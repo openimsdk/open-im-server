@@ -49,7 +49,7 @@ business data.
 
 2. Open-IM relies on five open source high-performance components: **Etcd**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM privately, please make sure that you have installed the above five components and **check the component parameters ** in the configuration file. If your server does not have the above components, you must install the missing components first. **If you have the above components, it is recommended to use them directly, if not, Docker installation is recommended, which is faster and more convenient**.
 
-3. Git clone  Open-IM project 
+3. Git clone   Open-IM project 
 
    ```
    git clone https://github.com/tinode/chat
