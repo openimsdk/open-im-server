@@ -1,0 +1,159 @@
+syntax = "proto3";
+option go_package = "friend;friend";
+package friend;
+
+message CommonResp{
+  int32   errorCode = 1;
+  string  errorMsg = 2;
+}
+
+message SearchFriendReq{
+  string uid = 1;
+  string OperationID = 2;
+  string Token = 3;
+}
+message SearchFriendResp{
+  int32  errorCode = 1;
+  string errorMsg = 2;
+  SearchFriendData Data = 3;
+}
+
+message SearchFriendData{
+  string uid = 1;
+  string icon = 2;
+  string name = 3;
+  int32 gender = 4;
+  string mobile = 5;
+  string birth = 6;
+  string email = 7;
+  string ex = 8;
+  string comment = 9;
+  int32  isFriend = 10;
+  int32 isInBlackList = 11;
+}
+
+message AddFriendReq{
+  string   uid = 1;
+  string  OperationID = 2;
+  string  Token = 3;
+  string  ReqMessage = 4;
+}
+
+
+message GetFriendApplyReq{
+  string OperationID = 1;
+  string Token = 2;
+}
+message GetFriendApplyResp{
+  int32   errorCode = 1;
+  string  errorMsg = 2;
+  repeated ApplyUserInfo data = 4;
+}
+
+message ApplyUserInfo{
+  string   uid = 1;
+  string   name = 2;
+  string   icon = 3;
+  int32    gender = 4;
+  string   mobile = 5;
+  string   birth = 6;
+  string   email = 7;
+  string   ex = 8;
+  int32    flag = 9;
+  string   applyTime = 10;
+  string   reqMessage = 11;
+}
+
+
+message getFriendListReq{
+  string OperationID = 1;
+  string Token = 2;
+}
+message getFriendListResp{
+  int32   errorCode = 1;
+  string  errorMsg = 2;
+  repeated UserInfo data = 3;
+}
+message UserInfo{
+  string  uid = 1;
+  string  name = 3;
+  string  icon = 2;
+  int32   gender = 4;
+  string mobile = 5;
+  string birth = 6;
+  string email = 7;
+  string ex = 8;
+  string  comment = 9;
+  int32 isInBlackList = 10;
+}
+
+message AddBlacklistReq{
+  string uid = 1;
+  string OperationID = 2;
+  string Token = 3;
+}
+
+
+message RemoveBlacklistReq{
+  string uid = 1;
+  string OperationID = 2;
+  string Token = 3;
+}
+
+
+message GetBlacklistReq{
+  string OperationID = 1;
+  string token = 2;
+}
+message GetBlacklistResp{
+  int32   errorCode = 1;
+  string  errorMsg = 2;
+  repeated UserInfo data = 3;
+}
+
+
+message IsInBlackListReq{
+  string sendUid = 1;
+  string receiveUid = 2;
+  string OperationID = 3;
+}
+message IsInBlackListResp{
+  int32   errorCode = 1;
+  string  errorMsg = 2;
+  bool    response = 3;
+}
+
+message DeleteFriendReq{
+  string uid = 1;
+  string OperationID = 2;
+  string Token = 3;
+}
+
+
+message AddedFriendReq{
+  string uid = 1;
+  int32  flag = 2;
+  string OperationID = 3;
+  string Token = 4;
+}
+
+message SetFriendCommentReq{
+  string uid = 1;
+  string operationID = 2;
+  string comment = 3;
+  string token = 4;
+}
+
+service friend{
+  rpc searchFriend(SearchFriendReq) returns(SearchFriendResp);
+  rpc addFriend(AddFriendReq) returns(CommonResp);
+  rpc getFriendApplyList(GetFriendApplyReq) returns(GetFriendApplyResp);
+  rpc getFriendList(getFriendListReq) returns(getFriendListResp);
+  rpc addBlacklist(AddBlacklistReq) returns(CommonResp);
+  rpc removeBlacklist(RemoveBlacklistReq) returns(CommonResp);
+  rpc isInBlackList(IsInBlackListReq) returns(IsInBlackListResp);
+  rpc getBlacklist(GetBlacklistReq) returns(GetBlacklistResp);
+  rpc deleteFriend(DeleteFriendReq) returns(CommonResp);
+  rpc addedFriend(AddedFriendReq) returns(CommonResp);
+  rpc setFriendComment(SetFriendCommentReq) returns(CommonResp);
+}
