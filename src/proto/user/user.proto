@@ -1,0 +1,52 @@
+syntax = "proto3";
+option go_package = "user;user";
+package user;
+
+message CommonResp{
+  int32  errorCode = 1;
+  string errorMsg = 2;
+}
+
+message GetUserInfoReq{
+  repeated string userIDList = 1;
+  string token = 2;
+  string OperationID = 3;
+}
+message GetUserInfoResp{
+  int32  errorCode = 1;
+  string errorMsg = 2;
+  repeated UserInfo Data = 3;
+}
+message UserInfo{
+  string uid = 1;
+  string name = 2;
+  string icon = 3;
+  int32 gender = 4;
+  string mobile = 5;
+  string birth = 6;
+  string email = 7;
+  string ex = 8;
+}
+
+
+message LogoutReq{
+  string  OperationID = 1;
+  string  token = 2;
+}
+
+message UpdateUserInfoReq{
+  string icon = 1;
+  string name = 2;
+  int32  gender = 3;
+  string mobile = 4;
+  string birth = 5;
+  string email = 6;
+  string ex = 7;
+  string token = 8;
+  string  OperationID = 9;
+}
+
+service user {
+  rpc getUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
+  rpc UpdateUserInfo(UpdateUserInfoReq) returns(CommonResp);
+}
