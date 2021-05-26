@@ -103,17 +103,13 @@ business data.
 5. Build Open-IM server and database initializer:
 
    - **MySQL**
-
      ```
     ...
      ```
-
    - **MongoDB**
-
      ```
      ...
      ```
-
 6. Enter the script directory and execute the script according to the steps。
 
    1. Shell authorization
