@@ -1,0 +1,121 @@
+syntax = "proto3";
+option go_package = "group;group";
+package group;
+
+message CommonResp{
+  int32   ErrorCode = 1;
+  string  ErrorMsg = 2;
+}
+
+message CreateGroupReq{
+  repeated string userIDList = 1;
+  string token = 2;
+  string OperationID = 3;
+}
+message CreateGroupResp{
+  int32   ErrorCode = 1;
+  string  ErrorMsg = 2;
+  string  groupID = 3;
+}
+
+message GetGroupListReq{
+  string token = 1;
+  string OperationID = 2;
+}
+message GetGroupListResp{
+  int32   ErrorCode = 1;
+  string  ErrorMsg = 2;
+  repeated string groupList = 3;
+}
+
+
+message GetGroupInfoReq{
+  string groupID = 1;
+  string OperationID = 2;
+  string token = 3;
+}
+message GetGroupInfoResp{
+  int32   ErrorCode = 1;
+  string  ErrorMsg = 2;
+  string  groupID = 3;
+  string groupName = 4;
+  string groupHeadURL = 5;
+  string bulletin = 6;
+  repeated MemberList groupMemberList = 7;
+}
+message MemberList{
+  string userID = 1;
+  string nickName = 2;
+  int32 isAdmin = 3;
+}
+
+
+message DeleteGroupMemberReq{
+  string groupID = 1;
+  string token = 2;
+  string OperationID = 3;
+  repeated string userIdList = 4;
+}
+
+
+message SetGroupNameReq{
+  string groupID = 1;
+  string name = 2;
+  string token = 3;
+  string OperationID = 4;
+}
+
+
+message SetGroupBulletinReq{
+  string groupID = 1;
+  string bulletin = 2;
+  string OperationID = 3;
+  string token = 4;
+}
+
+message SetOwnerGroupNickNameReq{
+  string groupID = 1;
+  string nickName = 2;
+  string OperationID = 3;
+  string token = 4;
+}
+
+
+message SetGroupHeadImageReq{
+  string groupID = 1;
+  string headUrl = 2;
+  string OperationID = 3;
+  string token = 4;
+}
+
+message MemberExitGroupReq{
+  string groupID = 1;
+  string OperationID = 2;
+  string token = 3;
+}
+
+
+
+service group{
+  rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
+  rpc getGroupList(GetGroupListReq) returns(GetGroupListResp);
+  rpc getGroupInfo(GetGroupInfoReq)returns(GetGroupInfoResp);
+  rpc deleteGroupMember(DeleteGroupMemberReq) returns(CommonResp);
+  rpc setGroupName(SetGroupNameReq) returns(CommonResp);
+  rpc setGroupBulletin(SetGroupBulletinReq) returns(CommonResp);
+  rpc setOwnerGroupNickName(SetOwnerGroupNickNameReq) returns(CommonResp);
+  rpc setGroupHeadImage(SetGroupHeadImageReq) returns(CommonResp);
+  rpc memberExitGroup(MemberExitGroupReq) returns(CommonResp);
+}
+
+
+
+
+
+
+
+
+
+
+
+
