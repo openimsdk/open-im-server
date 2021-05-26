@@ -1,5 +1,4 @@
 # Open-IM-Server
-Open-IM-Server is open source instant messaging Server.Backend in Go.
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM.png)
 
 [![LICENSE](https://img.shields.io/badge/license-Apache--2.0-green)](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE)
@@ -103,17 +102,12 @@ business data.
 5. Build Open-IM server and database initializer:
 
    - **MySQL**
-
      ```
-    ...
      ```
-
    - **MongoDB**
-
      ```
      ...
      ```
-
 6. Enter the script directory and execute the script according to the steps。
 
    1. Shell authorization
