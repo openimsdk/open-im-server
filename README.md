@@ -105,13 +105,13 @@ business data.
    - **MySQL**
 
      ```
-     待补充
+    ...
      ```
 
    - **MongoDB**
 
      ```
-     待补充
+     ...
      ```
 
 6. Enter the script directory and execute the script according to the steps。
