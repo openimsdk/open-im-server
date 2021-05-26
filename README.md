@@ -104,7 +104,6 @@ business data.
 
    - **MySQL**
      ```
-    ...
      ```
    - **MongoDB**
      ```
