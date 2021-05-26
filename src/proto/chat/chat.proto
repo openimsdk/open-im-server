@@ -1,0 +1,124 @@
+syntax = "proto3";
+package pbChat;
+option go_package = "chat;pbChat";
+
+message WSToMsgSvrChatMsg{
+  string SendID = 1;
+  string RecvID = 2;
+  string Content = 3;
+  int64 SendTime = 4;
+  int32 MsgFrom = 5;
+  int32 ContentType = 6;
+  int32 SessionType = 7;
+  string OperationID = 8;
+  string MsgID = 9;
+  string Token = 10;
+  string OfflineInfo =11;
+  string Options = 12;
+  int32  PlatformID =13;
+  repeated string  ForceList = 14;
+}
+message MsgSvrToPushSvrChatMsg {
+  string SendID = 1;
+  string RecvID = 2;
+  string Content = 3;
+  int64 RecvSeq = 4;
+  int64 SendTime = 5;
+  int32 MsgFrom = 6;
+  int32 ContentType = 7;
+  int32 SessionType = 8;
+  string OperationID = 9;
+  string MsgID = 10;
+  string OfflineInfo = 11;
+  string Options =12;
+  int32  PlatformID =13;
+  bool   IsEmphasize = 14;
+}
+
+message PullMessageReq {
+  string UserID = 1;
+  int64 SeqBegin = 2;
+  int64 SeqEnd = 3;
+  string OperationID = 4;
+}
+
+message PullMessageResp {
+  int32 ErrCode = 1;
+  string ErrMsg = 2;
+  int64 MaxSeq = 3;
+  int64 MinSeq = 4;
+  repeated GatherFormat SingleUserMsg = 5;
+  repeated GatherFormat GroupUserMsg = 6;
+}
+message GetNewSeqReq {
+  string UserID = 1;
+  string OperationID = 2;
+}
+message GetNewSeqResp {
+  int32 ErrCode = 1;
+  string ErrMsg = 2;
+  int64 Seq = 3;
+}
+message GatherFormat{
+  // @inject_tag: json:"id"
+  string ID = 1;
+  // @inject_tag: json:"list"
+  repeated MsgFormat List = 2;//detail msg
+}
+message MsgFormat{
+  // @inject_tag: json:"sendID"
+  string SendID = 1;
+  // @inject_tag: json:"recvID"
+  string RecvID = 2;
+  // @inject_tag: json:"msgFrom"
+  int32 MsgFrom = 3;
+  // @inject_tag: json:"contentType"
+  int32 ContentType = 4;
+  // @inject_tag: json:"serverMsgID"
+  string ServerMsgID = 5;
+  // @inject_tag: json:"content"
+  string Content = 6;
+  // @inject_tag: json:"seq"
+  int64 Seq = 7;
+  // @inject_tag: json:"sendTime"
+  int64 SendTime = 8;
+  // @inject_tag: json:"senderPlatformID"
+  int32 SenderPlatformID = 9;
+}
+
+message UserSendMsgReq {
+
+  int32 ReqIdentifier = 1;
+  string Token = 2;
+  string SendID = 3;
+  string OperationID = 4;
+  int32 MsgIncr = 5;
+  int32 PlatformID = 6;
+  int32 SessionType = 7;
+  int32 MsgFrom = 8;
+  int32 ContentType = 9;
+  string RecvID = 10;
+  repeated string ForceList = 11;
+  string Content = 12;
+  string Options = 13;
+  string ClientMsgID = 14;
+  string OffLineInfo = 15;
+  string Ex = 16;
+
+
+}
+
+message UserSendMsgResp {
+  int32 ErrCode = 1;
+  string ErrMsg = 2;
+  int32 ReqIdentifier = 3;
+  int32 MsgIncr = 4;
+  string ServerMsgID = 5;
+  string ClientMsgID = 6;
+
+}
+service Chat {
+  rpc GetNewSeq(GetNewSeqReq) returns(GetNewSeqResp);
+  rpc PullMessage(PullMessageReq) returns(PullMessageResp);
+  rpc UserSendMsg(UserSendMsgReq) returns(UserSendMsgResp);
+}
