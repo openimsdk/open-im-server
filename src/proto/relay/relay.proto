@@ -1,0 +1,42 @@
+syntax = "proto3";
+option go_package = "relay;pbRelay";
+package relay;
+
+message MsgToUserReq {
+  string SendID = 1;
+  string RecvID = 2;
+  string Content = 5;
+  int64  RecvSeq = 6;
+  int64 SendTime = 7;
+  int32  MsgFrom = 8;
+  int32  ContentType = 9;
+  int32  SessionType = 10;
+  string OperationID = 11;
+  string ServerMsgID = 12;
+  int32  PlatformID = 13;
+  bool   IsEmphasize = 14;
+}
+message MsgToUserResp{
+repeated SingleMsgToUser resp = 1;
+}
+//message SendMsgByWSReq{
+//  string SendID = 1;
+//  string RecvID = 2;
+//  string Content = 3;
+//  int64 SendTime = 4;
+//  int64  MsgFrom = 5;
+//  int64  ContentType = 6;
+//  int64  SessionType = 7;
+//  string OperationID = 8;
+//  int64  PlatformID = 9;
+//}
+message SingleMsgToUser{
+  int64   ResultCode = 1;
+  string  RecvID = 2;
+  int32   RecvPlatFormID = 3;
+}
+service OnlineMessageRelayService {
+  rpc MsgToUser(MsgToUserReq) returns(MsgToUserResp);
+//  rpc SendMsgByWS(SendMsgByWSReq)  returns(MsgToUserResp);
+}
+
