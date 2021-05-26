@@ -60,14 +60,14 @@ business data.
 
      ```
      etcd:
-       etcdAddr: [ xxx.xxx.xxx.xxx:2379]
+       etcdAddr: [ 127.0.0.1:2379]
      ```
 
    - Check or modify database(MySQL) connection parameters are correct for your database.
 
      ```
      mysql:
-       dbAddress: [ xxx.xxx.xxx.xxx:3306]
+       dbAddress: [ 127.0.0.1:3306]
        dbUserName: xxx
        dbPassword: xxx
      ```
@@ -76,7 +76,7 @@ business data.
 
      ```
      mongo:
-     dbAddress: [xxx.xxx.xxx.xxx:27017 ]
+     dbAddress: [ 127.0.0.1:27017 ]
        dbUserName:
        dbPassword:
      ```
@@ -85,7 +85,7 @@ business data.
 
      ```
      redis:
-       dbAddress: [xxx.xxx.xxx.xxx:6379]
+       dbAddress: [ 127.0.0.1:6379]
        dbPassWord: 
      ```
 
@@ -94,9 +94,9 @@ business data.
      ```
      kafka:
        ws2mschat:
-         addr: [ xxx.xxx.xxx.xxx:9092 ]
+         addr: [ 127.0.0.1:9092 ]
        ms2pschat:
-         addr: [ xxx.xxx.xxx.xxx:9092 ]
+         addr: [ 127.0.0.1:9092 ]
      ```
 
 5. Build Open-IM server and database initializer:
@@ -158,14 +158,14 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 
      ```
      etcd:
-       etcdAddr: [ x.x.x.x:2379]
+       etcdAddr: [ 127.0.0.1:2379]
      ```
 
      - Check or modify  database(MySQL) connection parameters are correct for your database.
 
      ```
      mysql:
-       dbAddress: [ x.x.x.x:3306]
+       dbAddress: [ 127.0.0.1:3306]
        dbUserName: xxx
        dbPassword: xxx
      ```
@@ -174,7 +174,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 
      ```
      mongo:
-     dbAddress: [ x.x.x.x:27017 ]
+     dbAddress: [ 127.0.0.1:27017 ]
        dbUserName:
        dbPassword:
      ```
@@ -183,7 +183,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 
      ```
      redis:
-       dbAddress: [x.x.x.x:6379]
+       dbAddress: [ 127.0.0.1:6379]
        dbPassWord: 
      ```
 
@@ -192,9 +192,9 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
      ```
      kafka:
        ws2mschat:
-         addr: [ x.x.x.x:9092 ]
+         addr: [ 127.0.0.1:9092 ]
        ms2pschat:
-         addr: [ x.x.x.x:9092 ]
+         addr: [ 127.0.0.1:9092 ]
      ```
 
 5. Start Open-IM-Server Service
