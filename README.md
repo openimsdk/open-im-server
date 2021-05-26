@@ -338,9 +338,9 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
   
 ## Architecture
 
-![avatar](https://github.com/Open-IM-IM/opim_admin/blob/main/docs/Architecture.jpg)
+![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg)
 
 ## License
 
 Open-IM-Server is under the Apache 2.0 license. See
-the [LICENSE](https://github.com/Open-IM-IM/opim_admin/blob/main/LICENSE) file for details.
+the [LICENSE](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE) file for details.
