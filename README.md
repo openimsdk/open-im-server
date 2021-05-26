@@ -49,7 +49,7 @@ business data.
 
 2. Open-IM relies on five open source high-performance components: **Etcd**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM privately, please make sure that you have installed the above five components and **check the component parameters ** in the configuration file. If your server does not have the above components, you must install the missing components first. **If you have the above components, it is recommended to use them directly, if not, Docker installation is recommended, which is faster and more convenient**.
 
-3. Git clone  Open-IM project 
+3. Git clone   Open-IM project 
 
    ```
    git clone https://github.com/tinode/chat
@@ -338,9 +338,9 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
   
 ## Architecture
 
-![avatar](https://github.com/Open-IM-IM/opim_admin/blob/main/docs/Architecture.jpg)
+![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg)
 
 ## License
 
 Open-IM-Server is under the Apache 2.0 license. See
-the [LICENSE](https://github.com/Open-IM-IM/opim_admin/blob/main/LICENSE) file for details.
+the [LICENSE](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE) file for details.
