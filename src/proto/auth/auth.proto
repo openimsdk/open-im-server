@@ -1,0 +1,35 @@
+syntax = "proto3";
+package pbAuth;
+option go_package = "auth;pbAuth";
+
+message UserRegisterReq {
+    string UID = 1;
+    string Name = 2;
+    string Icon = 3;
+    int32  Gender = 4;
+    string Mobile = 5;
+    string Birth = 6;
+    string Email = 7;
+    string Ex = 8;
+}
+
+message UserRegisterResp {
+    bool Success = 1;
+}
+
+message UserTokenReq {
+    int32  Platform = 1;
+    string UID = 2;
+}
+
+message UserTokenResp {
+    int32  ErrCode = 1;
+    string ErrMsg = 2;
+    string Token = 3;
+    int64  ExpiredTime = 4;
+}
+
+service Auth {
+    rpc UserRegister(UserRegisterReq) returns(UserRegisterResp);
+    rpc UserToken(UserTokenReq) returns(UserTokenResp);
+}
