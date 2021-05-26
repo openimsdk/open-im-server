@@ -44,7 +44,7 @@ business data.
 
 #### Building from Source
 
-> Open-IM relies on five open source high-performance components: **ETCD**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM-Server privately, please make sure that you have installed the above five components and **check the component  connection parameters ** in the configuration file. you must install the missing components first,If your server does not have the above components. **It is recommended to use it directly, if you have the above components, if not, Docker installation is recommended, which is faster and more convenient**.
+> Open-IM relies on five open source high-performance components: **ETCD**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM-Server privately, please make sure that you have installed the above five components and **check the component  connection parameters** in the configuration file. you must install the missing components first,If your server does not have the above components. **It is recommended to use it directly, if you have the above components, if not, Docker installation is recommended, which is faster and more convenient**.
 
 1. Install [Go environment](https://golang.org/doc/install). Make sure Go version is at least 1.15.
 
@@ -135,7 +135,7 @@ business data.
 
 #### Using Docker to run Open-IM-Server
 
-> Open-IM relies on five open source high-performance components: **ETCD**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM-Server privately, please make sure that you have installed the above five components and **check the component  connection parameters ** in the configuration file. you must install the missing components first,If your server does not have the above components. **It is recommended to use it directly, if you have the above components, if not, Docker installation is recommended, which is faster and more convenient**.
+> Open-IM relies on five open source high-performance components: **ETCD**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM-Server privately, please make sure that you have installed the above five components and **check the component  connection parameters** in the configuration file. you must install the missing components first,If your server does not have the above components. **It is recommended to use it directly, if you have the above components, if not, Docker installation is recommended, which is faster and more convenient**.
 
 All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 
