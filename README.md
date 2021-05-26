@@ -2,7 +2,7 @@
 Open-IM-Server is open source instant messaging Server.Backend in Go.
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM.png)
 
-[![LICENSE](https://img.shields.io/github/license/pingcap/tidb.svg)](https://github.com/pingcap/tidb/blob/master/LICENSE)
+[![LICENSE](https://img.shields.io/github/license/pingcap/tidb.svg)](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE)
 [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
 
 ## Open-IM-Server: Open source  Instant Messaging Server
