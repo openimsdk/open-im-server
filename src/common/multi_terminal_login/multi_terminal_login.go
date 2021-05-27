@@ -5,6 +5,7 @@ import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db"
 	pbChat "Open_IM/src/proto/chat"
+	"Open_IM/src/push/content_struct"
 	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 )
@@ -63,7 +64,7 @@ func PushMessageToTheTerminal(uid string, platform int32) {
 	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
 		SendID:      uid,
 		RecvID:      uid,
-		Content:     "Your account is already logged on other terminal,please confirm",
+		Content:     content_struct.NewContentStructString(1, "", "Your account is already logged on other terminal,please confirm"),
 		SendTime:    utils.GetCurrentTimestampBySecond(),
 		MsgFrom:     constant.SysMsgType,
 		ContentType: constant.KickOnlineTip,

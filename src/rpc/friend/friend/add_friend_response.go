@@ -7,6 +7,7 @@ import (
 	"Open_IM/src/common/log"
 	pbChat "Open_IM/src/proto/chat"
 	pbFriend "Open_IM/src/proto/friend"
+	"Open_IM/src/push/content_struct"
 	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
@@ -45,7 +46,7 @@ func (s *friendServer) AddedFriend(ctx context.Context, req *pbFriend.AddedFrien
 			logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
 				SendID:      claims.UID,
 				RecvID:      req.Uid,
-				Content:     senderInfo.Name + " agreed to add you as a friend.",
+				Content:     content_struct.NewContentStructString(0, "", senderInfo.Name+" agreed to add you as a friend."),
 				SendTime:    utils.GetCurrentTimestampBySecond(),
 				MsgFrom:     constant.SysMsgType,        //Notification message identification
 				ContentType: constant.AgreeAddFriendTip, //Add friend flag
