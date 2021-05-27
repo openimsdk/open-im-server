@@ -28,7 +28,12 @@ func (s *friendServer) AddedFriend(ctx context.Context, req *pbFriend.AddedFrien
 	}
 	log.Info(req.Token, req.OperationID, "rpc add friend response success return,userid=%s,flag=%d", req.Uid, req.Flag)
 	//Change the status of the friend request form
-	if req.Flag == 1 {
+	if req.Flag == constant.FriendFlag {
+		//Establish friendship after find friend relationship not exists
+		_, err := im_mysql_model.FindFriendRelationshipFromFriend(claims.UID, req.Uid)
+		if err == nil {
+			return &pbFriend.CommonResp{ErrorCode: 0, ErrorMsg: "You are already friends"}, nil
+		}
 		//Establish two single friendship
 		err = im_mysql_model.InsertToFriend(claims.UID, req.Uid, req.Flag)
 		if err != nil {
