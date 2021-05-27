@@ -19,7 +19,7 @@ business data.
 
 ## Features
 
-* Everything in Free
+* Everything in Free 
 
 * Scalable architecture
 
