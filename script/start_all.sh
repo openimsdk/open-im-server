@@ -4,7 +4,7 @@
 
 #fixme Put the shell script name here
 need_to_start_server_shell=(
-  auto_start_service.sh
+  start_rpc_service.sh
   msg_gateway_start.sh
   push_start.sh
   msg_transfer_start.sh
