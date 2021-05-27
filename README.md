@@ -327,8 +327,8 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
    ```
    app：app client
    app-server：app server
-   open-im-sdk：Tuoyun's open source sdk
-   open-im-server：Tuoyun's open source sdk service 
+   open-im-sdk：open-im source sdk
+   open-im-server：open-im source sdk service 
    ```
 
 - **Authentication Clow Chart**
