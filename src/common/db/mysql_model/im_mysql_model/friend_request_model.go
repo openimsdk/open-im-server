@@ -5,12 +5,12 @@ import (
 	"time"
 )
 
-func InsertIntoFriendReq(reqId, userId string, flag int32, reqMessage string) error {
+func ReplaceIntoFriendReq(reqId, userId string, flag int32, reqMessage string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	err = dbConn.Exec("insert into friend_request(req_id,user_id,flag,req_message,create_time) values(?,?,?,?,?)", reqId, userId, flag, reqMessage, time.Now()).Error
+	err = dbConn.Exec("replace into friend_request(req_id,user_id,flag,req_message,create_time) values(?,?,?,?,?)", reqId, userId, flag, reqMessage, time.Now()).Error
 	if err != nil {
 		return err
 	}
