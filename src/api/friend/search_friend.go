@@ -21,6 +21,7 @@ func SearchFriend(c *gin.Context) {
 	log.Info("", "", fmt.Sprintf("api search friend init ...."))
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := pbFriend.NewFriendClient(etcdConn)
+	defer etcdConn.Close()
 
 	params := paramsSearchFriend{}
 	if err := c.BindJSON(&params); err != nil {

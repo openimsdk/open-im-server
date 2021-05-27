@@ -21,6 +21,7 @@ func RemoveBlacklist(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := pbFriend.NewFriendClient(etcdConn)
+	defer etcdConn.Close()
 
 	params := paramsRemoveBlackList{}
 	if err := c.BindJSON(&params); err != nil {

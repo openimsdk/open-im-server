@@ -29,6 +29,7 @@ func UpdateUserInfo(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
+	defer etcdConn.Close()
 
 	params := paramsStruct{}
 	if err := c.BindJSON(&params); err != nil {

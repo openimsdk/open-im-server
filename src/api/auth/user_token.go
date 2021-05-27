@@ -29,6 +29,7 @@ func UserToken(c *gin.Context) {
 	log.Info("", "", "api user_token init ....")
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.RpcGetTokenName)
 	client := pbAuth.NewAuthClient(etcdConn)
+	defer etcdConn.Close()
 
 	params := paramsUserToken{}
 	if err := c.BindJSON(&params); err != nil {
