@@ -106,8 +106,7 @@ func MapToJsonString(param map[string]interface{}) string {
 	dataString := string(dataType)
 	return dataString
 }
-func JsonStringToMap(str string) map[string]interface{} {
-	var tempMap map[string]interface{}
+func JsonStringToMap(str string) (tempMap map[string]interface{}) {
 	_ = json.Unmarshal([]byte(str), &tempMap)
 	return tempMap
 }

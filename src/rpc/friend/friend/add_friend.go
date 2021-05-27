@@ -7,6 +7,7 @@ import (
 	"Open_IM/src/common/log"
 	pbChat "Open_IM/src/proto/chat"
 	pbFriend "Open_IM/src/proto/friend"
+	"Open_IM/src/push/content_struct"
 	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
@@ -35,7 +36,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
 			SendID:      senderInfo.UID,
 			RecvID:      receiverInfo.UID,
-			Content:     senderInfo.Name + " asked to add you as a friend",
+			Content:     content_struct.NewContentStructString(0, "", senderInfo.Name+" asked to add you as a friend"),
 			SendTime:    utils.GetCurrentTimestampBySecond(),
 			MsgFrom:     constant.SysMsgType,
 			ContentType: constant.AddFriendTip,
