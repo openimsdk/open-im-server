@@ -5,10 +5,10 @@
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openIM
-  etcdAddr: [ 47.112.160.66:2379 ]
+  etcdAddr: [ 127.0.0.1:2379 ]
 
 mysql:
-  dbAddress: [ 47.112.160.66:3306 ]
+  dbAddress: [ 127.0.0.1:3306 ]
   dbUserName: root
   dbPassword: 123456
   dbDatabaseName: openIM
@@ -19,7 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 47.112.160.66:27017 ]
+  dbAddress: [ 127.0.0.1:27017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: [ openIM ]
@@ -30,7 +30,7 @@ mongo:
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: [47.112.160.66:6379]
+  dbAddress: [ 127.0.0.1:6379 ]
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -38,10 +38,10 @@ redis:
 
 kafka:
   ws2mschat:
-    addr: [ 47.112.160.66:9092 ]
+    addr: [ 127.0.0.1:9092 ]
     topic: "ws2ms_chat"
   ms2pschat:
-    addr: [ 47.112.160.66:9092 ]
+    addr: [ 127.0.0.1:9092 ]
     topic: "ms2ps_chat"
   consumergroupid:
     msgToMongo: mongo

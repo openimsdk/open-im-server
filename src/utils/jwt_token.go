@@ -4,6 +4,7 @@ import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/db"
 	"errors"
+	"github.com/dgrijalva/jwt-go"
 	"time"
 )
 
