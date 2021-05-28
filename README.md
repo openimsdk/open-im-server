@@ -48,31 +48,34 @@ business data.
 
 1. Install [Go environment](https://golang.org/doc/install). Make sure Go version is at least 1.15.
 
-3. Git clone  Open-IM project
+3. Git clone Open-IM project
 
    ```
-   https://github.com/OpenIMSDK/Open-IM-Server.git
+   git clone https://github.com/OpenIMSDK/Open-IM-Server.git
    ```
 
-4. Open [config.yaml](https://github.com/Open-IM-IM/opim_admin/blob/main/config/config.yaml),then modify the following parameters.
+3. Open [config.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/config/config.yaml),then modify the
+   following parameters.
 
-    - Check that the ETCD connection parameters.
+    - Check or modify the Etcd connection parameters.
 
       ```
       etcd:
-        etcdAddr: [ 127.0.0.1:2379]
+        etcdAddr: [ 127.0.0.1:2379 ]
       ```
 
     - Check or modify database(MySQL) connection parameters are correct for your database.
 
       ```
       mysql:
-        dbAddress: [ 127.0.0.1:3306]
+        dbAddress: [ 127.0.0.1:3306 ]
         dbUserName: xxx
         dbPassword: xxx
+        dbDatabaseName: openIM
       ```
 
-    - Check or modify database(MongoDB) connection parameters are correct for your database.
+    - Check or modify database(MongoDB) connection parameters are correct for your
+      database.`No authentication mode if dbUserName and dbPassword is empty  else authentication`
 
       ```
       mongo:
@@ -81,11 +84,11 @@ business data.
         dbPassword:
       ```
 
-    - Check or modify Redis connection parameters.
+    - Check or modify Redis connection parameters.`No authentication mode if  dbPassword is empty  else authentication`
 
       ```
       redis:
-        dbAddress: [ 127.0.0.1:6379]
+        dbAddress: [ 127.0.0.1:6379 ]
         dbPassWord: 
       ```
 
@@ -99,21 +102,9 @@ business data.
           addr: [ 127.0.0.1:9092 ]
       ```
 
-5. Build Open-IM server and database initializer:
+4. Database initializer:
 
-    - **MySQL**
-
-      ```
-      need to add
-      ```
-
-    - **MongoDB**
-
-      ```
-      need to add
-      ```
-
-6. Enter the script directory and execute the script according to the steps。
+- **MySQL**
 
     1. Shell authorization
 
@@ -121,13 +112,25 @@ business data.
        chmod +x *.sh
        ```
 
-    2. Execute build shell
+    2. Enter the script directory and execute `mysql_database_init.sh`
+
+       ```
+       #1.Enter the directory 
+       cd Open-IM-server/scrip
+       
+       #2.execute the shell
+       ./mysql_database_init.sh
+       ```
+
+5. Build and start Service.
+
+    1. Execute the build shell
 
        ```
        ./build_all_service.sh
        ```
 
-    3. Start service
+    2. Start service
 
        ```
        ./start_all.sh
@@ -149,7 +152,9 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
    docker pull docker.io/lyt1123/open_im_server:1.0
    ```
 
-4. External config file,the container comes with a built-in config file which can be customized with values from the environment variables .**If changes are extensive it may be more convenient to replace the built-in config file with a custom one**. In that case map the config file located on your host.
+3. External config file,the container comes with a built-in config file which can be customized with values from the
+   environment variables .**If changes are extensive it may be more convenient to replace the built-in config file with
+   a custom one**. In that case map the config file located on your host.
 
     - Create configuration folder directory
 
@@ -157,25 +162,27 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
       mkdir -p open_im_server/config
       ```
 
-    - Download the [config.yaml](https://github.com/Open-IM-IM/opim_admin/blob/main/config/config.yaml) file from github, then modify the following parameters
+    - Download the  [config.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/config/config.yaml) file from
+      github, then modify the following parameters
 
-        - Check or modify the Etcd connection parameters.
+        - Check or modify the ETCD connection parameters.
 
       ```
       etcd:
-        etcdAddr: [ 127.0.0.1:2379]
+        etcdAddr: [ 127.0.0.1:2379 ]
       ```
 
-        - Check or modify  database(MySQL) connection parameters are correct for your database.
+        - Check or modify database(MySQL) connection parameters are correct for your database.
 
       ```
       mysql:
-        dbAddress: [ 127.0.0.1:3306]
+        dbAddress: [ 127.0.0.1:3306 ]
         dbUserName: xxx
         dbPassword: xxx
       ```
 
-        - Check or modify  database(MongoDB) connection parameters are correct for your database.
+        - Check or modify database(MongoDB) connection parameters are correct for your
+          database.`No authentication mode if dbUserName and dbPassword is empty  else authentication`
 
       ```
       mongo:
@@ -184,15 +191,16 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
         dbPassword:
       ```
 
-        - Check or modify  the Redis connection parameters.
+        - Check or modify the Redis connection
+          parameters.`No authentication mode if  dbPassword is empty  else authentication`
 
       ```
       redis:
-        dbAddress: [ 127.0.0.1:6379]
+        dbAddress: [ 127.0.0.1:6379 ]
         dbPassWord: 
       ```
 
-        - Check or modify  the Kafka connection parameters.
+        - Check or modify the Kafka connection parameters.
 
       ```
       kafka:
@@ -202,19 +210,23 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
           addr: [ 127.0.0.1:9092 ]
       ```
 
-5. Start Open-IM-Server Service
+4. Upload the [config.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/config/config.yaml)  file that you
+   modified to the **open_im_server/config** that you create in the server.
+
+5. Start Open-IM-Server image
 
    ```
-   docker run -p 10000:10000 -p 7777:7777 --name open_im_server -v /home/open_im_server/logs:/home/open_im_server/logs -v /home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml --restart always -d docker.io/lyt1123/open_im_server:[tag]
+   docker run -p 10000:10000 -p 17778:17778 --name open_im_server -v /home/open_im_server/logs:/home/open_im_server/logs -v /home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml --restart always -d docker.io/lyt1123/open_im_server:1.0
    ```
 
-    - -p 10000:10000	The container port maps the host 10000 port, provides api service.
-    - -p  7777:7777    The container port maps the host  7777 port, provides message services.
-    - --name open_im_server   Container service name
-    - -v /home/open_im_server/logs:/home/open_im_server/logs    The container log directory maps the host directory
-    - -v /home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml    The container configuration file maps the host configuration file
-    - --restart always    Automatically start when the container is closed abnormally
-    - -d  Running service in the background
+    - -p `10000:10000`    The container port maps the host 10000 port, provides api service.
+    - -p  `17778:17778`    The container port maps the host 17778 port, provides message services.
+    - --name `open_im_server`   Container service name
+    - -v `/home/open_im_server/logs:/home/open_im_server/logs`    The container log directory maps the host directory
+    - -v `/home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml`    The container
+      configuration file maps the host configuration file
+    - --restart `always`    Automatically start when the container is closed abnormally
+    - -d Running service in the background
 
 ### CONFIGURATION INSTRUCTIONS
 >Open-IM configuration is divided into basic component configuration and business internal service configuration. Developers need to fill in the address of each component as the address of their server component when using the product, and ensure that the internal service port of the business is not occupied
