@@ -101,7 +101,7 @@ modulename:
   pushName: push
 
 longconnsvr:
-  websocketPort: [ 7778 ]
+  websocketPort: [ 17778 ]
   websocketMaxConnNum: 10000
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10
