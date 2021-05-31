@@ -4,6 +4,16 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 
+bin_dir="../bin"
+logs_dir="../logs"
+#Automatically created when there is no bin, logs folder
+if [ ! -d $bin_dir ]; then
+  mkdir -p $bin_dir
+fi
+if [ ! -d $logs_dir ]; then
+  mkdir -p $logs_dir
+fi
+
 #begin path
 begin_path=$PWD
 
