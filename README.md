@@ -36,7 +36,7 @@ business data.
 ## Community
 
 * Join the Telegram-OpenIM group: https://t.me/joinchat/zSJLPaHBNLZmODI1
-* 扫码加入微信群:[二维码](https://github.com/Open-IM-IM/opim_admin/blob/main/docs/Wechat.jpg)
+* 扫码加入微信群:[二维码](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Wechat.jpg)
 * 中文访问这里：[Open-IM中文官网](http://open-im.io:9528/website/index.html#/)
 
 ## Quick start
