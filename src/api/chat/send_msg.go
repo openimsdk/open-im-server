@@ -83,8 +83,8 @@ func UserSendMsg(c *gin.Context) {
 	log.Info("", "", "api UserSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
 
 	c.JSON(http.StatusOK, gin.H{
-		"errCode":       0,
-		"errMsg":        "",
+		"errCode":       reply.ErrCode,
+		"errMsg":        reply.ErrMsg,
 		"msgIncr":       reply.MsgIncr,
 		"reqIdentifier": reply.ReqIdentifier,
 		"data": gin.H{

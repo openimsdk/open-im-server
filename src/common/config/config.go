@@ -25,10 +25,10 @@ type config struct {
 	}
 
 	Mysql struct {
-		DBAddress      []string `yaml:"dbAddress"`
-		DBUserName     string   `yaml:"dbUserName"`
-		DBPassword     string   `yaml:"dbPassword"`
-		DBDatabaseName string   `yaml:"dbDatabaseName"`
+		DBAddress      []string `yaml:"dbMysqlAddress"`
+		DBUserName     string   `yaml:"dbMysqlUserName"`
+		DBPassword     string   `yaml:"dbMysqlPassword"`
+		DBDatabaseName string   `yaml:"dbMysqlDatabaseName"`
 		DBTableName    string   `yaml:"DBTableName"`
 		DBMsgTableNum  int      `yaml:"dbMsgTableNum"`
 		DBMaxOpenConns int      `yaml:"dbMaxOpenConns"`
@@ -77,6 +77,8 @@ type config struct {
 	}
 	Log struct {
 		StorageLocation       string   `yaml:"storageLocation"`
+		RotationTime          int      `yaml:"rotationTime"`
+		RemainRotationCount   uint     `yaml:"remainRotationCount"`
 		ElasticSearchSwitch   bool     `yaml:"elasticSearchSwitch"`
 		ElasticSearchAddr     []string `yaml:"elasticSearchAddr"`
 		ElasticSearchUser     string   `yaml:"elasticSearchUser"`
@@ -133,6 +135,10 @@ type config struct {
 	TokenPolicy struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
+	}
+	MessageCallBack struct {
+		CallbackSwitch bool   `yaml:"callbackSwitch"`
+		CallbackUrl    string `yaml:"callbackUrl"`
 	}
 }
 

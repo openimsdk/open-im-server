@@ -1,4 +1,3 @@
-//实现pb定义的rpc服务
 package rpcChat
 
 import (
@@ -33,37 +32,6 @@ func (rpc *rpcChat) GetNewSeq(_ context.Context, in *pbMsg.GetNewSeqReq) (*pbMsg
 
 }
 
-//func (s *MsgServer) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*pbMsg.PullMessageResp, error) {
-//	log.InfoByArgs(fmt.Sprintf("rpc pullMessage is arriving,args=%s", in.String()))
-//	resp := new(pbMsg.PullMessageResp)
-//	var respMsgFormat []*pbMsg.MsgFormat
-//	var respUserMsgFormat []*pbMsg.UserMsgFormat
-//	conn := db.NewDbConnection()
-//	rows, err := conn.Table("receive r").Select("c.sender_id,c.receiver_id,"+
-//		"c.msg_type,c.push_msg_type,c.chat_type,c.msg_id,c.send_content,r.seq,c.send_time,c.sender_nickname,c.receiver_nickname,c.sender_head_url,c.receiver_head_url").
-//		Joins("INNER JOIN chat_log c ON r.msg_id = c.msg_id AND r.user_id = ? AND seq BETWEEN ? AND ?",
-//			in.UserID, in.SeqBegin, in.SeqEnd).Rows()
-//	if err != nil {
-//		fmt.Printf("pullMsg data error: %v\n", err)
-//		resp.ErrCode = 1
-//		resp.ErrMsg = err.Error()
-//		return resp, nil
-//	}
-//	defer rows.Close()
-//	for rows.Next() {
-//		tempResp := new(pbMsg.MsgFormat)
-//		rows.Scan(&tempResp.SendID, &tempResp.RecvID, &tempResp.MsgType, &tempResp.PushMsgType, &tempResp.ChatType,
-//			&tempResp.MsgID, &tempResp.Msg, &tempResp.Seq, &tempResp.Time, &tempResp.SendNickName, &tempResp.RecvNickName,
-//			&tempResp.SendHeadUrl, &tempResp.RecvHeadUrl)
-//		respMsgFormat = append(respMsgFormat, tempResp)
-//	}
-//	respUserMsgFormat = msgHandleByUser(respMsgFormat, in.UserID)
-//	return &pbMsg.PullMessageResp{
-//		ErrCode: 0,
-//		ErrMsg:  "",
-//		UserMsg: respUserMsgFormat,
-//	}, nil
-//}
 func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*pbMsg.PullMessageResp, error) {
 	log.InfoByKv("rpc pullMessage is arriving", in.OperationID, "args", in.String())
 	resp := new(pbMsg.PullMessageResp)
@@ -91,7 +59,7 @@ func singleMsgHandleByUser(allMsg []*pbMsg.MsgFormat, ownerId string) []*pbMsg.G
 	var userid string
 	var respMsgFormat []*pbMsg.GatherFormat
 	m := make(map[string]MsgFormats)
-	//将消息以用户为维度聚集
+	//Gather messages in the dimension of users
 	for _, v := range allMsg {
 		if v.RecvID != ownerId {
 			userid = v.RecvID
@@ -105,7 +73,7 @@ func singleMsgHandleByUser(allMsg []*pbMsg.MsgFormat, ownerId string) []*pbMsg.G
 			m[userid] = append(value, v)
 		}
 	}
-	//形成pb格式返回
+	//Return in pb format
 	for user, msg := range m {
 		tempUserMsg := new(pbMsg.GatherFormat)
 		tempUserMsg.ID = user
@@ -118,9 +86,9 @@ func singleMsgHandleByUser(allMsg []*pbMsg.MsgFormat, ownerId string) []*pbMsg.G
 func groupMsgHandleByUser(allMsg []*pbMsg.MsgFormat) []*pbMsg.GatherFormat {
 	var respMsgFormat []*pbMsg.GatherFormat
 	m := make(map[string]MsgFormats)
-	//将消息以用户为维度聚集
+	//Gather messages in the dimension of users
 	for _, v := range allMsg {
-		//获得群ID
+		//Get group ID
 		groupID := strings.Split(v.RecvID, " ")[1]
 		if value, ok := m[groupID]; !ok {
 			var t MsgFormats
@@ -130,7 +98,7 @@ func groupMsgHandleByUser(allMsg []*pbMsg.MsgFormat) []*pbMsg.GatherFormat {
 		}
 
 	}
-	//形成pb格式返回
+	//Return in pb format
 	for groupID, msg := range m {
 		tempUserMsg := new(pbMsg.GatherFormat)
 		tempUserMsg.ID = groupID
@@ -143,17 +111,17 @@ func groupMsgHandleByUser(allMsg []*pbMsg.MsgFormat) []*pbMsg.GatherFormat {
 
 type MsgFormats []*pbMsg.MsgFormat
 
-// 实现sort.Interface接口取元素数量方法
+// Implement the sort.Interface interface to get the number of elements method
 func (s MsgFormats) Len() int {
 	return len(s)
 }
 
-// 实现sort.Interface接口比较元素方法
+//Implement the sort.Interface interface comparison element method
 func (s MsgFormats) Less(i, j int) bool {
 	return s[i].SendTime < s[j].SendTime
 }
 
-// 实现sort.Interface接口交换元素方法
+//Implement the sort.Interface interface exchange element method
 func (s MsgFormats) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }

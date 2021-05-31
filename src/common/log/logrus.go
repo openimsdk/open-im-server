@@ -44,56 +44,19 @@ func loggerInit(moduleName string) *Logger {
 		logger.AddHook(newEsHook(moduleName))
 	}
 	//Log file segmentation hook
-	hook := NewLfsHook(config.Config.Log.StorageLocation+time.Now().Format("2006-01-02")+".log", 0, 5, moduleName)
+	hook := NewLfsHook(time.Duration(config.Config.Log.RotationTime)*time.Hour, config.Config.Log.RemainRotationCount, moduleName)
 	logger.AddHook(hook)
 	return &Logger{
 		logger,
 		os.Getpid(),
 	}
 }
-func NewLfsHook(logName string, rotationTime time.Duration, maxRemainNum uint, moduleName string) logrus.Hook {
-	var fileNameSuffix string
-	if GetCurrentTimestamp() >= GetCurDayZeroTimestamp() && GetCurrentTimestamp() <= GetCurDayHalfTimestamp() {
-		fileNameSuffix = time.Now().Format("2006-01-02") + ".log"
-	} else {
-		fileNameSuffix = time.Now().Format("2006-01-02") + ".log"
-	}
-	writer, err := rotatelogs.New(
-		logName,
-		rotatelogs.WithRotationCount(maxRemainNum),
-	)
-	if err != nil {
-		panic(err)
-	}
-	writeInfo, err := rotatelogs.New(
-		config.Config.Log.StorageLocation+moduleName+"/info."+fileNameSuffix,
-		rotatelogs.WithRotationTime(time.Duration(60)*time.Second),
-		rotatelogs.WithRotationCount(maxRemainNum),
-	)
-	writeError, err := rotatelogs.New(
-		config.Config.Log.StorageLocation+moduleName+"/error."+fileNameSuffix,
-		rotatelogs.WithRotationTime(time.Minute),
-		rotatelogs.WithRotationCount(maxRemainNum),
-	)
-	writeDebug, err := rotatelogs.New(
-		config.Config.Log.StorageLocation+moduleName+"/debug."+fileNameSuffix,
-		rotatelogs.WithRotationCount(maxRemainNum),
-	)
-	writeWarn, err := rotatelogs.New(
-		config.Config.Log.StorageLocation+moduleName+"/warn."+fileNameSuffix,
-		rotatelogs.WithRotationTime(time.Minute),
-		rotatelogs.WithRotationCount(maxRemainNum),
-	)
-	if err != nil {
-		panic(err)
-	}
+func NewLfsHook(rotationTime time.Duration, maxRemainNum uint, moduleName string) logrus.Hook {
 	lfsHook := lfshook.NewHook(lfshook.WriterMap{
-		logrus.DebugLevel: writeDebug,
-		logrus.InfoLevel:  writeInfo,
-		logrus.WarnLevel:  writeWarn,
-		logrus.ErrorLevel: writeError,
-		logrus.FatalLevel: writer,
-		logrus.PanicLevel: writer,
+		logrus.DebugLevel: initRotateLogs(rotationTime, maxRemainNum, "debug", moduleName),
+		logrus.InfoLevel:  initRotateLogs(rotationTime, maxRemainNum, "info", moduleName),
+		logrus.WarnLevel:  initRotateLogs(rotationTime, maxRemainNum, "warn", moduleName),
+		logrus.ErrorLevel: initRotateLogs(rotationTime, maxRemainNum, "error", moduleName),
 	}, &nested.Formatter{
 		TimestampFormat: "2006-01-02 15:04:05",
 		HideKeys:        false,
@@ -101,6 +64,18 @@ func NewLfsHook(logName string, rotationTime time.Duration, maxRemainNum uint, m
 	})
 
 	return lfsHook
+}
+func initRotateLogs(rotationTime time.Duration, maxRemainNum uint, level string, moduleName string) *rotatelogs.RotateLogs {
+	writer, err := rotatelogs.New(
+		config.Config.Log.StorageLocation+moduleName+"/"+level+"."+"%Y-%m-%d_%H-%M-%S",
+		rotatelogs.WithRotationTime(rotationTime),
+		rotatelogs.WithRotationCount(maxRemainNum),
+	)
+	if err != nil {
+		panic(err)
+	} else {
+		return writer
+	}
 }
 
 func Info(token, OperationID, format string, args ...interface{}) {

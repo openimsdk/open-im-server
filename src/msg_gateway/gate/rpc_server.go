@@ -77,18 +77,20 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	case constant.SyncSenderMsg:
 		log.InfoByKv("come sync", in.OperationID, "args", in.String())
 		RecvID = in.GetSendID()
-		for key, conn := range ws.wsUserToConn {
-			UIDAndPID := strings.Split(key, " ")
-			if UIDAndPID[0] == RecvID && utils.PlatformIDToName(in.GetPlatformID()) != UIDAndPID[1] {
-				resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
-				temp := &pbRelay.SingleMsgToUser{
-					ResultCode:     resultCode,
-					RecvID:         UIDAndPID[0],
-					RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
+		if in.MsgFrom != constant.SysMsgType {
+			for key, conn := range ws.wsUserToConn {
+				UIDAndPID := strings.Split(key, " ")
+				if UIDAndPID[0] == RecvID && utils.PlatformIDToName(in.GetPlatformID()) != UIDAndPID[1] {
+					resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
+					temp := &pbRelay.SingleMsgToUser{
+						ResultCode:     resultCode,
+						RecvID:         UIDAndPID[0],
+						RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
+					}
+					resp = append(resp, temp)
 				}
-				resp = append(resp, temp)
-			}
 
+			}
 		}
 	default:
 		log.InfoByKv("not come sync", in.OperationID, "args", in.String())
@@ -119,25 +121,6 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 		Resp: resp,
 	}, nil
 }
-
-//func (r *RPCServer) SendMsgByWS(_ context.Context, in *pbRelay.SendMsgByWSReq) (*pbRelay.MsgToUserResp, error) {
-//	log.InfoByKv("SendMsgByWS is arriving ", in.OperationID, "args", in.String())
-//	resp := new(pbRelay.MsgToUserResp)
-//	MsgId := ws.genMsgNum()
-//	pbData := pbMsg.WSToMsgSvrChatMsg{}
-//	pbData.SendID = in.SendID
-//	pbData.RecvID = in.RecvID
-//	pbData.MsgID = MsgId
-//	pbData.SessionType = in.SessionType
-//	pbData.MsgFrom = in.MsgFrom
-//	pbData.Content = in.Content
-//	pbData.ContentType = in.ContentType
-//	pbData.OperationID = in.OperationID
-//	pbData.SendTime = in.SendTime
-//	pbData.PlatformID = in.PlatformID
-//	pKafka.writeMsg(&pbData)
-//	return resp, nil
-//}
 
 func sendMsgToUser(conn *websocket.Conn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPlatForm, RecvID string) (ResultCode int64) {
 	err := ws.writeMsg(conn, websocket.TextMessage, bMsg)

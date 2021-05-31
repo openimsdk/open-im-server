@@ -8,10 +8,10 @@ etcd:
   etcdAddr: [ 127.0.0.1:2379 ]
 
 mysql:
-  dbAddress: [ 127.0.0.1:3306 ]
-  dbUserName: root
-  dbPassword: 123456
-  dbDatabaseName: openIM
+  dbMysqlAddress: [ 127.0.0.1:3306 ]
+  dbMysqlUserName: root
+  dbMysqlPassword: 123456
+  dbMysqlDatabaseName: openIM
   dbTableName: eMsg
   dbMsgTableNum: 1
   dbMaxOpenConns: 20
@@ -90,6 +90,8 @@ rpcregistername:
 
 log:
   storageLocation: ../logs/
+  rotationTime: 12
+  remainRotationCount: 10
   elasticSearchSwitch: false
   elasticSearchAddr: [ 47.112.160.66:9201 ]
   elasticSearchUser: ""
@@ -128,3 +130,7 @@ tokenpolicy:
   # Token effective time seconds as a unit
   #Seven days   7*24*60*60
   accessExpire: 604800
+
+messagecallback:
+  callbackSwitch: false
+  callbackUrl: "http://www.xxx.com/msg/judge"
