@@ -8,7 +8,6 @@ import (
 	pbFriend "Open_IM/src/proto/friend"
 	"Open_IM/src/utils"
 	"context"
-	"fmt"
 )
 
 func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFriendListReq) (*pbFriend.GetFriendListResp, error) {
@@ -39,21 +38,21 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 		us, err := im_mysql_model.FindUserByUID(friendUser.FriendId)
 		if err != nil {
 			log.Error(req.Token, req.OperationID, "err=%s search userInfo failed", err.Error())
-		} else {
-			friendUserInfo.Uid = friendUser.FriendId
-			friendUserInfo.Comment = friendUser.Comment
-			friendUserInfo.Icon = us.Icon
-			friendUserInfo.Name = us.Name
-			friendUserInfo.Gender = us.Gender
-			friendUserInfo.Mobile = us.Mobile
-			friendUserInfo.Birth = us.Birth
-			friendUserInfo.Email = us.Email
-			friendUserInfo.Ex = us.Ex
-
-			userInfoList = append(userInfoList, &friendUserInfo)
+			continue
 		}
+		friendUserInfo.Uid = friendUser.FriendId
+		friendUserInfo.Comment = friendUser.Comment
+		friendUserInfo.Icon = us.Icon
+		friendUserInfo.Name = us.Name
+		friendUserInfo.Gender = us.Gender
+		friendUserInfo.Mobile = us.Mobile
+		friendUserInfo.Birth = us.Birth
+		friendUserInfo.Email = us.Email
+		friendUserInfo.Ex = us.Ex
+
+		userInfoList = append(userInfoList, &friendUserInfo)
 
 	}
-	log.Info(req.Token, req.OperationID, fmt.Sprintf("rpc get friend list success return"))
+	log.Info(req.Token, req.OperationID, "rpc get friend list success return")
 	return &pbFriend.GetFriendListResp{Data: userInfoList}, nil
 }

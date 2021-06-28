@@ -12,9 +12,7 @@ func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlac
 	log.InfoByArgs("rpc is in blacklist is server,args=%s", req.String())
 	var isInBlacklist = false
 	err := im_mysql_model.FindRelationshipFromBlackList(req.ReceiveUid, req.SendUid)
-	if err != nil {
-		log.Error("", req.OperationID, "err=%s,", err.Error())
-	} else {
+	if err == nil {
 		isInBlacklist = true
 	}
 	log.InfoByArgs(fmt.Sprintf("rpc is in blackList success return"))
