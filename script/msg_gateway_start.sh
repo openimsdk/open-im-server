@@ -25,9 +25,6 @@ fi
 #Waiting port recycling
 sleep 3
 cd ${msg_gateway_binary_root}
-
-ulimit -n 300000
-
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
   nohup ./${msg_gateway_name} -rpc_port ${rpc_ports[$i]} -ws_port ${ws_ports[$i]} >>../logs/${msg_gateway_name}.$(date +%Y-%m-%d).log 2>&1 &
 done
