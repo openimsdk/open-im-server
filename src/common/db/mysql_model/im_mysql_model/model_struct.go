@@ -23,7 +23,7 @@ type Friend struct {
 }
 type FriendRequest struct {
 	ReqId      string    `gorm:"column:req_id"`
-	UserId     string    `gorm:"column:user_id"`
+	Uid        string    `gorm:"column:user_id"`
 	Flag       int32     `gorm:"column:flag"`
 	ReqMessage string    `gorm:"column:req_message"`
 	CreateTime time.Time `gorm:"column:create_time"`
@@ -33,16 +33,37 @@ type BlackList struct {
 	BlockId    string    `gorm:"column:block_id"`
 	CreateTime time.Time `gorm:"column:create_time"`
 }
+
 type Group struct {
-	GroupId  string `gorm:"column:group_id"`
-	Name     string `gorm:"column:name"`
-	HeadURL  string `gorm:"column:head_url"`
-	Bulletin string `gorm:"column:bulletin"`
+	GroupId      string    `gorm:"column:group_id"`
+	Name         string    `gorm:"column:name"`
+	Introduction string    `gorm:"column:introduction"`
+	Notification string    `gorm:"column:notification"`
+	FaceUrl      string    `gorm:"column:face_url"`
+	CreateTime   time.Time `gorm:"column:create_time"`
+	Ex           string    `gorm:"column:ex"`
 }
 
 type GroupMember struct {
-	GroupId  string `gorm:"column:group_id"`
-	UserId   string `gorm:"column:user_id"`
-	NickName string `gorm:"column:nickname"`
-	IsAdmin  int32  `gorm:"column:is_admin"`
+	GroupId            string    `gorm:"column:group_id"`
+	Uid                string    `gorm:"column:uid"`
+	NickName           string    `gorm:"column:nickname"`
+	AdministratorLevel int32     `gorm:"column:administrator_level"`
+	JoinTime           time.Time `gorm:"column:join_time"`
+	UserGroupFaceUrl   string    `gorm:"user_group_face_url"`
+}
+
+type GroupRequest struct {
+	GroupID          string    `gorm:"column:group_id"`
+	FromUserID       string    `gorm:"column:from_user_id"`
+	ToUserID         string    `gorm:"column:to_user_id"`
+	Flag             int32     `gorm:"column:flag"`
+	ReqMsg           string    `gorm:"column:req_msg"`
+	HandledMsg       string    `gorm:"column:handled_msg"`
+	CreateTime       time.Time `gorm:"column:create_time"`
+	FromUserNickname string    `gorm:"from_user_nickname"`
+	ToUserNickname   string    `gorm:"to_user_nickname"`
+	FromUserFaceUrl  string    `gorm:"from_user_face_url"`
+	ToUserFaceUrl    string    `gorm:"to_user_face_url"`
+	HandledUser      string    `gorm:"handled_user"`
 }

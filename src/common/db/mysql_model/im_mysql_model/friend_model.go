@@ -42,7 +42,6 @@ func FindUserInfoFromFriend(ownerId string) ([]Friend, error) {
 	if err != nil {
 		return nil, err
 	}
-	//dbConn.LogMode(true)
 	var friends []Friend
 	err = dbConn.Table("friend").Where("owner_id=?", ownerId).Find(&friends).Error
 	if err != nil {

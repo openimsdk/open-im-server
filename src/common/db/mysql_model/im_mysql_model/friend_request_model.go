@@ -31,7 +31,20 @@ func FindFriendsApplyFromFriendReq(userId string) ([]FriendRequest, error) {
 	return usersInfo, nil
 }
 
-func FindFriendRelationshipFromFriendReq(reqId, userId string) (*FriendRequest, error) {
+func FindSelfApplyFromFriendReq(userId string) ([]FriendRequest, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	var usersInfo []FriendRequest
+	err = dbConn.Table("friend_request").Where("req_id=?", userId).Find(&usersInfo).Error
+	if err != nil {
+		return nil, err
+	}
+	return usersInfo, nil
+}
+
+func FindFriendApplyFromFriendReqByUid(reqId, userId string) (*FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err

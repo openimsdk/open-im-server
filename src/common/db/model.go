@@ -1,72 +1,60 @@
 package db
 
 import (
+	"Open_IM/src/common/config"
+	"github.com/garyburd/redigo/redis"
 	"gopkg.in/mgo.v2"
+	"time"
 )
 
 var DB DataBases
 
 type DataBases struct {
-	MgoDB   mongoDB
-	RedisDB redisDB
-	MysqlDB mysqlDB
+	MysqlDB    mysqlDB
+	mgoSession *mgo.Session
+	redisPool  *redis.Pool
 }
 
 func key(dbAddress, dbName string) string {
 	return dbAddress + "_" + dbName
 }
 
-//type Config struct {
-//	Mongo struct {
-//		DBAddress     []string `yaml:"dbAddress"`
-//		DBDirect      bool     `yaml:"dbDirect"`
-//		DBTimeout     int      `yaml:"dbTimeout"`
-//		DBDatabase    []string `yaml:"dbDatabase"`
-//		DBSource      string   `yaml:"dbSource"`
-//		DBUserName    string   `yaml:"dbUserName"`
-//		DBPassword    string   `yaml:"dbPassword"`
-//		DBMaxPoolSize int      `yaml:"dbMaxPoolSize"`
-//	}
-//	Mysql struct {
-//		DBAddress      []string `yaml:"dbAddress"`
-//		DBPort         int      `yaml:"dbPort"`
-//		DBUserName     string   `yaml:"dbUserName"`
-//		DBPassword     string   `yaml:"dbPassword"`
-//		DBDatabaseName     string   `yaml:"dbChatName"` // 默认使用DBAddress[0]
-//		DBTableName      string   `yaml:"dbMsgName"`
-//		DBMsgTableNum  int      `yaml:"dbMsgTableNum"`
-//		DBCharset      string   `yaml:"dbCharset"`
-//		DBMaxOpenConns int      `yaml:"dbMaxOpenConns"`
-//		DBMaxIdleConns int      `yaml:"dbMaxIdleConns"`
-//		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
-//	}
-//	Redis struct {
-//		DBAddress     string `yaml:"dbAddress"`
-//		DBPort        int    `yaml:"dbPort"`
-//		DBMaxIdle     int    `yaml:"dbMaxIdle"`
-//		DBMaxActive   int    `yaml:"dbMaxActive"`
-//		DBIdleTimeout int    `yaml:"dbIdleTimeout"`
-//	}
-//}
-
-//func init() {
-//	bytes, err := ioutil.ReadFile("config/db.yaml")
-//	if err != nil {
-//		log.Error("", "", "read db.yaml config fail! err = %s", err.Error())
-//		return
-//	}
-//
-//	if err = yaml.Unmarshal(bytes, &DB.Config); err != nil {
-//		log.Error("", "", "unmarshal db.yaml config fail! err = %s", err.Error())
-//		return
-//	}
-//
-//	DB.RedisDB.newPool(DB.Config)
-//	//DB.MysqlDB.sqlxDB(DB.Config.Mysql.DBName[0], DB.Config)
-//}
 func init() {
-	DB.RedisDB.newPool()
-}
-func (d *DataBases) session(dbName string) *mgo.Session {
-	return d.MgoDB.mgoSession(dbName)
+	//mysql init
+
+	// mongo init
+	mgoDailInfo := &mgo.DialInfo{
+		Addrs:     config.Config.Mongo.DBAddress,
+		Direct:    config.Config.Mongo.DBDirect,
+		Timeout:   time.Second * time.Duration(config.Config.Mongo.DBTimeout),
+		Database:  config.Config.Mongo.DBDatabase,
+		Source:    config.Config.Mongo.DBSource,
+		Username:  config.Config.Mongo.DBUserName,
+		Password:  config.Config.Mongo.DBPassword,
+		PoolLimit: config.Config.Mongo.DBMaxPoolSize,
+	}
+	mgoSession, err := mgo.DialWithInfo(mgoDailInfo)
+	if err != nil {
+		panic(err)
+	}
+	DB.mgoSession = mgoSession
+	DB.mgoSession.SetMode(mgo.Monotonic, true)
+
+	// redis pool init
+	DB.redisPool = &redis.Pool{
+		MaxIdle:     config.Config.Redis.DBMaxIdle,
+		MaxActive:   config.Config.Redis.DBMaxActive,
+		IdleTimeout: time.Duration(config.Config.Redis.DBIdleTimeout) * time.Second,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial(
+				"tcp",
+				config.Config.Redis.DBAddress,
+				redis.DialReadTimeout(time.Duration(1000)*time.Millisecond),
+				redis.DialWriteTimeout(time.Duration(1000)*time.Millisecond),
+				redis.DialConnectTimeout(time.Duration(1000)*time.Millisecond),
+				redis.DialDatabase(0),
+				redis.DialPassword(config.Config.Redis.DBPassWord),
+			)
+		},
+	}
 }

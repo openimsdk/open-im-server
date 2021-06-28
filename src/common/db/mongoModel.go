@@ -6,24 +6,30 @@ import (
 	pbMsg "Open_IM/src/proto/chat"
 	"errors"
 	"github.com/golang/protobuf/proto"
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"time"
 )
 
+const cChat = "chat"
+
+type MsgInfo struct {
+	SendTime int64
+	Msg      []byte
+}
+
 type UserChat struct {
 	UID string
-	Msg [][]byte
+	Msg []MsgInfo
 }
 
 func (d *DataBases) GetUserChat(uid string, seqBegin, seqEnd int64) (SingleMsg []*pbMsg.MsgFormat, GroupMsg []*pbMsg.MsgFormat, MaxSeq int64, MinSeq int64, err error) {
-	session := d.session(config.Config.Mongo.DBDatabase[0]).Clone()
+	session := d.mgoSession.Clone()
 	if session == nil {
 		return nil, nil, MaxSeq, MinSeq, errors.New("session == nil")
 	}
 	defer session.Close()
 
-	c := session.DB(config.Config.Mongo.DBDatabase[0]).C("chat")
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
 
 	sChat := UserChat{}
 	if err = c.Find(bson.M{"uid": uid}).One(&sChat); err != nil {
@@ -31,9 +37,8 @@ func (d *DataBases) GetUserChat(uid string, seqBegin, seqEnd int64) (SingleMsg [
 	}
 	pChat := pbMsg.MsgSvrToPushSvrChatMsg{}
 	for i := 0; i < len(sChat.Msg); i++ {
-		//每次产生新的指针
 		temp := new(pbMsg.MsgFormat)
-		if err = proto.Unmarshal(sChat.Msg[i], &pChat); err != nil {
+		if err = proto.Unmarshal(sChat.Msg[i].Msg, &pChat); err != nil {
 			return nil, nil, MaxSeq, MinSeq, err
 		}
 		if pChat.RecvSeq >= seqBegin && pChat.RecvSeq <= seqEnd {
@@ -55,7 +60,6 @@ func (d *DataBases) GetUserChat(uid string, seqBegin, seqEnd int64) (SingleMsg [
 			if pChat.RecvSeq < MinSeq {
 				MinSeq = pChat.RecvSeq
 			}
-			//单聊消息
 			if pChat.SessionType == constant.SingleChatType {
 				SingleMsg = append(SingleMsg, temp)
 			} else {
@@ -64,39 +68,41 @@ func (d *DataBases) GetUserChat(uid string, seqBegin, seqEnd int64) (SingleMsg [
 		}
 	}
 
-	//d.DelUserChat(&sChat)
-
 	return SingleMsg, GroupMsg, MaxSeq, MinSeq, nil
 }
 
-func (d *DataBases) SaveUserChat(uid string, m proto.Message) error {
-	session := d.session(config.Config.Mongo.DBDatabase[0]).Clone()
+func (d *DataBases) SaveUserChat(uid string, sendTime int64, m proto.Message) error {
+
+	session := d.mgoSession.Clone()
 	if session == nil {
 		return errors.New("session == nil")
 	}
 	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
 
-	c := session.DB(config.Config.Mongo.DBDatabase[0]).C("chat")
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
 
 	n, err := c.Find(bson.M{"uid": uid}).Count()
 	if err != nil {
 		return err
 	}
 
+	sMsg := MsgInfo{}
+	sMsg.SendTime = sendTime
+	if sMsg.Msg, err = proto.Marshal(m); err != nil {
+		return err
+	}
+
 	if n == 0 {
 		sChat := UserChat{}
 		sChat.UID = uid
-		bMsg, _ := proto.Marshal(m)
-		sChat.Msg = append(sChat.Msg, bMsg)
-
+		sChat.Msg = append(sChat.Msg, sMsg)
 		err = c.Insert(&sChat)
 		if err != nil {
 			return err
 		}
 	} else {
-		bMsg, err := proto.Marshal(m)
-		err = c.Update(bson.M{"uid": uid}, bson.M{"$addToSet": bson.M{"msg": bMsg}})
+
+		err = c.Update(bson.M{"uid": uid}, bson.M{"$push": bson.M{"msg": sMsg}})
 		if err != nil {
 			return err
 		}
@@ -105,85 +111,45 @@ func (d *DataBases) SaveUserChat(uid string, m proto.Message) error {
 	return nil
 }
 
-func (d *DataBases) DelUserChat(uc *UserChat) {
-	delMaxIndex := 0
-	pbData := pbMsg.WSToMsgSvrChatMsg{}
-	for i := 0; i < len(uc.Msg); i++ {
-		if err := proto.Unmarshal(uc.Msg[i], &pbData); err != nil {
-			delMaxIndex = i
-		} else {
-			if time.Now().Unix()-pbData.SendTime > 7*24*3600 {
-				delMaxIndex = i
-			} else {
-				break
-			}
-		}
-	}
-
-	if delMaxIndex > 0 {
-		uc.Msg = uc.Msg[delMaxIndex:]
-
-		session := d.session(config.Config.Mongo.DBDatabase[0]).Clone()
-		if session == nil {
-			return
-		}
-		defer session.Close()
-
-		c := session.DB(config.Config.Mongo.DBDatabase[0]).C("chat")
-		if err := c.Update(bson.M{"uid": uc.UID}, bson.M{"msg": uc.Msg}); err != nil {
-			return
-		}
-	}
-}
-
-func (d *DataBases) DelHistoryChat(days int64, ids []string) error {
-	session := d.session(config.Config.Mongo.DBDatabase[0]).Clone()
+func (d *DataBases) DelUserChat(uid string) error {
+	session := d.mgoSession.Clone()
 	if session == nil {
-		return errors.New("mgo session == nil")
+		return errors.New("session == nil")
 	}
 	defer session.Close()
 
-	c := session.DB(config.Config.Mongo.DBDatabase[0]).C("chat")
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
 
-	for i := 0; i < len(ids); i++ {
-		d.delHistoryUserChat(c, days, ids[i])
-		//time.Sleep(1 * time.Millisecond)
+	delTime := time.Now().Unix() - int64(config.Config.Mongo.DBRetainChatRecords)*24*3600
+	if err := c.Update(bson.M{"uid": uid}, bson.M{"$pull": bson.M{"msg": bson.M{"sendtime": bson.M{"$lte": delTime}}}}); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (d *DataBases) delHistoryUserChat(c *mgo.Collection, days int64, id string) error {
+func (d *DataBases) MgoUserCount() (int, error) {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return 0, errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
+
+	return c.Find(nil).Count()
+}
+
+func (d *DataBases) MgoSkipUID(count int) (string, error) {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return "", errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
+
 	sChat := UserChat{}
-	if err := c.Find(bson.M{"uid": id}).One(&sChat); err != nil {
-		return err
-	}
-
-	delMaxIndex := 0
-	pbData := pbMsg.WSToMsgSvrChatMsg{}
-	for i := 0; i < len(sChat.Msg); i++ {
-		if err := proto.Unmarshal(sChat.Msg[i], &pbData); err != nil {
-			delMaxIndex = i
-		} else {
-			if time.Now().Unix()-pbData.SendTime > int64(days)*24*3600 {
-				delMaxIndex = i
-			} else {
-				break
-			}
-		}
-	}
-
-	if delMaxIndex > 0 {
-		if delMaxIndex < len(sChat.Msg) {
-			sChat.Msg = sChat.Msg[delMaxIndex:]
-		} else {
-			sChat.Msg = sChat.Msg[0:0]
-		}
-
-		if err := c.Update(bson.M{"uid": sChat.UID}, bson.M{"msg": sChat.Msg}); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	c.Find(nil).Skip(count).Limit(1).One(&sChat)
+	return sChat.UID, nil
 }
