@@ -211,7 +211,9 @@ func init() {
 	proto.RegisterType((*PushMsgResp)(nil), "push.PushMsgResp")
 }
 
-func init() { proto.RegisterFile("push/push.proto", fileDescriptor_ae0042da44e9a7a7) }
+func init() {
+	proto.RegisterFile("push/push.proto", fileDescriptor_ae0042da44e9a7a7)
+}
 
 var fileDescriptor_ae0042da44e9a7a7 = []byte{
 	// 346 bytes of a gzipped FileDescriptorProto
@@ -241,11 +243,11 @@ var fileDescriptor_ae0042da44e9a7a7 = []byte{
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // PushMsgServiceClient is the client API for PushMsgService service.
 //
@@ -255,10 +257,10 @@ type PushMsgServiceClient interface {
 }
 
 type pushMsgServiceClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewPushMsgServiceClient(cc *grpc.ClientConn) PushMsgServiceClient {
+func NewPushMsgServiceClient(cc grpc.ClientConnInterface) PushMsgServiceClient {
 	return &pushMsgServiceClient{cc}
 }
 

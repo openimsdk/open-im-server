@@ -7,18 +7,18 @@ message CommonResp{
   string  errorMsg = 2;
 }
 
-message SearchFriendReq{
+message GetFriendsInfoReq{
   string uid = 1;
   string OperationID = 2;
   string Token = 3;
 }
-message SearchFriendResp{
+message GetFriendInfoResp{
   int32  errorCode = 1;
   string errorMsg = 2;
-  SearchFriendData Data = 3;
+  GetFriendData Data = 3;
 }
 
-message SearchFriendData{
+message GetFriendData{
   string uid = 1;
   string icon = 2;
   string name = 3;
@@ -111,7 +111,16 @@ message GetBlacklistResp{
   repeated UserInfo data = 3;
 }
 
-
+message IsFriendReq{
+  string token = 1;
+  string receiveUid = 2;
+  string OperationID = 3;
+}
+message IsFriendResp{
+  int32   errorCode = 1;
+  string  errorMsg = 2;
+  int32   shipType = 3;
+}
 message IsInBlackListReq{
   string sendUid = 1;
   string receiveUid = 2;
@@ -130,7 +139,7 @@ message DeleteFriendReq{
 }
 
 
-message AddedFriendReq{
+message AddFriendResponseReq{
   string uid = 1;
   int32  flag = 2;
   string OperationID = 3;
@@ -145,15 +154,17 @@ message SetFriendCommentReq{
 }
 
 service friend{
-  rpc searchFriend(SearchFriendReq) returns(SearchFriendResp);
+  rpc getFriendsInfo(GetFriendsInfoReq) returns(GetFriendInfoResp);
   rpc addFriend(AddFriendReq) returns(CommonResp);
   rpc getFriendApplyList(GetFriendApplyReq) returns(GetFriendApplyResp);
+  rpc getSelfApplyList(GetFriendApplyReq) returns(GetFriendApplyResp);
   rpc getFriendList(getFriendListReq) returns(getFriendListResp);
   rpc addBlacklist(AddBlacklistReq) returns(CommonResp);
   rpc removeBlacklist(RemoveBlacklistReq) returns(CommonResp);
+  rpc isFriend(IsFriendReq) returns(IsFriendResp);
   rpc isInBlackList(IsInBlackListReq) returns(IsInBlackListResp);
   rpc getBlacklist(GetBlacklistReq) returns(GetBlacklistResp);
   rpc deleteFriend(DeleteFriendReq) returns(CommonResp);
-  rpc addedFriend(AddedFriendReq) returns(CommonResp);
+  rpc addFriendResponse(AddFriendResponseReq) returns(CommonResp);
   rpc setFriendComment(SetFriendCommentReq) returns(CommonResp);
 }

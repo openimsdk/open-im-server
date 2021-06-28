@@ -71,7 +71,7 @@ func (m *CommonResp) GetErrorMsg() string {
 	return ""
 }
 
-type SearchFriendReq struct {
+type GetFriendsInfoReq struct {
 	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
 	Token                string   `protobuf:"bytes,3,opt,name=Token,proto3" json:"Token,omitempty"`
@@ -80,108 +80,108 @@ type SearchFriendReq struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *SearchFriendReq) Reset()         { *m = SearchFriendReq{} }
-func (m *SearchFriendReq) String() string { return proto.CompactTextString(m) }
-func (*SearchFriendReq) ProtoMessage()    {}
-func (*SearchFriendReq) Descriptor() ([]byte, []int) {
+func (m *GetFriendsInfoReq) Reset()         { *m = GetFriendsInfoReq{} }
+func (m *GetFriendsInfoReq) String() string { return proto.CompactTextString(m) }
+func (*GetFriendsInfoReq) ProtoMessage()    {}
+func (*GetFriendsInfoReq) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1a7db849dd7bb41b, []int{1}
 }
 
-func (m *SearchFriendReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SearchFriendReq.Unmarshal(m, b)
+func (m *GetFriendsInfoReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFriendsInfoReq.Unmarshal(m, b)
 }
-func (m *SearchFriendReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SearchFriendReq.Marshal(b, m, deterministic)
+func (m *GetFriendsInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFriendsInfoReq.Marshal(b, m, deterministic)
 }
-func (m *SearchFriendReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SearchFriendReq.Merge(m, src)
+func (m *GetFriendsInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFriendsInfoReq.Merge(m, src)
 }
-func (m *SearchFriendReq) XXX_Size() int {
-	return xxx_messageInfo_SearchFriendReq.Size(m)
+func (m *GetFriendsInfoReq) XXX_Size() int {
+	return xxx_messageInfo_GetFriendsInfoReq.Size(m)
 }
-func (m *SearchFriendReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_SearchFriendReq.DiscardUnknown(m)
+func (m *GetFriendsInfoReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFriendsInfoReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_SearchFriendReq proto.InternalMessageInfo
+var xxx_messageInfo_GetFriendsInfoReq proto.InternalMessageInfo
 
-func (m *SearchFriendReq) GetUid() string {
+func (m *GetFriendsInfoReq) GetUid() string {
 	if m != nil {
 		return m.Uid
 	}
 	return ""
 }
 
-func (m *SearchFriendReq) GetOperationID() string {
+func (m *GetFriendsInfoReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
 	}
 	return ""
 }
 
-func (m *SearchFriendReq) GetToken() string {
+func (m *GetFriendsInfoReq) GetToken() string {
 	if m != nil {
 		return m.Token
 	}
 	return ""
 }
 
-type SearchFriendResp struct {
-	ErrorCode            int32             `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
-	ErrorMsg             string            `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
-	Data                 *SearchFriendData `protobuf:"bytes,3,opt,name=Data,proto3" json:"Data,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
+type GetFriendInfoResp struct {
+	ErrorCode            int32          `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
+	ErrorMsg             string         `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	Data                 *GetFriendData `protobuf:"bytes,3,opt,name=Data,proto3" json:"Data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
 }
 
-func (m *SearchFriendResp) Reset()         { *m = SearchFriendResp{} }
-func (m *SearchFriendResp) String() string { return proto.CompactTextString(m) }
-func (*SearchFriendResp) ProtoMessage()    {}
-func (*SearchFriendResp) Descriptor() ([]byte, []int) {
+func (m *GetFriendInfoResp) Reset()         { *m = GetFriendInfoResp{} }
+func (m *GetFriendInfoResp) String() string { return proto.CompactTextString(m) }
+func (*GetFriendInfoResp) ProtoMessage()    {}
+func (*GetFriendInfoResp) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1a7db849dd7bb41b, []int{2}
 }
 
-func (m *SearchFriendResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SearchFriendResp.Unmarshal(m, b)
+func (m *GetFriendInfoResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFriendInfoResp.Unmarshal(m, b)
 }
-func (m *SearchFriendResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SearchFriendResp.Marshal(b, m, deterministic)
+func (m *GetFriendInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFriendInfoResp.Marshal(b, m, deterministic)
 }
-func (m *SearchFriendResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SearchFriendResp.Merge(m, src)
+func (m *GetFriendInfoResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFriendInfoResp.Merge(m, src)
 }
-func (m *SearchFriendResp) XXX_Size() int {
-	return xxx_messageInfo_SearchFriendResp.Size(m)
+func (m *GetFriendInfoResp) XXX_Size() int {
+	return xxx_messageInfo_GetFriendInfoResp.Size(m)
 }
-func (m *SearchFriendResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_SearchFriendResp.DiscardUnknown(m)
+func (m *GetFriendInfoResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFriendInfoResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_SearchFriendResp proto.InternalMessageInfo
+var xxx_messageInfo_GetFriendInfoResp proto.InternalMessageInfo
 
-func (m *SearchFriendResp) GetErrorCode() int32 {
+func (m *GetFriendInfoResp) GetErrorCode() int32 {
 	if m != nil {
 		return m.ErrorCode
 	}
 	return 0
 }
 
-func (m *SearchFriendResp) GetErrorMsg() string {
+func (m *GetFriendInfoResp) GetErrorMsg() string {
 	if m != nil {
 		return m.ErrorMsg
 	}
 	return ""
 }
 
-func (m *SearchFriendResp) GetData() *SearchFriendData {
+func (m *GetFriendInfoResp) GetData() *GetFriendData {
 	if m != nil {
 		return m.Data
 	}
 	return nil
 }
 
-type SearchFriendData struct {
+type GetFriendData struct {
 	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	Icon                 string   `protobuf:"bytes,2,opt,name=icon,proto3" json:"icon,omitempty"`
 	Name                 string   `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
@@ -198,102 +198,102 @@ type SearchFriendData struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *SearchFriendData) Reset()         { *m = SearchFriendData{} }
-func (m *SearchFriendData) String() string { return proto.CompactTextString(m) }
-func (*SearchFriendData) ProtoMessage()    {}
-func (*SearchFriendData) Descriptor() ([]byte, []int) {
+func (m *GetFriendData) Reset()         { *m = GetFriendData{} }
+func (m *GetFriendData) String() string { return proto.CompactTextString(m) }
+func (*GetFriendData) ProtoMessage()    {}
+func (*GetFriendData) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1a7db849dd7bb41b, []int{3}
 }
 
-func (m *SearchFriendData) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SearchFriendData.Unmarshal(m, b)
+func (m *GetFriendData) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFriendData.Unmarshal(m, b)
 }
-func (m *SearchFriendData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SearchFriendData.Marshal(b, m, deterministic)
+func (m *GetFriendData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFriendData.Marshal(b, m, deterministic)
 }
-func (m *SearchFriendData) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SearchFriendData.Merge(m, src)
+func (m *GetFriendData) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFriendData.Merge(m, src)
 }
-func (m *SearchFriendData) XXX_Size() int {
-	return xxx_messageInfo_SearchFriendData.Size(m)
+func (m *GetFriendData) XXX_Size() int {
+	return xxx_messageInfo_GetFriendData.Size(m)
 }
-func (m *SearchFriendData) XXX_DiscardUnknown() {
-	xxx_messageInfo_SearchFriendData.DiscardUnknown(m)
+func (m *GetFriendData) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFriendData.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_SearchFriendData proto.InternalMessageInfo
+var xxx_messageInfo_GetFriendData proto.InternalMessageInfo
 
-func (m *SearchFriendData) GetUid() string {
+func (m *GetFriendData) GetUid() string {
 	if m != nil {
 		return m.Uid
 	}
 	return ""
 }
 
-func (m *SearchFriendData) GetIcon() string {
+func (m *GetFriendData) GetIcon() string {
 	if m != nil {
 		return m.Icon
 	}
 	return ""
 }
 
-func (m *SearchFriendData) GetName() string {
+func (m *GetFriendData) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-func (m *SearchFriendData) GetGender() int32 {
+func (m *GetFriendData) GetGender() int32 {
 	if m != nil {
 		return m.Gender
 	}
 	return 0
 }
 
-func (m *SearchFriendData) GetMobile() string {
+func (m *GetFriendData) GetMobile() string {
 	if m != nil {
 		return m.Mobile
 	}
 	return ""
 }
 
-func (m *SearchFriendData) GetBirth() string {
+func (m *GetFriendData) GetBirth() string {
 	if m != nil {
 		return m.Birth
 	}
 	return ""
 }
 
-func (m *SearchFriendData) GetEmail() string {
+func (m *GetFriendData) GetEmail() string {
 	if m != nil {
 		return m.Email
 	}
 	return ""
 }
 
-func (m *SearchFriendData) GetEx() string {
+func (m *GetFriendData) GetEx() string {
 	if m != nil {
 		return m.Ex
 	}
 	return ""
 }
 
-func (m *SearchFriendData) GetComment() string {
+func (m *GetFriendData) GetComment() string {
 	if m != nil {
 		return m.Comment
 	}
 	return ""
 }
 
-func (m *SearchFriendData) GetIsFriend() int32 {
+func (m *GetFriendData) GetIsFriend() int32 {
 	if m != nil {
 		return m.IsFriend
 	}
 	return 0
 }
 
-func (m *SearchFriendData) GetIsInBlackList() int32 {
+func (m *GetFriendData) GetIsInBlackList() int32 {
 	if m != nil {
 		return m.IsInBlackList
 	}
@@ -1009,6 +1009,116 @@ func (m *GetBlacklistResp) GetData() []*UserInfo {
 	return nil
 }
 
+type IsFriendReq struct {
+	Token                string   `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	ReceiveUid           string   `protobuf:"bytes,2,opt,name=receiveUid,proto3" json:"receiveUid,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *IsFriendReq) Reset()         { *m = IsFriendReq{} }
+func (m *IsFriendReq) String() string { return proto.CompactTextString(m) }
+func (*IsFriendReq) ProtoMessage()    {}
+func (*IsFriendReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a7db849dd7bb41b, []int{15}
+}
+
+func (m *IsFriendReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IsFriendReq.Unmarshal(m, b)
+}
+func (m *IsFriendReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IsFriendReq.Marshal(b, m, deterministic)
+}
+func (m *IsFriendReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IsFriendReq.Merge(m, src)
+}
+func (m *IsFriendReq) XXX_Size() int {
+	return xxx_messageInfo_IsFriendReq.Size(m)
+}
+func (m *IsFriendReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_IsFriendReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IsFriendReq proto.InternalMessageInfo
+
+func (m *IsFriendReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+func (m *IsFriendReq) GetReceiveUid() string {
+	if m != nil {
+		return m.ReceiveUid
+	}
+	return ""
+}
+
+func (m *IsFriendReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type IsFriendResp struct {
+	ErrorCode            int32    `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
+	ErrorMsg             string   `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	ShipType             int32    `protobuf:"varint,3,opt,name=shipType,proto3" json:"shipType,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *IsFriendResp) Reset()         { *m = IsFriendResp{} }
+func (m *IsFriendResp) String() string { return proto.CompactTextString(m) }
+func (*IsFriendResp) ProtoMessage()    {}
+func (*IsFriendResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a7db849dd7bb41b, []int{16}
+}
+
+func (m *IsFriendResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IsFriendResp.Unmarshal(m, b)
+}
+func (m *IsFriendResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IsFriendResp.Marshal(b, m, deterministic)
+}
+func (m *IsFriendResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IsFriendResp.Merge(m, src)
+}
+func (m *IsFriendResp) XXX_Size() int {
+	return xxx_messageInfo_IsFriendResp.Size(m)
+}
+func (m *IsFriendResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_IsFriendResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IsFriendResp proto.InternalMessageInfo
+
+func (m *IsFriendResp) GetErrorCode() int32 {
+	if m != nil {
+		return m.ErrorCode
+	}
+	return 0
+}
+
+func (m *IsFriendResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
+}
+
+func (m *IsFriendResp) GetShipType() int32 {
+	if m != nil {
+		return m.ShipType
+	}
+	return 0
+}
+
 type IsInBlackListReq struct {
 	SendUid              string   `protobuf:"bytes,1,opt,name=sendUid,proto3" json:"sendUid,omitempty"`
 	ReceiveUid           string   `protobuf:"bytes,2,opt,name=receiveUid,proto3" json:"receiveUid,omitempty"`
@@ -1022,7 +1132,7 @@ func (m *IsInBlackListReq) Reset()         { *m = IsInBlackListReq{} }
 func (m *IsInBlackListReq) String() string { return proto.CompactTextString(m) }
 func (*IsInBlackListReq) ProtoMessage()    {}
 func (*IsInBlackListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a7db849dd7bb41b, []int{15}
+	return fileDescriptor_1a7db849dd7bb41b, []int{17}
 }
 
 func (m *IsInBlackListReq) XXX_Unmarshal(b []byte) error {
@@ -1077,7 +1187,7 @@ func (m *IsInBlackListResp) Reset()         { *m = IsInBlackListResp{} }
 func (m *IsInBlackListResp) String() string { return proto.CompactTextString(m) }
 func (*IsInBlackListResp) ProtoMessage()    {}
 func (*IsInBlackListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a7db849dd7bb41b, []int{16}
+	return fileDescriptor_1a7db849dd7bb41b, []int{18}
 }
 
 func (m *IsInBlackListResp) XXX_Unmarshal(b []byte) error {
@@ -1132,7 +1242,7 @@ func (m *DeleteFriendReq) Reset()         { *m = DeleteFriendReq{} }
 func (m *DeleteFriendReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteFriendReq) ProtoMessage()    {}
 func (*DeleteFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a7db849dd7bb41b, []int{17}
+	return fileDescriptor_1a7db849dd7bb41b, []int{19}
 }
 
 func (m *DeleteFriendReq) XXX_Unmarshal(b []byte) error {
@@ -1174,7 +1284,7 @@ func (m *DeleteFriendReq) GetToken() string {
 	return ""
 }
 
-type AddedFriendReq struct {
+type AddFriendResponseReq struct {
 	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
 	Flag                 int32    `protobuf:"varint,2,opt,name=flag,proto3" json:"flag,omitempty"`
 	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
@@ -1184,53 +1294,53 @@ type AddedFriendReq struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *AddedFriendReq) Reset()         { *m = AddedFriendReq{} }
-func (m *AddedFriendReq) String() string { return proto.CompactTextString(m) }
-func (*AddedFriendReq) ProtoMessage()    {}
-func (*AddedFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a7db849dd7bb41b, []int{18}
+func (m *AddFriendResponseReq) Reset()         { *m = AddFriendResponseReq{} }
+func (m *AddFriendResponseReq) String() string { return proto.CompactTextString(m) }
+func (*AddFriendResponseReq) ProtoMessage()    {}
+func (*AddFriendResponseReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1a7db849dd7bb41b, []int{20}
 }
 
-func (m *AddedFriendReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AddedFriendReq.Unmarshal(m, b)
+func (m *AddFriendResponseReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddFriendResponseReq.Unmarshal(m, b)
 }
-func (m *AddedFriendReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AddedFriendReq.Marshal(b, m, deterministic)
+func (m *AddFriendResponseReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddFriendResponseReq.Marshal(b, m, deterministic)
 }
-func (m *AddedFriendReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddedFriendReq.Merge(m, src)
+func (m *AddFriendResponseReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddFriendResponseReq.Merge(m, src)
 }
-func (m *AddedFriendReq) XXX_Size() int {
-	return xxx_messageInfo_AddedFriendReq.Size(m)
+func (m *AddFriendResponseReq) XXX_Size() int {
+	return xxx_messageInfo_AddFriendResponseReq.Size(m)
 }
-func (m *AddedFriendReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddedFriendReq.DiscardUnknown(m)
+func (m *AddFriendResponseReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddFriendResponseReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddedFriendReq proto.InternalMessageInfo
+var xxx_messageInfo_AddFriendResponseReq proto.InternalMessageInfo
 
-func (m *AddedFriendReq) GetUid() string {
+func (m *AddFriendResponseReq) GetUid() string {
 	if m != nil {
 		return m.Uid
 	}
 	return ""
 }
 
-func (m *AddedFriendReq) GetFlag() int32 {
+func (m *AddFriendResponseReq) GetFlag() int32 {
 	if m != nil {
 		return m.Flag
 	}
 	return 0
 }
 
-func (m *AddedFriendReq) GetOperationID() string {
+func (m *AddFriendResponseReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
 	}
 	return ""
 }
 
-func (m *AddedFriendReq) GetToken() string {
+func (m *AddFriendResponseReq) GetToken() string {
 	if m != nil {
 		return m.Token
 	}
@@ -1251,7 +1361,7 @@ func (m *SetFriendCommentReq) Reset()         { *m = SetFriendCommentReq{} }
 func (m *SetFriendCommentReq) String() string { return proto.CompactTextString(m) }
 func (*SetFriendCommentReq) ProtoMessage()    {}
 func (*SetFriendCommentReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1a7db849dd7bb41b, []int{19}
+	return fileDescriptor_1a7db849dd7bb41b, []int{21}
 }
 
 func (m *SetFriendCommentReq) XXX_Unmarshal(b []byte) error {
@@ -1302,9 +1412,9 @@ func (m *SetFriendCommentReq) GetToken() string {
 
 func init() {
 	proto.RegisterType((*CommonResp)(nil), "friend.CommonResp")
-	proto.RegisterType((*SearchFriendReq)(nil), "friend.SearchFriendReq")
-	proto.RegisterType((*SearchFriendResp)(nil), "friend.SearchFriendResp")
-	proto.RegisterType((*SearchFriendData)(nil), "friend.SearchFriendData")
+	proto.RegisterType((*GetFriendsInfoReq)(nil), "friend.GetFriendsInfoReq")
+	proto.RegisterType((*GetFriendInfoResp)(nil), "friend.GetFriendInfoResp")
+	proto.RegisterType((*GetFriendData)(nil), "friend.GetFriendData")
 	proto.RegisterType((*AddFriendReq)(nil), "friend.AddFriendReq")
 	proto.RegisterType((*GetFriendApplyReq)(nil), "friend.GetFriendApplyReq")
 	proto.RegisterType((*GetFriendApplyResp)(nil), "friend.GetFriendApplyResp")
@@ -1316,110 +1426,119 @@ func init() {
 	proto.RegisterType((*RemoveBlacklistReq)(nil), "friend.RemoveBlacklistReq")
 	proto.RegisterType((*GetBlacklistReq)(nil), "friend.GetBlacklistReq")
 	proto.RegisterType((*GetBlacklistResp)(nil), "friend.GetBlacklistResp")
+	proto.RegisterType((*IsFriendReq)(nil), "friend.IsFriendReq")
+	proto.RegisterType((*IsFriendResp)(nil), "friend.IsFriendResp")
 	proto.RegisterType((*IsInBlackListReq)(nil), "friend.IsInBlackListReq")
 	proto.RegisterType((*IsInBlackListResp)(nil), "friend.IsInBlackListResp")
 	proto.RegisterType((*DeleteFriendReq)(nil), "friend.DeleteFriendReq")
-	proto.RegisterType((*AddedFriendReq)(nil), "friend.AddedFriendReq")
+	proto.RegisterType((*AddFriendResponseReq)(nil), "friend.AddFriendResponseReq")
 	proto.RegisterType((*SetFriendCommentReq)(nil), "friend.SetFriendCommentReq")
 }
 
-func init() { proto.RegisterFile("friend/friend.proto", fileDescriptor_1a7db849dd7bb41b) }
+func init() {
+	proto.RegisterFile("friend/friend.proto", fileDescriptor_1a7db849dd7bb41b)
+}
 
 var fileDescriptor_1a7db849dd7bb41b = []byte{
-	// 867 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x57, 0xdb, 0x4e, 0xdb, 0x4c,
-	0x10, 0x56, 0x6c, 0x27, 0x24, 0x93, 0x84, 0x84, 0x85, 0x9f, 0xdf, 0xa4, 0x55, 0x15, 0x59, 0x5c,
-	0x50, 0xa9, 0xa2, 0x12, 0x55, 0x2f, 0x2a, 0xae, 0x42, 0x22, 0x50, 0x4a, 0x51, 0x25, 0x03, 0x37,
-	0x45, 0xaa, 0x64, 0xe2, 0x21, 0x58, 0xc4, 0x07, 0xbc, 0x2e, 0x82, 0xbe, 0x40, 0x5f, 0xa0, 0x6f,
-	0xd7, 0x97, 0xe8, 0x23, 0x54, 0xbb, 0x3e, 0xad, 0x0f, 0x01, 0xa4, 0x14, 0x7a, 0x15, 0xcf, 0xb7,
-	0xab, 0x99, 0x9d, 0xf9, 0xbe, 0x99, 0xdd, 0xc0, 0xea, 0x85, 0x6f, 0xa1, 0x63, 0xbe, 0x0d, 0x7f,
-	0xb6, 0x3d, 0xdf, 0x0d, 0x5c, 0x52, 0x0b, 0x2d, 0x6d, 0x1f, 0x60, 0xe8, 0xda, 0xb6, 0xeb, 0xe8,
-	0x48, 0x3d, 0xf2, 0x12, 0x1a, 0xe8, 0xfb, 0xae, 0x3f, 0x74, 0x4d, 0x54, 0x2b, 0xfd, 0xca, 0x56,
-	0x55, 0x4f, 0x01, 0xd2, 0x83, 0x3a, 0x37, 0x8e, 0xe8, 0x54, 0x95, 0xfa, 0x95, 0xad, 0x86, 0x9e,
-	0xd8, 0xda, 0x19, 0x74, 0x8e, 0xd1, 0xf0, 0x27, 0x97, 0xfb, 0xdc, 0xaf, 0x8e, 0xd7, 0xa4, 0x0b,
-	0xf2, 0x37, 0xcb, 0xe4, 0x6e, 0x1a, 0x3a, 0xfb, 0x24, 0x7d, 0x68, 0x7e, 0xf6, 0xd0, 0x37, 0x02,
-	0xcb, 0x75, 0xc6, 0xa3, 0xc8, 0x87, 0x08, 0x91, 0x35, 0xa8, 0x9e, 0xb8, 0x57, 0xe8, 0xa8, 0x32,
-	0x5f, 0x0b, 0x0d, 0xed, 0x3b, 0x74, 0xb3, 0xce, 0x17, 0x39, 0x2a, 0x79, 0x03, 0xca, 0xc8, 0x08,
-	0x0c, 0x1e, 0xa2, 0xb9, 0xa3, 0x6e, 0x47, 0x75, 0x11, 0x23, 0xb0, 0x75, 0x9d, 0xef, 0xd2, 0x7e,
-	0x4a, 0xd9, 0xe0, 0x0c, 0x2c, 0x49, 0x8d, 0x80, 0x62, 0x4d, 0x5c, 0x27, 0x0a, 0xc6, 0xbf, 0x19,
-	0xe6, 0x18, 0x36, 0x46, 0xb9, 0xf0, 0x6f, 0xb2, 0x0e, 0xb5, 0x29, 0x3a, 0x26, 0xfa, 0xaa, 0xc2,
-	0xcf, 0x1c, 0x59, 0x0c, 0xb7, 0xdd, 0x73, 0x6b, 0x86, 0x6a, 0x95, 0xef, 0x8e, 0x2c, 0x56, 0x90,
-	0x73, 0xcb, 0x0f, 0x2e, 0xd5, 0x5a, 0x58, 0x10, 0x6e, 0x30, 0x14, 0x6d, 0xc3, 0x9a, 0xa9, 0x4b,
-	0x21, 0xca, 0x0d, 0xb2, 0x0c, 0x12, 0xde, 0xaa, 0x75, 0x0e, 0x49, 0x78, 0x4b, 0x54, 0x58, 0x9a,
-	0xb8, 0xb6, 0x8d, 0x4e, 0xa0, 0x36, 0x38, 0x18, 0x9b, 0xac, 0x3c, 0x16, 0x0d, 0xf3, 0x51, 0x81,
-	0x9f, 0x23, 0xb1, 0xc9, 0x26, 0xb4, 0x2d, 0x3a, 0x76, 0xf6, 0x66, 0xc6, 0xe4, 0xea, 0x93, 0x45,
-	0x03, 0xb5, 0xc9, 0x37, 0x64, 0x41, 0xed, 0x16, 0x5a, 0x03, 0xd3, 0x7c, 0x02, 0xb2, 0xc9, 0x2b,
-	0x00, 0x1d, 0xaf, 0x8f, 0x90, 0x52, 0x63, 0x8a, 0xbc, 0x4a, 0x0d, 0x5d, 0x40, 0xb4, 0x43, 0x58,
-	0x39, 0xc0, 0x20, 0x8c, 0x3c, 0xf0, 0xbc, 0xd9, 0x1d, 0x0b, 0x9f, 0x0b, 0x56, 0xb9, 0x27, 0x98,
-	0x24, 0x2a, 0xeb, 0x0e, 0x48, 0xde, 0xd9, 0x42, 0xda, 0x7a, 0x0d, 0x8a, 0xc9, 0xb4, 0xa5, 0xf4,
-	0xe5, 0xad, 0xe6, 0xce, 0x7f, 0xb1, 0xb6, 0xb8, 0xeb, 0x53, 0x8a, 0xfe, 0xd8, 0xb9, 0x70, 0x75,
-	0xbe, 0x45, 0xfb, 0x21, 0x41, 0x3b, 0x83, 0x97, 0xab, 0x8a, 0x2b, 0x48, 0x12, 0x14, 0x14, 0x2b,
-	0x4d, 0x16, 0x94, 0xf6, 0x9c, 0xaa, 0x22, 0xa0, 0x5c, 0xcc, 0x8c, 0x29, 0x97, 0x54, 0x55, 0xe7,
-	0xdf, 0xac, 0x60, 0x06, 0x4b, 0xe5, 0xc4, 0xb2, 0x91, 0x0b, 0xaa, 0xa1, 0xa7, 0x00, 0x63, 0xd4,
-	0x4f, 0x19, 0x6d, 0x86, 0x8c, 0xa6, 0x88, 0xf6, 0x11, 0xba, 0xd3, 0x98, 0x04, 0x26, 0xae, 0x45,
-	0x08, 0xa5, 0xb0, 0x92, 0xf3, 0xb5, 0x10, 0x9f, 0x9b, 0x11, 0x9f, 0x32, 0xe7, 0xb3, 0x1b, 0xf3,
-	0x99, 0xa3, 0xf2, 0x77, 0x05, 0xea, 0x8f, 0x60, 0x51, 0x2e, 0x61, 0x51, 0xfa, 0x47, 0x2c, 0xce,
-	0x9f, 0x0d, 0x85, 0xfe, 0x87, 0xb2, 0xfe, 0x3f, 0x83, 0xce, 0xc0, 0x34, 0xb9, 0x3d, 0x8b, 0x28,
-	0xfb, 0x7b, 0xf3, 0xfe, 0x2b, 0x10, 0x1d, 0x6d, 0xf7, 0x06, 0x9f, 0xc8, 0xff, 0x18, 0x3a, 0x07,
-	0x18, 0x64, 0x9c, 0x3f, 0x4a, 0x6f, 0x81, 0xa8, 0x37, 0x6e, 0x68, 0x3e, 0x74, 0xb3, 0xae, 0x9e,
-	0x41, 0x6e, 0x0e, 0x74, 0xc7, 0x22, 0x19, 0xec, 0xfc, 0x2a, 0x2c, 0x51, 0x74, 0xcc, 0xd3, 0xa4,
-	0x40, 0xb1, 0x19, 0x76, 0xdf, 0x04, 0xad, 0x1b, 0x64, 0x8b, 0x52, 0xdc, 0x7d, 0x31, 0x92, 0xcf,
-	0x5c, 0x2e, 0x64, 0xae, 0x59, 0xb0, 0x92, 0x8b, 0xb7, 0x50, 0x92, 0x3d, 0xa8, 0xfb, 0x48, 0x3d,
-	0xd7, 0xa1, 0x61, 0x4b, 0xd4, 0xf5, 0xc4, 0x66, 0xb2, 0x1a, 0xe1, 0x0c, 0x03, 0x7c, 0x8a, 0x67,
-	0x84, 0x03, 0xcb, 0x03, 0xd3, 0xc4, 0x7b, 0x6f, 0xad, 0x78, 0xba, 0x49, 0xc2, 0x74, 0x7b, 0xb0,
-	0x42, 0x69, 0x3c, 0x25, 0x7b, 0xb9, 0xac, 0x1e, 0xc7, 0xb3, 0x68, 0x18, 0x76, 0xd7, 0xdc, 0x84,
-	0xdc, 0x62, 0x42, 0x02, 0x24, 0xb6, 0xab, 0x9c, 0x6d, 0xd7, 0x44, 0x96, 0x8a, 0x20, 0xcb, 0x9d,
-	0x5f, 0x55, 0x88, 0x5e, 0x78, 0x64, 0x00, 0x2d, 0x2a, 0xbc, 0x5f, 0xc8, 0xff, 0x65, 0x0f, 0x1e,
-	0x1d, 0xaf, 0x7b, 0x6a, 0xf9, 0x02, 0xf5, 0xc8, 0x7b, 0x68, 0x18, 0xf1, 0x65, 0x4f, 0xd6, 0x92,
-	0x4b, 0x4d, 0xb8, 0xff, 0x7b, 0x24, 0x46, 0x85, 0xd7, 0xe4, 0x21, 0x90, 0x69, 0xe6, 0x72, 0x65,
-	0xe2, 0x21, 0x1b, 0xf1, 0xce, 0xc2, 0x2d, 0xde, 0xeb, 0xcd, 0x5b, 0xa2, 0x1e, 0x19, 0x41, 0x3b,
-	0x33, 0xd8, 0x49, 0x72, 0xdc, 0xfc, 0xdd, 0xd1, 0xdb, 0x98, 0xb3, 0x42, 0x3d, 0xb2, 0x0b, 0x2d,
-	0x43, 0x18, 0x5b, 0x69, 0x31, 0x72, 0xc3, 0xac, 0x34, 0x9f, 0x01, 0x74, 0xfc, 0xec, 0x58, 0x22,
-	0xc9, 0x89, 0x8b, 0xf3, 0xaa, 0xd4, 0xc5, 0x28, 0x37, 0x5c, 0xd3, 0x2c, 0xf2, 0x1d, 0x9d, 0x66,
-	0x51, 0xec, 0xbd, 0x01, 0xb4, 0xa6, 0xc2, 0xd0, 0x49, 0xb3, 0xc8, 0x4d, 0xb5, 0x94, 0xd2, 0xc2,
-	0x8c, 0xda, 0x85, 0x96, 0x29, 0x34, 0x5a, 0xea, 0x22, 0xd7, 0x7e, 0xa5, 0x59, 0x7c, 0x80, 0xa6,
-	0x91, 0x36, 0x12, 0x59, 0x17, 0x8a, 0x88, 0x0f, 0x68, 0x62, 0x08, 0x5d, 0x9a, 0xeb, 0x09, 0xf2,
-	0x22, 0x15, 0x5e, 0xa1, 0x5b, 0xca, 0x9c, 0xec, 0x75, 0xbe, 0xb4, 0x43, 0x70, 0x37, 0xfc, 0x39,
-	0xaf, 0xf1, 0x3f, 0x35, 0xef, 0xfe, 0x04, 0x00, 0x00, 0xff, 0xff, 0xbd, 0x0d, 0xba, 0x52, 0xeb,
-	0x0c, 0x00, 0x00,
+	// 914 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x57, 0x5b, 0x6f, 0xeb, 0x44,
+	0x10, 0x56, 0xec, 0x24, 0x4d, 0x26, 0xc9, 0x49, 0xb2, 0x0d, 0x60, 0xcc, 0x11, 0x8a, 0xac, 0xf3,
+	0x70, 0x78, 0x39, 0x48, 0x07, 0x9d, 0xa7, 0x3e, 0xa5, 0x09, 0xad, 0x42, 0xa9, 0x90, 0xdc, 0xf6,
+	0x05, 0x04, 0x92, 0x1b, 0x4f, 0x5c, 0xab, 0xbe, 0xd5, 0x6b, 0xaa, 0xf4, 0x17, 0xf0, 0xcc, 0x1f,
+	0x45, 0xfc, 0x04, 0xb4, 0xbb, 0xbe, 0xac, 0x2f, 0x85, 0x4a, 0x69, 0xcb, 0x53, 0x3c, 0xdf, 0x6e,
+	0x67, 0x76, 0x66, 0xbe, 0xb9, 0x14, 0x0e, 0xb7, 0xb1, 0x8b, 0x81, 0xfd, 0xad, 0xf8, 0xf9, 0x10,
+	0xc5, 0x61, 0x12, 0x92, 0xae, 0x90, 0x8c, 0x13, 0x80, 0x65, 0xe8, 0xfb, 0x61, 0x60, 0x22, 0x8d,
+	0xc8, 0x5b, 0xe8, 0x63, 0x1c, 0x87, 0xf1, 0x32, 0xb4, 0x51, 0x6b, 0xcd, 0x5b, 0xef, 0x3b, 0x66,
+	0x01, 0x10, 0x1d, 0x7a, 0x5c, 0x38, 0xa7, 0x8e, 0xa6, 0xcc, 0x5b, 0xef, 0xfb, 0x66, 0x2e, 0x1b,
+	0xbf, 0xc2, 0xf4, 0x14, 0x93, 0x13, 0xae, 0x94, 0xae, 0x83, 0x6d, 0x68, 0xe2, 0x1d, 0x99, 0x80,
+	0xfa, 0xbb, 0x6b, 0x73, 0x45, 0x7d, 0x93, 0x7d, 0x92, 0x39, 0x0c, 0x7e, 0x8a, 0x30, 0xb6, 0x12,
+	0x37, 0x0c, 0xd6, 0xab, 0x54, 0x8b, 0x0c, 0x91, 0x19, 0x74, 0x2e, 0xc3, 0x5b, 0x0c, 0x34, 0x95,
+	0x9f, 0x09, 0xc1, 0xd8, 0x49, 0xea, 0x85, 0xf6, 0x7d, 0x5e, 0x4b, 0xbe, 0x81, 0xf6, 0xca, 0x4a,
+	0x2c, 0x6e, 0x63, 0xf0, 0xf1, 0xb3, 0x0f, 0x69, 0x68, 0x72, 0x13, 0xec, 0xd0, 0xe4, 0x57, 0x8c,
+	0x3f, 0x15, 0x18, 0x95, 0xf0, 0x06, 0xaf, 0x08, 0xb4, 0xdd, 0x4d, 0x18, 0xa4, 0x66, 0xf8, 0x37,
+	0xc3, 0x02, 0xcb, 0xc7, 0xd4, 0x0d, 0xfe, 0x4d, 0x3e, 0x87, 0xae, 0x83, 0x81, 0x8d, 0xb1, 0xd6,
+	0xe6, 0xaf, 0x4d, 0x25, 0x86, 0xfb, 0xe1, 0xb5, 0xeb, 0xa1, 0xd6, 0xe1, 0xb7, 0x53, 0x89, 0xc5,
+	0xe2, 0xda, 0x8d, 0x93, 0x1b, 0xad, 0x2b, 0x62, 0xc1, 0x05, 0x86, 0xa2, 0x6f, 0xb9, 0x9e, 0x76,
+	0x20, 0x50, 0x2e, 0x90, 0x37, 0xa0, 0xe0, 0x4e, 0xeb, 0x71, 0x48, 0xc1, 0x1d, 0xd1, 0xe0, 0x60,
+	0x13, 0xfa, 0x3e, 0x06, 0x89, 0xd6, 0xe7, 0x60, 0x26, 0xb2, 0xc0, 0xb8, 0x54, 0xf8, 0xa3, 0x01,
+	0x7f, 0x47, 0x2e, 0x93, 0x77, 0x30, 0x72, 0xe9, 0x3a, 0x38, 0xf6, 0xac, 0xcd, 0xed, 0x8f, 0x2e,
+	0x4d, 0xb4, 0x01, 0xbf, 0x50, 0x06, 0x8d, 0x1d, 0x0c, 0x17, 0xb6, 0x2d, 0xfe, 0xe4, 0x59, 0xf3,
+	0x4c, 0xbe, 0x06, 0x30, 0xf1, 0xee, 0x1c, 0x29, 0xb5, 0x1c, 0xe4, 0x51, 0xea, 0x9b, 0x12, 0x62,
+	0x9c, 0x49, 0x3c, 0x58, 0x44, 0x91, 0xf7, 0xc0, 0xcc, 0x57, 0x8c, 0xb5, 0xfe, 0xc5, 0x98, 0x22,
+	0x93, 0xea, 0x01, 0x48, 0x55, 0xd9, 0xbe, 0xac, 0xb2, 0x19, 0xab, 0xda, 0x73, 0x55, 0x66, 0x15,
+	0x57, 0x7d, 0x45, 0x31, 0xe6, 0xc4, 0xe5, 0x57, 0x8c, 0x3f, 0x14, 0x18, 0x95, 0xf0, 0x66, 0x56,
+	0x71, 0x06, 0x29, 0x12, 0x83, 0x32, 0xa6, 0xa9, 0x12, 0xd3, 0x5e, 0x93, 0x55, 0x04, 0xda, 0x5b,
+	0xcf, 0x72, 0x38, 0xa5, 0x3a, 0x26, 0xff, 0x66, 0x01, 0xb3, 0x98, 0x2b, 0x97, 0xae, 0x8f, 0x9c,
+	0x50, 0x7d, 0xb3, 0x00, 0x58, 0x46, 0xe3, 0x22, 0xa3, 0x03, 0x91, 0xd1, 0x02, 0x31, 0x7e, 0x80,
+	0x89, 0x93, 0x25, 0x81, 0x91, 0x6b, 0x9f, 0x84, 0x52, 0x98, 0x56, 0x74, 0xed, 0x95, 0xcf, 0x77,
+	0x69, 0x3e, 0x55, 0x9e, 0xcf, 0x49, 0x96, 0xcf, 0x4a, 0x2a, 0xff, 0x6e, 0x41, 0xef, 0x09, 0x59,
+	0x54, 0x1b, 0xb2, 0xa8, 0xfc, 0x4f, 0x59, 0x7c, 0xbc, 0x37, 0xd4, 0xea, 0x1f, 0x9a, 0xea, 0xff,
+	0x17, 0x18, 0x2f, 0x6c, 0x9b, 0xcb, 0x5e, 0x9a, 0xb2, 0xe7, 0x6b, 0xf5, 0xbf, 0x01, 0x31, 0xd1,
+	0x0f, 0xef, 0xf1, 0x85, 0xf4, 0xaf, 0x61, 0x7c, 0x8a, 0x49, 0x49, 0xf9, 0x93, 0xf8, 0x96, 0xc8,
+	0x7c, 0xe3, 0x82, 0x11, 0xc3, 0xa4, 0xac, 0xea, 0x15, 0xe8, 0x86, 0x30, 0x58, 0xd3, 0xa2, 0xf5,
+	0xe6, 0x0f, 0x6b, 0x49, 0x0f, 0x13, 0x45, 0xb7, 0x41, 0xf7, 0x1e, 0xaf, 0x5c, 0x3b, 0x35, 0x24,
+	0x21, 0x55, 0x87, 0xd5, 0x9a, 0xc3, 0x86, 0x0d, 0xc3, 0xc2, 0xcc, 0x5e, 0x6e, 0xe9, 0xd0, 0xa3,
+	0x37, 0x6e, 0x74, 0xf9, 0x10, 0x89, 0x22, 0xe8, 0x98, 0xb9, 0x6c, 0x04, 0x30, 0x59, 0xcb, 0xcc,
+	0x62, 0x1e, 0x69, 0x70, 0x40, 0x31, 0xb0, 0xaf, 0xf2, 0x6c, 0x67, 0xe2, 0x33, 0x78, 0xe5, 0xc2,
+	0xb4, 0x62, 0x6f, 0x5f, 0xd7, 0x62, 0xa4, 0x51, 0x18, 0x50, 0xe1, 0x5a, 0xcf, 0xcc, 0x65, 0x56,
+	0x23, 0x2b, 0xf4, 0x30, 0xc1, 0x17, 0x18, 0x93, 0x46, 0x02, 0x33, 0x69, 0x00, 0x0b, 0x8b, 0xcd,
+	0x16, 0xb2, 0x86, 0xad, 0x48, 0x0d, 0xfb, 0x3f, 0xe3, 0x54, 0x58, 0x6d, 0x97, 0xe7, 0xe5, 0xe1,
+	0x45, 0xd6, 0x5e, 0x97, 0xa2, 0x61, 0x3c, 0xea, 0x56, 0x58, 0x77, 0x4b, 0x82, 0xe4, 0x0e, 0xa4,
+	0x96, 0x3b, 0x50, 0x4e, 0xe8, 0xb6, 0x44, 0xe8, 0x8f, 0x7f, 0x75, 0x21, 0xdd, 0x58, 0xc9, 0x09,
+	0xbc, 0x71, 0x4a, 0x9b, 0x26, 0xf9, 0xb2, 0xb6, 0xbf, 0x65, 0x1b, 0xa8, 0x5e, 0x3f, 0xca, 0xb7,
+	0xc7, 0x4f, 0xd0, 0xb7, 0xb2, 0x18, 0x92, 0x59, 0x3e, 0xac, 0xa5, 0xbd, 0x46, 0x27, 0x19, 0x2a,
+	0xad, 0xc8, 0x67, 0x40, 0x9c, 0xd2, 0xd2, 0xc0, 0x78, 0xd4, 0xf0, 0x84, 0x6c, 0x3b, 0xd1, 0xf5,
+	0xc7, 0x8e, 0x68, 0x44, 0xd6, 0x7c, 0xf8, 0x5d, 0xa0, 0xb7, 0xdd, 0x5b, 0xd5, 0x0a, 0x46, 0xa5,
+	0xd9, 0x47, 0xb4, 0xec, 0x72, 0x75, 0xbc, 0x16, 0x41, 0xa9, 0x0f, 0xcb, 0x23, 0x18, 0x5a, 0x52,
+	0x67, 0x27, 0x5f, 0x48, 0x71, 0x91, 0x5b, 0x66, 0x63, 0x68, 0x16, 0x30, 0x8e, 0xcb, 0x9d, 0x9b,
+	0xe4, 0x2f, 0xae, 0xb7, 0xf4, 0x46, 0x15, 0x9f, 0x8a, 0xdd, 0x94, 0x1c, 0x66, 0xe7, 0x52, 0xbf,
+	0xd3, 0x67, 0x75, 0x50, 0x38, 0x5f, 0x9a, 0x50, 0x85, 0xf3, 0xd5, 0xf6, 0x52, 0x38, 0x5f, 0x6f,
+	0x04, 0x0b, 0x18, 0x3a, 0x52, 0x3b, 0x2f, 0x9c, 0xaf, 0xcc, 0x0b, 0x5d, 0x6b, 0x3e, 0x10, 0xf1,
+	0xb3, 0xa5, 0xaa, 0x2f, 0x54, 0x54, 0x7a, 0x41, 0xa3, 0xf3, 0xdf, 0xc3, 0xd4, 0xaa, 0x56, 0x35,
+	0x79, 0xdb, 0xc0, 0xcc, 0xbc, 0xe0, 0x1b, 0xd5, 0x2c, 0x61, 0x42, 0x2b, 0x65, 0x4a, 0xbe, 0xca,
+	0xee, 0x35, 0x14, 0x70, 0x93, 0x92, 0xe3, 0xf1, 0xcf, 0x23, 0x01, 0x1e, 0x89, 0x9f, 0xeb, 0x2e,
+	0xff, 0xbf, 0xf1, 0xbb, 0x7f, 0x02, 0x00, 0x00, 0xff, 0xff, 0x5d, 0x57, 0x24, 0x62, 0x4e, 0x0e,
+	0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // FriendClient is the client API for Friend service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type FriendClient interface {
-	SearchFriend(ctx context.Context, in *SearchFriendReq, opts ...grpc.CallOption) (*SearchFriendResp, error)
+	GetFriendsInfo(ctx context.Context, in *GetFriendsInfoReq, opts ...grpc.CallOption) (*GetFriendInfoResp, error)
 	AddFriend(ctx context.Context, in *AddFriendReq, opts ...grpc.CallOption) (*CommonResp, error)
 	GetFriendApplyList(ctx context.Context, in *GetFriendApplyReq, opts ...grpc.CallOption) (*GetFriendApplyResp, error)
+	GetSelfApplyList(ctx context.Context, in *GetFriendApplyReq, opts ...grpc.CallOption) (*GetFriendApplyResp, error)
 	GetFriendList(ctx context.Context, in *GetFriendListReq, opts ...grpc.CallOption) (*GetFriendListResp, error)
 	AddBlacklist(ctx context.Context, in *AddBlacklistReq, opts ...grpc.CallOption) (*CommonResp, error)
 	RemoveBlacklist(ctx context.Context, in *RemoveBlacklistReq, opts ...grpc.CallOption) (*CommonResp, error)
+	IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc.CallOption) (*IsFriendResp, error)
 	IsInBlackList(ctx context.Context, in *IsInBlackListReq, opts ...grpc.CallOption) (*IsInBlackListResp, error)
 	GetBlacklist(ctx context.Context, in *GetBlacklistReq, opts ...grpc.CallOption) (*GetBlacklistResp, error)
 	DeleteFriend(ctx context.Context, in *DeleteFriendReq, opts ...grpc.CallOption) (*CommonResp, error)
-	AddedFriend(ctx context.Context, in *AddedFriendReq, opts ...grpc.CallOption) (*CommonResp, error)
+	AddFriendResponse(ctx context.Context, in *AddFriendResponseReq, opts ...grpc.CallOption) (*CommonResp, error)
 	SetFriendComment(ctx context.Context, in *SetFriendCommentReq, opts ...grpc.CallOption) (*CommonResp, error)
 }
 
 type friendClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewFriendClient(cc *grpc.ClientConn) FriendClient {
+func NewFriendClient(cc grpc.ClientConnInterface) FriendClient {
 	return &friendClient{cc}
 }
 
-func (c *friendClient) SearchFriend(ctx context.Context, in *SearchFriendReq, opts ...grpc.CallOption) (*SearchFriendResp, error) {
-	out := new(SearchFriendResp)
-	err := c.cc.Invoke(ctx, "/friend.friend/searchFriend", in, out, opts...)
+func (c *friendClient) GetFriendsInfo(ctx context.Context, in *GetFriendsInfoReq, opts ...grpc.CallOption) (*GetFriendInfoResp, error) {
+	out := new(GetFriendInfoResp)
+	err := c.cc.Invoke(ctx, "/friend.friend/getFriendsInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1438,6 +1557,15 @@ func (c *friendClient) AddFriend(ctx context.Context, in *AddFriendReq, opts ...
 func (c *friendClient) GetFriendApplyList(ctx context.Context, in *GetFriendApplyReq, opts ...grpc.CallOption) (*GetFriendApplyResp, error) {
 	out := new(GetFriendApplyResp)
 	err := c.cc.Invoke(ctx, "/friend.friend/getFriendApplyList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *friendClient) GetSelfApplyList(ctx context.Context, in *GetFriendApplyReq, opts ...grpc.CallOption) (*GetFriendApplyResp, error) {
+	out := new(GetFriendApplyResp)
+	err := c.cc.Invoke(ctx, "/friend.friend/getSelfApplyList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1471,6 +1599,15 @@ func (c *friendClient) RemoveBlacklist(ctx context.Context, in *RemoveBlacklistR
 	return out, nil
 }
 
+func (c *friendClient) IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc.CallOption) (*IsFriendResp, error) {
+	out := new(IsFriendResp)
+	err := c.cc.Invoke(ctx, "/friend.friend/isFriend", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *friendClient) IsInBlackList(ctx context.Context, in *IsInBlackListReq, opts ...grpc.CallOption) (*IsInBlackListResp, error) {
 	out := new(IsInBlackListResp)
 	err := c.cc.Invoke(ctx, "/friend.friend/isInBlackList", in, out, opts...)
@@ -1498,9 +1635,9 @@ func (c *friendClient) DeleteFriend(ctx context.Context, in *DeleteFriendReq, op
 	return out, nil
 }
 
-func (c *friendClient) AddedFriend(ctx context.Context, in *AddedFriendReq, opts ...grpc.CallOption) (*CommonResp, error) {
+func (c *friendClient) AddFriendResponse(ctx context.Context, in *AddFriendResponseReq, opts ...grpc.CallOption) (*CommonResp, error) {
 	out := new(CommonResp)
-	err := c.cc.Invoke(ctx, "/friend.friend/addedFriend", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/friend.friend/addFriendResponse", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1518,16 +1655,18 @@ func (c *friendClient) SetFriendComment(ctx context.Context, in *SetFriendCommen
 
 // FriendServer is the server API for Friend service.
 type FriendServer interface {
-	SearchFriend(context.Context, *SearchFriendReq) (*SearchFriendResp, error)
+	GetFriendsInfo(context.Context, *GetFriendsInfoReq) (*GetFriendInfoResp, error)
 	AddFriend(context.Context, *AddFriendReq) (*CommonResp, error)
 	GetFriendApplyList(context.Context, *GetFriendApplyReq) (*GetFriendApplyResp, error)
+	GetSelfApplyList(context.Context, *GetFriendApplyReq) (*GetFriendApplyResp, error)
 	GetFriendList(context.Context, *GetFriendListReq) (*GetFriendListResp, error)
 	AddBlacklist(context.Context, *AddBlacklistReq) (*CommonResp, error)
 	RemoveBlacklist(context.Context, *RemoveBlacklistReq) (*CommonResp, error)
+	IsFriend(context.Context, *IsFriendReq) (*IsFriendResp, error)
 	IsInBlackList(context.Context, *IsInBlackListReq) (*IsInBlackListResp, error)
 	GetBlacklist(context.Context, *GetBlacklistReq) (*GetBlacklistResp, error)
 	DeleteFriend(context.Context, *DeleteFriendReq) (*CommonResp, error)
-	AddedFriend(context.Context, *AddedFriendReq) (*CommonResp, error)
+	AddFriendResponse(context.Context, *AddFriendResponseReq) (*CommonResp, error)
 	SetFriendComment(context.Context, *SetFriendCommentReq) (*CommonResp, error)
 }
 
@@ -1535,14 +1674,17 @@ type FriendServer interface {
 type UnimplementedFriendServer struct {
 }
 
-func (*UnimplementedFriendServer) SearchFriend(ctx context.Context, req *SearchFriendReq) (*SearchFriendResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchFriend not implemented")
+func (*UnimplementedFriendServer) GetFriendsInfo(ctx context.Context, req *GetFriendsInfoReq) (*GetFriendInfoResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFriendsInfo not implemented")
 }
 func (*UnimplementedFriendServer) AddFriend(ctx context.Context, req *AddFriendReq) (*CommonResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddFriend not implemented")
 }
 func (*UnimplementedFriendServer) GetFriendApplyList(ctx context.Context, req *GetFriendApplyReq) (*GetFriendApplyResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFriendApplyList not implemented")
+}
+func (*UnimplementedFriendServer) GetSelfApplyList(ctx context.Context, req *GetFriendApplyReq) (*GetFriendApplyResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSelfApplyList not implemented")
 }
 func (*UnimplementedFriendServer) GetFriendList(ctx context.Context, req *GetFriendListReq) (*GetFriendListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFriendList not implemented")
@@ -1553,6 +1695,9 @@ func (*UnimplementedFriendServer) AddBlacklist(ctx context.Context, req *AddBlac
 func (*UnimplementedFriendServer) RemoveBlacklist(ctx context.Context, req *RemoveBlacklistReq) (*CommonResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveBlacklist not implemented")
 }
+func (*UnimplementedFriendServer) IsFriend(ctx context.Context, req *IsFriendReq) (*IsFriendResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsFriend not implemented")
+}
 func (*UnimplementedFriendServer) IsInBlackList(ctx context.Context, req *IsInBlackListReq) (*IsInBlackListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsInBlackList not implemented")
 }
@@ -1562,8 +1707,8 @@ func (*UnimplementedFriendServer) GetBlacklist(ctx context.Context, req *GetBlac
 func (*UnimplementedFriendServer) DeleteFriend(ctx context.Context, req *DeleteFriendReq) (*CommonResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFriend not implemented")
 }
-func (*UnimplementedFriendServer) AddedFriend(ctx context.Context, req *AddedFriendReq) (*CommonResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddedFriend not implemented")
+func (*UnimplementedFriendServer) AddFriendResponse(ctx context.Context, req *AddFriendResponseReq) (*CommonResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddFriendResponse not implemented")
 }
 func (*UnimplementedFriendServer) SetFriendComment(ctx context.Context, req *SetFriendCommentReq) (*CommonResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetFriendComment not implemented")
@@ -1573,20 +1718,20 @@ func RegisterFriendServer(s *grpc.Server, srv FriendServer) {
 	s.RegisterService(&_Friend_serviceDesc, srv)
 }
 
-func _Friend_SearchFriend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchFriendReq)
+func _Friend_GetFriendsInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendsInfoReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).SearchFriend(ctx, in)
+		return srv.(FriendServer).GetFriendsInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/SearchFriend",
+		FullMethod: "/friend.friend/GetFriendsInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).SearchFriend(ctx, req.(*SearchFriendReq))
+		return srv.(FriendServer).GetFriendsInfo(ctx, req.(*GetFriendsInfoReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1623,6 +1768,24 @@ func _Friend_GetFriendApplyList_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FriendServer).GetFriendApplyList(ctx, req.(*GetFriendApplyReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Friend_GetSelfApplyList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendApplyReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendServer).GetSelfApplyList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/friend.friend/GetSelfApplyList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendServer).GetSelfApplyList(ctx, req.(*GetFriendApplyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1681,6 +1844,24 @@ func _Friend_RemoveBlacklist_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Friend_IsFriend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsFriendReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FriendServer).IsFriend(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/friend.friend/IsFriend",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FriendServer).IsFriend(ctx, req.(*IsFriendReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Friend_IsInBlackList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(IsInBlackListReq)
 	if err := dec(in); err != nil {
@@ -1735,20 +1916,20 @@ func _Friend_DeleteFriend_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_AddedFriend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddedFriendReq)
+func _Friend_AddFriendResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddFriendResponseReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).AddedFriend(ctx, in)
+		return srv.(FriendServer).AddFriendResponse(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/AddedFriend",
+		FullMethod: "/friend.friend/AddFriendResponse",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).AddedFriend(ctx, req.(*AddedFriendReq))
+		return srv.(FriendServer).AddFriendResponse(ctx, req.(*AddFriendResponseReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1776,8 +1957,8 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*FriendServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "searchFriend",
-			Handler:    _Friend_SearchFriend_Handler,
+			MethodName: "getFriendsInfo",
+			Handler:    _Friend_GetFriendsInfo_Handler,
 		},
 		{
 			MethodName: "addFriend",
@@ -1786,6 +1967,10 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "getFriendApplyList",
 			Handler:    _Friend_GetFriendApplyList_Handler,
+		},
+		{
+			MethodName: "getSelfApplyList",
+			Handler:    _Friend_GetSelfApplyList_Handler,
 		},
 		{
 			MethodName: "getFriendList",
@@ -1800,6 +1985,10 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Friend_RemoveBlacklist_Handler,
 		},
 		{
+			MethodName: "isFriend",
+			Handler:    _Friend_IsFriend_Handler,
+		},
+		{
 			MethodName: "isInBlackList",
 			Handler:    _Friend_IsInBlackList_Handler,
 		},
@@ -1812,8 +2001,8 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Friend_DeleteFriend_Handler,
 		},
 		{
-			MethodName: "addedFriend",
-			Handler:    _Friend_AddedFriend_Handler,
+			MethodName: "addFriendResponse",
+			Handler:    _Friend_AddFriendResponse_Handler,
 		},
 		{
 			MethodName: "setFriendComment",

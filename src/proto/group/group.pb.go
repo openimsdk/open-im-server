@@ -72,12 +72,16 @@ func (m *CommonResp) GetErrorMsg() string {
 }
 
 type CreateGroupReq struct {
-	UserIDList           []string `protobuf:"bytes,1,rep,name=userIDList,proto3" json:"userIDList,omitempty"`
-	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	MemberList           []*GroupAddMemberInfo `protobuf:"bytes,1,rep,name=memberList,proto3" json:"memberList,omitempty"`
+	GroupName            string                `protobuf:"bytes,2,opt,name=groupName,proto3" json:"groupName,omitempty"`
+	Introduction         string                `protobuf:"bytes,3,opt,name=introduction,proto3" json:"introduction,omitempty"`
+	Notification         string                `protobuf:"bytes,4,opt,name=notification,proto3" json:"notification,omitempty"`
+	FaceUrl              string                `protobuf:"bytes,5,opt,name=faceUrl,proto3" json:"faceUrl,omitempty"`
+	Token                string                `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string                `protobuf:"bytes,7,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
+	XXX_unrecognized     []byte                `json:"-"`
+	XXX_sizecache        int32                 `json:"-"`
 }
 
 func (m *CreateGroupReq) Reset()         { *m = CreateGroupReq{} }
@@ -105,11 +109,39 @@ func (m *CreateGroupReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CreateGroupReq proto.InternalMessageInfo
 
-func (m *CreateGroupReq) GetUserIDList() []string {
+func (m *CreateGroupReq) GetMemberList() []*GroupAddMemberInfo {
 	if m != nil {
-		return m.UserIDList
+		return m.MemberList
 	}
 	return nil
+}
+
+func (m *CreateGroupReq) GetGroupName() string {
+	if m != nil {
+		return m.GroupName
+	}
+	return ""
+}
+
+func (m *CreateGroupReq) GetIntroduction() string {
+	if m != nil {
+		return m.Introduction
+	}
+	return ""
+}
+
+func (m *CreateGroupReq) GetNotification() string {
+	if m != nil {
+		return m.Notification
+	}
+	return ""
+}
+
+func (m *CreateGroupReq) GetFaceUrl() string {
+	if m != nil {
+		return m.FaceUrl
+	}
+	return ""
 }
 
 func (m *CreateGroupReq) GetToken() string {
@@ -126,6 +158,53 @@ func (m *CreateGroupReq) GetOperationID() string {
 	return ""
 }
 
+type GroupAddMemberInfo struct {
+	Uid                  string   `protobuf:"bytes,1,opt,name=uid,proto3" json:"uid,omitempty"`
+	SetRole              int32    `protobuf:"varint,2,opt,name=setRole,proto3" json:"setRole,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GroupAddMemberInfo) Reset()         { *m = GroupAddMemberInfo{} }
+func (m *GroupAddMemberInfo) String() string { return proto.CompactTextString(m) }
+func (*GroupAddMemberInfo) ProtoMessage()    {}
+func (*GroupAddMemberInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{2}
+}
+
+func (m *GroupAddMemberInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GroupAddMemberInfo.Unmarshal(m, b)
+}
+func (m *GroupAddMemberInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GroupAddMemberInfo.Marshal(b, m, deterministic)
+}
+func (m *GroupAddMemberInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GroupAddMemberInfo.Merge(m, src)
+}
+func (m *GroupAddMemberInfo) XXX_Size() int {
+	return xxx_messageInfo_GroupAddMemberInfo.Size(m)
+}
+func (m *GroupAddMemberInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_GroupAddMemberInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GroupAddMemberInfo proto.InternalMessageInfo
+
+func (m *GroupAddMemberInfo) GetUid() string {
+	if m != nil {
+		return m.Uid
+	}
+	return ""
+}
+
+func (m *GroupAddMemberInfo) GetSetRole() int32 {
+	if m != nil {
+		return m.SetRole
+	}
+	return 0
+}
+
 type CreateGroupResp struct {
 	ErrorCode            int32    `protobuf:"varint,1,opt,name=ErrorCode,proto3" json:"ErrorCode,omitempty"`
 	ErrorMsg             string   `protobuf:"bytes,2,opt,name=ErrorMsg,proto3" json:"ErrorMsg,omitempty"`
@@ -139,7 +218,7 @@ func (m *CreateGroupResp) Reset()         { *m = CreateGroupResp{} }
 func (m *CreateGroupResp) String() string { return proto.CompactTextString(m) }
 func (*CreateGroupResp) ProtoMessage()    {}
 func (*CreateGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{2}
+	return fileDescriptor_6e2b031859d3bcfd, []int{3}
 }
 
 func (m *CreateGroupResp) XXX_Unmarshal(b []byte) error {
@@ -181,371 +260,584 @@ func (m *CreateGroupResp) GetGroupID() string {
 	return ""
 }
 
-type GetGroupListReq struct {
-	Token                string   `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
+type GetGroupsInfoReq struct {
+	GroupIDList          []string `protobuf:"bytes,1,rep,name=groupIDList,proto3" json:"groupIDList,omitempty"`
+	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID,proto3" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *GetGroupListReq) Reset()         { *m = GetGroupListReq{} }
-func (m *GetGroupListReq) String() string { return proto.CompactTextString(m) }
-func (*GetGroupListReq) ProtoMessage()    {}
-func (*GetGroupListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{3}
-}
-
-func (m *GetGroupListReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetGroupListReq.Unmarshal(m, b)
-}
-func (m *GetGroupListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetGroupListReq.Marshal(b, m, deterministic)
-}
-func (m *GetGroupListReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetGroupListReq.Merge(m, src)
-}
-func (m *GetGroupListReq) XXX_Size() int {
-	return xxx_messageInfo_GetGroupListReq.Size(m)
-}
-func (m *GetGroupListReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetGroupListReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetGroupListReq proto.InternalMessageInfo
-
-func (m *GetGroupListReq) GetToken() string {
-	if m != nil {
-		return m.Token
-	}
-	return ""
-}
-
-func (m *GetGroupListReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
-type GetGroupListResp struct {
-	ErrorCode            int32    `protobuf:"varint,1,opt,name=ErrorCode,proto3" json:"ErrorCode,omitempty"`
-	ErrorMsg             string   `protobuf:"bytes,2,opt,name=ErrorMsg,proto3" json:"ErrorMsg,omitempty"`
-	GroupList            []string `protobuf:"bytes,3,rep,name=groupList,proto3" json:"groupList,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GetGroupListResp) Reset()         { *m = GetGroupListResp{} }
-func (m *GetGroupListResp) String() string { return proto.CompactTextString(m) }
-func (*GetGroupListResp) ProtoMessage()    {}
-func (*GetGroupListResp) Descriptor() ([]byte, []int) {
+func (m *GetGroupsInfoReq) Reset()         { *m = GetGroupsInfoReq{} }
+func (m *GetGroupsInfoReq) String() string { return proto.CompactTextString(m) }
+func (*GetGroupsInfoReq) ProtoMessage()    {}
+func (*GetGroupsInfoReq) Descriptor() ([]byte, []int) {
 	return fileDescriptor_6e2b031859d3bcfd, []int{4}
 }
 
-func (m *GetGroupListResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetGroupListResp.Unmarshal(m, b)
+func (m *GetGroupsInfoReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupsInfoReq.Unmarshal(m, b)
 }
-func (m *GetGroupListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetGroupListResp.Marshal(b, m, deterministic)
+func (m *GetGroupsInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupsInfoReq.Marshal(b, m, deterministic)
 }
-func (m *GetGroupListResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetGroupListResp.Merge(m, src)
+func (m *GetGroupsInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupsInfoReq.Merge(m, src)
 }
-func (m *GetGroupListResp) XXX_Size() int {
-	return xxx_messageInfo_GetGroupListResp.Size(m)
+func (m *GetGroupsInfoReq) XXX_Size() int {
+	return xxx_messageInfo_GetGroupsInfoReq.Size(m)
 }
-func (m *GetGroupListResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetGroupListResp.DiscardUnknown(m)
+func (m *GetGroupsInfoReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupsInfoReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetGroupListResp proto.InternalMessageInfo
+var xxx_messageInfo_GetGroupsInfoReq proto.InternalMessageInfo
 
-func (m *GetGroupListResp) GetErrorCode() int32 {
+func (m *GetGroupsInfoReq) GetGroupIDList() []string {
 	if m != nil {
-		return m.ErrorCode
-	}
-	return 0
-}
-
-func (m *GetGroupListResp) GetErrorMsg() string {
-	if m != nil {
-		return m.ErrorMsg
-	}
-	return ""
-}
-
-func (m *GetGroupListResp) GetGroupList() []string {
-	if m != nil {
-		return m.GroupList
+		return m.GroupIDList
 	}
 	return nil
 }
 
-type GetGroupInfoReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
-	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
-	Token                string   `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GetGroupInfoReq) Reset()         { *m = GetGroupInfoReq{} }
-func (m *GetGroupInfoReq) String() string { return proto.CompactTextString(m) }
-func (*GetGroupInfoReq) ProtoMessage()    {}
-func (*GetGroupInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{5}
-}
-
-func (m *GetGroupInfoReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetGroupInfoReq.Unmarshal(m, b)
-}
-func (m *GetGroupInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetGroupInfoReq.Marshal(b, m, deterministic)
-}
-func (m *GetGroupInfoReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetGroupInfoReq.Merge(m, src)
-}
-func (m *GetGroupInfoReq) XXX_Size() int {
-	return xxx_messageInfo_GetGroupInfoReq.Size(m)
-}
-func (m *GetGroupInfoReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetGroupInfoReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetGroupInfoReq proto.InternalMessageInfo
-
-func (m *GetGroupInfoReq) GetGroupID() string {
-	if m != nil {
-		return m.GroupID
-	}
-	return ""
-}
-
-func (m *GetGroupInfoReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
-func (m *GetGroupInfoReq) GetToken() string {
+func (m *GetGroupsInfoReq) GetToken() string {
 	if m != nil {
 		return m.Token
 	}
 	return ""
 }
 
-type GetGroupInfoResp struct {
-	ErrorCode            int32         `protobuf:"varint,1,opt,name=ErrorCode,proto3" json:"ErrorCode,omitempty"`
-	ErrorMsg             string        `protobuf:"bytes,2,opt,name=ErrorMsg,proto3" json:"ErrorMsg,omitempty"`
-	GroupID              string        `protobuf:"bytes,3,opt,name=groupID,proto3" json:"groupID,omitempty"`
-	GroupName            string        `protobuf:"bytes,4,opt,name=groupName,proto3" json:"groupName,omitempty"`
-	GroupHeadURL         string        `protobuf:"bytes,5,opt,name=groupHeadURL,proto3" json:"groupHeadURL,omitempty"`
-	Bulletin             string        `protobuf:"bytes,6,opt,name=bulletin,proto3" json:"bulletin,omitempty"`
-	GroupMemberList      []*MemberList `protobuf:"bytes,7,rep,name=groupMemberList,proto3" json:"groupMemberList,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
+func (m *GetGroupsInfoReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
 }
 
-func (m *GetGroupInfoResp) Reset()         { *m = GetGroupInfoResp{} }
-func (m *GetGroupInfoResp) String() string { return proto.CompactTextString(m) }
-func (*GetGroupInfoResp) ProtoMessage()    {}
-func (*GetGroupInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{6}
+type GetGroupsInfoResp struct {
+	ErrorCode            int32        `protobuf:"varint,1,opt,name=ErrorCode,proto3" json:"ErrorCode,omitempty"`
+	ErrorMsg             string       `protobuf:"bytes,2,opt,name=ErrorMsg,proto3" json:"ErrorMsg,omitempty"`
+	Data                 []*GroupInfo `protobuf:"bytes,3,rep,name=data,proto3" json:"data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
 }
 
-func (m *GetGroupInfoResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetGroupInfoResp.Unmarshal(m, b)
-}
-func (m *GetGroupInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetGroupInfoResp.Marshal(b, m, deterministic)
-}
-func (m *GetGroupInfoResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetGroupInfoResp.Merge(m, src)
-}
-func (m *GetGroupInfoResp) XXX_Size() int {
-	return xxx_messageInfo_GetGroupInfoResp.Size(m)
-}
-func (m *GetGroupInfoResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetGroupInfoResp.DiscardUnknown(m)
+func (m *GetGroupsInfoResp) Reset()         { *m = GetGroupsInfoResp{} }
+func (m *GetGroupsInfoResp) String() string { return proto.CompactTextString(m) }
+func (*GetGroupsInfoResp) ProtoMessage()    {}
+func (*GetGroupsInfoResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{5}
 }
 
-var xxx_messageInfo_GetGroupInfoResp proto.InternalMessageInfo
+func (m *GetGroupsInfoResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupsInfoResp.Unmarshal(m, b)
+}
+func (m *GetGroupsInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupsInfoResp.Marshal(b, m, deterministic)
+}
+func (m *GetGroupsInfoResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupsInfoResp.Merge(m, src)
+}
+func (m *GetGroupsInfoResp) XXX_Size() int {
+	return xxx_messageInfo_GetGroupsInfoResp.Size(m)
+}
+func (m *GetGroupsInfoResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupsInfoResp.DiscardUnknown(m)
+}
 
-func (m *GetGroupInfoResp) GetErrorCode() int32 {
+var xxx_messageInfo_GetGroupsInfoResp proto.InternalMessageInfo
+
+func (m *GetGroupsInfoResp) GetErrorCode() int32 {
 	if m != nil {
 		return m.ErrorCode
 	}
 	return 0
 }
 
-func (m *GetGroupInfoResp) GetErrorMsg() string {
+func (m *GetGroupsInfoResp) GetErrorMsg() string {
 	if m != nil {
 		return m.ErrorMsg
 	}
 	return ""
 }
 
-func (m *GetGroupInfoResp) GetGroupID() string {
+func (m *GetGroupsInfoResp) GetData() []*GroupInfo {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+type SetGroupInfoReq struct {
+	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
+	GroupName            string   `protobuf:"bytes,2,opt,name=groupName,proto3" json:"groupName,omitempty"`
+	Notification         string   `protobuf:"bytes,3,opt,name=notification,proto3" json:"notification,omitempty"`
+	Introduction         string   `protobuf:"bytes,4,opt,name=introduction,proto3" json:"introduction,omitempty"`
+	FaceUrl              string   `protobuf:"bytes,5,opt,name=faceUrl,proto3" json:"faceUrl,omitempty"`
+	Token                string   `protobuf:"bytes,6,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string   `protobuf:"bytes,7,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SetGroupInfoReq) Reset()         { *m = SetGroupInfoReq{} }
+func (m *SetGroupInfoReq) String() string { return proto.CompactTextString(m) }
+func (*SetGroupInfoReq) ProtoMessage()    {}
+func (*SetGroupInfoReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{6}
+}
+
+func (m *SetGroupInfoReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetGroupInfoReq.Unmarshal(m, b)
+}
+func (m *SetGroupInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetGroupInfoReq.Marshal(b, m, deterministic)
+}
+func (m *SetGroupInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetGroupInfoReq.Merge(m, src)
+}
+func (m *SetGroupInfoReq) XXX_Size() int {
+	return xxx_messageInfo_SetGroupInfoReq.Size(m)
+}
+func (m *SetGroupInfoReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetGroupInfoReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetGroupInfoReq proto.InternalMessageInfo
+
+func (m *SetGroupInfoReq) GetGroupID() string {
 	if m != nil {
 		return m.GroupID
 	}
 	return ""
 }
 
-func (m *GetGroupInfoResp) GetGroupName() string {
+func (m *SetGroupInfoReq) GetGroupName() string {
 	if m != nil {
 		return m.GroupName
 	}
 	return ""
 }
 
-func (m *GetGroupInfoResp) GetGroupHeadURL() string {
+func (m *SetGroupInfoReq) GetNotification() string {
 	if m != nil {
-		return m.GroupHeadURL
+		return m.Notification
 	}
 	return ""
 }
 
-func (m *GetGroupInfoResp) GetBulletin() string {
+func (m *SetGroupInfoReq) GetIntroduction() string {
 	if m != nil {
-		return m.Bulletin
+		return m.Introduction
 	}
 	return ""
 }
 
-func (m *GetGroupInfoResp) GetGroupMemberList() []*MemberList {
+func (m *SetGroupInfoReq) GetFaceUrl() string {
 	if m != nil {
-		return m.GroupMemberList
-	}
-	return nil
-}
-
-type MemberList struct {
-	UserID               string   `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
-	NickName             string   `protobuf:"bytes,2,opt,name=nickName,proto3" json:"nickName,omitempty"`
-	IsAdmin              int32    `protobuf:"varint,3,opt,name=isAdmin,proto3" json:"isAdmin,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *MemberList) Reset()         { *m = MemberList{} }
-func (m *MemberList) String() string { return proto.CompactTextString(m) }
-func (*MemberList) ProtoMessage()    {}
-func (*MemberList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{7}
-}
-
-func (m *MemberList) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_MemberList.Unmarshal(m, b)
-}
-func (m *MemberList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_MemberList.Marshal(b, m, deterministic)
-}
-func (m *MemberList) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MemberList.Merge(m, src)
-}
-func (m *MemberList) XXX_Size() int {
-	return xxx_messageInfo_MemberList.Size(m)
-}
-func (m *MemberList) XXX_DiscardUnknown() {
-	xxx_messageInfo_MemberList.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_MemberList proto.InternalMessageInfo
-
-func (m *MemberList) GetUserID() string {
-	if m != nil {
-		return m.UserID
+		return m.FaceUrl
 	}
 	return ""
 }
 
-func (m *MemberList) GetNickName() string {
-	if m != nil {
-		return m.NickName
-	}
-	return ""
-}
-
-func (m *MemberList) GetIsAdmin() int32 {
-	if m != nil {
-		return m.IsAdmin
-	}
-	return 0
-}
-
-type DeleteGroupMemberReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
-	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
-	UserIdList           []string `protobuf:"bytes,4,rep,name=userIdList,proto3" json:"userIdList,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *DeleteGroupMemberReq) Reset()         { *m = DeleteGroupMemberReq{} }
-func (m *DeleteGroupMemberReq) String() string { return proto.CompactTextString(m) }
-func (*DeleteGroupMemberReq) ProtoMessage()    {}
-func (*DeleteGroupMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{8}
-}
-
-func (m *DeleteGroupMemberReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_DeleteGroupMemberReq.Unmarshal(m, b)
-}
-func (m *DeleteGroupMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_DeleteGroupMemberReq.Marshal(b, m, deterministic)
-}
-func (m *DeleteGroupMemberReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeleteGroupMemberReq.Merge(m, src)
-}
-func (m *DeleteGroupMemberReq) XXX_Size() int {
-	return xxx_messageInfo_DeleteGroupMemberReq.Size(m)
-}
-func (m *DeleteGroupMemberReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_DeleteGroupMemberReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_DeleteGroupMemberReq proto.InternalMessageInfo
-
-func (m *DeleteGroupMemberReq) GetGroupID() string {
-	if m != nil {
-		return m.GroupID
-	}
-	return ""
-}
-
-func (m *DeleteGroupMemberReq) GetToken() string {
+func (m *SetGroupInfoReq) GetToken() string {
 	if m != nil {
 		return m.Token
 	}
 	return ""
 }
 
-func (m *DeleteGroupMemberReq) GetOperationID() string {
+func (m *SetGroupInfoReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
 	}
 	return ""
 }
 
-func (m *DeleteGroupMemberReq) GetUserIdList() []string {
+type GetGroupApplicationListReq struct {
+	UID                  string   `protobuf:"bytes,1,opt,name=UID,proto3" json:"UID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetGroupApplicationListReq) Reset()         { *m = GetGroupApplicationListReq{} }
+func (m *GetGroupApplicationListReq) String() string { return proto.CompactTextString(m) }
+func (*GetGroupApplicationListReq) ProtoMessage()    {}
+func (*GetGroupApplicationListReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{7}
+}
+
+func (m *GetGroupApplicationListReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupApplicationListReq.Unmarshal(m, b)
+}
+func (m *GetGroupApplicationListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupApplicationListReq.Marshal(b, m, deterministic)
+}
+func (m *GetGroupApplicationListReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupApplicationListReq.Merge(m, src)
+}
+func (m *GetGroupApplicationListReq) XXX_Size() int {
+	return xxx_messageInfo_GetGroupApplicationListReq.Size(m)
+}
+func (m *GetGroupApplicationListReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupApplicationListReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupApplicationListReq proto.InternalMessageInfo
+
+func (m *GetGroupApplicationListReq) GetUID() string {
 	if m != nil {
-		return m.UserIdList
+		return m.UID
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationListReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetGroupApplicationList_Data_User struct {
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID,proto3" json:"GroupID,omitempty"`
+	FromUserID           string   `protobuf:"bytes,2,opt,name=FromUserID,proto3" json:"FromUserID,omitempty"`
+	FromUserNickName     string   `protobuf:"bytes,3,opt,name=FromUserNickName,proto3" json:"FromUserNickName,omitempty"`
+	FromUserFaceUrl      string   `protobuf:"bytes,4,opt,name=FromUserFaceUrl,proto3" json:"FromUserFaceUrl,omitempty"`
+	ToUserID             string   `protobuf:"bytes,5,opt,name=ToUserID,proto3" json:"ToUserID,omitempty"`
+	AddTime              int64    `protobuf:"varint,6,opt,name=AddTime,proto3" json:"AddTime,omitempty"`
+	RequestMsg           string   `protobuf:"bytes,7,opt,name=RequestMsg,proto3" json:"RequestMsg,omitempty"`
+	HandledMsg           string   `protobuf:"bytes,8,opt,name=HandledMsg,proto3" json:"HandledMsg,omitempty"`
+	Type                 int32    `protobuf:"varint,9,opt,name=Type,proto3" json:"Type,omitempty"`
+	HandleStatus         int32    `protobuf:"varint,10,opt,name=HandleStatus,proto3" json:"HandleStatus,omitempty"`
+	HandleResult         int32    `protobuf:"varint,11,opt,name=HandleResult,proto3" json:"HandleResult,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetGroupApplicationList_Data_User) Reset()         { *m = GetGroupApplicationList_Data_User{} }
+func (m *GetGroupApplicationList_Data_User) String() string { return proto.CompactTextString(m) }
+func (*GetGroupApplicationList_Data_User) ProtoMessage()    {}
+func (*GetGroupApplicationList_Data_User) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{8}
+}
+
+func (m *GetGroupApplicationList_Data_User) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupApplicationList_Data_User.Unmarshal(m, b)
+}
+func (m *GetGroupApplicationList_Data_User) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupApplicationList_Data_User.Marshal(b, m, deterministic)
+}
+func (m *GetGroupApplicationList_Data_User) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupApplicationList_Data_User.Merge(m, src)
+}
+func (m *GetGroupApplicationList_Data_User) XXX_Size() int {
+	return xxx_messageInfo_GetGroupApplicationList_Data_User.Size(m)
+}
+func (m *GetGroupApplicationList_Data_User) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupApplicationList_Data_User.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupApplicationList_Data_User proto.InternalMessageInfo
+
+func (m *GetGroupApplicationList_Data_User) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationList_Data_User) GetFromUserID() string {
+	if m != nil {
+		return m.FromUserID
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationList_Data_User) GetFromUserNickName() string {
+	if m != nil {
+		return m.FromUserNickName
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationList_Data_User) GetFromUserFaceUrl() string {
+	if m != nil {
+		return m.FromUserFaceUrl
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationList_Data_User) GetToUserID() string {
+	if m != nil {
+		return m.ToUserID
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationList_Data_User) GetAddTime() int64 {
+	if m != nil {
+		return m.AddTime
+	}
+	return 0
+}
+
+func (m *GetGroupApplicationList_Data_User) GetRequestMsg() string {
+	if m != nil {
+		return m.RequestMsg
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationList_Data_User) GetHandledMsg() string {
+	if m != nil {
+		return m.HandledMsg
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationList_Data_User) GetType() int32 {
+	if m != nil {
+		return m.Type
+	}
+	return 0
+}
+
+func (m *GetGroupApplicationList_Data_User) GetHandleStatus() int32 {
+	if m != nil {
+		return m.HandleStatus
+	}
+	return 0
+}
+
+func (m *GetGroupApplicationList_Data_User) GetHandleResult() int32 {
+	if m != nil {
+		return m.HandleResult
+	}
+	return 0
+}
+
+type GetGroupApplicationListData struct {
+	Count                int32                                `protobuf:"varint,1,opt,name=Count,proto3" json:"Count,omitempty"`
+	User                 []*GetGroupApplicationList_Data_User `protobuf:"bytes,2,rep,name=User,proto3" json:"User,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                             `json:"-"`
+	XXX_unrecognized     []byte                               `json:"-"`
+	XXX_sizecache        int32                                `json:"-"`
+}
+
+func (m *GetGroupApplicationListData) Reset()         { *m = GetGroupApplicationListData{} }
+func (m *GetGroupApplicationListData) String() string { return proto.CompactTextString(m) }
+func (*GetGroupApplicationListData) ProtoMessage()    {}
+func (*GetGroupApplicationListData) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{9}
+}
+
+func (m *GetGroupApplicationListData) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupApplicationListData.Unmarshal(m, b)
+}
+func (m *GetGroupApplicationListData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupApplicationListData.Marshal(b, m, deterministic)
+}
+func (m *GetGroupApplicationListData) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupApplicationListData.Merge(m, src)
+}
+func (m *GetGroupApplicationListData) XXX_Size() int {
+	return xxx_messageInfo_GetGroupApplicationListData.Size(m)
+}
+func (m *GetGroupApplicationListData) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupApplicationListData.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupApplicationListData proto.InternalMessageInfo
+
+func (m *GetGroupApplicationListData) GetCount() int32 {
+	if m != nil {
+		return m.Count
+	}
+	return 0
+}
+
+func (m *GetGroupApplicationListData) GetUser() []*GetGroupApplicationList_Data_User {
+	if m != nil {
+		return m.User
 	}
 	return nil
 }
 
-type SetGroupNameReq struct {
+type GetGroupApplicationListResp struct {
+	ErrCode              int32                        `protobuf:"varint,1,opt,name=ErrCode,proto3" json:"ErrCode,omitempty"`
+	ErrMsg               string                       `protobuf:"bytes,2,opt,name=ErrMsg,proto3" json:"ErrMsg,omitempty"`
+	Data                 *GetGroupApplicationListData `protobuf:"bytes,3,opt,name=Data,proto3" json:"Data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
+	XXX_unrecognized     []byte                       `json:"-"`
+	XXX_sizecache        int32                        `json:"-"`
+}
+
+func (m *GetGroupApplicationListResp) Reset()         { *m = GetGroupApplicationListResp{} }
+func (m *GetGroupApplicationListResp) String() string { return proto.CompactTextString(m) }
+func (*GetGroupApplicationListResp) ProtoMessage()    {}
+func (*GetGroupApplicationListResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{10}
+}
+
+func (m *GetGroupApplicationListResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupApplicationListResp.Unmarshal(m, b)
+}
+func (m *GetGroupApplicationListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupApplicationListResp.Marshal(b, m, deterministic)
+}
+func (m *GetGroupApplicationListResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupApplicationListResp.Merge(m, src)
+}
+func (m *GetGroupApplicationListResp) XXX_Size() int {
+	return xxx_messageInfo_GetGroupApplicationListResp.Size(m)
+}
+func (m *GetGroupApplicationListResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupApplicationListResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupApplicationListResp proto.InternalMessageInfo
+
+func (m *GetGroupApplicationListResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *GetGroupApplicationListResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *GetGroupApplicationListResp) GetData() *GetGroupApplicationListData {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
+type TransferGroupOwnerReq struct {
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID,proto3" json:"GroupID,omitempty"`
+	OldOwner             string   `protobuf:"bytes,2,opt,name=OldOwner,proto3" json:"OldOwner,omitempty"`
+	NewOwner             string   `protobuf:"bytes,3,opt,name=NewOwner,proto3" json:"NewOwner,omitempty"`
+	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TransferGroupOwnerReq) Reset()         { *m = TransferGroupOwnerReq{} }
+func (m *TransferGroupOwnerReq) String() string { return proto.CompactTextString(m) }
+func (*TransferGroupOwnerReq) ProtoMessage()    {}
+func (*TransferGroupOwnerReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{11}
+}
+
+func (m *TransferGroupOwnerReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TransferGroupOwnerReq.Unmarshal(m, b)
+}
+func (m *TransferGroupOwnerReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TransferGroupOwnerReq.Marshal(b, m, deterministic)
+}
+func (m *TransferGroupOwnerReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TransferGroupOwnerReq.Merge(m, src)
+}
+func (m *TransferGroupOwnerReq) XXX_Size() int {
+	return xxx_messageInfo_TransferGroupOwnerReq.Size(m)
+}
+func (m *TransferGroupOwnerReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_TransferGroupOwnerReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TransferGroupOwnerReq proto.InternalMessageInfo
+
+func (m *TransferGroupOwnerReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *TransferGroupOwnerReq) GetOldOwner() string {
+	if m != nil {
+		return m.OldOwner
+	}
+	return ""
+}
+
+func (m *TransferGroupOwnerReq) GetNewOwner() string {
+	if m != nil {
+		return m.NewOwner
+	}
+	return ""
+}
+
+func (m *TransferGroupOwnerReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type TransferGroupOwnerResp struct {
+	ErrCode              int32    `protobuf:"varint,1,opt,name=ErrCode,proto3" json:"ErrCode,omitempty"`
+	ErrMsg               string   `protobuf:"bytes,2,opt,name=ErrMsg,proto3" json:"ErrMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TransferGroupOwnerResp) Reset()         { *m = TransferGroupOwnerResp{} }
+func (m *TransferGroupOwnerResp) String() string { return proto.CompactTextString(m) }
+func (*TransferGroupOwnerResp) ProtoMessage()    {}
+func (*TransferGroupOwnerResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{12}
+}
+
+func (m *TransferGroupOwnerResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TransferGroupOwnerResp.Unmarshal(m, b)
+}
+func (m *TransferGroupOwnerResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TransferGroupOwnerResp.Marshal(b, m, deterministic)
+}
+func (m *TransferGroupOwnerResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TransferGroupOwnerResp.Merge(m, src)
+}
+func (m *TransferGroupOwnerResp) XXX_Size() int {
+	return xxx_messageInfo_TransferGroupOwnerResp.Size(m)
+}
+func (m *TransferGroupOwnerResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_TransferGroupOwnerResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TransferGroupOwnerResp proto.InternalMessageInfo
+
+func (m *TransferGroupOwnerResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *TransferGroupOwnerResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+type JoinGroupReq struct {
 	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Message              string   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	Token                string   `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
 	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -553,118 +845,253 @@ type SetGroupNameReq struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *SetGroupNameReq) Reset()         { *m = SetGroupNameReq{} }
-func (m *SetGroupNameReq) String() string { return proto.CompactTextString(m) }
-func (*SetGroupNameReq) ProtoMessage()    {}
-func (*SetGroupNameReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{9}
+func (m *JoinGroupReq) Reset()         { *m = JoinGroupReq{} }
+func (m *JoinGroupReq) String() string { return proto.CompactTextString(m) }
+func (*JoinGroupReq) ProtoMessage()    {}
+func (*JoinGroupReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{13}
 }
 
-func (m *SetGroupNameReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SetGroupNameReq.Unmarshal(m, b)
+func (m *JoinGroupReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JoinGroupReq.Unmarshal(m, b)
 }
-func (m *SetGroupNameReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SetGroupNameReq.Marshal(b, m, deterministic)
+func (m *JoinGroupReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JoinGroupReq.Marshal(b, m, deterministic)
 }
-func (m *SetGroupNameReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SetGroupNameReq.Merge(m, src)
+func (m *JoinGroupReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinGroupReq.Merge(m, src)
 }
-func (m *SetGroupNameReq) XXX_Size() int {
-	return xxx_messageInfo_SetGroupNameReq.Size(m)
+func (m *JoinGroupReq) XXX_Size() int {
+	return xxx_messageInfo_JoinGroupReq.Size(m)
 }
-func (m *SetGroupNameReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_SetGroupNameReq.DiscardUnknown(m)
+func (m *JoinGroupReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_JoinGroupReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_SetGroupNameReq proto.InternalMessageInfo
+var xxx_messageInfo_JoinGroupReq proto.InternalMessageInfo
 
-func (m *SetGroupNameReq) GetGroupID() string {
+func (m *JoinGroupReq) GetGroupID() string {
 	if m != nil {
 		return m.GroupID
 	}
 	return ""
 }
 
-func (m *SetGroupNameReq) GetName() string {
+func (m *JoinGroupReq) GetMessage() string {
 	if m != nil {
-		return m.Name
+		return m.Message
 	}
 	return ""
 }
 
-func (m *SetGroupNameReq) GetToken() string {
+func (m *JoinGroupReq) GetToken() string {
 	if m != nil {
 		return m.Token
 	}
 	return ""
 }
 
-func (m *SetGroupNameReq) GetOperationID() string {
+func (m *JoinGroupReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
 	}
 	return ""
 }
 
-type SetGroupBulletinReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
-	Bulletin             string   `protobuf:"bytes,2,opt,name=bulletin,proto3" json:"bulletin,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
-	Token                string   `protobuf:"bytes,4,opt,name=token,proto3" json:"token,omitempty"`
+type GroupApplicationResponseReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
+	OwnerID              string   `protobuf:"bytes,2,opt,name=OwnerID,proto3" json:"OwnerID,omitempty"`
+	GroupID              string   `protobuf:"bytes,3,opt,name=GroupID,proto3" json:"GroupID,omitempty"`
+	FromUserID           string   `protobuf:"bytes,4,opt,name=FromUserID,proto3" json:"FromUserID,omitempty"`
+	FromUserNickName     string   `protobuf:"bytes,5,opt,name=FromUserNickName,proto3" json:"FromUserNickName,omitempty"`
+	FromUserFaceUrl      string   `protobuf:"bytes,6,opt,name=FromUserFaceUrl,proto3" json:"FromUserFaceUrl,omitempty"`
+	ToUserID             string   `protobuf:"bytes,7,opt,name=ToUserID,proto3" json:"ToUserID,omitempty"`
+	ToUserNickName       string   `protobuf:"bytes,8,opt,name=ToUserNickName,proto3" json:"ToUserNickName,omitempty"`
+	ToUserFaceUrl        string   `protobuf:"bytes,9,opt,name=ToUserFaceUrl,proto3" json:"ToUserFaceUrl,omitempty"`
+	AddTime              int64    `protobuf:"varint,10,opt,name=AddTime,proto3" json:"AddTime,omitempty"`
+	RequestMsg           string   `protobuf:"bytes,11,opt,name=RequestMsg,proto3" json:"RequestMsg,omitempty"`
+	HandledMsg           string   `protobuf:"bytes,12,opt,name=HandledMsg,proto3" json:"HandledMsg,omitempty"`
+	Type                 int32    `protobuf:"varint,13,opt,name=Type,proto3" json:"Type,omitempty"`
+	HandleStatus         int32    `protobuf:"varint,14,opt,name=HandleStatus,proto3" json:"HandleStatus,omitempty"`
+	HandleResult         int32    `protobuf:"varint,15,opt,name=HandleResult,proto3" json:"HandleResult,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *SetGroupBulletinReq) Reset()         { *m = SetGroupBulletinReq{} }
-func (m *SetGroupBulletinReq) String() string { return proto.CompactTextString(m) }
-func (*SetGroupBulletinReq) ProtoMessage()    {}
-func (*SetGroupBulletinReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{10}
+func (m *GroupApplicationResponseReq) Reset()         { *m = GroupApplicationResponseReq{} }
+func (m *GroupApplicationResponseReq) String() string { return proto.CompactTextString(m) }
+func (*GroupApplicationResponseReq) ProtoMessage()    {}
+func (*GroupApplicationResponseReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{14}
 }
 
-func (m *SetGroupBulletinReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SetGroupBulletinReq.Unmarshal(m, b)
+func (m *GroupApplicationResponseReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GroupApplicationResponseReq.Unmarshal(m, b)
 }
-func (m *SetGroupBulletinReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SetGroupBulletinReq.Marshal(b, m, deterministic)
+func (m *GroupApplicationResponseReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GroupApplicationResponseReq.Marshal(b, m, deterministic)
 }
-func (m *SetGroupBulletinReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SetGroupBulletinReq.Merge(m, src)
+func (m *GroupApplicationResponseReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GroupApplicationResponseReq.Merge(m, src)
 }
-func (m *SetGroupBulletinReq) XXX_Size() int {
-	return xxx_messageInfo_SetGroupBulletinReq.Size(m)
+func (m *GroupApplicationResponseReq) XXX_Size() int {
+	return xxx_messageInfo_GroupApplicationResponseReq.Size(m)
 }
-func (m *SetGroupBulletinReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_SetGroupBulletinReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_SetGroupBulletinReq proto.InternalMessageInfo
-
-func (m *SetGroupBulletinReq) GetGroupID() string {
-	if m != nil {
-		return m.GroupID
-	}
-	return ""
+func (m *GroupApplicationResponseReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GroupApplicationResponseReq.DiscardUnknown(m)
 }
 
-func (m *SetGroupBulletinReq) GetBulletin() string {
-	if m != nil {
-		return m.Bulletin
-	}
-	return ""
-}
+var xxx_messageInfo_GroupApplicationResponseReq proto.InternalMessageInfo
 
-func (m *SetGroupBulletinReq) GetOperationID() string {
+func (m *GroupApplicationResponseReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
 	}
 	return ""
 }
 
-func (m *SetGroupBulletinReq) GetToken() string {
+func (m *GroupApplicationResponseReq) GetOwnerID() string {
 	if m != nil {
-		return m.Token
+		return m.OwnerID
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetFromUserID() string {
+	if m != nil {
+		return m.FromUserID
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetFromUserNickName() string {
+	if m != nil {
+		return m.FromUserNickName
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetFromUserFaceUrl() string {
+	if m != nil {
+		return m.FromUserFaceUrl
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetToUserID() string {
+	if m != nil {
+		return m.ToUserID
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetToUserNickName() string {
+	if m != nil {
+		return m.ToUserNickName
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetToUserFaceUrl() string {
+	if m != nil {
+		return m.ToUserFaceUrl
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetAddTime() int64 {
+	if m != nil {
+		return m.AddTime
+	}
+	return 0
+}
+
+func (m *GroupApplicationResponseReq) GetRequestMsg() string {
+	if m != nil {
+		return m.RequestMsg
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetHandledMsg() string {
+	if m != nil {
+		return m.HandledMsg
+	}
+	return ""
+}
+
+func (m *GroupApplicationResponseReq) GetType() int32 {
+	if m != nil {
+		return m.Type
+	}
+	return 0
+}
+
+func (m *GroupApplicationResponseReq) GetHandleStatus() int32 {
+	if m != nil {
+		return m.HandleStatus
+	}
+	return 0
+}
+
+func (m *GroupApplicationResponseReq) GetHandleResult() int32 {
+	if m != nil {
+		return m.HandleResult
+	}
+	return 0
+}
+
+type GroupApplicationResponseResp struct {
+	ErrCode              int32    `protobuf:"varint,1,opt,name=ErrCode,proto3" json:"ErrCode,omitempty"`
+	ErrMsg               string   `protobuf:"bytes,2,opt,name=ErrMsg,proto3" json:"ErrMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GroupApplicationResponseResp) Reset()         { *m = GroupApplicationResponseResp{} }
+func (m *GroupApplicationResponseResp) String() string { return proto.CompactTextString(m) }
+func (*GroupApplicationResponseResp) ProtoMessage()    {}
+func (*GroupApplicationResponseResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{15}
+}
+
+func (m *GroupApplicationResponseResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GroupApplicationResponseResp.Unmarshal(m, b)
+}
+func (m *GroupApplicationResponseResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GroupApplicationResponseResp.Marshal(b, m, deterministic)
+}
+func (m *GroupApplicationResponseResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GroupApplicationResponseResp.Merge(m, src)
+}
+func (m *GroupApplicationResponseResp) XXX_Size() int {
+	return xxx_messageInfo_GroupApplicationResponseResp.Size(m)
+}
+func (m *GroupApplicationResponseResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GroupApplicationResponseResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GroupApplicationResponseResp proto.InternalMessageInfo
+
+func (m *GroupApplicationResponseResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *GroupApplicationResponseResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
 	}
 	return ""
 }
@@ -683,7 +1110,7 @@ func (m *SetOwnerGroupNickNameReq) Reset()         { *m = SetOwnerGroupNickNameR
 func (m *SetOwnerGroupNickNameReq) String() string { return proto.CompactTextString(m) }
 func (*SetOwnerGroupNickNameReq) ProtoMessage()    {}
 func (*SetOwnerGroupNickNameReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{11}
+	return fileDescriptor_6e2b031859d3bcfd, []int{16}
 }
 
 func (m *SetOwnerGroupNickNameReq) XXX_Unmarshal(b []byte) error {
@@ -732,217 +1159,1274 @@ func (m *SetOwnerGroupNickNameReq) GetToken() string {
 	return ""
 }
 
-type SetGroupHeadImageReq struct {
+type QuitGroupReq struct {
 	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
-	HeadUrl              string   `protobuf:"bytes,2,opt,name=headUrl,proto3" json:"headUrl,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
-	Token                string   `protobuf:"bytes,4,opt,name=token,proto3" json:"token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *SetGroupHeadImageReq) Reset()         { *m = SetGroupHeadImageReq{} }
-func (m *SetGroupHeadImageReq) String() string { return proto.CompactTextString(m) }
-func (*SetGroupHeadImageReq) ProtoMessage()    {}
-func (*SetGroupHeadImageReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{12}
-}
-
-func (m *SetGroupHeadImageReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SetGroupHeadImageReq.Unmarshal(m, b)
-}
-func (m *SetGroupHeadImageReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SetGroupHeadImageReq.Marshal(b, m, deterministic)
-}
-func (m *SetGroupHeadImageReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SetGroupHeadImageReq.Merge(m, src)
-}
-func (m *SetGroupHeadImageReq) XXX_Size() int {
-	return xxx_messageInfo_SetGroupHeadImageReq.Size(m)
-}
-func (m *SetGroupHeadImageReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_SetGroupHeadImageReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_SetGroupHeadImageReq proto.InternalMessageInfo
-
-func (m *SetGroupHeadImageReq) GetGroupID() string {
-	if m != nil {
-		return m.GroupID
-	}
-	return ""
-}
-
-func (m *SetGroupHeadImageReq) GetHeadUrl() string {
-	if m != nil {
-		return m.HeadUrl
-	}
-	return ""
-}
-
-func (m *SetGroupHeadImageReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
-func (m *SetGroupHeadImageReq) GetToken() string {
-	if m != nil {
-		return m.Token
-	}
-	return ""
-}
-
-type MemberExitGroupReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
-	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID,proto3" json:"OperationID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID,proto3" json:"operationID,omitempty"`
 	Token                string   `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *MemberExitGroupReq) Reset()         { *m = MemberExitGroupReq{} }
-func (m *MemberExitGroupReq) String() string { return proto.CompactTextString(m) }
-func (*MemberExitGroupReq) ProtoMessage()    {}
-func (*MemberExitGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6e2b031859d3bcfd, []int{13}
+func (m *QuitGroupReq) Reset()         { *m = QuitGroupReq{} }
+func (m *QuitGroupReq) String() string { return proto.CompactTextString(m) }
+func (*QuitGroupReq) ProtoMessage()    {}
+func (*QuitGroupReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{17}
 }
 
-func (m *MemberExitGroupReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_MemberExitGroupReq.Unmarshal(m, b)
+func (m *QuitGroupReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QuitGroupReq.Unmarshal(m, b)
 }
-func (m *MemberExitGroupReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_MemberExitGroupReq.Marshal(b, m, deterministic)
+func (m *QuitGroupReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QuitGroupReq.Marshal(b, m, deterministic)
 }
-func (m *MemberExitGroupReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MemberExitGroupReq.Merge(m, src)
+func (m *QuitGroupReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuitGroupReq.Merge(m, src)
 }
-func (m *MemberExitGroupReq) XXX_Size() int {
-	return xxx_messageInfo_MemberExitGroupReq.Size(m)
+func (m *QuitGroupReq) XXX_Size() int {
+	return xxx_messageInfo_QuitGroupReq.Size(m)
 }
-func (m *MemberExitGroupReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_MemberExitGroupReq.DiscardUnknown(m)
+func (m *QuitGroupReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_QuitGroupReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MemberExitGroupReq proto.InternalMessageInfo
+var xxx_messageInfo_QuitGroupReq proto.InternalMessageInfo
 
-func (m *MemberExitGroupReq) GetGroupID() string {
+func (m *QuitGroupReq) GetGroupID() string {
 	if m != nil {
 		return m.GroupID
 	}
 	return ""
 }
 
-func (m *MemberExitGroupReq) GetOperationID() string {
+func (m *QuitGroupReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
 	}
 	return ""
 }
 
-func (m *MemberExitGroupReq) GetToken() string {
+func (m *QuitGroupReq) GetToken() string {
 	if m != nil {
 		return m.Token
 	}
 	return ""
 }
 
+type GroupApplicationUserInfo struct {
+	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
+	Uid                  string   `protobuf:"bytes,2,opt,name=uid,proto3" json:"uid,omitempty"`
+	Name                 string   `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Icon                 string   `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
+	ReqMsg               string   `protobuf:"bytes,5,opt,name=reqMsg,proto3" json:"reqMsg,omitempty"`
+	ApplicationTime      int64    `protobuf:"varint,6,opt,name=applicationTime,proto3" json:"applicationTime,omitempty"`
+	Flag                 int32    `protobuf:"varint,7,opt,name=flag,proto3" json:"flag,omitempty"`
+	OperatorID           string   `protobuf:"bytes,8,opt,name=operatorID,proto3" json:"operatorID,omitempty"`
+	HandledMsg           string   `protobuf:"bytes,9,opt,name=handledMsg,proto3" json:"handledMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GroupApplicationUserInfo) Reset()         { *m = GroupApplicationUserInfo{} }
+func (m *GroupApplicationUserInfo) String() string { return proto.CompactTextString(m) }
+func (*GroupApplicationUserInfo) ProtoMessage()    {}
+func (*GroupApplicationUserInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{18}
+}
+
+func (m *GroupApplicationUserInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GroupApplicationUserInfo.Unmarshal(m, b)
+}
+func (m *GroupApplicationUserInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GroupApplicationUserInfo.Marshal(b, m, deterministic)
+}
+func (m *GroupApplicationUserInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GroupApplicationUserInfo.Merge(m, src)
+}
+func (m *GroupApplicationUserInfo) XXX_Size() int {
+	return xxx_messageInfo_GroupApplicationUserInfo.Size(m)
+}
+func (m *GroupApplicationUserInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_GroupApplicationUserInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GroupApplicationUserInfo proto.InternalMessageInfo
+
+func (m *GroupApplicationUserInfo) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *GroupApplicationUserInfo) GetUid() string {
+	if m != nil {
+		return m.Uid
+	}
+	return ""
+}
+
+func (m *GroupApplicationUserInfo) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *GroupApplicationUserInfo) GetIcon() string {
+	if m != nil {
+		return m.Icon
+	}
+	return ""
+}
+
+func (m *GroupApplicationUserInfo) GetReqMsg() string {
+	if m != nil {
+		return m.ReqMsg
+	}
+	return ""
+}
+
+func (m *GroupApplicationUserInfo) GetApplicationTime() int64 {
+	if m != nil {
+		return m.ApplicationTime
+	}
+	return 0
+}
+
+func (m *GroupApplicationUserInfo) GetFlag() int32 {
+	if m != nil {
+		return m.Flag
+	}
+	return 0
+}
+
+func (m *GroupApplicationUserInfo) GetOperatorID() string {
+	if m != nil {
+		return m.OperatorID
+	}
+	return ""
+}
+
+func (m *GroupApplicationUserInfo) GetHandledMsg() string {
+	if m != nil {
+		return m.HandledMsg
+	}
+	return ""
+}
+
+type GroupMemberFullInfo struct {
+	UserId               string   `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	Role                 int32    `protobuf:"varint,2,opt,name=role,proto3" json:"role,omitempty"`
+	JoinTime             uint64   `protobuf:"varint,3,opt,name=joinTime,proto3" json:"joinTime,omitempty"`
+	NickName             string   `protobuf:"bytes,4,opt,name=nickName,proto3" json:"nickName,omitempty"`
+	FaceUrl              string   `protobuf:"bytes,5,opt,name=faceUrl,proto3" json:"faceUrl,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GroupMemberFullInfo) Reset()         { *m = GroupMemberFullInfo{} }
+func (m *GroupMemberFullInfo) String() string { return proto.CompactTextString(m) }
+func (*GroupMemberFullInfo) ProtoMessage()    {}
+func (*GroupMemberFullInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{19}
+}
+
+func (m *GroupMemberFullInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GroupMemberFullInfo.Unmarshal(m, b)
+}
+func (m *GroupMemberFullInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GroupMemberFullInfo.Marshal(b, m, deterministic)
+}
+func (m *GroupMemberFullInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GroupMemberFullInfo.Merge(m, src)
+}
+func (m *GroupMemberFullInfo) XXX_Size() int {
+	return xxx_messageInfo_GroupMemberFullInfo.Size(m)
+}
+func (m *GroupMemberFullInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_GroupMemberFullInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GroupMemberFullInfo proto.InternalMessageInfo
+
+func (m *GroupMemberFullInfo) GetUserId() string {
+	if m != nil {
+		return m.UserId
+	}
+	return ""
+}
+
+func (m *GroupMemberFullInfo) GetRole() int32 {
+	if m != nil {
+		return m.Role
+	}
+	return 0
+}
+
+func (m *GroupMemberFullInfo) GetJoinTime() uint64 {
+	if m != nil {
+		return m.JoinTime
+	}
+	return 0
+}
+
+func (m *GroupMemberFullInfo) GetNickName() string {
+	if m != nil {
+		return m.NickName
+	}
+	return ""
+}
+
+func (m *GroupMemberFullInfo) GetFaceUrl() string {
+	if m != nil {
+		return m.FaceUrl
+	}
+	return ""
+}
+
+type GetGroupMemberListReq struct {
+	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
+	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	Filter               int32    `protobuf:"varint,4,opt,name=filter,proto3" json:"filter,omitempty"`
+	NextSeq              int32    `protobuf:"varint,5,opt,name=nextSeq,proto3" json:"nextSeq,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetGroupMemberListReq) Reset()         { *m = GetGroupMemberListReq{} }
+func (m *GetGroupMemberListReq) String() string { return proto.CompactTextString(m) }
+func (*GetGroupMemberListReq) ProtoMessage()    {}
+func (*GetGroupMemberListReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{20}
+}
+
+func (m *GetGroupMemberListReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupMemberListReq.Unmarshal(m, b)
+}
+func (m *GetGroupMemberListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupMemberListReq.Marshal(b, m, deterministic)
+}
+func (m *GetGroupMemberListReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupMemberListReq.Merge(m, src)
+}
+func (m *GetGroupMemberListReq) XXX_Size() int {
+	return xxx_messageInfo_GetGroupMemberListReq.Size(m)
+}
+func (m *GetGroupMemberListReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupMemberListReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupMemberListReq proto.InternalMessageInfo
+
+func (m *GetGroupMemberListReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *GetGroupMemberListReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+func (m *GetGroupMemberListReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GetGroupMemberListReq) GetFilter() int32 {
+	if m != nil {
+		return m.Filter
+	}
+	return 0
+}
+
+func (m *GetGroupMemberListReq) GetNextSeq() int32 {
+	if m != nil {
+		return m.NextSeq
+	}
+	return 0
+}
+
+type GetGroupMemberListResp struct {
+	ErrorCode            int32                  `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
+	ErrorMsg             string                 `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	MemberList           []*GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList,proto3" json:"memberList,omitempty"`
+	NextSeq              int32                  `protobuf:"varint,4,opt,name=nextSeq,proto3" json:"nextSeq,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
+}
+
+func (m *GetGroupMemberListResp) Reset()         { *m = GetGroupMemberListResp{} }
+func (m *GetGroupMemberListResp) String() string { return proto.CompactTextString(m) }
+func (*GetGroupMemberListResp) ProtoMessage()    {}
+func (*GetGroupMemberListResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{21}
+}
+
+func (m *GetGroupMemberListResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupMemberListResp.Unmarshal(m, b)
+}
+func (m *GetGroupMemberListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupMemberListResp.Marshal(b, m, deterministic)
+}
+func (m *GetGroupMemberListResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupMemberListResp.Merge(m, src)
+}
+func (m *GetGroupMemberListResp) XXX_Size() int {
+	return xxx_messageInfo_GetGroupMemberListResp.Size(m)
+}
+func (m *GetGroupMemberListResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupMemberListResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupMemberListResp proto.InternalMessageInfo
+
+func (m *GetGroupMemberListResp) GetErrorCode() int32 {
+	if m != nil {
+		return m.ErrorCode
+	}
+	return 0
+}
+
+func (m *GetGroupMemberListResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
+}
+
+func (m *GetGroupMemberListResp) GetMemberList() []*GroupMemberFullInfo {
+	if m != nil {
+		return m.MemberList
+	}
+	return nil
+}
+
+func (m *GetGroupMemberListResp) GetNextSeq() int32 {
+	if m != nil {
+		return m.NextSeq
+	}
+	return 0
+}
+
+type GetGroupMembersInfoReq struct {
+	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
+	MemberList           []string `protobuf:"bytes,2,rep,name=memberList,proto3" json:"memberList,omitempty"`
+	Token                string   `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string   `protobuf:"bytes,4,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetGroupMembersInfoReq) Reset()         { *m = GetGroupMembersInfoReq{} }
+func (m *GetGroupMembersInfoReq) String() string { return proto.CompactTextString(m) }
+func (*GetGroupMembersInfoReq) ProtoMessage()    {}
+func (*GetGroupMembersInfoReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{22}
+}
+
+func (m *GetGroupMembersInfoReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupMembersInfoReq.Unmarshal(m, b)
+}
+func (m *GetGroupMembersInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupMembersInfoReq.Marshal(b, m, deterministic)
+}
+func (m *GetGroupMembersInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupMembersInfoReq.Merge(m, src)
+}
+func (m *GetGroupMembersInfoReq) XXX_Size() int {
+	return xxx_messageInfo_GetGroupMembersInfoReq.Size(m)
+}
+func (m *GetGroupMembersInfoReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupMembersInfoReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupMembersInfoReq proto.InternalMessageInfo
+
+func (m *GetGroupMembersInfoReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *GetGroupMembersInfoReq) GetMemberList() []string {
+	if m != nil {
+		return m.MemberList
+	}
+	return nil
+}
+
+func (m *GetGroupMembersInfoReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+func (m *GetGroupMembersInfoReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetGroupMembersInfoResp struct {
+	ErrorCode            int32                  `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
+	ErrorMsg             string                 `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	MemberList           []*GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList,proto3" json:"memberList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
+}
+
+func (m *GetGroupMembersInfoResp) Reset()         { *m = GetGroupMembersInfoResp{} }
+func (m *GetGroupMembersInfoResp) String() string { return proto.CompactTextString(m) }
+func (*GetGroupMembersInfoResp) ProtoMessage()    {}
+func (*GetGroupMembersInfoResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{23}
+}
+
+func (m *GetGroupMembersInfoResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupMembersInfoResp.Unmarshal(m, b)
+}
+func (m *GetGroupMembersInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupMembersInfoResp.Marshal(b, m, deterministic)
+}
+func (m *GetGroupMembersInfoResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupMembersInfoResp.Merge(m, src)
+}
+func (m *GetGroupMembersInfoResp) XXX_Size() int {
+	return xxx_messageInfo_GetGroupMembersInfoResp.Size(m)
+}
+func (m *GetGroupMembersInfoResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupMembersInfoResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupMembersInfoResp proto.InternalMessageInfo
+
+func (m *GetGroupMembersInfoResp) GetErrorCode() int32 {
+	if m != nil {
+		return m.ErrorCode
+	}
+	return 0
+}
+
+func (m *GetGroupMembersInfoResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
+}
+
+func (m *GetGroupMembersInfoResp) GetMemberList() []*GroupMemberFullInfo {
+	if m != nil {
+		return m.MemberList
+	}
+	return nil
+}
+
+type KickGroupMemberReq struct {
+	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
+	UidList              []string `protobuf:"bytes,2,rep,name=uidList,proto3" json:"uidList,omitempty"`
+	Reason               string   `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	Token                string   `protobuf:"bytes,4,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string   `protobuf:"bytes,5,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *KickGroupMemberReq) Reset()         { *m = KickGroupMemberReq{} }
+func (m *KickGroupMemberReq) String() string { return proto.CompactTextString(m) }
+func (*KickGroupMemberReq) ProtoMessage()    {}
+func (*KickGroupMemberReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{24}
+}
+
+func (m *KickGroupMemberReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_KickGroupMemberReq.Unmarshal(m, b)
+}
+func (m *KickGroupMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_KickGroupMemberReq.Marshal(b, m, deterministic)
+}
+func (m *KickGroupMemberReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_KickGroupMemberReq.Merge(m, src)
+}
+func (m *KickGroupMemberReq) XXX_Size() int {
+	return xxx_messageInfo_KickGroupMemberReq.Size(m)
+}
+func (m *KickGroupMemberReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_KickGroupMemberReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_KickGroupMemberReq proto.InternalMessageInfo
+
+func (m *KickGroupMemberReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *KickGroupMemberReq) GetUidList() []string {
+	if m != nil {
+		return m.UidList
+	}
+	return nil
+}
+
+func (m *KickGroupMemberReq) GetReason() string {
+	if m != nil {
+		return m.Reason
+	}
+	return ""
+}
+
+func (m *KickGroupMemberReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+func (m *KickGroupMemberReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type Id2Result struct {
+	UId                  string   `protobuf:"bytes,1,opt,name=uId,proto3" json:"uId,omitempty"`
+	Result               int32    `protobuf:"varint,2,opt,name=result,proto3" json:"result,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Id2Result) Reset()         { *m = Id2Result{} }
+func (m *Id2Result) String() string { return proto.CompactTextString(m) }
+func (*Id2Result) ProtoMessage()    {}
+func (*Id2Result) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{25}
+}
+
+func (m *Id2Result) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Id2Result.Unmarshal(m, b)
+}
+func (m *Id2Result) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Id2Result.Marshal(b, m, deterministic)
+}
+func (m *Id2Result) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Id2Result.Merge(m, src)
+}
+func (m *Id2Result) XXX_Size() int {
+	return xxx_messageInfo_Id2Result.Size(m)
+}
+func (m *Id2Result) XXX_DiscardUnknown() {
+	xxx_messageInfo_Id2Result.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Id2Result proto.InternalMessageInfo
+
+func (m *Id2Result) GetUId() string {
+	if m != nil {
+		return m.UId
+	}
+	return ""
+}
+
+func (m *Id2Result) GetResult() int32 {
+	if m != nil {
+		return m.Result
+	}
+	return 0
+}
+
+type KickGroupMemberResp struct {
+	ErrorCode            int32        `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
+	ErrorMsg             string       `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	Id2Result            []*Id2Result `protobuf:"bytes,3,rep,name=id2result,proto3" json:"id2result,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
+}
+
+func (m *KickGroupMemberResp) Reset()         { *m = KickGroupMemberResp{} }
+func (m *KickGroupMemberResp) String() string { return proto.CompactTextString(m) }
+func (*KickGroupMemberResp) ProtoMessage()    {}
+func (*KickGroupMemberResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{26}
+}
+
+func (m *KickGroupMemberResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_KickGroupMemberResp.Unmarshal(m, b)
+}
+func (m *KickGroupMemberResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_KickGroupMemberResp.Marshal(b, m, deterministic)
+}
+func (m *KickGroupMemberResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_KickGroupMemberResp.Merge(m, src)
+}
+func (m *KickGroupMemberResp) XXX_Size() int {
+	return xxx_messageInfo_KickGroupMemberResp.Size(m)
+}
+func (m *KickGroupMemberResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_KickGroupMemberResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_KickGroupMemberResp proto.InternalMessageInfo
+
+func (m *KickGroupMemberResp) GetErrorCode() int32 {
+	if m != nil {
+		return m.ErrorCode
+	}
+	return 0
+}
+
+func (m *KickGroupMemberResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
+}
+
+func (m *KickGroupMemberResp) GetId2Result() []*Id2Result {
+	if m != nil {
+		return m.Id2Result
+	}
+	return nil
+}
+
+type GetJoinedGroupListReq struct {
+	Token                string   `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetJoinedGroupListReq) Reset()         { *m = GetJoinedGroupListReq{} }
+func (m *GetJoinedGroupListReq) String() string { return proto.CompactTextString(m) }
+func (*GetJoinedGroupListReq) ProtoMessage()    {}
+func (*GetJoinedGroupListReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{27}
+}
+
+func (m *GetJoinedGroupListReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetJoinedGroupListReq.Unmarshal(m, b)
+}
+func (m *GetJoinedGroupListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetJoinedGroupListReq.Marshal(b, m, deterministic)
+}
+func (m *GetJoinedGroupListReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetJoinedGroupListReq.Merge(m, src)
+}
+func (m *GetJoinedGroupListReq) XXX_Size() int {
+	return xxx_messageInfo_GetJoinedGroupListReq.Size(m)
+}
+func (m *GetJoinedGroupListReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetJoinedGroupListReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetJoinedGroupListReq proto.InternalMessageInfo
+
+func (m *GetJoinedGroupListReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+func (m *GetJoinedGroupListReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GroupInfo struct {
+	GroupId              string   `protobuf:"bytes,1,opt,name=groupId,proto3" json:"groupId,omitempty"`
+	GroupName            string   `protobuf:"bytes,2,opt,name=groupName,proto3" json:"groupName,omitempty"`
+	Notification         string   `protobuf:"bytes,3,opt,name=notification,proto3" json:"notification,omitempty"`
+	Introduction         string   `protobuf:"bytes,4,opt,name=introduction,proto3" json:"introduction,omitempty"`
+	FaceUrl              string   `protobuf:"bytes,5,opt,name=faceUrl,proto3" json:"faceUrl,omitempty"`
+	CreateTime           uint64   `protobuf:"varint,6,opt,name=createTime,proto3" json:"createTime,omitempty"`
+	OwnerId              string   `protobuf:"bytes,7,opt,name=ownerId,proto3" json:"ownerId,omitempty"`
+	MemberCount          uint32   `protobuf:"varint,8,opt,name=memberCount,proto3" json:"memberCount,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GroupInfo) Reset()         { *m = GroupInfo{} }
+func (m *GroupInfo) String() string { return proto.CompactTextString(m) }
+func (*GroupInfo) ProtoMessage()    {}
+func (*GroupInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{28}
+}
+
+func (m *GroupInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GroupInfo.Unmarshal(m, b)
+}
+func (m *GroupInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GroupInfo.Marshal(b, m, deterministic)
+}
+func (m *GroupInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GroupInfo.Merge(m, src)
+}
+func (m *GroupInfo) XXX_Size() int {
+	return xxx_messageInfo_GroupInfo.Size(m)
+}
+func (m *GroupInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_GroupInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GroupInfo proto.InternalMessageInfo
+
+func (m *GroupInfo) GetGroupId() string {
+	if m != nil {
+		return m.GroupId
+	}
+	return ""
+}
+
+func (m *GroupInfo) GetGroupName() string {
+	if m != nil {
+		return m.GroupName
+	}
+	return ""
+}
+
+func (m *GroupInfo) GetNotification() string {
+	if m != nil {
+		return m.Notification
+	}
+	return ""
+}
+
+func (m *GroupInfo) GetIntroduction() string {
+	if m != nil {
+		return m.Introduction
+	}
+	return ""
+}
+
+func (m *GroupInfo) GetFaceUrl() string {
+	if m != nil {
+		return m.FaceUrl
+	}
+	return ""
+}
+
+func (m *GroupInfo) GetCreateTime() uint64 {
+	if m != nil {
+		return m.CreateTime
+	}
+	return 0
+}
+
+func (m *GroupInfo) GetOwnerId() string {
+	if m != nil {
+		return m.OwnerId
+	}
+	return ""
+}
+
+func (m *GroupInfo) GetMemberCount() uint32 {
+	if m != nil {
+		return m.MemberCount
+	}
+	return 0
+}
+
+type GetJoinedGroupListResp struct {
+	ErrorCode            int32        `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
+	ErrorMsg             string       `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	GroupList            []*GroupInfo `protobuf:"bytes,3,rep,name=groupList,proto3" json:"groupList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
+}
+
+func (m *GetJoinedGroupListResp) Reset()         { *m = GetJoinedGroupListResp{} }
+func (m *GetJoinedGroupListResp) String() string { return proto.CompactTextString(m) }
+func (*GetJoinedGroupListResp) ProtoMessage()    {}
+func (*GetJoinedGroupListResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{29}
+}
+
+func (m *GetJoinedGroupListResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetJoinedGroupListResp.Unmarshal(m, b)
+}
+func (m *GetJoinedGroupListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetJoinedGroupListResp.Marshal(b, m, deterministic)
+}
+func (m *GetJoinedGroupListResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetJoinedGroupListResp.Merge(m, src)
+}
+func (m *GetJoinedGroupListResp) XXX_Size() int {
+	return xxx_messageInfo_GetJoinedGroupListResp.Size(m)
+}
+func (m *GetJoinedGroupListResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetJoinedGroupListResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetJoinedGroupListResp proto.InternalMessageInfo
+
+func (m *GetJoinedGroupListResp) GetErrorCode() int32 {
+	if m != nil {
+		return m.ErrorCode
+	}
+	return 0
+}
+
+func (m *GetJoinedGroupListResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
+}
+
+func (m *GetJoinedGroupListResp) GetGroupList() []*GroupInfo {
+	if m != nil {
+		return m.GroupList
+	}
+	return nil
+}
+
+type InviteUserToGroupReq struct {
+	Token                string   `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	GroupID              string   `protobuf:"bytes,3,opt,name=groupID,proto3" json:"groupID,omitempty"`
+	Reason               string   `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	UidList              []string `protobuf:"bytes,5,rep,name=uidList,proto3" json:"uidList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *InviteUserToGroupReq) Reset()         { *m = InviteUserToGroupReq{} }
+func (m *InviteUserToGroupReq) String() string { return proto.CompactTextString(m) }
+func (*InviteUserToGroupReq) ProtoMessage()    {}
+func (*InviteUserToGroupReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{30}
+}
+
+func (m *InviteUserToGroupReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_InviteUserToGroupReq.Unmarshal(m, b)
+}
+func (m *InviteUserToGroupReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_InviteUserToGroupReq.Marshal(b, m, deterministic)
+}
+func (m *InviteUserToGroupReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InviteUserToGroupReq.Merge(m, src)
+}
+func (m *InviteUserToGroupReq) XXX_Size() int {
+	return xxx_messageInfo_InviteUserToGroupReq.Size(m)
+}
+func (m *InviteUserToGroupReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_InviteUserToGroupReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InviteUserToGroupReq proto.InternalMessageInfo
+
+func (m *InviteUserToGroupReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+func (m *InviteUserToGroupReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *InviteUserToGroupReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *InviteUserToGroupReq) GetReason() string {
+	if m != nil {
+		return m.Reason
+	}
+	return ""
+}
+
+func (m *InviteUserToGroupReq) GetUidList() []string {
+	if m != nil {
+		return m.UidList
+	}
+	return nil
+}
+
+type InviteUserToGroupResp struct {
+	ErrorCode            int32        `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
+	ErrorMsg             string       `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	Id2Result            []*Id2Result `protobuf:"bytes,3,rep,name=id2result,proto3" json:"id2result,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
+}
+
+func (m *InviteUserToGroupResp) Reset()         { *m = InviteUserToGroupResp{} }
+func (m *InviteUserToGroupResp) String() string { return proto.CompactTextString(m) }
+func (*InviteUserToGroupResp) ProtoMessage()    {}
+func (*InviteUserToGroupResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{31}
+}
+
+func (m *InviteUserToGroupResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_InviteUserToGroupResp.Unmarshal(m, b)
+}
+func (m *InviteUserToGroupResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_InviteUserToGroupResp.Marshal(b, m, deterministic)
+}
+func (m *InviteUserToGroupResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InviteUserToGroupResp.Merge(m, src)
+}
+func (m *InviteUserToGroupResp) XXX_Size() int {
+	return xxx_messageInfo_InviteUserToGroupResp.Size(m)
+}
+func (m *InviteUserToGroupResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_InviteUserToGroupResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InviteUserToGroupResp proto.InternalMessageInfo
+
+func (m *InviteUserToGroupResp) GetErrorCode() int32 {
+	if m != nil {
+		return m.ErrorCode
+	}
+	return 0
+}
+
+func (m *InviteUserToGroupResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
+}
+
+func (m *InviteUserToGroupResp) GetId2Result() []*Id2Result {
+	if m != nil {
+		return m.Id2Result
+	}
+	return nil
+}
+
+type GetGroupAllMemberReq struct {
+	GroupID              string   `protobuf:"bytes,1,opt,name=groupID,proto3" json:"groupID,omitempty"`
+	Token                string   `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID,proto3" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetGroupAllMemberReq) Reset()         { *m = GetGroupAllMemberReq{} }
+func (m *GetGroupAllMemberReq) String() string { return proto.CompactTextString(m) }
+func (*GetGroupAllMemberReq) ProtoMessage()    {}
+func (*GetGroupAllMemberReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{32}
+}
+
+func (m *GetGroupAllMemberReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupAllMemberReq.Unmarshal(m, b)
+}
+func (m *GetGroupAllMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupAllMemberReq.Marshal(b, m, deterministic)
+}
+func (m *GetGroupAllMemberReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupAllMemberReq.Merge(m, src)
+}
+func (m *GetGroupAllMemberReq) XXX_Size() int {
+	return xxx_messageInfo_GetGroupAllMemberReq.Size(m)
+}
+func (m *GetGroupAllMemberReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupAllMemberReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupAllMemberReq proto.InternalMessageInfo
+
+func (m *GetGroupAllMemberReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *GetGroupAllMemberReq) GetToken() string {
+	if m != nil {
+		return m.Token
+	}
+	return ""
+}
+
+func (m *GetGroupAllMemberReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetGroupAllMemberResp struct {
+	ErrorCode            int32                  `protobuf:"varint,1,opt,name=errorCode,proto3" json:"errorCode,omitempty"`
+	ErrorMsg             string                 `protobuf:"bytes,2,opt,name=errorMsg,proto3" json:"errorMsg,omitempty"`
+	MemberList           []*GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList,proto3" json:"memberList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
+	XXX_unrecognized     []byte                 `json:"-"`
+	XXX_sizecache        int32                  `json:"-"`
+}
+
+func (m *GetGroupAllMemberResp) Reset()         { *m = GetGroupAllMemberResp{} }
+func (m *GetGroupAllMemberResp) String() string { return proto.CompactTextString(m) }
+func (*GetGroupAllMemberResp) ProtoMessage()    {}
+func (*GetGroupAllMemberResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6e2b031859d3bcfd, []int{33}
+}
+
+func (m *GetGroupAllMemberResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupAllMemberResp.Unmarshal(m, b)
+}
+func (m *GetGroupAllMemberResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupAllMemberResp.Marshal(b, m, deterministic)
+}
+func (m *GetGroupAllMemberResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupAllMemberResp.Merge(m, src)
+}
+func (m *GetGroupAllMemberResp) XXX_Size() int {
+	return xxx_messageInfo_GetGroupAllMemberResp.Size(m)
+}
+func (m *GetGroupAllMemberResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupAllMemberResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupAllMemberResp proto.InternalMessageInfo
+
+func (m *GetGroupAllMemberResp) GetErrorCode() int32 {
+	if m != nil {
+		return m.ErrorCode
+	}
+	return 0
+}
+
+func (m *GetGroupAllMemberResp) GetErrorMsg() string {
+	if m != nil {
+		return m.ErrorMsg
+	}
+	return ""
+}
+
+func (m *GetGroupAllMemberResp) GetMemberList() []*GroupMemberFullInfo {
+	if m != nil {
+		return m.MemberList
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*CommonResp)(nil), "group.CommonResp")
 	proto.RegisterType((*CreateGroupReq)(nil), "group.CreateGroupReq")
+	proto.RegisterType((*GroupAddMemberInfo)(nil), "group.GroupAddMemberInfo")
 	proto.RegisterType((*CreateGroupResp)(nil), "group.CreateGroupResp")
-	proto.RegisterType((*GetGroupListReq)(nil), "group.GetGroupListReq")
-	proto.RegisterType((*GetGroupListResp)(nil), "group.GetGroupListResp")
-	proto.RegisterType((*GetGroupInfoReq)(nil), "group.GetGroupInfoReq")
-	proto.RegisterType((*GetGroupInfoResp)(nil), "group.GetGroupInfoResp")
-	proto.RegisterType((*MemberList)(nil), "group.MemberList")
-	proto.RegisterType((*DeleteGroupMemberReq)(nil), "group.DeleteGroupMemberReq")
-	proto.RegisterType((*SetGroupNameReq)(nil), "group.SetGroupNameReq")
-	proto.RegisterType((*SetGroupBulletinReq)(nil), "group.SetGroupBulletinReq")
+	proto.RegisterType((*GetGroupsInfoReq)(nil), "group.GetGroupsInfoReq")
+	proto.RegisterType((*GetGroupsInfoResp)(nil), "group.GetGroupsInfoResp")
+	proto.RegisterType((*SetGroupInfoReq)(nil), "group.SetGroupInfoReq")
+	proto.RegisterType((*GetGroupApplicationListReq)(nil), "group.GetGroupApplicationListReq")
+	proto.RegisterType((*GetGroupApplicationList_Data_User)(nil), "group.GetGroupApplicationList_Data_User")
+	proto.RegisterType((*GetGroupApplicationListData)(nil), "group.GetGroupApplicationListData")
+	proto.RegisterType((*GetGroupApplicationListResp)(nil), "group.GetGroupApplicationListResp")
+	proto.RegisterType((*TransferGroupOwnerReq)(nil), "group.TransferGroupOwnerReq")
+	proto.RegisterType((*TransferGroupOwnerResp)(nil), "group.TransferGroupOwnerResp")
+	proto.RegisterType((*JoinGroupReq)(nil), "group.JoinGroupReq")
+	proto.RegisterType((*GroupApplicationResponseReq)(nil), "group.GroupApplicationResponseReq")
+	proto.RegisterType((*GroupApplicationResponseResp)(nil), "group.GroupApplicationResponseResp")
 	proto.RegisterType((*SetOwnerGroupNickNameReq)(nil), "group.SetOwnerGroupNickNameReq")
-	proto.RegisterType((*SetGroupHeadImageReq)(nil), "group.SetGroupHeadImageReq")
-	proto.RegisterType((*MemberExitGroupReq)(nil), "group.MemberExitGroupReq")
+	proto.RegisterType((*QuitGroupReq)(nil), "group.QuitGroupReq")
+	proto.RegisterType((*GroupApplicationUserInfo)(nil), "group.GroupApplicationUserInfo")
+	proto.RegisterType((*GroupMemberFullInfo)(nil), "group.GroupMemberFullInfo")
+	proto.RegisterType((*GetGroupMemberListReq)(nil), "group.GetGroupMemberListReq")
+	proto.RegisterType((*GetGroupMemberListResp)(nil), "group.GetGroupMemberListResp")
+	proto.RegisterType((*GetGroupMembersInfoReq)(nil), "group.GetGroupMembersInfoReq")
+	proto.RegisterType((*GetGroupMembersInfoResp)(nil), "group.GetGroupMembersInfoResp")
+	proto.RegisterType((*KickGroupMemberReq)(nil), "group.KickGroupMemberReq")
+	proto.RegisterType((*Id2Result)(nil), "group.Id2Result")
+	proto.RegisterType((*KickGroupMemberResp)(nil), "group.KickGroupMemberResp")
+	proto.RegisterType((*GetJoinedGroupListReq)(nil), "group.getJoinedGroupListReq")
+	proto.RegisterType((*GroupInfo)(nil), "group.GroupInfo")
+	proto.RegisterType((*GetJoinedGroupListResp)(nil), "group.getJoinedGroupListResp")
+	proto.RegisterType((*InviteUserToGroupReq)(nil), "group.inviteUserToGroupReq")
+	proto.RegisterType((*InviteUserToGroupResp)(nil), "group.inviteUserToGroupResp")
+	proto.RegisterType((*GetGroupAllMemberReq)(nil), "group.GetGroupAllMemberReq")
+	proto.RegisterType((*GetGroupAllMemberResp)(nil), "group.GetGroupAllMemberResp")
 }
 
-func init() { proto.RegisterFile("group/group.proto", fileDescriptor_6e2b031859d3bcfd) }
+func init() {
+	proto.RegisterFile("group/group.proto", fileDescriptor_6e2b031859d3bcfd)
+}
 
 var fileDescriptor_6e2b031859d3bcfd = []byte{
-	// 664 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcf, 0x6f, 0xd3, 0x30,
-	0x14, 0x56, 0xda, 0xb4, 0xa5, 0xaf, 0x85, 0xae, 0xa6, 0x1b, 0xa6, 0x4c, 0x50, 0xe5, 0xd4, 0xd3,
-	0x90, 0xc6, 0x09, 0x0d, 0x69, 0xda, 0xda, 0x31, 0x2a, 0x36, 0x26, 0x65, 0xe2, 0xb2, 0x5b, 0x7f,
-	0x78, 0x5d, 0x58, 0x93, 0x14, 0x27, 0xd5, 0xb8, 0x02, 0x97, 0xfd, 0x93, 0xfc, 0x2f, 0xc8, 0x8e,
-	0x63, 0x3b, 0xa9, 0x69, 0xa5, 0x8e, 0x5d, 0xa2, 0xbe, 0x17, 0xe7, 0x7b, 0xdf, 0xfb, 0xf1, 0x3d,
-	0x17, 0x9a, 0x53, 0x1a, 0x2e, 0xe6, 0x6f, 0xf9, 0x73, 0x6f, 0x4e, 0xc3, 0x38, 0x44, 0x25, 0x6e,
-	0x38, 0x1f, 0x01, 0x7a, 0xa1, 0xef, 0x87, 0x81, 0x4b, 0xa2, 0x39, 0xda, 0x85, 0xea, 0x09, 0xa5,
-	0x21, 0xed, 0x85, 0x13, 0x82, 0xad, 0x8e, 0xd5, 0x2d, 0xb9, 0xca, 0x81, 0xda, 0xf0, 0x84, 0x1b,
-	0xe7, 0xd1, 0x14, 0x17, 0x3a, 0x56, 0xb7, 0xea, 0x4a, 0xdb, 0xb9, 0x81, 0x67, 0x3d, 0x4a, 0x86,
-	0x31, 0x39, 0x65, 0xb0, 0x2e, 0xf9, 0x8e, 0x5e, 0x03, 0x2c, 0x22, 0x42, 0x07, 0xfd, 0x33, 0x2f,
-	0x8a, 0xb1, 0xd5, 0x29, 0x76, 0xab, 0xae, 0xe6, 0x41, 0x2d, 0x28, 0xc5, 0xe1, 0x2d, 0x09, 0x04,
-	0x54, 0x62, 0xa0, 0x0e, 0xd4, 0x2e, 0xe6, 0x84, 0x0e, 0x63, 0x2f, 0x0c, 0x06, 0x7d, 0x5c, 0xe4,
-	0xef, 0x74, 0x97, 0x43, 0xa0, 0x91, 0x89, 0xf4, 0x10, 0xda, 0x08, 0x43, 0x85, 0xd7, 0x41, 0x86,
-	0x4a, 0x4d, 0x67, 0x00, 0x8d, 0x53, 0x12, 0xf3, 0x18, 0x8c, 0x2e, 0xcb, 0x48, 0x32, 0xb6, 0x56,
-	0x30, 0x2e, 0x2c, 0x33, 0xfe, 0x06, 0x5b, 0x59, 0xa8, 0x07, 0x51, 0xde, 0x85, 0xea, 0x34, 0x85,
-	0xc2, 0x45, 0x5e, 0x56, 0xe5, 0x70, 0xc6, 0x8a, 0xf6, 0x20, 0xb8, 0x0e, 0x19, 0x6d, 0x2d, 0x47,
-	0x2b, 0x93, 0xe3, 0x7a, 0xea, 0x2a, 0xe5, 0xa2, 0x96, 0xb2, 0xf3, 0xb3, 0xa0, 0x32, 0x4a, 0xa2,
-	0x3c, 0x4e, 0x13, 0x64, 0xae, 0x5f, 0x86, 0x3e, 0xc1, 0x36, 0x7f, 0xa7, 0x1c, 0xc8, 0x81, 0x3a,
-	0x37, 0x3e, 0x91, 0xe1, 0xe4, 0xab, 0x7b, 0x86, 0x4b, 0xfc, 0x40, 0xc6, 0xc7, 0xe2, 0x8e, 0x16,
-	0xb3, 0x19, 0x89, 0xbd, 0x00, 0x97, 0x93, 0xb8, 0xa9, 0x8d, 0x0e, 0xa0, 0xc1, 0xcf, 0x9e, 0x13,
-	0x7f, 0x44, 0x28, 0xaf, 0x67, 0xa5, 0x53, 0xec, 0xd6, 0xf6, 0x9b, 0x7b, 0x89, 0x52, 0xd4, 0x0b,
-	0x37, 0x7f, 0xd2, 0xb9, 0x02, 0x50, 0x16, 0xda, 0x81, 0x72, 0x32, 0xda, 0xa2, 0xc4, 0xc2, 0x62,
-	0xe1, 0x03, 0x6f, 0x7c, 0xcb, 0xf9, 0x8b, 0xb4, 0x53, 0x9b, 0xa5, 0xed, 0x45, 0x47, 0x13, 0xdf,
-	0x4b, 0xaa, 0x5b, 0x72, 0x53, 0xd3, 0xb9, 0xb7, 0xa0, 0xd5, 0x27, 0x33, 0x22, 0x66, 0x3c, 0x89,
-	0xb3, 0xba, 0x95, 0x1b, 0xaa, 0x49, 0xaa, 0x74, 0xc2, 0xd3, 0xb7, 0x35, 0x95, 0x72, 0x8f, 0x73,
-	0x07, 0x8d, 0x4b, 0xd1, 0x69, 0x46, 0x7a, 0x35, 0x09, 0x04, 0x76, 0xa0, 0x32, 0xe5, 0xbf, 0xcd,
-	0x13, 0x94, 0x27, 0x66, 0x2f, 0x8b, 0xe6, 0xb7, 0x05, 0xcf, 0xd3, 0xc8, 0xc7, 0xa2, 0x63, 0xab,
-	0xa3, 0xeb, 0xad, 0x2e, 0xe4, 0x5a, 0xbd, 0xbe, 0x10, 0x92, 0xa7, 0xad, 0x4f, 0xfa, 0xbd, 0x05,
-	0xf8, 0x92, 0xc4, 0x17, 0x77, 0x01, 0xa1, 0x49, 0x11, 0x44, 0xf7, 0xd6, 0x52, 0xf9, 0x67, 0xdb,
-	0x37, 0xa5, 0xf2, 0xcb, 0x82, 0x56, 0x5a, 0x10, 0x36, 0xdd, 0x03, 0x7f, 0x38, 0x5d, 0x43, 0x03,
-	0x43, 0xe5, 0x86, 0xe9, 0x80, 0xce, 0x04, 0x8b, 0xd4, 0xdc, 0x98, 0xc4, 0x35, 0xa0, 0x64, 0x1a,
-	0x4f, 0x7e, 0x78, 0xb1, 0x5c, 0xf5, 0xff, 0x7d, 0xc3, 0xec, 0xff, 0xb1, 0x21, 0xb9, 0xa0, 0xd0,
-	0x07, 0xa8, 0x8d, 0xd5, 0xba, 0x47, 0xdb, 0x42, 0x9a, 0xd9, 0xcb, 0xa6, 0xbd, 0x63, 0x72, 0x47,
-	0x73, 0x74, 0x08, 0xf5, 0xa9, 0xb6, 0x7a, 0x51, 0x7a, 0x2e, 0xb7, 0xda, 0xdb, 0x2f, 0x8c, 0xfe,
-	0x2c, 0x00, 0xdb, 0x74, 0x4b, 0x00, 0x62, 0xc9, 0x2e, 0x01, 0xc8, 0xb5, 0xd8, 0x83, 0xe6, 0x24,
-	0x2f, 0x65, 0xf4, 0x4a, 0x9c, 0x36, 0x89, 0xbc, 0x9d, 0x6e, 0x1f, 0xed, 0x5e, 0x7e, 0x0f, 0xf5,
-	0x48, 0x53, 0xa1, 0x64, 0x91, 0x93, 0xa6, 0xe9, 0xd3, 0x23, 0xd8, 0x8a, 0x72, 0x32, 0x42, 0xed,
-	0xdc, 0xe7, 0x9a, 0xbe, 0x4c, 0x10, 0x9f, 0x61, 0x3b, 0x32, 0x69, 0x00, 0xbd, 0x51, 0x38, 0x46,
-	0x85, 0x98, 0xc0, 0x7a, 0xd0, 0x8c, 0xf2, 0x53, 0x2c, 0xeb, 0x61, 0x9a, 0x6f, 0x13, 0xc8, 0x21,
-	0x34, 0xfc, 0xec, 0x18, 0xa2, 0x97, 0x99, 0x9d, 0xad, 0x8f, 0xa7, 0x01, 0xe0, 0xf8, 0xe9, 0x55,
-	0x8d, 0xfb, 0x0e, 0xf8, 0x73, 0x54, 0xe6, 0xff, 0x89, 0xde, 0xfd, 0x0d, 0x00, 0x00, 0xff, 0xff,
-	0xa7, 0xec, 0x78, 0x9d, 0x28, 0x09, 0x00, 0x00,
+	// 1619 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x59, 0xcd, 0x6f, 0xdc, 0x44,
+	0x14, 0x97, 0x77, 0xbd, 0x49, 0xf6, 0x25, 0x69, 0x92, 0x49, 0x93, 0x1a, 0x37, 0x44, 0xe9, 0x50,
+	0xa1, 0x88, 0x43, 0x91, 0x52, 0x81, 0x54, 0xe8, 0x81, 0x36, 0x69, 0xda, 0x14, 0x9a, 0xb4, 0x4e,
+	0x7a, 0xe1, 0xd2, 0xba, 0xeb, 0xc9, 0xd6, 0x8d, 0xd7, 0xf6, 0xda, 0x5e, 0x0a, 0x5c, 0x50, 0xf9,
+	0x10, 0x5f, 0x42, 0x1c, 0xb8, 0x20, 0xf8, 0x07, 0x38, 0xf1, 0x4f, 0xf1, 0x8f, 0xa0, 0xf9, 0xf4,
+	0xf8, 0x6b, 0x37, 0x4a, 0x10, 0xbd, 0x44, 0xfb, 0xde, 0x3c, 0xcf, 0xbc, 0xf7, 0x9b, 0xf7, 0x39,
+	0x81, 0xa5, 0x7e, 0x12, 0x8d, 0xe2, 0x77, 0xd9, 0xdf, 0x6b, 0x71, 0x12, 0x65, 0x11, 0xea, 0x30,
+	0x02, 0xef, 0x02, 0x6c, 0x47, 0x83, 0x41, 0x14, 0x3a, 0x24, 0x8d, 0xd1, 0x1a, 0x74, 0xef, 0x24,
+	0x49, 0x94, 0x6c, 0x47, 0x1e, 0xb1, 0x8c, 0x0d, 0x63, 0xb3, 0xe3, 0xe4, 0x0c, 0x64, 0xc3, 0x0c,
+	0x23, 0x1e, 0xa4, 0x7d, 0xab, 0xb5, 0x61, 0x6c, 0x76, 0x1d, 0x45, 0xe3, 0x6f, 0x5a, 0x70, 0x61,
+	0x3b, 0x21, 0x6e, 0x46, 0xee, 0xd2, 0x7d, 0x1d, 0x32, 0x44, 0x37, 0x00, 0x06, 0x64, 0xf0, 0x8c,
+	0x24, 0x9f, 0xf8, 0x69, 0x66, 0x19, 0x1b, 0xed, 0xcd, 0xd9, 0xad, 0x37, 0xae, 0x71, 0x1d, 0x98,
+	0xd0, 0x2d, 0xcf, 0x7b, 0xc0, 0x04, 0xf6, 0xc2, 0xe3, 0xc8, 0xd1, 0x84, 0xa9, 0x1e, 0x4c, 0x6e,
+	0xdf, 0x1d, 0x10, 0x71, 0x54, 0xce, 0x40, 0x18, 0xe6, 0xfc, 0x30, 0x4b, 0x22, 0x6f, 0xd4, 0xcb,
+	0xfc, 0x28, 0xb4, 0xda, 0x4c, 0xa0, 0xc0, 0xa3, 0x32, 0x61, 0x94, 0xf9, 0xc7, 0x7e, 0xcf, 0x65,
+	0x32, 0x26, 0x97, 0xd1, 0x79, 0xc8, 0x82, 0xe9, 0x63, 0xb7, 0x47, 0x1e, 0x27, 0x81, 0xd5, 0x61,
+	0xcb, 0x92, 0x44, 0x17, 0xa1, 0x93, 0x45, 0x27, 0x24, 0xb4, 0xa6, 0x18, 0x9f, 0x13, 0x68, 0x03,
+	0x66, 0xa3, 0x98, 0x24, 0xec, 0xe3, 0xbd, 0x1d, 0x6b, 0x9a, 0xad, 0xe9, 0x2c, 0xfc, 0x11, 0xa0,
+	0xaa, 0x65, 0x68, 0x11, 0xda, 0x23, 0xdf, 0x63, 0x78, 0x76, 0x1d, 0xfa, 0x93, 0x9e, 0x9c, 0x92,
+	0xcc, 0x89, 0x02, 0x6e, 0x5d, 0xc7, 0x91, 0x24, 0x26, 0xb0, 0x50, 0x80, 0xf1, 0x3c, 0x97, 0x42,
+	0x8f, 0x61, 0xa8, 0xed, 0xed, 0x08, 0x8c, 0x24, 0x89, 0x03, 0x58, 0xbc, 0x4b, 0x32, 0x76, 0x46,
+	0xca, 0xd0, 0x27, 0x43, 0x6a, 0x9e, 0x58, 0x56, 0x17, 0xd6, 0x75, 0x74, 0x56, 0x0e, 0x4b, 0x6b,
+	0x0c, 0x2c, 0xed, 0x2a, 0x2c, 0x29, 0x2c, 0x95, 0x4e, 0x3b, 0x97, 0x59, 0x57, 0xc1, 0xf4, 0xdc,
+	0xcc, 0xb5, 0xda, 0xcc, 0xa5, 0x16, 0x75, 0x97, 0x62, 0xbb, 0xb3, 0x55, 0xfc, 0x8f, 0x01, 0x0b,
+	0x87, 0xe2, 0x54, 0x69, 0xa2, 0x06, 0x88, 0x51, 0x00, 0x64, 0xb2, 0xc7, 0x15, 0xbc, 0xa9, 0x5d,
+	0xe3, 0x4d, 0x65, 0xaf, 0x34, 0x6b, 0xbc, 0xf2, 0xbf, 0xf7, 0xb8, 0x87, 0x60, 0x4b, 0x68, 0x6f,
+	0xc5, 0x71, 0x20, 0x94, 0xa1, 0xb7, 0x45, 0xed, 0x5d, 0x84, 0xf6, 0x63, 0x65, 0x2b, 0xfd, 0x49,
+	0x77, 0x3c, 0xd0, 0x76, 0xe4, 0x96, 0xea, 0x2c, 0xfc, 0x5d, 0x1b, 0xae, 0x34, 0x6c, 0xf9, 0x64,
+	0xc7, 0xcd, 0xdc, 0x27, 0x8f, 0x53, 0x92, 0x50, 0x4b, 0xee, 0x16, 0x91, 0x14, 0x24, 0x5a, 0x07,
+	0xd8, 0x4d, 0xa2, 0x01, 0x95, 0x52, 0x07, 0x68, 0x1c, 0xf4, 0x0e, 0x2c, 0x4a, 0x6a, 0xdf, 0xef,
+	0x9d, 0x30, 0xc0, 0x39, 0x9e, 0x15, 0x3e, 0xda, 0x84, 0x05, 0xc9, 0xdb, 0x15, 0xb8, 0x71, 0x58,
+	0xcb, 0x6c, 0xea, 0x2f, 0x47, 0x91, 0x38, 0x93, 0x43, 0xab, 0x68, 0xaa, 0xeb, 0x2d, 0xcf, 0x3b,
+	0xf2, 0x07, 0x84, 0xa1, 0xdb, 0x76, 0x24, 0x49, 0x75, 0x75, 0xc8, 0x70, 0x44, 0xd2, 0x8c, 0xfa,
+	0x19, 0x87, 0x57, 0xe3, 0xd0, 0xf5, 0x7b, 0x6e, 0xe8, 0x05, 0xc4, 0xa3, 0xeb, 0x33, 0x7c, 0x3d,
+	0xe7, 0x20, 0x04, 0xe6, 0xd1, 0x17, 0x31, 0xb1, 0xba, 0xcc, 0x7d, 0xd9, 0x6f, 0xea, 0x07, 0x5c,
+	0xe2, 0x30, 0x73, 0xb3, 0x51, 0x6a, 0x01, 0x5b, 0x2b, 0xf0, 0x72, 0x19, 0x87, 0xa4, 0xa3, 0x20,
+	0xb3, 0x66, 0x75, 0x19, 0xce, 0xc3, 0x43, 0xb8, 0xdc, 0x70, 0x0d, 0xf4, 0x16, 0xa8, 0xc3, 0x6c,
+	0x47, 0xa3, 0x30, 0x13, 0xa1, 0xc3, 0x09, 0x74, 0x13, 0x4c, 0x6a, 0xb4, 0xd5, 0x62, 0xa1, 0xb1,
+	0x29, 0x43, 0x63, 0xd2, 0x75, 0x3a, 0xec, 0x2b, 0xfc, 0xbd, 0xd1, 0x78, 0x26, 0x0b, 0x59, 0x0b,
+	0xa6, 0xef, 0x24, 0x7a, 0xc0, 0x4a, 0x12, 0xad, 0xc2, 0xd4, 0x9d, 0x44, 0x0b, 0x56, 0x41, 0xa1,
+	0xf7, 0xc1, 0xdc, 0xe1, 0xa1, 0x6a, 0x6c, 0xce, 0x6e, 0xe1, 0xf1, 0xfa, 0x50, 0x49, 0x87, 0xc9,
+	0xe3, 0x9f, 0x0d, 0x58, 0x39, 0x4a, 0xdc, 0x30, 0x3d, 0x26, 0x09, 0x13, 0x3d, 0x78, 0x19, 0x92,
+	0x44, 0x84, 0x70, 0x83, 0xe3, 0xd9, 0x30, 0x73, 0x10, 0x78, 0x4c, 0x50, 0xa6, 0x0c, 0x49, 0xd3,
+	0xb5, 0x7d, 0xf2, 0x92, 0xaf, 0x71, 0x67, 0x53, 0x74, 0x39, 0x24, 0xcc, 0x6a, 0x48, 0xdc, 0x87,
+	0xd5, 0x3a, 0x65, 0xce, 0x82, 0x08, 0xfe, 0x12, 0xe6, 0xee, 0x47, 0x7e, 0xa8, 0xaa, 0x64, 0x73,
+	0x4a, 0xb2, 0x60, 0x7a, 0x40, 0xd2, 0xd4, 0xed, 0xcb, 0x84, 0x24, 0xc9, 0x3c, 0x59, 0xb4, 0x4b,
+	0xc9, 0x62, 0x82, 0x1d, 0x3f, 0x9a, 0x70, 0xb9, 0x0c, 0x3c, 0x35, 0x23, 0x0a, 0x53, 0x22, 0x2a,
+	0x80, 0xbe, 0x83, 0x51, 0xd9, 0x81, 0xea, 0xc4, 0x8c, 0x57, 0x91, 0x2d, 0x49, 0xfd, 0x5e, 0xda,
+	0xe3, 0x12, 0x82, 0x79, 0xaa, 0x84, 0xd0, 0x39, 0x7d, 0x42, 0x98, 0x9a, 0x9c, 0x10, 0xa6, 0x4b,
+	0x09, 0xe1, 0x6d, 0xb8, 0xc0, 0x7f, 0xab, 0xf3, 0x78, 0x68, 0x97, 0xb8, 0xe8, 0x2a, 0xcc, 0x73,
+	0x8e, 0x3c, 0xab, 0xcb, 0xc4, 0x8a, 0x4c, 0x3d, 0xbd, 0xc0, 0xb8, 0xf4, 0x32, 0x3b, 0x21, 0xbd,
+	0xcc, 0x35, 0xa6, 0x97, 0xf9, 0x31, 0xe9, 0xe5, 0xc2, 0x29, 0xd2, 0xcb, 0x42, 0x4d, 0x7a, 0x79,
+	0x08, 0x6b, 0xcd, 0xae, 0x70, 0x26, 0xcf, 0xfe, 0xc1, 0x00, 0xeb, 0x90, 0x64, 0xcc, 0x21, 0xd8,
+	0xd6, 0x12, 0xc7, 0xf1, 0x6e, 0x6e, 0xc3, 0x4c, 0x28, 0xaf, 0x41, 0x84, 0xad, 0xa4, 0xcb, 0x0e,
+	0xd9, 0xae, 0x3a, 0xa4, 0x0a, 0x05, 0x53, 0x0b, 0x05, 0xfc, 0x14, 0xe6, 0x1e, 0x8d, 0xfc, 0xec,
+	0x14, 0x41, 0x56, 0xaa, 0xb0, 0xad, 0x4a, 0x85, 0xad, 0x0f, 0x36, 0xfc, 0x6d, 0x0b, 0xac, 0x32,
+	0x7e, 0xcc, 0xbb, 0x68, 0xc3, 0xd7, 0x7c, 0x9c, 0x68, 0x05, 0x5b, 0x79, 0x2b, 0x88, 0xc0, 0x0c,
+	0xf3, 0x12, 0xc8, 0x7e, 0x53, 0x9e, 0xdf, 0x53, 0x2d, 0x04, 0xfb, 0x4d, 0x51, 0x4f, 0xc8, 0x90,
+	0xa2, 0xce, 0x63, 0x43, 0x50, 0x34, 0x22, 0xdc, 0x5c, 0x05, 0xad, 0xc8, 0x95, 0xd9, 0x74, 0xd7,
+	0xe3, 0xc0, 0xe5, 0x65, 0xae, 0xe3, 0xb0, 0xdf, 0xd4, 0x03, 0xb9, 0xad, 0x11, 0x8d, 0x13, 0x51,
+	0xe0, 0x72, 0x0e, 0x5d, 0x7f, 0x9e, 0x7b, 0x28, 0x77, 0x7f, 0x8d, 0x83, 0x7f, 0x33, 0x60, 0x99,
+	0xc1, 0xc0, 0xdb, 0xdd, 0xdd, 0x51, 0x10, 0x30, 0x04, 0x56, 0x61, 0x6a, 0x44, 0xd1, 0x90, 0x5d,
+	0xaf, 0xa0, 0xa8, 0x0e, 0x49, 0xde, 0xf5, 0xb2, 0xdf, 0xd4, 0x01, 0x5e, 0x44, 0x3e, 0x57, 0x9d,
+	0xa2, 0x60, 0x3a, 0x8a, 0x2e, 0x38, 0x87, 0x59, 0x72, 0x8e, 0xc6, 0x66, 0x0a, 0xff, 0x69, 0xc0,
+	0x8a, 0xac, 0x31, 0x0f, 0xd4, 0x54, 0x31, 0xde, 0x11, 0xce, 0xd8, 0xdb, 0x52, 0x4b, 0x8f, 0xfd,
+	0x20, 0x23, 0x09, 0xd3, 0xaf, 0xe3, 0x08, 0x8a, 0x9e, 0x14, 0x92, 0xcf, 0xb3, 0x43, 0x32, 0x64,
+	0xda, 0x75, 0x1c, 0x49, 0xe2, 0xbf, 0x0c, 0x58, 0xad, 0xd3, 0x8e, 0xf7, 0xc4, 0xa4, 0xdc, 0x13,
+	0x13, 0xbd, 0x27, 0x26, 0xa5, 0x9e, 0x58, 0xd2, 0xe8, 0x83, 0xc2, 0xb0, 0xc5, 0x3b, 0x63, 0x5b,
+	0xef, 0x8c, 0x8b, 0x17, 0x54, 0x98, 0xb6, 0x34, 0x55, 0xcd, 0xa2, 0xaa, 0x3f, 0x55, 0x54, 0x4d,
+	0x27, 0xb7, 0xd2, 0xeb, 0x05, 0x55, 0x5a, 0x6c, 0x8c, 0xd0, 0x8f, 0x6b, 0xac, 0x5e, 0x51, 0xb5,
+	0x7a, 0xe9, 0xad, 0xee, 0xaf, 0x06, 0x5c, 0xaa, 0x55, 0xe6, 0x75, 0x01, 0x87, 0x7f, 0x37, 0x00,
+	0x7d, 0xec, 0xf7, 0x4e, 0x34, 0xb9, 0x89, 0x25, 0x7d, 0xe4, 0x7b, 0x1a, 0x2e, 0x92, 0xe4, 0xe1,
+	0xed, 0xa6, 0x6a, 0xb6, 0x10, 0x54, 0x7d, 0x7e, 0x2b, 0x83, 0xd5, 0xa9, 0x82, 0xf5, 0x1e, 0x74,
+	0xf7, 0xbc, 0x2d, 0x9e, 0xeb, 0x59, 0xd6, 0xd9, 0xcb, 0x07, 0xd0, 0x3d, 0x8f, 0x1f, 0xc7, 0x6a,
+	0x03, 0x8f, 0x44, 0x41, 0xe1, 0xaf, 0x60, 0xb9, 0x62, 0xd0, 0xb9, 0xe0, 0xbd, 0x06, 0x5d, 0xdf,
+	0xdb, 0x12, 0x67, 0x15, 0x07, 0x36, 0xa5, 0x9f, 0x93, 0x8b, 0xe0, 0x03, 0x58, 0xe9, 0x93, 0x8c,
+	0x76, 0x48, 0xc4, 0x63, 0x5a, 0xc8, 0xc8, 0x55, 0x40, 0x18, 0x63, 0x80, 0xa8, 0xa6, 0x6f, 0xfc,
+	0xaa, 0x05, 0x5d, 0x35, 0x03, 0xe6, 0x57, 0xe3, 0x15, 0xaf, 0xc6, 0x7b, 0xed, 0x03, 0xe0, 0x3a,
+	0x40, 0x8f, 0x0d, 0xfe, 0x2a, 0x85, 0x9b, 0x8e, 0xc6, 0xa1, 0x5f, 0x46, 0xac, 0xd5, 0xf2, 0x44,
+	0x3b, 0x23, 0x49, 0x8a, 0x01, 0xf7, 0x49, 0x3e, 0x0f, 0xd0, 0x24, 0x3e, 0xef, 0xe8, 0x2c, 0xfc,
+	0xb5, 0x01, 0xab, 0x75, 0xa8, 0x9e, 0xf7, 0x66, 0xfb, 0x72, 0xab, 0xc6, 0x51, 0x3c, 0x17, 0xc1,
+	0x7f, 0x18, 0x70, 0xd1, 0x0f, 0x3f, 0xf3, 0x33, 0x42, 0xeb, 0xe4, 0x51, 0xa4, 0x8a, 0xf3, 0x19,
+	0x6f, 0xb6, 0xf9, 0x75, 0x43, 0x0b, 0x26, 0xb3, 0x10, 0x4c, 0x5a, 0xf8, 0x75, 0x0a, 0xe1, 0x87,
+	0x5f, 0x19, 0xb0, 0x52, 0xa3, 0xdc, 0xff, 0xea, 0xfa, 0xcf, 0xe1, 0xa2, 0x1a, 0x8c, 0x82, 0xe0,
+	0x34, 0xe9, 0xe4, 0xac, 0xef, 0x31, 0xbf, 0x68, 0xf5, 0x51, 0x3b, 0xea, 0x75, 0xe5, 0xd1, 0xad,
+	0xbf, 0x67, 0x80, 0x3f, 0x47, 0xa2, 0x9b, 0x30, 0xdb, 0xcb, 0x9f, 0xbf, 0xd0, 0x8a, 0xd8, 0xa0,
+	0xf8, 0xb2, 0x68, 0xaf, 0xd6, 0xb1, 0xd3, 0x18, 0x5d, 0x87, 0xee, 0x0b, 0x39, 0x5b, 0xa1, 0x65,
+	0x21, 0xa4, 0x4f, 0x5b, 0xf6, 0x92, 0xfc, 0x32, 0x7f, 0xf3, 0xbc, 0x0e, 0xdd, 0xa1, 0xec, 0x15,
+	0xd5, 0x47, 0x7a, 0xf7, 0x58, 0xf7, 0xd1, 0x6d, 0x98, 0xef, 0xeb, 0x2f, 0x5a, 0xe8, 0x52, 0x69,
+	0xb4, 0x95, 0x75, 0xd2, 0xb6, 0xea, 0x17, 0xd2, 0x18, 0xdd, 0x80, 0xb9, 0x54, 0x7b, 0x9f, 0x42,
+	0xd2, 0xaa, 0xd2, 0xa3, 0x55, 0xdd, 0xf1, 0x4f, 0xe1, 0x52, 0xbf, 0x7e, 0x86, 0x46, 0x57, 0xc6,
+	0xcf, 0xd8, 0x74, 0x43, 0x3c, 0x49, 0x24, 0x8d, 0xd1, 0x23, 0x40, 0x59, 0x65, 0xe4, 0x45, 0x6b,
+	0xe2, 0xcb, 0xda, 0xd1, 0xdc, 0x7e, 0x73, 0xcc, 0x6a, 0x1a, 0xa3, 0x1e, 0x58, 0xfd, 0x86, 0x89,
+	0x03, 0xe1, 0xc2, 0xbb, 0x70, 0xed, 0x74, 0x6a, 0xbf, 0x35, 0x51, 0x86, 0xeb, 0xdd, 0xaf, 0xf4,
+	0x56, 0x4a, 0xef, 0xda, 0xa6, 0x50, 0xe9, 0xdd, 0xd0, 0x94, 0x1d, 0xc1, 0x72, 0xbf, 0xda, 0x76,
+	0xa0, 0xfa, 0xaf, 0xd4, 0xbd, 0xaf, 0x8f, 0x5b, 0x4e, 0x63, 0x74, 0x0f, 0x16, 0x4e, 0x8a, 0x95,
+	0x16, 0xc9, 0xc7, 0xf1, 0x6a, 0x4b, 0x61, 0xdb, 0x4d, 0x4b, 0xca, 0xe4, 0x52, 0x72, 0x57, 0x26,
+	0xd7, 0x56, 0x53, 0x65, 0x72, 0x43, 0x55, 0xd8, 0x87, 0xa5, 0x4a, 0x36, 0x44, 0x97, 0xc5, 0x37,
+	0x75, 0x49, 0xdc, 0x5e, 0x6b, 0x5e, 0xe4, 0xfb, 0xf5, 0xcb, 0xf9, 0x46, 0xed, 0x57, 0x97, 0xf4,
+	0xec, 0xb5, 0xe6, 0xc5, 0x34, 0xbe, 0x3d, 0xff, 0x29, 0x7f, 0x97, 0xfe, 0x90, 0xfd, 0x7d, 0x36,
+	0xc5, 0xfe, 0xa5, 0x71, 0xfd, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x2a, 0xb4, 0x48, 0x28, 0xe7,
+	0x18, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // GroupClient is the client API for Group service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type GroupClient interface {
 	CreateGroup(ctx context.Context, in *CreateGroupReq, opts ...grpc.CallOption) (*CreateGroupResp, error)
-	GetGroupList(ctx context.Context, in *GetGroupListReq, opts ...grpc.CallOption) (*GetGroupListResp, error)
-	GetGroupInfo(ctx context.Context, in *GetGroupInfoReq, opts ...grpc.CallOption) (*GetGroupInfoResp, error)
-	DeleteGroupMember(ctx context.Context, in *DeleteGroupMemberReq, opts ...grpc.CallOption) (*CommonResp, error)
-	SetGroupName(ctx context.Context, in *SetGroupNameReq, opts ...grpc.CallOption) (*CommonResp, error)
-	SetGroupBulletin(ctx context.Context, in *SetGroupBulletinReq, opts ...grpc.CallOption) (*CommonResp, error)
-	SetOwnerGroupNickName(ctx context.Context, in *SetOwnerGroupNickNameReq, opts ...grpc.CallOption) (*CommonResp, error)
-	SetGroupHeadImage(ctx context.Context, in *SetGroupHeadImageReq, opts ...grpc.CallOption) (*CommonResp, error)
-	MemberExitGroup(ctx context.Context, in *MemberExitGroupReq, opts ...grpc.CallOption) (*CommonResp, error)
+	JoinGroup(ctx context.Context, in *JoinGroupReq, opts ...grpc.CallOption) (*CommonResp, error)
+	QuitGroup(ctx context.Context, in *QuitGroupReq, opts ...grpc.CallOption) (*CommonResp, error)
+	GetGroupsInfo(ctx context.Context, in *GetGroupsInfoReq, opts ...grpc.CallOption) (*GetGroupsInfoResp, error)
+	SetGroupInfo(ctx context.Context, in *SetGroupInfoReq, opts ...grpc.CallOption) (*CommonResp, error)
+	GetGroupApplicationList(ctx context.Context, in *GetGroupApplicationListReq, opts ...grpc.CallOption) (*GetGroupApplicationListResp, error)
+	TransferGroupOwner(ctx context.Context, in *TransferGroupOwnerReq, opts ...grpc.CallOption) (*TransferGroupOwnerResp, error)
+	GroupApplicationResponse(ctx context.Context, in *GroupApplicationResponseReq, opts ...grpc.CallOption) (*GroupApplicationResponseResp, error)
+	//  rpc setOwnerGroupNickName(SetOwnerGroupNickNameReq) returns(CommonResp);
+	GetGroupMemberList(ctx context.Context, in *GetGroupMemberListReq, opts ...grpc.CallOption) (*GetGroupMemberListResp, error)
+	GetGroupMembersInfo(ctx context.Context, in *GetGroupMembersInfoReq, opts ...grpc.CallOption) (*GetGroupMembersInfoResp, error)
+	KickGroupMember(ctx context.Context, in *KickGroupMemberReq, opts ...grpc.CallOption) (*KickGroupMemberResp, error)
+	GetJoinedGroupList(ctx context.Context, in *GetJoinedGroupListReq, opts ...grpc.CallOption) (*GetJoinedGroupListResp, error)
+	InviteUserToGroup(ctx context.Context, in *InviteUserToGroupReq, opts ...grpc.CallOption) (*InviteUserToGroupResp, error)
+	GetGroupAllMember(ctx context.Context, in *GetGroupAllMemberReq, opts ...grpc.CallOption) (*GetGroupAllMemberResp, error)
 }
 
 type groupClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewGroupClient(cc *grpc.ClientConn) GroupClient {
+func NewGroupClient(cc grpc.ClientConnInterface) GroupClient {
 	return &groupClient{cc}
 }
 
@@ -955,72 +2439,117 @@ func (c *groupClient) CreateGroup(ctx context.Context, in *CreateGroupReq, opts 
 	return out, nil
 }
 
-func (c *groupClient) GetGroupList(ctx context.Context, in *GetGroupListReq, opts ...grpc.CallOption) (*GetGroupListResp, error) {
-	out := new(GetGroupListResp)
-	err := c.cc.Invoke(ctx, "/group.group/getGroupList", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *groupClient) GetGroupInfo(ctx context.Context, in *GetGroupInfoReq, opts ...grpc.CallOption) (*GetGroupInfoResp, error) {
-	out := new(GetGroupInfoResp)
-	err := c.cc.Invoke(ctx, "/group.group/getGroupInfo", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *groupClient) DeleteGroupMember(ctx context.Context, in *DeleteGroupMemberReq, opts ...grpc.CallOption) (*CommonResp, error) {
+func (c *groupClient) JoinGroup(ctx context.Context, in *JoinGroupReq, opts ...grpc.CallOption) (*CommonResp, error) {
 	out := new(CommonResp)
-	err := c.cc.Invoke(ctx, "/group.group/deleteGroupMember", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/group.group/joinGroup", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *groupClient) SetGroupName(ctx context.Context, in *SetGroupNameReq, opts ...grpc.CallOption) (*CommonResp, error) {
+func (c *groupClient) QuitGroup(ctx context.Context, in *QuitGroupReq, opts ...grpc.CallOption) (*CommonResp, error) {
 	out := new(CommonResp)
-	err := c.cc.Invoke(ctx, "/group.group/setGroupName", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/group.group/quitGroup", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *groupClient) SetGroupBulletin(ctx context.Context, in *SetGroupBulletinReq, opts ...grpc.CallOption) (*CommonResp, error) {
-	out := new(CommonResp)
-	err := c.cc.Invoke(ctx, "/group.group/setGroupBulletin", in, out, opts...)
+func (c *groupClient) GetGroupsInfo(ctx context.Context, in *GetGroupsInfoReq, opts ...grpc.CallOption) (*GetGroupsInfoResp, error) {
+	out := new(GetGroupsInfoResp)
+	err := c.cc.Invoke(ctx, "/group.group/getGroupsInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *groupClient) SetOwnerGroupNickName(ctx context.Context, in *SetOwnerGroupNickNameReq, opts ...grpc.CallOption) (*CommonResp, error) {
+func (c *groupClient) SetGroupInfo(ctx context.Context, in *SetGroupInfoReq, opts ...grpc.CallOption) (*CommonResp, error) {
 	out := new(CommonResp)
-	err := c.cc.Invoke(ctx, "/group.group/setOwnerGroupNickName", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/group.group/setGroupInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *groupClient) SetGroupHeadImage(ctx context.Context, in *SetGroupHeadImageReq, opts ...grpc.CallOption) (*CommonResp, error) {
-	out := new(CommonResp)
-	err := c.cc.Invoke(ctx, "/group.group/setGroupHeadImage", in, out, opts...)
+func (c *groupClient) GetGroupApplicationList(ctx context.Context, in *GetGroupApplicationListReq, opts ...grpc.CallOption) (*GetGroupApplicationListResp, error) {
+	out := new(GetGroupApplicationListResp)
+	err := c.cc.Invoke(ctx, "/group.group/getGroupApplicationList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *groupClient) MemberExitGroup(ctx context.Context, in *MemberExitGroupReq, opts ...grpc.CallOption) (*CommonResp, error) {
-	out := new(CommonResp)
-	err := c.cc.Invoke(ctx, "/group.group/memberExitGroup", in, out, opts...)
+func (c *groupClient) TransferGroupOwner(ctx context.Context, in *TransferGroupOwnerReq, opts ...grpc.CallOption) (*TransferGroupOwnerResp, error) {
+	out := new(TransferGroupOwnerResp)
+	err := c.cc.Invoke(ctx, "/group.group/transferGroupOwner", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupClient) GroupApplicationResponse(ctx context.Context, in *GroupApplicationResponseReq, opts ...grpc.CallOption) (*GroupApplicationResponseResp, error) {
+	out := new(GroupApplicationResponseResp)
+	err := c.cc.Invoke(ctx, "/group.group/groupApplicationResponse", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupClient) GetGroupMemberList(ctx context.Context, in *GetGroupMemberListReq, opts ...grpc.CallOption) (*GetGroupMemberListResp, error) {
+	out := new(GetGroupMemberListResp)
+	err := c.cc.Invoke(ctx, "/group.group/getGroupMemberList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupClient) GetGroupMembersInfo(ctx context.Context, in *GetGroupMembersInfoReq, opts ...grpc.CallOption) (*GetGroupMembersInfoResp, error) {
+	out := new(GetGroupMembersInfoResp)
+	err := c.cc.Invoke(ctx, "/group.group/getGroupMembersInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupClient) KickGroupMember(ctx context.Context, in *KickGroupMemberReq, opts ...grpc.CallOption) (*KickGroupMemberResp, error) {
+	out := new(KickGroupMemberResp)
+	err := c.cc.Invoke(ctx, "/group.group/kickGroupMember", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupClient) GetJoinedGroupList(ctx context.Context, in *GetJoinedGroupListReq, opts ...grpc.CallOption) (*GetJoinedGroupListResp, error) {
+	out := new(GetJoinedGroupListResp)
+	err := c.cc.Invoke(ctx, "/group.group/getJoinedGroupList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupClient) InviteUserToGroup(ctx context.Context, in *InviteUserToGroupReq, opts ...grpc.CallOption) (*InviteUserToGroupResp, error) {
+	out := new(InviteUserToGroupResp)
+	err := c.cc.Invoke(ctx, "/group.group/inviteUserToGroup", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupClient) GetGroupAllMember(ctx context.Context, in *GetGroupAllMemberReq, opts ...grpc.CallOption) (*GetGroupAllMemberResp, error) {
+	out := new(GetGroupAllMemberResp)
+	err := c.cc.Invoke(ctx, "/group.group/getGroupAllMember", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1030,14 +2559,20 @@ func (c *groupClient) MemberExitGroup(ctx context.Context, in *MemberExitGroupRe
 // GroupServer is the server API for Group service.
 type GroupServer interface {
 	CreateGroup(context.Context, *CreateGroupReq) (*CreateGroupResp, error)
-	GetGroupList(context.Context, *GetGroupListReq) (*GetGroupListResp, error)
-	GetGroupInfo(context.Context, *GetGroupInfoReq) (*GetGroupInfoResp, error)
-	DeleteGroupMember(context.Context, *DeleteGroupMemberReq) (*CommonResp, error)
-	SetGroupName(context.Context, *SetGroupNameReq) (*CommonResp, error)
-	SetGroupBulletin(context.Context, *SetGroupBulletinReq) (*CommonResp, error)
-	SetOwnerGroupNickName(context.Context, *SetOwnerGroupNickNameReq) (*CommonResp, error)
-	SetGroupHeadImage(context.Context, *SetGroupHeadImageReq) (*CommonResp, error)
-	MemberExitGroup(context.Context, *MemberExitGroupReq) (*CommonResp, error)
+	JoinGroup(context.Context, *JoinGroupReq) (*CommonResp, error)
+	QuitGroup(context.Context, *QuitGroupReq) (*CommonResp, error)
+	GetGroupsInfo(context.Context, *GetGroupsInfoReq) (*GetGroupsInfoResp, error)
+	SetGroupInfo(context.Context, *SetGroupInfoReq) (*CommonResp, error)
+	GetGroupApplicationList(context.Context, *GetGroupApplicationListReq) (*GetGroupApplicationListResp, error)
+	TransferGroupOwner(context.Context, *TransferGroupOwnerReq) (*TransferGroupOwnerResp, error)
+	GroupApplicationResponse(context.Context, *GroupApplicationResponseReq) (*GroupApplicationResponseResp, error)
+	//  rpc setOwnerGroupNickName(SetOwnerGroupNickNameReq) returns(CommonResp);
+	GetGroupMemberList(context.Context, *GetGroupMemberListReq) (*GetGroupMemberListResp, error)
+	GetGroupMembersInfo(context.Context, *GetGroupMembersInfoReq) (*GetGroupMembersInfoResp, error)
+	KickGroupMember(context.Context, *KickGroupMemberReq) (*KickGroupMemberResp, error)
+	GetJoinedGroupList(context.Context, *GetJoinedGroupListReq) (*GetJoinedGroupListResp, error)
+	InviteUserToGroup(context.Context, *InviteUserToGroupReq) (*InviteUserToGroupResp, error)
+	GetGroupAllMember(context.Context, *GetGroupAllMemberReq) (*GetGroupAllMemberResp, error)
 }
 
 // UnimplementedGroupServer can be embedded to have forward compatible implementations.
@@ -1047,29 +2582,44 @@ type UnimplementedGroupServer struct {
 func (*UnimplementedGroupServer) CreateGroup(ctx context.Context, req *CreateGroupReq) (*CreateGroupResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateGroup not implemented")
 }
-func (*UnimplementedGroupServer) GetGroupList(ctx context.Context, req *GetGroupListReq) (*GetGroupListResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGroupList not implemented")
+func (*UnimplementedGroupServer) JoinGroup(ctx context.Context, req *JoinGroupReq) (*CommonResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JoinGroup not implemented")
 }
-func (*UnimplementedGroupServer) GetGroupInfo(ctx context.Context, req *GetGroupInfoReq) (*GetGroupInfoResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetGroupInfo not implemented")
+func (*UnimplementedGroupServer) QuitGroup(ctx context.Context, req *QuitGroupReq) (*CommonResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QuitGroup not implemented")
 }
-func (*UnimplementedGroupServer) DeleteGroupMember(ctx context.Context, req *DeleteGroupMemberReq) (*CommonResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteGroupMember not implemented")
+func (*UnimplementedGroupServer) GetGroupsInfo(ctx context.Context, req *GetGroupsInfoReq) (*GetGroupsInfoResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroupsInfo not implemented")
 }
-func (*UnimplementedGroupServer) SetGroupName(ctx context.Context, req *SetGroupNameReq) (*CommonResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetGroupName not implemented")
+func (*UnimplementedGroupServer) SetGroupInfo(ctx context.Context, req *SetGroupInfoReq) (*CommonResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetGroupInfo not implemented")
 }
-func (*UnimplementedGroupServer) SetGroupBulletin(ctx context.Context, req *SetGroupBulletinReq) (*CommonResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetGroupBulletin not implemented")
+func (*UnimplementedGroupServer) GetGroupApplicationList(ctx context.Context, req *GetGroupApplicationListReq) (*GetGroupApplicationListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroupApplicationList not implemented")
 }
-func (*UnimplementedGroupServer) SetOwnerGroupNickName(ctx context.Context, req *SetOwnerGroupNickNameReq) (*CommonResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetOwnerGroupNickName not implemented")
+func (*UnimplementedGroupServer) TransferGroupOwner(ctx context.Context, req *TransferGroupOwnerReq) (*TransferGroupOwnerResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TransferGroupOwner not implemented")
 }
-func (*UnimplementedGroupServer) SetGroupHeadImage(ctx context.Context, req *SetGroupHeadImageReq) (*CommonResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetGroupHeadImage not implemented")
+func (*UnimplementedGroupServer) GroupApplicationResponse(ctx context.Context, req *GroupApplicationResponseReq) (*GroupApplicationResponseResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GroupApplicationResponse not implemented")
 }
-func (*UnimplementedGroupServer) MemberExitGroup(ctx context.Context, req *MemberExitGroupReq) (*CommonResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MemberExitGroup not implemented")
+func (*UnimplementedGroupServer) GetGroupMemberList(ctx context.Context, req *GetGroupMemberListReq) (*GetGroupMemberListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroupMemberList not implemented")
+}
+func (*UnimplementedGroupServer) GetGroupMembersInfo(ctx context.Context, req *GetGroupMembersInfoReq) (*GetGroupMembersInfoResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroupMembersInfo not implemented")
+}
+func (*UnimplementedGroupServer) KickGroupMember(ctx context.Context, req *KickGroupMemberReq) (*KickGroupMemberResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method KickGroupMember not implemented")
+}
+func (*UnimplementedGroupServer) GetJoinedGroupList(ctx context.Context, req *GetJoinedGroupListReq) (*GetJoinedGroupListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetJoinedGroupList not implemented")
+}
+func (*UnimplementedGroupServer) InviteUserToGroup(ctx context.Context, req *InviteUserToGroupReq) (*InviteUserToGroupResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InviteUserToGroup not implemented")
+}
+func (*UnimplementedGroupServer) GetGroupAllMember(ctx context.Context, req *GetGroupAllMemberReq) (*GetGroupAllMemberResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGroupAllMember not implemented")
 }
 
 func RegisterGroupServer(s *grpc.Server, srv GroupServer) {
@@ -1094,146 +2644,236 @@ func _Group_CreateGroup_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Group_GetGroupList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetGroupListReq)
+func _Group_JoinGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinGroupReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GroupServer).GetGroupList(ctx, in)
+		return srv.(GroupServer).JoinGroup(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/GetGroupList",
+		FullMethod: "/group.group/JoinGroup",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GroupServer).GetGroupList(ctx, req.(*GetGroupListReq))
+		return srv.(GroupServer).JoinGroup(ctx, req.(*JoinGroupReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Group_GetGroupInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetGroupInfoReq)
+func _Group_QuitGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QuitGroupReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GroupServer).GetGroupInfo(ctx, in)
+		return srv.(GroupServer).QuitGroup(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/GetGroupInfo",
+		FullMethod: "/group.group/QuitGroup",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GroupServer).GetGroupInfo(ctx, req.(*GetGroupInfoReq))
+		return srv.(GroupServer).QuitGroup(ctx, req.(*QuitGroupReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Group_DeleteGroupMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteGroupMemberReq)
+func _Group_GetGroupsInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupsInfoReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GroupServer).DeleteGroupMember(ctx, in)
+		return srv.(GroupServer).GetGroupsInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/DeleteGroupMember",
+		FullMethod: "/group.group/GetGroupsInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GroupServer).DeleteGroupMember(ctx, req.(*DeleteGroupMemberReq))
+		return srv.(GroupServer).GetGroupsInfo(ctx, req.(*GetGroupsInfoReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Group_SetGroupName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetGroupNameReq)
+func _Group_SetGroupInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetGroupInfoReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GroupServer).SetGroupName(ctx, in)
+		return srv.(GroupServer).SetGroupInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/SetGroupName",
+		FullMethod: "/group.group/SetGroupInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GroupServer).SetGroupName(ctx, req.(*SetGroupNameReq))
+		return srv.(GroupServer).SetGroupInfo(ctx, req.(*SetGroupInfoReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Group_SetGroupBulletin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetGroupBulletinReq)
+func _Group_GetGroupApplicationList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupApplicationListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GroupServer).SetGroupBulletin(ctx, in)
+		return srv.(GroupServer).GetGroupApplicationList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/SetGroupBulletin",
+		FullMethod: "/group.group/GetGroupApplicationList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GroupServer).SetGroupBulletin(ctx, req.(*SetGroupBulletinReq))
+		return srv.(GroupServer).GetGroupApplicationList(ctx, req.(*GetGroupApplicationListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Group_SetOwnerGroupNickName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetOwnerGroupNickNameReq)
+func _Group_TransferGroupOwner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TransferGroupOwnerReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GroupServer).SetOwnerGroupNickName(ctx, in)
+		return srv.(GroupServer).TransferGroupOwner(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/SetOwnerGroupNickName",
+		FullMethod: "/group.group/TransferGroupOwner",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GroupServer).SetOwnerGroupNickName(ctx, req.(*SetOwnerGroupNickNameReq))
+		return srv.(GroupServer).TransferGroupOwner(ctx, req.(*TransferGroupOwnerReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Group_SetGroupHeadImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetGroupHeadImageReq)
+func _Group_GroupApplicationResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GroupApplicationResponseReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GroupServer).SetGroupHeadImage(ctx, in)
+		return srv.(GroupServer).GroupApplicationResponse(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/SetGroupHeadImage",
+		FullMethod: "/group.group/GroupApplicationResponse",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GroupServer).SetGroupHeadImage(ctx, req.(*SetGroupHeadImageReq))
+		return srv.(GroupServer).GroupApplicationResponse(ctx, req.(*GroupApplicationResponseReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Group_MemberExitGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MemberExitGroupReq)
+func _Group_GetGroupMemberList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupMemberListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GroupServer).MemberExitGroup(ctx, in)
+		return srv.(GroupServer).GetGroupMemberList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/MemberExitGroup",
+		FullMethod: "/group.group/GetGroupMemberList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GroupServer).MemberExitGroup(ctx, req.(*MemberExitGroupReq))
+		return srv.(GroupServer).GetGroupMemberList(ctx, req.(*GetGroupMemberListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Group_GetGroupMembersInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupMembersInfoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupServer).GetGroupMembersInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/group.group/GetGroupMembersInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServer).GetGroupMembersInfo(ctx, req.(*GetGroupMembersInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Group_KickGroupMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KickGroupMemberReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupServer).KickGroupMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/group.group/KickGroupMember",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServer).KickGroupMember(ctx, req.(*KickGroupMemberReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Group_GetJoinedGroupList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetJoinedGroupListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupServer).GetJoinedGroupList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/group.group/GetJoinedGroupList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServer).GetJoinedGroupList(ctx, req.(*GetJoinedGroupListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Group_InviteUserToGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InviteUserToGroupReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupServer).InviteUserToGroup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/group.group/InviteUserToGroup",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServer).InviteUserToGroup(ctx, req.(*InviteUserToGroupReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Group_GetGroupAllMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupAllMemberReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupServer).GetGroupAllMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/group.group/GetGroupAllMember",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupServer).GetGroupAllMember(ctx, req.(*GetGroupAllMemberReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1247,36 +2887,56 @@ var _Group_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Group_CreateGroup_Handler,
 		},
 		{
-			MethodName: "getGroupList",
-			Handler:    _Group_GetGroupList_Handler,
+			MethodName: "joinGroup",
+			Handler:    _Group_JoinGroup_Handler,
 		},
 		{
-			MethodName: "getGroupInfo",
-			Handler:    _Group_GetGroupInfo_Handler,
+			MethodName: "quitGroup",
+			Handler:    _Group_QuitGroup_Handler,
 		},
 		{
-			MethodName: "deleteGroupMember",
-			Handler:    _Group_DeleteGroupMember_Handler,
+			MethodName: "getGroupsInfo",
+			Handler:    _Group_GetGroupsInfo_Handler,
 		},
 		{
-			MethodName: "setGroupName",
-			Handler:    _Group_SetGroupName_Handler,
+			MethodName: "setGroupInfo",
+			Handler:    _Group_SetGroupInfo_Handler,
 		},
 		{
-			MethodName: "setGroupBulletin",
-			Handler:    _Group_SetGroupBulletin_Handler,
+			MethodName: "getGroupApplicationList",
+			Handler:    _Group_GetGroupApplicationList_Handler,
 		},
 		{
-			MethodName: "setOwnerGroupNickName",
-			Handler:    _Group_SetOwnerGroupNickName_Handler,
+			MethodName: "transferGroupOwner",
+			Handler:    _Group_TransferGroupOwner_Handler,
 		},
 		{
-			MethodName: "setGroupHeadImage",
-			Handler:    _Group_SetGroupHeadImage_Handler,
+			MethodName: "groupApplicationResponse",
+			Handler:    _Group_GroupApplicationResponse_Handler,
 		},
 		{
-			MethodName: "memberExitGroup",
-			Handler:    _Group_MemberExitGroup_Handler,
+			MethodName: "getGroupMemberList",
+			Handler:    _Group_GetGroupMemberList_Handler,
+		},
+		{
+			MethodName: "getGroupMembersInfo",
+			Handler:    _Group_GetGroupMembersInfo_Handler,
+		},
+		{
+			MethodName: "kickGroupMember",
+			Handler:    _Group_KickGroupMember_Handler,
+		},
+		{
+			MethodName: "getJoinedGroupList",
+			Handler:    _Group_GetJoinedGroupList_Handler,
+		},
+		{
+			MethodName: "inviteUserToGroup",
+			Handler:    _Group_InviteUserToGroup_Handler,
+		},
+		{
+			MethodName: "getGroupAllMember",
+			Handler:    _Group_GetGroupAllMember_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -262,7 +262,9 @@ func init() {
 	proto.RegisterType((*SingleMsgToUser)(nil), "relay.SingleMsgToUser")
 }
 
-func init() { proto.RegisterFile("relay/relay.proto", fileDescriptor_b6da3b5c0d1535b3) }
+func init() {
+	proto.RegisterFile("relay/relay.proto", fileDescriptor_b6da3b5c0d1535b3)
+}
 
 var fileDescriptor_b6da3b5c0d1535b3 = []byte{
 	// 381 bytes of a gzipped FileDescriptorProto
@@ -294,11 +296,11 @@ var fileDescriptor_b6da3b5c0d1535b3 = []byte{
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // OnlineMessageRelayServiceClient is the client API for OnlineMessageRelayService service.
 //
@@ -308,10 +310,10 @@ type OnlineMessageRelayServiceClient interface {
 }
 
 type onlineMessageRelayServiceClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewOnlineMessageRelayServiceClient(cc *grpc.ClientConn) OnlineMessageRelayServiceClient {
+func NewOnlineMessageRelayServiceClient(cc grpc.ClientConnInterface) OnlineMessageRelayServiceClient {
 	return &onlineMessageRelayServiceClient{cc}
 }
 

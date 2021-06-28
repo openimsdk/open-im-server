@@ -18,6 +18,8 @@ message WSToMsgSvrChatMsg{
   int32  PlatformID =13;
   repeated string  ForceList = 14;
 }
+
+
 message MsgSvrToPushSvrChatMsg {
   string SendID = 1;
   string RecvID = 2;
@@ -113,8 +115,9 @@ message UserSendMsgResp {
   string ErrMsg = 2;
   int32 ReqIdentifier = 3;
   int32 MsgIncr = 4;
-  string ServerMsgID = 5;
-  string ClientMsgID = 6;
+  int64 SendTime = 5;
+  string ServerMsgID = 6;
+  string ClientMsgID = 7;
 
 }
 service Chat {

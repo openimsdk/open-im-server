@@ -275,7 +275,9 @@ func init() {
 	proto.RegisterType((*UserTokenResp)(nil), "pbAuth.UserTokenResp")
 }
 
-func init() { proto.RegisterFile("auth/auth.proto", fileDescriptor_712ec48c1eaf43a2) }
+func init() {
+	proto.RegisterFile("auth/auth.proto", fileDescriptor_712ec48c1eaf43a2)
+}
 
 var fileDescriptor_712ec48c1eaf43a2 = []byte{
 	// 346 bytes of a gzipped FileDescriptorProto
@@ -305,11 +307,11 @@ var fileDescriptor_712ec48c1eaf43a2 = []byte{
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // AuthClient is the client API for Auth service.
 //
@@ -320,10 +322,10 @@ type AuthClient interface {
 }
 
 type authClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewAuthClient(cc *grpc.ClientConn) AuthClient {
+func NewAuthClient(cc grpc.ClientConnInterface) AuthClient {
 	return &authClient{cc}
 }
 
