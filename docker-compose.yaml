@@ -1,0 +1,113 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    container_name: mysql
+    volumes:
+      - /home/mysql/data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+    restart: always
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    container_name: mongo
+    volumes:
+      - /home/mongodb/data:/data/db
+    restart: always
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    container_name: redis
+    volumes:
+      - /home/redis/data:/data
+    restart: always
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - 2181:2181
+    container_name: zookeeper
+    volumes:
+      - /etc/localtime:/etc/localtime
+    restart: always
+
+
+  kafka:
+    image: wurstmeister/kafka
+    ports:
+      - 9092:9092
+    container_name: kafka
+    volumes:
+      - /etc/localtime:/etc/localtime
+    restart: always
+    environment:
+      KAFKA_BROKER_ID: "0"
+      KAFKA_ZOOKEEPER_CONNECT: "127.0.0.1:2181"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://127.0.0.1:9092"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092"
+    depends_on:
+      - zookeeper
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.2.32
+    ports:
+      - 2379:2379
+      - 2380:2380
+    container_name: etcd-v3.2.32
+    restart: always
+    command:
+      - "/usr/local/bin/etcd"
+      - "--name s1"
+      - "--data-dir /etcd-data"
+      - "--listen-client-urls http://0.0.0.0:2379"
+      - "--advertise-client-urls http://0.0.0.0:2379"
+      - "--listen-peer-urls http://0.0.0.0:2380"
+      - "--initial-advertise-peer-urls http://0.0.0.0:2380"
+      - "--initial-cluster s1=http://0.0.0.0:2380"
+      - "--initial-cluster-token tkn"
+      - "--initial-cluster-state new"
+
+
+  open-im-server:
+    image: lyt1123/open_im_server:1.2
+    ports:
+      - 10000:10000
+      - 17778:17778
+    container_name: open-im-server
+    volumes:
+      - /home/open_im_server/logs:/home/open_im_server/logs
+      - /home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml
+    restart: always
+    depends_on:
+      - mysql
+      - mongodb
+      - redis
+      - kafka
+      - etcd
+
+#fixme build from dockerfile
+#    open-im-server:
+#      ports:
+#        - 10000:10000
+#        - 17778:17778
+#      volumes:
+#        - /home/open_im_server/logs:/home/open_im_server/logs
+#        - /home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml
+#      restart: always
+#      build:
+#        context: .
+#        dockerfile: deploy.Dockerfile
+#      depends_on:
+#        - mysql
+#        - mongodb
+#        - redis
+#        - kafka
+#        - etcd
