@@ -57,11 +57,13 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 func (ws *WServer) readMsg(conn *websocket.Conn) {
 	for {
-		_, msg, err := conn.ReadMessage()
+		msgType, msg, err := conn.ReadMessage()
 		if err != nil {
 			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err)
 			ws.delUserConn(conn)
 			return
+		} else {
+			log.ErrorByKv("test", "", "msgType", msgType, "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn))
 		}
 		ws.msgParse(conn, msg)
 		//ws.writeMsg(conn, 1, chat)
