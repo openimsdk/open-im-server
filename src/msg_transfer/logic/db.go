@@ -12,7 +12,7 @@ func saveUserChat(uid string, pbMsg *pbMsg.MsgSvrToPushSvrChatMsg) error {
 		return err
 	}
 	pbMsg.RecvSeq = seq
-	return db.DB.SaveUserChat(uid, pbMsg.SendTime, pbMsg)
+	return db.DB.SaveUserChat(uid, pbMsg)
 }
 
 func getGroupList(groupID string) ([]string, error) {

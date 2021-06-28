@@ -6,6 +6,7 @@ import (
 	kfk "Open_IM/src/common/kafka"
 	"Open_IM/src/common/log"
 	pbMsg "Open_IM/src/proto/chat"
+	pb "Open_IM/src/proto/group"
 	pbPush "Open_IM/src/proto/push"
 	"Open_IM/src/utils"
 	"context"
@@ -54,8 +55,10 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 	isHistory := utils.GetSwitchFromOptions(Options, "history")
 	//Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(Options, "persistent")
+	//Control whether to push message to sender's other terminal
+	isSenderSync := utils.GetSwitchFromOptions(Options, "senderSync")
 	if pbData.SessionType == constant.SingleChatType {
-		log.Info("", "", "msg_transfer chat type = SingleChatType", isHistory, isPersist)
+		log.Info("", "", "msg_transfer chat type = SingleChatType", isHistory, isPersist, isSenderSync)
 		if isHistory {
 			if msgKey == pbSaveData.RecvID {
 				err := saveUserChat(pbData.RecvID, &pbSaveData)
@@ -70,30 +73,58 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				if err != nil {
 					log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
 				}
-				//if isSenderSync {
-				//	pbSaveData.ContentType = constant.SyncSenderMsg
-				//	log.WarnByKv("SyncSenderMsg come here", pbData.OperationID, pbSaveData.String())
-				//	sendMessageToPush(&pbSaveData)
-				//}
+				if isSenderSync {
+					pbSaveData.ContentType = constant.SyncSenderMsg
+					log.WarnByKv("SyncSenderMsg come here", pbData.OperationID, pbSaveData.String())
+					sendMessageToPush(&pbSaveData)
+				}
 			}
 
 		}
-		log.InfoByKv("msg_transfer handle topic success...", "", "")
 	} else if pbData.SessionType == constant.GroupChatType {
 		log.Info("", "", "msg_transfer chat type = GroupChatType")
-		uidAndGroupID := strings.Split(pbData.RecvID, " ")
-		saveUserChat(uidAndGroupID[0], &pbSaveData)
-		pbSaveData.Options = pbData.Options
-		pbSaveData.OfflineInfo = pbData.OfflineInfo
-		if utils.IsContain(uidAndGroupID[0], pbData.ForceList) {
-			pbSaveData.IsEmphasize = true
+
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+		client := pb.NewGroupClient(etcdConn)
+		req := &pb.GetGroupInfoReq{
+			GroupID:     pbSaveData.RecvID,
+			Token:       pbData.Token,
+			OperationID: pbSaveData.OperationID,
 		}
-		sendMessageToPush(&pbSaveData)
-		log.InfoByKv("msg_transfer handle topic success...", "", "")
+		log.Info("", "", "msg_transfer call group rpc, data = %s", req.String())
+		reply, err := client.GetGroupInfo(context.Background(), req)
+		if err != nil {
+			log.Error("", "", "msg_transfer client.GetGroupInfo fail, err = %s", err.Error())
+			return
+		}
+		for _, v := range reply.GroupMemberList {
+			//Store RecvID is userID+" "+groupID when chatType is Group
+			pbSaveData.RecvID = v.UserID + " " + pbSaveData.RecvID
+			if isHistory {
+				saveUserChat(v.UserID, &pbSaveData)
+			}
+			pbSaveData.Options = pbData.Options
+			pbSaveData.OfflineInfo = pbData.OfflineInfo
+			if v.UserID != pbSaveData.SendID {
+				if utils.IsContain(v.UserID, pbData.ForceList) {
+					pbSaveData.IsEmphasize = true
+				}
+				sendMessageToPush(&pbSaveData)
+			} else {
+				if isSenderSync {
+					pbSaveData.ContentType = constant.SyncSenderMsg
+					sendMessageToPush(&pbSaveData)
+				}
+
+			}
+
+		}
+
 	} else {
 		log.Error("", "", "msg_transfer recv chat err, chat.MsgFrom = %d", pbData.SessionType)
 	}
 
+	log.InfoByKv("msg_transfer handle topic success...", "", "")
 }
 
 func (HistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
