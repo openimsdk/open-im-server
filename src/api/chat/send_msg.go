@@ -18,17 +18,17 @@ type paramsUserSendMsg struct {
 	PlatformID    int32  `json:"platformID" binding:"required"`
 	SendID        string `json:"sendID" binding:"required"`
 	OperationID   string `json:"operationID" binding:"required"`
-	MsgIncr       int32  `json:"msgIncr" binding:"required"`
+	MsgIncr       int32  `json:"msgIncr"`
 	Data          struct {
 		SessionType int32                  `json:"sessionType" binding:"required"`
 		MsgFrom     int32                  `json:"msgFrom" binding:"required"`
 		ContentType int32                  `json:"contentType" binding:"required"`
 		RecvID      string                 `json:"recvID" binding:"required"`
-		ForceList   []string               `json:"forceList" binding:"required"`
+		ForceList   []string               `json:"forceList"`
 		Content     string                 `json:"content" binding:"required"`
-		Options     map[string]interface{} `json:"options" binding:"required"`
+		Options     map[string]interface{} `json:"options" `
 		ClientMsgID string                 `json:"clientMsgID" binding:"required"`
-		OffLineInfo map[string]interface{} `json:"offlineInfo" binding:"required"`
+		OffLineInfo map[string]interface{} `json:"offlineInfo" `
 		Ex          map[string]interface{} `json:"ext"`
 	}
 }
@@ -90,6 +90,7 @@ func UserSendMsg(c *gin.Context) {
 		"data": gin.H{
 			"clientMsgID": reply.ClientMsgID,
 			"serverMsgID": reply.ServerMsgID,
+			"sendTime":    reply.SendTime,
 		},
 	})
 

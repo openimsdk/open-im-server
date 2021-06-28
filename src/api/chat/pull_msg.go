@@ -13,13 +13,13 @@ import (
 )
 
 type paramsUserPullMsg struct {
-	ReqIdentifier int    `json:"reqIdentifier" binding:"required"`
+	ReqIdentifier *int   `json:"reqIdentifier" binding:"required"`
 	SendID        string `json:"sendID" binding:"required"`
 	OperationID   string `json:"operationID" binding:"required"`
-	MsgIncr       int    `json:"msgIncr" binding:"required"`
+	MsgIncr       *int   `json:"msgIncr" binding:"required"`
 	Data          struct {
-		SeqBegin int64 `json:"seqBegin" binding:"required"`
-		SeqEnd   int64 `json:"seqEnd" binding:"required"`
+		SeqBegin *int64 `json:"seqBegin" binding:"required"`
+		SeqEnd   *int64 `json:"seqEnd" binding:"required"`
 	}
 }
 
@@ -39,8 +39,8 @@ func UserPullMsg(c *gin.Context) {
 	pbData := pbChat.PullMessageReq{}
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID
-	pbData.SeqBegin = params.Data.SeqBegin
-	pbData.SeqEnd = params.Data.SeqEnd
+	pbData.SeqBegin = *params.Data.SeqBegin
+	pbData.SeqEnd = *params.Data.SeqEnd
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 	msgClient := pbChat.NewChatClient(grpcConn)
 	reply, err := msgClient.PullMessage(context.Background(), &pbData)
@@ -67,8 +67,8 @@ func UserPullMsg(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"errCode":       reply.ErrCode,
 		"errMsg":        reply.ErrMsg,
-		"msgIncr":       params.MsgIncr,
-		"reqIdentifier": params.ReqIdentifier,
+		"msgIncr":       *params.MsgIncr,
+		"reqIdentifier": *params.ReqIdentifier,
 		"data":          msg,
 	})
 
