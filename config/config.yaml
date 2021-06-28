@@ -22,7 +22,7 @@ mongo:
   dbAddress: [ 127.0.0.1:27017 ]
   dbDirect: false
   dbTimeout: 10
-  dbDatabase: [ openIM ]
+  dbDatabase: openIM
   dbSource: admin
   dbUserName:
   dbPassword:
@@ -30,7 +30,7 @@ mongo:
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: [ 127.0.0.1:6379 ]
+  dbAddress: 127.0.0.1:6379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
