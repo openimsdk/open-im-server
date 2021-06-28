@@ -30,14 +30,14 @@ func AddFriendResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.AddedFriendReq{
+	req := &pbFriend.AddFriendResponseReq{
 		Uid:         params.UID,
 		Flag:        params.Flag,
 		OperationID: params.OperationID,
 		Token:       c.Request.Header.Get("token"),
 	}
 	log.Info(req.Token, req.OperationID, "api add friend response is server:userID=%s", req.Uid)
-	RpcResp, err := client.AddedFriend(context.Background(), req)
+	RpcResp, err := client.AddFriendResponse(context.Background(), req)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,call add_friend_response rpc server failed", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call add_friend_response rpc server failed"})
