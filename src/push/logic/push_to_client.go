@@ -11,6 +11,7 @@ import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/log"
 	pbChat "Open_IM/src/proto/chat"
+	pbGroup "Open_IM/src/proto/group"
 	pbRelay "Open_IM/src/proto/relay"
 	pbGetInfo "Open_IM/src/proto/user"
 	rpcChat "Open_IM/src/rpc/chat/chat"
@@ -33,19 +34,25 @@ type EChatContent struct {
 func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 	var wsResult []*pbRelay.SingleMsgToUser
 	isShouldOfflinePush := true
-	MOptions := utils.JsonStringToMap(Options)
+	MOptions := utils.JsonStringToMap(Options) //Control whether to push message to sender's other terminal
+	//isSenderSync := utils.GetSwitchFromOptions(MOptions, "senderSync")
 	isOfflinePush := utils.GetSwitchFromOptions(MOptions, "offlinePush")
 	log.InfoByKv("Get chat from msg_transfer And push chat", sendPbData.OperationID, "PushData", sendPbData)
 	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
 	//Online push message
+	log.InfoByKv("test", sendPbData.OperationID, "len  grpc", len(grpcCons), "data", sendPbData)
 	for _, v := range grpcCons {
 		msgClient := pbRelay.NewOnlineMessageRelayServiceClient(v)
 		reply, err := msgClient.MsgToUser(context.Background(), sendPbData)
+		if err != nil {
+			log.InfoByKv("push data to client rpc err", sendPbData.OperationID, "err", err)
+		}
 		if reply != nil && reply.Resp != nil && err == nil {
 			wsResult = append(wsResult, reply.Resp...)
 		}
 	}
-	if isOfflinePush && sendPbData.ContentType != constant.SyncSenderMsg {
+	log.InfoByKv("push_result", sendPbData.OperationID, "result", wsResult)
+	if isOfflinePush {
 
 		for _, t := range pushTerminal {
 			for _, v := range wsResult {
@@ -101,12 +108,41 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 
 func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
 	m.MsgID = rpcChat.GetMsgID(m.SendID)
-	pid, offset, err := producer.SendMessage(m, m.SendID)
-	if err != nil {
-		log.ErrorByKv("sys send msg to kafka  failed", m.OperationID, "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "msgKey--sendID", m.SendID)
+	switch m.SessionType {
+	case constant.SingleChatType:
+		sendMsgToKafka(m, m.SendID, "msgKey--sendID")
+		sendMsgToKafka(m, m.RecvID, "msgKey--recvID")
+	case constant.GroupChatType:
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+		client := pbGroup.NewGroupClient(etcdConn)
+		req := &pbGroup.GetGroupAllMemberReq{
+			GroupID:     m.RecvID,
+			Token:       config.Config.Secret,
+			OperationID: m.OperationID,
+		}
+		reply, err := client.GetGroupAllMember(context.Background(), req)
+		if err != nil {
+			log.Error(m.Token, m.OperationID, "rpc  getGroupInfo failed, err = %s", err.Error())
+			return
+		}
+		if reply.ErrorCode != 0 {
+			log.Error(m.Token, m.OperationID, "rpc  getGroupInfo failed, err = %s", reply.ErrorMsg)
+			return
+		}
+		groupID := m.RecvID
+		for _, v := range reply.MemberList {
+			m.RecvID = v.UserId + " " + groupID
+			sendMsgToKafka(m, m.RecvID, "msgKey--recvID+\" \"+groupID")
+		}
+	default:
+
 	}
-	pid, offset, err = producer.SendMessage(m, m.RecvID)
+
+}
+func sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string, flag string) {
+	pid, offset, err := producer.SendMessage(m, key)
 	if err != nil {
-		log.ErrorByKv("kafka send failed", m.OperationID, "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "msgKey--recvID", m.RecvID)
+		log.ErrorByKv("kafka send failed", m.OperationID, "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), flag, key)
 	}
+
 }
