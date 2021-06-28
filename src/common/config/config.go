@@ -39,7 +39,7 @@ type config struct {
 		DBAddress           []string `yaml:"dbAddress"`
 		DBDirect            bool     `yaml:"dbDirect"`
 		DBTimeout           int      `yaml:"dbTimeout"`
-		DBDatabase          []string `yaml:"dbDatabase"`
+		DBDatabase          string   `yaml:"dbDatabase"`
 		DBSource            string   `yaml:"dbSource"`
 		DBUserName          string   `yaml:"dbUserName"`
 		DBPassword          string   `yaml:"dbPassword"`
@@ -47,11 +47,11 @@ type config struct {
 		DBRetainChatRecords int      `yaml:"dbRetainChatRecords"`
 	}
 	Redis struct {
-		DBAddress     []string `yaml:"dbAddress"`
-		DBMaxIdle     int      `yaml:"dbMaxIdle"`
-		DBMaxActive   int      `yaml:"dbMaxActive"`
-		DBIdleTimeout int      `yaml:"dbIdleTimeout"`
-		DBPassWord    string   `yaml:"dbPassWord"`
+		DBAddress     string `yaml:"dbAddress"`
+		DBMaxIdle     int    `yaml:"dbMaxIdle"`
+		DBMaxActive   int    `yaml:"dbMaxActive"`
+		DBIdleTimeout int    `yaml:"dbIdleTimeout"`
+		DBPassWord    string `yaml:"dbPassWord"`
 	}
 	RpcPort struct {
 		OpenImUserPort        []int `yaml:"openImUserPort"`

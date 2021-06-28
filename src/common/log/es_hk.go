@@ -1,5 +1,5 @@
 /*
-** description("Hook to send logs to elasticsearch").
+** description("将日志发送到elasticsearch的hook").
 ** copyright('tuoyun,www.tuoyun.net').
 ** author("fg,Gordon@tuoyun.net").
 ** time(2021/3/26 17:05).
@@ -18,13 +18,13 @@ import (
 	"time"
 )
 
-//esHook custom es hook
+//esHook 自定义的ES hook
 type esHook struct {
 	moduleName string
 	client     *elasticV7.Client
 }
 
-//newEsHook initialization
+//newEsHook 初始化
 func newEsHook(moduleName string) *esHook {
 	//https://github.com/sohlich/elogrus
 	//client, err := elastic.NewClient(elastic.SetURL("http://localhost:9200"))
@@ -61,19 +61,19 @@ func newEsHook(moduleName string) *esHook {
 	return &esHook{client: es, moduleName: moduleName}
 }
 
-//Fire log hook interface method
+//Fire log hook interface 方法
 func (hook *esHook) Fire(entry *logrus.Entry) error {
 	doc := newEsLog(entry)
 	go hook.sendEs(doc)
 	return nil
 }
 
-//Levels log hook interface method, the log affected by this hook
+//Levels log hook interface 方法,此hook影响的日志
 func (hook *esHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
-//sendEs Asynchronously send logs to es
+//sendEs 异步发送日志到es
 func (hook *esHook) sendEs(doc appLogDocModel) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -102,7 +102,7 @@ func newEsLog(e *logrus.Entry) appLogDocModel {
 	return ins
 }
 
-// indexName es index name time division
+// indexName es index name 时间分割
 func (m *appLogDocModel) indexName() string {
 	return time.Now().Format("2006-01-02")
 }

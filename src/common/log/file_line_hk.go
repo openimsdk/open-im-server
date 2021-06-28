@@ -1,5 +1,5 @@
 /*
-** description("Get the hook of the calling file name and line number").
+** description("得到调用文件名字和行号的hook").
 ** copyright('tuoyun,www.tuoyun.net').
 ** author("fg,Gordon@tuoyun.net").
 ** time(2021/3/16 11:26).

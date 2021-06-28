@@ -3,11 +3,18 @@ package constant
 const (
 
 	//group admin
-	GroupAdmin = 1
+	OrdinaryMember = 0
+	GroupCreator   = 1
+	Administrator  = 2
+	//group application
+	Application      = 0
+	AgreeApplication = 1
+
 	//feiend related
-	BlackListFlag = 1
-	NotFriendFlag = 0
-	FriendFlag    = 1
+	BlackListFlag         = 1
+	ApplicationFriendFlag = 0
+	FriendFlag            = 1
+	RefuseFriendFlag      = -1
 
 	//Websocket Protocol
 	WSGetNewestSeq = 1001
@@ -25,9 +32,27 @@ const (
 
 	SyncSenderMsg = 108
 	//SysRelated
-	AddFriendTip      = 201
-	AgreeAddFriendTip = 202
-	KickOnlineTip     = 203
+	AcceptFriendApplicationTip = 201
+	AddFriendTip               = 202
+	RefuseFriendApplicationTip = 203
+	SetSelfInfoTip             = 204
+	Revoke                     = 205
+	C2CMessageAsRead           = 206
+
+	KickOnlineTip = 303
+
+	TransferGroupOwnerTip           = 501
+	CreateGroupTip                  = 502
+	GroupApplicationResponseTip     = 503
+	JoinGroupTip                    = 504
+	QuitGroupTip                    = 505
+	SetGroupInfoTip                 = 506
+	AcceptGroupApplicationTip       = 507
+	RefuseGroupApplicationTip       = 508
+	KickGroupMemberTip              = 509
+	InviteUserToGroupTip            = 510
+	AcceptGroupApplicationResultTip = 511
+	RefuseGroupApplicationResultTip = 512
 
 	//MsgFrom
 	UserMsgType = 100
