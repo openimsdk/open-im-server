@@ -6,7 +6,9 @@
  */
 package content_struct
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Content struct {
 	IsDisplay int32  `json:"isDisplay"`
@@ -22,4 +24,37 @@ func (c *Content) contentToString() string {
 	data, _ := json.Marshal(c)
 	dataString := string(data)
 	return dataString
+}
+
+type groupMemberFullInfo struct {
+	GroupId  string `json:"groupID"`
+	UserId   string `json:"userId"`
+	Role     int    `json:"role"`
+	JoinTime uint64 `json:"joinTime"`
+	NickName string `json:"nickName"`
+	FaceUrl  string `json:"faceUrl"`
+}
+
+type AgreeOrRejectGroupMember struct {
+	GroupId  string `json:"groupID"`
+	UserId   string `json:"userId"`
+	Role     int    `json:"role"`
+	JoinTime uint64 `json:"joinTime"`
+	NickName string `json:"nickName"`
+	FaceUrl  string `json:"faceUrl"`
+	Reason   string `json:"reason"`
+}
+
+type CreateGroupSysMsg struct {
+	uIdCreator     string                `creatorUid`
+	initMemberList []groupMemberFullInfo `json: initMemberList`
+	CreateTime     uint64                `json:"CreateTime"`
+	Text           string                `json:"text"`
+}
+
+func NewCreateGroupSysMsgString(create *CreateGroupSysMsg, text string) string {
+	create.Text = text
+	jstring, _ := json.Marshal(create)
+
+	return string(jstring)
 }
