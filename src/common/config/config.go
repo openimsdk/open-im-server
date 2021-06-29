@@ -143,7 +143,7 @@ type config struct {
 }
 
 func init() {
-	bytes, err := ioutil.ReadFile("config/config.yaml")
+	bytes, err := ioutil.ReadFile("../config/config.yaml")
 	if err != nil {
 		panic(err)
 		return
