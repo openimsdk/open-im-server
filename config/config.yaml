@@ -34,7 +34,7 @@ redis:
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
-  dbPassWord: open_im4545453
+  dbPassWord:
 
 kafka:
   ws2mschat:
