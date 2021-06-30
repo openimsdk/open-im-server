@@ -50,8 +50,8 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
   for j in ${ports_array}; do
     echo -e "${SKY_BLUE_PREFIX}${service_filename[$i]} Service is starting,port number:$j $COLOR_SUFFIX"
     #Start the service in the background
-    ./${service_filename[$i]} -port $j &
-    #    nohup ./${service_filename[$i]} -port $j >/dev/null 2>&1 &
+    #    ./${service_filename[$i]} -port $j &
+    nohup ./${service_filename[$i]} -port $j >../logs/openIM.log 2>&1 &
     sleep 1
     pid="netstat -ntlp|grep $j |awk '{printf \$7}'|cut -d/ -f1"
     echo -e "${RED_PREFIX}${service_filename[$i]} Service is started,port number:$j pid:$(eval $pid)$COLOR_SUFFIX"
