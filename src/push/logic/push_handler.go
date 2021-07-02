@@ -47,9 +47,11 @@ func (ms *PushConsumerHandler) handleMs2PsChat(msg []byte) {
 	sendPbData.RecvID = pbData.RecvID
 	sendPbData.Content = pbData.Content
 	sendPbData.SendID = pbData.SendID
+	sendPbData.SenderNickName = pbData.SenderNickName
+	sendPbData.SenderFaceURL = pbData.SenderFaceURL
+	sendPbData.ClientMsgID = pbData.ClientMsgID
 	sendPbData.PlatformID = pbData.PlatformID
 	sendPbData.RecvSeq = pbData.RecvSeq
-	sendPbData.IsEmphasize = pbData.IsEmphasize
 	//Call push module to send message to the user
 	MsgToUser(&sendPbData, pbData.OfflineInfo, pbData.Options)
 }

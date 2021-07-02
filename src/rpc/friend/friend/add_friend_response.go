@@ -56,7 +56,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 			logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
 				SendID:      claims.UID,
 				RecvID:      req.Uid,
-				Content:     senderInfo.Name + " agreed to add you as a friend.",
+				Content:     content_struct.NewContentStructString(1, "", senderInfo.Name+" agreed to add you as a friend."),
 				SendTime:    utils.GetCurrentTimestampBySecond(),
 				MsgFrom:     constant.UserMsgType,                //Notification message identification
 				ContentType: constant.AcceptFriendApplicationTip, //Add friend flag

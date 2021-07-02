@@ -8,15 +8,19 @@ message WSToMsgSvrChatMsg{
   string Content = 3;
   int64 SendTime = 4;
   int32 MsgFrom = 5;
-  int32 ContentType = 6;
-  int32 SessionType = 7;
-  string OperationID = 8;
-  string MsgID = 9;
-  string Token = 10;
-  string OfflineInfo =11;
-  string Options = 12;
-  int32  PlatformID =13;
-  repeated string  ForceList = 14;
+  string SenderNickName = 6;
+  string SenderFaceURL = 7;
+  int32 ContentType = 8;
+  int32 SessionType = 9;
+  string OperationID = 10;
+  string MsgID = 11;
+  string Token = 12;
+  string OfflineInfo =13;
+  string Options = 14;
+  int32  PlatformID =15;
+  repeated string  ForceList = 16;
+  string ClientMsgID = 17;
+
 }
 
 
@@ -27,14 +31,17 @@ message MsgSvrToPushSvrChatMsg {
   int64 RecvSeq = 4;
   int64 SendTime = 5;
   int32 MsgFrom = 6;
-  int32 ContentType = 7;
-  int32 SessionType = 8;
-  string OperationID = 9;
-  string MsgID = 10;
-  string OfflineInfo = 11;
-  string Options =12;
-  int32  PlatformID =13;
-  bool   IsEmphasize = 14;
+  string SenderNickName = 7;
+  string SenderFaceURL = 8;
+  int32 ContentType = 9;
+  int32 SessionType = 10;
+  string OperationID = 11;
+  string MsgID = 12;
+  string OfflineInfo = 13;
+  string Options =14;
+  int32  PlatformID =15;
+  string ClientMsgID = 16;
+
 }
 
 message PullMessageReq {
@@ -86,6 +93,12 @@ message MsgFormat{
   int64 SendTime = 8;
   // @inject_tag: json:"senderPlatformID"
   int32 SenderPlatformID = 9;
+  // @inject_tag: json:"senderNickName"
+  string SenderNickName = 10;
+  // @inject_tag: json:"senderFaceUrl"
+  string SenderFaceURL = 11;
+  // @inject_tag: json:"clientMsgID"
+  string ClientMsgID = 12;
 }
 
 message UserSendMsgReq {
@@ -94,18 +107,19 @@ message UserSendMsgReq {
   string Token = 2;
   string SendID = 3;
   string OperationID = 4;
-  int32 MsgIncr = 5;
-  int32 PlatformID = 6;
-  int32 SessionType = 7;
-  int32 MsgFrom = 8;
-  int32 ContentType = 9;
-  string RecvID = 10;
-  repeated string ForceList = 11;
-  string Content = 12;
-  string Options = 13;
-  string ClientMsgID = 14;
-  string OffLineInfo = 15;
-  string Ex = 16;
+  string SenderNickName = 5;
+  string SenderFaceURL = 6;
+  int32 PlatformID = 7;
+  int32 SessionType = 8;
+  int32 MsgFrom = 9;
+  int32 ContentType = 10;
+  string RecvID = 11;
+  repeated string ForceList = 12;
+  string Content = 13;
+  string Options = 14;
+  string ClientMsgID = 15;
+  string OffLineInfo = 16;
+  string Ex = 17;
 
 
 }
@@ -114,7 +128,6 @@ message UserSendMsgResp {
   int32 ErrCode = 1;
   string ErrMsg = 2;
   int32 ReqIdentifier = 3;
-  int32 MsgIncr = 4;
   int64 SendTime = 5;
   string ServerMsgID = 6;
   string ClientMsgID = 7;

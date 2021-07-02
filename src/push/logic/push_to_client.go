@@ -108,6 +108,7 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 
 func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
 	m.MsgID = rpcChat.GetMsgID(m.SendID)
+	m.ClientMsgID = m.MsgID
 	switch m.SessionType {
 	case constant.SingleChatType:
 		sendMsgToKafka(m, m.SendID, "msgKey--sendID")

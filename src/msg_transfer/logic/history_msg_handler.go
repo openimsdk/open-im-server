@@ -7,6 +7,7 @@ import (
 	"Open_IM/src/common/log"
 	pbMsg "Open_IM/src/proto/chat"
 	pbPush "Open_IM/src/proto/push"
+	"Open_IM/src/push/content_struct"
 	"Open_IM/src/utils"
 	"context"
 	"github.com/Shopify/sarama"
@@ -41,12 +42,16 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 	}
 	pbSaveData := pbMsg.MsgSvrToPushSvrChatMsg{}
 	pbSaveData.SendID = pbData.SendID
+	pbSaveData.SenderNickName = pbData.SenderNickName
+	pbSaveData.SenderFaceURL = pbData.SenderFaceURL
+	pbSaveData.ClientMsgID = pbData.ClientMsgID
 	pbSaveData.SendTime = pbData.SendTime
 	pbSaveData.Content = pbData.Content
 	pbSaveData.MsgFrom = pbData.MsgFrom
 	pbSaveData.ContentType = pbData.ContentType
 	pbSaveData.SessionType = pbData.SessionType
 	pbSaveData.MsgID = pbData.MsgID
+	pbSaveData.OperationID = pbData.OperationID
 	pbSaveData.RecvID = pbData.RecvID
 	pbSaveData.PlatformID = pbData.PlatformID
 	Options := utils.JsonStringToMap(pbData.Options)
@@ -82,12 +87,20 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 	} else if pbData.SessionType == constant.GroupChatType {
 		log.Info("", "", "msg_transfer chat type = GroupChatType")
 		uidAndGroupID := strings.Split(pbData.RecvID, " ")
+		if pbData.ContentType == constant.AtText {
+			atContent := content_struct.AtTextContent{
+				Text:       pbData.Content,
+				AtUserList: pbData.ForceList,
+			}
+			if utils.IsContain(uidAndGroupID[0], pbData.ForceList) {
+				atContent.IsAtSelf = true
+			}
+			pbSaveData.Content = utils.StructToJsonString(atContent)
+		}
+
 		saveUserChat(uidAndGroupID[0], &pbSaveData)
 		pbSaveData.Options = pbData.Options
 		pbSaveData.OfflineInfo = pbData.OfflineInfo
-		if utils.IsContain(uidAndGroupID[0], pbData.ForceList) {
-			pbSaveData.IsEmphasize = true
-		}
 		sendMessageToPush(&pbSaveData)
 		log.InfoByKv("msg_transfer handle topic success...", "", "")
 	} else {
@@ -115,7 +128,9 @@ func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
 	msg.SessionType = message.SessionType
 	msg.RecvID = message.RecvID
 	msg.SendID = message.SendID
-	msg.IsEmphasize = message.IsEmphasize
+	msg.SenderNickName = message.SenderNickName
+	msg.SenderFaceURL = message.SenderFaceURL
+	msg.ClientMsgID = message.ClientMsgID
 	msg.MsgFrom = message.MsgFrom
 	msg.Options = message.Options
 	msg.RecvSeq = message.RecvSeq

@@ -31,7 +31,6 @@ func (rpc *rpcChat) GetNewSeq(_ context.Context, in *pbMsg.GetNewSeqReq) (*pbMsg
 	}
 
 }
-
 func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*pbMsg.PullMessageResp, error) {
 	log.InfoByKv("rpc pullMessage is arriving", in.OperationID, "args", in.String())
 	resp := new(pbMsg.PullMessageResp)

@@ -14,12 +14,13 @@ import (
 )
 
 type paramsUserSendMsg struct {
-	ReqIdentifier int32  `json:"reqIdentifier" binding:"required"`
-	PlatformID    int32  `json:"platformID" binding:"required"`
-	SendID        string `json:"sendID" binding:"required"`
-	OperationID   string `json:"operationID" binding:"required"`
-	MsgIncr       int32  `json:"msgIncr"`
-	Data          struct {
+	ReqIdentifier  int32  `json:"reqIdentifier" binding:"required"`
+	PlatformID     int32  `json:"platformID" binding:"required"`
+	SendID         string `json:"sendID" binding:"required"`
+	SenderNickName string `json:"senderNickName" binding:"required"`
+	SenderFaceURL  string `json:"senderFaceUrl"`
+	OperationID    string `json:"operationID" binding:"required"`
+	Data           struct {
 		SessionType int32                  `json:"sessionType" binding:"required"`
 		MsgFrom     int32                  `json:"msgFrom" binding:"required"`
 		ContentType int32                  `json:"contentType" binding:"required"`
@@ -35,22 +36,23 @@ type paramsUserSendMsg struct {
 
 func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.UserSendMsgReq {
 	pbData := pbChat.UserSendMsgReq{
-		ReqIdentifier: params.ReqIdentifier,
-		Token:         token,
-		SendID:        params.SendID,
-		OperationID:   params.OperationID,
-		MsgIncr:       params.MsgIncr,
-		PlatformID:    params.PlatformID,
-		SessionType:   params.Data.SessionType,
-		MsgFrom:       params.Data.MsgFrom,
-		ContentType:   params.Data.ContentType,
-		RecvID:        params.Data.RecvID,
-		ForceList:     params.Data.ForceList,
-		Content:       params.Data.Content,
-		Options:       utils.MapToJsonString(params.Data.Options),
-		ClientMsgID:   params.Data.ClientMsgID,
-		OffLineInfo:   utils.MapToJsonString(params.Data.OffLineInfo),
-		Ex:            utils.MapToJsonString(params.Data.Ex),
+		ReqIdentifier:  params.ReqIdentifier,
+		Token:          token,
+		SendID:         params.SendID,
+		SenderNickName: params.SenderNickName,
+		SenderFaceURL:  params.SenderFaceURL,
+		OperationID:    params.OperationID,
+		PlatformID:     params.PlatformID,
+		SessionType:    params.Data.SessionType,
+		MsgFrom:        params.Data.MsgFrom,
+		ContentType:    params.Data.ContentType,
+		RecvID:         params.Data.RecvID,
+		ForceList:      params.Data.ForceList,
+		Content:        params.Data.Content,
+		Options:        utils.MapToJsonString(params.Data.Options),
+		ClientMsgID:    params.Data.ClientMsgID,
+		OffLineInfo:    utils.MapToJsonString(params.Data.OffLineInfo),
+		Ex:             utils.MapToJsonString(params.Data.Ex),
 	}
 	return &pbData
 }
@@ -85,7 +87,6 @@ func UserSendMsg(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"errCode":       reply.ErrCode,
 		"errMsg":        reply.ErrMsg,
-		"msgIncr":       reply.MsgIncr,
 		"reqIdentifier": reply.ReqIdentifier,
 		"data": gin.H{
 			"clientMsgID": reply.ClientMsgID,

@@ -51,6 +51,9 @@ func (d *DataBases) GetUserChat(uid string, seqBegin, seqEnd int64) (SingleMsg [
 			temp.Content = pChat.Content
 			temp.ContentType = pChat.ContentType
 			temp.SenderPlatformID = pChat.PlatformID
+			temp.ClientMsgID = pChat.ClientMsgID
+			temp.SenderFaceURL = pChat.SenderFaceURL
+			temp.SenderNickName = pChat.SenderNickName
 			if pChat.RecvSeq > MaxSeq {
 				MaxSeq = pChat.RecvSeq
 			}
@@ -101,7 +104,6 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m proto.Message) er
 			return err
 		}
 	} else {
-
 		err = c.Update(bson.M{"uid": uid}, bson.M{"$push": bson.M{"msg": sMsg}})
 		if err != nil {
 			return err

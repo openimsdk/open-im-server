@@ -55,13 +55,15 @@ func (r *RPCServer) PushMsg(_ context.Context, pbData *pbPush.PushMsgReq) (*pbPu
 	sendPbData.ServerMsgID = pbData.MsgID
 	sendPbData.MsgFrom = pbData.MsgFrom
 	sendPbData.ContentType = pbData.ContentType
+	sendPbData.SenderNickName = pbData.SenderNickName
+	sendPbData.SenderFaceURL = pbData.SenderFaceURL
+	sendPbData.ClientMsgID = pbData.ClientMsgID
 	sendPbData.SessionType = pbData.SessionType
 	sendPbData.RecvID = pbData.RecvID
 	sendPbData.Content = pbData.Content
 	sendPbData.SendID = pbData.SendID
 	sendPbData.PlatformID = pbData.PlatformID
 	sendPbData.RecvSeq = pbData.RecvSeq
-	sendPbData.IsEmphasize = pbData.IsEmphasize
 	//Call push module to send message to the user
 	MsgToUser(&sendPbData, pbData.OfflineInfo, pbData.Options)
 	return &pbPush.PushMsgResp{
