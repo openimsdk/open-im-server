@@ -188,7 +188,7 @@ func GetGroupOwnerByGroupId(groupId string) string {
 		return ""
 	}
 	for _, v := range omList {
-		if v.AdministratorLevel == 2 {
+		if v.AdministratorLevel == 1 {
 			return v.Uid
 		}
 	}
