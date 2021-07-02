@@ -17,7 +17,7 @@ type paramsUserSendMsg struct {
 	ReqIdentifier  int32  `json:"reqIdentifier" binding:"required"`
 	PlatformID     int32  `json:"platformID" binding:"required"`
 	SendID         string `json:"sendID" binding:"required"`
-	SenderNickName string `json:"senderNickName"`
+	SenderNickName string `json:"senderNickName" binding:"required"`
 	SenderFaceURL  string `json:"senderFaceUrl"`
 	OperationID    string `json:"operationID" binding:"required"`
 	Data           struct {
