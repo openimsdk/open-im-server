@@ -135,6 +135,10 @@ type GetGroupMemberListReq struct {
 	NextSeq     int32  `json:"nextSeq"`
 	OperationID string `json:"operationID"`
 }
+type getGroupAllMemberReq struct {
+	GroupID     string `json:"groupID"`
+	OperationID string `json:"operationID"`
+}
 
 type MemberResult struct {
 	GroupId  string `json:"groupID"`
@@ -194,6 +198,52 @@ func GetGroupMemberList(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, memberListResp)
 
+}
+
+func GetGroupAllMember(c *gin.Context) {
+	log.Info("", "", "GetGroupAllMember start....")
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := pb.NewGroupClient(etcdConn)
+	defer etcdConn.Close()
+
+	params := getGroupAllMemberReq{}
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &pb.GetGroupAllMemberReq{
+		GroupID:     params.GroupID,
+		OperationID: params.OperationID,
+		Token:       c.Request.Header.Get("token"),
+	}
+	log.Info(req.Token, req.OperationID, "recv req: ", req.String())
+	RpcResp, err := client.GetGroupAllMember(context.Background(), req)
+	if err != nil {
+		log.Error(req.Token, req.OperationID, "GetGroupAllMember failed, err: ", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	type GetGroupMemberListResp struct {
+		ErrorCode int32          `json:"errCode"`
+		ErrorMsg  string         `json:"errMsg"`
+		Data      []MemberResult `json:"data"`
+	}
+
+	var memberListResp GetGroupMemberListResp
+	memberListResp.ErrorMsg = RpcResp.ErrorMsg
+	memberListResp.ErrorCode = RpcResp.ErrorCode
+	for _, v := range RpcResp.MemberList {
+		memberListResp.Data = append(memberListResp.Data,
+			MemberResult{GroupId: req.GroupID,
+				UserId:   v.UserId,
+				Role:     v.Role,
+				JoinTime: uint64(v.JoinTime),
+				Nickname: v.NickName,
+				FaceUrl:  v.FaceUrl})
+	}
+	c.JSON(http.StatusOK, memberListResp)
 }
 
 type groupResult struct {
