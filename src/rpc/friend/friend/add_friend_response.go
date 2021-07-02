@@ -51,19 +51,19 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 			log.Error(req.Token, req.OperationID, "err=%s,create friendship failed", err.Error())
 		}
 		//Push message when establish friends successfully
-		senderInfo, errSend := im_mysql_model.FindUserByUID(claims.UID)
-		if errSend == nil {
-			logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-				SendID:      claims.UID,
-				RecvID:      req.Uid,
-				Content:     content_struct.NewContentStructString(1, "", senderInfo.Name+" agreed to add you as a friend."),
-				SendTime:    utils.GetCurrentTimestampBySecond(),
-				MsgFrom:     constant.UserMsgType,                //Notification message identification
-				ContentType: constant.AcceptFriendApplicationTip, //Add friend flag
-				SessionType: constant.SingleChatType,
-				OperationID: req.OperationID,
-			})
-		}
+		//senderInfo, errSend := im_mysql_model.FindUserByUID(claims.UID)
+		//if errSend == nil {
+		//	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+		//		SendID:      claims.UID,
+		//		RecvID:      req.Uid,
+		//		Content:     content_struct.NewContentStructString(1, "", senderInfo.Name+" agreed to add you as a friend."),
+		//		SendTime:    utils.GetCurrentTimestampBySecond(),
+		//		MsgFrom:     constant.UserMsgType,                //Notification message identification
+		//		ContentType: constant.AcceptFriendApplicationTip, //Add friend flag
+		//		SessionType: constant.SingleChatType,
+		//		OperationID: req.OperationID,
+		//	})
+		//}
 	}
 	if req.Flag == constant.RefuseFriendFlag {
 		senderInfo, errSend := im_mysql_model.FindUserByUID(claims.UID)
