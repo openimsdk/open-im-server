@@ -50,7 +50,10 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	pbData.OfflineInfo = pb.OffLineInfo
 	pbData.Options = pb.Options
 	pbData.PlatformID = pb.PlatformID
+	pbData.ClientMsgID = pb.ClientMsgID
 	pbData.SendID = pb.SendID
+	pbData.SenderNickName = pb.SenderNickName
+	pbData.SenderFaceURL = pb.SenderFaceURL
 	pbData.MsgID = serverMsgID
 	pbData.OperationID = pb.OperationID
 	pbData.Token = pb.Token
@@ -136,7 +139,6 @@ func returnMsg(replay *pbChat.UserSendMsgResp, pb *pbChat.UserSendMsgReq, errCod
 	replay.ErrCode = errCode
 	replay.ErrMsg = errMsg
 	replay.ReqIdentifier = pb.ReqIdentifier
-	replay.MsgIncr = pb.MsgIncr
 	replay.ClientMsgID = pb.ClientMsgID
 	replay.ServerMsgID = serverMsgID
 	replay.SendTime = sendTime

@@ -65,11 +65,13 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	msg["msgFrom"] = in.MsgFrom
 	msg["contentType"] = in.ContentType
 	msg["sessionType"] = in.SessionType
+	msg["senderNickName"] = in.SenderNickName
+	msg["senderFaceUrl"] = in.SenderFaceURL
+	msg["clientMsgID"] = in.ClientMsgID
 	msg["serverMsgID"] = in.ServerMsgID
 	msg["content"] = in.Content
 	msg["seq"] = in.RecvSeq
 	msg["sendTime"] = in.SendTime
-	msg["isEmphasize"] = in.IsEmphasize
 	msg["senderPlatformID"] = in.PlatformID
 	mReply["data"] = msg
 	bMsg, _ := json.Marshal(mReply)

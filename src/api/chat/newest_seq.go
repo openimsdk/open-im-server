@@ -31,7 +31,6 @@ func UserNewestSeq(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
 		return
 	}
-
 	pbData := pbMsg.GetNewSeqReq{}
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID

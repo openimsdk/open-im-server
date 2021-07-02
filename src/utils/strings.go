@@ -6,7 +6,10 @@
  */
 package utils
 
-import "strconv"
+import (
+	"encoding/json"
+	"strconv"
+)
 
 func IntToString(i int) string {
 	return strconv.FormatInt(int64(i), 10)
@@ -38,4 +41,9 @@ func InterfaceArrayToStringArray(data []interface{}) (i []string) {
 		i = append(i, param.(string))
 	}
 	return i
+}
+func StructToJsonString(param interface{}) string {
+	dataType, _ := json.Marshal(param)
+	dataString := string(dataType)
+	return dataString
 }

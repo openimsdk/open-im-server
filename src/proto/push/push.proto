@@ -16,7 +16,9 @@ message PushMsgReq {
   string OfflineInfo = 11;
   string Options =12;
   int32  PlatformID =13;
-  bool   IsEmphasize = 14;
+  string SenderNickName = 14;
+  string SenderFaceURL = 15;
+  string ClientMsgID = 16;
 }
 message PushMsgResp{
   int32   ResultCode = 1;

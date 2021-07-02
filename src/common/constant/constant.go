@@ -29,6 +29,7 @@ const (
 	Voice   = 103
 	Video   = 104
 	File    = 105
+	AtText  = 106
 
 	SyncSenderMsg = 108
 	//SysRelated

@@ -155,7 +155,6 @@ func (ws *WServer) sendMsgReq(conn *websocket.Conn, m *Req) {
 			Token:         m.Token,
 			SendID:        m.SendID,
 			OperationID:   m.OperationID,
-			MsgIncr:       m.MsgIncr,
 			PlatformID:    data.PlatformID,
 			SessionType:   data.SessionType,
 			MsgFrom:       data.MsgFrom,

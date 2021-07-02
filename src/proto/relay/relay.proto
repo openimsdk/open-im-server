@@ -14,7 +14,9 @@ message MsgToUserReq {
   string OperationID = 11;
   string ServerMsgID = 12;
   int32  PlatformID = 13;
-  bool   IsEmphasize = 14;
+  string SenderNickName = 14;
+  string SenderFaceURL = 15;
+  string ClientMsgID = 16;
 }
 message MsgToUserResp{
 repeated SingleMsgToUser resp = 1;

@@ -44,6 +44,11 @@ type AgreeOrRejectGroupMember struct {
 	FaceUrl  string `json:"faceUrl"`
 	Reason   string `json:"reason"`
 }
+type AtTextContent struct {
+	Text       string   `json:"text"`
+	AtUserList []string `json:"atUserList"`
+	IsAtSelf   bool     `json:"isAtSelf"`
+}
 
 type CreateGroupSysMsg struct {
 	uIdCreator     string                `creatorUid`

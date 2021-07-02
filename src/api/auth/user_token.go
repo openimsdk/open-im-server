@@ -33,6 +33,7 @@ func UserToken(c *gin.Context) {
 
 	params := paramsUserToken{}
 	if err := c.BindJSON(&params); err != nil {
+		log.Error("", "", params.UID, params.Platform, params.Secret)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
