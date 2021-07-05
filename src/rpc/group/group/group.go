@@ -119,9 +119,9 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 	claims, err := utils.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-	}
-	if req.Token != config.Config.Secret {
-		return &pbGroup.GetGroupAllMemberResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		if req.Token != config.Config.Secret {
+			return &pbGroup.GetGroupAllMemberResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		}
 	}
 
 	var resp pbGroup.GetGroupAllMemberResp
