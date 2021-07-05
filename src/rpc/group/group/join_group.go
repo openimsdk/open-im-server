@@ -5,10 +5,7 @@ import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
-	"Open_IM/src/push/content_struct"
-	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
 )
@@ -40,23 +37,23 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		log.Error(req.Token, req.OperationID, "Insert into group request failed,er=%s", err.Error())
 		return &pbGroup.CommonResp{ErrorCode: config.ErrJoinGroupApplication.ErrCode, ErrorMsg: config.ErrJoinGroupApplication.ErrMsg}, nil
 	}
-	//Find the the group owner
-	groupCreatorInfo, err := im_mysql_model.FindGroupMemberListByGroupIdAndFilterInfo(req.GroupID, constant.GroupCreator)
-	if err != nil {
-		log.Error(req.Token, req.OperationID, "find group creator failed", err.Error())
-	} else {
-		//Push message when join group chat
-		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-			SendID:      claims.UID,
-			RecvID:      groupCreatorInfo[0].Uid,
-			Content:     content_struct.NewContentStructString(0, "", req.String()),
-			SendTime:    utils.GetCurrentTimestampBySecond(),
-			MsgFrom:     constant.SysMsgType,
-			ContentType: constant.JoinGroupTip,
-			SessionType: constant.SingleChatType,
-			OperationID: req.OperationID,
-		})
-	}
+	////Find the the group owner
+	//groupCreatorInfo, err := im_mysql_model.FindGroupMemberListByGroupIdAndFilterInfo(req.GroupID, constant.GroupCreator)
+	//if err != nil {
+	//	log.Error(req.Token, req.OperationID, "find group creator failed", err.Error())
+	//} else {
+	//	//Push message when join group chat
+	//	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+	//		SendID:      claims.UID,
+	//		RecvID:      groupCreatorInfo[0].Uid,
+	//		Content:     content_struct.NewContentStructString(0, "", req.String()),
+	//		SendTime:    utils.GetCurrentTimestampBySecond(),
+	//		MsgFrom:     constant.SysMsgType,
+	//		ContentType: constant.JoinGroupTip,
+	//		SessionType: constant.SingleChatType,
+	//		OperationID: req.OperationID,
+	//	})
+	//}
 
 	log.Info(req.Token, req.OperationID, "rpc join group success return")
 	return &pbGroup.CommonResp{}, nil

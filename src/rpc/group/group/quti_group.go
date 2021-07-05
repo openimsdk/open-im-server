@@ -2,15 +2,11 @@ package group
 
 import (
 	"Open_IM/src/common/config"
-	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
-	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
-	"encoding/json"
 )
 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) (*pbGroup.CommonResp, error) {
@@ -33,18 +29,18 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		log.ErrorByArgs("this user exit the group failed,err=%s", err.Error())
 		return &pbGroup.CommonResp{ErrorCode: config.ErrQuitGroup.ErrCode, ErrorMsg: config.ErrQuitGroup.ErrMsg}, nil
 	}
-	//Push message when quit group chat
-	jsonInfo, _ := json.Marshal(req)
-	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-		SendID:      claims.UID,
-		RecvID:      req.GroupID,
-		Content:     string(jsonInfo),
-		SendTime:    utils.GetCurrentTimestampBySecond(),
-		MsgFrom:     constant.SysMsgType,
-		ContentType: constant.QuitGroupTip,
-		SessionType: constant.GroupChatType,
-		OperationID: req.OperationID,
-	})
+	////Push message when quit group chat
+	//jsonInfo, _ := json.Marshal(req)
+	//logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+	//	SendID:      claims.UID,
+	//	RecvID:      req.GroupID,
+	//	Content:     string(jsonInfo),
+	//	SendTime:    utils.GetCurrentTimestampBySecond(),
+	//	MsgFrom:     constant.SysMsgType,
+	//	ContentType: constant.QuitGroupTip,
+	//	SessionType: constant.GroupChatType,
+	//	OperationID: req.OperationID,
+	//})
 	log.Info(req.Token, req.OperationID, "rpc quit group is success return")
 	return &pbGroup.CommonResp{}, nil
 }

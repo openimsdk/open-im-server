@@ -5,12 +5,9 @@ import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
-	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
-	"encoding/json"
 )
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.CommonResp, error) {
@@ -34,17 +31,17 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err = im_mysql_model.SetGroupInfo(req.GroupID, req.GroupName, req.Introduction, req.Notification, req.FaceUrl, ""); err != nil {
 		return &pbGroup.CommonResp{ErrorCode: config.ErrSetGroupInfo.ErrCode, ErrorMsg: config.ErrSetGroupInfo.ErrMsg}, nil
 	}
-	//Push message when set group info
-	jsonInfo, _ := json.Marshal(req)
-	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-		SendID:      claims.UID,
-		RecvID:      req.GroupID,
-		Content:     string(jsonInfo),
-		SendTime:    utils.GetCurrentTimestampBySecond(),
-		MsgFrom:     constant.SysMsgType,
-		ContentType: constant.SetGroupInfoTip,
-		SessionType: constant.GroupChatType,
-		OperationID: req.OperationID,
-	})
+	////Push message when set group info
+	//jsonInfo, _ := json.Marshal(req)
+	//logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+	//	SendID:      claims.UID,
+	//	RecvID:      req.GroupID,
+	//	Content:     string(jsonInfo),
+	//	SendTime:    utils.GetCurrentTimestampBySecond(),
+	//	MsgFrom:     constant.SysMsgType,
+	//	ContentType: constant.SetGroupInfoTip,
+	//	SessionType: constant.GroupChatType,
+	//	OperationID: req.OperationID,
+	//})
 	return &pbGroup.CommonResp{}, nil
 }

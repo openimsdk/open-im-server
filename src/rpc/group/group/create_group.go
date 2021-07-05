@@ -5,10 +5,7 @@ import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
-	"Open_IM/src/push/content_struct"
-	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
 	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
@@ -97,17 +94,17 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			log.ErrorByArgs("pull %s to group %s failed,err=%s", user.Uid, groupId, err.Error())
 		}
 	}
-	//Push message when create group chat
-	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-		SendID:      claims.UID,
-		RecvID:      groupId,
-		Content:     content_struct.NewContentStructString(0, "", req.String()),
-		SendTime:    utils.GetCurrentTimestampBySecond(),
-		MsgFrom:     constant.SysMsgType,     //Notification message identification
-		ContentType: constant.CreateGroupTip, //Add friend flag
-		SessionType: constant.GroupChatType,
-		OperationID: req.OperationID,
-	})
+	////Push message when create group chat
+	//logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+	//	SendID:      claims.UID,
+	//	RecvID:      groupId,
+	//	Content:     content_struct.NewContentStructString(0, "", req.String()),
+	//	SendTime:    utils.GetCurrentTimestampBySecond(),
+	//	MsgFrom:     constant.SysMsgType,     //Notification message identification
+	//	ContentType: constant.CreateGroupTip, //Add friend flag
+	//	SessionType: constant.GroupChatType,
+	//	OperationID: req.OperationID,
+	//})
 	log.Info(req.Token, req.OperationID, "rpc create group success return")
 	return &pbGroup.CreateGroupResp{GroupID: groupId}, nil
 }
