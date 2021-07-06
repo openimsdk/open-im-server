@@ -24,7 +24,8 @@ func main() {
 		return
 	}
 	syscall.Dup2(int(logFile.Fd()), int(os.Stderr.Fd()))
-
+	//gin.SetMode(gin.ReleaseMode)
+	//gin.DefaultWriter = ioutil.Discard
 	log.Info("", "", "api server running...")
 	r := gin.Default()
 	r.Use(utils.CorsHandler())

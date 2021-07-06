@@ -62,7 +62,6 @@ func NewLfsHook(rotationTime time.Duration, maxRemainNum uint, moduleName string
 		HideKeys:        false,
 		FieldsOrder:     []string{"PID"},
 	})
-
 	return lfsHook
 }
 func initRotateLogs(rotationTime time.Duration, maxRemainNum uint, level string, moduleName string) *rotatelogs.RotateLogs {

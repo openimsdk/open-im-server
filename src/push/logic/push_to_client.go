@@ -131,9 +131,9 @@ func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
 			return
 		}
 		groupID := m.RecvID
-		for _, v := range reply.MemberList {
+		for i, v := range reply.MemberList {
 			m.RecvID = v.UserId + " " + groupID
-			sendMsgToKafka(m, m.RecvID, "msgKey--recvID+\" \"+groupID")
+			sendMsgToKafka(m, utils.IntToString(i), "msgKey--recvID+\" \"+groupID")
 		}
 	default:
 

@@ -111,9 +111,9 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 				return returnMsg(&replay, pb, reply.ErrorCode, reply.ErrorMsg, "", 0)
 			}
 			groupID := pbData.RecvID
-			for _, v := range reply.MemberList {
+			for i, v := range reply.MemberList {
 				pbData.RecvID = v.UserId + " " + groupID
-				rpc.sendMsgToKafka(&pbData, pbData.RecvID)
+				rpc.sendMsgToKafka(&pbData, utils.IntToString(i))
 			}
 			return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
 		default:

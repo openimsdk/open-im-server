@@ -8,6 +8,7 @@ package logic
 
 import (
 	"Open_IM/src/common/config"
+	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_msg_model"
 	kfk "Open_IM/src/common/kafka"
 	"Open_IM/src/common/log"
@@ -15,6 +16,7 @@ import (
 	"Open_IM/src/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
+	"strings"
 )
 
 type PersistentConsumerHandler struct {
@@ -42,14 +44,23 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey strin
 	//Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(Options, "persistent")
 	//Only process receiver data
-	if isPersist && msgKey == pbData.RecvID {
-		log.InfoByKv("msg_transfer chat persisting", pbData.OperationID)
-		if err = im_mysql_msg_model.InsertMessageToChatLog(pbData); err != nil {
-			log.ErrorByKv("Message insert failed", pbData.OperationID, "err", err.Error(), "chat", pbData.String())
-			return
+	if isPersist {
+		if msgKey == pbData.RecvID && pbData.SessionType == constant.SingleChatType {
+			log.InfoByKv("msg_transfer chat persisting", pbData.OperationID)
+			if err = im_mysql_msg_model.InsertMessageToChatLog(pbData); err != nil {
+				log.ErrorByKv("Message insert failed", pbData.OperationID, "err", err.Error(), "chat", pbData.String())
+				return
+			}
+		} else if pbData.SessionType == constant.GroupChatType && msgKey == "0" {
+			pbData.RecvID = strings.Split(pbData.RecvID, " ")[1]
+			log.InfoByKv("msg_transfer chat persisting", pbData.OperationID)
+			if err = im_mysql_msg_model.InsertMessageToChatLog(pbData); err != nil {
+				log.ErrorByKv("Message insert failed", pbData.OperationID, "err", err.Error(), "chat", pbData.String())
+				return
+			}
 		}
-	}
 
+	}
 }
 func (PersistentConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (PersistentConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
