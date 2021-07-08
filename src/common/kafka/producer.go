@@ -15,15 +15,15 @@ type Producer struct {
 
 func NewKafkaProducer(addr []string, topic string) *Producer {
 	p := Producer{}
-	p.config = sarama.NewConfig()                             //实例化个sarama的Config
-	p.config.Producer.Return.Successes = true                 //是否开启消息发送成功后通知 successes channel
-	p.config.Producer.RequiredAcks = sarama.WaitForAll        //设置生产者 消息 回复等级 0 1 all
-	p.config.Producer.Partitioner = sarama.NewHashPartitioner //过设置 hash-key 自动 hash 分区,在发送消息的时候必须指定消息的key值,如果没有key，则随机选取分区
+	p.config = sarama.NewConfig()                             //Instantiate a sarama Config
+	p.config.Producer.Return.Successes = true                 //Whether to enable the successes channel to be notified after the message is sent successfully
+	p.config.Producer.RequiredAcks = sarama.WaitForAll        //Set producer Message Reply level 0 1 all
+	p.config.Producer.Partitioner = sarama.NewHashPartitioner //Set the hash-key automatic hash partition. When sending a message, you must specify the key value of the message. If there is no key, the partition will be selected randomly
 
 	p.addr = addr
 	p.topic = topic
 
-	producer, err := sarama.NewSyncProducer(p.addr, p.config) //初始化客户端
+	producer, err := sarama.NewSyncProducer(p.addr, p.config) //Initialize the client
 	if err != nil {
 		panic(err)
 		return nil
