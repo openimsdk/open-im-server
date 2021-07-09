@@ -191,7 +191,7 @@ message GetGroupMembersInfoResp {
 
 message KickGroupMemberReq {
   string groupID = 1;
-  repeated string uidList = 2;
+  repeated GroupMemberFullInfo uidList = 2;
   string reason = 3;
   string token = 4;
   string operationID = 5;
