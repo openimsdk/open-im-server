@@ -71,7 +71,7 @@ business data.
       mysql:
         dbAddress: [ 127.0.0.1:3306 ]
       ```
-
+      
     - Check or modify database(MongoDB) connection parameters are correct for your
       database.`No authentication mode if dbUserName and dbPassword is empty  else authentication`
 
@@ -79,16 +79,16 @@ business data.
       mongo:
       dbAddress: [ 127.0.0.1:27017 ]
       ```
-
+      
     - Check or modify Redis connection parameters.`No authentication mode if  dbPassword is empty  else authentication`
-
+   
       ```
       redis:
         dbAddress: [ 127.0.0.1:6379 ]
       ```
-
+      
     - Check or modify Kafka connection parameters.
-
+   
       ```
       kafka:
         ws2mschat:
@@ -96,7 +96,7 @@ business data.
         ms2pschat:
           addr: [ 127.0.0.1:9092 ]
       ```
-
+   
 4. Build and start Service.
 
     1. Shell authorization
@@ -108,13 +108,13 @@ business data.
        ```
 
     2. Execute the build shell
-
+    
        ```
        ./build_all_service.sh
        ```
-
+    
     3. Start service
-
+    
        ```
        ./start_all.sh
        ```
@@ -138,12 +138,12 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 5. Open [docker-compose](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docker-compose.yaml),then modify the
    following parameters,**127.0.0.1 replace with your host IP**.
 
-    - Check or modify docker-compose Kafka connection parameters.
+   - Check or modify docker-compose Kafka connection parameters.
 
-      ```
-       KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
-       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
-      ```
+     ```
+      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+     ```
 
 6. Open [config.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/config/config.yaml),then modify the
    following parameters,**127.0.0.1 replace with your host IP**.
@@ -161,7 +161,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
       mysql:
         dbAddress: [ 127.0.0.1:3306 ]
       ```
-
+      
     - Check or modify database(MongoDB) connection parameters are correct for your
       database.`No authentication mode if dbUserName and dbPassword is empty  else authentication`
 
@@ -169,16 +169,16 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
       mongo:
       dbAddress: [ 127.0.0.1:27017 ]
       ```
-
+      
     - Check or modify Redis connection parameters.`No authentication mode if  dbPassword is empty  else authentication`
-
+   
       ```
       redis:
         dbAddress: [ 127.0.0.1:6379 ]
       ```
-
+      
     - Check or modify Kafka connection parameters.
-
+   
       ```
       kafka:
         ws2mschat:
@@ -193,14 +193,14 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
    docker-compose up -d
    ```
 
-
+   
 
 ### CONFIGURATION INSTRUCTIONS
 >Open-IM configuration is divided into basic component configuration and business internal service configuration. Developers need to fill in the address of each component as the address of their server component when using the product, and ensure that the internal service port of the business is not occupied
 
 #### Basic Component Configuration Instructions
 * **ETCD**
-
+  
     * Etcd is used for the discovery and registration of rpc services, etcd Schema is the prefix of the registered name, it is recommended to modify it to  your company name, etcd address (ip+port) supports clustered deployment, you can fill in multiple ETCD addresses separated by commas, and also only one etcd address.
 * **MySQL**
     * mysql is used for full storage of messages and user relationships. Cluster deployment is not supported for the time being. Modify addresses and users, passwords, and database names.
@@ -216,7 +216,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 * **api&&rpcport&&longconnsvr&&rpcregistername**
     * The api port is the http interface, longconnsvr is the websocket listening port, and rpcport is the internal service startup port. Both support cluster deployment. Make sure that these ports are not used. If you want to open multiple services for a single service, fill in multiple ports separated by commas. rpcregistername is the service name registered by each service to the registry etcd, no need to modify
 * **log&&modulename**
-
+  
     * The log configuration includes the storage path of the log file, and the log is sent to elasticsearch for log viewing. Currently, the log is not supported to be sent to elasticsearch. The configuration does not need to be modified for the time being. The modulename is used to split the log according to the name of the service module. The default configuration is fine.
 * **multiloginpolicy&&tokenpolicy**
     * Open-IM supports multi-terminal login. Currently, there are three multi-terminal login policies. The PC terminal and the mobile terminal are online at the same time by default. When multiple policies are configured to be true, the first policy with true is used by default, and the token policy is the generated token policy. , The developer can customize the expiration time of the token
@@ -246,7 +246,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
     - **Parameter**
 
       | parameter name | required | Type   | Description                                                  |
-            | -------------- | -------- | ------ | ------------------------------------------------------------ |
+      | -------------- | -------- | ------ | ------------------------------------------------------------ |
       | secret         | Y        | string | The secret key used by the app server to connect to the sdk server. The maximum length is 32 characters. It must be ensured that the secret keys of the app server and the sdk server are the same. There is a risk of secret leakage, and it is best to save it on the user server. |
       | platform       | Y        | int    | Platform type iOS 1, Android 2, Windows 3, OSX 4, WEB 5, applet 6, linux 7 |
       | uid            | Y        | string | User ID, with a maximum length of 64 characters, must be unique within an APP |
@@ -283,11 +283,11 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
     - **Parameter**
 
       | parameter name | required | Type   | Description                                                  |
-            | -------------- | -------- | ------ | ------------------------------------------------------------ |
+      | -------------- | -------- | ------ | ------------------------------------------------------------ |
       | secret         | Y        | string | The secret key used by the app server to connect to the sdk server. The maximum length is 32 characters. It must be ensured that the secret keys of the app server and the sdk server are the same. There is a risk of secret leakage, and it is best to save it on the user server. |
       | platform       | Y        | int    | Platform type iOS 1, Android 2, Windows 3, OSX 4, WEB 5, applet 6, linux 7 |
       | uid            | Y        | string | User ID, with a maximum length of 64 characters, must be unique within an APP |
-
+    
     - **Return Parameter**
       ```
       {
@@ -302,7 +302,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
       ```
 
 - **API call description**
-
+  
    ```
    app：app client
    app-server：app server
