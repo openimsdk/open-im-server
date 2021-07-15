@@ -113,8 +113,8 @@ services:
       - 17778:17778
     container_name: open-im-server
     volumes:
-      - /home/Open-IM-server/logs:/home/open_im_server/logs
-      - /home/Open-IM-server/config/config.yaml:/home/open_im_server/config/config.yaml
+      - ./logs:/home/open_im_server/logs
+      - ./config/config.yaml:/home/open_im_server/config/config.yaml
     restart: always
     depends_on:
       - kafka
