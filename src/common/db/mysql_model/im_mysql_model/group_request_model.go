@@ -11,14 +11,14 @@ func InsertIntoGroupRequest(groupId, fromUserId, toUserId, reqMsg, fromUserNickN
 		return err
 	}
 	toInsertInfo := GroupRequest{GroupID: groupId, FromUserID: fromUserId, ToUserID: toUserId, ReqMsg: reqMsg, FromUserNickname: fromUserNickName, FromUserFaceUrl: fromUserFaceUrl, CreateTime: time.Now()}
-	err = dbConn.Table("group_request").Create(toInsertInfo).Error
+	err = dbConn.Table("group_request").Create(&toInsertInfo).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func FindGroupRequestUserInfoByUidAndGroupID(groupId, uid string) (*GroupRequest, error) {
+func FindGroupRequestUserInfoByGroupIDAndUid(groupId, uid string) (*GroupRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err

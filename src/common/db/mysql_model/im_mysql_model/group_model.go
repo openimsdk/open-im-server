@@ -95,7 +95,8 @@ func GetGroupApplicationList(uid string) (*group.GetGroupApplicationListResp, er
 		return &group.GetGroupApplicationListResp{}, nil
 	}
 
-	sql := "select group_id, from_user_id, to_user_id, flag, req_msg, handled_msg, create_time, from_user_nickname, from_user_face_url, handled_user  from `group_request` where  group_id in ( "
+	sql := "select id, group_id, from_user_id, to_user_id, flag, req_msg, handled_msg, create_time, " +
+		"from_user_nickname, to_user_nickname, from_user_face_url, to_user_face_url, handled_user  from `group_request` where  group_id in ( "
 	for i := 0; i < len(gIDs); i++ {
 		if i == len(gIDs)-1 {
 			sql = sql + "\"" + gIDs[i] + "\"" + " )"
@@ -113,8 +114,9 @@ func GetGroupApplicationList(uid string) (*group.GetGroupApplicationListResp, er
 		return nil, err
 	}
 	for rows.Next() {
-		rows.Scan(&groupRequest.GroupID, &groupRequest.FromUserID, &groupRequest.ToUserID, &groupRequest.Flag, &groupRequest.ReqMsg,
-			&groupRequest.HandledMsg, &groupRequest.CreateTime, &groupRequest.FromUserNickname, &groupRequest.FromUserFaceUrl, &groupRequest.HandledUser)
+		rows.Scan(&groupRequest.ID, &groupRequest.GroupID, &groupRequest.FromUserID, &groupRequest.ToUserID, &groupRequest.Flag, &groupRequest.ReqMsg,
+			&groupRequest.HandledMsg, &groupRequest.CreateTime, &groupRequest.FromUserNickname, &groupRequest.ToUserNickname,
+			&groupRequest.FromUserFaceUrl, &groupRequest.ToUserFaceUrl, &groupRequest.HandledUser)
 		groupRequests = append(groupRequests, groupRequest)
 	}
 
@@ -123,14 +125,19 @@ func GetGroupApplicationList(uid string) (*group.GetGroupApplicationListResp, er
 	reply.Data.Count = int32(len(groupRequests))
 	for i := 0; i < int(reply.Data.Count); i++ {
 		addUser := group.GetGroupApplicationList_Data_User{
+			ID:               groupRequests[i].ID,
 			GroupID:          groupRequests[i].GroupID,
 			FromUserID:       groupRequests[i].FromUserID,
-			FromUserNickName: groupRequests[i].FromUserNickname,
+			FromUserNickname: groupRequests[i].FromUserNickname,
 			FromUserFaceUrl:  groupRequests[i].FromUserFaceUrl,
 			ToUserID:         groupRequests[i].ToUserID,
 			AddTime:          groupRequests[i].CreateTime.Unix(),
 			RequestMsg:       groupRequests[i].ReqMsg,
 			HandledMsg:       groupRequests[i].HandledMsg,
+			Flag:             groupRequests[i].Flag,
+			ToUserNickname:   groupRequests[i].ToUserNickname,
+			ToUserFaceUrl:    groupRequests[i].ToUserFaceUrl,
+			HandledUser:      groupRequests[i].HandledUser,
 			Type:             0,
 			HandleStatus:     0,
 			HandleResult:     0,

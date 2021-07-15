@@ -54,6 +54,7 @@ type GroupMember struct {
 }
 
 type GroupRequest struct {
+	ID               string    `gorm:"column:id"`
 	GroupID          string    `gorm:"column:group_id"`
 	FromUserID       string    `gorm:"column:from_user_id"`
 	ToUserID         string    `gorm:"column:to_user_id"`

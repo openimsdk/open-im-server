@@ -11,6 +11,7 @@ import (
 )
 
 const cChat = "chat"
+const cGroup = "group"
 
 type MsgInfo struct {
 	SendTime int64
@@ -22,7 +23,13 @@ type UserChat struct {
 	Msg []MsgInfo
 }
 
+type GroupMember struct {
+	GroupID string
+	UIDList []string
+}
+
 func (d *DataBases) GetUserChat(uid string, seqBegin, seqEnd int64) (SingleMsg []*pbMsg.MsgFormat, GroupMsg []*pbMsg.MsgFormat, MaxSeq int64, MinSeq int64, err error) {
+	count := 0
 	session := d.mgoSession.Clone()
 	if session == nil {
 		return nil, nil, MaxSeq, MinSeq, errors.New("session == nil")
@@ -57,7 +64,7 @@ func (d *DataBases) GetUserChat(uid string, seqBegin, seqEnd int64) (SingleMsg [
 			if pChat.RecvSeq > MaxSeq {
 				MaxSeq = pChat.RecvSeq
 			}
-			if i == 0 {
+			if count == 0 {
 				MinSeq = pChat.RecvSeq
 			}
 			if pChat.RecvSeq < MinSeq {
@@ -68,6 +75,7 @@ func (d *DataBases) GetUserChat(uid string, seqBegin, seqEnd int64) (SingleMsg [
 			} else {
 				GroupMsg = append(GroupMsg, temp)
 			}
+			count++
 		}
 	}
 
@@ -154,4 +162,72 @@ func (d *DataBases) MgoSkipUID(count int) (string, error) {
 	sChat := UserChat{}
 	c.Find(nil).Skip(count).Limit(1).One(&sChat)
 	return sChat.UID, nil
+}
+
+func (d *DataBases) GetGroupMember(groupID string) []string {
+	groupInfo := GroupMember{}
+	groupInfo.GroupID = groupID
+	groupInfo.UIDList = make([]string, 0)
+
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return groupInfo.UIDList
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroup)
+
+	if err := c.Find(bson.M{"groupid": groupInfo.GroupID}).One(&groupInfo); err != nil {
+		return groupInfo.UIDList
+	}
+
+	return groupInfo.UIDList
+}
+
+func (d *DataBases) AddGroupMember(groupID, uid string) error {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroup)
+
+	n, err := c.Find(bson.M{"groupid": groupID}).Count()
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		groupInfo := GroupMember{}
+		groupInfo.GroupID = groupID
+		groupInfo.UIDList = append(groupInfo.UIDList, uid)
+		err = c.Insert(&groupInfo)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = c.Update(bson.M{"groupid": groupID}, bson.M{"$addToSet": bson.M{"uidlist": uid}})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (d *DataBases) DelGroupMember(groupID, uid string) error {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroup)
+
+	if err := c.Update(bson.M{"groupid": groupID}, bson.M{"$pull": bson.M{"uidlist": uid}}); err != nil {
+		return err
+	}
+
+	return nil
 }

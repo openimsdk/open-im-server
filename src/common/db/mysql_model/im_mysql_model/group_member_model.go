@@ -139,6 +139,23 @@ func GetOwnerManagerByGroupId(groupId string) ([]GroupMember, error) {
 	return groupMemberList, nil
 }
 
+func IsExistGroupMember(groupId, uid string) bool {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return false
+	}
+	var number int32
+	err = dbConn.Raw("select count(*) from `group_member` where group_id = ? and uid = ?", groupId, uid).Count(&number).Error
+	if err != nil {
+		return false
+	}
+
+	if number != 1 {
+		return false
+	}
+	return true
+}
+
 func RemoveGroupMember(groupId string, memberId string) error {
 	return DeleteGroupMemberByGroupIdAndUserId(groupId, memberId)
 }
