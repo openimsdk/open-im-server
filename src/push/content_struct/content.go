@@ -57,6 +57,18 @@ type CreateGroupSysMsg struct {
 	Text           string                `json:"text"`
 }
 
+type NotificationContent struct {
+	IsDisplay   int32  `json:"isDisplay"`
+	DefaultTips string `json:"defaultTips"`
+	Detail      string `json:"detail"`
+}
+type KickGroupMemberApiReq struct {
+	GroupID     string   `json:"groupID"`
+	UidList     []string `json:"uidList"`
+	Reason      string   `json:"reason"`
+	OperationID string   `json:"operationID"`
+}
+
 func NewCreateGroupSysMsgString(create *CreateGroupSysMsg, text string) string {
 	create.Text = text
 	jstring, _ := json.Marshal(create)
