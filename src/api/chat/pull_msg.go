@@ -3,11 +3,11 @@ package apiChat
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	"Open_IM/src/proto/chat"
 	"Open_IM/src/utils"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )

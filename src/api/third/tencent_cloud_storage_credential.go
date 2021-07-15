@@ -14,6 +14,9 @@ type paramsTencentCloudStorageCredential struct {
 	OperationID string `json:"operationID"`
 }
 
+var lastTime int64
+var lastRes *sts.CredentialResult
+
 func TencentCloudStorageCredential(c *gin.Context) {
 	params := paramsTencentCloudStorageCredential{}
 	if err := c.BindJSON(&params); err != nil {
@@ -22,6 +25,19 @@ func TencentCloudStorageCredential(c *gin.Context) {
 	}
 
 	log2.Info(params.Token, params.OperationID, "api TencentUpLoadCredential call start...")
+
+	if time.Now().Unix()-lastTime < 10 && lastRes != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"errCode": 0,
+			"errMsg":  "",
+			"region":  config.Config.Credential.Tencent.Region,
+			"bucket":  config.Config.Credential.Tencent.Bucket,
+			"data":    lastRes,
+		})
+		return
+	}
+
+	lastTime = time.Now().Unix()
 
 	cli := sts.NewClient(
 		config.Config.Credential.Tencent.SecretID,
@@ -63,6 +79,8 @@ func TencentCloudStorageCredential(c *gin.Context) {
 		return
 	}
 	log2.Info(c.Request.Header.Get("token"), c.PostForm("optionID"), "api TencentUpLoadCredential cli.GetCredential success res = %v, res.Credentials = %v", res, res.Credentials)
+
+	lastRes = res
 
 	c.JSON(http.StatusOK, gin.H{
 		"errCode": 0,

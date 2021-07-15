@@ -3,10 +3,10 @@ package group
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pb "Open_IM/src/proto/group"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )
@@ -21,7 +21,7 @@ func GetGroupsInfo(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
+	//defer etcdConn.Close()
 
 	params := paramsGetGroupInfo{}
 	if err := c.BindJSON(&params); err != nil {
@@ -40,12 +40,26 @@ func GetGroupsInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	log.InfoByArgs("call get groups info rpc server success,info=%s", RpcResp.String())
+	log.InfoByArgs("call get groups info rpc server success", RpcResp.String())
 	if RpcResp.ErrorCode == 0 {
+		groupsInfo := make([]pb.GroupInfo, 0)
+		for _, v := range RpcResp.Data {
+			var groupInfo pb.GroupInfo
+			groupInfo.GroupId = v.GroupId
+			groupInfo.GroupName = v.GroupName
+			groupInfo.Notification = v.Notification
+			groupInfo.Introduction = v.Introduction
+			groupInfo.FaceUrl = v.FaceUrl
+			groupInfo.CreateTime = v.CreateTime
+			groupInfo.OwnerId = v.OwnerId
+			groupInfo.MemberCount = v.MemberCount
+
+			groupsInfo = append(groupsInfo, groupInfo)
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"errCode": RpcResp.ErrorCode,
 			"errMsg":  RpcResp.ErrorMsg,
-			"data":    RpcResp.Data,
+			"data":    groupsInfo,
 		})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"errCode": RpcResp.ErrorCode, "errMsg": RpcResp.ErrorMsg})

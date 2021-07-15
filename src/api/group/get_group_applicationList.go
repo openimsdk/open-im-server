@@ -3,11 +3,11 @@ package group
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	"Open_IM/src/proto/group"
 	"Open_IM/src/utils"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )
@@ -24,14 +24,19 @@ func newUserRegisterReq(params *paramsGroupApplicationList) *group.GetGroupAppli
 }
 
 type paramsGroupApplicationListRet struct {
+	ID               string `json:"id"`
 	GroupID          string `json:"groupID"`
 	FromUserID       string `json:"fromUserID"`
-	FromUserNickName string `json:"fromUserNickName"`
-	FromUserFaceUrl  string `json:"fromUserFaceUrl"`
 	ToUserID         string `json:"toUserID"`
-	AddTime          int64  `json:"addTime"`
-	RequestMsg       string `json:"requestMsg"`
+	Flag             int32  `json:"flag"`
+	RequestMsg       string `json:"reqMsg"`
 	HandledMsg       string `json:"handledMsg"`
+	AddTime          int64  `json:"createTime"`
+	FromUserNickname string `json:"fromUserNickName"`
+	ToUserNickname   string `json:"toUserNickName"`
+	FromUserFaceUrl  string `json:"fromUserFaceURL"`
+	ToUserFaceUrl    string `json:"toUserFaceURL"`
+	HandledUser      string `json:"handledUser"`
 	Type             int32  `json:"type"`
 	HandleStatus     int32  `json:"handleStatus"`
 	HandleResult     int32  `json:"handleResult"`
@@ -41,7 +46,7 @@ func GetGroupApplicationList(c *gin.Context) {
 	log.Info("", "", "api GetGroupApplicationList init ....")
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := group.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
+	//defer etcdConn.Close()
 
 	params := paramsGroupApplicationList{}
 	if err := c.BindJSON(&params); err != nil {
@@ -67,27 +72,40 @@ func GetGroupApplicationList(c *gin.Context) {
 	}
 	log.Info("", "", "api GetGroupApplicationList call rpc success, [data: %s] [reply: %s]", pbData.String(), reply.String())
 
-	var userReq []paramsGroupApplicationListRet
-	for i := 0; i < len(reply.Data.User); i++ {
-		req := paramsGroupApplicationListRet{}
-		req.GroupID = reply.Data.User[i].GroupID
-		req.FromUserID = reply.Data.User[i].FromUserID
-		req.FromUserNickName = reply.Data.User[i].FromUserNickName
-		req.FromUserFaceUrl = reply.Data.User[i].FromUserFaceUrl
-		req.ToUserID = reply.Data.User[i].ToUserID
-		req.RequestMsg = reply.Data.User[i].RequestMsg
-		req.HandledMsg = reply.Data.User[i].HandledMsg
-		req.Type = reply.Data.User[i].Type
-		req.HandleStatus = reply.Data.User[i].HandleStatus
-		req.HandleResult = reply.Data.User[i].HandleResult
-		userReq = append(userReq, req)
+	unProcessCount := 0
+	userReq := make([]paramsGroupApplicationListRet, 0)
+	if reply != nil && reply.Data != nil && reply.Data.User != nil {
+		for i := 0; i < len(reply.Data.User); i++ {
+			req := paramsGroupApplicationListRet{}
+			req.ID = reply.Data.User[i].ID
+			req.GroupID = reply.Data.User[i].GroupID
+			req.FromUserID = reply.Data.User[i].FromUserID
+			req.ToUserID = reply.Data.User[i].ToUserID
+			req.Flag = reply.Data.User[i].Flag
+			req.RequestMsg = reply.Data.User[i].RequestMsg
+			req.HandledMsg = reply.Data.User[i].HandledMsg
+			req.AddTime = reply.Data.User[i].AddTime
+			req.FromUserNickname = reply.Data.User[i].FromUserNickname
+			req.ToUserNickname = reply.Data.User[i].ToUserNickname
+			req.FromUserFaceUrl = reply.Data.User[i].FromUserFaceUrl
+			req.ToUserFaceUrl = reply.Data.User[i].ToUserFaceUrl
+			req.HandledUser = reply.Data.User[i].HandledUser
+			req.Type = reply.Data.User[i].Type
+			req.HandleStatus = reply.Data.User[i].HandleStatus
+			req.HandleResult = reply.Data.User[i].HandleResult
+			userReq = append(userReq, req)
+
+			if req.Flag == 0 {
+				unProcessCount++
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"errCode": reply.ErrCode,
 		"errMsg":  reply.ErrMsg,
 		"data": gin.H{
-			"count": reply.Data.Count,
+			"count": unProcessCount,
 			"user":  userReq,
 		},
 	})

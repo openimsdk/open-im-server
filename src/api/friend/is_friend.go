@@ -3,10 +3,10 @@ package friend
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/src/proto/friend"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )
@@ -21,7 +21,7 @@ func IsFriend(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := pbFriend.NewFriendClient(etcdConn)
-	defer etcdConn.Close()
+	//defer etcdConn.Close()
 
 	params := paramsIsFriend{}
 	if err := c.BindJSON(&params); err != nil {

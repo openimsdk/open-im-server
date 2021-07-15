@@ -3,10 +3,10 @@ package apiAuth
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbAuth "Open_IM/src/proto/auth"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )
@@ -29,7 +29,7 @@ func UserToken(c *gin.Context) {
 	log.Info("", "", "api user_token init ....")
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.RpcGetTokenName)
 	client := pbAuth.NewAuthClient(etcdConn)
-	defer etcdConn.Close()
+	//defer etcdConn.Close()
 
 	params := paramsUserToken{}
 	if err := c.BindJSON(&params); err != nil {

@@ -7,8 +7,8 @@ import (
 	"Open_IM/src/utils"
 	"context"
 
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )

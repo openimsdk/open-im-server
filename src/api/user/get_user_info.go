@@ -3,10 +3,10 @@ package user
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbUser "Open_IM/src/proto/user"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )
@@ -27,7 +27,7 @@ func GetUserInfo(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
-	defer etcdConn.Close()
+	//defer etcdConn.Close()
 
 	params := paramsStruct{}
 	if err := c.BindJSON(&params); err != nil {

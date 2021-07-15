@@ -7,26 +7,23 @@ import (
 	"Open_IM/src/api/group"
 	apiThird "Open_IM/src/api/third"
 	"Open_IM/src/api/user"
-	"Open_IM/src/common/log"
 	"Open_IM/src/utils"
 	"flag"
 	"github.com/gin-gonic/gin"
-	"os"
 	"strconv"
-	"syscall"
+	//"syscall"
 )
 
 func main() {
 
-	logFile, err := os.OpenFile("./fatal.log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0660)
-	if err != nil {
+	//logFile, err := os.OpenFile("./fatal.log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0660)
+	//	if err != nil {
 
-		return
-	}
-	syscall.Dup2(int(logFile.Fd()), int(os.Stderr.Fd()))
-	//gin.SetMode(gin.ReleaseMode)
-	//gin.DefaultWriter = ioutil.Discard
-	log.Info("", "", "api server running...")
+	//	return
+	//	}
+	//syscall.Dup2(int(logFile.Fd()), int(os.Stderr.Fd()))
+
+	//log.Info("", "", "api server running...")
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
 	// user routing group, which handles user registration and login services

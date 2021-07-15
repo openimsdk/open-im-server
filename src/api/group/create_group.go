@@ -3,17 +3,17 @@ package group
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pb "Open_IM/src/proto/group"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )
 
 type paramsCreateGroupStruct struct {
 	MemberList   []*pb.GroupAddMemberInfo `json:"memberList"`
-	GroupName    string                   `json:"name"`
+	GroupName    string                   `json:"groupName"`
 	Introduction string                   `json:"introduction"`
 	Notification string                   `json:"notification"`
 	FaceUrl      string                   `json:"faceUrl"`
@@ -25,7 +25,7 @@ func CreateGroup(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
+	//defer etcdConn.Close()
 
 	params := paramsCreateGroupStruct{}
 	if err := c.BindJSON(&params); err != nil {

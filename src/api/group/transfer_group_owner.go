@@ -3,11 +3,11 @@ package group
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	"Open_IM/src/proto/group"
 	"Open_IM/src/utils"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )
@@ -31,7 +31,7 @@ func TransferGroupOwner(c *gin.Context) {
 	log.Info("", "", "api TransferGroupOwner init ....")
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := group.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
+	//defer etcdConn.Close()
 
 	params := paramsTransferGroupOwner{}
 	if err := c.BindJSON(&params); err != nil {

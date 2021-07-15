@@ -3,11 +3,11 @@ package group
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pb "Open_IM/src/proto/group"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"net/http"
 	"strings"
 )
@@ -24,10 +24,10 @@ type GetJoinedGroupListReq struct {
 }
 
 type KickGroupMemberReq struct {
-	GroupID     string   `json:"groupID"`
-	UidList     []string `json:"uidList" binding:"required"`
-	Reason      string   `json:"reason"`
-	OperationID string   `json:"operationID" binding:"required"`
+	GroupID     string                    `json:"groupID"`
+	UidListInfo []*pb.GroupMemberFullInfo `json:"uidListInfo" binding:"required"`
+	Reason      string                    `json:"reason"`
+	OperationID string                    `json:"operationID" binding:"required"`
 }
 
 func KickGroupMember(c *gin.Context) {
@@ -35,7 +35,6 @@ func KickGroupMember(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
 
 	params := KickGroupMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -47,7 +46,7 @@ func KickGroupMember(c *gin.Context) {
 		OperationID: params.OperationID,
 		GroupID:     params.GroupID,
 		Token:       c.Request.Header.Get("token"),
-		UidList:     params.UidList,
+		UidListInfo: params.UidListInfo,
 	}
 	log.Info(req.Token, req.OperationID, "recv req: ", req.String())
 
@@ -91,7 +90,6 @@ func GetGroupMembersInfo(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
 
 	params := GetGroupMembersInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -154,7 +152,6 @@ func GetGroupMemberList(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
 
 	params := GetGroupMemberListReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -205,7 +202,6 @@ func GetGroupAllMember(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
 
 	params := getGroupAllMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -264,8 +260,6 @@ func GetJoinedGroupList(c *gin.Context) {
 	fmt.Println("config:    ", etcdConn, config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
 
-	defer etcdConn.Close()
-
 	params := GetJoinedGroupListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -283,6 +277,7 @@ func GetJoinedGroupList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
+	log.Info(req.Token, req.OperationID, "GetJoinedGroupList: ", RpcResp)
 
 	type GetJoinedGroupListResp struct {
 		ErrorCode int32         `json:"errCode"`
@@ -315,7 +310,6 @@ func InviteUserToGroup(c *gin.Context) {
 	log.Info("", "", "InviteUserToGroup start....")
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
-	defer etcdConn.Close()
 
 	params := InviteUserToGroupReq{}
 	if err := c.BindJSON(&params); err != nil {
