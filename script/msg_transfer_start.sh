@@ -16,7 +16,7 @@ fi
 #Waiting port recycling
 sleep 1
 cd ${msg_transfer_binary_root}
-    nohup ./${msg_transfer_name}  >>../logs/${msg_transfer_name}.`date +%Y-%m-%d`.log 2>&1 &
+    nohup ./${msg_transfer_name}  >>../logs/${msg_transfer_name}.log 2>&1 &
 #Check launched service process
 check=`ps aux | grep -w ./${msg_transfer_name} | grep -v grep| wc -l`
 if [ $check -eq 1 ]

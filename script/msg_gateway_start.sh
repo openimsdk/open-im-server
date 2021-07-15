@@ -20,13 +20,13 @@ fi
 check=$(ps aux | grep -w ./${msg_gateway_name} | grep -v grep | wc -l)
 if [ $check -ge 1 ]; then
   oldPid=$(ps aux | grep -w ./${msg_gateway_name} | grep -v grep | awk '{print $2}')
-    kill -9 ${oldPid}
+  kill -9 ${oldPid}
 fi
 #Waiting port recycling
 sleep 3
 cd ${msg_gateway_binary_root}
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
-  nohup ./${msg_gateway_name} -rpc_port ${rpc_ports[$i]} -ws_port ${ws_ports[$i]} >>../logs/${msg_gateway_name}.$(date +%Y-%m-%d).log 2>&1 &
+  nohup ./${msg_gateway_name} -rpc_port ${rpc_ports[$i]} -ws_port ${ws_ports[$i]} >>../logs/${msg_gateway_name}.log 2>&1 &
 done
 
 #Check launched service process
@@ -37,7 +37,7 @@ if [ $check -ge 1 ]; then
   allNewPid=$(ps aux | grep -w ./${msg_gateway_name} | grep -v grep | awk '{print $2}')
   for i in $allNewPid; do
     ports=$(netstat -netulp | grep ${i} | awk '{print $4}' | awk -F '[:]' '{print $NF}')
-      allPorts=${allPorts}"$ports "
+    allPorts=${allPorts}"$ports "
   done
   echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS !!!"${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${YELLOW_PREFIX}${msg_gateway_name}${COLOR_SUFFIX}
