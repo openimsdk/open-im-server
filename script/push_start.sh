@@ -4,8 +4,6 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 
-
-
 list1=$(cat $config_path | grep openImPushPort | awk -F '[:]' '{print $NF}')
 list_to_string $list1
 rpc_ports=($ports_array)
@@ -24,7 +22,6 @@ cd ${push_binary_root}
 for ((i = 0; i < ${#rpc_ports[@]}; i++)); do
   nohup ./${push_name} -port ${rpc_ports[$i]} >>../logs/${push_name}.log 2>&1 &
 done
-
 
 #Check launched service process
 check=$(ps aux | grep -w ./${push_name} | grep -v grep | wc -l)
