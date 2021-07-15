@@ -87,15 +87,15 @@ business data.
         dbAddress: [ 127.0.0.1:6379 ]
       ```
 
-   - Check or modify Kafka connection parameters.
+    - Check or modify Kafka connection parameters.
 
-     ```
-     kafka:
-       ws2mschat:
-         addr: [ 127.0.0.1:9092 ]
-       ms2pschat:
-         addr: [ 127.0.0.1:9092 ]
-     ```
+      ```
+      kafka:
+        ws2mschat:
+          addr: [ 127.0.0.1:9092 ]
+        ms2pschat:
+          addr: [ 127.0.0.1:9092 ]
+      ```
 
 4. Build and start Service.
 
@@ -127,8 +127,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 
 3. [Install Docker Compose](https://docs.docker.com/compose/install/) 1.22 or above.
 
-3. [Download redis configuration](https://redis.io/topics/config)  download the redis configuration file
-   to **`/home/redis/config`**
+3. [Download redis configuration](https://redis.io/topics/config)  download the redis configuration file to **`/home/redis/config`**
 
 4. Git clone Open-IM project
 
@@ -218,7 +217,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
     * The api port is the http interface, longconnsvr is the websocket listening port, and rpcport is the internal service startup port. Both support cluster deployment. Make sure that these ports are not used. If you want to open multiple services for a single service, fill in multiple ports separated by commas. rpcregistername is the service name registered by each service to the registry etcd, no need to modify
 * **log&&modulename**
 
-      * The log configuration includes the storage path of the log file, and the log is sent to elasticsearch for log viewing. Currently, the log is not supported to be sent to elasticsearch. The configuration does not need to be modified for the time being. The modulename is used to split the log according to the name of the service module. The default configuration is fine.
+    * The log configuration includes the storage path of the log file, and the log is sent to elasticsearch for log viewing. Currently, the log is not supported to be sent to elasticsearch. The configuration does not need to be modified for the time being. The modulename is used to split the log according to the name of the service module. The default configuration is fine.
 * **multiloginpolicy&&tokenpolicy**
     * Open-IM supports multi-terminal login. Currently, there are three multi-terminal login policies. The PC terminal and the mobile terminal are online at the same time by default. When multiple policies are configured to be true, the first policy with true is used by default, and the token policy is the generated token policy. , The developer can customize the expiration time of the token
 
@@ -247,7 +246,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
     - **Parameter**
 
       | parameter name | required | Type   | Description                                                  |
-                  | -------------- | -------- | ------ | ------------------------------------------------------------ |
+            | -------------- | -------- | ------ | ------------------------------------------------------------ |
       | secret         | Y        | string | The secret key used by the app server to connect to the sdk server. The maximum length is 32 characters. It must be ensured that the secret keys of the app server and the sdk server are the same. There is a risk of secret leakage, and it is best to save it on the user server. |
       | platform       | Y        | int    | Platform type iOS 1, Android 2, Windows 3, OSX 4, WEB 5, applet 6, linux 7 |
       | uid            | Y        | string | User ID, with a maximum length of 64 characters, must be unique within an APP |
@@ -284,7 +283,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
     - **Parameter**
 
       | parameter name | required | Type   | Description                                                  |
-                  | -------------- | -------- | ------ | ------------------------------------------------------------ |
+            | -------------- | -------- | ------ | ------------------------------------------------------------ |
       | secret         | Y        | string | The secret key used by the app server to connect to the sdk server. The maximum length is 32 characters. It must be ensured that the secret keys of the app server and the sdk server are the same. There is a risk of secret leakage, and it is best to save it on the user server. |
       | platform       | Y        | int    | Platform type iOS 1, Android 2, Windows 3, OSX 4, WEB 5, applet 6, linux 7 |
       | uid            | Y        | string | User ID, with a maximum length of 64 characters, must be unique within an APP |
