@@ -17,14 +17,9 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
 		return &pbGroup.GetGroupsInfoResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
 	}
+	log.Info("", req.OperationID, "args:", req.GroupIDList, claims.UID)
 	groupsInfoList := make([]*pbGroup.GroupInfo, 0)
 	for _, groupID := range req.GroupIDList {
-		//	Get group information to check whether the current user is in the current group
-		_, err = im_mysql_model.FindGroupMemberInfoByGroupIdAndUserId(groupID, claims.UID)
-		if err != nil {
-			log.Error(req.Token, req.OperationID, "find group member failed,err=%s", err.Error())
-			continue
-		}
 		groupInfoFromMysql, err := im_mysql_model.FindGroupInfoByGroupId(groupID)
 		if err != nil {
 			log.Error(req.Token, req.OperationID, "find group info failed,err=%s", err.Error())
@@ -36,6 +31,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		groupInfo.Introduction = groupInfoFromMysql.Introduction
 		groupInfo.Notification = groupInfoFromMysql.Notification
 		groupInfo.FaceUrl = groupInfoFromMysql.FaceUrl
+		groupInfo.OwnerId = im_mysql_model.GetGroupOwnerByGroupId(groupID)
 		groupInfo.MemberCount = uint32(im_mysql_model.GetGroupMemberNumByGroupId(groupID))
 		groupInfo.CreateTime = uint64(groupInfoFromMysql.CreateTime.Unix())
 

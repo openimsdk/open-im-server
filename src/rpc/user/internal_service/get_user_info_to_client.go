@@ -2,9 +2,9 @@ package internal_service
 
 import (
 	"Open_IM/src/common/config"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbUser "Open_IM/src/proto/user"
 	"context"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"strings"
 )
 

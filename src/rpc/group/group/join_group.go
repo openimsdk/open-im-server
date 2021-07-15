@@ -2,7 +2,6 @@ package group
 
 import (
 	"Open_IM/src/common/config"
-	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
 	pbGroup "Open_IM/src/proto/group"
@@ -23,16 +22,14 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		log.Error(req.Token, req.OperationID, "No this user,err=%s", err.Error())
 		return &pbGroup.CommonResp{ErrorCode: config.ErrSearchUserInfo.ErrCode, ErrorMsg: config.ErrSearchUserInfo.ErrMsg}, nil
 	}
-	//todo Actively apply or be invited, apply to join the group and keep a record
-	requestUserInfo, err := im_mysql_model.FindGroupRequestUserInfoByUidAndGroupID(req.GroupID, claims.UID)
+
+	_, err = im_mysql_model.FindGroupRequestUserInfoByGroupIDAndUid(req.GroupID, claims.UID)
 	if err == nil {
-		if requestUserInfo.Flag == constant.AgreeApplication {
-			return &pbGroup.CommonResp{ErrorCode: config.ErrJoinGroupApplication.ErrCode, ErrorMsg: config.ErrJoinGroupApplication.ErrMsg}, nil
-		}
-		if requestUserInfo.Flag == constant.Application {
-			err = im_mysql_model.DelGroupRequest(req.GroupID, claims.UID, "0")
-		}
+		err = im_mysql_model.DelGroupRequest(req.GroupID, claims.UID, "0")
 	}
+
+	log.Info(req.Token, req.OperationID, "args: ", req.GroupID, claims.UID, "0", req.Message, applicationUserInfo.Name, applicationUserInfo.Icon)
+
 	if err = im_mysql_model.InsertIntoGroupRequest(req.GroupID, claims.UID, "0", req.Message, applicationUserInfo.Name, applicationUserInfo.Icon); err != nil {
 		log.Error(req.Token, req.OperationID, "Insert into group request failed,er=%s", err.Error())
 		return &pbGroup.CommonResp{ErrorCode: config.ErrJoinGroupApplication.ErrCode, ErrorMsg: config.ErrJoinGroupApplication.ErrMsg}, nil

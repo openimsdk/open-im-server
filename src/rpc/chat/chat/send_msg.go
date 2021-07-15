@@ -1,16 +1,18 @@
 package rpcChat
 
 import (
+	"Open_IM/src/api/group"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	http2 "Open_IM/src/common/http"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
+	"Open_IM/src/push/content_struct"
 	"Open_IM/src/utils"
 	"context"
 	"encoding/json"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -110,10 +112,37 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 				log.Error(pbData.Token, pbData.OperationID, "rpc send_msg getGroupInfo failed, err = %s", reply.ErrorMsg)
 				return returnMsg(&replay, pb, reply.ErrorCode, reply.ErrorMsg, "", 0)
 			}
+			var addUidList []string
+			switch pbData.ContentType {
+			case constant.KickGroupMemberTip:
+				var notification content_struct.NotificationContent
+				var kickContent group.KickGroupMemberReq
+				err := utils.JsonStringToStruct(pbData.Content, &notification)
+				if err != nil {
+					log.ErrorByKv("json unmarshall err", pbData.OperationID, "err", err.Error())
+					return returnMsg(&replay, pb, 200, err.Error(), "", 0)
+				} else {
+					err := utils.JsonStringToStruct(notification.Detail, &kickContent)
+					if err != nil {
+						log.ErrorByKv("json unmarshall err", pbData.OperationID, "err", err.Error())
+						return returnMsg(&replay, pb, 200, err.Error(), "", 0)
+					}
+					for _, v := range kickContent.UidListInfo {
+						addUidList = append(addUidList, v.UserId)
+					}
+				}
+			case constant.QuitGroupTip:
+				addUidList = append(addUidList, pbData.SendID)
+			default:
+			}
 			groupID := pbData.RecvID
 			for i, v := range reply.MemberList {
 				pbData.RecvID = v.UserId + " " + groupID
 				rpc.sendMsgToKafka(&pbData, utils.IntToString(i))
+			}
+			for i, v := range addUidList {
+				pbData.RecvID = v + " " + groupID
+				rpc.sendMsgToKafka(&pbData, utils.IntToString(i+1))
 			}
 			return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
 		default:

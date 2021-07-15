@@ -3,9 +3,9 @@ package rpcAuth
 import (
 	"Open_IM/src/common/config"
 	log2 "Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbAuth "Open_IM/src/proto/auth"
 	"Open_IM/src/utils"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"

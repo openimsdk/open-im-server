@@ -3,12 +3,14 @@ package group
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
+	"Open_IM/src/common/db"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbGroup "Open_IM/src/proto/group"
 	"Open_IM/src/utils"
 	"context"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
+	"fmt"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
@@ -74,7 +76,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
 	}
 	//Time stamp + MD5 to generate group chat id
-	groupId = utils.Md5(strconv.FormatInt(time.Now().Unix(), 10))
+	groupId = utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
 	err = im_mysql_model.InsertIntoGroup(groupId, req.GroupName, req.Introduction, req.Notification, req.FaceUrl)
 	if err != nil {
 		log.ErrorByKv("create group chat failed", req.OperationID, "err=%s", err.Error())
@@ -82,16 +84,37 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 
 	//Add the group owner to the group first, otherwise the group creation will fail
-	err = im_mysql_model.InsertIntoGroupMember(groupId, claims.UID, "", "", constant.GroupCreator)
+	us, err := im_mysql_model.FindUserByUID(claims.UID)
+	if err != nil {
+		log.Error("", req.OperationID, "find userInfo failed", err.Error())
+		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+	}
+	err = im_mysql_model.InsertIntoGroupMember(groupId, claims.UID, us.Name, us.Icon, constant.GroupOwner)
 	if err != nil {
 		log.Error("", req.OperationID, "create group chat failed,err=%s", err.Error())
 		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
 	}
+
+	err = db.DB.AddGroupMember(groupId, claims.UID)
+	if err != nil {
+		log.Error("", "", "create mongo group member failed, db.DB.AddGroupMember fail [err: %s]", err.Error())
+		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+	}
+
 	//Binding group id and member id
 	for _, user := range req.MemberList {
-		err = im_mysql_model.InsertIntoGroupMember(groupId, user.Uid, "", "", user.SetRole)
+		us, err := im_mysql_model.FindUserByUID(user.Uid)
+		if err != nil {
+			log.Error("", req.OperationID, "find userInfo failed,uid=%s", user.Uid, err.Error())
+			continue
+		}
+		err = im_mysql_model.InsertIntoGroupMember(groupId, user.Uid, us.Name, us.Icon, user.SetRole)
 		if err != nil {
 			log.ErrorByArgs("pull %s to group %s failed,err=%s", user.Uid, groupId, err.Error())
+		}
+		err = db.DB.AddGroupMember(groupId, user.Uid)
+		if err != nil {
+			log.Error("", "", "add mongo group member failed, db.DB.AddGroupMember fail [err: %s]", err.Error())
 		}
 	}
 	////Push message when create group chat
@@ -106,5 +129,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	//	OperationID: req.OperationID,
 	//})
 	log.Info(req.Token, req.OperationID, "rpc create group success return")
+
+	t := db.DB.GetGroupMember(groupId)
+	fmt.Println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
+	fmt.Println(t)
+
 	return &pbGroup.CreateGroupResp{GroupID: groupId}, nil
 }
