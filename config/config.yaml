@@ -10,7 +10,7 @@ etcd:
 mysql:
   dbMysqlAddress: [ 127.0.0.1:3306 ]
   dbMysqlUserName: root
-  dbMysqlPassword: 123456
+  dbMysqlPassword: openIM
   dbMysqlDatabaseName: openIM
   dbTableName: eMsg
   dbMsgTableNum: 1
@@ -34,7 +34,7 @@ redis:
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
-  dbPassWord:
+  dbPassWord: openIM
 
 kafka:
   ws2mschat:
@@ -93,7 +93,7 @@ log:
   rotationTime: 12
   remainRotationCount: 10
   elasticSearchSwitch: false
-  elasticSearchAddr: [ 47.112.160.66:9201 ]
+  elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
   elasticSearchPassword: ""
 
