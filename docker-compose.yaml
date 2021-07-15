@@ -9,10 +9,10 @@ services:
     container_name: mysql
     volumes:
       - /home/mysql/data:/var/lib/mysql
+      - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
     environment:
-      MYSQL_ROOT_PASSWORD: "123456"
-      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: openIM
     restart: always
 
   mongodb:
@@ -39,7 +39,7 @@ services:
     restart: always
     sysctls:
       net.core.somaxconn: 1024
-    command: 'redis-server /usr/local/redis/config/redis.conf'
+    command: redis-server /usr/local/redis/config/redis.conf
 
 
   zookeeper:
@@ -76,10 +76,10 @@ services:
       - 2380:2380
     container_name: etcd
     volumes:
+      - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
     environment:
       ETCDCTL_API: 3
-      TZ: Asia/Shanghai
     restart: always
     command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
