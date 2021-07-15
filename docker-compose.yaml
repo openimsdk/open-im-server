@@ -1,4 +1,5 @@
 version: "3"
+#fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
 
 services:
   mysql:
@@ -8,17 +9,21 @@ services:
     container_name: mysql
     volumes:
       - /home/mysql/data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime
     environment:
       MYSQL_ROOT_PASSWORD: "123456"
+      TZ: Asia/Shanghai
     restart: always
 
   mongodb:
-    image: mongo:latest
+    image: mongo
     ports:
       - 27017:27017
     container_name: mongo
     volumes:
       - /home/mongodb/data:/data/db
+    environment:
+      TZ: Asia/Shanghai
     restart: always
 
   redis:
@@ -28,7 +33,14 @@ services:
     container_name: redis
     volumes:
       - /home/redis/data:/data
+      - /home/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+    environment:
+      TZ: Asia/Shanghai
     restart: always
+    sysctls:
+      net.core.somaxconn: 1024
+    command: 'redis-server /usr/local/redis/config/redis.conf'
+
 
   zookeeper:
     image: wurstmeister/zookeeper
@@ -37,6 +49,8 @@ services:
     container_name: zookeeper
     volumes:
       - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Shanghai
     restart: always
 
 
@@ -45,69 +59,66 @@ services:
     ports:
       - 9092:9092
     container_name: kafka
-    volumes:
-      - /etc/localtime:/etc/localtime
     restart: always
     environment:
-      KAFKA_BROKER_ID: "0"
-      KAFKA_ZOOKEEPER_CONNECT: "127.0.0.1:2181"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://127.0.0.1:9092"
-      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092"
+      TZ: Asia/Shanghai
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
     depends_on:
       - zookeeper
 
   etcd:
-    image: quay.io/coreos/etcd:v3.2.32
+    image: quay.io/coreos/etcd
     ports:
       - 2379:2379
       - 2380:2380
-    container_name: etcd-v3.2.32
+    container_name: etcd
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      ETCDCTL_API: 3
+      TZ: Asia/Shanghai
     restart: always
-    command:
-      - "/usr/local/bin/etcd"
-      - "--name s1"
-      - "--data-dir /etcd-data"
-      - "--listen-client-urls http://0.0.0.0:2379"
-      - "--advertise-client-urls http://0.0.0.0:2379"
-      - "--listen-peer-urls http://0.0.0.0:2380"
-      - "--initial-advertise-peer-urls http://0.0.0.0:2380"
-      - "--initial-cluster s1=http://0.0.0.0:2380"
-      - "--initial-cluster-token tkn"
-      - "--initial-cluster-state new"
+    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
 
+  #fixme-----build from dockerfile---------
+  #  open-im-server:
+  #      image: open_im_server
+  #      ports:
+  #        - 10000:10000
+  #        - 17778:17778
+  #      container_name: open-im-server
+  #      volumes:
+  #        - /home/Open-IM-server/logs:/home/open_im_server/logs
+  #        - /home/Open-IM-server/config/config.yaml:/home/open_im_server/config/config.yaml
+  #      restart: always
+  #      build:
+  #        context: .
+  #        dockerfile: deploy.Dockerfile
+  #      depends_on:
+  #        - mysql
+  #        - mongodb
+  #        - redis
+  #        - kafka
+  #        - etcd
+
+  #fixme----build from docker hub------
   open-im-server:
-    image: lyt1123/open_im_server:1.2
+    image: lyt1123/open_im_server
     ports:
       - 10000:10000
       - 17778:17778
     container_name: open-im-server
     volumes:
-      - /home/open_im_server/logs:/home/open_im_server/logs
-      - /home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml
+      - /home/Open-IM-server/logs:/home/open_im_server/logs
+      - /home/Open-IM-server/config/config.yaml:/home/open_im_server/config/config.yaml
     restart: always
     depends_on:
+      - kafka
       - mysql
       - mongodb
       - redis
-      - kafka
       - etcd
-
-#fixme build from dockerfile
-#    open-im-server:
-#      ports:
-#        - 10000:10000
-#        - 17778:17778
-#      volumes:
-#        - /home/open_im_server/logs:/home/open_im_server/logs
-#        - /home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml
-#      restart: always
-#      build:
-#        context: .
-#        dockerfile: deploy.Dockerfile
-#      depends_on:
-#        - mysql
-#        - mongodb
-#        - redis
-#        - kafka
-#        - etcd
