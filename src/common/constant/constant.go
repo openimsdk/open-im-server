@@ -4,7 +4,7 @@ const (
 
 	//group admin
 	OrdinaryMember = 0
-	GroupCreator   = 1
+	GroupOwner     = 1
 	Administrator  = 2
 	//group application
 	Application      = 0
@@ -42,18 +42,16 @@ const (
 
 	KickOnlineTip = 303
 
-	TransferGroupOwnerTip           = 501
-	CreateGroupTip                  = 502
-	GroupApplicationResponseTip     = 503
-	JoinGroupTip                    = 504
-	QuitGroupTip                    = 505
-	SetGroupInfoTip                 = 506
-	AcceptGroupApplicationTip       = 507
-	RefuseGroupApplicationTip       = 508
-	KickGroupMemberTip              = 509
-	InviteUserToGroupTip            = 510
-	AcceptGroupApplicationResultTip = 511
-	RefuseGroupApplicationResultTip = 512
+	TransferGroupOwnerTip       = 501
+	CreateGroupTip              = 502
+	GroupApplicationResponseTip = 503
+	JoinGroupTip                = 504
+	QuitGroupTip                = 505
+	SetGroupInfoTip             = 506
+	AcceptGroupApplicationTip   = 507
+	RefuseGroupApplicationTip   = 508
+	KickGroupMemberTip          = 509
+	InviteUserToGroupTip        = 510
 
 	//MsgFrom
 	UserMsgType = 100
