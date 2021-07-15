@@ -45,7 +45,7 @@ business data.
 
 #### Building from Source
 
-> Open-IM relies on five open source high-performance components: **ETCD**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM-Server privately, please make sure that you have installed the above five components and **check the component  connection parameters** in the configuration file. you must install the missing components first,If your server does not have the above components. **It is recommended to use it directly, if you have the above components, if not, Docker installation is recommended, which is faster and more convenient**.
+> Open-IM relies on five open source high-performance components: **ETCD**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM-Server privately, please make sure that you have installed the above five components and **check the component  connection parameters** in the configuration file. you must install the missing components first,If your server does not have the above components. **It is recommended to use it directly, if you have the above components, if not, Docker-compose is recommended, which you don't need to install dependenciesis  and more convenient**.
 
 1. Install [Go environment](https://golang.org/doc/install). Make sure Go version is at least 1.15.
 
@@ -56,7 +56,7 @@ business data.
    ```
 
 3. Open [config.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/config/config.yaml),then modify the
-   following parameters.
+   following parameters,**127.0.0.1 replace with your host IP**.
 
     - Check or modify the Etcd connection parameters.
 
@@ -70,9 +70,6 @@ business data.
       ```
       mysql:
         dbAddress: [ 127.0.0.1:3306 ]
-        dbUserName: xxx
-        dbPassword: xxx
-        dbDatabaseName: openIM
       ```
 
     - Check or modify database(MongoDB) connection parameters are correct for your
@@ -81,8 +78,6 @@ business data.
       ```
       mongo:
       dbAddress: [ 127.0.0.1:27017 ]
-        dbUserName:
-        dbPassword:
       ```
 
     - Check or modify Redis connection parameters.`No authentication mode if  dbPassword is empty  else authentication`
@@ -90,7 +85,97 @@ business data.
       ```
       redis:
         dbAddress: [ 127.0.0.1:6379 ]
-        dbPassWord: 
+      ```
+
+   - Check or modify Kafka connection parameters.
+
+     ```
+     kafka:
+       ws2mschat:
+         addr: [ 127.0.0.1:9092 ]
+       ms2pschat:
+         addr: [ 127.0.0.1:9092 ]
+     ```
+
+4. Build and start Service.
+
+    1. Shell authorization
+
+       ```
+       #cd Open-IM-server/scrip
+       
+       chmod +x *.sh
+       ```
+
+    2. Execute the build shell
+
+       ```
+       ./build_all_service.sh
+       ```
+
+    3. Start service
+
+       ```
+       ./start_all.sh
+       ```
+
+#### Using Docker to run Open-IM-Server(One-click deployment)
+
+All images are available at https://hub.docker.com/r/lyt1123/open_im_server
+
+1. [Install Docker](https://docs.docker.com/install/) 1.13 or above.
+
+3. [Install Docker Compose](https://docs.docker.com/compose/install/) 1.22 or above.
+
+3. [Download redis configuration](https://redis.io/topics/config)  download the redis configuration file
+   to **`/home/redis/config`**
+
+4. Git clone Open-IM project
+
+   ```
+   git clone https://github.com/OpenIMSDK/Open-IM-Server.git
+   ```
+
+5. Open [docker-compose](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docker-compose.yaml),then modify the
+   following parameters,**127.0.0.1 replace with your host IP**.
+
+    - Check or modify docker-compose Kafka connection parameters.
+
+      ```
+       KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      ```
+
+6. Open [config.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/config/config.yaml),then modify the
+   following parameters,**127.0.0.1 replace with your host IP**.
+
+    - Check or modify the Etcd connection parameters.
+
+      ```
+      etcd:
+        etcdAddr: [ 127.0.0.1:2379 ]
+      ```
+
+    - Check or modify database(MySQL) connection parameters are correct for your database.
+
+      ```
+      mysql:
+        dbAddress: [ 127.0.0.1:3306 ]
+      ```
+
+    - Check or modify database(MongoDB) connection parameters are correct for your
+      database.`No authentication mode if dbUserName and dbPassword is empty  else authentication`
+
+      ```
+      mongo:
+      dbAddress: [ 127.0.0.1:27017 ]
+      ```
+
+    - Check or modify Redis connection parameters.`No authentication mode if  dbPassword is empty  else authentication`
+
+      ```
+      redis:
+        dbAddress: [ 127.0.0.1:6379 ]
       ```
 
     - Check or modify Kafka connection parameters.
@@ -103,138 +188,20 @@ business data.
           addr: [ 127.0.0.1:9092 ]
       ```
 
-4. Database initializer:
-
-- **MySQL**
-
-    1. Shell authorization
-
-       ```
-       chmod +x *.sh
-       ```
-
-    2. Enter the script directory and execute `mysql_database_init.sh`
-
-       ```
-       #1.Enter the directory 
-       cd Open-IM-server/scrip
-       
-       #2.execute the shell
-       ./mysql_database_init.sh
-       ```
-
-5. Build and start Service.
-
-    1. Execute the build shell
-
-       ```
-       ./build_all_service.sh
-       ```
-
-    2. Start service
-
-       ```
-       ./start_all.sh
-       ```
-
-#### Using Docker to run Open-IM-Server
-
-> Open-IM relies on five open source high-performance components: **ETCD**, **MySQL**, **MongoDB**, **Redis**, **Kafka**. Before you deploy Open-IM-Server privately, please make sure that you have installed the above five components and **check the component  connection parameters** in the configuration file. you must install the missing components first,If your server does not have the above components. **It is recommended to use it directly, if you have the above components, if not, Docker installation is recommended, which is faster and more convenient**.
-
-All images are available at https://hub.docker.com/r/lyt1123/open_im_server
-
-1. [Install Docker](https://docs.docker.com/install/) 1.13 or above.
-
-3. Pull Open_IM_Server Image from docker
+7. Start docker-compose with one click(Docker automatically pulls all images)
 
    ```
-   docker pull docker.io/lyt1123/open_im_server:[tag]
-   #eg
-   docker pull docker.io/lyt1123/open_im_server:1.0
+   docker-compose up -d
    ```
 
-3. External config file,the container comes with a built-in config file which can be customized with values from the
-   environment variables .**If changes are extensive it may be more convenient to replace the built-in config file with
-   a custom one**. In that case map the config file located on your host.
 
-    - Create configuration folder directory
-
-      ```
-      mkdir -p open_im_server/config
-      ```
-
-    - Download the  [config.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/config/config.yaml) file from
-      github, then modify the following parameters
-
-        - Check or modify the ETCD connection parameters.
-
-      ```
-      etcd:
-        etcdAddr: [ 127.0.0.1:2379 ]
-      ```
-
-        - Check or modify database(MySQL) connection parameters are correct for your database.
-
-      ```
-      mysql:
-        dbAddress: [ 127.0.0.1:3306 ]
-        dbUserName: xxx
-        dbPassword: xxx
-      ```
-
-        - Check or modify database(MongoDB) connection parameters are correct for your
-          database.`No authentication mode if dbUserName and dbPassword is empty  else authentication`
-
-      ```
-      mongo:
-      dbAddress: [ 127.0.0.1:27017 ]
-        dbUserName:
-        dbPassword:
-      ```
-
-        - Check or modify the Redis connection
-          parameters.`No authentication mode if  dbPassword is empty  else authentication`
-
-      ```
-      redis:
-        dbAddress: [ 127.0.0.1:6379 ]
-        dbPassWord: 
-      ```
-
-        - Check or modify the Kafka connection parameters.
-
-      ```
-      kafka:
-        ws2mschat:
-          addr: [ 127.0.0.1:9092 ]
-        ms2pschat:
-          addr: [ 127.0.0.1:9092 ]
-      ```
-
-4. Upload the [config.yaml](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/config/config.yaml)  file that you
-   modified to the **open_im_server/config** that you create in the server.
-
-5. Start Open-IM-Server image
-
-   ```
-   docker run -p 10000:10000 -p 17778:17778 --name open_im_server -v /home/open_im_server/logs:/home/open_im_server/logs -v /home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml --restart always -d docker.io/lyt1123/open_im_server:1.0
-   ```
-
-    - -p `10000:10000`    The container port maps the host 10000 port, provides api service.
-    - -p  `17778:17778`    The container port maps the host 17778 port, provides message services.
-    - --name `open_im_server`   Container service name
-    - -v `/home/open_im_server/logs:/home/open_im_server/logs`    The container log directory maps the host directory
-    - -v `/home/open_im_server/config/config.yaml:/home/open_im_server/config/config.yaml`    The container
-      configuration file maps the host configuration file
-    - --restart `always`    Automatically start when the container is closed abnormally
-    - -d Running service in the background
 
 ### CONFIGURATION INSTRUCTIONS
 >Open-IM configuration is divided into basic component configuration and business internal service configuration. Developers need to fill in the address of each component as the address of their server component when using the product, and ensure that the internal service port of the business is not occupied
 
 #### Basic Component Configuration Instructions
 * **ETCD**
-  
+
     * Etcd is used for the discovery and registration of rpc services, etcd Schema is the prefix of the registered name, it is recommended to modify it to  your company name, etcd address (ip+port) supports clustered deployment, you can fill in multiple ETCD addresses separated by commas, and also only one etcd address.
 * **MySQL**
     * mysql is used for full storage of messages and user relationships. Cluster deployment is not supported for the time being. Modify addresses and users, passwords, and database names.
@@ -250,8 +217,8 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 * **api&&rpcport&&longconnsvr&&rpcregistername**
     * The api port is the http interface, longconnsvr is the websocket listening port, and rpcport is the internal service startup port. Both support cluster deployment. Make sure that these ports are not used. If you want to open multiple services for a single service, fill in multiple ports separated by commas. rpcregistername is the service name registered by each service to the registry etcd, no need to modify
 * **log&&modulename**
-    
-    * The log configuration includes the storage path of the log file, and the log is sent to elasticsearch for log viewing. Currently, the log is not supported to be sent to elasticsearch. The configuration does not need to be modified for the time being. The modulename is used to split the log according to the name of the service module. The default configuration is fine.
+
+      * The log configuration includes the storage path of the log file, and the log is sent to elasticsearch for log viewing. Currently, the log is not supported to be sent to elasticsearch. The configuration does not need to be modified for the time being. The modulename is used to split the log according to the name of the service module. The default configuration is fine.
 * **multiloginpolicy&&tokenpolicy**
     * Open-IM supports multi-terminal login. Currently, there are three multi-terminal login policies. The PC terminal and the mobile terminal are online at the same time by default. When multiple policies are configured to be true, the first policy with true is used by default, and the token policy is the generated token policy. , The developer can customize the expiration time of the token
 
@@ -267,7 +234,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
     * Total script, start all services and close all services
 
 ### Server-side authentication api graphic explanation of the login authentication process
-   
+
 - **User Register**
     - **Request URL**
        ```
@@ -280,7 +247,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
     - **Parameter**
 
       | parameter name | required | Type   | Description                                                  |
-      | -------------- | -------- | ------ | ------------------------------------------------------------ |
+                  | -------------- | -------- | ------ | ------------------------------------------------------------ |
       | secret         | Y        | string | The secret key used by the app server to connect to the sdk server. The maximum length is 32 characters. It must be ensured that the secret keys of the app server and the sdk server are the same. There is a risk of secret leakage, and it is best to save it on the user server. |
       | platform       | Y        | int    | Platform type iOS 1, Android 2, Windows 3, OSX 4, WEB 5, applet 6, linux 7 |
       | uid            | Y        | string | User ID, with a maximum length of 64 characters, must be unique within an APP |
@@ -317,11 +284,11 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
     - **Parameter**
 
       | parameter name | required | Type   | Description                                                  |
-      | -------------- | -------- | ------ | ------------------------------------------------------------ |
+                  | -------------- | -------- | ------ | ------------------------------------------------------------ |
       | secret         | Y        | string | The secret key used by the app server to connect to the sdk server. The maximum length is 32 characters. It must be ensured that the secret keys of the app server and the sdk server are the same. There is a risk of secret leakage, and it is best to save it on the user server. |
       | platform       | Y        | int    | Platform type iOS 1, Android 2, Windows 3, OSX 4, WEB 5, applet 6, linux 7 |
       | uid            | Y        | string | User ID, with a maximum length of 64 characters, must be unique within an APP |
-    
+
     - **Return Parameter**
       ```
       {
@@ -336,7 +303,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
       ```
 
 - **API call description**
-   
+
    ```
    app：app client
    app-server：app server
@@ -347,7 +314,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 - **Authentication Clow Chart**
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png)
-  
+
 ## Architecture
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Architecture.jpg)
