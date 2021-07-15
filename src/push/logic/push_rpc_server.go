@@ -3,11 +3,11 @@ package logic
 import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	"Open_IM/src/proto/push"
 	pbRelay "Open_IM/src/proto/relay"
 	"Open_IM/src/utils"
 	"context"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"google.golang.org/grpc"
 	"net"
 	"strings"

@@ -80,23 +80,40 @@ func (ws *WServer) writeMsg(conn *websocket.Conn, a int, msg []byte) error {
 func (ws *WServer) addUserConn(uid string, conn *websocket.Conn) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
+	if oldConn, ok := ws.wsUserToConn[uid]; ok {
+		err := oldConn.Close()
+		delete(ws.wsConnToUser, oldConn)
+		if err != nil {
+			log.ErrorByKv("close err", "", "uid", uid, "conn", conn)
+		}
+	} else {
+		log.InfoByKv("this user is first login", "", "uid", uid)
+	}
 	ws.wsConnToUser[conn] = uid
 	ws.wsUserToConn[uid] = conn
-	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "uid", uid)
+	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "uid", uid, "online_num", len(ws.wsUserToConn))
 
 }
 
 func (ws *WServer) delUserConn(conn *websocket.Conn) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
+	var uidPlatform string
 	if uid, ok := ws.wsConnToUser[conn]; ok {
+		uidPlatform = uid
 		if _, ok = ws.wsUserToConn[uid]; ok {
 			delete(ws.wsUserToConn, uid)
-			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "uid", uid)
+			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "uid", uid, "online_num", len(ws.wsUserToConn))
+		} else {
+			log.WarnByKv("uid not exist", "", "wsUser deleted", ws.wsUserToConn, "uid", uid, "online_num", len(ws.wsUserToConn))
 		}
 		delete(ws.wsConnToUser, conn)
 	}
-	conn.Close()
+	err := conn.Close()
+	if err != nil {
+		log.ErrorByKv("close err", "", "uid", uidPlatform, "conn", conn)
+	}
+
 }
 
 func (ws *WServer) getUserConn(uid string) *websocket.Conn {

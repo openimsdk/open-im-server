@@ -5,14 +5,13 @@ import (
 	"Open_IM/src/common/constant"
 	kfk "Open_IM/src/common/kafka"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbMsg "Open_IM/src/proto/chat"
 	pbPush "Open_IM/src/proto/push"
-	"Open_IM/src/push/content_struct"
 	"Open_IM/src/utils"
 	"context"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"strings"
 )
 
@@ -87,17 +86,6 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 	} else if pbData.SessionType == constant.GroupChatType {
 		log.Info("", "", "msg_transfer chat type = GroupChatType")
 		uidAndGroupID := strings.Split(pbData.RecvID, " ")
-		if pbData.ContentType == constant.AtText {
-			atContent := content_struct.AtTextContent{
-				Text:       pbData.Content,
-				AtUserList: pbData.ForceList,
-			}
-			if utils.IsContain(uidAndGroupID[0], pbData.ForceList) {
-				atContent.IsAtSelf = true
-			}
-			pbSaveData.Content = utils.StructToJsonString(atContent)
-		}
-
 		saveUserChat(uidAndGroupID[0], &pbSaveData)
 		pbSaveData.Options = pbData.Options
 		pbSaveData.OfflineInfo = pbData.OfflineInfo
@@ -148,7 +136,6 @@ func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
 	}
 	msgClient := pbPush.NewPushMsgServiceClient(grpcConn)
 	_, err := msgClient.PushMsg(context.Background(), &msg)
-	defer grpcConn.Close()
 	if err != nil {
 		log.ErrorByKv("rpc send failed", msg.OperationID, "push data", msg.String(), "err", err.Error())
 		pid, offset, err := producer.SendMessage(message)

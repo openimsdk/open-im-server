@@ -10,6 +10,7 @@ import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/log"
+	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
 	pbRelay "Open_IM/src/proto/relay"
@@ -20,7 +21,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/skiffer-git/grpc-etcdv3/getcdv3"
 	"strings"
 )
 
