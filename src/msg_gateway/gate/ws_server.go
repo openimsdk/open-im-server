@@ -59,7 +59,7 @@ func (ws *WServer) readMsg(conn *websocket.Conn) {
 	for {
 		msgType, msg, err := conn.ReadMessage()
 		if err != nil {
-			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err)
+			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err, "conn", conn)
 			ws.delUserConn(conn)
 			return
 		} else {
