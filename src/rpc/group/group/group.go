@@ -135,10 +135,6 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		logic.SendMsgByWS(&chatMsg)
 	*/
 
-	t := db.DB.GetGroupMember(req.GroupID)
-	fmt.Println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-	fmt.Println(t)
-
 	return &resp, nil
 }
 
@@ -288,9 +284,6 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 	*/
 
-	t := db.DB.GetGroupMember(req.GroupID)
-	fmt.Println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-	fmt.Println(t)
 
 	resp.ErrorCode = 0
 	return &resp, nil

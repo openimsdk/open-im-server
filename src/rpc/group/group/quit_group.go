@@ -8,7 +8,6 @@ import (
 	pbGroup "Open_IM/src/proto/group"
 	"Open_IM/src/utils"
 	"context"
-	"fmt"
 )
 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) (*pbGroup.CommonResp, error) {
@@ -51,10 +50,6 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	//	OperationID: req.OperationID,
 	//})
 	log.Info(req.Token, req.OperationID, "rpc quit group is success return")
-
-	t := db.DB.GetGroupMember(req.GroupID)
-	fmt.Println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-	fmt.Println(t)
 
 	return &pbGroup.CommonResp{}, nil
 }
