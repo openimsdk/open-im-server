@@ -37,4 +37,4 @@ COPY --from=build /home/Open-IM-Server/bin /home/Open-IM-Server/bin
 WORKDIR /home/Open-IM-Server/script
 
 # "&& tail -f /dev/null " Prevent the container exit after the command is executed
-CMD ["./start_all.sh","tail -f /dev/null"]
+CMD ["./start_all.sh && tail -f /dev/null"]
