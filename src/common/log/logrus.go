@@ -32,7 +32,7 @@ func loggerInit(moduleName string) *Logger {
 	logger.SetLevel(logrus.TraceLevel)
 	//Log Style Setting
 	logger.SetFormatter(&nested.Formatter{
-		TimestampFormat: "2006-01-02 15:04:05",
+		TimestampFormat: "2006-01-02 15:04:05.000",
 		HideKeys:        false,
 		FieldsOrder:     []string{"PID"},
 	})
@@ -58,7 +58,7 @@ func NewLfsHook(rotationTime time.Duration, maxRemainNum uint, moduleName string
 		logrus.WarnLevel:  initRotateLogs(rotationTime, maxRemainNum, "warn", moduleName),
 		logrus.ErrorLevel: initRotateLogs(rotationTime, maxRemainNum, "error", moduleName),
 	}, &nested.Formatter{
-		TimestampFormat: "2006-01-02 15:04:05",
+		TimestampFormat: "2006-01-02 15:04:05.000",
 		HideKeys:        false,
 		FieldsOrder:     []string{"PID"},
 	})

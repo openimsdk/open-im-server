@@ -66,9 +66,6 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				if err != nil {
 					log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
 				}
-				pbSaveData.Options = pbData.Options
-				pbSaveData.OfflineInfo = pbData.OfflineInfo
-				sendMessageToPush(&pbSaveData)
 			} else if msgKey == pbSaveData.SendID {
 				err := saveUserChat(pbData.SendID, &pbSaveData)
 				if err != nil {
@@ -82,11 +79,19 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 			}
 
 		}
+		if msgKey == pbSaveData.RecvID {
+			pbSaveData.Options = pbData.Options
+			pbSaveData.OfflineInfo = pbData.OfflineInfo
+			sendMessageToPush(&pbSaveData)
+		}
+
 		log.InfoByKv("msg_transfer handle topic success...", "", "")
 	} else if pbData.SessionType == constant.GroupChatType {
 		log.Info("", "", "msg_transfer chat type = GroupChatType")
-		uidAndGroupID := strings.Split(pbData.RecvID, " ")
-		saveUserChat(uidAndGroupID[0], &pbSaveData)
+		if isHistory {
+			uidAndGroupID := strings.Split(pbData.RecvID, " ")
+			saveUserChat(uidAndGroupID[0], &pbSaveData)
+		}
 		pbSaveData.Options = pbData.Options
 		pbSaveData.OfflineInfo = pbData.OfflineInfo
 		sendMessageToPush(&pbSaveData)
@@ -108,6 +113,7 @@ func (mc *HistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	return nil
 }
 func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
+	log.InfoByKv("msg_transfer send message to push", message.OperationID, "message", message.String())
 	msg := pbPush.PushMsgReq{}
 	msg.OperationID = message.OperationID
 	msg.PlatformID = message.PlatformID

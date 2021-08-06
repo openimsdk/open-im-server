@@ -26,6 +26,11 @@ func UnixSecondToTime(second int64) time.Time {
 	return time.Unix(second, 0)
 }
 
+//Convert nano timestamp to time.Time type
+func UnixNanoSecondToTime(nanoSecond int64) time.Time {
+	return time.Unix(0, nanoSecond)
+}
+
 //Get the current timestamp by Nano
 func GetCurrentTimestampByNano() int64 {
 	return time.Now().UnixNano()
