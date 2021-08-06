@@ -6,7 +6,6 @@ import (
 	"Open_IM/src/common/log"
 	"Open_IM/src/proto/group"
 	"context"
-	"fmt"
 )
 
 func (s *groupServer) GroupApplicationResponse(_ context.Context, pb *group.GroupApplicationResponseReq) (*group.GroupApplicationResponseResp, error) {
@@ -33,10 +32,6 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, pb *group.Grou
 			}
 		}
 	}
-
-	t := db.DB.GetGroupMember(pb.GroupID)
-	fmt.Println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-	fmt.Println(t)
 
 	log.Info("", "", "rpc GroupApplicationResponse call..., im_mysql_model.GroupApplicationResponse")
 

@@ -10,7 +10,6 @@ import (
 	pbGroup "Open_IM/src/proto/group"
 	"Open_IM/src/utils"
 	"context"
-	"fmt"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
@@ -129,10 +128,5 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	//	OperationID: req.OperationID,
 	//})
 	log.Info(req.Token, req.OperationID, "rpc create group success return")
-
-	t := db.DB.GetGroupMember(groupId)
-	fmt.Println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY")
-	fmt.Println(t)
-
 	return &pbGroup.CreateGroupResp{GroupID: groupId}, nil
 }
