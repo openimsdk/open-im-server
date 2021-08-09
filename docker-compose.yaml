@@ -9,7 +9,6 @@ services:
     container_name: mysql
     volumes:
       - /home/mysql/data:/var/lib/mysql
-      - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
     environment:
       MYSQL_ROOT_PASSWORD: openIM
