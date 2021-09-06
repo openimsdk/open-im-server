@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func InsertIntoGroup(groupId, name, introduction, notification, faceUrl string) error {
+func InsertIntoGroup(groupId, name, introduction, notification, faceUrl, ex string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -17,7 +17,7 @@ func InsertIntoGroup(groupId, name, introduction, notification, faceUrl string) 
 	if name == "" {
 		name = "groupChat"
 	}
-	toInsertInfo := Group{GroupId: groupId, Name: name, Introduction: introduction, Notification: notification, FaceUrl: faceUrl, CreateTime: time.Now()}
+	toInsertInfo := Group{GroupId: groupId, Name: name, Introduction: introduction, Notification: notification, FaceUrl: faceUrl, CreateTime: time.Now(), Ex: ex}
 	err = dbConn.Table("group").Create(toInsertInfo).Error
 	if err != nil {
 		return err
@@ -194,6 +194,7 @@ func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.Gro
 
 	ownerUser, err := FindGroupMemberInfoByGroupIdAndUserId(pb.GroupID, pb.OwnerID)
 	if err != nil {
+		log.ErrorByKv("FindGroupMemberInfoByGroupIdAndUserId failed", pb.OperationID, "groupId", pb.GroupID, "ownerID", pb.OwnerID)
 		return nil, err
 	}
 	if ownerUser.AdministratorLevel <= 0 {
@@ -208,6 +209,7 @@ func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.Gro
 	err = dbConn.Raw("select * from `group_request` where handled_user = ? and group_id = ? and from_user_id = ? and to_user_id = ?",
 		"", pb.GroupID, pb.FromUserID, pb.ToUserID).Scan(&groupRequest).Error
 	if err != nil {
+		log.ErrorByKv("find group_request info failed", pb.OperationID, "groupId", pb.GroupID, "fromUserId", pb.FromUserID, "toUserId", pb.OwnerID)
 		return nil, err
 	}
 
@@ -226,6 +228,7 @@ func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.Gro
 	err = dbConn.Exec("update `group_request` set flag = ?, handled_msg = ?, handled_user = ? where group_id = ? and from_user_id = ? and to_user_id = ?",
 		saveFlag, pb.HandledMsg, pb.OwnerID, groupRequest.GroupID, groupRequest.FromUserID, groupRequest.ToUserID).Error
 	if err != nil {
+		log.ErrorByKv("update group request failed", pb.OperationID, "groupID", pb.GroupID, "flag", saveFlag, "ownerId", pb.OwnerID, "fromUserId", pb.FromUserID, "toUserID", pb.ToUserID)
 		return nil, err
 	}
 
@@ -233,11 +236,13 @@ func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.Gro
 		if groupRequest.ToUserID == "0" {
 			err = InsertIntoGroupMember(pb.GroupID, pb.FromUserID, groupRequest.FromUserNickname, groupRequest.FromUserFaceUrl, 0)
 			if err != nil {
+				log.ErrorByKv("InsertIntoGroupMember failed", pb.OperationID, "groupID", pb.GroupID, "fromUserId", pb.FromUserID)
 				return nil, err
 			}
 		} else {
 			err = InsertIntoGroupMember(pb.GroupID, pb.ToUserID, groupRequest.ToUserNickname, groupRequest.ToUserFaceUrl, 0)
 			if err != nil {
+				log.ErrorByKv("InsertIntoGroupMember failed", pb.OperationID, "groupID", pb.GroupID, "fromUserId", pb.FromUserID)
 				return nil, err
 			}
 		}

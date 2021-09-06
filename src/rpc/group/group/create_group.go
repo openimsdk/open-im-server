@@ -76,7 +76,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 	//Time stamp + MD5 to generate group chat id
 	groupId = utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
-	err = im_mysql_model.InsertIntoGroup(groupId, req.GroupName, req.Introduction, req.Notification, req.FaceUrl)
+	err = im_mysql_model.InsertIntoGroup(groupId, req.GroupName, req.Introduction, req.Notification, req.FaceUrl, req.Ex)
 	if err != nil {
 		log.ErrorByKv("create group chat failed", req.OperationID, "err=%s", err.Error())
 		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
