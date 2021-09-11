@@ -32,13 +32,14 @@ services:
     container_name: redis
     volumes:
       - ./components/redis/data:/data
-      - ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+      #redis config file
+      #- ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
     environment:
       TZ: Asia/Shanghai
     restart: always
     sysctls:
       net.core.somaxconn: 1024
-    command: redis-server /usr/local/redis/config/redis.conf
+    command: redis-server --requirepass openIM --appendonly yes
 
 
   zookeeper:
