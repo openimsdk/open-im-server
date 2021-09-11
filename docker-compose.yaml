@@ -8,7 +8,7 @@ services:
       - 3306:3306
     container_name: mysql
     volumes:
-      - /home/mysql/data:/var/lib/mysql
+      - ./components/mysql/data:/var/lib/mysql
       - /etc/localtime:/etc/localtime
     environment:
       MYSQL_ROOT_PASSWORD: openIM
@@ -20,7 +20,7 @@ services:
       - 27017:27017
     container_name: mongo
     volumes:
-      - /home/mongodb/data:/data/db
+      - ./components/mongodb/data:/data/db
     environment:
       TZ: Asia/Shanghai
     restart: always
@@ -31,8 +31,8 @@ services:
       - 6379:6379
     container_name: redis
     volumes:
-      - /home/redis/data:/data
-      - /home/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+      - ./components/redis/data:/data
+      - ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
     environment:
       TZ: Asia/Shanghai
     restart: always
@@ -62,11 +62,12 @@ services:
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_ZOOKEEPER_CONNECT: 127.0.0:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
     depends_on:
       - zookeeper
+    network_mode: "host"
 
   etcd:
     image: quay.io/coreos/etcd
@@ -91,8 +92,8 @@ services:
   #        - 17778:17778
   #      container_name: open-im-server
   #      volumes:
-  #        - ./logs:/home/Open-IM-Server/logs
-  #        - ./config/config.yaml:/home/Open-IM-Server/config/config.yaml
+  #        - ./logs:/Open-IM-Server/logs
+  #        - ./config/config.yaml:/Open-IM-Server/config/config.yaml
   #      restart: always
   #      build:
   #        context: .
@@ -112,8 +113,8 @@ services:
       - 17778:17778
     container_name: open-im-server
     volumes:
-      - ./logs:/home/Open-IM-Server/logs
-      - ./config/config.yaml:/home/Open-IM-Server/config/config.yaml
+      - ./logs:/Open-IM-Server/logs
+      - ./config/config.yaml:/Open-IM-Server/config/config.yaml
     restart: always
     depends_on:
       - kafka
@@ -121,3 +122,9 @@ services:
       - mongodb
       - redis
       - etcd
+    network_mode: "host"
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
