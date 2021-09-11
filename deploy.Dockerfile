@@ -1,15 +1,15 @@
-FROM golang:1.15 as build
+FROM golang as build
 
 # go mod Installation source, container environment variable addition will override the default variable value
 ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.cn,direct
 
 # Set up the working directory
-WORKDIR /home/Open-IM-Server
+WORKDIR /Open-IM-Server
 # add all files to the container
 COPY . .
 
-WORKDIR /home/Open-IM-Server/script
+WORKDIR /Open-IM-Server/script
 RUN chmod +x *.sh
 
 RUN /bin/sh -c ./build_all_service.sh
@@ -18,7 +18,7 @@ RUN /bin/sh -c ./build_all_service.sh
 FROM ubuntu
 
 RUN rm -rf /var/lib/apt/lists/*
-RUN apt-get install apt-transport-https && apt-get update && apt-get install procps\
+RUN apt-get update && apt-get install apt-transport-https && apt-get install procps\
 &&apt-get install net-tools
 #Non-interactive operation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -28,12 +28,12 @@ RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && dpkg-reconfigure 
 
 
 #set directory to map logs,config file,script file.
-VOLUME ["/home/Open-IM-Server/logs","/home/Open-IM-Server/config","/home/Open-IM-Server/script"]
+VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/script"]
 
 #Copy scripts files and binary files to the blank image
-COPY --from=build /home/Open-IM-Server/script /home/Open-IM-Server/script
-COPY --from=build /home/Open-IM-Server/bin /home/Open-IM-Server/bin
+COPY --from=build /Open-IM-Server/script /Open-IM-Server/script
+COPY --from=build /Open-IM-Server/bin /Open-IM-Server/bin
 
-WORKDIR /home/Open-IM-Server/script
+WORKDIR /Open-IM-Server/script
 
 CMD ["./start_all.sh"]
