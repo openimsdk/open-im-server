@@ -66,9 +66,9 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+    network_mode: "host"
     depends_on:
       - zookeeper
-    network_mode: "host"
 
   etcd:
     image: quay.io/coreos/etcd

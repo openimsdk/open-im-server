@@ -36,4 +36,4 @@ COPY --from=build /Open-IM-Server/bin /Open-IM-Server/bin
 
 WORKDIR /Open-IM-Server/script
 
-CMD ["./start_all.sh"]
+CMD ["./start_all_for_docker.sh"]
