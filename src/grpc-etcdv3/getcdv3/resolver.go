@@ -86,35 +86,6 @@ func GetConn(schema, etcdaddr, serviceName string) *grpc.ClientConn {
 	nameResolver[schema+serviceName] = r
 	rwNameResolverMutex.Unlock()
 	return r.grpcClientConn
-
-	var ipAdr string
-	switch serviceName {
-	case "User":
-		ipAdr = "1.14.194.38:10100"
-	case "Friend":
-		ipAdr = "1.14.194.38:10200"
-	case "OfflineMessage":
-		ipAdr = "1.14.194.38:10300"
-	case "Push":
-		ipAdr = "1.14.194.38:10700"
-	case "OnlineMessageRelay":
-		ipAdr = "1.14.194.38:10400"
-	case "Group":
-		ipAdr = "1.14.194.38:10500"
-	case "Auth":
-		ipAdr = "1.14.194.38:10600"
-	}
-	conn, err := grpc.Dial(ipAdr,
-		grpc.WithChainStreamInterceptor(),
-		grpc.WithInsecure(),
-		grpc.WithBlock(),
-		grpc.WithDisableRetry(),
-	)
-	if err != nil {
-		return nil
-	}
-
-	return conn
 }
 
 func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
