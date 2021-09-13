@@ -70,6 +70,8 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
        ./start_all.sh
        ```
 
+       ![Open-IM-Servers-on-System.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png)
+
 #### Docker deployment
 
 All images are available at https://hub.docker.com/r/lyt1123/open_im_server
@@ -91,6 +93,8 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
    ```
    docker-compose up -d
    ```
+
+   ![Open-IM-Servers-on-docker.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-docker.png)
 
 ### CONFIGURATION INSTRUCTIONS
 
