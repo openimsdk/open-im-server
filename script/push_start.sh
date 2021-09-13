@@ -25,7 +25,7 @@ for ((i = 0; i < ${#rpc_ports[@]}; i++)); do
   nohup ./${push_name} -port ${rpc_ports[$i]} >>../logs/${push_name}.log 2>&1 &
 done
 
-sleep 1
+sleep 3
 #Check launched service process
 check=$(ps aux | grep -w ./${push_name} | grep -v grep | wc -l)
 if [ $check -eq 1 ]; then

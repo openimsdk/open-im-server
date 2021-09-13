@@ -23,14 +23,14 @@ if [ $check -ge 1 ]; then
     kill -9 ${oldPid}
 fi
 #Waiting port recycling
-sleep 3
+sleep 1
 cd ${msg_gateway_binary_root}
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
   nohup ./${msg_gateway_name} -rpc_port ${rpc_ports[$i]} -ws_port ${ws_ports[$i]} >>../logs/${msg_gateway_name}.log 2>&1 &
 done
 
 #Check launched service process
-sleep 1
+sleep 3
 check=$(ps aux | grep -w ./${msg_gateway_name} | grep -v grep | wc -l)
 allPorts=""
 if [ $check -ge 1 ]; then
