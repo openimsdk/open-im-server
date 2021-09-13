@@ -41,18 +41,29 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	if RpcResp.ErrorCode != 0 {
 		log.ErrorByKv("get friend list rpc server failed", req.OperationID, "err", err.Error(), "req", req.String())
+
+	}
+	self, err := im_mysql_model.FindUserByUID(claims.UID)
+	if err != nil {
+		log.ErrorByKv("get self info failed", req.OperationID, "err", err.Error(), "req", req.String())
+	}
+	var name, faceUrl string
+	if self != nil {
+		name, faceUrl = self.Name, self.Icon
 	}
 	for _, v := range RpcResp.Data {
 		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-			SendID:      claims.UID,
-			RecvID:      v.Uid,
-			Content:     claims.UID + "'s info has changed",
-			SendTime:    utils.GetCurrentTimestampBySecond(),
-			MsgFrom:     constant.SysMsgType,
-			ContentType: constant.SetSelfInfoTip,
-			SessionType: constant.SingleChatType,
-			OperationID: req.OperationID,
-			Token:       req.Token,
+			SendID:         claims.UID,
+			RecvID:         v.Uid,
+			SenderNickName: name,
+			SenderFaceURL:  faceUrl,
+			Content:        claims.UID + "'s info has changed",
+			SendTime:       utils.GetCurrentTimestampBySecond(),
+			MsgFrom:        constant.SysMsgType,
+			ContentType:    constant.SetSelfInfoTip,
+			SessionType:    constant.SingleChatType,
+			OperationID:    req.OperationID,
+			Token:          req.Token,
 		})
 
 	}

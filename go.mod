@@ -36,9 +36,9 @@ require (
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
 	go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/tools v0.0.0-20210106214847-113979e3529a // indirect
 	google.golang.org/grpc v1.33.2
-	google.golang.org/protobuf v1.26.0
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 	sigs.k8s.io/yaml v1.2.0 // indirect

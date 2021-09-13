@@ -37,7 +37,7 @@ func InsertMessageToChatLog(msgData pbMsg.WSToMsgSvrChatMsg) error {
 		MsgId:            msgData.MsgID,
 		SendID:           msgData.SendID,
 		RecvID:           msgData.RecvID,
-		SendTime:         utils.UnixSecondToTime(msgData.SendTime),
+		SendTime:         utils.UnixNanoSecondToTime(msgData.SendTime),
 		SessionType:      msgData.SessionType,
 		ContentType:      msgData.ContentType,
 		MsgFrom:          msgData.MsgFrom,

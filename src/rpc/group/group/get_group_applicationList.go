@@ -13,7 +13,7 @@ func (s *groupServer) GetGroupApplicationList(_ context.Context, pb *group.GetGr
 	reply, err := im_mysql_model.GetGroupApplicationList(pb.UID)
 	if err != nil {
 		log.Error("", "", "rpc GetGroupApplicationList call..., im_mysql_model.GetGroupApplicationList fail [uid: %s] [err: %s]", pb.UID, err.Error())
-		return nil, err
+		return &group.GetGroupApplicationListResp{ErrCode: 701, ErrMsg: "GetGroupApplicationList failed"}, nil
 	}
 	log.Info("", "", "rpc GetGroupApplicationList call..., im_mysql_model.GetGroupApplicationList")
 

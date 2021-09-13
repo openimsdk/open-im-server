@@ -70,12 +70,12 @@ credential:
 
 
 rpcport:
-  openImUserPort: [ 10100,10101 ]
-  openImFriendPort: [ 10200,10201 ]
+  openImUserPort: [ 10100 ]
+  openImFriendPort: [ 10200 ]
   openImOfflineMessagePort: [ 10300 ]
   openImOnlineRelayPort: [ 10400 ]
-  openImGroupPort: [ 10500 ,10501 ]
-  openImAuthPort: [ 10600, 10601 ]
+  openImGroupPort: [ 10500  ]
+  openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
 
 

@@ -69,6 +69,7 @@ func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	for msg := range claim.Messages() {
 		log.InfoByKv("kafka get info to mysql", "", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "chat", string(msg.Value))
 		pc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+		sess.MarkMessage(msg, "")
 	}
 	return nil
 }

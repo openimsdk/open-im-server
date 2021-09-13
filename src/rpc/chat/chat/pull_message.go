@@ -2,6 +2,7 @@ package rpcChat
 
 import (
 	"context"
+	"github.com/garyburd/redigo/redis"
 
 	commonDB "Open_IM/src/common/db"
 	"Open_IM/src/common/log"
@@ -23,8 +24,12 @@ func (rpc *rpcChat) GetNewSeq(_ context.Context, in *pbMsg.GetNewSeqReq) (*pbMsg
 		resp.ErrMsg = ""
 		return resp, err
 	} else {
-		log.ErrorByKv("getSeq from redis error", in.OperationID, "args", in.String(), "err", err.Error())
-		resp.Seq = 0
+		if err == redis.ErrNil {
+			resp.Seq = 0
+		} else {
+			log.ErrorByKv("getSeq from redis error", in.OperationID, "args", in.String(), "err", err.Error())
+			resp.Seq = -1
+		}
 		resp.ErrCode = 0
 		resp.ErrMsg = ""
 		return resp, nil

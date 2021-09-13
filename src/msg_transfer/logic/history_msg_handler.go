@@ -109,6 +109,7 @@ func (mc *HistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	for msg := range claim.Messages() {
 		log.InfoByKv("kafka get info to mongo", "", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "chat", string(msg.Value))
 		mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+		sess.MarkMessage(msg, "")
 	}
 	return nil
 }

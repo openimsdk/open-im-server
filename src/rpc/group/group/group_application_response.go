@@ -14,7 +14,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, pb *group.Grou
 	reply, err := im_mysql_model.GroupApplicationResponse(pb)
 	if err != nil {
 		log.Error("", "", "rpc GroupApplicationResponse call..., im_mysql_model.GroupApplicationResponse fail [pb: %s] [err: %s]", pb.String(), err.Error())
-		return nil, err
+		return &group.GroupApplicationResponseResp{ErrCode: 702, ErrMsg: "rpc GroupApplicationResponse failed"}, nil
 	}
 
 	if pb.HandleResult == 1 {
