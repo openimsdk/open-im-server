@@ -33,10 +33,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 
 ### Installing Open-IM-Server
 
-> Open-IM relies on five open source high-performance components: ETCD, MySQL, MongoDB, Redis, and Kafka. Privatization deployment
-> Before Open-IM-Server, please make sure that the above five components have been installed. If your server does not have the above components, you must first install
-> Missing components. If you have the above components, it is recommended to use them directly. If not, it is recommended to use Docker-compose, no
-> To install dependencies, one-click deployment, faster and more convenient.
+> Open-IM relies on five open source high-performance components: ETCD, MySQL, MongoDB, Redis, and Kafka. Privatization deployment Before Open-IM-Server, please make sure that the above five components have been installed. If your server does not have the above components, you must first install Missing components. If you have the above components, it is recommended to use them directly. If not, it is recommended to use Docker-compose, no To install dependencies, one-click deployment, faster and more convenient.
 
 #### Source code deployment
 
@@ -70,7 +67,13 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
        ./start_all.sh
        ```
 
-       ![Open-IM-Servers-on-System.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png)
+    4. Check service
+
+       ```
+       ./check_all.sh
+       ```
+
+       ![OpenIMServersonSystempng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png)
 
 #### Docker deployment
 
@@ -80,21 +83,25 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 
 2. [Install Docker Compose](https://docs.docker.com/compose/install/) 1.22 or above.
 
-3. [Download redis configuration](https://redis.io/topics/config) download the redis configuration file to **`/home/redis/config`**
-
-4. Clone the Open-IM project to your server.
+3. Clone the Open-IM project to your server.
 
    ```
    git clone https://github.com/OpenIMSDK/Open-IM-Server.git
    ```
 
-5. Start docker-compose with one click(Docker automatically pulls all images)
+4. Start docker-compose with one click(Docker automatically pulls all images)
 
    ```
    docker-compose up -d
    ```
 
-   ![Open-IM-Servers-on-docker.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-docker.png)
+5. Check service
+
+   ```
+   ./docker_check_service.sh 
+   ```
+
+   ![OpenIMServersondockerpng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-docker.png)
 
 ### CONFIGURATION INSTRUCTIONS
 
@@ -102,26 +109,26 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 
 #### Basic Component Configuration Instructions
 
-- **ETCD**
+- ETCD
     - Etcd is used for the discovery and registration of rpc services, etcd Schema is the prefix of the registered name, it is recommended to modify it to your company name, etcd address (ip+port) supports clustered deployment, you can fill in multiple ETCD addresses separated by commas, and also only one etcd address.
-- **MySQL**
+- MySQL
     - mysql is used for full storage of messages and user relationships. Cluster deployment is not supported for the time being. Modify addresses and users, passwords, and database names.
-- **Mongo**
+- Mongo
     - Mongo is used for offline storage of messages. The default storage is 7 days. Cluster deployment is temporarily not supported. Just modify the address and database name.
-- **Redis**
+- Redis
     - Redis is currently mainly used for message serial number storage and user token information storage. Cluster deployment is temporarily not supported. Just modify the corresponding redis address and password.
-- **Kafka**
+- Kafka
     - Kafka is used as a message transfer storage queue to support cluster deployment, just modify the corresponding address
 
 #### Internal Service Configuration Instructions
 
-- **credential&&push**
+- credential&&push
     - The Open-IM needs to use the three-party offline push function. Currently, Tencent's three-party push is used. It supports IOS, Android and OSX push. This information is some registration information pushed by Tencent. Developers need to go to Tencent Cloud Mobile Push to register the corresponding information. If you do not fill in the corresponding information, you cannot use the offline message push function
-- **api&&rpcport&&longconnsvr&&rpcregistername**
+- api&&rpcport&&longconnsvr&&rpcregistername
     - The api port is the http interface, longconnsvr is the websocket listening port, and rpcport is the internal service startup port. Both support cluster deployment. Make sure that these ports are not used. If you want to open multiple services for a single service, fill in multiple ports separated by commas. rpcregistername is the service name registered by each service to the registry etcd, no need to modify
-- **log&&modulename**
+- log&&modulename
     - The log configuration includes the storage path of the log file, and the log is sent to elasticsearch for log viewing. Currently, the log is not supported to be sent to elasticsearch. The configuration does not need to be modified for the time being. The modulename is used to split the log according to the name of the service module. The default configuration is fine.
-- **multiloginpolicy&&tokenpolicy**
+- multiloginpolicy&&tokenpolicy
     - Open-IM supports multi-terminal login. Currently, there are three multi-terminal login policies. The PC terminal and the mobile terminal are online at the same time by default. When multiple policies are configured to be true, the first policy with true is used by default, and the token policy is the generated token policy. , The developer can customize the expiration time of the token
 
 ### SCRIPT DESCRIPTION
