@@ -56,8 +56,6 @@ services:
 
   kafka:
     image: wurstmeister/kafka
-    ports:
-      - 9092:9092
     container_name: kafka
     restart: always
     environment:
@@ -109,9 +107,6 @@ services:
   #fixme----build from docker hub------
   open-im-server:
     image: lyt1123/open_im_server
-    ports:
-      - 10000:10000
-      - 17778:17778
     container_name: open-im-server
     volumes:
       - ./logs:/Open-IM-Server/logs
