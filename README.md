@@ -144,7 +144,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 - start_all.sh&&stop_all.sh
     - Total script, start all services and close all services
 
-- **Authentication Clow Chart**
+## Authentication Clow Chart 
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png)
 
