@@ -162,6 +162,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 
     - **Parameter**
 
+
       | parameter name | required | Type   | Description                                                  |
           | -------------- | -------- | ------ | ------------------------------------------------------------ |
       | secret         | Y        | string | The secret key used by the app server to connect to the sdk server. The maximum length is 32 characters. It must be ensured that the secret keys of the app server and the sdk server are the same. There is a risk of secret leakage, and it is best to save it on the user server. |
@@ -174,6 +175,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
       | birth          | N        | string | The birthday of the user, the maximum length is 16 characters, can be set as an empty string |
       | email          | N        | string | User email, the maximum length is 64 characters, can be set as an empty string |
       | ex             | N        | string | User business card extension field, the maximum length is 1024 characters, users can extend it by themselves, it is recommended to encapsulate it into a JSON string, or set it to an empty string |
+      
 
     - **Return Parameter**
 
