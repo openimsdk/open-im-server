@@ -30,6 +30,17 @@ func UserRegister(pb *pbAuth.UserRegisterReq) error {
 	return nil
 }
 
+func UserDelete(uid string) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	err = dbConn.Table("user").Where("uid=?", uid).Delete(User{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
 func FindUserByUID(uid string) (*User, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {

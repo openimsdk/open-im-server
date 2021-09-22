@@ -51,3 +51,66 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	}
 	return &pbFriend.CommonResp{}, nil
 }
+
+func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.CommonResp, error) {
+	log.Info(req.Token, req.OperationID, "ImportFriendis server,userid=%s", req.OwnerUid)
+	//Parse token, to find current user information
+	claims, err := utils.ParseToken(req.Token)
+	if err != nil {
+		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
+		return &pbFriend.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+	}
+	if claims.UID != config.Config.AppManagerUid {
+		log.Error(req.Token, req.OperationID, "not magager uid", claims.UID, config.Config.AppManagerUid)
+		return &pbFriend.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+	}
+
+	if _, err = im_mysql_model.FindUserByUID(req.Uid); err != nil {
+		log.Error(req.Token, req.OperationID, "this user not exists,cant not add friend", req.Uid)
+		return &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: config.ErrSearchUserInfo.ErrMsg}, nil
+	}
+
+	if _, err = im_mysql_model.FindUserByUID(req.OwnerUid); err != nil {
+		log.Error(req.Token, req.OperationID, "this user not exists,cant not add friend", req.OwnerUid)
+		return &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: config.ErrSearchUserInfo.ErrMsg}, nil
+	}
+
+	_, err = im_mysql_model.FindFriendRelationshipFromFriend(req.OwnerUid, req.Uid)
+
+	if err != nil {
+		log.Error("", req.OperationID, err.Error())
+	}
+	//Establish two single friendship
+	err = im_mysql_model.InsertToFriend(req.OwnerUid, req.Uid, 1)
+	if err != nil {
+		log.Error(req.Token, req.OperationID, "err=%s,create friendship failed", err.Error())
+	}
+	err = im_mysql_model.InsertToFriend(req.Uid, req.OwnerUid, 1)
+	if err != nil {
+		log.Error(req.Token, req.OperationID, "err=%s,create friendship failed", err.Error())
+	}
+
+	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+		SendID:      req.OwnerUid,
+		RecvID:      req.Uid,
+		Content:     content_struct.NewContentStructString(0, "", " add you as a friend."),
+		SendTime:    utils.GetCurrentTimestampBySecond(),
+		MsgFrom:     constant.UserMsgType,                //Notification message identification
+		ContentType: constant.AcceptFriendApplicationTip, //Add friend flag
+		SessionType: constant.SingleChatType,
+		OperationID: req.OperationID,
+	})
+
+	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+		SendID:      req.Uid,
+		RecvID:      req.OwnerUid,
+		Content:     content_struct.NewContentStructString(0, "", " add you as a friend."),
+		SendTime:    utils.GetCurrentTimestampBySecond(),
+		MsgFrom:     constant.UserMsgType,                //Notification message identification
+		ContentType: constant.AcceptFriendApplicationTip, //Add friend flag
+		SessionType: constant.SingleChatType,
+		OperationID: req.OperationID,
+	})
+
+	return &pbFriend.CommonResp{}, nil
+}

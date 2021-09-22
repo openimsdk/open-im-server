@@ -22,7 +22,15 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
 		return &pbUser.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: err.Error()}, nil
 	}
-	err = im_mysql_model.UpDateUserInfo(claims.UID, req.Name, req.Icon, req.Mobile, req.Birth, req.Email, req.Ex, req.Gender)
+
+	ownerUid := ""
+	if claims.UID == config.Config.AppManagerUid {
+		ownerUid = req.Uid
+	} else {
+		ownerUid = claims.UID
+	}
+
+	err = im_mysql_model.UpDateUserInfo(ownerUid, req.Name, req.Icon, req.Mobile, req.Birth, req.Email, req.Ex, req.Gender)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "update user some attribute failed,err=%s", err.Error())
 		return &pbUser.CommonResp{ErrorCode: config.ErrModifyUserInfo.ErrCode, ErrorMsg: config.ErrModifyUserInfo.ErrMsg}, nil
@@ -43,7 +51,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		log.ErrorByKv("get friend list rpc server failed", req.OperationID, "err", err.Error(), "req", req.String())
 
 	}
-	self, err := im_mysql_model.FindUserByUID(claims.UID)
+	self, err := im_mysql_model.FindUserByUID(ownerUid)
 	if err != nil {
 		log.ErrorByKv("get self info failed", req.OperationID, "err", err.Error(), "req", req.String())
 	}
@@ -53,12 +61,12 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	for _, v := range RpcResp.Data {
 		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-			SendID:         claims.UID,
+			SendID:         ownerUid,
 			RecvID:         v.Uid,
 			SenderNickName: name,
 			SenderFaceURL:  faceUrl,
-			Content:        claims.UID + "'s info has changed",
-			SendTime:       utils.GetCurrentTimestampBySecond(),
+			Content:        ownerUid + "'s info has changed",
+			SendTime:       utils.GetCurrentTimestampByNano(),
 			MsgFrom:        constant.SysMsgType,
 			ContentType:    constant.SetSelfInfoTip,
 			SessionType:    constant.SingleChatType,

@@ -20,6 +20,7 @@ func NewContentStructString(isDisplay int32, ID string, text string) string {
 	c := Content{IsDisplay: isDisplay, ID: ID, Text: text}
 	return c.contentToString()
 }
+
 func (c *Content) contentToString() string {
 	data, _ := json.Marshal(c)
 	dataString := string(data)
@@ -62,6 +63,13 @@ type NotificationContent struct {
 	DefaultTips string `json:"defaultTips"`
 	Detail      string `json:"detail"`
 }
+
+func (c *NotificationContent) ContentToString() string {
+	data, _ := json.Marshal(c)
+	dataString := string(data)
+	return dataString
+}
+
 type KickGroupMemberApiReq struct {
 	GroupID     string   `json:"groupID"`
 	UidList     []string `json:"uidList"`

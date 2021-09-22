@@ -5,6 +5,7 @@ import (
 	apiChat "Open_IM/src/api/chat"
 	"Open_IM/src/api/friend"
 	"Open_IM/src/api/group"
+	"Open_IM/src/api/manage"
 	apiThird "Open_IM/src/api/third"
 	"Open_IM/src/api/user"
 	"Open_IM/src/utils"
@@ -47,6 +48,7 @@ func main() {
 		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)
 		friendRouterGroup.POST("/set_friend_comment", friend.SetFriendComment)
 		friendRouterGroup.POST("/is_friend", friend.IsFriend)
+		friendRouterGroup.POST("/import_friend", friend.ImportFriend)
 	}
 	//group related routing group
 	groupRouterGroup := r.Group("/group")
@@ -83,6 +85,12 @@ func main() {
 		chatGroup.POST("/newest_seq", apiChat.UserNewestSeq)
 		chatGroup.POST("/pull_msg", apiChat.UserPullMsg)
 		chatGroup.POST("/send_msg", apiChat.UserSendMsg)
+	}
+	managementGroup := r.Group("/manager")
+	{
+		managementGroup.POST("/delete_user", manage.DeleteUser)
+		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
+		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
 	}
 
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")

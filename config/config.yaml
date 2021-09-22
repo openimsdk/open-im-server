@@ -117,6 +117,7 @@ push:
       accessID: 111
       secretKey: 111
 
+appmanageruid: "openIM123456"
 secret: tuoyun
 
 multiloginpolicy:

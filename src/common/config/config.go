@@ -124,8 +124,8 @@ type config struct {
 			MsgToPush  string `yaml:"msgToPush"`
 		}
 	}
-
-	Secret string
+	AppManagerUid string
+	Secret        string
 
 	MultiLoginPolicy struct {
 		OnlyOneTerminalAccess                                  bool `yaml:"onlyOneTerminalAccess"`

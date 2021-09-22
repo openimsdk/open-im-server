@@ -8,6 +8,7 @@ package utils
 
 import (
 	"encoding/json"
+	"math/rand"
 	"strconv"
 )
 
@@ -52,4 +53,12 @@ func StructToJsonString(param interface{}) string {
 func JsonStringToStruct(s string, args interface{}) error {
 	err := json.Unmarshal([]byte(s), args)
 	return err
+}
+
+func GetMsgID(sendID string) string {
+	t := int64ToString(GetCurrentTimestampByNano())
+	return Md5(t + sendID + int64ToString(rand.Int63n(GetCurrentTimestampByNano())))
+}
+func int64ToString(i int64) string {
+	return strconv.FormatInt(i, 10)
 }

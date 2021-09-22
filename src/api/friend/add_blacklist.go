@@ -11,10 +11,11 @@ import (
 	"strings"
 )
 
+/*
 type paramsAddBlackList struct {
 	OperationID string `json:"operationID" binding:"required"`
 	UID         string `json:"uid" binding:"required"`
-}
+}*/
 
 func AddBlacklist(c *gin.Context) {
 	log.Info("", "", "api add blacklist init ....")
@@ -32,6 +33,7 @@ func AddBlacklist(c *gin.Context) {
 		Uid:         params.UID,
 		OperationID: params.OperationID,
 		Token:       c.Request.Header.Get("token"),
+		OwnerUid:    params.OwnerUid,
 	}
 	log.Info(req.Token, req.OperationID, "api add blacklist is server:userID=%s", req.Uid)
 	RpcResp, err := client.AddBlacklist(context.Background(), req)

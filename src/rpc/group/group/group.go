@@ -2,7 +2,12 @@ package group
 
 import (
 	"Open_IM/src/common/config"
+	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db"
+	pbChat "Open_IM/src/proto/chat"
+	"Open_IM/src/push/content_struct"
+	"Open_IM/src/push/logic"
+	"encoding/json"
 
 	imdb "Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
@@ -59,7 +64,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	}
 	log.Info(claims.UID, req.OperationID, "recv req: ", req.String())
 
-	if !imdb.IsExistGroupMember(req.GroupID, claims.UID) {
+	if !imdb.IsExistGroupMember(req.GroupID, claims.UID) && claims.UID != config.Config.AppManagerUid {
 		log.Error(req.Token, req.OperationID, "err= invite user not in group")
 		return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrAccess.ErrCode, ErrorMsg: config.ErrAccess.ErrMsg}, nil
 	}
@@ -94,16 +99,6 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			resp.Id2Result = append(resp.Id2Result, &resultNode)
 			continue
 		}
-		/*
-			err = imdb.InsertGroupRequest(req.GroupID, fromUserInfo.UID, fromUserInfo.Name, fromUserInfo.Icon, toUserInfo.UID, req.Reason, "invited", 1)
-			if err != nil {
-				log.Error(v, req.OperationID, "InsertGroupRequest failed, err: ", err.Error(), "params: ",
-					req.GroupID, fromUserInfo.UID, fromUserInfo.Name, fromUserInfo.Icon, toUserInfo.UID, req.Reason)
-				resultNode.Result = -1
-				resp.Id2Result = append(resp.Id2Result, &resultNode)
-				continue
-			}
-		*/
 
 		err = imdb.InsertGroupMember(req.GroupID, toUserInfo.UID, toUserInfo.Name, toUserInfo.Icon, 0)
 		if err != nil {
@@ -122,20 +117,40 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	}
 	resp.ErrorCode = 0
 	resp.ErrorMsg = "ok"
-	/*
-		var chatMsg pbChat.WSToMsgSvrChatMsg
-		chatMsg.SendID = claims.UID
-		chatMsg.RecvID = req.GroupID
-		content, _ := json.Marshal(req)
-		chatMsg.Content = string(content)
-		chatMsg.SendTime = utils.GetCurrentTimestampBySecond()
-		chatMsg.MsgFrom = constant.UserMsgType
-		chatMsg.ContentType = constant.InviteUserToGroupTip
-		chatMsg.SessionType = constant.GroupChatType
-		logic.SendMsgByWS(&chatMsg)
-	*/
+
+	if claims.UID == config.Config.AppManagerUid {
+		var iu inviteUserToGroupReq
+		iu.GroupID = req.GroupID
+		iu.OperationID = req.OperationID
+		iu.Reason = req.Reason
+		iu.UidList = req.UidList
+		n := content_struct.NotificationContent{1, req.GroupID, iu.ContentToString()}
+		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+			SendID:      claims.UID,
+			RecvID:      req.GroupID,
+			Content:     n.ContentToString(),
+			SendTime:    utils.GetCurrentTimestampByNano(),
+			MsgFrom:     constant.UserMsgType,
+			ContentType: constant.InviteUserToGroupTip,
+			SessionType: constant.GroupChatType,
+			OperationID: req.OperationID,
+		})
+	}
 
 	return &resp, nil
+}
+
+type inviteUserToGroupReq struct {
+	GroupID     string   `json:"groupID"`
+	UidList     []string `json:"uidList"`
+	Reason      string   `json:"reason"`
+	OperationID string   `json:"operationID"`
+}
+
+func (c *inviteUserToGroupReq) ContentToString() string {
+	data, _ := json.Marshal(c)
+	dataString := string(data)
+	return dataString
 }
 
 func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGroupAllMemberReq) (*pbGroup.GetGroupAllMemberResp, error) {
@@ -209,6 +224,28 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	return &resp, nil
 }
 
+type groupMemberFullInfo struct {
+	GroupId  string `json:"groupID"`
+	UserId   string `json:"userId"`
+	Role     int    `json:"role"`
+	JoinTime uint64 `json:"joinTime"`
+	NickName string `json:"nickName"`
+	FaceUrl  string `json:"faceUrl"`
+}
+
+type kickGroupMemberApiReq struct {
+	GroupID     string                `json:"groupID"`
+	UidListInfo []groupMemberFullInfo `json:"uidListInfo"`
+	Reason      string                `json:"reason"`
+	OperationID string                `json:"operationID"`
+}
+
+func (c *kickGroupMemberApiReq) ContentToString() string {
+	data, _ := json.Marshal(c)
+	dataString := string(data)
+	return dataString
+}
+
 func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (*pbGroup.KickGroupMemberResp, error) {
 	claims, err := utils.ParseToken(req.Token)
 	if err != nil {
@@ -230,6 +267,12 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			break
 		}
 	}
+	if flag != 1 {
+		if claims.UID == config.Config.AppManagerUid {
+			flag = 1
+		}
+	}
+
 	if flag != 1 {
 		log.Error(claims.UID, req.OperationID, "no access kick")
 		return &pbGroup.KickGroupMemberResp{ErrorCode: config.ErrAccess.ErrCode, ErrorMsg: config.ErrAccess.ErrMsg}, nil
@@ -262,29 +305,48 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 
 	}
+	var kq kickGroupMemberApiReq
 
-	/*
-		var chatMsg pbChat.WSToMsgSvrChatMsg
-		chatMsg.SendID = claims.UID
-		chatMsg.RecvID = req.GroupID
-		content, _ := json.Marshal(req)
-		chatMsg.Content = string(content)
-		chatMsg.SendTime = utils.GetCurrentTimestampBySecond()
-		chatMsg.MsgFrom = constant.UserMsgType
-		chatMsg.ContentType = constant.KickGroupMemberTip
-		chatMsg.SessionType = constant.GroupChatType
-		logic.SendMsgByWS(&chatMsg)
+	kq.GroupID = req.GroupID
+	kq.OperationID = req.OperationID
+	kq.Reason = req.Reason
 
-		for _, v := range req.UidList {
-			kickChatMsg := chatMsg
-			kickChatMsg.RecvID = v
-			kickChatMsg.SendTime = utils.GetCurrentTimestampBySecond()
-			kickChatMsg.SessionType = constant.SingleChatType
-			logic.SendMsgByWS(&kickChatMsg)
+	var gf groupMemberFullInfo
+	for _, v := range req.UidListInfo {
+		gf.UserId = v.UserId
+		gf.GroupId = req.GroupID
+		kq.UidListInfo = append(kq.UidListInfo, gf)
+	}
+
+	n := content_struct.NotificationContent{1, req.GroupID, kq.ContentToString()}
+
+	if claims.UID == config.Config.AppManagerUid {
+		log.Info("", req.OperationID, claims.UID, req.GroupID)
+		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+			SendID:      claims.UID,
+			RecvID:      req.GroupID,
+			Content:     n.ContentToString(),
+			SendTime:    utils.GetCurrentTimestampByNano(),
+			MsgFrom:     constant.UserMsgType,
+			ContentType: constant.KickGroupMemberTip,
+			SessionType: constant.GroupChatType,
+			OperationID: req.OperationID,
+		})
+
+		for _, v := range req.UidListInfo {
+			log.Info("", req.OperationID, claims.UID, v.UserId)
+			logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+				SendID:      claims.UID,
+				RecvID:      v.UserId,
+				Content:     n.ContentToString(),
+				SendTime:    utils.GetCurrentTimestampBySecond(),
+				MsgFrom:     constant.UserMsgType,
+				ContentType: constant.KickGroupMemberTip,
+				SessionType: constant.SingleChatType,
+				OperationID: req.OperationID,
+			})
 		}
-	*/
-
-
+	}
 	resp.ErrorCode = 0
 	return &resp, nil
 }

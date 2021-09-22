@@ -7,7 +7,10 @@ import (
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
+	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
+	"Open_IM/src/push/content_struct"
+	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
 	"google.golang.org/grpc"
@@ -82,22 +85,30 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
 	}
 
-	//Add the group owner to the group first, otherwise the group creation will fail
-	us, err := im_mysql_model.FindUserByUID(claims.UID)
-	if err != nil {
-		log.Error("", req.OperationID, "find userInfo failed", err.Error())
-		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
-	}
-	err = im_mysql_model.InsertIntoGroupMember(groupId, claims.UID, us.Name, us.Icon, constant.GroupOwner)
-	if err != nil {
-		log.Error("", req.OperationID, "create group chat failed,err=%s", err.Error())
-		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+	isMagagerFlag := 0
+	tokenUid := claims.UID
+	if tokenUid == config.Config.AppManagerUid {
+		isMagagerFlag = 1
 	}
 
-	err = db.DB.AddGroupMember(groupId, claims.UID)
-	if err != nil {
-		log.Error("", "", "create mongo group member failed, db.DB.AddGroupMember fail [err: %s]", err.Error())
-		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+	if isMagagerFlag == 0 {
+		//Add the group owner to the group first, otherwise the group creation will fail
+		us, err := im_mysql_model.FindUserByUID(claims.UID)
+		if err != nil {
+			log.Error("", req.OperationID, "find userInfo failed", err.Error())
+			return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+		}
+		err = im_mysql_model.InsertIntoGroupMember(groupId, claims.UID, us.Name, us.Icon, constant.GroupOwner)
+		if err != nil {
+			log.Error("", req.OperationID, "create group chat failed,err=%s", err.Error())
+			return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+		}
+
+		err = db.DB.AddGroupMember(groupId, claims.UID)
+		if err != nil {
+			log.Error("", "", "create mongo group member failed, db.DB.AddGroupMember fail [err: %s]", err.Error())
+			return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+		}
 	}
 
 	//Binding group id and member id
@@ -116,17 +127,33 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			log.Error("", "", "add mongo group member failed, db.DB.AddGroupMember fail [err: %s]", err.Error())
 		}
 	}
-	////Push message when create group chat
-	//logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-	//	SendID:      claims.UID,
-	//	RecvID:      groupId,
-	//	Content:     content_struct.NewContentStructString(0, "", req.String()),
-	//	SendTime:    utils.GetCurrentTimestampBySecond(),
-	//	MsgFrom:     constant.SysMsgType,     //Notification message identification
-	//	ContentType: constant.CreateGroupTip, //Add friend flag
-	//	SessionType: constant.GroupChatType,
-	//	OperationID: req.OperationID,
-	//})
+
+	if isMagagerFlag == 1 {
+
+		//type NotificationContent struct {
+		//	IsDisplay   int32  `json:"isDisplay"`
+		//	DefaultTips string `json:"defaultTips"`
+		//	Detail      string `json:"detail"`
+		//}	n := NotificationContent{
+		//		IsDisplay:   1,
+		//		DefaultTips: "You have joined the group chat:" + createGroupResp.Data.GroupName,
+		//		Detail:      createGroupResp.Data.GroupId,
+		//	}
+
+		////Push message when create group chat
+		n := content_struct.NotificationContent{1, req.GroupName, groupId}
+		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+			SendID:      claims.UID,
+			RecvID:      groupId,
+			Content:     n.ContentToString(),
+			SendTime:    utils.GetCurrentTimestampByNano(),
+			MsgFrom:     constant.SysMsgType,     //Notification message identification
+			ContentType: constant.CreateGroupTip, //Add friend flag
+			SessionType: constant.GroupChatType,
+			OperationID: req.OperationID,
+		})
+	}
+
 	log.Info(req.Token, req.OperationID, "rpc create group success return")
 	return &pbGroup.CreateGroupResp{GroupID: groupId}, nil
 }

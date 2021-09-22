@@ -17,7 +17,23 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
 		return &pbFriend.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
 	}
-	err = im_mysql_model.InsertInToUserBlackList(claims.UID, req.Uid)
+
+	isMagagerFlag := 0
+	tokenUid := claims.UID
+	if tokenUid == config.Config.AppManagerUid {
+		isMagagerFlag = 1
+	}
+	if isMagagerFlag == 0 {
+		err = im_mysql_model.InsertInToUserBlackList(claims.UID, req.Uid)
+		if err != nil {
+			log.Error(req.Token, req.OperationID, "err=%s,Failed to add blacklist", err.Error())
+			return &pbFriend.CommonResp{ErrorCode: config.ErrMysql.ErrCode, ErrorMsg: config.ErrMysql.ErrMsg}, nil
+		}
+		log.Info(req.Token, req.OperationID, "rpc add blacklist success return,uid=%s", req.Uid)
+		return &pbFriend.CommonResp{}, nil
+	}
+
+	err = im_mysql_model.InsertInToUserBlackList(req.OwnerUid, req.Uid)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,Failed to add blacklist", err.Error())
 		return &pbFriend.CommonResp{ErrorCode: config.ErrMysql.ErrCode, ErrorMsg: config.ErrMysql.ErrMsg}, nil

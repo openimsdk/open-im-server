@@ -22,6 +22,7 @@ type paramsStruct struct {
 	Birth       string   `json:"birth"`
 	Email       string   `json:"email"`
 	Ex          string   `json:"ex"`
+	Uid         string   `json:"uid"`
 }
 
 func UpdateUserInfo(c *gin.Context) {
@@ -46,6 +47,7 @@ func UpdateUserInfo(c *gin.Context) {
 		Birth:       params.Birth,
 		Email:       params.Email,
 		Ex:          params.Ex,
+		Uid:         params.Uid,
 	}
 	log.InfoByKv("api update user info is server", req.OperationID, req.Token)
 	RpcResp, err := client.UpdateUserInfo(context.Background(), req)

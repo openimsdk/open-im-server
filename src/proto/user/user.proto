@@ -6,7 +6,25 @@ message CommonResp{
   int32  errorCode = 1;
   string errorMsg = 2;
 }
+message DeleteUsersResp{
+  CommonResp  commonResp = 1;
+  repeated string failedUidList = 2;
+}
+message DeleteUsersReq{
+  repeated string  deleteUidList = 2;
+  string token = 3;
+  string OperationID = 4;
+}
+message GetAllUsersUidReq{
+  string token = 2;
+  string operationID = 3;
 
+}
+message GetAllUsersUidResp{
+  CommonResp  commonResp = 1;
+  repeated string uidList = 2;
+
+}
 message GetUserInfoReq{
   repeated string userIDList = 1;
   string token = 2;
@@ -44,9 +62,12 @@ message UpdateUserInfoReq{
   string ex = 7;
   string token = 8;
   string  OperationID = 9;
+  string Uid = 10;
 }
 
 service user {
   rpc getUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(CommonResp);
+  rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
+  rpc GetAllUsersUid(GetAllUsersUidReq)returns(GetAllUsersUidResp);
 }

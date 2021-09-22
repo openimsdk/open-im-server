@@ -40,6 +40,16 @@ message AddFriendReq{
 }
 
 
+message ImportFriendReq{
+  string   uid = 1;
+  string  OperationID = 2;
+  string  Token = 3;
+  string OwnerUid = 4;
+}
+
+
+
+
 message GetFriendApplyReq{
   string OperationID = 1;
   string Token = 2;
@@ -91,6 +101,7 @@ message AddBlacklistReq{
   string uid = 1;
   string OperationID = 2;
   string Token = 3;
+  string OwnerUid = 4;
 }
 
 
@@ -167,4 +178,5 @@ service friend{
   rpc deleteFriend(DeleteFriendReq) returns(CommonResp);
   rpc addFriendResponse(AddFriendResponseReq) returns(CommonResp);
   rpc setFriendComment(SetFriendCommentReq) returns(CommonResp);
+  rpc ImportFriend(ImportFriendReq)  returns(CommonResp);
 }

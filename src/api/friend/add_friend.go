@@ -11,10 +11,47 @@ import (
 	"strings"
 )
 
+type paramsImportFriendReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	UID         string `json:"uid" binding:"required"`
+	OwnerUid    string `json:"ownerUid"`
+}
+
 type paramsAddFriend struct {
 	OperationID string `json:"operationID" binding:"required"`
 	UID         string `json:"uid" binding:"required"`
 	ReqMessage  string `json:"reqMessage"`
+}
+
+//
+func ImportFriend(c *gin.Context) {
+	log.Info("", "", "ImportFriend init ....")
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	client := pbFriend.NewFriendClient(etcdConn)
+
+	params := paramsImportFriendReq{}
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &pbFriend.ImportFriendReq{
+		Uid:         params.UID,
+		OperationID: params.OperationID,
+		OwnerUid:    params.OwnerUid,
+		Token:       c.Request.Header.Get("token"),
+	}
+	log.Info(req.Token, req.OperationID, "api add friend is server")
+	RpcResp, err := client.ImportFriend(context.Background(), req)
+	if err != nil {
+		log.Error(req.Token, req.OperationID, "err=%s,ImportFriend failed", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed"})
+		return
+	}
+	log.InfoByArgs("ImportFriend  success,args=%s", RpcResp.String())
+	resp := gin.H{"errCode": RpcResp.ErrorCode, "errMsg": RpcResp.ErrorMsg}
+	c.JSON(http.StatusOK, resp)
+	log.InfoByArgs("ImportFriend success return,get args=%s,return args=%s", req.String(), RpcResp.String())
 }
 
 func AddFriend(c *gin.Context) {
@@ -22,7 +59,6 @@ func AddFriend(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := pbFriend.NewFriendClient(etcdConn)
-	//defer etcdConn.Close()
 
 	params := paramsAddFriend{}
 	if err := c.BindJSON(&params); err != nil {

@@ -15,6 +15,7 @@ import (
 type paramsSearchFriend struct {
 	OperationID string `json:"operationID" binding:"required"`
 	UID         string `json:"uid" binding:"required"`
+	OwnerUid    string `json:"ownerUid"`
 }
 
 func GetFriendsInfo(c *gin.Context) {
