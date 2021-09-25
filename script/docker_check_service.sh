@@ -26,7 +26,7 @@ for ((i = 0; i < ${#docker_compose_components[*]}; i++)); do
   fi
 done
 
-if [ ${component_server_count} -eq 6 ]; then
+if [ ${component_server_count} -eq 7 ]; then
   echo -e "${YELLOW_PREFIX}\ndocker-compose all services is Up!${COLOR_SUFFIX}"
 else
   echo -e "${RED_PREFIX}\nsome docker-compose services start failed,please check red logs on console ${COLOR_SUFFIX}"
