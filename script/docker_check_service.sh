@@ -8,6 +8,7 @@ docker_compose_components=(
   mysql
   open-im-server
   redis
+  kafka
   zookeeper
 )
 
