@@ -23,7 +23,7 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 		log.ErrorByKv("parse token failed", req.OperationID, "err", err.Error())
 		return &pbUser.DeleteUsersResp{CommonResp: &pbUser.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: err.Error()}, FailedUidList: req.DeleteUidList}, nil
 	}
-	if c.UID != config.Config.AppManagerUid {
+	if !utils.IsContain(c.UID, config.Config.Manager.AppManagerUid) {
 		log.ErrorByKv(" Authentication failed", req.OperationID, "args", c)
 		return &pbUser.DeleteUsersResp{CommonResp: &pbUser.CommonResp{ErrorCode: 401, ErrorMsg: "not authorized"}, FailedUidList: req.DeleteUidList}, nil
 	}
@@ -46,7 +46,7 @@ func (s *userServer) GetAllUsersUid(_ context.Context, req *pbUser.GetAllUsersUi
 		log.InfoByKv("parse token failed", req.OperationID, "err", err.Error())
 		return &pbUser.GetAllUsersUidResp{CommonResp: &pbUser.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: err.Error()}}, nil
 	}
-	if c.UID != config.Config.AppManagerUid {
+	if !utils.IsContain(c.UID, config.Config.Manager.AppManagerUid) {
 		log.ErrorByKv(" Authentication failed", req.OperationID, "args", c)
 		return &pbUser.GetAllUsersUidResp{CommonResp: &pbUser.CommonResp{ErrorCode: 401, ErrorMsg: "not authorized"}}, nil
 	}

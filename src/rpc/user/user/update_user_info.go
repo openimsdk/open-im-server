@@ -24,7 +24,8 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 
 	ownerUid := ""
-	if claims.UID == config.Config.AppManagerUid {
+	//if claims.UID == config.Config.AppManagerUid {
+	if utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		ownerUid = req.Uid
 	} else {
 		ownerUid = claims.UID

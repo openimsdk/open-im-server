@@ -41,7 +41,11 @@ type MsgCallBackResp struct {
 }
 
 func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*pbChat.UserSendMsgResp, error) {
+	replay := pbChat.UserSendMsgResp{}
 	log.InfoByKv("sendMsg", pb.OperationID, "args", pb.String())
+	if !utils.VerifyToken(pb.Token, pb.SendID) {
+		return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
+	}
 	serverMsgID := GetMsgID(pb.SendID)
 	pbData := pbChat.WSToMsgSvrChatMsg{}
 	pbData.MsgFrom = pb.MsgFrom
@@ -61,7 +65,6 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	pbData.OperationID = pb.OperationID
 	pbData.Token = pb.Token
 	pbData.SendTime = utils.GetCurrentTimestampByNano()
-	replay := pbChat.UserSendMsgResp{}
 	m := MsgCallBackResp{}
 	if config.Config.MessageCallBack.CallbackSwitch {
 		bMsg, err := http2.Post(config.Config.MessageCallBack.CallbackUrl, MsgCallBackReq{

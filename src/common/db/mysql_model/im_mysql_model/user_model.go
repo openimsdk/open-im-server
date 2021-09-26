@@ -1,12 +1,28 @@
 package im_mysql_model
 
 import (
+	"Open_IM/src/common/config"
 	"Open_IM/src/common/db"
 	pbAuth "Open_IM/src/proto/auth"
+	"Open_IM/src/utils"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"time"
 )
 
+func init() {
+	//init managers
+	var pb pbAuth.UserRegisterReq
+	for k, v := range config.Config.Manager.AppManagerUid {
+		if !IsExistUser(v) {
+			pb.UID = v
+			pb.Name = "AppManager" + utils.IntToString(k+1)
+			err := UserRegister(&pb)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+}
 func UserRegister(pb *pbAuth.UserRegisterReq) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
@@ -112,4 +128,20 @@ func SelectAllUID() ([]string, error) {
 		uid = append(uid, strUID)
 	}
 	return uid, nil
+}
+
+func IsExistUser(uid string) bool {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return false
+	}
+	var number int32
+	err = dbConn.Raw("select count(*) from `user` where  uid = ?", uid).Count(&number).Error
+	if err != nil {
+		return false
+	}
+	if number != 1 {
+		return false
+	}
+	return true
 }

@@ -103,9 +103,10 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if !utils.VerifyToken(token, config.Config.AppManagerUid) {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err,not authorized", "sendTime": 0, "MsgID": ""})
+	if !utils.IsContain(params.SendID, config.Config.Manager.AppManagerUid) {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not appManager", "sendTime": 0, "MsgID": ""})
 		return
+
 	}
 
 	log.InfoByKv("Ws call success to ManagementSendMsgReq", params.OperationID, "Parameters", params)

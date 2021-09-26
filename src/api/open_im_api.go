@@ -86,6 +86,7 @@ func main() {
 		chatGroup.POST("/pull_msg", apiChat.UserPullMsg)
 		chatGroup.POST("/send_msg", apiChat.UserSendMsg)
 	}
+	//Manager
 	managementGroup := r.Group("/manager")
 	{
 		managementGroup.POST("/delete_user", manage.DeleteUser)

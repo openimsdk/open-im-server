@@ -69,3 +69,5 @@ var ContentType2PushContent = map[int64]string{
 	Video:   "[video]",
 	File:    "[file]",
 }
+
+const FriendAcceptTip = "You have successfully become friends, so start chatting"

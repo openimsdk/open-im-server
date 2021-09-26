@@ -52,65 +52,69 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	return &pbFriend.CommonResp{}, nil
 }
 
-func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.CommonResp, error) {
-	log.Info(req.Token, req.OperationID, "ImportFriendis server,userid=%s", req.OwnerUid)
+func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.ImportFriendResp, error) {
+	log.Info(req.Token, req.OperationID, "ImportFriend come here,args=%s", req.String())
+	var resp pbFriend.ImportFriendResp
 	//Parse token, to find current user information
 	claims, err := utils.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbFriend.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
-	}
-	if claims.UID != config.Config.AppManagerUid {
-		log.Error(req.Token, req.OperationID, "not magager uid", claims.UID, config.Config.AppManagerUid)
-		return &pbFriend.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbFriend.ImportFriendResp{CommonResp: &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, FailedUidList: req.UidList}, nil
 	}
 
-	if _, err = im_mysql_model.FindUserByUID(req.Uid); err != nil {
-		log.Error(req.Token, req.OperationID, "this user not exists,cant not add friend", req.Uid)
-		return &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: config.ErrSearchUserInfo.ErrMsg}, nil
+	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
+		log.Error(req.Token, req.OperationID, "not magager uid", claims.UID)
+		return &pbFriend.ImportFriendResp{CommonResp: &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: "not authorized"}, FailedUidList: req.UidList}, nil
 	}
-
 	if _, err = im_mysql_model.FindUserByUID(req.OwnerUid); err != nil {
 		log.Error(req.Token, req.OperationID, "this user not exists,cant not add friend", req.OwnerUid)
-		return &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: config.ErrSearchUserInfo.ErrMsg}, nil
+		return &pbFriend.ImportFriendResp{CommonResp: &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: "this user not exists,cant not add friend"}, FailedUidList: req.UidList}, nil
 	}
+	for _, v := range req.UidList {
+		if _, err = im_mysql_model.FindUserByUID(v); err != nil {
+			resp.CommonResp.ErrorMsg = "some uid establish failed"
+			resp.CommonResp.ErrorCode = 408
+			resp.FailedUidList = append(resp.FailedUidList, v)
+		} else {
+			if _, err = im_mysql_model.FindFriendRelationshipFromFriend(req.OwnerUid, v); err != nil {
+				//Establish two single friendship
+				err1 := im_mysql_model.InsertToFriend(req.OwnerUid, v, 1)
+				if err1 != nil {
+					resp.FailedUidList = append(resp.FailedUidList, v)
+					log.Error(req.Token, req.OperationID, "err=%s,create friendship failed", err.Error())
+				}
+				err2 := im_mysql_model.InsertToFriend(v, req.OwnerUid, 1)
+				if err2 != nil {
+					log.Error(req.Token, req.OperationID, "err=%s,create friendship failed", err.Error())
+				}
+				if err1 == nil && err2 == nil {
+					var name, faceUrl string
+					n := content_struct.NotificationContent{1, constant.FriendAcceptTip, ""}
+					r, err := im_mysql_model.FindUserByUID(v)
+					if err != nil {
+						log.ErrorByKv("get  info failed", req.OperationID, "err", err.Error(), "req", req.String())
+					}
+					if r != nil {
+						name, faceUrl = r.Name, r.Icon
+					}
 
-	_, err = im_mysql_model.FindFriendRelationshipFromFriend(req.OwnerUid, req.Uid)
+					logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
+						SendID:         v,
+						RecvID:         req.OwnerUid,
+						SenderFaceURL:  faceUrl,
+						SenderNickName: name,
+						Content:        n.ContentToString(),
+						SendTime:       utils.GetCurrentTimestampByNano(),
+						MsgFrom:        constant.UserMsgType,                //Notification message identification
+						ContentType:    constant.AcceptFriendApplicationTip, //Add friend flag
+						SessionType:    constant.SingleChatType,
+						OperationID:    req.OperationID,
+					})
+				}
+			}
+		}
 
-	if err != nil {
-		log.Error("", req.OperationID, err.Error())
 	}
-	//Establish two single friendship
-	err = im_mysql_model.InsertToFriend(req.OwnerUid, req.Uid, 1)
-	if err != nil {
-		log.Error(req.Token, req.OperationID, "err=%s,create friendship failed", err.Error())
-	}
-	err = im_mysql_model.InsertToFriend(req.Uid, req.OwnerUid, 1)
-	if err != nil {
-		log.Error(req.Token, req.OperationID, "err=%s,create friendship failed", err.Error())
-	}
+	return &resp, nil
 
-	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-		SendID:      req.OwnerUid,
-		RecvID:      req.Uid,
-		Content:     content_struct.NewContentStructString(0, "", " add you as a friend."),
-		SendTime:    utils.GetCurrentTimestampBySecond(),
-		MsgFrom:     constant.UserMsgType,                //Notification message identification
-		ContentType: constant.AcceptFriendApplicationTip, //Add friend flag
-		SessionType: constant.SingleChatType,
-		OperationID: req.OperationID,
-	})
-
-	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-		SendID:      req.Uid,
-		RecvID:      req.OwnerUid,
-		Content:     content_struct.NewContentStructString(0, "", " add you as a friend."),
-		SendTime:    utils.GetCurrentTimestampBySecond(),
-		MsgFrom:     constant.UserMsgType,                //Notification message identification
-		ContentType: constant.AcceptFriendApplicationTip, //Add friend flag
-		SessionType: constant.SingleChatType,
-		OperationID: req.OperationID,
-	})
-
-	return &pbFriend.CommonResp{}, nil
 }

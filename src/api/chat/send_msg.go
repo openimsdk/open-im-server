@@ -66,10 +66,6 @@ func UserSendMsg(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if !utils.VerifyToken(token, params.SendID) {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
-		return
-	}
 
 	log.InfoByKv("Ws call success to sendMsgReq", params.OperationID, "Parameters", params)
 

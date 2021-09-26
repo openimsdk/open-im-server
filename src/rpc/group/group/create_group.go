@@ -87,7 +87,8 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 
 	isMagagerFlag := 0
 	tokenUid := claims.UID
-	if tokenUid == config.Config.AppManagerUid {
+
+	if utils.IsContain(tokenUid, config.Config.Manager.AppManagerUid) {
 		isMagagerFlag = 1
 	}
 

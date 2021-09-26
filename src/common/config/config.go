@@ -108,7 +108,10 @@ type config struct {
 			}
 		}
 	}
-
+	Manager struct {
+		AppManagerUid []string `yaml:"appManagerUid"`
+		Secrets       []string `yaml:"secrets"`
+	}
 	Kafka struct {
 		Ws2mschat struct {
 			Addr  []string `yaml:"addr"`
@@ -124,9 +127,7 @@ type config struct {
 			MsgToPush  string `yaml:"msgToPush"`
 		}
 	}
-	AppManagerUid string
-	Secret        string
-
+	Secret           string `yaml:"secret"`
 	MultiLoginPolicy struct {
 		OnlyOneTerminalAccess                                  bool `yaml:"onlyOneTerminalAccess"`
 		MobileAndPCTerminalAccessButOtherTerminalKickEachOther bool `yaml:"mobileAndPCTerminalAccessButOtherTerminalKickEachOther"`

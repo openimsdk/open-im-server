@@ -116,8 +116,10 @@ push:
     android:
       accessID: 111
       secretKey: 111
+manager:
+  appManagerUid: ["openIM123456","openIM654321"]
+  secrets: ["openIM1","openIM2"]
 
-appmanageruid: "openIM123456"
 secret: tuoyun
 
 multiloginpolicy:

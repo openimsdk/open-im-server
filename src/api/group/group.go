@@ -13,7 +13,7 @@ import (
 )
 
 type InviteUserToGroupReq struct {
-	GroupID     string   `json:"groupID"`
+	GroupID     string   `json:"groupID" binding:"required"`
 	UidList     []string `json:"uidList" binding:"required"`
 	Reason      string   `json:"reason"`
 	OperationID string   `json:"operationID" binding:"required"`
@@ -46,6 +46,7 @@ func KickGroupMember(c *gin.Context) {
 		OperationID: params.OperationID,
 		GroupID:     params.GroupID,
 		Token:       c.Request.Header.Get("token"),
+
 		UidListInfo: params.UidListInfo,
 	}
 	log.Info(req.Token, req.OperationID, "recv req: ", req.String())

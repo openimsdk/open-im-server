@@ -20,9 +20,11 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 
 	isMagagerFlag := 0
 	tokenUid := claims.UID
-	if tokenUid == config.Config.AppManagerUid {
+
+	if utils.IsContain(tokenUid, config.Config.Manager.AppManagerUid) {
 		isMagagerFlag = 1
 	}
+
 	if isMagagerFlag == 0 {
 		err = im_mysql_model.InsertInToUserBlackList(claims.UID, req.Uid)
 		if err != nil {

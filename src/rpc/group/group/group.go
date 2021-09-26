@@ -63,8 +63,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
 	}
 	log.Info(claims.UID, req.OperationID, "recv req: ", req.String())
+	//	if !imdb.IsExistGroupMember(req.GroupID, claims.UID) &&  claims.UID != config.Config.AppManagerUid
 
-	if !imdb.IsExistGroupMember(req.GroupID, claims.UID) && claims.UID != config.Config.AppManagerUid {
+	if !imdb.IsExistGroupMember(req.GroupID, claims.UID) && !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		log.Error(req.Token, req.OperationID, "err= invite user not in group")
 		return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrAccess.ErrCode, ErrorMsg: config.ErrAccess.ErrMsg}, nil
 	}
@@ -118,7 +119,8 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	resp.ErrorCode = 0
 	resp.ErrorMsg = "ok"
 
-	if claims.UID == config.Config.AppManagerUid {
+	//if claims.UID == config.Config.AppManagerUid
+	if utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		var iu inviteUserToGroupReq
 		iu.GroupID = req.GroupID
 		iu.OperationID = req.OperationID
@@ -268,7 +270,8 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 	}
 	if flag != 1 {
-		if claims.UID == config.Config.AppManagerUid {
+		//	if claims.UID == config.Config.AppManagerUid {
+		if utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 			flag = 1
 		}
 	}
@@ -320,7 +323,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 
 	n := content_struct.NotificationContent{1, req.GroupID, kq.ContentToString()}
 
-	if claims.UID == config.Config.AppManagerUid {
+	if utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		log.Info("", req.OperationID, claims.UID, req.GroupID)
 		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
 			SendID:      claims.UID,
