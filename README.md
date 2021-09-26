@@ -50,7 +50,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
     1. Shell authorization
 
        ```
-       #cd Open-IM-server/scrip
+       #cd Open-IM-server/script
        
        chmod +x *.sh
        ```
