@@ -20,7 +20,6 @@ message WSToMsgSvrChatMsg{
   int32  PlatformID =15;
   repeated string  ForceList = 16;
   string ClientMsgID = 17;
-
 }
 
 

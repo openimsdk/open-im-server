@@ -40,7 +40,7 @@ func CreateGroup(c *gin.Context) {
 		Notification: params.Notification,
 		FaceUrl:      params.FaceUrl,
 		OperationID:  params.OperationID,
-		Ex: params.Ex,
+		Ex:           params.Ex,
 		Token:        c.Request.Header.Get("token"),
 	}
 	log.Info(req.Token, req.OperationID, "api create group is server,params=%s", req.String())

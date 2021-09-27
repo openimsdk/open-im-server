@@ -59,6 +59,8 @@ serverip:
 
 api:
   openImApiPort: [ 10000 ]
+sdk:
+  sdkWsPort: [ 30000 ]
 
 credential:
   tencent:

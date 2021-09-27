@@ -13,7 +13,9 @@ type config struct {
 	Api struct {
 		GinPort []int `yaml:"openImApiPort"`
 	}
-
+	Sdk struct {
+		WsPort []int `yaml:"sdkWsPort"`
+	}
 	Credential struct {
 		Tencent struct {
 			AppID     string `yaml:"appID"`

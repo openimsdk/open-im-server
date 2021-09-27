@@ -8,6 +8,7 @@ need_to_start_server_shell=(
   msg_gateway_start.sh
   push_start.sh
   msg_transfer_start.sh
+  start_sdk_svr.sh
 )
 
 for i in ${need_to_start_server_shell[*]}; do
