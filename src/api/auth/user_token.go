@@ -13,7 +13,7 @@ import (
 
 type paramsUserToken struct {
 	Secret   string `json:"secret" binding:"required,max=32"`
-	Platform int32  `json:"platform" binding:"required,min=1,max=7"`
+	Platform int32  `json:"platform" binding:"required,min=1,max=8"`
 	UID      string `json:"uid" binding:"required,min=1,max=64"`
 }
 
