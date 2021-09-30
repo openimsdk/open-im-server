@@ -42,7 +42,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 2. Clone the Open-IM project to your server.
 
    ```
-   git clone https://github.com/OpenIMSDK/Open-IM-Server.git
+   git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
    ```
 
 3. Build and start Service.
@@ -86,7 +86,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 3. Clone the Open-IM project to your server.
 
    ```
-   git clone https://github.com/OpenIMSDK/Open-IM-Server.git
+   git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
    ```
 
 4. Start docker-compose with one click(Docker automatically pulls all images)
