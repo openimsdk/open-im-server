@@ -4,8 +4,8 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 list1=$(cat $config_path | grep openImApiPort | awk -F '[:]' '{print $NF}')
-list2=$(cat $config_path | grep websocketPort | awk -F '[:]' '{print $NF}')
-list3=$(cat $config_path | grep sdkWsPort | awk -F '[:]' '{print $NF}')
+list2=$(cat $config_path | grep openImWsPort | awk -F '[:]' '{print $NF}')
+list3=$(cat $config_path | grep openImSdkWsPort | awk -F '[:]' '{print $NF}')
 list_to_string $list1
 api_ports=($ports_array)
 list_to_string $list2

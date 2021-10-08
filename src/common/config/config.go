@@ -14,7 +14,7 @@ type config struct {
 		GinPort []int `yaml:"openImApiPort"`
 	}
 	Sdk struct {
-		WsPort []int `yaml:"sdkWsPort"`
+		WsPort []int `yaml:"openImSdkWsPort"`
 	}
 	Credential struct {
 		Tencent struct {
@@ -92,7 +92,7 @@ type config struct {
 		PushName        string `yaml:"pushName"`
 	}
 	LongConnSvr struct {
-		WebsocketPort       []int `yaml:"websocketPort"`
+		WebsocketPort       []int `yaml:"openImWsPort"`
 		WebsocketMaxConnNum int   `yaml:"websocketMaxConnNum"`
 		WebsocketMaxMsgLen  int   `yaml:"websocketMaxMsgLen"`
 		WebsocketTimeOut    int   `yaml:"websocketTimeOut"`

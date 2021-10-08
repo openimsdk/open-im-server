@@ -4,7 +4,7 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 list1=$(cat $config_path | grep openImOnlineRelayPort | awk -F '[:]' '{print $NF}')
-list2=$(cat $config_path | grep websocketPort | awk -F '[:]' '{print $NF}')
+list2=$(cat $config_path | grep openImWsPort | awk -F '[:]' '{print $NF}')
 list_to_string $list1
 rpc_ports=($ports_array)
 list_to_string $list2
@@ -39,7 +39,7 @@ if [ $check -ge 1 ]; then
     ports=$(netstat -netulp | grep -w ${i} | awk '{print $4}' | awk -F '[:]' '{print $NF}')
       allPorts=${allPorts}"$ports "
   done
-  echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS !!!"${COLOR_SUFFIX}
+  echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS"${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${YELLOW_PREFIX}${msg_gateway_name}${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${YELLOW_PREFIX}${allNewPid}${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${YELLOW_PREFIX}${allPorts}${COLOR_SUFFIX}
