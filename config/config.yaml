@@ -60,7 +60,7 @@ serverip:
 api:
   openImApiPort: [ 10000 ]
 sdk:
-  sdkWsPort: [ 30000 ]
+  openImSdkWsPort: [ 30000 ]
 
 credential:
   tencent:
@@ -105,7 +105,7 @@ modulename:
   pushName: push
 
 longconnsvr:
-  websocketPort: [ 17778 ]
+  openImWsPort: [ 17778 ]
   websocketMaxConnNum: 10000
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10

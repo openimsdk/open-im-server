@@ -36,7 +36,7 @@ if [ $check -eq 1 ]; then
   for i in $ports; do
     allPorts=${allPorts}"$i "
   done
-  echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS !!!"${COLOR_SUFFIX}
+  echo -e ${SKY_BLUE_PREFIX}"SERVICE START SUCCESS "${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"SERVICE_NAME: "${COLOR_SUFFIX}${YELLOW_PREFIX}${push_name}${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"PID: "${COLOR_SUFFIX}${YELLOW_PREFIX}${newPid}${COLOR_SUFFIX}
   echo -e ${SKY_BLUE_PREFIX}"LISTENING_PORT: "${COLOR_SUFFIX}${YELLOW_PREFIX}${allPorts}${COLOR_SUFFIX}

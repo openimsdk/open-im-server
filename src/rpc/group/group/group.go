@@ -81,7 +81,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			log.Error(claims.UID, req.OperationID, "FindUserByUID failed, err: ", err.Error())
 			return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrParam.ErrCode, ErrorMsg: config.ErrParam.ErrMsg}, nil
 		}*/
-
+	var nicknameList string
 	for _, v := range req.UidList {
 		var resultNode pbGroup.Id2Result
 		resultNode.UId = v
@@ -113,7 +113,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		if err != nil {
 			log.Error("", "", "add mongo group member failed, db.DB.AddGroupMember fail [err: %s]", err.Error())
 		}
-
+		nicknameList = nicknameList + toUserInfo.Name + " "
 		resp.Id2Result = append(resp.Id2Result, &resultNode)
 	}
 	resp.ErrorCode = 0
@@ -121,12 +121,13 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 
 	//if claims.UID == config.Config.AppManagerUid
 	if utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
+		m, _ := imdb.FindUserByUID(claims.UID)
 		var iu inviteUserToGroupReq
 		iu.GroupID = req.GroupID
 		iu.OperationID = req.OperationID
 		iu.Reason = req.Reason
 		iu.UidList = req.UidList
-		n := content_struct.NotificationContent{1, req.GroupID, iu.ContentToString()}
+		n := content_struct.NotificationContent{1, nicknameList + "  invited into the group chat by " + m.Name, iu.ContentToString()}
 		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
 			SendID:      claims.UID,
 			RecvID:      req.GroupID,
