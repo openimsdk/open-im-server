@@ -84,25 +84,28 @@ services:
 
 
   #fixme-----build from dockerfile---------
-  #  open-im-server:
-  #      image: open_im_server
-  #      ports:
-  #        - 10000:10000
-  #        - 17778:17778
-  #      container_name: open-im-server
-  #      volumes:
-  #        - ./logs:/Open-IM-Server/logs
-  #        - ./config/config.yaml:/Open-IM-Server/config/config.yaml
-  #      restart: always
-  #      build:
-  #        context: .
-  #        dockerfile: deploy.Dockerfile
-  #      depends_on:
-  #        - mysql
-  #        - mongodb
-  #        - redis
-  #        - kafka
-  #        - etcd
+  # open-im-server:
+  #    image: open_im_server
+  #    container_name: open-im-server
+  #    volumes:
+  #      - ./logs:/Open-IM-Server/logs
+  #      - ./config/config.yaml:/Open-IM-Server/config/config.yaml
+  #    restart: always
+  #    build:
+  #      context: .
+  #      dockerfile: deploy.Dockerfile
+  #    depends_on:
+  #      - mysql
+  #      - mongodb
+  #      - redis
+  #      - kafka
+  #      - etcd
+  #    network_mode: "host"
+  #      logging:
+  #        driver: json-file
+  #        options:
+  #          max-size: "1g"
+  #          max-file: "2"
 
   #fixme----build from docker hub------
   open-im-server:
