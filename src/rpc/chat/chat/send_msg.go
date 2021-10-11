@@ -2,6 +2,7 @@ package rpcChat
 
 import (
 	"Open_IM/internal/api/group"
+	"Open_IM/internal/push/content_struct"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	http2 "Open_IM/src/common/http"
@@ -9,7 +10,6 @@ import (
 	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
-	"Open_IM/src/push/content_struct"
 	"Open_IM/src/utils"
 	"context"
 	"encoding/json"

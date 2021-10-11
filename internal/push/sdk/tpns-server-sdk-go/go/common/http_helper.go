@@ -1,7 +1,7 @@
 package common
 
 import (
-	tpns "Open_IM/src/push/sdk/tpns-server-sdk-go/go"
+	tpns "Open_IM/internal/push/sdk/tpns-server-sdk-go/go"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

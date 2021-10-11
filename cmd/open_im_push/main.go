@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/src/push/logic"
+	"Open_IM/internal/push/logic"
 	"flag"
 	"sync"
 )
