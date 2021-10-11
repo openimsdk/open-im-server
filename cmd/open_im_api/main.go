@@ -1,13 +1,13 @@
 package main
 
 import (
-	apiAuth "Open_IM/src/api/auth"
-	apiChat "Open_IM/src/api/chat"
-	"Open_IM/src/api/friend"
-	"Open_IM/src/api/group"
-	"Open_IM/src/api/manage"
-	apiThird "Open_IM/src/api/third"
-	"Open_IM/src/api/user"
+	apiAuth "Open_IM/internal/api/auth"
+	apiChat "Open_IM/internal/api/chat"
+	"Open_IM/internal/api/friend"
+	"Open_IM/internal/api/group"
+	"Open_IM/internal/api/manage"
+	apiThird "Open_IM/internal/api/third"
+	"Open_IM/internal/api/user"
 	"Open_IM/src/utils"
 	"flag"
 	"github.com/gin-gonic/gin"

@@ -1,7 +1,7 @@
 package rpcChat
 
 import (
-	"Open_IM/src/api/group"
+	"Open_IM/internal/api/group"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	http2 "Open_IM/src/common/http"
