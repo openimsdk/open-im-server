@@ -7,11 +7,11 @@
 package manage
 
 import (
+	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbChat "Open_IM/src/proto/chat"
 	"Open_IM/src/utils"
 	"context"
 	"github.com/gin-gonic/gin"

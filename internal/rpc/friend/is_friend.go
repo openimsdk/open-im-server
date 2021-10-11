@@ -5,7 +5,7 @@ import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	pbFriend "Open_IM/src/proto/friend"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/src/utils"
 	"context"
 	"fmt"

@@ -1,9 +1,9 @@
 package internal_service
 
 import (
+	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/src/common/config"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbUser "Open_IM/src/proto/user"
 	"context"
 	"strings"
 )

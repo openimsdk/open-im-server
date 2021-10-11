@@ -6,12 +6,12 @@ import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db"
-	pbChat "Open_IM/src/proto/chat"
+	pbChat "Open_IM/pkg/proto/chat"
 	"encoding/json"
 
 	imdb "Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	pbGroup "Open_IM/src/proto/group"
+	pbGroup "Open_IM/pkg/proto/group"
 	"Open_IM/src/utils"
 	"context"
 

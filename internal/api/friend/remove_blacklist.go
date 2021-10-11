@@ -1,10 +1,10 @@
 package friend
 
 import (
+	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbFriend "Open_IM/src/proto/friend"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"

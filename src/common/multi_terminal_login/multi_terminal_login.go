@@ -1,12 +1,12 @@
 package multi_terminal_login
 
 import (
+	"Open_IM/internal/push/content_struct"
+	"Open_IM/internal/push/logic"
+	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db"
-	pbChat "Open_IM/src/proto/chat"
-	"Open_IM/src/push/content_struct"
-	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 )
 

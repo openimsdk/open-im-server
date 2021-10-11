@@ -7,8 +7,8 @@
 package im_mysql_msg_model
 
 import (
+	pbMsg "Open_IM/pkg/proto/chat"
 	"Open_IM/src/common/db"
-	pbMsg "Open_IM/src/proto/chat"
 	"Open_IM/src/utils"
 	"database/sql"
 	"time"

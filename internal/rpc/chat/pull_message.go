@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	pbMsg "Open_IM/src/proto/chat"
+	pbMsg "Open_IM/pkg/proto/chat"
 )
 
 func (rpc *rpcChat) GetNewSeq(_ context.Context, in *pbMsg.GetNewSeqReq) (*pbMsg.GetNewSeqResp, error) {

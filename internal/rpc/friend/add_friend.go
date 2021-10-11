@@ -7,8 +7,8 @@ import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	pbChat "Open_IM/src/proto/chat"
-	pbFriend "Open_IM/src/proto/friend"
+	pbChat "Open_IM/pkg/proto/chat"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/src/utils"
 	"context"
 )

@@ -1,9 +1,9 @@
 package logic
 
 import (
+	pbMsg "Open_IM/pkg/proto/chat"
 	"Open_IM/src/common/db"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
-	pbMsg "Open_IM/src/proto/chat"
 )
 
 func saveUserChat(uid string, pbMsg *pbMsg.MsgSvrToPushSvrChatMsg) error {

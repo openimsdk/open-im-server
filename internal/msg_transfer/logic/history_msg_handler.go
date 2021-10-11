@@ -1,13 +1,13 @@
 package logic
 
 import (
+	pbMsg "Open_IM/pkg/proto/chat"
+	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	kfk "Open_IM/src/common/kafka"
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbMsg "Open_IM/src/proto/chat"
-	pbPush "Open_IM/src/proto/push"
 	"Open_IM/src/utils"
 	"context"
 	"github.com/Shopify/sarama"

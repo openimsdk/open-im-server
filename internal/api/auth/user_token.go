@@ -1,10 +1,10 @@
 package apiAuth
 
 import (
+	pbAuth "Open_IM/pkg/proto/auth"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbAuth "Open_IM/src/proto/auth"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"

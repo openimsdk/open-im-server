@@ -1,9 +1,9 @@
 package apiChat
 
 import (
+	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
-	pbChat "Open_IM/src/proto/chat"
 	"Open_IM/src/utils"
 	"context"
 

@@ -5,7 +5,7 @@ import (
 	"Open_IM/src/common/kafka"
 	log2 "Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbChat "Open_IM/src/proto/chat"
+	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/src/utils"
 	"google.golang.org/grpc"
 	"net"

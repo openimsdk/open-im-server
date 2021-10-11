@@ -1,9 +1,9 @@
 package im_mysql_model
 
 import (
+	"Open_IM/pkg/proto/group"
 	"Open_IM/src/common/db"
 	"Open_IM/src/common/log"
-	"Open_IM/src/proto/group"
 	"errors"
 	"time"
 )

@@ -5,7 +5,7 @@ import (
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbUser "Open_IM/src/proto/user"
+	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/src/utils"
 	"context"
 	"google.golang.org/grpc"

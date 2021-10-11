@@ -10,8 +10,8 @@ import (
 	"Open_IM/src/common/config"
 	kfk "Open_IM/src/common/kafka"
 	"Open_IM/src/common/log"
-	pbChat "Open_IM/src/proto/chat"
-	pbRelay "Open_IM/src/proto/relay"
+	pbChat "Open_IM/pkg/proto/chat"
+	pbRelay "Open_IM/pkg/proto/relay"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )

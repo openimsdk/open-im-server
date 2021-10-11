@@ -4,7 +4,7 @@ import (
 	"Open_IM/src/common/db"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	"Open_IM/src/proto/group"
+	"Open_IM/pkg/proto/group"
 	"context"
 )
 

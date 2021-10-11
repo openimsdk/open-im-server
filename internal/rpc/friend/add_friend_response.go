@@ -1,14 +1,14 @@
 package friend
 
 import (
+	"Open_IM/internal/push/content_struct"
+	"Open_IM/internal/push/logic"
+	pbChat "Open_IM/pkg/proto/chat"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
 	"Open_IM/src/common/log"
-	pbChat "Open_IM/src/proto/chat"
-	pbFriend "Open_IM/src/proto/friend"
-	"Open_IM/src/push/content_struct"
-	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
 )

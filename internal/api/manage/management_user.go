@@ -7,10 +7,10 @@
 package manage
 
 import (
+	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbUser "Open_IM/src/proto/user"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"

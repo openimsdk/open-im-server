@@ -7,12 +7,12 @@
 package logic
 
 import (
+	pbMsg "Open_IM/pkg/proto/chat"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_msg_model"
 	kfk "Open_IM/src/common/kafka"
 	"Open_IM/src/common/log"
-	pbMsg "Open_IM/src/proto/chat"
 	"Open_IM/src/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"

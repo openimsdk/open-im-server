@@ -1,11 +1,11 @@
 package gate
 
 import (
+	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbRelay "Open_IM/src/proto/relay"
 	"Open_IM/src/utils"
 	"context"
 	"encoding/json"
