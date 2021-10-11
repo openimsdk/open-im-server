@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/src/rpc/group/group"
+	"Open_IM/internal/rpc/group"
 	"flag"
 )
 

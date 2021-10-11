@@ -1,4 +1,4 @@
-package rpcAuth
+package auth
 
 import (
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"

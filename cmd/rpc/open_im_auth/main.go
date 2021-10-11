@@ -1,7 +1,7 @@
 package main
 
 import (
-	rpcAuth "Open_IM/src/rpc/auth/auth"
+	rpcAuth "Open_IM/internal/rpc/auth"
 	"flag"
 )
 

@@ -1,6 +1,8 @@
 package group
 
 import (
+	"Open_IM/internal/push/content_struct"
+	"Open_IM/internal/push/logic"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db"
@@ -9,8 +11,6 @@ import (
 	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
-	"Open_IM/src/push/content_struct"
-	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
 	"google.golang.org/grpc"

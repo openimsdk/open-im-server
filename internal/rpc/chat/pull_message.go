@@ -1,4 +1,4 @@
-package rpcChat
+package chat
 
 import (
 	"context"

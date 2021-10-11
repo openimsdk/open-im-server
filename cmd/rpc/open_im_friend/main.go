@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/src/rpc/friend/friend"
+	"Open_IM/internal/rpc/friend"
 	"flag"
 )
 

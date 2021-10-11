@@ -1,12 +1,12 @@
 package group
 
 import (
+	"Open_IM/internal/push/content_struct"
+	"Open_IM/internal/push/logic"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db"
 	pbChat "Open_IM/src/proto/chat"
-	"Open_IM/src/push/content_struct"
-	"Open_IM/src/push/logic"
 	"encoding/json"
 
 	imdb "Open_IM/src/common/db/mysql_model/im_mysql_model"

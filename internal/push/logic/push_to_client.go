@@ -7,6 +7,8 @@
 package logic
 
 import (
+	rpcChat "Open_IM/internal/rpc/chat"
+	"Open_IM/internal/rpc/user/internal_service"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/log"
@@ -15,8 +17,6 @@ import (
 	pbGroup "Open_IM/src/proto/group"
 	pbRelay "Open_IM/src/proto/relay"
 	pbGetInfo "Open_IM/src/proto/user"
-	rpcChat "Open_IM/src/rpc/chat/chat"
-	"Open_IM/src/rpc/user/internal_service"
 	"Open_IM/src/utils"
 	"context"
 	"encoding/json"

@@ -1,4 +1,4 @@
-package rpcChat
+package chat
 
 import (
 	"Open_IM/internal/api/group"

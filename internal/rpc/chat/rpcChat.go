@@ -1,10 +1,11 @@
-package rpcAuth
+package chat
 
 import (
 	"Open_IM/src/common/config"
+	"Open_IM/src/common/kafka"
 	log2 "Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
-	pbAuth "Open_IM/src/proto/auth"
+	pbChat "Open_IM/src/proto/chat"
 	"Open_IM/src/utils"
 	"google.golang.org/grpc"
 	"net"
@@ -12,23 +13,26 @@ import (
 	"strings"
 )
 
-type rpcAuth struct {
+type rpcChat struct {
 	rpcPort         int
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
+	producer        *kafka.Producer
 }
 
-func NewRpcAuthServer(port int) *rpcAuth {
-	return &rpcAuth{
+func NewRpcChatServer(port int) *rpcChat {
+	rc := rpcChat{
 		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.RpcGetTokenName,
+		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfflineMessageName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
+	rc.producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
+	return &rc
 }
 
-func (rpc *rpcAuth) Run() {
+func (rpc *rpcChat) Run() {
 	log2.Info("", "", "rpc get_token init...")
 
 	address := utils.ServerIP + ":" + strconv.Itoa(rpc.rpcPort)
@@ -45,7 +49,7 @@ func (rpc *rpcAuth) Run() {
 
 	//service registers with etcd
 
-	pbAuth.RegisterAuthServer(srv, rpc)
+	pbChat.RegisterChatServer(srv, rpc)
 	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
 		log2.Error("", "", "register rpc get_token to etcd failed, err = %s", err.Error())

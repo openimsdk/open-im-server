@@ -1,6 +1,7 @@
 package user
 
 import (
+	"Open_IM/internal/push/logic"
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/db/mysql_model/im_mysql_model"
@@ -9,7 +10,6 @@ import (
 	pbChat "Open_IM/src/proto/chat"
 	pbFriend "Open_IM/src/proto/friend"
 	pbUser "Open_IM/src/proto/user"
-	"Open_IM/src/push/logic"
 	"Open_IM/src/utils"
 	"context"
 	"strings"
