@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"Open_IM/src/common/db/mysql_model/im_mysql_model"
-	"Open_IM/src/common/log"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	"Open_IM/pkg/common/log"
 	pbAuth "Open_IM/pkg/proto/auth"
 	"context"
 )

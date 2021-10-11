@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Open_IM/src/common/config"
+	"Open_IM/pkg/common/config"
 	"net"
 )
 

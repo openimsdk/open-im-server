@@ -1,14 +1,14 @@
 package logic
 
 import (
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
+	kfk "Open_IM/pkg/common/kafka"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbMsg "Open_IM/pkg/proto/chat"
 	pbPush "Open_IM/pkg/proto/push"
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/constant"
-	kfk "Open_IM/src/common/kafka"
-	"Open_IM/src/common/log"
-	"Open_IM/src/grpc-etcdv3/getcdv3"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	"context"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"

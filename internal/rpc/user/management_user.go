@@ -7,11 +7,11 @@
 package user
 
 import (
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/db/mysql_model/im_mysql_model"
-	"Open_IM/src/common/log"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	"Open_IM/pkg/common/log"
 	pbUser "Open_IM/pkg/proto/user"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	"context"
 )
 

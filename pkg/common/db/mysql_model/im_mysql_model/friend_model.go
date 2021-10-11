@@ -1,7 +1,7 @@
 package im_mysql_model
 
 import (
-	"Open_IM/src/common/db"
+	"Open_IM/pkg/common/db"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"time"
 )

@@ -1,8 +1,8 @@
 package db
 
 import (
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/log"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/log"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"

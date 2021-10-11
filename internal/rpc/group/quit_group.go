@@ -1,12 +1,12 @@
 package group
 
 import (
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/db"
-	"Open_IM/src/common/db/mysql_model/im_mysql_model"
-	"Open_IM/src/common/log"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	"Open_IM/pkg/common/log"
 	pbGroup "Open_IM/pkg/proto/group"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	"context"
 )
 

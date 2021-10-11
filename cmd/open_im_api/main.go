@@ -8,7 +8,7 @@ import (
 	"Open_IM/internal/api/manage"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	"flag"
 	"github.com/gin-gonic/gin"
 	"strconv"

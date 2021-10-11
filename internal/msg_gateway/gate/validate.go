@@ -7,8 +7,8 @@
 package gate
 
 import (
-	"Open_IM/src/common/constant"
-	"Open_IM/src/common/log"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/log"
 	"github.com/mitchellh/mapstructure"
 )
 

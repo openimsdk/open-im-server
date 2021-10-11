@@ -2,12 +2,12 @@ package apiChat
 
 import (
 	pbChat "Open_IM/pkg/proto/chat"
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/log"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common"
 	"context"
 
-	"Open_IM/src/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

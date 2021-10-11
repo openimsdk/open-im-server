@@ -2,8 +2,8 @@ package db
 
 import (
 	pbMsg "Open_IM/pkg/proto/chat"
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/constant"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"errors"
 	"github.com/golang/protobuf/proto"
 	"gopkg.in/mgo.v2/bson"

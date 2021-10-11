@@ -1,7 +1,7 @@
 package db
 
 import (
-	log2 "Open_IM/src/common/log"
+	log2 "Open_IM/pkg/common/log"
 	"github.com/garyburd/redigo/redis"
 )
 

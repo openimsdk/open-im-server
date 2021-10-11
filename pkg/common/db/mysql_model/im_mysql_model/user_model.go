@@ -1,10 +1,10 @@
 package im_mysql_model
 
 import (
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/db"
 	pbAuth "Open_IM/pkg/proto/auth"
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/db"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"time"
 )

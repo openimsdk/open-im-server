@@ -5,7 +5,7 @@ import (
 	"Open_IM/internal/push/sdk/tpns-server-sdk-go/go/auth"
 	"Open_IM/internal/push/sdk/tpns-server-sdk-go/go/common"
 	"Open_IM/internal/push/sdk/tpns-server-sdk-go/go/req"
-	"Open_IM/src/common/config"
+	"Open_IM/pkg/common/config"
 )
 
 var badgeType = -2

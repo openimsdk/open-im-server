@@ -2,7 +2,7 @@ package main
 
 import (
 	rpcChat "Open_IM/internal/rpc/chat"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	"flag"
 )
 

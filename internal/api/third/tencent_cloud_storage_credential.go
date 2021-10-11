@@ -1,8 +1,8 @@
 package apiThird
 
 import (
-	"Open_IM/src/common/config"
-	log2 "Open_IM/src/common/log"
+	"Open_IM/pkg/common/config"
+	log2 "Open_IM/pkg/common/log"
 	"github.com/gin-gonic/gin"
 	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"net/http"

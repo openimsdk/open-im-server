@@ -2,15 +2,15 @@ package user
 
 import (
 	"Open_IM/internal/push/logic"
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/constant"
-	"Open_IM/src/common/db/mysql_model/im_mysql_model"
-	"Open_IM/src/common/log"
-	"Open_IM/src/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbFriend "Open_IM/pkg/proto/friend"
 	pbUser "Open_IM/pkg/proto/user"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	"context"
 	"strings"
 )

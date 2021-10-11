@@ -1,8 +1,8 @@
 package gate
 
 import (
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/log"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/log"
 	"github.com/go-playground/validator/v10"
 	"sync"
 )

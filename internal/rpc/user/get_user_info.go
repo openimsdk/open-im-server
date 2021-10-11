@@ -1,12 +1,12 @@
 package user
 
 import (
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/db/mysql_model/im_mysql_model"
-	"Open_IM/src/common/log"
-	"Open_IM/src/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbUser "Open_IM/pkg/proto/user"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	"context"
 	"google.golang.org/grpc"
 	"net"

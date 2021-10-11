@@ -1,7 +1,7 @@
 package kafka
 
 import (
-	log2 "Open_IM/src/common/log"
+	log2 "Open_IM/pkg/common/log"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )

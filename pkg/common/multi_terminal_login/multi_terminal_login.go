@@ -4,10 +4,10 @@ import (
 	"Open_IM/internal/push/content_struct"
 	"Open_IM/internal/push/logic"
 	pbChat "Open_IM/pkg/proto/chat"
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/constant"
-	"Open_IM/src/common/db"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common"
 )
 
 func MultiTerminalLoginChecker(uid, token string, platformID int32) error {

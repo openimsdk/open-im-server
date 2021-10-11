@@ -1,7 +1,7 @@
 package db
 
 import (
-	"Open_IM/src/common/config"
+	"Open_IM/pkg/common/config"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/mgo.v2"
 	"time"

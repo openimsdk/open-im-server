@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/garyburd/redigo/redis"
 
-	commonDB "Open_IM/src/common/db"
-	"Open_IM/src/common/log"
+	commonDB "Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/log"
 
 	"sort"
 	"strings"

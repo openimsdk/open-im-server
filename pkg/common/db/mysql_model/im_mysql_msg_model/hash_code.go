@@ -1,8 +1,8 @@
 package im_mysql_msg_model
 
 import (
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/db"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/db"
 	"hash/crc32"
 	"strconv"
 )

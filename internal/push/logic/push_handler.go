@@ -7,9 +7,9 @@
 package logic
 
 import (
-	"Open_IM/src/common/config"
-	kfk "Open_IM/src/common/kafka"
-	"Open_IM/src/common/log"
+	"Open_IM/pkg/common/config"
+	kfk "Open_IM/pkg/common/kafka"
+	"Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"github.com/Shopify/sarama"

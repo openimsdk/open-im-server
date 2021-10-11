@@ -1,12 +1,12 @@
 package chat
 
 import (
-	"Open_IM/src/common/config"
-	"Open_IM/src/common/kafka"
-	log2 "Open_IM/src/common/log"
-	"Open_IM/src/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/kafka"
+	log2 "Open_IM/pkg/common/log"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
-	"Open_IM/src/utils"
+	"Open_IM/pkg/utils"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
