@@ -4,9 +4,7 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 service_port_name=(
-  #api port name
   openImApiPort
-  #rpc port name
   openImUserPort
   openImFriendPort
   openImOfflineMessagePort
@@ -14,8 +12,8 @@ service_port_name=(
   openImGroupPort
   openImAuthPort
   openImPushPort
-  websocketPort
-  sdkWsPort
+  openImWsPort
+  openImSdkWsPort
 )
   for i in ${service_port_name[*]};do
       list=$(cat $config_path | grep -w ${i} | awk -F '[:]' '{print $NF}')

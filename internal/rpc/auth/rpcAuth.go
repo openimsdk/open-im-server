@@ -2,7 +2,7 @@ package auth
 
 import (
 	"Open_IM/pkg/common/config"
-	log2 "Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAuth "Open_IM/pkg/proto/auth"
 	"Open_IM/pkg/utils"
@@ -20,24 +20,25 @@ type rpcAuth struct {
 }
 
 func NewRpcAuthServer(port int) *rpcAuth {
+	log.NewPrivateLog("auth")
 	return &rpcAuth{
 		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.RpcGetTokenName,
+		rpcRegisterName: config.Config.RpcRegisterName.OpenImAuthName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
 }
 
 func (rpc *rpcAuth) Run() {
-	log2.Info("", "", "rpc get_token init...")
+	log.Info("", "", "rpc get_token init...")
 
 	address := utils.ServerIP + ":" + strconv.Itoa(rpc.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log2.Error("", "", "listen network failed, err = %s, address = %s", err.Error(), address)
+		log.Error("", "", "listen network failed, err = %s, address = %s", err.Error(), address)
 		return
 	}
-	log2.Info("", "", "listen network success, address = %s", address)
+	log.Info("", "", "listen network success, address = %s", address)
 
 	//grpc server
 	srv := grpc.NewServer()
@@ -48,14 +49,14 @@ func (rpc *rpcAuth) Run() {
 	pbAuth.RegisterAuthServer(srv, rpc)
 	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
-		log2.Error("", "", "register rpc get_token to etcd failed, err = %s", err.Error())
+		log.Error("", "", "register rpc get_token to etcd failed, err = %s", err.Error())
 		return
 	}
 
 	err = srv.Serve(listener)
 	if err != nil {
-		log2.Info("", "", "rpc get_token fail, err = %s", err.Error())
+		log.Info("", "", "rpc get_token fail, err = %s", err.Error())
 		return
 	}
-	log2.Info("", "", "rpc get_token init success")
+	log.Info("", "", "rpc get_token init success")
 }

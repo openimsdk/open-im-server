@@ -3,7 +3,7 @@ package chat
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/kafka"
-	log2 "Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/utils"
@@ -22,6 +22,7 @@ type rpcChat struct {
 }
 
 func NewRpcChatServer(port int) *rpcChat {
+	log.NewPrivateLog("msg")
 	rc := rpcChat{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfflineMessageName,
@@ -33,15 +34,15 @@ func NewRpcChatServer(port int) *rpcChat {
 }
 
 func (rpc *rpcChat) Run() {
-	log2.Info("", "", "rpc get_token init...")
+	log.Info("", "", "rpc get_token init...")
 
 	address := utils.ServerIP + ":" + strconv.Itoa(rpc.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log2.Error("", "", "listen network failed, err = %s, address = %s", err.Error(), address)
+		log.Error("", "", "listen network failed, err = %s, address = %s", err.Error(), address)
 		return
 	}
-	log2.Info("", "", "listen network success, address = %s", address)
+	log.Info("", "", "listen network success, address = %s", address)
 
 	//grpc server
 	srv := grpc.NewServer()
@@ -52,14 +53,14 @@ func (rpc *rpcChat) Run() {
 	pbChat.RegisterChatServer(srv, rpc)
 	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
-		log2.Error("", "", "register rpc get_token to etcd failed, err = %s", err.Error())
+		log.Error("", "", "register rpc get_token to etcd failed, err = %s", err.Error())
 		return
 	}
 
 	err = srv.Serve(listener)
 	if err != nil {
-		log2.Info("", "", "rpc get_token fail, err = %s", err.Error())
+		log.Info("", "", "rpc get_token fail, err = %s", err.Error())
 		return
 	}
-	log2.Info("", "", "rpc get_token init success")
+	log.Info("", "", "rpc get_token init success")
 }

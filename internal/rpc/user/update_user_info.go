@@ -45,16 +45,17 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 
 	RpcResp, err := client.GetFriendList(context.Background(), newReq)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "err=%s,call get friend list rpc server failed", err)
 		log.ErrorByKv("get friend list rpc server failed", req.OperationID, "err", err.Error(), "req", req.String())
+		return &pbUser.CommonResp{}, nil
 	}
 	if RpcResp.ErrorCode != 0 {
 		log.ErrorByKv("get friend list rpc server failed", req.OperationID, "err", err.Error(), "req", req.String())
-
+		return &pbUser.CommonResp{}, nil
 	}
 	self, err := im_mysql_model.FindUserByUID(ownerUid)
 	if err != nil {
 		log.ErrorByKv("get self info failed", req.OperationID, "err", err.Error(), "req", req.String())
+		return &pbUser.CommonResp{}, nil
 	}
 	var name, faceUrl string
 	if self != nil {

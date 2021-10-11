@@ -110,6 +110,10 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 						SessionType:    constant.SingleChatType,
 						OperationID:    req.OperationID,
 					})
+				} else {
+					resp.CommonResp.ErrorMsg = "some uid establish failed"
+					resp.CommonResp.ErrorCode = 408
+					resp.FailedUidList = append(resp.FailedUidList, v)
 				}
 			}
 		}
