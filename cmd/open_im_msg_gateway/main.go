@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/src/msg_gateway/gate"
+	"Open_IM/internal/msg_gateway/gate"
 	"flag"
 	"sync"
 )
