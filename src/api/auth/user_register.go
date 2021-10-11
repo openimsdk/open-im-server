@@ -40,7 +40,7 @@ func newUserRegisterReq(params *paramsUserRegister) *pbAuth.UserRegisterReq {
 
 func UserRegister(c *gin.Context) {
 	log.Info("", "", "api user_register init ....")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.RpcGetTokenName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
 	client := pbAuth.NewAuthClient(etcdConn)
 	//defer etcdConn.Close()
 

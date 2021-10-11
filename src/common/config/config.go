@@ -71,7 +71,7 @@ type config struct {
 		OpenImPushName               string `yaml:"openImPushName"`
 		OpenImOnlineMessageRelayName string `yaml:"openImOnlineMessageRelayName"`
 		OpenImGroupName              string `yaml:"openImGroupName"`
-		RpcGetTokenName              string `yaml:"rpcGetTokenName"`
+		OpenImAuthName               string `yaml:"openImAuthName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
@@ -81,6 +81,7 @@ type config struct {
 		StorageLocation       string   `yaml:"storageLocation"`
 		RotationTime          int      `yaml:"rotationTime"`
 		RemainRotationCount   uint     `yaml:"remainRotationCount"`
+		RemainLogLevel        uint     `yaml:"remainLogLevel"`
 		ElasticSearchSwitch   bool     `yaml:"elasticSearchSwitch"`
 		ElasticSearchAddr     []string `yaml:"elasticSearchAddr"`
 		ElasticSearchUser     string   `yaml:"elasticSearchUser"`

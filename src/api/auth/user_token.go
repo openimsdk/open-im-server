@@ -27,7 +27,7 @@ func newUserTokenReq(params *paramsUserToken) *pbAuth.UserTokenReq {
 
 func UserToken(c *gin.Context) {
 	log.Info("", "", "api user_token init ....")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.RpcGetTokenName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
 	client := pbAuth.NewAuthClient(etcdConn)
 	//defer etcdConn.Close()
 

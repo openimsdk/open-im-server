@@ -88,12 +88,13 @@ rpcregistername:
   openImPushName: Push
   openImOnlineMessageRelayName: OnlineMessageRelay
   openImGroupName: Group
-  rpcGetTokenName: Auth
+  openImAuthName: Auth
 
 log:
   storageLocation: ../logs/
-  rotationTime: 12
-  remainRotationCount: 10
+  rotationTime: 24
+  remainRotationCount: 5
+  remainLogLevel: 6
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
