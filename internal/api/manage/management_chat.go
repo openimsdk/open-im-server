@@ -7,12 +7,12 @@
 package manage
 
 import (
-	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	"Open_IM/pkg/common"
+	pbChat "Open_IM/pkg/proto/chat"
+	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"

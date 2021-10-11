@@ -2,13 +2,11 @@
 
 BINARY_NAME=open_im_api
 BIN_DIR=../../bin/
-LAN_FILE=.go
-GO_FILE:=${BINARY_NAME}${LAN_FILE}
 
 all: gotool build
 
 build:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ${BINARY_NAME}  ${GO_FILE}
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
 run:
 	@go run ./

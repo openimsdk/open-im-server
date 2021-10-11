@@ -1,10 +1,10 @@
 package apiChat
 
 import (
-	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common"
+	pbChat "Open_IM/pkg/proto/chat"
+	"Open_IM/pkg/utils"
 	"context"
 
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
