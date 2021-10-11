@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Open_IM/src/msg_transfer/logic"
+	"Open_IM/internal/msg_transfer/logic"
 	"sync"
 )
 
