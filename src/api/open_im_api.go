@@ -8,6 +8,7 @@ import (
 	"Open_IM/src/api/manage"
 	apiThird "Open_IM/src/api/third"
 	"Open_IM/src/api/user"
+	"Open_IM/src/common/log"
 	"Open_IM/src/utils"
 	"flag"
 	"github.com/gin-gonic/gin"
@@ -93,7 +94,7 @@ func main() {
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
 		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
 	}
-
+	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
 	r.Run(utils.ServerIP + ":" + strconv.Itoa(*ginPort))
