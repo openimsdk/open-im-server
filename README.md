@@ -1,4 +1,4 @@
-# Open-IM-Server
+# Open-IM-Server 
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-logo.png)
 
