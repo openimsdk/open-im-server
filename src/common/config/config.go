@@ -1,8 +1,17 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"path/filepath"
+	"runtime"
+
+	"gopkg.in/yaml.v3"
+)
+
+var (
+	_, b, _, _ = runtime.Caller(0)
+	// Root folder of this project
+	Root = filepath.Join(filepath.Dir(b), "../../..")
 )
 
 var Config config
@@ -147,7 +156,9 @@ type config struct {
 }
 
 func init() {
-	bytes, err := ioutil.ReadFile("../config/config.yaml")
+	// if we cd Open-IM-Server/src/utils and run go test
+	// it will panic cannot find config/config.yaml
+	bytes, err := ioutil.ReadFile(Root + "/config/config.yaml")
 	if err != nil {
 		panic(err)
 		return
