@@ -1,11 +1,12 @@
 package utils
 
 import (
+	"net"
 	"testing"
 )
 
 func TestServerIP(t *testing.T) {
-	if ServerIP == "" {
+	if net.ParseIP(ServerIP) == nil {
 		t.Fail()
 	}
 }
