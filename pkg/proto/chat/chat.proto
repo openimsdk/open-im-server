@@ -1,0 +1,139 @@
+syntax = "proto3";
+package pbChat;//The package name to which the proto file belongs
+option go_package = "chat;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
+
+message WSToMsgSvrChatMsg{
+  string SendID = 1;
+  string RecvID = 2;
+  string Content = 3;
+  int64 SendTime = 4;
+  int32 MsgFrom = 5;
+  string SenderNickName = 6;
+  string SenderFaceURL = 7;
+  int32 ContentType = 8;
+  int32 SessionType = 9;
+  string OperationID = 10;
+  string MsgID = 11;
+  string Token = 12;
+  string OfflineInfo =13;
+  string Options = 14;
+  int32  PlatformID =15;
+  repeated string  ForceList = 16;
+  string ClientMsgID = 17;
+}
+
+
+message MsgSvrToPushSvrChatMsg {
+  string SendID = 1;
+  string RecvID = 2;
+  string Content = 3;
+  int64 RecvSeq = 4;
+  int64 SendTime = 5;
+  int32 MsgFrom = 6;
+  string SenderNickName = 7;
+  string SenderFaceURL = 8;
+  int32 ContentType = 9;
+  int32 SessionType = 10;
+  string OperationID = 11;
+  string MsgID = 12;
+  string OfflineInfo = 13;
+  string Options =14;
+  int32  PlatformID =15;
+  string ClientMsgID = 16;
+
+}
+
+message PullMessageReq {
+  string UserID = 1;
+  int64 SeqBegin = 2;
+  int64 SeqEnd = 3;
+  string OperationID = 4;
+}
+
+message PullMessageResp {
+  int32 ErrCode = 1;
+  string ErrMsg = 2;
+  int64 MaxSeq = 3;
+  int64 MinSeq = 4;
+  repeated GatherFormat SingleUserMsg = 5;
+  repeated GatherFormat GroupUserMsg = 6;
+}
+message GetNewSeqReq {
+  string UserID = 1;
+  string OperationID = 2;
+}
+message GetNewSeqResp {
+  int32 ErrCode = 1;
+  string ErrMsg = 2;
+  int64 Seq = 3;
+}
+message GatherFormat{
+  // @inject_tag: json:"id"
+  string ID = 1;
+  // @inject_tag: json:"list"
+  repeated MsgFormat List = 2;//detail msg
+}
+message MsgFormat{
+  // @inject_tag: json:"sendID"
+  string SendID = 1;
+  // @inject_tag: json:"recvID"
+  string RecvID = 2;
+  // @inject_tag: json:"msgFrom"
+  int32 MsgFrom = 3;
+  // @inject_tag: json:"contentType"
+  int32 ContentType = 4;
+  // @inject_tag: json:"serverMsgID"
+  string ServerMsgID = 5;
+  // @inject_tag: json:"content"
+  string Content = 6;
+  // @inject_tag: json:"seq"
+  int64 Seq = 7;
+  // @inject_tag: json:"sendTime"
+  int64 SendTime = 8;
+  // @inject_tag: json:"senderPlatformID"
+  int32 SenderPlatformID = 9;
+  // @inject_tag: json:"senderNickName"
+  string SenderNickName = 10;
+  // @inject_tag: json:"senderFaceUrl"
+  string SenderFaceURL = 11;
+  // @inject_tag: json:"clientMsgID"
+  string ClientMsgID = 12;
+}
+
+message UserSendMsgReq {
+
+  int32 ReqIdentifier = 1;
+  string Token = 2;
+  string SendID = 3;
+  string OperationID = 4;
+  string SenderNickName = 5;
+  string SenderFaceURL = 6;
+  int32 PlatformID = 7;
+  int32 SessionType = 8;
+  int32 MsgFrom = 9;
+  int32 ContentType = 10;
+  string RecvID = 11;
+  repeated string ForceList = 12;
+  string Content = 13;
+  string Options = 14;
+  string ClientMsgID = 15;
+  string OffLineInfo = 16;
+  string Ex = 17;
+
+
+}
+
+message UserSendMsgResp {
+  int32 ErrCode = 1;
+  string ErrMsg = 2;
+  int32 ReqIdentifier = 3;
+  int64 SendTime = 5;
+  string ServerMsgID = 6;
+  string ClientMsgID = 7;
+
+}
+service Chat {
+  rpc GetNewSeq(GetNewSeqReq) returns(GetNewSeqResp);
+  rpc PullMessage(PullMessageReq) returns(PullMessageResp);
+  rpc UserSendMsg(UserSendMsgReq) returns(UserSendMsgResp);
+}

@@ -5,12 +5,12 @@
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openIM
-  etcdAddr: [ 127.0.0.1:2379 ]
+  etcdAddr: [ 81.68.126.69:2379 ]
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:3306 ]
-  dbMysqlUserName: root
-  dbMysqlPassword: openIM
+  dbMysqlAddress: [ 81.68.126.69:13306 ]
+  dbMysqlUserName: openIM
+  dbMysqlPassword: 12345
   dbMysqlDatabaseName: openIM
   dbTableName: eMsg
   dbMsgTableNum: 1
@@ -19,18 +19,18 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:27017 ]
+  dbAddress: [ 81.68.126.69:27017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
-  dbSource: admin
-  dbUserName:
-  dbPassword:
+  dbSource: openIM
+  dbUserName: openIM
+  dbPassword: 12345
   dbMaxPoolSize: 20
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 127.0.0.1:6379
+  dbAddress: 81.68.126.69:16379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -38,10 +38,10 @@ redis:
 
 kafka:
   ws2mschat:
-    addr: [ 127.0.0.1:9092 ]
+    addr: [ 81.68.126.69:9092 ]
     topic: "ws2ms_chat"
   ms2pschat:
-    addr: [ 127.0.0.1:9092 ]
+    addr: [ 81.68.126.69:9092 ]
     topic: "ms2ps_chat"
   consumergroupid:
     msgToMongo: mongo
@@ -59,6 +59,8 @@ serverip:
 
 api:
   openImApiPort: [ 10000 ]
+sdk:
+  openImSdkWsPort: [ 30000 ]
 
 credential:
   tencent:
@@ -86,12 +88,13 @@ rpcregistername:
   openImPushName: Push
   openImOnlineMessageRelayName: OnlineMessageRelay
   openImGroupName: Group
-  rpcGetTokenName: Auth
+  openImAuthName: Auth
 
 log:
   storageLocation: ../logs/
-  rotationTime: 12
-  remainRotationCount: 10
+  rotationTime: 24
+  remainRotationCount: 5
+  remainLogLevel: 6
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
@@ -103,7 +106,7 @@ modulename:
   pushName: push
 
 longconnsvr:
-  websocketPort: [ 17778 ]
+  openImWsPort: [ 17778 ]
   websocketMaxConnNum: 10000
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10
