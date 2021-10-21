@@ -13,7 +13,7 @@ rpc_ports=($ports_array)
 #Check if the service exists
 #If it is exists,kill this process
 check=$(ps aux | grep -w ./${push_name} | grep -v grep | wc -l)
-if [ $check -eq 1 ]; then
+if [ $check -ge 1 ]; then
   oldPid=$(ps aux | grep -w ./${push_name} | grep -v grep | awk '{print $2}')
   kill -9 $oldPid
 fi
@@ -28,7 +28,7 @@ done
 sleep 3
 #Check launched service process
 check=$(ps aux | grep -w ./${push_name} | grep -v grep | wc -l)
-if [ $check -eq 1 ]; then
+if [ $check -ge 1 ]; then
   newPid=$(ps aux | grep -w ./${push_name} | grep -v grep | awk '{print $2}')
   ports=$(netstat -netulp | grep -w ${newPid} | awk '{print $4}' | awk -F '[:]' '{print $NF}')
   allPorts=""

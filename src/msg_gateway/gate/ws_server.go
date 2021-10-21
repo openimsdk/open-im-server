@@ -6,23 +6,28 @@ import (
 	"Open_IM/src/utils"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"sync"
 	"time"
 )
 
+type UserConn struct {
+	*websocket.Conn
+	w *sync.Mutex
+}
 type WServer struct {
 	wsAddr       string
 	wsMaxConnNum int
 	wsUpGrader   *websocket.Upgrader
-	wsConnToUser map[*websocket.Conn]string
-	wsUserToConn map[string]*websocket.Conn
+	wsConnToUser map[*UserConn]string
+	wsUserToConn map[string]*UserConn
 }
 
 func (ws *WServer) onInit(wsPort int) {
 	ip := utils.ServerIP
 	ws.wsAddr = ip + ":" + utils.IntToString(wsPort)
 	ws.wsMaxConnNum = config.Config.LongConnSvr.WebsocketMaxConnNum
-	ws.wsConnToUser = make(map[*websocket.Conn]string)
-	ws.wsUserToConn = make(map[string]*websocket.Conn)
+	ws.wsConnToUser = make(map[*UserConn]string)
+	ws.wsUserToConn = make(map[string]*UserConn)
 	ws.wsUpGrader = &websocket.Upgrader{
 		HandshakeTimeout: time.Duration(config.Config.LongConnSvr.WebsocketTimeOut) * time.Second,
 		ReadBufferSize:   config.Config.LongConnSvr.WebsocketMaxMsgLen,
@@ -49,35 +54,36 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 			//Connection mapping relationship,
 			//userID+" "+platformID->conn
 			SendID := query["sendID"][0] + " " + utils.PlatformIDToName(int32(utils.StringToInt64(query["platformID"][0])))
-			ws.addUserConn(SendID, conn)
-			go ws.readMsg(conn)
+			//Initialize a lock for each user
+			newConn := &UserConn{conn, new(sync.Mutex)}
+			ws.addUserConn(SendID, newConn)
+			go ws.readMsg(newConn)
 		}
 	}
 }
 
-func (ws *WServer) readMsg(conn *websocket.Conn) {
+func (ws *WServer) readMsg(conn *UserConn) {
 	for {
-		msgType, msg, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err)
 			ws.delUserConn(conn)
 			return
 		} else {
-			log.ErrorByKv("test", "", "msgType", msgType, "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn))
+			//log.ErrorByKv("test", "", "msgType", msgType, "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn))
 		}
 		ws.msgParse(conn, msg)
 		//ws.writeMsg(conn, 1, chat)
 	}
 
 }
-
-func (ws *WServer) writeMsg(conn *websocket.Conn, a int, msg []byte) error {
-	rwLock.Lock()
-	defer rwLock.Unlock()
+func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
+	conn.w.Lock()
+	defer conn.w.Unlock()
 	return conn.WriteMessage(a, msg)
 
 }
-func (ws *WServer) addUserConn(uid string, conn *websocket.Conn) {
+func (ws *WServer) addUserConn(uid string, conn *UserConn) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	if oldConn, ok := ws.wsUserToConn[uid]; ok {
@@ -95,7 +101,7 @@ func (ws *WServer) addUserConn(uid string, conn *websocket.Conn) {
 
 }
 
-func (ws *WServer) delUserConn(conn *websocket.Conn) {
+func (ws *WServer) delUserConn(conn *UserConn) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	var uidPlatform string
@@ -111,12 +117,12 @@ func (ws *WServer) delUserConn(conn *websocket.Conn) {
 	}
 	err := conn.Close()
 	if err != nil {
-		log.ErrorByKv("close err", "", "uid", uidPlatform, "conn", conn)
+		log.ErrorByKv("close err", "", "uid", uidPlatform)
 	}
 
 }
 
-func (ws *WServer) getUserConn(uid string) *websocket.Conn {
+func (ws *WServer) getUserConn(uid string) *UserConn {
 	rwLock.RLock()
 	defer rwLock.RUnlock()
 	if conn, ok := ws.wsUserToConn[uid]; ok {
@@ -124,7 +130,7 @@ func (ws *WServer) getUserConn(uid string) *websocket.Conn {
 	}
 	return nil
 }
-func (ws *WServer) getUserUid(conn *websocket.Conn) string {
+func (ws *WServer) getUserUid(conn *UserConn) string {
 	rwLock.RLock()
 	defer rwLock.RUnlock()
 

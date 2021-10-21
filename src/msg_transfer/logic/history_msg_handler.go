@@ -33,6 +33,7 @@ func (mc *HistoryConsumerHandler) Init() {
 
 func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
 	log.InfoByKv("chat come mongo!!!", "", "chat", string(msg))
+	time := utils.GetCurrentTimestampBySecond()
 	pbData := pbMsg.WSToMsgSvrChatMsg{}
 	err := proto.Unmarshal(msg, &pbData)
 	if err != nil {
@@ -78,11 +79,13 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				//}
 			}
 
+			log.NewInfo(pbSaveData.OperationID, "saveUserChat cost time ", utils.GetCurrentTimestampBySecond()-time)
 		}
 		if msgKey == pbSaveData.RecvID {
 			pbSaveData.Options = pbData.Options
 			pbSaveData.OfflineInfo = pbData.OfflineInfo
 			sendMessageToPush(&pbSaveData)
+			log.NewInfo(pbSaveData.OperationID, "sendMessageToPush cost time ", utils.GetCurrentTimestampBySecond()-time)
 		}
 
 		log.InfoByKv("msg_transfer handle topic success...", "", "")

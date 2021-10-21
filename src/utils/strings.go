@@ -62,3 +62,6 @@ func GetMsgID(sendID string) string {
 func int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)
 }
+func Int64ToString(i int64) string {
+	return strconv.FormatInt(i, 10)
+}

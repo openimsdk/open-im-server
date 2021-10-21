@@ -51,7 +51,7 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 			wsResult = append(wsResult, reply.Resp...)
 		}
 	}
-	log.InfoByKv("push_result", sendPbData.OperationID, "result", wsResult)
+	log.InfoByKv("push_result", sendPbData.OperationID, "result", wsResult, "sendData", sendPbData)
 	if isOfflinePush {
 
 		for _, t := range pushTerminal {

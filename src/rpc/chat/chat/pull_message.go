@@ -41,7 +41,7 @@ func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*p
 	resp := new(pbMsg.PullMessageResp)
 	var respSingleMsgFormat []*pbMsg.GatherFormat
 	var respGroupMsgFormat []*pbMsg.GatherFormat
-	SingleMsgFormat, GroupMsgFormat, MaxSeq, MinSeq, err := commonDB.DB.GetUserChat(in.UserID, in.SeqBegin, in.SeqEnd)
+	SingleMsgFormat, GroupMsgFormat, MaxSeq, MinSeq, err := commonDB.DB.GetMsgBySeqRange(in.UserID, in.SeqBegin, in.SeqEnd)
 	if err != nil {
 		log.ErrorByKv("pullMsg data error", in.OperationID, in.String())
 		resp.ErrCode = 1
@@ -58,6 +58,30 @@ func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*p
 		SingleUserMsg: respSingleMsgFormat,
 		GroupUserMsg:  respGroupMsgFormat,
 	}, nil
+}
+func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *pbMsg.PullMessageBySeqListReq) (*pbMsg.PullMessageResp, error) {
+	log.NewInfo(in.OperationID, "rpc PullMessageBySeqList is arriving", in.String())
+	resp := new(pbMsg.PullMessageResp)
+	var respSingleMsgFormat []*pbMsg.GatherFormat
+	var respGroupMsgFormat []*pbMsg.GatherFormat
+	SingleMsgFormat, GroupMsgFormat, MaxSeq, MinSeq, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList)
+	if err != nil {
+		log.ErrorByKv("PullMessageBySeqList data error", in.OperationID, in.String())
+		resp.ErrCode = 1
+		resp.ErrMsg = err.Error()
+		return resp, nil
+	}
+	respSingleMsgFormat = singleMsgHandleByUser(SingleMsgFormat, in.UserID)
+	respGroupMsgFormat = groupMsgHandleByUser(GroupMsgFormat)
+	return &pbMsg.PullMessageResp{
+		ErrCode:       0,
+		ErrMsg:        "",
+		MaxSeq:        MaxSeq,
+		MinSeq:        MinSeq,
+		SingleUserMsg: respSingleMsgFormat,
+		GroupUserMsg:  respGroupMsgFormat,
+	}, nil
+	panic("implement me")
 }
 func singleMsgHandleByUser(allMsg []*pbMsg.MsgFormat, ownerId string) []*pbMsg.GatherFormat {
 	var userid string

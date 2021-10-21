@@ -58,6 +58,11 @@ message PullMessageResp {
   repeated GatherFormat SingleUserMsg = 5;
   repeated GatherFormat GroupUserMsg = 6;
 }
+message PullMessageBySeqListReq{
+  string UserID = 1;
+  string OperationID = 2;
+  repeated int64 seqList =3;
+}
 message GetNewSeqReq {
   string UserID = 1;
   string OperationID = 2;
@@ -119,6 +124,7 @@ message UserSendMsgReq {
   string ClientMsgID = 15;
   string OffLineInfo = 16;
   string Ex = 17;
+  int64 sendTime = 18;
 
 
 }
@@ -127,13 +133,13 @@ message UserSendMsgResp {
   int32 ErrCode = 1;
   string ErrMsg = 2;
   int32 ReqIdentifier = 3;
-  int64 SendTime = 5;
-  string ServerMsgID = 6;
-  string ClientMsgID = 7;
+  string ServerMsgID = 4;
+  string ClientMsgID = 5;
 
 }
 service Chat {
   rpc GetNewSeq(GetNewSeqReq) returns(GetNewSeqResp);
   rpc PullMessage(PullMessageReq) returns(PullMessageResp);
+  rpc PullMessageBySeqList(PullMessageBySeqListReq) returns(PullMessageResp);
   rpc UserSendMsg(UserSendMsgReq) returns(UserSendMsgResp);
 }

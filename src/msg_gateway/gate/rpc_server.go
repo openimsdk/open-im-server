@@ -81,10 +81,12 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	case constant.GroupChatType:
 		RecvID = strings.Split(in.GetRecvID(), " ")[0]
 	}
-	log.InfoByKv("test", in.OperationID, "wsUserToConn", ws.wsUserToConn)
-	for key, conn := range ws.wsUserToConn {
-		UIDAndPID := strings.Split(key, " ")
-		if UIDAndPID[0] == RecvID {
+	var tag bool
+	a := genUidPlatformArray(RecvID)
+	for _, v := range a {
+		if conn := ws.getUserConn(v); conn != nil {
+			UIDAndPID := strings.Split(v, " ")
+			tag = true
 			resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
 			temp := &pbRelay.SingleMsgToUser{
 				ResultCode:     resultCode,
@@ -94,6 +96,25 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 			resp = append(resp, temp)
 		}
 	}
+	if !tag {
+		log.NewError(in.OperationID, "push err ,ws conn not in map", in.String())
+	}
+	//for key, conn := range ws.wsUserToConn {
+	//	UIDAndPID := strings.Split(key, " ")
+	//	if UIDAndPID[0] == RecvID {
+	//		tag = true
+	//		resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
+	//		temp := &pbRelay.SingleMsgToUser{
+	//			ResultCode:     resultCode,
+	//			RecvID:         UIDAndPID[0],
+	//			RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
+	//		}
+	//		resp = append(resp, temp)
+	//	}
+	//}
+	//if !tag {
+	//	log.NewError(in.OperationID, "push err ,ws conn not in map", in.String())
+	//}
 	//switch in.GetContentType() {
 	//case constant.SyncSenderMsg:
 	//	log.InfoByKv("come sync", in.OperationID, "args", in.String())
@@ -143,7 +164,7 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	}, nil
 }
 
-func sendMsgToUser(conn *websocket.Conn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPlatForm, RecvID string) (ResultCode int64) {
+func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPlatForm, RecvID string) (ResultCode int64) {
 	err := ws.writeMsg(conn, websocket.TextMessage, bMsg)
 	if err != nil {
 		log.ErrorByKv("PushMsgToUser is failed By Ws", "", "Addr", conn.RemoteAddr().String(),
@@ -156,4 +177,10 @@ func sendMsgToUser(conn *websocket.Conn, bMsg []byte, in *pbRelay.MsgToUserReq, 
 		return ResultCode
 	}
 
+}
+func genUidPlatformArray(uid string) (array []string) {
+	for i := 1; i <= utils.LinuxPlatformID; i++ {
+		array = append(array, uid+" "+utils.PlatformIDToName(int32(i)))
+	}
+	return array
 }

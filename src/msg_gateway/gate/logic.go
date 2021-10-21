@@ -9,11 +9,13 @@ import (
 	"Open_IM/src/utils"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
+	"runtime"
 	"strings"
 )
 
-func (ws *WServer) msgParse(conn *websocket.Conn, jsonMsg []byte) {
+func (ws *WServer) msgParse(conn *UserConn, jsonMsg []byte) {
 	//ws online debug data
 	//{"ReqIdentifier":1001,"Token":"123","SendID":"c4ca4238a0b923820dcc509a6f75849b","Time":"123","OperationID":"123","MsgIncr":0}
 	//{"ReqIdentifier":1002,"Token":"123","SendID":"c4ca4238a0b923820dcc509a6f75849b","Time":"123","OperationID":"123","MsgIncr":0,"SeqBegin":1,"SeqEnd":6}
@@ -23,32 +25,43 @@ func (ws *WServer) msgParse(conn *websocket.Conn, jsonMsg []byte) {
 	m := Req{}
 	if err := json.Unmarshal(jsonMsg, &m); err != nil {
 		log.ErrorByKv("ws json Unmarshal err", "", "err", err.Error())
-		ws.sendErrMsg(conn, 200, err.Error())
+		ws.sendErrMsg(conn, 200, err.Error(), constant.WSDataError, "")
+		err = conn.Close()
+		if err != nil {
+			log.NewError("", "ws close err", err.Error())
+		}
 		return
 	}
 	if err := validate.Struct(m); err != nil {
 		log.ErrorByKv("ws args validate  err", "", "err", err.Error())
-		ws.sendErrMsg(conn, 201, err.Error())
+		ws.sendErrMsg(conn, 201, err.Error(), m.ReqIdentifier, m.MsgIncr)
 		return
 	}
 
 	if !utils.VerifyToken(m.Token, m.SendID) {
-		ws.sendErrMsg(conn, 202, "token validate err")
+		ws.sendErrMsg(conn, 202, "token validate err", m.ReqIdentifier, m.MsgIncr)
 		return
 	}
+	fmt.Println("test fmt Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
 	log.InfoByKv("Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
 
 	switch m.ReqIdentifier {
 	case constant.WSGetNewestSeq:
-		ws.newestSeqReq(conn, &m)
+		go ws.newestSeqReq(conn, &m)
 	case constant.WSPullMsg:
-		ws.pullMsgReq(conn, &m)
+		go ws.pullMsgReq(conn, &m)
 	case constant.WSSendMsg:
-		ws.sendMsgReq(conn, &m)
+		sendTime := utils.GetCurrentTimestampByNano()
+		go ws.sendMsgReq(conn, &m, sendTime)
+	case constant.WSPullMsgBySeqList:
+		go ws.pullMsgBySeqListReq(conn, &m)
 	default:
 	}
+
+	log.NewInfo("", "goroutine num is ", runtime.NumGoroutine())
+
 }
-func (ws *WServer) newestSeqResp(conn *websocket.Conn, m *Req, pb *pbChat.GetNewSeqResp) {
+func (ws *WServer) newestSeqResp(conn *UserConn, m *Req, pb *pbChat.GetNewSeqResp) {
 	mReply := make(map[string]interface{})
 	mData := make(map[string]interface{})
 	mReply["reqIdentifier"] = m.ReqIdentifier
@@ -59,7 +72,7 @@ func (ws *WServer) newestSeqResp(conn *websocket.Conn, m *Req, pb *pbChat.GetNew
 	mReply["data"] = mData
 	ws.sendMsg(conn, mReply)
 }
-func (ws *WServer) newestSeqReq(conn *websocket.Conn, m *Req) {
+func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
 	log.InfoByKv("Ws call success to getNewSeq", m.OperationID, "Parameters", m)
 	pbData := pbChat.GetNewSeqReq{}
 	pbData.UserID = m.SendID
@@ -79,7 +92,7 @@ func (ws *WServer) newestSeqReq(conn *websocket.Conn, m *Req) {
 
 }
 
-func (ws *WServer) pullMsgResp(conn *websocket.Conn, m *Req, pb *pbChat.PullMessageResp) {
+func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageResp) {
 	mReply := make(map[string]interface{})
 	msg := make(map[string]interface{})
 	mReply["reqIdentifier"] = m.ReqIdentifier
@@ -104,7 +117,7 @@ func (ws *WServer) pullMsgResp(conn *websocket.Conn, m *Req, pb *pbChat.PullMess
 
 }
 
-func (ws *WServer) pullMsgReq(conn *websocket.Conn, m *Req) {
+func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
 	log.InfoByKv("Ws call success to pullMsgReq", m.OperationID, "Parameters", m)
 	reply := new(pbChat.PullMessageResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsg)
@@ -130,21 +143,55 @@ func (ws *WServer) pullMsgReq(conn *websocket.Conn, m *Req) {
 		ws.pullMsgResp(conn, m, reply)
 	}
 }
+func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
+	log.NewError(m.OperationID, "Ws call success to pullMsgBySeqListReq", m)
+	reply := new(pbChat.PullMessageResp)
+	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
+	if isPass {
+		pbData := pbChat.PullMessageBySeqListReq{}
+		pbData.SeqList = data.(SeqListData).SeqList
+		pbData.UserID = m.SendID
+		pbData.OperationID = m.OperationID
+		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+		msgClient := pbChat.NewChatClient(grpcConn)
+		reply, err := msgClient.PullMessageBySeqList(context.Background(), &pbData)
+		if err != nil {
+			log.NewError(pbData.OperationID, "pullMsgBySeqListReq err", err.Error())
+			return
+		}
+		log.NewInfo(pbData.OperationID, "rpc call success to pullMsgBySeqListReq", reply.String(), reply.GetMaxSeq(), reply.GetMinSeq(), len(reply.GetSingleUserMsg()), len(reply.GetGroupUserMsg()))
+		ws.pullMsgResp(conn, m, reply)
+	} else {
+		reply.ErrCode = errCode
+		reply.ErrMsg = errMsg
+		ws.pullMsgResp(conn, m, reply)
+	}
+}
 
-func (ws *WServer) sendMsgResp(conn *websocket.Conn, m *Req, pb *pbChat.UserSendMsgResp) {
-	mReply := make(map[string]interface{})
+func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.UserSendMsgResp, sendTime int64) {
+	// := make(map[string]interface{})
 	mReplyData := make(map[string]interface{})
-	mReply["reqIdentifier"] = m.ReqIdentifier
-	mReply["msgIncr"] = m.MsgIncr
-	mReply["errCode"] = pb.GetErrCode()
-	mReply["errMsg"] = pb.GetErrMsg()
+	//mReply["reqIdentifier"] = m.ReqIdentifier
+	//mReply["msgIncr"] = m.MsgIncr
+	//mReply["errCode"] = pb.GetErrCode()
+	//mReply["errMsg"] = pb.GetErrMsg()
 	mReplyData["clientMsgID"] = pb.GetClientMsgID()
 	mReplyData["serverMsgID"] = pb.GetServerMsgID()
-	mReply["data"] = mReplyData
+	mReplyData["sendTime"] = utils.Int64ToString(sendTime)
+	//mReply["data"] = mReplyData
+	mReply := Resp{
+		ReqIdentifier: m.ReqIdentifier,
+		MsgIncr:       m.MsgIncr,
+		ErrCode:       pb.GetErrCode(),
+		ErrMsg:        pb.GetErrMsg(),
+		OperationID:   m.OperationID,
+		Data:          mReplyData,
+	}
+	fmt.Println("test fmt send msg resp", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
 	ws.sendMsg(conn, mReply)
 }
 
-func (ws *WServer) sendMsgReq(conn *websocket.Conn, m *Req) {
+func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 	log.InfoByKv("Ws call success to sendMsgReq", m.OperationID, "Parameters", m)
 	reply := new(pbChat.UserSendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
@@ -165,32 +212,43 @@ func (ws *WServer) sendMsgReq(conn *websocket.Conn, m *Req) {
 			Options:       utils.MapToJsonString(data.Options),
 			ClientMsgID:   data.ClientMsgID,
 			OffLineInfo:   utils.MapToJsonString(data.OfflineInfo),
+			SendTime:      sendTime,
 		}
 		log.InfoByKv("Ws call success to sendMsgReq", m.OperationID, "Parameters", m)
+		time := utils.GetCurrentTimestampBySecond()
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		client := pbChat.NewChatClient(etcdConn)
-		log.Info("", "", "api UserSendMsg call, api call rpc...")
-		reply, _ := client.UserSendMsg(context.Background(), &pbData)
+		log.Info("", "", "ws UserSendMsg call, api call rpc...")
+		reply, err := client.UserSendMsg(context.Background(), &pbData)
+		if err != nil {
+			log.NewError(pbData.OperationID, "UserSendMsg err", err.Error())
+			reply.ErrCode = 100
+			reply.ErrMsg = "rpc err"
+		}
+		log.NewInfo(pbData.OperationID, "sendMsgReq call rpc  cost time ", utils.GetCurrentTimestampBySecond()-time)
 		log.Info("", "", "api UserSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
-		ws.sendMsgResp(conn, m, reply)
+		ws.sendMsgResp(conn, m, reply, sendTime)
+		log.NewInfo(pbData.OperationID, "sendMsgResp end  cost time ", utils.GetCurrentTimestampBySecond()-time)
 	} else {
 		reply.ErrCode = errCode
 		reply.ErrMsg = errMsg
-		ws.sendMsgResp(conn, m, reply)
+		ws.sendMsgResp(conn, m, reply, sendTime)
 	}
 
 }
 
-func (ws *WServer) sendMsg(conn *websocket.Conn, mReply map[string]interface{}) {
+func (ws *WServer) sendMsg(conn *UserConn, mReply interface{}) {
 	bMsg, _ := json.Marshal(mReply)
 	err := ws.writeMsg(conn, websocket.TextMessage, bMsg)
 	if err != nil {
 		log.ErrorByKv("WS WriteMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err, "mReply", mReply)
 	}
 }
-func (ws *WServer) sendErrMsg(conn *websocket.Conn, errCode int32, errMsg string) {
+func (ws *WServer) sendErrMsg(conn *UserConn, errCode int32, errMsg string, reqIdentifier int32, msgIncr string) {
 	mReply := make(map[string]interface{})
 	mReply["errCode"] = errCode
 	mReply["errMsg"] = errMsg
+	mReply["reqIdentifier"] = reqIdentifier
+	mReply["msgIncr"] = msgIncr
 	ws.sendMsg(conn, mReply)
 }

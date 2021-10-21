@@ -70,6 +70,12 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrAccess.ErrCode, ErrorMsg: config.ErrAccess.ErrMsg}, nil
 	}
 
+	groupInfoFromMysql, err := imdb.FindGroupInfoByGroupId(req.GroupID)
+	if err != nil || groupInfoFromMysql == nil {
+		log.NewError(req.OperationID, "get group info error", req.GroupID, req.UidList)
+		return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrAccess.ErrCode, ErrorMsg: config.ErrAccess.ErrMsg}, nil
+	}
+
 	//
 	//from User:  invite: applicant
 	//to user:  invite: invited
