@@ -4,8 +4,9 @@ import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/db"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 var (
@@ -25,21 +26,16 @@ type Claims struct {
 func BuildClaims(uid, accountAddr, platform string, ttl int64) Claims {
 	now := time.Now().Unix()
 	//if ttl=-1 Permanent token
-	if ttl == -1 {
-		return Claims{
-			UID:      uid,
-			Platform: platform,
-			StandardClaims: jwt.StandardClaims{
-				ExpiresAt: -1,
-				IssuedAt:  now,
-				NotBefore: now,
-			}}
+	expiresAt := int64(-1)
+	if ttl != -1 {
+		expiresAt = now + ttl
 	}
+
 	return Claims{
 		UID:      uid,
 		Platform: platform,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: now + ttl, //Expiration time
+			ExpiresAt: expiresAt, //Expiration time
 			IssuedAt:  now,       //Issuing time
 			NotBefore: now,       //Begin Effective time
 		}}
