@@ -1,6 +1,6 @@
 syntax = "proto3";
 package pbChat;//The package name to which the proto file belongs
-option go_package = "chat;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
+option go_package = "./chat;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
 
 message WSToMsgSvrChatMsg{
   string SendID = 1;

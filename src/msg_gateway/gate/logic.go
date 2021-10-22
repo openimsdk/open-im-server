@@ -7,23 +7,27 @@ import (
 	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/src/proto/chat"
 	"Open_IM/src/utils"
+	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"runtime"
 	"strings"
 )
 
-func (ws *WServer) msgParse(conn *UserConn, jsonMsg []byte) {
+func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	//ws online debug data
 	//{"ReqIdentifier":1001,"Token":"123","SendID":"c4ca4238a0b923820dcc509a6f75849b","Time":"123","OperationID":"123","MsgIncr":0}
 	//{"ReqIdentifier":1002,"Token":"123","SendID":"c4ca4238a0b923820dcc509a6f75849b","Time":"123","OperationID":"123","MsgIncr":0,"SeqBegin":1,"SeqEnd":6}
 	//{"ReqIdentifier":1003,"Token":"123","SendID":"c4ca4238a0b923820dcc509a6f75849b",
 	//"RecvID":"a87ff679a2f3e71d9181a67b7542122c","ClientMsgID":"2343","Time":"147878787","OperationID":
 	//"123","MsgIncr":0,"SubMsgType":101,"MsgType":100,"MsgFrom":1,"Content":"sdfsdf"}
+	b := bytes.NewBuffer(binaryMsg)
 	m := Req{}
-	if err := json.Unmarshal(jsonMsg, &m); err != nil {
+	dec := gob.NewDecoder(b)
+	err := dec.Decode(&m)
+	if err != nil {
 		log.ErrorByKv("ws json Unmarshal err", "", "err", err.Error())
 		ws.sendErrMsg(conn, 200, err.Error(), constant.WSDataError, "")
 		err = conn.Close()
@@ -238,8 +242,13 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 }
 
 func (ws *WServer) sendMsg(conn *UserConn, mReply interface{}) {
-	bMsg, _ := json.Marshal(mReply)
-	err := ws.writeMsg(conn, websocket.TextMessage, bMsg)
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(mReply)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = ws.writeMsg(conn, websocket.BinaryMessage, b.Bytes())
 	if err != nil {
 		log.ErrorByKv("WS WriteMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err, "mReply", mReply)
 	}

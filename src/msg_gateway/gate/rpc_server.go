@@ -7,8 +7,9 @@ import (
 	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/src/proto/relay"
 	"Open_IM/src/utils"
+	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"google.golang.org/grpc"
@@ -74,7 +75,12 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	msg["sendTime"] = in.SendTime
 	msg["senderPlatformID"] = in.PlatformID
 	mReply["data"] = msg
-	bMsg, _ := json.Marshal(mReply)
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(mReply)
+	if err != nil {
+		fmt.Println(err)
+	}
 	switch in.GetSessionType() {
 	case constant.SingleChatType:
 		RecvID = in.GetRecvID()
@@ -87,7 +93,7 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 		if conn := ws.getUserConn(v); conn != nil {
 			UIDAndPID := strings.Split(v, " ")
 			tag = true
-			resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
+			resultCode := sendMsgToUser(conn, b.Bytes(), in, UIDAndPID[1], UIDAndPID[0])
 			temp := &pbRelay.SingleMsgToUser{
 				ResultCode:     resultCode,
 				RecvID:         UIDAndPID[0],
@@ -165,7 +171,7 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 }
 
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPlatForm, RecvID string) (ResultCode int64) {
-	err := ws.writeMsg(conn, websocket.TextMessage, bMsg)
+	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
 	if err != nil {
 		log.ErrorByKv("PushMsgToUser is failed By Ws", "", "Addr", conn.RemoteAddr().String(),
 			"error", err, "senderPlatform", utils.PlatformIDToName(in.PlatformID), "recvPlatform", RecvPlatForm, "args", in.String(), "recvID", RecvID)
