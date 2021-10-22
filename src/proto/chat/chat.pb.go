@@ -7,6 +7,11 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 
+import (
+	context "golang.org/x/net/context"
+	grpc "google.golang.org/grpc"
+)
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
@@ -1086,6 +1091,177 @@ func init() {
 	proto.RegisterType((*MsgFormat)(nil), "pbChat.MsgFormat")
 	proto.RegisterType((*UserSendMsgReq)(nil), "pbChat.UserSendMsgReq")
 	proto.RegisterType((*UserSendMsgResp)(nil), "pbChat.UserSendMsgResp")
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// Client API for Chat service
+
+type ChatClient interface {
+	GetNewSeq(ctx context.Context, in *GetNewSeqReq, opts ...grpc.CallOption) (*GetNewSeqResp, error)
+	PullMessage(ctx context.Context, in *PullMessageReq, opts ...grpc.CallOption) (*PullMessageResp, error)
+	PullMessageBySeqList(ctx context.Context, in *PullMessageBySeqListReq, opts ...grpc.CallOption) (*PullMessageResp, error)
+	UserSendMsg(ctx context.Context, in *UserSendMsgReq, opts ...grpc.CallOption) (*UserSendMsgResp, error)
+}
+
+type chatClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewChatClient(cc *grpc.ClientConn) ChatClient {
+	return &chatClient{cc}
+}
+
+func (c *chatClient) GetNewSeq(ctx context.Context, in *GetNewSeqReq, opts ...grpc.CallOption) (*GetNewSeqResp, error) {
+	out := new(GetNewSeqResp)
+	err := grpc.Invoke(ctx, "/pbChat.Chat/GetNewSeq", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) PullMessage(ctx context.Context, in *PullMessageReq, opts ...grpc.CallOption) (*PullMessageResp, error) {
+	out := new(PullMessageResp)
+	err := grpc.Invoke(ctx, "/pbChat.Chat/PullMessage", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) PullMessageBySeqList(ctx context.Context, in *PullMessageBySeqListReq, opts ...grpc.CallOption) (*PullMessageResp, error) {
+	out := new(PullMessageResp)
+	err := grpc.Invoke(ctx, "/pbChat.Chat/PullMessageBySeqList", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) UserSendMsg(ctx context.Context, in *UserSendMsgReq, opts ...grpc.CallOption) (*UserSendMsgResp, error) {
+	out := new(UserSendMsgResp)
+	err := grpc.Invoke(ctx, "/pbChat.Chat/UserSendMsg", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for Chat service
+
+type ChatServer interface {
+	GetNewSeq(context.Context, *GetNewSeqReq) (*GetNewSeqResp, error)
+	PullMessage(context.Context, *PullMessageReq) (*PullMessageResp, error)
+	PullMessageBySeqList(context.Context, *PullMessageBySeqListReq) (*PullMessageResp, error)
+	UserSendMsg(context.Context, *UserSendMsgReq) (*UserSendMsgResp, error)
+}
+
+func RegisterChatServer(s *grpc.Server, srv ChatServer) {
+	s.RegisterService(&_Chat_serviceDesc, srv)
+}
+
+func _Chat_GetNewSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNewSeqReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).GetNewSeq(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbChat.Chat/GetNewSeq",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).GetNewSeq(ctx, req.(*GetNewSeqReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_PullMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PullMessageReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).PullMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbChat.Chat/PullMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).PullMessage(ctx, req.(*PullMessageReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_PullMessageBySeqList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PullMessageBySeqListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).PullMessageBySeqList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbChat.Chat/PullMessageBySeqList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).PullMessageBySeqList(ctx, req.(*PullMessageBySeqListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_UserSendMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserSendMsgReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).UserSendMsg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pbChat.Chat/UserSendMsg",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).UserSendMsg(ctx, req.(*UserSendMsgReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Chat_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "pbChat.Chat",
+	HandlerType: (*ChatServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetNewSeq",
+			Handler:    _Chat_GetNewSeq_Handler,
+		},
+		{
+			MethodName: "PullMessage",
+			Handler:    _Chat_PullMessage_Handler,
+		},
+		{
+			MethodName: "PullMessageBySeqList",
+			Handler:    _Chat_PullMessageBySeqList_Handler,
+		},
+		{
+			MethodName: "UserSendMsg",
+			Handler:    _Chat_UserSendMsg_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "chat/chat.proto",
 }
 
 func init() { proto.RegisterFile("chat/chat.proto", fileDescriptor_chat_1c5fb32d3659e154) }
