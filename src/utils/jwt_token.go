@@ -4,9 +4,8 @@ import (
 	"Open_IM/src/common/config"
 	"Open_IM/src/common/db"
 	"errors"
+	"github.com/golang-jwt/jwt/v4"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 var (
@@ -23,7 +22,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func BuildClaims(uid, accountAddr, platform string, ttl int64) Claims {
+func BuildClaims(uid, platform string, ttl int64) Claims {
 	now := time.Now().Unix()
 	//if ttl=-1 Permanent token
 	expiresAt := int64(-1)
@@ -41,8 +40,8 @@ func BuildClaims(uid, accountAddr, platform string, ttl int64) Claims {
 		}}
 }
 
-func CreateToken(userID, accountAddr string, platform int32) (string, int64, error) {
-	claims := BuildClaims(userID, accountAddr, PlatformIDToName(platform), config.Config.TokenPolicy.AccessExpire)
+func CreateToken(userID string, platform int32) (string, int64, error) {
+	claims := BuildClaims(userID, PlatformIDToName(platform), config.Config.TokenPolicy.AccessExpire)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(config.Config.TokenPolicy.AccessSecret))
 
