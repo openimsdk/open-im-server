@@ -10,10 +10,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"google.golang.org/grpc"
 	"net"
 	"strings"
+
+	"github.com/gorilla/websocket"
+	"google.golang.org/grpc"
 )
 
 type RPCServer struct {
@@ -41,7 +42,7 @@ func (r *RPCServer) run() {
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	pbRelay.RegisterOnlineMessageRelayServiceServer(srv, r)
-	err = getcdv3.RegisterEtcd4Unique(r.etcdSchema, strings.Join(r.etcdAddr, ","), ip, r.rpcPort, r.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(r.etcdSchema, strings.Join(r.etcdAddr, ","), ip, r.rpcPort, r.rpcRegisterName, 10)
 	if err != nil {
 		log.ErrorByKv("register push message rpc to etcd err", "", "err", err.Error())
 	}
