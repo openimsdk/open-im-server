@@ -2,6 +2,7 @@ package log
 
 import (
 	"Open_IM/src/common/config"
+	"bufio"
 	"fmt"
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -29,18 +30,25 @@ func NewPrivateLog(moduleName string) {
 func loggerInit(moduleName string) *Logger {
 	var logger = logrus.New()
 	//All logs will be printed
-	logger.SetLevel(logrus.TraceLevel)
-	//Log Style Setting
+	logger.SetLevel(logrus.Level(config.Config.Log.RemainLogLevel))
+	//Close std console output
+	src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		panic(err)
+	}
+	writer := bufio.NewWriter(src)
+	logger.SetOutput(writer)
+	//Log Console Print Style Setting
 	logger.SetFormatter(&nested.Formatter{
 		TimestampFormat: "2006-01-02 15:04:05.000",
 		HideKeys:        false,
-		FieldsOrder:     []string{"PID"},
+		FieldsOrder:     []string{"PID", "FilePath", "OperationID"},
 	})
 	//File name and line number display hook
 	logger.AddHook(newFileHook())
 
 	//Send logs to elasticsearch hook
-	if config.Config.Log.ElasticSearchSwitch == true {
+	if config.Config.Log.ElasticSearchSwitch {
 		logger.AddHook(newEsHook(moduleName))
 	}
 	//Log file segmentation hook
@@ -60,13 +68,16 @@ func NewLfsHook(rotationTime time.Duration, maxRemainNum uint, moduleName string
 	}, &nested.Formatter{
 		TimestampFormat: "2006-01-02 15:04:05.000",
 		HideKeys:        false,
-		FieldsOrder:     []string{"PID"},
+		FieldsOrder:     []string{"PID", "FilePath", "OperationID"},
 	})
 	return lfsHook
 }
 func initRotateLogs(rotationTime time.Duration, maxRemainNum uint, level string, moduleName string) *rotatelogs.RotateLogs {
+	if moduleName != "" {
+		moduleName = moduleName + "."
+	}
 	writer, err := rotatelogs.New(
-		config.Config.Log.StorageLocation+moduleName+"/"+level+"."+"%Y-%m-%d_%H-%M-%S",
+		config.Config.Log.StorageLocation+moduleName+level+"."+"%Y-%m-%d",
 		rotatelogs.WithRotationTime(rotationTime),
 		rotatelogs.WithRotationCount(maxRemainNum),
 	)
@@ -77,54 +88,50 @@ func initRotateLogs(rotationTime time.Duration, maxRemainNum uint, level string,
 	}
 }
 
+//Deprecated
 func Info(token, OperationID, format string, args ...interface{}) {
-	if token == "" && OperationID == "" {
-		logger.WithFields(logrus.Fields{}).Infof(format, args...)
-	} else {
-		logger.WithFields(logrus.Fields{
-			"token":       token,
-			"OperationID": OperationID,
-		}).Infof(format, args...)
-	}
+	logger.WithFields(logrus.Fields{
+		"PID":         logger.Pid,
+		"OperationID": OperationID,
+	}).Infof(format, args...)
+
 }
 
+//Deprecated
 func Error(token, OperationID, format string, args ...interface{}) {
-	if token == "" && OperationID == "" {
-		logger.WithFields(logrus.Fields{}).Errorf(format, args...)
-	} else {
-		logger.WithFields(logrus.Fields{
-			"token":       token,
-			"OperationID": OperationID,
-		}).Errorf(format, args...)
-	}
+
+	logger.WithFields(logrus.Fields{
+		"PID":         logger.Pid,
+		"OperationID": OperationID,
+	}).Errorf(format, args...)
+
 }
 
+//Deprecated
 func Debug(token, OperationID, format string, args ...interface{}) {
-	if token == "" && OperationID == "" {
-		logger.WithFields(logrus.Fields{}).Debugf(format, args...)
-	} else {
-		logger.WithFields(logrus.Fields{
-			"token":       token,
-			"OperationID": OperationID,
-		}).Debugf(format, args...)
-	}
+
+	logger.WithFields(logrus.Fields{
+		"PID":         logger.Pid,
+		"OperationID": OperationID,
+	}).Debugf(format, args...)
+
 }
 
+//Deprecated
 func Warning(token, OperationID, format string, args ...interface{}) {
-	if token == "" && OperationID == "" {
-		logger.WithFields(logrus.Fields{}).Warningf(format, args...)
-	} else {
-		logger.WithFields(logrus.Fields{
-			"token":       token,
-			"OperationID": OperationID,
-		}).Warningf(format, args...)
-	}
+	logger.WithFields(logrus.Fields{
+		"PID":         logger.Pid,
+		"OperationID": OperationID,
+	}).Warningf(format, args...)
+
 }
 
+//Deprecated
 func InfoByArgs(format string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{}).Infof(format, args)
 }
 
+//Deprecated
 func ErrorByArgs(format string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{}).Errorf(format, args...)
 }
@@ -132,21 +139,28 @@ func ErrorByArgs(format string, args ...interface{}) {
 //Print log information in k, v format,
 //kv is best to appear in pairs. tipInfo is the log prompt information for printing,
 //and kv is the key and value for printing.
+//Deprecated
 func InfoByKv(tipInfo, OperationID string, args ...interface{}) {
 	fields := make(logrus.Fields)
 	argsHandle(OperationID, fields, args)
 	logger.WithFields(fields).Info(tipInfo)
 }
+
+//Deprecated
 func ErrorByKv(tipInfo, OperationID string, args ...interface{}) {
 	fields := make(logrus.Fields)
 	argsHandle(OperationID, fields, args)
 	logger.WithFields(fields).Error(tipInfo)
 }
+
+//Deprecated
 func DebugByKv(tipInfo, OperationID string, args ...interface{}) {
 	fields := make(logrus.Fields)
 	argsHandle(OperationID, fields, args)
 	logger.WithFields(fields).Debug(tipInfo)
 }
+
+//Deprecated
 func WarnByKv(tipInfo, OperationID string, args ...interface{}) {
 	fields := make(logrus.Fields)
 	argsHandle(OperationID, fields, args)
@@ -162,6 +176,30 @@ func argsHandle(OperationID string, fields logrus.Fields, args []interface{}) {
 			fields[fmt.Sprintf("%v", args[i])] = ""
 		}
 	}
-	fields["operationID"] = OperationID
+	fields["OperationID"] = OperationID
 	fields["PID"] = logger.Pid
+}
+func NewInfo(OperationID string, args ...interface{}) {
+	logger.WithFields(logrus.Fields{
+		"OperationID": OperationID,
+		"PID":         logger.Pid,
+	}).Infoln(args)
+}
+func NewError(OperationID string, args ...interface{}) {
+	logger.WithFields(logrus.Fields{
+		"OperationID": OperationID,
+		"PID":         logger.Pid,
+	}).Errorln(args)
+}
+func NewDebug(OperationID string, args ...interface{}) {
+	logger.WithFields(logrus.Fields{
+		"OperationID": OperationID,
+		"PID":         logger.Pid,
+	}).Debugln(args)
+}
+func NewWarn(OperationID string, args ...interface{}) {
+	logger.WithFields(logrus.Fields{
+		"OperationID": OperationID,
+		"PID":         logger.Pid,
+	}).Warnln(args)
 }

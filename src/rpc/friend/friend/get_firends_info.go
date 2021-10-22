@@ -24,6 +24,7 @@ type friendServer struct {
 }
 
 func NewFriendServer(port int) *friendServer {
+	log.NewPrivateLog("friend")
 	return &friendServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImFriendName,

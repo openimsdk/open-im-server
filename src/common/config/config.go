@@ -1,8 +1,17 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"path/filepath"
+	"runtime"
+
+	"gopkg.in/yaml.v3"
+)
+
+var (
+	_, b, _, _ = runtime.Caller(0)
+	// Root folder of this project
+	Root = filepath.Join(filepath.Dir(b), "../../..")
 )
 
 var Config config
@@ -14,7 +23,7 @@ type config struct {
 		GinPort []int `yaml:"openImApiPort"`
 	}
 	Sdk struct {
-		WsPort []int `yaml:"sdkWsPort"`
+		WsPort []int `yaml:"openImSdkWsPort"`
 	}
 	Credential struct {
 		Tencent struct {
@@ -71,7 +80,7 @@ type config struct {
 		OpenImPushName               string `yaml:"openImPushName"`
 		OpenImOnlineMessageRelayName string `yaml:"openImOnlineMessageRelayName"`
 		OpenImGroupName              string `yaml:"openImGroupName"`
-		RpcGetTokenName              string `yaml:"rpcGetTokenName"`
+		OpenImAuthName               string `yaml:"openImAuthName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
@@ -81,6 +90,7 @@ type config struct {
 		StorageLocation       string   `yaml:"storageLocation"`
 		RotationTime          int      `yaml:"rotationTime"`
 		RemainRotationCount   uint     `yaml:"remainRotationCount"`
+		RemainLogLevel        uint     `yaml:"remainLogLevel"`
 		ElasticSearchSwitch   bool     `yaml:"elasticSearchSwitch"`
 		ElasticSearchAddr     []string `yaml:"elasticSearchAddr"`
 		ElasticSearchUser     string   `yaml:"elasticSearchUser"`
@@ -92,7 +102,7 @@ type config struct {
 		PushName        string `yaml:"pushName"`
 	}
 	LongConnSvr struct {
-		WebsocketPort       []int `yaml:"websocketPort"`
+		WebsocketPort       []int `yaml:"openImWsPort"`
 		WebsocketMaxConnNum int   `yaml:"websocketMaxConnNum"`
 		WebsocketMaxMsgLen  int   `yaml:"websocketMaxMsgLen"`
 		WebsocketTimeOut    int   `yaml:"websocketTimeOut"`
@@ -146,14 +156,14 @@ type config struct {
 }
 
 func init() {
-	bytes, err := ioutil.ReadFile("../config/config.yaml")
+	// if we cd Open-IM-Server/src/utils and run go test
+	// it will panic cannot find config/config.yaml
+	bytes, err := ioutil.ReadFile(Root + "/config/config.yaml")
 	if err != nil {
 		panic(err)
-		return
 	}
 	if err = yaml.Unmarshal(bytes, &Config); err != nil {
 		panic(err)
-		return
 	}
 
 }

@@ -8,6 +8,7 @@ need_to_start_server_shell=(
   msg_gateway_start.sh
   push_start.sh
   msg_transfer_start.sh
+  sdk_svr_start.sh
 )
 
 #fixme The 10 second delay to start the project is for the docker-compose one-click to start openIM when the infrastructure dependencies are not started
