@@ -135,6 +135,7 @@ message UserSendMsgResp {
   int32 ReqIdentifier = 3;
   string ServerMsgID = 4;
   string ClientMsgID = 5;
+  int64  sendTime = 6;
 
 }
 service Chat {
