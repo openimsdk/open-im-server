@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./relay;pbRelay";
+option go_package = "relay;pbRelay";
 package relay;
 
 message MsgToUserReq {

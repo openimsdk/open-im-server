@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./push;pbPush";
+option go_package = "push;pbPush";
 package push;
 
 message PushMsgReq {

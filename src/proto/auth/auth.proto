@@ -1,6 +1,6 @@
 syntax = "proto3";
 package pbAuth;
-option go_package = "./auth;pbAuth";
+option go_package = "auth;pbAuth";
 
 message UserRegisterReq {
     string UID = 1;
