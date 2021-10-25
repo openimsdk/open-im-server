@@ -50,7 +50,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 		return
 	}
 	fmt.Println("test fmt Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
-	log.InfoByKv("Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
+	log.InfoByKv("Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID, "msgIncr", m.MsgIncr)
 
 	switch m.ReqIdentifier {
 	case constant.WSGetNewestSeq:
@@ -106,8 +106,12 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 	var mReplyData pbWs.PullMessageBySeqListResp
 	mReplyData.MaxSeq = pb.GetMaxSeq()
 	mReplyData.MinSeq = pb.GetMinSeq()
-	b, _ := json.Marshal(pb.GetSingleUserMsg)
-	err := json.Unmarshal(b, &mReplyData.SingleUserMsg)
+	b, err := json.Marshal(pb.GetSingleUserMsg)
+	if err != nil {
+		log.NewError(m.OperationID, "GetSingleUserMsg,json marshal,err", err.Error())
+	}
+	log.NewInfo(m.OperationID, "pullMsgResp json is ", string(b))
+	err = json.Unmarshal(b, &mReplyData.SingleUserMsg)
 	if err != nil {
 		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
 	}
@@ -222,7 +226,6 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 			ClientMsgID:   data.ClientMsgID,
 			SendTime:      sendTime,
 		}
-		log.InfoByKv("Ws call success to sendMsgReq", m.OperationID, "Parameters", m)
 		time := utils.GetCurrentTimestampBySecond()
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		client := pbChat.NewChatClient(etcdConn)
