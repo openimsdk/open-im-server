@@ -42,7 +42,6 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 	sigs.k8s.io/yaml v1.2.0 // indirect
-
 )
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
