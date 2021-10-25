@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
@@ -104,26 +105,26 @@ func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
 func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageResp) {
 	log.NewInfo(m.OperationID, "pullMsgResp come  here ", pb.String())
 	var mReplyData pbWs.PullMessageBySeqListResp
-	b, err := proto.Marshal(pb)
+	a, err := json.Marshal(pb.SingleUserMsg)
 	if err != nil {
 		log.NewError(m.OperationID, "GetSingleUserMsg,json marshal,err", err.Error())
 	}
 	log.NewInfo(m.OperationID, "pullMsgResp json is ", len(pb.SingleUserMsg))
-	err = proto.Unmarshal(b, &mReplyData)
+	err = json.Unmarshal(a, &mReplyData.SingleUserMsg)
 	if err != nil {
 		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
 	}
-
-	c, err := proto.Marshal(&mReplyData)
+	b, err := json.Marshal(pb.GroupUserMsg)
 	if err != nil {
 		log.NewError(m.OperationID, "mReplyData,json marshal,err", err.Error())
 	}
-	var test pbWs.PullMessageBySeqListResp
-	err = proto.Unmarshal(c, &test)
+	err = json.Unmarshal(b, &mReplyData.GroupUserMsg)
 	if err != nil {
 		log.NewError(m.OperationID, "test SingleUserMsg,json Unmarshal,err", err.Error())
 	}
-	log.NewInfo(m.OperationID, "test info is ", len(test.SingleUserMsg), test.SingleUserMsg)
+	c, err := proto.Marshal(&mReplyData)
+	log.NewInfo(m.OperationID, "test info is ", len(mReplyData.SingleUserMsg), mReplyData.SingleUserMsg)
+
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
@@ -133,7 +134,7 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 		Data:          c,
 	}
 	log.NewInfo(m.OperationID, "pullMsgResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
-		mReply.OperationID)
+		len(mReply.Data))
 
 	ws.sendMsg(conn, mReply)
 
