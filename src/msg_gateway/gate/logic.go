@@ -108,7 +108,7 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 	if err != nil {
 		log.NewError(m.OperationID, "GetSingleUserMsg,json marshal,err", err.Error())
 	}
-	log.NewInfo(m.OperationID, "pullMsgResp json is ", string(b))
+	log.NewInfo(m.OperationID, "pullMsgResp json is ", len(pb.SingleUserMsg))
 	err = proto.Unmarshal(b, &mReplyData)
 	if err != nil {
 		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
@@ -118,6 +118,12 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 	if err != nil {
 		log.NewError(m.OperationID, "mReplyData,json marshal,err", err.Error())
 	}
+	var test pbWs.PullMessageBySeqListResp
+	err = proto.Unmarshal(c, &test)
+	if err != nil {
+		log.NewError(m.OperationID, "test SingleUserMsg,json Unmarshal,err", err.Error())
+	}
+	log.NewInfo(m.OperationID, "test info is ", len(test.SingleUserMsg), test.SingleUserMsg)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
@@ -126,7 +132,8 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 		OperationID:   m.OperationID,
 		Data:          c,
 	}
-	log.NewInfo(m.OperationID, "pullMsgResp all data  is ", mReply)
+	log.NewInfo(m.OperationID, "pullMsgResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
+		mReply.OperationID)
 
 	ws.sendMsg(conn, mReply)
 
