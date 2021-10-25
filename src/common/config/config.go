@@ -3,7 +3,6 @@ package config
 import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
-	"os"
 )
 
 var Config config
@@ -148,8 +147,8 @@ type config struct {
 }
 
 func init() {
-	path, _ := os.Getwd()
-	bytes, err := ioutil.ReadFile(path + "/config/config.yaml")
+	//path, _ := os.Getwd()
+	bytes, err := ioutil.ReadFile("../config/config.yaml")
 	if err != nil {
 		panic(err)
 	}
