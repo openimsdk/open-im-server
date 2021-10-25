@@ -11,7 +11,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
@@ -104,21 +103,14 @@ func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
 
 func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageResp) {
 	var mReplyData pbWs.PullMessageBySeqListResp
-	mReplyData.MaxSeq = pb.GetMaxSeq()
-	mReplyData.MinSeq = pb.GetMinSeq()
-	b, err := json.Marshal(pb.GetSingleUserMsg)
+	b, err := proto.Marshal(pb)
 	if err != nil {
 		log.NewError(m.OperationID, "GetSingleUserMsg,json marshal,err", err.Error())
 	}
 	log.NewInfo(m.OperationID, "pullMsgResp json is ", string(b))
-	err = json.Unmarshal(b, &mReplyData.SingleUserMsg)
+	err = proto.Unmarshal(b, &mReplyData)
 	if err != nil {
 		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
-	}
-	b, _ = json.Marshal(pb.GetGroupUserMsg())
-	err = json.Unmarshal(b, &mReplyData.GroupUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "GroupUserMsg,json Unmarshal,err", err.Error())
 	}
 	c, _ := proto.Marshal(&mReplyData)
 	mReply := Resp{
