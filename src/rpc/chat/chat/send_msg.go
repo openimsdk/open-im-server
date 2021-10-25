@@ -66,7 +66,11 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	pbData.MsgID = serverMsgID
 	pbData.OperationID = pb.OperationID
 	pbData.Token = pb.Token
-	pbData.SendTime = pb.SendTime
+	if pb.SendTime == 0 {
+		pbData.SendTime = utils.GetCurrentTimestampByNano()
+	} else {
+		pbData.SendTime = pb.SendTime
+	}
 	m := MsgCallBackResp{}
 	if config.Config.MessageCallBack.CallbackSwitch {
 		bMsg, err := http2.Post(config.Config.MessageCallBack.CallbackUrl, MsgCallBackReq{
@@ -182,5 +186,6 @@ func returnMsg(replay *pbChat.UserSendMsgResp, pb *pbChat.UserSendMsgReq, errCod
 	replay.ReqIdentifier = pb.ReqIdentifier
 	replay.ClientMsgID = pb.ClientMsgID
 	replay.ServerMsgID = serverMsgID
+	replay.SendTime = sendTime
 	return replay, nil
 }

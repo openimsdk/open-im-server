@@ -87,7 +87,7 @@ func UserSendMsg(c *gin.Context) {
 		"data": gin.H{
 			"clientMsgID": reply.ClientMsgID,
 			"serverMsgID": reply.ServerMsgID,
-			"sendTime":    0,
+			"sendTime":    reply.SendTime,
 		},
 	})
 

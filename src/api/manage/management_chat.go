@@ -125,7 +125,7 @@ func ManagementSendMsg(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"errCode":  reply.ErrCode,
 		"errMsg":   reply.ErrMsg,
-		"sendTime": "",
+		"sendTime": reply.SendTime,
 		"msgID":    reply.ClientMsgID,
 	})
 
