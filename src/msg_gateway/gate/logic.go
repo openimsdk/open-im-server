@@ -112,7 +112,11 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 	if err != nil {
 		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
 	}
-	c, _ := proto.Marshal(&mReplyData)
+
+	c, err := proto.Marshal(&mReplyData)
+	if err != nil {
+		log.NewError(m.OperationID, "mReplyData,json marshal,err", err.Error())
+	}
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
