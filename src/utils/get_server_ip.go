@@ -13,23 +13,14 @@ func init() {
 		ServerIP = config.Config.ServerIP
 		return
 	}
-	//fixme Get the ip of the local network card
-	netInterfaces, err := net.Interfaces()
+
+	// see https://gist.github.com/jniltinho/9787946#gistcomment-3019898
+	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		panic(err)
 	}
-	for i := 0; i < len(netInterfaces); i++ {
-		//Exclude useless network cards by judging the net.flag Up flag
-		if (netInterfaces[i].Flags & net.FlagUp) != 0 {
-			address, _ := netInterfaces[i].Addrs()
-			for _, addr := range address {
-				if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
-					if ipNet.IP.To4() != nil {
-						ServerIP = ipNet.IP.String()
-						return
-					}
-				}
-			}
-		}
-	}
+
+	defer conn.Close()
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	ServerIP = localAddr.IP.String()
 }
