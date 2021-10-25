@@ -44,9 +44,9 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	replay := pbChat.UserSendMsgResp{}
 	log.InfoByKv("sendMsg", pb.OperationID, "args", pb.String())
 	time := utils.GetCurrentTimestampByMill()
-	if !utils.VerifyToken(pb.Token, pb.SendID) {
-		return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
-	}
+	//if !utils.VerifyToken(pb.Token, pb.SendID) {
+	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
+	//}
 	log.NewInfo(pb.OperationID, "VerifyToken cost time ", utils.GetCurrentTimestampByMill()-time)
 	serverMsgID := GetMsgID(pb.SendID)
 	pbData := pbChat.WSToMsgSvrChatMsg{}

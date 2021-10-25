@@ -6,11 +6,13 @@ import (
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/src/proto/relay"
+	pbWs "Open_IM/src/proto/sdk_ws"
 	"Open_IM/src/utils"
 	"bytes"
 	"context"
 	"encoding/gob"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"google.golang.org/grpc"
 	"net"
@@ -56,27 +58,29 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	log.InfoByKv("PushMsgToUser is arriving", in.OperationID, "args", in.String())
 	var resp []*pbRelay.SingleMsgToUser
 	var RecvID string
-	msg := make(map[string]interface{})
-	mReply := make(map[string]interface{})
-	mReply["reqIdentifier"] = constant.WSPushMsg
-	mReply["errCode"] = 0
-	mReply["errMsg"] = ""
-	msg["sendID"] = in.SendID
-	msg["recvID"] = in.RecvID
-	msg["msgFrom"] = in.MsgFrom
-	msg["contentType"] = in.ContentType
-	msg["sessionType"] = in.SessionType
-	msg["senderNickName"] = in.SenderNickName
-	msg["senderFaceUrl"] = in.SenderFaceURL
-	msg["clientMsgID"] = in.ClientMsgID
-	msg["serverMsgID"] = in.ServerMsgID
-	msg["content"] = in.Content
-	msg["seq"] = in.RecvSeq
-	msg["sendTime"] = in.SendTime
-	msg["senderPlatformID"] = in.PlatformID
-	mReply["data"] = msg
-	var b bytes.Buffer
-	enc := gob.NewEncoder(&b)
+	msg := pbWs.MsgData{
+		SendID:           in.SendID,
+		RecvID:           in.RecvID,
+		MsgFrom:          in.MsgFrom,
+		ContentType:      in.ContentType,
+		SessionType:      in.SessionType,
+		SenderNickName:   in.SenderNickName,
+		SenderFaceURL:    in.SenderFaceURL,
+		ClientMsgID:      in.ClientMsgID,
+		ServerMsgID:      in.ServerMsgID,
+		Content:          in.Content,
+		Seq:              in.RecvSeq,
+		SendTime:         in.SendTime,
+		SenderPlatformID: in.PlatformID,
+	}
+	msgBytes, _ := proto.Marshal(&msg)
+	mReply := Resp{
+		ReqIdentifier: constant.WSPushMsg,
+		OperationID:   in.OperationID,
+		Data:          msgBytes,
+	}
+	var replyBytes bytes.Buffer
+	enc := gob.NewEncoder(&replyBytes)
 	err := enc.Encode(mReply)
 	if err != nil {
 		fmt.Println(err)
@@ -88,12 +92,12 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 		RecvID = strings.Split(in.GetRecvID(), " ")[0]
 	}
 	var tag bool
-	a := genUidPlatformArray(RecvID)
-	for _, v := range a {
+	userIDList := genUidPlatformArray(RecvID)
+	for _, v := range userIDList {
 		if conn := ws.getUserConn(v); conn != nil {
 			UIDAndPID := strings.Split(v, " ")
 			tag = true
-			resultCode := sendMsgToUser(conn, b.Bytes(), in, UIDAndPID[1], UIDAndPID[0])
+			resultCode := sendMsgToUser(conn, replyBytes.Bytes(), in, UIDAndPID[1], UIDAndPID[0])
 			temp := &pbRelay.SingleMsgToUser{
 				ResultCode:     resultCode,
 				RecvID:         UIDAndPID[0],
