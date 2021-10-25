@@ -1,6 +1,6 @@
 syntax = "proto3";
-package pbWs;//The package name to which the proto file belongs
-option go_package = "./sdk_ws;pbWs";//The generated go pb file is in the current directory, and the package name is pbChat
+package open_im_sdk;//The package name to which the proto file belongs
+option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
 
 
 message PullMessageBySeqListResp {

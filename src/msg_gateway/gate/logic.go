@@ -6,11 +6,14 @@ import (
 	"Open_IM/src/common/log"
 	"Open_IM/src/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/src/proto/chat"
+	pbWs "Open_IM/src/proto/sdk_ws"
 	"Open_IM/src/utils"
 	"bytes"
 	"context"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"runtime"
 	"strings"
@@ -66,14 +69,17 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 
 }
 func (ws *WServer) newestSeqResp(conn *UserConn, m *Req, pb *pbChat.GetNewSeqResp) {
-	mReply := make(map[string]interface{})
-	mData := make(map[string]interface{})
-	mReply["reqIdentifier"] = m.ReqIdentifier
-	mReply["msgIncr"] = m.MsgIncr
-	mReply["errCode"] = pb.GetErrCode()
-	mReply["errMsg"] = pb.GetErrMsg()
-	mData["seq"] = pb.GetSeq()
-	mReply["data"] = mData
+	var mReplyData pbWs.GetNewSeqResp
+	mReplyData.Seq = pb.GetSeq()
+	b, _ := proto.Marshal(&mReplyData)
+	mReply := Resp{
+		ReqIdentifier: m.ReqIdentifier,
+		MsgIncr:       m.MsgIncr,
+		ErrCode:       pb.GetErrCode(),
+		ErrMsg:        pb.GetErrMsg(),
+		OperationID:   m.OperationID,
+		Data:          b,
+	}
 	ws.sendMsg(conn, mReply)
 }
 func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
@@ -97,26 +103,28 @@ func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
 }
 
 func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageResp) {
-	mReply := make(map[string]interface{})
-	msg := make(map[string]interface{})
-	mReply["reqIdentifier"] = m.ReqIdentifier
-	mReply["msgIncr"] = m.MsgIncr
-	mReply["errCode"] = pb.GetErrCode()
-	mReply["errMsg"] = pb.GetErrMsg()
-	//空切片
-	if v := pb.GetSingleUserMsg(); v != nil {
-		msg["single"] = v
-	} else {
-		msg["single"] = []pbChat.GatherFormat{}
+	var mReplyData pbWs.PullMessageBySeqListResp
+	mReplyData.MaxSeq = pb.GetMaxSeq()
+	mReplyData.MinSeq = pb.GetMinSeq()
+	b, _ := json.Marshal(pb.GetSingleUserMsg)
+	err := json.Unmarshal(b, &mReplyData.SingleUserMsg)
+	if err != nil {
+		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
 	}
-	if v := pb.GetGroupUserMsg(); v != nil {
-		msg["group"] = v
-	} else {
-		msg["group"] = []pbChat.GatherFormat{}
+	b, _ = json.Marshal(pb.GetGroupUserMsg())
+	err = json.Unmarshal(b, &mReplyData.GroupUserMsg)
+	if err != nil {
+		log.NewError(m.OperationID, "GroupUserMsg,json Unmarshal,err", err.Error())
 	}
-	msg["maxSeq"] = pb.GetMaxSeq()
-	msg["minSeq"] = pb.GetMinSeq()
-	mReply["data"] = msg
+	c, _ := proto.Marshal(&mReplyData)
+	mReply := Resp{
+		ReqIdentifier: m.ReqIdentifier,
+		MsgIncr:       m.MsgIncr,
+		ErrCode:       pb.GetErrCode(),
+		ErrMsg:        pb.GetErrMsg(),
+		OperationID:   m.OperationID,
+		Data:          c,
+	}
 	ws.sendMsg(conn, mReply)
 
 }
@@ -153,7 +161,7 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
 	if isPass {
 		pbData := pbChat.PullMessageBySeqListReq{}
-		pbData.SeqList = data.(SeqListData).SeqList
+		pbData.SeqList = data.(pbWs.PullMessageBySeqListReq).SeqList
 		pbData.UserID = m.SendID
 		pbData.OperationID = m.OperationID
 		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
@@ -174,22 +182,19 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 
 func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.UserSendMsgResp, sendTime int64) {
 	// := make(map[string]interface{})
-	mReplyData := make(map[string]interface{})
-	//mReply["reqIdentifier"] = m.ReqIdentifier
-	//mReply["msgIncr"] = m.MsgIncr
-	//mReply["errCode"] = pb.GetErrCode()
-	//mReply["errMsg"] = pb.GetErrMsg()
-	mReplyData["clientMsgID"] = pb.GetClientMsgID()
-	mReplyData["serverMsgID"] = pb.GetServerMsgID()
-	mReplyData["sendTime"] = utils.Int64ToString(sendTime)
-	//mReply["data"] = mReplyData
+
+	var mReplyData pbWs.UserSendMsgResp
+	mReplyData.ClientMsgID = pb.GetClientMsgID()
+	mReplyData.ServerMsgID = pb.GetServerMsgID()
+	mReplyData.SendTime = sendTime
+	b, _ := proto.Marshal(&mReplyData)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
 		ErrCode:       pb.GetErrCode(),
 		ErrMsg:        pb.GetErrMsg(),
 		OperationID:   m.OperationID,
-		Data:          mReplyData,
+		Data:          b,
 	}
 	fmt.Println("test fmt send msg resp", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
 	ws.sendMsg(conn, mReply)
@@ -200,7 +205,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 	reply := new(pbChat.UserSendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
 	if isPass {
-		data := pData.(MsgData)
+		data := pData.(pbWs.UserSendMsgReq)
 		pbData := pbChat.UserSendMsgReq{
 			ReqIdentifier: m.ReqIdentifier,
 			Token:         m.Token,
@@ -213,9 +218,8 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 			RecvID:        data.RecvID,
 			ForceList:     data.ForceList,
 			Content:       data.Content,
-			Options:       utils.MapToJsonString(data.Options),
+			Options:       utils.MapIntToJsonString(data.Options),
 			ClientMsgID:   data.ClientMsgID,
-			OffLineInfo:   utils.MapToJsonString(data.OfflineInfo),
 			SendTime:      sendTime,
 		}
 		log.InfoByKv("Ws call success to sendMsgReq", m.OperationID, "Parameters", m)
