@@ -102,6 +102,7 @@ func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
 }
 
 func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageResp) {
+	log.NewInfo(m.OperationID, "pullMsgResp come  here ", pb.String())
 	var mReplyData pbWs.PullMessageBySeqListResp
 	b, err := proto.Marshal(pb)
 	if err != nil {
@@ -125,6 +126,8 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 		OperationID:   m.OperationID,
 		Data:          c,
 	}
+	log.NewInfo(m.OperationID, "pullMsgResp all data  is ", mReply)
+
 	ws.sendMsg(conn, mReply)
 
 }
@@ -156,7 +159,7 @@ func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
 	}
 }
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
-	log.NewError(m.OperationID, "Ws call success to pullMsgBySeqListReq", m)
+	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq", m)
 	reply := new(pbChat.PullMessageResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
 	if isPass {
