@@ -70,3 +70,19 @@ message UserSendMsgResp {
   int64  sendTime = 3;
 
 }
+message MsgData {
+  string  sendID = 1;
+  string  recvID = 2;
+  int32   sessionType = 3;
+  int32 msgFrom = 4;
+  int32 contentType = 5;
+  string serverMsgID = 6;
+  string content  =7;
+  int64 sendTime =8;
+  int64 seq =9;
+  int32 senderPlatformID  =10;
+  string  senderNickName =11;
+  string  senderFaceURL =12;
+  string clientMsgID =13;
+}
+
