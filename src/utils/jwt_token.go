@@ -19,24 +19,18 @@ var (
 type Claims struct {
 	UID      string
 	Platform string //login platform
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 func BuildClaims(uid, platform string, ttl int64) Claims {
-	now := time.Now().Unix()
-	//if ttl=-1 Permanent token
-	expiresAt := int64(-1)
-	if ttl != -1 {
-		expiresAt = now + ttl
-	}
-
+	now := time.Now()
 	return Claims{
 		UID:      uid,
 		Platform: platform,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expiresAt, //Expiration time
-			IssuedAt:  now,       //Issuing time
-			NotBefore: now,       //Begin Effective time
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), //Expiration time
+			IssuedAt:  jwt.NewNumericDate(now),                                        //Issuing time
+			NotBefore: jwt.NewNumericDate(now),                                        //Begin Effective time
 		}}
 }
 
@@ -45,7 +39,7 @@ func CreateToken(userID string, platform int32) (string, int64, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(config.Config.TokenPolicy.AccessSecret))
 
-	return tokenString, claims.ExpiresAt, err
+	return tokenString, claims.ExpiresAt.Time.Unix(), err
 }
 
 func secret() jwt.Keyfunc {
@@ -105,7 +99,7 @@ func ParseToken(tokensString string) (claims *Claims, err error) {
 
 		exists = existsInterface.(int64)
 		if exists == 1 {
-			res, err := MakeTheTokenInvalid(*claims, platform)
+			res, err := MakeTheTokenInvalid(claims, platform)
 			if err != nil {
 				return nil, err
 			}
@@ -118,7 +112,7 @@ func ParseToken(tokensString string) (claims *Claims, err error) {
 	// or  PC/Mobile validate success
 	// final check
 	if exists == 1 {
-		res, err := MakeTheTokenInvalid(*claims, Platform2class[claims.Platform])
+		res, err := MakeTheTokenInvalid(claims, Platform2class[claims.Platform])
 		if err != nil {
 			return nil, err
 		}
@@ -129,7 +123,7 @@ func ParseToken(tokensString string) (claims *Claims, err error) {
 	return claims, nil
 }
 
-func MakeTheTokenInvalid(currentClaims Claims, platformClass string) (bool, error) {
+func MakeTheTokenInvalid(currentClaims *Claims, platformClass string) (bool, error) {
 	storedRedisTokenInterface, err := db.DB.GetPlatformToken(currentClaims.UID, platformClass)
 	if err != nil {
 		return false, err
@@ -139,7 +133,7 @@ func MakeTheTokenInvalid(currentClaims Claims, platformClass string) (bool, erro
 		return false, err
 	}
 	//if issue time less than redis token then make this token invalid
-	if currentClaims.IssuedAt < storedRedisPlatformClaims.IssuedAt {
+	if currentClaims.IssuedAt.Time.Unix() < storedRedisPlatformClaims.IssuedAt.Time.Unix() {
 		return true, TokenInvalid
 	}
 	return false, nil

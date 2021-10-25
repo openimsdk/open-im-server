@@ -17,18 +17,18 @@ func Test_BuildClaims(t *testing.T) {
 
 	assert.Equal(t, claim.UID, uid, "uid should equal")
 	assert.Equal(t, claim.Platform, platform, "platform should equal")
-	assert.Equal(t, claim.StandardClaims.ExpiresAt, int64(-1), "StandardClaims.ExpiresAt should be equal")
+	assert.Equal(t, claim.RegisteredClaims.ExpiresAt, int64(-1), "StandardClaims.ExpiresAt should be equal")
 	// time difference within 1s
-	assert.Equal(t, claim.StandardClaims.IssuedAt, now, "StandardClaims.IssuedAt should be equal")
-	assert.Equal(t, claim.StandardClaims.NotBefore, now, "StandardClaims.NotBefore should be equal")
+	assert.Equal(t, claim.RegisteredClaims.IssuedAt, now, "StandardClaims.IssuedAt should be equal")
+	assert.Equal(t, claim.RegisteredClaims.NotBefore, now, "StandardClaims.NotBefore should be equal")
 
 	ttl = int64(60)
 	now = time.Now().Unix()
 	claim = BuildClaims(uid, platform, ttl)
 	// time difference within 1s
-	assert.Equal(t, claim.StandardClaims.ExpiresAt, int64(60)+now, "StandardClaims.ExpiresAt should be equal")
-	assert.Equal(t, claim.StandardClaims.IssuedAt, now, "StandardClaims.IssuedAt should be equal")
-	assert.Equal(t, claim.StandardClaims.NotBefore, now, "StandardClaims.NotBefore should be equal")
+	assert.Equal(t, claim.RegisteredClaims.ExpiresAt, int64(60)+now, "StandardClaims.ExpiresAt should be equal")
+	assert.Equal(t, claim.RegisteredClaims.IssuedAt, now, "StandardClaims.IssuedAt should be equal")
+	assert.Equal(t, claim.RegisteredClaims.NotBefore, now, "StandardClaims.NotBefore should be equal")
 }
 
 func Test_CreateToken(t *testing.T) {
