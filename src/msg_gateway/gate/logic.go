@@ -32,7 +32,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	err := dec.Decode(&m)
 	if err != nil {
 		log.ErrorByKv("ws json Unmarshal err", "", "err", err.Error())
-		ws.sendErrMsg(conn, 200, err.Error(), constant.WSDataError, "")
+		ws.sendErrMsg(conn, 200, err.Error(), constant.WSDataError, "", "")
 		err = conn.Close()
 		if err != nil {
 			log.NewError("", "ws close err", err.Error())
@@ -41,14 +41,14 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	}
 	if err := validate.Struct(m); err != nil {
 		log.ErrorByKv("ws args validate  err", "", "err", err.Error())
-		ws.sendErrMsg(conn, 201, err.Error(), m.ReqIdentifier, m.MsgIncr)
+		ws.sendErrMsg(conn, 201, err.Error(), m.ReqIdentifier, m.MsgIncr, m.OperationID)
 		return
 	}
 
-	if !utils.VerifyToken(m.Token, m.SendID) {
-		ws.sendErrMsg(conn, 202, "token validate err", m.ReqIdentifier, m.MsgIncr)
-		return
-	}
+	//if !utils.VerifyToken(m.Token, m.SendID) {
+	//	ws.sendErrMsg(conn, 202, "token validate err", m.ReqIdentifier, m.MsgIncr,m.OperationID)
+	//	return
+	//}
 	fmt.Println("test fmt Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
 	log.InfoByKv("Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID, "msgIncr", m.MsgIncr)
 
@@ -267,11 +267,13 @@ func (ws *WServer) sendMsg(conn *UserConn, mReply interface{}) {
 		log.ErrorByKv("WS WriteMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err, "mReply", mReply)
 	}
 }
-func (ws *WServer) sendErrMsg(conn *UserConn, errCode int32, errMsg string, reqIdentifier int32, msgIncr string) {
-	mReply := make(map[string]interface{})
-	mReply["errCode"] = errCode
-	mReply["errMsg"] = errMsg
-	mReply["reqIdentifier"] = reqIdentifier
-	mReply["msgIncr"] = msgIncr
+func (ws *WServer) sendErrMsg(conn *UserConn, errCode int32, errMsg string, reqIdentifier int32, msgIncr string, operationID string) {
+	mReply := Resp{
+		ReqIdentifier: reqIdentifier,
+		MsgIncr:       msgIncr,
+		ErrCode:       errCode,
+		ErrMsg:        errMsg,
+		OperationID:   operationID,
+	}
 	ws.sendMsg(conn, mReply)
 }
