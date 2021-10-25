@@ -9,16 +9,17 @@ package gate
 import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/log"
-	"github.com/mitchellh/mapstructure"
+	"bytes"
+	"encoding/gob"
 )
 
 type Req struct {
-	ReqIdentifier int32       `json:"reqIdentifier" validate:"required"`
-	Token         string      `json:"token" validate:"required"`
-	SendID        string      `json:"sendID" validate:"required"`
-	OperationID   string      `json:"operationID" validate:"required"`
-	MsgIncr       string      `json:"msgIncr" validate:"required"`
-	Data          interface{} `json:"data"`
+	ReqIdentifier int32  `json:"reqIdentifier" validate:"required"`
+	Token         string `json:"token" validate:"required"`
+	SendID        string `json:"sendID" validate:"required"`
+	OperationID   string `json:"operationID" validate:"required"`
+	MsgIncr       string `json:"msgIncr" validate:"required"`
+	Data          []byte `json:"data"`
 }
 type Resp struct {
 	ReqIdentifier int32       `json:"reqIdentifier"`
@@ -60,10 +61,18 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 		data = SeqListData{}
 	default:
 	}
-	if err := mapstructure.WeakDecode(m.Data, &data); err != nil {
-		log.ErrorByKv("map to Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+	b := bytes.NewBuffer(m.Data)
+	dec := gob.NewDecoder(b)
+	err := dec.Decode(&data)
+	if err != nil {
+		log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
 		return false, 203, err.Error(), nil
-	} else if err := validate.Struct(data); err != nil {
+	}
+	//if err := mapstructure.WeakDecode(m.Data, &data); err != nil {
+	//	log.ErrorByKv("map to Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+	//	return false, 203, err.Error(), nil
+	//} else
+	if err = validate.Struct(data); err != nil {
 		log.ErrorByKv("data args validate  err", "", "err", err.Error(), "reqIdentifier", r)
 		return false, 204, err.Error(), nil
 
