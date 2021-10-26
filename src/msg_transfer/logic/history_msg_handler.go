@@ -63,16 +63,16 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 		log.Info("", "", "msg_transfer chat type = SingleChatType", isHistory, isPersist)
 		if isHistory {
 			if msgKey == pbSaveData.RecvID {
-				//err := saveUserChat(pbData.RecvID, &pbSaveData)
-				//if err != nil {
-				//	log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
-				//}
+				err := saveUserChat(pbData.RecvID, &pbSaveData)
+				if err != nil {
+					log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
+				}
 
 			} else if msgKey == pbSaveData.SendID {
-				//err := saveUserChat(pbData.SendID, &pbSaveData)
-				//if err != nil {
-				//	log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
-				//}
+				err := saveUserChat(pbData.SendID, &pbSaveData)
+				if err != nil {
+					log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
+				}
 
 			}
 
