@@ -68,9 +68,10 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	log.NewInfo("", "goroutine num is ", runtime.NumGoroutine())
 
 }
-func (ws *WServer) newestSeqResp(conn *UserConn, m *Req, pb *pbChat.GetNewSeqResp) {
-	var mReplyData pbWs.GetNewSeqResp
-	mReplyData.Seq = pb.GetSeq()
+func (ws *WServer) newestSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeqResp) {
+	var mReplyData pbWs.GetMaxAndMinSeqResp
+	mReplyData.MaxSeq = pb.GetMaxSeq()
+	mReplyData.MinSeq = pb.GetMinSeq()
 	b, _ := proto.Marshal(&mReplyData)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
@@ -84,7 +85,7 @@ func (ws *WServer) newestSeqResp(conn *UserConn, m *Req, pb *pbChat.GetNewSeqRes
 }
 func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
 	log.InfoByKv("Ws call success to getNewSeq", m.OperationID, "Parameters", m)
-	pbData := pbChat.GetNewSeqReq{}
+	pbData := pbChat.GetMaxAndMinSeqReq{}
 	pbData.UserID = m.SendID
 	pbData.OperationID = m.OperationID
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
@@ -92,7 +93,7 @@ func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
 		log.ErrorByKv("get grpcConn err", pbData.OperationID, "args", m)
 	}
 	msgClient := pbChat.NewChatClient(grpcConn)
-	reply, err := msgClient.GetNewSeq(context.Background(), &pbData)
+	reply, err := msgClient.GetMaxAndMinSeq(context.Background(), &pbData)
 	if err != nil {
 		log.ErrorByKv("rpc call failed to getNewSeq", pbData.OperationID, "err", err, "pbData", pbData.String())
 		return
