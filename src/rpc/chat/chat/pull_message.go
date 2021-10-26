@@ -36,7 +36,7 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeq
 	} else {
 		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err2.Error())
 		resp.MinSeq = -1
-		resp.ErrCode = 200
+		resp.ErrCode = 201
 		resp.ErrMsg = "redis get err"
 	}
 	return resp, nil
