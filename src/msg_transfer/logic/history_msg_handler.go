@@ -63,20 +63,21 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 		log.Info("", "", "msg_transfer chat type = SingleChatType", isHistory, isPersist)
 		if isHistory {
 			if msgKey == pbSaveData.RecvID {
-				err := saveUserChat(pbData.RecvID, &pbSaveData)
-				if err != nil {
-					log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
-				}
+				go func() {
+					err := saveUserChat(pbData.RecvID, &pbSaveData)
+					if err != nil {
+						log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
+					}
+				}()
+
 			} else if msgKey == pbSaveData.SendID {
-				err := saveUserChat(pbData.SendID, &pbSaveData)
-				if err != nil {
-					log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
-				}
-				//if isSenderSync {
-				//	pbSaveData.ContentType = constant.SyncSenderMsg
-				//	log.WarnByKv("SyncSenderMsg come here", pbData.OperationID, pbSaveData.String())
-				//	sendMessageToPush(&pbSaveData)
-				//}
+				go func() {
+					err := saveUserChat(pbData.SendID, &pbSaveData)
+					if err != nil {
+						log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
+					}
+				}()
+
 			}
 
 			log.NewInfo(pbSaveData.OperationID, "saveUserChat cost time ", utils.GetCurrentTimestampBySecond()-time)
