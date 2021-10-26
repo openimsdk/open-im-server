@@ -12,10 +12,11 @@ message PullMessageBySeqListResp {
 message PullMessageBySeqListReq{
   repeated int64 seqList =1;
 }
-message GetNewSeqReq {
+message GetMaxAndMinSeqReq {
 }
-message GetNewSeqResp {
-  int64 Seq = 1;
+message GetMaxAndMinSeqResp {
+  int64 maxSeq = 1;
+  int64 minSeq = 2;
 }
 message GatherFormat{
   // @inject_tag: json:"id"
