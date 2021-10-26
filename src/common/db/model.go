@@ -22,7 +22,6 @@ func key(dbAddress, dbName string) string {
 func init() {
 	//mysql init
 	initMysqlDB()
-	// mongo init
 	mgoDailInfo := &mgo.DialInfo{
 		Addrs:     config.Config.Mongo.DBAddress,
 		Direct:    config.Config.Mongo.DBDirect,
@@ -40,6 +39,11 @@ func init() {
 	DB.mgoSession = mgoSession
 	DB.mgoSession.SetMode(mgo.Monotonic, true)
 
+	c := DB.mgoSession.DB(config.Config.Mongo.DBDatabase).C(cChat)
+	err = c.EnsureIndexKey("uid")
+	if err != nil {
+		panic(err)
+	}
 	// redis pool init
 	DB.redisPool = &redis.Pool{
 		MaxIdle:     config.Config.Redis.DBMaxIdle,
