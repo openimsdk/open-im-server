@@ -22,7 +22,6 @@ type MsgInfo struct {
 type UserChat struct {
 	UID string
 	Msg []MsgInfo
-	BId bson.ObjectId `bson:"bid"`
 }
 
 type GroupMember struct {
@@ -156,10 +155,6 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m proto.Message) er
 
 	log.NewInfo("", "get mgoSession cost time", getCurrentTimestampByMill()-newTime)
 	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
-	err := c.EnsureIndexKey("uid")
-	if err != nil {
-		log.NewError("", "EnsureIndexKey uid failed ", err.Error())
-	}
 	n, err := c.Find(bson.M{"uid": uid}).Count()
 	if err != nil {
 		return err
@@ -171,6 +166,8 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m proto.Message) er
 		return err
 	}
 
+	log.NewInfo("insert len: ", len(sMsg.Msg))
+
 	if n == 0 {
 		sChat := UserChat{}
 		sChat.UID = uid
@@ -179,6 +176,7 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m proto.Message) er
 		if err != nil {
 			return err
 		}
+
 	} else {
 		err = c.Update(bson.M{"uid": uid}, bson.M{"$push": bson.M{"msg": sMsg}})
 		if err != nil {
