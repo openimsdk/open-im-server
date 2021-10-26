@@ -19,30 +19,27 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeq
 	maxSeq, err1 := commonDB.DB.GetUserMaxSeq(in.UserID)
 	minSeq, err2 := commonDB.DB.GetUserMinSeq(in.UserID)
 	resp := new(pbMsg.GetMaxAndMinSeqResp)
-	if err1 == nil && err2 == nil {
+	if err1 == nil {
 		resp.MaxSeq = maxSeq
-		resp.MinSeq = minSeq
-		resp.ErrCode = 0
-		resp.ErrMsg = ""
-		return resp, nil
+	} else if err1 == redis.ErrNil {
+		resp.MaxSeq = 0
 	} else {
-		if err1 == redis.ErrNil {
-			resp.MaxSeq = 0
-		} else if err1 != nil {
-			log.NewInfo(in.OperationID, "getMaxSeq from redis error", in.String(), err1.Error())
-			resp.MaxSeq = -1
-		}
-		if err2 == redis.ErrNil {
-			resp.MinSeq = 0
-		} else if err2 != nil {
-			log.NewInfo(in.OperationID, "getMinSeq from redis error", in.String(), err2.Error())
-			resp.MinSeq = -1
-		}
-		resp.ErrCode = 0
-		resp.ErrMsg = ""
-		return resp, nil
+		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err1.Error())
+		resp.MaxSeq = -1
+		resp.ErrCode = 200
+		resp.ErrMsg = "redis get err"
 	}
-
+	if err2 == nil {
+		resp.MinSeq = minSeq
+	} else if err2 == redis.ErrNil {
+		resp.MinSeq = 0
+	} else {
+		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err2.Error())
+		resp.MinSeq = -1
+		resp.ErrCode = 200
+		resp.ErrMsg = "redis get err"
+	}
+	return resp, nil
 }
 func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*pbMsg.PullMessageResp, error) {
 	log.InfoByKv("rpc pullMessage is arriving", in.OperationID, "args", in.String())
