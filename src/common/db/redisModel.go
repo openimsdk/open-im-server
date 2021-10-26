@@ -9,6 +9,7 @@ const (
 	userIncrSeq      = "REDIS_USER_INCR_SEQ:" // user incr seq
 	appleDeviceToken = "DEVICE_TOKEN"
 	lastGetSeq       = "LAST_GET_SEQ"
+	userMinSeq       = "REDIS_USER_Min_SEQ:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -37,9 +38,22 @@ func (d *DataBases) IncrUserSeq(uid string) (int64, error) {
 	return redis.Int64(d.Exec("INCR", key))
 }
 
-//获取最新的seq
-func (d *DataBases) GetUserSeq(uid string) (int64, error) {
+//获取最大的Seq
+func (d *DataBases) GetUserMaxSeq(uid string) (int64, error) {
 	key := userIncrSeq + uid
+	return redis.Int64(d.Exec("GET", key))
+}
+
+//设置用户最小的seq
+func (d *DataBases) SetUserMinSeq(uid string) (err error) {
+	key := userMinSeq + uid
+	_, err = d.Exec("SET", key)
+	return err
+}
+
+//获取最小的Seq
+func (d *DataBases) GetUserMinSeq(uid string) (int64, error) {
+	key := userMinSeq + uid
 	return redis.Int64(d.Exec("GET", key))
 }
 

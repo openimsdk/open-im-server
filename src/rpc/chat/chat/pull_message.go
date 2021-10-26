@@ -13,22 +13,30 @@ import (
 	pbMsg "Open_IM/src/proto/chat"
 )
 
-func (rpc *rpcChat) GetNewSeq(_ context.Context, in *pbMsg.GetNewSeqReq) (*pbMsg.GetNewSeqResp, error) {
-	log.InfoByKv("rpc getNewSeq is arriving", in.OperationID, in.String())
+func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeqReq) (*pbMsg.GetMaxAndMinSeqResp, error) {
+	log.InfoByKv("rpc getMaxAndMinSeq is arriving", in.OperationID, in.String())
 	//seq, err := model.GetBiggestSeqFromReceive(in.UserID)
-	seq, err := commonDB.DB.GetUserSeq(in.UserID)
-	resp := new(pbMsg.GetNewSeqResp)
-	if err == nil {
-		resp.Seq = seq
+	maxSeq, err1 := commonDB.DB.GetUserMaxSeq(in.UserID)
+	minSeq, err2 := commonDB.DB.GetUserMinSeq(in.UserID)
+	resp := new(pbMsg.GetMaxAndMinSeqResp)
+	if err1 == nil && err2 == nil {
+		resp.MaxSeq = maxSeq
+		resp.MinSeq = minSeq
 		resp.ErrCode = 0
 		resp.ErrMsg = ""
-		return resp, err
+		return resp, nil
 	} else {
-		if err == redis.ErrNil {
-			resp.Seq = 0
-		} else {
-			log.ErrorByKv("getSeq from redis error", in.OperationID, "args", in.String(), "err", err.Error())
-			resp.Seq = -1
+		if err1 == redis.ErrNil {
+			resp.MaxSeq = 0
+		} else if err1 != nil {
+			log.NewInfo(in.OperationID, "getMaxSeq from redis error", in.String(), err1.Error())
+			resp.MaxSeq = -1
+		}
+		if err2 == redis.ErrNil {
+			resp.MinSeq = 0
+		} else if err2 != nil {
+			log.NewInfo(in.OperationID, "getMinSeq from redis error", in.String(), err2.Error())
+			resp.MinSeq = -1
 		}
 		resp.ErrCode = 0
 		resp.ErrMsg = ""
@@ -81,7 +89,6 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *pbMsg.PullMessag
 		SingleUserMsg: respSingleMsgFormat,
 		GroupUserMsg:  respGroupMsgFormat,
 	}, nil
-	panic("implement me")
 }
 func singleMsgHandleByUser(allMsg []*pbMsg.MsgFormat, ownerId string) []*pbMsg.GatherFormat {
 	var userid string
