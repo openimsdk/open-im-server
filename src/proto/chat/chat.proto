@@ -63,14 +63,15 @@ message PullMessageBySeqListReq{
   string OperationID = 2;
   repeated int64 seqList =3;
 }
-message GetNewSeqReq {
+message GetMaxAndMinSeqReq {
   string UserID = 1;
   string OperationID = 2;
 }
-message GetNewSeqResp {
+message GetMaxAndMinSeqResp {
   int32 ErrCode = 1;
   string ErrMsg = 2;
-  int64 Seq = 3;
+  int64 MaxSeq = 3;
+  int64 MinSeq = 4;
 }
 message GatherFormat{
   // @inject_tag: json:"id"
@@ -139,7 +140,7 @@ message UserSendMsgResp {
 
 }
 service Chat {
-  rpc GetNewSeq(GetNewSeqReq) returns(GetNewSeqResp);
+  rpc GetMaxAndMinSeq(GetMaxAndMinSeqReq) returns(GetMaxAndMinSeqResp);
   rpc PullMessage(PullMessageReq) returns(PullMessageResp);
   rpc PullMessageBySeqList(PullMessageBySeqListReq) returns(PullMessageResp);
   rpc UserSendMsg(UserSendMsgReq) returns(UserSendMsgResp);
