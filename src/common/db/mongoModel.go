@@ -158,9 +158,6 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []int64) (SingleMsg []*p
 				}
 			}
 		}
-		if allCount == len(seqList) {
-			break
-		}
 	}
 	return SingleMsg, GroupMsg, MaxSeq, MinSeq, nil
 }
