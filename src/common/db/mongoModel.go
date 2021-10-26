@@ -147,7 +147,12 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m proto.Message) er
 	if session == nil {
 		return errors.New("session == nil")
 	}
-	defer session.Close()
+	defer func() {
+		if session != nil {
+			session.Close()
+		}
+	}()
+
 	log.NewInfo("", "get mgoSession cost time", getCurrentTimestampByMill()-newTime)
 	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
 
