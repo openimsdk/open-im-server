@@ -168,7 +168,7 @@ func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
 	}
 }
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq", m)
+	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq", m.SendID)
 	reply := new(pbChat.PullMessageResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
 	if isPass {

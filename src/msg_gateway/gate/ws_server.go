@@ -64,7 +64,10 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 func (ws *WServer) readMsg(conn *UserConn) {
 	for {
-		_, msg, err := conn.ReadMessage()
+		messageType, msg, err := conn.ReadMessage()
+		if messageType == websocket.PingMessage {
+			log.NewInfo("", "this is a  pingMessage")
+		}
 		if err != nil {
 			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err)
 			ws.delUserConn(conn)
