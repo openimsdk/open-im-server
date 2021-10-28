@@ -14,13 +14,10 @@ import (
 	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
 	pbRelay "Open_IM/src/proto/relay"
-	pbGetInfo "Open_IM/src/proto/user"
 	rpcChat "Open_IM/src/rpc/chat/chat"
-	"Open_IM/src/rpc/user/internal_service"
 	"Open_IM/src/utils"
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 )
 
@@ -65,14 +62,6 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 				//Use offline push messaging
 				var UIDList []string
 				UIDList = append(UIDList, sendPbData.RecvID)
-				var sendUIDList []string
-				sendUIDList = append(sendUIDList, sendPbData.SendID)
-				userInfo, err := internal_service.GetUserInfoClient(&pbGetInfo.GetUserInfoReq{UserIDList: sendUIDList, OperationID: sendPbData.OperationID})
-				if err != nil {
-					log.ErrorByArgs(fmt.Sprintf("err=%v,call GetUserInfoClient rpc server failed", err))
-					return
-				}
-
 				customContent := EChatContent{
 					SessionType: int(sendPbData.SessionType),
 					From:        sendPbData.SendID,
@@ -84,15 +73,15 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 				jsonCustomContent := string(bCustomContent)
 				switch sendPbData.ContentType {
 				case constant.Text:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, sendPbData.Content, jsonCustomContent)
+					IOSAccountListPush(UIDList, sendPbData.SenderNickName, sendPbData.Content, jsonCustomContent)
 				case constant.Picture:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Picture], jsonCustomContent)
+					IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Picture], jsonCustomContent)
 				case constant.Voice:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Voice], jsonCustomContent)
+					IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Voice], jsonCustomContent)
 				case constant.Video:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Video], jsonCustomContent)
+					IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Video], jsonCustomContent)
 				case constant.File:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.File], jsonCustomContent)
+					IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.File], jsonCustomContent)
 				default:
 
 				}

@@ -109,66 +109,6 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	if !tag {
 		log.NewError(in.OperationID, "push err ,ws conn not in map", in.String())
 	}
-	//for key, conn := range ws.wsUserToConn {
-	//	UIDAndPID := strings.Split(key, " ")
-	//	if UIDAndPID[0] == RecvID {
-	//		tag = true
-	//		resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
-	//		temp := &pbRelay.SingleMsgToUser{
-	//			ResultCode:     resultCode,
-	//			RecvID:         UIDAndPID[0],
-	//			RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
-	//		}
-	//		resp = append(resp, temp)
-	//	}
-	//}
-	//if !tag {
-	//	log.NewError(in.OperationID, "push err ,ws conn not in map", in.String())
-	//}
-	//switch in.GetContentType() {
-	//case constant.SyncSenderMsg:
-	//	log.InfoByKv("come sync", in.OperationID, "args", in.String())
-	//	RecvID = in.GetSendID()
-	//	if in.MsgFrom != constant.SysMsgType {
-	//		for key, conn := range ws.wsUserToConn {
-	//			UIDAndPID := strings.Split(key, " ")
-	//			if UIDAndPID[0] == RecvID && utils.PlatformIDToName(in.GetPlatformID()) != UIDAndPID[1] {
-	//				resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
-	//				temp := &pbRelay.SingleMsgToUser{
-	//					ResultCode:     resultCode,
-	//					RecvID:         UIDAndPID[0],
-	//					RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
-	//				}
-	//				resp = append(resp, temp)
-	//			}
-	//
-	//		}
-	//	}
-	//default:
-	//	log.InfoByKv("not come sync", in.OperationID, "args", in.String())
-	//	switch in.SessionType {
-	//	case constant.SingleChatType:
-	//		log.InfoByKv("come single", in.OperationID, "args", in.String())
-	//		RecvID = in.GetRecvID()
-	//	case constant.GroupChatType:
-	//		RecvID = strings.Split(in.GetRecvID(), " ")[0]
-	//	default:
-	//	}
-	//	log.InfoByKv("come for range", in.OperationID, "args", in.String())
-	//
-	//	for key, conn := range ws.wsUserToConn {
-	//		UIDAndPID := strings.Split(key, " ")
-	//		if UIDAndPID[0] == RecvID {
-	//			resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
-	//			temp := &pbRelay.SingleMsgToUser{
-	//				ResultCode:     resultCode,
-	//				RecvID:         UIDAndPID[0],
-	//				RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
-	//			}
-	//			resp = append(resp, temp)
-	//		}
-	//	}
-	//}
 	return &pbRelay.MsgToUserResp{
 		Resp: resp,
 	}, nil
@@ -182,7 +122,7 @@ func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPl
 		ResultCode = -2
 		return ResultCode
 	} else {
-		log.InfoByKv("PushMsgToUser is success By Ws", in.OperationID, "args", in.String())
+		log.InfoByKv("PushMsgToUser is success By Ws", in.OperationID, "args", in.String(), "recvPlatForm", RecvPlatForm, "recvID", RecvID)
 		ResultCode = 0
 		return ResultCode
 	}

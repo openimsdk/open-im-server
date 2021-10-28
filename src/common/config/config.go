@@ -8,9 +8,9 @@ import (
 var Config config
 
 type config struct {
-	ServerIP string `yaml:"serverip"`
-
-	Api struct {
+	ServerIP      string `yaml:"serverip"`
+	ServerVersion string `yaml:"serverversion"`
+	Api           struct {
 		GinPort []int `yaml:"openImApiPort"`
 	}
 	Sdk struct {
@@ -109,6 +109,10 @@ type config struct {
 				AccessID  string `yaml:"accessID"`
 				SecretKey string `yaml:"secretKey"`
 			}
+		}
+		Jpns struct {
+			AppKey       string `yaml:"appKey"`
+			MasterSecret string `yaml:"masterSecret"`
 		}
 	}
 	Manager struct {

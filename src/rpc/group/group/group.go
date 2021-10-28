@@ -163,13 +163,13 @@ func (c *inviteUserToGroupReq) ContentToString() string {
 }
 
 func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGroupAllMemberReq) (*pbGroup.GetGroupAllMemberResp, error) {
-	claims, err := utils.ParseToken(req.Token)
-	if err != nil {
-		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		if req.Token != config.Config.Secret {
-			return &pbGroup.GetGroupAllMemberResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
-		}
-	}
+	//claims, err := utils.ParseToken(req.Token)
+	//if err != nil {
+	//	log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
+	//	if req.Token != config.Config.Secret {
+	//		return &pbGroup.GetGroupAllMemberResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+	//	}
+	//}
 
 	var resp pbGroup.GetGroupAllMemberResp
 	resp.ErrorCode = 0
@@ -177,7 +177,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 	if err != nil {
 		resp.ErrorCode = config.ErrDb.ErrCode
 		resp.ErrorMsg = err.Error()
-		log.Error(claims.UID, req.OperationID, "FindGroupMemberListByGroupId failed, ", err.Error(), "params: ", req.GroupID)
+		log.NewError(req.OperationID, "FindGroupMemberListByGroupId failed,", err.Error(), req.GroupID)
 		return &resp, nil
 	}
 
