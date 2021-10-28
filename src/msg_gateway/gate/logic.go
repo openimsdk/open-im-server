@@ -213,27 +213,30 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.UserSendMsgRes
 }
 
 func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
-	log.InfoByKv("Ws call success to sendMsgReq", m.OperationID, "Parameters", m)
+	log.InfoByKv("Ws call success to sendMsgReq start", m.OperationID, "Parameters")
 	reply := new(pbChat.UserSendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
 	if isPass {
 		data := pData.(pbWs.UserSendMsgReq)
 		pbData := pbChat.UserSendMsgReq{
-			ReqIdentifier: m.ReqIdentifier,
-			Token:         m.Token,
-			SendID:        m.SendID,
-			OperationID:   m.OperationID,
-			PlatformID:    data.PlatformID,
-			SessionType:   data.SessionType,
-			MsgFrom:       data.MsgFrom,
-			ContentType:   data.ContentType,
-			RecvID:        data.RecvID,
-			ForceList:     data.ForceList,
-			Content:       data.Content,
-			Options:       utils.MapIntToJsonString(data.Options),
-			ClientMsgID:   data.ClientMsgID,
-			SendTime:      sendTime,
+			ReqIdentifier:  m.ReqIdentifier,
+			Token:          m.Token,
+			SendID:         m.SendID,
+			OperationID:    m.OperationID,
+			PlatformID:     data.PlatformID,
+			SessionType:    data.SessionType,
+			MsgFrom:        data.MsgFrom,
+			ContentType:    data.ContentType,
+			RecvID:         data.RecvID,
+			ForceList:      data.ForceList,
+			SenderNickName: data.SenderNickName,
+			SenderFaceURL:  data.SenderFaceURL,
+			Content:        data.Content,
+			Options:        utils.MapIntToJsonString(data.Options),
+			ClientMsgID:    data.ClientMsgID,
+			SendTime:       sendTime,
 		}
+		log.NewInfo(m.OperationID, "Ws call success to sendMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data)
 		time := utils.GetCurrentTimestampBySecond()
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		client := pbChat.NewChatClient(etcdConn)
@@ -265,7 +268,7 @@ func (ws *WServer) sendMsg(conn *UserConn, mReply interface{}) {
 	}
 	err = ws.writeMsg(conn, websocket.BinaryMessage, b.Bytes())
 	if err != nil {
-		log.ErrorByKv("WS WriteMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err, "mReply", mReply)
+		log.NewError(mReply.(Resp).OperationID, mReply.(Resp).ReqIdentifier, mReply.(Resp).ErrCode, mReply.(Resp).ErrMsg, "WS WriteMsg error", conn.RemoteAddr().String(), ws.getUserUid(conn), err.Error())
 	}
 }
 func (ws *WServer) sendErrMsg(conn *UserConn, errCode int32, errMsg string, reqIdentifier int32, msgIncr string, operationID string) {

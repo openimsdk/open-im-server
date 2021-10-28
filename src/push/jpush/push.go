@@ -9,10 +9,13 @@ import (
 	"net/http"
 )
 
-func JGAccountListPush(accounts []string, jsonCustomContent string, Platform string) (*http.Response, error) {
+type JPushResp struct {
+}
+
+func JGAccountListPush(accounts []string, jsonCustomContent string, platform string) (*http.Response, error) {
 
 	var pf requestBody.Platform
-	_ = pf.SetAndroid()
+	_ = pf.SetPlatform(platform)
 	var au requestBody.Audience
 	au.SetAlias(accounts)
 	var no requestBody.Notification
@@ -32,7 +35,7 @@ func JGAccountListPush(accounts []string, jsonCustomContent string, Platform str
 
 	client := &http.Client{}
 
-	req, err := http.NewRequest("POST", common.PushUrl, bytes.NewBuffer(con))
+	req, err := http.NewRequest("POST", config.Config.Push.Jpns.PushUrl, bytes.NewBuffer(con))
 	if err != nil {
 		return nil, err
 	}

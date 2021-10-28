@@ -17,7 +17,6 @@ import (
 	rpcChat "Open_IM/src/rpc/chat/chat"
 	"Open_IM/src/utils"
 	"context"
-	"encoding/json"
 	"strings"
 )
 
@@ -60,31 +59,32 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 			}
 			if isShouldOfflinePush {
 				//Use offline push messaging
-				var UIDList []string
-				UIDList = append(UIDList, sendPbData.RecvID)
-				customContent := EChatContent{
-					SessionType: int(sendPbData.SessionType),
-					From:        sendPbData.SendID,
-					To:          sendPbData.RecvID,
-					Seq:         sendPbData.RecvSeq,
-				}
-				bCustomContent, _ := json.Marshal(customContent)
-
-				jsonCustomContent := string(bCustomContent)
-				switch sendPbData.ContentType {
-				case constant.Text:
-					IOSAccountListPush(UIDList, sendPbData.SenderNickName, sendPbData.Content, jsonCustomContent)
-				case constant.Picture:
-					IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Picture], jsonCustomContent)
-				case constant.Voice:
-					IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Voice], jsonCustomContent)
-				case constant.Video:
-					IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Video], jsonCustomContent)
-				case constant.File:
-					IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.File], jsonCustomContent)
-				default:
-
-				}
+				//var UIDList []string
+				//UIDList = append(UIDList, sendPbData.RecvID)
+				//customContent := EChatContent{
+				//	SessionType: int(sendPbData.SessionType),
+				//	From:        sendPbData.SendID,
+				//	To:          sendPbData.RecvID,
+				//	Seq:         sendPbData.RecvSeq,
+				//}
+				//bCustomContent, _ := json.Marshal(customContent)
+				//
+				//jsonCustomContent := string(bCustomContent)
+				//switch sendPbData.ContentType {
+				//case constant.Text:
+				//	IOSAccountListPush(UIDList, sendPbData.SenderNickName, sendPbData.Content, jsonCustomContent)
+				//case constant.Picture:
+				//	IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Picture], jsonCustomContent)
+				//case constant.Voice:
+				//	IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Voice], jsonCustomContent)
+				//case constant.Video:
+				//	IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.Video], jsonCustomContent)
+				//case constant.File:
+				//	IOSAccountListPush(UIDList, sendPbData.SenderNickName, constant.ContentType2PushContent[constant.File], jsonCustomContent)
+				//default:
+				//
+				//}
+				//push.JGAccountListPush(UIDList,jsonCustomContent,utils.PlatformIDToName(t))
 
 			} else {
 				isShouldOfflinePush = true

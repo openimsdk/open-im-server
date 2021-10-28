@@ -1,6 +1,9 @@
 package requestBody
 
-import "errors"
+import (
+	"Open_IM/src/utils"
+	"errors"
+)
 
 const (
 	ANDROID      = "android"
@@ -48,10 +51,14 @@ func (p *Platform) Set(os string) error {
 
 	return nil
 }
-func (p *Platform) setPlatform(platform string) {
+func (p *Platform) SetPlatform(platform string) error {
 	switch platform {
-	case ANDROID:
-		p.SetAndroid()
+	case utils.AndroidPlatformStr:
+		return p.SetAndroid()
+	case utils.IOSPlatformStr:
+		return p.SetIOS()
+	default:
+		return errors.New("platform err")
 	}
 
 }

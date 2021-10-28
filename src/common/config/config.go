@@ -113,6 +113,7 @@ type config struct {
 		Jpns struct {
 			AppKey       string `yaml:"appKey"`
 			MasterSecret string `yaml:"masterSecret"`
+			PushUrl      string `yaml:"pushUrl"`
 		}
 	}
 	Manager struct {
