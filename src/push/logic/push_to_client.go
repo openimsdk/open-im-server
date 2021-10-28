@@ -14,9 +14,11 @@ import (
 	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
 	pbRelay "Open_IM/src/proto/relay"
+	push "Open_IM/src/push/jpush"
 	rpcChat "Open_IM/src/rpc/chat/chat"
 	"Open_IM/src/utils"
 	"context"
+	"encoding/json"
 	"strings"
 )
 
@@ -59,17 +61,17 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 			}
 			if isShouldOfflinePush {
 				//Use offline push messaging
-				//var UIDList []string
-				//UIDList = append(UIDList, sendPbData.RecvID)
-				//customContent := EChatContent{
-				//	SessionType: int(sendPbData.SessionType),
-				//	From:        sendPbData.SendID,
-				//	To:          sendPbData.RecvID,
-				//	Seq:         sendPbData.RecvSeq,
-				//}
-				//bCustomContent, _ := json.Marshal(customContent)
-				//
-				//jsonCustomContent := string(bCustomContent)
+				var UIDList []string
+				UIDList = append(UIDList, sendPbData.RecvID)
+				customContent := EChatContent{
+					SessionType: int(sendPbData.SessionType),
+					From:        sendPbData.SendID,
+					To:          sendPbData.RecvID,
+					Seq:         sendPbData.RecvSeq,
+				}
+				bCustomContent, _ := json.Marshal(customContent)
+
+				jsonCustomContent := string(bCustomContent)
 				//switch sendPbData.ContentType {
 				//case constant.Text:
 				//	IOSAccountListPush(UIDList, sendPbData.SenderNickName, sendPbData.Content, jsonCustomContent)
@@ -84,7 +86,7 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 				//default:
 				//
 				//}
-				//push.JGAccountListPush(UIDList,jsonCustomContent,utils.PlatformIDToName(t))
+				push.JGAccountListPush(UIDList, jsonCustomContent, utils.PlatformIDToName(t))
 
 			} else {
 				isShouldOfflinePush = true
