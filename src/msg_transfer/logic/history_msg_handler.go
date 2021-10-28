@@ -81,7 +81,7 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 		if msgKey == pbSaveData.RecvID {
 			pbSaveData.Options = pbData.Options
 			pbSaveData.OfflineInfo = pbData.OfflineInfo
-			sendMessageToPush(&pbSaveData)
+			go sendMessageToPush(&pbSaveData)
 			log.NewInfo(pbSaveData.OperationID, "sendMessageToPush cost time ", utils.GetCurrentTimestampBySecond()-time)
 		}
 
