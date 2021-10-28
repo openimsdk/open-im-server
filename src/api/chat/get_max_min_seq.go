@@ -19,7 +19,7 @@ type paramsUserNewestSeq struct {
 	MsgIncr       int    `json:"msgIncr" binding:"required"`
 }
 
-func UserNewestSeq(c *gin.Context) {
+func UserGetSeq(c *gin.Context) {
 	params := paramsUserNewestSeq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})

@@ -49,12 +49,11 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	//	ws.sendErrMsg(conn, 202, "token validate err", m.ReqIdentifier, m.MsgIncr,m.OperationID)
 	//	return
 	//}
-	fmt.Println("test fmt Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
 	log.InfoByKv("Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID, "msgIncr", m.MsgIncr)
 
 	switch m.ReqIdentifier {
 	case constant.WSGetNewestSeq:
-		go ws.newestSeqReq(conn, &m)
+		go ws.getSeqReq(conn, &m)
 	case constant.WSPullMsg:
 		go ws.pullMsgReq(conn, &m)
 	case constant.WSSendMsg:
@@ -68,7 +67,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	log.NewInfo("", "goroutine num is ", runtime.NumGoroutine())
 
 }
-func (ws *WServer) newestSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeqResp) {
+func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeqResp) {
 	var mReplyData pbWs.GetMaxAndMinSeqResp
 	mReplyData.MaxSeq = pb.GetMaxSeq()
 	mReplyData.MinSeq = pb.GetMinSeq()
@@ -83,8 +82,8 @@ func (ws *WServer) newestSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMin
 	}
 	ws.sendMsg(conn, mReply)
 }
-func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
-	log.InfoByKv("Ws call success to getNewSeq", m.OperationID, "Parameters", m)
+func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
+	log.NewInfo(m.OperationID, "Ws call success to getNewSeq", m.MsgIncr, m.SendID, m.ReqIdentifier)
 	pbData := pbChat.GetMaxAndMinSeqReq{}
 	pbData.UserID = m.SendID
 	pbData.OperationID = m.OperationID
@@ -95,11 +94,11 @@ func (ws *WServer) newestSeqReq(conn *UserConn, m *Req) {
 	msgClient := pbChat.NewChatClient(grpcConn)
 	reply, err := msgClient.GetMaxAndMinSeq(context.Background(), &pbData)
 	if err != nil {
-		log.ErrorByKv("rpc call failed to getNewSeq", pbData.OperationID, "err", err, "pbData", pbData.String())
+		log.ErrorByKv("rpc call failed to getSeqReq", pbData.OperationID, "err", err, "pbData", pbData.String())
 		return
 	}
-	log.InfoByKv("rpc call success to getNewSeq", pbData.OperationID, "replyData", reply.String())
-	ws.newestSeqResp(conn, m, reply)
+	log.InfoByKv("rpc call success to getSeqReq", pbData.OperationID, "replyData", reply.String())
+	ws.getSeqResp(conn, m, reply)
 
 }
 
@@ -142,7 +141,7 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 }
 
 func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
-	log.InfoByKv("Ws call success to pullMsgReq", m.OperationID, "Parameters", m)
+	log.NewInfo(m.OperationID, "Ws call success to pullMsgReq", m.ReqIdentifier, m.MsgIncr, m.SendID)
 	reply := new(pbChat.PullMessageResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsg)
 	if isPass {
@@ -168,9 +167,10 @@ func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
 	}
 }
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq", m.SendID)
+	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr)
 	reply := new(pbChat.PullMessageResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
+	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(pbWs.PullMessageBySeqListReq).SeqList)
 	if isPass {
 		pbData := pbChat.PullMessageBySeqListReq{}
 		pbData.SeqList = data.(pbWs.PullMessageBySeqListReq).SeqList
@@ -181,9 +181,12 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 		reply, err := msgClient.PullMessageBySeqList(context.Background(), &pbData)
 		if err != nil {
 			log.NewError(pbData.OperationID, "pullMsgBySeqListReq err", err.Error())
-			return
+			reply.ErrCode = 200
+			reply.ErrMsg = err.Error()
+
+		} else {
+			log.NewInfo(pbData.OperationID, "rpc call success to pullMsgBySeqListReq", reply.String(), reply.GetMaxSeq(), reply.GetMinSeq(), len(reply.GetSingleUserMsg()), len(reply.GetGroupUserMsg()))
 		}
-		log.NewInfo(pbData.OperationID, "rpc call success to pullMsgBySeqListReq", reply.String(), reply.GetMaxSeq(), reply.GetMinSeq(), len(reply.GetSingleUserMsg()), len(reply.GetGroupUserMsg()))
 		ws.pullMsgResp(conn, m, reply)
 	} else {
 		reply.ErrCode = errCode
@@ -208,12 +211,11 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.UserSendMsgRes
 		OperationID:   m.OperationID,
 		Data:          b,
 	}
-	fmt.Println("test fmt send msg resp", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID)
 	ws.sendMsg(conn, mReply)
 }
 
 func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
-	log.InfoByKv("Ws call success to sendMsgReq start", m.OperationID, "Parameters")
+	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, sendTime)
 	reply := new(pbChat.UserSendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
 	if isPass {
@@ -237,20 +239,18 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 			SendTime:       sendTime,
 		}
 		log.NewInfo(m.OperationID, "Ws call success to sendMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data)
-		time := utils.GetCurrentTimestampBySecond()
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		client := pbChat.NewChatClient(etcdConn)
-		log.Info("", "", "ws UserSendMsg call, api call rpc...")
 		reply, err := client.UserSendMsg(context.Background(), &pbData)
 		if err != nil {
 			log.NewError(pbData.OperationID, "UserSendMsg err", err.Error())
-			reply.ErrCode = 100
-			reply.ErrMsg = "rpc err"
+			reply.ErrCode = 200
+			reply.ErrMsg = err.Error()
+		} else {
+			log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
 		}
-		log.NewInfo(pbData.OperationID, "sendMsgReq call rpc  cost time ", utils.GetCurrentTimestampBySecond()-time)
-		log.Info("", "", "api UserSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
 		ws.sendMsgResp(conn, m, reply, sendTime)
-		log.NewInfo(pbData.OperationID, "sendMsgResp end  cost time ", utils.GetCurrentTimestampBySecond()-time)
+
 	} else {
 		reply.ErrCode = errCode
 		reply.ErrMsg = errMsg
