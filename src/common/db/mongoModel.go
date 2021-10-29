@@ -14,7 +14,7 @@ import (
 
 const cChat = "chat"
 const cGroup = "group"
-const singleGocMsgNum = 10000
+const singleGocMsgNum = 5000
 
 type MsgInfo struct {
 	SendTime int64
