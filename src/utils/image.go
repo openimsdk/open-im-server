@@ -2,19 +2,26 @@ package utils
 
 import (
 	"errors"
-	"github.com/nfnt/resize"
-	"golang.org/x/image/bmp"
 	"image"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"io"
 	"os"
+	"path/filepath"
+
+	"github.com/nfnt/resize"
+	"golang.org/x/image/bmp"
 )
 
 func GenSmallImage(src, dst string) error {
 	fIn, _ := os.Open(src)
 	defer fIn.Close()
+
+	distDir := filepath.Dir(dst)
+	if _, err := os.Stat(distDir); os.IsNotExist(err) {
+		os.MkdirAll(distDir, os.ModePerm)
+	}
 
 	fOut, _ := os.Create(dst)
 	defer fOut.Close()
@@ -41,7 +48,7 @@ func scale(in io.Reader, out io.Writer, width, height, quality int) error {
 
 	switch fm {
 	case "jpeg":
-		return jpeg.Encode(out, canvas, &jpeg.Options{quality})
+		return jpeg.Encode(out, canvas, &jpeg.Options{Quality: quality})
 	case "png":
 		return png.Encode(out, canvas)
 	case "gif":
@@ -51,6 +58,4 @@ func scale(in io.Reader, out io.Writer, width, height, quality int) error {
 	default:
 		return errors.New("ERROR FORMAT")
 	}
-
-	return nil
 }
