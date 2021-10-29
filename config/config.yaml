@@ -1,7 +1,7 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-
+serverversion: 1.0.0
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openIM
@@ -119,6 +119,10 @@ push:
     android:
       accessID: 111
       secretKey: 111
+  jpns:
+    appKey: 2783339cee4de379cc798fe1
+    masterSecret: 66e5f309e032c68cc668c28a
+    pushUrl: "https://api.jpush.cn/v3/push"
 manager:
   appManagerUid: ["openIM123456","openIM654321"]
   secrets: ["openIM1","openIM2"]
