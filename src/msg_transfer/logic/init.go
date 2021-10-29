@@ -20,6 +20,6 @@ func Init() {
 }
 func Run() {
 	//register mysqlConsumerHandler to
-	//go persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&persistentCH)
+	go persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&persistentCH)
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
 }
