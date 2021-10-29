@@ -7,7 +7,6 @@ require (
 	github.com/Shopify/toxiproxy v2.1.4+incompatible // indirect
 	github.com/antonfisher/nested-logrus-formatter v1.3.0
 	github.com/coreos/go-semver v0.3.0 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
@@ -16,6 +15,7 @@ require (
 	github.com/garyburd/redigo v1.6.2
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
+	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/gorilla/websocket v1.4.2
@@ -32,6 +32,7 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.6.0
+	github.com/stretchr/testify v1.7.0
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20210325043845-84a0811633ca
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
 	go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698

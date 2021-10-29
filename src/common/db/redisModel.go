@@ -66,7 +66,7 @@ func (d *DataBases) SetLastGetSeq(uid string) (err error) {
 
 //获取用户上一次主动拉取Seq的值
 func (d *DataBases) GetLastGetSeq(uid string) (int64, error) {
-	key := userIncrSeq + uid
+	key := lastGetSeq + uid
 	return redis.Int64(d.Exec("GET", key))
 }
 
