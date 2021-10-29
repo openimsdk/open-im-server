@@ -41,7 +41,9 @@ func ImportFriend(c *gin.Context) {
 		OwnerUid:    params.OwnerUid,
 		Token:       c.Request.Header.Get("token"),
 	}
+	log.NewInfo(params.OperationID, "ImportFriend Test start", params.UIDList, params.OwnerUid)
 	RpcResp, err := client.ImportFriend(context.Background(), req)
+	//log.ErrorByKv("ImportFriend Test end", params.OperationID, "resp", RpcResp, "err", err.Error())
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,ImportFriend failed", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed" + err.Error()})
