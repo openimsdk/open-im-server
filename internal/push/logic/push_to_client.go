@@ -33,7 +33,7 @@ type EChatContent struct {
 
 func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 	var wsResult []*pbRelay.SingleMsgToUser
-	isShouldOfflinePush := true
+	//isShouldOfflinePush := true
 	MOptions := utils.JsonStringToMap(Options) //Control whether to push message to sender's other terminal
 	//isSenderSync := utils.GetSwitchFromOptions(MOptions, "senderSync")
 	isOfflinePush := utils.GetSwitchFromOptions(MOptions, "offlinePush")
@@ -54,7 +54,51 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 	log.InfoByKv("push_result", sendPbData.OperationID, "result", wsResult)
 	if isOfflinePush {
 
-		for _, t := range pushTerminal {
+		for _, v := range wsResult {
+			if v.ResultCode == 0 {
+				continue
+			}
+			//supported terminal
+			for _, t := range pushTerminal {
+				if v.RecvPlatFormID == t {
+					//Use offline push messaging
+					var UIDList []string
+					UIDList = append(UIDList, sendPbData.RecvID)
+					var sendUIDList []string
+					sendUIDList = append(sendUIDList, sendPbData.SendID)
+					userInfo, err := internal_service.GetUserInfoClient(&pbGetInfo.GetUserInfoReq{UserIDList: sendUIDList, OperationID: sendPbData.OperationID})
+					if err != nil {
+						log.ErrorByArgs(fmt.Sprintf("err=%v,call GetUserInfoClient rpc server failed", err))
+						return
+					}
+
+					customContent := EChatContent{
+						SessionType: int(sendPbData.SessionType),
+						From:        sendPbData.SendID,
+						To:          sendPbData.RecvID,
+						Seq:         sendPbData.RecvSeq,
+					}
+					bCustomContent, _ := json.Marshal(customContent)
+
+					jsonCustomContent := string(bCustomContent)
+					switch sendPbData.ContentType {
+					case constant.Text:
+						IOSAccountListPush(UIDList, userInfo.Data[0].Name, sendPbData.Content, jsonCustomContent)
+					case constant.Picture:
+						IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Picture], jsonCustomContent)
+					case constant.Voice:
+						IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Voice], jsonCustomContent)
+					case constant.Video:
+						IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Video], jsonCustomContent)
+					case constant.File:
+						IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.File], jsonCustomContent)
+					default:
+
+					}
+				}
+			}
+		}
+		/*for _, t := range pushTerminal {
 			for _, v := range wsResult {
 				if v.RecvPlatFormID == t && v.ResultCode == 0 {
 					isShouldOfflinePush = false
@@ -100,7 +144,7 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 			} else {
 				isShouldOfflinePush = true
 			}
-		}
+		}*/
 
 	}
 
