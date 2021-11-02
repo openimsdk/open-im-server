@@ -109,7 +109,7 @@ services:
 
   #fixme----build from docker hub------
   open-im-server:
-    image: lyt1123/open_im_server
+    image: lyt1123/open_im_server:1.0.1
     container_name: open-im-server
     volumes:
       - ./logs:/Open-IM-Server/logs
