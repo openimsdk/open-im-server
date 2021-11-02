@@ -37,6 +37,10 @@ func UserToken(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
+	if params.Secret != config.Config.Secret {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "not authorized"})
+		return
+	}
 	pbData := newUserTokenReq(&params)
 
 	log.Info("", "", "api user_token is server, [data: %s]", pbData.String())

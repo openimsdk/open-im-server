@@ -42,12 +42,9 @@ type MsgCallBackResp struct {
 
 func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*pbChat.UserSendMsgResp, error) {
 	replay := pbChat.UserSendMsgResp{}
-	log.InfoByKv("sendMsg", pb.OperationID, "args", pb.String())
-	time := utils.GetCurrentTimestampByMill()
+	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
 	//if !utils.VerifyToken(pb.Token, pb.SendID) {
 	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
-	//}
-	log.NewInfo(pb.OperationID, "VerifyToken cost time ", utils.GetCurrentTimestampByMill()-time)
 	serverMsgID := GetMsgID(pb.SendID)
 	pbData := pbChat.WSToMsgSvrChatMsg{}
 	pbData.MsgFrom = pb.MsgFrom
@@ -99,10 +96,8 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	}
 	switch pbData.SessionType {
 	case constant.SingleChatType:
-		time := utils.GetCurrentTimestampByMill()
 		err1 := rpc.sendMsgToKafka(&pbData, pbData.RecvID)
 		err2 := rpc.sendMsgToKafka(&pbData, pbData.SendID)
-		log.NewInfo(pb.OperationID, "send kafka cost time ", utils.GetCurrentTimestampByMill()-time)
 		if err1 != nil || err2 != nil {
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 		}

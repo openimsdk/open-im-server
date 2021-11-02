@@ -35,7 +35,7 @@ type paramsManagementSendMsg struct {
 	SessionType    int32                  `json:"sessionType" binding:"required"`
 }
 
-func newUserSendMsgReq(token string, params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
+func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
 	var newContent string
 	switch params.ContentType {
 	case constant.Text:
@@ -53,7 +53,6 @@ func newUserSendMsgReq(token string, params *paramsManagementSendMsg) *pbChat.Us
 	}
 	pbData := pbChat.UserSendMsgReq{
 		ReqIdentifier:  constant.WSSendMsg,
-		Token:          token,
 		SendID:         params.SendID,
 		SenderNickName: params.SenderNickName,
 		SenderFaceURL:  params.SenderFaceURL,
@@ -103,15 +102,19 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if !utils.IsContain(params.SendID, config.Config.Manager.AppManagerUid) {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not appManager", "sendTime": 0, "MsgID": ""})
+	claims, err := utils.ParseToken(token)
+	if err != nil {
+		log.NewError(params.OperationID, "parse token failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
+	}
+	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not authorized", "sendTime": 0, "MsgID": ""})
 		return
 
 	}
-
 	log.InfoByKv("Ws call success to ManagementSendMsgReq", params.OperationID, "Parameters", params)
 
-	pbData := newUserSendMsgReq(token, &params)
+	pbData := newUserSendMsgReq(&params)
 	log.Info("", "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
