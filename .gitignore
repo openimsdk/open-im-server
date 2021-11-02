@@ -2,3 +2,9 @@
 components
 logs
 out-test
+
+# for unit test
+src/utils/config
+
+# gosum
+go.sum
