@@ -6,13 +6,14 @@ import (
 	"Open_IM/src/push/jpush/requestBody"
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 )
 
 type JPushResp struct {
 }
 
-func JGAccountListPush(accounts []string, jsonCustomContent string, platform string) (*http.Response, error) {
+func JGAccountListPush(accounts []string, jsonCustomContent string, platform string) ([]byte, error) {
 
 	var pf requestBody.Platform
 	_ = pf.SetPlatform(platform)
@@ -46,8 +47,9 @@ func JGAccountListPush(accounts []string, jsonCustomContent string, platform str
 		return nil, err
 	}
 	defer resp.Body.Close()
+	result, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	return resp, nil
+	return result, nil
 }
