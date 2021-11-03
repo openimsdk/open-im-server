@@ -120,8 +120,8 @@ push:
       accessID: 111
       secretKey: 111
   jpns:
-    appKey: 2783339cee4de379cc798fe1
-    masterSecret: 66e5f309e032c68cc668c28a
+    appKey: cf47465a368f24c659608e7e
+    masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
 manager:
   appManagerUid: ["openIM123456","openIM654321"]
