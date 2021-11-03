@@ -41,55 +41,136 @@ func initMysqlDB() {
 		panic(err)
 	}
 
-	sqlTable := "CREATE TABLE IF NOT EXISTS `user` (\n  `uid` varchar(64) NOT NULL,\n  `name` varchar(64) DEFAULT NULL,\n  `icon` varchar(1024) DEFAULT NULL,\n  `gender` int(11) unsigned zerofill DEFAULT NULL,\n  `mobile` varchar(32) DEFAULT NULL,\n  `birth` varchar(16) DEFAULT NULL,\n  `email` varchar(64) DEFAULT NULL,\n  `ex` varchar(1024) DEFAULT NULL,\n  `create_time` datetime DEFAULT NULL,\n  PRIMARY KEY (`uid`),\n  UNIQUE KEY `uk_uid` (`uid`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+	sqlTable := "CREATE TABLE IF NOT EXISTS `user` ("+
+		" `uid` varchar(64) NOT NULL,"+
+		" `name` varchar(64) DEFAULT NULL,"+
+		" `icon` varchar(1024) DEFAULT NULL,"+
+		" `gender` tinyint(4) unsigned zerofill DEFAULT NULL,"+
+		" `mobile` varchar(32) DEFAULT NULL,"+
+		" `birth` varchar(16) DEFAULT NULL,"+
+		" `email` varchar(64) DEFAULT NULL,"+
+		" `ex` varchar(1024) DEFAULT NULL,"+
+		" `create_time` datetime DEFAULT NULL,"+
+		" PRIMARY KEY (`uid`),"+
+		" UNIQUE KEY `uk_uid` (`uid`)"+
+		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS `friend` (\n  `owner_id` varchar(255) NOT NULL,\n  `friend_id` varchar(255) NOT NULL,\n  `comment` varchar(255) DEFAULT NULL,\n  `friend_flag` int(11) NOT NULL,\n  `create_time` datetime NOT NULL,\n  PRIMARY KEY (`owner_id`,`friend_id`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
+	sqlTable = "CREATE TABLE IF NOT EXISTS `friend` ("+
+		" `owner_id` varchar(64) NOT NULL,"+
+		" `friend_id` varchar(64) NOT NULL,"+
+		" `comment` varchar(255) DEFAULT NULL,"+
+		" `friend_flag` int(11) NOT NULL,"+
+		" `create_time` datetime NOT NULL,"+
+		" PRIMARY KEY (`owner_id`,`friend_id`) USING BTREE"+
+		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS  `friend_request` (\n  `req_id` varchar(255) NOT NULL,\n  `user_id` varchar(255) NOT NULL,\n  `flag` int(11) NOT NULL DEFAULT '0',\n  `req_message` varchar(255) DEFAULT NULL,\n  `create_time` datetime NOT NULL,\n  PRIMARY KEY (`user_id`,`req_id`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
+	sqlTable = "CREATE TABLE IF NOT EXISTS  `friend_request` ("+
+		" `req_id` varchar(64) NOT NULL,"+
+		" `user_id` varchar(64) NOT NULL,"+
+		" `flag` int(11) NOT NULL DEFAULT '0',"+
+		" `req_message` varchar(255) DEFAULT NULL,"+
+		" `create_time` datetime NOT NULL,"+
+		" PRIMARY KEY (`user_id`,`req_id`) USING BTREE"+
+		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS `black_list` (\n  `uid` varchar(32) NOT NULL COMMENT 'uid',\n  `begin_disable_time` datetime DEFAULT NULL,\n  `end_disable_time` datetime DEFAULT NULL,\n  `ex` varchar(1024) DEFAULT NULL,\n  PRIMARY KEY (`uid`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
+	sqlTable = "CREATE TABLE IF NOT EXISTS `black_list` ("+
+		" `uid` varchar(32) NOT NULL COMMENT 'uid',"+
+		" `begin_disable_time` datetime DEFAULT NULL,"+
+		" `end_disable_time` datetime DEFAULT NULL,"+
+		" `ex` varchar(1024) DEFAULT NULL,"+
+		" PRIMARY KEY (`uid`) USING BTREE"+
+		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS `user_black_list` (\n  `owner_id` varchar(255) NOT NULL,\n  `block_id` varchar(255) NOT NULL,\n  `create_time` datetime NOT NULL,\n  PRIMARY KEY (`owner_id`,`block_id`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
+	sqlTable = "CREATE TABLE IF NOT EXISTS `user_black_list` ("+
+		" `owner_id` varchar(64) NOT NULL,"+
+		" `block_id` varchar(64) NOT NULL,"+
+		" `create_time` datetime NOT NULL,"+
+		" PRIMARY KEY (`owner_id`,`block_id`) USING BTREE"+
+		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS `group` (\n  `group_id` varchar(255) NOT NULL,\n  `name` varchar(255) DEFAULT NULL,\n  `introduction` varchar(255) DEFAULT NULL,\n  `notification` varchar(255) DEFAULT NULL,\n  `face_url` varchar(255) DEFAULT NULL,\n  `create_time` datetime DEFAULT NULL,\n  `ex` varchar(255) DEFAULT NULL,\n  PRIMARY KEY (`group_id`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
+	sqlTable = "CREATE TABLE IF NOT EXISTS `group` ("+
+		" `group_id` varchar(64) NOT NULL,"+
+		" `name` varchar(255) DEFAULT NULL,"+
+		" `introduction` varchar(255) DEFAULT NULL,"+
+		" `notification` varchar(255) DEFAULT NULL,"+
+		" `face_url` varchar(255) DEFAULT NULL,"+
+		" `create_time` datetime DEFAULT NULL,"+
+		" `ex` varchar(255) DEFAULT NULL,"+
+		" PRIMARY KEY (`group_id`)"+
+		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS `group_member` (\n  `group_id` varchar(255) NOT NULL,\n  `uid` varchar(255) NOT NULL,\n  `nickname` varchar(255) DEFAULT NULL,\n  `user_group_face_url` varchar(255) DEFAULT NULL,\n  `administrator_level` int(11) NOT NULL,\n  `join_time` datetime NOT NULL,\n  PRIMARY KEY (`group_id`,`uid`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
+	sqlTable = "CREATE TABLE IF NOT EXISTS `group_member` ("+
+		" `group_id` varchar(64) NOT NULL,"+
+		" `uid` varchar(64) NOT NULL,"+
+		" `nickname` varchar(255) DEFAULT NULL,"+
+		" `user_group_face_url` varchar(255) DEFAULT NULL,"+
+		" `administrator_level` int(11) NOT NULL,"+
+		" `join_time` datetime NOT NULL,"+
+		"  PRIMARY KEY (`group_id`,`uid`) USING BTREE"+
+		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS `group_request` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `group_id` varchar(255) NOT NULL,\n  `from_user_id` varchar(255) NOT NULL,\n  `to_user_id` varchar(255) NOT NULL,\n  `flag` int(10) NOT NULL DEFAULT '0',\n  `req_msg` varchar(255) DEFAULT '',\n  `handled_msg` varchar(255) DEFAULT '',\n  `create_time` datetime NOT NULL,\n  `from_user_nickname` varchar(255) DEFAULT '',\n  `to_user_nickname` varchar(255) DEFAULT NULL,\n  `from_user_face_url` varchar(255) DEFAULT '',\n  `to_user_face_url` varchar(255) DEFAULT '',\n  `handled_user` varchar(255) DEFAULT '',\n  PRIMARY KEY (`id`)\n) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4;"
+	sqlTable = "CREATE TABLE IF NOT EXISTS `group_request` ("+
+		" `id` int(11) NOT NULL AUTO_INCREMENT,"+
+		" `group_id` varchar(64) NOT NULL,"+
+		" `from_user_id` varchar(255) NOT NULL,"+
+		" `to_user_id` varchar(255) NOT NULL,"+
+		" `flag` int(10) NOT NULL DEFAULT '0',"+
+		" `req_msg` varchar(255) DEFAULT '',"+
+		" `handled_msg` varchar(255) DEFAULT '',"+
+		" `create_time` datetime NOT NULL,"+
+		" `from_user_nickname` varchar(255) DEFAULT '',"+
+		" `to_user_nickname` varchar(255) DEFAULT NULL,"+
+		" `from_user_face_url` varchar(255) DEFAULT '',"+
+		" `to_user_face_url` varchar(255) DEFAULT '',"+
+		" `handled_user` varchar(255) DEFAULT '',"+
+		" PRIMARY KEY (`id`)"+
+		" ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS  `chat_log` (\n  `msg_id` varchar(128) NOT NULL,\n  `send_id` varchar(255) NOT NULL,\n  `session_type` int(11) NOT NULL,\n  `recv_id` varchar(255) NOT NULL,\n  `content_type` int(11) NOT NULL,\n  `msg_from` int(11) NOT NULL,\n  `content` varchar(1000) NOT NULL,\n  `remark` varchar(100) DEFAULT NULL,\n  `sender_platform_id` int(11) NOT NULL,\n  `send_time` datetime NOT NULL,\n  PRIMARY KEY (`msg_id`) USING BTREE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
+	sqlTable = "CREATE TABLE IF NOT EXISTS  `chat_log` ("+
+		" `msg_id` varchar(128) NOT NULL,"+
+		" `send_id` varchar(255) NOT NULL,"+
+		" `session_type` int(11) NOT NULL,"+
+		" `recv_id` varchar(255) NOT NULL,"+
+		" `content_type` int(11) NOT NULL,"+
+		" `msg_from` int(11) NOT NULL,"+
+		" `content` varchar(1000) NOT NULL,"+
+		" `remark` varchar(100) DEFAULT NULL,"+
+		" `sender_platform_id` int(11) NOT NULL,"+
+		" `send_time` datetime NOT NULL,"+
+		" PRIMARY KEY (`msg_id`) USING BTREE"+
+		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
 		panic(err)
