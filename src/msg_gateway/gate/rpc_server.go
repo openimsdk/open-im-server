@@ -83,7 +83,7 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	enc := gob.NewEncoder(&replyBytes)
 	err := enc.Encode(mReply)
 	if err != nil {
-		fmt.Println(err)
+		log.NewError(in.OperationID, "data encode err", err.Error())
 	}
 	switch in.GetSessionType() {
 	case constant.SingleChatType:
@@ -92,14 +92,22 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 		RecvID = strings.Split(in.GetRecvID(), " ")[0]
 	}
 	var tag bool
+	var UIDAndPID []string
 	userIDList := genUidPlatformArray(RecvID)
 	for _, v := range userIDList {
+		UIDAndPID = strings.Split(v, " ")
 		if conn := ws.getUserConn(v); conn != nil {
-			UIDAndPID := strings.Split(v, " ")
 			tag = true
 			resultCode := sendMsgToUser(conn, replyBytes.Bytes(), in, UIDAndPID[1], UIDAndPID[0])
 			temp := &pbRelay.SingleMsgToUser{
 				ResultCode:     resultCode,
+				RecvID:         UIDAndPID[0],
+				RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
+			}
+			resp = append(resp, temp)
+		} else {
+			temp := &pbRelay.SingleMsgToUser{
+				ResultCode:     -1,
 				RecvID:         UIDAndPID[0],
 				RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
 			}
