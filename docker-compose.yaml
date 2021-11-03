@@ -5,7 +5,7 @@ services:
   mysql:
     image: mysql:5.7
     ports:
-      - 33306:33306
+      - 3306:3306
     container_name: mysql
     volumes:
       - ./components/mysql/data:/var/lib/mysql
@@ -17,7 +17,7 @@ services:
   mongodb:
     image: mongo
     ports:
-      - 37017:37017
+      - 27017:27017
     container_name: mongo
     volumes:
       - ./components/mongodb/data:/data/db
@@ -28,7 +28,7 @@ services:
   redis:
     image: redis
     ports:
-      - 36379:36379
+      - 6379:6379
     container_name: redis
     volumes:
       - ./components/redis/data:/data
@@ -45,7 +45,7 @@ services:
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
-      - 32181:32181
+      - 2181:2181
     container_name: zookeeper
     volumes:
       - /etc/localtime:/etc/localtime
@@ -61,9 +61,9 @@ services:
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:32181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:39092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:39092
+      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
     network_mode: "host"
     depends_on:
       - zookeeper
@@ -71,8 +71,8 @@ services:
   etcd:
     image: quay.io/coreos/etcd
     ports:
-      - 32379:32379
-      - 32380:32380
+      - 2379:2379
+      - 2380:2380
     container_name: etcd
     volumes:
       - /etc/timezone:/etc/timezone
@@ -80,7 +80,7 @@ services:
     environment:
       ETCDCTL_API: 3
     restart: always
-    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:32379 --advertise-client-urls http://0.0.0.0:32379 --listen-peer-urls http://0.0.0.0:32380 --initial-advertise-peer-urls http://0.0.0.0:32380 --initial-cluster etcd0=http://0.0.0.0:32380 --initial-cluster-token tkn --initial-cluster-state new
+    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
 
   #fixme-----build from dockerfile---------
@@ -109,7 +109,7 @@ services:
 
   #fixme----build from docker hub------
   open-im-server:
-    image: lyt1123/open_im_server:1.0.1
+    image: lyt1123/open_im_server
     container_name: open-im-server
     volumes:
       - ./logs:/Open-IM-Server/logs
