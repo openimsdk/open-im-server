@@ -42,6 +42,9 @@ func JGAccountListPush(accounts []string, jsonCustomContent string, platform str
 	req.Header.Set("Authorization", common.GetAuthorization(config.Config.Push.Jpns.AppKey, config.Config.Push.Jpns.MasterSecret))
 
 	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
