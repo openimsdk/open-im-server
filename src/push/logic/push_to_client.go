@@ -23,10 +23,15 @@ import (
 )
 
 type OpenIMContent struct {
-	SessionType int    `json:"chatType"`
+	SessionType int    `json:"sessionType"`
 	From        string `json:"from"`
 	To          string `json:"to"`
 	Seq         int64  `json:"seq"`
+}
+type AtContent struct {
+	Text       string   `json:"text"`
+	AtUserList []string `json:"atUserList"`
+	IsAtSelf   bool     `json:"isAtSelf"`
 }
 
 func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
@@ -60,7 +65,7 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 					if v.RecvPlatFormID == t {
 						//Use offline push messaging
 						var UIDList []string
-						UIDList = append(UIDList, sendPbData.RecvID)
+						UIDList = append(UIDList, v.RecvID)
 						customContent := OpenIMContent{
 							SessionType: int(sendPbData.SessionType),
 							From:        sendPbData.SendID,
@@ -69,7 +74,29 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 						}
 						bCustomContent, _ := json.Marshal(customContent)
 						jsonCustomContent := string(bCustomContent)
-						pushResult, err := push.JGAccountListPush(UIDList, jsonCustomContent, utils.PlatformIDToName(t))
+						var content string
+						switch sendPbData.ContentType {
+						case constant.Text:
+							content = constant.ContentType2PushContent[constant.Text]
+						case constant.Picture:
+							content = constant.ContentType2PushContent[constant.Picture]
+						case constant.Voice:
+							content = constant.ContentType2PushContent[constant.Voice]
+						case constant.Video:
+							content = constant.ContentType2PushContent[constant.Video]
+						case constant.File:
+							content = constant.ContentType2PushContent[constant.File]
+						case constant.AtText:
+							a := AtContent{}
+							_ = utils.JsonStringToStruct(sendPbData.Content, &a)
+							if utils.IsContain(v.RecvID, a.AtUserList) {
+								content = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
+							} else {
+								content = constant.ContentType2PushContent[constant.GroupMsg]
+							}
+						default:
+						}
+						pushResult, err := push.JGAccountListPush(UIDList, content, jsonCustomContent, utils.PlatformIDToName(t))
 						if err != nil {
 							log.NewError(sendPbData.OperationID, "offline push error", sendPbData.String(), err.Error(), t)
 						} else {

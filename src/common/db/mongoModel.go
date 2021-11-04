@@ -5,6 +5,7 @@ import (
 	"Open_IM/src/common/constant"
 	"Open_IM/src/common/log"
 	pbMsg "Open_IM/src/proto/chat"
+	"Open_IM/src/utils"
 	"errors"
 	"github.com/golang/protobuf/proto"
 	"gopkg.in/mgo.v2/bson"
@@ -124,7 +125,7 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []int64) (SingleMsg []*p
 				log.NewError("", "not find seqUid", seqUid, value, uid, seqList)
 				return nil, nil, MaxSeq, MinSeq, err
 			}
-			if isContainInt64(pChat.RecvSeq, value) {
+			if utils.IsContainInt64(pChat.RecvSeq, value) {
 				temp.SendID = pChat.SendID
 				temp.RecvID = pChat.RecvID
 				temp.MsgFrom = pChat.MsgFrom
@@ -310,17 +311,7 @@ func (d *DataBases) DelGroupMember(groupID, uid string) error {
 
 	return nil
 }
-func isContainInt64(target int64, List []int64) bool {
 
-	for _, element := range List {
-
-		if target == element {
-			return true
-		}
-	}
-	return false
-
-}
 func getCurrentTimestampByMill() int64 {
 	return time.Now().UnixNano() / 1e6
 }

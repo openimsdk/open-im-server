@@ -35,6 +35,8 @@ const (
 	Custom         = 110
 	HasReadReceipt = 112
 	Typing         = 113
+	Common         = 200
+	GroupMsg       = 201
 
 	//SysRelated
 	AcceptFriendApplicationTip = 201
@@ -67,10 +69,14 @@ const (
 )
 
 var ContentType2PushContent = map[int64]string{
-	Picture: "[picture]",
-	Voice:   "[voice]",
-	Video:   "[video]",
-	File:    "[file]",
+	Picture:  "[图片]",
+	Voice:    "[语音]",
+	Video:    "[视频]",
+	File:     "[文件]",
+	Text:     "你收到了一条文本消息",
+	AtText:   "[有人@你]",
+	GroupMsg: "你收到一条群聊消息",
+	Common:   "你收到一条新消息",
 }
 
 const FriendAcceptTip = "You have successfully become friends, so start chatting"
