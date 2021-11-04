@@ -14,13 +14,15 @@ import (
 	pbChat "Open_IM/src/proto/chat"
 	pbGroup "Open_IM/src/proto/group"
 	pbRelay "Open_IM/src/proto/relay"
+	push "Open_IM/src/push/jpush"
 	rpcChat "Open_IM/src/rpc/chat/chat"
 	"Open_IM/src/utils"
 	"context"
+	"encoding/json"
 	"strings"
 )
 
-type EChatContent struct {
+type OpenIMContent struct {
 	SessionType int    `json:"chatType"`
 	From        string `json:"from"`
 	To          string `json:"to"`
@@ -47,37 +49,40 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 		}
 	}
 	log.InfoByKv("push_result", sendPbData.OperationID, "result", wsResult, "sendData", sendPbData)
-	if isOfflinePush {
-		for _, v := range wsResult {
-			if v.ResultCode == 0 {
-				continue
-			}
-			//supported terminal
-			for _, t := range pushTerminal {
-				if v.RecvPlatFormID == t {
-					//Use offline push messaging
-					//var UIDList []string
-					//UIDList = append(UIDList, sendPbData.RecvID)
-					//customContent := EChatContent{
-					//	SessionType: int(sendPbData.SessionType),
-					//	From:        sendPbData.SendID,
-					//	To:          sendPbData.RecvID,
-					//	Seq:         sendPbData.RecvSeq,
-					//}
-					//bCustomContent, _ := json.Marshal(customContent)
-					//jsonCustomContent := string(bCustomContent)
-					//pushResult, err := push.JGAccountListPush(UIDList, jsonCustomContent, utils.PlatformIDToName(t))
-					//if err != nil {
-					//	log.NewError(sendPbData.OperationID, "offline push error", sendPbData.String(), err.Error(), t)
-					//} else {
-					//	log.NewDebug(sendPbData.OperationID, "offline push return result is ", string(pushResult), sendPbData, t)
-					//}
+	if sendPbData.ContentType != constant.Typing && sendPbData.ContentType != constant.HasReadReceipt {
+		if isOfflinePush {
+			for _, v := range wsResult {
+				if v.ResultCode == 0 {
+					continue
+				}
+				//supported terminal
+				for _, t := range pushTerminal {
+					if v.RecvPlatFormID == t {
+						//Use offline push messaging
+						var UIDList []string
+						UIDList = append(UIDList, sendPbData.RecvID)
+						customContent := OpenIMContent{
+							SessionType: int(sendPbData.SessionType),
+							From:        sendPbData.SendID,
+							To:          sendPbData.RecvID,
+							Seq:         sendPbData.RecvSeq,
+						}
+						bCustomContent, _ := json.Marshal(customContent)
+						jsonCustomContent := string(bCustomContent)
+						pushResult, err := push.JGAccountListPush(UIDList, jsonCustomContent, utils.PlatformIDToName(t))
+						if err != nil {
+							log.NewError(sendPbData.OperationID, "offline push error", sendPbData.String(), err.Error(), t)
+						} else {
+							log.NewDebug(sendPbData.OperationID, "offline push return result is ", string(pushResult), sendPbData, t)
+						}
 
+					}
 				}
 			}
-		}
 
+		}
 	}
+
 }
 
 func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {

@@ -26,15 +26,16 @@ const (
 
 	///ContentType
 	//UserRelated
-	Text    = 101
-	Picture = 102
-	Voice   = 103
-	Video   = 104
-	File    = 105
-	AtText  = 106
-	Custom  = 110
+	Text           = 101
+	Picture        = 102
+	Voice          = 103
+	Video          = 104
+	File           = 105
+	AtText         = 106
+	Custom         = 110
+	HasReadReceipt = 112
+	Typing         = 113
 
-	SyncSenderMsg = 108
 	//SysRelated
 	AcceptFriendApplicationTip = 201
 	AddFriendTip               = 202
