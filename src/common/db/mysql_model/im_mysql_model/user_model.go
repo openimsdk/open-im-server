@@ -5,6 +5,7 @@ import (
 	"Open_IM/src/common/db"
 	pbAuth "Open_IM/src/proto/auth"
 	"Open_IM/src/utils"
+	"fmt"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"time"
 )
@@ -18,7 +19,7 @@ func init() {
 			pb.Name = "AppManager" + utils.IntToString(k+1)
 			err := UserRegister(&pb)
 			if err != nil {
-				panic(err)
+				fmt.Println("AppManager insert error", err.Error())
 			}
 		}
 	}
