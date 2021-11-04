@@ -74,11 +74,11 @@ credential:
 rpcport:
   openImUserPort: [ 10100 ]
   openImFriendPort: [ 10200 ]
-  openImOfflineMessagePort: [ 10300,10301,10302,10303 ]
+  openImOfflineMessagePort: [ 10300]
   openImOnlineRelayPort: [ 10400 ]
   openImGroupPort: [ 10500  ]
   openImAuthPort: [ 10600 ]
-  openImPushPort: [ 10700,10701,10702,10703 ]
+  openImPushPort: [ 10700 ]
 
 
 rpcregistername:
