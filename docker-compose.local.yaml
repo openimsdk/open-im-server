@@ -1,6 +1,4 @@
 version: "3"
-#fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
-
 services:
   mysql:
     image: mysql:5.7
@@ -61,12 +59,16 @@ services:
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-    network_mode: "host"
+    # network_mode: "host"
     depends_on:
       - zookeeper
+    links:
+      - zookeeper
+    ports:
+      - 9092:9092
 
   etcd:
     image: quay.io/coreos/etcd
@@ -81,49 +83,3 @@ services:
       ETCDCTL_API: 3
     restart: always
     command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
-
-
-  #fixme-----build from dockerfile---------
-  # open-im-server:
-  #    image: open_im_server
-  #    container_name: open-im-server
-  #    volumes:
-  #      - ./logs:/Open-IM-Server/logs
-  #      - ./config/config.yaml:/Open-IM-Server/config/config.yaml
-  #    restart: always
-  #    build:
-  #      context: .
-  #      dockerfile: deploy.Dockerfile
-  #    depends_on:
-  #      - mysql
-  #      - mongodb
-  #      - redis
-  #      - kafka
-  #      - etcd
-  #    network_mode: "host"
-  #      logging:
-  #        driver: json-file
-  #        options:
-  #          max-size: "1g"
-  #          max-file: "2"
-
-  #fixme----build from docker hub------
-  open-im-server:
-    image: lyt1123/open_im_server
-    container_name: open-im-server
-    volumes:
-      - ./logs:/Open-IM-Server/logs
-      - ./config/config.yaml:/Open-IM-Server/config/config.yaml
-    restart: always
-    depends_on:
-      - kafka
-      - mysql
-      - mongodb
-      - redis
-      - etcd
-    network_mode: "host"
-    logging:
-      driver: json-file
-      options:
-        max-size: "1g"
-        max-file: "2"

@@ -8,3 +8,4 @@ src/utils/config
 
 # gosum
 go.sum
+tmp

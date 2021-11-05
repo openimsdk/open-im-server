@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	rpcPort := flag.Int("port", -1, "rpc listening port")
+	rpcPort := flag.Int("port", 10700, "rpc listening port")
 	flag.Parse()
 	var wg sync.WaitGroup
 	wg.Add(1)

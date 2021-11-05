@@ -2,13 +2,12 @@ package main
 
 import (
 	rpcChat "Open_IM/src/rpc/chat/chat"
-	"Open_IM/src/utils"
 	"flag"
 )
 
 func main() {
-	rpcPort := flag.String("port", "", "rpc listening port")
+	rpcPort := flag.Int("port", 10300, "rpc listening port")
 	flag.Parse()
-	rpcServer := rpcChat.NewRpcChatServer(utils.StringToInt(*rpcPort))
+	rpcServer := rpcChat.NewRpcChatServer(*rpcPort)
 	rpcServer.Run()
 }

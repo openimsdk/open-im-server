@@ -1,0 +1,41 @@
+
+apps:
+- name: open_im_api
+  script: "go run open_im_api.go"
+  cwd: "./src/api"
+
+- name: open_im_auth
+  script: "go run open_im_auth.go"
+  cwd: "src/rpc/auth"
+
+- name: open_im_offline_msg
+  script: "go run open_im_msg.go"
+  cwd: "src/rpc/chat"
+
+- name: open_im_friend
+  script: "go run open_im_friend.go"
+  cwd: "src/rpc/friend"
+
+- name: open_im_group
+  script: "go run open_im_group.go"
+  cwd: "src/rpc/group"
+
+- name: open_im_user
+  script: "go run open_im_user.go"
+  cwd: "src/rpc/user"
+
+- name: open_im_push
+  script: "go run open_im_push.go"
+  cwd: "src/push"
+
+- name: open_im_timed_task
+  script: "go run open_im_timed_task.go"
+  cwd: "src/timed_task"
+
+- name: open_im_msg_transfer
+  script: "go run open_im_msg_transfer.go"
+  cwd: "src/msg_transfer"
+
+- name: open_im_msg_gateway
+  script: "go run open_im_msg_gateway.go"
+  cwd: "src/msg_gateway"
