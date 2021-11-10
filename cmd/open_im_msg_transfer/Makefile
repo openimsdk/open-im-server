@@ -3,6 +3,7 @@
 BINARY_NAME=open_im_msg_transfer
 BIN_DIR=../../bin/
 
+
 all: gotool build
 
 build:

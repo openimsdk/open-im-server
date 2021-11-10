@@ -3,11 +3,11 @@ package multi_terminal_login
 import (
 	"Open_IM/internal/push/content_struct"
 	"Open_IM/internal/push/logic"
-	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/common"
+	pbChat "Open_IM/pkg/proto/chat"
+	"Open_IM/pkg/utils"
 )
 
 func MultiTerminalLoginChecker(uid, token string, platformID int32) error {

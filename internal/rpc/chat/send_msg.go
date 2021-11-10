@@ -42,10 +42,9 @@ type MsgCallBackResp struct {
 
 func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*pbChat.UserSendMsgResp, error) {
 	replay := pbChat.UserSendMsgResp{}
-	log.InfoByKv("sendMsg", pb.OperationID, "args", pb.String())
-	if !utils.VerifyToken(pb.Token, pb.SendID) {
-		return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
-	}
+	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
+	//if !utils.VerifyToken(pb.Token, pb.SendID) {
+	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
 	serverMsgID := GetMsgID(pb.SendID)
 	pbData := pbChat.WSToMsgSvrChatMsg{}
 	pbData.MsgFrom = pb.MsgFrom
@@ -64,7 +63,11 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	pbData.MsgID = serverMsgID
 	pbData.OperationID = pb.OperationID
 	pbData.Token = pb.Token
-	pbData.SendTime = utils.GetCurrentTimestampByNano()
+	if pb.SendTime == 0 {
+		pbData.SendTime = utils.GetCurrentTimestampByNano()
+	} else {
+		pbData.SendTime = pb.SendTime
+	}
 	m := MsgCallBackResp{}
 	if config.Config.MessageCallBack.CallbackSwitch {
 		bMsg, err := http2.Post(config.Config.MessageCallBack.CallbackUrl, MsgCallBackReq{
@@ -88,85 +91,77 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 				return returnMsg(&replay, pb, m.ResponseErrCode, m.ErrMsg, "", 0)
 			} else {
 				pbData.Content = m.ResponseResult.ModifiedMsg
-				err1 := rpc.sendMsgToKafka(&pbData, pbData.RecvID)
-				err2 := rpc.sendMsgToKafka(&pbData, pbData.SendID)
-				if err1 != nil || err2 != nil {
-					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
-				}
-				return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
 			}
 		}
-	} else {
-		switch pbData.SessionType {
-		case constant.SingleChatType:
-			err1 := rpc.sendMsgToKafka(&pbData, pbData.RecvID)
-			err2 := rpc.sendMsgToKafka(&pbData, pbData.SendID)
-			if err1 != nil || err2 != nil {
-				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
-			}
-			return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
-		case constant.GroupChatType:
-			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-			client := pbGroup.NewGroupClient(etcdConn)
-			req := &pbGroup.GetGroupAllMemberReq{
-				GroupID:     pbData.RecvID,
-				Token:       pbData.Token,
-				OperationID: pbData.OperationID,
-			}
-			reply, err := client.GetGroupAllMember(context.Background(), req)
+	}
+	switch pbData.SessionType {
+	case constant.SingleChatType:
+		err1 := rpc.sendMsgToKafka(&pbData, pbData.RecvID)
+		err2 := rpc.sendMsgToKafka(&pbData, pbData.SendID)
+		if err1 != nil || err2 != nil {
+			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+		}
+		return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
+	case constant.GroupChatType:
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+		client := pbGroup.NewGroupClient(etcdConn)
+		req := &pbGroup.GetGroupAllMemberReq{
+			GroupID:     pbData.RecvID,
+			Token:       pbData.Token,
+			OperationID: pbData.OperationID,
+		}
+		reply, err := client.GetGroupAllMember(context.Background(), req)
+		if err != nil {
+			log.Error(pbData.Token, pbData.OperationID, "rpc send_msg getGroupInfo failed, err = %s", err.Error())
+			return returnMsg(&replay, pb, 201, err.Error(), "", 0)
+		}
+		if reply.ErrorCode != 0 {
+			log.Error(pbData.Token, pbData.OperationID, "rpc send_msg getGroupInfo failed, err = %s", reply.ErrorMsg)
+			return returnMsg(&replay, pb, reply.ErrorCode, reply.ErrorMsg, "", 0)
+		}
+		var addUidList []string
+		switch pbData.ContentType {
+		case constant.KickGroupMemberTip:
+			var notification content_struct.NotificationContent
+			var kickContent group.KickGroupMemberReq
+			err := utils.JsonStringToStruct(pbData.Content, &notification)
 			if err != nil {
-				log.Error(pbData.Token, pbData.OperationID, "rpc send_msg getGroupInfo failed, err = %s", err.Error())
-				return returnMsg(&replay, pb, 201, err.Error(), "", 0)
-			}
-			if reply.ErrorCode != 0 {
-				log.Error(pbData.Token, pbData.OperationID, "rpc send_msg getGroupInfo failed, err = %s", reply.ErrorMsg)
-				return returnMsg(&replay, pb, reply.ErrorCode, reply.ErrorMsg, "", 0)
-			}
-			var addUidList []string
-			switch pbData.ContentType {
-			case constant.KickGroupMemberTip:
-				var notification content_struct.NotificationContent
-				var kickContent group.KickGroupMemberReq
-				err := utils.JsonStringToStruct(pbData.Content, &notification)
+				log.ErrorByKv("json unmarshall err", pbData.OperationID, "err", err.Error())
+				return returnMsg(&replay, pb, 200, err.Error(), "", 0)
+			} else {
+				err := utils.JsonStringToStruct(notification.Detail, &kickContent)
 				if err != nil {
 					log.ErrorByKv("json unmarshall err", pbData.OperationID, "err", err.Error())
 					return returnMsg(&replay, pb, 200, err.Error(), "", 0)
-				} else {
-					err := utils.JsonStringToStruct(notification.Detail, &kickContent)
-					if err != nil {
-						log.ErrorByKv("json unmarshall err", pbData.OperationID, "err", err.Error())
-						return returnMsg(&replay, pb, 200, err.Error(), "", 0)
-					}
-					for _, v := range kickContent.UidListInfo {
-						addUidList = append(addUidList, v.UserId)
-					}
 				}
-			case constant.QuitGroupTip:
-				addUidList = append(addUidList, pbData.SendID)
-			default:
-			}
-			groupID := pbData.RecvID
-			for i, v := range reply.MemberList {
-				pbData.RecvID = v.UserId + " " + groupID
-				err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i))
-				if err != nil {
-					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+				for _, v := range kickContent.UidListInfo {
+					addUidList = append(addUidList, v.UserId)
 				}
 			}
-			for i, v := range addUidList {
-				pbData.RecvID = v + " " + groupID
-				err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i+1))
-				if err != nil {
-					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
-				}
-			}
-			return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
+		case constant.QuitGroupTip:
+			addUidList = append(addUidList, pbData.SendID)
 		default:
-
 		}
+		groupID := pbData.RecvID
+		for i, v := range reply.MemberList {
+			pbData.RecvID = v.UserId + " " + groupID
+			err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i))
+			if err != nil {
+				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+			}
+		}
+		for i, v := range addUidList {
+			pbData.RecvID = v + " " + groupID
+			err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i+1))
+			if err != nil {
+				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+			}
+		}
+		return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
+	default:
+		return returnMsg(&replay, pb, 203, "unkonwn sessionType", "", 0)
 
 	}
-	return returnMsg(&replay, pb, 203, "unkonwn sessionType", "", 0)
 
 }
 func (rpc *rpcChat) sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string) error {

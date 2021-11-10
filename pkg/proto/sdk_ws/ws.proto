@@ -1,0 +1,89 @@
+syntax = "proto3";
+package open_im_sdk;//The package name to which the proto file belongs
+option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
+
+
+message PullMessageBySeqListResp {
+  int64 MaxSeq = 1;
+  int64 MinSeq = 2;
+  repeated GatherFormat SingleUserMsg = 3;
+  repeated GatherFormat GroupUserMsg = 4;
+}
+message PullMessageBySeqListReq{
+  repeated int64 seqList =1;
+}
+message GetMaxAndMinSeqReq {
+}
+message GetMaxAndMinSeqResp {
+  int64 maxSeq = 1;
+  int64 minSeq = 2;
+}
+message GatherFormat{
+  // @inject_tag: json:"id"
+  string ID = 1;
+  // @inject_tag: json:"list"
+  repeated MsgFormat List = 2;//detail msg
+}
+message MsgFormat{
+  // @inject_tag: json:"sendID"
+  string SendID = 1;
+  // @inject_tag: json:"recvID"
+  string RecvID = 2;
+  // @inject_tag: json:"msgFrom"
+  int32 MsgFrom = 3;
+  // @inject_tag: json:"contentType"
+  int32 ContentType = 4;
+  // @inject_tag: json:"serverMsgID"
+  string ServerMsgID = 5;
+  // @inject_tag: json:"content"
+  string Content = 6;
+  // @inject_tag: json:"seq"
+  int64 Seq = 7;
+  // @inject_tag: json:"sendTime"
+  int64 SendTime = 8;
+  // @inject_tag: json:"senderPlatformID"
+  int32 SenderPlatformID = 9;
+  // @inject_tag: json:"senderNickName"
+  string SenderNickName = 10;
+  // @inject_tag: json:"senderFaceUrl"
+  string SenderFaceURL = 11;
+  // @inject_tag: json:"clientMsgID"
+  string ClientMsgID = 12;
+}
+
+message UserSendMsgReq {
+  map<string,int32> Options= 1;
+  string SenderNickName = 2;
+  string SenderFaceURL = 3;
+  int32 PlatformID = 4;
+  int32 SessionType = 5;
+  int32 MsgFrom = 6;
+  int32 ContentType = 7;
+  string RecvID = 8;
+  repeated string ForceList = 9;
+  string Content = 10;
+  string ClientMsgID = 11;
+}
+
+message UserSendMsgResp {
+  string ServerMsgID = 1;
+  string ClientMsgID = 2;
+  int64  sendTime = 3;
+
+}
+message MsgData {
+  string  sendID = 1;
+  string  recvID = 2;
+  int32   sessionType = 3;
+  int32 msgFrom = 4;
+  int32 contentType = 5;
+  string serverMsgID = 6;
+  string content  =7;
+  int64 sendTime =8;
+  int64 seq =9;
+  int32 senderPlatformID  =10;
+  string  senderNickName =11;
+  string  senderFaceURL =12;
+  string clientMsgID =13;
+}
+

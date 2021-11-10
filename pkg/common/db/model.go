@@ -39,6 +39,11 @@ func init() {
 	}
 	DB.mgoSession = mgoSession
 	DB.mgoSession.SetMode(mgo.Monotonic, true)
+	c := DB.mgoSession.DB(config.Config.Mongo.DBDatabase).C(cChat)
+	err = c.EnsureIndexKey("uid")
+	if err != nil {
+		panic(err)
+	}
 
 	// redis pool init
 	DB.redisPool = &redis.Pool{

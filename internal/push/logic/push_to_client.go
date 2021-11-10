@@ -7,33 +7,35 @@
 package logic
 
 import (
+	push "Open_IM/internal/push/jpush"
 	rpcChat "Open_IM/internal/rpc/chat"
-	"Open_IM/internal/rpc/user/internal_service"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbGroup "Open_IM/pkg/proto/group"
 	pbRelay "Open_IM/pkg/proto/relay"
-	pbGetInfo "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 )
 
-type EChatContent struct {
-	SessionType int    `json:"chatType"`
+type OpenIMContent struct {
+	SessionType int    `json:"sessionType"`
 	From        string `json:"from"`
 	To          string `json:"to"`
 	Seq         int64  `json:"seq"`
 }
+type AtContent struct {
+	Text       string   `json:"text"`
+	AtUserList []string `json:"atUserList"`
+	IsAtSelf   bool     `json:"isAtSelf"`
+}
 
 func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 	var wsResult []*pbRelay.SingleMsgToUser
-	//isShouldOfflinePush := true
 	MOptions := utils.JsonStringToMap(Options) //Control whether to push message to sender's other terminal
 	//isSenderSync := utils.GetSwitchFromOptions(MOptions, "senderSync")
 	isOfflinePush := utils.GetSwitchFromOptions(MOptions, "offlinePush")
@@ -51,101 +53,61 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 			wsResult = append(wsResult, reply.Resp...)
 		}
 	}
-	log.InfoByKv("push_result", sendPbData.OperationID, "result", wsResult)
-	if isOfflinePush {
-
-		for _, v := range wsResult {
-			if v.ResultCode == 0 {
-				continue
-			}
-			//supported terminal
-			for _, t := range pushTerminal {
-				if v.RecvPlatFormID == t {
-					//Use offline push messaging
-					var UIDList []string
-					UIDList = append(UIDList, sendPbData.RecvID)
-					var sendUIDList []string
-					sendUIDList = append(sendUIDList, sendPbData.SendID)
-					userInfo, err := internal_service.GetUserInfoClient(&pbGetInfo.GetUserInfoReq{UserIDList: sendUIDList, OperationID: sendPbData.OperationID})
-					if err != nil {
-						log.ErrorByArgs(fmt.Sprintf("err=%v,call GetUserInfoClient rpc server failed", err))
-						return
-					}
-
-					customContent := EChatContent{
-						SessionType: int(sendPbData.SessionType),
-						From:        sendPbData.SendID,
-						To:          sendPbData.RecvID,
-						Seq:         sendPbData.RecvSeq,
-					}
-					bCustomContent, _ := json.Marshal(customContent)
-
-					jsonCustomContent := string(bCustomContent)
-					switch sendPbData.ContentType {
-					case constant.Text:
-						IOSAccountListPush(UIDList, userInfo.Data[0].Name, sendPbData.Content, jsonCustomContent)
-					case constant.Picture:
-						IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Picture], jsonCustomContent)
-					case constant.Voice:
-						IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Voice], jsonCustomContent)
-					case constant.Video:
-						IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Video], jsonCustomContent)
-					case constant.File:
-						IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.File], jsonCustomContent)
-					default:
-
-					}
-				}
-			}
-		}
-		/*for _, t := range pushTerminal {
+	log.InfoByKv("push_result", sendPbData.OperationID, "result", wsResult, "sendData", sendPbData)
+	if sendPbData.ContentType != constant.Typing && sendPbData.ContentType != constant.HasReadReceipt {
+		if isOfflinePush {
 			for _, v := range wsResult {
-				if v.RecvPlatFormID == t && v.ResultCode == 0 {
-					isShouldOfflinePush = false
-					break
+				if v.ResultCode == 0 {
+					continue
+				}
+				//supported terminal
+				for _, t := range pushTerminal {
+					if v.RecvPlatFormID == t {
+						//Use offline push messaging
+						var UIDList []string
+						UIDList = append(UIDList, v.RecvID)
+						customContent := OpenIMContent{
+							SessionType: int(sendPbData.SessionType),
+							From:        sendPbData.SendID,
+							To:          sendPbData.RecvID,
+							Seq:         sendPbData.RecvSeq,
+						}
+						bCustomContent, _ := json.Marshal(customContent)
+						jsonCustomContent := string(bCustomContent)
+						var content string
+						switch sendPbData.ContentType {
+						case constant.Text:
+							content = constant.ContentType2PushContent[constant.Text]
+						case constant.Picture:
+							content = constant.ContentType2PushContent[constant.Picture]
+						case constant.Voice:
+							content = constant.ContentType2PushContent[constant.Voice]
+						case constant.Video:
+							content = constant.ContentType2PushContent[constant.Video]
+						case constant.File:
+							content = constant.ContentType2PushContent[constant.File]
+						case constant.AtText:
+							a := AtContent{}
+							_ = utils.JsonStringToStruct(sendPbData.Content, &a)
+							if utils.IsContain(v.RecvID, a.AtUserList) {
+								content = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
+							} else {
+								content = constant.ContentType2PushContent[constant.GroupMsg]
+							}
+						default:
+						}
+						pushResult, err := push.JGAccountListPush(UIDList, content, jsonCustomContent, utils.PlatformIDToName(t))
+						if err != nil {
+							log.NewError(sendPbData.OperationID, "offline push error", sendPbData.String(), err.Error(), t)
+						} else {
+							log.NewDebug(sendPbData.OperationID, "offline push return result is ", string(pushResult), sendPbData, t)
+						}
+
+					}
 				}
 			}
-			if isShouldOfflinePush {
-				//Use offline push messaging
-				var UIDList []string
-				UIDList = append(UIDList, sendPbData.RecvID)
-				var sendUIDList []string
-				sendUIDList = append(sendUIDList, sendPbData.SendID)
-				userInfo, err := internal_service.GetUserInfoClient(&pbGetInfo.GetUserInfoReq{UserIDList: sendUIDList, OperationID: sendPbData.OperationID})
-				if err != nil {
-					log.ErrorByArgs(fmt.Sprintf("err=%v,call GetUserInfoClient rpc server failed", err))
-					return
-				}
 
-				customContent := EChatContent{
-					SessionType: int(sendPbData.SessionType),
-					From:        sendPbData.SendID,
-					To:          sendPbData.RecvID,
-					Seq:         sendPbData.RecvSeq,
-				}
-				bCustomContent, _ := json.Marshal(customContent)
-
-				jsonCustomContent := string(bCustomContent)
-				switch sendPbData.ContentType {
-				case constant.Text:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, sendPbData.Content, jsonCustomContent)
-				case constant.Picture:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Picture], jsonCustomContent)
-				case constant.Voice:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Voice], jsonCustomContent)
-				case constant.Video:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.Video], jsonCustomContent)
-				case constant.File:
-					IOSAccountListPush(UIDList, userInfo.Data[0].Name, constant.ContentType2PushContent[constant.File], jsonCustomContent)
-				default:
-
-				}
-
-			} else {
-				isShouldOfflinePush = true
-			}
-		}*/
-
+		}
 	}
 
 }

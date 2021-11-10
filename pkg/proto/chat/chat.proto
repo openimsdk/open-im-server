@@ -1,6 +1,6 @@
 syntax = "proto3";
 package pbChat;//The package name to which the proto file belongs
-option go_package = "chat;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
+option go_package = "./chat;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
 
 message WSToMsgSvrChatMsg{
   string SendID = 1;
@@ -58,14 +58,20 @@ message PullMessageResp {
   repeated GatherFormat SingleUserMsg = 5;
   repeated GatherFormat GroupUserMsg = 6;
 }
-message GetNewSeqReq {
+message PullMessageBySeqListReq{
+  string UserID = 1;
+  string OperationID = 2;
+  repeated int64 seqList =3;
+}
+message GetMaxAndMinSeqReq {
   string UserID = 1;
   string OperationID = 2;
 }
-message GetNewSeqResp {
+message GetMaxAndMinSeqResp {
   int32 ErrCode = 1;
   string ErrMsg = 2;
-  int64 Seq = 3;
+  int64 MaxSeq = 3;
+  int64 MinSeq = 4;
 }
 message GatherFormat{
   // @inject_tag: json:"id"
@@ -119,6 +125,7 @@ message UserSendMsgReq {
   string ClientMsgID = 15;
   string OffLineInfo = 16;
   string Ex = 17;
+  int64 sendTime = 18;
 
 
 }
@@ -127,13 +134,14 @@ message UserSendMsgResp {
   int32 ErrCode = 1;
   string ErrMsg = 2;
   int32 ReqIdentifier = 3;
-  int64 SendTime = 5;
-  string ServerMsgID = 6;
-  string ClientMsgID = 7;
+  string ServerMsgID = 4;
+  string ClientMsgID = 5;
+  int64  sendTime = 6;
 
 }
 service Chat {
-  rpc GetNewSeq(GetNewSeqReq) returns(GetNewSeqResp);
+  rpc GetMaxAndMinSeq(GetMaxAndMinSeqReq) returns(GetMaxAndMinSeqResp);
   rpc PullMessage(PullMessageReq) returns(PullMessageResp);
+  rpc PullMessageBySeqList(PullMessageBySeqListReq) returns(PullMessageResp);
   rpc UserSendMsg(UserSendMsgReq) returns(UserSendMsgResp);
 }

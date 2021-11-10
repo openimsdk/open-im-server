@@ -1,16 +1,16 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-
+serverversion: 1.0.2
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openIM
-  etcdAddr: [ 81.68.126.69:2379 ]
+  etcdAddr: [ 127.0.0.1:2379 ]
 
 mysql:
-  dbMysqlAddress: [ 81.68.126.69:13306 ]
-  dbMysqlUserName: openIM
-  dbMysqlPassword: 12345
+  dbMysqlAddress: [ 127.0.0.1:3306 ]
+  dbMysqlUserName: root
+  dbMysqlPassword: openIM
   dbMysqlDatabaseName: openIM
   dbTableName: eMsg
   dbMsgTableNum: 1
@@ -19,18 +19,18 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 81.68.126.69:27017 ]
+  dbAddress: [ 127.0.0.1:27017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
-  dbSource: openIM
-  dbUserName: openIM
-  dbPassword: 12345
+  dbSource: admin
+  dbUserName:
+  dbPassword:
   dbMaxPoolSize: 20
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 81.68.126.69:16379
+  dbAddress: 127.0.0.1:6379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -38,10 +38,10 @@ redis:
 
 kafka:
   ws2mschat:
-    addr: [ 81.68.126.69:9092 ]
+    addr: [ 127.0.0.1:9092 ]
     topic: "ws2ms_chat"
   ms2pschat:
-    addr: [ 81.68.126.69:9092 ]
+    addr: [ 127.0.0.1:9092 ]
     topic: "ms2ps_chat"
   consumergroupid:
     msgToMongo: mongo
@@ -74,7 +74,7 @@ credential:
 rpcport:
   openImUserPort: [ 10100 ]
   openImFriendPort: [ 10200 ]
-  openImOfflineMessagePort: [ 10300 ]
+  openImOfflineMessagePort: [ 10300]
   openImOnlineRelayPort: [ 10400 ]
   openImGroupPort: [ 10500  ]
   openImAuthPort: [ 10600 ]
@@ -119,6 +119,10 @@ push:
     android:
       accessID: 111
       secretKey: 111
+  jpns:
+    appKey: cf47465a368f24c659608e7e
+    masterSecret: 02204efe3f3832947a236ee5
+    pushUrl: "https://api.jpush.cn/v3/push"
 manager:
   appManagerUid: ["openIM123456","openIM654321"]
   secrets: ["openIM1","openIM2"]
@@ -133,9 +137,8 @@ multiloginpolicy:
 #token config
 tokenpolicy:
   accessSecret: "open_im_server"
-  # Token effective time seconds as a unit
-  #Seven days   7*24*60*60
-  accessExpire: 604800
+  # Token effective time day as a unit
+  accessExpire: 7
 
 messagecallback:
   callbackSwitch: false

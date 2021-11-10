@@ -1,10 +1,10 @@
 package apiAuth
 
 import (
-	pbAuth "Open_IM/pkg/proto/auth"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbAuth "Open_IM/pkg/proto/auth"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -35,6 +35,10 @@ func UserToken(c *gin.Context) {
 	if err := c.BindJSON(&params); err != nil {
 		log.Error("", "", params.UID, params.Platform, params.Secret)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	if params.Secret != config.Config.Secret {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "not authorized"})
 		return
 	}
 	pbData := newUserTokenReq(&params)

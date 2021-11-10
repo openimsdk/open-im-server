@@ -9,6 +9,7 @@ const (
 	userIncrSeq      = "REDIS_USER_INCR_SEQ:" // user incr seq
 	appleDeviceToken = "DEVICE_TOKEN"
 	lastGetSeq       = "LAST_GET_SEQ"
+	userMinSeq       = "REDIS_USER_MIN_SEQ:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -31,42 +32,55 @@ func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (inte
 	return con.Do(cmd, params...)
 }
 
-//执行用户消息的seq自增操作
+//Perform seq auto-increment operation of user messages
 func (d *DataBases) IncrUserSeq(uid string) (int64, error) {
 	key := userIncrSeq + uid
 	return redis.Int64(d.Exec("INCR", key))
 }
 
-//获取最新的seq
-func (d *DataBases) GetUserSeq(uid string) (int64, error) {
+//Get the largest Seq
+func (d *DataBases) GetUserMaxSeq(uid string) (int64, error) {
 	key := userIncrSeq + uid
 	return redis.Int64(d.Exec("GET", key))
 }
 
-//存储苹果的设备token到redis
+//Set the user's minimum seq
+func (d *DataBases) SetUserMinSeq(uid string) (err error) {
+	key := userMinSeq + uid
+	_, err = d.Exec("SET", key)
+	return err
+}
+
+//Get the smallest Seq
+func (d *DataBases) GetUserMinSeq(uid string) (int64, error) {
+	key := userMinSeq + uid
+	return redis.Int64(d.Exec("GET", key))
+}
+
+//Store Apple's device token to redis
 func (d *DataBases) SetAppleDeviceToken(accountAddress, value string) (err error) {
 	key := appleDeviceToken + accountAddress
 	_, err = d.Exec("SET", key, value)
 	return err
 }
 
-//删除苹果设备token
+//Delete Apple device token
 func (d *DataBases) DelAppleDeviceToken(accountAddress string) (err error) {
 	key := appleDeviceToken + accountAddress
 	_, err = d.Exec("DEL", key)
 	return err
 }
 
-//记录用户上一次主动拉取Seq的值
+//Record the last time the user actively pulled the value of Seq
 func (d *DataBases) SetLastGetSeq(uid string) (err error) {
 	key := lastGetSeq + uid
 	_, err = d.Exec("SET", key)
 	return err
 }
 
-//获取用户上一次主动拉取Seq的值
+//Get the value of the user's last active pull Seq
 func (d *DataBases) GetLastGetSeq(uid string) (int64, error) {
-	key := userIncrSeq + uid
+	key := lastGetSeq + uid
 	return redis.Int64(d.Exec("GET", key))
 }
 

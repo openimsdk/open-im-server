@@ -67,7 +67,7 @@ func UserSendMsg(c *gin.Context) {
 
 	token := c.Request.Header.Get("token")
 
-	log.InfoByKv("Ws call success to sendMsgReq", params.OperationID, "Parameters", params)
+	log.InfoByKv("api call success to sendMsgReq", params.OperationID, "Parameters", params)
 
 	pbData := newUserSendMsgReq(token, &params)
 	log.Info("", "", "api UserSendMsg call start..., [data: %s]", pbData.String())

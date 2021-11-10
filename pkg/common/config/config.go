@@ -3,14 +3,22 @@ package config
 import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"path/filepath"
+	"runtime"
+)
+
+var (
+	_, b, _, _ = runtime.Caller(0)
+	// Root folder of this project
+	Root = filepath.Join(filepath.Dir(b), "../../..")
 )
 
 var Config config
 
 type config struct {
-	ServerIP string `yaml:"serverip"`
-
-	Api struct {
+	ServerIP      string `yaml:"serverip"`
+	ServerVersion string `yaml:"serverversion"`
+	Api           struct {
 		GinPort []int `yaml:"openImApiPort"`
 	}
 	Sdk struct {
@@ -110,6 +118,11 @@ type config struct {
 				SecretKey string `yaml:"secretKey"`
 			}
 		}
+		Jpns struct {
+			AppKey       string `yaml:"appKey"`
+			MasterSecret string `yaml:"masterSecret"`
+			PushUrl      string `yaml:"pushUrl"`
+		}
 	}
 	Manager struct {
 		AppManagerUid []string `yaml:"appManagerUid"`
@@ -147,14 +160,16 @@ type config struct {
 }
 
 func init() {
-	bytes, err := ioutil.ReadFile("config/config.yaml")
+	//path, _ := os.Getwd()
+	//bytes, err := ioutil.ReadFile(path + "/config/config.yaml")
+	// if we cd Open-IM-Server/src/utils and run go test
+	// it will panic cannot find config/config.yaml
+	bytes, err := ioutil.ReadFile(Root + "/config/config.yaml")
 	if err != nil {
 		panic(err)
-		return
 	}
 	if err = yaml.Unmarshal(bytes, &Config); err != nil {
 		panic(err)
-		return
 	}
 
 }

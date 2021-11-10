@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "group;group";
+option go_package = "./group;group";
 package group;
 
 message CommonResp{
