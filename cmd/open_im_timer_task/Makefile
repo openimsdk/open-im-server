@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-BINARY_NAME=open_im_timed_task
+BINARY_NAME=open_im_timer_task
 BIN_DIR=../../bin/
 
 all: gotool build

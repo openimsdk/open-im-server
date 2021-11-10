@@ -40,4 +40,14 @@ else
       exit -1
 fi
 
+
+check=$(ps aux | grep -w ./${timer_task_name} | grep -v grep | wc -l)
+if [ $check -ge 1 ]; then
+  echo -e ${GREEN_PREFIX}"none  port has been starting,belongs service is openImMsgTimer"${COLOR_SUFFIX}
+else
+  echo -e ${RED_PREFIX}"openImMsgTimer service does not start normally"${COLOR_SUFFIX}
+        echo -e ${RED_PREFIX}"please check ../logs/openIM.log "${COLOR_SUFFIX}
+      exit -1
+fi
+
 echo -e ${YELLOW_PREFIX}"all services launch success"${COLOR_SUFFIX}

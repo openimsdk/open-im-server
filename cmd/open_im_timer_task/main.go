@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	log.NewPrivateLog("timer")
 	//for {
 	//	fmt.Println("start delete mongodb expired record")
 	//	timeUnixBegin := time.Now().Unix()
