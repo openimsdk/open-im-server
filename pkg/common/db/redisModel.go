@@ -45,9 +45,9 @@ func (d *DataBases) GetUserMaxSeq(uid string) (int64, error) {
 }
 
 //Set the user's minimum seq
-func (d *DataBases) SetUserMinSeq(uid string) (err error) {
+func (d *DataBases) SetUserMinSeq(uid string, minSeq int64) (err error) {
 	key := userMinSeq + uid
-	_, err = d.Exec("SET", key)
+	_, err = d.Exec("SET", key, minSeq)
 	return err
 }
 

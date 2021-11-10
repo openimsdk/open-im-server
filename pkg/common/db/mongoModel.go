@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
 	"errors"
+	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
 	"gopkg.in/mgo.v2/bson"
 	"strconv"
@@ -86,6 +87,34 @@ func (d *DataBases) GetMsgBySeqRange(uid string, seqBegin, seqEnd int64) (Single
 	}
 
 	return SingleMsg, GroupMsg, MaxSeq, MinSeq, nil
+}
+func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq int64, err error) {
+	var i int64
+	var seqUid string
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return MinSeq, errors.New("session == nil")
+	}
+	defer session.Close()
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
+	MaxSeq, err := d.GetUserMaxSeq(uid)
+	if err != nil && err != redis.ErrNil {
+		return MinSeq, err
+	}
+	NB := MaxSeq / singleGocMsgNum
+	for i = 0; i <= NB; i++ {
+		seqUid = indexGen(uid, i)
+		n, err := c.Find(bson.M{"uid": seqUid}).Count()
+		if err == nil && n != 0 {
+			if i == 0 {
+				MinSeq = 1
+			} else {
+				MinSeq = i * singleGocMsgNum
+			}
+			break
+		}
+	}
+	return MinSeq, nil
 }
 func (d *DataBases) GetMsgBySeqList(uid string, seqList []int64) (SingleMsg []*pbMsg.MsgFormat, GroupMsg []*pbMsg.MsgFormat, MaxSeq int64, MinSeq int64, err error) {
 	allCount := 0
@@ -316,7 +345,7 @@ func getCurrentTimestampByMill() int64 {
 }
 func getSeqUid(uid string, seq int64) string {
 	seqSuffix := seq / singleGocMsgNum
-	return uid + ":" + strconv.FormatInt(seqSuffix, 10)
+	return indexGen(uid, seqSuffix)
 }
 func isContainInt64(target int64, List []int64) bool {
 
@@ -328,4 +357,7 @@ func isContainInt64(target int64, List []int64) bool {
 	}
 	return false
 
+}
+func indexGen(uid string, seqSuffix int64) string {
+	return uid + ":" + strconv.FormatInt(seqSuffix, 10)
 }
