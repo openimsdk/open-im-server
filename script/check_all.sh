@@ -33,9 +33,19 @@ done
 #Check launched service process
 check=$(ps aux | grep -w ./${msg_transfer_name} | grep -v grep | wc -l)
 if [ $check -eq ${msg_transfer_service_num} ]; then
-  echo -e ${GREEN_PREFIX}"none  port service has been starting,belongs service is openImMsgTransfer"${COLOR_SUFFIX}
+  echo -e ${GREEN_PREFIX}"none  port has been listening,belongs service is openImMsgTransfer"${COLOR_SUFFIX}
 else
   echo -e ${RED_PREFIX}"openImMsgTransfer service does not start normally, num err"${COLOR_SUFFIX}
+        echo -e ${RED_PREFIX}"please check ../logs/openIM.log "${COLOR_SUFFIX}
+      exit -1
+fi
+
+
+check=$(ps aux | grep -w ./${timer_task_name} | grep -v grep | wc -l)
+if [ $check -ge 1 ]; then
+  echo -e ${GREEN_PREFIX}"none  port has been listening,belongs service is openImMsgTimer"${COLOR_SUFFIX}
+else
+  echo -e ${RED_PREFIX}"openImMsgTimer service does not start normally"${COLOR_SUFFIX}
         echo -e ${RED_PREFIX}"please check ../logs/openIM.log "${COLOR_SUFFIX}
       exit -1
 fi
