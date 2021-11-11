@@ -22,6 +22,7 @@ func key(dbAddress, dbName string) string {
 func init() {
 	//mysql init
 	initMysqlDB()
+	// mongo init
 	mgoDailInfo := &mgo.DialInfo{
 		Addrs:     config.Config.Mongo.DBAddress,
 		Direct:    config.Config.Mongo.DBDirect,
