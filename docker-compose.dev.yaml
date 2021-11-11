@@ -1,0 +1,381 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    container_name: mysql
+    volumes:
+      - ./components/mysql/data:/var/lib/mysql
+      - /etc/localtime:/etc/localtime
+    environment:
+      MYSQL_ROOT_PASSWORD: openIM
+    restart: always
+
+  mongodb:
+    image: mongo:4.0
+    ports:
+      - 27017:27017
+    container_name: mongo
+    volumes:
+      - ./components/mongodb/data:/data/db
+    environment:
+      TZ: Asia/Shanghai
+    restart: always
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    container_name: redis
+    volumes:
+      - ./components/redis/data:/data
+      #redis config file
+      #- ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+    environment:
+      TZ: Asia/Shanghai
+    restart: always
+    sysctls:
+      net.core.somaxconn: 1024
+    command: redis-server --requirepass openIM --appendonly yes
+
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - 2181:2181
+    container_name: zookeeper
+    volumes:
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Shanghai
+    restart: always
+
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092
+    depends_on:
+      - zookeeper
+    links:
+      - zookeeper
+    ports:
+      - 9092:9092
+
+  etcd:
+    image: quay.io/coreos/etcd
+    ports:
+      - 2379:2379
+      - 2380:2380
+    container_name: etcd
+    volumes:
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+    environment:
+      ETCDCTL_API: 3
+    restart: always
+    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
+
+  open_im_api:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_api
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/open_im_api
+    ports:
+      - 10000:10000
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+
+  open_im_auth:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_auth
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/rpc/open_im_auth
+    ports:
+      - 10600:10600
+
+  open_im_user:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_user
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/rpc/open_im_user
+    ports:
+      - 10100:10100
+
+  open_im_friend:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_friend
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/rpc/open_im_friend
+    ports:
+      - 10200:10200
+
+  open_im_group:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_group
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/rpc/open_im_group
+    ports:
+      - 10500:10500
+
+  open_im_push:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_push
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/open_im_push
+    ports:
+      - 10700:10700
+
+  open_im_timed_task:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_timed_task
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/open_im_timer_task
+
+  open_im_offline_msg:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_offline_msg
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/rpc/open_im_msg
+    ports:
+      - 10300:10300
+
+  open_im_msg_transfer:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_msg_transfer
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/open_im_msg_transfer
+
+  open_im_msg_gateway:
+    build:
+      dockerfile: dev.Dockerfile
+      context: .
+      target: dev
+      network: host
+    depends_on:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    links:
+      - kafka
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+    container_name: open_im_msg_gateway
+    volumes:
+      - ./cmd:/Open-IM-Server/cmd
+      - ./config/config.dev.yaml:/Open-IM-Server/config/config.yaml
+      - ./internal:/Open-IM-Server/internal
+      - ./pkg:/Open-IM-Server/pkg
+      - ./go.mod:/Open-IM-Server/go.mod
+      - ./go.sum:/Open-IM-Server/go.sum
+    working_dir: /Open-IM-Server/cmd/open_im_msg_gateway
+    ports:
+      - 10400:10400
+      - 17778:17778
