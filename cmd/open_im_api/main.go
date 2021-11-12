@@ -11,8 +11,9 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	//"syscall"
 )
 
@@ -56,7 +57,7 @@ func main() {
 	{
 		groupRouterGroup.POST("/create_group", group.CreateGroup)
 		groupRouterGroup.POST("/set_group_info", group.SetGroupInfo)
-		groupRouterGroup.POST("join_group", group.JoinGroup)
+		groupRouterGroup.POST("/join_group", group.JoinGroup)
 		groupRouterGroup.POST("/quit_group", group.QuitGroup)
 		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)
