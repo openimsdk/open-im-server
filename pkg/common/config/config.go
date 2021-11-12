@@ -122,6 +122,7 @@ type config struct {
 			AppKey       string `yaml:"appKey"`
 			MasterSecret string `yaml:"masterSecret"`
 			PushUrl      string `yaml:"pushUrl"`
+			PushIntent   string `yaml:"pushIntent"`
 		}
 	}
 	Manager struct {

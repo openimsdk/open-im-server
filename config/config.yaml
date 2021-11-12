@@ -123,6 +123,7 @@ push:
     appKey: cf47465a368f24c659608e7e
     masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
+    pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
   appManagerUid: ["openIM123456","openIM654321"]
   secrets: ["openIM1","openIM2"]

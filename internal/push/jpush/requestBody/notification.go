@@ -1,6 +1,6 @@
 package requestBody
 
-const INTENT_URL = "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
+import "Open_IM/pkg/common/config"
 
 type Notification struct {
 	Alert   string   `json:"alert,omitempty"`
@@ -18,5 +18,5 @@ func (n *Notification) SetAlert(alert string) {
 	n.Alert = alert
 }
 func (n *Notification) SetAndroidIntent() {
-	n.Android.Intent = INTENT_URL
+	n.Android.Intent = config.Config.Push.Jpns.PushIntent
 }
