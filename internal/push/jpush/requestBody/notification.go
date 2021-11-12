@@ -9,7 +9,9 @@ type Notification struct {
 }
 
 type Android struct {
-	Intent string `json:"intent,omitempty"`
+	Intent struct {
+		URL string `json:"url,omitempty"`
+	} `json:"intent,omitempty"`
 }
 type Ios struct {
 }
@@ -18,5 +20,5 @@ func (n *Notification) SetAlert(alert string) {
 	n.Alert = alert
 }
 func (n *Notification) SetAndroidIntent() {
-	n.Android.Intent = config.Config.Push.Jpns.PushIntent
+	n.Android.Intent.URL = config.Config.Push.Jpns.PushIntent
 }
