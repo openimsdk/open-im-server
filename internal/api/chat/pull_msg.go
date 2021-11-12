@@ -4,14 +4,16 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	"Open_IM/pkg/proto/chat"
+	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsUserPullMsg struct
 type paramsUserPullMsg struct {
 	ReqIdentifier *int   `json:"reqIdentifier" binding:"required"`
 	SendID        string `json:"sendID" binding:"required"`
@@ -22,6 +24,18 @@ type paramsUserPullMsg struct {
 	}
 }
 
+// @Summary
+// @Schemes
+// @Description user pull messages
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param body body apiChat.paramsUserPullMsg true "user pull messages"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{reqIdentifier=int}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /chat/pull_msg [post]
 func UserPullMsg(c *gin.Context) {
 	params := paramsUserPullMsg{}
 	if err := c.BindJSON(&params); err != nil {
@@ -71,6 +85,7 @@ func UserPullMsg(c *gin.Context) {
 
 }
 
+// paramsUserPullMsgBySeqList struct
 type paramsUserPullMsgBySeqList struct {
 	ReqIdentifier int     `json:"reqIdentifier" binding:"required"`
 	SendID        string  `json:"sendID" binding:"required"`
@@ -78,6 +93,18 @@ type paramsUserPullMsgBySeqList struct {
 	SeqList       []int64 `json:"seqList"`
 }
 
+// @Summary
+// @Schemes
+// @Description user pull msg by seq
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param body body apiChat.paramsUserPullMsgBySeqList true "pull msg by seq"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{reqIdentifier=int}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /chat/pull_msg_by_seq [post]
 func UserPullMsgBySeqList(c *gin.Context) {
 	params := paramsUserPullMsgBySeqList{}
 	if err := c.BindJSON(&params); err != nil {
@@ -100,6 +127,7 @@ func UserPullMsgBySeqList(c *gin.Context) {
 	reply, err := msgClient.PullMessageBySeqList(context.Background(), &pbData)
 	if err != nil {
 		log.ErrorByKv("PullMessageBySeqList error", pbData.OperationID, "err", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 	log.InfoByKv("rpc call success to PullMessageBySeqList", pbData.OperationID, "ReplyArgs", reply.String(), "maxSeq", reply.GetMaxSeq(),

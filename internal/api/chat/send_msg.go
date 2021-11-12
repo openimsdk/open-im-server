@@ -8,11 +8,13 @@ import (
 	"context"
 
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsUserSendMsg struct
 type paramsUserSendMsg struct {
 	ReqIdentifier  int32  `json:"reqIdentifier" binding:"required"`
 	PlatformID     int32  `json:"platformID" binding:"required"`
@@ -57,6 +59,24 @@ func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.UserSend
 	return &pbData
 }
 
+// resultSendMsg struct
+type resultSendMsg struct {
+	ClientMsgID string `json:"clientMsgID"`
+	ServerMsgID string `json:"serverMsgID"`
+	SendTime    int64  `json:"sendTime"`
+}
+
+// @Summary
+// @Schemes
+// @Description user send messages
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param body body apiChat.paramsUserSendMsg true "user send messages"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{reqIdentifier=int,data=resultSendMsg}
+// @Failure 400 {object} user.result
+// @Router /chat/send_msg [post]
 func UserSendMsg(c *gin.Context) {
 	params := paramsUserSendMsg{}
 	if err := c.BindJSON(&params); err != nil {

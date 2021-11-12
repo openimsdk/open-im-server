@@ -6,24 +6,45 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsImportFriendReq struct
 type paramsImportFriendReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 	UIDList     []string `json:"uidList" binding:"required"`
 	OwnerUid    string   `json:"ownerUid" binding:"required"`
 }
 
+// resultImportFriend struct
+type resultImportFriend struct {
+	ErrCode       int      `json:"errCode" example:"0"`
+	ErrMsg        string   `json:"errMsg"  example:"error"`
+	FailedUidList []string `json:"failedUidList" example: []`
+}
+
+// paramsAddFriend struct
 type paramsAddFriend struct {
 	OperationID string `json:"operationID" binding:"required"`
 	UID         string `json:"uid" binding:"required"`
 	ReqMessage  string `json:"reqMessage"`
 }
 
-//
+// @Summary
+// @Schemes
+// @Description import friend
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsImportFriendReq true "import friend params"
+// @Param token header string true "token"
+// @Success 200 {object} friend.resultImportFriend
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /friend/import_friend [post]
 func ImportFriend(c *gin.Context) {
 	log.Info("", "", "ImportFriend init ....")
 
@@ -53,6 +74,18 @@ func ImportFriend(c *gin.Context) {
 	log.InfoByArgs("ImportFriend success return,get args=%s,return args=%s", req.String(), RpcResp.String())
 }
 
+// @Summary
+// @Schemes
+// @Description add a new friend by uid
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsAddFriend true "add friend params"
+// @Param token header string true "token"
+// @Success 200 {object} user.result
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /friend/add_friend [post]
 func AddFriend(c *gin.Context) {
 	log.Info("", "", "api add friend init ....")
 

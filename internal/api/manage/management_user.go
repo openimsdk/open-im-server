@@ -7,24 +7,54 @@
 package manage
 
 import (
-	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbUser "Open_IM/pkg/proto/user"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsDeleteUsers struct
 type paramsDeleteUsers struct {
 	OperationID   string   `json:"operationID" binding:"required"`
 	DeleteUidList []string `json:"deleteUidList" binding:"required"`
 }
+
+// paramsGetAllUsersUid struct
 type paramsGetAllUsersUid struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 
+// deleteUserResult struct
+type deleteUserResult struct {
+	ErrCode       int      `json:"errCode" example:"0"`
+	ErrMsg        string   `json:"errMsg"  example:"error"`
+	FailedUidList []string `json:"failedUidList"  example:[]`
+}
+
+// uidListResult struct
+type uidListResult struct {
+	ErrCode int      `json:"errCode" example:"0"`
+	ErrMsg  string   `json:"errMsg"  example:"error"`
+	UidList []string `json:"uidList"  example:[]`
+}
+
+// @Summary
+// @Schemes
+// @Description delete user
+// @Tags manage
+// @Accept json
+// @Produce json
+// @Param body body manage.paramsDeleteUsers true "user to be deleted"
+// @Param token header string true "token"
+// @Success 200 {object} manage.deleteUserResult
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /manager/delete_user [post]
 func DeleteUser(c *gin.Context) {
 	params := paramsDeleteUsers{}
 	if err := c.BindJSON(&params); err != nil {
@@ -51,6 +81,18 @@ func DeleteUser(c *gin.Context) {
 	resp := gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "failedUidList": RpcResp.FailedUidList}
 	c.JSON(http.StatusOK, resp)
 }
+
+// @Summary
+// @Schemes
+// @Description get all user ids
+// @Tags manage
+// @Accept json
+// @Produce json
+// @Param body body manage.paramsGetAllUsersUid true "all user ids"
+// @Param token header string true "token"
+// @Success 200 {object} manage.uidListResult
+// @Failure 500 {object} manage.uidListResult
+// @Router /manager/get_all_users_uid [post]
 func GetAllUsersUid(c *gin.Context) {
 	params := paramsGetAllUsersUid{}
 	if err := c.BindJSON(&params); err != nil {

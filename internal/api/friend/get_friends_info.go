@@ -1,23 +1,49 @@
 package friend
 
 import (
-	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsSearchFriend struct
 type paramsSearchFriend struct {
 	OperationID string `json:"operationID" binding:"required"`
 	UID         string `json:"uid" binding:"required"`
 	OwnerUid    string `json:"ownerUid"`
 }
 
+// resultFriendInfo struct
+type resultFriendInfo struct {
+	UID     string `json:"uid"`
+	Name    string `json:"name"`
+	Icon    string `json:"icon"`
+	Gender  int32  `json:"gender"`
+	Mobile  string `json:"mobile"`
+	Birth   string `json:"birth"`
+	Email   string `json:"email"`
+	Ex      string `json:"ex"`
+	Comment string `json:"comment"`
+}
+
+// @Summary
+// @Schemes
+// @Description get friend info
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsSearchFriend true "search friend params"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{data=friend.resultFriendInfo}
+// @Failure 200 {object} user.result
+// @Router /friend/get_friends_info [post]
 func GetFriendsInfo(c *gin.Context) {
 	log.Info("", "", fmt.Sprintf("api search friend init ...."))
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)

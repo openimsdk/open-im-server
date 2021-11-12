@@ -14,15 +14,17 @@ import (
 	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/utils"
 	"context"
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"net/http"
-	"strings"
 )
 
 var validate *validator.Validate
 
+// paramsManagementSendMsg struct
 type paramsManagementSendMsg struct {
 	OperationID    string                 `json:"operationID" binding:"required"`
 	SendID         string                 `json:"sendID" binding:"required"`
@@ -33,6 +35,14 @@ type paramsManagementSendMsg struct {
 	Content        map[string]interface{} `json:"content" binding:"required"`
 	ContentType    int32                  `json:"contentType" binding:"required"`
 	SessionType    int32                  `json:"sessionType" binding:"required"`
+}
+
+// sendMsgResult struct
+type sendMsgResult struct {
+	ErrCode  int    `json:"errCode" example:"0"`
+	ErrMsg   string `json:"errMsg"  example:"error"`
+	SendTime int    `json:"sendTime"  example:0`
+	MsgID    string `json:"msgID"  example:""`
 }
 
 func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
@@ -71,6 +81,19 @@ func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
 func init() {
 	validate = validator.New()
 }
+
+// @Summary
+// @Schemes
+// @Description manage send message
+// @Tags manage
+// @Accept json
+// @Produce json
+// @Param body body manage.paramsManagementSendMsg true "manage send message"
+// @Param token header string true "token"
+// @Success 200 {object} manage.sendMsgResult
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /manager/send_msg [post]
 func ManagementSendMsg(c *gin.Context) {
 	var data interface{}
 	params := paramsManagementSendMsg{}

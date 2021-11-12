@@ -1,21 +1,24 @@
 package friend
 
 import (
-	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsGetBlackList struct
 type paramsGetBlackList struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 
+// blackListUserInfo struct
 type blackListUserInfo struct {
 	UID    string `json:"uid"`
 	Name   string `json:"name"`
@@ -27,6 +30,18 @@ type blackListUserInfo struct {
 	Ex     string `json:"ex"`
 }
 
+// @Summary
+// @Schemes
+// @Description get black list
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsSearchFriend true "get black list"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{data=[]friend.blackListUserInfo}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /friend/get_blacklist [post]
 func GetBlacklist(c *gin.Context) {
 	log.Info("", "", "api get blacklist init ....")
 

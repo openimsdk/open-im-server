@@ -1,17 +1,19 @@
 package group
 
 import (
-	pb "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pb "Open_IM/pkg/proto/group"
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// InviteUserToGroupReq struct
 type InviteUserToGroupReq struct {
 	GroupID     string   `json:"groupID" binding:"required"`
 	UidList     []string `json:"uidList" binding:"required"`
@@ -19,7 +21,22 @@ type InviteUserToGroupReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 }
 
+// GetJoinedGroupListReq struct
 type GetJoinedGroupListReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+// paramsKickGroupMember struct
+type paramsKickGroupMember struct {
+	GroupID     string `json:"groupID"`
+	UidListInfo []struct {
+		UserId   string `json:"userId,omitempty"`
+		Role     int32  `json:"role,omitempty"`
+		JoinTime uint64 `json:"joinTime,omitempty"`
+		NickName string `json:"nickName,omitempty"`
+		FaceUrl  string `json:"faceUrl,omitempty"`
+	} `json:"uidListInfo" binding:"required"`
+	Reason      string `json:"reason"`
 	OperationID string `json:"operationID" binding:"required"`
 }
 
@@ -30,6 +47,18 @@ type KickGroupMemberReq struct {
 	OperationID string                    `json:"operationID" binding:"required"`
 }
 
+// @Summary
+// @Schemes
+// @Description kick member from group
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.paramsKickGroupMember true "kick member from group params"
+// @Param token header string true "token"
+// @Success 200 {object} group.KickGroupMemberResp
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/kick_group [post]
 func KickGroupMember(c *gin.Context) {
 	log.Info("", "", "KickGroupMember start....")
 
@@ -58,6 +87,7 @@ func KickGroupMember(c *gin.Context) {
 		return
 	}
 
+	// KickGroupMemberResp struct
 	type KickGroupMemberResp struct {
 		ErrorCode int32       `json:"errCode"`
 		ErrorMsg  string      `json:"errMsg"`
@@ -75,17 +105,32 @@ func KickGroupMember(c *gin.Context) {
 	c.JSON(http.StatusOK, memberListResp)
 }
 
+// GetGroupMembersInfoReq struct
 type GetGroupMembersInfoReq struct {
 	GroupID     string   `json:"groupID"`
 	MemberList  []string `json:"memberList"`
 	OperationID string   `json:"operationID"`
 }
+
+// GetGroupMembersInfoResp struct
 type GetGroupMembersInfoResp struct {
 	ErrorCode int32          `json:"errCode"`
 	ErrorMsg  string         `json:"errMsg"`
 	Data      []MemberResult `json:"data"`
 }
 
+// @Summary
+// @Schemes
+// @Description get group members info
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.GetGroupMembersInfoReq true "get group members info params"
+// @Param token header string true "token"
+// @Success 200 {object} group.GetGroupMembersInfoResp
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/get_group_members_info [post]
 func GetGroupMembersInfo(c *gin.Context) {
 	log.Info("", "", "GetGroupMembersInfo start....")
 
@@ -128,17 +173,21 @@ func GetGroupMembersInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, memberListResp)
 }
 
+// GetGroupMemberListReq struct
 type GetGroupMemberListReq struct {
 	GroupID     string `json:"groupID"`
 	Filter      int32  `json:"filter"`
-	NextSeq     int32  `json:"nextSeq"`
+	NextSeq     int32  `json:"nextSeq,omitempty"`
 	OperationID string `json:"operationID"`
 }
+
+// getGroupAllMemberReq struct
 type getGroupAllMemberReq struct {
 	GroupID     string `json:"groupID"`
 	OperationID string `json:"operationID"`
 }
 
+// MemberResult struct
 type MemberResult struct {
 	GroupId  string `json:"groupID"`
 	UserId   string `json:"userId"`
@@ -148,6 +197,18 @@ type MemberResult struct {
 	FaceUrl  string `json:"faceUrl"`
 }
 
+// @Summary
+// @Schemes
+// @Description get group member list
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.GetGroupMemberListReq true "get group member list params"
+// @Param token header string true "token"
+// @Success 200 {object} group.GetGroupMemberListResp
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/get_group_member_list [post]
 func GetGroupMemberList(c *gin.Context) {
 	log.Info("", "", "GetGroupMemberList start....")
 
@@ -174,6 +235,7 @@ func GetGroupMemberList(c *gin.Context) {
 		return
 	}
 
+	// GetGroupMemberListResp struct
 	type GetGroupMemberListResp struct {
 		ErrorCode int32          `json:"errCode"`
 		ErrorMsg  string         `json:"errMsg"`
@@ -198,6 +260,18 @@ func GetGroupMemberList(c *gin.Context) {
 
 }
 
+// @Summary
+// @Schemes
+// @Description get group all members
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.getGroupAllMemberReq true "get group all members params"
+// @Param token header string true "token"
+// @Success 200 {object} group.GetGroupMemberListResp
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/get_group_all_member_list [post]
 func GetGroupAllMember(c *gin.Context) {
 	log.Info("", "", "GetGroupAllMember start....")
 
@@ -222,6 +296,7 @@ func GetGroupAllMember(c *gin.Context) {
 		return
 	}
 
+	// GetGroupMemberListResp struct
 	type GetGroupMemberListResp struct {
 		ErrorCode int32          `json:"errCode"`
 		ErrorMsg  string         `json:"errMsg"`
@@ -243,6 +318,7 @@ func GetGroupAllMember(c *gin.Context) {
 	c.JSON(http.StatusOK, memberListResp)
 }
 
+// groupResult struct
 type groupResult struct {
 	GroupId      string `json:"groupId"`
 	GroupName    string `json:"groupName"`
@@ -254,6 +330,18 @@ type groupResult struct {
 	MemberCount  uint32 `json:"memberCount"`
 }
 
+// @Summary
+// @Schemes
+// @Description get joined group list
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.GetJoinedGroupListReq true "get joined group list params"
+// @Param token header string true "token"
+// @Success 200 {object} group.GetJoinedGroupListResp
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/get_joined_group_list [post]
 func GetJoinedGroupList(c *gin.Context) {
 	log.Info("", "", "GetJoinedGroupList start....")
 
@@ -280,6 +368,7 @@ func GetJoinedGroupList(c *gin.Context) {
 	}
 	log.Info(req.Token, req.OperationID, "GetJoinedGroupList: ", RpcResp)
 
+	// GetJoinedGroupListResp struct
 	type GetJoinedGroupListResp struct {
 		ErrorCode int32         `json:"errCode"`
 		ErrorMsg  string        `json:"errMsg"`
@@ -302,11 +391,24 @@ func GetJoinedGroupList(c *gin.Context) {
 	c.JSON(http.StatusOK, GroupListResp)
 }
 
+// Id2Result struct
 type Id2Result struct {
 	UId    string `json:"uid"`
 	Result int32  `json:"result"`
 }
 
+// @Summary
+// @Schemes
+// @Description invite user to group
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.InviteUserToGroupReq true "invite user to group params"
+// @Param token header string true "token"
+// @Success 200 {object} group.InviteUserToGroupResp
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/invite_user_to_group [post]
 func InviteUserToGroup(c *gin.Context) {
 	log.Info("", "", "InviteUserToGroup start....")
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -333,6 +435,7 @@ func InviteUserToGroup(c *gin.Context) {
 		return
 	}
 
+	// InviteUserToGroupResp struct
 	type InviteUserToGroupResp struct {
 		ErrorCode int32       `json:"errCode"`
 		ErrorMsg  string      `json:"errMsg"`

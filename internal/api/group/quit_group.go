@@ -1,21 +1,35 @@
 package group
 
 import (
-	pb "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pb "Open_IM/pkg/proto/group"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsQuitGroup struct
 type paramsQuitGroup struct {
 	GroupID     string `json:"groupID" binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
 }
 
+// @Summary
+// @Schemes
+// @Description quit group
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.paramsQuitGroup true "quit group"
+// @Param token header string true "token"
+// @Success 200 {object} user.result
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/set_group_info [post]
 func QuitGroup(c *gin.Context) {
 	log.Info("", "", "api quit group init ....")
 

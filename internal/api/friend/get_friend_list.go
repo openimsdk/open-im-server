@@ -1,21 +1,24 @@
 package friend
 
 import (
-	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsGetFriendLIst struct
 type paramsGetFriendLIst struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 
+// friendInfo struct
 type friendInfo struct {
 	UID           string `json:"uid"`
 	Name          string `json:"name"`
@@ -29,6 +32,18 @@ type friendInfo struct {
 	IsInBlackList int32  `json:"isInBlackList"`
 }
 
+// @Summary
+// @Schemes
+// @Description get friend apply list
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsGetFriendLIst true "get friend apply list"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{data=[]friend.friendInfo}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /friend/get_friend_list [post]
 func GetFriendList(c *gin.Context) {
 	log.Info("", "", fmt.Sprintf("api get_friendlist init ...."))
 

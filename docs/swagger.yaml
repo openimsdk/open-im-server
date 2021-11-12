@@ -1,0 +1,2208 @@
+definitions:
+  apiAuth.paramsUserRegister:
+    properties:
+      birth:
+        type: string
+      email:
+        type: string
+      ex:
+        type: string
+      gender:
+        type: integer
+      icon:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      platform:
+        type: integer
+      secret:
+        type: string
+      uid:
+        type: string
+    required:
+    - name
+    - platform
+    - secret
+    - uid
+    type: object
+  apiAuth.paramsUserToken:
+    properties:
+      platform:
+        type: integer
+      secret:
+        type: string
+      uid:
+        type: string
+    required:
+    - platform
+    - secret
+    - uid
+    type: object
+  apiAuth.resultUserRegister:
+    properties:
+      expiredTime:
+        type: integer
+      token:
+        type: string
+      uid:
+        type: string
+    type: object
+  apiChat.paramsUserNewestSeq:
+    properties:
+      msgIncr:
+        type: integer
+      operationID:
+        type: string
+      reqIdentifier:
+        type: integer
+      sendID:
+        type: string
+    required:
+    - msgIncr
+    - operationID
+    - reqIdentifier
+    - sendID
+    type: object
+  apiChat.paramsUserPullMsg:
+    properties:
+      data:
+        properties:
+          seqBegin:
+            type: integer
+          seqEnd:
+            type: integer
+        required:
+        - seqBegin
+        - seqEnd
+        type: object
+      operationID:
+        type: string
+      reqIdentifier:
+        type: integer
+      sendID:
+        type: string
+    required:
+    - operationID
+    - reqIdentifier
+    - sendID
+    type: object
+  apiChat.paramsUserPullMsgBySeqList:
+    properties:
+      operationID:
+        type: string
+      reqIdentifier:
+        type: integer
+      sendID:
+        type: string
+      seqList:
+        items:
+          type: integer
+        type: array
+    required:
+    - operationID
+    - reqIdentifier
+    - sendID
+    type: object
+  apiChat.paramsUserSendMsg:
+    properties:
+      data:
+        properties:
+          clientMsgID:
+            type: string
+          content:
+            type: string
+          contentType:
+            type: integer
+          ext:
+            additionalProperties: true
+            type: object
+          forceList:
+            items:
+              type: string
+            type: array
+          msgFrom:
+            type: integer
+          offlineInfo:
+            additionalProperties: true
+            type: object
+          options:
+            additionalProperties: true
+            type: object
+          recvID:
+            type: string
+          sessionType:
+            type: integer
+        required:
+        - clientMsgID
+        - content
+        - contentType
+        - msgFrom
+        - recvID
+        - sessionType
+        type: object
+      operationID:
+        type: string
+      platformID:
+        type: integer
+      reqIdentifier:
+        type: integer
+      sendID:
+        type: string
+      senderFaceUrl:
+        type: string
+      senderNickName:
+        type: string
+    required:
+    - operationID
+    - platformID
+    - reqIdentifier
+    - sendID
+    type: object
+  apiChat.resultSendMsg:
+    properties:
+      clientMsgID:
+        type: string
+      sendTime:
+        type: integer
+      serverMsgID:
+        type: string
+    type: object
+  apiChat.resultUserNewestSeq:
+    properties:
+      data:
+        properties:
+          maxSeq:
+            type: integer
+          minSeq:
+            type: integer
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+      msgIncr:
+        type: integer
+      reqIdentifier:
+        type: integer
+    type: object
+  apiThird.paramsTencentCloudStorageCredential:
+    properties:
+      operationID:
+        type: string
+      token:
+        type: string
+    type: object
+  apiThird.resultTencentCredential:
+    properties:
+      bucket:
+        type: string
+      data: {}
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+      region:
+        type: string
+    type: object
+  friend.UserInfo:
+    properties:
+      applyTime:
+        type: string
+      birth:
+        type: string
+      email:
+        type: string
+      ex:
+        type: string
+      flag:
+        type: integer
+      gender:
+        type: integer
+      icon:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      reqMessage:
+        type: string
+      uid:
+        type: string
+    type: object
+  friend.blackListUserInfo:
+    properties:
+      birth:
+        type: string
+      email:
+        type: string
+      ex:
+        type: string
+      gender:
+        type: integer
+      icon:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      uid:
+        type: string
+    type: object
+  friend.friendInfo:
+    properties:
+      birth:
+        type: string
+      comment:
+        type: string
+      email:
+        type: string
+      ex:
+        type: string
+      gender:
+        type: integer
+      icon:
+        type: string
+      isInBlackList:
+        type: integer
+      mobile:
+        type: string
+      name:
+        type: string
+      uid:
+        type: string
+    type: object
+  friend.paramsAddFriend:
+    properties:
+      operationID:
+        type: string
+      reqMessage:
+        type: string
+      uid:
+        type: string
+    required:
+    - operationID
+    - uid
+    type: object
+  friend.paramsAddFriendResponse:
+    properties:
+      flag:
+        type: integer
+      operationID:
+        type: string
+      uid:
+        type: string
+    required:
+    - flag
+    - operationID
+    - uid
+    type: object
+  friend.paramsGetApplyList:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  friend.paramsGetFriendLIst:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  friend.paramsImportFriendReq:
+    properties:
+      operationID:
+        type: string
+      ownerUid:
+        type: string
+      uidList:
+        items:
+          type: string
+        type: array
+    required:
+    - operationID
+    - ownerUid
+    - uidList
+    type: object
+  friend.paramsSearchFriend:
+    properties:
+      operationID:
+        type: string
+      ownerUid:
+        type: string
+      uid:
+        type: string
+    required:
+    - operationID
+    - uid
+    type: object
+  friend.paramsSetFriendComment:
+    properties:
+      comment:
+        type: string
+      operationID:
+        type: string
+      uid:
+        type: string
+    required:
+    - operationID
+    - uid
+    type: object
+  friend.resultFriendInfo:
+    properties:
+      birth:
+        type: string
+      comment:
+        type: string
+      email:
+        type: string
+      ex:
+        type: string
+      gender:
+        type: integer
+      icon:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      uid:
+        type: string
+    type: object
+  friend.resultImportFriend:
+    properties:
+      errCode:
+        example: 0
+        type: integer
+      errMsg:
+        example: error
+        type: string
+      failedUidList:
+        items:
+          type: string
+        type: array
+    type: object
+  group.GetGroupMemberListReq:
+    properties:
+      filter:
+        type: integer
+      groupID:
+        type: string
+      nextSeq:
+        type: integer
+      operationID:
+        type: string
+    type: object
+  group.GetGroupMemberListResp:
+    properties:
+      errorCode:
+        type: integer
+      errorMsg:
+        type: string
+      memberList:
+        items:
+          $ref: '#/definitions/group.GroupMemberFullInfo'
+        type: array
+      nextSeq:
+        type: integer
+    type: object
+  group.GetGroupMembersInfoReq:
+    properties:
+      groupID:
+        type: string
+      memberList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+    type: object
+  group.GetGroupMembersInfoResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/group.MemberResult'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  group.GetJoinedGroupListReq:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  group.GetJoinedGroupListResp:
+    properties:
+      errorCode:
+        type: integer
+      errorMsg:
+        type: string
+      groupList:
+        items:
+          $ref: '#/definitions/group.GroupInfo'
+        type: array
+    type: object
+  group.GroupInfo:
+    properties:
+      createTime:
+        type: integer
+      faceUrl:
+        type: string
+      groupId:
+        type: string
+      groupName:
+        type: string
+      introduction:
+        type: string
+      memberCount:
+        type: integer
+      notification:
+        type: string
+      ownerId:
+        type: string
+    type: object
+  group.GroupMemberFullInfo:
+    properties:
+      faceUrl:
+        type: string
+      joinTime:
+        type: integer
+      nickName:
+        type: string
+      role:
+        type: integer
+      userId:
+        type: string
+    type: object
+  group.Id2Result:
+    properties:
+      result:
+        type: integer
+      uId:
+        type: string
+    type: object
+  group.InviteUserToGroupReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+      reason:
+        type: string
+      uidList:
+        items:
+          type: string
+        type: array
+    required:
+    - groupID
+    - operationID
+    - uidList
+    type: object
+  group.InviteUserToGroupResp:
+    properties:
+      errorCode:
+        type: integer
+      errorMsg:
+        type: string
+      id2result:
+        items:
+          $ref: '#/definitions/group.Id2Result'
+        type: array
+    type: object
+  group.KickGroupMemberResp:
+    properties:
+      errorCode:
+        type: integer
+      errorMsg:
+        type: string
+      id2result:
+        items:
+          $ref: '#/definitions/group.Id2Result'
+        type: array
+    type: object
+  group.MemberResult:
+    properties:
+      faceUrl:
+        type: string
+      groupID:
+        type: string
+      joinTime:
+        type: integer
+      nickName:
+        type: string
+      role:
+        type: integer
+      userId:
+        type: string
+    type: object
+  group.getGroupAllMemberReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+    type: object
+  group.paramsCreateGroup:
+    properties:
+      ex:
+        type: string
+      faceUrl:
+        type: string
+      groupName:
+        type: string
+      introduction:
+        type: string
+      memberList:
+        properties:
+          setRole:
+            type: string
+          uid:
+            type: string
+        type: object
+      notification:
+        type: string
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  group.paramsGetGroupInfo:
+    properties:
+      groupIDList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+    required:
+    - groupIDList
+    - operationID
+    type: object
+  group.paramsGroupApplicationList:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  group.paramsGroupApplicationListRet:
+    properties:
+      createTime:
+        type: integer
+      flag:
+        type: integer
+      fromUserFaceURL:
+        type: string
+      fromUserID:
+        type: string
+      fromUserNickName:
+        type: string
+      groupID:
+        type: string
+      handleResult:
+        type: integer
+      handleStatus:
+        type: integer
+      handledMsg:
+        type: string
+      handledUser:
+        type: string
+      id:
+        type: string
+      reqMsg:
+        type: string
+      toUserFaceURL:
+        type: string
+      toUserID:
+        type: string
+      toUserNickName:
+        type: string
+      type:
+        type: integer
+    type: object
+  group.paramsGroupApplicationResponse:
+    properties:
+      addTime:
+        type: integer
+      fromUserFaceUrl:
+        type: string
+      fromUserID:
+        type: string
+      fromUserNickName:
+        type: string
+      groupID:
+        type: string
+      handleResult:
+        type: integer
+      handleStatus:
+        type: integer
+      handledMsg:
+        type: string
+      operationID:
+        type: string
+      requestMsg:
+        type: string
+      toUserFaceUrl:
+        type: string
+      toUserID:
+        type: string
+      toUserNickName:
+        type: string
+      type:
+        type: integer
+    required:
+    - fromUserID
+    - groupID
+    - operationID
+    - toUserID
+    type: object
+  group.paramsJoinGroup:
+    properties:
+      groupID:
+        type: string
+      message:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  group.paramsKickGroupMember:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+      reason:
+        type: string
+      uidListInfo:
+        items:
+          properties:
+            faceUrl:
+              type: string
+            joinTime:
+              type: integer
+            nickName:
+              type: string
+            role:
+              type: integer
+            userId:
+              type: string
+          type: object
+        type: array
+    required:
+    - operationID
+    - uidListInfo
+    type: object
+  group.paramsQuitGroup:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  group.paramsSetGroupInfo:
+    properties:
+      faceUrl:
+        type: string
+      groupId:
+        type: string
+      groupName:
+        type: string
+      introduction:
+        type: string
+      notification:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupId
+    - operationID
+    type: object
+  group.paramsTransferGroupOwner:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+      uid:
+        type: string
+    required:
+    - groupID
+    - operationID
+    - uid
+    type: object
+  group.resultGroupApplication:
+    properties:
+      count:
+        type: integer
+      user:
+        items:
+          $ref: '#/definitions/group.paramsGroupApplicationListRet'
+        type: array
+    type: object
+  manage.deleteUserResult:
+    properties:
+      errCode:
+        example: 0
+        type: integer
+      errMsg:
+        example: error
+        type: string
+      failedUidList:
+        items:
+          type: string
+        type: array
+    type: object
+  manage.paramsDeleteUsers:
+    properties:
+      deleteUidList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+    required:
+    - deleteUidList
+    - operationID
+    type: object
+  manage.paramsGetAllUsersUid:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  manage.paramsManagementSendMsg:
+    properties:
+      content:
+        additionalProperties: true
+        type: object
+      contentType:
+        type: integer
+      forceList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+      recvID:
+        type: string
+      sendID:
+        type: string
+      senderFaceURL:
+        type: string
+      senderNickName:
+        type: string
+      sessionType:
+        type: integer
+    required:
+    - content
+    - contentType
+    - operationID
+    - recvID
+    - sendID
+    - sessionType
+    type: object
+  manage.sendMsgResult:
+    properties:
+      errCode:
+        example: 0
+        type: integer
+      errMsg:
+        example: error
+        type: string
+      msgID:
+        type: string
+      sendTime:
+        type: integer
+    type: object
+  manage.uidListResult:
+    properties:
+      errCode:
+        example: 0
+        type: integer
+      errMsg:
+        example: error
+        type: string
+      uidList:
+        items:
+          type: string
+        type: array
+    type: object
+  user.queryUserInfoParam:
+    properties:
+      operationID:
+        type: string
+      uidList:
+        items:
+          type: string
+        type: array
+    required:
+    - operationID
+    type: object
+  user.result:
+    properties:
+      data: {}
+      errCode:
+        example: 0
+        type: integer
+      errMsg:
+        example: error
+        type: string
+    type: object
+  user.updateUserInfoParam:
+    properties:
+      birth:
+        type: string
+      email:
+        type: string
+      ex:
+        type: string
+      gender:
+        type: integer
+      icon:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      operationID:
+        type: string
+      uid:
+        type: string
+    required:
+    - operationID
+    type: object
+  user.userInfo:
+    properties:
+      birth:
+        type: string
+      email:
+        type: string
+      ex:
+        type: string
+      gender:
+        type: integer
+      icon:
+        type: string
+      mobile:
+        type: string
+      name:
+        type: string
+      uid:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/user_register:
+    post:
+      consumes:
+      - application/json
+      description: register a new user
+      parameters:
+      - description: new user params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/apiAuth.paramsUserRegister'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiAuth.resultUserRegister'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - auth
+  /auth/user_token:
+    post:
+      consumes:
+      - application/json
+      description: get token
+      parameters:
+      - description: get token params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/apiAuth.paramsUserToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiAuth.resultUserRegister'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - auth
+  /chat/newest_seq:
+    post:
+      consumes:
+      - application/json
+      description: get latest message seq
+      parameters:
+      - description: user get latest seq params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/apiChat.paramsUserNewestSeq'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apiChat.resultUserNewestSeq'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - chat
+  /chat/pull_msg:
+    post:
+      consumes:
+      - application/json
+      description: user pull messages
+      parameters:
+      - description: user pull messages
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/apiChat.paramsUserPullMsg'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                reqIdentifier:
+                  type: integer
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - chat
+  /chat/pull_msg_by_seq:
+    post:
+      consumes:
+      - application/json
+      description: user pull msg by seq
+      parameters:
+      - description: pull msg by seq
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/apiChat.paramsUserPullMsgBySeqList'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                reqIdentifier:
+                  type: integer
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - chat
+  /chat/send_msg:
+    post:
+      consumes:
+      - application/json
+      description: user send messages
+      parameters:
+      - description: user send messages
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/apiChat.paramsUserSendMsg'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  $ref: '#/definitions/apiChat.resultSendMsg'
+                reqIdentifier:
+                  type: integer
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - chat
+  /friend/add_blacklist:
+    post:
+      consumes:
+      - application/json
+      description: add a user into black list
+      parameters:
+      - description: add black list params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsSearchFriend'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/add_friend:
+    post:
+      consumes:
+      - application/json
+      description: add a new friend by uid
+      parameters:
+      - description: add friend params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsAddFriend'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/add_friend_response:
+    post:
+      consumes:
+      - application/json
+      description: the response of adding friend
+      parameters:
+      - description: response of adding friend
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsAddFriendResponse'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/delete_friend:
+    post:
+      consumes:
+      - application/json
+      description: delete friend
+      parameters:
+      - description: delete friend params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsSearchFriend'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/get_blacklist:
+    post:
+      consumes:
+      - application/json
+      description: get black list
+      parameters:
+      - description: get black list
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsSearchFriend'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/friend.blackListUserInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/get_friend_apply_list:
+    post:
+      consumes:
+      - application/json
+      description: get friend apply list
+      parameters:
+      - description: get friend apply list
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsGetApplyList'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/friend.UserInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/get_friend_list:
+    post:
+      consumes:
+      - application/json
+      description: get friend apply list
+      parameters:
+      - description: get friend apply list
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsGetFriendLIst'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/friend.friendInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/get_friends_info:
+    post:
+      consumes:
+      - application/json
+      description: get friend info
+      parameters:
+      - description: search friend params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsSearchFriend'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/get_self_apply_list:
+    post:
+      consumes:
+      - application/json
+      description: get friend apply list
+      parameters:
+      - description: get friend apply list
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsGetApplyList'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/friend.UserInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/import_friend:
+    post:
+      consumes:
+      - application/json
+      description: import friend
+      parameters:
+      - description: import friend params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsImportFriendReq'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/friend.resultImportFriend'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/is_friend:
+    post:
+      consumes:
+      - application/json
+      description: check is friend
+      parameters:
+      - description: is friend params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsSearchFriend'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/remove_blacklist:
+    post:
+      consumes:
+      - application/json
+      description: remove black list
+      parameters:
+      - description: remove black list params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsSearchFriend'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /friend/set_friend_comment:
+    post:
+      consumes:
+      - application/json
+      description: set friend comment
+      parameters:
+      - description: set friend comment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/friend.paramsSetFriendComment'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - friend
+  /group/create_group:
+    post:
+      consumes:
+      - application/json
+      description: create group
+      parameters:
+      - description: create group params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.paramsCreateGroup'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/get_group_all_member_list:
+    post:
+      consumes:
+      - application/json
+      description: get group all members
+      parameters:
+      - description: get group all members params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.getGroupAllMemberReq'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GetGroupMemberListResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/get_group_applicationList:
+    post:
+      consumes:
+      - application/json
+      description: get group application list
+      parameters:
+      - description: get group application list params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.paramsGroupApplicationList'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  $ref: '#/definitions/group.resultGroupApplication'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/get_group_member_list:
+    post:
+      consumes:
+      - application/json
+      description: get group member list
+      parameters:
+      - description: get group member list params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.GetGroupMemberListReq'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GetGroupMemberListResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/get_group_members_info:
+    post:
+      consumes:
+      - application/json
+      description: get group members info
+      parameters:
+      - description: get group members info params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.GetGroupMembersInfoReq'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GetGroupMembersInfoResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/get_groups_info:
+    post:
+      consumes:
+      - application/json
+      description: get groups info
+      parameters:
+      - description: get groups info params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.paramsGetGroupInfo'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/group.GroupInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/get_joined_group_list:
+    post:
+      consumes:
+      - application/json
+      description: get joined group list
+      parameters:
+      - description: get joined group list params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.GetJoinedGroupListReq'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.GetJoinedGroupListResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/group_application_response:
+    post:
+      consumes:
+      - application/json
+      description: response of application group
+      parameters:
+      - description: application group param
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.paramsGroupApplicationResponse'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/invite_user_to_group:
+    post:
+      consumes:
+      - application/json
+      description: invite user to group
+      parameters:
+      - description: invite user to group params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.InviteUserToGroupReq'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.InviteUserToGroupResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/kick_group:
+    post:
+      consumes:
+      - application/json
+      description: kick member from group
+      parameters:
+      - description: kick member from group params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.paramsKickGroupMember'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/group.KickGroupMemberResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/set_group_info:
+    post:
+      consumes:
+      - application/json
+      description: set group info
+      parameters:
+      - description: set group info params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.paramsSetGroupInfo'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /group/transfer_group:
+    post:
+      consumes:
+      - application/json
+      description: transfer group owner
+      parameters:
+      - description: transfer group owner param
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/group.paramsTransferGroupOwner'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - group
+  /manager/delete_user:
+    post:
+      consumes:
+      - application/json
+      description: delete user
+      parameters:
+      - description: user to be deleted
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/manage.paramsDeleteUsers'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/manage.deleteUserResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - manage
+  /manager/get_all_users_uid:
+    post:
+      consumes:
+      - application/json
+      description: get all user ids
+      parameters:
+      - description: all user ids
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/manage.paramsGetAllUsersUid'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/manage.uidListResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/manage.uidListResult'
+      tags:
+      - manage
+  /manager/send_msg:
+    post:
+      consumes:
+      - application/json
+      description: manage send message
+      parameters:
+      - description: manage send message
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/manage.paramsManagementSendMsg'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/manage.sendMsgResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - manage
+  /third/user_register:
+    post:
+      consumes:
+      - application/json
+      description: get Tencent cloud storage credential
+      parameters:
+      - description: get Tencent cloud storage credential params
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/apiThird.paramsTencentCloudStorageCredential'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apiThird.resultTencentCredential'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - third
+  /user/get_user_info:
+    post:
+      consumes:
+      - application/json
+      description: get user info by uid list
+      parameters:
+      - description: get userInfo by uidList
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.queryUserInfoParam'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/user.result'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/user.userInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - user
+  /user/update_user_info:
+    post:
+      consumes:
+      - application/json
+      description: update user info
+      parameters:
+      - description: new user info
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.updateUserInfoParam'
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.result'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/user.result'
+      tags:
+      - user
+swagger: "2.0"

@@ -163,6 +163,7 @@ func (m *CreateGroupReq) GetEx() string {
 	return ""
 }
 
+// GroupAddMemberInfo struct
 type GroupAddMemberInfo struct {
 	Uid                  string   `protobuf:"bytes,1,opt,name=uid" json:"uid,omitempty"`
 	SetRole              int32    `protobuf:"varint,2,opt,name=setRole" json:"setRole,omitempty"`
@@ -1879,6 +1880,7 @@ func (m *GetJoinedGroupListReq) GetOperationID() string {
 	return ""
 }
 
+// GroupInfo struct
 type GroupInfo struct {
 	GroupId              string   `protobuf:"bytes,1,opt,name=groupId" json:"groupId,omitempty"`
 	GroupName            string   `protobuf:"bytes,2,opt,name=groupName" json:"groupName,omitempty"`

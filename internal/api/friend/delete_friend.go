@@ -1,22 +1,36 @@
 package friend
 
 import (
-	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsDeleteFriend struct
 type paramsDeleteFriend struct {
 	OperationID string `json:"operationID" binding:"required"`
 	UID         string `json:"uid" binding:"required"`
 }
 
+// @Summary
+// @Schemes
+// @Description delete friend
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsSearchFriend true "delete friend params"
+// @Param token header string true "token"
+// @Success 200 {object} user.result
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /friend/delete_friend [post]
 func DeleteFriend(c *gin.Context) {
 	log.Info("", "", fmt.Sprintf("api delete_friend init ...."))
 

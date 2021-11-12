@@ -1,16 +1,30 @@
 package group
 
 import (
-	pb "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pb "Open_IM/pkg/proto/group"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsCreateGroup struct
+type paramsCreateGroup struct {
+	MemberList struct {
+		Uid     string `json:"uid"`
+		SetRole string `json:"setRole,omitempty"`
+	} `json:"memberList"`
+	GroupName    string `json:"groupName"`
+	Introduction string `json:"introduction"`
+	Notification string `json:"notification"`
+	FaceUrl      string `json:"faceUrl"`
+	OperationID  string `json:"operationID" binding:"required"`
+	Ex           string `json:"ex"`
+}
 type paramsCreateGroupStruct struct {
 	MemberList   []*pb.GroupAddMemberInfo `json:"memberList"`
 	GroupName    string                   `json:"groupName"`
@@ -21,6 +35,18 @@ type paramsCreateGroupStruct struct {
 	Ex           string                   `json:"ex"`
 }
 
+// @Summary
+// @Schemes
+// @Description create group
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.paramsCreateGroup true "create group params"
+// @Param token header string true "token"
+// @Success 200 {object} user.result
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/create_group [post]
 func CreateGroup(c *gin.Context) {
 	log.Info("", "", "api create group init ....")
 
