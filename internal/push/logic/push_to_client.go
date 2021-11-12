@@ -95,6 +95,7 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 								content = constant.ContentType2PushContent[constant.GroupMsg]
 							}
 						default:
+							content = constant.ContentType2PushContent[constant.Common]
 						}
 						pushResult, err := push.JGAccountListPush(UIDList, content, jsonCustomContent, utils.PlatformIDToName(t))
 						if err != nil {
