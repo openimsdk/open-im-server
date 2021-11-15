@@ -26,7 +26,7 @@ type paramsAddFriend struct {
 //
 func ImportFriend(c *gin.Context) {
 	log.Info("", "", "ImportFriend init ....")
-
+	log.NewDebug("", "api importFriend start")
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := pbFriend.NewFriendClient(etcdConn)
 
@@ -41,16 +41,15 @@ func ImportFriend(c *gin.Context) {
 		OwnerUid:    params.OwnerUid,
 		Token:       c.Request.Header.Get("token"),
 	}
+	log.NewDebug(req.OperationID, "args is ", req.String())
 	RpcResp, err := client.ImportFriend(context.Background(), req)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "err=%s,ImportFriend failed", err)
+		log.NewError(req.OperationID, "rpc importFriend failed", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed" + err.Error()})
 		return
 	}
-	log.InfoByArgs("ImportFriend  success,args=%s", RpcResp.String())
-	resp := gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "failedUidList": RpcResp.FailedUidList}
-	c.JSON(http.StatusOK, resp)
-	log.InfoByArgs("ImportFriend success return,get args=%s,return args=%s", req.String(), RpcResp.String())
+	log.NewDebug(req.OperationID, "rpc importFriend success", RpcResp.CommonResp.ErrorMsg, RpcResp.CommonResp.ErrorCode, RpcResp.FailedUidList)
+	c.JSON(http.StatusOK, gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "failedUidList": RpcResp.FailedUidList})
 }
 
 func AddFriend(c *gin.Context) {
@@ -78,7 +77,8 @@ func AddFriend(c *gin.Context) {
 		return
 	}
 	log.InfoByArgs("call add friend rpc server success,args=%s", RpcResp.String())
-	resp := gin.H{"errCode": RpcResp.ErrorCode, "errMsg": RpcResp.ErrorMsg}
-	c.JSON(http.StatusOK, resp)
-	log.InfoByArgs("api add friend success return,get args=%s,return args=%s", req.String(), RpcResp.String())
+	c.JSON(http.StatusOK, gin.H{
+		"errCode": RpcResp.ErrorCode,
+		"errMsg":  RpcResp.ErrorMsg,
+	})
 }

@@ -127,6 +127,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		}
 
 	}
+	log.NewDebug(req.OperationID, "rpc come end", resp.CommonResp.ErrorCode, resp.CommonResp.ErrorMsg, resp.FailedUidList)
 	return &resp, nil
 
 }
