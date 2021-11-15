@@ -45,7 +45,7 @@ func ImportFriend(c *gin.Context) {
 	RpcResp, err := client.ImportFriend(context.Background(), req)
 	if err != nil {
 		log.NewError(req.OperationID, "rpc importFriend failed", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed" + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed " + err.Error()})
 		return
 	}
 	log.NewDebug(req.OperationID, "rpc importFriend success", RpcResp.CommonResp.ErrorMsg, RpcResp.CommonResp.ErrorCode, RpcResp.FailedUidList)

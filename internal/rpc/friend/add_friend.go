@@ -81,7 +81,6 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		if _, fErr := im_mysql_model.FindUserByUID(v); fErr != nil {
 			c.ErrorMsg = "some uid establish failed"
 			c.ErrorCode = 408
-			resp.CommonResp = &c
 			resp.FailedUidList = append(resp.FailedUidList, v)
 		} else {
 			if _, err = im_mysql_model.FindFriendRelationshipFromFriend(req.OwnerUid, v); err != nil {
@@ -127,6 +126,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		}
 
 	}
+	resp.CommonResp = &c
 	log.NewDebug(req.OperationID, "rpc come end", resp.CommonResp.ErrorCode, resp.CommonResp.ErrorMsg, resp.FailedUidList)
 	return &resp, nil
 
