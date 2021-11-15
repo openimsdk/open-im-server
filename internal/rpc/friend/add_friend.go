@@ -59,7 +59,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	//Parse token, to find current user information
 	claims, err := utils.ParseToken(req.Token)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
+		log.NewError(req.OperationID, "parse token failed", err.Error())
 		c.ErrorCode = config.ErrAddFriend.ErrCode
 		c.ErrorMsg = config.ErrParseToken.ErrMsg
 		return &pbFriend.ImportFriendResp{CommonResp: &c, FailedUidList: req.UidList}, nil
@@ -72,7 +72,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		return &pbFriend.ImportFriendResp{CommonResp: &c, FailedUidList: req.UidList}, nil
 	}
 	if _, err = im_mysql_model.FindUserByUID(req.OwnerUid); err != nil {
-		log.Error(req.Token, req.OperationID, "this user not exists,cant not add friend", req.OwnerUid)
+		log.NewError(req.OperationID, "this user not exists,cant not add friend", req.OwnerUid)
 		c.ErrorCode = config.ErrAddFriend.ErrCode
 		c.ErrorMsg = "this user not exists,cant not add friend"
 		return &pbFriend.ImportFriendResp{CommonResp: &c, FailedUidList: req.UidList}, nil
