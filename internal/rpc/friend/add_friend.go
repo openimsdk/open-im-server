@@ -118,13 +118,12 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 						OperationID:    req.OperationID,
 					})
 				} else {
-					resp.CommonResp.ErrorMsg = "some uid establish failed"
-					resp.CommonResp.ErrorCode = 408
+					c.ErrorMsg = "some uid establish failed"
+					c.ErrorCode = 408
 					resp.FailedUidList = append(resp.FailedUidList, v)
 				}
 			}
 		}
-
 	}
 	resp.CommonResp = &c
 	log.NewDebug(req.OperationID, "rpc come end", resp.CommonResp.ErrorCode, resp.CommonResp.ErrorMsg, resp.FailedUidList)
