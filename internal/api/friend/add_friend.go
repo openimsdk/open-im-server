@@ -48,8 +48,12 @@ func ImportFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed " + err.Error()})
 		return
 	}
+	failedUidList := make([]string, 0)
+	for _, v := range RpcResp.FailedUidList {
+		failedUidList = append(failedUidList, v)
+	}
 	log.NewDebug(req.OperationID, "rpc importFriend success", RpcResp.CommonResp.ErrorMsg, RpcResp.CommonResp.ErrorCode, RpcResp.FailedUidList)
-	c.JSON(http.StatusOK, gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "failedUidList": RpcResp.FailedUidList})
+	c.JSON(http.StatusOK, gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "failedUidList": failedUidList})
 }
 
 func AddFriend(c *gin.Context) {

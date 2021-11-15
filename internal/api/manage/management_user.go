@@ -43,9 +43,13 @@ func DeleteUser(c *gin.Context) {
 	}
 	RpcResp, err := client.DeleteUsers(context.Background(), req)
 	if err != nil {
-
+		log.NewError(req.OperationID, "call delete users rpc server failed", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call delete users rpc server failed"})
 		return
+	}
+	failedUidList := make([]string, 0)
+	for _, v := range RpcResp.FailedUidList {
+		failedUidList = append(failedUidList, v)
 	}
 	log.InfoByKv("call delete user rpc server is success", params.OperationID, "resp args", RpcResp.String())
 	resp := gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "failedUidList": RpcResp.FailedUidList}

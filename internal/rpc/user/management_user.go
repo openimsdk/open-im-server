@@ -18,6 +18,7 @@ import (
 func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
 	log.InfoByKv("rpc DeleteUsers arrived server", req.OperationID, "args", req.String())
 	var resp pbUser.DeleteUsersResp
+	var common pbUser.CommonResp
 	c, err := utils.ParseToken(req.Token)
 	if err != nil {
 		log.ErrorByKv("parse token failed", req.OperationID, "err", err.Error())
@@ -30,11 +31,12 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 	for _, uid := range req.DeleteUidList {
 		err = im_mysql_model.UserDelete(uid)
 		if err != nil {
-			resp.CommonResp.ErrorCode = 201
-			resp.CommonResp.ErrorMsg = "some uid deleted failed"
+			common.ErrorCode = 201
+			common.ErrorMsg = "some uid deleted failed"
 			resp.FailedUidList = append(resp.FailedUidList, uid)
 		}
 	}
+	resp.CommonResp = &common
 	return &resp, nil
 
 }
