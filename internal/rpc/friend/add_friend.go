@@ -66,7 +66,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	}
 
 	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
-		log.Error(req.Token, req.OperationID, "not manager uid", claims.UID)
+		log.NewError(req.OperationID, "not manager uid", claims.UID)
 		c.ErrorCode = config.ErrAddFriend.ErrCode
 		c.ErrorMsg = "not authorized"
 		return &pbFriend.ImportFriendResp{CommonResp: &c, FailedUidList: req.UidList}, nil
