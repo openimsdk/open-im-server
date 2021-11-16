@@ -155,8 +155,9 @@ type config struct {
 		AccessExpire int64  `yaml:"accessExpire"`
 	}
 	MessageCallBack struct {
-		CallbackSwitch bool   `yaml:"callbackSwitch"`
-		CallbackUrl    string `yaml:"callbackUrl"`
+		CallbackSwitch  bool   `yaml:"callbackSwitch"`
+		CallbackUrl     string `yaml:"callbackUrl"`
+		CallBackTimeOut int    `yaml:"callbackTimeOut"`
 	}
 }
 

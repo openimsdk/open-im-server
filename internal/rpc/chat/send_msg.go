@@ -21,14 +21,16 @@ import (
 )
 
 type MsgCallBackReq struct {
-	SendID      string `json:"sendID"`
-	RecvID      string `json:"recvID"`
-	Content     string `json:"content"`
-	SendTime    int64  `json:"sendTime"`
-	MsgFrom     int32  `json:"msgFrom"`
-	ContentType int32  `json:"contentType"`
-	SessionType int32  `json:"sessionType"`
-	PlatformID  int32  `json:"senderPlatformID"`
+	SendID       string `json:"sendID"`
+	RecvID       string `json:"recvID"`
+	Content      string `json:"content"`
+	SendTime     int64  `json:"sendTime"`
+	MsgFrom      int32  `json:"msgFrom"`
+	ContentType  int32  `json:"contentType"`
+	SessionType  int32  `json:"sessionType"`
+	PlatformID   int32  `json:"senderPlatformID"`
+	MsgID        string `json:"msgID"`
+	IsOnlineOnly bool   `json:"isOnlineOnly"`
 }
 type MsgCallBackResp struct {
 	ErrCode         int32  `json:"errCode"`
@@ -68,29 +70,36 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	} else {
 		pbData.SendTime = pb.SendTime
 	}
-	m := MsgCallBackResp{}
+	Options := utils.JsonStringToMap(pbData.Options)
+	isHistory := utils.GetSwitchFromOptions(Options, "history")
+	mReq := MsgCallBackReq{
+		SendID:      pb.SendID,
+		RecvID:      pb.RecvID,
+		Content:     pb.Content,
+		SendTime:    pbData.SendTime,
+		MsgFrom:     pbData.MsgFrom,
+		ContentType: pb.ContentType,
+		SessionType: pb.SessionType,
+		PlatformID:  pb.PlatformID,
+		MsgID:       pb.ClientMsgID,
+	}
+	if !isHistory {
+		mReq.IsOnlineOnly = true
+	}
+	mResp := MsgCallBackResp{}
 	if config.Config.MessageCallBack.CallbackSwitch {
-		bMsg, err := http2.Post(config.Config.MessageCallBack.CallbackUrl, MsgCallBackReq{
-			SendID:      pb.SendID,
-			RecvID:      pb.RecvID,
-			Content:     pb.Content,
-			SendTime:    pbData.SendTime,
-			MsgFrom:     pbData.MsgFrom,
-			ContentType: pb.ContentType,
-			SessionType: pb.SessionType,
-			PlatformID:  pb.PlatformID,
-		}, "application/json; charset=utf-8")
+		bMsg, err := http2.Post(config.Config.MessageCallBack.CallbackUrl, mReq, config.Config.MessageCallBack.CallBackTimeOut)
 		if err != nil {
 			log.ErrorByKv("callback to Business server err", pb.OperationID, "args", pb.String(), "err", err.Error())
 			return returnMsg(&replay, pb, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), "", 0)
-		} else if err = json.Unmarshal(bMsg, &m); err != nil {
+		} else if err = json.Unmarshal(bMsg, &mResp); err != nil {
 			log.ErrorByKv("ws json Unmarshal err", pb.OperationID, "args", pb.String(), "err", err.Error())
 			return returnMsg(&replay, pb, 200, err.Error(), "", 0)
 		} else {
-			if m.ErrCode != 0 {
-				return returnMsg(&replay, pb, m.ResponseErrCode, m.ErrMsg, "", 0)
+			if mResp.ErrCode != 0 {
+				return returnMsg(&replay, pb, mResp.ResponseErrCode, mResp.ErrMsg, "", 0)
 			} else {
-				pbData.Content = m.ResponseResult.ModifiedMsg
+				pbData.Content = mResp.ResponseResult.ModifiedMsg
 			}
 		}
 	}

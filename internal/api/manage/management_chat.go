@@ -24,15 +24,17 @@ import (
 var validate *validator.Validate
 
 type paramsManagementSendMsg struct {
-	OperationID    string                 `json:"operationID" binding:"required"`
-	SendID         string                 `json:"sendID" binding:"required"`
-	RecvID         string                 `json:"recvID" binding:"required"`
-	SenderNickName string                 `json:"senderNickName" `
-	SenderFaceURL  string                 `json:"senderFaceURL" `
-	ForceList      []string               `json:"forceList" `
-	Content        map[string]interface{} `json:"content" binding:"required"`
-	ContentType    int32                  `json:"contentType" binding:"required"`
-	SessionType    int32                  `json:"sessionType" binding:"required"`
+	OperationID      string                 `json:"operationID" binding:"required"`
+	SendID           string                 `json:"sendID" binding:"required"`
+	RecvID           string                 `json:"recvID" binding:"required"`
+	SenderNickName   string                 `json:"senderNickName" `
+	SenderFaceURL    string                 `json:"senderFaceURL" `
+	SenderPlatformID int32                  `json:"senderPlatformID"`
+	ForceList        []string               `json:"forceList" `
+	Content          map[string]interface{} `json:"content" binding:"required"`
+	ContentType      int32                  `json:"contentType" binding:"required"`
+	SessionType      int32                  `json:"sessionType" binding:"required"`
+	IsOnlineOnly     bool                   `json:"isOnlineOnly"`
 }
 
 func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
@@ -49,7 +51,11 @@ func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
 	case constant.File:
 		newContent = utils.StructToJsonString(params.Content)
 	default:
-
+	}
+	options := make(map[string]int32, 2)
+	if params.IsOnlineOnly {
+		options["history"] = 0
+		options["persistent"] = 0
 	}
 	pbData := pbChat.UserSendMsgReq{
 		ReqIdentifier:  constant.WSSendMsg,
@@ -57,7 +63,7 @@ func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
 		SenderNickName: params.SenderNickName,
 		SenderFaceURL:  params.SenderFaceURL,
 		OperationID:    params.OperationID,
-		PlatformID:     0,
+		PlatformID:     params.SenderPlatformID,
 		SessionType:    params.SessionType,
 		MsgFrom:        constant.UserMsgType,
 		ContentType:    params.ContentType,
@@ -65,6 +71,7 @@ func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
 		ForceList:      params.ForceList,
 		Content:        newContent,
 		ClientMsgID:    utils.GetMsgID(params.SendID),
+		Options:        utils.MapIntToJsonString(options),
 	}
 	return &pbData
 }
@@ -84,8 +91,24 @@ func ManagementSendMsg(c *gin.Context) {
 		data = TextElem{}
 	case constant.Picture:
 		data = PictureElem{}
+	case constant.Voice:
+		data = SoundElem{}
+	case constant.Video:
+		data = VideoElem{}
+	case constant.File:
+		data = FileElem{}
+	//case constant.AtText:
+	//	data = AtElem{}
+	//case constant.Merger:
+	//	data =
+	//case constant.Card:
+	//case constant.Location:
 	case constant.Custom:
 		data = CustomElem{}
+	//case constant.Revoke:
+	//case constant.HasReadReceipt:
+	//case constant.Typing:
+	//case constant.Quote:
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 404, "errMsg": "contentType err"})
 		log.ErrorByKv("contentType err", c.PostForm("operationID"), "content", c.PostForm("content"))

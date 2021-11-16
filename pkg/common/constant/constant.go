@@ -32,9 +32,13 @@ const (
 	Video          = 104
 	File           = 105
 	AtText         = 106
+	Merger         = 107
+	Card           = 108
+	Location       = 109
 	Custom         = 110
 	HasReadReceipt = 112
 	Typing         = 113
+	Quote          = 114
 	Common         = 200
 	GroupMsg       = 201
 
