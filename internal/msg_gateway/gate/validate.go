@@ -9,17 +9,27 @@ package gate
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	"github.com/mitchellh/mapstructure"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	"github.com/golang/protobuf/proto"
 )
 
 type Req struct {
-	ReqIdentifier int32                  `json:"reqIdentifier" validate:"required"`
-	Token         string                 `json:"token" validate:"required"`
-	SendID        string                 `json:"sendID" validate:"required"`
-	OperationID   string                 `json:"operationID" validate:"required"`
-	MsgIncr       int32                  `json:"msgIncr" validate:"required"`
-	Data          map[string]interface{} `json:"data"`
+	ReqIdentifier int32  `json:"reqIdentifier" validate:"required"`
+	Token         string `json:"token" `
+	SendID        string `json:"sendID" validate:"required"`
+	OperationID   string `json:"operationID" validate:"required"`
+	MsgIncr       string `json:"msgIncr" validate:"required"`
+	Data          []byte `json:"data"`
 }
+type Resp struct {
+	ReqIdentifier int32  `json:"reqIdentifier"`
+	MsgIncr       string `json:"msgIncr"`
+	OperationID   string `json:"operationID"`
+	ErrCode       int32  `json:"errCode"`
+	ErrMsg        string `json:"errMsg"`
+	Data          []byte `json:"data"`
+}
+
 type SeqData struct {
 	SeqBegin int64 `mapstructure:"seqBegin" validate:"required"`
 	SeqEnd   int64 `mapstructure:"seqEnd" validate:"required"`
@@ -30,31 +40,64 @@ type MsgData struct {
 	MsgFrom     int32                  `mapstructure:"msgFrom" validate:"required"`
 	ContentType int32                  `mapstructure:"contentType" validate:"required"`
 	RecvID      string                 `mapstructure:"recvID" validate:"required"`
-	ForceList   []string               `mapstructure:"forceList" validate:"required"`
+	ForceList   []string               `mapstructure:"forceList"`
 	Content     string                 `mapstructure:"content" validate:"required"`
 	Options     map[string]interface{} `mapstructure:"options" validate:"required"`
 	ClientMsgID string                 `mapstructure:"clientMsgID" validate:"required"`
 	OfflineInfo map[string]interface{} `mapstructure:"offlineInfo" validate:"required"`
 	Ext         map[string]interface{} `mapstructure:"ext"`
 }
+type MaxSeqResp struct {
+	MaxSeq int64 `json:"maxSeq"`
+}
+type PullMessageResp struct {
+}
+type SeqListData struct {
+	SeqList []int64 `mapstructure:"seqList" validate:"required"`
+}
 
-func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, errMsg string, data interface{}) {
+func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, errMsg string, returnData interface{}) {
 	switch r {
-	case constant.WSPullMsg:
-		data = SeqData{}
 	case constant.WSSendMsg:
-		data = MsgData{}
+		data := open_im_sdk.UserSendMsgReq{}
+		if err := proto.Unmarshal(m.Data, &data); err != nil {
+			log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+			return false, 203, err.Error(), nil
+		}
+		if err := validate.Struct(data); err != nil {
+			log.ErrorByKv("data args validate  err", "", "err", err.Error(), "reqIdentifier", r)
+			return false, 204, err.Error(), nil
+
+		}
+		return true, 0, "", data
+	case constant.WSPullMsgBySeqList:
+		data := open_im_sdk.PullMessageBySeqListReq{}
+		if err := proto.Unmarshal(m.Data, &data); err != nil {
+			log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+			return false, 203, err.Error(), nil
+		}
+		if err := validate.Struct(data); err != nil {
+			log.ErrorByKv("data args validate  err", "", "err", err.Error(), "reqIdentifier", r)
+			return false, 204, err.Error(), nil
+
+		}
+		return true, 0, "", data
+
 	default:
 	}
-	if err := mapstructure.WeakDecode(m.Data, &data); err != nil {
-		log.ErrorByKv("map to Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
-		return false, 203, err.Error(), nil
-	} else if err := validate.Struct(data); err != nil {
-		log.ErrorByKv("data args validate  err", "", "err", err.Error(), "reqIdentifier", r)
-		return false, 204, err.Error(), nil
 
-	} else {
-		return true, 0, "", data
-	}
+	return false, 204, "args err", nil
+
+	//b := bytes.NewBuffer(m.Data)
+	//dec := gob.NewDecoder(b)
+	//err := dec.Decode(&data)
+	//if err != nil {
+	//	log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+	//	return false, 203, err.Error(), nil
+	//}
+	//if err := mapstructure.WeakDecode(m.Data, &data); err != nil {
+	//	log.ErrorByKv("map to Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+	//	return false, 203, err.Error(), nil
+	//} else
 
 }

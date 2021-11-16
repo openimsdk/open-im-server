@@ -6,14 +6,18 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/gob"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"google.golang.org/grpc"
+	"github.com/golang/protobuf/proto"
 	"net"
 	"strings"
+
+	"github.com/gorilla/websocket"
+	"google.golang.org/grpc"
 )
 
 type RPCServer struct {
@@ -55,105 +59,87 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 	log.InfoByKv("PushMsgToUser is arriving", in.OperationID, "args", in.String())
 	var resp []*pbRelay.SingleMsgToUser
 	var RecvID string
-	msg := make(map[string]interface{})
-	mReply := make(map[string]interface{})
-	mReply["reqIdentifier"] = constant.WSPushMsg
-	mReply["errCode"] = 0
-	mReply["errMsg"] = ""
-	msg["sendID"] = in.SendID
-	msg["recvID"] = in.RecvID
-	msg["msgFrom"] = in.MsgFrom
-	msg["contentType"] = in.ContentType
-	msg["sessionType"] = in.SessionType
-	msg["senderNickName"] = in.SenderNickName
-	msg["senderFaceUrl"] = in.SenderFaceURL
-	msg["clientMsgID"] = in.ClientMsgID
-	msg["serverMsgID"] = in.ServerMsgID
-	msg["content"] = in.Content
-	msg["seq"] = in.RecvSeq
-	msg["sendTime"] = in.SendTime
-	msg["senderPlatformID"] = in.PlatformID
-	mReply["data"] = msg
-	bMsg, _ := json.Marshal(mReply)
+	msg := open_im_sdk.MsgData{
+		SendID:           in.SendID,
+		RecvID:           in.RecvID,
+		MsgFrom:          in.MsgFrom,
+		ContentType:      in.ContentType,
+		SessionType:      in.SessionType,
+		SenderNickName:   in.SenderNickName,
+		SenderFaceURL:    in.SenderFaceURL,
+		ClientMsgID:      in.ClientMsgID,
+		ServerMsgID:      in.ServerMsgID,
+		Content:          in.Content,
+		Seq:              in.RecvSeq,
+		SendTime:         in.SendTime,
+		SenderPlatformID: in.PlatformID,
+	}
+	msgBytes, _ := proto.Marshal(&msg)
+	mReply := Resp{
+		ReqIdentifier: constant.WSPushMsg,
+		OperationID:   in.OperationID,
+		Data:          msgBytes,
+	}
+	var replyBytes bytes.Buffer
+	enc := gob.NewEncoder(&replyBytes)
+	err := enc.Encode(mReply)
+	if err != nil {
+		log.NewError(in.OperationID, "data encode err", err.Error())
+	}
 	switch in.GetSessionType() {
 	case constant.SingleChatType:
 		RecvID = in.GetRecvID()
 	case constant.GroupChatType:
 		RecvID = strings.Split(in.GetRecvID(), " ")[0]
 	}
-	log.InfoByKv("test", in.OperationID, "wsUserToConn", ws.wsUserToConn)
-	for key, conn := range ws.wsUserToConn {
-		UIDAndPID := strings.Split(key, " ")
-		if UIDAndPID[0] == RecvID {
-			resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
+	var tag bool
+	var UIDAndPID []string
+	userIDList := genUidPlatformArray(RecvID)
+	for _, v := range userIDList {
+		UIDAndPID = strings.Split(v, " ")
+		if conn := ws.getUserConn(v); conn != nil {
+			tag = true
+			resultCode := sendMsgToUser(conn, replyBytes.Bytes(), in, UIDAndPID[1], UIDAndPID[0])
 			temp := &pbRelay.SingleMsgToUser{
 				ResultCode:     resultCode,
 				RecvID:         UIDAndPID[0],
 				RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
 			}
 			resp = append(resp, temp)
+		} else {
+			temp := &pbRelay.SingleMsgToUser{
+				ResultCode:     -1,
+				RecvID:         UIDAndPID[0],
+				RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
+			}
+			resp = append(resp, temp)
 		}
 	}
-	//switch in.GetContentType() {
-	//case constant.SyncSenderMsg:
-	//	log.InfoByKv("come sync", in.OperationID, "args", in.String())
-	//	RecvID = in.GetSendID()
-	//	if in.MsgFrom != constant.SysMsgType {
-	//		for key, conn := range ws.wsUserToConn {
-	//			UIDAndPID := strings.Split(key, " ")
-	//			if UIDAndPID[0] == RecvID && utils.PlatformIDToName(in.GetPlatformID()) != UIDAndPID[1] {
-	//				resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
-	//				temp := &pbRelay.SingleMsgToUser{
-	//					ResultCode:     resultCode,
-	//					RecvID:         UIDAndPID[0],
-	//					RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
-	//				}
-	//				resp = append(resp, temp)
-	//			}
-	//
-	//		}
-	//	}
-	//default:
-	//	log.InfoByKv("not come sync", in.OperationID, "args", in.String())
-	//	switch in.SessionType {
-	//	case constant.SingleChatType:
-	//		log.InfoByKv("come single", in.OperationID, "args", in.String())
-	//		RecvID = in.GetRecvID()
-	//	case constant.GroupChatType:
-	//		RecvID = strings.Split(in.GetRecvID(), " ")[0]
-	//	default:
-	//	}
-	//	log.InfoByKv("come for range", in.OperationID, "args", in.String())
-	//
-	//	for key, conn := range ws.wsUserToConn {
-	//		UIDAndPID := strings.Split(key, " ")
-	//		if UIDAndPID[0] == RecvID {
-	//			resultCode := sendMsgToUser(conn, bMsg, in, UIDAndPID[1], UIDAndPID[0])
-	//			temp := &pbRelay.SingleMsgToUser{
-	//				ResultCode:     resultCode,
-	//				RecvID:         UIDAndPID[0],
-	//				RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
-	//			}
-	//			resp = append(resp, temp)
-	//		}
-	//	}
-	//}
+	if !tag {
+		log.NewError(in.OperationID, "push err ,no matched ws conn not in map", in.String())
+	}
 	return &pbRelay.MsgToUserResp{
 		Resp: resp,
 	}, nil
 }
 
-func sendMsgToUser(conn *websocket.Conn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPlatForm, RecvID string) (ResultCode int64) {
-	err := ws.writeMsg(conn, websocket.TextMessage, bMsg)
+func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPlatForm, RecvID string) (ResultCode int64) {
+	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
 	if err != nil {
 		log.ErrorByKv("PushMsgToUser is failed By Ws", "", "Addr", conn.RemoteAddr().String(),
 			"error", err, "senderPlatform", utils.PlatformIDToName(in.PlatformID), "recvPlatform", RecvPlatForm, "args", in.String(), "recvID", RecvID)
 		ResultCode = -2
 		return ResultCode
 	} else {
-		log.InfoByKv("PushMsgToUser is success By Ws", in.OperationID, "args", in.String())
+		log.InfoByKv("PushMsgToUser is success By Ws", in.OperationID, "args", in.String(), "recvPlatForm", RecvPlatForm, "recvID", RecvID)
 		ResultCode = 0
 		return ResultCode
 	}
 
+}
+func genUidPlatformArray(uid string) (array []string) {
+	for i := 1; i <= utils.LinuxPlatformID; i++ {
+		array = append(array, uid+" "+utils.PlatformIDToName(int32(i)))
+	}
+	return array
 }

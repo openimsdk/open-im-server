@@ -17,22 +17,27 @@ const (
 	RefuseFriendFlag      = -1
 
 	//Websocket Protocol
-	WSGetNewestSeq = 1001
-	WSPullMsg      = 1002
-	WSSendMsg      = 1003
-	WSPushMsg      = 2001
+	WSGetNewestSeq     = 1001
+	WSPullMsg          = 1002
+	WSSendMsg          = 1003
+	WSPullMsgBySeqList = 1004
+	WSPushMsg          = 2001
+	WSDataError        = 3001
 
 	///ContentType
 	//UserRelated
-	Text    = 101
-	Picture = 102
-	Voice   = 103
-	Video   = 104
-	File    = 105
-	AtText  = 106
-	Custom  = 110
+	Text           = 101
+	Picture        = 102
+	Voice          = 103
+	Video          = 104
+	File           = 105
+	AtText         = 106
+	Custom         = 110
+	HasReadReceipt = 112
+	Typing         = 113
+	Common         = 200
+	GroupMsg       = 201
 
-	SyncSenderMsg = 108
 	//SysRelated
 	AcceptFriendApplicationTip = 201
 	AddFriendTip               = 202
@@ -64,10 +69,14 @@ const (
 )
 
 var ContentType2PushContent = map[int64]string{
-	Picture: "[picture]",
-	Voice:   "[voice]",
-	Video:   "[video]",
-	File:    "[file]",
+	Picture:  "[图片]",
+	Voice:    "[语音]",
+	Video:    "[视频]",
+	File:     "[文件]",
+	Text:     "你收到了一条文本消息",
+	AtText:   "[有人@你]",
+	GroupMsg: "你收到一条群聊消息",
+	Common:   "你收到一条新消息",
 }
 
 const FriendAcceptTip = "You have successfully become friends, so start chatting"

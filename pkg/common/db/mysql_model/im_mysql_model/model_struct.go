@@ -3,7 +3,7 @@ package im_mysql_model
 import "time"
 
 type User struct {
-	UID        string    `gorm:"column:uid"`
+	UID        string    `gorm:"column:uid;primaryKey;"`
 	Name       string    `gorm:"column:name"`
 	Icon       string    `gorm:"column:icon"`
 	Gender     int32     `gorm:"column:gender"`

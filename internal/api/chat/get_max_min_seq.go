@@ -19,7 +19,7 @@ type paramsUserNewestSeq struct {
 	MsgIncr       int    `json:"msgIncr" binding:"required"`
 }
 
-func UserNewestSeq(c *gin.Context) {
+func UserGetSeq(c *gin.Context) {
 	params := paramsUserNewestSeq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -31,7 +31,7 @@ func UserNewestSeq(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
 		return
 	}
-	pbData := pbMsg.GetNewSeqReq{}
+	pbData := pbMsg.GetMaxAndMinSeqReq{}
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
@@ -40,7 +40,7 @@ func UserNewestSeq(c *gin.Context) {
 		log.ErrorByKv("get grpcConn err", pbData.OperationID, "args", params)
 	}
 	msgClient := pbMsg.NewChatClient(grpcConn)
-	reply, err := msgClient.GetNewSeq(context.Background(), &pbData)
+	reply, err := msgClient.GetMaxAndMinSeq(context.Background(), &pbData)
 	if err != nil {
 		log.ErrorByKv("rpc call failed to getNewSeq", pbData.OperationID, "err", err, "pbData", pbData.String())
 		return
@@ -52,7 +52,8 @@ func UserNewestSeq(c *gin.Context) {
 		"msgIncr":       params.MsgIncr,
 		"reqIdentifier": params.ReqIdentifier,
 		"data": gin.H{
-			"seq": reply.Seq,
+			"maxSeq": reply.MaxSeq,
+			"minSeq": reply.MinSeq,
 		},
 	})
 
