@@ -1,13 +1,11 @@
 package group
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pb "Open_IM/pkg/proto/group"
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,7 +30,7 @@ type paramsGetGroupInfo struct {
 func GetGroupsInfo(c *gin.Context) {
 	log.Info("", "", "api get groups info init ....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := pb.NewGroupClient(etcdConn)
 	//defer etcdConn.Close()
 

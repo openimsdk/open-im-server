@@ -62,7 +62,7 @@ type KickGroupMemberReq struct {
 func KickGroupMember(c *gin.Context) {
 	log.Info("", "", "KickGroupMember start....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := pb.NewGroupClient(etcdConn)
 
 	params := KickGroupMemberReq{}
@@ -134,7 +134,7 @@ type GetGroupMembersInfoResp struct {
 func GetGroupMembersInfo(c *gin.Context) {
 	log.Info("", "", "GetGroupMembersInfo start....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := pb.NewGroupClient(etcdConn)
 
 	params := GetGroupMembersInfoReq{}
@@ -212,7 +212,7 @@ type MemberResult struct {
 func GetGroupMemberList(c *gin.Context) {
 	log.Info("", "", "GetGroupMemberList start....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := pb.NewGroupClient(etcdConn)
 
 	params := GetGroupMemberListReq{}
@@ -275,7 +275,7 @@ func GetGroupMemberList(c *gin.Context) {
 func GetGroupAllMember(c *gin.Context) {
 	log.Info("", "", "GetGroupAllMember start....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := pb.NewGroupClient(etcdConn)
 
 	params := getGroupAllMemberReq{}
@@ -345,7 +345,7 @@ type groupResult struct {
 func GetJoinedGroupList(c *gin.Context) {
 	log.Info("", "", "GetJoinedGroupList start....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	fmt.Println("config:    ", etcdConn, config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pb.NewGroupClient(etcdConn)
 
@@ -411,7 +411,7 @@ type Id2Result struct {
 // @Router /group/invite_user_to_group [post]
 func InviteUserToGroup(c *gin.Context) {
 	log.Info("", "", "InviteUserToGroup start....")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := pb.NewGroupClient(etcdConn)
 
 	params := InviteUserToGroupReq{}

@@ -1,14 +1,12 @@
 package group
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,7 +63,7 @@ type resultGroupApplication struct {
 // @Router /group/get_group_applicationList [post]
 func GetGroupApplicationList(c *gin.Context) {
 	log.Info("", "", "api GetGroupApplicationList init ....")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := group.NewGroupClient(etcdConn)
 	//defer etcdConn.Close()
 

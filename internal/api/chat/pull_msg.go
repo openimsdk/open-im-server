@@ -1,14 +1,12 @@
 package apiChat
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/utils"
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,7 +51,7 @@ func UserPullMsg(c *gin.Context) {
 	pbData.OperationID = params.OperationID
 	pbData.SeqBegin = *params.Data.SeqBegin
 	pbData.SeqEnd = *params.Data.SeqEnd
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	grpcConn := getcdv3.GetOfflineMessageConn()
 	msgClient := pbChat.NewChatClient(grpcConn)
 	reply, err := msgClient.PullMessage(context.Background(), &pbData)
 	if err != nil {
@@ -122,7 +120,7 @@ func UserPullMsgBySeqList(c *gin.Context) {
 	pbData.OperationID = params.OperationID
 	pbData.SeqList = params.SeqList
 
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	grpcConn := getcdv3.GetOfflineMessageConn()
 	msgClient := pbChat.NewChatClient(grpcConn)
 	reply, err := msgClient.PullMessageBySeqList(context.Background(), &pbData)
 	if err != nil {

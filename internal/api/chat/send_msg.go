@@ -1,7 +1,6 @@
 package apiChat
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/utils"
@@ -9,7 +8,6 @@ import (
 
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -92,7 +90,7 @@ func UserSendMsg(c *gin.Context) {
 	pbData := newUserSendMsgReq(token, &params)
 	log.Info("", "", "api UserSendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	etcdConn := getcdv3.GetOfflineMessageConn()
 	client := pbChat.NewChatClient(etcdConn)
 
 	log.Info("", "", "api UserSendMsg call, api call rpc...")

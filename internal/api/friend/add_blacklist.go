@@ -1,13 +1,11 @@
 package friend
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +25,7 @@ import (
 func AddBlacklist(c *gin.Context) {
 	log.Info("", "", "api add blacklist init ....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetFriendConn()
 	client := pbFriend.NewFriendClient(etcdConn)
 	//defer etcdConn.Close()
 

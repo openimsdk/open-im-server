@@ -1,14 +1,12 @@
 package apiChat
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbMsg "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/utils"
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -60,7 +58,7 @@ func UserGetSeq(c *gin.Context) {
 	pbData := pbMsg.GetMaxAndMinSeqReq{}
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	grpcConn := getcdv3.GetOfflineMessageConn()
 
 	if grpcConn == nil {
 		log.ErrorByKv("get grpcConn err", pbData.OperationID, "args", params)

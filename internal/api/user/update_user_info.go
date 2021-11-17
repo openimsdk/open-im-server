@@ -1,13 +1,11 @@
 package user
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbUser "Open_IM/pkg/proto/user"
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,7 +36,7 @@ type updateUserInfoParam struct {
 func UpdateUserInfo(c *gin.Context) {
 	log.InfoByKv("api update userinfo init...", "")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	etcdConn := getcdv3.GetUserConn()
 	client := pbUser.NewUserClient(etcdConn)
 	//defer etcdConn.Close()
 

@@ -10,9 +10,10 @@ import (
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
 	"context"
+	"strings"
+
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"strings"
 )
 
 type fcb func(msg []byte, msgKey string)
@@ -138,7 +139,7 @@ func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
 	msg.SendTime = message.SendTime
 	msg.MsgID = message.MsgID
 	msg.OfflineInfo = message.OfflineInfo
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName)
+	grpcConn := getcdv3.GetPushConn()
 	if grpcConn == nil {
 		log.ErrorByKv("rpc dial failed", msg.OperationID, "push data", msg.String())
 		pid, offset, err := producer.SendMessage(message)

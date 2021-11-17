@@ -15,7 +15,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -140,7 +139,7 @@ func ManagementSendMsg(c *gin.Context) {
 	pbData := newUserSendMsgReq(&params)
 	log.Info("", "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	etcdConn := getcdv3.GetOfflineMessageConn()
 	client := pbChat.NewChatClient(etcdConn)
 
 	log.Info("", "", "api ManagementSendMsg call, api call rpc...")

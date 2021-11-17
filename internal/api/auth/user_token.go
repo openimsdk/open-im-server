@@ -7,7 +7,6 @@ import (
 	pbAuth "Open_IM/pkg/proto/auth"
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,7 +39,7 @@ func newUserTokenReq(params *paramsUserToken) *pbAuth.UserTokenReq {
 // @Router /auth/user_token [post]
 func UserToken(c *gin.Context) {
 	log.Info("", "", "api user_token init ....")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+	etcdConn := getcdv3.GetAuthConn()
 	client := pbAuth.NewAuthClient(etcdConn)
 	//defer etcdConn.Close()
 
