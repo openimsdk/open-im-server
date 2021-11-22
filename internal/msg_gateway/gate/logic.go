@@ -1,7 +1,6 @@
 package gate
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -12,10 +11,10 @@ import (
 	"context"
 	"encoding/gob"
 	"encoding/json"
+	"runtime"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
-	"runtime"
-	"strings"
 )
 
 func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
@@ -69,7 +68,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	nReply := new(pbChat.GetMaxAndMinSeqResp)
 	pbData.UserID = m.SendID
 	pbData.OperationID = m.OperationID
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	grpcConn := getcdv3.GetOfflineMessageConn()
 	if grpcConn == nil {
 		log.ErrorByKv("get grpcConn err", pbData.OperationID, "args", m)
 	}
@@ -110,7 +109,7 @@ func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
 		pbData.OperationID = m.OperationID
 		pbData.SeqBegin = data.(SeqData).SeqBegin
 		pbData.SeqEnd = data.(SeqData).SeqEnd
-		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+		grpcConn := getcdv3.GetOfflineMessageConn()
 		msgClient := pbChat.NewChatClient(grpcConn)
 		reply, err := msgClient.PullMessage(context.Background(), &pbData)
 		if err != nil {
@@ -176,7 +175,7 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 		pbData.SeqList = data.(open_im_sdk.PullMessageBySeqListReq).SeqList
 		pbData.UserID = m.SendID
 		pbData.OperationID = m.OperationID
-		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+		grpcConn := getcdv3.GetOfflineMessageConn()
 		msgClient := pbChat.NewChatClient(grpcConn)
 		reply, err := msgClient.PullMessageBySeqList(context.Background(), &pbData)
 		if err != nil {
@@ -219,7 +218,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 			SendTime:       sendTime,
 		}
 		log.NewInfo(m.OperationID, "Ws call success to sendMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data)
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+		etcdConn := getcdv3.GetOfflineMessageConn()
 		client := pbChat.NewChatClient(etcdConn)
 		reply, err := client.UserSendMsg(context.Background(), &pbData)
 		if err != nil {

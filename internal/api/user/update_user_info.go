@@ -1,38 +1,46 @@
 package user
 
 import (
-	pbUser "Open_IM/pkg/proto/user"
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbUser "Open_IM/pkg/proto/user"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
-type paramsStruct struct {
-	OperationID string   `json:"operationID" binding:"required"`
-	UIDList     []string `json:"uidList"`
-	Platform    int32    `json:"platform"`
-	Name        string   `json:"name"`
-	Icon        string   `json:"icon"`
-	Gender      int32    `json:"gender"`
-	Mobile      string   `json:"mobile"`
-	Birth       string   `json:"birth"`
-	Email       string   `json:"email"`
-	Ex          string   `json:"ex"`
-	Uid         string   `json:"uid"`
+// updateUserInfoParam struct
+type updateUserInfoParam struct {
+	OperationID string `json:"operationID" binding:"required"`
+	Name        string `json:"name"`
+	Icon        string `json:"icon"`
+	Gender      int32  `json:"gender"`
+	Mobile      string `json:"mobile"`
+	Birth       string `json:"birth"`
+	Email       string `json:"email"`
+	Ex          string `json:"ex"`
+	Uid         string `json:"uid"`
 }
 
+// @Summary
+// @Description update user info
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param body body user.updateUserInfoParam true "new user info"
+// @Param token header string true "token"
+// @Success 200 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /user/update_user_info [post]
 func UpdateUserInfo(c *gin.Context) {
 	log.InfoByKv("api update userinfo init...", "")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	etcdConn := getcdv3.GetUserConn()
 	client := pbUser.NewUserClient(etcdConn)
 	//defer etcdConn.Close()
 
-	params := paramsStruct{}
+	params := updateUserInfoParam{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return

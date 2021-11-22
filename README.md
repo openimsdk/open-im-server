@@ -140,6 +140,16 @@ or try with `docker-compose`
     docker-compose -f docker-compose.dev.yaml logs -f
 ```
 
+### Api Swagger
+run service by `pm2` firstly, then run visit `[ip]:10000/swagger/index.html`
+
+run following command to generate swagger docs
+```
+go get -u github.com/swaggo/swag/cmd/swag
+export PATH=$(go env GOPATH)/bin:$PATH
+swag init --generalInfo cmd/open_im_api/main.go
+```
+
 ### CONFIGURATION INSTRUCTIONS
 
 > Open-IM configuration is divided into basic component configuration and business internal service configuration. Developers need to fill in the address of each component as the address of their server component when using the product, and ensure that the internal service port of the business is not occupied

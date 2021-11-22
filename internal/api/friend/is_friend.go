@@ -1,25 +1,37 @@
 package friend
 
 import (
-	pbFriend "Open_IM/pkg/proto/friend"
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsIsFriend struct
 type paramsIsFriend struct {
 	OperationID string `json:"operationID" binding:"required"`
 	ReceiveUid  string `json:"receive_uid"`
 }
 
+// @Summary
+// @Schemes
+// @Description check is friend
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsSearchFriend true "is friend params"
+// @Param token header string true "token"
+// @Success 200 {object} user.result
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /friend/is_friend [post]
 func IsFriend(c *gin.Context) {
 	log.Info("", "", "api is friend init....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetFriendConn()
 	client := pbFriend.NewFriendClient(etcdConn)
 	//defer etcdConn.Close()
 

@@ -1,14 +1,13 @@
 package group
 
 import (
-	pb "Open_IM/pkg/proto/group"
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pb "Open_IM/pkg/proto/group"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 type paramsGetGroupInfo struct {
@@ -16,10 +15,22 @@ type paramsGetGroupInfo struct {
 	OperationID string   `json:"operationID" binding:"required"`
 }
 
+// @Summary
+// @Schemes
+// @Description get groups info
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.paramsGetGroupInfo true "get groups info params"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{data=[]group.GroupInfo}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/get_groups_info [post]
 func GetGroupsInfo(c *gin.Context) {
 	log.Info("", "", "api get groups info init ....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := pb.NewGroupClient(etcdConn)
 	//defer etcdConn.Close()
 

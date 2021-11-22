@@ -1,16 +1,23 @@
 package user
 
 import (
-	pbUser "Open_IM/pkg/proto/user"
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbUser "Open_IM/pkg/proto/user"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// result struct
+type result struct {
+	ErrCode int         `json:"errCode" example:"0"`
+	ErrMsg  string      `json:"errMsg"  example:"error"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
+// userInfo struct
 type userInfo struct {
 	UID    string `json:"uid"`
 	Name   string `json:"name"`
@@ -22,14 +29,30 @@ type userInfo struct {
 	Ex     string `json:"ex"`
 }
 
+// queryUserInfoParam struct
+type queryUserInfoParam struct {
+	OperationID string   `json:"operationID" binding:"required"`
+	UIDList     []string `json:"uidList"`
+}
+
+// @Summary
+// @Description get user info by uid list
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param body body user.queryUserInfoParam true "get userInfo by uidList"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{data=[]user.userInfo}
+// @Failure 400 {object} user.result
+// @Router /user/get_user_info [post]
 func GetUserInfo(c *gin.Context) {
 	log.InfoByKv("api get userinfo init...", "")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	etcdConn := getcdv3.GetUserConn()
 	client := pbUser.NewUserClient(etcdConn)
 	//defer etcdConn.Close()
 
-	params := paramsStruct{}
+	params := queryUserInfoParam{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
@@ -44,8 +67,8 @@ func GetUserInfo(c *gin.Context) {
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,call get user info rpc server failed", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"errorCode": 500,
-			"errorMsg":  "call  rpc server failed",
+			"errCode": 500,
+			"errMsg":  "call  rpc server failed",
 		})
 		return
 	}

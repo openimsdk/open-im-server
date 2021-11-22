@@ -1,0 +1,3407 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/auth/user_register": {
+            "post": {
+                "description": "register a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "description": "new user params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiAuth.paramsUserRegister"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiAuth.resultUserRegister"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/user_token": {
+            "post": {
+                "description": "get token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "parameters": [
+                    {
+                        "description": "get token params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiAuth.paramsUserToken"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiAuth.resultUserRegister"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/newest_seq": {
+            "post": {
+                "description": "get latest message seq",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "parameters": [
+                    {
+                        "description": "user get latest seq params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiChat.paramsUserNewestSeq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apiChat.resultUserNewestSeq"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/pull_msg": {
+            "post": {
+                "description": "user pull messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "parameters": [
+                    {
+                        "description": "user pull messages",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiChat.paramsUserPullMsg"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "reqIdentifier": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/pull_msg_by_seq": {
+            "post": {
+                "description": "user pull msg by seq",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "parameters": [
+                    {
+                        "description": "pull msg by seq",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiChat.paramsUserPullMsgBySeqList"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "reqIdentifier": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/chat/send_msg": {
+            "post": {
+                "description": "user send messages",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "parameters": [
+                    {
+                        "description": "user send messages",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiChat.paramsUserSendMsg"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/apiChat.resultSendMsg"
+                                        },
+                                        "reqIdentifier": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/add_blacklist": {
+            "post": {
+                "description": "add a user into black list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "add black list params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsSearchFriend"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/add_friend": {
+            "post": {
+                "description": "add a new friend by uid",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "add friend params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsAddFriend"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/add_friend_response": {
+            "post": {
+                "description": "the response of adding friend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "response of adding friend",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsAddFriendResponse"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/delete_friend": {
+            "post": {
+                "description": "delete friend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "delete friend params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsSearchFriend"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_blacklist": {
+            "post": {
+                "description": "get black list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "get black list",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsSearchFriend"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/friend.blackListUserInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_friend_apply_list": {
+            "post": {
+                "description": "get friend apply list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "get friend apply list",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsGetApplyList"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/friend.UserInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_friend_list": {
+            "post": {
+                "description": "get friend apply list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "get friend apply list",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsGetFriendLIst"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/friend.friendInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_friends_info": {
+            "post": {
+                "description": "get friend info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "search friend params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsSearchFriend"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_self_apply_list": {
+            "post": {
+                "description": "get friend apply list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "get friend apply list",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsGetApplyList"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/friend.UserInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/import_friend": {
+            "post": {
+                "description": "import friend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "import friend params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsImportFriendReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/friend.resultImportFriend"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/is_friend": {
+            "post": {
+                "description": "check is friend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "is friend params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsSearchFriend"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/remove_blacklist": {
+            "post": {
+                "description": "remove black list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "remove black list params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsSearchFriend"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/set_friend_comment": {
+            "post": {
+                "description": "set friend comment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friend"
+                ],
+                "parameters": [
+                    {
+                        "description": "set friend comment",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/friend.paramsSetFriendComment"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/create_group": {
+            "post": {
+                "description": "create group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "create group params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.paramsCreateGroup"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_group_all_member_list": {
+            "post": {
+                "description": "get group all members",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "get group all members params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.getGroupAllMemberReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GetGroupMemberListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_group_applicationList": {
+            "post": {
+                "description": "get group application list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "get group application list params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.paramsGroupApplicationList"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/group.resultGroupApplication"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_group_member_list": {
+            "post": {
+                "description": "get group member list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "get group member list params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.GetGroupMemberListReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GetGroupMemberListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_group_members_info": {
+            "post": {
+                "description": "get group members info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "get group members info params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.GetGroupMembersInfoReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GetGroupMembersInfoResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_groups_info": {
+            "post": {
+                "description": "get groups info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "get groups info params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.paramsGetGroupInfo"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/group.GroupInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_joined_group_list": {
+            "post": {
+                "description": "get joined group list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "get joined group list params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.GetJoinedGroupListReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.GetJoinedGroupListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/group_application_response": {
+            "post": {
+                "description": "response of application group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "application group param",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.paramsGroupApplicationResponse"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/invite_user_to_group": {
+            "post": {
+                "description": "invite user to group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "invite user to group params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.InviteUserToGroupReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.InviteUserToGroupResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/kick_group": {
+            "post": {
+                "description": "kick member from group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "kick member from group params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.paramsKickGroupMember"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/group.KickGroupMemberResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/set_group_info": {
+            "post": {
+                "description": "set group info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "set group info params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.paramsSetGroupInfo"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/transfer_group": {
+            "post": {
+                "description": "transfer group owner",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "group"
+                ],
+                "parameters": [
+                    {
+                        "description": "transfer group owner param",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/group.paramsTransferGroupOwner"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/manager/delete_user": {
+            "post": {
+                "description": "delete user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manage"
+                ],
+                "parameters": [
+                    {
+                        "description": "user to be deleted",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/manage.paramsDeleteUsers"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/manage.deleteUserResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/manager/get_all_users_uid": {
+            "post": {
+                "description": "get all user ids",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manage"
+                ],
+                "parameters": [
+                    {
+                        "description": "all user ids",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/manage.paramsGetAllUsersUid"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/manage.uidListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/manage.uidListResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/manager/send_msg": {
+            "post": {
+                "description": "manage send message",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manage"
+                ],
+                "parameters": [
+                    {
+                        "description": "manage send message",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/manage.paramsManagementSendMsg"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/manage.sendMsgResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/third/user_register": {
+            "post": {
+                "description": "get Tencent cloud storage credential",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "third"
+                ],
+                "parameters": [
+                    {
+                        "description": "get Tencent cloud storage credential params",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apiThird.paramsTencentCloudStorageCredential"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apiThird.resultTencentCredential"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/get_user_info": {
+            "post": {
+                "description": "get user info by uid list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "parameters": [
+                    {
+                        "description": "get userInfo by uidList",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.queryUserInfoParam"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/user.result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/user.userInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/update_user_info": {
+            "post": {
+                "description": "update user info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "parameters": [
+                    {
+                        "description": "new user info",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.updateUserInfoParam"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/user.result"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "apiAuth.paramsUserRegister": {
+            "type": "object",
+            "required": [
+                "name",
+                "platform",
+                "secret",
+                "uid"
+            ],
+            "properties": {
+                "birth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "integer"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiAuth.paramsUserToken": {
+            "type": "object",
+            "required": [
+                "platform",
+                "secret",
+                "uid"
+            ],
+            "properties": {
+                "platform": {
+                    "type": "integer"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiAuth.resultUserRegister": {
+            "type": "object",
+            "properties": {
+                "expiredTime": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiChat.paramsUserNewestSeq": {
+            "type": "object",
+            "required": [
+                "msgIncr",
+                "operationID",
+                "reqIdentifier",
+                "sendID"
+            ],
+            "properties": {
+                "msgIncr": {
+                    "type": "integer"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reqIdentifier": {
+                    "type": "integer"
+                },
+                "sendID": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiChat.paramsUserPullMsg": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "reqIdentifier",
+                "sendID"
+            ],
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "required": [
+                        "seqBegin",
+                        "seqEnd"
+                    ],
+                    "properties": {
+                        "seqBegin": {
+                            "type": "integer"
+                        },
+                        "seqEnd": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reqIdentifier": {
+                    "type": "integer"
+                },
+                "sendID": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiChat.paramsUserPullMsgBySeqList": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "reqIdentifier",
+                "sendID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "reqIdentifier": {
+                    "type": "integer"
+                },
+                "sendID": {
+                    "type": "string"
+                },
+                "seqList": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "apiChat.paramsUserSendMsg": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "platformID",
+                "reqIdentifier",
+                "sendID"
+            ],
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "required": [
+                        "clientMsgID",
+                        "content",
+                        "contentType",
+                        "msgFrom",
+                        "recvID",
+                        "sessionType"
+                    ],
+                    "properties": {
+                        "clientMsgID": {
+                            "type": "string"
+                        },
+                        "content": {
+                            "type": "string"
+                        },
+                        "contentType": {
+                            "type": "integer"
+                        },
+                        "ext": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "forceList": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "msgFrom": {
+                            "type": "integer"
+                        },
+                        "offlineInfo": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "options": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
+                        "recvID": {
+                            "type": "string"
+                        },
+                        "sessionType": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "platformID": {
+                    "type": "integer"
+                },
+                "reqIdentifier": {
+                    "type": "integer"
+                },
+                "sendID": {
+                    "type": "string"
+                },
+                "senderFaceUrl": {
+                    "type": "string"
+                },
+                "senderNickName": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiChat.resultSendMsg": {
+            "type": "object",
+            "properties": {
+                "clientMsgID": {
+                    "type": "string"
+                },
+                "sendTime": {
+                    "type": "integer"
+                },
+                "serverMsgID": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiChat.resultUserNewestSeq": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "maxSeq": {
+                            "type": "integer"
+                        },
+                        "minSeq": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                },
+                "msgIncr": {
+                    "type": "integer"
+                },
+                "reqIdentifier": {
+                    "type": "integer"
+                }
+            }
+        },
+        "apiThird.paramsTencentCloudStorageCredential": {
+            "type": "object",
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "apiThird.resultTencentCredential": {
+            "type": "object",
+            "properties": {
+                "bucket": {
+                    "type": "string"
+                },
+                "data": {},
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.UserInfo": {
+            "type": "object",
+            "properties": {
+                "applyTime": {
+                    "type": "string"
+                },
+                "birth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "flag": {
+                    "type": "integer"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "reqMessage": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.blackListUserInfo": {
+            "type": "object",
+            "properties": {
+                "birth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.friendInfo": {
+            "type": "object",
+            "properties": {
+                "birth": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "isInBlackList": {
+                    "type": "integer"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.paramsAddFriend": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "uid"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "reqMessage": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.paramsAddFriendResponse": {
+            "type": "object",
+            "required": [
+                "flag",
+                "operationID",
+                "uid"
+            ],
+            "properties": {
+                "flag": {
+                    "type": "integer"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.paramsGetApplyList": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.paramsGetFriendLIst": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.paramsImportFriendReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "ownerUid",
+                "uidList"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "ownerUid": {
+                    "type": "string"
+                },
+                "uidList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "friend.paramsSearchFriend": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "uid"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "ownerUid": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.paramsSetFriendComment": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "uid"
+            ],
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.resultFriendInfo": {
+            "type": "object",
+            "properties": {
+                "birth": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "friend.resultImportFriend": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "errMsg": {
+                    "type": "string",
+                    "example": "error"
+                },
+                "failedUidList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "group.GetGroupMemberListReq": {
+            "type": "object",
+            "properties": {
+                "filter": {
+                    "type": "integer"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "nextSeq": {
+                    "type": "integer"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.GetGroupMemberListResp": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "integer"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "memberList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.GroupMemberFullInfo"
+                    }
+                },
+                "nextSeq": {
+                    "type": "integer"
+                }
+            }
+        },
+        "group.GetGroupMembersInfoReq": {
+            "type": "object",
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "memberList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.GetGroupMembersInfoResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.MemberResult"
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.GetJoinedGroupListReq": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.GetJoinedGroupListResp": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "integer"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "groupList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.GroupInfo"
+                    }
+                }
+            }
+        },
+        "group.GroupInfo": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "integer"
+                },
+                "faceUrl": {
+                    "type": "string"
+                },
+                "groupId": {
+                    "type": "string"
+                },
+                "groupName": {
+                    "type": "string"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "memberCount": {
+                    "type": "integer"
+                },
+                "notification": {
+                    "type": "string"
+                },
+                "ownerId": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.GroupMemberFullInfo": {
+            "type": "object",
+            "properties": {
+                "faceUrl": {
+                    "type": "string"
+                },
+                "joinTime": {
+                    "type": "integer"
+                },
+                "nickName": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.Id2Result": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "integer"
+                },
+                "uId": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.InviteUserToGroupReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID",
+                "uidList"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "uidList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "group.InviteUserToGroupResp": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "integer"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "id2result": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.Id2Result"
+                    }
+                }
+            }
+        },
+        "group.KickGroupMemberResp": {
+            "type": "object",
+            "properties": {
+                "errorCode": {
+                    "type": "integer"
+                },
+                "errorMsg": {
+                    "type": "string"
+                },
+                "id2result": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.Id2Result"
+                    }
+                }
+            }
+        },
+        "group.MemberResult": {
+            "type": "object",
+            "properties": {
+                "faceUrl": {
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "joinTime": {
+                    "type": "integer"
+                },
+                "nickName": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.getGroupAllMemberReq": {
+            "type": "object",
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.paramsCreateGroup": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "ex": {
+                    "type": "string"
+                },
+                "faceUrl": {
+                    "type": "string"
+                },
+                "groupName": {
+                    "type": "string"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "memberList": {
+                    "type": "object",
+                    "properties": {
+                        "setRole": {
+                            "type": "string"
+                        },
+                        "uid": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "notification": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.paramsGetGroupInfo": {
+            "type": "object",
+            "required": [
+                "groupIDList",
+                "operationID"
+            ],
+            "properties": {
+                "groupIDList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.paramsGroupApplicationList": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.paramsGroupApplicationListRet": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "integer"
+                },
+                "flag": {
+                    "type": "integer"
+                },
+                "fromUserFaceURL": {
+                    "type": "string"
+                },
+                "fromUserID": {
+                    "type": "string"
+                },
+                "fromUserNickName": {
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "handleResult": {
+                    "type": "integer"
+                },
+                "handleStatus": {
+                    "type": "integer"
+                },
+                "handledMsg": {
+                    "type": "string"
+                },
+                "handledUser": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "reqMsg": {
+                    "type": "string"
+                },
+                "toUserFaceURL": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                },
+                "toUserNickName": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "group.paramsGroupApplicationResponse": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "groupID",
+                "operationID",
+                "toUserID"
+            ],
+            "properties": {
+                "addTime": {
+                    "type": "integer"
+                },
+                "fromUserFaceUrl": {
+                    "type": "string"
+                },
+                "fromUserID": {
+                    "type": "string"
+                },
+                "fromUserNickName": {
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "handleResult": {
+                    "type": "integer"
+                },
+                "handleStatus": {
+                    "type": "integer"
+                },
+                "handledMsg": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "requestMsg": {
+                    "type": "string"
+                },
+                "toUserFaceUrl": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                },
+                "toUserNickName": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "group.paramsJoinGroup": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.paramsKickGroupMember": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "uidListInfo"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "uidListInfo": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "faceUrl": {
+                                "type": "string"
+                            },
+                            "joinTime": {
+                                "type": "integer"
+                            },
+                            "nickName": {
+                                "type": "string"
+                            },
+                            "role": {
+                                "type": "integer"
+                            },
+                            "userId": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "group.paramsQuitGroup": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.paramsSetGroupInfo": {
+            "type": "object",
+            "required": [
+                "groupId",
+                "operationID"
+            ],
+            "properties": {
+                "faceUrl": {
+                    "type": "string"
+                },
+                "groupId": {
+                    "type": "string"
+                },
+                "groupName": {
+                    "type": "string"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "notification": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.paramsTransferGroupOwner": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID",
+                "uid"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "group.resultGroupApplication": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "user": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/group.paramsGroupApplicationListRet"
+                    }
+                }
+            }
+        },
+        "manage.deleteUserResult": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "errMsg": {
+                    "type": "string",
+                    "example": "error"
+                },
+                "failedUidList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "manage.paramsDeleteUsers": {
+            "type": "object",
+            "required": [
+                "deleteUidList",
+                "operationID"
+            ],
+            "properties": {
+                "deleteUidList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "manage.paramsGetAllUsersUid": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "manage.paramsManagementSendMsg": {
+            "type": "object",
+            "required": [
+                "content",
+                "contentType",
+                "operationID",
+                "recvID",
+                "sendID",
+                "sessionType"
+            ],
+            "properties": {
+                "content": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "contentType": {
+                    "type": "integer"
+                },
+                "forceList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "recvID": {
+                    "type": "string"
+                },
+                "sendID": {
+                    "type": "string"
+                },
+                "senderFaceURL": {
+                    "type": "string"
+                },
+                "senderNickName": {
+                    "type": "string"
+                },
+                "sessionType": {
+                    "type": "integer"
+                }
+            }
+        },
+        "manage.sendMsgResult": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "errMsg": {
+                    "type": "string",
+                    "example": "error"
+                },
+                "msgID": {
+                    "type": "string"
+                },
+                "sendTime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "manage.uidListResult": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "errMsg": {
+                    "type": "string",
+                    "example": "error"
+                },
+                "uidList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "user.queryUserInfoParam": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "uidList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "user.result": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "errCode": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "errMsg": {
+                    "type": "string",
+                    "example": "error"
+                }
+            }
+        },
+        "user.updateUserInfoParam": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "birth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.userInfo": {
+            "type": "object",
+            "properties": {
+                "birth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "mobile": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "uid": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

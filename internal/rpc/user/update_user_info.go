@@ -12,7 +12,6 @@ import (
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	"strings"
 )
 
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (*pbUser.CommonResp, error) {
@@ -36,7 +35,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		log.Error(req.Token, req.OperationID, "update user some attribute failed,err=%s", err.Error())
 		return &pbUser.CommonResp{ErrorCode: config.ErrModifyUserInfo.ErrCode, ErrorMsg: config.ErrModifyUserInfo.ErrMsg}, nil
 	}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetFriendConn()
 	client := pbFriend.NewFriendClient(etcdConn)
 	newReq := &pbFriend.GetFriendListReq{
 		OperationID: req.OperationID,

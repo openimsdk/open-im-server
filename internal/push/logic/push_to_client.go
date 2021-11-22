@@ -19,7 +19,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"strings"
 )
 
 type OpenIMContent struct {
@@ -40,7 +39,7 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 	//isSenderSync := utils.GetSwitchFromOptions(MOptions, "senderSync")
 	isOfflinePush := utils.GetSwitchFromOptions(MOptions, "offlinePush")
 	log.InfoByKv("Get chat from msg_transfer And push chat", sendPbData.OperationID, "PushData", sendPbData)
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+	grpcCons := getcdv3.GetOnlineMessageConn()
 	//Online push message
 	log.InfoByKv("test", sendPbData.OperationID, "len  grpc", len(grpcCons), "data", sendPbData)
 	for _, v := range grpcCons {
@@ -120,7 +119,7 @@ func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
 		sendMsgToKafka(m, m.SendID, "msgKey--sendID")
 		sendMsgToKafka(m, m.RecvID, "msgKey--recvID")
 	case constant.GroupChatType:
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+		etcdConn := getcdv3.GetGroupConn()
 		client := pbGroup.NewGroupClient(etcdConn)
 		req := &pbGroup.GetGroupAllMemberReq{
 			GroupID:     m.RecvID,

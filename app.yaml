@@ -3,6 +3,9 @@ apps:
 - name: open_im_api
   script: "go run main.go"
   cwd: "cmd/open_im_api"
+  env:
+    OPEN_IM_SWAGGER_API: true
+  watch: ["docs", "cmd", "internal", "pkg"]
 
 - name: open_im_auth
   script: "go run main.go"

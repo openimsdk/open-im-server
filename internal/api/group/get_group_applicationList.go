@@ -1,17 +1,17 @@
 package group
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsGroupApplicationList struct
 type paramsGroupApplicationList struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
@@ -23,6 +23,7 @@ func newUserRegisterReq(params *paramsGroupApplicationList) *group.GetGroupAppli
 	return &pbData
 }
 
+// paramsGroupApplicationListRet struct
 type paramsGroupApplicationListRet struct {
 	ID               string `json:"id"`
 	GroupID          string `json:"groupID"`
@@ -42,9 +43,27 @@ type paramsGroupApplicationListRet struct {
 	HandleResult     int32  `json:"handleResult"`
 }
 
+// resultGroupApplication struct
+type resultGroupApplication struct {
+	Count int                             `json:"count"`
+	User  []paramsGroupApplicationListRet `json:"user"`
+}
+
+// @Summary
+// @Schemes
+// @Description get group application list
+// @Tags group
+// @Accept json
+// @Produce json
+// @Param body body group.paramsGroupApplicationList true "get group application list params"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{data=group.resultGroupApplication}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /group/get_group_applicationList [post]
 func GetGroupApplicationList(c *gin.Context) {
 	log.Info("", "", "api GetGroupApplicationList init ....")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetGroupConn()
 	client := group.NewGroupClient(etcdConn)
 	//defer etcdConn.Close()
 

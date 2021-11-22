@@ -16,7 +16,6 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -103,7 +102,7 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 		}
 		return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
 	case constant.GroupChatType:
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+		etcdConn := getcdv3.GetGroupConn()
 		client := pbGroup.NewGroupClient(etcdConn)
 		req := &pbGroup.GetGroupAllMemberReq{
 			GroupID:     pbData.RecvID,
