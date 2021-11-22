@@ -1,17 +1,21 @@
 package getcdv3
 
 import (
+	"Open_IM/pkg/common/config"
 	"context"
 	"fmt"
+
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
+
 	//"google.golang.org/genproto/googleapis/ads/googleads/v1/services"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/balancer/roundrobin"
-	"google.golang.org/grpc/resolver"
 	"strings"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer/roundrobin"
+	"google.golang.org/grpc/resolver"
 )
 
 type Resolver struct {
@@ -86,6 +90,34 @@ func GetConn(schema, etcdaddr, serviceName string) *grpc.ClientConn {
 	nameResolver[schema+serviceName] = r
 	rwNameResolverMutex.Unlock()
 	return r.grpcClientConn
+}
+
+func GetAuthConn() *grpc.ClientConn {
+	return GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+}
+
+func GetOfflineMessageConn() *grpc.ClientConn {
+	return GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+}
+
+func GetFriendConn() *grpc.ClientConn {
+	return GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+}
+
+func GetGroupConn() *grpc.ClientConn {
+	return GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+}
+
+func GetUserConn() *grpc.ClientConn {
+	return GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+}
+
+func GetPushConn() *grpc.ClientConn {
+	return GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName)
+}
+
+func GetOnlineMessageConn() []*grpc.ClientConn {
+	return GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
 }
 
 func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {

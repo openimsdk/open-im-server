@@ -1,0 +1,44 @@
+
+apps:
+- name: open_im_api
+  script: "go run main.go"
+  cwd: "cmd/open_im_api"
+  env:
+    OPEN_IM_SWAGGER_API: true
+  watch: ["docs", "cmd", "internal", "pkg"]
+
+- name: open_im_auth
+  script: "go run main.go"
+  cwd: "cmd/rpc/open_im_auth"
+
+- name: open_im_offline_msg
+  script: "go run main.go"
+  cwd: "cmd/rpc/open_im_msg"
+
+- name: open_im_friend
+  script: "go run main.go"
+  cwd: "cmd/rpc/open_im_friend"
+
+- name: open_im_group
+  script: "go run main.go"
+  cwd: "cmd/rpc/open_im_group"
+
+- name: open_im_user
+  script: "go run main.go"
+  cwd: "cmd/rpc/open_im_user"
+
+- name: open_im_push
+  script: "go run main.go"
+  cwd: "cmd/open_im_push"
+
+- name: open_im_timed_task
+  script: "go run main.go"
+  cwd: "cmd/open_im_timer_task"
+
+- name: open_im_msg_transfer
+  script: "go run main.go"
+  cwd: "cmd/open_im_msg_transfer"
+
+- name: open_im_msg_gateway
+  script: "go run main.go"
+  cwd: "cmd/open_im_msg_gateway"

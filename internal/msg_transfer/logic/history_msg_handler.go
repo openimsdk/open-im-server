@@ -10,9 +10,10 @@ import (
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
 	"context"
+	"strings"
+
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"strings"
 )
 
 type fcb func(msg []byte, msgKey string)
@@ -33,6 +34,7 @@ func (mc *HistoryConsumerHandler) Init() {
 
 func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
 	log.InfoByKv("chat come mongo!!!", "", "chat", string(msg))
+	time := utils.GetCurrentTimestampByNano()
 	pbData := pbMsg.WSToMsgSvrChatMsg{}
 	err := proto.Unmarshal(msg, &pbData)
 	if err != nil {
@@ -58,48 +60,53 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 	isHistory := utils.GetSwitchFromOptions(Options, "history")
 	//Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(Options, "persistent")
-	if pbData.SessionType == constant.SingleChatType {
-		log.Info("", "", "msg_transfer chat type = SingleChatType", isHistory, isPersist)
+	switch pbData.SessionType {
+	case constant.SingleChatType:
+		log.NewDebug(pbSaveData.OperationID, "msg_transfer chat type = SingleChatType", isHistory, isPersist)
 		if isHistory {
 			if msgKey == pbSaveData.RecvID {
 				err := saveUserChat(pbData.RecvID, &pbSaveData)
 				if err != nil {
-					log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
+					log.NewError(pbSaveData.OperationID, "single data insert to mongo err", err.Error(), pbSaveData.String())
+					return
 				}
+
 			} else if msgKey == pbSaveData.SendID {
 				err := saveUserChat(pbData.SendID, &pbSaveData)
 				if err != nil {
-					log.ErrorByKv("data insert to mongo err", pbSaveData.OperationID, "data", pbSaveData.String(), "err", err.Error())
+					log.NewError(pbSaveData.OperationID, "single data insert to mongo err", err.Error(), pbSaveData.String())
+					return
 				}
-				//if isSenderSync {
-				//	pbSaveData.ContentType = constant.SyncSenderMsg
-				//	log.WarnByKv("SyncSenderMsg come here", pbData.OperationID, pbSaveData.String())
-				//	sendMessageToPush(&pbSaveData)
-				//}
+
 			}
 
+			log.NewDebug(pbSaveData.OperationID, "saveUserChat cost time ", utils.GetCurrentTimestampByNano()-time)
 		}
 		if msgKey == pbSaveData.RecvID {
 			pbSaveData.Options = pbData.Options
 			pbSaveData.OfflineInfo = pbData.OfflineInfo
-			sendMessageToPush(&pbSaveData)
+			go sendMessageToPush(&pbSaveData)
+			log.NewDebug(pbSaveData.OperationID, "sendMessageToPush cost time ", utils.GetCurrentTimestampByNano()-time)
 		}
 
-		log.InfoByKv("msg_transfer handle topic success...", "", "")
-	} else if pbData.SessionType == constant.GroupChatType {
-		log.Info("", "", "msg_transfer chat type = GroupChatType")
+	case constant.GroupChatType:
+		log.NewDebug(pbSaveData.OperationID, "msg_transfer chat type = GroupChatType", isHistory, isPersist)
 		if isHistory {
 			uidAndGroupID := strings.Split(pbData.RecvID, " ")
-			saveUserChat(uidAndGroupID[0], &pbSaveData)
+			err := saveUserChat(uidAndGroupID[0], &pbSaveData)
+			if err != nil {
+				log.NewError(pbSaveData.OperationID, "group data insert to mongo err", pbSaveData.String(), uidAndGroupID[0], err.Error())
+				return
+			}
 		}
 		pbSaveData.Options = pbData.Options
 		pbSaveData.OfflineInfo = pbData.OfflineInfo
-		sendMessageToPush(&pbSaveData)
-		log.InfoByKv("msg_transfer handle topic success...", "", "")
-	} else {
-		log.Error("", "", "msg_transfer recv chat err, chat.MsgFrom = %d", pbData.SessionType)
+		go sendMessageToPush(&pbSaveData)
+	default:
+		log.NewError(pbSaveData.OperationID, "SessionType error", pbSaveData.String())
+		return
 	}
-
+	log.NewDebug(pbSaveData.OperationID, "msg_transfer handle topic data to database success...", pbSaveData.String())
 }
 
 func (HistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
@@ -132,7 +139,7 @@ func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
 	msg.SendTime = message.SendTime
 	msg.MsgID = message.MsgID
 	msg.OfflineInfo = message.OfflineInfo
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName)
+	grpcConn := getcdv3.GetPushConn()
 	if grpcConn == nil {
 		log.ErrorByKv("rpc dial failed", msg.OperationID, "push data", msg.String())
 		pid, offset, err := producer.SendMessage(message)

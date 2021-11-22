@@ -1,16 +1,17 @@
 package apiAuth
 
 import (
-	pbAuth "Open_IM/pkg/proto/auth"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbAuth "Open_IM/pkg/proto/auth"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsUserToken struct
 type paramsUserToken struct {
 	Secret   string `json:"secret" binding:"required,max=32"`
 	Platform int32  `json:"platform" binding:"required,min=1,max=8"`
@@ -25,9 +26,20 @@ func newUserTokenReq(params *paramsUserToken) *pbAuth.UserTokenReq {
 	return &pbData
 }
 
+// @Summary
+// @Schemes
+// @Description get token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param body body apiAuth.paramsUserToken true "get token params"
+// @Success 200 {object} user.result{data=apiAuth.resultUserRegister}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /auth/user_token [post]
 func UserToken(c *gin.Context) {
 	log.Info("", "", "api user_token init ....")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+	etcdConn := getcdv3.GetAuthConn()
 	client := pbAuth.NewAuthClient(etcdConn)
 	//defer etcdConn.Close()
 
@@ -35,6 +47,10 @@ func UserToken(c *gin.Context) {
 	if err := c.BindJSON(&params); err != nil {
 		log.Error("", "", params.UID, params.Platform, params.Secret)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	if params.Secret != config.Config.Secret {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "not authorized"})
 		return
 	}
 	pbData := newUserTokenReq(&params)

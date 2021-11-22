@@ -51,7 +51,7 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 
        ```
        #cd Open-IM-server/script
-       
+
        chmod +x *.sh
        ```
 
@@ -98,10 +98,57 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 5. Check service
 
    ```
-   ./docker_check_service.sh 
+   ./docker_check_service.sh
    ```
 
    ![OpenIMServersondockerpng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-docker.png)
+
+#### How to develop
+
+1. Install [Go environment](https://golang.org/doc/install). Make sure Go version is at least 1.15.
+
+2. Install `Nodejs` and `pm2`
+
+```
+    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    npm install pm2 -g
+```
+
+2. Clone the Open-IM project to your server.
+
+   ```
+   git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
+   ```
+
+3. Start Service.
+
+    ```
+    # run etcd/mongodb/mysql/redis/kafka
+    docker-compose -f docker-compose.local.yaml up -d
+
+    # run open-im services
+    pm2 start app.yaml --watch
+    pm2 ls
+    pm2 logs
+    ```
+
+or try with `docker-compose`
+
+```
+    docker-compose -f docker-compose.dev.yaml up -d
+    docker-compose -f docker-compose.dev.yaml ps
+    docker-compose -f docker-compose.dev.yaml logs -f
+```
+
+### Api Swagger
+run service by `pm2` firstly, then run visit `[ip]:10000/swagger/index.html`
+
+run following command to generate swagger docs
+```
+go get -u github.com/swaggo/swag/cmd/swag
+export PATH=$(go env GOPATH)/bin:$PATH
+swag init --generalInfo cmd/open_im_api/main.go
+```
 
 ### CONFIGURATION INSTRUCTIONS
 
@@ -144,7 +191,7 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
 - start_all.sh&&stop_all.sh
     - Total script, start all services and close all services
 
-## Authentication Clow Chart 
+## Authentication Clow Chart
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png)
 

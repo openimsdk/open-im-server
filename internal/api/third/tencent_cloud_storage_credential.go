@@ -3,20 +3,43 @@ package apiThird
 import (
 	"Open_IM/pkg/common/config"
 	log2 "Open_IM/pkg/common/log"
-	"github.com/gin-gonic/gin"
-	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 )
 
+// paramsTencentCloudStorageCredential struct
 type paramsTencentCloudStorageCredential struct {
 	Token       string `json:"token"`
 	OperationID string `json:"operationID"`
 }
 
+// resultTencentCredential struct
+type resultTencentCredential struct {
+	ErrCode int         `json:"errCode`
+	ErrMsg  string      `json:"errMsg"`
+	Region  string      `json:"region"`
+	Bucket  string      `json:"bucket"`
+	Data    interface{} `json:"data"`
+}
+
 var lastTime int64
 var lastRes *sts.CredentialResult
 
+// @Summary
+// @Schemes
+// @Description get Tencent cloud storage credential
+// @Tags third
+// @Accept json
+// @Produce json
+// @Param body body apiThird.paramsTencentCloudStorageCredential true "get Tencent cloud storage credential params"
+// @Param token header string true "token"
+// @Success 200 {object} apiThird.resultTencentCredential
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /third/user_register [post]
 func TencentCloudStorageCredential(c *gin.Context) {
 	params := paramsTencentCloudStorageCredential{}
 	if err := c.BindJSON(&params); err != nil {

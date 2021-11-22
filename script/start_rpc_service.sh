@@ -26,7 +26,6 @@ service_port_name=(
   openImGroupPort
   openImAuthPort
   openImOfflineMessagePort
-
 )
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do

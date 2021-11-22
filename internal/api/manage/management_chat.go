@@ -14,15 +14,16 @@ import (
 	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/utils"
 	"context"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"net/http"
-	"strings"
 )
 
 var validate *validator.Validate
 
+// paramsManagementSendMsg struct
 type paramsManagementSendMsg struct {
 	OperationID    string                 `json:"operationID" binding:"required"`
 	SendID         string                 `json:"sendID" binding:"required"`
@@ -35,7 +36,15 @@ type paramsManagementSendMsg struct {
 	SessionType    int32                  `json:"sessionType" binding:"required"`
 }
 
-func newUserSendMsgReq(token string, params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
+// sendMsgResult struct
+type sendMsgResult struct {
+	ErrCode  int    `json:"errCode" example:"0"`
+	ErrMsg   string `json:"errMsg"  example:"error"`
+	SendTime int    `json:"sendTime"  example:0`
+	MsgID    string `json:"msgID"  example:""`
+}
+
+func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
 	var newContent string
 	switch params.ContentType {
 	case constant.Text:
@@ -53,7 +62,6 @@ func newUserSendMsgReq(token string, params *paramsManagementSendMsg) *pbChat.Us
 	}
 	pbData := pbChat.UserSendMsgReq{
 		ReqIdentifier:  constant.WSSendMsg,
-		Token:          token,
 		SendID:         params.SendID,
 		SenderNickName: params.SenderNickName,
 		SenderFaceURL:  params.SenderFaceURL,
@@ -72,6 +80,19 @@ func newUserSendMsgReq(token string, params *paramsManagementSendMsg) *pbChat.Us
 func init() {
 	validate = validator.New()
 }
+
+// @Summary
+// @Schemes
+// @Description manage send message
+// @Tags manage
+// @Accept json
+// @Produce json
+// @Param body body manage.paramsManagementSendMsg true "manage send message"
+// @Param token header string true "token"
+// @Success 200 {object} manage.sendMsgResult
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /manager/send_msg [post]
 func ManagementSendMsg(c *gin.Context) {
 	var data interface{}
 	params := paramsManagementSendMsg{}
@@ -103,18 +124,22 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if !utils.IsContain(params.SendID, config.Config.Manager.AppManagerUid) {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not appManager", "sendTime": 0, "MsgID": ""})
+	claims, err := utils.ParseToken(token)
+	if err != nil {
+		log.NewError(params.OperationID, "parse token failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
+	}
+	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not authorized", "sendTime": 0, "MsgID": ""})
 		return
 
 	}
-
 	log.InfoByKv("Ws call success to ManagementSendMsgReq", params.OperationID, "Parameters", params)
 
-	pbData := newUserSendMsgReq(token, &params)
+	pbData := newUserSendMsgReq(&params)
 	log.Info("", "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	etcdConn := getcdv3.GetOfflineMessageConn()
 	client := pbChat.NewChatClient(etcdConn)
 
 	log.Info("", "", "api ManagementSendMsg call, api call rpc...")

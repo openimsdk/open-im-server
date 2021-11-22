@@ -1,19 +1,21 @@
 package friend
 
 import (
-	pbFriend "Open_IM/pkg/proto/friend"
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
+// paramsGetApplyList struct
 type paramsGetApplyList struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
+
+// UserInfo struct
 type UserInfo struct {
 	UID        string `json:"uid"`
 	Name       string `json:"name"`
@@ -28,10 +30,22 @@ type UserInfo struct {
 	Flag       int32  `json:"flag"`
 }
 
+// @Summary
+// @Schemes
+// @Description get friend apply list
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsGetApplyList true "get friend apply list"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{data=[]friend.UserInfo}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /friend/get_friend_apply_list [post]
 func GetFriendApplyList(c *gin.Context) {
 	log.Info("", "", "api get_friend_apply_list init ....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetFriendConn()
 	client := pbFriend.NewFriendClient(etcdConn)
 	//defer etcdConn.Close()
 
@@ -78,10 +92,22 @@ func GetFriendApplyList(c *gin.Context) {
 	log.InfoByArgs("api get friend apply list success return,get args=%s,return args=%s", req.String(), RpcResp.String())
 }
 
+// @Summary
+// @Schemes
+// @Description get self friend apply list
+// @Tags friend
+// @Accept json
+// @Produce json
+// @Param body body friend.paramsGetApplyList true "get self friend apply list"
+// @Param token header string true "token"
+// @Success 200 {object} user.result{data=[]friend.UserInfo}
+// @Failure 400 {object} user.result
+// @Failure 500 {object} user.result
+// @Router /friend/get_self_apply_list [post]
 func GetSelfApplyList(c *gin.Context) {
 	log.Info("", "", "api get self friend apply list init ....")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetFriendConn()
 	client := pbFriend.NewFriendClient(etcdConn)
 	//defer etcdConn.Close()
 

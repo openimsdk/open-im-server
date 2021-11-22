@@ -1,6 +1,7 @@
 package main
 
 import (
+	docs "Open_IM/docs"
 	apiAuth "Open_IM/internal/api/auth"
 	apiChat "Open_IM/internal/api/chat"
 	"Open_IM/internal/api/friend"
@@ -12,9 +13,12 @@ import (
 	"Open_IM/pkg/utils"
 	"flag"
 	"strconv"
-
 	"github.com/gin-gonic/gin"
+
 	//"syscall"
+
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -29,6 +33,12 @@ func main() {
 	//log.Info("", "", "api server running...")
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
+
+	if os.Getenv("OPEN_IM_SWAGGER_API") == "true" {
+		docs.SwaggerInfo.BasePath = "/"
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
+
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
@@ -84,9 +94,10 @@ func main() {
 	//Message
 	chatGroup := r.Group("/chat")
 	{
-		chatGroup.POST("/newest_seq", apiChat.UserNewestSeq)
+		chatGroup.POST("/newest_seq", apiChat.UserGetSeq)
 		chatGroup.POST("/pull_msg", apiChat.UserPullMsg)
 		chatGroup.POST("/send_msg", apiChat.UserSendMsg)
+		chatGroup.POST("/pull_msg_by_seq", apiChat.UserPullMsgBySeqList)
 	}
 	//Manager
 	managementGroup := r.Group("/manager")
@@ -98,5 +109,6 @@ func main() {
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
+
 	r.Run(utils.ServerIP + ":" + strconv.Itoa(*ginPort))
 }

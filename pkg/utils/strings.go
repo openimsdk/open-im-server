@@ -37,6 +37,7 @@ func IsContain(target string, List []string) bool {
 	return false
 
 }
+
 func InterfaceArrayToStringArray(data []interface{}) (i []string) {
 	for _, param := range data {
 		i = append(i, param.(string))
@@ -60,5 +61,8 @@ func GetMsgID(sendID string) string {
 	return Md5(t + sendID + int64ToString(rand.Int63n(GetCurrentTimestampByNano())))
 }
 func int64ToString(i int64) string {
+	return strconv.FormatInt(i, 10)
+}
+func Int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)
 }
