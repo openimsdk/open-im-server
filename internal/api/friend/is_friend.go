@@ -30,7 +30,7 @@ func IsFriend(c *gin.Context) {
 	}
 	req := &pbFriend.IsFriendReq{
 		OperationID: params.OperationID,
-		ReceiveUid:  params.OperationID,
+		ReceiveUid:  params.ReceiveUid,
 		Token:       c.Request.Header.Get("token"),
 	}
 	log.Info(req.Token, req.OperationID, "api is friend is server")
