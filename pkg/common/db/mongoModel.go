@@ -15,6 +15,7 @@ import (
 
 const cChat = "chat"
 const cGroup = "group"
+const cGroupMemberModel = "groupMemberModel"
 const singleGocMsgNum = 5000
 
 type MsgInfo struct {
@@ -30,6 +31,15 @@ type UserChat struct {
 type GroupMember struct {
 	GroupID string
 	UIDList []string
+}
+
+type GroupMemberModel struct {
+	GroupId            string    `bson:"group_id"`
+	Uid                string    `bson:"uid"`
+	NickName           string    `bson:"nickname"`
+	AdministratorLevel int32     `bson:"administrator_level"`
+	JoinTime           time.Time `bson:"join_time"`
+	UserGroupFaceUrl   string    `bson:"user_group_face_url"`
 }
 
 func (d *DataBases) GetMsgBySeqRange(uid string, seqBegin, seqEnd int64) (SingleMsg []*pbMsg.MsgFormat, GroupMsg []*pbMsg.MsgFormat, MaxSeq int64, MinSeq int64, err error) {
@@ -360,4 +370,292 @@ func isContainInt64(target int64, List []int64) bool {
 }
 func indexGen(uid string, seqSuffix int64) string {
 	return uid + ":" + strconv.FormatInt(seqSuffix, 10)
+}
+
+func (d *DataBases) InsertIntoGroupMember(groupId, uid, nickName, userGroupFaceUrl string, administratorLevel int32) error {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	n, err := c.Find(bson.M{"group_id": groupId, "uid": uid}).Count()
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+
+		groupMsgInfo := GroupMemberModel{}
+		groupMsgInfo.GroupId = groupId
+		groupMsgInfo.Uid = uid
+		groupMsgInfo.NickName = nickName
+		groupMsgInfo.AdministratorLevel = administratorLevel
+		groupMsgInfo.JoinTime = time.Now()
+		groupMsgInfo.UserGroupFaceUrl = userGroupFaceUrl
+
+		err = c.Insert(&groupMsgInfo)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = c.Update(bson.M{"group_id": groupId, "uid": uid}, bson.M{"$set": bson.M{"nickname": nickName,
+			"administrator_level": administratorLevel, "join_time": time.Now(), "user_group_face_url": userGroupFaceUrl}})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (d *DataBases) FindGroupMemberListByUserId(uid string) ([]GroupMemberModel, error) {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return nil, errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	var sGroupMemberModel []GroupMemberModel
+	if err := c.Find(bson.M{"uid": uid}).All(&sGroupMemberModel); err != nil {
+		return nil, err
+	}
+
+	return sGroupMemberModel, nil
+
+}
+
+func (d *DataBases) FindGroupMemberListByGroupId(groupId string) ([]GroupMemberModel, error) {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return nil, errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	var sGroupMemberModel []GroupMemberModel
+	if err := c.Find(bson.M{"group_id": groupId}).All(&sGroupMemberModel); err != nil {
+		return nil, err
+	}
+
+	return sGroupMemberModel, nil
+}
+
+func (d *DataBases) FindGroupMemberListByGroupIdAndFilterInfo(groupId string, filter int32) ([]GroupMemberModel, error) {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return nil, errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	var sGroupMemberModel []GroupMemberModel
+	if err := c.Find(bson.M{"group_id": groupId, "administrator_level": filter}).All(&sGroupMemberModel); err != nil {
+		return nil, err
+	}
+
+	return sGroupMemberModel, nil
+}
+
+func (d *DataBases) FindGroupMemberInfoByGroupIdAndUserId(groupId, uid string) (*GroupMemberModel, error) {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return nil, errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	sGroupMemberModel := GroupMemberModel{}
+	if err := c.Find(bson.M{"group_id": groupId, "uid": uid}).One(&sGroupMemberModel); err != nil {
+		return nil, err
+	}
+
+	return &sGroupMemberModel, nil
+}
+
+func (d *DataBases) DeleteGroupMemberByGroupIdAndUserId(groupId, uid string) error {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	if err := c.Remove(bson.M{"group_id": groupId, "uid": uid}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DataBases) UpdateOwnerGroupNickName(groupId, userId, groupNickName string) error {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	if err := c.Update(bson.M{"group_id": groupId, "uid": userId}, bson.M{"$set": bson.M{"nickname": groupNickName}}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DataBases) SelectGroupList(groupId string) ([]string, error) {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return nil, errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	var sGroupMemberModel []GroupMemberModel
+	if err := c.Find(bson.M{"group_id": groupId}).All(&sGroupMemberModel); err != nil {
+		return nil, err
+	}
+
+	var groupUserID string
+	var groupList []string
+	for _, GroupMemberModel := range sGroupMemberModel {
+		groupUserID = GroupMemberModel.Uid
+		groupList = append(groupList, groupUserID)
+	}
+
+	return groupList, nil
+}
+
+func (d *DataBases) UpdateTheUserAdministratorLevel(groupId, uid string, administratorLevel int64) error {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	if err := c.Update(bson.M{"group_id": groupId, "uid": uid}, bson.M{"$set": bson.M{"administrator_level": administratorLevel}}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *DataBases) GetOwnerManagerByGroupId(groupId string) ([]GroupMemberModel, error) {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return nil, errors.New("session == nil")
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	var sGroupMemberModel []GroupMemberModel
+	if err := c.Find(bson.M{"group_id": groupId, "administrator_level": bson.M{"$gt": 0}}).All(&sGroupMemberModel); err != nil {
+		return nil, err
+	}
+
+	return sGroupMemberModel, nil
+
+}
+
+func (d *DataBases) IsExistGroupMember(groupId, uid string) bool {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return false
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	number, err := c.Find(bson.M{"group_id": groupId, "uid": uid}).Count()
+	if err != nil {
+		return false
+	}
+
+	if number != 1 {
+		return false
+	}
+
+	return true
+}
+
+func (d *DataBases) RemoveGroupMember(groupId string, memberId string) error {
+	return d.DeleteGroupMemberByGroupIdAndUserId(groupId, memberId)
+}
+
+func (d *DataBases) GetMemberInfoById(groupId string, memberId string) (*GroupMemberModel, error) {
+	return d.FindGroupMemberInfoByGroupIdAndUserId(groupId, memberId)
+}
+
+func (d *DataBases) GetGroupMemberByGroupId(groupId string, filter int32, begin int32, maxNumber int32) ([]GroupMemberModel, error) {
+	memberList, err := d.FindGroupMemberListByGroupId(groupId) //sorted by join time
+	if err != nil {
+		return nil, err
+	}
+	if begin >= int32(len(memberList)) {
+		return nil, nil
+	}
+
+	var end int32
+	if begin+int32(maxNumber) < int32(len(memberList)) {
+		end = begin + maxNumber
+	} else {
+		end = int32(len(memberList))
+	}
+	return memberList[begin:end], nil
+}
+
+func (d *DataBases) GetJoinedGroupIdListByMemberId(memberId string) ([]GroupMemberModel, error) {
+	return d.FindGroupMemberListByUserId(memberId)
+}
+
+func (d *DataBases) GetGroupMemberNumByGroupId(groupId string) int32 {
+	session := d.mgoSession.Clone()
+	if session == nil {
+		return 0
+	}
+	defer session.Close()
+
+	c := session.DB(config.Config.Mongo.DBDatabase).C(cGroupMemberModel)
+
+	var number int
+	number, err := c.Find(bson.M{"group_id": groupId}).Count()
+	if err != nil {
+		return 0
+	}
+
+	if number != 1 {
+		return 0
+	}
+
+	return int32(number)
+}
+
+func (d *DataBases) GetGroupOwnerByGroupId(groupId string) string {
+	omList, err := d.GetOwnerManagerByGroupId(groupId)
+	if err != nil {
+		return ""
+	}
+	for _, v := range omList {
+		if v.AdministratorLevel == 1 {
+			return v.Uid
+		}
+	}
+	return ""
+}
+
+func (d *DataBases) InsertGroupMember(groupId, userId, nickName, userFaceUrl string, role int32) error {
+	return d.InsertIntoGroupMember(groupId, userId, nickName, userFaceUrl, role)
 }
