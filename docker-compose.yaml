@@ -5,7 +5,8 @@ services:
   mysql:
     image: mysql:5.7
     ports:
-      - 3306:3306
+      - 13306:3306
+      - 23306:33060
     container_name: mysql
     volumes:
       - ./components/mysql/data:/var/lib/mysql
@@ -15,20 +16,25 @@ services:
     restart: always
 
   mongodb:
-    image: mongo:4.0
+    image: mongo:5.0
     ports:
-      - 27017:27017
+      - 37017:27017
     container_name: mongo
     volumes:
-      - ./components/mongodb/data:/data/db
+      - ./components/mongodb/data/db:/data/db
+      - ./components/mongodb/data/logs:/data/logs
+      - ./components/mongodb/data/conf:/etc/mongo
     environment:
-      TZ: Asia/Shanghai
+      - MONGO_INITDB_ROOT_USERNAME=openIM
+      - MONGO_INITDB_ROOT_PASSWORD=openIM
+
+      #TZ: Asia/Shanghai
     restart: always
 
   redis:
     image: redis
     ports:
-      - 6379:6379
+      - 16379:6379
     container_name: redis
     volumes:
       - ./components/redis/data:/data
@@ -82,38 +88,13 @@ services:
     restart: always
     command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
-
-  #fixme-----build from dockerfile---------
-  # open-im-server:
-  #    image: open_im_server
-  #    container_name: open-im-server
-  #    volumes:
-  #      - ./logs:/Open-IM-Server/logs
-  #      - ./config/config.yaml:/Open-IM-Server/config/config.yaml
-  #    restart: always
-  #    build:
-  #      context: .
-  #      dockerfile: deploy.Dockerfile
-  #    depends_on:
-  #      - mysql
-  #      - mongodb
-  #      - redis
-  #      - kafka
-  #      - etcd
-  #    network_mode: "host"
-  #      logging:
-  #        driver: json-file
-  #        options:
-  #          max-size: "1g"
-  #          max-file: "2"
-
-  #fixme----build from docker hub------
-  open-im-server:
-    image: lyt1123/open_im_server
-    container_name: open-im-server
+  open_im_server:
+    image: openim/open_im_server
+    container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
+      - ./db/sdk:/Open-IM-Server/db/sdk
     restart: always
     depends_on:
       - kafka

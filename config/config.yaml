@@ -1,14 +1,14 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-serverversion: 1.0.2
+serverversion: 1.0.3
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openIM
   etcdAddr: [ 127.0.0.1:2379 ]
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:3306 ]
+  dbMysqlAddress: [ 127.0.0.1:13306 ]
   dbMysqlUserName: root
   dbMysqlPassword: openIM
   dbMysqlDatabaseName: openIM
@@ -19,18 +19,18 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:27017 ]
+  dbAddress: [ 127.0.0.1:37017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
   dbSource: admin
-  dbUserName:
-  dbPassword:
+  dbUserName: openIM
+  dbPassword: openIM
   dbMaxPoolSize: 20
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 127.0.0.1:6379
+  dbAddress: 127.0.0.1:16379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -123,6 +123,7 @@ push:
     appKey: cf47465a368f24c659608e7e
     masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
+    pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
   appManagerUid: ["openIM123456","openIM654321"]
   secrets: ["openIM1","openIM2"]
@@ -143,3 +144,5 @@ tokenpolicy:
 messagecallback:
   callbackSwitch: false
   callbackUrl: "http://www.xxx.com/msg/judge"
+  #TimeOut use second as unit
+  callbackTimeOut: 10
