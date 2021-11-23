@@ -6,7 +6,7 @@ docker_compose_components=(
   etcd
   mongo
   mysql
-  open-im-server
+  open_im_server
   redis
   kafka
   zookeeper
