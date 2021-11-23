@@ -4,9 +4,9 @@ version: "3"
 services:
   mysql:
     image: mysql:5.7
-    ports:
-      - 3306:3306
-    container_name: mysql
+    networks:
+      - open_im_net
+    container_name: open_im_mysql
     volumes:
       - ./components/mysql/data:/var/lib/mysql
       - /etc/localtime:/etc/localtime
@@ -16,9 +16,9 @@ services:
 
   mongodb:
     image: mongo:4.0
-    ports:
-      - 27017:27017
-    container_name: mongo
+    networks:
+      - open_im_net
+    container_name: open_im_mongo
     volumes:
       - ./components/mongodb/data:/data/db
     environment:
@@ -27,9 +27,9 @@ services:
 
   redis:
     image: redis
-    ports:
-      - 6379:6379
-    container_name: redis
+    networks:
+      - open_im_net
+    container_name: open_im_redis
     volumes:
       - ./components/redis/data:/data
       #redis config file
@@ -44,9 +44,9 @@ services:
 
   zookeeper:
     image: wurstmeister/zookeeper
-    ports:
-      - 2181:2181
-    container_name: zookeeper
+    networks:
+      - open_im_net
+    container_name: open_im_zookeeper
     volumes:
       - /etc/localtime:/etc/localtime
     environment:
@@ -56,24 +56,24 @@ services:
 
   kafka:
     image: wurstmeister/kafka
-    container_name: kafka
+    networks:
+      - open_im_net
+    container_name: open_im_kafka
     restart: always
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_ZOOKEEPER_CONNECT: open_im_zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-    network_mode: "host"
     depends_on:
       - zookeeper
 
   etcd:
     image: quay.io/coreos/etcd
-    ports:
-      - 2379:2379
-      - 2380:2380
-    container_name: etcd
+    networks:
+      - open_im_net
+    container_name: open_im_etcd
     volumes:
       - /etc/timezone:/etc/timezone
       - /etc/localtime:/etc/localtime
@@ -110,10 +110,10 @@ services:
   #fixme----build from docker hub------
   open-im-server:
     image: lyt1123/open_im_server
-    container_name: open-im-server
+    container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
-      - ./config/config.yaml:/Open-IM-Server/config/config.yaml
+      - ./config/config.docker.yaml:/Open-IM-Server/config/config.yaml
     restart: always
     depends_on:
       - kafka
@@ -121,9 +121,25 @@ services:
       - mongodb
       - redis
       - etcd
-    network_mode: "host"
+    networks:
+      - open_im_net
+    ports:
+      - "10000:10000"
+      - "30000:30000"
+      - "10100:10100"
+      - "10200:10200"
+      - "10300:10300"
+      - "10400:10400"
+      - "10500:10500"
+      - "10600:10600"
+      - "10700:10700"
+      - "17778:17778"
     logging:
       driver: json-file
       options:
         max-size: "1g"
         max-file: "2"
+
+networks:
+  open_im_net:
+    driver: bridge

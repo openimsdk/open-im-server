@@ -1,0 +1,147 @@
+
+# The class cannot be named by Pascal or camel case.
+# If it is not used, the corresponding structure will not be set,
+# and it will not be read naturally.
+serverversion: 1.0.0
+#---------------Infrastructure configuration---------------------#
+etcd:
+  etcdSchema: openIM
+  etcdAddr: [ open_im_etcd:2379 ]
+
+mysql:
+  dbMysqlAddress: [ open_im_mysql:3306 ]
+  dbMysqlUserName: root
+  dbMysqlPassword: openIM
+  dbMysqlDatabaseName: openIM
+  dbTableName: eMsg
+  dbMsgTableNum: 1
+  dbMaxOpenConns: 20
+  dbMaxIdleConns: 10
+  dbMaxLifeTime: 120
+
+mongo:
+  dbAddress: [ open_im_mongodb:27017 ]
+  dbDirect: false
+  dbTimeout: 10
+  dbDatabase: openIM
+  dbSource: admin
+  dbUserName:
+  dbPassword:
+  dbMaxPoolSize: 20
+  dbRetainChatRecords: 7
+
+redis:
+  dbAddress: open_im_redis:6379
+  dbMaxIdle: 128
+  dbMaxActive: 0
+  dbIdleTimeout: 120
+  dbPassWord: openIM
+
+kafka:
+  ws2mschat:
+    addr: [ open_im_kafka:9092 ]
+    topic: "ws2ms_chat"
+  ms2pschat:
+    addr: [ open_im_kafka:9092 ]
+    topic: "ms2ps_chat"
+  consumergroupid:
+    msgToMongo: mongo
+    msgToMySql: mysql
+    msgToPush: push
+
+
+
+#---------------Internal service configuration---------------------#
+
+# The service ip default is empty,
+# automatically obtain the machine's valid network card ip as the service ip,
+# otherwise the configuration ip is preferred
+serverip:
+
+api:
+  openImApiPort: [ 10000 ]
+sdk:
+  openImSdkWsPort: [ 30000 ]
+
+credential:
+  tencent:
+    appID: 1302656840
+    region: ap-chengdu
+    bucket: echat-1302656840
+    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
+    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
+
+
+rpcport:
+  openImUserPort: [ 10100 ]
+  openImFriendPort: [ 10200 ]
+  openImOfflineMessagePort: [ 10300 ]
+  openImOnlineRelayPort: [ 10400 ]
+  openImGroupPort: [ 10500  ]
+  openImAuthPort: [ 10600 ]
+  openImPushPort: [ 10700 ]
+
+
+rpcregistername:
+  openImUserName: User
+  openImFriendName: Friend
+  openImOfflineMessageName: OfflineMessage
+  openImPushName: Push
+  openImOnlineMessageRelayName: OnlineMessageRelay
+  openImGroupName: Group
+  openImAuthName: Auth
+
+log:
+  storageLocation: ../logs/
+  rotationTime: 24
+  remainRotationCount: 5
+  remainLogLevel: 6
+  elasticSearchSwitch: false
+  elasticSearchAddr: [ 127.0.0.1:9201 ]
+  elasticSearchUser: ""
+  elasticSearchPassword: ""
+
+modulename:
+  longConnSvrName: msg_gateway
+  msgTransferName: msg_transfer
+  pushName: push
+
+longconnsvr:
+  openImWsPort: [ 17778 ]
+  websocketMaxConnNum: 10000
+  websocketMaxMsgLen: 4096
+  websocketTimeOut: 10
+
+push:
+  tpns:
+    ios:
+      accessID: 1600018281
+      secretKey: 3cd68a77a95b89e5089a1aca523f318f
+    android:
+      accessID: 111
+      secretKey: 111
+  jpns:
+    appKey: 2783339cee4de379cc798fe1
+    masterSecret: 66e5f309e032c68cc668c28a
+    pushUrl: "https://api.jpush.cn/v3/push"
+manager:
+  appManagerUid: ["openIM123456","openIM654321"]
+  secrets: ["openIM1","openIM2"]
+
+secret: tuoyun
+
+multiloginpolicy:
+  onlyOneTerminalAccess: false
+  mobileAndPCTerminalAccessButOtherTerminalKickEachOther: true
+  allTerminalAccess: false
+
+#token config
+tokenpolicy:
+  accessSecret: "open_im_server"
+  # Token effective time seconds as a unit
+  #Seven days   7*24*60*60
+  accessExpire: 604800
+
+messagecallback:
+  callbackSwitch: false
+  callbackUrl: "http://www.xxx.com/msg/judge"
