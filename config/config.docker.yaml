@@ -20,7 +20,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ open_im_mongodb:27017 ]
+  dbAddress: [ open_im_mongo:27017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
