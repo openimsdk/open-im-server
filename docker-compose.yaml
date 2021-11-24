@@ -95,6 +95,8 @@ services:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
       - ./db/sdk:/Open-IM-Server/db/sdk
+      - ./script:/Open-IM-Server/script
+
     restart: always
     depends_on:
       - kafka
