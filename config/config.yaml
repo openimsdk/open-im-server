@@ -57,7 +57,7 @@ kafka:
 # otherwise the configuration ip is preferred
 serverip:
 
-api:
+api: 0.0.0.0
   openImApiPort: [ 10000 ]
 sdk:
   openImSdkWsPort: [ 30000 ]
