@@ -3,38 +3,37 @@ version: "3"
 
 services:
   mysql:
-    image: mysql:5.7
+    image: mysql:${MYSQL_VERSION}
     ports:
-      - 13306:3306
-      - 23306:33060
+      - ${MYSQL_3306_PORT}:3306
     container_name: mysql
     volumes:
       - ./components/mysql/data:/var/lib/mysql
       - /etc/localtime:/etc/localtime
     environment:
-      MYSQL_ROOT_PASSWORD: openIM
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PWD}
     restart: always
 
   mongodb:
-    image: mongo:4.0
+    image: mongo:${MONGO_VERSION}
     ports:
-      - 37017:27017
+      - ${MONGO_PORT}:27017
     container_name: mongo
     volumes:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
       - ./components/mongodb/data/conf:/etc/mongo
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=openIM
-      - MONGO_INITDB_ROOT_PASSWORD=openIM
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PWD}
 
       #TZ: Asia/Shanghai
     restart: always
 
   redis:
-    image: redis
+    image: redis:${REDIS_VERSION}
     ports:
-      - 16379:6379
+      - ${REDIS_PORT}:6379
     container_name: redis
     volumes:
       - ./components/redis/data:/data
@@ -51,7 +50,7 @@ services:
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
-      - 2181:2181
+      - ${ZOOKEEPER_PORT}:2181
     container_name: zookeeper
     volumes:
       - /etc/localtime:/etc/localtime
@@ -67,18 +66,17 @@ services:
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      KAFKA_ZOOKEEPER_CONNECT: ${KAFKA_ZOOKEEPER_CONNECT}
+      KAFKA_ADVERTISED_LISTENERS: ${KAFKA_ADVERTISED_LISTENERS}
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-    network_mode: "host"
     depends_on:
       - zookeeper
 
   etcd:
     image: quay.io/coreos/etcd
     ports:
-      - 2379:2379
-      - 2380:2380
+      - ${ETCD_2379_PORT}:2379
+      - ${ETCD_2380_PORT}:2380
     container_name: etcd
     volumes:
       - /etc/timezone:/etc/timezone
@@ -89,8 +87,11 @@ services:
     command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
   open_im_server:
-    image: openim/open_im_server
+    image: openim/open_im_server:${OPEN_IM_SERVER_VERSION}
     container_name: open_im_server
+    ports:
+      - ${OPEN_IM_API_PORT}:10000
+      - ${OPEN_IM_SDK_WS_PORT}:30000
     volumes:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
@@ -104,7 +105,6 @@ services:
       - mongodb
       - redis
       - etcd
-    network_mode: "host"
     logging:
       driver: json-file
       options:
