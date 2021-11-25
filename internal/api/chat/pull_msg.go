@@ -3,9 +3,9 @@ package apiChat
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/chat"
-	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -30,8 +30,8 @@ func UserPullMsg(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if !utils.VerifyToken(token, params.SendID) {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
+	if ok, err := token_verify.VerifyToken(token, params.SendID); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err" + err.Error()})
 		return
 	}
 	pbData := pbChat.PullMessageReq{}
@@ -86,8 +86,8 @@ func UserPullMsgBySeqList(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if !utils.VerifyToken(token, params.SendID) {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
+	if ok, err := token_verify.VerifyToken(token, params.SendID); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err" + err.Error()})
 		return
 	}
 	pbData := pbChat.PullMessageBySeqListReq{}

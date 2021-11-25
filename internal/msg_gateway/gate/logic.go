@@ -30,7 +30,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	dec := gob.NewDecoder(b)
 	err := dec.Decode(&m)
 	if err != nil {
-		log.ErrorByKv("ws json Unmarshal err", "", "err", err.Error())
+		log.ErrorByKv("ws Decode  err", "", "err", err.Error())
 		ws.sendErrMsg(conn, 200, err.Error(), constant.WSDataError, "", "")
 		err = conn.Close()
 		if err != nil {

@@ -145,12 +145,8 @@ type config struct {
 		}
 	}
 	Secret           string `yaml:"secret"`
-	MultiLoginPolicy struct {
-		OnlyOneTerminalAccess                                  bool `yaml:"onlyOneTerminalAccess"`
-		MobileAndPCTerminalAccessButOtherTerminalKickEachOther bool `yaml:"mobileAndPCTerminalAccessButOtherTerminalKickEachOther"`
-		AllTerminalAccess                                      bool `yaml:"allTerminalAccess"`
-	}
-	TokenPolicy struct {
+	MultiLoginPolicy int    `yaml:"multiloginpolicy"`
+	TokenPolicy      struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
 	}

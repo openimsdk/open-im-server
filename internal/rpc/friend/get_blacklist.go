@@ -1,11 +1,11 @@
 package friend
 
 import (
-	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	pbFriend "Open_IM/pkg/proto/friend"
-	"Open_IM/pkg/utils"
 	"context"
 )
 
@@ -16,15 +16,15 @@ func (s *friendServer) GetBlacklist(ctx context.Context, req *pbFriend.GetBlackl
 		comment      string
 	)
 	//Parse token, to find current user information
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbFriend.GetBlacklistResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbFriend.GetBlacklistResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	blackListInfo, err := im_mysql_model.GetBlackListByUID(claims.UID)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s get blacklist failed", err.Error())
-		return &pbFriend.GetBlacklistResp{ErrorCode: config.ErrGetBlackList.ErrCode, ErrorMsg: config.ErrGetBlackList.ErrMsg}, nil
+		return &pbFriend.GetBlacklistResp{ErrorCode: constant.ErrGetBlackList.ErrCode, ErrorMsg: constant.ErrGetBlackList.ErrMsg}, nil
 	}
 	for _, blackUser := range blackListInfo {
 		var blackUserInfo pbFriend.UserInfo

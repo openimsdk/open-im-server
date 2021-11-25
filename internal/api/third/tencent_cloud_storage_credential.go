@@ -2,6 +2,7 @@ package apiThird
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	log2 "Open_IM/pkg/common/log"
 	"github.com/gin-gonic/gin"
 	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
@@ -70,7 +71,7 @@ func TencentCloudStorageCredential(c *gin.Context) {
 	if err != nil {
 		log2.Error(c.Request.Header.Get("token"), c.PostForm("optionID"), "api TencentUpLoadCredential cli.GetCredential err = %s", err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"errCode": config.ErrTencentCredential.ErrCode,
+			"errCode": constant.ErrTencentCredential.ErrCode,
 			"errMsg":  err.Error(),
 			"bucket":  "",
 			"region":  "",

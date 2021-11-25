@@ -8,8 +8,10 @@ package user
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -19,10 +21,10 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 	log.InfoByKv("rpc DeleteUsers arrived server", req.OperationID, "args", req.String())
 	var resp pbUser.DeleteUsersResp
 	var common pbUser.CommonResp
-	c, err := utils.ParseToken(req.Token)
+	c, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.ErrorByKv("parse token failed", req.OperationID, "err", err.Error())
-		return &pbUser.DeleteUsersResp{CommonResp: &pbUser.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: err.Error()}, FailedUidList: req.DeleteUidList}, nil
+		return &pbUser.DeleteUsersResp{CommonResp: &pbUser.CommonResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: err.Error()}, FailedUidList: req.DeleteUidList}, nil
 	}
 	if !utils.IsContain(c.UID, config.Config.Manager.AppManagerUid) {
 		log.ErrorByKv(" Authentication failed", req.OperationID, "args", c)
@@ -43,10 +45,10 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 
 func (s *userServer) GetAllUsersUid(_ context.Context, req *pbUser.GetAllUsersUidReq) (*pbUser.GetAllUsersUidResp, error) {
 	log.InfoByKv("rpc GetAllUsersUid arrived server", req.OperationID, "args", req.String())
-	c, err := utils.ParseToken(req.Token)
+	c, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.InfoByKv("parse token failed", req.OperationID, "err", err.Error())
-		return &pbUser.GetAllUsersUidResp{CommonResp: &pbUser.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: err.Error()}}, nil
+		return &pbUser.GetAllUsersUidResp{CommonResp: &pbUser.CommonResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: err.Error()}}, nil
 	}
 	if !utils.IsContain(c.UID, config.Config.Manager.AppManagerUid) {
 		log.ErrorByKv(" Authentication failed", req.OperationID, "args", c)
@@ -55,7 +57,7 @@ func (s *userServer) GetAllUsersUid(_ context.Context, req *pbUser.GetAllUsersUi
 	uidList, err := im_mysql_model.SelectAllUID()
 	if err != nil {
 		log.ErrorByKv("db get failed", req.OperationID, "err", err.Error())
-		return &pbUser.GetAllUsersUidResp{CommonResp: &pbUser.CommonResp{ErrorCode: config.ErrMysql.ErrCode, ErrorMsg: err.Error()}}, nil
+		return &pbUser.GetAllUsersUidResp{CommonResp: &pbUser.CommonResp{ErrorCode: constant.ErrMysql.ErrCode, ErrorMsg: err.Error()}}, nil
 	} else {
 		return &pbUser.GetAllUsersUidResp{CommonResp: &pbUser.CommonResp{ErrorCode: 0, ErrorMsg: ""}, UidList: uidList}, nil
 	}

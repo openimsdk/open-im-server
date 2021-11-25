@@ -1,21 +1,21 @@
 package group
 
 import (
-	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	pbGroup "Open_IM/pkg/proto/group"
-	"Open_IM/pkg/utils"
 	"context"
 )
 
 func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (*pbGroup.GetGroupsInfoResp, error) {
 	log.Info(req.Token, req.OperationID, "rpc get group info is server,args=%s", req.String())
 	//Parse token, to find current user information
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbGroup.GetGroupsInfoResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbGroup.GetGroupsInfoResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	log.Info("", req.OperationID, "args:", req.GroupIDList, claims.UID)
 	groupsInfoList := make([]*pbGroup.GroupInfo, 0)

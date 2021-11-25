@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/token_verify"
 	pbChat "Open_IM/pkg/proto/chat"
 	"encoding/json"
 
@@ -19,17 +20,17 @@ import (
 )
 
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbGroup.GetJoinedGroupListResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbGroup.GetJoinedGroupListResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	log.Info(claims.UID, req.OperationID, "recv req: ", req.String())
 
 	joinedGroupList, err := imdb.GetJoinedGroupIdListByMemberId(claims.UID)
 	if err != nil {
 		log.Error(claims.UID, req.OperationID, "GetJoinedGroupIdListByMemberId failed, err: ", err.Error())
-		return &pbGroup.GetJoinedGroupListResp{ErrorCode: config.ErrParam.ErrCode, ErrorMsg: config.ErrParam.ErrMsg}, nil
+		return &pbGroup.GetJoinedGroupListResp{ErrorCode: constant.ErrParam.ErrCode, ErrorMsg: constant.ErrParam.ErrMsg}, nil
 	}
 
 	var resp pbGroup.GetJoinedGroupListResp
@@ -57,23 +58,23 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 }
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.InviteUserToGroupReq) (*pbGroup.InviteUserToGroupResp, error) {
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbGroup.InviteUserToGroupResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	log.Info(claims.UID, req.OperationID, "recv req: ", req.String())
 	//	if !imdb.IsExistGroupMember(req.GroupID, claims.UID) &&  claims.UID != config.Config.AppManagerUid
 
 	if !imdb.IsExistGroupMember(req.GroupID, claims.UID) && !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		log.Error(req.Token, req.OperationID, "err= invite user not in group")
-		return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrAccess.ErrCode, ErrorMsg: config.ErrAccess.ErrMsg}, nil
+		return &pbGroup.InviteUserToGroupResp{ErrorCode: constant.ErrAccess.ErrCode, ErrorMsg: constant.ErrAccess.ErrMsg}, nil
 	}
 
 	groupInfoFromMysql, err := imdb.FindGroupInfoByGroupId(req.GroupID)
 	if err != nil || groupInfoFromMysql == nil {
 		log.NewError(req.OperationID, "get group info error", req.GroupID, req.UidList)
-		return &pbGroup.InviteUserToGroupResp{ErrorCode: config.ErrAccess.ErrCode, ErrorMsg: config.ErrAccess.ErrMsg}, nil
+		return &pbGroup.InviteUserToGroupResp{ErrorCode: constant.ErrAccess.ErrCode, ErrorMsg: constant.ErrAccess.ErrMsg}, nil
 	}
 
 	//
@@ -175,7 +176,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 	resp.ErrorCode = 0
 	memberList, err := imdb.FindGroupMemberListByGroupId(req.GroupID)
 	if err != nil {
-		resp.ErrorCode = config.ErrDb.ErrCode
+		resp.ErrorCode = constant.ErrDb.ErrCode
 		resp.ErrorMsg = err.Error()
 		log.NewError(req.OperationID, "FindGroupMemberListByGroupId failed,", err.Error(), req.GroupID)
 		return &resp, nil
@@ -196,10 +197,10 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 }
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (*pbGroup.GetGroupMemberListResp, error) {
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbGroup.GetGroupMemberListResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbGroup.GetGroupMemberListResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	//	log.Info(claims.UID, req.OperationID, "recv req: ", req.String())
 	fmt.Println("req: ", req.GroupID)
@@ -207,7 +208,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	resp.ErrorCode = 0
 	memberList, err := imdb.GetGroupMemberByGroupId(req.GroupID, req.Filter, req.NextSeq, 30)
 	if err != nil {
-		resp.ErrorCode = config.ErrDb.ErrCode
+		resp.ErrorCode = constant.ErrDb.ErrCode
 		resp.ErrorMsg = err.Error()
 		log.Error(claims.UID, req.OperationID, "GetGroupMemberByGroupId failed, ", err.Error(), "params: ", req.GroupID, req.Filter, req.NextSeq)
 		return &resp, nil
@@ -256,17 +257,17 @@ func (c *kickGroupMemberApiReq) ContentToString() string {
 }
 
 func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (*pbGroup.KickGroupMemberResp, error) {
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbGroup.KickGroupMemberResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbGroup.KickGroupMemberResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	log.Info(claims.UID, req.OperationID, "recv req: ", req.String())
 
 	ownerList, err := imdb.GetOwnerManagerByGroupId(req.GroupID)
 	if err != nil {
 		log.Error(claims.UID, req.OperationID, req.GroupID, "GetOwnerManagerByGroupId, ", err.Error())
-		return &pbGroup.KickGroupMemberResp{ErrorCode: config.ErrParam.ErrCode, ErrorMsg: config.ErrParam.ErrMsg}, nil
+		return &pbGroup.KickGroupMemberResp{ErrorCode: constant.ErrParam.ErrCode, ErrorMsg: constant.ErrParam.ErrMsg}, nil
 	}
 	//op is group owner?
 	var flag = 0
@@ -285,12 +286,12 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 
 	if flag != 1 {
 		log.Error(claims.UID, req.OperationID, "no access kick")
-		return &pbGroup.KickGroupMemberResp{ErrorCode: config.ErrAccess.ErrCode, ErrorMsg: config.ErrAccess.ErrMsg}, nil
+		return &pbGroup.KickGroupMemberResp{ErrorCode: constant.ErrAccess.ErrCode, ErrorMsg: constant.ErrAccess.ErrMsg}, nil
 	}
 
 	if len(req.UidListInfo) == 0 {
 		log.Error(claims.UID, req.OperationID, "kick list 0")
-		return &pbGroup.KickGroupMemberResp{ErrorCode: config.ErrParam.ErrCode, ErrorMsg: config.ErrParam.ErrMsg}, nil
+		return &pbGroup.KickGroupMemberResp{ErrorCode: constant.ErrParam.ErrCode, ErrorMsg: constant.ErrParam.ErrMsg}, nil
 	}
 	//remove
 	var resp pbGroup.KickGroupMemberResp
@@ -362,10 +363,10 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 }
 
 func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (*pbGroup.GetGroupMembersInfoResp, error) {
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbGroup.GetGroupMembersInfoResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbGroup.GetGroupMembersInfoResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	log.InfoByKv(claims.UID, req.OperationID, "param: ", req.MemberList)
 	var resp pbGroup.GetGroupMembersInfoResp

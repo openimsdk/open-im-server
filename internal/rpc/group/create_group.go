@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbGroup "Open_IM/pkg/proto/group"
@@ -73,17 +74,17 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupId string
 	)
 	//Parse token, to find current user information
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbGroup.CreateGroupResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	//Time stamp + MD5 to generate group chat id
 	groupId = utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
 	err = im_mysql_model.InsertIntoGroup(groupId, req.GroupName, req.Introduction, req.Notification, req.FaceUrl, req.Ex)
 	if err != nil {
 		log.ErrorByKv("create group chat failed", req.OperationID, "err=%s", err.Error())
-		return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+		return &pbGroup.CreateGroupResp{ErrorCode: constant.ErrCreateGroup.ErrCode, ErrorMsg: constant.ErrCreateGroup.ErrMsg}, nil
 	}
 
 	isMagagerFlag := 0
@@ -98,18 +99,18 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		us, err := im_mysql_model.FindUserByUID(claims.UID)
 		if err != nil {
 			log.Error("", req.OperationID, "find userInfo failed", err.Error())
-			return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+			return &pbGroup.CreateGroupResp{ErrorCode: constant.ErrCreateGroup.ErrCode, ErrorMsg: constant.ErrCreateGroup.ErrMsg}, nil
 		}
 		err = im_mysql_model.InsertIntoGroupMember(groupId, claims.UID, us.Name, us.Icon, constant.GroupOwner)
 		if err != nil {
 			log.Error("", req.OperationID, "create group chat failed,err=%s", err.Error())
-			return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+			return &pbGroup.CreateGroupResp{ErrorCode: constant.ErrCreateGroup.ErrCode, ErrorMsg: constant.ErrCreateGroup.ErrMsg}, nil
 		}
 
 		err = db.DB.AddGroupMember(groupId, claims.UID)
 		if err != nil {
 			log.Error("", "", "create mongo group member failed, db.DB.AddGroupMember fail [err: %s]", err.Error())
-			return &pbGroup.CreateGroupResp{ErrorCode: config.ErrCreateGroup.ErrCode, ErrorMsg: config.ErrCreateGroup.ErrMsg}, nil
+			return &pbGroup.CreateGroupResp{ErrorCode: constant.ErrCreateGroup.ErrCode, ErrorMsg: constant.ErrCreateGroup.ErrMsg}, nil
 		}
 	}
 

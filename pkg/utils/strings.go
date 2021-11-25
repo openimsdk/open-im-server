@@ -24,6 +24,9 @@ func StringToInt64(i string) int64 {
 	j, _ := strconv.ParseInt(i, 10, 64)
 	return j
 }
+func Int32ToString(i int32) string {
+	return strconv.FormatInt(int64(i), 10)
+}
 
 //judge a string whether in the  string list
 func IsContain(target string, List []string) bool {

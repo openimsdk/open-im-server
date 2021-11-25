@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
@@ -16,22 +17,22 @@ import (
 func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq) (*pbFriend.CommonResp, error) {
 	log.Info(req.Token, req.OperationID, "rpc add friend is server,userid=%s", req.Uid)
 	//Parse token, to find current user information
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbFriend.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbFriend.CommonResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	//Cannot add non-existent users
 	if _, err = im_mysql_model.FindUserByUID(req.Uid); err != nil {
 		log.Error(req.Token, req.OperationID, "this user not exists,cant not add friend")
-		return &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: config.ErrSearchUserInfo.ErrMsg}, nil
+		return &pbFriend.CommonResp{ErrorCode: constant.ErrAddFriend.ErrCode, ErrorMsg: constant.ErrSearchUserInfo.ErrMsg}, nil
 	}
 
 	//Establish a latest relationship in the friend request table
 	err = im_mysql_model.ReplaceIntoFriendReq(claims.UID, req.Uid, constant.ApplicationFriendFlag, req.ReqMessage)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,create friend request record failed", err.Error())
-		return &pbFriend.CommonResp{ErrorCode: config.ErrAddFriend.ErrCode, ErrorMsg: config.ErrAddFriend.ErrMsg}, nil
+		return &pbFriend.CommonResp{ErrorCode: constant.ErrAddFriend.ErrCode, ErrorMsg: constant.ErrAddFriend.ErrMsg}, nil
 	}
 	log.Info(req.Token, req.OperationID, "rpc add friend  is success return,uid=%s", req.Uid)
 	//Push message when add friend successfully
@@ -57,23 +58,23 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	var resp pbFriend.ImportFriendResp
 	var c pbFriend.CommonResp
 	//Parse token, to find current user information
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.NewError(req.OperationID, "parse token failed", err.Error())
-		c.ErrorCode = config.ErrAddFriend.ErrCode
-		c.ErrorMsg = config.ErrParseToken.ErrMsg
+		c.ErrorCode = constant.ErrAddFriend.ErrCode
+		c.ErrorMsg = constant.ErrParseToken.ErrMsg
 		return &pbFriend.ImportFriendResp{CommonResp: &c, FailedUidList: req.UidList}, nil
 	}
 
 	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		log.NewError(req.OperationID, "not manager uid", claims.UID)
-		c.ErrorCode = config.ErrAddFriend.ErrCode
+		c.ErrorCode = constant.ErrAddFriend.ErrCode
 		c.ErrorMsg = "not authorized"
 		return &pbFriend.ImportFriendResp{CommonResp: &c, FailedUidList: req.UidList}, nil
 	}
 	if _, err = im_mysql_model.FindUserByUID(req.OwnerUid); err != nil {
 		log.NewError(req.OperationID, "this user not exists,cant not add friend", req.OwnerUid)
-		c.ErrorCode = config.ErrAddFriend.ErrCode
+		c.ErrorCode = constant.ErrAddFriend.ErrCode
 		c.ErrorMsg = "this user not exists,cant not add friend"
 		return &pbFriend.ImportFriendResp{CommonResp: &c, FailedUidList: req.UidList}, nil
 	}

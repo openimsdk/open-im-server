@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
@@ -71,10 +72,10 @@ func (s *friendServer) GetFriendsInfo(ctx context.Context, req *pbFriend.GetFrie
 		comment       string
 	)
 	//Parse token, to find current user information
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbFriend.GetFriendInfoResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbFriend.GetFriendInfoResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	friendShip, err := im_mysql_model.FindFriendRelationshipFromFriend(claims.UID, req.Uid)
 	if err == nil {
@@ -84,7 +85,7 @@ func (s *friendServer) GetFriendsInfo(ctx context.Context, req *pbFriend.GetFrie
 	friendUserInfo, err := im_mysql_model.FindUserByUID(req.Uid)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,no this user", err.Error())
-		return &pbFriend.GetFriendInfoResp{ErrorCode: config.ErrSearchUserInfo.ErrCode, ErrorMsg: config.ErrSearchUserInfo.ErrMsg}, nil
+		return &pbFriend.GetFriendInfoResp{ErrorCode: constant.ErrSearchUserInfo.ErrCode, ErrorMsg: constant.ErrSearchUserInfo.ErrMsg}, nil
 	}
 	err = im_mysql_model.FindRelationshipFromBlackList(claims.UID, req.Uid)
 	if err == nil {

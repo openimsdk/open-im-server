@@ -1,4 +1,6 @@
-package config
+package constant
+
+import "errors"
 
 // key = errCode, string = errMsg
 type ErrInfo struct {
@@ -20,8 +22,6 @@ var (
 	ErrorUserRegister             = ErrInfo{600, "User registration failed"}
 	ErrAccountExists              = ErrInfo{601, "The account is already registered and cannot be registered again"}
 	ErrUserPassword               = ErrInfo{602, "User password error"}
-	ErrTokenIncorrect             = ErrInfo{603, "Invalid token"}
-	ErrTokenExpired               = ErrInfo{604, "Expired token"}
 	ErrRefreshToken               = ErrInfo{605, "Failed to refresh token"}
 	ErrAddFriend                  = ErrInfo{606, "Failed to add friends"}
 	ErrAgreeToAddFriend           = ErrInfo{607, "Failed to agree application"}
@@ -40,9 +40,26 @@ var (
 	ErrJoinGroupApplication       = ErrInfo{620, "Failed to apply to join the group"}
 	ErrQuitGroup                  = ErrInfo{621, "Failed to quit the group"}
 	ErrSetGroupInfo               = ErrInfo{622, "Failed to set group info"}
-	ErrParam                      = ErrInfo{ErrCode: 700, ErrMsg: "param failed"}
+	ErrParam                      = ErrInfo{700, "param failed"}
+	ErrTokenExpired               = ErrInfo{701, TokenExpired.Error()}
+	ErrTokenInvalid               = ErrInfo{702, TokenInvalid.Error()}
+	ErrTokenMalformed             = ErrInfo{703, TokenMalformed.Error()}
+	ErrTokenNotValidYet           = ErrInfo{704, TokenNotValidYet.Error()}
+	ErrTokenUnknown               = ErrInfo{705, TokenUnknown.Error()}
 
 	ErrAccess = ErrInfo{ErrCode: 800, ErrMsg: "no permission"}
 
 	ErrDb = ErrInfo{ErrCode: 900, ErrMsg: "db failed"}
 )
+
+var (
+	TokenExpired     = errors.New("token is timed out, please log in again")
+	TokenInvalid     = errors.New("token has been invalidated")
+	TokenNotValidYet = errors.New("token not active yet")
+	TokenMalformed   = errors.New("that's not even a token")
+	TokenUnknown     = errors.New("couldn't handle this token")
+)
+
+func (e *ErrInfo) Error() string {
+	return e.ErrMsg
+}

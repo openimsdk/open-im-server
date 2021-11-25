@@ -1,4 +1,4 @@
-package utils
+package constant
 
 // fixme 1<--->IOS 2<--->Android  3<--->Windows
 //fixme  4<--->OSX  5<--->Web  6<--->MiniWeb 7<--->Linux
@@ -48,10 +48,10 @@ var PlatformName2ID = map[string]int32{
 var Platform2class = map[string]string{
 	IOSPlatformStr:     TerminalMobile,
 	AndroidPlatformStr: TerminalMobile,
-	MiniWebPlatformStr: TerminalMobile,
+	MiniWebPlatformStr: WebPlatformStr,
+	WebPlatformStr:     WebPlatformStr,
 	WindowsPlatformStr: TerminalPC,
 	OSXPlatformStr:     TerminalPC,
-	WebPlatformStr:     TerminalPC,
 	LinuxPlatformStr:   TerminalPC,
 }
 

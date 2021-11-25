@@ -3,10 +3,10 @@ package friend
 import (
 	"Open_IM/internal/push/content_struct"
 	"Open_IM/internal/push/logic"
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
@@ -16,21 +16,21 @@ import (
 func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddFriendResponseReq) (*pbFriend.CommonResp, error) {
 	log.Info(req.Token, req.OperationID, "rpc add friend response is server,args=%s", req.String())
 	//Parse token, to find current user information
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbFriend.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: config.ErrParseToken.ErrMsg}, nil
+		return &pbFriend.CommonResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	//Check there application before agreeing or refuse to a friend's application
 	if _, err = im_mysql_model.FindFriendApplyFromFriendReqByUid(req.Uid, claims.UID); err != nil {
 		log.Error(req.Token, req.OperationID, "No such application record")
-		return &pbFriend.CommonResp{ErrorCode: config.ErrAgreeToAddFriend.ErrCode, ErrorMsg: config.ErrAgreeToAddFriend.ErrMsg}, nil
+		return &pbFriend.CommonResp{ErrorCode: constant.ErrAgreeToAddFriend.ErrCode, ErrorMsg: constant.ErrAgreeToAddFriend.ErrMsg}, nil
 	}
 	//Change friend request status flag
 	err = im_mysql_model.UpdateFriendRelationshipToFriendReq(req.Uid, claims.UID, req.Flag)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,update friend request table failed", err.Error())
-		return &pbFriend.CommonResp{ErrorCode: config.ErrMysql.ErrCode, ErrorMsg: config.ErrAgreeToAddFriend.ErrMsg}, nil
+		return &pbFriend.CommonResp{ErrorCode: constant.ErrMysql.ErrCode, ErrorMsg: constant.ErrAgreeToAddFriend.ErrMsg}, nil
 	}
 	log.Info(req.Token, req.OperationID, "rpc add friend response success return,userid=%s,flag=%d", req.Uid, req.Flag)
 	//Change the status of the friend request form

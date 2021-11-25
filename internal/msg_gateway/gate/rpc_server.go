@@ -103,14 +103,14 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 			temp := &pbRelay.SingleMsgToUser{
 				ResultCode:     resultCode,
 				RecvID:         UIDAndPID[0],
-				RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
+				RecvPlatFormID: constant.PlatformNameToID(UIDAndPID[1]),
 			}
 			resp = append(resp, temp)
 		} else {
 			temp := &pbRelay.SingleMsgToUser{
 				ResultCode:     -1,
 				RecvID:         UIDAndPID[0],
-				RecvPlatFormID: utils.PlatformNameToID(UIDAndPID[1]),
+				RecvPlatFormID: constant.PlatformNameToID(UIDAndPID[1]),
 			}
 			resp = append(resp, temp)
 		}
@@ -127,7 +127,7 @@ func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPl
 	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
 	if err != nil {
 		log.ErrorByKv("PushMsgToUser is failed By Ws", "", "Addr", conn.RemoteAddr().String(),
-			"error", err, "senderPlatform", utils.PlatformIDToName(in.PlatformID), "recvPlatform", RecvPlatForm, "args", in.String(), "recvID", RecvID)
+			"error", err, "senderPlatform", constant.PlatformIDToName(in.PlatformID), "recvPlatform", RecvPlatForm, "args", in.String(), "recvID", RecvID)
 		ResultCode = -2
 		return ResultCode
 	} else {
@@ -138,8 +138,8 @@ func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPl
 
 }
 func genUidPlatformArray(uid string) (array []string) {
-	for i := 1; i <= utils.LinuxPlatformID; i++ {
-		array = append(array, uid+" "+utils.PlatformIDToName(int32(i)))
+	for i := 1; i <= constant.LinuxPlatformID; i++ {
+		array = append(array, uid+" "+constant.PlatformIDToName(int32(i)))
 	}
 	return array
 }

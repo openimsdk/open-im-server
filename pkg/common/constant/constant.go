@@ -22,6 +22,7 @@ const (
 	WSSendMsg          = 1003
 	WSPullMsgBySeqList = 1004
 	WSPushMsg          = 2001
+	WSKickOnlineMsg    = 2002
 	WSDataError        = 3001
 
 	///ContentType
@@ -70,6 +71,21 @@ const (
 	//SessionType
 	SingleChatType = 1
 	GroupChatType  = 2
+	//token
+	NormalToken  = 0
+	InValidToken = 1
+	KickedToken  = 2
+	ExpiredToken = 3
+
+	//MultiTerminalLogin
+	//全端登录，但是同端互斥
+	AllLoginButSameTermKick = 1
+	//所有端中只能有一端能够登录
+	SingleTerminalLogin = 2
+	//web端可以同时在线，其他端只能有一端登录
+	WebAndOther = 3
+	//Pc端互斥，移动端互斥，但是web端可以同时在线
+	PcMobileAndWeb = 4
 )
 
 var ContentType2PushContent = map[int64]string{

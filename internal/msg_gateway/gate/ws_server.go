@@ -2,8 +2,13 @@ package gate
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/utils"
+	"bytes"
+	"encoding/gob"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"sync"
@@ -53,10 +58,10 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			//Connection mapping relationship,
 			//userID+" "+platformID->conn
-			SendID := query["sendID"][0] + " " + utils.PlatformIDToName(int32(utils.StringToInt64(query["platformID"][0])))
+
 			//Initialize a lock for each user
 			newConn := &UserConn{conn, new(sync.Mutex)}
-			ws.addUserConn(SendID, newConn)
+			ws.addUserConn(query["sendID"][0], int32(utils.StringToInt64(query["platformID"][0])), newConn, query["token"][0])
 			go ws.readMsg(newConn)
 		}
 	}
@@ -86,20 +91,66 @@ func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	return conn.WriteMessage(a, msg)
 
 }
-func (ws *WServer) addUserConn(uid string, conn *UserConn) {
+func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newConn *UserConn, token string) {
+	switch config.Config.MultiLoginPolicy {
+	case constant.AllLoginButSameTermKick:
+		if oldConn, ok := ws.wsUserToConn[genMapKey(uid, platformID)]; ok {
+			ws.sendKickMsg(oldConn, newConn)
+			m, err := db.DB.GetTokenMapByUidPid(uid, utils.Int32ToString(platformID))
+			if err != nil {
+				log.NewError("", "get token from redis err", err.Error())
+				return
+			}
+			if m == nil {
+				log.NewError("", "get token from redis err", "m is nil")
+				return
+			}
+			for k, _ := range m {
+				if k != token {
+					m[k] = constant.KickedToken
+				}
+			}
+			err = db.DB.SetTokenMapByUidPid(uid, utils.Int32ToString(platformID), m)
+			if err != nil {
+				log.NewError("", "SetTokenMapByUidPid err", err.Error())
+				return
+			}
+			err = oldConn.Close()
+			delete(ws.wsConnToUser, oldConn)
+			if err != nil {
+				log.NewError("", "conn close err", err.Error())
+			}
+		}
+
+	case constant.SingleTerminalLogin:
+	case constant.WebAndOther:
+	}
+}
+func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
+	mReply := Resp{
+		ReqIdentifier: constant.WSKickOnlineMsg,
+		ErrCode:       constant.ErrTokenInvalid.ErrCode,
+		ErrMsg:        constant.ErrTokenInvalid.ErrMsg,
+	}
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	err := enc.Encode(mReply)
+	if err != nil {
+		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "Encode Msg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
+		return
+	}
+	err = ws.writeMsg(oldConn, websocket.BinaryMessage, b.Bytes())
+	if err != nil {
+		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "WS WriteMsg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
+	}
+}
+func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, token string) {
+	key := genMapKey(uid, platformID)
 	rwLock.Lock()
 	defer rwLock.Unlock()
-	if oldConn, ok := ws.wsUserToConn[uid]; ok {
-		err := oldConn.Close()
-		delete(ws.wsConnToUser, oldConn)
-		if err != nil {
-			log.ErrorByKv("close err", "", "uid", uid, "conn", conn)
-		}
-	} else {
-		log.InfoByKv("this user is first login", "", "uid", uid)
-	}
-	ws.wsConnToUser[conn] = uid
-	ws.wsUserToConn[uid] = conn
+	ws.MultiTerminalLoginChecker(uid, platformID, conn, token)
+	ws.wsConnToUser[conn] = key
+	ws.wsUserToConn[key] = conn
 	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "uid", uid, "online_num", len(ws.wsUserToConn))
 
 }
@@ -146,10 +197,11 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
-		if !utils.VerifyToken(query["token"][0], query["sendID"][0]) {
+		if ok, err := token_verify.VerifyToken(query["token"][0], query["sendID"][0]); !ok {
+			e := err.(*constant.ErrInfo)
 			log.ErrorByKv("Token verify failed", "", "query", query)
 			w.Header().Set("Sec-Websocket-Version", "13")
-			http.Error(w, http.StatusText(status), status)
+			http.Error(w, e.ErrMsg, int(e.ErrCode))
 			return false
 		} else {
 			log.InfoByKv("Connection Authentication Success", "", "token", query["token"][0], "userID", query["sendID"][0])
@@ -162,4 +214,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 
+}
+func genMapKey(uid string, platformID int32) string {
+	return uid + " " + constant.PlatformIDToName(platformID)
 }

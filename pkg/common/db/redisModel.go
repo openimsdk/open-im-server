@@ -2,6 +2,7 @@ package db
 
 import (
 	log2 "Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -10,6 +11,7 @@ const (
 	appleDeviceToken = "DEVICE_TOKEN"
 	lastGetSeq       = "LAST_GET_SEQ"
 	userMinSeq       = "REDIS_USER_MIN_SEQ:"
+	uidPidToken      = "UID_PID_TOKEN:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -71,36 +73,39 @@ func (d *DataBases) DelAppleDeviceToken(accountAddress string) (err error) {
 	return err
 }
 
-//Record the last time the user actively pulled the value of Seq
-func (d *DataBases) SetLastGetSeq(uid string) (err error) {
-	key := lastGetSeq + uid
-	_, err = d.Exec("SET", key)
-	return err
-}
-
-//Get the value of the user's last active pull Seq
-func (d *DataBases) GetLastGetSeq(uid string) (int64, error) {
-	key := lastGetSeq + uid
-	return redis.Int64(d.Exec("GET", key))
-}
-
 //Store userid and platform class to redis
-func (d *DataBases) SetUserIDAndPlatform(userID, platformClass, value string, ttl int64) error {
-	key := userID + platformClass
-	_, err := d.Exec("SET", key, value, "EX", ttl)
+func (d *DataBases) AddTokenFlag(userID string, platformID int32, token string, flag int) error {
+	key := uidPidToken + userID + ":" + utils.Int32ToString(platformID)
+	m, err := redis.IntMap(d.Exec("GET", key))
+	if err != nil && err != redis.ErrNil {
+		return err
+	}
+	if err == redis.ErrNil {
+		m = make(map[string]int, 5)
+	}
+	m[token] = flag
+	_, err1 := d.Exec("SET", key, m)
+	return err1
+}
+
+func (d *DataBases) GetTokenMapByUidPid(userID, platformID string) (map[string]int, error) {
+	key := uidPidToken + userID + ":" + platformID
+	return redis.IntMap(d.Exec("GET", key))
+}
+func (d *DataBases) SetTokenMapByUidPid(userID, platformID string, m map[string]int) error {
+	key := uidPidToken + userID + ":" + platformID
+	_, err := d.Exec("SET", key, m)
 	return err
 }
 
 //Check exists userid and platform class from redis
-func (d *DataBases) ExistsUserIDAndPlatform(userID, platformClass string) (interface{}, error) {
+func (d *DataBases) ExistsUserIDAndPlatform(userID, platformClass string) (int64, error) {
 	key := userID + platformClass
-	exists, err := d.Exec("EXISTS", key)
-	return exists, err
+	return redis.Int64(d.Exec("EXISTS", key))
 }
 
 //Get platform class Token
-func (d *DataBases) GetPlatformToken(userID, platformClass string) (interface{}, error) {
+func (d *DataBases) GetPlatformToken(userID, platformClass string) (string, error) {
 	key := userID + platformClass
-	token, err := d.Exec("GET", key)
-	return token, err
+	return redis.String(d.Exec("GET", key))
 }

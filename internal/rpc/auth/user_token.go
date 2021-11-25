@@ -3,8 +3,8 @@ package auth
 import (
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	pbAuth "Open_IM/pkg/proto/auth"
-	"Open_IM/pkg/utils"
 	"context"
 )
 
@@ -18,7 +18,7 @@ func (rpc *rpcAuth) UserToken(_ context.Context, pb *pbAuth.UserTokenReq) (*pbAu
 	}
 	log.Info("", "", "rpc user_token call..., im_mysql_model.AppServerFindFromUserByUserID")
 
-	tokens, expTime, err := utils.CreateToken(pb.UID, pb.Platform)
+	tokens, expTime, err := token_verify.CreateToken(pb.UID, pb.Platform)
 	if err != nil {
 		log.Error("", "", "rpc user_token call..., utils.CreateToken fail [uid: %s] [err: %s]", pb.UID, err.Error())
 		return &pbAuth.UserTokenResp{ErrCode: 500, ErrMsg: err.Error()}, err

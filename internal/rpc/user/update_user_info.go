@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbFriend "Open_IM/pkg/proto/friend"
@@ -17,10 +18,10 @@ import (
 
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (*pbUser.CommonResp, error) {
 	log.Info(req.Token, req.OperationID, "rpc modify user is server,args=%s", req.String())
-	claims, err := utils.ParseToken(req.Token)
+	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
-		return &pbUser.CommonResp{ErrorCode: config.ErrParseToken.ErrCode, ErrorMsg: err.Error()}, nil
+		return &pbUser.CommonResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: err.Error()}, nil
 	}
 
 	ownerUid := ""
@@ -34,7 +35,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	err = im_mysql_model.UpDateUserInfo(ownerUid, req.Name, req.Icon, req.Mobile, req.Birth, req.Email, req.Ex, req.Gender)
 	if err != nil {
 		log.Error(req.Token, req.OperationID, "update user some attribute failed,err=%s", err.Error())
-		return &pbUser.CommonResp{ErrorCode: config.ErrModifyUserInfo.ErrCode, ErrorMsg: config.ErrModifyUserInfo.ErrMsg}, nil
+		return &pbUser.CommonResp{ErrorCode: constant.ErrModifyUserInfo.ErrCode, ErrorMsg: constant.ErrModifyUserInfo.ErrMsg}, nil
 	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := pbFriend.NewFriendClient(etcdConn)

@@ -3,9 +3,9 @@ package group
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/group"
-	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -56,7 +56,7 @@ func GetGroupApplicationList(c *gin.Context) {
 	pbData := newUserRegisterReq(&params)
 
 	token := c.Request.Header.Get("token")
-	if claims, err := utils.ParseToken(token); err != nil {
+	if claims, err := token_verify.ParseToken(token); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
 		return
 	} else {
