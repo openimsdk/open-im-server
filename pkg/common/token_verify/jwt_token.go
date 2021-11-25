@@ -73,6 +73,7 @@ func getClaimFromToken(tokensString string) (*Claims, error) {
 		}
 	} else {
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+			log.NewDebug("", claims.UID, claims.Platform)
 			return claims, nil
 		}
 		return nil, &constant.ErrTokenNotValidYet
@@ -80,13 +81,13 @@ func getClaimFromToken(tokensString string) (*Claims, error) {
 }
 
 func ParseToken(tokensString string) (claims *Claims, err error) {
-	//根据token的算法本身做出的有效性检验
+
 	claims, err = getClaimFromToken(tokensString)
 	if err != nil {
 		log.NewError("", "token validate err", err.Error())
 		return nil, err
 	}
-	//根据redis做出的有效性检验
+
 	m, err := commonDB.DB.GetTokenMapByUidPid(claims.UID, claims.Platform)
 	if err != nil {
 		log.NewError("", "get token from redis err", err.Error())
@@ -99,6 +100,7 @@ func ParseToken(tokensString string) (claims *Claims, err error) {
 	if v, ok := m[tokensString]; ok {
 		switch v {
 		case constant.NormalToken:
+			log.NewDebug("", "this is normal return", claims)
 			return claims, nil
 		case constant.InValidToken:
 			return nil, &constant.ErrTokenInvalid
@@ -140,5 +142,6 @@ func VerifyToken(token, uid string) (bool, error) {
 	if claims.UID != uid {
 		return false, &constant.ErrTokenUnknown
 	}
+	log.NewDebug("", claims.UID, claims.Platform)
 	return true, nil
 }

@@ -110,7 +110,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 					m[k] = constant.KickedToken
 				}
 			}
-			err = db.DB.SetTokenMapByUidPid(uid, utils.Int32ToString(platformID), m)
+			err = db.DB.SetTokenMapByUidPid(uid, platformID, m)
 			if err != nil {
 				log.NewError("", "SetTokenMapByUidPid err", err.Error())
 				return

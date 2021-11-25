@@ -1,6 +1,7 @@
 package db
 
 import (
+	"Open_IM/pkg/common/constant"
 	log2 "Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"github.com/garyburd/redigo/redis"
@@ -75,26 +76,39 @@ func (d *DataBases) DelAppleDeviceToken(accountAddress string) (err error) {
 
 //Store userid and platform class to redis
 func (d *DataBases) AddTokenFlag(userID string, platformID int32, token string, flag int) error {
-	key := uidPidToken + userID + ":" + utils.Int32ToString(platformID)
-	m, err := redis.IntMap(d.Exec("GET", key))
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+	var m map[string]int
+	m = make(map[string]int)
+	ls, err := redis.String(d.Exec("GET", key))
 	if err != nil && err != redis.ErrNil {
 		return err
 	}
 	if err == redis.ErrNil {
-		m = make(map[string]int, 5)
+	} else {
+		_ = utils.JsonStringToStruct(ls, &m)
 	}
 	m[token] = flag
-	_, err1 := d.Exec("SET", key, m)
+	s := utils.StructToJsonString(m)
+	_, err1 := d.Exec("SET", key, s)
 	return err1
 }
 
-func (d *DataBases) GetTokenMapByUidPid(userID, platformID string) (map[string]int, error) {
+func (d *DataBases) GetTokenMapByUidPid(userID, platformID string) (m map[string]int, e error) {
 	key := uidPidToken + userID + ":" + platformID
-	return redis.IntMap(d.Exec("GET", key))
+	log2.NewDebug("", "key is ", key)
+	s, e := redis.String(d.Exec("GET", key))
+	if e != nil {
+		return nil, e
+	} else {
+		m = make(map[string]int)
+		_ = utils.JsonStringToStruct(s, m)
+		return m, nil
+	}
 }
-func (d *DataBases) SetTokenMapByUidPid(userID, platformID string, m map[string]int) error {
-	key := uidPidToken + userID + ":" + platformID
-	_, err := d.Exec("SET", key, m)
+func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int32, m map[string]int) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+	s := utils.StructToJsonString(m)
+	_, err := d.Exec("SET", key, s)
 	return err
 }
 
