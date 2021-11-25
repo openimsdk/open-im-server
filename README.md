@@ -88,14 +88,21 @@ All images are available at https://hub.docker.com/r/lyt1123/open_im_server
    ```
    git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
    ```
-
-4. Start docker-compose with one click(Docker automatically pulls all images)
+4. configure your env
+    ```
+    cp env-example .env
+    ```
+5. show your config
+    ```
+    docker-compose config
+    ```
+6. Start docker-compose with one click(Docker automatically pulls all images)
 
    ```
    docker-compose up -d
    ```
 
-5. Check service
+7. Check service
 
    ```
    ./docker_check_service.sh
