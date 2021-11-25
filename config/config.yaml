@@ -24,8 +24,8 @@ mongo:
   dbTimeout: 10
   dbDatabase: openIM
   dbSource: admin
-  dbUserName: openIM
-  dbPassword: openIM
+  dbUserName:
+  dbPassword:
   dbMaxPoolSize: 20
   dbRetainChatRecords: 7
 
