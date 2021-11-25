@@ -21,9 +21,9 @@ services:
       - 37017:27017
     container_name: mongo
     volumes:
-      - ./components/mongodb/data/db:/data/db
-      - ./components/mongodb/data/logs:/data/logs
-      - ./components/mongodb/data/conf:/etc/mongo
+    #  - ./components/mongodb/data/db:/data/db
+    #  - ./components/mongodb/data/logs:/data/logs
+    #  - ./components/mongodb/data/conf:/etc/mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=openIM
       - MONGO_INITDB_ROOT_PASSWORD=openIM
