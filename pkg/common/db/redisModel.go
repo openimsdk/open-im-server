@@ -101,7 +101,7 @@ func (d *DataBases) GetTokenMapByUidPid(userID, platformID string) (m map[string
 		return nil, e
 	} else {
 		m = make(map[string]int)
-		_ = utils.JsonStringToStruct(s, m)
+		_ = utils.JsonStringToStruct(s, &m)
 		return m, nil
 	}
 }

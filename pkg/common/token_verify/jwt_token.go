@@ -108,6 +108,8 @@ func ParseToken(tokensString string) (claims *Claims, err error) {
 			return nil, &constant.ErrTokenInvalid
 		case constant.ExpiredToken:
 			return nil, &constant.ErrTokenExpired
+		default:
+			return nil, &constant.ErrTokenUnknown
 		}
 	}
 	return nil, err

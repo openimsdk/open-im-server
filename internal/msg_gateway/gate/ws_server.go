@@ -95,8 +95,9 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 	switch config.Config.MultiLoginPolicy {
 	case constant.AllLoginButSameTermKick:
 		if oldConn, ok := ws.wsUserToConn[genMapKey(uid, platformID)]; ok {
+			log.NewDebug("", uid, platformID, "kick old conn")
 			ws.sendKickMsg(oldConn, newConn)
-			m, err := db.DB.GetTokenMapByUidPid(uid, utils.Int32ToString(platformID))
+			m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 			if err != nil {
 				log.NewError("", "get token from redis err", err.Error())
 				return
@@ -110,6 +111,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 					m[k] = constant.KickedToken
 				}
 			}
+			log.NewDebug("get map is ", m)
 			err = db.DB.SetTokenMapByUidPid(uid, platformID, m)
 			if err != nil {
 				log.NewError("", "SetTokenMapByUidPid err", err.Error())
@@ -120,6 +122,8 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 			if err != nil {
 				log.NewError("", "conn close err", err.Error())
 			}
+		} else {
+			log.NewDebug("no other conn", ws.wsUserToConn)
 		}
 
 	case constant.SingleTerminalLogin:
