@@ -55,9 +55,9 @@ kafka:
 # The service ip default is empty,
 # automatically obtain the machine's valid network card ip as the service ip,
 # otherwise the configuration ip is preferred
-serverip:
+serverip: 0.0.0.0
 
-api: 0.0.0.0
+api:
   openImApiPort: [ 10000 ]
 sdk:
   openImSdkWsPort: [ 30000 ]
