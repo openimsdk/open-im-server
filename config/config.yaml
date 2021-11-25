@@ -130,10 +130,7 @@ manager:
 
 secret: tuoyun
 
-multiloginpolicy:
-  onlyOneTerminalAccess: false
-  mobileAndPCTerminalAccessButOtherTerminalKickEachOther: true
-  allTerminalAccess: false
+multiloginpolicy: 1
 
 #token config
 tokenpolicy:
