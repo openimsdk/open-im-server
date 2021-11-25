@@ -24,9 +24,9 @@ services:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
       - ./components/mongodb/data/conf:/etc/mongo
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=openIM
-      - MONGO_INITDB_ROOT_PASSWORD=openIM
+  #  environment:
+   #   - MONGO_INITDB_ROOT_USERNAME=openIM
+    #  - MONGO_INITDB_ROOT_PASSWORD=openIM
 
       #TZ: Asia/Shanghai
     restart: always
