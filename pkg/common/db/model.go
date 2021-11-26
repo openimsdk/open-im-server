@@ -2,6 +2,7 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/log"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/mgo.v2"
 	"time"
@@ -20,6 +21,8 @@ func key(dbAddress, dbName string) string {
 }
 
 func init() {
+	var mgoSession *mgo.Session
+	var err1 error
 	//mysql init
 	initMysqlDB()
 	// mongo init
@@ -35,7 +38,14 @@ func init() {
 	}
 	mgoSession, err := mgo.DialWithInfo(mgoDailInfo)
 	if err != nil {
-		panic(err.Error())
+		log.NewError("mgo init err", err.Error(), mgoDailInfo)
+	}
+	if err != nil {
+		time.Sleep(time.Duration(30) * time.Second)
+		mgoSession, err1 = mgo.DialWithInfo(mgoDailInfo)
+		if err1 != nil {
+			panic(err1.Error())
+		}
 	}
 	DB.mgoSession = mgoSession
 	DB.mgoSession.SetMode(mgo.Monotonic, true)
