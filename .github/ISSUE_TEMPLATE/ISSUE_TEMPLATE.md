@@ -33,5 +33,5 @@ Example:
 <!-- view log file(logs/openIM.log) content. -->
 
 
-### Anything else screenshot:
+### screenshot:
 <!---->
