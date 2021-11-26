@@ -23,14 +23,14 @@ func initMysqlDB() {
 	db, err := gorm.Open("mysql", dsn)
 	if err != nil {
 		log.Error("", "", dsn)
-		panic(err)
+		panic(err.Error())
 	}
 
 	//Check the database and table during initialization
 	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName)
 	err = db.Exec(sql).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	db.Close()
 
@@ -38,7 +38,7 @@ func initMysqlDB() {
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable := "CREATE TABLE IF NOT EXISTS `user` (" +
@@ -56,7 +56,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable = "CREATE TABLE IF NOT EXISTS `friend` (" +
@@ -69,7 +69,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable = "CREATE TABLE IF NOT EXISTS  `friend_request` (" +
@@ -82,7 +82,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable = "CREATE TABLE IF NOT EXISTS `black_list` (" +
@@ -94,7 +94,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable = "CREATE TABLE IF NOT EXISTS `user_black_list` (" +
@@ -105,7 +105,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable = "CREATE TABLE IF NOT EXISTS `group` (" +
@@ -120,7 +120,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable = "CREATE TABLE IF NOT EXISTS `group_member` (" +
@@ -134,7 +134,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable = "CREATE TABLE IF NOT EXISTS `group_request` (" +
@@ -155,7 +155,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	sqlTable = "CREATE TABLE IF NOT EXISTS  `chat_log` (" +
@@ -173,7 +173,7 @@ func initMysqlDB() {
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 }

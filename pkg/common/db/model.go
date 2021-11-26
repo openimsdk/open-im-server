@@ -35,14 +35,14 @@ func init() {
 	}
 	mgoSession, err := mgo.DialWithInfo(mgoDailInfo)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	DB.mgoSession = mgoSession
 	DB.mgoSession.SetMode(mgo.Monotonic, true)
 	c := DB.mgoSession.DB(config.Config.Mongo.DBDatabase).C(cChat)
 	err = c.EnsureIndexKey("uid")
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	// redis pool init

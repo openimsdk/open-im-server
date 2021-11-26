@@ -30,11 +30,11 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addr []stri
 	config.Consumer.Return.Errors = consumerConfig.IsReturnErr
 	client, err := sarama.NewClient(addr, config)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	consumerGroup, err := sarama.NewConsumerGroupFromClient(groupID, client)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	return &MConsumerGroup{
 		consumerGroup,
@@ -47,7 +47,7 @@ func (mc *MConsumerGroup) RegisterHandleAndConsumer(handler sarama.ConsumerGroup
 	for {
 		err := mc.ConsumerGroup.Consume(ctx, mc.topics, handler)
 		if err != nil {
-			panic(err)
+			panic(err.Error())
 		}
 	}
 }
