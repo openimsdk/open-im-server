@@ -87,8 +87,8 @@ const (
 	//Pc端互斥，移动端互斥，但是web端可以同时在线
 	PcMobileAndWeb = 4
 
-	OnlineStatus  = "Online"
-	OfflineStatus = "Offline"
+	OnlineStatus  = "online"
+	OfflineStatus = "offline"
 )
 
 var ContentType2PushContent = map[int64]string{
