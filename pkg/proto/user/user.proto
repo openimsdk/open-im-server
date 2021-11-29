@@ -64,29 +64,6 @@ message UpdateUserInfoReq{
   string  OperationID = 9;
   string Uid = 10;
 }
-message GetUsersOnlineStatusReq{
-  repeated string  userIDList = 1;
-  string  operationID = 2;
-}
-message GetUsersOnlineStatusResp{
-  CommonResp  commonResp = 1;
-  repeated SuccessResult successResult = 2;
-  repeated FailedDetail failedResult = 3;
-  message SuccessDetail{
-    string platform = 1;
-    string status = 2;
-  }
-  message FailedDetail{
-    string userID = 1;
-    CommonResp  commonResp = 2;
-  }
-  message SuccessResult{
-    string userID = 1;
-    string status = 2;
-    repeated SuccessDetail detailPlatformStatus = 3;
-
-  }
-}
 
 
 service user {
@@ -94,5 +71,5 @@ service user {
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(CommonResp);
   rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
   rpc GetAllUsersUid(GetAllUsersUidReq)returns(GetAllUsersUidResp);
-  rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq)returns(GetUsersOnlineStatusResp);
+
 }
