@@ -6,7 +6,7 @@ serverversion: 1.0.3
 etcd:
   etcdSchema: openIM
   etcdAddr: [ 127.0.0.1:2379 ]
-11
+
 mysql:
   dbMysqlAddress: [ 127.0.0.1:13306 ]
   dbMysqlUserName: root
