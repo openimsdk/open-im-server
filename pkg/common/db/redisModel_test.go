@@ -10,6 +10,7 @@ func Test_SetTokenMapByUidPid(t *testing.T) {
 	m := make(map[string]int, 0)
 	m["哈哈"] = 1
 	m["heihei"] = 2
+	m["2332"] = 4
 	_ = DB.SetTokenMapByUidPid("1234", 2, m)
 
 }
