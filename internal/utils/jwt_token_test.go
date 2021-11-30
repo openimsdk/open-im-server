@@ -81,3 +81,9 @@ func Test_ParseToken(t *testing.T) {
 		assert.Equal(t, claims.UID, uid)
 	}
 }
+func Test_GetClaimFromToken(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVSUQiOiJvcGVuSU0xMjM0NTYiLCJQbGF0Zm9ybSI6IiIsImV4cCI6MTYzODg0NjQ3NiwibmJmIjoxNjM4MjQxNjc2LCJpYXQiOjE2MzgyNDE2NzZ9.W8RZB7ec5ySFj-rGE2Aho2z32g3MprQMdCyPiQu_C2I"
+	c, err := token_verify.GetClaimFromToken(token)
+	assert.Nil(t, c)
+	assert.Nil(t, err)
+}
