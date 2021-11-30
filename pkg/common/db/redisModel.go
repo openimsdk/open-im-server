@@ -93,7 +93,7 @@ func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int32, m map[s
 	//	a = append(a, k)
 	//	a = append(a, v)
 	//}
-	_, err := d.Exec("HMSET", redis.Args{}.Add(key).AddFlat(m))
+	_, err := d.Exec("hmset", redis.Args{}.Add(key).AddFlat(m))
 	return err
 }
 
