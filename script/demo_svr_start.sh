@@ -23,8 +23,8 @@ fi
 sleep 1
 cd ${demo_server_source_root}
 
-for ((i = 0; i < ${#rpc_ports[@]}; i++)); do
-  nohup ./${demo_server_name} -port ${rpc_ports[$i]} >>../logs/openIM.log 2>&1 &
+for ((i = 0; i < ${#api_ports[@]}; i++)); do
+  nohup ./${demo_server_name} -port ${api_ports[$i]} >>../logs/openIM.log 2>&1 &
 done
 
 sleep 3
