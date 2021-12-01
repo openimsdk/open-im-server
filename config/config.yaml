@@ -8,7 +8,7 @@ etcd:
   etcdAddr: [ 127.0.0.1:2379 ]
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:3306 ]
+  dbMysqlAddress: [ 127.0.0.1:13306 ]
   dbMysqlUserName: root
   dbMysqlPassword: openIM
   dbMysqlDatabaseName: openIM
@@ -19,7 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:27017 ]
+  dbAddress: [ 127.0.0.1:37017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
@@ -30,7 +30,7 @@ mongo:
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 127.0.0.1:6379
+  dbAddress: 127.0.0.1:16379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -55,7 +55,7 @@ kafka:
 # The service ip default is empty,
 # automatically obtain the machine's valid network card ip as the service ip,
 # otherwise the configuration ip is preferred
-serverip:
+serverip: 0.0.0.0
 
 api:
   openImApiPort: [ 10000 ]
@@ -130,10 +130,7 @@ manager:
 
 secret: tuoyun
 
-multiloginpolicy:
-  onlyOneTerminalAccess: false
-  mobileAndPCTerminalAccessButOtherTerminalKickEachOther: true
-  allTerminalAccess: false
+multiloginpolicy: 1
 
 #token config
 tokenpolicy:
@@ -144,3 +141,26 @@ tokenpolicy:
 messagecallback:
   callbackSwitch: false
   callbackUrl: "http://www.xxx.com/msg/judge"
+  #TimeOut use second as unit
+  callbackTimeOut: 10
+
+
+#---------------demo configuration---------------------#
+#The following configuration items are applied to openIM Demo configuration
+demoswitch: true
+demo:
+  openImDemoPort: [ 42233 ]
+  alismsverify:
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
+    signName: OpenIM Corporation
+    verificationCodeTemplateCode: SMS_2268101641
+  superCode: 666666
+  mail:
+    title: "openIM"
+    senderMail: "1765567899@qq.com"
+    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    smtpAddr: "smtp.qq.com"
+    smtpPort: 25
+
+
