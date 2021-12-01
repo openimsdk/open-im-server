@@ -155,6 +155,23 @@ type config struct {
 		CallbackUrl     string `yaml:"callbackUrl"`
 		CallBackTimeOut int    `yaml:"callbackTimeOut"`
 	}
+	Demo struct {
+		Port         []int `yaml:"openImDemoPort"`
+		AliSMSVerify struct {
+			AccessKeyID                  string `yaml:"accessKeyId"`
+			AccessKeySecret              string `yaml:"accessKeySecret"`
+			SignName                     string `yaml:"signName"`
+			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
+		}
+		SuperCode string `yaml:"superCode"`
+		Mail      struct {
+			Title                   string `yaml:"title"`
+			SenderMail              string `yaml:"senderMail"`
+			SenderAuthorizationCode string `yaml:"senderAuthorizationCode"`
+			SmtpAddr                string `yaml:"smtpAddr"`
+			SmtpPort                int    `yaml:"smtpPort"`
+		}
+	}
 }
 
 func init() {
