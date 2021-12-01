@@ -182,6 +182,16 @@ func initMysqlDB() {
 		panic(err.Error())
 	}
 
+	sqlTable = "CREATE TABLE IF NOT EXISTS `register` (" +
+		" `account` varchar(255) NOT NULL," +
+		" `password` varchar(255) NOT NULL," +
+		" PRIMARY KEY (`account`)  USING BTREE" +
+		" ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;"
+	err = db.Exec(sqlTable).Error
+	if err != nil {
+		panic(err.Error())
+	}
+
 }
 
 func (m *mysqlDB) DefaultGormDB() (*gorm.DB, error) {

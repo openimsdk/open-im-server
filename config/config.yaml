@@ -143,3 +143,24 @@ messagecallback:
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
+
+
+#---------------demo configuration---------------------#
+#The following configuration items are applied to openIM Demo configuration
+demoswitch: true
+demo:
+  openImDemoPort: [ 42233 ]
+  alismsverify:
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+    signName: OpenIM Corporation
+    verificationCodeTemplateCode: SMS_226810164
+  superCode: 666666
+  mail:
+    title: "挼信"
+    senderMail: "765567899@qq.com"
+    senderAuthorizationCode: "gxyausfoevlzbfag"
+    smtpAddr: "smtp.qq.com"
+    smtpPort: 25
+
+

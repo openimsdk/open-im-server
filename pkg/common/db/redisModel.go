@@ -88,11 +88,6 @@ func (d *DataBases) GetTokenMapByUidPid(userID, platformID string) (map[string]i
 }
 func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int32, m map[string]int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
-	//var a []interface{}
-	//for k, v := range m {
-	//	a = append(a, k)
-	//	a = append(a, v)
-	//}
 	_, err := d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
