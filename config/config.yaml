@@ -151,15 +151,15 @@ demoswitch: true
 demo:
   openImDemoPort: [ 42233 ]
   alismsverify:
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
     signName: OpenIM Corporation
-    verificationCodeTemplateCode: SMS_226810164
+    verificationCodeTemplateCode: SMS_2268101641
   superCode: 666666
   mail:
-    title: "挼信"
-    senderMail: "765567899@qq.com"
-    senderAuthorizationCode: "gxyausfoevlzbfag"
+    title: "openIM"
+    senderMail: "1765567899@qq.com"
+    senderAuthorizationCode: "1gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
     smtpPort: 25
 
