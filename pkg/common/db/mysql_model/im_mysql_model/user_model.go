@@ -121,7 +121,10 @@ func SelectAllUID() ([]string, error) {
 	if err != nil {
 		return uid, err
 	}
-	rows, _ := dbConn.Raw("select uid from user").Rows()
+	rows, err := dbConn.Raw("select uid from user").Rows()
+	if err != nil {
+		return uid, err
+	}
 	defer rows.Close()
 	var strUID string
 	for rows.Next() {
