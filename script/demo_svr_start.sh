@@ -4,7 +4,7 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 switch=$(cat $config_path | grep demoswitch |awk -F '[:]' '{print $NF}')
-if [[ ${switch} -ne true ]]; then
+if [ ${switch} != "true" ]; then
       echo -e ${YELLOW_PREFIX}" demo service switch is false not start demo "${COLOR_SUFFIX}
       exit 0
 fi

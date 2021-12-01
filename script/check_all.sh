@@ -18,8 +18,8 @@ service_port_name=(
 )
 switch=$(cat $config_path | grep demoswitch |awk -F '[:]' '{print $NF}')
 for i in ${service_port_name[*]}; do
-  if [[ ${switch} -ne true ]]; then
-    if [ $i -eq openImDemoPort]; then
+  if [ ${switch} != "true" ]; then
+    if [ ${i} == "openImDemoPort"]; then
              continue
     fi
   fi
