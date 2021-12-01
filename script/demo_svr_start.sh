@@ -21,7 +21,7 @@ if [ $check -ge 1 ]; then
 fi
 #Waiting port recycling
 sleep 1
-cd ${demo_server_source_root}
+cd ${demo_server_binary_root}
 
 for ((i = 0; i < ${#api_ports[@]}; i++)); do
   nohup ./${demo_server_name} -port ${api_ports[$i]} >>../logs/openIM.log 2>&1 &
