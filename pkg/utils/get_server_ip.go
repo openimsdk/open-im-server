@@ -17,7 +17,7 @@ func init() {
 	// see https://gist.github.com/jniltinho/9787946#gistcomment-3019898
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	defer conn.Close()

@@ -164,10 +164,10 @@ func init() {
 	// it will panic cannot find config/config.yaml
 	bytes, err := ioutil.ReadFile(Root + "/config/config.yaml")
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	if err = yaml.Unmarshal(bytes, &Config); err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 }

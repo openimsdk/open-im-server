@@ -65,9 +65,11 @@ message UpdateUserInfoReq{
   string Uid = 10;
 }
 
+
 service user {
   rpc getUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(CommonResp);
   rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
   rpc GetAllUsersUid(GetAllUsersUidReq)returns(GetAllUsersUidResp);
+
 }

@@ -94,7 +94,15 @@ func main() {
 		managementGroup.POST("/delete_user", manage.DeleteUser)
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
 		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
+		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus)
 	}
+	//Conversation
+	conversationGroup := r.Group("/conversation")
+	{
+		conversationGroup.POST("/delete_user", manage.DeleteUser)
+
+	}
+
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()

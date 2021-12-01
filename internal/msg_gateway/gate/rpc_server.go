@@ -122,7 +122,31 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 		Resp: resp,
 	}, nil
 }
+func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUsersOnlineStatusReq) (*pbRelay.GetUsersOnlineStatusResp, error) {
+	log.NewDebug(req.OperationID, "rpc GetUsersOnlineStatus arrived server", req.String())
+	var UIDAndPID []string
+	var resp pbRelay.GetUsersOnlineStatusResp
+	for _, v1 := range req.UserIDList {
+		userIDList := genUidPlatformArray(v1)
+		temp := new(pbRelay.GetUsersOnlineStatusResp_SuccessResult)
+		temp.UserID = v1
+		for _, v2 := range userIDList {
+			UIDAndPID = strings.Split(v2, " ")
+			if conn := ws.getUserConn(v2); conn != nil {
+				ps := new(pbRelay.GetUsersOnlineStatusResp_SuccessDetail)
+				ps.Platform = UIDAndPID[1]
+				ps.Status = constant.OnlineStatus
+				temp.Status = constant.OnlineStatus
+				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)
 
+			}
+		}
+		if temp.Status == constant.OnlineStatus {
+			resp.SuccessResult = append(resp.SuccessResult, temp)
+		}
+	}
+	return &resp, nil
+}
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.MsgToUserReq, RecvPlatForm, RecvID string) (ResultCode int64) {
 	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
 	if err != nil {

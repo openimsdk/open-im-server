@@ -55,7 +55,7 @@ func secret() jwt.Keyfunc {
 	}
 }
 
-func getClaimFromToken(tokensString string) (*Claims, error) {
+func GetClaimFromToken(tokensString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokensString, &Claims{}, secret())
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
@@ -82,7 +82,7 @@ func getClaimFromToken(tokensString string) (*Claims, error) {
 
 func ParseToken(tokensString string) (claims *Claims, err error) {
 
-	claims, err = getClaimFromToken(tokensString)
+	claims, err = GetClaimFromToken(tokensString)
 	if err != nil {
 		log.NewError("", "token validate err", err.Error())
 		return nil, err
@@ -112,7 +112,7 @@ func ParseToken(tokensString string) (claims *Claims, err error) {
 			return nil, &constant.ErrTokenUnknown
 		}
 	}
-	return nil, err
+	return nil, &constant.ErrTokenUnknown
 }
 
 //func MakeTheTokenInvalid(currentClaims *Claims, platformClass string) (bool, error) {
@@ -132,7 +132,7 @@ func ParseToken(tokensString string) (claims *Claims, err error) {
 //}
 
 func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
-	return getClaimFromToken(string(redisToken.([]uint8)))
+	return GetClaimFromToken(string(redisToken.([]uint8)))
 }
 
 //Validation token, false means failure, true means successful verification

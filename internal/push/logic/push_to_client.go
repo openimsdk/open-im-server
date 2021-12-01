@@ -48,8 +48,9 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 		reply, err := msgClient.MsgToUser(context.Background(), sendPbData)
 		if err != nil {
 			log.InfoByKv("push data to client rpc err", sendPbData.OperationID, "err", err)
+			continue
 		}
-		if reply != nil && reply.Resp != nil && err == nil {
+		if reply != nil && reply.Resp != nil {
 			wsResult = append(wsResult, reply.Resp...)
 		}
 	}

@@ -34,7 +34,7 @@ func loggerInit(moduleName string) *Logger {
 	//Close std console output
 	src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	writer := bufio.NewWriter(src)
 	logger.SetOutput(writer)
@@ -82,7 +82,7 @@ func initRotateLogs(rotationTime time.Duration, maxRemainNum uint, level string,
 		rotatelogs.WithRotationCount(maxRemainNum),
 	)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	} else {
 		return writer
 	}
