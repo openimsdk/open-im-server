@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-echo "docker-compose ps....................."
+echo "docker-compose ps..........................."
 docker-compose ps
 
-sleep 10
+sleep 20
 
-echo "check OpenIM.........................."
+echo "check OpenIM................................."
 ./check_all.sh
 
