@@ -16,7 +16,11 @@ service_port_name=(
   openImSdkWsPort
   openImDemoPort
 )
+switch=$(cat $config_path | grep demoswitch |awk -F '[:]' '{print $NF}')
 for i in ${service_port_name[*]}; do
+  if [[ ${switch} -ne true ]]&&[$i -eq openImDemoPort]; then
+     continue
+  fi
   list=$(cat $config_path | grep -w ${i} | awk -F '[:]' '{print $NF}')
   list_to_string $list
   for j in ${ports_array}; do
