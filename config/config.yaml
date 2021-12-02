@@ -24,8 +24,8 @@ mongo:
   dbTimeout: 10
   dbDatabase: openIM
   dbSource: admin
-  dbUserName: 
-  dbPassword: 
+  dbUserName:
+  dbPassword:
   dbMaxPoolSize: 20
   dbRetainChatRecords: 7
 
@@ -143,3 +143,24 @@ messagecallback:
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
+
+
+#---------------demo configuration---------------------#
+#The following configuration items are applied to openIM Demo configuration
+demoswitch: true
+demo:
+  openImDemoPort: [ 42233 ]
+  alismsverify:
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
+    signName: OpenIM Corporation
+    verificationCodeTemplateCode: SMS_2268101641
+  superCode: 666666
+  mail:
+    title: "openIM"
+    senderMail: "1765567899@qq.com"
+    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    smtpAddr: "smtp.qq.com"
+    smtpPort: 25
+
+
