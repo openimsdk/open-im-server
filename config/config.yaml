@@ -79,7 +79,15 @@ rpcport:
   openImGroupPort: [ 10500  ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
-
+  c2c:
+    callbackBeforeSendMsg:
+      switch: false
+      timeoutStrategy: 1 #1:send
+    callbackAfterSendMsg:
+      switch: false
+  state:
+    stateChange:
+      switch: false
 
 rpcregistername:
   openImUserName: User
@@ -139,11 +147,18 @@ tokenpolicy:
   accessExpire: 7
 
 messagecallback:
-  callbackSwitch: false
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
-
+  c2c:
+    callbackBeforeSendMsg:
+      switch: false
+      timeoutStrategy: 1 #1:send
+    callbackAfterSendMsg:
+      switch: false
+  state:
+    stateChange:
+      switch: false
 
 #---------------demo configuration---------------------#
 #The following configuration items are applied to openIM Demo configuration
