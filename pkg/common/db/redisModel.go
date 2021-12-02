@@ -11,7 +11,7 @@ const (
 	appleDeviceToken = "DEVICE_TOKEN"
 	lastGetSeq       = "LAST_GET_SEQ"
 	userMinSeq       = "REDIS_USER_MIN_SEQ:"
-	uidPidToken      = "UID_PID_TOKEN:"
+	uidPidToken      = "UID_PID_TOKEN_STATUS:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
