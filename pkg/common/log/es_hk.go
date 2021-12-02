@@ -61,19 +61,18 @@ func newEsHook(moduleName string) *esHook {
 	return &esHook{client: es, moduleName: moduleName}
 }
 
-//Fire log hook interface 方法
+//Fire log hook interface
 func (hook *esHook) Fire(entry *logrus.Entry) error {
 	doc := newEsLog(entry)
 	go hook.sendEs(doc)
 	return nil
 }
 
-//Levels log hook interface 方法,此hook影响的日志
 func (hook *esHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
-//sendEs 异步发送日志到es
+//sendEs
 func (hook *esHook) sendEs(doc appLogDocModel) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -102,7 +101,7 @@ func newEsLog(e *logrus.Entry) appLogDocModel {
 	return ins
 }
 
-// indexName es index name 时间分割
+// indexName es index name
 func (m *appLogDocModel) indexName() string {
 	return time.Now().Format("2006-01-02")
 }

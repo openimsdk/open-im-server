@@ -127,7 +127,7 @@ func OpenIMRegister(account string) (*http.Response, error) {
 	params := make(map[string]interface{})
 
 	params["secret"] = config.Config.Secret
-	params["platform"] = 7
+	params["platform"] = 2
 	params["uid"] = account
 	params["name"] = account
 	params["icon"] = ""
