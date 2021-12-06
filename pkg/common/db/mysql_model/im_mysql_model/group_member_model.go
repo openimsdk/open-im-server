@@ -63,7 +63,7 @@ func FindGroupMemberInfoByGroupIdAndUserId(groupId, uid string) (*GroupMember, e
 		return nil, err
 	}
 	var groupMember GroupMember
-	err = dbConn.Raw("select * from `group_member` where group_id=? and uid=? limit 1", groupId, uid).Scan(&groupMember).Error
+	err = dbConn.Raw("select * from `group_member` where group_id=? and uid=? limit 1", groupId, uid).Find(&groupMember).Error
 	if err != nil {
 		return nil, err
 	}
