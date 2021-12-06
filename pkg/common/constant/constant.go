@@ -89,6 +89,11 @@ const (
 
 	OnlineStatus  = "online"
 	OfflineStatus = "offline"
+
+	//MsgReceiveOpt
+	ReceiveMessage          = 0
+	NotReceiveMessage       = 1
+	ReceiveNotNotifyMessage = 2
 )
 
 var ContentType2PushContent = map[int64]string{

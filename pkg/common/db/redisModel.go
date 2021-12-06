@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	userIncrSeq      = "REDIS_USER_INCR_SEQ:" // user incr seq
-	appleDeviceToken = "DEVICE_TOKEN"
-	lastGetSeq       = "LAST_GET_SEQ"
-	userMinSeq       = "REDIS_USER_MIN_SEQ:"
-	uidPidToken      = "UID_PID_TOKEN_STATUS:"
+	userIncrSeq                   = "REDIS_USER_INCR_SEQ:" // user incr seq
+	appleDeviceToken              = "DEVICE_TOKEN"
+	userMinSeq                    = "REDIS_USER_MIN_SEQ:"
+	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
+	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -91,15 +91,12 @@ func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int32, m map[s
 	_, err := d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
-
-//Check exists userid and platform class from redis
-func (d *DataBases) ExistsUserIDAndPlatform(userID, platformClass string) (int64, error) {
-	key := userID + platformClass
-	return redis.Int64(d.Exec("EXISTS", key))
+func (d *DataBases) SetConversationMsgOpt(userID, conversationID string, opt int) error {
+	key := conversationReceiveMessageOpt + userID
+	_, err1 := d.Exec("HSet", key, conversationID, opt)
+	return err1
 }
-
-//Get platform class Token
-func (d *DataBases) GetPlatformToken(userID, platformClass string) (string, error) {
-	key := userID + platformClass
-	return redis.String(d.Exec("GET", key))
+func (d *DataBases) GetConversationMsgOpt(userID, conversationID string) (int, error) {
+	key := conversationReceiveMessageOpt + userID
+	return redis.Int(d.Exec("HGet", key, conversationID))
 }
