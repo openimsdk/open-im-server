@@ -116,8 +116,11 @@ func JsonStringToMap(str string) (tempMap map[string]interface{}) {
 	return tempMap
 }
 func GetSwitchFromOptions(Options map[string]interface{}, key string) (result bool) {
-	if flag, ok := Options[key]; !ok || flag == 1 {
+	if flag, ok := Options[key]; !ok || flag.(int) == 1 {
 		return true
 	}
 	return false
+}
+func SetSwitchFromOptions(Options map[string]interface{}, key string, value interface{}) {
+	Options[key] = value
 }
