@@ -146,8 +146,8 @@ func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
 	default:
 
 	}
-
 }
+
 func sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string, flag string) {
 	pid, offset, err := producer.SendMessage(m, key)
 	if err != nil {

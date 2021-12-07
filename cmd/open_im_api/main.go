@@ -3,6 +3,7 @@ package main
 import (
 	apiAuth "Open_IM/internal/api/auth"
 	apiChat "Open_IM/internal/api/chat"
+	"Open_IM/internal/api/conversation"
 	"Open_IM/internal/api/friend"
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
@@ -17,15 +18,6 @@ import (
 )
 
 func main() {
-
-	//logFile, err := os.OpenFile("./fatal.log", os.O_CREATE|os.O_APPEND|os.O_RDWR, 0660)
-	//	if err != nil {
-
-	//	return
-	//	}
-	//syscall.Dup2(int(logFile.Fd()), int(os.Stderr.Fd()))
-
-	//log.Info("", "", "api server running...")
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
 	// user routing group, which handles user registration and login services
@@ -100,8 +92,9 @@ func main() {
 	//Conversation
 	conversationGroup := r.Group("/conversation")
 	{
-		conversationGroup.POST("/delete_user", manage.DeleteUser)
-
+		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)
+		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)
+		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt)
 	}
 
 	log.NewPrivateLog("api")
