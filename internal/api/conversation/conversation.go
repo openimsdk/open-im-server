@@ -122,6 +122,7 @@ func GetReceiveMessageOpt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "GetReceiveMessageOpt rpc failed, " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, "GetReceiveMessageOptReq req: ", req, resp)
 	var ginResp GetReceiveMessageOptResp
 	ginResp.ErrCode = resp.ErrCode
 	ginResp.ErrMsg = resp.ErrMsg
@@ -171,7 +172,7 @@ func SetReceiveMessageOpt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "SetReceiveMessageOpt rpc failed, " + err.Error()})
 		return
 	}
-
+	log.NewInfo(req.OperationID, "SetReceiveMessageOpt req: ", req, resp)
 	ginResp := SetReceiveMessageOptResp{
 		ErrCode: resp.ErrCode,
 		ErrMsg:  resp.ErrMsg,
