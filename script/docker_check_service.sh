@@ -7,7 +7,7 @@ docker-compose ps
 
 echo  -e "check OpenIM result............................."
 i=1
-t=5
+t=10
 while [ $i -le $t ]
 do
         p=`awk 'BEGIN{printf "%.2f%\n",('$i'/'$t')*100}'`
