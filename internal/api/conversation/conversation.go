@@ -128,7 +128,9 @@ func GetReceiveMessageOpt(c *gin.Context) {
 
 	for _, v := range resp.ConversationOptResult {
 		var opt OptResult
+		log.NewDebug("CopyStructFields begin ", v, req.OperationID)
 		err := utils.CopyStructFields(&opt, v)
+		log.NewDebug("CopyStructFields end ", v, req.OperationID)
 		if err != nil {
 			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
 			continue
