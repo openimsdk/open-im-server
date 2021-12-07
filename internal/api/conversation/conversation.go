@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/user"
+	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -18,10 +19,15 @@ type paramsSetReceiveMessageOpt struct {
 	ConversationIdList []string `json:"conversationIdList" binding:"required"`
 }
 
+type OptResult struct {
+	ConversationId string `json:"conversationId" binding:"required"`
+	Result         int32  `json:"result" binding:"required"`
+}
+
 type SetReceiveMessageOptResp struct {
-	ErrCode int32             `json:"errCode"`
-	ErrMsg  string            `json:"errMsg"`
-	Data    []*user.OptResult `json:"data"`
+	ErrCode int32       `json:"errCode"`
+	ErrMsg  string      `json:"errMsg"`
+	Data    []OptResult `json:"data"`
 }
 
 type paramGetReceiveMessageOpt struct {
@@ -40,6 +46,8 @@ type paramGetAllConversationMessageOpt struct {
 type GetAllConversationMessageOptResp struct {
 	SetReceiveMessageOptResp
 }
+
+//CopyStructFields
 
 func GetAllConversationMessageOpt(c *gin.Context) {
 	params := paramGetAllConversationMessageOpt{}
@@ -72,7 +80,15 @@ func GetAllConversationMessageOpt(c *gin.Context) {
 	var ginResp GetAllConversationMessageOptResp
 	ginResp.ErrCode = resp.ErrCode
 	ginResp.ErrMsg = resp.ErrMsg
-	ginResp.Data = resp.ConversationOptResult
+	for _, v := range resp.ConversationOptResult {
+		var opt OptResult
+		err := utils.CopyStructFields(&opt, v)
+		if err != nil {
+			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
+			continue
+		}
+		ginResp.Data = append(ginResp.Data, opt)
+	}
 	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt resp: ", ginResp, req)
 	c.JSON(http.StatusOK, ginResp)
 }
@@ -109,7 +125,16 @@ func GetReceiveMessageOpt(c *gin.Context) {
 	var ginResp GetReceiveMessageOptResp
 	ginResp.ErrCode = resp.ErrCode
 	ginResp.ErrMsg = resp.ErrMsg
-	ginResp.Data = resp.ConversationOptResult
+
+	for _, v := range resp.ConversationOptResult {
+		var opt OptResult
+		err := utils.CopyStructFields(&opt, v)
+		if err != nil {
+			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
+			continue
+		}
+		ginResp.Data = append(ginResp.Data, opt)
+	}
 	log.NewInfo(req.OperationID, "GetReceiveMessageOpt resp: ", ginResp)
 	c.JSON(http.StatusOK, ginResp)
 }
@@ -148,7 +173,16 @@ func SetReceiveMessageOpt(c *gin.Context) {
 	ginResp := SetReceiveMessageOptResp{
 		ErrCode: resp.ErrCode,
 		ErrMsg:  resp.ErrMsg,
-		Data:    resp.OptResult,
+	}
+
+	for _, v := range resp.OptResult {
+		var opt OptResult
+		err := utils.CopyStructFields(&opt, v)
+		if err != nil {
+			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
+			continue
+		}
+		ginResp.Data = append(ginResp.Data, opt)
 	}
 	log.NewInfo(req.OperationID, "SetReceiveMessageOpt resp: ", ginResp)
 	c.JSON(http.StatusOK, ginResp)
