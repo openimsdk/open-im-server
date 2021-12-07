@@ -19,3 +19,9 @@ func Test_GetTokenMapByUidPid(t *testing.T) {
 	assert.Nil(t, err)
 	fmt.Println(m)
 }
+
+func TestDataBases_GetMultiConversationMsgOpt(t *testing.T) {
+	m, err := DB.GetMultiConversationMsgOpt("fg", []string{"user", "age", "color"})
+	assert.Nil(t, err)
+	fmt.Println(m)
+}

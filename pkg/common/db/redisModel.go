@@ -109,7 +109,16 @@ func (d *DataBases) SetMultiConversationMsgOpt(userID string, m map[string]int) 
 	_, err := d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
-func (d *DataBases) GetMultiConversationMsgOpt(userID string, conversationIDs []string) ([]int, error) {
+func (d *DataBases) GetMultiConversationMsgOpt(userID string, conversationIDs []string) (m map[string]int, err error) {
+	m = make(map[string]int)
 	key := conversationReceiveMessageOpt + userID
-	return redis.Ints(d.Exec("hmget", key, redis.Args{}.Add().AddFlat(conversationIDs)...))
+	i, err := redis.Ints(d.Exec("hmget", key, redis.Args{}.Add().AddFlat(conversationIDs)...))
+	if err != nil {
+		return m, err
+	}
+	for k, v := range conversationIDs {
+		m[v] = i[k]
+	}
+	return m, nil
+
 }
