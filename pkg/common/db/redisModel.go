@@ -91,12 +91,25 @@ func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int32, m map[s
 	_, err := d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
-func (d *DataBases) SetConversationMsgOpt(userID, conversationID string, opt int) error {
+func (d *DataBases) SetSingleConversationMsgOpt(userID, conversationID string, opt int) error {
 	key := conversationReceiveMessageOpt + userID
 	_, err1 := d.Exec("HSet", key, conversationID, opt)
 	return err1
 }
-func (d *DataBases) GetConversationMsgOpt(userID, conversationID string) (int, error) {
+func (d *DataBases) GetSingleConversationMsgOpt(userID, conversationID string) (int, error) {
 	key := conversationReceiveMessageOpt + userID
 	return redis.Int(d.Exec("HGet", key, conversationID))
+}
+func (d *DataBases) GetAllConversationMsgOpt(userID string) (map[string]int, error) {
+	key := conversationReceiveMessageOpt + userID
+	return redis.IntMap(d.Exec("HGETALL", key))
+}
+func (d *DataBases) SetMultiConversationMsgOpt(userID string, m map[string]int) error {
+	key := conversationReceiveMessageOpt + userID
+	_, err := d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
+	return err
+}
+func (d *DataBases) GetMultiConversationMsgOpt(userID string, conversationIDs []string) ([]int, error) {
+	key := conversationReceiveMessageOpt + userID
+	return redis.Ints(d.Exec("hmget", key, redis.Args{}.Add().AddFlat(conversationIDs)...))
 }

@@ -213,9 +213,9 @@ func returnMsg(replay *pbChat.UserSendMsgResp, pb *pbChat.UserSendMsgReq, errCod
 }
 func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, msg *pbChat.WSToMsgSvrChatMsg) bool {
 	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
-	opt, err := db.DB.GetConversationMsgOpt(userID, conversationID)
+	opt, err := db.DB.GetSingleConversationMsgOpt(userID, conversationID)
 	if err != nil {
-		log.NewError(msg.OperationID, "GetConversationMsgOpt from redis err", msg.String())
+		log.NewError(msg.OperationID, "GetSingleConversationMsgOpt from redis err", msg.String())
 		return true
 	}
 	switch opt {
