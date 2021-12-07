@@ -1,10 +1,13 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -179,7 +182,18 @@ func init() {
 	//bytes, err := ioutil.ReadFile(path + "/config/config.yaml")
 	// if we cd Open-IM-Server/src/utils and run go test
 	// it will panic cannot find config/config.yaml
-	bytes, err := ioutil.ReadFile(Root + "/config/config.yaml")
+
+	cfgName := os.Getenv("CONFIG_NAME")
+	if len(cfgName) == 0 {
+		cfgName = Root + "/config/config.yaml"
+	}
+
+	viper.SetConfigFile(cfgName)
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+	bytes, err := ioutil.ReadFile(cfgName)
 	if err != nil {
 		panic(err.Error())
 	}

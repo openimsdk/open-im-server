@@ -11,8 +11,9 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	//"syscall"
 )
 
@@ -107,5 +108,5 @@ func main() {
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
-	r.Run(utils.ServerIP + ":" + strconv.Itoa(*ginPort))
+	r.Run(":" + strconv.Itoa(*ginPort))
 }

@@ -14,11 +14,13 @@ import (
 	pbGroup "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 )
 
 type groupServer struct {
@@ -40,8 +42,7 @@ func NewGroupServer(port int) *groupServer {
 func (s *groupServer) Run() {
 	log.Info("", "", "rpc group init....")
 
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
+	registerAddress := ":" + strconv.Itoa(s.rpcPort)
 	//listener network
 	listener, err := net.Listen("tcp", registerAddress)
 	if err != nil {
@@ -55,7 +56,8 @@ func (s *groupServer) Run() {
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbGroup.RegisterGroupServer(srv, s)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
+	host := viper.GetString("endpoints.rpc_group")
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), host, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.ErrorByArgs("get etcd failed,err=%s", err.Error())
 		return
