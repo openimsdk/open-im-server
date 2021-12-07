@@ -82,7 +82,7 @@ func GetAllConversationMessageOpt(c *gin.Context) {
 	ginResp.ErrMsg = resp.ErrMsg
 	for _, v := range resp.ConversationOptResult {
 		var opt OptResult
-		err := utils.CopyStructFields(&opt, v)
+		err := utils.CopyStructFields(&opt, *v, "ConversationId", "Result")
 		if err != nil {
 			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
 			continue
@@ -122,15 +122,16 @@ func GetReceiveMessageOpt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "GetReceiveMessageOpt rpc failed, " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, "GetReceiveMessageOptReq req: ", req, resp)
 	var ginResp GetReceiveMessageOptResp
 	ginResp.ErrCode = resp.ErrCode
 	ginResp.ErrMsg = resp.ErrMsg
 
 	for _, v := range resp.ConversationOptResult {
 		var opt OptResult
-		log.NewDebug("CopyStructFields begin ", v, req.OperationID)
-		err := utils.CopyStructFields(&opt, v)
-		log.NewDebug("CopyStructFields end ", v, req.OperationID)
+		log.NewInfo("CopyStructFields begin ", v, req.OperationID)
+		err := utils.CopyStructFields(&opt, *v, "ConversationId", "Result")
+		log.NewInfo("CopyStructFields end ", v, req.OperationID)
 		if err != nil {
 			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
 			continue
@@ -171,7 +172,7 @@ func SetReceiveMessageOpt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "SetReceiveMessageOpt rpc failed, " + err.Error()})
 		return
 	}
-
+	log.NewInfo(req.OperationID, "SetReceiveMessageOpt req: ", req, resp)
 	ginResp := SetReceiveMessageOptResp{
 		ErrCode: resp.ErrCode,
 		ErrMsg:  resp.ErrMsg,
@@ -179,7 +180,9 @@ func SetReceiveMessageOpt(c *gin.Context) {
 
 	for _, v := range resp.OptResult {
 		var opt OptResult
-		err := utils.CopyStructFields(&opt, v)
+		log.NewDebug("CopyStructFields begin ", v, req.OperationID)
+		err := utils.CopyStructFields(&opt, *v, "ConversationId", "Result")
+		log.NewDebug("CopyStructFields end ", v, req.OperationID)
 		if err != nil {
 			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
 			continue
