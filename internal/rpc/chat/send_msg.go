@@ -224,7 +224,7 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 	case constant.NotReceiveMessage:
 		return false
 	case constant.ReceiveNotNotifyMessage:
-		m := utils.JsonStringToMap(msg.OfflineInfo)
+		m := utils.JsonStringToMap(msg.Options)
 		utils.SetSwitchFromOptions(m, "offlinePush", 0)
 		s := utils.MapToJsonString(m)
 		msg.OfflineInfo = s
