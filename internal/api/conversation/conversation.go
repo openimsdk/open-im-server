@@ -31,7 +31,7 @@ type SetReceiveMessageOptResp struct {
 }
 
 type paramGetReceiveMessageOpt struct {
-	ConversationIdList []string `json:"ConversationIdList" binding:"required"`
+	ConversationIdList []string `json:"conversationIdList" binding:"required"`
 	OperationID        string   `json:"operationID" binding:"required"`
 }
 
