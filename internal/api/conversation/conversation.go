@@ -15,7 +15,7 @@ import (
 
 type paramsSetReceiveMessageOpt struct {
 	OperationID        string   `json:"operationID" binding:"required"`
-	Option             int32    `json:"option" binding:"required"`
+	Option             int32    `json:"option"`
 	ConversationIdList []string `json:"conversationIdList" binding:"required"`
 }
 
