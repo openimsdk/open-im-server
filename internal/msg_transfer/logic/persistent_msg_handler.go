@@ -40,9 +40,8 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey strin
 		log.ErrorByKv("msg_transfer Unmarshal chat err", "", "chat", string(msg), "err", err.Error())
 		return
 	}
-	Options := utils.JsonStringToMap(pbData.Options)
 	//Control whether to store history messages (mysql)
-	isPersist := utils.GetSwitchFromOptions(Options, "persistent")
+	isPersist := utils.GetSwitchFromOptions(pbData.Options, "persistent")
 	//Only process receiver data
 	if isPersist {
 		if msgKey == pbData.RecvID && pbData.SessionType == constant.SingleChatType {
