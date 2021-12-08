@@ -34,6 +34,27 @@ VOLUME ["/Open-IM-Server/logs","/Open-IM-Server/config","/Open-IM-Server/script"
 COPY --from=build /Open-IM-Server/script /Open-IM-Server/script
 COPY --from=build /Open-IM-Server/bin /Open-IM-Server/bin
 
+# openImApiPort
+EXPOSE 10000
+# openImSdkWsPort
+EXPOSE 30000
+# openImUserPort
+EXPOSE 10100
+# openImFriendPort
+EXPOSE 10200
+# openImOfflineMessagePort
+EXPOSE 10300
+# openImOnlineRelayPort
+EXPOSE 10400
+# openImGroupPort
+EXPOSE 10500
+# openImAuthPort
+EXPOSE 10600
+# openImPushPort
+EXPOSE 10700
+# openImWsPort
+EXPOSE 17778
+
 WORKDIR /Open-IM-Server/script
 
 CMD ["./docker_start_all.sh"]

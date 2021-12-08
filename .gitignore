@@ -2,9 +2,9 @@ bin
 logs
 .devcontainer
 components
-logs
 out-test
 .github
-
+.idea
+.vscode
 tmp
 .idea
