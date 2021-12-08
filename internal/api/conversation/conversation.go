@@ -15,7 +15,7 @@ import (
 
 type paramsSetReceiveMessageOpt struct {
 	OperationID        string   `json:"operationID" binding:"required"`
-	Option             int32    `json:"option"`
+	Option             *int32   `json:"option" binding:"required"`
 	ConversationIdList []string `json:"conversationIdList" binding:"required"`
 }
 
@@ -159,7 +159,7 @@ func SetReceiveMessageOpt(c *gin.Context) {
 
 	req := &user.SetReceiveMessageOptReq{
 		UId:            claims.UID,
-		Opt:            params.Option,
+		Opt:            *params.Option,
 		ConversationId: params.ConversationIdList,
 		OperationID:    params.OperationID,
 	}
