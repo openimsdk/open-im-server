@@ -34,11 +34,9 @@ type AtContent struct {
 	IsAtSelf   bool     `json:"isAtSelf"`
 }
 
-func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
+func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo string, Options map[string]int32) {
 	var wsResult []*pbRelay.SingleMsgToUser
-	MOptions := utils.JsonStringToMap(Options) //Control whether to push message to sender's other terminal
-	//isSenderSync := utils.GetSwitchFromOptions(MOptions, "senderSync")
-	isOfflinePush := utils.GetSwitchFromOptions(MOptions, "offlinePush")
+	isOfflinePush := utils.GetSwitchFromOptions(Options, "offlinePush")
 	log.InfoByKv("Get chat from msg_transfer And push chat", sendPbData.OperationID, "PushData", sendPbData)
 	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
 	//Online push message

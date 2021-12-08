@@ -115,12 +115,12 @@ func JsonStringToMap(str string) (tempMap map[string]interface{}) {
 	_ = json.Unmarshal([]byte(str), &tempMap)
 	return tempMap
 }
-func GetSwitchFromOptions(Options map[string]interface{}, key string) (result bool) {
-	if flag, ok := Options[key]; !ok || flag.(float64) == 1 {
+func GetSwitchFromOptions(Options map[string]int32, key string) (result bool) {
+	if flag, ok := Options[key]; !ok || flag == 1 {
 		return true
 	}
 	return false
 }
-func SetSwitchFromOptions(Options map[string]interface{}, key string, value interface{}) {
+func SetSwitchFromOptions(Options map[string]int32, key string, value int32) {
 	Options[key] = value
 }

@@ -27,7 +27,7 @@ type paramsUserSendMsg struct {
 		RecvID      string                 `json:"recvID" binding:"required"`
 		ForceList   []string               `json:"forceList"`
 		Content     string                 `json:"content" binding:"required"`
-		Options     map[string]interface{} `json:"options" `
+		Options     map[string]int32       `json:"options" `
 		ClientMsgID string                 `json:"clientMsgID" binding:"required"`
 		OffLineInfo map[string]interface{} `json:"offlineInfo" `
 		Ex          map[string]interface{} `json:"ext"`
@@ -49,7 +49,7 @@ func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.UserSend
 		RecvID:         params.Data.RecvID,
 		ForceList:      params.Data.ForceList,
 		Content:        params.Data.Content,
-		Options:        utils.MapToJsonString(params.Data.Options),
+		Options:        params.Data.Options,
 		ClientMsgID:    params.Data.ClientMsgID,
 		OffLineInfo:    utils.MapToJsonString(params.Data.OffLineInfo),
 		Ex:             utils.MapToJsonString(params.Data.Ex),
