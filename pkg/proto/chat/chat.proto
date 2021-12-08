@@ -16,7 +16,7 @@ message WSToMsgSvrChatMsg{
   string MsgID = 11;
   string Token = 12;
   string OfflineInfo =13;
-  string Options = 14;
+  map<string,int32> Options = 14;
   int32  PlatformID =15;
   repeated string  ForceList = 16;
   string ClientMsgID = 17;
@@ -37,7 +37,7 @@ message MsgSvrToPushSvrChatMsg {
   string OperationID = 11;
   string MsgID = 12;
   string OfflineInfo = 13;
-  string Options =14;
+  map<string,int32> Options =14;
   int32  PlatformID =15;
   string ClientMsgID = 16;
 
@@ -121,7 +121,7 @@ message UserSendMsgReq {
   string RecvID = 11;
   repeated string ForceList = 12;
   string Content = 13;
-  string Options = 14;
+  map<string,int32> Options = 14;
   string ClientMsgID = 15;
   string OffLineInfo = 16;
   string Ex = 17;
