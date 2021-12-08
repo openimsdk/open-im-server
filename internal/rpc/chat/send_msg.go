@@ -223,6 +223,9 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 	case constant.NotReceiveMessage:
 		return false
 	case constant.ReceiveNotNotifyMessage:
+		if msg.Options == nil {
+			msg.Options = make(map[string]int32, 2)
+		}
 		utils.SetSwitchFromOptions(msg.Options, "offlinePush", 0)
 		return true
 	}
