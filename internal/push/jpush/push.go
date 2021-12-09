@@ -24,12 +24,13 @@ func JGAccountListPush(accounts []string, content, detailContent, platform strin
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)
 	var o requestBody.Options
-	o.SetApnsProduction(false)
+	o.SetApnsProduction(true)
 	var po requestBody.PushObj
 	po.SetPlatform(&pf)
 	po.SetAudience(&au)
 	po.SetNotification(&no)
 	po.SetMessage(&me)
+	po.SetOptions(&o)
 
 	con, err := json.Marshal(po)
 	if err != nil {
