@@ -20,8 +20,7 @@ func JGAccountListPush(accounts []string, content, detailContent, platform strin
 	var au requestBody.Audience
 	au.SetAlias(accounts)
 	var no requestBody.Notification
-	no.SetAlert(content)
-	no.SetAndroidIntent()
+	no.SetAlert(content, platform)
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)
 	var po requestBody.PushObj
