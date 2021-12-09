@@ -37,7 +37,7 @@ type AtContent struct {
 func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo string, Options map[string]int32) {
 	var wsResult []*pbRelay.SingleMsgToUser
 	isOfflinePush := utils.GetSwitchFromOptions(Options, "offlinePush")
-	log.InfoByKv("Get chat from msg_transfer And push chat", sendPbData.OperationID, "PushData", sendPbData)
+	log.InfoByKv("Get chat from msg_transfer And push chat", sendPbData.OperationID, "PushData", sendPbData, Options, isOfflinePush)
 	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
 	//Online push message
 	log.InfoByKv("test", sendPbData.OperationID, "len  grpc", len(grpcCons), "data", sendPbData)
