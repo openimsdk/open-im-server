@@ -23,6 +23,8 @@ func JGAccountListPush(accounts []string, content, detailContent, platform strin
 	no.SetAlert(content, platform)
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)
+	var o requestBody.Options
+	o.SetApnsProduction(true)
 	var po requestBody.PushObj
 	po.SetPlatform(&pf)
 	po.SetAudience(&au)
