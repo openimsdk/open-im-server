@@ -190,6 +190,20 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	}
 
 }
+
+type WSToMsgSvrChatMsg struct {
+	SendID      string `protobuf:"bytes,1,opt,name=SendID" json:"SendID,omitempty"`
+	RecvID      string `protobuf:"bytes,2,opt,name=RecvID" json:"RecvID,omitempty"`
+	Content     string `protobuf:"bytes,3,opt,name=Content" json:"Content,omitempty"`
+	MsgFrom     int32  `protobuf:"varint,5,opt,name=MsgFrom" json:"MsgFrom,omitempty"`
+	ContentType int32  `protobuf:"varint,8,opt,name=ContentType" json:"ContentType,omitempty"`
+	SessionType int32  `protobuf:"varint,9,opt,name=SessionType" json:"SessionType,omitempty"`
+	OperationID string `protobuf:"bytes,10,opt,name=OperationID" json:"OperationID,omitempty"`
+}
+
+func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool, offlineInfo interface{}) {
+
+}
 func (rpc *rpcChat) sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string) error {
 	pid, offset, err := rpc.producer.SendMessage(m, key)
 	if err != nil {
