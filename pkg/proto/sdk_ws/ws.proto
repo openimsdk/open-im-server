@@ -93,3 +93,36 @@ message OfflinePushInfo{
     string Ext = 3;
 }
 
+message GroupInfoTip{
+     string GroupID = 1;
+     string GroupName   = 2;
+     string Notification = 3;
+     string Introduction  = 4;
+     string FaceUrl = 5;
+     string Ex   = 6;
+     string OwnerID = 7;
+     uint64 CreateTime = 8;
+     uint32 MemberCount = 9;
+}
+
+
+
+type GroupMemberFullInfoTip struct {
+	string GroupId = 1 ;
+	string UserId = 2 ;
+	int Role = 3;
+	uint64 JoinTime = 4;
+	string NickName = 5;
+	string FaceUrl =6;
+}
+
+
+
+message CreateGroupTip{
+    GroupInfoTip group = 1;
+    UserInfoTip creator = 2;
+    repeated GroupMemberFullInfoTip memberList = 3;
+}
+
+
+
