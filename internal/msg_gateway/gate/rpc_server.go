@@ -116,7 +116,7 @@ func (r *RPCServer) MsgToUser(_ context.Context, in *pbRelay.MsgToUserReq) (*pbR
 		}
 	}
 	//Single chat sender synchronization message
-	if in.GetSessionType() == constant.SingleChatType {
+	if in.GetSessionType() == constant.SingleChatType && in.ContentType <= constant.Quote && in.ContentType != constant.Typing && in.ContentType != constant.HasReadReceipt {
 		userIDList = genUidPlatformArray(in.SendID)
 		for _, v := range userIDList {
 			UIDAndPID = strings.Split(v, " ")
