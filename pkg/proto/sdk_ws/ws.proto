@@ -87,3 +87,9 @@ message MsgData {
   string clientMsgID =13;
 }
 
+message OfflinePushInfo{
+    string Title = 1;
+    string Desc = 2;
+    string Ext = 3;
+}
+

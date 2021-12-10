@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbGroup "Open_IM/pkg/proto/group"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
@@ -202,7 +203,7 @@ type WSToMsgSvrChatMsg struct {
 	OperationID string `protobuf:"bytes,10,opt,name=OperationID" json:"OperationID,omitempty"`
 }
 
-func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool, offlineInfo interface{}) {
+func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool, offlineInfo open_im_sdk.OfflinePushInfo) {
 
 }
 func (rpc *rpcChat) sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string) error {
