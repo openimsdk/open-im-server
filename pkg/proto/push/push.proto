@@ -14,7 +14,7 @@ message PushMsgReq {
   string OperationID = 9;
   string MsgID = 10;
   string OfflineInfo = 11;
-  map<string,int32> Options =12;
+  string Options =12;
   int32  PlatformID =13;
   string SenderNickName = 14;
   string SenderFaceURL = 15;
