@@ -71,7 +71,8 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	} else {
 		pbData.SendTime = pb.SendTime
 	}
-	isHistory := utils.GetSwitchFromOptions(pbData.Options, "history")
+	options := utils.JsonStringToMap(pbData.Options)
+	isHistory := utils.GetSwitchFromOptions(options, "history")
 	mReq := MsgCallBackReq{
 		SendID:      pb.SendID,
 		RecvID:      pb.RecvID,
@@ -237,10 +238,12 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 	case constant.NotReceiveMessage:
 		return false
 	case constant.ReceiveNotNotifyMessage:
-		if msg.Options == nil {
-			msg.Options = make(map[string]int32, 2)
+		options := utils.JsonStringToMap(msg.Options)
+		if options == nil {
+			options = make(map[string]int32, 2)
 		}
-		utils.SetSwitchFromOptions(msg.Options, "offlinePush", 0)
+		utils.SetSwitchFromOptions(options, "offlinePush", 0)
+		msg.Options = utils.MapIntToJsonString(options)
 		return true
 	}
 

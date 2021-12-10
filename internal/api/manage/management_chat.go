@@ -72,7 +72,7 @@ func newUserSendMsgReq(params *paramsManagementSendMsg) *pbChat.UserSendMsgReq {
 		ForceList:      params.ForceList,
 		Content:        newContent,
 		ClientMsgID:    utils.GetMsgID(params.SendID),
-		Options:        options,
+		Options:        utils.MapIntToJsonString(options),
 	}
 	return &pbData
 }

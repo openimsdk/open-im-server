@@ -54,10 +54,11 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 	pbSaveData.OperationID = pbData.OperationID
 	pbSaveData.RecvID = pbData.RecvID
 	pbSaveData.PlatformID = pbData.PlatformID
+	options := utils.JsonStringToMap(pbData.Options)
 	//Control whether to store offline messages (mongo)
-	isHistory := utils.GetSwitchFromOptions(pbData.Options, "history")
+	isHistory := utils.GetSwitchFromOptions(options, "history")
 	//Control whether to store history messages (mysql)
-	isPersist := utils.GetSwitchFromOptions(pbData.Options, "persistent")
+	isPersist := utils.GetSwitchFromOptions(options, "persistent")
 	switch pbData.SessionType {
 	case constant.SingleChatType:
 		log.NewDebug(pbSaveData.OperationID, "msg_transfer chat type = SingleChatType", isHistory, isPersist)

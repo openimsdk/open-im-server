@@ -111,7 +111,7 @@ func MapIntToJsonString(param map[string]int32) string {
 	dataString := string(dataType)
 	return dataString
 }
-func JsonStringToMap(str string) (tempMap map[string]interface{}) {
+func JsonStringToMap(str string) (tempMap map[string]int32) {
 	_ = json.Unmarshal([]byte(str), &tempMap)
 	return tempMap
 }

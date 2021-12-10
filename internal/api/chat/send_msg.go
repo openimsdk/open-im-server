@@ -49,7 +49,7 @@ func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.UserSend
 		RecvID:         params.Data.RecvID,
 		ForceList:      params.Data.ForceList,
 		Content:        params.Data.Content,
-		Options:        params.Data.Options,
+		Options:        utils.MapIntToJsonString(params.Data.Options),
 		ClientMsgID:    params.Data.ClientMsgID,
 		OffLineInfo:    utils.MapToJsonString(params.Data.OffLineInfo),
 		Ex:             utils.MapToJsonString(params.Data.Ex),

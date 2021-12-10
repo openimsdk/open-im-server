@@ -214,7 +214,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 			SenderNickName: data.SenderNickName,
 			SenderFaceURL:  data.SenderFaceURL,
 			Content:        data.Content,
-			Options:        data.Options,
+			Options:        utils.MapIntToJsonString(data.Options),
 			ClientMsgID:    data.ClientMsgID,
 			SendTime:       sendTime,
 		}
