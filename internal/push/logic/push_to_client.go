@@ -34,12 +34,10 @@ type AtContent struct {
 	IsAtSelf   bool     `json:"isAtSelf"`
 }
 
-func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
+func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo string, Options map[string]int32) {
 	var wsResult []*pbRelay.SingleMsgToUser
-	MOptions := utils.JsonStringToMap(Options) //Control whether to push message to sender's other terminal
-	//isSenderSync := utils.GetSwitchFromOptions(MOptions, "senderSync")
-	isOfflinePush := utils.GetSwitchFromOptions(MOptions, "offlinePush")
-	log.InfoByKv("Get chat from msg_transfer And push chat", sendPbData.OperationID, "PushData", sendPbData)
+	isOfflinePush := utils.GetSwitchFromOptions(Options, "offlinePush")
+	log.InfoByKv("Get chat from msg_transfer And push chat", sendPbData.OperationID, "PushData", sendPbData, Options, isOfflinePush)
 	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
 	//Online push message
 	log.InfoByKv("test", sendPbData.OperationID, "len  grpc", len(grpcCons), "data", sendPbData)
@@ -100,9 +98,9 @@ func MsgToUser(sendPbData *pbRelay.MsgToUserReq, OfflineInfo, Options string) {
 						}
 						pushResult, err := push.JGAccountListPush(UIDList, content, jsonCustomContent, constant.PlatformIDToName(t))
 						if err != nil {
-							log.NewError(sendPbData.OperationID, "offline push error", sendPbData.String(), err.Error(), t)
+							log.NewError(sendPbData.OperationID, "offline push error", sendPbData.String(), err.Error(), constant.PlatformIDToName(t))
 						} else {
-							log.NewDebug(sendPbData.OperationID, "offline push return result is ", string(pushResult), sendPbData, t)
+							log.NewDebug(sendPbData.OperationID, "offline push return result is ", string(pushResult), sendPbData, constant.PlatformIDToName(t))
 						}
 
 					}

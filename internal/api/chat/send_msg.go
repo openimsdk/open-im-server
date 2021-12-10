@@ -27,7 +27,7 @@ type paramsUserSendMsg struct {
 		RecvID      string                 `json:"recvID" binding:"required"`
 		ForceList   []string               `json:"forceList"`
 		Content     string                 `json:"content" binding:"required"`
-		Options     map[string]interface{} `json:"options" `
+		Options     map[string]int32       `json:"options" `
 		ClientMsgID string                 `json:"clientMsgID" binding:"required"`
 		OffLineInfo map[string]interface{} `json:"offlineInfo" `
 		Ex          map[string]interface{} `json:"ext"`
@@ -49,7 +49,7 @@ func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.UserSend
 		RecvID:         params.Data.RecvID,
 		ForceList:      params.Data.ForceList,
 		Content:        params.Data.Content,
-		Options:        utils.MapToJsonString(params.Data.Options),
+		Options:        utils.MapIntToJsonString(params.Data.Options),
 		ClientMsgID:    params.Data.ClientMsgID,
 		OffLineInfo:    utils.MapToJsonString(params.Data.OffLineInfo),
 		Ex:             utils.MapToJsonString(params.Data.Ex),
@@ -77,7 +77,12 @@ func UserSendMsg(c *gin.Context) {
 
 	log.Info("", "", "api UserSendMsg call, api call rpc...")
 
-	reply, _ := client.UserSendMsg(context.Background(), pbData)
+	reply, err := client.UserSendMsg(context.Background(), pbData)
+	if err != nil {
+		log.NewError(params.OperationID, "UserSendMsg rpc failed, ", params, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "UserSendMsg rpc failed, " + err.Error()})
+		return
+	}
 	log.Info("", "", "api UserSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
 
 	c.JSON(http.StatusOK, gin.H{

@@ -198,14 +198,14 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m *pbMsg.MsgSvrToPu
 		return errors.New("session == nil")
 	}
 	defer session.Close()
-	log.NewInfo("", "get mgoSession cost time", getCurrentTimestampByMill()-newTime)
+	log.NewDebug("", "get mgoSession cost time", getCurrentTimestampByMill()-newTime)
 	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
 	seqUid = getSeqUid(uid, m.RecvSeq)
 	n, err := c.Find(bson.M{"uid": seqUid}).Count()
 	if err != nil {
 		return err
 	}
-	log.NewInfo("", "find mgo uid cost time", getCurrentTimestampByMill()-newTime)
+	log.NewDebug("", "find mgo uid cost time", getCurrentTimestampByMill()-newTime)
 	sMsg := MsgInfo{}
 	sMsg.SendTime = sendTime
 	if sMsg.Msg, err = proto.Marshal(m); err != nil {
@@ -225,7 +225,7 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m *pbMsg.MsgSvrToPu
 			return err
 		}
 	}
-	log.NewInfo("", "insert mgo data cost time", getCurrentTimestampByMill()-newTime)
+	log.NewDebug("", "insert mgo data cost time", getCurrentTimestampByMill()-newTime)
 	return nil
 }
 

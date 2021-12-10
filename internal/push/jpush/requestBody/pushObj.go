@@ -5,6 +5,7 @@ type PushObj struct {
 	Audience     interface{} `json:"audience"`
 	Notification interface{} `json:"notification,omitempty"`
 	Message      interface{} `json:"message,omitempty"`
+	Options      interface{} `json:"options,omitempty"`
 }
 
 func (p *PushObj) SetPlatform(pf *Platform) {
@@ -21,4 +22,7 @@ func (p *PushObj) SetNotification(no *Notification) {
 
 func (p *PushObj) SetMessage(m *Message) {
 	p.Message = m
+}
+func (p *PushObj) SetOptions(o *Options) {
+	p.Options = o
 }

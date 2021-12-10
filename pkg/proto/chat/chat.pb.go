@@ -50,7 +50,7 @@ func (m *WSToMsgSvrChatMsg) Reset()         { *m = WSToMsgSvrChatMsg{} }
 func (m *WSToMsgSvrChatMsg) String() string { return proto.CompactTextString(m) }
 func (*WSToMsgSvrChatMsg) ProtoMessage()    {}
 func (*WSToMsgSvrChatMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{0}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{0}
 }
 func (m *WSToMsgSvrChatMsg) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WSToMsgSvrChatMsg.Unmarshal(m, b)
@@ -215,7 +215,7 @@ func (m *MsgSvrToPushSvrChatMsg) Reset()         { *m = MsgSvrToPushSvrChatMsg{}
 func (m *MsgSvrToPushSvrChatMsg) String() string { return proto.CompactTextString(m) }
 func (*MsgSvrToPushSvrChatMsg) ProtoMessage()    {}
 func (*MsgSvrToPushSvrChatMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{1}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{1}
 }
 func (m *MsgSvrToPushSvrChatMsg) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgSvrToPushSvrChatMsg.Unmarshal(m, b)
@@ -361,7 +361,7 @@ func (m *PullMessageReq) Reset()         { *m = PullMessageReq{} }
 func (m *PullMessageReq) String() string { return proto.CompactTextString(m) }
 func (*PullMessageReq) ProtoMessage()    {}
 func (*PullMessageReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{2}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{2}
 }
 func (m *PullMessageReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PullMessageReq.Unmarshal(m, b)
@@ -425,7 +425,7 @@ func (m *PullMessageResp) Reset()         { *m = PullMessageResp{} }
 func (m *PullMessageResp) String() string { return proto.CompactTextString(m) }
 func (*PullMessageResp) ProtoMessage()    {}
 func (*PullMessageResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{3}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{3}
 }
 func (m *PullMessageResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PullMessageResp.Unmarshal(m, b)
@@ -500,7 +500,7 @@ func (m *PullMessageBySeqListReq) Reset()         { *m = PullMessageBySeqListReq
 func (m *PullMessageBySeqListReq) String() string { return proto.CompactTextString(m) }
 func (*PullMessageBySeqListReq) ProtoMessage()    {}
 func (*PullMessageBySeqListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{4}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{4}
 }
 func (m *PullMessageBySeqListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PullMessageBySeqListReq.Unmarshal(m, b)
@@ -553,7 +553,7 @@ func (m *GetMaxAndMinSeqReq) Reset()         { *m = GetMaxAndMinSeqReq{} }
 func (m *GetMaxAndMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqReq) ProtoMessage()    {}
 func (*GetMaxAndMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{5}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{5}
 }
 func (m *GetMaxAndMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqReq.Unmarshal(m, b)
@@ -601,7 +601,7 @@ func (m *GetMaxAndMinSeqResp) Reset()         { *m = GetMaxAndMinSeqResp{} }
 func (m *GetMaxAndMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqResp) ProtoMessage()    {}
 func (*GetMaxAndMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{6}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{6}
 }
 func (m *GetMaxAndMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqResp.Unmarshal(m, b)
@@ -663,7 +663,7 @@ func (m *GatherFormat) Reset()         { *m = GatherFormat{} }
 func (m *GatherFormat) String() string { return proto.CompactTextString(m) }
 func (*GatherFormat) ProtoMessage()    {}
 func (*GatherFormat) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{7}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{7}
 }
 func (m *GatherFormat) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GatherFormat.Unmarshal(m, b)
@@ -731,7 +731,7 @@ func (m *MsgFormat) Reset()         { *m = MsgFormat{} }
 func (m *MsgFormat) String() string { return proto.CompactTextString(m) }
 func (*MsgFormat) ProtoMessage()    {}
 func (*MsgFormat) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{8}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{8}
 }
 func (m *MsgFormat) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgFormat.Unmarshal(m, b)
@@ -863,7 +863,7 @@ func (m *UserSendMsgReq) Reset()         { *m = UserSendMsgReq{} }
 func (m *UserSendMsgReq) String() string { return proto.CompactTextString(m) }
 func (*UserSendMsgReq) ProtoMessage()    {}
 func (*UserSendMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{9}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{9}
 }
 func (m *UserSendMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserSendMsgReq.Unmarshal(m, b)
@@ -1025,7 +1025,7 @@ func (m *UserSendMsgResp) Reset()         { *m = UserSendMsgResp{} }
 func (m *UserSendMsgResp) String() string { return proto.CompactTextString(m) }
 func (*UserSendMsgResp) ProtoMessage()    {}
 func (*UserSendMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_feb94a5514034c46, []int{10}
+	return fileDescriptor_chat_163a8d226aa6edb5, []int{10}
 }
 func (m *UserSendMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserSendMsgResp.Unmarshal(m, b)
@@ -1272,9 +1272,9 @@ var _Chat_serviceDesc = grpc.ServiceDesc{
 	Metadata: "chat/chat.proto",
 }
 
-func init() { proto.RegisterFile("chat/chat.proto", fileDescriptor_chat_feb94a5514034c46) }
+func init() { proto.RegisterFile("chat/chat.proto", fileDescriptor_chat_163a8d226aa6edb5) }
 
-var fileDescriptor_chat_feb94a5514034c46 = []byte{
+var fileDescriptor_chat_163a8d226aa6edb5 = []byte{
 	// 981 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0xdd, 0x6a, 0xe3, 0x46,
 	0x14, 0xc6, 0x92, 0x2d, 0xdb, 0xc7, 0xbf, 0x99, 0x86, 0xec, 0x90, 0x96, 0xd6, 0x88, 0x6d, 0x31,
