@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 )
 
 // copy a by b  b->a
@@ -44,12 +45,6 @@ func CopyStructFields(a interface{}, b interface{}, fields ...string) (err error
 	return nil
 }
 
-type S1 struct {
-	Name string
-	Age  int
-}
-
-type S2 struct {
-	Name string
-	Age  int32
+func OperationIDGenerator() string {
+	return strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10)
 }

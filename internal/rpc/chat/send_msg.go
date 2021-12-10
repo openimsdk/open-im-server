@@ -203,9 +203,20 @@ type WSToMsgSvrChatMsg struct {
 	OperationID string `protobuf:"bytes,10,opt,name=OperationID" json:"OperationID,omitempty"`
 }
 
+func CreateGroupNotification(SendID, RecvID string, tip open_im_sdk.CreateGroupTip) {
+	var msg WSToMsgSvrChatMsg
+	msg.OperationID = utils.OperationIDGenerator()
+	msg.SendID = SendID
+	msg.RecvID = RecvID
+	msg.ContentType = constant.CreateGroupTip
+	msg.SessionType = constant.SysMsgType
+
+}
+
 func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool, offlineInfo open_im_sdk.OfflinePushInfo) {
 
 }
+
 func (rpc *rpcChat) sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string) error {
 	pid, offset, err := rpc.producer.SendMessage(m, key)
 	if err != nil {
