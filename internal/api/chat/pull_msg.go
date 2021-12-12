@@ -43,7 +43,8 @@ func UserPullMsg(c *gin.Context) {
 	msgClient := pbChat.NewChatClient(grpcConn)
 	reply, err := msgClient.PullMessage(context.Background(), &pbData)
 	if err != nil {
-		log.ErrorByKv("PullMessage error", pbData.OperationID, "err", err.Error())
+		log.NewError(params.OperationID, "UserPullMsg rpc failed, ", params, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "UserPullMsg rpc failed, " + err.Error()})
 		return
 	}
 	log.InfoByKv("rpc call success to pullMsgRep", pbData.OperationID, "ReplyArgs", reply.String(), "maxSeq", reply.GetMaxSeq(),

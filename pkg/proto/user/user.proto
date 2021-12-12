@@ -65,11 +65,55 @@ message UpdateUserInfoReq{
   string Uid = 10;
 }
 
+message SetReceiveMessageOptReq{
+    string uId = 1;
+    int32  opt = 2;
+    repeated string conversationId = 3;
+    string  operationID = 4;
+}
+
+message SetReceiveMessageOptResp{
+    int32  errCode = 1;
+    string errMsg = 2;
+    repeated OptResult optResult = 3;
+}
+
+
+message GetReceiveMessageOptReq{
+    string uId = 1;
+    repeated string conversationId = 2;
+    string  operationID = 3;
+}
+
+message OptResult{
+    string conversationId = 1;
+    int32 result = 2; //-1: failed;  0:default; 1: not receive ; 2: not jpush
+}
+
+message GetReceiveMessageOptResp{
+    int32  errCode = 1;
+    string errMsg = 2;
+    repeated OptResult conversationOptResult = 3;
+}
+
+message GetAllConversationMsgOptReq{
+    string uId = 1;
+    string  operationID = 2;
+}
+
+message GetAllConversationMsgOptResp{
+    int32  errCode = 1;
+    string errMsg = 2;
+    repeated OptResult conversationOptResult = 3;
+}
+
 
 service user {
   rpc getUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(CommonResp);
   rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
   rpc GetAllUsersUid(GetAllUsersUidReq)returns(GetAllUsersUidResp);
-
+  rpc SetReceiveMessageOpt(SetReceiveMessageOptReq)returns(SetReceiveMessageOptResp);
+  rpc GetReceiveMessageOpt(GetReceiveMessageOptReq)returns(GetReceiveMessageOptResp);
+  rpc GetAllConversationMsgOpt(GetAllConversationMsgOptReq)returns(GetAllConversationMsgOptResp);
 }

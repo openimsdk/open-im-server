@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbRelay "Open_IM/pkg/proto/relay"
+	"Open_IM/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )
@@ -53,7 +54,7 @@ func (ms *PushConsumerHandler) handleMs2PsChat(msg []byte) {
 	sendPbData.PlatformID = pbData.PlatformID
 	sendPbData.RecvSeq = pbData.RecvSeq
 	//Call push module to send message to the user
-	MsgToUser(&sendPbData, pbData.OfflineInfo, pbData.Options)
+	MsgToUser(&sendPbData, pbData.OfflineInfo, utils.JsonStringToMap(pbData.Options))
 }
 func (PushConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (PushConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }

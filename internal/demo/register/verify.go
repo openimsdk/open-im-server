@@ -26,6 +26,7 @@ func Verify(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
 		return
 	}
+	log.NewInfo("recv req: ", params)
 
 	var account string
 	if params.Email != "" {
@@ -42,7 +43,7 @@ func Verify(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "Verified successfully!", "data": data})
 		return
 	}
-
+	log.NewInfo("0", " params.VerificationCode != config.Config.Demo.SuperCode", params.VerificationCode, config.Config.Demo)
 	log.InfoByKv("begin get form redis", account)
 	v, err := redis.String(db.DB.Exec("GET", account))
 	log.InfoByKv("redis phone number and verificating Code", account, v)

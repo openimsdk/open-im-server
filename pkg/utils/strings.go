@@ -7,6 +7,7 @@
 package utils
 
 import (
+	"Open_IM/pkg/common/constant"
 	"encoding/json"
 	"math/rand"
 	"strconv"
@@ -62,6 +63,15 @@ func JsonStringToStruct(s string, args interface{}) error {
 func GetMsgID(sendID string) string {
 	t := int64ToString(GetCurrentTimestampByNano())
 	return Md5(t + sendID + int64ToString(rand.Int63n(GetCurrentTimestampByNano())))
+}
+func GetConversationIDBySessionType(sourceID string, sessionType int) string {
+	switch sessionType {
+	case constant.SingleChatType:
+		return "single_" + sourceID
+	case constant.GroupChatType:
+		return "group_" + sourceID
+	}
+	return ""
 }
 func int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)

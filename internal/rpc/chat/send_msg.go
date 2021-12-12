@@ -5,11 +5,13 @@ import (
 	"Open_IM/internal/push/content_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbGroup "Open_IM/pkg/proto/group"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
@@ -70,8 +72,8 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	} else {
 		pbData.SendTime = pb.SendTime
 	}
-	Options := utils.JsonStringToMap(pbData.Options)
-	isHistory := utils.GetSwitchFromOptions(Options, "history")
+	options := utils.JsonStringToMap(pbData.Options)
+	isHistory := utils.GetSwitchFromOptions(options, "history")
 	mReq := MsgCallBackReq{
 		SendID:      pb.SendID,
 		RecvID:      pb.RecvID,
@@ -105,9 +107,17 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	}
 	switch pbData.SessionType {
 	case constant.SingleChatType:
-		err1 := rpc.sendMsgToKafka(&pbData, pbData.RecvID)
+		isSend := modifyMessageByUserMessageReceiveOpt(pbData.RecvID, pbData.SendID, constant.SingleChatType, &pbData)
+		if isSend {
+			err1 := rpc.sendMsgToKafka(&pbData, pbData.RecvID)
+			if err1 != nil {
+				log.NewError(pbData.OperationID, "kafka send msg err:RecvID", pbData.RecvID, pbData.String())
+				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+			}
+		}
 		err2 := rpc.sendMsgToKafka(&pbData, pbData.SendID)
-		if err1 != nil || err2 != nil {
+		if err2 != nil {
+			log.NewError(pbData.OperationID, "kafka send msg err:SendID", pbData.SendID, pbData.String())
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 		}
 		return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
@@ -154,16 +164,25 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 		groupID := pbData.RecvID
 		for i, v := range reply.MemberList {
 			pbData.RecvID = v.UserId + " " + groupID
-			err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i))
-			if err != nil {
-				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+			isSend := modifyMessageByUserMessageReceiveOpt(v.UserId, groupID, constant.GroupChatType, &pbData)
+			if isSend {
+				err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i))
+				if err != nil {
+					log.NewError(pbData.OperationID, "kafka send msg err:UserId", v.UserId, pbData.String())
+					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+				}
 			}
+
 		}
 		for i, v := range addUidList {
 			pbData.RecvID = v + " " + groupID
-			err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i+1))
-			if err != nil {
-				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+			isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &pbData)
+			if isSend {
+				err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i+1))
+				if err != nil {
+					log.NewError(pbData.OperationID, "kafka send msg err:UserId", v, pbData.String())
+					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+				}
 			}
 		}
 		return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
@@ -173,6 +192,31 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	}
 
 }
+
+type WSToMsgSvrChatMsg struct {
+	SendID      string `protobuf:"bytes,1,opt,name=SendID" json:"SendID,omitempty"`
+	RecvID      string `protobuf:"bytes,2,opt,name=RecvID" json:"RecvID,omitempty"`
+	Content     string `protobuf:"bytes,3,opt,name=Content" json:"Content,omitempty"`
+	MsgFrom     int32  `protobuf:"varint,5,opt,name=MsgFrom" json:"MsgFrom,omitempty"`
+	ContentType int32  `protobuf:"varint,8,opt,name=ContentType" json:"ContentType,omitempty"`
+	SessionType int32  `protobuf:"varint,9,opt,name=SessionType" json:"SessionType,omitempty"`
+	OperationID string `protobuf:"bytes,10,opt,name=OperationID" json:"OperationID,omitempty"`
+}
+
+func CreateGroupNotification(SendID, RecvID string, tip open_im_sdk.CreateGroupTip) {
+	var msg WSToMsgSvrChatMsg
+	msg.OperationID = utils.OperationIDGenerator()
+	msg.SendID = SendID
+	msg.RecvID = RecvID
+	msg.ContentType = constant.CreateGroupTip
+	msg.SessionType = constant.SysMsgType
+
+}
+
+func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool, offlineInfo open_im_sdk.OfflinePushInfo) {
+
+}
+
 func (rpc *rpcChat) sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string) error {
 	pid, offset, err := rpc.producer.SendMessage(m, key)
 	if err != nil {
@@ -192,4 +236,28 @@ func returnMsg(replay *pbChat.UserSendMsgResp, pb *pbChat.UserSendMsgReq, errCod
 	replay.ServerMsgID = serverMsgID
 	replay.SendTime = sendTime
 	return replay, nil
+}
+func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, msg *pbChat.WSToMsgSvrChatMsg) bool {
+	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
+	opt, err := db.DB.GetSingleConversationMsgOpt(userID, conversationID)
+	if err != nil {
+		log.NewError(msg.OperationID, "GetSingleConversationMsgOpt from redis err", msg.String())
+		return true
+	}
+	switch opt {
+	case constant.ReceiveMessage:
+		return true
+	case constant.NotReceiveMessage:
+		return false
+	case constant.ReceiveNotNotifyMessage:
+		options := utils.JsonStringToMap(msg.Options)
+		if options == nil {
+			options = make(map[string]int32, 2)
+		}
+		utils.SetSwitchFromOptions(options, "offlinePush", 0)
+		msg.Options = utils.MapIntToJsonString(options)
+		return true
+	}
+
+	return true
 }

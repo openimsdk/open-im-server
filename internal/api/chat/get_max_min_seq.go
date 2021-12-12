@@ -42,7 +42,8 @@ func UserGetSeq(c *gin.Context) {
 	msgClient := pbMsg.NewChatClient(grpcConn)
 	reply, err := msgClient.GetMaxAndMinSeq(context.Background(), &pbData)
 	if err != nil {
-		log.ErrorByKv("rpc call failed to getNewSeq", pbData.OperationID, "err", err, "pbData", pbData.String())
+		log.NewError(params.OperationID, "UserGetSeq rpc failed, ", params, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "UserGetSeq rpc failed, " + err.Error()})
 		return
 	}
 

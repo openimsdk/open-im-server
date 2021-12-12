@@ -49,7 +49,7 @@ func (m *PushMsgReq) Reset()         { *m = PushMsgReq{} }
 func (m *PushMsgReq) String() string { return proto.CompactTextString(m) }
 func (*PushMsgReq) ProtoMessage()    {}
 func (*PushMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_push_4f08d2ff54ba8af2, []int{0}
+	return fileDescriptor_push_e44270f7d93180b9, []int{0}
 }
 func (m *PushMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PushMsgReq.Unmarshal(m, b)
@@ -192,7 +192,7 @@ func (m *PushMsgResp) Reset()         { *m = PushMsgResp{} }
 func (m *PushMsgResp) String() string { return proto.CompactTextString(m) }
 func (*PushMsgResp) ProtoMessage()    {}
 func (*PushMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_push_4f08d2ff54ba8af2, []int{1}
+	return fileDescriptor_push_e44270f7d93180b9, []int{1}
 }
 func (m *PushMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PushMsgResp.Unmarshal(m, b)
@@ -296,9 +296,9 @@ var _PushMsgService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "push/push.proto",
 }
 
-func init() { proto.RegisterFile("push/push.proto", fileDescriptor_push_4f08d2ff54ba8af2) }
+func init() { proto.RegisterFile("push/push.proto", fileDescriptor_push_e44270f7d93180b9) }
 
-var fileDescriptor_push_4f08d2ff54ba8af2 = []byte{
+var fileDescriptor_push_e44270f7d93180b9 = []byte{
 	// 378 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x5c, 0x92, 0x5d, 0xeb, 0xda, 0x30,
 	0x14, 0xc6, 0xe9, 0xb4, 0xbe, 0x1c, 0xe7, 0xcb, 0xc2, 0x18, 0xc1, 0x8b, 0x51, 0x64, 0x0c, 0x6f,
