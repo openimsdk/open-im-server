@@ -5,10 +5,10 @@ serverversion: 1.0.3
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openIM
-  etcdAddr: [ etcd:2379 ]
+  etcdAddr: [ openim_etcd:2379 ]
 
 mysql:
-  dbMysqlAddress: [ 192.168.31.101:3306 ]
+  dbMysqlAddress: [ openim_mysql:3306 ] # openim_mysql 是对应的mysql服务的host
   dbMysqlUserName: openIM
   dbMysqlPassword: openIM
   dbMysqlDatabaseName: openIM
@@ -19,7 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 192.168.31.102:27017 ]
+  dbAddress: [ openim_mongo:27017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
@@ -58,6 +58,7 @@ kafka:
 serverip: 0.0.0.0
 
 # endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
+#   新增的这一段配置节，主要是位了注册到etcd时，可以使用同一network下的容器名(host)来访问不同的容器，拆分到不同容器后原来全部使用serverip的形式不能用了
 endpoints:
   api: openim_api
   push: openim_push

@@ -1,15 +1,11 @@
 version: "3.7"
-#fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
 networks: 
-  huochai-local: 
-    external: true
   openim:
     external: true
  
 services:
   api:
     networks: 
-      - huochai-local
       - openim
     image: openim/api
     container_name: openim_api
@@ -17,6 +13,7 @@ services:
       - 10000:10000 # API，必须开
     volumes:
       - ./logs:/app/logs
+      # Dockerfile 里定义了配置文件的路径环境变量，CONFIG_NAME，默认指向了 /app/config/config.yaml
       - ./config/config.yaml:/app/config/config.yaml
       - ./db/sdk:/app/db/sdk
     restart: always
@@ -34,7 +31,6 @@ services:
 
   msg_gateway:
     networks: 
-      - huochai-local
       - openim
     image: openim/msg_gateway
     container_name: openim_msg_gateway
@@ -59,7 +55,6 @@ services:
         
   msg_transfer:
     networks: 
-      - huochai-local
       - openim
     image: openim/msg_transfer
     container_name: openim_msg_transfer
@@ -82,7 +77,6 @@ services:
   
   push:
     networks: 
-      - huochai-local
       - openim
     image: openim/push
     container_name: openim_push
@@ -105,7 +99,6 @@ services:
 
   timer_task:
     networks: 
-      - huochai-local
       - openim
     image: openim/timer_task
     container_name: openim_timer_task
@@ -128,7 +121,6 @@ services:
 
   rpc_user:
     networks: 
-      - huochai-local
       - openim
     image: openim/rpc_user
     container_name: openim_rpc_user
@@ -151,7 +143,6 @@ services:
 
   rpc_friend:
     networks: 
-      - huochai-local
       - openim
     image: openim/rpc_friend
     container_name: openim_rpc_friend
@@ -169,7 +160,6 @@ services:
 
   rpc_group:
     networks: 
-      - huochai-local
       - openim
     image: openim/rpc_group
     container_name: openim_rpc_group
@@ -187,7 +177,6 @@ services:
 
   rpc_auth:
     networks: 
-      - huochai-local
       - openim
     image: openim/rpc_auth
     container_name: openim_rpc_auth
@@ -205,7 +194,6 @@ services:
 
   rpc_msg:
     networks: 
-      - huochai-local
       - openim
     image: openim/rpc_msg
     container_name: openim_rpc_msg
@@ -223,7 +211,6 @@ services:
 
   demo:
     networks: 
-      - huochai-local
       - openim
     image: openim/demo
     container_name: openim_demo
