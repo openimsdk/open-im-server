@@ -226,9 +226,9 @@ func CreateGroupNotification(sendID string, creator im_mysql_model.User, group i
 
 	msg.Content = utils.StructToJsonString(tip)
 	var offlinePushInfo open_im_sdk.OfflinePushInfo
-	offlinePushInfo.Title = "create group title"
-	offlinePushInfo.Desc = "create group desc"
-	offlinePushInfo.Ext = "create group ext"
+	offlinePushInfo.Title = config.Config.Notification.CreateGroup.Title
+	offlinePushInfo.Desc = config.Config.Notification.CreateGroup.Desc
+	offlinePushInfo.Ext = config.Config.Notification.CreateGroup.Ext
 	Notification(&msg, false, offlinePushInfo)
 }
 

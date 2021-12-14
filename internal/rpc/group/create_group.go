@@ -1,8 +1,6 @@
 package group
 
 import (
-	"Open_IM/internal/push/content_struct"
-	"Open_IM/internal/push/logic"
 	"Open_IM/internal/rpc/chat"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -11,9 +9,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbChat "Open_IM/pkg/proto/chat"
 	pbGroup "Open_IM/pkg/proto/group"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"google.golang.org/grpc"
@@ -71,7 +67,7 @@ func (s *groupServer) Run() {
 }
 
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
-	log.InfoByArgs("rpc create group is server,args=%s", req.String())
+	log.NewInfo(req.OperationID, "rpc create group is server,args=%s", req.String())
 	var (
 		groupId string
 	)
@@ -133,49 +129,24 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 	}
 
-	if isMagagerFlag == 1 {
-
-		//type NotificationContent struct {
-		//	IsDisplay   int32  `json:"isDisplay"`
-		//	DefaultTips string `json:"defaultTips"`
-		//	Detail      string `json:"detail"`
-		//}	n := NotificationContent{
-		//		IsDisplay:   1,
-		//		DefaultTips: "You have joined the group chat:" + createGroupResp.Data.GroupName,
-		//		Detail:      createGroupResp.Data.GroupId,
-		//	}
-
-		////Push message when create group chat
-		n := content_struct.NotificationContent{1, req.GroupName, groupId}
-		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-			SendID:      claims.UID,
-			RecvID:      groupId,
-			Content:     n.ContentToString(),
-			SendTime:    utils.GetCurrentTimestampByNano(),
-			MsgFrom:     constant.SysMsgType,     //Notification message identification
-			ContentType: constant.CreateGroupTip, //Add friend flag
-			SessionType: constant.GroupChatType,
-			OperationID: req.OperationID,
-		})
-	}
-
-	var tip open_im_sdk.CreateGroupTip
 	groupInfo, err := im_mysql_model.FindGroupInfoByGroupId(groupId)
 	if err != nil {
+		log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", groupId)
 		return &pbGroup.CreateGroupResp{ErrorCode: constant.ErrCreateGroup.ErrCode, ErrorMsg: constant.ErrCreateGroup.ErrMsg}, nil
 	}
 
 	creatorInfo, err := im_mysql_model.FindUserByUID(claims.UID)
 	if err != nil {
-
+		log.NewError(req.OperationID, "FindUserByUID failed ", claims.UID)
+		return &pbGroup.CreateGroupResp{ErrorCode: constant.ErrCreateGroup.ErrCode, ErrorMsg: constant.ErrCreateGroup.ErrMsg}, nil
 	}
 
 	memberList, err := im_mysql_model.FindGroupMemberListByGroupId(groupId)
 	if err != nil {
-		
+		log.NewError(req.OperationID, "FindGroupMemberListByGroupId failed ", groupId)
 	}
-	chat.CreateGroupNotification(claims.UID, *creatorInfo, *groupInfo, memberList)
 
-	log.Info(req.Token, req.OperationID, "rpc create group success return")
+	log.NewInfo(req.OperationID, "creator, group, member list:  ", *creatorInfo, *groupInfo, memberList)
+	chat.CreateGroupNotification(claims.UID, *creatorInfo, *groupInfo, memberList)
 	return &pbGroup.CreateGroupResp{GroupID: groupId}, nil
 }
