@@ -160,6 +160,19 @@ messagecallback:
     stateChange:
       switch: false
 
+notification:
+  offlinePush:
+    switch: true
+  createGroup:
+    title: "create group title"
+    desc: "create group desc"
+    ext: "create group ext"
+  quitGroup:
+    title: "quit group title"
+    desc: "quit group desc"
+    ext: "quit group ext"
+
+
 #---------------demo configuration---------------------#
 #The following configuration items are applied to openIM Demo configuration
 demoswitch: true

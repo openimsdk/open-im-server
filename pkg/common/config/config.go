@@ -1,7 +1,7 @@
 package config
 
 import (
-	"gopkg.in/yaml.v3"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"runtime"
@@ -172,6 +172,21 @@ type config struct {
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
 	}
+	Notification struct {
+		OfflinePush struct {
+			Switch bool `yaml:"switch"`
+		}
+		CreateGroup struct {
+			Title string `yaml:"title"`
+			Desc  string `yaml:"desc"`
+			Ext   string `yaml:"ext"`
+		}
+		QuiteGroup struct {
+			Title string `yaml:"title"`
+			Desc  string `yaml:"desc"`
+			Ext   string `yaml:"ext"`
+		}
+	}
 }
 
 func init() {
@@ -186,5 +201,5 @@ func init() {
 	if err = yaml.Unmarshal(bytes, &Config); err != nil {
 		panic(err.Error())
 	}
-
+	fmt.Println("init load config: ", Config)
 }

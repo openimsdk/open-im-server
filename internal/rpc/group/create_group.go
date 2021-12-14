@@ -3,6 +3,7 @@ package group
 import (
 	"Open_IM/internal/push/content_struct"
 	"Open_IM/internal/push/logic"
+	"Open_IM/internal/rpc/chat"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
@@ -12,6 +13,7 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbGroup "Open_IM/pkg/proto/group"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"google.golang.org/grpc"
@@ -156,6 +158,23 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			OperationID: req.OperationID,
 		})
 	}
+
+	var tip open_im_sdk.CreateGroupTip
+	groupInfo, err := im_mysql_model.FindGroupInfoByGroupId(groupId)
+	if err != nil {
+		return &pbGroup.CreateGroupResp{ErrorCode: constant.ErrCreateGroup.ErrCode, ErrorMsg: constant.ErrCreateGroup.ErrMsg}, nil
+	}
+
+	creatorInfo, err := im_mysql_model.FindUserByUID(claims.UID)
+	if err != nil {
+
+	}
+
+	memberList, err := im_mysql_model.FindGroupMemberListByGroupId(groupId)
+	if err != nil {
+		
+	}
+	chat.CreateGroupNotification(claims.UID, *creatorInfo, *groupInfo, memberList)
 
 	log.Info(req.Token, req.OperationID, "rpc create group success return")
 	return &pbGroup.CreateGroupResp{GroupID: groupId}, nil

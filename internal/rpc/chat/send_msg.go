@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -203,17 +204,35 @@ type WSToMsgSvrChatMsg struct {
 	OperationID string `protobuf:"bytes,10,opt,name=OperationID" json:"OperationID,omitempty"`
 }
 
-func CreateGroupNotification(SendID, RecvID string, tip open_im_sdk.CreateGroupTip) {
+func CreateGroupNotification(sendID string, creator im_mysql_model.User, group im_mysql_model.Group, memberList []im_mysql_model.GroupMember) {
 	var msg WSToMsgSvrChatMsg
 	msg.OperationID = utils.OperationIDGenerator()
-	msg.SendID = SendID
-	msg.RecvID = RecvID
+	msg.SendID = sendID
+	msg.RecvID = group.GroupId
 	msg.ContentType = constant.CreateGroupTip
-	msg.SessionType = constant.SysMsgType
+	msg.SessionType = constant.GroupChatType
+	msg.MsgFrom = constant.SysMsgType
 
+	var tip open_im_sdk.CreateGroupTip
+	tip.Group = &open_im_sdk.GroupInfoTip{}
+	utils.CopyStructFields(tip.Group, group)
+	tip.Creator = &open_im_sdk.UserInfoTip{}
+	utils.CopyStructFields(tip.Creator, creator)
+	for _, v := range memberList {
+		var groupMemberInfo open_im_sdk.GroupMemberFullInfoTip
+		utils.CopyStructFields(&groupMemberInfo, v)
+		tip.MemberList = append(tip.MemberList, &groupMemberInfo)
+	}
+
+	msg.Content = utils.StructToJsonString(tip)
+	var offlinePushInfo open_im_sdk.OfflinePushInfo
+	offlinePushInfo.Title = "create group title"
+	offlinePushInfo.Desc = "create group desc"
+	offlinePushInfo.Ext = "create group ext"
+	Notification(&msg, false, offlinePushInfo)
 }
 
-func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool, offlineInfo open_im_sdk.OfflinePushInfo) {
+func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool, offlinePushInfo open_im_sdk.OfflinePushInfo) {
 
 }
 

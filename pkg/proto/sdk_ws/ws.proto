@@ -107,10 +107,10 @@ message GroupInfoTip{
 
 
 
-type GroupMemberFullInfoTip struct {
+message GroupMemberFullInfoTip {
 	string GroupId = 1 ;
 	string UserId = 2 ;
-	int Role = 3;
+	int32 Role = 3;
 	uint64 JoinTime = 4;
 	string NickName = 5;
 	string FaceUrl =6;
@@ -119,10 +119,20 @@ type GroupMemberFullInfoTip struct {
 
 
 message CreateGroupTip{
-    GroupInfoTip group = 1;
-    UserInfoTip creator = 2;
-    repeated GroupMemberFullInfoTip memberList = 3;
+    GroupInfoTip Group = 1;
+    UserInfoTip Creator = 2;
+    repeated GroupMemberFullInfoTip MemberList = 3;
 }
 
+message UserInfoTip  {
+  string UserID = 1;
+  string Name = 2;
+  string Icon = 3;
+  int32 Gender = 4;
+  string Mobile = 5;
+  string Birth = 6;
+  string Email = 7;
+  string Ex = 8;
+}
 
 
