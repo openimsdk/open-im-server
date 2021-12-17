@@ -87,6 +87,8 @@ const (
 
 	OnlineStatus  = "online"
 	OfflineStatus = "offline"
+	Registered    = "registered"
+	UnRegistered  = "unregistered"
 
 	//MsgReceiveOpt
 	ReceiveMessage          = 0

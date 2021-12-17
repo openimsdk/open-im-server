@@ -32,6 +32,10 @@ type paramsGetUsersOnlineStatus struct {
 	OperationID string   `json:"operationID" binding:"required"`
 	UserIDList  []string `json:"userIDList" binding:"required,lte=200"`
 }
+type paramsAccountCheck struct {
+	OperationID string   `json:"operationID" binding:"required"`
+	UserIDList  []string `json:"userIDList" binding:"required,lte=100"`
+}
 
 func DeleteUser(c *gin.Context) {
 	params := paramsDeleteUsers{}
@@ -85,6 +89,32 @@ func GetAllUsersUid(c *gin.Context) {
 	}
 	log.InfoByKv("call GetAllUsersUid rpc server is success", params.OperationID, "resp args", RpcResp.String())
 	resp := gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "uidList": RpcResp.UidList}
+	c.JSON(http.StatusOK, resp)
+
+}
+func AccountCheck(c *gin.Context) {
+	params := paramsAccountCheck{}
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	log.InfoByKv("AccountCheck req come here", params.OperationID, params.UserIDList)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := pbUser.NewUserClient(etcdConn)
+	//defer etcdConn.Close()
+
+	req := &pbUser.AccountCheckReq{
+		OperationID: params.OperationID,
+		Token:       c.Request.Header.Get("token"),
+		UidList:     params.UserIDList,
+	}
+	RpcResp, err := client.AccountCheck(context.Background(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+	log.InfoByKv("call AccountCheck rpc server is success", params.OperationID, "resp args", RpcResp.String())
+	resp := gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "Result": RpcResp.Result}
 	c.JSON(http.StatusOK, resp)
 
 }
