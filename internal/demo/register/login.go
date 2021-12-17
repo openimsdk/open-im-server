@@ -5,13 +5,14 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/utils"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 type ParamsLogin struct {
@@ -88,7 +89,7 @@ func Login(c *gin.Context) {
 }
 
 func OpenIMToken(Account string, platform int32) (*http.Response, error) {
-	url := fmt.Sprintf("http://%s:10000/auth/user_token", utils.ServerIP)
+	url := fmt.Sprintf("http://%s:10000/auth/user_token", viper.GetString("endpoints.api"))
 
 	client := &http.Client{}
 	params := make(map[string]interface{})

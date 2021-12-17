@@ -6,12 +6,13 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbUser "Open_IM/pkg/proto/user"
-	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 )
 
 type userServer struct {
@@ -34,8 +35,7 @@ func NewUserServer(port int) *userServer {
 func (s *userServer) Run() {
 	log.Info("", "", "rpc user init....")
 
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
+	registerAddress := ":" + strconv.Itoa(s.rpcPort)
 	//listener network
 	listener, err := net.Listen("tcp", registerAddress)
 	if err != nil {
@@ -49,7 +49,8 @@ func (s *userServer) Run() {
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbUser.RegisterUserServer(srv, s)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
+	host := viper.GetString("endpoints.rpc_user")
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), host, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.ErrorByArgs("register rpc token to etcd failed,err=%s", err.Error())
 		return

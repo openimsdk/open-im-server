@@ -6,11 +6,12 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
-	"Open_IM/pkg/utils"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/viper"
+	"google.golang.org/grpc"
 )
 
 type rpcChat struct {
@@ -36,7 +37,7 @@ func NewRpcChatServer(port int) *rpcChat {
 func (rpc *rpcChat) Run() {
 	log.Info("", "", "rpc get_token init...")
 
-	address := utils.ServerIP + ":" + strconv.Itoa(rpc.rpcPort)
+	address := ":" + strconv.Itoa(rpc.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Error("", "", "listen network failed, err = %s, address = %s", err.Error(), address)
@@ -51,7 +52,8 @@ func (rpc *rpcChat) Run() {
 	//service registers with etcd
 
 	pbChat.RegisterChatServer(srv, rpc)
-	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
+	host := viper.GetString("endpoints.rpc_msg")
+	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), host, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
 		log.Error("", "", "register rpc get_token to etcd failed, err = %s", err.Error())
 		return
