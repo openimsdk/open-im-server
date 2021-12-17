@@ -114,7 +114,7 @@ func AccountCheck(c *gin.Context) {
 		return
 	}
 	log.InfoByKv("call AccountCheck rpc server is success", params.OperationID, "resp args", RpcResp.String())
-	resp := gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "Result": RpcResp.Result}
+	resp := gin.H{"errCode": RpcResp.CommonResp.ErrorCode, "errMsg": RpcResp.CommonResp.ErrorMsg, "result": RpcResp.Result}
 	c.JSON(http.StatusOK, resp)
 
 }
