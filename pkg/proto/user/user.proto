@@ -131,4 +131,5 @@ service user {
   rpc SetReceiveMessageOpt(SetReceiveMessageOptReq)returns(SetReceiveMessageOptResp);
   rpc GetReceiveMessageOpt(GetReceiveMessageOptReq)returns(GetReceiveMessageOptResp);
   rpc GetAllConversationMsgOpt(GetAllConversationMsgOptReq)returns(GetAllConversationMsgOptResp);
+  rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
 }
