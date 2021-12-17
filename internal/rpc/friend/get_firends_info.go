@@ -8,14 +8,13 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
+	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
-
-	"github.com/spf13/viper"
-	"google.golang.org/grpc"
 )
 
 type friendServer struct {
@@ -38,7 +37,8 @@ func NewFriendServer(port int) *friendServer {
 func (s *friendServer) Run() {
 	log.Info("", "", fmt.Sprintf("rpc friend init...."))
 
-	registerAddress := ":" + strconv.Itoa(s.rpcPort)
+	ip := utils.ServerIP
+	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
 	//listener network
 	listener, err := net.Listen("tcp", registerAddress)
 	if err != nil {
@@ -52,8 +52,7 @@ func (s *friendServer) Run() {
 	defer srv.GracefulStop()
 	//User friend related services register to etcd
 	pbFriend.RegisterFriendServer(srv, s)
-	host := viper.GetString("endpoints.rpc_friend")
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), host, s.rpcPort, s.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.ErrorByArgs("register rpc fiend service to etcd failed,err=%s", err.Error())
 		return
