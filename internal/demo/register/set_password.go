@@ -6,15 +6,14 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/garyburd/redigo/redis"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
+	"io/ioutil"
+	"net/http"
 )
 
 type ParamsSetPassword struct {
@@ -120,7 +119,7 @@ openIMRegisterTab:
 }
 
 func OpenIMRegister(account string) (*http.Response, error) {
-	url := fmt.Sprintf("http://%s:10000/auth/user_register", viper.GetString("endpoints.api"))
+	url := fmt.Sprintf("http://%s:10000/auth/user_register", utils.ServerIP)
 	fmt.Println("1:", config.Config.Secret)
 
 	client := &http.Client{}
