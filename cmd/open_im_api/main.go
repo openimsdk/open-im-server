@@ -89,7 +89,7 @@ func main() {
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
 		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
 		managementGroup.POST("/account_check", manage.AccountCheck)
-		//managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus)
+		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus)
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
