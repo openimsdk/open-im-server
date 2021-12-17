@@ -146,7 +146,12 @@ func ManagementSendMsg(c *gin.Context) {
 
 	log.Info("", "", "api ManagementSendMsg call, api call rpc...")
 
-	reply, _ := client.UserSendMsg(context.Background(), pbData)
+	reply, err := client.UserSendMsg(context.Background(), pbData)
+	if err != nil {
+		log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call UserSendMsg  rpc server failed"})
+		return
+	}
 	log.Info("", "", "api ManagementSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
 
 	c.JSON(http.StatusOK, gin.H{

@@ -51,8 +51,6 @@ const (
 	Revoke                     = 205
 	C2CMessageAsRead           = 206
 
-	KickOnlineTip = 303
-
 	TransferGroupOwnerTip       = 501
 	CreateGroupTip              = 502
 	GroupApplicationResponseTip = 503
