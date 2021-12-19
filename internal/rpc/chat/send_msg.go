@@ -213,26 +213,24 @@ func CreateGroupNotification(sendID string, creator im_mysql_model.User, group i
 	msg.SessionType = constant.GroupChatType
 	msg.MsgFrom = constant.SysMsgType
 
-	var tip open_im_sdk.CreateGroupTip
-	tip.Group = &open_im_sdk.GroupInfoTip{}
-	utils.CopyStructFields(tip.Group, group)
-	tip.Creator = &open_im_sdk.UserInfoTip{}
-	utils.CopyStructFields(tip.Creator, creator)
+	var groupCreated open_im_sdk.GroupCreatedTips
+	groupCreated.Group = &open_im_sdk.GroupInfo{}
+	utils.CopyStructFields(groupCreated.Group, group)
+	groupCreated.Creator = &open_im_sdk.GroupMemberFullInfo{}
+	utils.CopyStructFields(groupCreated.Creator, creator)
 	for _, v := range memberList {
-		var groupMemberInfo open_im_sdk.GroupMemberFullInfoTip
+		var groupMemberInfo open_im_sdk.GroupMemberFullInfo
 		utils.CopyStructFields(&groupMemberInfo, v)
-		tip.MemberList = append(tip.MemberList, &groupMemberInfo)
+		groupCreated.MemberList = append(groupCreated.MemberList, &groupMemberInfo)
 	}
-
-	msg.Content = utils.StructToJsonString(tip)
-	var offlinePushInfo open_im_sdk.OfflinePushInfo
-	offlinePushInfo.Title = config.Config.Notification.CreateGroup.Title
-	offlinePushInfo.Desc = config.Config.Notification.CreateGroup.Desc
-	offlinePushInfo.Ext = config.Config.Notification.CreateGroup.Ext
-	Notification(&msg, false, offlinePushInfo)
+	var tips open_im_sdk.TipsComm
+	tips.Detail = utils.StructToJsonString(groupCreated)
+	tips.DefaultTips = creator.Name + " " + config.Config.DefaultTips.GroupCreatedTips
+	msg.Content = utils.StructToJsonString(tips)
+	Notification(&msg, false)
 }
 
-func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool, offlinePushInfo open_im_sdk.OfflinePushInfo) {
+func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool) {
 
 }
 

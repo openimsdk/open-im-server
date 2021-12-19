@@ -160,17 +160,35 @@ messagecallback:
     stateChange:
       switch: false
 
+iOSPush:
+  pushSound: "xxx"
+  badgeCount: 1
+
 notification:
-  offlinePush:
-    switch: true
-  createGroup:
-    title: "create group title"
-    desc: "create group desc"
-    ext: "create group ext"
-  quitGroup:
-    title: "quit group title"
-    desc: "quit group desc"
-    ext: "quit group ext"
+  groupCreated:
+    conversation:
+      conversationChanged: 1
+      unreadCount: 1
+    offlinePush:
+      switch: true
+      title: "create group title"
+      desc: "create group desc"
+      ext: "create group ext"
+    defaultTips:
+      tips: "create the group"  # xx create the group
+
+  groupInfoChanged:
+    conversation:
+      conversationChanged: 1
+      unreadCount: 1
+    offlinePush:
+      switch: true
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+      conversationChanged: 0
 
 
 #---------------demo configuration---------------------#

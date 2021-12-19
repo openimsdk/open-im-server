@@ -172,19 +172,30 @@ type config struct {
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
 	}
+	//notification:
+	//  groupCreated:
+	//    offlinePush:
+	//      switch: true
+	//      title: "create group title"
+	//      desc: "create group desc"
+	//      ext: "create group ext"
+	//    defaultTips:
+	//      tips: "create the group"  # xx create the group
+	//      conversationChanged: 1
+	//
+
 	Notification struct {
-		OfflinePush struct {
-			Switch bool `yaml:"switch"`
-		}
-		CreateGroup struct {
-			Title string `yaml:"title"`
-			Desc  string `yaml:"desc"`
-			Ext   string `yaml:"ext"`
-		}
-		QuiteGroup struct {
-			Title string `yaml:"title"`
-			Desc  string `yaml:"desc"`
-			Ext   string `yaml:"ext"`
+		GroupCreated struct {
+			OfflinePush struct {
+				Switch bool   `yaml:"switch"`
+				Title  string `yaml:"title"`
+				Desc   string `yaml:"desc"`
+				Ext    string `yaml:"ext"`
+			}
+			DefaultTips struct {
+				GroupCreatedTips     string `yaml:"croupCreatedTips"`
+				GroupInfoChangedTips string `yaml:"groupInfoChangedTips"`
+			}
 		}
 	}
 }

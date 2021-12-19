@@ -93,38 +93,33 @@ message OfflinePushInfo{
     string Ext = 3;
 }
 
-message GroupInfoTip{
-     string GroupID = 1;
-     string GroupName   = 2;
-     string Notification = 3;
-     string Introduction  = 4;
-     string FaceUrl = 5;
-     string Ex   = 6;
-     string OwnerID = 7;
-     uint64 CreateTime = 8;
-     uint32 MemberCount = 9;
+//public
+message GroupInfo{
+  string GroupID = 1;
+  string GroupName   = 2;
+  string Notification = 3;
+  string Introduction  = 4;
+  string FaceUrl = 5;
+  string Ex   = 6;
+  PublicUserInfo Owner = 7;
+  uint64 CreateTime = 8;
+  uint32 MemberCount = 9;
 }
 
 
-
-message GroupMemberFullInfoTip {
-	string GroupId = 1 ;
-	string UserId = 2 ;
+//private, Group members have permission to view
+message GroupMemberFullInfo {
+	string GroupID = 1 ;
+	string UserID = 2 ;
 	int32 Role = 3;
 	uint64 JoinTime = 4;
 	string NickName = 5;
-	string FaceUrl =6;
+	string FaceUrl = 6;
+  string FriendRemark = 7;
 }
 
-
-
-message CreateGroupTip{
-    GroupInfoTip Group = 1;
-    UserInfoTip Creator = 2;
-    repeated GroupMemberFullInfoTip MemberList = 3;
-}
-
-message UserInfoTip  {
+//private, Friends have permission to view
+message UserInfo{
   string UserID = 1;
   string Name = 2;
   string Icon = 3;
@@ -135,4 +130,140 @@ message UserInfoTip  {
   string Ex = 8;
 }
 
+//No permissions required
+message PublicUserInfo{
+  string UserID = 1;
+  string Name = 2;
+  string Icon = 3;
+  int32 Gender = 4;
+}
 
+message TipsComm{
+  string Detail = 1;
+  string DefaultTips = 2;
+}
+
+//////////////////////group/////////////////////
+//Actively join the group
+message MemberEnterTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo Member = 2;
+  uint64 OperationTime = 3;
+}
+
+
+//Actively leave the group
+message MemberLeaveTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo Member = 2;
+  uint64 OperationTime = 3;
+}
+
+message MemberInvitedTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo OpUser = 2;
+  GroupMemberFullInfo Member = 3;
+  uint64 OperationTime = 4;
+}
+
+message MemberKickedTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo OpUser = 2;
+  GroupMemberFullInfo Member = 3;
+  uint64 OperationTime = 4;
+}
+
+message GroupMemberChangeInfo{
+  int32 ChangeType = 1; //1:info changed; 2:mute
+  GroupMemberFullInfo OpUser = 2; //who do this
+  GroupMemberFullInfo Member = 3;
+  uint64 MuteTime = 4;
+}
+
+message MemberInfoChangedTips{
+  GroupInfo Group = 1;
+  GroupMemberChangeInfo MemberChanged = 2;
+}
+
+message GroupCreatedTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo Creator = 2;
+  repeated GroupMemberFullInfo MemberList = 3;
+  uint64 OperationTime = 4;
+}
+
+message GroupInfoChangedTips{
+  int32 ChangedType = 1; //1:name;2:Notification ...
+  GroupInfo Group = 2;
+  GroupMemberFullInfo OpUser = 3;
+}
+
+message ReceiveJoinApplicationTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo Member = 2;
+  string 	Reason = 3;
+}
+
+message ApplicationProcessedTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo OpUser = 2;
+  int32 Result = 3;
+  string 	Reason = 4;
+}
+
+//////////////////////friend/////////////////////
+message FriendInfo{
+  string OwnerUserID = 1;
+  string Remark = 2;
+  uint64 CreateTime = 3;
+  UserInfo FriendUserInfo = 4;
+}
+
+message FriendApplication{
+  uint64 AddTime = 4;
+  string AddSource = 5;
+  string AddWording = 6;
+}
+
+//user1 add user2
+message FriendApplicationListAddedTips{
+  PublicUserInfo OpUser = 1; //user1
+  FriendApplication Application = 2;
+  PublicUserInfo  OpedUser = 3; //user2
+}
+
+// user2 accept
+message FriendApplicationListAcceptTips{
+  PublicUserInfo     OpUser = 1;  //user2
+  PublicUserInfo     OpedUser = 2; //user1
+}
+
+// user2 reject
+message FriendApplicationListRejectTips{
+  PublicUserInfo     OpUser = 1;  //user2
+  PublicUserInfo     OpedUser = 2; //user1
+}
+
+message FriendListAddedTips{
+  FriendInfo Friend = 1;
+}
+
+message FriendListDeletedTips{
+  FriendInfo Friend = 1;
+}
+
+message BlackListAddTips{
+  FriendInfo Friend = 1;
+}
+
+message BlackListDeletedTips{
+  FriendInfo Friend = 1;
+}
+
+message FriendInfoChangedTips{
+  FriendInfo Friend = 1;
+}
+//////////////////////user/////////////////////
+message SelfInfoUpdatedTips{
+  UserInfo SelfUserInfo = 1;
+}
