@@ -91,6 +91,8 @@ message OfflinePushInfo{
     string Title = 1;
     string Desc = 2;
     string Ext = 3;
+    string PushSound = 4;
+    bool ISBadgeCount = 5;
 }
 
 message GroupInfoTip{
