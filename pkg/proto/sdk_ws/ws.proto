@@ -95,36 +95,62 @@ message OfflinePushInfo{
     bool ISBadgeCount = 5;
 }
 
-message GroupInfoTip{
+
+message GroupInfo{
      string GroupID = 1;
-     string GroupName   = 2;
+     string GroupName = 2;
      string Notification = 3;
-     string Introduction  = 4;
+     string Introduction = 4;
      string FaceUrl = 5;
-     string Ex   = 6;
-     string OwnerID = 7;
-     uint64 CreateTime = 8;
-     uint32 MemberCount = 9;
+     string OwnerID = 6;
+     int64 CreateTime = 7;
+     uint32 MemberCount = 8;
 }
 
 
-
-type GroupMemberFullInfoTip struct {
-	string GroupId = 1 ;
-	string UserId = 2 ;
-	int Role = 3;
-	uint64 JoinTime = 4;
+message GroupMemberFullInfo{
+	string GroupID = 1 ;
+	string UserID = 2 ;
+	int32 Role = 3;
+	int64 JoinTime = 4;
 	string NickName = 5;
 	string FaceUrl =6;
 }
 
+message FriendInfo{
+	string UserID = 1;
+	string Nickname = 2;
+	string FaceUrl = 3;
+	int32 Gender = 4;
+	string Mobile = 5;
+	string Birth = 6;
+	string Email = 7;
+	string Remark = 8;
+}
 
+message UserInfo{
+	string UserID = 1;
+	string Nickname = 2;
+	string FaceUrl = 3;
+	int32 Gender = 4;
+	string Mobile = 5;
+	string Birth = 6;
+	string Email = 7;
+}
+
+message UserPublicInfo{
+	string UserID = 1;
+	string Nickname = 2;
+	string FaceUrl = 3;
+	int32 Gender = 4;
+}
 
 message CreateGroupTip{
-    GroupInfoTip group = 1;
-    UserInfoTip creator = 2;
-    repeated GroupMemberFullInfoTip memberList = 3;
+    GroupInfo group = 1;
+    UserInfo creator = 2;
+    repeated GroupMemberFullInfo memberList = 3;
 }
+
 
 
 
