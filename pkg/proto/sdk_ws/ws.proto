@@ -1,6 +1,6 @@
 syntax = "proto3";
 package open_im_sdk;//The package name to which the proto file belongs
-option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
+//option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
 
 
 message PullMessageBySeqListResp {
@@ -78,7 +78,7 @@ message MsgData {
   int32 msgFrom = 4;
   int32 contentType = 5;
   string serverMsgID = 6;
-  string content  =7;
+  bytes content  =7;
   int64 sendTime =8;
   int64 seq =9;
   int32 senderPlatformID  =10;
@@ -91,66 +91,187 @@ message OfflinePushInfo{
     string Title = 1;
     string Desc = 2;
     string Ext = 3;
-    string PushSound = 4;
-    bool ISBadgeCount = 5;
+    string iOSPushSound = 4;
+    bool iOSBadgeCount = 5;
 }
 
-
+//public
 message GroupInfo{
-     string GroupID = 1;
-     string GroupName = 2;
-     string Notification = 3;
-     string Introduction = 4;
-     string FaceUrl = 5;
-     string OwnerID = 6;
-     int64 CreateTime = 7;
-     uint32 MemberCount = 8;
+  string GroupID = 1;
+  string GroupName   = 2;
+  string Notification = 3;
+  string Introduction  = 4;
+  string FaceUrl = 5;
+  PublicUserInfo Owner = 6;
+  uint64 CreateTime = 7;
+  uint32 MemberCount = 8;
 }
 
 
-message GroupMemberFullInfo{
+//private, Group members have permission to view
+message GroupMemberFullInfo {
 	string GroupID = 1 ;
 	string UserID = 2 ;
-	int32 Role = 3;
-	int64 JoinTime = 4;
+	int32 AdministratorLevel = 3;
+	uint64 JoinTime = 4;
 	string NickName = 5;
-	string FaceUrl =6;
+	string FaceUrl = 6;
+  string FriendRemark = 7;
 }
 
-message FriendInfo{
-	string UserID = 1;
-	string Nickname = 2;
-	string FaceUrl = 3;
-	int32 Gender = 4;
-	string Mobile = 5;
-	string Birth = 6;
-	string Email = 7;
-	string Remark = 8;
-}
-
+//private, Friends have permission to view
 message UserInfo{
-	string UserID = 1;
-	string Nickname = 2;
-	string FaceUrl = 3;
-	int32 Gender = 4;
-	string Mobile = 5;
-	string Birth = 6;
-	string Email = 7;
+  string UserID = 1;
+  string Nickname = 2;
+  string FaceUrl = 3;
+  int32 Gender = 4;
+  string Mobile = 5;
+  string Birth = 6;
+  string Email = 7;
 }
 
-message UserPublicInfo{
-	string UserID = 1;
-	string Nickname = 2;
-	string FaceUrl = 3;
-	int32 Gender = 4;
+//No permissions required
+message PublicUserInfo{
+  string UserID = 1;
+  string Nickname = 2;
+  string FaceUrl = 3;
+  int32 Gender = 4;
 }
 
-message CreateGroupTip{
-    GroupInfo group = 1;
-    UserInfo creator = 2;
-    repeated GroupMemberFullInfo memberList = 3;
+message TipsComm{
+  bytes Detail = 1;
+  string DefaultTips = 2;
+}
+
+//////////////////////group/////////////////////
+//Actively join the group
+message MemberEnterTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo EntrantUser = 2;
+  uint64 OperationTime = 3;
 }
 
 
+//Actively leave the group
+message MemberLeaveTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo LeaverUser = 2;
+  uint64 OperationTime = 3;
+}
+
+message MemberInvitedTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo OpUser = 2;
+  GroupMemberFullInfo InvitedUser = 3;
+  uint64 OperationTime = 4;
+}
+
+message MemberKickedTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo OpUser = 2;
+  GroupMemberFullInfo KickedUser = 3;
+  uint64 OperationTime = 4;
+}
 
 
+message MemberInfoChangedTips{
+  int32 ChangeType = 1; //1:info changed; 2:mute
+  GroupMemberFullInfo OpUser = 2; //who do this
+  GroupMemberFullInfo FinalInfo = 3; //
+  uint64 MuteTime = 4;
+  GroupInfo Group = 5;
+}
+
+message GroupCreatedTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo Creator = 2;
+  repeated GroupMemberFullInfo MemberList = 3;
+  uint64 OperationTime = 4;
+}
+
+message GroupInfoChangedTips{
+  int32 ChangedType = 1; //bitwise operators: 1:groupName; 10:Notification  100:Introduction; 1000:FaceUrl
+  GroupInfo Group = 2;
+  GroupMemberFullInfo OpUser = 3;
+}
+
+message ReceiveJoinApplicationTips{
+  GroupInfo Group = 1;
+  PublicUserInfo Applicant  = 2;
+  string 	Reason = 3;
+}
+
+message ApplicationProcessedTips{
+  GroupInfo Group = 1;
+  GroupMemberFullInfo OpUser = 2;
+  int32 Result = 3;
+  string 	Reason = 4;
+}
+
+//////////////////////friend/////////////////////
+message FriendInfo{
+  UserInfo OwnerUser = 1;
+  string Remark = 2;
+  uint64 CreateTime = 3;
+  UserInfo FriendUser = 4;
+}
+
+message FriendApplication{
+  uint64 AddTime = 1;
+  string AddSource = 2;
+  string AddWording = 3;
+}
+
+//user1 add user2
+message FriendApplicationAddedTips{
+  PublicUserInfo OpUser = 1; //user1
+  FriendApplication Application = 2;
+  PublicUserInfo  OpedUser = 3; //user2
+  uint64 OperationTime = 4;
+}
+
+// user2 accept or reject
+message FriendApplicationProcessedTips{
+  PublicUserInfo     OpUser = 1;  //user2
+  PublicUserInfo     OpedUser = 2; //user1
+  int32 result = 3; //1: accept; -1: reject
+  uint64 OperationTime = 4;
+}
+
+message FriendAddedTips{
+  FriendInfo Friend = 1;
+  uint64 OperationTime = 2;
+}
+
+message FriendDeletedTips{
+  FriendInfo Friend = 1;
+  uint64 OperationTime = 2;
+}
+
+message BlackInfo{
+  PublicUserInfo OwnerUser = 1;
+  uint64 CreateTime = 3;
+  PublicUserInfo BlackUser = 4;
+}
+
+message BlackAddedTips{
+  BlackInfo Black = 1;
+  uint64 OperationTime = 2;
+}
+
+message BlackDeletedTips{
+  BlackInfo Black = 1;
+  uint64 OperationTime = 2;
+}
+
+message FriendInfoChangedTips{
+  FriendInfo Friend = 1;
+  PublicUserInfo OpUser = 2;
+  uint64 OperationTime = 3;
+}
+//////////////////////user/////////////////////
+message SelfInfoUpdatedTips{
+  UserInfo SelfUserInfo = 1;
+  PublicUserInfo OpUser = 2;
+  uint64 OperationTime = 3;
+}

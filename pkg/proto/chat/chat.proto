@@ -1,6 +1,7 @@
 syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 package pbChat;//The package name to which the proto file belongs
-option go_package = "./chat;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
+//option go_package = ".;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
 
 message WSToMsgSvrChatMsg{
   string SendID = 1;
@@ -106,31 +107,16 @@ message MsgFormat{
   string ClientMsgID = 12;
 }
 
-message UserSendMsgReq {
+message SendMsgReq {
 
-  int32 ReqIdentifier = 1;
-  string Token = 2;
-  string SendID = 3;
-  string OperationID = 4;
-  string SenderNickName = 5;
-  string SenderFaceURL = 6;
-  int32 PlatformID = 7;
-  int32 SessionType = 8;
-  int32 MsgFrom = 9;
-  int32 ContentType = 10;
-  string RecvID = 11;
-  repeated string ForceList = 12;
-  string Content = 13;
-  string Options = 14;
-  string ClientMsgID = 15;
-  string OffLineInfo = 16;
-  string Ex = 17;
-  int64 sendTime = 18;
+string token =1;
+string operationID = 2;
+open_im_sdk.MsgData msgData = 3;
 
 
 }
 
-message UserSendMsgResp {
+message SendMsgResp {
   int32 ErrCode = 1;
   string ErrMsg = 2;
   int32 ReqIdentifier = 3;
@@ -143,5 +129,5 @@ service Chat {
   rpc GetMaxAndMinSeq(GetMaxAndMinSeqReq) returns(GetMaxAndMinSeqResp);
   rpc PullMessage(PullMessageReq) returns(PullMessageResp);
   rpc PullMessageBySeqList(PullMessageBySeqListReq) returns(PullMessageResp);
-  rpc UserSendMsg(UserSendMsgReq) returns(UserSendMsgResp);
+  rpc SendMsg(SendMsgReq) returns(SendMsgResp);
 }

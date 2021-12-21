@@ -20,8 +20,7 @@ message MsgToUserReq {
 }
 message MsgToUserResp{
 repeated SingleMsgToUser resp = 1;
-}
-//message SendMsgByWSReq{
+}//message SendMsgByWSReq{
 //  string SendID = 1;
 //  string RecvID = 2;
 //  string Content = 3;
@@ -32,6 +31,7 @@ repeated SingleMsgToUser resp = 1;
 //  string OperationID = 8;
 //  int64  PlatformID = 9;
 //}
+
 message SingleMsgToUser{
   int64   ResultCode = 1;
   string  RecvID = 2;

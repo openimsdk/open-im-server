@@ -30,9 +30,9 @@ func UserRegister(pb *pbAuth.UserRegisterReq) error {
 		return err
 	}
 	addUser := User{
-		UID:        pb.UID,
-		Name:       pb.Name,
-		Icon:       pb.Icon,
+		UserID:     pb.UID,
+		Nickname:   pb.Name,
+		FaceUrl:    pb.Icon,
 		Gender:     pb.Gender,
 		Mobile:     pb.Mobile,
 		Birth:      pb.Birth,

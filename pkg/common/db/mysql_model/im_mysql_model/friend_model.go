@@ -12,10 +12,10 @@ func InsertToFriend(ownerId, friendId string, flag int32) error {
 		return err
 	}
 	toInsertFollow := Friend{
-		OwnerId:    ownerId,
-		FriendId:   friendId,
-		FriendFlag: flag,
-		CreateTime: time.Now(),
+		OwnerUserID:  ownerId,
+		FriendUserID: friendId,
+		FriendFlag:   flag,
+		CreateTime:   time.Now(),
 	}
 	err = dbConn.Table("friend").Create(toInsertFollow).Error
 	if err != nil {

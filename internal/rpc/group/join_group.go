@@ -1,6 +1,7 @@
 package group
 
 import (
+	"Open_IM/internal/rpc/chat"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
@@ -10,16 +11,16 @@ import (
 )
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.CommonResp, error) {
-	log.Info(req.Token, req.OperationID, "rpc join group is server,args=%s", req.String())
+	log.NewInfo(req.Token, req.OperationID, "JoinGroup args ", req.String())
 	//Parse token, to find current user information
 	claims, err := token_verify.ParseToken(req.Token)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "err=%s,parse token failed", err.Error())
+		log.NewError(req.OperationID, "ParseToken failed", err.Error(), req.String())
 		return &pbGroup.CommonResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 	applicationUserInfo, err := im_mysql_model.FindUserByUID(claims.UID)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "No this user,err=%s", err.Error())
+		log.NewError(req.OperationID, "FindUserByUID failed", err.Error(), claims.UID)
 		return &pbGroup.CommonResp{ErrorCode: constant.ErrSearchUserInfo.ErrCode, ErrorMsg: constant.ErrSearchUserInfo.ErrMsg}, nil
 	}
 
@@ -28,30 +29,23 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		err = im_mysql_model.DelGroupRequest(req.GroupID, claims.UID, "0")
 	}
 
-	log.Info(req.Token, req.OperationID, "args: ", req.GroupID, claims.UID, "0", req.Message, applicationUserInfo.Name, applicationUserInfo.Icon)
-
-	if err = im_mysql_model.InsertIntoGroupRequest(req.GroupID, claims.UID, "0", req.Message, applicationUserInfo.Name, applicationUserInfo.Icon); err != nil {
+	if err = im_mysql_model.InsertIntoGroupRequest(req.GroupID, claims.UID, "0", req.Message, applicationUserInfo.Nickname, applicationUserInfo.FaceUrl); err != nil {
 		log.Error(req.Token, req.OperationID, "Insert into group request failed,er=%s", err.Error())
 		return &pbGroup.CommonResp{ErrorCode: constant.ErrJoinGroupApplication.ErrCode, ErrorMsg: constant.ErrJoinGroupApplication.ErrMsg}, nil
 	}
-	////Find the the group owner
-	//groupCreatorInfo, err := im_mysql_model.FindGroupMemberListByGroupIdAndFilterInfo(req.GroupID, constant.GroupCreator)
-	//if err != nil {
-	//	log.Error(req.Token, req.OperationID, "find group creator failed", err.Error())
-	//} else {
-	//	//Push message when join group chat
-	//	logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
-	//		SendID:      claims.UID,
-	//		RecvID:      groupCreatorInfo[0].Uid,
-	//		Content:     content_struct.NewContentStructString(0, "", req.String()),
-	//		SendTime:    utils.GetCurrentTimestampBySecond(),
-	//		MsgFrom:     constant.SysMsgType,
-	//		ContentType: constant.JoinGroupTip,
-	//		SessionType: constant.SingleChatType,
-	//		OperationID: req.OperationID,
-	//	})
-	//}
 
-	log.Info(req.Token, req.OperationID, "rpc join group success return")
-	return &pbGroup.CommonResp{}, nil
+	memberList, err := im_mysql_model.FindGroupMemberListByGroupIdAndFilterInfo(req.GroupID, constant.GroupOwner)
+	if len(memberList) == 0 {
+		log.NewError(req.OperationID, "FindGroupMemberListByGroupIdAndFilterInfo failed ", req.GroupID, constant.GroupOwner, err)
+		return &pbGroup.CommonResp{ErrorCode: 0, ErrorMsg: ""}, nil
+	}
+	group, err := im_mysql_model.FindGroupInfoByGroupId(req.GroupID)
+	if err != nil {
+		log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", req.GroupID)
+		return &pbGroup.CommonResp{ErrorCode: 0, ErrorMsg: ""}, nil
+	}
+	chat.ReceiveJoinApplicationNotification(req.OperationID, memberList[0].UserID, applicationUserInfo, group)
+
+	log.NewInfo(req.OperationID, "ReceiveJoinApplicationNotification rpc JoinGroup success return")
+	return &pbGroup.CommonResp{ErrorCode: 0, ErrorMsg: ""}, nil
 }

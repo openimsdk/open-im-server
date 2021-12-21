@@ -15,8 +15,10 @@ message CreateGroupReq{
   string faceUrl = 5;
   string token = 6;
   string operationID = 7;
-  string ex = 8;
+  string CreatorUserID = 8;
 }
+
+
 message GroupAddMemberInfo{
   string uid = 1;
   int32 setRole = 2;
@@ -31,6 +33,7 @@ message GetGroupsInfoReq{
   repeated string groupIDList = 1;
   string token = 2;
   string operationID = 3;
+  string UserID = 4;
 }
 message GetGroupsInfoResp{
   int32   ErrorCode = 1;
@@ -105,12 +108,12 @@ message JoinGroupReq{
 
 message GroupApplicationResponseReq{
   string OperationID = 1;
-  string OwnerID = 2;
+  string UserID = 2;
   string GroupID = 3;
-  string FromUserID = 4;
+  string FromUserID = 4;  //请求加群:请求者，邀请加群:邀请人
   string FromUserNickName = 5;
   string FromUserFaceUrl = 6;
-  string ToUserID = 7;
+  string ToUserID = 7;  //请求加群:0，邀请加群:被邀请人
   string  ToUserNickName = 8;
   string  ToUserFaceUrl = 9;
   int64 AddTime = 10;

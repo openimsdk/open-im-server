@@ -1,6 +1,7 @@
 package group
 
 import (
+	"Open_IM/internal/rpc/chat"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
@@ -9,12 +10,11 @@ import (
 )
 
 func (s *groupServer) GroupApplicationResponse(_ context.Context, pb *group.GroupApplicationResponseReq) (*group.GroupApplicationResponseResp, error) {
-	log.Info("", "", "rpc GroupApplicationResponse call start..., [pb: %s]", pb.String())
-
+	log.NewInfo(pb.OperationID, "GroupApplicationResponse args: ", pb.String())
 	reply, err := im_mysql_model.GroupApplicationResponse(pb)
 	if err != nil {
-		log.Error("", "", "rpc GroupApplicationResponse call..., im_mysql_model.GroupApplicationResponse fail [pb: %s] [err: %s]", pb.String(), err.Error())
-		return &group.GroupApplicationResponseResp{ErrCode: 702, ErrMsg: "rpc GroupApplicationResponse failed"}, nil
+		log.NewError(pb.OperationID, "GroupApplicationResponse failed ", err.Error(), pb)
+		return &group.GroupApplicationResponseResp{ErrCode: 702, ErrMsg: err.Error()}, nil
 	}
 
 	if pb.HandleResult == 1 {
@@ -32,8 +32,15 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, pb *group.Grou
 			}
 		}
 	}
+	if pb.ToUserID == "0" {
+		chat.ApplicationProcessedNotification(pb.OperationID, pb.FromUserID)
+	}
 
-	log.Info("", "", "rpc GroupApplicationResponse call..., im_mysql_model.GroupApplicationResponse")
+	if pb.HandleResult == 1 {
+
+	}
+
+	log.NewInfo(pb.OperationID, "rpc GroupApplicationResponse ok ", reply)
 
 	return reply, nil
 }

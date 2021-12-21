@@ -17,7 +17,7 @@ func InsertIntoGroup(groupId, name, introduction, notification, faceUrl, ex stri
 	if name == "" {
 		name = "groupChat"
 	}
-	toInsertInfo := Group{GroupId: groupId, Name: name, Introduction: introduction, Notification: notification, FaceUrl: faceUrl, CreateTime: time.Now(), Ex: ex}
+	toInsertInfo := Group{GroupID: groupId, GroupName: name, Introduction: introduction, Notification: notification, FaceUrl: faceUrl, CreateTime: time.Now(), Ex: ex}
 	err = dbConn.Table("group").Create(toInsertInfo).Error
 	if err != nil {
 		return err
@@ -174,7 +174,7 @@ func TransferGroupOwner(pb *group.TransferGroupOwnerReq) (*group.TransferGroupOw
 		return nil, err
 	}
 
-	if oldOwner.Uid == newOwner.Uid {
+	if oldOwner.UserID == newOwner.UserID {
 		return nil, errors.New("the self")
 	}
 
@@ -247,56 +247,6 @@ func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.Gro
 			}
 		}
 	}
-
-	//if err != nil {
-	//	err = dbConn.Raw("select * from `group_request` where handled_user = ? and group_id = ? and to_user_id = ? and from_user_id = ?", "", pb.GroupID, "0", pb.UID).Scan(&groupRequest).Error
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	if pb.Flag == 1 {
-	//		err = dbConn.Exec("update `group_request` set flag = ?, handled_msg = ?, handled_user = ? where group_id = ? and to_user_id = ? and from_user_id = ?",
-	//			pb.Flag, pb.RespMsg, pb.OwnerID, pb.GroupID, "0", pb.UID).Error
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//
-	//		// add to group member
-	//		err = InsertIntoGroupMember(pb.GroupID, pb.UID, groupRequest.FromUserNickname, groupRequest.FromUserFaceUrl, 0)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//	} else if pb.Flag == -1 {
-	//		err = dbConn.Exec("update `group_request` set flag = ?, handled_msg = ?, handled_user = ? where group_id = ? and to_user_id = ? and from_user_id = ?",
-	//			pb.Flag, pb.RespMsg, pb.OwnerID, pb.GroupID, "0", pb.UID).Error
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//	} else {
-	//		return nil, errors.New("flag error")
-	//	}
-	//} else {
-	//	if pb.Flag == 1 {
-	//		err = dbConn.Exec("update `group_request` set flag = ?, handled_msg = ?, handled_user = ? where group_id = ? and to_user_id = ?",
-	//			pb.Flag, pb.RespMsg, pb.OwnerID, pb.GroupID, pb.UID).Error
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//
-	//		// add to group member
-	//		err = InsertIntoGroupMember(pb.GroupID, pb.UID, groupRequest.ToUserNickname, groupRequest.ToUserFaceUrl, 0)
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//	} else if pb.Flag == -1 {
-	//		err = dbConn.Exec("update `group_request` set flag = ?, handled_msg = ?, handled_user = ? where group_id = ? and to_user_id = ?",
-	//			pb.Flag, pb.RespMsg, pb.OwnerID, pb.GroupID, pb.UID).Error
-	//		if err != nil {
-	//			return nil, err
-	//		}
-	//	} else {
-	//		return nil, errors.New("flag error")
-	//	}
-	//}
 
 	return &group.GroupApplicationResponseResp{}, nil
 }

@@ -384,9 +384,9 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 		}
 		user, err := imdb.FindUserByUID(v)
 		if err == nil && user != nil {
-			memberNode.FaceUrl = user.Icon
+			memberNode.FaceUrl = user.FaceUrl
 			memberNode.JoinTime = uint64(memberInfo.JoinTime.Unix())
-			memberNode.UserId = user.UID
+			memberNode.UserId = user.UserID
 			memberNode.NickName = memberInfo.NickName
 			memberNode.Role = memberInfo.AdministratorLevel
 		}

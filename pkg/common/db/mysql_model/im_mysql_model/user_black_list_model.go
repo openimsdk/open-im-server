@@ -10,7 +10,7 @@ func InsertInToUserBlackList(ownerID, blockID string) error {
 	if err != nil {
 		return err
 	}
-	toInsertInfo := BlackList{OwnerId: ownerID, BlockId: blockID, CreateTime: time.Now()}
+	toInsertInfo := BlackList{OwnerUserID: ownerID, BlockUserID: blockID, CreateTime: time.Now()}
 	err = dbConn.Table("user_black_list").Create(toInsertInfo).Error
 	return err
 }

@@ -27,6 +27,8 @@ type paramsGroupApplicationResponse struct {
 	Type             int32  `json:"type"`
 	HandleStatus     int32  `json:"handleStatus"`
 	HandleResult     int32  `json:"handleResult"`
+
+	UserID string `json:"userID"`
 }
 
 func newGroupApplicationResponse(params *paramsGroupApplicationResponse) *group.GroupApplicationResponseReq {
