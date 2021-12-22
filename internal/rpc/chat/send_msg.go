@@ -328,7 +328,7 @@ func ApplicationProcessedNotification(operationID, RecvID string, group immysql.
 //  GroupMemberFullInfo InvitedUser = 3;
 //  uint64 OperationTime = 4;
 //}
-func MemberInvitedNotification(operationID string, group immysql.Group, opUser immysql.GroupMember, invitedUser immysql.GroupMember) {
+func MemberInvitedNotification(operationID string, group immysql.Group, opUser immysql.User, invitedUser immysql.GroupMember) {
 
 }
 
@@ -338,6 +338,10 @@ func MemberInvitedNotification(operationID string, group immysql.Group, opUser i
 //  GroupMemberFullInfo KickedUser = 3;
 //  uint64 OperationTime = 4;
 //}
+
+func MemberKickedNotificationID(operationID, GroupID, opUserID, kickedUserID, reason string) {
+
+}
 func MemberKickedNotification(operationID string, group immysql.Group, opUser immysql.GroupMember, KickedUser immysql.GroupMember) {
 
 }
@@ -347,6 +351,11 @@ func MemberKickedNotification(operationID string, group immysql.Group, opUser im
 //  GroupInfo Group = 2;
 //  GroupMemberFullInfo OpUser = 3;
 //}
+func GroupInfoChangedNotification(operationID string, changedType int32, groupID string, opUserID string) {
+
+}
+
+/*
 func GroupInfoChangedNotification(operationID string, changedType int32, group *immysql.Group, opUser *immysql.GroupMember) {
 	var n NotificationMsg
 	n.SendID = opUser.UserID
@@ -369,13 +378,14 @@ func GroupInfoChangedNotification(operationID string, changedType int32, group *
 	n.Content, _ = json.Marshal(tips)
 	Notification(&n, false)
 }
+*/
 
 //message MemberLeaveTips{
 //  GroupInfo Group = 1;
 //  GroupMemberFullInfo LeaverUser = 2;
 //  uint64 OperationTime = 3;
 //}
-func MemberLeaveNotification(operationID string, group *immysql.Group, leaverUser *immysql.GroupMember) {
+func MemberLeaveNotification(operationID, groupID, leaverUserID string) {
 
 }
 

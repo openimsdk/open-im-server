@@ -3,8 +3,8 @@ option go_package = "./group;group";
 package group;
 
 message CommonResp{
-  int32   ErrorCode = 1;
-  string  ErrorMsg = 2;
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
 }
 
 message CreateGroupReq{
@@ -15,7 +15,8 @@ message CreateGroupReq{
   string faceUrl = 5;
   string token = 6;
   string operationID = 7;
-  string CreatorUserID = 8;
+  string OpUserID = 8;
+  string Ext = 9;
 }
 
 
@@ -23,9 +24,10 @@ message GroupAddMemberInfo{
   string uid = 1;
   int32 setRole = 2;
 }
+
 message CreateGroupResp{
-  int32   ErrorCode = 1;
-  string  ErrorMsg = 2;
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
   string  groupID = 3;
 }
 
@@ -33,11 +35,12 @@ message GetGroupsInfoReq{
   repeated string groupIDList = 1;
   string token = 2;
   string operationID = 3;
-  string UserID = 4;
+  string OpUserID = 4;
 }
+
 message GetGroupsInfoResp{
-  int32   ErrorCode = 1;
-  string  ErrorMsg = 2;
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
   repeated GroupInfo data = 3;
 }
 
@@ -49,11 +52,12 @@ message SetGroupInfoReq{
   string faceUrl = 5;
   string token = 6;
   string operationID = 7;
+  string OpUserID = 8;
 }
 
 
 message GetGroupApplicationListReq {
-  string UID = 1;
+  string OpUserID = 1;
   string OperationID = 2;
 }
 
@@ -92,6 +96,7 @@ message TransferGroupOwnerReq {
   string OldOwner = 2;
   string NewOwner = 3;
   string OperationID = 4;
+  string OpUserID = 5;
 }
 
 message TransferGroupOwnerResp{
@@ -104,6 +109,7 @@ message JoinGroupReq{
   string message = 2;
   string token = 3;
   string OperationID = 4;
+  string OpUserID = 5;
 }
 
 message GroupApplicationResponseReq{
@@ -135,6 +141,7 @@ message SetOwnerGroupNickNameReq{
   string nickName = 2;
   string OperationID = 3;
   string token = 4;
+  string OpUserID = 5;
 }
 
 
@@ -142,6 +149,7 @@ message QuitGroupReq{
   string groupID = 1;
   string operationID = 2;
   string token = 3;
+  string OpUserID = 4;
 }
 
 
@@ -171,11 +179,12 @@ message GetGroupMemberListReq {
   string operationID = 3;
   int32 filter = 4;
   int32 nextSeq = 5;
+  string OpUserID = 6;
 }
 
 message GetGroupMemberListResp {
-  int32   errorCode = 1;
-  string  errorMsg = 2;
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
   repeated GroupMemberFullInfo memberList = 3;
   int32 nextSeq = 4;
 }
@@ -187,11 +196,12 @@ message GetGroupMembersInfoReq {
   repeated string memberList = 2;
   string token = 3;
   string operationID = 4;
+  string OpUserID = 5;
 }
 
 message GetGroupMembersInfoResp {
-  int32   errorCode = 1;
-  string  errorMsg = 2;
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
   repeated GroupMemberFullInfo memberList = 3;
 
 }
@@ -202,6 +212,7 @@ message KickGroupMemberReq {
   string reason = 3;
   string token = 4;
   string operationID = 5;
+  string OpUserID = 6;
 }
 
 message Id2Result {
@@ -210,8 +221,8 @@ message Id2Result {
 }
 
 message KickGroupMemberResp {
-  int32   errorCode = 1;
-  string  errorMsg = 2;
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
   repeated Id2Result id2result = 3;
 }
 
@@ -219,6 +230,7 @@ message KickGroupMemberResp {
 message getJoinedGroupListReq {
   string token = 1;
   string operationID = 2;
+  string OpUserID = 3;
 }
 
 message GroupInfo {
@@ -233,9 +245,9 @@ message GroupInfo {
 }
 
 message getJoinedGroupListResp{
-  int32   errorCode = 1;
-  string  errorMsg = 2;
-  repeated  GroupInfo groupList = 3;
+  int32   ErrCode = 1;
+  string  ErrorMsg = 2;
+  repeated  GroupInfo GroupList = 3;
 }
 
 
@@ -245,23 +257,25 @@ message inviteUserToGroupReq {
   string groupID = 3;
   string reason = 4;
   repeated string uidList = 5;
+  string OpUserID = 6;
 }
 
 message inviteUserToGroupResp {
-  int32   errorCode = 1;
-  string  errorMsg = 2;
-  repeated  Id2Result id2result = 3; // 0 ok, -1 error
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
+  repeated  Id2Result Id2Result = 3; // 0 ok, -1 error
 }
 
 message GetGroupAllMemberReq {
   string groupID = 1;
   string token = 2;
   string operationID = 3;
+  string OpUserID = 4;
 }
 
 message GetGroupAllMemberResp {
-  int32   errorCode = 1;
-  string  errorMsg = 2;
+  int32   ErrCode = 1;
+  string  ErrMsg = 2;
   repeated GroupMemberFullInfo memberList = 3;
 }
 
