@@ -83,12 +83,13 @@ message MsgData {
   int32   sessionType = 9;
   int32 msgFrom = 10;
   int32 contentType = 11;
-  string content  =12;
+  bytes content  =12;
   repeated string forceList = 13;
   int64 seq =14;
   int64 sendTime = 15;
   int64 createTime = 16;
-  OfflinePushInfo offlinePushInfo =17;
+  map<string,bool> Options= 17;
+  OfflinePushInfo offlinePushInfo =18;
 }
 
 message OfflinePushInfo{
