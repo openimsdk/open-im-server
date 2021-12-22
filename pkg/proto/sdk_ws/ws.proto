@@ -74,17 +74,21 @@ message UserSendMsgResp {
 message MsgData {
   string  sendID = 1;
   string  recvID = 2;
-  int32   sessionType = 3;
-  int32 msgFrom = 4;
-  int32 contentType = 5;
-  string serverMsgID = 6;
-  string content  =7;
-  int64 sendTime =8;
-  int64 seq =9;
-  int32 senderPlatformID  =10;
-  string  senderNickName =11;
-  string  senderFaceURL =12;
-  string clientMsgID =13;
+  string groupID = 3;
+  string clientMsgID =4;
+  string serverMsgID =5;
+  int32 senderPlatformID  =6;
+  string  senderNickName =7;
+  string  senderFaceURL =8;
+  int32   sessionType = 9;
+  int32 msgFrom = 10;
+  int32 contentType = 11;
+  string content  =12;
+  repeated string forceList = 13;
+  int64 seq =14;
+  int64 sendTime = 15;
+  int64 createTime = 16;
+  OfflinePushInfo offlinePushInfo =17;
 }
 
 message OfflinePushInfo{
