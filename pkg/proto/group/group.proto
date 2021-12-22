@@ -108,7 +108,7 @@ message JoinGroupReq{
 
 message GroupApplicationResponseReq{
   string OperationID = 1;
-  string UserID = 2;
+  string OpUserID = 2;
   string GroupID = 3;
   string FromUserID = 4;  //请求加群:请求者，邀请加群:邀请人
   string FromUserNickName = 5;
