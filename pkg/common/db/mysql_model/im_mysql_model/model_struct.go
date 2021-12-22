@@ -3,9 +3,9 @@ package im_mysql_model
 import "time"
 
 type User struct {
-	UID        string    `gorm:"column:uid;primaryKey;"`
-	Name       string    `gorm:"column:name"`
-	Icon       string    `gorm:"column:icon"`
+	UserID     string    `gorm:"column:uid;primaryKey;"`
+	Nickname   string    `gorm:"column:name"`
+	FaceUrl    string    `gorm:"column:icon"`
 	Gender     int32     `gorm:"column:gender"`
 	Mobile     string    `gorm:"column:mobile"`
 	Birth      string    `gorm:"column:birth"`
@@ -15,28 +15,28 @@ type User struct {
 }
 
 type Friend struct {
-	OwnerId    string    `gorm:"column:owner_id"`
-	FriendId   string    `gorm:"column:friend_id"`
-	Comment    string    `gorm:"column:comment"`
-	FriendFlag int32     `gorm:"column:friend_flag"`
-	CreateTime time.Time `gorm:"column:create_time"`
+	OwnerUserID  string    `gorm:"column:owner_id"`
+	FriendUserID string    `gorm:"column:friend_id"`
+	Remark       string    `gorm:"column:comment"`
+	FriendFlag   int32     `gorm:"column:friend_flag"`
+	CreateTime   time.Time `gorm:"column:create_time"`
 }
 type FriendRequest struct {
-	ReqId      string    `gorm:"column:req_id"`
-	Uid        string    `gorm:"column:user_id"`
+	ReqID      string    `gorm:"column:req_id"`
+	UserID     string    `gorm:"column:user_id"`
 	Flag       int32     `gorm:"column:flag"`
 	ReqMessage string    `gorm:"column:req_message"`
 	CreateTime time.Time `gorm:"column:create_time"`
 }
 type BlackList struct {
-	OwnerId    string    `gorm:"column:owner_id"`
-	BlockId    string    `gorm:"column:block_id"`
-	CreateTime time.Time `gorm:"column:create_time"`
+	OwnerUserID string    `gorm:"column:owner_id"`
+	BlockUserID string    `gorm:"column:block_id"`
+	CreateTime  time.Time `gorm:"column:create_time"`
 }
 
 type Group struct {
-	GroupId      string    `gorm:"column:group_id"`
-	Name         string    `gorm:"column:name"`
+	GroupID      string    `gorm:"column:group_id"`
+	GroupName    string    `gorm:"column:name"`
 	Introduction string    `gorm:"column:introduction"`
 	Notification string    `gorm:"column:notification"`
 	FaceUrl      string    `gorm:"column:face_url"`
@@ -45,12 +45,12 @@ type Group struct {
 }
 
 type GroupMember struct {
-	GroupId            string    `gorm:"column:group_id"`
-	Uid                string    `gorm:"column:uid"`
+	GroupID            string    `gorm:"column:group_id"`
+	UserID             string    `gorm:"column:uid"`
 	NickName           string    `gorm:"column:nickname"`
 	AdministratorLevel int32     `gorm:"column:administrator_level"`
 	JoinTime           time.Time `gorm:"column:join_time"`
-	UserGroupFaceUrl   string    `gorm:"user_group_face_url"`
+	FaceUrl            string    `gorm:"user_group_face_url"`
 }
 
 type GroupRequest struct {

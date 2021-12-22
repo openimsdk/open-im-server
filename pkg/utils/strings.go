@@ -54,6 +54,11 @@ func StructToJsonString(param interface{}) string {
 	return dataString
 }
 
+func StructToJsonBytes(param interface{}) []byte {
+	dataType, _ := json.Marshal(param)
+	return dataType
+}
+
 //The incoming parameter must be a pointer
 func JsonStringToStruct(s string, args interface{}) error {
 	err := json.Unmarshal([]byte(s), args)

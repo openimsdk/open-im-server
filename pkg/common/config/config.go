@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -158,6 +159,59 @@ type config struct {
 		CallbackUrl     string `yaml:"callbackUrl"`
 		CallBackTimeOut int    `yaml:"callbackTimeOut"`
 	}
+	IOSPush struct {
+		PushSound  string `yaml:"pushSound"`
+		BadgeCount bool   `yaml:"badgeCount"`
+	}
+	Notification struct {
+		GroupCreated struct {
+			Conversation struct {
+				ConversationChanged bool `yaml:"conversationChanged"`
+				UnreadCount         bool `yaml:"unreadCount"`
+			}
+			OfflinePush struct {
+				PushSwitch bool   `yaml:"switch"`
+				Title      string `yaml:"title"`
+				Desc       string `yaml:"desc"`
+				Ext        string `yaml:"ext"`
+			}
+			DefaultTips struct {
+				Tips string `yaml:"tips"`
+			}
+		}
+
+		GroupInfoChanged struct {
+			Conversation struct {
+				ConversationChanged bool `yaml:"conversationChanged"`
+				UnreadCount         bool `yaml:"unreadCount"`
+			}
+			OfflinePush struct {
+				PushSwitch bool   `yaml:"switch"`
+				Title      string `yaml:"title"`
+				Desc       string `yaml:"desc"`
+				Ext        string `yaml:"ext"`
+			}
+			DefaultTips struct {
+				Tips string `yaml:"tips"`
+			}
+		}
+
+		ApplyJoinGroup struct {
+			Conversation struct {
+				ConversationChanged bool `yaml:"conversationChanged"`
+				UnreadCount         bool `yaml:"unreadCount"`
+			}
+			OfflinePush struct {
+				PushSwitch bool   `yaml:"switch"`
+				Title      string `yaml:"title"`
+				Desc       string `yaml:"desc"`
+				Ext        string `yaml:"ext"`
+			}
+			DefaultTips struct {
+				Tips string `yaml:"tips"`
+			}
+		}
+	}
 	Demo struct {
 		Port         []int `yaml:"openImDemoPort"`
 		AliSMSVerify struct {
@@ -200,5 +254,5 @@ func init() {
 	if err = yaml.Unmarshal(bytes, &Config); err != nil {
 		panic(err.Error())
 	}
-
+	fmt.Println("load config: ", Config)
 }

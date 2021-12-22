@@ -54,13 +54,14 @@ const (
 	TransferGroupOwnerTip       = 501
 	CreateGroupTip              = 502
 	GroupApplicationResponseTip = 503
-	JoinGroupTip                = 504
+	ApplyJoinGroupTip           = 504
 	QuitGroupTip                = 505
 	SetGroupInfoTip             = 506
 	AcceptGroupApplicationTip   = 507
 	RefuseGroupApplicationTip   = 508
 	KickGroupMemberTip          = 509
 	InviteUserToGroupTip        = 510
+	ChangeGroupInfoTip          = 511
 
 	//MsgFrom
 	UserMsgType = 100

@@ -10,7 +10,7 @@ func InsertIntoGroupMember(groupId, uid, nickName, userGroupFaceUrl string, admi
 	if err != nil {
 		return err
 	}
-	toInsertInfo := GroupMember{GroupId: groupId, Uid: uid, NickName: nickName, AdministratorLevel: administratorLevel, JoinTime: time.Now(), UserGroupFaceUrl: userGroupFaceUrl}
+	toInsertInfo := GroupMember{GroupID: groupId, UserID: uid, NickName: nickName, AdministratorLevel: administratorLevel, JoinTime: time.Now(), FaceUrl: userGroupFaceUrl}
 	err = dbConn.Table("group_member").Create(toInsertInfo).Error
 	if err != nil {
 		return err
@@ -206,7 +206,7 @@ func GetGroupOwnerByGroupId(groupId string) string {
 	}
 	for _, v := range omList {
 		if v.AdministratorLevel == 1 {
-			return v.Uid
+			return v.UserID
 		}
 	}
 	return ""

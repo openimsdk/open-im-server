@@ -173,13 +173,13 @@ messagecallback:
 
 iOSPush:
   pushSound: "xxx"
-  badgeCount: 1
+  badgeCount: true
 
 notification:
   groupCreated:
     conversation:
-      conversationChanged: 1
-      unreadCount: 1
+      conversationChanged: true
+      unreadCount: true
     offlinePush:
       switch: true
       title: "create group title"
@@ -190,8 +190,8 @@ notification:
 
   groupInfoChanged:
     conversation:
-      conversationChanged: 1
-      unreadCount: 1
+      conversationChanged: true
+      unreadCount: true
     offlinePush:
       switch: true
       title: "group info changed title"

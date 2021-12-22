@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	immysql "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -189,49 +189,7 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 		return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
 	default:
 		return returnMsg(&replay, pb, 203, "unkonwn sessionType", "", 0)
-
 	}
-
-}
-
-type WSToMsgSvrChatMsg struct {
-	SendID      string `protobuf:"bytes,1,opt,name=SendID" json:"SendID,omitempty"`
-	RecvID      string `protobuf:"bytes,2,opt,name=RecvID" json:"RecvID,omitempty"`
-	Content     string `protobuf:"bytes,3,opt,name=Content" json:"Content,omitempty"`
-	MsgFrom     int32  `protobuf:"varint,5,opt,name=MsgFrom" json:"MsgFrom,omitempty"`
-	ContentType int32  `protobuf:"varint,8,opt,name=ContentType" json:"ContentType,omitempty"`
-	SessionType int32  `protobuf:"varint,9,opt,name=SessionType" json:"SessionType,omitempty"`
-	OperationID string `protobuf:"bytes,10,opt,name=OperationID" json:"OperationID,omitempty"`
-}
-
-func CreateGroupNotification(sendID string, creator im_mysql_model.User, group im_mysql_model.Group, memberList []im_mysql_model.GroupMember) {
-	var msg WSToMsgSvrChatMsg
-	msg.OperationID = utils.OperationIDGenerator()
-	msg.SendID = sendID
-	msg.RecvID = group.GroupId
-	msg.ContentType = constant.CreateGroupTip
-	msg.SessionType = constant.GroupChatType
-	msg.MsgFrom = constant.SysMsgType
-
-	var groupCreated open_im_sdk.GroupCreatedTips
-	groupCreated.Group = &open_im_sdk.GroupInfo{}
-	utils.CopyStructFields(groupCreated.Group, group)
-	groupCreated.Creator = &open_im_sdk.GroupMemberFullInfo{}
-	utils.CopyStructFields(groupCreated.Creator, creator)
-	for _, v := range memberList {
-		var groupMemberInfo open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(&groupMemberInfo, v)
-		groupCreated.MemberList = append(groupCreated.MemberList, &groupMemberInfo)
-	}
-	var tips open_im_sdk.TipsComm
-	tips.Detail = utils.StructToJsonString(groupCreated)
-	tips.DefaultTips = creator.Name + " " + config.Config.DefaultTips.GroupCreatedTips
-	msg.Content = utils.StructToJsonString(tips)
-	Notification(&msg, false)
-}
-
-func Notification(m *WSToMsgSvrChatMsg, onlineUserOnly bool) {
-
 }
 
 func (rpc *rpcChat) sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string) error {
@@ -245,6 +203,7 @@ func GetMsgID(sendID string) string {
 	t := time.Now().Format("2006-01-02 15:04:05")
 	return t + "-" + sendID + "-" + strconv.Itoa(rand.Int())
 }
+
 func returnMsg(replay *pbChat.UserSendMsgResp, pb *pbChat.UserSendMsgReq, errCode int32, errMsg, serverMsgID string, sendTime int64) (*pbChat.UserSendMsgResp, error) {
 	replay.ErrCode = errCode
 	replay.ErrMsg = errMsg
@@ -254,6 +213,7 @@ func returnMsg(replay *pbChat.UserSendMsgResp, pb *pbChat.UserSendMsgReq, errCod
 	replay.SendTime = sendTime
 	return replay, nil
 }
+
 func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, msg *pbChat.WSToMsgSvrChatMsg) bool {
 	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
 	opt, err := db.DB.GetSingleConversationMsgOpt(userID, conversationID)
@@ -277,4 +237,241 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 	}
 
 	return true
+}
+
+type NotificationMsg struct {
+	SendID      string
+	RecvID      string
+	Content     []byte
+	MsgFrom     int32
+	ContentType int32
+	SessionType int32
+	OperationID string
+}
+
+func Notification(n *NotificationMsg, onlineUserOnly bool) {
+
+}
+
+//message GroupCreatedTips{
+//  GroupInfo Group = 1;
+//  GroupMemberFullInfo Creator = 2;
+//  repeated GroupMemberFullInfo MemberList = 3;
+//  uint64 OperationTime = 4;
+//}
+func GroupCreatedNotification(operationID string, creator *immysql.User, group *immysql.Group, memberList []immysql.GroupMember) {
+	var n NotificationMsg
+	n.SendID = creator.UserID
+	n.RecvID = group.GroupID
+	n.ContentType = constant.CreateGroupTip
+	n.SessionType = constant.GroupChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = operationID
+
+	var groupCreated open_im_sdk.GroupCreatedTips
+	groupCreated.Group = &open_im_sdk.GroupInfo{}
+	utils.CopyStructFields(groupCreated.Group, group)
+	groupCreated.Creator = &open_im_sdk.GroupMemberFullInfo{}
+	utils.CopyStructFields(groupCreated.Creator, creator)
+	for _, v := range memberList {
+		var groupMemberInfo open_im_sdk.GroupMemberFullInfo
+		utils.CopyStructFields(&groupMemberInfo, v)
+		groupCreated.MemberList = append(groupCreated.MemberList, &groupMemberInfo)
+	}
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(groupCreated)
+	tips.DefaultTips = config.Config.Notification.GroupCreated.DefaultTips.Tips
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, false)
+}
+
+//message ReceiveJoinApplicationTips{
+//  GroupInfo Group = 1;
+//  PublicUserInfo Applicant  = 2;
+//  string 	Reason = 3;
+//}
+func ReceiveJoinApplicationNotification(operationID, RecvID string, applicant *immysql.User, group *immysql.Group) {
+	var n NotificationMsg
+	n.SendID = applicant.UserID
+	n.RecvID = RecvID
+	n.ContentType = constant.ApplyJoinGroupTip
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = operationID
+
+	var joniGroup open_im_sdk.ReceiveJoinApplicationTips
+	joniGroup.Group = &open_im_sdk.GroupInfo{}
+	utils.CopyStructFields(joniGroup.Group, group)
+	joniGroup.Applicant = &open_im_sdk.PublicUserInfo{}
+	utils.CopyStructFields(joniGroup.Applicant, applicant)
+
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(joniGroup)
+	tips.DefaultTips = config.Config.Notification.ApplyJoinGroup.DefaultTips.Tips
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, false)
+}
+
+//message ApplicationProcessedTips{
+//  GroupInfo Group = 1;
+//  GroupMemberFullInfo OpUser = 2;
+//  int32 Result = 3;
+//  string 	Reason = 4;
+//}
+func ApplicationProcessedNotification(operationID, RecvID string, group immysql.Group, opUser immysql.GroupMember, result int32, Reason string) {
+
+}
+
+//message MemberInvitedTips{
+//  GroupInfo Group = 1;
+//  GroupMemberFullInfo OpUser = 2;
+//  GroupMemberFullInfo InvitedUser = 3;
+//  uint64 OperationTime = 4;
+//}
+func MemberInvitedNotification(operationID string, group immysql.Group, opUser immysql.GroupMember, invitedUser immysql.GroupMember) {
+
+}
+
+//message MemberKickedTips{
+//  GroupInfo Group = 1;
+//  GroupMemberFullInfo OpUser = 2;
+//  GroupMemberFullInfo KickedUser = 3;
+//  uint64 OperationTime = 4;
+//}
+func MemberKickedNotification(operationID string, group immysql.Group, opUser immysql.GroupMember, KickedUser immysql.GroupMember) {
+
+}
+
+//message GroupInfoChangedTips{
+//  int32 ChangedType = 1; //bitwise operators: 1:groupName; 10:Notification  100:Introduction; 1000:FaceUrl
+//  GroupInfo Group = 2;
+//  GroupMemberFullInfo OpUser = 3;
+//}
+func GroupInfoChangedNotification(operationID string, changedType int32, group *immysql.Group, opUser *immysql.GroupMember) {
+	var n NotificationMsg
+	n.SendID = opUser.UserID
+	n.RecvID = group.GroupID
+	n.ContentType = constant.ChangeGroupInfoTip
+	n.SessionType = constant.GroupChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = operationID
+
+	var groupInfoChanged open_im_sdk.GroupInfoChangedTips
+	groupInfoChanged.Group = &open_im_sdk.GroupInfo{}
+	utils.CopyStructFields(groupInfoChanged.Group, group)
+	groupInfoChanged.OpUser = &open_im_sdk.GroupMemberFullInfo{}
+	utils.CopyStructFields(groupInfoChanged.OpUser, opUser)
+	groupInfoChanged.ChangedType = changedType
+
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(groupInfoChanged)
+	tips.DefaultTips = config.Config.Notification.GroupInfoChanged.DefaultTips.Tips
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, false)
+}
+
+//message MemberLeaveTips{
+//  GroupInfo Group = 1;
+//  GroupMemberFullInfo LeaverUser = 2;
+//  uint64 OperationTime = 3;
+//}
+func MemberLeaveNotification(operationID string, group *immysql.Group, leaverUser *immysql.GroupMember) {
+
+}
+
+//message MemberEnterTips{
+//  GroupInfo Group = 1;
+//  GroupMemberFullInfo EntrantUser = 2;
+//  uint64 OperationTime = 3;
+//}
+func MemberEnterNotification(operationID string, group *immysql.Group, entrantUser *immysql.GroupMember) {
+
+}
+
+//message MemberInfoChangedTips{
+//  int32 ChangeType = 1; //1:info changed; 2:mute
+//  GroupMemberFullInfo OpUser = 2; //who do this
+//  GroupMemberFullInfo FinalInfo = 3; //
+//  uint64 MuteTime = 4;
+//  GroupInfo Group = 5;
+//}
+func MemberInfoChangedNotification(operationID string, group *immysql.Group, opUser *immysql.GroupMember, userFinalInfo *immysql.GroupMember) {
+
+}
+
+//message FriendApplicationAddedTips{
+//  PublicUserInfo OpUser = 1; //user1
+//  FriendApplication Application = 2;
+//  PublicUserInfo  OpedUser = 3; //user2
+//}
+func FriendApplicationAddedNotification(operationID string, opUser *immysql.User, opedUser *immysql.User, application *immysql.FriendRequest) {
+
+}
+
+//message FriendApplicationProcessedTips{
+//  PublicUserInfo     OpUser = 1;  //user2
+//  PublicUserInfo     OpedUser = 2; //user1
+//  int32 result = 3; //1: accept; -1: reject
+//}
+func FriendApplicationProcessedNotification(operationID string, opUser *immysql.User, OpedUser *immysql.User, result int32) {
+
+}
+
+//message FriendAddedTips{
+//  FriendInfo Friend = 1;
+//}
+//message FriendInfo{
+//  UserInfo OwnerUser = 1;
+//  string Remark = 2;
+//  uint64 CreateTime = 3;
+//  UserInfo FriendUser = 4;
+//}
+
+func FriendAddedNotification(operationID string, opUser *immysql.User, friendUser *immysql.Friend) {
+
+}
+
+//message FriendDeletedTips{
+//  FriendInfo Friend = 1;
+//}
+func FriendDeletedNotification(operationID string, opUser *immysql.User, friendUser *immysql.Friend) {
+
+}
+
+//message FriendInfoChangedTips{
+//  FriendInfo Friend = 1;
+//  PublicUserInfo OpUser = 2;
+//  uint64 OperationTime = 3;
+//}
+func FriendInfoChangedNotification(operationID string, opUser *immysql.User, friendUser *immysql.Friend) {
+
+}
+
+//message BlackAddedTips{
+//    BlackInfo Black = 1;
+//}
+//message BlackInfo{
+//  PublicUserInfo OwnerUser = 1;
+//  string Remark = 2;
+//  uint64 CreateTime = 3;
+//  PublicUserInfo BlackUser = 4;
+//}
+func BlackAddedNotification(operationID string, opUser *immysql.User, blackUser *immysql.User) {
+
+}
+
+//message BlackDeletedTips{
+//  BlackInfo Black = 1;
+//}
+func BlackDeletedNotification(operationID string, opUser *immysql.User, blackUser *immysql.User) {
+
+}
+
+//message SelfInfoUpdatedTips{
+//  UserInfo SelfUserInfo = 1;
+//  PublicUserInfo OpUser = 2;
+//  uint64 OperationTime = 3;
+//}
+func SelfInfoUpdatedNotification(operationID string, opUser *immysql.User, selfUser *immysql.User) {
+
 }
