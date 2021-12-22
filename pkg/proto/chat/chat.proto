@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 package pbChat;//The package name to which the proto file belongs
-option go_package = "./msg;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
+option go_package = "./chat;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
 
 message MsgDataToMQ{
   string token =1;
