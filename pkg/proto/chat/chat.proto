@@ -1,47 +1,22 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 package pbChat;//The package name to which the proto file belongs
-//option go_package = ".;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
+option go_package = "./msg;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
 
-message WSToMsgSvrChatMsg{
-  string SendID = 1;
-  string RecvID = 2;
-  string Content = 3;
-  int64 SendTime = 4;
-  int32 MsgFrom = 5;
-  string SenderNickName = 6;
-  string SenderFaceURL = 7;
-  int32 ContentType = 8;
-  int32 SessionType = 9;
-  string OperationID = 10;
-  string MsgID = 11;
-  string Token = 12;
-  string OfflineInfo =13;
-  string Options = 14;
-  int32  PlatformID =15;
-  repeated string  ForceList = 16;
-  string ClientMsgID = 17;
+message MsgDataToMQ{
+  string token =1;
+  string operationID = 2;
+  open_im_sdk.MsgData msgData = 3;
 }
 
 
-message MsgSvrToPushSvrChatMsg {
-  string SendID = 1;
-  string RecvID = 2;
-  string Content = 3;
-  int64 RecvSeq = 4;
-  int64 SendTime = 5;
-  int32 MsgFrom = 6;
-  string SenderNickName = 7;
-  string SenderFaceURL = 8;
-  int32 ContentType = 9;
-  int32 SessionType = 10;
-  string OperationID = 11;
-  string MsgID = 12;
-  string OfflineInfo = 13;
-  string Options =14;
-  int32  PlatformID =15;
-  string ClientMsgID = 16;
+message MsgDataToDB {
+  open_im_sdk.MsgData msgData = 1;
 
+}
+message PushMsgDataToMQ{
+  string OperationID = 1;
+  open_im_sdk.MsgData msgData = 2;
 }
 
 message PullMessageReq {
