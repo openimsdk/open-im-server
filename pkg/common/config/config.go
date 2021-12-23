@@ -165,21 +165,21 @@ type config struct {
 	}
 	Notification struct {
 		GroupCreated struct {
-			conversation Conversation `yaml:"conversation"`
-			offlinePush  OfflinePush  `yaml:"offlinePush"`
-			defaultTips  DefaultTips  `yaml:"defaultTips"`
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
 
 		GroupInfoChanged struct {
-			conversation Conversation `yaml:"conversation"`
-			offlinePush  OfflinePush  `yaml:"offlinePush"`
-			defaultTips  DefaultTips  `yaml:"defaultTips"`
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
 
 		ApplyJoinGroup struct {
-			conversation Conversation `yaml:"conversation"`
-			offlinePush  OfflinePush  `yaml:"offlinePush"`
-			defaultTips  DefaultTips  `yaml:"defaultTips"`
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
 	}
 	Demo struct {
@@ -200,18 +200,18 @@ type config struct {
 		}
 	}
 }
-type Conversation struct {
+type PConversation struct {
 	ConversationChanged bool `yaml:"conversationChanged"`
 	UnreadCount         bool `yaml:"unreadCount"`
 }
 
-type OfflinePush struct {
+type POfflinePush struct {
 	PushSwitch bool   `yaml:"switch"`
 	Title      string `yaml:"title"`
 	Desc       string `yaml:"desc"`
 	Ext        string `yaml:"ext"`
 }
-type DefaultTips struct {
+type PDefaultTips struct {
 	Tips string `yaml:"tips"`
 }
 
