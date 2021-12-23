@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
@@ -78,6 +79,43 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 		}
 		return nil, &constant.ErrTokenNotValidYet
 	}
+}
+
+func IsAppManagerAccess(token string, OpUserID string) bool {
+	claims, err := ParseToken(token)
+	if err != nil {
+		return false
+	}
+	if utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) && claims.UID == OpUserID {
+		return true
+	}
+	return false
+}
+
+func IsMangerUserID(OpUserID string) bool {
+	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func CheckAccess(OpUserID string, OwnerUserID string) bool {
+	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
+		return true
+	}
+	if OpUserID == OwnerUserID {
+		return true
+	}
+	return false
+}
+
+func GetUserIDFromToken(token string) (bool, string) {
+	claims, err := ParseToken(token)
+	if err != nil {
+		return false, ""
+	}
+	return true, claims.UID
 }
 
 func ParseToken(tokensString string) (claims *Claims, err error) {

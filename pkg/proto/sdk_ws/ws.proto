@@ -1,6 +1,6 @@
 syntax = "proto3";
 package open_im_sdk;//The package name to which the proto file belongs
-option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
+//option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
 
 
 message PullMessageBySeqListResp {
@@ -110,6 +110,7 @@ message GroupInfo{
   PublicUserInfo Owner = 6;
   uint64 CreateTime = 7;
   uint32 MemberCount = 8;
+  string Ext = 9;
 }
 
 
@@ -133,6 +134,7 @@ message UserInfo{
   string Mobile = 5;
   string Birth = 6;
   string Email = 7;
+  string Ext = 8;
 }
 
 //No permissions required

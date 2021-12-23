@@ -10,7 +10,7 @@ const (
 	Application      = 0
 	AgreeApplication = 1
 
-	//feiend related
+	//friend related
 	BlackListFlag         = 1
 	ApplicationFriendFlag = 0
 	FriendFlag            = 1
