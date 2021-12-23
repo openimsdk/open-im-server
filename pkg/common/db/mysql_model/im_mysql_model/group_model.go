@@ -164,12 +164,12 @@ func GetGroupApplicationList(uid string) (*group.GetGroupApplicationListResp, er
 	return reply, nil
 }
 
-func TransferGroupOwner(pb *group.TransferGroupOwnerReq) (*group.TransferGroupOwnerResp, error) {
-	oldOwner, err := FindGroupMemberInfoByGroupIdAndUserId(pb.GroupID, pb.OldOwner)
+func TransferGroupOwner(pb *group.TransferGroupOwnerReq) (*group.CommonResp, error) {
+	oldOwner, err := FindGroupMemberInfoByGroupIdAndUserId(pb.GroupID, pb.OldOwnerUserID)
 	if err != nil {
 		return nil, err
 	}
-	newOwner, err := FindGroupMemberInfoByGroupIdAndUserId(pb.GroupID, pb.NewOwner)
+	newOwner, err := FindGroupMemberInfoByGroupIdAndUserId(pb.GroupID, pb.NewOwnerUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -178,19 +178,19 @@ func TransferGroupOwner(pb *group.TransferGroupOwnerReq) (*group.TransferGroupOw
 		return nil, errors.New("the self")
 	}
 
-	if err = UpdateTheUserAdministratorLevel(pb.GroupID, pb.OldOwner, 0); err != nil {
+	if err = UpdateTheUserAdministratorLevel(pb.GroupID, pb.OldOwnerUserID, 0); err != nil {
 		return nil, err
 	}
 
-	if err = UpdateTheUserAdministratorLevel(pb.GroupID, pb.NewOwner, 1); err != nil {
-		UpdateTheUserAdministratorLevel(pb.GroupID, pb.OldOwner, 1)
+	if err = UpdateTheUserAdministratorLevel(pb.GroupID, pb.NewOwnerUserID, 1); err != nil {
+		UpdateTheUserAdministratorLevel(pb.GroupID, pb.OldOwnerUserID, 1)
 		return nil, err
 	}
 
-	return &group.TransferGroupOwnerResp{}, nil
+	return &group.CommonResp{}, nil
 }
 
-func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.GroupApplicationResponseResp, error) {
+func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.CommonResp, error) {
 
 	ownerUser, err := FindGroupMemberInfoByGroupIdAndUserId(pb.GroupID, pb.OwnerID)
 	if err != nil {

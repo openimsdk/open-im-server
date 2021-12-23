@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 option go_package = "./group;group";
 package group;
 
@@ -7,58 +8,54 @@ message CommonResp{
   string  ErrMsg = 2;
 }
 
-message CreateGroupReq{
-  repeated GroupAddMemberInfo memberList = 1;
-  string groupName = 2;
-  string introduction = 3;
-  string notification = 4;
-  string faceUrl = 5;
-  string token = 6;
-  string operationID = 7;
-  string OpUserID = 8;
-  string Ext = 9;
+message GroupAddMemberInfo{
+  string UserID = 1;
+  int32 Role = 2;
 }
 
-
-message GroupAddMemberInfo{
-  string uid = 1;
-  int32 setRole = 2;
+message CreateGroupReq{
+  repeated GroupAddMemberInfo InitMemberList = 1; //
+  string GroupName = 2;
+  string Introduction = 3;
+  string Notification = 4;
+  string FaceUrl = 5;
+  string Ext = 6;
+  string OperationID = 7;
+  string OpUserID = 8;
+  string FromUserID = 9;
 }
 
 message CreateGroupResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  string  groupID = 3;
+  open_im_sdk.GroupInfo GroupInfo = 3;
 }
 
 message GetGroupsInfoReq{
-  repeated string groupIDList = 1;
-  string token = 2;
-  string operationID = 3;
-  string OpUserID = 4;
+  repeated string GroupIDList = 1;
+  string OperationID = 2;
+  string OpUserID = 3;
 }
 
 message GetGroupsInfoResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated GroupInfo data = 3;
+  repeated open_im_sdk.GroupInfo GroupInfoList = 3;
 }
+
 
 message SetGroupInfoReq{
-  string groupID = 1;
-  string groupName = 2;
-  string notification = 3;
-  string introduction = 4;
-  string faceUrl = 5;
-  string token = 6;
-  string operationID = 7;
-  string OpUserID = 8;
+  open_im_sdk.GroupInfo GroupInfo = 1;
+  string OpUserID = 2;
+  string FromUserID = 3;
+  string OperationID = 4;
 }
 
-
+//owner or manager
 message GetGroupApplicationListReq {
   string OpUserID = 1;
   string OperationID = 2;
+  string FromUserID = 3; //owner or manager
 }
 
 message GetGroupApplicationList_Data_User {
@@ -93,21 +90,17 @@ message GetGroupApplicationListResp {
 
 message TransferGroupOwnerReq {
   string GroupID = 1;
-  string OldOwner = 2;
-  string NewOwner = 3;
+  string OldOwnerUserID = 2;
+  string NewOwnerUserID = 3;
   string OperationID = 4;
   string OpUserID = 5;
 }
 
-message TransferGroupOwnerResp{
-  int32   ErrCode = 1;
-  string  ErrMsg = 2;
-}
 
 message JoinGroupReq{
-  string groupID = 1;
-  string message = 2;
-  string token = 3;
+  string GroupID = 1;
+  string ReqMessage = 2;
+  string FromUserID = 3;
   string OperationID = 4;
   string OpUserID = 5;
 }
@@ -117,166 +110,124 @@ message GroupApplicationResponseReq{
   string OpUserID = 2;
   string GroupID = 3;
   string FromUserID = 4;  //请求加群:请求者，邀请加群:邀请人
-  string FromUserNickName = 5;
-  string FromUserFaceUrl = 6;
   string ToUserID = 7;  //请求加群:0，邀请加群:被邀请人
-  string  ToUserNickName = 8;
-  string  ToUserFaceUrl = 9;
   int64 AddTime = 10;
-  string RequestMsg = 11;
   string HandledMsg = 12;
-  int32 Type = 13;
-  int32 HandleStatus = 14;
-  int32 HandleResult = 15;
+ // int32 Type = 13;
+//  int32 HandleStatus = 14;
+ int32 HandleResult = 15;
 }
 
-message GroupApplicationResponseResp{
-  int32   ErrCode = 1;
-  string  ErrMsg = 2;
-}
+
 
 
 message SetOwnerGroupNickNameReq{
-  string groupID = 1;
-  string nickName = 2;
+  string GroupID = 1;
+  string Nickname = 2;
   string OperationID = 3;
-  string token = 4;
+  string FromUserID = 4;
   string OpUserID = 5;
 }
 
 
 message QuitGroupReq{
-  string groupID = 1;
-  string operationID = 2;
-  string token = 3;
+  string GroupID = 1;
+  string OperationID = 2;
+  string FromUserID = 3;
   string OpUserID = 4;
 }
 
 
-message GroupApplicationUserInfo{
-  string groupID = 1;
-  string uid = 2;
-  string name = 3;
-  string icon = 4;
-  string reqMsg = 5;
-  int64 applicationTime = 6;
-  int32 flag = 7;
-  string operatorID = 8;
-  string handledMsg = 9;
-}
-
-message GroupMemberFullInfo {
-  string userId = 1;
-  int32 role = 2;
-  uint64 joinTime = 3;
-  string nickName = 4;
-  string faceUrl = 5;
-}
 
 message GetGroupMemberListReq {
-  string groupID = 1;
-  string token = 2;
-  string operationID = 3;
-  int32 filter = 4;
-  int32 nextSeq = 5;
-  string OpUserID = 6;
+  string GroupID = 1;
+  string OpUserID = 2;
+  string OperationID = 3;
+  int32 Filter = 4;
+  int32 NextSeq = 5;
 }
 
 message GetGroupMemberListResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated GroupMemberFullInfo memberList = 3;
+  repeated open_im_sdk.GroupMemberFullInfo memberList = 3;
   int32 nextSeq = 4;
 }
 
 
 
 message GetGroupMembersInfoReq {
-  string groupID = 1;
+  string GroupID = 1;
   repeated string memberList = 2;
-  string token = 3;
-  string operationID = 4;
-  string OpUserID = 5;
+  string OpUserID = 3;
+  string OperationID = 4;
 }
 
 message GetGroupMembersInfoResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated GroupMemberFullInfo memberList = 3;
-
+  repeated open_im_sdk.GroupMemberFullInfo memberList = 3;
 }
 
 message KickGroupMemberReq {
-  string groupID = 1;
-  repeated GroupMemberFullInfo uidListInfo = 2;
-  string reason = 3;
-  string token = 4;
-  string operationID = 5;
+  string GroupID = 1;
+  repeated string KickedUserIDList = 2;
+  string Reason = 3;
+  string OperationID = 5;
   string OpUserID = 6;
 }
 
 message Id2Result {
-  string uId = 1;
-  int32 result = 2; //0 ok; -1 error
+  string UserID = 1;
+  int32 Result = 2; //0 ok; -1 error
 }
 
 message KickGroupMemberResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated Id2Result id2result = 3;
+  repeated Id2Result Id2ResultList = 3;
 }
 
 
-message getJoinedGroupListReq {
-  string token = 1;
+message GetJoinedGroupListReq {
+  string FromUserID = 1;
   string operationID = 2;
   string OpUserID = 3;
 }
 
-message GroupInfo {
-  string groupId = 1;
-  string groupName = 2;
-  string notification = 3;
-  string introduction = 4;
-  string faceUrl = 5;
-  uint64 createTime = 6;
-  string ownerId = 7;
-  uint32 memberCount = 8;
-}
 
-message getJoinedGroupListResp{
+message GetJoinedGroupListResp{
   int32   ErrCode = 1;
-  string  ErrorMsg = 2;
-  repeated  GroupInfo GroupList = 3;
+  string  ErrMsg = 2;
+  repeated  open_im_sdk.GroupInfo GroupList = 3;
 }
 
 
-message inviteUserToGroupReq {
-  string token = 1;
-  string operationID = 2;
-  string groupID = 3;
-  string reason = 4;
-  repeated string uidList = 5;
+message InviteUserToGroupReq {
+  string OperationID = 2;
+  string GroupID = 3;
+  string Reason = 4;
+  repeated string InvitedUserIDList = 5;
   string OpUserID = 6;
 }
 
-message inviteUserToGroupResp {
+message InviteUserToGroupResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated  Id2Result Id2Result = 3; // 0 ok, -1 error
+  repeated  Id2Result Id2ResultList = 3; // 0 ok, -1 error
 }
 
+
 message GetGroupAllMemberReq {
-  string groupID = 1;
-  string token = 2;
-  string operationID = 3;
-  string OpUserID = 4;
+  string GroupID = 1;
+  string OpUserID = 2;
+  string OperationID = 3;
 }
 
 message GetGroupAllMemberResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated GroupMemberFullInfo memberList = 3;
+  repeated open_im_sdk.GroupMemberFullInfo memberList = 3;
 }
 
 
@@ -288,14 +239,14 @@ service group{
   rpc getGroupsInfo(GetGroupsInfoReq) returns(GetGroupsInfoResp);
   rpc setGroupInfo(SetGroupInfoReq) returns(CommonResp);
   rpc getGroupApplicationList(GetGroupApplicationListReq) returns(GetGroupApplicationListResp);
-  rpc transferGroupOwner(TransferGroupOwnerReq) returns(TransferGroupOwnerResp);
-  rpc groupApplicationResponse(GroupApplicationResponseReq) returns(GroupApplicationResponseResp);
+  rpc transferGroupOwner(TransferGroupOwnerReq) returns(CommonResp);
+  rpc groupApplicationResponse(GroupApplicationResponseReq) returns(CommonResp);
   //  rpc setOwnerGroupNickName(SetOwnerGroupNickNameReq) returns(CommonResp);
   rpc getGroupMemberList(GetGroupMemberListReq) returns(GetGroupMemberListResp);
   rpc getGroupMembersInfo(GetGroupMembersInfoReq) returns(GetGroupMembersInfoResp);
   rpc kickGroupMember(KickGroupMemberReq) returns (KickGroupMemberResp);
-  rpc getJoinedGroupList(getJoinedGroupListReq) returns (getJoinedGroupListResp);
-  rpc inviteUserToGroup(inviteUserToGroupReq) returns (inviteUserToGroupResp);
+  rpc getJoinedGroupList(GetJoinedGroupListReq) returns (GetJoinedGroupListResp);
+  rpc inviteUserToGroup(InviteUserToGroupReq) returns (InviteUserToGroupResp);
 
   rpc getGroupAllMember(GetGroupAllMemberReq) returns(GetGroupAllMemberResp);
 }

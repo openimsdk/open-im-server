@@ -41,7 +41,7 @@ type Group struct {
 	Notification string    `gorm:"column:notification"`
 	FaceUrl      string    `gorm:"column:face_url"`
 	CreateTime   time.Time `gorm:"column:create_time"`
-	Ex           string    `gorm:"column:ex"`
+	Ext          string    `gorm:"column:ex"`
 }
 
 type GroupMember struct {

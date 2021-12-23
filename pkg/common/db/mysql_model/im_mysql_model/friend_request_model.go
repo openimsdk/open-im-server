@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// reqId add userId
 func ReplaceIntoFriendReq(reqId, userId string, flag int32, reqMessage string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
@@ -44,6 +45,7 @@ func FindSelfApplyFromFriendReq(userId string) ([]FriendRequest, error) {
 	return usersInfo, nil
 }
 
+//reqId apply to add userId already
 func FindFriendApplyFromFriendReqByUid(reqId, userId string) (*FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
@@ -57,6 +59,7 @@ func FindFriendApplyFromFriendReqByUid(reqId, userId string) (*FriendRequest, er
 	return &friendRequest, nil
 }
 
+//userId process reqId
 func UpdateFriendRelationshipToFriendReq(reqId, userId string, flag int32) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {

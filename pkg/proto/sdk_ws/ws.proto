@@ -115,6 +115,7 @@ message GroupInfo{
   PublicUserInfo Owner = 6;
   uint64 CreateTime = 7;
   uint32 MemberCount = 8;
+  string Ext = 9;
 }
 
 
@@ -138,6 +139,7 @@ message UserInfo{
   string Mobile = 5;
   string Birth = 6;
   string Email = 7;
+  string Ext = 8;
 }
 
 //No permissions required

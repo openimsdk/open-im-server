@@ -6,6 +6,7 @@ package group // import "./group"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
+import sdk_ws "Open_IM/pkg/proto/sdk_ws"
 
 import (
 	context "golang.org/x/net/context"
@@ -35,7 +36,7 @@ func (m *CommonResp) Reset()         { *m = CommonResp{} }
 func (m *CommonResp) String() string { return proto.CompactTextString(m) }
 func (*CommonResp) ProtoMessage()    {}
 func (*CommonResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{0}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{0}
 }
 func (m *CommonResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CommonResp.Unmarshal(m, b)
@@ -69,16 +70,62 @@ func (m *CommonResp) GetErrMsg() string {
 	return ""
 }
 
+type GroupAddMemberInfo struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=UserID" json:"UserID,omitempty"`
+	Role                 int32    `protobuf:"varint,2,opt,name=Role" json:"Role,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GroupAddMemberInfo) Reset()         { *m = GroupAddMemberInfo{} }
+func (m *GroupAddMemberInfo) String() string { return proto.CompactTextString(m) }
+func (*GroupAddMemberInfo) ProtoMessage()    {}
+func (*GroupAddMemberInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{1}
+}
+func (m *GroupAddMemberInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GroupAddMemberInfo.Unmarshal(m, b)
+}
+func (m *GroupAddMemberInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GroupAddMemberInfo.Marshal(b, m, deterministic)
+}
+func (dst *GroupAddMemberInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GroupAddMemberInfo.Merge(dst, src)
+}
+func (m *GroupAddMemberInfo) XXX_Size() int {
+	return xxx_messageInfo_GroupAddMemberInfo.Size(m)
+}
+func (m *GroupAddMemberInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_GroupAddMemberInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GroupAddMemberInfo proto.InternalMessageInfo
+
+func (m *GroupAddMemberInfo) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *GroupAddMemberInfo) GetRole() int32 {
+	if m != nil {
+		return m.Role
+	}
+	return 0
+}
+
 type CreateGroupReq struct {
-	MemberList           []*GroupAddMemberInfo `protobuf:"bytes,1,rep,name=memberList" json:"memberList,omitempty"`
-	GroupName            string                `protobuf:"bytes,2,opt,name=groupName" json:"groupName,omitempty"`
-	Introduction         string                `protobuf:"bytes,3,opt,name=introduction" json:"introduction,omitempty"`
-	Notification         string                `protobuf:"bytes,4,opt,name=notification" json:"notification,omitempty"`
-	FaceUrl              string                `protobuf:"bytes,5,opt,name=faceUrl" json:"faceUrl,omitempty"`
-	Token                string                `protobuf:"bytes,6,opt,name=token" json:"token,omitempty"`
-	OperationID          string                `protobuf:"bytes,7,opt,name=operationID" json:"operationID,omitempty"`
+	InitMemberList       []*GroupAddMemberInfo `protobuf:"bytes,1,rep,name=InitMemberList" json:"InitMemberList,omitempty"`
+	GroupName            string                `protobuf:"bytes,2,opt,name=GroupName" json:"GroupName,omitempty"`
+	Introduction         string                `protobuf:"bytes,3,opt,name=Introduction" json:"Introduction,omitempty"`
+	Notification         string                `protobuf:"bytes,4,opt,name=Notification" json:"Notification,omitempty"`
+	FaceUrl              string                `protobuf:"bytes,5,opt,name=FaceUrl" json:"FaceUrl,omitempty"`
+	Ext                  string                `protobuf:"bytes,6,opt,name=Ext" json:"Ext,omitempty"`
+	OperationID          string                `protobuf:"bytes,7,opt,name=OperationID" json:"OperationID,omitempty"`
 	OpUserID             string                `protobuf:"bytes,8,opt,name=OpUserID" json:"OpUserID,omitempty"`
-	Ext                  string                `protobuf:"bytes,9,opt,name=Ext" json:"Ext,omitempty"`
+	FromUserID           string                `protobuf:"bytes,9,opt,name=FromUserID" json:"FromUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
 	XXX_unrecognized     []byte                `json:"-"`
 	XXX_sizecache        int32                 `json:"-"`
@@ -88,7 +135,7 @@ func (m *CreateGroupReq) Reset()         { *m = CreateGroupReq{} }
 func (m *CreateGroupReq) String() string { return proto.CompactTextString(m) }
 func (*CreateGroupReq) ProtoMessage()    {}
 func (*CreateGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{1}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{2}
 }
 func (m *CreateGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateGroupReq.Unmarshal(m, b)
@@ -108,9 +155,9 @@ func (m *CreateGroupReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CreateGroupReq proto.InternalMessageInfo
 
-func (m *CreateGroupReq) GetMemberList() []*GroupAddMemberInfo {
+func (m *CreateGroupReq) GetInitMemberList() []*GroupAddMemberInfo {
 	if m != nil {
-		return m.MemberList
+		return m.InitMemberList
 	}
 	return nil
 }
@@ -143,9 +190,9 @@ func (m *CreateGroupReq) GetFaceUrl() string {
 	return ""
 }
 
-func (m *CreateGroupReq) GetToken() string {
+func (m *CreateGroupReq) GetExt() string {
 	if m != nil {
-		return m.Token
+		return m.Ext
 	}
 	return ""
 }
@@ -164,73 +211,27 @@ func (m *CreateGroupReq) GetOpUserID() string {
 	return ""
 }
 
-func (m *CreateGroupReq) GetExt() string {
+func (m *CreateGroupReq) GetFromUserID() string {
 	if m != nil {
-		return m.Ext
+		return m.FromUserID
 	}
 	return ""
-}
-
-type GroupAddMemberInfo struct {
-	Uid                  string   `protobuf:"bytes,1,opt,name=uid" json:"uid,omitempty"`
-	SetRole              int32    `protobuf:"varint,2,opt,name=setRole" json:"setRole,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GroupAddMemberInfo) Reset()         { *m = GroupAddMemberInfo{} }
-func (m *GroupAddMemberInfo) String() string { return proto.CompactTextString(m) }
-func (*GroupAddMemberInfo) ProtoMessage()    {}
-func (*GroupAddMemberInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{2}
-}
-func (m *GroupAddMemberInfo) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GroupAddMemberInfo.Unmarshal(m, b)
-}
-func (m *GroupAddMemberInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GroupAddMemberInfo.Marshal(b, m, deterministic)
-}
-func (dst *GroupAddMemberInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GroupAddMemberInfo.Merge(dst, src)
-}
-func (m *GroupAddMemberInfo) XXX_Size() int {
-	return xxx_messageInfo_GroupAddMemberInfo.Size(m)
-}
-func (m *GroupAddMemberInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_GroupAddMemberInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GroupAddMemberInfo proto.InternalMessageInfo
-
-func (m *GroupAddMemberInfo) GetUid() string {
-	if m != nil {
-		return m.Uid
-	}
-	return ""
-}
-
-func (m *GroupAddMemberInfo) GetSetRole() int32 {
-	if m != nil {
-		return m.SetRole
-	}
-	return 0
 }
 
 type CreateGroupResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	GroupID              string   `protobuf:"bytes,3,opt,name=groupID" json:"groupID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	ErrCode              int32             `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
+	ErrMsg               string            `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
+	GroupInfo            *sdk_ws.GroupInfo `protobuf:"bytes,3,opt,name=GroupInfo" json:"GroupInfo,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
 }
 
 func (m *CreateGroupResp) Reset()         { *m = CreateGroupResp{} }
 func (m *CreateGroupResp) String() string { return proto.CompactTextString(m) }
 func (*CreateGroupResp) ProtoMessage()    {}
 func (*CreateGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{3}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{3}
 }
 func (m *CreateGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateGroupResp.Unmarshal(m, b)
@@ -264,18 +265,17 @@ func (m *CreateGroupResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *CreateGroupResp) GetGroupID() string {
+func (m *CreateGroupResp) GetGroupInfo() *sdk_ws.GroupInfo {
 	if m != nil {
-		return m.GroupID
+		return m.GroupInfo
 	}
-	return ""
+	return nil
 }
 
 type GetGroupsInfoReq struct {
-	GroupIDList          []string `protobuf:"bytes,1,rep,name=groupIDList" json:"groupIDList,omitempty"`
-	Token                string   `protobuf:"bytes,2,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
-	OpUserID             string   `protobuf:"bytes,4,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	GroupIDList          []string `protobuf:"bytes,1,rep,name=GroupIDList" json:"GroupIDList,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID" json:"OperationID,omitempty"`
+	OpUserID             string   `protobuf:"bytes,3,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -285,7 +285,7 @@ func (m *GetGroupsInfoReq) Reset()         { *m = GetGroupsInfoReq{} }
 func (m *GetGroupsInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupsInfoReq) ProtoMessage()    {}
 func (*GetGroupsInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{4}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{4}
 }
 func (m *GetGroupsInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupsInfoReq.Unmarshal(m, b)
@@ -312,13 +312,6 @@ func (m *GetGroupsInfoReq) GetGroupIDList() []string {
 	return nil
 }
 
-func (m *GetGroupsInfoReq) GetToken() string {
-	if m != nil {
-		return m.Token
-	}
-	return ""
-}
-
 func (m *GetGroupsInfoReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
@@ -334,19 +327,19 @@ func (m *GetGroupsInfoReq) GetOpUserID() string {
 }
 
 type GetGroupsInfoResp struct {
-	ErrCode              int32        `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string       `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	Data                 []*GroupInfo `protobuf:"bytes,3,rep,name=data" json:"data,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
-	XXX_unrecognized     []byte       `json:"-"`
-	XXX_sizecache        int32        `json:"-"`
+	ErrCode              int32               `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
+	ErrMsg               string              `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
+	GroupInfoList        []*sdk_ws.GroupInfo `protobuf:"bytes,3,rep,name=GroupInfoList" json:"GroupInfoList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
 }
 
 func (m *GetGroupsInfoResp) Reset()         { *m = GetGroupsInfoResp{} }
 func (m *GetGroupsInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupsInfoResp) ProtoMessage()    {}
 func (*GetGroupsInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{5}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{5}
 }
 func (m *GetGroupsInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupsInfoResp.Unmarshal(m, b)
@@ -380,32 +373,28 @@ func (m *GetGroupsInfoResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *GetGroupsInfoResp) GetData() []*GroupInfo {
+func (m *GetGroupsInfoResp) GetGroupInfoList() []*sdk_ws.GroupInfo {
 	if m != nil {
-		return m.Data
+		return m.GroupInfoList
 	}
 	return nil
 }
 
 type SetGroupInfoReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
-	GroupName            string   `protobuf:"bytes,2,opt,name=groupName" json:"groupName,omitempty"`
-	Notification         string   `protobuf:"bytes,3,opt,name=notification" json:"notification,omitempty"`
-	Introduction         string   `protobuf:"bytes,4,opt,name=introduction" json:"introduction,omitempty"`
-	FaceUrl              string   `protobuf:"bytes,5,opt,name=faceUrl" json:"faceUrl,omitempty"`
-	Token                string   `protobuf:"bytes,6,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,7,opt,name=operationID" json:"operationID,omitempty"`
-	OpUserID             string   `protobuf:"bytes,8,opt,name=OpUserID" json:"OpUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	GroupInfo            *sdk_ws.GroupInfo `protobuf:"bytes,1,opt,name=GroupInfo" json:"GroupInfo,omitempty"`
+	OpUserID             string            `protobuf:"bytes,2,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	FromUserID           string            `protobuf:"bytes,3,opt,name=FromUserID" json:"FromUserID,omitempty"`
+	OperationID          string            `protobuf:"bytes,4,opt,name=OperationID" json:"OperationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
+	XXX_unrecognized     []byte            `json:"-"`
+	XXX_sizecache        int32             `json:"-"`
 }
 
 func (m *SetGroupInfoReq) Reset()         { *m = SetGroupInfoReq{} }
 func (m *SetGroupInfoReq) String() string { return proto.CompactTextString(m) }
 func (*SetGroupInfoReq) ProtoMessage()    {}
 func (*SetGroupInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{6}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{6}
 }
 func (m *SetGroupInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetGroupInfoReq.Unmarshal(m, b)
@@ -425,44 +414,23 @@ func (m *SetGroupInfoReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetGroupInfoReq proto.InternalMessageInfo
 
-func (m *SetGroupInfoReq) GetGroupID() string {
+func (m *SetGroupInfoReq) GetGroupInfo() *sdk_ws.GroupInfo {
 	if m != nil {
-		return m.GroupID
+		return m.GroupInfo
+	}
+	return nil
+}
+
+func (m *SetGroupInfoReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
 	}
 	return ""
 }
 
-func (m *SetGroupInfoReq) GetGroupName() string {
+func (m *SetGroupInfoReq) GetFromUserID() string {
 	if m != nil {
-		return m.GroupName
-	}
-	return ""
-}
-
-func (m *SetGroupInfoReq) GetNotification() string {
-	if m != nil {
-		return m.Notification
-	}
-	return ""
-}
-
-func (m *SetGroupInfoReq) GetIntroduction() string {
-	if m != nil {
-		return m.Introduction
-	}
-	return ""
-}
-
-func (m *SetGroupInfoReq) GetFaceUrl() string {
-	if m != nil {
-		return m.FaceUrl
-	}
-	return ""
-}
-
-func (m *SetGroupInfoReq) GetToken() string {
-	if m != nil {
-		return m.Token
+		return m.FromUserID
 	}
 	return ""
 }
@@ -474,16 +442,11 @@ func (m *SetGroupInfoReq) GetOperationID() string {
 	return ""
 }
 
-func (m *SetGroupInfoReq) GetOpUserID() string {
-	if m != nil {
-		return m.OpUserID
-	}
-	return ""
-}
-
+// owner or manager
 type GetGroupApplicationListReq struct {
 	OpUserID             string   `protobuf:"bytes,1,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID" json:"OperationID,omitempty"`
+	FromUserID           string   `protobuf:"bytes,3,opt,name=FromUserID" json:"FromUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -493,7 +456,7 @@ func (m *GetGroupApplicationListReq) Reset()         { *m = GetGroupApplicationL
 func (m *GetGroupApplicationListReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupApplicationListReq) ProtoMessage()    {}
 func (*GetGroupApplicationListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{7}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{7}
 }
 func (m *GetGroupApplicationListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupApplicationListReq.Unmarshal(m, b)
@@ -527,6 +490,13 @@ func (m *GetGroupApplicationListReq) GetOperationID() string {
 	return ""
 }
 
+func (m *GetGroupApplicationListReq) GetFromUserID() string {
+	if m != nil {
+		return m.FromUserID
+	}
+	return ""
+}
+
 type GetGroupApplicationList_Data_User struct {
 	ID                   string   `protobuf:"bytes,1,opt,name=ID" json:"ID,omitempty"`
 	GroupID              string   `protobuf:"bytes,2,opt,name=GroupID" json:"GroupID,omitempty"`
@@ -553,7 +523,7 @@ func (m *GetGroupApplicationList_Data_User) Reset()         { *m = GetGroupAppli
 func (m *GetGroupApplicationList_Data_User) String() string { return proto.CompactTextString(m) }
 func (*GetGroupApplicationList_Data_User) ProtoMessage()    {}
 func (*GetGroupApplicationList_Data_User) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{8}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{8}
 }
 func (m *GetGroupApplicationList_Data_User) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupApplicationList_Data_User.Unmarshal(m, b)
@@ -697,7 +667,7 @@ func (m *GetGroupApplicationListData) Reset()         { *m = GetGroupApplication
 func (m *GetGroupApplicationListData) String() string { return proto.CompactTextString(m) }
 func (*GetGroupApplicationListData) ProtoMessage()    {}
 func (*GetGroupApplicationListData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{9}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{9}
 }
 func (m *GetGroupApplicationListData) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupApplicationListData.Unmarshal(m, b)
@@ -744,7 +714,7 @@ func (m *GetGroupApplicationListResp) Reset()         { *m = GetGroupApplication
 func (m *GetGroupApplicationListResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupApplicationListResp) ProtoMessage()    {}
 func (*GetGroupApplicationListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{10}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{10}
 }
 func (m *GetGroupApplicationListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupApplicationListResp.Unmarshal(m, b)
@@ -787,8 +757,8 @@ func (m *GetGroupApplicationListResp) GetData() *GetGroupApplicationListData {
 
 type TransferGroupOwnerReq struct {
 	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
-	OldOwner             string   `protobuf:"bytes,2,opt,name=OldOwner" json:"OldOwner,omitempty"`
-	NewOwner             string   `protobuf:"bytes,3,opt,name=NewOwner" json:"NewOwner,omitempty"`
+	OldOwnerUserID       string   `protobuf:"bytes,2,opt,name=OldOwnerUserID" json:"OldOwnerUserID,omitempty"`
+	NewOwnerUserID       string   `protobuf:"bytes,3,opt,name=NewOwnerUserID" json:"NewOwnerUserID,omitempty"`
 	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID" json:"OperationID,omitempty"`
 	OpUserID             string   `protobuf:"bytes,5,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -800,7 +770,7 @@ func (m *TransferGroupOwnerReq) Reset()         { *m = TransferGroupOwnerReq{} }
 func (m *TransferGroupOwnerReq) String() string { return proto.CompactTextString(m) }
 func (*TransferGroupOwnerReq) ProtoMessage()    {}
 func (*TransferGroupOwnerReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{11}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{11}
 }
 func (m *TransferGroupOwnerReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TransferGroupOwnerReq.Unmarshal(m, b)
@@ -827,16 +797,16 @@ func (m *TransferGroupOwnerReq) GetGroupID() string {
 	return ""
 }
 
-func (m *TransferGroupOwnerReq) GetOldOwner() string {
+func (m *TransferGroupOwnerReq) GetOldOwnerUserID() string {
 	if m != nil {
-		return m.OldOwner
+		return m.OldOwnerUserID
 	}
 	return ""
 }
 
-func (m *TransferGroupOwnerReq) GetNewOwner() string {
+func (m *TransferGroupOwnerReq) GetNewOwnerUserID() string {
 	if m != nil {
-		return m.NewOwner
+		return m.NewOwnerUserID
 	}
 	return ""
 }
@@ -855,56 +825,10 @@ func (m *TransferGroupOwnerReq) GetOpUserID() string {
 	return ""
 }
 
-type TransferGroupOwnerResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *TransferGroupOwnerResp) Reset()         { *m = TransferGroupOwnerResp{} }
-func (m *TransferGroupOwnerResp) String() string { return proto.CompactTextString(m) }
-func (*TransferGroupOwnerResp) ProtoMessage()    {}
-func (*TransferGroupOwnerResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{12}
-}
-func (m *TransferGroupOwnerResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_TransferGroupOwnerResp.Unmarshal(m, b)
-}
-func (m *TransferGroupOwnerResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_TransferGroupOwnerResp.Marshal(b, m, deterministic)
-}
-func (dst *TransferGroupOwnerResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TransferGroupOwnerResp.Merge(dst, src)
-}
-func (m *TransferGroupOwnerResp) XXX_Size() int {
-	return xxx_messageInfo_TransferGroupOwnerResp.Size(m)
-}
-func (m *TransferGroupOwnerResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_TransferGroupOwnerResp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_TransferGroupOwnerResp proto.InternalMessageInfo
-
-func (m *TransferGroupOwnerResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *TransferGroupOwnerResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
 type JoinGroupReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
-	Message              string   `protobuf:"bytes,2,opt,name=message" json:"message,omitempty"`
-	Token                string   `protobuf:"bytes,3,opt,name=token" json:"token,omitempty"`
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
+	ReqMessage           string   `protobuf:"bytes,2,opt,name=ReqMessage" json:"ReqMessage,omitempty"`
+	FromUserID           string   `protobuf:"bytes,3,opt,name=FromUserID" json:"FromUserID,omitempty"`
 	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID" json:"OperationID,omitempty"`
 	OpUserID             string   `protobuf:"bytes,5,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -916,7 +840,7 @@ func (m *JoinGroupReq) Reset()         { *m = JoinGroupReq{} }
 func (m *JoinGroupReq) String() string { return proto.CompactTextString(m) }
 func (*JoinGroupReq) ProtoMessage()    {}
 func (*JoinGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{13}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{12}
 }
 func (m *JoinGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JoinGroupReq.Unmarshal(m, b)
@@ -943,16 +867,16 @@ func (m *JoinGroupReq) GetGroupID() string {
 	return ""
 }
 
-func (m *JoinGroupReq) GetMessage() string {
+func (m *JoinGroupReq) GetReqMessage() string {
 	if m != nil {
-		return m.Message
+		return m.ReqMessage
 	}
 	return ""
 }
 
-func (m *JoinGroupReq) GetToken() string {
+func (m *JoinGroupReq) GetFromUserID() string {
 	if m != nil {
-		return m.Token
+		return m.FromUserID
 	}
 	return ""
 }
@@ -972,20 +896,15 @@ func (m *JoinGroupReq) GetOpUserID() string {
 }
 
 type GroupApplicationResponseReq struct {
-	OperationID          string   `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
-	OpUserID             string   `protobuf:"bytes,2,opt,name=OpUserID" json:"OpUserID,omitempty"`
-	GroupID              string   `protobuf:"bytes,3,opt,name=GroupID" json:"GroupID,omitempty"`
-	FromUserID           string   `protobuf:"bytes,4,opt,name=FromUserID" json:"FromUserID,omitempty"`
-	FromUserNickName     string   `protobuf:"bytes,5,opt,name=FromUserNickName" json:"FromUserNickName,omitempty"`
-	FromUserFaceUrl      string   `protobuf:"bytes,6,opt,name=FromUserFaceUrl" json:"FromUserFaceUrl,omitempty"`
-	ToUserID             string   `protobuf:"bytes,7,opt,name=ToUserID" json:"ToUserID,omitempty"`
-	ToUserNickName       string   `protobuf:"bytes,8,opt,name=ToUserNickName" json:"ToUserNickName,omitempty"`
-	ToUserFaceUrl        string   `protobuf:"bytes,9,opt,name=ToUserFaceUrl" json:"ToUserFaceUrl,omitempty"`
-	AddTime              int64    `protobuf:"varint,10,opt,name=AddTime" json:"AddTime,omitempty"`
-	RequestMsg           string   `protobuf:"bytes,11,opt,name=RequestMsg" json:"RequestMsg,omitempty"`
-	HandledMsg           string   `protobuf:"bytes,12,opt,name=HandledMsg" json:"HandledMsg,omitempty"`
-	Type                 int32    `protobuf:"varint,13,opt,name=Type" json:"Type,omitempty"`
-	HandleStatus         int32    `protobuf:"varint,14,opt,name=HandleStatus" json:"HandleStatus,omitempty"`
+	OperationID string `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
+	OpUserID    string `protobuf:"bytes,2,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	GroupID     string `protobuf:"bytes,3,opt,name=GroupID" json:"GroupID,omitempty"`
+	FromUserID  string `protobuf:"bytes,4,opt,name=FromUserID" json:"FromUserID,omitempty"`
+	ToUserID    string `protobuf:"bytes,7,opt,name=ToUserID" json:"ToUserID,omitempty"`
+	AddTime     int64  `protobuf:"varint,10,opt,name=AddTime" json:"AddTime,omitempty"`
+	HandledMsg  string `protobuf:"bytes,12,opt,name=HandledMsg" json:"HandledMsg,omitempty"`
+	// int32 Type = 13;
+	//  int32 HandleStatus = 14;
 	HandleResult         int32    `protobuf:"varint,15,opt,name=HandleResult" json:"HandleResult,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -996,7 +915,7 @@ func (m *GroupApplicationResponseReq) Reset()         { *m = GroupApplicationRes
 func (m *GroupApplicationResponseReq) String() string { return proto.CompactTextString(m) }
 func (*GroupApplicationResponseReq) ProtoMessage()    {}
 func (*GroupApplicationResponseReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{14}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{13}
 }
 func (m *GroupApplicationResponseReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GroupApplicationResponseReq.Unmarshal(m, b)
@@ -1044,37 +963,9 @@ func (m *GroupApplicationResponseReq) GetFromUserID() string {
 	return ""
 }
 
-func (m *GroupApplicationResponseReq) GetFromUserNickName() string {
-	if m != nil {
-		return m.FromUserNickName
-	}
-	return ""
-}
-
-func (m *GroupApplicationResponseReq) GetFromUserFaceUrl() string {
-	if m != nil {
-		return m.FromUserFaceUrl
-	}
-	return ""
-}
-
 func (m *GroupApplicationResponseReq) GetToUserID() string {
 	if m != nil {
 		return m.ToUserID
-	}
-	return ""
-}
-
-func (m *GroupApplicationResponseReq) GetToUserNickName() string {
-	if m != nil {
-		return m.ToUserNickName
-	}
-	return ""
-}
-
-func (m *GroupApplicationResponseReq) GetToUserFaceUrl() string {
-	if m != nil {
-		return m.ToUserFaceUrl
 	}
 	return ""
 }
@@ -1086,32 +977,11 @@ func (m *GroupApplicationResponseReq) GetAddTime() int64 {
 	return 0
 }
 
-func (m *GroupApplicationResponseReq) GetRequestMsg() string {
-	if m != nil {
-		return m.RequestMsg
-	}
-	return ""
-}
-
 func (m *GroupApplicationResponseReq) GetHandledMsg() string {
 	if m != nil {
 		return m.HandledMsg
 	}
 	return ""
-}
-
-func (m *GroupApplicationResponseReq) GetType() int32 {
-	if m != nil {
-		return m.Type
-	}
-	return 0
-}
-
-func (m *GroupApplicationResponseReq) GetHandleStatus() int32 {
-	if m != nil {
-		return m.HandleStatus
-	}
-	return 0
 }
 
 func (m *GroupApplicationResponseReq) GetHandleResult() int32 {
@@ -1121,57 +991,11 @@ func (m *GroupApplicationResponseReq) GetHandleResult() int32 {
 	return 0
 }
 
-type GroupApplicationResponseResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GroupApplicationResponseResp) Reset()         { *m = GroupApplicationResponseResp{} }
-func (m *GroupApplicationResponseResp) String() string { return proto.CompactTextString(m) }
-func (*GroupApplicationResponseResp) ProtoMessage()    {}
-func (*GroupApplicationResponseResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{15}
-}
-func (m *GroupApplicationResponseResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GroupApplicationResponseResp.Unmarshal(m, b)
-}
-func (m *GroupApplicationResponseResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GroupApplicationResponseResp.Marshal(b, m, deterministic)
-}
-func (dst *GroupApplicationResponseResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GroupApplicationResponseResp.Merge(dst, src)
-}
-func (m *GroupApplicationResponseResp) XXX_Size() int {
-	return xxx_messageInfo_GroupApplicationResponseResp.Size(m)
-}
-func (m *GroupApplicationResponseResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GroupApplicationResponseResp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GroupApplicationResponseResp proto.InternalMessageInfo
-
-func (m *GroupApplicationResponseResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *GroupApplicationResponseResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
 type SetOwnerGroupNickNameReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
-	NickName             string   `protobuf:"bytes,2,opt,name=nickName" json:"nickName,omitempty"`
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
+	Nickname             string   `protobuf:"bytes,2,opt,name=Nickname" json:"Nickname,omitempty"`
 	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID" json:"OperationID,omitempty"`
-	Token                string   `protobuf:"bytes,4,opt,name=token" json:"token,omitempty"`
+	FromUserID           string   `protobuf:"bytes,4,opt,name=FromUserID" json:"FromUserID,omitempty"`
 	OpUserID             string   `protobuf:"bytes,5,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1182,7 +1006,7 @@ func (m *SetOwnerGroupNickNameReq) Reset()         { *m = SetOwnerGroupNickNameR
 func (m *SetOwnerGroupNickNameReq) String() string { return proto.CompactTextString(m) }
 func (*SetOwnerGroupNickNameReq) ProtoMessage()    {}
 func (*SetOwnerGroupNickNameReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{16}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{14}
 }
 func (m *SetOwnerGroupNickNameReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetOwnerGroupNickNameReq.Unmarshal(m, b)
@@ -1209,9 +1033,9 @@ func (m *SetOwnerGroupNickNameReq) GetGroupID() string {
 	return ""
 }
 
-func (m *SetOwnerGroupNickNameReq) GetNickName() string {
+func (m *SetOwnerGroupNickNameReq) GetNickname() string {
 	if m != nil {
-		return m.NickName
+		return m.Nickname
 	}
 	return ""
 }
@@ -1223,9 +1047,9 @@ func (m *SetOwnerGroupNickNameReq) GetOperationID() string {
 	return ""
 }
 
-func (m *SetOwnerGroupNickNameReq) GetToken() string {
+func (m *SetOwnerGroupNickNameReq) GetFromUserID() string {
 	if m != nil {
-		return m.Token
+		return m.FromUserID
 	}
 	return ""
 }
@@ -1238,9 +1062,9 @@ func (m *SetOwnerGroupNickNameReq) GetOpUserID() string {
 }
 
 type QuitGroupReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
-	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
-	Token                string   `protobuf:"bytes,3,opt,name=token" json:"token,omitempty"`
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID" json:"OperationID,omitempty"`
+	FromUserID           string   `protobuf:"bytes,3,opt,name=FromUserID" json:"FromUserID,omitempty"`
 	OpUserID             string   `protobuf:"bytes,4,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1251,7 +1075,7 @@ func (m *QuitGroupReq) Reset()         { *m = QuitGroupReq{} }
 func (m *QuitGroupReq) String() string { return proto.CompactTextString(m) }
 func (*QuitGroupReq) ProtoMessage()    {}
 func (*QuitGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{17}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{15}
 }
 func (m *QuitGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QuitGroupReq.Unmarshal(m, b)
@@ -1285,9 +1109,9 @@ func (m *QuitGroupReq) GetOperationID() string {
 	return ""
 }
 
-func (m *QuitGroupReq) GetToken() string {
+func (m *QuitGroupReq) GetFromUserID() string {
 	if m != nil {
-		return m.Token
+		return m.FromUserID
 	}
 	return ""
 }
@@ -1299,185 +1123,12 @@ func (m *QuitGroupReq) GetOpUserID() string {
 	return ""
 }
 
-type GroupApplicationUserInfo struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
-	Uid                  string   `protobuf:"bytes,2,opt,name=uid" json:"uid,omitempty"`
-	Name                 string   `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
-	Icon                 string   `protobuf:"bytes,4,opt,name=icon" json:"icon,omitempty"`
-	ReqMsg               string   `protobuf:"bytes,5,opt,name=reqMsg" json:"reqMsg,omitempty"`
-	ApplicationTime      int64    `protobuf:"varint,6,opt,name=applicationTime" json:"applicationTime,omitempty"`
-	Flag                 int32    `protobuf:"varint,7,opt,name=flag" json:"flag,omitempty"`
-	OperatorID           string   `protobuf:"bytes,8,opt,name=operatorID" json:"operatorID,omitempty"`
-	HandledMsg           string   `protobuf:"bytes,9,opt,name=handledMsg" json:"handledMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GroupApplicationUserInfo) Reset()         { *m = GroupApplicationUserInfo{} }
-func (m *GroupApplicationUserInfo) String() string { return proto.CompactTextString(m) }
-func (*GroupApplicationUserInfo) ProtoMessage()    {}
-func (*GroupApplicationUserInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{18}
-}
-func (m *GroupApplicationUserInfo) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GroupApplicationUserInfo.Unmarshal(m, b)
-}
-func (m *GroupApplicationUserInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GroupApplicationUserInfo.Marshal(b, m, deterministic)
-}
-func (dst *GroupApplicationUserInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GroupApplicationUserInfo.Merge(dst, src)
-}
-func (m *GroupApplicationUserInfo) XXX_Size() int {
-	return xxx_messageInfo_GroupApplicationUserInfo.Size(m)
-}
-func (m *GroupApplicationUserInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_GroupApplicationUserInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GroupApplicationUserInfo proto.InternalMessageInfo
-
-func (m *GroupApplicationUserInfo) GetGroupID() string {
-	if m != nil {
-		return m.GroupID
-	}
-	return ""
-}
-
-func (m *GroupApplicationUserInfo) GetUid() string {
-	if m != nil {
-		return m.Uid
-	}
-	return ""
-}
-
-func (m *GroupApplicationUserInfo) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *GroupApplicationUserInfo) GetIcon() string {
-	if m != nil {
-		return m.Icon
-	}
-	return ""
-}
-
-func (m *GroupApplicationUserInfo) GetReqMsg() string {
-	if m != nil {
-		return m.ReqMsg
-	}
-	return ""
-}
-
-func (m *GroupApplicationUserInfo) GetApplicationTime() int64 {
-	if m != nil {
-		return m.ApplicationTime
-	}
-	return 0
-}
-
-func (m *GroupApplicationUserInfo) GetFlag() int32 {
-	if m != nil {
-		return m.Flag
-	}
-	return 0
-}
-
-func (m *GroupApplicationUserInfo) GetOperatorID() string {
-	if m != nil {
-		return m.OperatorID
-	}
-	return ""
-}
-
-func (m *GroupApplicationUserInfo) GetHandledMsg() string {
-	if m != nil {
-		return m.HandledMsg
-	}
-	return ""
-}
-
-type GroupMemberFullInfo struct {
-	UserId               string   `protobuf:"bytes,1,opt,name=userId" json:"userId,omitempty"`
-	Role                 int32    `protobuf:"varint,2,opt,name=role" json:"role,omitempty"`
-	JoinTime             uint64   `protobuf:"varint,3,opt,name=joinTime" json:"joinTime,omitempty"`
-	NickName             string   `protobuf:"bytes,4,opt,name=nickName" json:"nickName,omitempty"`
-	FaceUrl              string   `protobuf:"bytes,5,opt,name=faceUrl" json:"faceUrl,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GroupMemberFullInfo) Reset()         { *m = GroupMemberFullInfo{} }
-func (m *GroupMemberFullInfo) String() string { return proto.CompactTextString(m) }
-func (*GroupMemberFullInfo) ProtoMessage()    {}
-func (*GroupMemberFullInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{19}
-}
-func (m *GroupMemberFullInfo) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GroupMemberFullInfo.Unmarshal(m, b)
-}
-func (m *GroupMemberFullInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GroupMemberFullInfo.Marshal(b, m, deterministic)
-}
-func (dst *GroupMemberFullInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GroupMemberFullInfo.Merge(dst, src)
-}
-func (m *GroupMemberFullInfo) XXX_Size() int {
-	return xxx_messageInfo_GroupMemberFullInfo.Size(m)
-}
-func (m *GroupMemberFullInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_GroupMemberFullInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GroupMemberFullInfo proto.InternalMessageInfo
-
-func (m *GroupMemberFullInfo) GetUserId() string {
-	if m != nil {
-		return m.UserId
-	}
-	return ""
-}
-
-func (m *GroupMemberFullInfo) GetRole() int32 {
-	if m != nil {
-		return m.Role
-	}
-	return 0
-}
-
-func (m *GroupMemberFullInfo) GetJoinTime() uint64 {
-	if m != nil {
-		return m.JoinTime
-	}
-	return 0
-}
-
-func (m *GroupMemberFullInfo) GetNickName() string {
-	if m != nil {
-		return m.NickName
-	}
-	return ""
-}
-
-func (m *GroupMemberFullInfo) GetFaceUrl() string {
-	if m != nil {
-		return m.FaceUrl
-	}
-	return ""
-}
-
 type GetGroupMemberListReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
-	Token                string   `protobuf:"bytes,2,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
-	Filter               int32    `protobuf:"varint,4,opt,name=filter" json:"filter,omitempty"`
-	NextSeq              int32    `protobuf:"varint,5,opt,name=nextSeq" json:"nextSeq,omitempty"`
-	OpUserID             string   `protobuf:"bytes,6,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
+	OpUserID             string   `protobuf:"bytes,2,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID" json:"OperationID,omitempty"`
+	Filter               int32    `protobuf:"varint,4,opt,name=Filter" json:"Filter,omitempty"`
+	NextSeq              int32    `protobuf:"varint,5,opt,name=NextSeq" json:"NextSeq,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1487,7 +1138,7 @@ func (m *GetGroupMemberListReq) Reset()         { *m = GetGroupMemberListReq{} }
 func (m *GetGroupMemberListReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberListReq) ProtoMessage()    {}
 func (*GetGroupMemberListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{20}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{16}
 }
 func (m *GetGroupMemberListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberListReq.Unmarshal(m, b)
@@ -1514,9 +1165,9 @@ func (m *GetGroupMemberListReq) GetGroupID() string {
 	return ""
 }
 
-func (m *GetGroupMemberListReq) GetToken() string {
+func (m *GetGroupMemberListReq) GetOpUserID() string {
 	if m != nil {
-		return m.Token
+		return m.OpUserID
 	}
 	return ""
 }
@@ -1542,28 +1193,21 @@ func (m *GetGroupMemberListReq) GetNextSeq() int32 {
 	return 0
 }
 
-func (m *GetGroupMemberListReq) GetOpUserID() string {
-	if m != nil {
-		return m.OpUserID
-	}
-	return ""
-}
-
 type GetGroupMemberListResp struct {
-	ErrCode              int32                  `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string                 `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	MemberList           []*GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList" json:"memberList,omitempty"`
-	NextSeq              int32                  `protobuf:"varint,4,opt,name=nextSeq" json:"nextSeq,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
+	ErrCode              int32                         `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
+	ErrMsg               string                        `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
+	MemberList           []*sdk_ws.GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList" json:"memberList,omitempty"`
+	NextSeq              int32                         `protobuf:"varint,4,opt,name=nextSeq" json:"nextSeq,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
+	XXX_unrecognized     []byte                        `json:"-"`
+	XXX_sizecache        int32                         `json:"-"`
 }
 
 func (m *GetGroupMemberListResp) Reset()         { *m = GetGroupMemberListResp{} }
 func (m *GetGroupMemberListResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMemberListResp) ProtoMessage()    {}
 func (*GetGroupMemberListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{21}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{17}
 }
 func (m *GetGroupMemberListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMemberListResp.Unmarshal(m, b)
@@ -1597,7 +1241,7 @@ func (m *GetGroupMemberListResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *GetGroupMemberListResp) GetMemberList() []*GroupMemberFullInfo {
+func (m *GetGroupMemberListResp) GetMemberList() []*sdk_ws.GroupMemberFullInfo {
 	if m != nil {
 		return m.MemberList
 	}
@@ -1612,11 +1256,10 @@ func (m *GetGroupMemberListResp) GetNextSeq() int32 {
 }
 
 type GetGroupMembersInfoReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
 	MemberList           []string `protobuf:"bytes,2,rep,name=memberList" json:"memberList,omitempty"`
-	Token                string   `protobuf:"bytes,3,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,4,opt,name=operationID" json:"operationID,omitempty"`
-	OpUserID             string   `protobuf:"bytes,5,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	OpUserID             string   `protobuf:"bytes,3,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID" json:"OperationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1626,7 +1269,7 @@ func (m *GetGroupMembersInfoReq) Reset()         { *m = GetGroupMembersInfoReq{}
 func (m *GetGroupMembersInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMembersInfoReq) ProtoMessage()    {}
 func (*GetGroupMembersInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{22}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{18}
 }
 func (m *GetGroupMembersInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMembersInfoReq.Unmarshal(m, b)
@@ -1660,9 +1303,9 @@ func (m *GetGroupMembersInfoReq) GetMemberList() []string {
 	return nil
 }
 
-func (m *GetGroupMembersInfoReq) GetToken() string {
+func (m *GetGroupMembersInfoReq) GetOpUserID() string {
 	if m != nil {
-		return m.Token
+		return m.OpUserID
 	}
 	return ""
 }
@@ -1674,27 +1317,20 @@ func (m *GetGroupMembersInfoReq) GetOperationID() string {
 	return ""
 }
 
-func (m *GetGroupMembersInfoReq) GetOpUserID() string {
-	if m != nil {
-		return m.OpUserID
-	}
-	return ""
-}
-
 type GetGroupMembersInfoResp struct {
-	ErrCode              int32                  `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string                 `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	MemberList           []*GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList" json:"memberList,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
+	ErrCode              int32                         `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
+	ErrMsg               string                        `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
+	MemberList           []*sdk_ws.GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList" json:"memberList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
+	XXX_unrecognized     []byte                        `json:"-"`
+	XXX_sizecache        int32                         `json:"-"`
 }
 
 func (m *GetGroupMembersInfoResp) Reset()         { *m = GetGroupMembersInfoResp{} }
 func (m *GetGroupMembersInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupMembersInfoResp) ProtoMessage()    {}
 func (*GetGroupMembersInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{23}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{19}
 }
 func (m *GetGroupMembersInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupMembersInfoResp.Unmarshal(m, b)
@@ -1728,7 +1364,7 @@ func (m *GetGroupMembersInfoResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *GetGroupMembersInfoResp) GetMemberList() []*GroupMemberFullInfo {
+func (m *GetGroupMembersInfoResp) GetMemberList() []*sdk_ws.GroupMemberFullInfo {
 	if m != nil {
 		return m.MemberList
 	}
@@ -1736,22 +1372,21 @@ func (m *GetGroupMembersInfoResp) GetMemberList() []*GroupMemberFullInfo {
 }
 
 type KickGroupMemberReq struct {
-	GroupID              string                 `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
-	UidListInfo          []*GroupMemberFullInfo `protobuf:"bytes,2,rep,name=uidListInfo" json:"uidListInfo,omitempty"`
-	Reason               string                 `protobuf:"bytes,3,opt,name=reason" json:"reason,omitempty"`
-	Token                string                 `protobuf:"bytes,4,opt,name=token" json:"token,omitempty"`
-	OperationID          string                 `protobuf:"bytes,5,opt,name=operationID" json:"operationID,omitempty"`
-	OpUserID             string                 `protobuf:"bytes,6,opt,name=OpUserID" json:"OpUserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
+	KickedUserIDList     []string `protobuf:"bytes,2,rep,name=KickedUserIDList" json:"KickedUserIDList,omitempty"`
+	Reason               string   `protobuf:"bytes,3,opt,name=Reason" json:"Reason,omitempty"`
+	OperationID          string   `protobuf:"bytes,5,opt,name=OperationID" json:"OperationID,omitempty"`
+	OpUserID             string   `protobuf:"bytes,6,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *KickGroupMemberReq) Reset()         { *m = KickGroupMemberReq{} }
 func (m *KickGroupMemberReq) String() string { return proto.CompactTextString(m) }
 func (*KickGroupMemberReq) ProtoMessage()    {}
 func (*KickGroupMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{24}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{20}
 }
 func (m *KickGroupMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KickGroupMemberReq.Unmarshal(m, b)
@@ -1778,9 +1413,9 @@ func (m *KickGroupMemberReq) GetGroupID() string {
 	return ""
 }
 
-func (m *KickGroupMemberReq) GetUidListInfo() []*GroupMemberFullInfo {
+func (m *KickGroupMemberReq) GetKickedUserIDList() []string {
 	if m != nil {
-		return m.UidListInfo
+		return m.KickedUserIDList
 	}
 	return nil
 }
@@ -1788,13 +1423,6 @@ func (m *KickGroupMemberReq) GetUidListInfo() []*GroupMemberFullInfo {
 func (m *KickGroupMemberReq) GetReason() string {
 	if m != nil {
 		return m.Reason
-	}
-	return ""
-}
-
-func (m *KickGroupMemberReq) GetToken() string {
-	if m != nil {
-		return m.Token
 	}
 	return ""
 }
@@ -1814,8 +1442,8 @@ func (m *KickGroupMemberReq) GetOpUserID() string {
 }
 
 type Id2Result struct {
-	UId                  string   `protobuf:"bytes,1,opt,name=uId" json:"uId,omitempty"`
-	Result               int32    `protobuf:"varint,2,opt,name=result" json:"result,omitempty"`
+	UserID               string   `protobuf:"bytes,1,opt,name=UserID" json:"UserID,omitempty"`
+	Result               int32    `protobuf:"varint,2,opt,name=Result" json:"Result,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1825,7 +1453,7 @@ func (m *Id2Result) Reset()         { *m = Id2Result{} }
 func (m *Id2Result) String() string { return proto.CompactTextString(m) }
 func (*Id2Result) ProtoMessage()    {}
 func (*Id2Result) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{25}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{21}
 }
 func (m *Id2Result) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Id2Result.Unmarshal(m, b)
@@ -1845,9 +1473,9 @@ func (m *Id2Result) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Id2Result proto.InternalMessageInfo
 
-func (m *Id2Result) GetUId() string {
+func (m *Id2Result) GetUserID() string {
 	if m != nil {
-		return m.UId
+		return m.UserID
 	}
 	return ""
 }
@@ -1862,7 +1490,7 @@ func (m *Id2Result) GetResult() int32 {
 type KickGroupMemberResp struct {
 	ErrCode              int32        `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
 	ErrMsg               string       `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	Id2Result            []*Id2Result `protobuf:"bytes,3,rep,name=id2result" json:"id2result,omitempty"`
+	Id2ResultList        []*Id2Result `protobuf:"bytes,3,rep,name=Id2ResultList" json:"Id2ResultList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
 	XXX_unrecognized     []byte       `json:"-"`
 	XXX_sizecache        int32        `json:"-"`
@@ -1872,7 +1500,7 @@ func (m *KickGroupMemberResp) Reset()         { *m = KickGroupMemberResp{} }
 func (m *KickGroupMemberResp) String() string { return proto.CompactTextString(m) }
 func (*KickGroupMemberResp) ProtoMessage()    {}
 func (*KickGroupMemberResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{26}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{22}
 }
 func (m *KickGroupMemberResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KickGroupMemberResp.Unmarshal(m, b)
@@ -1906,15 +1534,15 @@ func (m *KickGroupMemberResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *KickGroupMemberResp) GetId2Result() []*Id2Result {
+func (m *KickGroupMemberResp) GetId2ResultList() []*Id2Result {
 	if m != nil {
-		return m.Id2Result
+		return m.Id2ResultList
 	}
 	return nil
 }
 
 type GetJoinedGroupListReq struct {
-	Token                string   `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
+	FromUserID           string   `protobuf:"bytes,1,opt,name=FromUserID" json:"FromUserID,omitempty"`
 	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
 	OpUserID             string   `protobuf:"bytes,3,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1926,7 +1554,7 @@ func (m *GetJoinedGroupListReq) Reset()         { *m = GetJoinedGroupListReq{} }
 func (m *GetJoinedGroupListReq) String() string { return proto.CompactTextString(m) }
 func (*GetJoinedGroupListReq) ProtoMessage()    {}
 func (*GetJoinedGroupListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{27}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{23}
 }
 func (m *GetJoinedGroupListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetJoinedGroupListReq.Unmarshal(m, b)
@@ -1946,9 +1574,9 @@ func (m *GetJoinedGroupListReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetJoinedGroupListReq proto.InternalMessageInfo
 
-func (m *GetJoinedGroupListReq) GetToken() string {
+func (m *GetJoinedGroupListReq) GetFromUserID() string {
 	if m != nil {
-		return m.Token
+		return m.FromUserID
 	}
 	return ""
 }
@@ -1967,114 +1595,20 @@ func (m *GetJoinedGroupListReq) GetOpUserID() string {
 	return ""
 }
 
-type GroupInfo struct {
-	GroupId              string   `protobuf:"bytes,1,opt,name=groupId" json:"groupId,omitempty"`
-	GroupName            string   `protobuf:"bytes,2,opt,name=groupName" json:"groupName,omitempty"`
-	Notification         string   `protobuf:"bytes,3,opt,name=notification" json:"notification,omitempty"`
-	Introduction         string   `protobuf:"bytes,4,opt,name=introduction" json:"introduction,omitempty"`
-	FaceUrl              string   `protobuf:"bytes,5,opt,name=faceUrl" json:"faceUrl,omitempty"`
-	CreateTime           uint64   `protobuf:"varint,6,opt,name=createTime" json:"createTime,omitempty"`
-	OwnerId              string   `protobuf:"bytes,7,opt,name=ownerId" json:"ownerId,omitempty"`
-	MemberCount          uint32   `protobuf:"varint,8,opt,name=memberCount" json:"memberCount,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GroupInfo) Reset()         { *m = GroupInfo{} }
-func (m *GroupInfo) String() string { return proto.CompactTextString(m) }
-func (*GroupInfo) ProtoMessage()    {}
-func (*GroupInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{28}
-}
-func (m *GroupInfo) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GroupInfo.Unmarshal(m, b)
-}
-func (m *GroupInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GroupInfo.Marshal(b, m, deterministic)
-}
-func (dst *GroupInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GroupInfo.Merge(dst, src)
-}
-func (m *GroupInfo) XXX_Size() int {
-	return xxx_messageInfo_GroupInfo.Size(m)
-}
-func (m *GroupInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_GroupInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GroupInfo proto.InternalMessageInfo
-
-func (m *GroupInfo) GetGroupId() string {
-	if m != nil {
-		return m.GroupId
-	}
-	return ""
-}
-
-func (m *GroupInfo) GetGroupName() string {
-	if m != nil {
-		return m.GroupName
-	}
-	return ""
-}
-
-func (m *GroupInfo) GetNotification() string {
-	if m != nil {
-		return m.Notification
-	}
-	return ""
-}
-
-func (m *GroupInfo) GetIntroduction() string {
-	if m != nil {
-		return m.Introduction
-	}
-	return ""
-}
-
-func (m *GroupInfo) GetFaceUrl() string {
-	if m != nil {
-		return m.FaceUrl
-	}
-	return ""
-}
-
-func (m *GroupInfo) GetCreateTime() uint64 {
-	if m != nil {
-		return m.CreateTime
-	}
-	return 0
-}
-
-func (m *GroupInfo) GetOwnerId() string {
-	if m != nil {
-		return m.OwnerId
-	}
-	return ""
-}
-
-func (m *GroupInfo) GetMemberCount() uint32 {
-	if m != nil {
-		return m.MemberCount
-	}
-	return 0
-}
-
 type GetJoinedGroupListResp struct {
-	ErrCode              int32        `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrorMsg             string       `protobuf:"bytes,2,opt,name=ErrorMsg" json:"ErrorMsg,omitempty"`
-	GroupList            []*GroupInfo `protobuf:"bytes,3,rep,name=GroupList" json:"GroupList,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
-	XXX_unrecognized     []byte       `json:"-"`
-	XXX_sizecache        int32        `json:"-"`
+	ErrCode              int32               `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
+	ErrMsg               string              `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
+	GroupList            []*sdk_ws.GroupInfo `protobuf:"bytes,3,rep,name=GroupList" json:"GroupList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
 }
 
 func (m *GetJoinedGroupListResp) Reset()         { *m = GetJoinedGroupListResp{} }
 func (m *GetJoinedGroupListResp) String() string { return proto.CompactTextString(m) }
 func (*GetJoinedGroupListResp) ProtoMessage()    {}
 func (*GetJoinedGroupListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{29}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{24}
 }
 func (m *GetJoinedGroupListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetJoinedGroupListResp.Unmarshal(m, b)
@@ -2101,14 +1635,14 @@ func (m *GetJoinedGroupListResp) GetErrCode() int32 {
 	return 0
 }
 
-func (m *GetJoinedGroupListResp) GetErrorMsg() string {
+func (m *GetJoinedGroupListResp) GetErrMsg() string {
 	if m != nil {
-		return m.ErrorMsg
+		return m.ErrMsg
 	}
 	return ""
 }
 
-func (m *GetJoinedGroupListResp) GetGroupList() []*GroupInfo {
+func (m *GetJoinedGroupListResp) GetGroupList() []*sdk_ws.GroupInfo {
 	if m != nil {
 		return m.GroupList
 	}
@@ -2116,11 +1650,10 @@ func (m *GetJoinedGroupListResp) GetGroupList() []*GroupInfo {
 }
 
 type InviteUserToGroupReq struct {
-	Token                string   `protobuf:"bytes,1,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
-	GroupID              string   `protobuf:"bytes,3,opt,name=groupID" json:"groupID,omitempty"`
-	Reason               string   `protobuf:"bytes,4,opt,name=reason" json:"reason,omitempty"`
-	UidList              []string `protobuf:"bytes,5,rep,name=uidList" json:"uidList,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID" json:"OperationID,omitempty"`
+	GroupID              string   `protobuf:"bytes,3,opt,name=GroupID" json:"GroupID,omitempty"`
+	Reason               string   `protobuf:"bytes,4,opt,name=Reason" json:"Reason,omitempty"`
+	InvitedUserIDList    []string `protobuf:"bytes,5,rep,name=InvitedUserIDList" json:"InvitedUserIDList,omitempty"`
 	OpUserID             string   `protobuf:"bytes,6,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -2131,7 +1664,7 @@ func (m *InviteUserToGroupReq) Reset()         { *m = InviteUserToGroupReq{} }
 func (m *InviteUserToGroupReq) String() string { return proto.CompactTextString(m) }
 func (*InviteUserToGroupReq) ProtoMessage()    {}
 func (*InviteUserToGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{30}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{25}
 }
 func (m *InviteUserToGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InviteUserToGroupReq.Unmarshal(m, b)
@@ -2150,13 +1683,6 @@ func (m *InviteUserToGroupReq) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_InviteUserToGroupReq proto.InternalMessageInfo
-
-func (m *InviteUserToGroupReq) GetToken() string {
-	if m != nil {
-		return m.Token
-	}
-	return ""
-}
 
 func (m *InviteUserToGroupReq) GetOperationID() string {
 	if m != nil {
@@ -2179,9 +1705,9 @@ func (m *InviteUserToGroupReq) GetReason() string {
 	return ""
 }
 
-func (m *InviteUserToGroupReq) GetUidList() []string {
+func (m *InviteUserToGroupReq) GetInvitedUserIDList() []string {
 	if m != nil {
-		return m.UidList
+		return m.InvitedUserIDList
 	}
 	return nil
 }
@@ -2196,7 +1722,7 @@ func (m *InviteUserToGroupReq) GetOpUserID() string {
 type InviteUserToGroupResp struct {
 	ErrCode              int32        `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
 	ErrMsg               string       `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	Id2Result            []*Id2Result `protobuf:"bytes,3,rep,name=Id2Result" json:"Id2Result,omitempty"`
+	Id2ResultList        []*Id2Result `protobuf:"bytes,3,rep,name=Id2ResultList" json:"Id2ResultList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
 	XXX_unrecognized     []byte       `json:"-"`
 	XXX_sizecache        int32        `json:"-"`
@@ -2206,7 +1732,7 @@ func (m *InviteUserToGroupResp) Reset()         { *m = InviteUserToGroupResp{} }
 func (m *InviteUserToGroupResp) String() string { return proto.CompactTextString(m) }
 func (*InviteUserToGroupResp) ProtoMessage()    {}
 func (*InviteUserToGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{31}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{26}
 }
 func (m *InviteUserToGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InviteUserToGroupResp.Unmarshal(m, b)
@@ -2240,17 +1766,17 @@ func (m *InviteUserToGroupResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *InviteUserToGroupResp) GetId2Result() []*Id2Result {
+func (m *InviteUserToGroupResp) GetId2ResultList() []*Id2Result {
 	if m != nil {
-		return m.Id2Result
+		return m.Id2ResultList
 	}
 	return nil
 }
 
 type GetGroupAllMemberReq struct {
-	GroupID              string   `protobuf:"bytes,1,opt,name=groupID" json:"groupID,omitempty"`
-	Token                string   `protobuf:"bytes,2,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
+	FromUserID           string   `protobuf:"bytes,2,opt,name=FromUserID" json:"FromUserID,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID" json:"OperationID,omitempty"`
 	OpUserID             string   `protobuf:"bytes,4,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -2261,7 +1787,7 @@ func (m *GetGroupAllMemberReq) Reset()         { *m = GetGroupAllMemberReq{} }
 func (m *GetGroupAllMemberReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupAllMemberReq) ProtoMessage()    {}
 func (*GetGroupAllMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{32}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{27}
 }
 func (m *GetGroupAllMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupAllMemberReq.Unmarshal(m, b)
@@ -2288,9 +1814,9 @@ func (m *GetGroupAllMemberReq) GetGroupID() string {
 	return ""
 }
 
-func (m *GetGroupAllMemberReq) GetToken() string {
+func (m *GetGroupAllMemberReq) GetFromUserID() string {
 	if m != nil {
-		return m.Token
+		return m.FromUserID
 	}
 	return ""
 }
@@ -2310,19 +1836,19 @@ func (m *GetGroupAllMemberReq) GetOpUserID() string {
 }
 
 type GetGroupAllMemberResp struct {
-	ErrCode              int32                  `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string                 `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	MemberList           []*GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList" json:"memberList,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}               `json:"-"`
-	XXX_unrecognized     []byte                 `json:"-"`
-	XXX_sizecache        int32                  `json:"-"`
+	ErrCode              int32                         `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
+	ErrMsg               string                        `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
+	MemberList           []*sdk_ws.GroupMemberFullInfo `protobuf:"bytes,3,rep,name=memberList" json:"memberList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                      `json:"-"`
+	XXX_unrecognized     []byte                        `json:"-"`
+	XXX_sizecache        int32                         `json:"-"`
 }
 
 func (m *GetGroupAllMemberResp) Reset()         { *m = GetGroupAllMemberResp{} }
 func (m *GetGroupAllMemberResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupAllMemberResp) ProtoMessage()    {}
 func (*GetGroupAllMemberResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_group_ac6850665f72c22b, []int{33}
+	return fileDescriptor_group_23d97c4cd172f0ff, []int{28}
 }
 func (m *GetGroupAllMemberResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupAllMemberResp.Unmarshal(m, b)
@@ -2356,7 +1882,7 @@ func (m *GetGroupAllMemberResp) GetErrMsg() string {
 	return ""
 }
 
-func (m *GetGroupAllMemberResp) GetMemberList() []*GroupMemberFullInfo {
+func (m *GetGroupAllMemberResp) GetMemberList() []*sdk_ws.GroupMemberFullInfo {
 	if m != nil {
 		return m.MemberList
 	}
@@ -2365,8 +1891,8 @@ func (m *GetGroupAllMemberResp) GetMemberList() []*GroupMemberFullInfo {
 
 func init() {
 	proto.RegisterType((*CommonResp)(nil), "group.CommonResp")
-	proto.RegisterType((*CreateGroupReq)(nil), "group.CreateGroupReq")
 	proto.RegisterType((*GroupAddMemberInfo)(nil), "group.GroupAddMemberInfo")
+	proto.RegisterType((*CreateGroupReq)(nil), "group.CreateGroupReq")
 	proto.RegisterType((*CreateGroupResp)(nil), "group.CreateGroupResp")
 	proto.RegisterType((*GetGroupsInfoReq)(nil), "group.GetGroupsInfoReq")
 	proto.RegisterType((*GetGroupsInfoResp)(nil), "group.GetGroupsInfoResp")
@@ -2376,14 +1902,10 @@ func init() {
 	proto.RegisterType((*GetGroupApplicationListData)(nil), "group.GetGroupApplicationListData")
 	proto.RegisterType((*GetGroupApplicationListResp)(nil), "group.GetGroupApplicationListResp")
 	proto.RegisterType((*TransferGroupOwnerReq)(nil), "group.TransferGroupOwnerReq")
-	proto.RegisterType((*TransferGroupOwnerResp)(nil), "group.TransferGroupOwnerResp")
 	proto.RegisterType((*JoinGroupReq)(nil), "group.JoinGroupReq")
 	proto.RegisterType((*GroupApplicationResponseReq)(nil), "group.GroupApplicationResponseReq")
-	proto.RegisterType((*GroupApplicationResponseResp)(nil), "group.GroupApplicationResponseResp")
 	proto.RegisterType((*SetOwnerGroupNickNameReq)(nil), "group.SetOwnerGroupNickNameReq")
 	proto.RegisterType((*QuitGroupReq)(nil), "group.QuitGroupReq")
-	proto.RegisterType((*GroupApplicationUserInfo)(nil), "group.GroupApplicationUserInfo")
-	proto.RegisterType((*GroupMemberFullInfo)(nil), "group.GroupMemberFullInfo")
 	proto.RegisterType((*GetGroupMemberListReq)(nil), "group.GetGroupMemberListReq")
 	proto.RegisterType((*GetGroupMemberListResp)(nil), "group.GetGroupMemberListResp")
 	proto.RegisterType((*GetGroupMembersInfoReq)(nil), "group.GetGroupMembersInfoReq")
@@ -2391,11 +1913,10 @@ func init() {
 	proto.RegisterType((*KickGroupMemberReq)(nil), "group.KickGroupMemberReq")
 	proto.RegisterType((*Id2Result)(nil), "group.Id2Result")
 	proto.RegisterType((*KickGroupMemberResp)(nil), "group.KickGroupMemberResp")
-	proto.RegisterType((*GetJoinedGroupListReq)(nil), "group.getJoinedGroupListReq")
-	proto.RegisterType((*GroupInfo)(nil), "group.GroupInfo")
-	proto.RegisterType((*GetJoinedGroupListResp)(nil), "group.getJoinedGroupListResp")
-	proto.RegisterType((*InviteUserToGroupReq)(nil), "group.inviteUserToGroupReq")
-	proto.RegisterType((*InviteUserToGroupResp)(nil), "group.inviteUserToGroupResp")
+	proto.RegisterType((*GetJoinedGroupListReq)(nil), "group.GetJoinedGroupListReq")
+	proto.RegisterType((*GetJoinedGroupListResp)(nil), "group.GetJoinedGroupListResp")
+	proto.RegisterType((*InviteUserToGroupReq)(nil), "group.InviteUserToGroupReq")
+	proto.RegisterType((*InviteUserToGroupResp)(nil), "group.InviteUserToGroupResp")
 	proto.RegisterType((*GetGroupAllMemberReq)(nil), "group.GetGroupAllMemberReq")
 	proto.RegisterType((*GetGroupAllMemberResp)(nil), "group.GetGroupAllMemberResp")
 }
@@ -2417,8 +1938,8 @@ type GroupClient interface {
 	GetGroupsInfo(ctx context.Context, in *GetGroupsInfoReq, opts ...grpc.CallOption) (*GetGroupsInfoResp, error)
 	SetGroupInfo(ctx context.Context, in *SetGroupInfoReq, opts ...grpc.CallOption) (*CommonResp, error)
 	GetGroupApplicationList(ctx context.Context, in *GetGroupApplicationListReq, opts ...grpc.CallOption) (*GetGroupApplicationListResp, error)
-	TransferGroupOwner(ctx context.Context, in *TransferGroupOwnerReq, opts ...grpc.CallOption) (*TransferGroupOwnerResp, error)
-	GroupApplicationResponse(ctx context.Context, in *GroupApplicationResponseReq, opts ...grpc.CallOption) (*GroupApplicationResponseResp, error)
+	TransferGroupOwner(ctx context.Context, in *TransferGroupOwnerReq, opts ...grpc.CallOption) (*CommonResp, error)
+	GroupApplicationResponse(ctx context.Context, in *GroupApplicationResponseReq, opts ...grpc.CallOption) (*CommonResp, error)
 	//  rpc setOwnerGroupNickName(SetOwnerGroupNickNameReq) returns(CommonResp);
 	GetGroupMemberList(ctx context.Context, in *GetGroupMemberListReq, opts ...grpc.CallOption) (*GetGroupMemberListResp, error)
 	GetGroupMembersInfo(ctx context.Context, in *GetGroupMembersInfoReq, opts ...grpc.CallOption) (*GetGroupMembersInfoResp, error)
@@ -2490,8 +2011,8 @@ func (c *groupClient) GetGroupApplicationList(ctx context.Context, in *GetGroupA
 	return out, nil
 }
 
-func (c *groupClient) TransferGroupOwner(ctx context.Context, in *TransferGroupOwnerReq, opts ...grpc.CallOption) (*TransferGroupOwnerResp, error) {
-	out := new(TransferGroupOwnerResp)
+func (c *groupClient) TransferGroupOwner(ctx context.Context, in *TransferGroupOwnerReq, opts ...grpc.CallOption) (*CommonResp, error) {
+	out := new(CommonResp)
 	err := grpc.Invoke(ctx, "/group.group/transferGroupOwner", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -2499,8 +2020,8 @@ func (c *groupClient) TransferGroupOwner(ctx context.Context, in *TransferGroupO
 	return out, nil
 }
 
-func (c *groupClient) GroupApplicationResponse(ctx context.Context, in *GroupApplicationResponseReq, opts ...grpc.CallOption) (*GroupApplicationResponseResp, error) {
-	out := new(GroupApplicationResponseResp)
+func (c *groupClient) GroupApplicationResponse(ctx context.Context, in *GroupApplicationResponseReq, opts ...grpc.CallOption) (*CommonResp, error) {
+	out := new(CommonResp)
 	err := grpc.Invoke(ctx, "/group.group/groupApplicationResponse", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -2571,8 +2092,8 @@ type GroupServer interface {
 	GetGroupsInfo(context.Context, *GetGroupsInfoReq) (*GetGroupsInfoResp, error)
 	SetGroupInfo(context.Context, *SetGroupInfoReq) (*CommonResp, error)
 	GetGroupApplicationList(context.Context, *GetGroupApplicationListReq) (*GetGroupApplicationListResp, error)
-	TransferGroupOwner(context.Context, *TransferGroupOwnerReq) (*TransferGroupOwnerResp, error)
-	GroupApplicationResponse(context.Context, *GroupApplicationResponseReq) (*GroupApplicationResponseResp, error)
+	TransferGroupOwner(context.Context, *TransferGroupOwnerReq) (*CommonResp, error)
+	GroupApplicationResponse(context.Context, *GroupApplicationResponseReq) (*CommonResp, error)
 	//  rpc setOwnerGroupNickName(SetOwnerGroupNickNameReq) returns(CommonResp);
 	GetGroupMemberList(context.Context, *GetGroupMemberListReq) (*GetGroupMemberListResp, error)
 	GetGroupMembersInfo(context.Context, *GetGroupMembersInfoReq) (*GetGroupMembersInfoResp, error)
@@ -2903,117 +2424,102 @@ var _Group_serviceDesc = grpc.ServiceDesc{
 	Metadata: "group/group.proto",
 }
 
-func init() { proto.RegisterFile("group/group.proto", fileDescriptor_group_ac6850665f72c22b) }
+func init() { proto.RegisterFile("group/group.proto", fileDescriptor_group_23d97c4cd172f0ff) }
 
-var fileDescriptor_group_ac6850665f72c22b = []byte{
-	// 1744 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x59, 0xdb, 0x6f, 0xdc, 0x44,
-	0x17, 0x97, 0x77, 0xbd, 0x9b, 0xec, 0xc9, 0x7d, 0xd2, 0xa4, 0xfe, 0xdc, 0x7c, 0x51, 0xea, 0xaf,
-	0xfa, 0x14, 0xf1, 0x10, 0xa4, 0x54, 0x20, 0x15, 0x2a, 0x44, 0x9b, 0x5b, 0xb7, 0xd0, 0x94, 0x3a,
-	0xe9, 0x4b, 0x25, 0x54, 0xdc, 0xf5, 0xec, 0xe2, 0x66, 0xd7, 0xf6, 0xda, 0x5e, 0xda, 0x4a, 0x08,
-	0x09, 0xa9, 0xa8, 0x48, 0x3c, 0x22, 0x21, 0xf1, 0xc6, 0x03, 0x82, 0x37, 0x24, 0x5e, 0xe0, 0x5f,
-	0xe1, 0xbf, 0x01, 0xcd, 0xd5, 0xe3, 0x6b, 0xa2, 0x45, 0x94, 0x97, 0x95, 0xcf, 0x99, 0x33, 0x33,
-	0x67, 0x7e, 0x73, 0xce, 0x6f, 0xce, 0xcc, 0xc2, 0xca, 0x20, 0x0a, 0x26, 0xe1, 0x9b, 0xf4, 0x77,
-	0x27, 0x8c, 0x82, 0x24, 0x40, 0x2d, 0x2a, 0x58, 0xef, 0x01, 0xec, 0x05, 0xa3, 0x51, 0xe0, 0xdb,
-	0x38, 0x0e, 0x91, 0x01, 0x33, 0x07, 0x51, 0xb4, 0x17, 0xb8, 0xd8, 0xd0, 0xb6, 0xb4, 0xed, 0x96,
-	0x2d, 0x44, 0xb4, 0x0e, 0xed, 0x83, 0x28, 0xba, 0x17, 0x0f, 0x8c, 0xc6, 0x96, 0xb6, 0xdd, 0xb1,
-	0xb9, 0x64, 0xfd, 0xda, 0x80, 0xc5, 0xbd, 0x08, 0x3b, 0x09, 0x3e, 0x22, 0xe3, 0xd9, 0x78, 0x8c,
-	0x6e, 0x00, 0x8c, 0xf0, 0xe8, 0x09, 0x8e, 0x3e, 0xf4, 0xe2, 0xc4, 0xd0, 0xb6, 0x9a, 0xdb, 0x73,
-	0xbb, 0xff, 0xd9, 0x61, 0x73, 0x53, 0xa3, 0x5b, 0xae, 0x7b, 0x8f, 0x1a, 0x74, 0xfd, 0x7e, 0x60,
-	0x2b, 0xc6, 0x68, 0x03, 0x3a, 0xd4, 0xee, 0xd8, 0x19, 0x61, 0x3e, 0x51, 0xaa, 0x40, 0x16, 0xcc,
-	0x7b, 0x7e, 0x12, 0x05, 0xee, 0xa4, 0x97, 0x78, 0x81, 0x6f, 0x34, 0xa9, 0x41, 0x46, 0x47, 0x6c,
-	0xfc, 0x20, 0xf1, 0xfa, 0x5e, 0xcf, 0xa1, 0x36, 0x3a, 0xb3, 0x51, 0x75, 0x64, 0x95, 0x7d, 0xa7,
-	0x87, 0x1f, 0x46, 0x43, 0xa3, 0x45, 0x9b, 0x85, 0x88, 0x2e, 0x41, 0x2b, 0x09, 0xce, 0xb0, 0x6f,
-	0xb4, 0xa9, 0x9e, 0x09, 0x68, 0x0b, 0xe6, 0x82, 0x10, 0x47, 0xb4, 0x73, 0x77, 0xdf, 0x98, 0xa1,
-	0x6d, 0xaa, 0x0a, 0x99, 0x30, 0x7b, 0x3f, 0x7c, 0x18, 0xe3, 0xa8, 0xbb, 0x6f, 0xcc, 0xd2, 0x66,
-	0x29, 0xa3, 0x65, 0x68, 0x1e, 0x3c, 0x4f, 0x8c, 0x0e, 0x55, 0x93, 0x4f, 0xeb, 0x7d, 0x40, 0x45,
-	0x1c, 0x88, 0xdd, 0xc4, 0x73, 0x29, 0xee, 0x1d, 0x9b, 0x7c, 0x12, 0x3f, 0x63, 0x9c, 0xd8, 0xc1,
-	0x90, 0x61, 0xd1, 0xb2, 0x85, 0x68, 0x7d, 0x0c, 0x4b, 0x19, 0xd0, 0xa7, 0xd9, 0x3a, 0xd2, 0x83,
-	0x62, 0xdb, 0xdd, 0xe7, 0x48, 0x0a, 0xd1, 0xfa, 0x5a, 0x83, 0xe5, 0x23, 0x9c, 0xd0, 0xc1, 0x63,
-	0xba, 0x49, 0x78, 0x4c, 0x50, 0xe0, 0xed, 0x72, 0x5f, 0x3b, 0xb6, 0xaa, 0x4a, 0xd1, 0x6b, 0xd4,
-	0xa0, 0xd7, 0xac, 0x47, 0x4f, 0xcf, 0xa2, 0x67, 0x9d, 0xc1, 0x4a, 0xce, 0x93, 0xa9, 0xd6, 0x7a,
-	0x0d, 0x74, 0xd7, 0x49, 0x1c, 0xa3, 0x49, 0xa3, 0x71, 0x59, 0x8d, 0x46, 0x3a, 0x2a, 0x6d, 0xb5,
-	0xfe, 0xd4, 0x60, 0xe9, 0x84, 0xcf, 0x26, 0x96, 0xad, 0xa0, 0xa4, 0x65, 0x50, 0x3a, 0x3f, 0x58,
-	0x33, 0x81, 0xd8, 0x2c, 0x09, 0xc4, 0x7c, 0x40, 0xeb, 0x25, 0x01, 0xfd, 0x5a, 0x83, 0xd5, 0x7a,
-	0x04, 0xa6, 0x80, 0xfb, 0x56, 0x18, 0x0e, 0xb9, 0xa3, 0x64, 0x77, 0x09, 0x16, 0x6a, 0x4f, 0x2d,
-	0x17, 0xe6, 0x5b, 0x30, 0x77, 0x5f, 0x99, 0x97, 0xe1, 0xa1, 0xaa, 0xac, 0xef, 0x75, 0xb8, 0x5a,
-	0x31, 0xf8, 0xe3, 0x7d, 0x27, 0x71, 0x1e, 0x93, 0x91, 0xd0, 0x22, 0x34, 0xe4, 0xe8, 0x8d, 0xee,
-	0x3e, 0x59, 0xff, 0x11, 0xc7, 0x9f, 0x8d, 0x29, 0x44, 0xb4, 0x09, 0x70, 0x18, 0x05, 0x23, 0xee,
-	0x0f, 0xc3, 0x57, 0xd1, 0x10, 0x6f, 0x4f, 0x83, 0x6c, 0x58, 0x09, 0x19, 0x21, 0xd0, 0x0f, 0x87,
-	0xce, 0x80, 0x42, 0xda, 0xb2, 0xe9, 0x37, 0x19, 0xcf, 0xc6, 0xe3, 0x09, 0x8e, 0x13, 0x12, 0x3f,
-	0x0c, 0x54, 0x45, 0x43, 0xda, 0xef, 0x38, 0xbe, 0x3b, 0xc4, 0x2e, 0x69, 0x67, 0xc0, 0x2a, 0x1a,
-	0xe2, 0xe9, 0x2d, 0xd7, 0x3d, 0xf5, 0x46, 0x98, 0xc2, 0xda, 0xb4, 0x85, 0x88, 0xde, 0x80, 0x65,
-	0xe1, 0xd7, 0xb1, 0xd7, 0x3b, 0xf3, 0x49, 0xc0, 0x30, 0x3e, 0x28, 0xe8, 0xd1, 0xff, 0x61, 0x91,
-	0x79, 0x29, 0x2d, 0x81, 0x5a, 0xe6, 0xb4, 0x68, 0x1b, 0x96, 0x44, 0xdf, 0x43, 0x1e, 0x1f, 0x73,
-	0xd4, 0x30, 0xaf, 0x46, 0xd7, 0x60, 0x81, 0xf5, 0x15, 0x76, 0xf3, 0xd4, 0x2e, 0xab, 0x24, 0xfb,
-	0xc7, 0xd7, 0x42, 0xb4, 0xc6, 0x02, 0xdb, 0x3f, 0x45, 0x45, 0x30, 0x3b, 0x7d, 0x11, 0x62, 0x63,
-	0x91, 0x61, 0x46, 0xbe, 0x49, 0x04, 0x33, 0x93, 0x93, 0xc4, 0x49, 0x26, 0xb1, 0xb1, 0x44, 0xdb,
-	0x32, 0xba, 0xd4, 0xc6, 0xc6, 0xf1, 0x64, 0x98, 0x18, 0xcb, 0xaa, 0x0d, 0xd3, 0x59, 0x63, 0xb8,
-	0x52, 0x11, 0x1a, 0x24, 0x32, 0x48, 0xa8, 0xef, 0x05, 0x13, 0x3f, 0xe1, 0xe9, 0xce, 0x04, 0x74,
-	0x13, 0x74, 0xea, 0x6b, 0x83, 0x26, 0xf5, 0xb6, 0x48, 0xea, 0xf3, 0x42, 0xcc, 0xa6, 0xbd, 0xac,
-	0x57, 0x5a, 0xe5, 0x9c, 0x53, 0x92, 0xcc, 0xdb, 0xa0, 0xef, 0x33, 0x92, 0xd1, 0xb6, 0xe7, 0x76,
-	0xad, 0x7a, 0x7f, 0x88, 0xa5, 0x4d, 0xed, 0xad, 0x9f, 0x35, 0x58, 0x3b, 0x8d, 0x1c, 0x3f, 0xee,
-	0xe3, 0x88, 0x9a, 0xde, 0x7f, 0xe6, 0xe3, 0x88, 0x93, 0xcf, 0x51, 0x96, 0x7c, 0x44, 0xf0, 0x93,
-	0x54, 0x1c, 0xba, 0xd4, 0x90, 0x7b, 0x21, 0x65, 0xd2, 0x76, 0x8c, 0x9f, 0xb1, 0x36, 0x96, 0x16,
-	0x52, 0xce, 0xa7, 0xa9, 0x5e, 0x48, 0xd3, 0x4c, 0x92, 0xb7, 0x72, 0xf4, 0x70, 0x17, 0xd6, 0xcb,
-	0x1c, 0x9d, 0xaa, 0x72, 0xf8, 0x4e, 0x83, 0xf9, 0xbb, 0x81, 0xe7, 0xcb, 0xba, 0xa1, 0x9a, 0x69,
-	0x0d, 0x98, 0x19, 0xe1, 0x38, 0x76, 0x06, 0x82, 0x67, 0x85, 0x98, 0x72, 0x60, 0x33, 0xc7, 0x81,
-	0x7f, 0x63, 0x91, 0xdf, 0xe8, 0x70, 0x25, 0xbf, 0x63, 0x64, 0x8d, 0x81, 0x1f, 0x63, 0x7e, 0x10,
-	0xaa, 0xa3, 0x6b, 0xf5, 0xa3, 0x37, 0x72, 0x3c, 0xa9, 0x6c, 0x69, 0xb3, 0x8e, 0xcf, 0xf4, 0x02,
-	0x9f, 0xe5, 0x58, 0x84, 0x1e, 0x3b, 0xad, 0x22, 0x8b, 0x1c, 0x57, 0xb0, 0x43, 0xbb, 0x9c, 0x1d,
-	0x54, 0x96, 0x9c, 0xc9, 0xb1, 0x64, 0x86, 0x8b, 0xe8, 0x7c, 0xb3, 0x79, 0x2e, 0xa2, 0xb3, 0x15,
-	0x18, 0xa6, 0x53, 0xc6, 0x30, 0x0a, 0x3f, 0x42, 0x96, 0x1f, 0xb3, 0xcc, 0x3b, 0x77, 0x0e, 0xf3,
-	0xce, 0x17, 0x98, 0x57, 0x30, 0xd3, 0x42, 0x0d, 0x33, 0x2d, 0x5e, 0x80, 0x99, 0x96, 0x4a, 0x98,
-	0xe9, 0x23, 0xd8, 0xa8, 0x0e, 0x86, 0xa9, 0x02, 0xff, 0x47, 0x0d, 0x8c, 0x13, 0x9c, 0xd0, 0xdc,
-	0xa1, 0x43, 0x0b, 0x1c, 0xeb, 0x93, 0xc0, 0x84, 0x59, 0x5f, 0x6c, 0x03, 0x0f, 0x2a, 0x21, 0xe7,
-	0x43, 0xb2, 0x59, 0x0c, 0x49, 0x99, 0x28, 0xba, 0x9a, 0x28, 0x75, 0x69, 0xf0, 0x39, 0xcc, 0x3f,
-	0x98, 0x78, 0xc9, 0x05, 0xd2, 0x33, 0x57, 0x72, 0x34, 0x8a, 0x25, 0x47, 0x79, 0x9a, 0xd6, 0xd5,
-	0x7d, 0x2f, 0x1b, 0x60, 0xe4, 0x71, 0xa7, 0x4d, 0xa4, 0x54, 0xae, 0x76, 0x85, 0x17, 0xd1, 0x8d,
-	0xb4, 0x88, 0x46, 0xa0, 0xd3, 0x53, 0x94, 0xcd, 0x4c, 0xbf, 0x89, 0xce, 0xeb, 0xc9, 0x7a, 0x8b,
-	0x7e, 0x93, 0xdd, 0x8a, 0xf0, 0x98, 0xec, 0x16, 0x03, 0x82, 0x4b, 0x24, 0x93, 0x9c, 0xd4, 0x05,
-	0x1a, 0xbd, 0x6d, 0x1a, 0xbd, 0x79, 0x35, 0x19, 0xb5, 0x4f, 0x6a, 0x8a, 0x19, 0x16, 0x85, 0x7d,
-	0x5e, 0x53, 0x30, 0x1c, 0x82, 0xb4, 0xda, 0x52, 0x34, 0xa4, 0xfd, 0xd3, 0x34, 0xb2, 0x59, 0xda,
-	0x28, 0x1a, 0xeb, 0x5b, 0x0d, 0x56, 0x29, 0x0c, 0xec, 0xa2, 0x70, 0x38, 0x19, 0x0e, 0x29, 0x02,
-	0xeb, 0xd0, 0x9e, 0x10, 0x34, 0xc4, 0x7d, 0x81, 0x4b, 0xc4, 0x87, 0x28, 0xbd, 0x2f, 0xd0, 0x6f,
-	0x02, 0xf3, 0xd3, 0xc0, 0x63, 0xae, 0x13, 0x14, 0x74, 0x5b, 0xca, 0x99, 0xa0, 0xd2, 0x73, 0x41,
-	0x55, 0x59, 0x79, 0x5a, 0xbf, 0x6b, 0xb0, 0x26, 0x8e, 0xb5, 0x7b, 0xf2, 0xf6, 0x56, 0x1f, 0x24,
-	0xd3, 0x5e, 0x0e, 0xd6, 0xa1, 0xdd, 0xf7, 0x86, 0x09, 0x8e, 0xa8, 0x7f, 0x2d, 0x9b, 0x4b, 0x64,
-	0x26, 0x1f, 0x3f, 0x4f, 0x4e, 0xf0, 0x98, 0x17, 0x71, 0x42, 0xcc, 0x84, 0x55, 0x3b, 0x17, 0x56,
-	0x3f, 0x68, 0xb0, 0x5e, 0xe6, 0xf9, 0x54, 0xe7, 0xfd, 0x3b, 0x99, 0x8b, 0x2e, 0xbb, 0x5a, 0x98,
-	0xea, 0xd5, 0x22, 0xbb, 0x69, 0x99, 0x9b, 0xae, 0xe2, 0xbe, 0x9e, 0x71, 0xdf, 0xfa, 0xa9, 0xe0,
-	0x62, 0x7c, 0xfe, 0x5d, 0x64, 0x33, 0xe3, 0x4a, 0x83, 0xde, 0xcd, 0xd4, 0xe9, 0x2a, 0xcf, 0xc9,
-	0xa0, 0x78, 0x4e, 0x06, 0x17, 0x3c, 0x27, 0x5f, 0x69, 0x70, 0xb9, 0xd4, 0xd1, 0xd7, 0x0d, 0xa6,
-	0xf5, 0x87, 0x06, 0xe8, 0x03, 0xaf, 0x77, 0xa6, 0xd8, 0xd5, 0xc3, 0x75, 0x13, 0xe6, 0x26, 0x9e,
-	0x4b, 0xfa, 0x92, 0xb1, 0x78, 0x01, 0x59, 0x37, 0x9b, 0x6a, 0xce, 0xa8, 0xc2, 0x89, 0xe5, 0xa5,
-	0x8e, 0x4b, 0x15, 0x1c, 0x9b, 0x03, 0xb9, 0x55, 0x0f, 0x72, 0x3e, 0x60, 0xdf, 0x82, 0x4e, 0xd7,
-	0xdd, 0x65, 0x67, 0x11, 0x65, 0xb7, 0x6e, 0xfa, 0x44, 0xd0, 0x75, 0x99, 0x2b, 0xf4, 0xec, 0x62,
-	0x19, 0xcf, 0x25, 0xeb, 0x19, 0xac, 0x16, 0x00, 0x99, 0x6a, 0x5b, 0x76, 0xa0, 0xe3, 0xb9, 0xbb,
-	0x7c, 0x8e, 0xec, 0xed, 0x59, 0xfa, 0x65, 0xa7, 0x26, 0xd6, 0x19, 0xac, 0x0d, 0x70, 0x42, 0xea,
-	0x3a, 0xec, 0xd2, 0xd9, 0x05, 0x33, 0x48, 0x70, 0xb4, 0x1a, 0x70, 0x1a, 0xf5, 0xe0, 0x34, 0x73,
-	0xe0, 0x7c, 0xd9, 0x80, 0x8e, 0xbc, 0xac, 0xa7, 0xdb, 0xed, 0x66, 0xb7, 0xdb, 0xfd, 0xd7, 0x6f,
-	0xea, 0x9b, 0x00, 0x3d, 0xfa, 0x5c, 0x23, 0x8f, 0x0f, 0xdd, 0x56, 0x34, 0xa4, 0x67, 0x40, 0xaa,
-	0x81, 0xae, 0xcb, 0x4b, 0x30, 0x21, 0x12, 0x7c, 0x58, 0x9c, 0xb3, 0xeb, 0x0f, 0x39, 0x40, 0x16,
-	0x6c, 0x55, 0x65, 0x7d, 0x01, 0xeb, 0x65, 0x80, 0xd7, 0x6e, 0xb6, 0x09, 0xb3, 0x07, 0x51, 0x14,
-	0x28, 0xdb, 0x2d, 0x65, 0xb2, 0xe1, 0x72, 0x98, 0xca, 0xe7, 0x92, 0xd4, 0xc4, 0xfa, 0x4d, 0x83,
-	0x4b, 0x9e, 0xff, 0x99, 0x97, 0x60, 0xb2, 0x29, 0xa7, 0x81, 0xac, 0x17, 0xa6, 0xdd, 0xf0, 0xca,
-	0x67, 0x29, 0x25, 0xef, 0xf4, 0x4c, 0xde, 0x19, 0x30, 0xc3, 0xd3, 0xd3, 0x68, 0x51, 0xe6, 0x13,
-	0x62, 0x6d, 0x66, 0xbd, 0x80, 0xb5, 0x12, 0xbf, 0xa7, 0x4d, 0x12, 0x99, 0x0c, 0xd5, 0x49, 0x22,
-	0x3f, 0xad, 0x97, 0x1a, 0x5c, 0x92, 0xd7, 0xc2, 0xe1, 0xf0, 0x22, 0x8c, 0xf5, 0x4f, 0xbc, 0xad,
-	0x7d, 0xa5, 0x1c, 0xe3, 0x8a, 0x1b, 0xaf, 0x9b, 0xbe, 0x77, 0x7f, 0x99, 0x05, 0xf6, 0x1a, 0x4d,
-	0x78, 0xb9, 0x97, 0xbe, 0x6b, 0xa2, 0x35, 0x3e, 0x40, 0xf6, 0x81, 0xd9, 0x5c, 0x2f, 0x53, 0xc7,
-	0x21, 0xba, 0x0e, 0x9d, 0xa7, 0xe2, 0x42, 0x89, 0x56, 0xb9, 0x91, 0x7a, 0xc5, 0x34, 0x57, 0x44,
-	0xcf, 0xf4, 0xc9, 0xfb, 0x3a, 0x74, 0xc6, 0xa2, 0xcc, 0x95, 0x9d, 0xd4, 0xc2, 0xb7, 0xac, 0xd3,
-	0x6d, 0x58, 0x18, 0xa8, 0xaf, 0x92, 0xe8, 0x72, 0xee, 0xb2, 0x2f, 0x8e, 0x6c, 0xd3, 0x28, 0x6f,
-	0x88, 0x43, 0x74, 0x03, 0xe6, 0x63, 0xe5, 0xad, 0x11, 0x89, 0x55, 0xe5, 0x1e, 0x20, 0xcb, 0xa6,
-	0xff, 0x04, 0x2e, 0x0f, 0xca, 0x5f, 0x15, 0xd0, 0xd5, 0xfa, 0x57, 0x07, 0x32, 0xa0, 0x75, 0x9e,
-	0x49, 0x1c, 0xa2, 0x07, 0x80, 0x92, 0xc2, 0x45, 0x1f, 0x6d, 0xf0, 0x9e, 0xa5, 0x8f, 0x15, 0xe6,
-	0x7f, 0x6b, 0x5a, 0xe3, 0x10, 0xf5, 0xc0, 0x18, 0x54, 0x5c, 0xa4, 0x90, 0x95, 0xf9, 0x7b, 0xa0,
-	0xf4, 0xda, 0x6d, 0xfe, 0xef, 0x5c, 0x1b, 0xe6, 0xf7, 0xa0, 0x50, 0xde, 0x49, 0xbf, 0x4b, 0x6b,
-	0x56, 0xe9, 0x77, 0x45, 0x5d, 0x78, 0x0a, 0xab, 0x83, 0x62, 0x95, 0x83, 0xca, 0x7b, 0xc9, 0x7d,
-	0xdf, 0xac, 0x6b, 0x8e, 0x43, 0x74, 0x07, 0x96, 0xce, 0xb2, 0x07, 0x34, 0x12, 0xff, 0x91, 0x14,
-	0x2b, 0x19, 0xd3, 0xac, 0x6a, 0x92, 0x4b, 0xce, 0x1d, 0x00, 0x72, 0xc9, 0xa5, 0x87, 0xb1, 0x5c,
-	0x72, 0xc5, 0xc9, 0x71, 0x0c, 0x2b, 0x05, 0x6a, 0x44, 0x57, 0x78, 0x9f, 0x32, 0xb2, 0x37, 0x37,
-	0xaa, 0x1b, 0xd9, 0x78, 0x83, 0x3c, 0xcf, 0xc8, 0xf1, 0xca, 0x88, 0xd0, 0xdc, 0xa8, 0x6e, 0x8c,
-	0xc3, 0xdb, 0x4b, 0x8f, 0x16, 0x76, 0xd8, 0x9f, 0x59, 0xef, 0xd2, 0xdf, 0x27, 0x6d, 0xfa, 0x9f,
-	0xd6, 0xf5, 0xbf, 0x02, 0x00, 0x00, 0xff, 0xff, 0xdb, 0x12, 0xfa, 0x38, 0xe8, 0x1a, 0x00, 0x00,
+var fileDescriptor_group_23d97c4cd172f0ff = []byte{
+	// 1492 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x58, 0xcb, 0x6f, 0x1c, 0x45,
+	0x13, 0xd7, 0xec, 0xc3, 0xf1, 0x96, 0x1f, 0x6b, 0x77, 0x62, 0x67, 0xbe, 0x89, 0xbf, 0xc8, 0x19,
+	0xa1, 0xc8, 0x8a, 0x90, 0x2d, 0x39, 0x08, 0x09, 0x25, 0x42, 0x71, 0xfc, 0x48, 0x16, 0xb0, 0xad,
+	0x8c, 0x37, 0x17, 0x2e, 0x66, 0xb2, 0xd3, 0x59, 0x0d, 0x3b, 0x3b, 0x33, 0x3b, 0x3d, 0x8b, 0x13,
+	0x2e, 0x80, 0x90, 0xe0, 0x80, 0x80, 0x5c, 0x39, 0x72, 0x80, 0x23, 0xe2, 0xc0, 0x9d, 0x03, 0xff,
+	0x18, 0xea, 0xc7, 0xcc, 0xf6, 0xf4, 0x3c, 0x76, 0x65, 0x4b, 0xe4, 0xb2, 0xda, 0xae, 0xaa, 0xee,
+	0x7a, 0x74, 0xd5, 0xaf, 0x6a, 0x1a, 0x56, 0xfb, 0x51, 0x30, 0x0e, 0x77, 0xd8, 0xef, 0x76, 0x18,
+	0x05, 0x71, 0x80, 0x9a, 0x6c, 0x61, 0xdc, 0x39, 0x0d, 0xb1, 0x7f, 0xde, 0x39, 0xde, 0x09, 0x07,
+	0xfd, 0x1d, 0xc6, 0xd9, 0x21, 0xce, 0xe0, 0xfc, 0x82, 0xec, 0x5c, 0x10, 0x2e, 0x69, 0x7e, 0x08,
+	0xb0, 0x1f, 0x0c, 0x87, 0x81, 0x6f, 0x61, 0x12, 0x22, 0x1d, 0xae, 0x1d, 0x46, 0xd1, 0x7e, 0xe0,
+	0x60, 0x5d, 0xdb, 0xd4, 0xb6, 0x9a, 0x56, 0xb2, 0x44, 0xeb, 0x30, 0x77, 0x18, 0x45, 0xc7, 0xa4,
+	0xaf, 0xd7, 0x36, 0xb5, 0xad, 0x96, 0x25, 0x56, 0xe6, 0x23, 0x40, 0x4f, 0xa8, 0xae, 0x3d, 0xc7,
+	0x39, 0xc6, 0xc3, 0x17, 0x38, 0xea, 0xf8, 0x2f, 0x03, 0x2a, 0xfd, 0x9c, 0xe0, 0xa8, 0x73, 0xc0,
+	0x8e, 0x69, 0x59, 0x62, 0x85, 0x10, 0x34, 0xac, 0xc0, 0xc3, 0xec, 0x8c, 0xa6, 0xc5, 0xfe, 0x9b,
+	0xff, 0xd4, 0x60, 0x79, 0x3f, 0xc2, 0x76, 0x8c, 0xd9, 0x41, 0x16, 0x1e, 0xa1, 0x3d, 0x58, 0xee,
+	0xf8, 0x6e, 0xcc, 0x0f, 0xfc, 0xc4, 0x25, 0xb1, 0xae, 0x6d, 0xd6, 0xb7, 0x16, 0x76, 0xff, 0xb7,
+	0xcd, 0x9d, 0xcc, 0x6b, 0xb4, 0x94, 0x0d, 0x68, 0x03, 0x5a, 0x4c, 0xea, 0xc4, 0x1e, 0x62, 0x61,
+	0xf2, 0x84, 0x80, 0x4c, 0x58, 0xec, 0xf8, 0x71, 0x14, 0x38, 0xe3, 0x5e, 0xec, 0x06, 0xbe, 0x5e,
+	0x67, 0x02, 0x19, 0x1a, 0x95, 0x39, 0x09, 0x62, 0xf7, 0xa5, 0xdb, 0xb3, 0x99, 0x4c, 0x83, 0xcb,
+	0xc8, 0x34, 0x1a, 0xaf, 0x23, 0xbb, 0x87, 0x9f, 0x47, 0x9e, 0xde, 0x64, 0xec, 0x64, 0x89, 0x56,
+	0xa0, 0x7e, 0xf8, 0x2a, 0xd6, 0xe7, 0x18, 0x95, 0xfe, 0x45, 0x9b, 0xb0, 0x70, 0x1a, 0xe2, 0x88,
+	0x6d, 0xec, 0x1c, 0xe8, 0xd7, 0x18, 0x47, 0x26, 0x21, 0x03, 0xe6, 0x4f, 0x43, 0x11, 0xb7, 0x79,
+	0xc6, 0x4e, 0xd7, 0xe8, 0x36, 0xc0, 0x51, 0x14, 0x0c, 0x05, 0xb7, 0xc5, 0xb8, 0x12, 0xc5, 0x7c,
+	0x0d, 0xed, 0x4c, 0x10, 0x2f, 0x73, 0x99, 0xe8, 0x3d, 0x11, 0x34, 0x1a, 0x51, 0x16, 0x93, 0x85,
+	0xdd, 0xf5, 0xed, 0x80, 0xe6, 0x90, 0x3b, 0x3c, 0x27, 0xce, 0x60, 0x3b, 0xe5, 0x5a, 0x13, 0x41,
+	0x33, 0x82, 0x95, 0x27, 0x38, 0x66, 0x6b, 0xc2, 0x78, 0x78, 0x44, 0x9d, 0xe5, 0x02, 0x07, 0xe9,
+	0xf5, 0xb5, 0x2c, 0x99, 0xa4, 0x86, 0xa3, 0x56, 0x1d, 0x8e, 0x7a, 0x36, 0x1c, 0xe6, 0xb7, 0x1a,
+	0xac, 0x2a, 0x4a, 0x2f, 0xe5, 0xf1, 0x43, 0x58, 0x4a, 0x1d, 0x61, 0x96, 0xd6, 0x59, 0xa2, 0x95,
+	0x79, 0x9d, 0x15, 0x36, 0x7f, 0xd3, 0xa0, 0x7d, 0x26, 0xac, 0x48, 0x3c, 0xcf, 0xc4, 0x50, 0x9b,
+	0x31, 0x86, 0x19, 0x5f, 0x6b, 0x95, 0x57, 0x5f, 0x57, 0xaf, 0x5e, 0x8d, 0x64, 0x23, 0x17, 0x49,
+	0xf3, 0x4b, 0x30, 0x92, 0x60, 0xed, 0x85, 0xa1, 0x27, 0xb2, 0x97, 0xba, 0x40, 0x2d, 0x96, 0x75,
+	0x6b, 0x8a, 0xee, 0xe9, 0xb7, 0x34, 0xc5, 0x3a, 0xf3, 0x97, 0x06, 0xdc, 0x29, 0x51, 0x7e, 0x7e,
+	0x60, 0xc7, 0xf6, 0x39, 0x95, 0x43, 0xcb, 0x50, 0x4b, 0xb5, 0xd7, 0x3a, 0x07, 0xf4, 0x26, 0x45,
+	0xb2, 0x08, 0x9d, 0xc9, 0x72, 0x6a, 0x34, 0x0c, 0x98, 0xef, 0x06, 0x82, 0xcb, 0x43, 0x91, 0xae,
+	0x29, 0xfc, 0x1c, 0x79, 0x76, 0x9f, 0xd5, 0x6a, 0xd3, 0x62, 0xff, 0xe9, 0x79, 0x16, 0x1e, 0x8d,
+	0x31, 0x89, 0x69, 0x76, 0xf0, 0x7a, 0x95, 0x28, 0x94, 0xff, 0xd4, 0xf6, 0x1d, 0x0f, 0x3b, 0x94,
+	0xcf, 0xab, 0x56, 0xa2, 0x50, 0x4b, 0xf7, 0x1c, 0xa7, 0xeb, 0x0e, 0x31, 0xab, 0xd9, 0xba, 0x95,
+	0x2c, 0xd1, 0x3d, 0x58, 0x49, 0xec, 0x3a, 0x71, 0x7b, 0x03, 0x9f, 0x22, 0x11, 0x2f, 0xdc, 0x1c,
+	0x1d, 0xdd, 0x85, 0x65, 0x6e, 0x65, 0x2a, 0x09, 0x4c, 0x52, 0xa1, 0xa2, 0x2d, 0x68, 0x27, 0x7b,
+	0x13, 0xe0, 0x59, 0x60, 0x82, 0x2a, 0x19, 0xbd, 0x03, 0x4b, 0x7c, 0x6f, 0x22, 0xb7, 0xc8, 0xe4,
+	0xb2, 0x44, 0x7a, 0xbf, 0xc2, 0x17, 0x4a, 0xd5, 0x97, 0xf8, 0xfd, 0x4a, 0x24, 0x1a, 0xb3, 0xee,
+	0xeb, 0x10, 0xeb, 0xcb, 0x3c, 0x66, 0xf4, 0x3f, 0x85, 0x46, 0x2e, 0x72, 0x16, 0xdb, 0xf1, 0x98,
+	0xe8, 0x6d, 0xc6, 0xcb, 0xd0, 0x26, 0x32, 0x16, 0x26, 0x63, 0x2f, 0xd6, 0x57, 0x64, 0x19, 0x4e,
+	0x33, 0x47, 0x70, 0xab, 0x24, 0x35, 0x68, 0x66, 0xa0, 0x1b, 0xd0, 0xdc, 0x0f, 0xc6, 0x7e, 0x2c,
+	0x8a, 0x99, 0x2f, 0xd0, 0x43, 0x68, 0x30, 0x5b, 0x6b, 0xac, 0x52, 0xb7, 0x92, 0x96, 0x30, 0x2d,
+	0xc5, 0x2c, 0xb6, 0xcb, 0xfc, 0x5e, 0x2b, 0xd5, 0x79, 0x49, 0x08, 0x79, 0x1f, 0x1a, 0x54, 0x89,
+	0xc0, 0x4b, 0xb3, 0xda, 0x1e, 0x2a, 0x69, 0x31, 0x79, 0xf3, 0x6f, 0x0d, 0xd6, 0xba, 0x91, 0xed,
+	0x93, 0x97, 0x38, 0x62, 0xa2, 0xa7, 0x17, 0x3e, 0x8e, 0x68, 0x41, 0x4a, 0xc9, 0xaf, 0x65, 0x93,
+	0xff, 0x2e, 0x2c, 0x9f, 0x7a, 0x0e, 0x13, 0xcc, 0x80, 0x85, 0x42, 0xa5, 0x72, 0x27, 0xf8, 0x42,
+	0x96, 0xe3, 0x85, 0xa2, 0x50, 0xa7, 0x43, 0x47, 0x06, 0x1c, 0x9a, 0x0a, 0x08, 0xff, 0xae, 0xc1,
+	0xe2, 0x47, 0x81, 0xeb, 0xa7, 0x7d, 0xbb, 0xdc, 0x70, 0x5e, 0x65, 0xc7, 0x98, 0x10, 0xbb, 0x9f,
+	0xf4, 0x63, 0x89, 0x72, 0x75, 0x8c, 0xab, 0x34, 0xf4, 0xe7, 0x1a, 0xdc, 0x52, 0x6f, 0x83, 0xde,
+	0x76, 0xe0, 0x13, 0x2c, 0xba, 0x95, 0x7c, 0xba, 0x56, 0x7d, 0xba, 0x8a, 0xcf, 0x92, 0xd7, 0xf5,
+	0x2a, 0xac, 0x6a, 0x54, 0x62, 0xd5, 0x35, 0x05, 0xab, 0x24, 0x5c, 0x81, 0x2c, 0xae, 0x64, 0x11,
+	0x69, 0x31, 0x87, 0x48, 0x6a, 0xe5, 0xb5, 0x0b, 0x2a, 0xef, 0x0f, 0x0d, 0xf4, 0x33, 0x1c, 0xb3,
+	0x5c, 0xe0, 0x63, 0x91, 0xdb, 0x1b, 0xd0, 0xd1, 0xa8, 0xfa, 0x1a, 0x0d, 0x98, 0x4f, 0x01, 0x4a,
+	0x84, 0x21, 0x85, 0x26, 0x25, 0x88, 0xf5, 0x69, 0xad, 0xa2, 0x30, 0x1c, 0xa5, 0x57, 0xf8, 0x9d,
+	0x06, 0x8b, 0xcf, 0xc6, 0x6e, 0x3c, 0x43, 0xae, 0x5d, 0xb9, 0x67, 0x65, 0x0c, 0x69, 0x28, 0x86,
+	0xfc, 0xaa, 0xc1, 0x5a, 0x52, 0xdc, 0x93, 0x79, 0x73, 0x6a, 0xd8, 0x4a, 0xb3, 0x67, 0x7a, 0xd8,
+	0xd6, 0x61, 0xee, 0xc8, 0xf5, 0x62, 0x1c, 0x31, 0x5b, 0x9a, 0x96, 0x58, 0x51, 0x7d, 0x27, 0xf8,
+	0x55, 0x7c, 0x86, 0x47, 0xa2, 0xa1, 0x25, 0x4b, 0x5a, 0x98, 0xeb, 0x45, 0x36, 0x5e, 0x0a, 0xdf,
+	0x1e, 0x01, 0x0c, 0x27, 0x83, 0x38, 0x9f, 0x8f, 0x36, 0xf3, 0x13, 0x0d, 0xd7, 0x73, 0x34, 0xf6,
+	0x3c, 0x36, 0xdb, 0x48, 0x7b, 0xa8, 0x4e, 0x5f, 0x18, 0xca, 0x3d, 0x48, 0x96, 0xe6, 0x9b, 0x9c,
+	0xa1, 0xe9, 0x04, 0x59, 0x89, 0x25, 0x92, 0x41, 0x35, 0x36, 0x5a, 0xca, 0xea, 0x2a, 0xe6, 0xc6,
+	0x19, 0x66, 0xa5, 0x1f, 0x35, 0xb8, 0x59, 0x68, 0xd2, 0xdb, 0x09, 0x9e, 0xf9, 0xa7, 0x06, 0xe8,
+	0x63, 0xb7, 0x37, 0x90, 0xe4, 0xaa, 0xc3, 0x73, 0x0f, 0x56, 0xa8, 0x3c, 0x6f, 0xdf, 0x62, 0xfe,
+	0xe6, 0x41, 0xca, 0xd1, 0xa9, 0xd9, 0x16, 0xb6, 0x49, 0xfa, 0x05, 0x24, 0x56, 0x6a, 0x98, 0x9a,
+	0xd5, 0x80, 0x38, 0xa7, 0x94, 0xc8, 0x03, 0x68, 0x75, 0x9c, 0x5d, 0x8e, 0x34, 0xa5, 0x9f, 0x82,
+	0x4c, 0x35, 0xc3, 0x27, 0xfe, 0x31, 0x28, 0x56, 0xe6, 0x57, 0x70, 0x3d, 0xe7, 0xee, 0x25, 0xfb,
+	0xf2, 0x52, 0x6a, 0x85, 0x14, 0xfd, 0x15, 0xd1, 0xa0, 0x53, 0x9e, 0x95, 0x15, 0x33, 0xc7, 0xac,
+	0xbe, 0x69, 0x5f, 0xc3, 0x0e, 0xb3, 0x22, 0xa9, 0xef, 0x2c, 0x6a, 0x68, 0x45, 0x3d, 0x2a, 0xc8,
+	0xe3, 0x4e, 0x30, 0xe3, 0x17, 0xcd, 0xd7, 0xbc, 0x14, 0x72, 0x7a, 0xaf, 0xf4, 0x21, 0x37, 0xc3,
+	0x27, 0xcd, 0x44, 0xd0, 0xfc, 0x4b, 0x83, 0x1b, 0x1d, 0xff, 0x0b, 0x37, 0xc6, 0xd4, 0xa6, 0x6e,
+	0x90, 0x62, 0xed, 0x74, 0x44, 0x2d, 0xef, 0x81, 0x93, 0x14, 0x6b, 0x64, 0x52, 0xec, 0x5d, 0x58,
+	0xe5, 0xba, 0xe4, 0x3c, 0x6d, 0xb2, 0x3c, 0xcd, 0x33, 0x2a, 0xd3, 0xed, 0x1b, 0x0d, 0xd6, 0x0a,
+	0xcc, 0xfe, 0x4f, 0x93, 0xe6, 0x27, 0x0d, 0x6e, 0xa4, 0x23, 0x9f, 0xe7, 0xcd, 0x52, 0xa7, 0xd9,
+	0x74, 0xaa, 0x4d, 0x1b, 0x79, 0xea, 0xd5, 0x35, 0xa8, 0xb6, 0xa9, 0x1f, 0xa4, 0x36, 0x25, 0x19,
+	0xf4, 0x76, 0x40, 0x6c, 0xf7, 0xcd, 0x3c, 0xf0, 0x27, 0x29, 0xf4, 0x10, 0x16, 0x7a, 0x93, 0x77,
+	0x0a, 0xb4, 0x26, 0x02, 0x9b, 0x7d, 0x00, 0x32, 0xd6, 0x8b, 0xc8, 0x24, 0x44, 0xf7, 0xa1, 0xf5,
+	0x79, 0x32, 0x70, 0xa2, 0xeb, 0x42, 0x48, 0x1e, 0x41, 0x8d, 0xd5, 0x64, 0xe7, 0xe4, 0x51, 0xeb,
+	0x3e, 0xb4, 0x46, 0xc9, 0xe4, 0x90, 0x6e, 0x92, 0x67, 0x89, 0xa2, 0x4d, 0x8f, 0x61, 0xa9, 0x2f,
+	0xbf, 0x2f, 0xa0, 0x9b, 0xca, 0x60, 0x9f, 0x34, 0x2a, 0x43, 0x2f, 0x66, 0x90, 0x10, 0x7d, 0x00,
+	0x8b, 0x44, 0x7a, 0x1d, 0x40, 0x89, 0x57, 0xca, 0x93, 0x41, 0x91, 0xfa, 0xcf, 0xe0, 0x66, 0xbf,
+	0xf8, 0x0b, 0x02, 0xdd, 0xa9, 0xfe, 0xc2, 0xa0, 0x07, 0x9a, 0xd3, 0x44, 0x48, 0x88, 0x0e, 0x01,
+	0xc5, 0xb9, 0xaf, 0x0f, 0xb4, 0x21, 0x76, 0x16, 0x7e, 0x98, 0x14, 0x19, 0xfa, 0x0c, 0xf4, 0x7e,
+	0xc9, 0x64, 0x8d, 0xcc, 0xcc, 0x73, 0x5d, 0xe1, 0xe8, 0x5d, 0x7c, 0x24, 0xea, 0xe7, 0x86, 0x97,
+	0xd4, 0xb2, 0xc2, 0xd9, 0xcb, 0xf8, 0x7f, 0x05, 0x97, 0x84, 0xa8, 0x0b, 0xd7, 0xfb, 0xf9, 0x9e,
+	0x8e, 0x8a, 0x77, 0xa5, 0x37, 0x7b, 0xbb, 0x8a, 0x4d, 0x42, 0xf4, 0x14, 0xda, 0x83, 0x6c, 0xab,
+	0x42, 0xc9, 0x0b, 0x65, 0xbe, 0x63, 0x1b, 0x46, 0x19, 0x2b, 0x75, 0x59, 0xc1, 0x7e, 0xd9, 0xe5,
+	0x7c, 0x3b, 0x92, 0x5d, 0x2e, 0x6a, 0x1a, 0x27, 0xb0, 0xea, 0xaa, 0xa0, 0x88, 0x6e, 0x25, 0x38,
+	0x56, 0x80, 0xf2, 0xc6, 0x46, 0x39, 0x93, 0x9f, 0xd7, 0x57, 0xf1, 0x24, 0x3d, 0xaf, 0x08, 0xfa,
+	0x8c, 0x8d, 0x72, 0x26, 0x09, 0x1f, 0xb7, 0x3f, 0x5d, 0xda, 0xe6, 0x6f, 0xd6, 0x0f, 0xd8, 0xef,
+	0x8b, 0x39, 0xf6, 0x20, 0x7d, 0xff, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0xaa, 0xd5, 0x63, 0xdb,
+	0xcf, 0x16, 0x00, 0x00,
 }

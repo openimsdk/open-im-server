@@ -212,6 +212,19 @@ func GetGroupOwnerByGroupId(groupId string) string {
 	return ""
 }
 
+func GetGroupOwnerInfoByGroupId(groupId string) (*GroupMember, error) {
+	omList, err := GetOwnerManagerByGroupId(groupId)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range omList {
+		if v.AdministratorLevel == 1 {
+			return v, nil
+		}
+	}
+	return nil, nil
+}
+
 func InsertGroupMember(groupId, userId, nickName, userFaceUrl string, role int32) error {
 	return InsertIntoGroupMember(groupId, userId, nickName, userFaceUrl, role)
 }
