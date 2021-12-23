@@ -77,10 +77,10 @@ func main() {
 	//Message
 	chatGroup := r.Group("/msg")
 	{
-		chatGroup.POST("/newest_seq", apiChat.UserGetSeq)
-		chatGroup.POST("/pull_msg", apiChat.UserPullMsg)
-		chatGroup.POST("/send_msg", apiChat.UserSendMsg)
-		chatGroup.POST("/pull_msg_by_seq", apiChat.UserPullMsgBySeqList)
+		chatGroup.POST("/newest_seq", apiChat.GetSeq)
+		chatGroup.POST("/pull_msg", apiChat.PullMsg)
+		chatGroup.POST("/send_msg", apiChat.SendMsg)
+		chatGroup.POST("/pull_msg_by_seq", apiChat.PullMsgBySeqList)
 	}
 	//Manager
 	managementGroup := r.Group("/manager")
