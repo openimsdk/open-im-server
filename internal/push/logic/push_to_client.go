@@ -93,6 +93,10 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 					default:
 						content = constant.ContentType2PushContent[constant.Common]
 					}
+					if pushMsg.MsgData.OfflinePushInfo != nil {
+						content = pushMsg.MsgData.OfflinePushInfo.Title
+
+					}
 					pushResult, err := push.JGAccountListPush(UIDList, content, jsonCustomContent, constant.PlatformIDToName(t))
 					if err != nil {
 						log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error(), constant.PlatformIDToName(t))
