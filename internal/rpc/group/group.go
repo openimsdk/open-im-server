@@ -1,7 +1,7 @@
 package group
 
 import (
-	"Open_IM/internal/rpc/chat"
+	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
@@ -132,7 +132,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		resp.ErrMsg = constant.ErrCreateGroup.ErrMsg
 		return resp, nil
 	}
-	chat.GroupCreatedNotification(req)
+	chat.GroupCreatedNotification(req, groupId)
 	utils.CopyStructFields(resp.GroupInfo, group)
 	log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
 	return resp, nil

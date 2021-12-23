@@ -21,7 +21,7 @@ message CreateGroupReq{
   string FaceUrl = 5;
   string Ext = 6;
   string OperationID = 7;
-  string OpUserID = 8;
+  string OpUserID = 8;  //app manager or group owner
   string FromUserID = 9;
 }
 
@@ -34,7 +34,7 @@ message CreateGroupResp{
 message GetGroupsInfoReq{
   repeated string GroupIDList = 1;
   string OperationID = 2;
-  string OpUserID = 3;
+  string OpUserID = 3; //No verification permission
 }
 
 message GetGroupsInfoResp{
@@ -46,16 +46,15 @@ message GetGroupsInfoResp{
 
 message SetGroupInfoReq{
   open_im_sdk.GroupInfo GroupInfo = 1;
-  string OpUserID = 2;
-  string FromUserID = 3;
-  string OperationID = 4;
+  string OpUserID = 2; //app manager or group owner
+  string OperationID = 3;
 }
 
-//owner or manager
+
 message GetGroupApplicationListReq {
-  string OpUserID = 1;
+  string OpUserID = 1; //app manager or group owner(manager)
   string OperationID = 2;
-  string FromUserID = 3; //owner or manager
+  string FromUserID = 3; //owner or manager (Received)
 }
 
 message GetGroupApplicationList_Data_User {
@@ -93,16 +92,15 @@ message TransferGroupOwnerReq {
   string OldOwnerUserID = 2;
   string NewOwnerUserID = 3;
   string OperationID = 4;
-  string OpUserID = 5;
+  string OpUserID = 5; //app manager or group owner
 }
 
 
 message JoinGroupReq{
   string GroupID = 1;
   string ReqMessage = 2;
-  string FromUserID = 3;
+  string OpUserID = 3;
   string OperationID = 4;
-  string OpUserID = 5;
 }
 
 message GroupApplicationResponseReq{
@@ -110,12 +108,10 @@ message GroupApplicationResponseReq{
   string OpUserID = 2;
   string GroupID = 3;
   string FromUserID = 4;  //请求加群:请求者，邀请加群:邀请人
-  string ToUserID = 7;  //请求加群:0，邀请加群:被邀请人
-  int64 AddTime = 10;
-  string HandledMsg = 12;
- // int32 Type = 13;
-//  int32 HandleStatus = 14;
- int32 HandleResult = 15;
+  string ToUserID = 5;  //请求加群:0，邀请加群:被邀请人
+  int64 AddTime = 6;
+  string HandledMsg = 7;
+  int32 HandleResult = 8;
 }
 
 
@@ -126,22 +122,21 @@ message SetOwnerGroupNickNameReq{
   string Nickname = 2;
   string OperationID = 3;
   string FromUserID = 4;
-  string OpUserID = 5;
+  string OpUserID = 5; //app manger or FromUserID
 }
 
 
 message QuitGroupReq{
   string GroupID = 1;
   string OperationID = 2;
-  string FromUserID = 3;
-  string OpUserID = 4;
+  string OpUserID = 3;
 }
 
 
 
 message GetGroupMemberListReq {
   string GroupID = 1;
-  string OpUserID = 2;
+  string OpUserID = 2;  //No verification permission
   string OperationID = 3;
   int32 Filter = 4;
   int32 NextSeq = 5;
@@ -159,7 +154,7 @@ message GetGroupMemberListResp {
 message GetGroupMembersInfoReq {
   string GroupID = 1;
   repeated string memberList = 2;
-  string OpUserID = 3;
+  string OpUserID = 3;  //No verification permission
   string OperationID = 4;
 }
 
@@ -174,7 +169,7 @@ message KickGroupMemberReq {
   repeated string KickedUserIDList = 2;
   string Reason = 3;
   string OperationID = 5;
-  string OpUserID = 6;
+  string OpUserID = 6;  //app manger or group manager
 }
 
 message Id2Result {
@@ -192,7 +187,7 @@ message KickGroupMemberResp {
 message GetJoinedGroupListReq {
   string FromUserID = 1;
   string operationID = 2;
-  string OpUserID = 3;
+  string OpUserID = 3; //app manager or FromUserID
 }
 
 
@@ -208,7 +203,7 @@ message InviteUserToGroupReq {
   string GroupID = 3;
   string Reason = 4;
   repeated string InvitedUserIDList = 5;
-  string OpUserID = 6;
+  string OpUserID = 6; //group member or app manager
 }
 
 message InviteUserToGroupResp {
@@ -220,7 +215,7 @@ message InviteUserToGroupResp {
 
 message GetGroupAllMemberReq {
   string GroupID = 1;
-  string OpUserID = 2;
+  string OpUserID = 2; //No verification permission
   string OperationID = 3;
 }
 

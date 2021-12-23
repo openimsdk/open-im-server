@@ -4,9 +4,10 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
-	immysql "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbGroup "Open_IM/pkg/proto/group"
@@ -306,26 +307,50 @@ func Notification(n *NotificationMsg, onlineUserOnly bool) {
 //  GroupMemberFullInfo Creator = 2;
 //  repeated GroupMemberFullInfo MemberList = 3;
 //  uint64 OperationTime = 4;
-//}
-func GroupCreatedNotification(operationID string, creator *immysql.User, group *immysql.Group, memberList []immysql.GroupMember) {
+//} creator->group
+func GroupCreatedNotification(req *pbGroup.CreateGroupReq, groupID string) {
 	var n NotificationMsg
-	n.SendID = creator.UserID
-	n.RecvID = group.GroupID
+	n.SendID = req.OpUserID
+	n.RecvID = groupID
 	n.ContentType = constant.CreateGroupTip
 	n.SessionType = constant.GroupChatType
 	n.MsgFrom = constant.SysMsgType
-	n.OperationID = operationID
+	n.OperationID = req.OperationID
 
 	var groupCreated open_im_sdk.GroupCreatedTips
 	groupCreated.Group = &open_im_sdk.GroupInfo{}
+
+	if token_verify.IsMangerUserID(req.OpUserID) {
+		u, err := imdb.FindUserByUID(req.OpUserID)
+		if err != nil || u == nil {
+			return
+		}
+		utils.CopyStructFields(groupCreated.Creator, u)
+		groupCreated.Creator.AppMangerLevel = 1
+	} else {
+		u, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(groupID, req.OpUserID)
+		if err != nil || u == nil {
+			return
+		}
+		utils.CopyStructFields(groupCreated.Creator, u)
+	}
+
+	group, err := imdb.FindGroupInfoByGroupId(groupID)
+	if err != nil || group == nil {
+		return
+	}
 	utils.CopyStructFields(groupCreated.Group, group)
 	groupCreated.Creator = &open_im_sdk.GroupMemberFullInfo{}
-	utils.CopyStructFields(groupCreated.Creator, creator)
-	for _, v := range memberList {
+
+	for _, v := range req.InitMemberList {
 		var groupMemberInfo open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(&groupMemberInfo, v)
+		member, err := imdb.GetMemberInfoById(groupID, v.UserID)
+		if err != nil {
+			utils.CopyStructFields(&groupMemberInfo, member)
+		}
 		groupCreated.MemberList = append(groupCreated.MemberList, &groupMemberInfo)
 	}
+
 	var tips open_im_sdk.TipsComm
 	tips.Detail, _ = json.Marshal(groupCreated)
 	tips.DefaultTips = config.Config.Notification.GroupCreated.DefaultTips.Tips

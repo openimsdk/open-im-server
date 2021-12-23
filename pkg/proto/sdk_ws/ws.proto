@@ -128,6 +128,7 @@ message GroupMemberFullInfo {
 	string NickName = 5;
 	string FaceUrl = 6;
   string FriendRemark = 7;
+  int32 AppMangerLevel = 8; // >0
 }
 
 //private, Friends have permission to view
