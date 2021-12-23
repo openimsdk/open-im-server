@@ -41,9 +41,9 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeq
 	}
 	return resp, nil
 }
-func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*pbMsg.PullMessageResp, error) {
+func (rpc *rpcChat) PullMessage(_ context.Context, in *open_im_sdk.PullMessageReq) (*open_im_sdk.PullMessageResp, error) {
 	log.InfoByKv("rpc pullMessage is arriving", in.OperationID, "args", in.String())
-	resp := new(pbMsg.PullMessageResp)
+	resp := new(open_im_sdk.PullMessageResp)
 	var respSingleMsgFormat []*open_im_sdk.GatherFormat
 	var respGroupMsgFormat []*open_im_sdk.GatherFormat
 	SingleMsgFormat, GroupMsgFormat, MaxSeq, MinSeq, err := commonDB.DB.GetMsgBySeqRange(in.UserID, in.SeqBegin, in.SeqEnd)
@@ -55,12 +55,12 @@ func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*p
 	}
 	respSingleMsgFormat = singleMsgHandleByUser(SingleMsgFormat, in.UserID)
 	respGroupMsgFormat = groupMsgHandleByUser(GroupMsgFormat)
-	return &pbMsg.PullMessageResp{
+	return &open_im_sdk.PullMessageResp{
 		ErrCode:       0,
 		ErrMsg:        "",
 		MaxSeq:        MaxSeq,
 		MinSeq:        MinSeq,
-		SingleUserMsg: []*pbMsg.GatherFormat(respSingleMsgFormat),
+		SingleUserMsg: respSingleMsgFormat,
 		GroupUserMsg:  respGroupMsgFormat,
 	}, nil
 }
@@ -108,7 +108,7 @@ func singleMsgHandleByUser(allMsg []*open_im_sdk.MsgData, ownerId string) []*ope
 	//Return in pb format
 	for user, msg := range m {
 		tempUserMsg := new(open_im_sdk.GatherFormat)
-		tempUserMsg.ID = user
+		tempUserMsg.Id = user
 		tempUserMsg.List = msg
 		sort.Sort(msg)
 		respMsgFormat = append(respMsgFormat, tempUserMsg)
@@ -133,7 +133,7 @@ func groupMsgHandleByUser(allMsg []*open_im_sdk.MsgData) []*open_im_sdk.GatherFo
 	//Return in pb format
 	for groupID, msg := range m {
 		tempUserMsg := new(open_im_sdk.GatherFormat)
-		tempUserMsg.ID = groupID
+		tempUserMsg.Id = groupID
 		tempUserMsg.List = msg
 		sort.Sort(msg)
 		respMsgFormat = append(respMsgFormat, tempUserMsg)

@@ -102,10 +102,10 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeq
 }
 func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to pullMsgReq", m.ReqIdentifier, m.MsgIncr, m.SendID)
-	nReply := new(pbChat.PullMessageResp)
+	nReply := new(sdk_ws.PullMessageResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsg)
 	if isPass {
-		pbData := pbChat.PullMessageReq{}
+		pbData := sdk_ws.PullMessageReq{}
 		pbData.UserID = m.SendID
 		pbData.OperationID = m.OperationID
 		pbData.SeqBegin = data.(SeqData).SeqBegin
@@ -129,7 +129,7 @@ func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
 		ws.pullMsgResp(conn, m, nReply)
 	}
 }
-func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageResp) {
+func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *sdk_ws.PullMessageResp) {
 	log.NewInfo(m.OperationID, "pullMsgResp come  here ", pb.String())
 	var mReplyData sdk_ws.PullMessageBySeqListResp
 	a, err := json.Marshal(pb.SingleUserMsg)
@@ -168,11 +168,11 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *pbChat.PullMessageRes
 }
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr)
-	nReply := new(pbChat.PullMessageResp)
+	nReply := new(sdk_ws.PullMessageResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
 	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList)
 	if isPass {
-		pbData := pbChat.PullMessageBySeqListReq{}
+		pbData := sdk_ws.PullMessageBySeqListReq{}
 		pbData.SeqList = data.(sdk_ws.PullMessageBySeqListReq).SeqList
 		pbData.UserID = m.SendID
 		pbData.OperationID = m.OperationID
@@ -186,13 +186,50 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 			ws.pullMsgResp(conn, m, nReply)
 		} else {
 			log.NewInfo(pbData.OperationID, "rpc call success to pullMsgBySeqListReq", reply.String(), reply.GetMaxSeq(), reply.GetMinSeq(), len(reply.GetSingleUserMsg()), len(reply.GetGroupUserMsg()))
-			ws.pullMsgResp(conn, m, reply)
+			ws.pullMsgBySeqListResp(conn, m, reply)
 		}
 	} else {
 		nReply.ErrCode = errCode
 		nReply.ErrMsg = errMsg
 		ws.pullMsgResp(conn, m, nReply)
 	}
+}
+func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullMessageBySeqListResp) {
+	log.NewInfo(m.OperationID, "pullMsgResp come  here ", pb.String())
+	var mReplyData sdk_ws.PullMessageBySeqListResp
+	a, err := json.Marshal(pb.SingleUserMsg)
+	if err != nil {
+		log.NewError(m.OperationID, "GetSingleUserMsg,json marshal,err", err.Error())
+	}
+	log.NewInfo(m.OperationID, "pullMsgResp json is ", len(pb.SingleUserMsg))
+	err = json.Unmarshal(a, &mReplyData.SingleUserMsg)
+	if err != nil {
+		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
+	}
+	b, err := json.Marshal(pb.GroupUserMsg)
+	if err != nil {
+		log.NewError(m.OperationID, "mReplyData,json marshal,err", err.Error())
+	}
+	err = json.Unmarshal(b, &mReplyData.GroupUserMsg)
+	if err != nil {
+		log.NewError(m.OperationID, "test SingleUserMsg,json Unmarshal,err", err.Error())
+	}
+	c, err := proto.Marshal(&mReplyData)
+	log.NewInfo(m.OperationID, "test info is ", len(mReplyData.SingleUserMsg), mReplyData.SingleUserMsg)
+
+	mReply := Resp{
+		ReqIdentifier: m.ReqIdentifier,
+		MsgIncr:       m.MsgIncr,
+		ErrCode:       pb.GetErrCode(),
+		ErrMsg:        pb.GetErrMsg(),
+		OperationID:   m.OperationID,
+		Data:          c,
+	}
+	log.NewInfo(m.OperationID, "pullMsgResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
+		len(mReply.Data))
+
+	ws.sendMsg(conn, mReply)
+
 }
 func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, sendTime)
