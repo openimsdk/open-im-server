@@ -1,4 +1,4 @@
-package chat
+package msg
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-
+	"Open_IM/pkg/proto/sdk_ws"
 	"sort"
 	"strings"
 
@@ -44,8 +44,8 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeq
 func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*pbMsg.PullMessageResp, error) {
 	log.InfoByKv("rpc pullMessage is arriving", in.OperationID, "args", in.String())
 	resp := new(pbMsg.PullMessageResp)
-	var respSingleMsgFormat []*pbMsg.GatherFormat
-	var respGroupMsgFormat []*pbMsg.GatherFormat
+	var respSingleMsgFormat []*open_im_sdk.GatherFormat
+	var respGroupMsgFormat []*open_im_sdk.GatherFormat
 	SingleMsgFormat, GroupMsgFormat, MaxSeq, MinSeq, err := commonDB.DB.GetMsgBySeqRange(in.UserID, in.SeqBegin, in.SeqEnd)
 	if err != nil {
 		log.ErrorByKv("pullMsg data error", in.OperationID, in.String())
@@ -60,15 +60,15 @@ func (rpc *rpcChat) PullMessage(_ context.Context, in *pbMsg.PullMessageReq) (*p
 		ErrMsg:        "",
 		MaxSeq:        MaxSeq,
 		MinSeq:        MinSeq,
-		SingleUserMsg: respSingleMsgFormat,
+		SingleUserMsg: []*pbMsg.GatherFormat(respSingleMsgFormat),
 		GroupUserMsg:  respGroupMsgFormat,
 	}, nil
 }
-func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *pbMsg.PullMessageBySeqListReq) (*pbMsg.PullMessageResp, error) {
+func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.PullMessageBySeqListReq) (*open_im_sdk.PullMessageBySeqListResp, error) {
 	log.NewInfo(in.OperationID, "rpc PullMessageBySeqList is arriving", in.String())
-	resp := new(pbMsg.PullMessageResp)
-	var respSingleMsgFormat []*pbMsg.GatherFormat
-	var respGroupMsgFormat []*pbMsg.GatherFormat
+	resp := new(open_im_sdk.PullMessageBySeqListResp)
+	var respSingleMsgFormat []*open_im_sdk.GatherFormat
+	var respGroupMsgFormat []*open_im_sdk.GatherFormat
 	SingleMsgFormat, GroupMsgFormat, MaxSeq, MinSeq, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList)
 	if err != nil {
 		log.ErrorByKv("PullMessageBySeqList data error", in.OperationID, in.String())
@@ -78,7 +78,7 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *pbMsg.PullMessag
 	}
 	respSingleMsgFormat = singleMsgHandleByUser(SingleMsgFormat, in.UserID)
 	respGroupMsgFormat = groupMsgHandleByUser(GroupMsgFormat)
-	return &pbMsg.PullMessageResp{
+	return &open_im_sdk.PullMessageBySeqListResp{
 		ErrCode:       0,
 		ErrMsg:        "",
 		MaxSeq:        MaxSeq,
@@ -87,9 +87,9 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *pbMsg.PullMessag
 		GroupUserMsg:  respGroupMsgFormat,
 	}, nil
 }
-func singleMsgHandleByUser(allMsg []*pbMsg.MsgFormat, ownerId string) []*pbMsg.GatherFormat {
+func singleMsgHandleByUser(allMsg []*open_im_sdk.MsgData, ownerId string) []*open_im_sdk.GatherFormat {
 	var userid string
-	var respMsgFormat []*pbMsg.GatherFormat
+	var respMsgFormat []*open_im_sdk.GatherFormat
 	m := make(map[string]MsgFormats)
 	//Gather messages in the dimension of users
 	for _, v := range allMsg {
@@ -107,7 +107,7 @@ func singleMsgHandleByUser(allMsg []*pbMsg.MsgFormat, ownerId string) []*pbMsg.G
 	}
 	//Return in pb format
 	for user, msg := range m {
-		tempUserMsg := new(pbMsg.GatherFormat)
+		tempUserMsg := new(open_im_sdk.GatherFormat)
 		tempUserMsg.ID = user
 		tempUserMsg.List = msg
 		sort.Sort(msg)
@@ -115,8 +115,8 @@ func singleMsgHandleByUser(allMsg []*pbMsg.MsgFormat, ownerId string) []*pbMsg.G
 	}
 	return respMsgFormat
 }
-func groupMsgHandleByUser(allMsg []*pbMsg.MsgFormat) []*pbMsg.GatherFormat {
-	var respMsgFormat []*pbMsg.GatherFormat
+func groupMsgHandleByUser(allMsg []*open_im_sdk.MsgData) []*open_im_sdk.GatherFormat {
+	var respMsgFormat []*open_im_sdk.GatherFormat
 	m := make(map[string]MsgFormats)
 	//Gather messages in the dimension of users
 	for _, v := range allMsg {
@@ -132,7 +132,7 @@ func groupMsgHandleByUser(allMsg []*pbMsg.MsgFormat) []*pbMsg.GatherFormat {
 	}
 	//Return in pb format
 	for groupID, msg := range m {
-		tempUserMsg := new(pbMsg.GatherFormat)
+		tempUserMsg := new(open_im_sdk.GatherFormat)
 		tempUserMsg.ID = groupID
 		tempUserMsg.List = msg
 		sort.Sort(msg)
@@ -141,7 +141,7 @@ func groupMsgHandleByUser(allMsg []*pbMsg.MsgFormat) []*pbMsg.GatherFormat {
 	return respMsgFormat
 }
 
-type MsgFormats []*pbMsg.MsgFormat
+type MsgFormats []*open_im_sdk.MsgData
 
 // Implement the sort.Interface interface to get the number of elements method
 func (s MsgFormats) Len() int {

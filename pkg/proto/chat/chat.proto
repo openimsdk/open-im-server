@@ -12,6 +12,7 @@ message MsgDataToMQ{
 
 message MsgDataToDB {
   open_im_sdk.MsgData msgData = 1;
+  string operationID = 2;
 
 }
 message PushMsgDataToMQ{
@@ -19,26 +20,26 @@ message PushMsgDataToMQ{
   open_im_sdk.MsgData msgData = 2;
 }
 
-message PullMessageReq {
-  string UserID = 1;
-  int64 SeqBegin = 2;
-  int64 SeqEnd = 3;
-  string OperationID = 4;
-}
-
-message PullMessageResp {
-  int32 ErrCode = 1;
-  string ErrMsg = 2;
-  int64 MaxSeq = 3;
-  int64 MinSeq = 4;
-  repeated GatherFormat SingleUserMsg = 5;
-  repeated GatherFormat GroupUserMsg = 6;
-}
-message PullMessageBySeqListReq{
-  string UserID = 1;
-  string OperationID = 2;
-  repeated int64 seqList =3;
-}
+//message PullMessageReq {
+//  string UserID = 1;
+//  int64 SeqBegin = 2;
+//  int64 SeqEnd = 3;
+//  string OperationID = 4;
+//}
+//
+//message PullMessageResp {
+//  int32 ErrCode = 1;
+//  string ErrMsg = 2;
+//  int64 MaxSeq = 3;
+//  int64 MinSeq = 4;
+//  repeated GatherFormat SingleUserMsg = 5;
+//  repeated GatherFormat GroupUserMsg = 6;
+//}
+//message PullMessageBySeqListReq{
+//  string UserID = 1;
+//  string OperationID = 2;
+//  repeated int64 seqList =3;
+//}
 message GetMaxAndMinSeqReq {
   string UserID = 1;
   string OperationID = 2;
@@ -49,38 +50,38 @@ message GetMaxAndMinSeqResp {
   int64 MaxSeq = 3;
   int64 MinSeq = 4;
 }
-message GatherFormat{
-  // @inject_tag: json:"id"
-  string ID = 1;
-  // @inject_tag: json:"list"
-  repeated MsgFormat List = 2;//detail msg
-}
-message MsgFormat{
-  // @inject_tag: json:"sendID"
-  string SendID = 1;
-  // @inject_tag: json:"recvID"
-  string RecvID = 2;
-  // @inject_tag: json:"msgFrom"
-  int32 MsgFrom = 3;
-  // @inject_tag: json:"contentType"
-  int32 ContentType = 4;
-  // @inject_tag: json:"serverMsgID"
-  string ServerMsgID = 5;
-  // @inject_tag: json:"content"
-  string Content = 6;
-  // @inject_tag: json:"seq"
-  int64 Seq = 7;
-  // @inject_tag: json:"sendTime"
-  int64 SendTime = 8;
-  // @inject_tag: json:"senderPlatformID"
-  int32 SenderPlatformID = 9;
-  // @inject_tag: json:"senderNickName"
-  string SenderNickName = 10;
-  // @inject_tag: json:"senderFaceUrl"
-  string SenderFaceURL = 11;
-  // @inject_tag: json:"clientMsgID"
-  string ClientMsgID = 12;
-}
+//message GatherFormat{
+//  // @inject_tag: json:"id"
+//  string ID = 1;
+//  // @inject_tag: json:"list"
+//  repeated MsgFormat List = 2;//detail msg
+//}
+//message MsgFormat{
+//  // @inject_tag: json:"sendID"
+//  string SendID = 1;
+//  // @inject_tag: json:"recvID"
+//  string RecvID = 2;
+//  // @inject_tag: json:"msgFrom"
+//  int32 MsgFrom = 3;
+//  // @inject_tag: json:"contentType"
+//  int32 ContentType = 4;
+//  // @inject_tag: json:"serverMsgID"
+//  string ServerMsgID = 5;
+//  // @inject_tag: json:"content"
+//  string Content = 6;
+//  // @inject_tag: json:"seq"
+//  int64 Seq = 7;
+//  // @inject_tag: json:"sendTime"
+//  int64 SendTime = 8;
+//  // @inject_tag: json:"senderPlatformID"
+//  int32 SenderPlatformID = 9;
+//  // @inject_tag: json:"senderNickName"
+//  string SenderNickName = 10;
+//  // @inject_tag: json:"senderFaceUrl"
+//  string SenderFaceURL = 11;
+//  // @inject_tag: json:"clientMsgID"
+//  string ClientMsgID = 12;
+//}
 
 message SendMsgReq {
 
@@ -92,17 +93,16 @@ open_im_sdk.MsgData msgData = 3;
 }
 
 message SendMsgResp {
-  int32 ErrCode = 1;
-  string ErrMsg = 2;
-  int32 ReqIdentifier = 3;
-  string ServerMsgID = 4;
-  string ClientMsgID = 5;
+  int32 errCode = 1;
+  string errMsg = 2;
+  string serverMsgID = 4;
+  string clientMsgID = 5;
   int64  sendTime = 6;
 
 }
 service Chat {
   rpc GetMaxAndMinSeq(GetMaxAndMinSeqReq) returns(GetMaxAndMinSeqResp);
-  rpc PullMessage(PullMessageReq) returns(PullMessageResp);
-  rpc PullMessageBySeqList(PullMessageBySeqListReq) returns(PullMessageResp);
+  rpc PullMessage(open_im_sdk.PullMessageReq) returns(open_im_sdk.PullMessageResp);
+  rpc PullMessageBySeqList(open_im_sdk.PullMessageBySeqListReq) returns(open_im_sdk.PullMessageBySeqListResp);
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
 }

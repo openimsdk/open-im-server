@@ -8,16 +8,18 @@ import (
 	"Open_IM/pkg/utils"
 )
 
-func saveUserChat(uid string, pbMsg *pbMsg.MsgSvrToPushSvrChatMsg) error {
+func saveUserChat(uid string, msg *pbMsg.MsgDataToMQ) error {
 	time := utils.GetCurrentTimestampByMill()
 	seq, err := db.DB.IncrUserSeq(uid)
 	if err != nil {
-		log.NewError(pbMsg.OperationID, "data insert to redis err", err.Error(), pbMsg.String())
+		log.NewError(msg.OperationID, "data insert to redis err", err.Error(), msg.String())
 		return err
 	}
-	pbMsg.RecvSeq = seq
-	log.NewInfo(pbMsg.OperationID, "IncrUserSeq cost time", utils.GetCurrentTimestampByMill()-time)
-	return db.DB.SaveUserChat(uid, pbMsg.SendTime, pbMsg)
+	msg.MsgData.Seq = seq
+	pbSaveData := pbMsg.MsgDataToDB{}
+	pbSaveData.MsgData = msg.MsgData
+	log.NewInfo(msg.OperationID, "IncrUserSeq cost time", utils.GetCurrentTimestampByMill()-time)
+	return db.DB.SaveUserChat(uid, pbSaveData.MsgData.SendTime, &pbSaveData)
 }
 
 func getGroupList(groupID string) ([]string, error) {

@@ -9,6 +9,7 @@ import (
 	"Open_IM/pkg/utils"
 	"bytes"
 	"encoding/gob"
+	"github.com/garyburd/redigo/redis"
 	"net/http"
 	"sync"
 	"time"
@@ -24,15 +25,15 @@ type WServer struct {
 	wsAddr       string
 	wsMaxConnNum int
 	wsUpGrader   *websocket.Upgrader
-	wsConnToUser map[*UserConn]string
-	wsUserToConn map[string]*UserConn
+	wsConnToUser map[*UserConn]map[string]string
+	wsUserToConn map[string]map[string]*UserConn
 }
 
 func (ws *WServer) onInit(wsPort int) {
 	ws.wsAddr = ":" + utils.IntToString(wsPort)
 	ws.wsMaxConnNum = config.Config.LongConnSvr.WebsocketMaxConnNum
-	ws.wsConnToUser = make(map[*UserConn]string)
-	ws.wsUserToConn = make(map[string]*UserConn)
+	ws.wsConnToUser = make(map[*UserConn]map[string]string)
+	ws.wsUserToConn = make(map[string]map[string]*UserConn)
 	ws.wsUpGrader = &websocket.Upgrader{
 		HandshakeTimeout: time.Duration(config.Config.LongConnSvr.WebsocketTimeOut) * time.Second,
 		ReadBufferSize:   config.Config.LongConnSvr.WebsocketMaxMsgLen,
@@ -74,7 +75,8 @@ func (ws *WServer) readMsg(conn *UserConn) {
 			log.NewInfo("", "this is a  pingMessage")
 		}
 		if err != nil {
-			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn), "error", err)
+			uid, platform := ws.getUserUid(conn)
+			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", uid, "platform", platform, "error", err.Error())
 			ws.delUserConn(conn)
 			return
 		} else {
@@ -94,34 +96,43 @@ func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newConn *UserConn, token string) {
 	switch config.Config.MultiLoginPolicy {
 	case constant.AllLoginButSameTermKick:
-		if oldConn, ok := ws.wsUserToConn[genMapKey(uid, platformID)]; ok {
-			log.NewDebug("", uid, platformID, "kick old conn")
-			ws.sendKickMsg(oldConn, newConn)
-			m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
-			if err != nil {
-				log.NewError("", "get token from redis err", err.Error())
-				return
-			}
-			if m == nil {
-				log.NewError("", "get token from redis err", "m is nil")
-				return
-			}
-			for k, _ := range m {
-				if k != token {
-					m[k] = constant.KickedToken
+		if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
+			if oldConn, ok := oldConnMap[constant.PlatformIDToName(platformID)]; ok {
+				log.NewDebug("", uid, platformID, "kick old conn")
+				ws.sendKickMsg(oldConn, newConn)
+				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
+				if err != nil && err != redis.ErrNil {
+					log.NewError("", "get token from redis err", err.Error())
+					return
 				}
+				if m == nil {
+					log.NewError("", "get token from redis err", "m is nil")
+					return
+				}
+				for k, _ := range m {
+					if k != token {
+						m[k] = constant.KickedToken
+					}
+				}
+				log.NewDebug("get map is ", m)
+				err = db.DB.SetTokenMapByUidPid(uid, platformID, m)
+				if err != nil {
+					log.NewError("", "SetTokenMapByUidPid err", err.Error())
+					return
+				}
+				err = oldConn.Close()
+				delete(oldConnMap, constant.PlatformIDToName(platformID))
+				ws.wsUserToConn[uid] = oldConnMap
+				if len(oldConnMap) == 0 {
+					delete(ws.wsUserToConn, uid)
+				}
+				delete(ws.wsConnToUser, oldConn)
+				if err != nil {
+					log.NewError("", "conn close err", err.Error())
+				}
+
 			}
-			log.NewDebug("get map is ", m)
-			err = db.DB.SetTokenMapByUidPid(uid, platformID, m)
-			if err != nil {
-				log.NewError("", "SetTokenMapByUidPid err", err.Error())
-				return
-			}
-			err = oldConn.Close()
-			delete(ws.wsConnToUser, oldConn)
-			if err != nil {
-				log.NewError("", "conn close err", err.Error())
-			}
+
 		} else {
 			log.NewDebug("no other conn", ws.wsUserToConn)
 		}
@@ -149,53 +160,97 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 	}
 }
 func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, token string) {
-	key := genMapKey(uid, platformID)
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	ws.MultiTerminalLoginChecker(uid, platformID, conn, token)
-	ws.wsConnToUser[conn] = key
-	ws.wsUserToConn[key] = conn
-	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "uid", uid, "online_num", len(ws.wsUserToConn))
+	if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
+		oldConnMap[constant.PlatformIDToName(platformID)] = conn
+		ws.wsUserToConn[uid] = oldConnMap
+	} else {
+		i := make(map[string]*UserConn)
+		i[constant.PlatformIDToName(platformID)] = conn
+		ws.wsUserToConn[uid] = i
+	}
+	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
+		oldStringMap[constant.PlatformIDToName(platformID)] = uid
+		ws.wsConnToUser[conn] = oldStringMap
+	} else {
+		i := make(map[string]string)
+		i[constant.PlatformIDToName(platformID)] = uid
+		ws.wsConnToUser[conn] = i
+	}
+	count := 0
+	for _, v := range ws.wsUserToConn {
+		count = count + len(v)
+	}
+	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "uid", uid, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 
 }
 
 func (ws *WServer) delUserConn(conn *UserConn) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
-	var uidPlatform string
-	if uid, ok := ws.wsConnToUser[conn]; ok {
-		uidPlatform = uid
-		if _, ok = ws.wsUserToConn[uid]; ok {
-			delete(ws.wsUserToConn, uid)
-			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "uid", uid, "online_num", len(ws.wsUserToConn))
+	var platform, uid string
+	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
+		for k, v := range oldStringMap {
+			platform = k
+			uid = v
+		}
+		if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
+			delete(oldConnMap, platform)
+			ws.wsUserToConn[uid] = oldConnMap
+			if len(oldConnMap) == 0 {
+				delete(ws.wsUserToConn, uid)
+			}
+			count := 0
+			for _, v := range ws.wsUserToConn {
+				count = count + len(v)
+			}
+			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "uid", uid, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 		} else {
-			log.WarnByKv("uid not exist", "", "wsUser deleted", ws.wsUserToConn, "uid", uid, "online_num", len(ws.wsUserToConn))
+			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "uid", uid, "online_user_num", len(ws.wsUserToConn))
 		}
 		delete(ws.wsConnToUser, conn)
+
 	}
 	err := conn.Close()
 	if err != nil {
-		log.ErrorByKv("close err", "", "uid", uidPlatform)
+		log.ErrorByKv("close err", "", "uid", uid, "platform", platform)
+
 	}
 
 }
 
-func (ws *WServer) getUserConn(uid string) *UserConn {
+func (ws *WServer) getUserConn(uid string, platform string) *UserConn {
 	rwLock.RLock()
 	defer rwLock.RUnlock()
-	if conn, ok := ws.wsUserToConn[uid]; ok {
-		return conn
+	if connMap, ok := ws.wsUserToConn[uid]; ok {
+		if conn, flag := connMap[platform]; flag {
+			return conn
+		}
 	}
 	return nil
 }
-func (ws *WServer) getUserUid(conn *UserConn) string {
+func (ws *WServer) getSingleUserAllConn(uid string) map[string]*UserConn {
+	rwLock.RLock()
+	defer rwLock.RUnlock()
+	if connMap, ok := ws.wsUserToConn[uid]; ok {
+		return connMap
+	}
+	return nil
+}
+func (ws *WServer) getUserUid(conn *UserConn) (uid, platform string) {
 	rwLock.RLock()
 	defer rwLock.RUnlock()
 
-	if uid, ok := ws.wsConnToUser[conn]; ok {
-		return uid
+	if stringMap, ok := ws.wsConnToUser[conn]; ok {
+		for k, v := range stringMap {
+			platform = k
+			uid = v
+		}
+		return uid, platform
 	}
-	return ""
+	return "", ""
 }
 func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 	status := http.StatusUnauthorized

@@ -1,4 +1,4 @@
-package chat
+package msg
 
 import (
 	"Open_IM/pkg/common/config"

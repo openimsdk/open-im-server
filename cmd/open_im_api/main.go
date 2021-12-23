@@ -75,7 +75,7 @@ func main() {
 		thirdGroup.POST("/tencent_cloud_storage_credential", apiThird.TencentCloudStorageCredential)
 	}
 	//Message
-	chatGroup := r.Group("/chat")
+	chatGroup := r.Group("/msg")
 	{
 		chatGroup.POST("/newest_seq", apiChat.UserGetSeq)
 		chatGroup.POST("/pull_msg", apiChat.UserPullMsg)

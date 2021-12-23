@@ -34,8 +34,8 @@ type paramsUserSendMsg struct {
 	}
 }
 
-func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.UserSendMsgReq {
-	pbData := pbChat.UserSendMsgReq{
+func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.SendMsgReq {
+	pbData := pbChat.SendMsgReq{
 		ReqIdentifier:  params.ReqIdentifier,
 		Token:          token,
 		SendID:         params.SendID,
@@ -70,20 +70,20 @@ func UserSendMsg(c *gin.Context) {
 	log.InfoByKv("api call success to sendMsgReq", params.OperationID, "Parameters", params)
 
 	pbData := newUserSendMsgReq(token, &params)
-	log.Info("", "", "api UserSendMsg call start..., [data: %s]", pbData.String())
+	log.Info("", "", "api SendMsg call start..., [data: %s]", pbData.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 	client := pbChat.NewChatClient(etcdConn)
 
-	log.Info("", "", "api UserSendMsg call, api call rpc...")
+	log.Info("", "", "api SendMsg call, api call rpc...")
 
-	reply, err := client.UserSendMsg(context.Background(), pbData)
+	reply, err := client.SendMsg(context.Background(), pbData)
 	if err != nil {
-		log.NewError(params.OperationID, "UserSendMsg rpc failed, ", params, err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "UserSendMsg rpc failed, " + err.Error()})
+		log.NewError(params.OperationID, "SendMsg rpc failed, ", params, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "SendMsg rpc failed, " + err.Error()})
 		return
 	}
-	log.Info("", "", "api UserSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
+	log.Info("", "", "api SendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
 
 	c.JSON(http.StatusOK, gin.H{
 		"errCode":       reply.ErrCode,
