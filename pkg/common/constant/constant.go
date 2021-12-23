@@ -37,6 +37,7 @@ const (
 	Card           = 108
 	Location       = 109
 	Custom         = 110
+	Revoke         = 111
 	HasReadReceipt = 112
 	Typing         = 113
 	Quote          = 114
@@ -48,8 +49,6 @@ const (
 	AddFriendTip               = 202
 	RefuseFriendApplicationTip = 203
 	SetSelfInfoTip             = 204
-	Revoke                     = 205
-	C2CMessageAsRead           = 206
 
 	TransferGroupOwnerTip       = 501
 	CreateGroupTip              = 502
@@ -95,6 +94,14 @@ const (
 	ReceiveMessage          = 0
 	NotReceiveMessage       = 1
 	ReceiveNotNotifyMessage = 2
+
+	//OptionsKey
+	IsHistory            = "history"
+	IsPersistent         = "persistent"
+	IsOfflinePush        = "offlinePush"
+	IsUnreadCount        = "unreadCount"
+	IsConversationUpdate = "conversationUpdate"
+	IsSenderSync         = "senderSync"
 )
 
 var ContentType2PushContent = map[int64]string{
