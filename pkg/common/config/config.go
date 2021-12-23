@@ -165,51 +165,21 @@ type config struct {
 	}
 	Notification struct {
 		GroupCreated struct {
-			Conversation struct {
-				ConversationChanged bool `yaml:"conversationChanged"`
-				UnreadCount         bool `yaml:"unreadCount"`
-			}
-			OfflinePush struct {
-				PushSwitch bool   `yaml:"switch"`
-				Title      string `yaml:"title"`
-				Desc       string `yaml:"desc"`
-				Ext        string `yaml:"ext"`
-			}
-			DefaultTips struct {
-				Tips string `yaml:"tips"`
-			}
+			conversation Conversation `yaml:"conversation"`
+			offlinePush  OfflinePush  `yaml:"offlinePush"`
+			defaultTips  DefaultTips  `yaml:"defaultTips"`
 		}
 
 		GroupInfoChanged struct {
-			Conversation struct {
-				ConversationChanged bool `yaml:"conversationChanged"`
-				UnreadCount         bool `yaml:"unreadCount"`
-			}
-			OfflinePush struct {
-				PushSwitch bool   `yaml:"switch"`
-				Title      string `yaml:"title"`
-				Desc       string `yaml:"desc"`
-				Ext        string `yaml:"ext"`
-			}
-			DefaultTips struct {
-				Tips string `yaml:"tips"`
-			}
+			conversation Conversation `yaml:"conversation"`
+			offlinePush  OfflinePush  `yaml:"offlinePush"`
+			defaultTips  DefaultTips  `yaml:"defaultTips"`
 		}
 
 		ApplyJoinGroup struct {
-			Conversation struct {
-				ConversationChanged bool `yaml:"conversationChanged"`
-				UnreadCount         bool `yaml:"unreadCount"`
-			}
-			OfflinePush struct {
-				PushSwitch bool   `yaml:"switch"`
-				Title      string `yaml:"title"`
-				Desc       string `yaml:"desc"`
-				Ext        string `yaml:"ext"`
-			}
-			DefaultTips struct {
-				Tips string `yaml:"tips"`
-			}
+			conversation Conversation `yaml:"conversation"`
+			offlinePush  OfflinePush  `yaml:"offlinePush"`
+			defaultTips  DefaultTips  `yaml:"defaultTips"`
 		}
 	}
 	Demo struct {
@@ -229,6 +199,20 @@ type config struct {
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
 	}
+}
+type Conversation struct {
+	ConversationChanged bool `yaml:"conversationChanged"`
+	UnreadCount         bool `yaml:"unreadCount"`
+}
+
+type OfflinePush struct {
+	PushSwitch bool   `yaml:"switch"`
+	Title      string `yaml:"title"`
+	Desc       string `yaml:"desc"`
+	Ext        string `yaml:"ext"`
+}
+type DefaultTips struct {
+	Tips string `yaml:"tips"`
 }
 
 func init() {
