@@ -75,6 +75,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.FromUserID)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrParseToken.ErrCode, ErrMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
+	var okUserIDList []string
 	//Time stamp + MD5 to generate group chat id
 	groupId := utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
 	//to group
@@ -118,6 +119,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		if err != nil {
 			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", groupId, user.UserID, us.Nickname, us.FaceUrl, user.Role)
 		}
+		okUserIDList = append(okUserIDList, user.UserID)
 		err = db.DB.AddGroupMember(groupId, user.UserID)
 		if err != nil {
 			log.NewError(req.OperationID, "add mongo group member failed, db.DB.AddGroupMember failed ", err.Error())
@@ -132,7 +134,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		resp.ErrMsg = constant.ErrCreateGroup.ErrMsg
 		return resp, nil
 	}
-	chat.GroupCreatedNotification(req, groupId)
+	chat.GroupCreatedNotification(req.OperationID, req.OpUserID, req.FromUserID, groupId, okUserIDList)
 	utils.CopyStructFields(resp.GroupInfo, group)
 	log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
 	return resp, nil
@@ -290,7 +292,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	}
 
 	resp.ErrCode = 0
-	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp)
+	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp.String())
 	return &resp, nil
 }
 
@@ -465,7 +467,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 		log.NewError(req.OperationID, "args failed ", req.String())
 	}
 
-	log.NewInfo(req.OperationID, "rpc GroupApplicationResponse ok ", reply)
+	log.NewInfo(req.OperationID, "rpc GroupApplicationResponse return ", reply)
 	return reply, nil
 }
 
@@ -494,9 +496,9 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		return &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}, nil
 	}
 
-	chat.ReceiveJoinApplicationNotification(req)
+	chat.JoinApplicationNotification(req)
 
-	log.NewInfo(req.OperationID, "ReceiveJoinApplicationNotification rpc JoinGroup success return")
+	log.NewInfo(req.OperationID, "ReceiveJoinApplicationNotification rpc return ")
 	return &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}, nil
 }
 
@@ -522,7 +524,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	}
 
 	chat.MemberLeaveNotification(req)
-	log.NewInfo(req.OperationID, "rpc quit group is success return")
+	log.NewInfo(req.OperationID, "rpc QuitGroup return ")
 	return &pbGroup.CommonResp{}, nil
 }
 
@@ -554,7 +556,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		return &pbGroup.CommonResp{ErrCode: constant.ErrSetGroupInfo.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
 
-	////bitwise operators: 1:groupName; 10:Notification  100:Introduction; 1000:FaceUrl
+	////bitwise operators: 0001:groupName; 0010:Notification  0100:Introduction; 1000:FaceUrl; 10000:owner
 	var changedType int32
 	if group.GroupName != req.GroupInfo.GroupName && req.GroupInfo.GroupName != "" {
 		changedType = 1
@@ -574,21 +576,22 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	}
 
 	if changedType != 0 {
-		chat.GroupInfoChangedNotification(req)
+		chat.GroupInfoChangedNotification(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, changedType)
 	}
-
+	log.NewInfo("SetGroupInfo rpc return ")
 	return &pbGroup.CommonResp{}, nil
 }
 
-func (s *groupServer) TransferGroupOwner(_ context.Context, pb *pbGroup.TransferGroupOwnerReq) (*pbGroup.CommonResp, error) {
-	log.Info("", "", "rpc TransferGroupOwner call start..., [pb: %s]", pb.String())
+func (s *groupServer) TransferGroupOwner(_ context.Context, req *pbGroup.TransferGroupOwnerReq) (*pbGroup.CommonResp, error) {
+	log.NewInfo(req.OperationID, "TransferGroupOwner ", req.String())
 
-	reply, err := im_mysql_model.TransferGroupOwner(pb)
+	reply, err := im_mysql_model.TransferGroupOwner(req)
 	if err != nil {
-		log.Error("", "", "rpc TransferGroupOwner call..., im_mysql_model.TransferGroupOwner fail [pb: %s] [err: %s]", pb.String(), err.Error())
-		return nil, err
+		log.NewError("TransferGroupOwner ", req.String())
+		return &pbGroup.CommonResp{ErrCode: constant.ErrDb.ErrCode, ErrMsg: constant.ErrDb.ErrMsg}, nil
 	}
-	log.Info("", "", "rpc TransferGroupOwner call..., im_mysql_model.TransferGroupOwner")
-
+	changedType := int32(1) << 4
+	chat.GroupInfoChangedNotification(req.OperationID, req.OpUserID, req.GroupID, changedType)
+	log.NewInfo("TransferGroupOwner rpc return ", reply.String())
 	return reply, nil
 }

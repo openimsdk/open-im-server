@@ -538,24 +538,24 @@ func MemberKickedNotification(req *pbGroup.KickGroupMemberReq, kickedUserIDList 
 //}
 
 //群信息改变后掉用
-func GroupInfoChangedNotification(req *pbGroup.SetGroupInfoReq) {
+func GroupInfoChangedNotification(operationID, opUserID, groupID string, changedType int32) {
 	var n NotificationMsg
-	n.SendID = req.OpUserID
+	n.SendID = opUserID
 	n.ContentType = constant.GroupInfoChangedNotification
 	n.SessionType = constant.GroupChatType
 	n.MsgFrom = constant.SysMsgType
-	n.OperationID = req.OperationID
+	n.OperationID = operationID
 
 	GroupInfoChangedTips := open_im_sdk.GroupInfoChangedTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
-	setGroupInfo(req.OperationID, req.GroupInfo.GroupID, GroupInfoChangedTips.Group, "")
-	setOpUserInfo(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, GroupInfoChangedTips.OpUser)
-
+	setGroupInfo(operationID, groupID, GroupInfoChangedTips.Group, opUserID)
+	setOpUserInfo(operationID, opUserID, groupID, GroupInfoChangedTips.OpUser)
+	GroupInfoChangedTips.ChangedType = changedType
 	var tips open_im_sdk.TipsComm
 	tips.Detail, _ = json.Marshal(GroupInfoChangedTips)
 	tips.DefaultTips = "GroupInfoChangedNotification"
 	n.Content, _ = json.Marshal(tips)
-	n.RecvID = req.GroupInfo.GroupID
-	Notification(&n, true)
+	n.RecvID = groupID
+	Notification(&n, false)
 }
 
 /*
