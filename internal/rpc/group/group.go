@@ -11,11 +11,9 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbGroup "Open_IM/pkg/proto/group"
-	"Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
-	"fmt"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
@@ -39,6 +37,7 @@ func NewGroupServer(port int) *groupServer {
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
 }
+
 func (s *groupServer) Run() {
 	log.Info("", "", "rpc group init....")
 
@@ -78,6 +77,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 	//Time stamp + MD5 to generate group chat id
 	groupId := utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
+	//to group
 	err := im_mysql_model.InsertIntoGroup(groupId, req.GroupName, req.Introduction, req.Notification, req.FaceUrl, req.Ext)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupId, req.GroupName, req.Introduction, req.Notification, req.FaceUrl, req.Ext)
@@ -90,7 +90,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrCreateGroup.ErrCode, ErrMsg: constant.ErrCreateGroup.ErrMsg}, nil
 	}
 
-	//Add the group owner to the group first, otherwise the group creation will fail
+	//to group member
 	err = im_mysql_model.InsertIntoGroupMember(groupId, us.UserID, us.Nickname, us.FaceUrl, constant.GroupOwner)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error())
@@ -103,7 +103,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		//	return &pbGroup.CreateGroupResp{ErrCode: constant.ErrCreateGroup.ErrCode, ErrMsg: constant.ErrCreateGroup.ErrMsg}, nil
 	}
 
-	//Binding group id and member id
+	//to group member
 	for _, user := range req.InitMemberList {
 		us, err := im_mysql_model.FindUserByUID(user.UserID)
 		if err != nil {
@@ -123,8 +123,8 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			log.NewError(req.OperationID, "add mongo group member failed, db.DB.AddGroupMember failed ", err.Error())
 		}
 	}
-	resp := &pbGroup.CreateGroupResp{}
 
+	resp := &pbGroup.CreateGroupResp{}
 	group, err := im_mysql_model.FindGroupInfoByGroupId(groupId)
 	if err != nil {
 		log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", err.Error(), groupId)
@@ -145,6 +145,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		return &pbGroup.GetJoinedGroupListResp{ErrCode: constant.ErrParseToken.ErrCode, ErrMsg: constant.ErrParseToken.ErrMsg}, nil
 	}
 
+	//group list
 	joinedGroupList, err := imdb.GetJoinedGroupIdListByMemberId(req.FromUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetJoinedGroupIdListByMemberId failed ", err.Error(), req.FromUserID)
@@ -152,7 +153,6 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	}
 
 	var resp pbGroup.GetJoinedGroupListResp
-
 	for _, v := range joinedGroupList {
 		var groupNode open_im_sdk.GroupInfo
 		num := imdb.GetGroupMemberNumByGroupId(v.GroupID)
@@ -160,6 +160,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		group, err := imdb.FindGroupInfoByGroupId(v.GroupID)
 		if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
 			utils.CopyStructFields(&groupNode, group)
+			groupNode.CreateTime = group.CreateTime
 			utils.CopyStructFields(groupNode.Owner, owner)
 			groupNode.MemberCount = uint32(num)
 			resp.GroupList = append(resp.GroupList, &groupNode)
@@ -177,7 +178,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.InviteUserToGroupReq) (*pbGroup.InviteUserToGroupResp, error) {
 	log.NewInfo(req.OperationID, "InviteUserToGroup args ", req.String())
 
-	if !imdb.IsExistGroupMember(req.GroupID, req.OpUserID) && !utils.IsContain(req.OpUserID, config.Config.Manager.AppManagerUid) {
+	if !imdb.IsExistGroupMember(req.GroupID, req.OpUserID) && !token_verify.IsMangerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "no permission InviteUserToGroup ", req.GroupID, req.OpUserID)
 		return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
@@ -191,6 +192,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	//from User:  invite: applicant
 	//to user:  invite: invited
 	var resp pbGroup.InviteUserToGroupResp
+	var okUserIDList []string
 	for _, v := range req.InvitedUserIDList {
 		var resultNode pbGroup.Id2Result
 		resultNode.UserID = v
@@ -217,7 +219,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
 			continue
 		}
-		chat.MemberInvitedNotification(req.OperationID, req.GroupID, req.OpUserID, v)
+		okUserIDList = append(okUserIDList, v)
 		err = db.DB.AddGroupMember(req.GroupID, toUserInfo.UserID)
 		if err != nil {
 			log.NewError(req.OperationID, "AddGroupMember failed ", err.Error(), req.GroupID, toUserInfo.UserID)
@@ -225,8 +227,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
 	}
 
+	chat.MemberInvitedNotification(req.OperationID, req.GroupID, req.OpUserID, req.Reason, okUserIDList)
 	resp.ErrCode = 0
-	log.NewInfo(req.OperationID, "InviteUserToGroup rpc return ", resp)
+	log.NewInfo(req.OperationID, "InviteUserToGroup rpc return ", resp.String())
 	return &resp, nil
 }
 
@@ -308,6 +311,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 	}
 
+	//op is app manager
 	if flag != 1 {
 		if token_verify.IsMangerUserID(req.OpUserID) {
 			flag = 1
@@ -332,6 +336,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 	}
 
+	var okUserIDList []string
 	//remove
 	var resp pbGroup.KickGroupMemberResp
 	for _, v := range req.KickedUserIDList {
@@ -347,19 +352,17 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: -1})
 		} else {
 			resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: 0})
+			okUserIDList = append(okUserIDList, v)
 		}
+
 		err = db.DB.DelGroupMember(req.GroupID, v)
 		if err != nil {
-			log.NewError(req.OperationID, "DelGroupMember failed ", err.Error(), req.GroupID, v.UserId)
+			log.NewError(req.OperationID, "DelGroupMember failed ", err.Error(), req.GroupID, v)
 		}
 	}
-
-	for _, v := range req.KickedUserIDList {
-		chat.MemberKickedNotification(req.OperationID, req.GroupID, req.OpUserID, v, req.Reason)
-	}
-
+	chat.MemberKickedNotification(req, okUserIDList)
 	resp.ErrCode = 0
-	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp)
+	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp.String())
 	return &resp, nil
 }
 
@@ -377,11 +380,12 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 			continue
 		} else {
 			utils.CopyStructFields(&memberNode, memberInfo)
+			memberNode.JoinTime = memberInfo.JoinTime
 			resp.MemberList = append(resp.MemberList, &memberNode)
 		}
 	}
 	resp.ErrCode = 0
-	log.NewInfo(req.OperationID, "GetGroupMembersInfo rpc return ", resp)
+	log.NewInfo(req.OperationID, "GetGroupMembersInfo rpc return ", resp.String())
 	return &resp, nil
 }
 
@@ -407,6 +411,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		}
 		var groupInfo open_im_sdk.GroupInfo
 		utils.CopyStructFields(&groupInfo, groupInfoFromMysql)
+		groupInfo.CreateTime = groupInfoFromMysql.CreateTime
 		groupsInfoList = append(groupsInfoList, &groupInfo)
 	}
 
@@ -437,24 +442,24 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 		}
 	}
 	if req.ToUserID == "0" {
-		group, err := imdb.FindGroupInfoByGroupId(req.GroupID)
-		if err != nil {
-			log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", req.GroupID)
-			return reply, nil
-		}
-		member, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(req.GroupID, req.OpUserID)
-		if err != nil {
-			log.NewError(req.OperationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", req.GroupID, req.OpUserID)
-			return reply, nil
-		}
-		chat.ApplicationProcessedNotification(req.OperationID, req.FromUserID, *group, *member, req.HandleResult, req.HandledMsg)
+		//group, err := imdb.FindGroupInfoByGroupId(req.GroupID)
+		//if err != nil {
+		//	log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", req.GroupID)
+		//	return reply, nil
+		//}
+		//member, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(req.GroupID, req.OpUserID)
+		//if err != nil {
+		//	log.NewError(req.OperationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", req.GroupID, req.OpUserID)
+		//	return reply, nil
+		//}
+		chat.ApplicationProcessedNotification(req)
 		if req.HandleResult == 1 {
-			entrantUser, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(req.GroupID, req.FromUserID)
-			if err != nil {
-				log.NewError(req.OperationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", err.Error(), req.GroupID, req.FromUserID)
-				return reply, nil
-			}
-			chat.MemberEnterNotification(req.OperationID, req.GroupID, entrantUser)
+			//	entrantUser, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(req.GroupID, req.FromUserID)
+			//	if err != nil {
+			//		log.NewError(req.OperationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", err.Error(), req.GroupID, req.FromUserID)
+			//	return reply, nil
+			//	}
+			chat.MemberEnterNotification(req)
 		}
 	} else {
 		log.NewError(req.OperationID, "args failed ", req.String())
@@ -466,25 +471,20 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.CommonResp, error) {
 	log.NewInfo(req.OperationID, "JoinGroup args ", req.String())
-	//Parse token, to find current user information
-	//claims, err := token_verify.ParseToken(req.Token)
-	//if err != nil {
-	//	log.NewError(req.OperationID, "ParseToken failed", err.Error(), req.String())
-	//	return &pbGroup.CommonResp{ErrCode: constant.ErrParseToken.ErrCode, ErrMsg: constant.ErrParseToken.ErrMsg}, nil
-	//}
-	applicationUserInfo, err := im_mysql_model.FindUserByUID(req.FromUserID)
+
+	applicationUserInfo, err := im_mysql_model.FindUserByUID(req.OpUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "FindUserByUID failed ", err.Error(), req.FromUserID)
+		log.NewError(req.OperationID, "FindUserByUID failed ", err.Error(), req.OpUserID)
 		return &pbGroup.CommonResp{ErrCode: constant.ErrSearchUserInfo.ErrCode, ErrMsg: constant.ErrSearchUserInfo.ErrMsg}, nil
 	}
 
-	_, err = im_mysql_model.FindGroupRequestUserInfoByGroupIDAndUid(req.GroupID, req.FromUserID)
+	_, err = im_mysql_model.FindGroupRequestUserInfoByGroupIDAndUid(req.GroupID, req.OpUserID)
 	if err == nil {
-		err = im_mysql_model.DelGroupRequest(req.GroupID, req.FromUserID, "0")
+		err = im_mysql_model.DelGroupRequest(req.GroupID, req.OpUserID, "0")
 	}
 
-	if err = im_mysql_model.InsertIntoGroupRequest(req.GroupID, req.FromUserID, "0", req.ReqMessage, applicationUserInfo.Nickname, applicationUserInfo.FaceUrl); err != nil {
-		log.NewError(req.OperationID, "InsertIntoGroupRequest ", err.Error(), req.GroupID, req.FromUserID, "0", req.ReqMessage, applicationUserInfo.Nickname, applicationUserInfo.FaceUrl)
+	if err = im_mysql_model.InsertIntoGroupRequest(req.GroupID, req.OpUserID, "0", req.ReqMessage, applicationUserInfo.Nickname, applicationUserInfo.FaceUrl); err != nil {
+		log.NewError(req.OperationID, "InsertIntoGroupRequest ", err.Error(), req.GroupID, req.OpUserID, "0", req.ReqMessage, applicationUserInfo.Nickname, applicationUserInfo.FaceUrl)
 		return &pbGroup.CommonResp{ErrCode: constant.ErrJoinGroupApplication.ErrCode, ErrMsg: constant.ErrJoinGroupApplication.ErrMsg}, nil
 	}
 
@@ -493,12 +493,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		log.NewError(req.OperationID, "FindGroupMemberListByGroupIdAndFilterInfo failed ", req.GroupID, constant.GroupOwner, err)
 		return &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}, nil
 	}
-	group, err := im_mysql_model.FindGroupInfoByGroupId(req.GroupID)
-	if err != nil {
-		log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", req.GroupID)
-		return &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}, nil
-	}
-	chat.ReceiveJoinApplicationNotification(req.OperationID, memberList[0].UserID, applicationUserInfo, group)
+
+	chat.ReceiveJoinApplicationNotification(req)
 
 	log.NewInfo(req.OperationID, "ReceiveJoinApplicationNotification rpc JoinGroup success return")
 	return &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}, nil
@@ -525,7 +521,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		//	return &pbGroup.CommonResp{ErrorCode: constant.ErrQuitGroup.ErrCode, ErrorMsg: constant.ErrQuitGroup.ErrMsg}, nil
 	}
 
-	chat.MemberLeaveNotification(req.OperationID, req.GroupID, req.OpUserID)
+	chat.MemberLeaveNotification(req)
 	log.NewInfo(req.OperationID, "rpc quit group is success return")
 	return &pbGroup.CommonResp{}, nil
 }
@@ -578,7 +574,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	}
 
 	if changedType != 0 {
-		chat.GroupInfoChangedNotification(req.OperationID, changedType, req.GroupInfo.GroupID, req.OpUserID)
+		chat.GroupInfoChangedNotification(req)
 	}
 
 	return &pbGroup.CommonResp{}, nil

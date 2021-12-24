@@ -15,7 +15,7 @@ func InsertIntoGroup(groupId, name, introduction, notification, faceUrl, ex stri
 	}
 	//Default group name
 	if name == "" {
-		name = "groupChat"
+		name = "Group Chat"
 	}
 	toInsertInfo := Group{GroupID: groupId, GroupName: name, Introduction: introduction, Notification: notification, FaceUrl: faceUrl, CreateTime: time.Now(), Ex: ex}
 	err = dbConn.Table("group").Create(toInsertInfo).Error

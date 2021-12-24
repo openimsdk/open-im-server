@@ -1,7 +1,7 @@
 package friend
 
 import (
-	"Open_IM/internal/rpc/chat"
+	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
@@ -124,7 +124,7 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 		return &pbFriend.CommonResp{ErrCode: constant.ErrMysql.ErrCode, ErrMsg: constant.ErrMysql.ErrMsg}, nil
 	}
 	log.NewInfo(req.CommID.OperationID, "InsertInToUserBlackList ok ", req.CommID.FromUserID, req.CommID.ToUserID)
-	chat.BlackAddedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID)
+	chat.BlackAddedNotification(req)
 	return &pbFriend.CommonResp{}, nil
 
 }
@@ -148,7 +148,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 		return &pbFriend.CommonResp{ErrCode: constant.ErrAddFriend.ErrCode, ErrMsg: constant.ErrAddFriend.ErrMsg}, nil
 	}
 
-	chat.FriendApplicationAddedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID, req.ReqMessage)
+	chat.FriendApplicationAddedNotification(req)
 	return &pbFriend.CommonResp{}, nil
 }
 
@@ -195,7 +195,10 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 					c.ErrCode = 408
 					continue
 				}
-				chat.FriendAddedNotification(req.OperationID, req.OpUserID, req.FromUserID, v)
+				for _, v := range req.FriendUserIDList {
+					chat.FriendAddedNotification(req.OperationID, req.OpUserID, req.FromUserID, v)
+				}
+
 			}
 		}
 	}
@@ -204,10 +207,11 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	return &resp, nil
 }
 
+//process Friend application
 func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddFriendResponseReq) (*pbFriend.CommonResp, error) {
 	log.NewInfo(req.CommID.OperationID, "AddFriendResponse args ", req.String())
 
-	if !token_verify.CheckAccess(rreq.CommID.FromUserID, req.CommID.ToUserID) {
+	if !token_verify.CheckAccess(req.CommID.FromUserID, req.CommID.ToUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess failed ", req.CommID.FromUserID, req.CommID.ToUserID)
 		return &pbFriend.CommonResp{ErrCode: constant.ErrAgreeToAddFriend.ErrCode, ErrMsg: constant.ErrAgreeToAddFriend.ErrMsg}, nil
 	}
@@ -253,7 +257,8 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 		}
 	}
 
-	chat.FriendApplicationProcessedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID, req.Flag)
+	chat.FriendApplicationProcessedNotification(req)
+	chat.FriendAddedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID)
 	return &pbFriend.CommonResp{}, nil
 }
 
@@ -271,7 +276,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 		return &pbFriend.CommonResp{ErrCode: constant.ErrMysql.ErrCode, ErrMsg: constant.ErrMysql.ErrMsg}, nil
 	}
 	log.NewInfo(req.CommID.OperationID, "DeleteFriend rpc ok")
-	chat.FriendDeletedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID)
+	chat.FriendDeletedNotification(req)
 	return &pbFriend.CommonResp{}, nil
 }
 
@@ -322,7 +327,7 @@ func (s *friendServer) SetFriendComment(ctx context.Context, req *pbFriend.SetFr
 		return &pbFriend.CommonResp{ErrCode: constant.ErrSetFriendComment.ErrCode, ErrMsg: constant.ErrSetFriendComment.ErrMsg}, nil
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc SetFriendComment ok")
-	chat.FriendInfoChangedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID)
+	chat.FriendInfoChangedNotification(req)
 	return &pbFriend.CommonResp{}, nil
 }
 
@@ -339,7 +344,7 @@ func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.Remove
 		return &pbFriend.CommonResp{ErrCode: constant.ErrMysql.ErrCode, ErrMsg: constant.ErrMysql.ErrMsg}, nil
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc RemoveBlacklist ok")
-	chat.BlackDeletedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID)
+	chat.BlackDeletedNotification(req)
 	return &pbFriend.CommonResp{}, nil
 }
 

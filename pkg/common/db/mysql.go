@@ -91,18 +91,6 @@ func initMysqlDB() {
 		panic(err.Error())
 	}
 
-	sqlTable = "CREATE TABLE IF NOT EXISTS `black_list` (" +
-		" `uid` varchar(32) NOT NULL COMMENT 'uid'," +
-		" `begin_disable_time` datetime DEFAULT NULL," +
-		" `end_disable_time` datetime DEFAULT NULL," +
-		" `ex` varchar(1024) DEFAULT NULL," +
-		" PRIMARY KEY (`uid`) USING BTREE" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
 	sqlTable = "CREATE TABLE IF NOT EXISTS `user_black_list` (" +
 		" `owner_id` varchar(64) NOT NULL," +
 		" `block_id` varchar(64) NOT NULL," +

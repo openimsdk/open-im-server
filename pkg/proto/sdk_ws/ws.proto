@@ -164,7 +164,6 @@ message MemberEnterTips{
   uint64 OperationTime = 3;
 }
 
-
 //Actively leave the group
 message MemberLeaveTips{
   GroupInfo Group = 1;
@@ -175,20 +174,19 @@ message MemberLeaveTips{
 message MemberInvitedTips{
   GroupInfo Group = 1;
   GroupMemberFullInfo OpUser = 2;
-  GroupMemberFullInfo InvitedUser = 3;
+  repeated GroupMemberFullInfo InvitedUserList = 3;
   uint64 OperationTime = 4;
 }
 
 message MemberKickedTips{
   GroupInfo Group = 1;
   GroupMemberFullInfo OpUser = 2;
-  GroupMemberFullInfo KickedUser = 3;
+  repeated GroupMemberFullInfo KickedUserList = 3;
   uint64 OperationTime = 4;
 }
 
-
 message MemberInfoChangedTips{
-  int32 ChangeType = 1; //1:info changed; 2:mute
+  int32 ChangeType = 1; ///bitwise operators 0001:member info changed; 0010:mute ;
   GroupMemberFullInfo OpUser = 2; //who do this
   GroupMemberFullInfo FinalInfo = 3; //
   uint64 MuteTime = 4;
@@ -203,12 +201,12 @@ message GroupCreatedTips{
 }
 
 message GroupInfoChangedTips{
-  int32 ChangedType = 1; //bitwise operators: 1:groupName; 10:Notification  100:Introduction; 1000:FaceUrl
+  int32 ChangedType = 1; //bitwise operators: 0001:groupName; 0010:Notification  0100:Introduction; 1000:FaceUrl
   GroupInfo Group = 2;
   GroupMemberFullInfo OpUser = 3;
 }
 
-message ReceiveJoinApplicationTips{
+message JoinGroupApplicationTips{
   GroupInfo Group = 1;
   PublicUserInfo Applicant  = 2;
   string 	Reason = 3;
@@ -235,56 +233,52 @@ message FriendApplication{
   string AddWording = 3;
 }
 
-//user1 add user2
+message FromToUserID{
+  string FromUserID = 1;
+  string ToUserID = 2;
+}
+
+//FromUserID apply to add ToUserID
 message FriendApplicationAddedTips{
-  PublicUserInfo OpUser = 1; //user1
-  FriendApplication Application = 2;
-  PublicUserInfo  OpedUser = 3; //user2
-  uint64 OperationTime = 4;
+    FromToUserID FromToUserID = 1;
 }
 
-// user2 accept or reject
+//FromUserID accept or reject ToUserID
 message FriendApplicationProcessedTips{
-  PublicUserInfo     OpUser = 1;  //user2
-  PublicUserInfo     OpedUser = 2; //user1
-  int32 result = 3; //1: accept; -1: reject
-  uint64 OperationTime = 4;
+  FromToUserID FromToUserID = 1;
 }
 
+// FromUserID  Added a friend ToUserID
 message FriendAddedTips{
   FriendInfo Friend = 1;
   uint64 OperationTime = 2;
+  PublicUserInfo     OpUser = 3;  //who do this
+
 }
 
+// FromUserID  deleted a friend ToUserID
 message FriendDeletedTips{
-  FriendInfo Friend = 1;
-  uint64 OperationTime = 2;
+  FromToUserID FromToUserID = 1;
 }
 
-message BlackInfo{
-  PublicUserInfo OwnerUser = 1;
-  uint64 CreateTime = 3;
-  PublicUserInfo BlackUser = 4;
-}
+//message BlackInfo{
+//  PublicUserInfo OwnerUser = 1;
+//  uint64 CreateTime = 3;
+//  PublicUserInfo BlackUser = 4;
+//}
 
 message BlackAddedTips{
-  BlackInfo Black = 1;
-  uint64 OperationTime = 2;
+  FromToUserID FromToUserID = 1;
 }
 
 message BlackDeletedTips{
-  BlackInfo Black = 1;
-  uint64 OperationTime = 2;
+  FromToUserID FromToUserID = 1;
 }
 
 message FriendInfoChangedTips{
-  FriendInfo Friend = 1;
-  PublicUserInfo OpUser = 2;
-  uint64 OperationTime = 3;
+  FromToUserID FromToUserID = 1;
 }
 //////////////////////user/////////////////////
 message SelfInfoUpdatedTips{
-  UserInfo SelfUserInfo = 1;
-  PublicUserInfo OpUser = 2;
-  uint64 OperationTime = 3;
+  string UserID = 1;
 }

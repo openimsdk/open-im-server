@@ -2,6 +2,7 @@ package user
 
 import (
 	"Open_IM/internal/push/logic"
+	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
@@ -49,7 +50,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		log.ErrorByKv("get friend list rpc server failed", req.OperationID, "err", err.Error(), "req", req.String())
 		return &pbUser.CommonResp{}, nil
 	}
-	if RpcResp.ErrorCode != 0 {
+	if RpcResp.ErrCode != 0 {
 		log.ErrorByKv("get friend list rpc server failed", req.OperationID, "err", err.Error(), "req", req.String())
 		return &pbUser.CommonResp{}, nil
 	}
@@ -62,6 +63,8 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if self != nil {
 		name, faceUrl = self.Name, self.Icon
 	}
+
+	chat.SelfInfoUpdatedNotification(req.OperationID, req.Uid)
 	for _, v := range RpcResp.Data {
 		logic.SendMsgByWS(&pbChat.WSToMsgSvrChatMsg{
 			SendID:         ownerUid,

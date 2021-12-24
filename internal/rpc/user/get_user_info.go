@@ -75,14 +75,7 @@ func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq
 				log.ErrorByKv("search userinfo failed", req.OperationID, "userID", userID, "err=%s", err.Error())
 				continue
 			}
-			userInfo.Uid = user.UID
-			userInfo.Icon = user.Icon
-			userInfo.Name = user.Name
-			userInfo.Gender = user.Gender
-			userInfo.Mobile = user.Mobile
-			userInfo.Birth = user.Birth
-			userInfo.Email = user.Email
-			userInfo.Ex = user.Ex
+			utils.CopyStructFields(&userInfo, user)
 			userInfoList = append(userInfoList, &userInfo)
 		}
 	} else {

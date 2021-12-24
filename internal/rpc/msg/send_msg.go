@@ -10,6 +10,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
+	pbFriend "Open_IM/pkg/proto/friend"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
@@ -308,51 +309,82 @@ func Notification(n *NotificationMsg, onlineUserOnly bool) {
 //  repeated GroupMemberFullInfo MemberList = 3;
 //  uint64 OperationTime = 4;
 //} creator->group
-func GroupCreatedNotification(req *pbGroup.CreateGroupReq, groupID string) {
-	var n NotificationMsg
-	n.SendID = req.OpUserID
-	n.RecvID = groupID
-	n.ContentType = constant.CreateGroupTip
-	n.SessionType = constant.GroupChatType
-	n.MsgFrom = constant.SysMsgType
-	n.OperationID = req.OperationID
 
-	var groupCreated open_im_sdk.GroupCreatedTips
-	groupCreated.Group = &open_im_sdk.GroupInfo{}
-
-	if token_verify.IsMangerUserID(req.OpUserID) {
-		u, err := imdb.FindUserByUID(req.OpUserID)
-		if err != nil || u == nil {
+func setOpUserInfo(operationID, opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupMemberFullInfo) {
+	if token_verify.IsMangerUserID(opUserID) {
+		u, err := imdb.FindUserByUID(opUserID)
+		if err != nil {
+			log.NewError(operationID, "FindUserByUID failed ", err.Error(), opUserID)
 			return
 		}
-		utils.CopyStructFields(groupCreated.Creator, u)
-		groupCreated.Creator.AppMangerLevel = 1
+		utils.CopyStructFields(groupMemberInfo, u)
+		groupMemberInfo.AppMangerLevel = 1
 	} else {
-		u, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(groupID, req.OpUserID)
-		if err != nil || u == nil {
+		u, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(groupID, opUserID)
+		if err != nil {
+			log.NewError(operationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", err.Error(), groupID, opUserID)
 			return
 		}
-		utils.CopyStructFields(groupCreated.Creator, u)
+		utils.CopyStructFields(groupMemberInfo, u)
 	}
+}
 
+func setGroupInfo(operationID, groupID string, groupInfo *open_im_sdk.GroupInfo, ownerUserID string) {
 	group, err := imdb.FindGroupInfoByGroupId(groupID)
-	if err != nil || group == nil {
+	if err != nil {
+		log.NewError(operationID, "FindGroupInfoByGroupId failed ", err.Error(), groupID)
 		return
 	}
-	utils.CopyStructFields(groupCreated.Group, group)
-	groupCreated.Creator = &open_im_sdk.GroupMemberFullInfo{}
+	utils.CopyStructFields(groupInfo, group)
 
-	for _, v := range req.InitMemberList {
+	if ownerUserID != "" {
+		groupInfo.Owner = &open_im_sdk.PublicUserInfo{}
+		setGroupPublicUserInfo(operationID, groupID, ownerUserID, groupInfo.Owner)
+	}
+}
+
+func setGroupMemberInfo(operationID, groupID, userID string, groupMemberInfo *open_im_sdk.GroupMemberFullInfo) {
+	group, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(groupID, userID)
+	if err != nil {
+		log.NewError(operationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", err.Error(), groupID, userID)
+		return
+	}
+	utils.CopyStructFields(groupMemberInfo, group)
+}
+
+func setGroupPublicUserInfo(operationID, groupID, userID string, publicUserInfo *open_im_sdk.PublicUserInfo) {
+	group, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(groupID, userID)
+	if err != nil {
+		log.NewError(operationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", err.Error(), groupID, userID)
+		return
+	}
+	utils.CopyStructFields(publicUserInfo, group)
+}
+
+//创建群后调用
+func GroupCreatedNotification(operationID, opUserID, OwnerUserID, groupID string, initMemberList []string) {
+	var n NotificationMsg
+	n.SendID = opUserID
+	n.RecvID = groupID
+	n.ContentType = constant.GroupCreatedNotification
+	n.SessionType = constant.GroupChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = operationID
+
+	GroupCreatedTips := open_im_sdk.GroupCreatedTips{Group: &open_im_sdk.GroupInfo{},
+		Creator: &open_im_sdk.GroupMemberFullInfo{}}
+	setOpUserInfo(operationID, GroupCreatedTips.Creator.UserID, groupID, GroupCreatedTips.Creator)
+
+	setGroupInfo(operationID, groupID, GroupCreatedTips.Group, OwnerUserID)
+
+	for _, v := range initMemberList {
 		var groupMemberInfo open_im_sdk.GroupMemberFullInfo
-		member, err := imdb.GetMemberInfoById(groupID, v.UserID)
-		if err != nil {
-			utils.CopyStructFields(&groupMemberInfo, member)
-		}
-		groupCreated.MemberList = append(groupCreated.MemberList, &groupMemberInfo)
+		setGroupMemberInfo(operationID, groupID, v, &groupMemberInfo)
+		GroupCreatedTips.MemberList = append(GroupCreatedTips.MemberList, &groupMemberInfo)
 	}
 
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(groupCreated)
+	tips.Detail, _ = json.Marshal(GroupCreatedTips)
 	tips.DefaultTips = config.Config.Notification.GroupCreated.DefaultTips.Tips
 	n.Content, _ = json.Marshal(tips)
 	Notification(&n, false)
@@ -362,27 +394,44 @@ func GroupCreatedNotification(req *pbGroup.CreateGroupReq, groupID string) {
 //  GroupInfo Group = 1;
 //  PublicUserInfo Applicant  = 2;
 //  string 	Reason = 3;
-//}
-func ReceiveJoinApplicationNotification(operationID, RecvID string, applicant *immysql.User, group *immysql.Group) {
+//}  apply->all managers GroupID              string   `protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"`
+//	ReqMessage           string   `protobuf:"bytes,2,opt,name=ReqMessage" json:"ReqMessage,omitempty"`
+//	OpUserID             string   `protobuf:"bytes,3,opt,name=OpUserID" json:"OpUserID,omitempty"`
+//	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID" json:"OperationID,omitempty"`
+//申请进群后调用
+func JoinApplicationNotification(req *pbGroup.JoinGroupReq) {
+	managerList, err := imdb.GetOwnerManagerByGroupId(req.GroupID)
+	if err != nil {
+		log.NewError(req.OperationID, "GetOwnerManagerByGroupId failed ", err.Error(), req.GroupID)
+		return
+	}
+
 	var n NotificationMsg
-	n.SendID = applicant.UserID
-	n.RecvID = RecvID
-	n.ContentType = constant.ApplyJoinGroupTip
+	n.SendID = req.OpUserID
+	n.ContentType = constant.JoinApplicationNotification
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
-	n.OperationID = operationID
+	n.OperationID = req.OperationID
 
-	var joniGroup open_im_sdk.ReceiveJoinApplicationTips
-	joniGroup.Group = &open_im_sdk.GroupInfo{}
-	utils.CopyStructFields(joniGroup.Group, group)
-	joniGroup.Applicant = &open_im_sdk.PublicUserInfo{}
-	utils.CopyStructFields(joniGroup.Applicant, applicant)
+	JoinGroupApplicationTips := open_im_sdk.JoinGroupApplicationTips{Group: &open_im_sdk.GroupInfo{}, Applicant: &open_im_sdk.PublicUserInfo{}}
+	setGroupInfo(req.OperationID, req.GroupID, JoinGroupApplicationTips.Group, "")
+
+	apply, err := imdb.FindUserByUID(req.OpUserID)
+	if err != nil {
+		log.NewError(req.OperationID, "FindUserByUID failed ", err.Error(), req.OpUserID)
+		return
+	}
+	utils.CopyStructFields(JoinGroupApplicationTips.Applicant, apply)
+	JoinGroupApplicationTips.Reason = req.ReqMessage
 
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(joniGroup)
-	tips.DefaultTips = config.Config.Notification.ApplyJoinGroup.DefaultTips.Tips
+	tips.Detail, _ = json.Marshal(JoinGroupApplicationTips)
+	tips.DefaultTips = "JoinGroupApplicationTips"
 	n.Content, _ = json.Marshal(tips)
-	Notification(&n, false)
+	for _, v := range managerList {
+		n.RecvID = v.UserID
+		Notification(&n, true)
+	}
 }
 
 //message ApplicationProcessedTips{
@@ -391,8 +440,28 @@ func ReceiveJoinApplicationNotification(operationID, RecvID string, applicant *i
 //  int32 Result = 3;
 //  string 	Reason = 4;
 //}
-func ApplicationProcessedNotification(operationID, RecvID string, group immysql.Group, opUser immysql.GroupMember, result int32, Reason string) {
+//处理进群请求后调用
+func ApplicationProcessedNotification(req *pbGroup.GroupApplicationResponseReq) {
+	var n NotificationMsg
+	n.SendID = req.OpUserID
+	n.ContentType = constant.ApplicationProcessedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.OperationID
+	n.RecvID = req.ToUserID
 
+	ApplicationProcessedTips := open_im_sdk.ApplicationProcessedTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
+	setGroupInfo(req.OperationID, req.GroupID, ApplicationProcessedTips.Group, "")
+	setOpUserInfo(req.OperationID, req.OpUserID, req.GroupID, ApplicationProcessedTips.OpUser)
+	ApplicationProcessedTips.Reason = req.HandledMsg
+	ApplicationProcessedTips.Result = req.HandleResult
+
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(ApplicationProcessedTips)
+	tips.DefaultTips = "ApplicationProcessedNotification"
+	n.Content, _ = json.Marshal(tips)
+
+	Notification(&n, true)
 }
 
 //message MemberInvitedTips{
@@ -401,8 +470,29 @@ func ApplicationProcessedNotification(operationID, RecvID string, group immysql.
 //  GroupMemberFullInfo InvitedUser = 3;
 //  uint64 OperationTime = 4;
 //}
-func MemberInvitedNotification(operationID string, group immysql.Group, opUser immysql.User, invitedUser immysql.GroupMember) {
+//被邀请进群后调用
+func MemberInvitedNotification(operationID, groupID, opUserID, reason string, invitedUserIDList []string) {
+	var n NotificationMsg
+	n.SendID = opUserID
+	n.ContentType = constant.MemberInvitedNotification
+	n.SessionType = constant.GroupChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = operationID
 
+	ApplicationProcessedTips := open_im_sdk.MemberInvitedTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
+	setGroupInfo(operationID, groupID, ApplicationProcessedTips.Group, "")
+	setOpUserInfo(operationID, opUserID, groupID, ApplicationProcessedTips.OpUser)
+	for _, v := range invitedUserIDList {
+		var groupMemberInfo open_im_sdk.GroupMemberFullInfo
+		setGroupMemberInfo(operationID, groupID, v, &groupMemberInfo)
+		ApplicationProcessedTips.InvitedUserList = append(ApplicationProcessedTips.InvitedUserList, &groupMemberInfo)
+	}
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(ApplicationProcessedTips)
+	tips.DefaultTips = "MemberInvitedNotification"
+	n.Content, _ = json.Marshal(tips)
+	n.RecvID = groupID
+	Notification(&n, true)
 }
 
 //message MemberKickedTips{
@@ -411,12 +501,35 @@ func MemberInvitedNotification(operationID string, group immysql.Group, opUser i
 //  GroupMemberFullInfo KickedUser = 3;
 //  uint64 OperationTime = 4;
 //}
+//被踢后调用
+func MemberKickedNotification(req *pbGroup.KickGroupMemberReq, kickedUserIDList []string) {
+	var n NotificationMsg
+	n.SendID = req.OpUserID
+	n.ContentType = constant.MemberKickedNotification
+	n.SessionType = constant.GroupChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.OperationID
 
-func MemberKickedNotificationID(operationID, GroupID, opUserID, kickedUserID, reason string) {
+	MemberKickedTips := open_im_sdk.MemberKickedTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
+	setGroupInfo(req.OperationID, req.GroupID, MemberKickedTips.Group, "")
+	setOpUserInfo(req.OperationID, req.OpUserID, req.GroupID, MemberKickedTips.OpUser)
+	for _, v := range kickedUserIDList {
+		var groupMemberInfo open_im_sdk.GroupMemberFullInfo
+		setGroupMemberInfo(req.OperationID, req.GroupID, v, &groupMemberInfo)
+		MemberKickedTips.KickedUserList = append(MemberKickedTips.KickedUserList, &groupMemberInfo)
+	}
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(MemberKickedTips)
+	tips.DefaultTips = "MemberKickedNotification"
+	n.Content, _ = json.Marshal(tips)
+	n.RecvID = req.GroupID
+	Notification(&n, true)
 
-}
-func MemberKickedNotification(operationID string, group immysql.Group, opUser immysql.GroupMember, KickedUser immysql.GroupMember) {
-
+	for _, v := range kickedUserIDList {
+		n.SessionType = constant.SingleChatType
+		n.RecvID = v
+		Notification(&n, true)
+	}
 }
 
 //message GroupInfoChangedTips{
@@ -424,8 +537,26 @@ func MemberKickedNotification(operationID string, group immysql.Group, opUser im
 //  GroupInfo Group = 2;
 //  GroupMemberFullInfo OpUser = 3;
 //}
-func GroupInfoChangedNotification(operationID string, changedType int32, groupID string, opUserID string) {
 
+//群信息改变后掉用
+func GroupInfoChangedNotification(req *pbGroup.SetGroupInfoReq) {
+	var n NotificationMsg
+	n.SendID = req.OpUserID
+	n.ContentType = constant.GroupInfoChangedNotification
+	n.SessionType = constant.GroupChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.OperationID
+
+	GroupInfoChangedTips := open_im_sdk.GroupInfoChangedTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
+	setGroupInfo(req.OperationID, req.GroupInfo.GroupID, GroupInfoChangedTips.Group, "")
+	setOpUserInfo(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, GroupInfoChangedTips.OpUser)
+
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(GroupInfoChangedTips)
+	tips.DefaultTips = "GroupInfoChangedNotification"
+	n.Content, _ = json.Marshal(tips)
+	n.RecvID = req.GroupInfo.GroupID
+	Notification(&n, true)
 }
 
 /*
@@ -458,8 +589,30 @@ func GroupInfoChangedNotification(operationID string, changedType int32, group *
 //  GroupMemberFullInfo LeaverUser = 2;
 //  uint64 OperationTime = 3;
 //}
-func MemberLeaveNotification(operationID, groupID, leaverUserID string) {
 
+//群成员退群后调用
+func MemberLeaveNotification(req *pbGroup.QuitGroupReq) {
+	var n NotificationMsg
+	n.SendID = req.OpUserID
+	n.ContentType = constant.MemberLeaveNotification
+	n.SessionType = constant.GroupChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.OperationID
+
+	MemberLeaveTips := open_im_sdk.MemberLeaveTips{Group: &open_im_sdk.GroupInfo{}, LeaverUser: &open_im_sdk.GroupMemberFullInfo{}}
+	setGroupInfo(req.OperationID, req.GroupID, MemberLeaveTips.Group, "")
+	setOpUserInfo(req.OperationID, req.OpUserID, req.GroupID, MemberLeaveTips.LeaverUser)
+
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(MemberLeaveTips)
+	tips.DefaultTips = "MemberLeaveNotification"
+	n.Content, _ = json.Marshal(tips)
+	n.RecvID = req.GroupID
+	Notification(&n, true)
+
+	n.SessionType = constant.SingleChatType
+	n.RecvID = req.OpUserID
+	Notification(&n, true)
 }
 
 //message MemberEnterTips{
@@ -467,7 +620,25 @@ func MemberLeaveNotification(operationID, groupID, leaverUserID string) {
 //  GroupMemberFullInfo EntrantUser = 2;
 //  uint64 OperationTime = 3;
 //}
-func MemberEnterNotification(operationID string, group *immysql.Group, entrantUser *immysql.GroupMember) {
+//群成员主动申请进群，管理员同意后调用，
+func MemberEnterNotification(req *pbGroup.GroupApplicationResponseReq) {
+	var n NotificationMsg
+	n.SendID = req.OpUserID
+	n.ContentType = constant.MemberEnterNotification
+	n.SessionType = constant.GroupChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.OperationID
+
+	MemberLeaveTips := open_im_sdk.MemberEnterTips{Group: &open_im_sdk.GroupInfo{}, EntrantUser: &open_im_sdk.GroupMemberFullInfo{}}
+	setGroupInfo(req.OperationID, req.GroupID, MemberLeaveTips.Group, "")
+	setOpUserInfo(req.OperationID, req.OpUserID, req.GroupID, MemberLeaveTips.EntrantUser)
+
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(MemberLeaveTips)
+	tips.DefaultTips = "MemberEnterNotification"
+	n.Content, _ = json.Marshal(tips)
+	n.RecvID = req.GroupID
+	Notification(&n, true)
 
 }
 
@@ -478,47 +649,143 @@ func MemberEnterNotification(operationID string, group *immysql.Group, entrantUs
 //  uint64 MuteTime = 4;
 //  GroupInfo Group = 5;
 //}
-func MemberInfoChangedNotification(operationID string, group *immysql.Group, opUser *immysql.GroupMember, userFinalInfo *immysql.GroupMember) {
+//func MemberInfoChangedNotification(operationID string, group *immysql.Group, opUser *immysql.GroupMember, userFinalInfo *immysql.GroupMember) {
 
-}
+//}
 
 //message FriendApplicationAddedTips{
 //  PublicUserInfo OpUser = 1; //user1
 //  FriendApplication Application = 2;
 //  PublicUserInfo  OpedUser = 3; //user2
 //}
-func FriendApplicationAddedNotification(operationID string, opUser *immysql.User, opedUser *immysql.User, application *immysql.FriendRequest) {
 
+func getFromToUserNickname(operationID, fromUserID, toUserID string) (string, string) {
+	from, err1 := imdb.FindUserByUID(fromUserID)
+	to, err2 := imdb.FindUserByUID(toUserID)
+	if err1 != nil || err2 != nil {
+		log.NewError("FindUserByUID failed ", err1, err2, fromUserID, toUserID)
+	}
+	fromNickname, toNickname := "", ""
+	if from != nil {
+		fromNickname = from.Nickname
+	}
+	if to != nil {
+		toNickname = to.Nickname
+	}
+	return fromNickname, toNickname
 }
 
-//message FriendApplicationProcessedTips{
-//  PublicUserInfo     OpUser = 1;  //user2
-//  PublicUserInfo     OpedUser = 2; //user1
-//  int32 result = 3; //1: accept; -1: reject
-//}
-func FriendApplicationProcessedNotification(operationID string, opUser *immysql.User, OpedUser *immysql.User, result int32) {
+func FriendApplicationAddedNotification(req *pbFriend.AddFriendReq) {
+	var n NotificationMsg
+	n.SendID = req.CommID.FromUserID
+	n.RecvID = req.CommID.ToUserID
+	n.ContentType = constant.FriendApplicationAddedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.CommID.OperationID
 
+	var FriendApplicationAddedTips open_im_sdk.FriendApplicationAddedTips
+	FriendApplicationAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	FriendApplicationAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	fromUserNickname, toUserNickname := getFromToUserNickname(req.CommID.OperationID, req.CommID.FromUserID, req.CommID.ToUserID)
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(FriendApplicationAddedTips)
+	tips.DefaultTips = fromUserNickname + " FriendApplicationAddedNotification " + toUserNickname
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, true)
 }
 
-//message FriendAddedTips{
-//  FriendInfo Friend = 1;
-//}
-//message FriendInfo{
-//  UserInfo OwnerUser = 1;
-//  string Remark = 2;
-//  uint64 CreateTime = 3;
-//  UserInfo FriendUser = 4;
-//}
+func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) {
+	var n NotificationMsg
+	n.SendID = req.CommID.FromUserID
+	n.RecvID = req.CommID.ToUserID
+	n.ContentType = constant.FriendApplicationProcessedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.CommID.OperationID
 
-func FriendAddedNotification(operationID string, opUser *immysql.User, friendUser *immysql.Friend) {
+	var FriendApplicationProcessedTips open_im_sdk.FriendApplicationProcessedTips
+	FriendApplicationProcessedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	FriendApplicationProcessedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	fromUserNickname, toUserNickname := getFromToUserNickname(req.CommID.OperationID, req.CommID.FromUserID, req.CommID.ToUserID)
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(FriendApplicationProcessedTips)
+	tips.DefaultTips = fromUserNickname + " FriendApplicationProcessedNotification " + toUserNickname
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, true)
+}
 
+func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string) {
+	var n NotificationMsg
+	n.SendID = fromUserID
+	n.RecvID = toUserID
+	n.ContentType = constant.FriendAddedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = operationID
+
+	var FriendAddedTips open_im_sdk.FriendAddedTips
+
+	user, err := imdb.FindUserByUID(opUserID)
+	if err != nil {
+		log.NewError(operationID, "FindUserByUID failed ", err.Error(), opUserID)
+
+	} else {
+		utils.CopyStructFields(FriendAddedTips.OpUser, user)
+	}
+
+	friend, err := imdb.FindFriendRelationshipFromFriend(fromUserID, toUserID)
+	if err != nil {
+		log.NewError(operationID, "FindUserByUID failed ", err.Error(), fromUserID, toUserID)
+	} else {
+		FriendAddedTips.Friend.Remark = friend.Remark
+	}
+
+	from, err := imdb.FindUserByUID(fromUserID)
+	if err != nil {
+		log.NewError(operationID, "FindUserByUID failed ", err.Error(), fromUserID)
+
+	} else {
+		utils.CopyStructFields(FriendAddedTips.Friend.OwnerUser, from)
+	}
+
+	to, err := imdb.FindUserByUID(toUserID)
+	if err != nil {
+		log.NewError(operationID, "FindUserByUID failed ", err.Error(), toUserID)
+
+	} else {
+		utils.CopyStructFields(FriendAddedTips.Friend.FriendUser, to)
+	}
+
+	fromUserNickname, toUserNickname := FriendAddedTips.Friend.OwnerUser.Nickname, FriendAddedTips.Friend.FriendUser.Nickname
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(FriendAddedTips)
+	tips.DefaultTips = fromUserNickname + " FriendAddedNotification " + toUserNickname
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, true)
 }
 
 //message FriendDeletedTips{
 //  FriendInfo Friend = 1;
 //}
-func FriendDeletedNotification(operationID string, opUser *immysql.User, friendUser *immysql.Friend) {
+func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
+	var n NotificationMsg
+	n.SendID = req.CommID.FromUserID
+	n.RecvID = req.CommID.ToUserID
+	n.ContentType = constant.FriendDeletedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.CommID.OperationID
 
+	var FriendDeletedTips open_im_sdk.FriendDeletedTips
+	FriendDeletedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	FriendDeletedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	fromUserNickname, toUserNickname := getFromToUserNickname(req.CommID.OperationID, req.CommID.FromUserID, req.CommID.ToUserID)
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(FriendDeletedTips)
+	tips.DefaultTips = fromUserNickname + " FriendDeletedNotification " + toUserNickname
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, true)
 }
 
 //message FriendInfoChangedTips{
@@ -526,8 +793,24 @@ func FriendDeletedNotification(operationID string, opUser *immysql.User, friendU
 //  PublicUserInfo OpUser = 2;
 //  uint64 OperationTime = 3;
 //}
-func FriendInfoChangedNotification(operationID string, opUser *immysql.User, friendUser *immysql.Friend) {
+func FriendInfoChangedNotification(req *pbFriend.SetFriendCommentReq) {
+	var n NotificationMsg
+	n.SendID = req.CommID.FromUserID
+	n.RecvID = req.CommID.ToUserID
+	n.ContentType = constant.FriendInfoChangedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.CommID.OperationID
 
+	var FriendInfoChangedTips open_im_sdk.FriendInfoChangedTips
+	FriendInfoChangedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	FriendInfoChangedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	fromUserNickname, toUserNickname := getFromToUserNickname(req.CommID.OperationID, req.CommID.FromUserID, req.CommID.ToUserID)
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(FriendInfoChangedTips)
+	tips.DefaultTips = fromUserNickname + " FriendDeletedNotification " + toUserNickname
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, true)
 }
 
 //message BlackAddedTips{
@@ -539,15 +822,47 @@ func FriendInfoChangedNotification(operationID string, opUser *immysql.User, fri
 //  uint64 CreateTime = 3;
 //  PublicUserInfo BlackUser = 4;
 //}
-func BlackAddedNotification(operationID string, opUser *immysql.User, blackUser *immysql.User) {
+func BlackAddedNotification(req *pbFriend.AddBlacklistReq) {
+	var n NotificationMsg
+	n.SendID = req.CommID.FromUserID
+	n.RecvID = req.CommID.ToUserID
+	n.ContentType = constant.BlackAddedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.CommID.OperationID
 
+	var BlackAddedTips open_im_sdk.BlackAddedTips
+	BlackAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	BlackAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	fromUserNickname, toUserNickname := getFromToUserNickname(req.CommID.OperationID, req.CommID.FromUserID, req.CommID.ToUserID)
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(BlackAddedTips)
+	tips.DefaultTips = fromUserNickname + " BlackAddedNotification " + toUserNickname
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, true)
 }
 
 //message BlackDeletedTips{
 //  BlackInfo Black = 1;
 //}
-func BlackDeletedNotification(operationID string, opUser *immysql.User, blackUser *immysql.User) {
+func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
+	var n NotificationMsg
+	n.SendID = req.CommID.FromUserID
+	n.RecvID = req.CommID.ToUserID
+	n.ContentType = constant.BlackDeletedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = req.CommID.OperationID
 
+	var BlackDeletedTips open_im_sdk.BlackDeletedTips
+	BlackDeletedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	BlackDeletedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	fromUserNickname, toUserNickname := getFromToUserNickname(req.CommID.OperationID, req.CommID.FromUserID, req.CommID.ToUserID)
+	var tips open_im_sdk.TipsComm
+	tips.Detail, _ = json.Marshal(BlackDeletedTips)
+	tips.DefaultTips = fromUserNickname + " BlackDeletedNotification " + toUserNickname
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, true)
 }
 
 //message SelfInfoUpdatedTips{
@@ -555,6 +870,26 @@ func BlackDeletedNotification(operationID string, opUser *immysql.User, blackUse
 //  PublicUserInfo OpUser = 2;
 //  uint64 OperationTime = 3;
 //}
-func SelfInfoUpdatedNotification(operationID string, opUser *immysql.User, selfUser *immysql.User) {
+func SelfInfoUpdatedNotification(operationID, userID string) {
+	var n NotificationMsg
+	n.SendID = userID
+	n.RecvID = userID
+	n.ContentType = constant.SelfInfoUpdatedNotification
+	n.SessionType = constant.SingleChatType
+	n.MsgFrom = constant.SysMsgType
+	n.OperationID = operationID
 
+	var SelfInfoUpdatedTips open_im_sdk.SelfInfoUpdatedTips
+	SelfInfoUpdatedTips.UserID = userID
+
+	var tips open_im_sdk.TipsComm
+	u, err := imdb.FindUserByUID(userID)
+	if err != nil {
+		log.NewError(operationID, "FindUserByUID failed ", err.Error(), userID)
+	}
+
+	tips.Detail, _ = json.Marshal(SelfInfoUpdatedTips)
+	tips.DefaultTips = u.Nickname + " SelfInfoUpdatedNotification "
+	n.Content, _ = json.Marshal(tips)
+	Notification(&n, true)
 }

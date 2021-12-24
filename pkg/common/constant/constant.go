@@ -45,22 +45,38 @@ const (
 	GroupMsg       = 201
 
 	//SysRelated
-	AcceptFriendApplicationTip = 201
-	AddFriendTip               = 202
-	RefuseFriendApplicationTip = 203
-	SetSelfInfoTip             = 204
+	FriendApplicationAddedNotification     = 201
+	FriendApplicationProcessedNotification = 202
+	FriendAddedNotification                = 203
+	FriendDeletedNotification              = 204
+	FriendInfoChangedNotification          = 205
+	BlackAddedNotification                 = 206
+	BlackDeletedNotification               = 207
+	//AcceptFriendApplicationTip = 201
+	//AddFriendTip               = 202
+	//RefuseFriendApplicationTip = 203
 
-	TransferGroupOwnerTip       = 501
-	CreateGroupTip              = 502
-	GroupApplicationResponseTip = 503
-	ApplyJoinGroupTip           = 504
-	QuitGroupTip                = 505
-	SetGroupInfoTip             = 506
-	AcceptGroupApplicationTip   = 507
-	RefuseGroupApplicationTip   = 508
-	KickGroupMemberTip          = 509
-	InviteUserToGroupTip        = 510
-	ChangeGroupInfoTip          = 511
+	SelfInfoUpdatedNotification = 301
+
+	GroupCreatedNotification         = 501
+	JoinApplicationNotification      = 502
+	ApplicationProcessedNotification = 503
+	MemberInvitedNotification        = 504
+	MemberKickedNotification         = 505
+	GroupInfoChangedNotification     = 506
+	MemberLeaveNotification          = 507
+	MemberEnterNotification          = 508
+	//TransferGroupOwnerTip       = 501
+	//CreateGroupTip              = 502
+	//GroupApplicationResponseTip = 503
+	//ApplyJoinGroupTip           = 504
+	//QuitGroupTip                = 505
+	//SetGroupInfoTip             = 506
+	//AcceptGroupApplicationTip   = 507
+	//RefuseGroupApplicationTip   = 508
+	//KickGroupMemberTip          = 509
+	//InviteUserToGroupTip        = 510
+	//ChangeGroupInfoTip          = 511
 
 	//MsgFrom
 	UserMsgType = 100
