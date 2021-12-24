@@ -45,38 +45,24 @@ const (
 	GroupMsg       = 201
 
 	//SysRelated
-	FriendApplicationAddedNotification     = 201
-	FriendApplicationProcessedNotification = 202
-	FriendAddedNotification                = 203
-	FriendDeletedNotification              = 204
-	FriendInfoChangedNotification          = 205
-	BlackAddedNotification                 = 206
-	BlackDeletedNotification               = 207
-	//AcceptFriendApplicationTip = 201
-	//AddFriendTip               = 202
-	//RefuseFriendApplicationTip = 203
+	FriendApplicationProcessedNotification = 1201 //AcceptFriendApplicationTip = 201
+	FriendApplicationAddedNotification     = 1202 //AddFriendTip               = 202
+	FriendAddedNotification                = 1203
+	FriendDeletedNotification              = 1204
+	FriendInfoChangedNotification          = 1205
+	BlackAddedNotification                 = 1206
+	BlackDeletedNotification               = 1207
 
-	SelfInfoUpdatedNotification = 301
+	SelfInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
 
-	GroupCreatedNotification         = 501
-	JoinApplicationNotification      = 502
-	ApplicationProcessedNotification = 503
-	MemberInvitedNotification        = 504
-	MemberKickedNotification         = 505
-	GroupInfoChangedNotification     = 506
-	MemberLeaveNotification          = 507
-	MemberEnterNotification          = 508
-	//TransferGroupOwnerTip       = 501
-	//CreateGroupTip              = 502
-	//GroupApplicationResponseTip = 503
-	//ApplyJoinGroupTip           = 504
-	//QuitGroupTip                = 505
-	//SetGroupInfoTip             = 506
-	//AcceptGroupApplicationTip   = 507
-	//RefuseGroupApplicationTip   = 508
-	//KickGroupMemberTip          = 509
-	//InviteUserToGroupTip        = 510
-	//ChangeGroupInfoTip          = 511
+	GroupCreatedNotification         = 1501 //CreateGroupTip            = 502
+	JoinApplicationNotification      = 1502 //JoinGroupTip              = 504
+	ApplicationProcessedNotification = 1503 //AcceptGroupApplicationTip = 507 RefuseGroupApplicationTip = 508
+	MemberInvitedNotification        = 1504 //InviteUserToGroupTip      = 510
+	MemberKickedNotification         = 1505 //KickGroupMemberTip        = 509
+	GroupInfoChangedNotification     = 1506 //SetGroupInfoTip           = 506  TransferGroupOwnerTip     = 501
+	MemberLeaveNotification          = 1507 //QuitGroupTip              = 505
+	MemberEnterNotification          = 1508
 
 	//MsgFrom
 	UserMsgType = 100
