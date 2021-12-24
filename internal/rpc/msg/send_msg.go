@@ -156,7 +156,6 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		client := pbGroup.NewGroupClient(etcdConn)
 		req := &pbGroup.GetGroupAllMemberReq{
 			GroupID:     pb.MsgData.GroupID,
-			Token:       pb.Token,
 			OperationID: pb.OperationID,
 		}
 		reply, err := client.GetGroupAllMember(context.Background(), req)
@@ -170,13 +169,13 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		}
 		groupID := pb.MsgData.GroupID
 		for _, v := range reply.MemberList {
-			pb.MsgData.RecvID = v.UserId
-			isSend := modifyMessageByUserMessageReceiveOpt(v.UserId, groupID, constant.GroupChatType, pb)
+			pb.MsgData.RecvID = v.UserID
+			isSend := modifyMessageByUserMessageReceiveOpt(v.UserID, groupID, constant.GroupChatType, pb)
 			if isSend {
 				msgToMQ.MsgData = pb.MsgData
-				err := rpc.sendMsgToKafka(&msgToMQ, v.UserId)
+				err := rpc.sendMsgToKafka(&msgToMQ, v.UserID)
 				if err != nil {
-					log.NewError(msgToMQ.OperationID, "kafka send msg err:UserId", v.UserId, msgToMQ.String())
+					log.NewError(msgToMQ.OperationID, "kafka send msg err:UserId", v.UserID, msgToMQ.String())
 					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 				}
 			}
