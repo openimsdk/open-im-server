@@ -2,15 +2,25 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
-	"time"
 )
 
-func InsertIntoGroupMember(groupId, uid, nickName, userGroupFaceUrl string, administratorLevel int32) error {
+//type GroupMember struct {
+//	GroupID            string    `gorm:"column:group_id;primaryKey;"`
+//	UserID             string    `gorm:"column:user_id;primaryKey;"`
+//	NickName           string    `gorm:"column:nickname"`
+//	FaceUrl            string    `gorm:"user_group_face_url"`
+//	RoleLevel int32     `gorm:"column:role_level"`
+//	JoinTime           time.Time `gorm:"column:join_time"`
+//	JoinSource int32 `gorm:"column:join_source"`
+//	OperatorUserID  string `gorm:"column:operator_user_id"`
+//	Ex string `gorm:"column:ex"`
+//}
+
+func InsertIntoGroupMember(toInsertInfo GroupMember) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	toInsertInfo := GroupMember{GroupID: groupId, UserID: uid, NickName: nickName, AdministratorLevel: administratorLevel, JoinTime: time.Now(), FaceUrl: userGroupFaceUrl}
 	err = dbConn.Table("group_member").Create(toInsertInfo).Error
 	if err != nil {
 		return err
@@ -18,154 +28,154 @@ func InsertIntoGroupMember(groupId, uid, nickName, userGroupFaceUrl string, admi
 	return nil
 }
 
-func FindGroupMemberListByUserId(uid string) ([]GroupMember, error) {
+func GetGroupMemberListByUserID(userID string) ([]GroupMember, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var groupMemberList []GroupMember
-	err = dbConn.Raw("select * from `group_member` where uid=?", uid).Find(&groupMemberList).Error
+	err = dbConn.Table("group_member").Where("user_id=?", userID).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
 	return groupMemberList, nil
 }
 
-func FindGroupMemberListByGroupId(groupId string) ([]GroupMember, error) {
+func GetGroupMemberListByGroupID(groupID string) ([]GroupMember, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var groupMemberList []GroupMember
-	err = dbConn.Raw("select * from `group_member` where group_id=?", groupId).Find(&groupMemberList).Error
+	err = dbConn.Table("group_member").Where("group_id=?", groupID).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
 	return groupMemberList, nil
 }
 
-func FindGroupMemberListByGroupIdAndFilterInfo(groupId string, filter int32) ([]GroupMember, error) {
+func GetGroupMemberListByGroupIDAndFilter(groupID string, filter int32) ([]GroupMember, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	dbConn.LogMode(true)
 	if err != nil {
 		return nil, err
 	}
 	var groupMemberList []GroupMember
-	err = dbConn.Raw("select * from `group_member` where group_id=? and administrator_level=?", groupId, filter).Find(&groupMemberList).Error
+	err = dbConn.Table("group_member").Where("group_id=? and role_level=?", groupID, filter).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
 	return groupMemberList, nil
 }
-func FindGroupMemberInfoByGroupIdAndUserId(groupId, uid string) (*GroupMember, error) {
+
+func GetGroupMemberInfoByGroupIDAndUserID(groupID, userID string) (*GroupMember, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var groupMember GroupMember
-	err = dbConn.Raw("select * from `group_member` where group_id=? and uid=? limit 1", groupId, uid).Find(&groupMember).Error
+	err = dbConn.Table("group_member").Where("group_id=? and user_id=? limit 1", groupID, userID).Find(&groupMember).Error
 	if err != nil {
 		return nil, err
 	}
 	return &groupMember, nil
 }
 
-func DeleteGroupMemberByGroupIdAndUserId(groupId, uid string) error {
+func DeleteGroupMemberByGroupIDAndUserID(groupID, userID string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	err = dbConn.Exec("delete  from `group_member` where group_id=? and uid=?", groupId, uid).Error
+	err = dbConn.Table("group_member").Where("group_id=? and user_id=? limit 1", groupID, userID).Delete(&GroupMember{}).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func UpdateOwnerGroupNickName(groupId, userId, groupNickName string) error {
+func UpdateGroupMemberInfo(groupMemberInfo GroupMember) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	err = dbConn.Exec("update `group_member` set nickname=? where group_id=? and uid=?", groupNickName, groupId, userId).Error
+	err = dbConn.Table("group_member").Where("group_id=? and user_id=?", groupMemberInfo.GroupID, groupMemberInfo.UserID).Update(&groupMemberInfo).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func SelectGroupList(groupID string) ([]string, error) {
-	var groupUserID string
-	var groupList []string
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return groupList, err
-	}
-
-	rows, err := dbConn.Model(&GroupMember{}).Where("group_id = ?", groupID).Select("user_id").Rows()
-	if err != nil {
-		return groupList, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		rows.Scan(&groupUserID)
-		groupList = append(groupList, groupUserID)
-	}
-	return groupList, nil
-}
-
-func UpdateTheUserAdministratorLevel(groupId, uid string, administratorLevel int64) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
-	err = dbConn.Exec("update `group_member` set administrator_level=? where group_id=? and uid=?", administratorLevel, groupId, uid).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func GetOwnerManagerByGroupId(groupId string) ([]GroupMember, error) {
+func GetOwnerManagerByGroupID(groupID string) ([]GroupMember, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var groupMemberList []GroupMember
-	err = dbConn.Raw("select * from `group_member` where group_id=? and administrator_level > 0", groupId).Find(&groupMemberList).Error
+	err = dbConn.Table("group_member").Where("group_id=? and role_level>0", groupID).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
 	return groupMemberList, nil
 }
 
-func IsExistGroupMember(groupId, uid string) bool {
+func GetGroupMemberNumByGroupID(groupID string) int32 {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return 0
+	}
+	var number int32
+	err = dbConn.Table("group_member").Where("group_id=?", groupID).Count(&number).Error
+	if err != nil {
+		return 0
+	}
+	return number
+}
+
+func GetGroupOwnerInfoByGroupID(groupID string) (*GroupMember, error) {
+	omList, err := GetOwnerManagerByGroupID(groupID)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range omList {
+		if v.RoleLevel == 1 {
+			return &v, nil
+		}
+	}
+	return nil, nil
+}
+
+func IsExistGroupMember(groupID, userID string) bool {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return false
 	}
 	var number int32
-	err = dbConn.Raw("select count(*) from `group_member` where group_id = ? and uid = ?", groupId, uid).Count(&number).Error
+	err = dbConn.Table("group_member").Where("group_id = ? and user_id = ?", groupID, userID).Count(&number).Error
 	if err != nil {
 		return false
 	}
-
 	if number != 1 {
 		return false
 	}
 	return true
 }
 
-func RemoveGroupMember(groupId string, memberId string) error {
-	return DeleteGroupMemberByGroupIdAndUserId(groupId, memberId)
+func RemoveGroupMember(groupID string, UserID string) error {
+	return DeleteGroupMemberByGroupIDAndUserID(groupID, UserID)
 }
 
-func GetMemberInfoById(groupId string, memberId string) (*GroupMember, error) {
-	return FindGroupMemberInfoByGroupIdAndUserId(groupId, memberId)
+func GetMemberInfoByID(groupID string, userID string) (*GroupMember, error) {
+	return GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
 }
 
-func GetGroupMemberByGroupId(groupId string, filter int32, begin int32, maxNumber int32) ([]GroupMember, error) {
-	memberList, err := FindGroupMemberListByGroupId(groupId) //sorted by join time
+func GetGroupMemberByGroupID(groupID string, filter int32, begin int32, maxNumber int32) ([]GroupMember, error) {
+	var memberList []GroupMember
+	var err error
+	if filter >= 0 {
+		memberList, err = GetGroupMemberListByGroupIDAndFilter(groupID, filter) //sorted by join time
+	} else {
+		memberList, err = GetGroupMemberListByGroupID(groupID)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -182,49 +192,35 @@ func GetGroupMemberByGroupId(groupId string, filter int32, begin int32, maxNumbe
 	return memberList[begin:end], nil
 }
 
-func GetJoinedGroupIdListByMemberId(memberId string) ([]GroupMember, error) {
-	return FindGroupMemberListByUserId(memberId)
-}
-
-func GetGroupMemberNumByGroupId(groupId string) int32 {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return 0
-	}
-	var number int32
-	err = dbConn.Raw("select count(*) from `group_member` where group_id=? ", groupId).Count(&number).Error
-	if err != nil {
-		return 0
-	}
-	return number
-}
-
-func GetGroupOwnerByGroupId(groupId string) string {
-	omList, err := GetOwnerManagerByGroupId(groupId)
-	if err != nil {
-		return ""
-	}
-	for _, v := range omList {
-		if v.AdministratorLevel == 1 {
-			return v.UserID
-		}
-	}
-	return ""
-}
-
-func GetGroupOwnerInfoByGroupId(groupId string) (*GroupMember, error) {
-	omList, err := GetOwnerManagerByGroupId(groupId)
+func GetJoinedGroupIDListByUserID(userID string) ([]string, error) {
+	memberList, err := GetGroupMemberListByUserID(userID)
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range omList {
-		if v.AdministratorLevel == 1 {
-			return v, nil
-		}
+	var groupIDList []string = make([]string, len(memberList))
+	for _, v := range memberList {
+		groupIDList = append(groupIDList, v.GroupID)
 	}
-	return nil, nil
+	return groupIDList, nil
 }
 
-func InsertGroupMember(groupId, userId, nickName, userFaceUrl string, role int32) error {
-	return InsertIntoGroupMember(groupId, userId, nickName, userFaceUrl, role)
-}
+//
+//func SelectGroupList(groupID string) ([]string, error) {
+//	var groupUserID string
+//	var groupList []string
+//	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+//	if err != nil {
+//		return groupList, err
+//	}
+//
+//	rows, err := dbConn.Model(&GroupMember{}).Where("group_id = ?", groupID).Select("user_id").Rows()
+//	if err != nil {
+//		return groupList, err
+//	}
+//	defer rows.Close()
+//	for rows.Next() {
+//		rows.Scan(&groupUserID)
+//		groupList = append(groupList, groupUserID)
+//	}
+//	return groupList, nil
+//}

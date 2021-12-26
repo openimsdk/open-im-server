@@ -8,17 +8,16 @@ import (
 	"time"
 )
 
-func InsertIntoGroup(groupId, name, introduction, notification, faceUrl, ex string) error {
+func InsertIntoGroup(groupInfo Group) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	//Default group name
-	if name == "" {
-		name = "Group Chat"
+	if groupInfo.GroupName == "" {
+		groupInfo.GroupName = "Group Chat"
 	}
-	toInsertInfo := Group{GroupID: groupId, GroupName: name, Introduction: introduction, Notification: notification, FaceUrl: faceUrl, CreateTime: time.Now(), Ex: ex}
-	err = dbConn.Table("group").Create(toInsertInfo).Error
+	groupInfo.CreateTime = time.Now()
+	err = dbConn.Table("group").Create(groupInfo).Error
 	if err != nil {
 		return err
 	}
@@ -164,7 +163,7 @@ func GetGroupApplicationList(uid string) (*group.GetGroupApplicationListResp, er
 	return reply, nil
 }
 
-func TransferGroupOwner(pb *group.TransferGroupOwnerReq) (*group.CommonResp, error) {
+func TransferGroupOwner(pb *group.TransferGroupOwnerReq) (*group.TransferGroupOwnerResp, error) {
 	oldOwner, err := FindGroupMemberInfoByGroupIdAndUserId(pb.GroupID, pb.OldOwnerUserID)
 	if err != nil {
 		return nil, err
@@ -187,7 +186,7 @@ func TransferGroupOwner(pb *group.TransferGroupOwnerReq) (*group.CommonResp, err
 		return nil, err
 	}
 
-	return &group.CommonResp{}, nil
+	return &group.TransferGroupOwnerResp{CommonResp: &group.CommonResp{ErrCode: 0}}, nil
 }
 
 func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.CommonResp, error) {

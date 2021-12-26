@@ -2,43 +2,42 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
-	"time"
 )
 
-// reqId add userId
-func ReplaceIntoFriendReq(reqId, userId string, flag int32, reqMessage string) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
-	err = dbConn.Exec("replace into friend_request(req_id,user_id,flag,req_message,create_time) values(?,?,?,?,?)", reqId, userId, flag, reqMessage, time.Now()).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
+//type FriendRequest struct {
+//	FromUserID    string    `gorm:"column:from_user_id;primaryKey;"`
+//	ToUserID      string    `gorm:"column:to_user_id;primaryKey;"`
+//	HandleResult  int32     `gorm:"column:handle_result"`
+//	ReqMessage    string    `gorm:"column:req_message"`
+//	CreateTime    time.Time `gorm:"column:create_time"`
+//	HandlerUserID string    `gorm:"column:handler_user_id"`
+//	HandleMsg     string    `gorm:"column:handle_msg"`
+//	HandleTime    time.Time `gorm:"column:handle_time"`
+//	Ex            string    `gorm:"column:ex"`
+//}
 
-func FindFriendsApplyFromFriendReq(userId string) ([]FriendRequest, error) {
+// who apply to add me
+func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var usersInfo []FriendRequest
-	//dbConn.LogMode(true)
-	err = dbConn.Table("friend_request").Where("user_id=?", userId).Find(&usersInfo).Error
+	err = dbConn.Table("friend_request").Where("to_user_id=?", ToUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
 	}
 	return usersInfo, nil
 }
 
-func FindSelfApplyFromFriendReq(userId string) ([]FriendRequest, error) {
+//I apply to add somebody
+func GetSendFriendApplicationListByUserID(FromUserID string) ([]FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var usersInfo []FriendRequest
-	err = dbConn.Table("friend_request").Where("req_id=?", userId).Find(&usersInfo).Error
+	err = dbConn.Table("friend_request").Where("from_user_id=?", FromUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -46,26 +45,25 @@ func FindSelfApplyFromFriendReq(userId string) ([]FriendRequest, error) {
 }
 
 //reqId apply to add userId already
-func FindFriendApplyFromFriendReqByUid(reqId, userId string) (*FriendRequest, error) {
+func FindFriendApplicationByBothUserID(FromUserId, ToUserID string) (*FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var friendRequest FriendRequest
-	err = dbConn.Table("friend_request").Where("req_id=? and user_id=?", reqId, userId).Find(&friendRequest).Error
+	err = dbConn.Table("friend_request").Where("from_user_id=? and to_user_id=?", FromUserId, ToUserID).Find(&friendRequest).Error
 	if err != nil {
 		return nil, err
 	}
 	return &friendRequest, nil
 }
 
-//userId process reqId
-func UpdateFriendRelationshipToFriendReq(reqId, userId string, flag int32) error {
+func UpdateFriendApplication(friendRequest FriendRequest) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	err = dbConn.Exec("update friend_request set flag=? where req_id=? and user_id=?", flag, reqId, userId).Error
+	err = dbConn.Table("friend_request").Where("from_user_id=? and to_user_id=?", friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest).Error
 	if err != nil {
 		return err
 	}

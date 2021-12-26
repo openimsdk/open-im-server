@@ -1,11 +1,12 @@
 package friend
 
 import (
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbFriend "Open_IM/pkg/proto/friend"
+	rpc "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -13,20 +14,14 @@ import (
 	"strings"
 )
 
-type paramsCommFriend struct {
-	OperationID string `json:"operationID" binding:"required"`
-	ToUserID    string `json:"toUserID" binding:"required"`
-	FromUserID  string `json:"fromUserID" binding:"required"`
-}
-
 func AddBlacklist(c *gin.Context) {
-	params := paramsCommFriend{}
+	params := api.AddBlacklistReq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		log.NewError("0", "BindJSON failed ", err.Error())
 		return
 	}
-	req := &pbFriend.AddBlacklistReq{}
+	req := &rpc.AddBlacklistReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -38,36 +33,26 @@ func AddBlacklist(c *gin.Context) {
 	log.NewInfo(params.OperationID, "AddBlacklist args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddBlacklist(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "AddBlacklist failed ", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call add blacklist rpc server failed"})
 		return
 	}
-
-	resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
+	resp := api.AddBlacklistResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "AddBlacklist api return ", resp)
 }
 
-type paramsImportFriendReq struct {
-	FriendUserIDList []string `json:"friendUserIDList" binding:"required"`
-	OperationID      string   `json:"operationID" binding:"required"`
-	Token            string   `json:"token"`
-	FromUserID       string   `json:"fromUserID" binding:"required"`
-	OpUserID         string   `json:"opUserID" binding:"required"`
-}
-
 func ImportFriend(c *gin.Context) {
-	params := paramsImportFriendReq{}
+	params := api.ImportFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		log.NewError("0", "BindJSON failed ", err.Error())
 		return
 	}
-
-	req := &pbFriend.ImportFriendReq{}
+	req := &rpc.ImportFriendReq{}
 	utils.CopyStructFields(req, params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -76,10 +61,10 @@ func ImportFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-
 	log.NewInfo(req.OperationID, "ImportFriend args ", req.String())
+
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.ImportFriend(context.Background(), req)
 	if err != nil {
 		log.NewError(req.OperationID, "ImportFriend failed", err.Error(), req.String())
@@ -87,28 +72,19 @@ func ImportFriend(c *gin.Context) {
 		return
 	}
 
-	failedUidList := make([]string, 0)
-	for _, v := range RpcResp.FailedUidList {
-		failedUidList = append(failedUidList, v)
-	}
-	resp := gin.H{"errCode": RpcResp.CommonResp.ErrCode, "errMsg": RpcResp.CommonResp.ErrMsg, "failedUidList": failedUidList}
+	resp := api.ImportFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, Data: RpcResp.FailedFriendUserIDList}
 	c.JSON(http.StatusOK, resp)
-	log.NewInfo(req.OperationID, "AddBlacklist api return ", resp)
-}
-
-type paramsAddFriend struct {
-	paramsCommFriend
-	ReqMessage string `json:"reqMessage"`
+	log.NewInfo(req.OperationID, "ImportFriend api return ", resp)
 }
 
 func AddFriend(c *gin.Context) {
-	params := paramsAddFriend{}
+	params := api.AddFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.AddFriendReq{}
+	req := &rpc.AddFriendReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -117,11 +93,10 @@ func AddFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	req.ReqMessage = params.ReqMessage
 	log.NewInfo("AddFriend args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddFriend(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "AddFriend failed ", err.Error(), req.String())
@@ -129,24 +104,19 @@ func AddFriend(c *gin.Context) {
 		return
 	}
 
-	resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
+	resp := api.AddFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "AddFriend api return ", resp)
 }
 
-type paramsAddFriendResponse struct {
-	paramsCommFriend
-	Flag int32 `json:"flag" binding:"required"`
-}
-
 func AddFriendResponse(c *gin.Context) {
-	params := paramsAddFriendResponse{}
+	params := api.AddFriendResponseReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.AddFriendResponseReq{}
+	req := &rpc.AddFriendResponseReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -155,11 +125,11 @@ func AddFriendResponse(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	req.Flag = params.Flag
-
+	utils.CopyStructFields(&req, params)
 	log.NewInfo(req.CommID.OperationID, "AddFriendResponse args ", req.String())
+
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddFriendResponse(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "AddFriendResponse failed ", err.Error(), req.String())
@@ -167,23 +137,19 @@ func AddFriendResponse(c *gin.Context) {
 		return
 	}
 
-	resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
+	resp := api.AddFriendResponseResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "AddFriendResponse api return ", resp)
 }
 
-type paramsDeleteFriend struct {
-	paramsCommFriend
-}
-
 func DeleteFriend(c *gin.Context) {
-	params := paramsDeleteFriend{}
+	params := api.DeleteFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.DeleteFriendReq{}
+	req := &rpc.DeleteFriendReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -195,7 +161,7 @@ func DeleteFriend(c *gin.Context) {
 	log.NewInfo(req.CommID.OperationID, "DeleteFriend args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.DeleteFriend(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "DeleteFriend failed ", err, req.String())
@@ -203,34 +169,19 @@ func DeleteFriend(c *gin.Context) {
 		return
 	}
 
-	resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
+	resp := api.DeleteFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
-	log.NewInfo(req.CommID.OperationID, "AddFriendResponse api return ", resp)
-}
-
-type paramsGetBlackList struct {
-	paramsCommFriend
-}
-
-type PublicUserInfo struct {
-	UserID   string `json:"userID"`
-	Nickname string `json:"nickname"`
-	FaceUrl  string `json:"faceUrl"`
-	Gender   int32  `json:"gender"`
-}
-
-type blackUserInfo struct {
-	PublicUserInfo
+	log.NewInfo(req.CommID.OperationID, "DeleteFriend api return ", resp)
 }
 
 func GetBlacklist(c *gin.Context) {
-	params := paramsGetBlackList{}
+	params := api.GetBlackListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.GetBlacklistReq{}
+	req := &rpc.GetBlacklistReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -239,10 +190,10 @@ func GetBlacklist(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-
 	log.NewInfo(req.CommID.OperationID, "GetBlacklist args ", req.String())
+
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetBlacklist(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetBlacklist failed ", err.Error(), req.String())
@@ -250,42 +201,22 @@ func GetBlacklist(c *gin.Context) {
 		return
 	}
 
-	if RpcResp.ErrCode == 0 {
-		userBlackList := make([]blackUserInfo, 0)
-		for _, friend := range RpcResp.Data {
-			var b blackUserInfo
-			utils.CopyStructFields(&b, friend)
+	resp := api.GetBlackListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	utils.CopyStructFields(&resp.BlackUserInfoList, RpcResp.BlackUserInfoList)
+	log.NewInfo(req.CommID.OperationID, "GetBlacklist api return ", resp)
 
-			userBlackList = append(userBlackList, b)
-		}
-		resp := gin.H{
-			"errCode": RpcResp.ErrCode,
-			"errMsg":  RpcResp.ErrMsg,
-			"data":    userBlackList,
-		}
-		c.JSON(http.StatusOK, resp)
-		log.NewInfo(req.CommID.OperationID, "GetBlacklist api return ", resp)
-	} else {
-		resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
-		c.JSON(http.StatusOK, resp)
-		log.NewError(req.CommID.OperationID, "GetBlacklist api return ", resp)
-	}
-}
-
-type paramsSetFriendComment struct {
-	paramsCommFriend
-	remark string `json:"remark" binding:"required"`
 }
 
 func SetFriendComment(c *gin.Context) {
-	params := paramsSetFriendComment{}
+	params := api.SetFriendCommentReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.SetFriendCommentReq{}
+	req := &rpc.SetFriendCommentReq{}
 	utils.CopyStructFields(req.CommID, params)
+	req.Remark = params.Remark
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -293,34 +224,29 @@ func SetFriendComment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	req.Remark = params.remark
-
 	log.NewInfo(req.CommID.OperationID, "SetFriendComment args ", req.String())
+
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.SetFriendComment(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "SetFriendComment failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call set friend comment rpc server failed"})
 		return
 	}
-	resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
+	resp := api.SetFriendCommentResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "SetFriendComment api return ", resp)
 }
 
-type paramsRemoveBlackList struct {
-	paramsCommFriend
-}
-
 func RemoveBlacklist(c *gin.Context) {
-	params := paramsRemoveBlackList{}
+	params := api.RemoveBlackListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.RemoveBlacklistReq{}
+	req := &rpc.RemoveBlacklistReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -332,31 +258,26 @@ func RemoveBlacklist(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "RemoveBlacklist args ", req.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.RemoveBlacklist(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "RemoveBlacklist failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call remove blacklist rpc server failed"})
 		return
 	}
-
-	resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
+	resp := api.RemoveBlackListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
-	log.NewInfo(req.CommID.OperationID, "SetFriendComment api return ", resp)
-}
-
-type paramsIsFriend struct {
-	paramsCommFriend
+	log.NewInfo(req.CommID.OperationID, "RemoveBlacklist api return ", resp)
 }
 
 func IsFriend(c *gin.Context) {
-	params := paramsIsFriend{}
+	params := api.IsFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.IsFriendReq{}
+	req := &rpc.IsFriendReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -368,96 +289,60 @@ func IsFriend(c *gin.Context) {
 	log.NewInfo(req.CommID.OperationID, "IsFriend args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.IsFriend(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "IsFriend failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call add friend rpc server failed"})
 		return
 	}
-	resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg, "isFriend": RpcResp.ShipType}
+	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Response: RpcResp.Response}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
 }
 
-type paramsSearchFriend struct {
-	paramsCommFriend
-}
-
-func GetFriendsInfo(c *gin.Context) {
-	params := paramsSearchFriend{}
-	if err := c.BindJSON(&params); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-		return
-	}
-	req := &pbFriend.GetFriendsInfoReq{}
-	utils.CopyStructFields(req.CommID, params)
-	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
-	if !ok {
-		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
-		return
-	}
-	log.NewInfo(req.CommID.OperationID, "GetFriendsInfo args ", req.String())
-
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
-	RpcResp, err := client.GetFriendsInfo(context.Background(), req)
-	if err != nil {
-		log.NewError(req.CommID.OperationID, "GetFriendsInfo failed ", err.Error(), req.String())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call search friend rpc server failed"})
-		return
-	}
-
-	if RpcResp.ErrCode == 0 {
-		var fi friendInfo
-		utils.CopyStructFields(&fi, RpcResp.Data.FriendUser)
-		utils.CopyStructFields(&fi, RpcResp.Data)
-
-		resp := gin.H{
-			"errCode": RpcResp.ErrCode,
-			"errMsg":  RpcResp.ErrMsg,
-			"data":    fi,
-		}
-		log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
-		c.JSON(http.StatusOK, resp)
-	} else {
-		resp := gin.H{
-			"errCode": RpcResp.ErrCode,
-			"errMsg":  RpcResp.ErrMsg,
-		}
-		log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
-		c.JSON(http.StatusOK, resp)
-	}
-}
-
-type paramsGetFriendList struct {
-	paramsCommFriend
-}
-
-type friendInfo struct {
-	UserID   string `json:"userID"`
-	Nickname string `json:"nickname"`
-	FaceUrl  string `json:"faceUrl"`
-	Gender   int32  `json:"gender"`
-	Mobile   string `json:"mobile"`
-	Birth    string `json:"birth"`
-	Email    string `json:"email"`
-	Ext      string `json:"ext"`
-	Remark   string `json:"remark"`
-	IsBlack  int32  `json:"isBlack"`
-}
+//
+//func GetFriendsInfo(c *gin.Context) {
+//	params := api.GetFriendsInfoReq{}
+//	if err := c.BindJSON(&params); err != nil {
+//		log.NewError("0", "BindJSON failed ", err.Error())
+//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+//		return
+//	}
+//	req := &rpc.GetFriendsInfoReq{}
+//	utils.CopyStructFields(req.CommID, params)
+//	var ok bool
+//	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+//	if !ok {
+//		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+//		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+//		return
+//	}
+//	log.NewInfo(req.CommID.OperationID, "GetFriendsInfo args ", req.String())
+//
+//	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+//	client := rpc.NewFriendClient(etcdConn)
+//	RpcResp, err := client.GetFriendsInfo(context.Background(), req)
+//	if err != nil {
+//		log.NewError(req.CommID.OperationID, "GetFriendsInfo failed ", err.Error(), req.String())
+//		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call search friend rpc server failed"})
+//		return
+//	}
+//
+//	resp := api.GetFriendsInfoResp{CommResp:api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+//	utils.CopyStructFields(&resp, RpcResp)
+//	c.JSON(http.StatusOK, resp)
+//	log.NewInfo(req.CommID.OperationID, "GetFriendsInfo api return ", resp)
+//}
 
 func GetFriendList(c *gin.Context) {
-	params := paramsGetFriendList{}
+	params := api.GetFriendListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.GetFriendListReq{}
+	req := &rpc.GetFriendListReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -469,7 +354,7 @@ func GetFriendList(c *gin.Context) {
 	log.NewInfo(req.CommID.OperationID, "GetFriendList args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetFriendList(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetFriendList failed ", err.Error(), req.String())
@@ -477,49 +362,19 @@ func GetFriendList(c *gin.Context) {
 		return
 	}
 
-	if RpcResp.ErrCode == 0 {
-		friendsInfo := make([]friendInfo, 0)
-		for _, friend := range RpcResp.Data {
-
-			var fi friendInfo
-			utils.CopyStructFields(&fi, friend.FriendUser)
-			utils.CopyStructFields(&fi, RpcResp.Data)
-			friendsInfo = append(friendsInfo, fi)
-		}
-		resp := gin.H{
-			"errCode": RpcResp.ErrCode,
-			"errMsg":  RpcResp.ErrMsg,
-			"data":    friendsInfo,
-		}
-		c.JSON(http.StatusOK, resp)
-		log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
-	} else {
-		resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
-		c.JSON(http.StatusOK, resp)
-		log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
-	}
-
-}
-
-type paramsGetApplyList struct {
-	paramsCommFriend
-}
-
-type FriendApplicationUserInfo struct {
-	PublicUserInfo
-	ApplyTime  int64  `json:"applyTime"`
-	ReqMessage string `json:"reqMessage`
-	Flag       int32  `json:"flag"`
+	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	utils.CopyStructFields(&resp, RpcResp)
+	log.NewInfo(req.CommID.OperationID, "GetFriendList api return ", resp)
 }
 
 func GetFriendApplyList(c *gin.Context) {
-	params := paramsGetApplyList{}
+	params := api.GetFriendApplyListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.GetFriendApplyReq{}
+	req := &rpc.GetFriendApplyListReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -531,7 +386,7 @@ func GetFriendApplyList(c *gin.Context) {
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 
 	RpcResp, err := client.GetFriendApplyList(context.Background(), req)
 	if err != nil {
@@ -540,32 +395,20 @@ func GetFriendApplyList(c *gin.Context) {
 		return
 	}
 
-	if RpcResp.ErrCode == 0 {
-		userInfoList := make([]FriendApplicationUserInfo, 0)
-		for _, applyUserinfo := range RpcResp.Data {
-			var un FriendApplicationUserInfo
-			utils.CopyStructFields(&un, applyUserinfo.UserInfo)
-			utils.CopyStructFields(&un, applyUserinfo)
-			userInfoList = append(userInfoList, un)
-		}
-		resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg, "data": userInfoList}
-		c.JSON(http.StatusOK, resp)
-		log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
-	} else {
-		resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
-		c.JSON(http.StatusOK, resp)
-		log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
-	}
+	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	utils.CopyStructFields(&resp, RpcResp)
+	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList api return ", resp)
+
 }
 
 func GetSelfApplyList(c *gin.Context) {
-	params := paramsGetApplyList{}
+	params := api.GetSelfApplyListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbFriend.GetFriendApplyReq{}
+	req := &rpc.GetSelfApplyListReq{}
 	utils.CopyStructFields(req.CommID, params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -577,7 +420,7 @@ func GetSelfApplyList(c *gin.Context) {
 	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := pbFriend.NewFriendClient(etcdConn)
+	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetSelfApplyList(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetSelfApplyList failed ", err.Error(), req.String())
@@ -585,20 +428,9 @@ func GetSelfApplyList(c *gin.Context) {
 		return
 	}
 
-	if RpcResp.ErrCode == 0 {
-		userInfoList := make([]FriendApplicationUserInfo, 0)
-		for _, applyUserinfo := range RpcResp.Data {
-			var un FriendApplicationUserInfo
-			utils.CopyStructFields(&un, applyUserinfo.UserInfo)
-			utils.CopyStructFields(&un, applyUserinfo)
-			userInfoList = append(userInfoList, un)
-		}
-		resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg, "data": userInfoList}
-		c.JSON(http.StatusOK, resp)
-		log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
-	} else {
-		resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg}
-		c.JSON(http.StatusOK, resp)
-		log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
-	}
+	resp := api.GetSelfApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	utils.CopyStructFields(resp, RpcResp)
+	c.JSON(http.StatusOK, resp)
+	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList api return ", resp)
+
 }
