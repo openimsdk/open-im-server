@@ -16,7 +16,6 @@ type UserInfo struct {
 	Ex          string `json:"ex" binding:"omitempty,max=1024"`
 }
 
-//c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 func SetErrCodeMsg(c *gin.Context, status int) *CommResp {
 	resp := CommResp{ErrCode: int32(status), ErrMsg: http.StatusText(status)}
 	c.JSON(status, resp)

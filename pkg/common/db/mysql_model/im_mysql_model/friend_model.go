@@ -20,7 +20,7 @@ func InsertToFriend(toInsertFollow *Friend) error {
 	return nil
 }
 
-func FindFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*Friend, error) {
+func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*Friend, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func FindFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*Friend
 	return &friend, err
 }
 
-func FindUserInfoFromFriend(OwnerUserID string) ([]Friend, error) {
+func GetUserInfoFromFriend(OwnerUserID string) ([]Friend, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err

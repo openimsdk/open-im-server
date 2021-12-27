@@ -21,6 +21,7 @@ func InsertIntoGroupMember(toInsertInfo GroupMember) error {
 	if err != nil {
 		return err
 	}
+	toInsertInfo.JoinSource = time.Now()
 	err = dbConn.Table("group_member").Create(toInsertInfo).Error
 	if err != nil {
 		return err
@@ -54,13 +55,13 @@ func GetGroupMemberListByGroupID(groupID string) ([]GroupMember, error) {
 	return groupMemberList, nil
 }
 
-func GetGroupMemberListByGroupIDAndFilter(groupID string, filter int32) ([]GroupMember, error) {
+func GetGroupMemberListByGroupIDAndRoleLevel(groupID string, roleLevel int32) ([]GroupMember, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var groupMemberList []GroupMember
-	err = dbConn.Table("group_member").Where("group_id=? and role_level=?", groupID, filter).Find(&groupMemberList).Error
+	err = dbConn.Table("group_member").Where("group_id=? and role_level=?", groupID, role_level).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}

@@ -45,7 +45,7 @@ func GetSendFriendApplicationListByUserID(FromUserID string) ([]FriendRequest, e
 }
 
 //reqId apply to add userId already
-func FindFriendApplicationByBothUserID(FromUserId, ToUserID string) (*FriendRequest, error) {
+func GetFriendApplicationByBothUserID(FromUserId, ToUserID string) (*FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func FindFriendApplicationByBothUserID(FromUserId, ToUserID string) (*FriendRequ
 	return &friendRequest, nil
 }
 
-func UpdateFriendApplication(friendRequest FriendRequest) error {
+func UpdateFriendApplication(friendRequest *FriendRequest) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
