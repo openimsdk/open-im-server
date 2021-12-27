@@ -792,19 +792,19 @@ func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
 //  PublicUserInfo OpUser = 2;
 //  uint64 OperationTime = 3;
 //}
-func FriendInfoChangedNotification(req *pbFriend.SetFriendCommentReq) {
+func FriendInfoChangedNotification(operationID, opUserID, fromUserID, toUserID string) {
 	var n NotificationMsg
-	n.SendID = req.CommID.FromUserID
-	n.RecvID = req.CommID.ToUserID
+	n.SendID = fromUserID
+	n.RecvID = toUserID
 	n.ContentType = constant.FriendInfoChangedNotification
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
-	n.OperationID = req.CommID.OperationID
+	n.OperationID = operationID
 
 	var FriendInfoChangedTips open_im_sdk.FriendInfoChangedTips
-	FriendInfoChangedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	FriendInfoChangedTips.FromToUserID.ToUserID = req.CommID.ToUserID
-	fromUserNickname, toUserNickname := getFromToUserNickname(req.CommID.OperationID, req.CommID.FromUserID, req.CommID.ToUserID)
+	FriendInfoChangedTips.FromToUserID.FromUserID = fromUserID
+	FriendInfoChangedTips.FromToUserID.ToUserID = toUserID
+	fromUserNickname, toUserNickname := getFromToUserNickname(operationID, fromUserID, toUserID)
 	var tips open_im_sdk.TipsComm
 	tips.Detail, _ = json.Marshal(FriendInfoChangedTips)
 	tips.DefaultTips = fromUserNickname + " FriendDeletedNotification " + toUserNickname
@@ -812,15 +812,6 @@ func FriendInfoChangedNotification(req *pbFriend.SetFriendCommentReq) {
 	Notification(&n, true)
 }
 
-//message BlackAddedTips{
-//    BlackInfo Black = 1;
-//}
-//message BlackInfo{
-//  PublicUserInfo OwnerUser = 1;
-//  string Remark = 2;
-//  uint64 CreateTime = 3;
-//  PublicUserInfo BlackUser = 4;
-//}
 func BlackAddedNotification(req *pbFriend.AddBlacklistReq) {
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID

@@ -40,7 +40,7 @@ type Group struct {
 type GroupMember struct {
 	GroupID        string    `gorm:"column:group_id;primaryKey;"`
 	UserID         string    `gorm:"column:user_id;primaryKey;"`
-	NickName       string    `gorm:"column:nickname"`
+	Nickname       string    `gorm:"column:nickname"`
 	FaceUrl        string    `gorm:"user_group_face_url"`
 	RoleLevel      int32     `gorm:"column:role_level"`
 	JoinTime       time.Time `gorm:"column:join_time"`
@@ -52,7 +52,7 @@ type GroupMember struct {
 type GroupRequest struct {
 	UserID       string    `gorm:"column:user_id;primaryKey;"`
 	GroupID      string    `gorm:"column:group_id;primaryKey;"`
-	HandleResult string    `gorm:"column:handle_result"`
+	HandleResult int32     `gorm:"column:handle_result"`
 	ReqMsg       string    `gorm:"column:req_msg"`
 	HandledMsg   string    `gorm:"column:handled_msg"`
 	ReqTime      time.Time `gorm:"column:req_time"`
@@ -73,7 +73,7 @@ type User struct {
 	CreateTime  time.Time `gorm:"column:create_time"`
 }
 
-type BlackList struct {
+type Black struct {
 	OwnerUserID    string    `gorm:"column:owner_user_id;primaryKey;"`
 	BlockUserID    string    `gorm:"column:block_user_id;primaryKey;"`
 	CreateTime     time.Time `gorm:"column:create_time"`

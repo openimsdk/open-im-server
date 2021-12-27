@@ -423,51 +423,37 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 
 func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	log.NewInfo(req.OperationID, "GroupApplicationResponse args ", req.String())
-	reply, err := imdb.GroupApplicationResponse(req)
+
+	groupRequest := imdb.GroupRequest{}
+	groupRequest.UserID = req.FromUserID
+	groupRequest.GroupID = req.GroupID
+	groupRequest.HandledTime = time.Now()
+	groupRequest.HandleResult = req.HandleResult
+	groupRequest.HandleUserID = req.OpUserID
+	groupRequest.HandledMsg = req.HandledMsg
+	err := imdb.UpdateGroupRequest(groupRequest)
 	if err != nil {
 		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.String())
-		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: 702, ErrMsg: err.Error()}}, nil
+		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-
+	chat.ApplicationProcessedNotification(req)
 	if req.HandleResult == 1 {
-		if req.ToUserID == "0" {
-			err = db.DB.AddGroupMember(req.GroupID, req.FromUserID)
-			if err != nil {
-				log.NewError(req.OperationID, "AddGroupMember failed ", err.Error(), req.GroupID, req.FromUserID)
-			}
-		} else {
-			err = db.DB.AddGroupMember(req.GroupID, req.ToUserID)
-			if err != nil {
-				log.NewError(req.OperationID, "AddGroupMember failed ", err.Error(), req.GroupID, req.ToUserID)
-			}
-		}
-	}
-	if req.ToUserID == "0" {
-		//group, err := imdb.FindGroupInfoByGroupId(req.GroupID)
-		//if err != nil {
-		//	log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", req.GroupID)
-		//	return reply, nil
+		chat.MemberEnterNotification(req)
+		//if req.ToUserID == "0" {
+		//	err = db.DB.AddGroupMember(req.GroupID, req.FromUserID)
+		//	if err != nil {
+		//		log.NewError(req.OperationID, "AddGroupMember failed ", err.Error(), req.GroupID, req.FromUserID)
+		//	}
+		//} else {
+		//	err = db.DB.AddGroupMember(req.GroupID, req.ToUserID)
+		//	if err != nil {
+		//		log.NewError(req.OperationID, "AddGroupMember failed ", err.Error(), req.GroupID, req.ToUserID)
+		//	}
 		//}
-		//member, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(req.GroupID, req.OpUserID)
-		//if err != nil {
-		//	log.NewError(req.OperationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", req.GroupID, req.OpUserID)
-		//	return reply, nil
-		//}
-		chat.ApplicationProcessedNotification(req)
-		if req.HandleResult == 1 {
-			//	entrantUser, err := imdb.FindGroupMemberInfoByGroupIdAndUserId(req.GroupID, req.FromUserID)
-			//	if err != nil {
-			//		log.NewError(req.OperationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", err.Error(), req.GroupID, req.FromUserID)
-			//	return reply, nil
-			//	}
-			chat.MemberEnterNotification(req)
-		}
-	} else {
-		log.NewError(req.OperationID, "args failed ", req.String())
 	}
 
-	log.NewInfo(req.OperationID, "rpc GroupApplicationResponse return ", reply)
-	return reply, nil
+	log.NewInfo(req.OperationID, "rpc GroupApplicationResponse return ")
+	return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}, nil
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
@@ -584,13 +570,23 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 func (s *groupServer) TransferGroupOwner(_ context.Context, req *pbGroup.TransferGroupOwnerReq) (*pbGroup.TransferGroupOwnerResp, error) {
 	log.NewInfo(req.OperationID, "TransferGroupOwner ", req.String())
 
-	reply, err := im_mysql_model.TransferGroupOwner(req)
+	if req.OldOwnerUserID == req.NewOwnerUserID {
+		log.NewError(req.OperationID, "same owner ", req.String())
+		return &pbGroup.TransferGroupOwnerResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: constant.ErrArgs.ErrMsg}}, nil
+	}
+	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.OldOwnerUserID, RoleLevel: 0}
+	err := imdb.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
-		log.NewError("TransferGroupOwner ", req.String())
+		return &pbGroup.TransferGroupOwnerResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+	groupMemberInfo = imdb.GroupMember{GroupID: req.GroupID, UserID: req.NewOwnerUserID, RoleLevel: 1}
+	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
+	if err != nil {
 		return &pbGroup.TransferGroupOwnerResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	changedType := int32(1) << 4
 	chat.GroupInfoChangedNotification(req.OperationID, req.OpUserID, req.GroupID, changedType)
-	log.NewInfo("TransferGroupOwner rpc return ", reply.String())
-	return reply, nil
+
+	return &pbGroup.TransferGroupOwnerResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+
 }

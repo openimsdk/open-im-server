@@ -5,42 +5,52 @@ import (
 	"time"
 )
 
-func InsertInToUserBlackList(ownerID, blockID string) error {
+func InsertInToUserBlackList(black Black) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	toInsertInfo := BlackList{OwnerUserID: ownerID, BlockUserID: blockID, CreateTime: time.Now()}
-	err = dbConn.Table("user_black_list").Create(toInsertInfo).Error
+	black.CreateTime = time.Now()
+	err = dbConn.Table("user_black_list").Create(black).Error
 	return err
 }
 
-func FindRelationshipFromBlackList(ownerID, blockID string) error {
+//type Black struct {
+//	OwnerUserID    string    `gorm:"column:owner_user_id;primaryKey;"`
+//	BlockUserID    string    `gorm:"column:block_user_id;primaryKey;"`
+//	CreateTime     time.Time `gorm:"column:create_time"`
+//	AddSource      int32     `gorm:"column:add_source"`
+//	OperatorUserID int32     `gorm:"column:operator_user_id"`
+//	Ex             string    `gorm:"column:ex"`
+//}
+
+func CheckBlack(ownerUserID, blockUserID string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	var blackList BlackList
-	err = dbConn.Table("user_black_list").Where("owner_id=? and block_id=?", ownerID, blockID).Find(&blackList).Error
+	var black Black
+	err = dbConn.Table("user_black_list").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
 	return err
 }
 
-func RemoveBlackList(ownerID, blockID string) error {
+func RemoveBlackList(ownerUserID, blockUserID string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	err = dbConn.Exec("delete from user_black_list where owner_id=? and block_id=?", ownerID, blockID).Error
+
+	err = dbConn.Table("user_black_list").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(&Black{}).Error
 	return err
 }
 
-func GetBlackListByUID(ownerID string) ([]BlackList, error) {
+func GetBlackListByUserID(ownerUserID string) ([]Black, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var blackListUsersInfo []BlackList
-	err = dbConn.Table("user_black_list").Where("owner_id=?", ownerID).Find(&blackListUsersInfo).Error
+	var blackListUsersInfo []Black
+	err = dbConn.Table("user_black_list").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
 	if err != nil {
 		return nil, err
 	}

@@ -3,7 +3,6 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/db"
-	pbAuth "Open_IM/pkg/proto/auth"
 	"Open_IM/pkg/utils"
 	"fmt"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -12,168 +11,101 @@ import (
 
 func init() {
 	//init managers
-	var pb pbAuth.UserRegisterReq
 	for k, v := range config.Config.Manager.AppManagerUid {
-		if !IsExistUser(v) {
-			pb.UID = v
-			pb.Name = "AppManager" + utils.IntToString(k+1)
-			err := UserRegister(&pb)
-			if err != nil {
-				fmt.Println("AppManager insert error", err.Error())
-			}
+		user, err := GetUserByUserID(v)
+		if err != nil {
+			fmt.Println("GetUserByUserID failed ", err.Error(), v, user)
+			continue
 		}
+		var appMgr User
+		appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
+		err = UserRegister(appMgr)
+		if err != nil {
+			fmt.Println("AppManager insert error", err.Error())
+		}
+
 	}
 }
-func UserRegister(pb *pbAuth.UserRegisterReq) error {
+
+func UserRegister(user User) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	addUser := User{
-		UserID:     pb.UID,
-		Nickname:   pb.Name,
-		FaceUrl:    pb.Icon,
-		Gender:     pb.Gender,
-		Mobile:     pb.Mobile,
-		Birth:      pb.Birth,
-		Email:      pb.Email,
-		Ex:         pb.Ex,
-		CreateTime: time.Now(),
-	}
-	err = dbConn.Table("user").Create(&addUser).Error
+	user.CreateTime = time.Now()
+
+	err = dbConn.Table("user").Create(&user).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func UserDelete(uid string) error {
+//type User struct {
+//	UserID      string    `gorm:"column:user_id;primaryKey;"`
+//	Nickname    string    `gorm:"column:name"`
+//	FaceUrl     string    `gorm:"column:icon"`
+//	Gender      int32     `gorm:"column:gender"`
+//	PhoneNumber string    `gorm:"column:phone_number"`
+//	Birth       string    `gorm:"column:birth"`
+//	Email       string    `gorm:"column:email"`
+//	Ex          string    `gorm:"column:ex"`
+//	CreateTime  time.Time `gorm:"column:create_time"`
+//}
+
+func DeleteUser(userID string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("user").Where("uid=?", uid).Delete(User{}).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	err = dbConn.Table("user").Where("user_id=?", userID).Delete(User{}).Error
+	return err
 }
-func FindUserByUID(uid string) (*User, error) {
+
+func GetUserByUserID(userID string) (*User, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var user User
-	err = dbConn.Table("user").Where("uid=?", uid).First(&user).Error
+	err = dbConn.Table("user").Where("user_id=?", userID).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func UpDateUserInfo(uid, name, headUrl, mobilePhoneNum, birth, email, extendInfo string, gender int32) error {
+func UpdateUserInfo(user User) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	if name != "" {
-		if err = dbConn.Exec("update user set name=? where uid=?", name, uid).Error; err != nil {
-			return err
-		}
-	}
-	if headUrl != "" {
-		if err = dbConn.Exec("update user set icon=? where uid=?", headUrl, uid).Error; err != nil {
-			return err
-		}
-	}
-	if mobilePhoneNum != "" {
-		if err = dbConn.Exec("update user set mobile=? where uid=?", mobilePhoneNum, uid).Error; err != nil {
-			return err
-		}
-	}
-	if birth != "" {
-		if err = dbConn.Exec("update user set birth=? where uid=?", birth, uid).Error; err != nil {
-			return err
-		}
-	}
-	if email != "" {
-		if err = dbConn.Exec("update user set email=? where uid=?", email, uid).Error; err != nil {
-			return err
-		}
-	}
-	if extendInfo != "" {
-		if err = dbConn.Exec("update user set ex=? where uid=?", extendInfo, uid).Error; err != nil {
-			return err
-		}
-	}
-	if gender != 0 {
-		if err = dbConn.Exec("update user set gender=? where uid=?", gender, uid).Error; err != nil {
-			return err
-		}
-	}
-	return nil
+	err = dbConn.Table("user").Where("user_id=?", user.UserID).Update(&user).Error
+	return err
 }
 
-func SelectAllUID() ([]string, error) {
-	var uid []string
-
+func SelectAllUserID() ([]string, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
-		return uid, err
+		return nil, err
 	}
-	rows, err := dbConn.Raw("select uid from user").Rows()
+	var resultArr []string
+	err = dbConn.Table("user").Select([]string{"user_id"}).Scan(&resultArr).Error
 	if err != nil {
-		return uid, err
+		return nil, err
 	}
-	defer rows.Close()
-	var strUID string
-	for rows.Next() {
-		rows.Scan(&strUID)
-		uid = append(uid, strUID)
-	}
-	return uid, nil
-}
-func SelectSomeUID(uids []string) ([]string, error) {
-	var uid []string
-
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return uid, err
-	}
-	rows, err := dbConn.Raw("select uid from user where uid in (" + sqlStringHandle(uids) + ")").Rows()
-	if err != nil {
-		return uid, err
-	}
-	defer rows.Close()
-	var strUID string
-	for rows.Next() {
-		rows.Scan(&strUID)
-		uid = append(uid, strUID)
-	}
-	return uid, nil
+	return resultArr, nil
 }
 
-func IsExistUser(uid string) bool {
+func SelectSomeUserID(userIDList []string) ([]string, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
-		return false
+		return nil, err
 	}
-	var number int32
-	err = dbConn.Raw("select count(*) from `user` where  uid = ?", uid).Count(&number).Error
+	var userList []User
+	err = dbConn.Table("user").Where("(user_id) IN ? ", userIDList).Find(&userList).Error
 	if err != nil {
-		return false
+		return nil, err
 	}
-	if number != 1 {
-		return false
-	}
-	return true
-}
-func sqlStringHandle(ss []string) (s string) {
-	for i := 0; i < len(ss); i++ {
-		s += "'" + ss[i] + "'"
-		if i < len(ss)-1 {
-			s += ","
-		}
-	}
-	return s
+	return userIDList, nil
 }
