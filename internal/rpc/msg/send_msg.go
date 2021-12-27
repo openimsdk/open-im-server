@@ -245,7 +245,7 @@ func Notification(n *NotificationMsg, onlineUserOnly bool) {
 	var req pbChat.SendMsgReq
 	var msg sdk_ws.MsgData
 	var offlineInfo sdk_ws.OfflinePushInfo
-	var title, desc, ext string
+	var title, desc, ex string
 	var pushSwitch bool
 	req.OperationID = n.OperationID
 	msg.SendID = n.SendID
@@ -263,33 +263,33 @@ func Notification(n *NotificationMsg, onlineUserOnly bool) {
 	}
 	if onlineUserOnly {
 		msg.Options = make(map[string]bool, 10)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
+		//utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
 	}
 	offlineInfo.IOSBadgeCount = config.Config.IOSPush.BadgeCount
 	offlineInfo.IOSPushSound = config.Config.IOSPush.PushSound
 	switch msg.ContentType {
-	case constant.CreateGroupTip:
+	case constant.GroupCreatedNotification:
 		pushSwitch = config.Config.Notification.GroupCreated.OfflinePush.PushSwitch
 		title = config.Config.Notification.GroupCreated.OfflinePush.Title
 		desc = config.Config.Notification.GroupCreated.OfflinePush.Desc
-		ext = config.Config.Notification.GroupCreated.OfflinePush.Ext
-	case constant.ChangeGroupInfoTip:
+		ex = config.Config.Notification.GroupCreated.OfflinePush.Ext
+	case constant.GroupInfoChangedNotification:
 		pushSwitch = config.Config.Notification.GroupInfoChanged.OfflinePush.PushSwitch
 		title = config.Config.Notification.GroupInfoChanged.OfflinePush.Title
 		desc = config.Config.Notification.GroupInfoChanged.OfflinePush.Desc
-		ext = config.Config.Notification.GroupInfoChanged.OfflinePush.Ext
-	case constant.ApplyJoinGroupTip:
+		ex = config.Config.Notification.GroupInfoChanged.OfflinePush.Ext
+	case constant.JoinApplicationNotification:
 		pushSwitch = config.Config.Notification.ApplyJoinGroup.OfflinePush.PushSwitch
 		title = config.Config.Notification.ApplyJoinGroup.OfflinePush.Title
 		desc = config.Config.Notification.ApplyJoinGroup.OfflinePush.Desc
-		ext = config.Config.Notification.ApplyJoinGroup.OfflinePush.Ext
+		ex = config.Config.Notification.ApplyJoinGroup.OfflinePush.Ext
 	}
 	utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, pushSwitch)
 	offlineInfo.Title = title
 	offlineInfo.Desc = desc
-	offlineInfo.Ext = ext
+	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
