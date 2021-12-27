@@ -1,4 +1,28 @@
-//package base_info
+package base_info
+
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+type UserInfo struct {
+	UserID      string `json:"userID" binding:"required,min=1,max=64"`
+	Nickname    string `json:"nickname" binding:"required,min=1,max=64"`
+	FaceUrl     string `json:"faceUrl" binding:"omitempty,max=1024"`
+	Gender      int32  `json:"gender" binding:"omitempty,oneof=0 1 2"`
+	PhoneNumber string `json:"phoneNumber" binding:"omitempty,max=32"`
+	Birth       string `json:"birth" binding:"omitempty,max=16"`
+	Email       string `json:"email" binding:"omitempty,max=64"`
+	Ex          string `json:"ex" binding:"omitempty,max=1024"`
+}
+
+//c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+func SetErrCodeMsg(c *gin.Context, status int) *CommResp {
+	resp := CommResp{ErrCode: int32(status), ErrMsg: http.StatusText(status)}
+	c.JSON(status, resp)
+	return &resp
+}
+
 //
 //type GroupInfo struct {
 //	GroupID       string `json:"groupID"`

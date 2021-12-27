@@ -1,15 +1,13 @@
 package user
 
 import (
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	"Open_IM/pkg/utils"
-
-	//	rpc "Open_IM/pkg/proto/relay"
-	api "Open_IM/pkg/base_info"
 	rpc "Open_IM/pkg/proto/user"
+	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -77,22 +75,6 @@ import (
 //
 //	c.JSON(http.StatusOK, resp)
 //}
-//params := api.AddBlacklistReq{}
-//	if err := c.BindJSON(&params); err != nil {
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-//		log.NewError("0", "BindJSON failed ", err.Error())
-//		return
-//	}
-//	req := &rpc.AddBlacklistReq{}
-//	utils.CopyStructFields(req.CommID, params)
-//	var ok bool
-//	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
-//	if !ok {
-//		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-//		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
-//		return
-//	}
-//	log.NewInfo(params.OperationID, "AddBlacklist args ", req.String())
 
 func GetUserInfo(c *gin.Context) {
 	params := api.GetUserInfoReq{}
@@ -128,37 +110,30 @@ func GetUserInfo(c *gin.Context) {
 }
 
 func UpdateUserInfo(c *gin.Context) {
-	log.InfoByKv("api update userinfo init...", "")
-
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
-	client := pbUser.NewUserClient(etcdConn)
-	//defer etcdConn.Close()
-
-	params := paramsStruct{}
+	params := api.GetUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pbUser.UpdateUserInfoReq{
-		OperationID: params.OperationID,
-		Token:       c.Request.Header.Get("token"),
-		Name:        params.Name,
-		Icon:        params.Icon,
-		Gender:      params.Gender,
-		Mobile:      params.Mobile,
-		Birth:       params.Birth,
-		Email:       params.Email,
-		Ex:          params.Ex,
-		Uid:         params.Uid,
+	req := &rpc.UpdateUserInfoReq{}
+	utils.CopyStructFields(&req, params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
 	}
-	log.InfoByKv("api update user info is server", req.OperationID, req.Token)
+	log.NewInfo(params.OperationID, "UpdateUserInfo args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := rpc.NewUserClient(etcdConn)
 	RpcResp, err := client.UpdateUserInfo(context.Background(), req)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "err=%s,call get user info rpc server failed", err)
+		log.NewError(req.OperationID, "UpdateUserInfo failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	log.InfoByKv("call update user info rpc server success", params.OperationID)
-	c.JSON(http.StatusOK, gin.H{"errCode": RpcResp.ErrorCode, "errMsg": RpcResp.ErrorMsg})
-	log.InfoByKv("api update user info return success", params.OperationID, "args=%s", RpcResp.String())
+	c.JSON(http.StatusOK, gin.H{"errCode": RpcResp.CommonResp.ErrCode, "errMsg": RpcResp.CommonResp.ErrMsg})
+	log.NewInfo(req.OperationID, "UpdateUserInfo api return ", RpcResp.CommonResp)
 }

@@ -66,7 +66,8 @@ func GetGroupMembersInfo(c *gin.Context) {
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		//c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		api.SetErrCodeMsg(c, http.StatusInternalServerError)
 		return
 	}
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())

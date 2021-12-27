@@ -48,6 +48,7 @@ func AddBlacklist(c *gin.Context) {
 func ImportFriend(c *gin.Context) {
 	params := api.ImportFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
+
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		log.NewError("0", "BindJSON failed ", err.Error())
 		return
@@ -104,7 +105,7 @@ func AddFriend(c *gin.Context) {
 		return
 	}
 
-	resp := api.AddFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp := api.AddFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "AddFriend api return ", resp)
 }
