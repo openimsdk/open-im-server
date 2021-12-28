@@ -27,7 +27,6 @@ message GroupMemberFullInfo {
   int64 JoinTime = 4;
   string NickName = 5;
   string FaceUrl = 6;
-  string FriendRemark = 7;
   int32 AppMangerLevel = 8; //if >0
   int32 JoinSource = 9;
   string OperatorUserID = 10;

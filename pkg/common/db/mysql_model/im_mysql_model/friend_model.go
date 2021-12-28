@@ -33,7 +33,7 @@ func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*Friend,
 	return &friend, err
 }
 
-func GetUserInfoFromFriend(OwnerUserID string) ([]Friend, error) {
+func GetFriendListByUserID(OwnerUserID string) ([]Friend, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err

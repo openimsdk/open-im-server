@@ -172,7 +172,7 @@ func GetGroupMemberByGroupID(groupID string, filter int32, begin int32, maxNumbe
 	var memberList []GroupMember
 	var err error
 	if filter >= 0 {
-		memberList, err = GetGroupMemberListByGroupIDAndFilter(groupID, filter) //sorted by join time
+		memberList, err = GetGroupMemberListByGroupIDAndRoleLevel(groupID, filter) //sorted by join time
 	} else {
 		memberList, err = GetGroupMemberListByGroupID(groupID)
 	}
