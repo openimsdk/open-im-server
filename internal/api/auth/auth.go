@@ -10,7 +10,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/copier"
 	"net/http"
 	"strings"
 )
@@ -30,7 +29,7 @@ func UserRegister(c *gin.Context) {
 	}
 	req := &rpc.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
 	utils.CopyStructFields(*req.UserInfo, params)
-	copier.Copy(req.UserInfo, &params)
+	//	copier.Copy(req.UserInfo, &params)
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
