@@ -95,7 +95,7 @@ type GroupMember struct {
 	JoinTime       time.Time `gorm:"column:join_time"`
 	Nickname       string    `gorm:"column:nickname"`
 	FaceUrl        string    `gorm:"user_group_face_url"`
-	JoinSource     int32     `gorm:"column:join_source"`
+	JoinSource     time.Time `gorm:"column:join_source"`
 	OperatorUserID string    `gorm:"column:operator_user_id"`
 	Ex             string    `gorm:"column:ex"`
 }

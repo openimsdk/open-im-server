@@ -171,7 +171,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		group, err := imdb.GetGroupInfoByGroupID(v)
 		if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
 			utils.CopyStructFields(&groupNode, group)
-			groupNode.CreateTime = group.CreateTime
+			groupNode.CreateTime = group.CreateTime.Unix()
 			groupNode.MemberCount = uint32(num)
 			groupNode.OwnerUserID = owner.UserID
 			resp.GroupList = append(resp.GroupList, &groupNode)
@@ -379,7 +379,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 			continue
 		} else {
 			utils.CopyStructFields(&memberNode, memberInfo)
-			memberNode.JoinTime = memberInfo.JoinTime
+			memberNode.JoinTime = memberInfo.JoinTime.Unix()
 			resp.MemberList = append(resp.MemberList, &memberNode)
 		}
 	}
@@ -416,7 +416,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		}
 		var groupInfo open_im_sdk.GroupInfo
 		utils.CopyStructFields(&groupInfo, groupInfoFromMysql)
-		groupInfo.CreateTime = groupInfoFromMysql.CreateTime
+		groupInfo.CreateTime = groupInfoFromMysql.CreateTime.Unix()
 		groupsInfoList = append(groupsInfoList, &groupInfo)
 	}
 
@@ -451,7 +451,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	log.NewInfo(req.OperationID, "JoinGroup args ", req.String())
-	applicationUserInfo, err := imdb.GetUserByUserID(req.OpUserID)
+	_, err := imdb.GetUserByUserID(req.OpUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "FindUserByUID failed ", err.Error(), req.OpUserID)
 		return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
@@ -516,6 +516,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 	if groupUserInfo.RoleLevel == constant.OrdinaryMember {
 		return true
 	}
+	return false
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {

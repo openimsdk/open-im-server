@@ -2,6 +2,7 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"time"
 )
 
 //type GroupMember struct {
@@ -61,7 +62,7 @@ func GetGroupMemberListByGroupIDAndRoleLevel(groupID string, roleLevel int32) ([
 		return nil, err
 	}
 	var groupMemberList []GroupMember
-	err = dbConn.Table("group_member").Where("group_id=? and role_level=?", groupID, role_level).Find(&groupMemberList).Error
+	err = dbConn.Table("group_member").Where("group_id=? and role_level=?", groupID, roleLevel).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}

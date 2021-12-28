@@ -26,12 +26,12 @@ func main() {
 	{
 		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)
 		userRouterGroup.POST("/get_user_info", user.GetUserInfo)
-		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus)
+		//userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus)
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
 	{
-		friendRouterGroup.POST("/get_friends_info", friend.GetFriendsInfo)
+		//	friendRouterGroup.POST("/get_friends_info", friend.GetFriendsInfo)
 		friendRouterGroup.POST("/add_friend", friend.AddFriend)
 		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList)
 		friendRouterGroup.POST("/get_self_apply_list", friend.GetSelfApplyList)
@@ -87,15 +87,15 @@ func main() {
 	{
 		managementGroup.POST("/delete_user", manage.DeleteUser)
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
-		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
-		managementGroup.POST("/account_check", manage.AccountCheck)
-		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus)
+		//	managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
+		//	managementGroup.POST("/account_check", manage.AccountCheck)
+		//	managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus)
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
 	{
 		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)
-		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)
+		//	conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)
 		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt)
 	}
 

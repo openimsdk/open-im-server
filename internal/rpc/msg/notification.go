@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
@@ -20,6 +21,7 @@ import (
 //} creator->group
 
 func setOpUserInfo(operationID, opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupMemberFullInfo) {
+	return
 	if token_verify.IsMangerUserID(opUserID) {
 		u, err := imdb.GetUserByUserID(opUserID)
 		if err != nil {
@@ -39,6 +41,7 @@ func setOpUserInfo(operationID, opUserID, groupID string, groupMemberInfo *open_
 }
 
 func setGroupInfo(operationID, groupID string, groupInfo *open_im_sdk.GroupInfo, ownerUserID string) {
+	return
 	group, err := imdb.GetGroupInfoByGroupID(groupID)
 	if err != nil {
 		log.NewError(operationID, "FindGroupInfoByGroupId failed ", err.Error(), groupID)
@@ -53,6 +56,7 @@ func setGroupInfo(operationID, groupID string, groupInfo *open_im_sdk.GroupInfo,
 }
 
 func setGroupMemberInfo(operationID, groupID, userID string, groupMemberInfo *open_im_sdk.GroupMemberFullInfo) {
+	return
 	group, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
 	if err != nil {
 		log.NewError(operationID, "FindGroupMemberInfoByGroupIdAndUserId failed ", err.Error(), groupID, userID)
@@ -72,6 +76,7 @@ func setGroupMemberInfo(operationID, groupID, userID string, groupMemberInfo *op
 
 //创建群后调用
 func GroupCreatedNotification(operationID, opUserID, OwnerUserID, groupID string, initMemberList []string) {
+	return
 	var n NotificationMsg
 	n.SendID = opUserID
 	n.RecvID = groupID
@@ -109,6 +114,7 @@ func GroupCreatedNotification(operationID, opUserID, OwnerUserID, groupID string
 //	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID" json:"OperationID,omitempty"`
 //申请进群后调用
 func JoinApplicationNotification(req *pbGroup.JoinGroupReq) {
+	return
 	managerList, err := imdb.GetOwnerManagerByGroupID(req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetOwnerManagerByGroupId failed ", err.Error(), req.GroupID)
@@ -151,6 +157,7 @@ func JoinApplicationNotification(req *pbGroup.JoinGroupReq) {
 //}
 //处理进群请求后调用
 func ApplicationProcessedNotification(req *pbGroup.GroupApplicationResponseReq) {
+	return
 	var n NotificationMsg
 	n.SendID = req.OpUserID
 	n.ContentType = constant.ApplicationProcessedNotification
@@ -181,6 +188,7 @@ func ApplicationProcessedNotification(req *pbGroup.GroupApplicationResponseReq) 
 //}
 //被邀请进群后调用
 func MemberInvitedNotification(operationID, groupID, opUserID, reason string, invitedUserIDList []string) {
+	return
 	var n NotificationMsg
 	n.SendID = opUserID
 	n.ContentType = constant.MemberInvitedNotification
@@ -212,6 +220,7 @@ func MemberInvitedNotification(operationID, groupID, opUserID, reason string, in
 //}
 //被踢后调用
 func MemberKickedNotification(req *pbGroup.KickGroupMemberReq, kickedUserIDList []string) {
+	return
 	var n NotificationMsg
 	n.SendID = req.OpUserID
 	n.ContentType = constant.MemberKickedNotification
@@ -249,6 +258,7 @@ func MemberKickedNotification(req *pbGroup.KickGroupMemberReq, kickedUserIDList 
 
 //群信息改变后掉用
 func GroupInfoChangedNotification(operationID, opUserID, groupID string, changedType int32) {
+	return
 	var n NotificationMsg
 	n.SendID = opUserID
 	n.ContentType = constant.GroupInfoChangedNotification
@@ -301,6 +311,7 @@ func GroupInfoChangedNotification(operationID string, changedType int32, group *
 
 //群成员退群后调用
 func MemberLeaveNotification(req *pbGroup.QuitGroupReq) {
+	return
 	var n NotificationMsg
 	n.SendID = req.OpUserID
 	n.ContentType = constant.MemberLeaveNotification
@@ -331,6 +342,7 @@ func MemberLeaveNotification(req *pbGroup.QuitGroupReq) {
 //}
 //群成员主动申请进群，管理员同意后调用，
 func MemberEnterNotification(req *pbGroup.GroupApplicationResponseReq) {
+	return
 	var n NotificationMsg
 	n.SendID = req.OpUserID
 	n.ContentType = constant.MemberEnterNotification
@@ -369,6 +381,7 @@ func MemberEnterNotification(req *pbGroup.GroupApplicationResponseReq) {
 //}
 
 func getFromToUserNickname(operationID, fromUserID, toUserID string) (string, string) {
+	return
 	from, err1 := imdb.GetUserByUserID(fromUserID)
 	to, err2 := imdb.GetUserByUserID(toUserID)
 	if err1 != nil || err2 != nil {
@@ -385,6 +398,7 @@ func getFromToUserNickname(operationID, fromUserID, toUserID string) (string, st
 }
 
 func FriendApplicationAddedNotification(req *pbFriend.AddFriendReq) {
+	return
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID
 	n.RecvID = req.CommID.ToUserID
@@ -405,6 +419,7 @@ func FriendApplicationAddedNotification(req *pbFriend.AddFriendReq) {
 }
 
 func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) {
+	return
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID
 	n.RecvID = req.CommID.ToUserID
@@ -425,6 +440,7 @@ func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) 
 }
 
 func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string) {
+	return
 	var n NotificationMsg
 	n.SendID = fromUserID
 	n.RecvID = toUserID
@@ -478,6 +494,7 @@ func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string)
 //  FriendInfo Friend = 1;
 //}
 func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
+	return
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID
 	n.RecvID = req.CommID.ToUserID
@@ -503,6 +520,7 @@ func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
 //  uint64 OperationTime = 3;
 //}
 func FriendInfoChangedNotification(operationID, opUserID, fromUserID, toUserID string) {
+	return
 	var n NotificationMsg
 	n.SendID = fromUserID
 	n.RecvID = toUserID
@@ -523,6 +541,7 @@ func FriendInfoChangedNotification(operationID, opUserID, fromUserID, toUserID s
 }
 
 func BlackAddedNotification(req *pbFriend.AddBlacklistReq) {
+	return
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID
 	n.RecvID = req.CommID.ToUserID
@@ -546,6 +565,7 @@ func BlackAddedNotification(req *pbFriend.AddBlacklistReq) {
 //  BlackInfo Black = 1;
 //}
 func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
+	return
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID
 	n.RecvID = req.CommID.ToUserID
@@ -571,6 +591,7 @@ func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
 //  uint64 OperationTime = 3;
 //}
 func SelfInfoUpdatedNotification(operationID, userID string) {
+	return
 	var n NotificationMsg
 	n.SendID = userID
 	n.RecvID = userID

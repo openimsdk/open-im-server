@@ -7,6 +7,7 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
+	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
@@ -16,6 +17,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type friendServer struct {
@@ -226,6 +228,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	}
 	friendRequest.HandleResult = req.Flag
 	friendRequest.HandleTime = time.Now()
+	//friendRequest.HandleTime.Unix()
 	friendRequest.HandleMsg = req.HandleMsg
 	friendRequest.HandlerUserID = req.CommID.OpUserID
 	err = imdb.UpdateFriendApplication(friendRequest)
@@ -454,7 +457,7 @@ func (s *friendServer) GetSelfApplyList(ctx context.Context, req *pbFriend.GetSe
 	var selfApplyOtherUserList []*sdkws.FriendRequest
 	for _, selfApplyOtherUserInfo := range usersInfo {
 		var userInfo sdkws.FriendRequest // pbFriend.ApplyUserInfo
-		utils.FriendRequestDBCopyOpenIM(&userInfo, selfApplyOtherUserInfo)
+		cp.FriendRequestDBCopyOpenIM(&userInfo, selfApplyOtherUserInfo)
 		selfApplyOtherUserList = append(selfApplyOtherUserList, &userInfo)
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc GetSelfApplyList ok", pbFriend.GetSelfApplyListResp{FriendRequestList: selfApplyOtherUserList})

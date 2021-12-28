@@ -10,6 +10,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
+	sdkws "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -17,7 +18,6 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	sdkws "Open_IM/pkg/proto/sdk_ws"
 )
 
 type userServer struct {
@@ -25,6 +25,16 @@ type userServer struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
+}
+
+func NewUserServer(port int) *userServer {
+	log.NewPrivateLog("user")
+	return &userServer{
+		rpcPort:         port,
+		rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,
+		etcdSchema:      config.Config.Etcd.EtcdSchema,
+		etcdAddr:        config.Config.Etcd.EtcdAddr,
+	}
 }
 
 func (s *userServer) Run() {
@@ -38,7 +48,7 @@ func (s *userServer) Run() {
 		log.NewError("0", "listen network failed ", err.Error(), registerAddress)
 		return
 	}
-	log.NewInfo("0",  "listen network success, address ", registerAddress, listener)
+	log.NewInfo("0", "listen network success, address ", registerAddress, listener)
 	defer listener.Close()
 	//grpc server
 	srv := grpc.NewServer()
@@ -55,7 +65,7 @@ func (s *userServer) Run() {
 		log.NewError("0", "Serve failed ", err.Error())
 		return
 	}
-	log.NewInfo("0",  "rpc  user success")
+	log.NewInfo("0", "rpc  user success")
 }
 
 func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq) (*pbUser.GetUserInfoResp, error) {
@@ -76,11 +86,9 @@ func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq
 
 		return &pbUser.GetUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: constant.ErrArgs.ErrMsg}}, nil
 	}
-	log.NewInfo(req.OperationID, "GetUserInfo rpc return ", pbUser.GetUserInfoResp{CommonResp: &pbUser.CommonResp{}, UserInfoList:userInfoList})
-	return &pbUser.GetUserInfoResp{CommonResp: &pbUser.CommonResp{}, UserInfoList:userInfoList}, nil
+	log.NewInfo(req.OperationID, "GetUserInfo rpc return ", pbUser.GetUserInfoResp{CommonResp: &pbUser.CommonResp{}, UserInfoList: userInfoList})
+	return &pbUser.GetUserInfoResp{CommonResp: &pbUser.CommonResp{}, UserInfoList: userInfoList}, nil
 }
-
-
 
 func (s *userServer) SetReceiveMessageOpt(ctx context.Context, req *pbUser.SetReceiveMessageOptReq) (*pbUser.SetReceiveMessageOptResp, error) {
 	log.NewInfo(req.OperationID, "SetReceiveMessageOpt args ", req.String())
@@ -132,10 +140,9 @@ func (s *userServer) GetAllConversationMsgOpt(ctx context.Context, req *pbUser.G
 	return &resp, nil
 }
 
-
 func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
 	log.NewInfo(req.OperationID, "DeleteUsers args ", req.String())
-	if token_verify.IsMangerUserID(req.OpUserID){
+	if token_verify.IsMangerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
 		return &pbUser.DeleteUsersResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, FailedUserIDList: req.DeleteUserIDList}, nil
 	}
@@ -154,8 +161,8 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 }
 
 func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq) (*pbUser.GetAllUserIDResp, error) {
-	log.NewInfo(req.OperationID,"GetAllUserID args ", req.String())
-	if token_verify.IsMangerUserID(req.OpUserID){
+	log.NewInfo(req.OperationID, "GetAllUserID args ", req.String())
+	if token_verify.IsMangerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
 		return &pbUser.GetAllUserIDResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
@@ -169,10 +176,9 @@ func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq
 	}
 }
 
-
 func (s *userServer) AccountCheck(_ context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
-	log.NewInfo(req.OperationID,"AccountCheck args ", req.String())
-	if token_verify.IsMangerUserID(req.OpUserID){
+	log.NewInfo(req.OperationID, "AccountCheck args ", req.String())
+	if token_verify.IsMangerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
 		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
@@ -199,12 +205,9 @@ func (s *userServer) AccountCheck(_ context.Context, req *pbUser.AccountCheckReq
 
 }
 
-
-
-
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (*pbUser.UpdateUserInfoResp, error) {
-	log.NewInfo(req.OperationID,"UpdateUserInfo args ", req.String())
-	if !token_verify.CheckAccess(req.OpUserID, req.UserInfo.UserID){
+	log.NewInfo(req.OperationID, "UpdateUserInfo args ", req.String())
+	if !token_verify.CheckAccess(req.OpUserID, req.UserInfo.UserID) {
 		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.UserInfo.UserID)
 		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
@@ -219,7 +222,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := pbFriend.NewFriendClient(etcdConn)
 	newReq := &pbFriend.GetFriendListReq{
-		CommID: &pbFriend.CommID{OperationID: req.OperationID, FromUserID: req.UserInfo.UserID, OpUserID: req.OpUserID}
+		CommID: &pbFriend.CommID{OperationID: req.OperationID, FromUserID: req.UserInfo.UserID, OpUserID: req.OpUserID},
 	}
 
 	RpcResp, err := client.GetFriendList(context.Background(), newReq)
@@ -227,12 +230,9 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		log.NewError(req.OperationID, "GetFriendList failed ", err.Error(), newReq)
 		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 	}
-	for _, v := range RpcResp.FriendInfoList{
+	for _, v := range RpcResp.FriendInfoList {
 		chat.FriendInfoChangedNotification(req.OperationID, req.OpUserID, req.UserInfo.UserID, v.FriendUser.UserID)
 	}
 	chat.SelfInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID)
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
-
-
-
