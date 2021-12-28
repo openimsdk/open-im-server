@@ -311,7 +311,7 @@ func Notification(n *NotificationMsg, onlineUserOnly bool) {
 
 func setOpUserInfo(operationID, opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupMemberFullInfo) {
 	if token_verify.IsMangerUserID(opUserID) {
-		u, err := imdb.FindUserByUID(opUserID)
+		u, err := imdb.GetUserByUserID(opUserID)
 		if err != nil {
 			log.NewError(operationID, "FindUserByUID failed ", err.Error(), opUserID)
 			return

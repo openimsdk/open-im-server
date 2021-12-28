@@ -140,7 +140,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	}
 
 	//Establish a latest relationship in the friend request table
-	friendRequest := imdb.FriendRequest{ReqMessage: req.ReqMsg}
+	friendRequest := imdb.FriendRequest{ReqMsg: req.ReqMsg}
 	utils.CopyStructFields(&friendRequest, req.CommID)
 	err := imdb.UpdateFriendApplication(&friendRequest)
 	if err != nil {
@@ -454,7 +454,7 @@ func (s *friendServer) GetSelfApplyList(ctx context.Context, req *pbFriend.GetSe
 	var selfApplyOtherUserList []*sdkws.FriendRequest
 	for _, selfApplyOtherUserInfo := range usersInfo {
 		var userInfo sdkws.FriendRequest // pbFriend.ApplyUserInfo
-		utils.CopyStructFields(&userInfo, selfApplyOtherUserInfo)
+		utils.FriendRequestDBCopyOpenIM(&userInfo, selfApplyOtherUserInfo)
 		selfApplyOtherUserList = append(selfApplyOtherUserList, &userInfo)
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc GetSelfApplyList ok", pbFriend.GetSelfApplyListResp{FriendRequestList: selfApplyOtherUserList})

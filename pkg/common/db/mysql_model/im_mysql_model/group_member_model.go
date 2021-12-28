@@ -118,12 +118,12 @@ func GetOwnerManagerByGroupID(groupID string) ([]GroupMember, error) {
 	return groupMemberList, nil
 }
 
-func GetGroupMemberNumByGroupID(groupID string) int32 {
+func GetGroupMemberNumByGroupID(groupID string) uint32 {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return 0
 	}
-	var number int32
+	var number uint32
 	err = dbConn.Table("group_member").Where("group_id=?", groupID).Count(&number).Error
 	if err != nil {
 		return 0

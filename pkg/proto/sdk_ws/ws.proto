@@ -20,6 +20,7 @@ message GroupInfo{
   int32 GroupType = 12;
 }
 
+
 message GroupMemberFullInfo {
   string GroupID = 1 ;
   string UserID = 2 ;
@@ -27,10 +28,10 @@ message GroupMemberFullInfo {
   int64 JoinTime = 4;
   string NickName = 5;
   string FaceUrl = 6;
-  int32 AppMangerLevel = 8; //if >0
-  int32 JoinSource = 9;
-  string OperatorUserID = 10;
-  string Ex = 11;
+  int32 AppMangerLevel = 7; //if >0
+  int32 JoinSource = 8;
+  string OperatorUserID = 9;
+  string Ex = 10;
 }
 
 message PublicUserInfo{
@@ -50,6 +51,8 @@ message UserInfo{
   string Birth = 6;
   string Email = 7;
   string Ex = 8;
+  int64 CreateTime = 9;
+  int32 AppMangerLevel = 10;
 }
 
 message FriendInfo{
@@ -65,10 +68,10 @@ message FriendInfo{
 message BlackInfo{
   string OwnerUserID = 1;
   int64 CreateTime = 2;
-  PublicUserInfo BlackUserInfo = 4;
-  int32 AddSource = 5;
-  string OperatorUserID = 6;
-  string Ex = 7;
+  PublicUserInfo BlackUserInfo = 3;
+  int32 AddSource = 4;
+  string OperatorUserID = 5;
+  string Ex = 6;
 }
 
 message GroupRequest{
