@@ -1,6 +1,7 @@
 package im_mysql_model
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"time"
 )
@@ -23,6 +24,9 @@ func InsertIntoGroupMember(toInsertInfo GroupMember) error {
 		return err
 	}
 	toInsertInfo.JoinSource = time.Now()
+	if toInsertInfo.RoleLevel == 0 {
+		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
+	}
 	err = dbConn.Table("group_member").Create(toInsertInfo).Error
 	if err != nil {
 		return err
@@ -138,7 +142,7 @@ func GetGroupOwnerInfoByGroupID(groupID string) (*GroupMember, error) {
 		return nil, err
 	}
 	for _, v := range omList {
-		if v.RoleLevel == 1 {
+		if v.RoleLevel == constant.GroupOwner {
 			return &v, nil
 		}
 	}

@@ -3,12 +3,12 @@ package constant
 const (
 
 	//group admin
-	OrdinaryMember = 0
-	GroupOwner     = 1
-	Administrator  = 2
+	//	OrdinaryMember = 0
+	//	GroupOwner     = 1
+	//	Administrator  = 2
 	//group application
-	Application      = 0
-	AgreeApplication = 1
+	//	Application      = 0
+	//	AgreeApplication = 1
 
 	//friend related
 	BlackListFlag         = 1
@@ -116,5 +116,17 @@ var ContentType2PushContent = map[int64]string{
 	GroupMsg: "你收到一条群聊消息",
 	Common:   "你收到一条新消息",
 }
+
+const (
+	AppOrdinaryUsers = 1
+	AppAdmin         = 2
+
+	GroupOrdinaryUsers = 1
+	GroupOwner         = 2
+	GroupAdmin         = 3
+
+	Male   = 1
+	Female = 2
+)
 
 const FriendAcceptTip = "You have successfully become friends, so start chatting"

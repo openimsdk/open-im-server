@@ -94,7 +94,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 
 	//to group member
-	groupMember := imdb.GroupMember{GroupID: groupId, RoleLevel: 1}
+	groupMember := imdb.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner}
 	utils.CopyStructFields(&groupMember, us)
 	err = im_mysql_model.InsertIntoGroupMember(groupMember)
 	if err != nil {
@@ -114,7 +114,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			log.NewError(req.OperationID, "FindUserByUID failed ", err.Error(), user.UserID)
 			continue
 		}
-		if user.RoleLevel == 1 {
+		if user.RoleLevel == constant.GroupOwner {
 			log.NewError(req.OperationID, "only one owner, failed ", user)
 			continue
 		}
@@ -224,7 +224,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		var toInsertInfo imdb.GroupMember
 		utils.CopyStructFields(&toInsertInfo, toUserInfo)
 		toInsertInfo.GroupID = req.GroupID
-		toInsertInfo.RoleLevel = 0
+		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
 		err = imdb.InsertIntoGroupMember(toInsertInfo)
 		if err != nil {
 			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", req.GroupID, toUserInfo.UserID, toUserInfo.Nickname, toUserInfo.FaceUrl)
@@ -331,7 +331,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 
 	groupOwnerUserID := ""
 	for _, v := range ownerList {
-		if v.RoleLevel == 1 {
+		if v.RoleLevel == constant.GroupOwner {
 			groupOwnerUserID = v.UserID
 		}
 	}
