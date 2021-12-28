@@ -434,7 +434,6 @@ func (s *friendServer) GetFriendApplyList(ctx context.Context, req *pbFriend.Get
 		var userInfo sdkws.FriendRequest
 		utils.CopyStructFields(&userInfo, applyUserInfo)
 		appleUserList = append(appleUserList, &userInfo)
-
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc GetFriendApplyList ok", pbFriend.GetFriendApplyListResp{FriendRequestList: appleUserList})
 	return &pbFriend.GetFriendApplyListResp{FriendRequestList: appleUserList}, nil

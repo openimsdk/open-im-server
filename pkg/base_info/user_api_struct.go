@@ -26,3 +26,12 @@ type GetUserInfoResp struct {
 	CommResp
 	UserInfoList []*open_im_sdk.UserInfo `json:"data"`
 }
+
+type UpdateUserInfoReq struct {
+	UserInfo
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type UpdateUserInfoResp struct {
+	CommResp
+}
