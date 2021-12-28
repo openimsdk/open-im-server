@@ -44,7 +44,7 @@ func newUserSendMsgReq(token string, params *paramsUserSendMsg) *pbChat.SendMsgR
 			GroupID:          params.Data.GroupID,
 			ClientMsgID:      params.Data.ClientMsgID,
 			SenderPlatformID: params.SenderPlatformID,
-			SenderNickName:   params.SenderNickName,
+			SenderNickname:   params.SenderNickName,
 			SenderFaceURL:    params.SenderFaceURL,
 			SessionType:      params.Data.SessionType,
 			MsgFrom:          params.Data.MsgFrom,
