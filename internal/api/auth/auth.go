@@ -36,9 +36,8 @@ func UserRegister(c *gin.Context) {
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserRegister(context.Background(), req)
 	if err != nil || reply.CommonResp.ErrCode != 0 {
-
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": reply.CommonResp.ErrMsg})
 		log.NewError(req.OperationID, "UserRegister failed ", err, reply.CommonResp.ErrCode)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": reply.CommonResp.ErrMsg})
 		return
 	}
 
@@ -51,8 +50,9 @@ func UserRegister(c *gin.Context) {
 	}
 	resp := api.UserRegisterResp{CommResp: api.CommResp{ErrCode: replyToken.CommonResp.ErrCode, ErrMsg: replyToken.CommonResp.ErrMsg},
 		UserToken: api.UserTokenInfo{UserID: req.UserInfo.UserID, Token: replyToken.Token, ExpiredTime: replyToken.ExpiredTime}}
-	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.OperationID, "UserRegister return ", resp)
+	c.JSON(http.StatusOK, resp)
+
 }
 
 func UserToken(c *gin.Context) {
