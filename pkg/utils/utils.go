@@ -2,11 +2,13 @@ package utils
 
 import (
 	"fmt"
+	"github.com/jinzhu/copier"
 	"reflect"
 )
 
 // copy a by b  b->a
 func CopyStructFields(a interface{}, b interface{}, fields ...string) (err error) {
+	copier.Copy(&a, &b)
 	at := reflect.TypeOf(a)
 	av := reflect.ValueOf(a)
 	bt := reflect.TypeOf(b)
@@ -34,6 +36,7 @@ func CopyStructFields(a interface{}, b interface{}, fields ...string) (err error
 
 	for i := 0; i < len(_fields); i++ {
 		name := _fields[i]
+
 		f := av.Elem().FieldByName(name)
 		bValue := bv.FieldByName(name)
 
