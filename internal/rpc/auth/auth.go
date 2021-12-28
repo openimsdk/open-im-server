@@ -22,6 +22,9 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
 	var user imdb.User
 	utils.CopyStructFields(&user, req.UserInfo)
+	if req.UserInfo.Birth != 0 {
+		user.Birth = utils.UnixSecondToTime(req.UserInfo.Birth)
+	}
 	err := imdb.UserRegister(user)
 	if err != nil {
 		log.NewError(req.OperationID, "UserRegister failed ", err.Error(), user)
