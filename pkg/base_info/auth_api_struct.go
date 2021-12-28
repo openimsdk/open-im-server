@@ -17,7 +17,7 @@ type UserRegisterReq struct {
 }
 
 type UserTokenInfo struct {
-	UserID      string `json:"secret"`
+	UserID      string `json:"userID"`
 	Token       string `json:"token"`
 	ExpiredTime int64  `json:"expiredTime"`
 }

@@ -25,6 +25,8 @@ func FriendDBCopyOpenIM(dst *open_im_sdk.FriendInfo, src imdb.Friend) {
 	if user != nil {
 		utils.CopyStructFields(dst.FriendUser, user)
 	}
+	dst.CreateTime = src.CreateTime.Unix()
+	dst.FriendUser.CreateTime = user.CreateTime.Unix()
 }
 
 //
@@ -34,6 +36,8 @@ func FriendRequestOpenIMCopyDB(dst *imdb.FriendRequest, src open_im_sdk.FriendRe
 
 func FriendRequestDBCopyOpenIM(dst *open_im_sdk.FriendRequest, src imdb.FriendRequest) {
 	utils.CopyStructFields(dst, src)
+	dst.CreateTime = src.CreateTime.Unix()
+	dst.HandleTime = src.HandleTime.Unix()
 }
 
 func GroupOpenIMCopyDB(dst *imdb.Group, src open_im_sdk.GroupInfo) {
@@ -47,6 +51,7 @@ func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src imdb.Group) {
 		dst.OwnerUserID = user.UserID
 	}
 	dst.MemberCount = imdb.GetGroupMemberNumByGroupID(src.GroupID)
+	dst.CreateTime = src.CreateTime.Unix()
 }
 
 func GroupMemberOpenIMCopyDB(dst *imdb.GroupMember, src open_im_sdk.GroupMemberFullInfo) {
@@ -62,6 +67,7 @@ func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src imdb.Grou
 		}
 		dst.AppMangerLevel = 1
 	}
+	dst.JoinTime = src.JoinTime.Unix()
 }
 
 func GroupRequestOpenIMCopyDB(dst *imdb.GroupRequest, src open_im_sdk.GroupRequest) {
@@ -70,6 +76,8 @@ func GroupRequestOpenIMCopyDB(dst *imdb.GroupRequest, src open_im_sdk.GroupReque
 
 func GroupRequestDBCopyOpenIM(dst *open_im_sdk.GroupRequest, src imdb.GroupRequest) {
 	utils.CopyStructFields(dst, src)
+	dst.ReqTime = src.ReqTime.Unix()
+	dst.HandleTime = src.HandledTime.Unix()
 }
 
 func UserOpenIMCopyDB(dst *imdb.User, src open_im_sdk.UserInfo) {
@@ -78,6 +86,7 @@ func UserOpenIMCopyDB(dst *imdb.User, src open_im_sdk.UserInfo) {
 
 func UserDBCopyOpenIM(dst *open_im_sdk.UserInfo, src imdb.User) {
 	utils.CopyStructFields(dst, src)
+	dst.CreateTime = src.CreateTime.Unix()
 }
 
 func BlackOpenIMCopyDB(dst *imdb.Black, src open_im_sdk.BlackInfo) {
