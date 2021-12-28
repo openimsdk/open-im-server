@@ -15,10 +15,13 @@ func init() {
 		user, err := GetUserByUserID(v)
 		if err != nil {
 			fmt.Println("GetUserByUserID failed ", err.Error(), v, user)
+		}else{
 			continue
 		}
 		var appMgr User
+		appMgr.UserID = v
 		appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
+		appMgr.AppMangerLevel = 2
 		err = UserRegister(appMgr)
 		if err != nil {
 			fmt.Println("AppManager insert error", err.Error())
