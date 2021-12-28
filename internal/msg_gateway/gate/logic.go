@@ -151,7 +151,6 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *sdk_ws.PullMessageRes
 	}
 	c, err := proto.Marshal(&mReplyData)
 	log.NewInfo(m.OperationID, "test info is ", len(mReplyData.SingleUserMsg), mReplyData.SingleUserMsg)
-
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
@@ -162,7 +161,6 @@ func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *sdk_ws.PullMessageRes
 	}
 	log.NewInfo(m.OperationID, "pullMsgResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
 		len(mReply.Data))
-
 	ws.sendMsg(conn, mReply)
 
 }

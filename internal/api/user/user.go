@@ -14,68 +14,6 @@ import (
 	"strings"
 )
 
-//
-//func GetUsersOnlineStatus(c *gin.Context) {
-//	params := api.GetUsersOnlineStatusReq{}
-//	if err := c.BindJSON(&params); err != nil {
-//		log.NewError(params.OperationID, "bind json failed ", err.Error(), c)
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-//		return
-//	}
-//
-//	if params.Secret != config.Config.Secret {
-//		log.NewError(params.OperationID, "parse token failed ", params.Secret, config.Config.Secret)
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "secret failed"})
-//		return
-//	}
-//
-//	req := &pbRelay.GetUsersOnlineStatusReq{
-//		OperationID: params.OperationID,
-//		UserIDList:  params.UserIDList,
-//	}
-//	var wsResult []*rpc.GetUsersOnlineStatusResp_SuccessResult
-//	var respResult []*rpc.GetUsersOnlineStatusResp_SuccessResult
-//	flag := false
-//	log.NewDebug(params.OperationID, "GetUsersOnlineStatus req come here", params.UserIDList)
-//
-//	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
-//	for _, v := range grpcCons {
-//		client := rpc.NewOnlineMessageRelayServiceClient(v)
-//		reply, err := client.GetUsersOnlineStatus(context.Background(), req)
-//		if err != nil {
-//			log.NewError(params.OperationID, "GetUsersOnlineStatus rpc  err", req.String(), err.Error())
-//			continue
-//		} else {
-//			if reply.ErrCode == 0 {
-//				wsResult = append(wsResult, reply.SuccessResult...)
-//			}
-//		}
-//	}
-//	log.NewDebug(params.OperationID, "call GetUsersOnlineStatus rpc server is success", wsResult)
-//	//Online data merge of each node
-//	for _, v1 := range params.UserIDList {
-//		flag = false
-//		temp := new(pbRelay.GetUsersOnlineStatusResp_SuccessResult)
-//		for _, v2 := range wsResult {
-//			if v2.UserID == v1 {
-//				flag = true
-//				temp.UserID = v1
-//				temp.Status = constant.OnlineStatus
-//				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, v2.DetailPlatformStatus...)
-//			}
-//		}
-//		if !flag {
-//			temp.UserID = v1
-//			temp.Status = constant.OfflineStatus
-//		}
-//		respResult = append(respResult, temp)
-//	}
-//	log.NewDebug(params.OperationID, "Finished merged data", respResult)
-//	resp := gin.H{"errCode": 0, "errMsg": "", "data": respResult}
-//
-//	c.JSON(http.StatusOK, resp)
-//}
-
 func GetUserInfo(c *gin.Context) {
 	params := api.GetUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -83,7 +21,7 @@ func GetUserInfo(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetUserInfoReq{}
-	utils.CopyStructFields(&req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {

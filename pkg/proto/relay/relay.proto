@@ -29,6 +29,7 @@ message SingleMsgToUser{
 message GetUsersOnlineStatusReq{
   repeated string  userIDList = 1;
   string  operationID = 2;
+  string opUserID = 3;
 }
 message GetUsersOnlineStatusResp{
   int32  errCode = 1;

@@ -1,6 +1,10 @@
 package base_info
 
-import open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+import (
+	pbRelay "Open_IM/pkg/proto/relay"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	pbUser "Open_IM/pkg/proto/user"
+)
 
 type paramsManagementSendMsg struct {
 	OperationID      string                       `json:"operationID" binding:"required"`
@@ -62,20 +66,36 @@ type FileElem struct {
 	FileSize  int64  `mapstructure:"fileSize"`
 }
 
-type paramsDeleteUsers struct {
+type DeleteUsersReq struct {
 	OperationID   string   `json:"operationID" binding:"required"`
 	DeleteUidList []string `json:"deleteUidList" binding:"required"`
 }
-type paramsGetAllUsersUid struct {
+type DeleteUsersResp struct {
+	CommResp
+	FailedUserIDList []string `json:"data"`
+}
+type GetAllUsersUidReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
-type paramsGetUsersOnlineStatus struct {
+type GetAllUsersUidResp struct {
+	CommResp
+	UserIDList []string `json:"data"`
+}
+type GetUsersOnlineStatusReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 	UserIDList  []string `json:"userIDList" binding:"required,lte=200"`
 }
-type paramsAccountCheck struct {
+type GetUsersOnlineStatusResp struct {
+	CommResp
+	SuccessResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult `json:"data"`
+}
+type AccountCheckReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 	UserIDList  []string `json:"userIDList" binding:"required,lte=100"`
+}
+type AccountCheckResp struct {
+	CommResp
+	ResultList []*pbUser.AccountCheckResp_SingleUserStatus `json:"data"`
 }
 
 type AtElem struct {
