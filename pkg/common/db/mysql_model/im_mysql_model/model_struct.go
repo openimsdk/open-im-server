@@ -137,7 +137,7 @@ type GroupRequest struct {
 type User struct {
 	UserID         string    `gorm:"column:user_id;primaryKey;"`
 	Nickname       string    `gorm:"column:name"`
-	FaceUrl        string    `gorm:"column:icon"`
+	FaceUrl        string    `gorm:"column:face_url"`
 	Gender         int32     `gorm:"column:gender"`
 	PhoneNumber    string    `gorm:"column:phone_number"`
 	Birth          string    `gorm:"column:birth"`
