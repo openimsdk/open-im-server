@@ -38,7 +38,7 @@ func UserRegister(c *gin.Context) {
 	reply, err := client.UserRegister(context.Background(), req)
 	if err != nil || reply.CommonResp.ErrCode != 0 {
 		log.NewError(req.OperationID, "UserRegister failed ", err, reply.CommonResp.ErrCode)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": reply.CommonResp.ErrMsg})
 		return
 	}
 
