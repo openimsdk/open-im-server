@@ -8,7 +8,7 @@ import (
 
 // copy a by b  b->a
 func CopyStructFields(a interface{}, b interface{}, fields ...string) (err error) {
-	return copier.Copy(a, b)
+	return copier.Copy(&a, &b)
 
 	at := reflect.TypeOf(a)
 	av := reflect.ValueOf(a)
