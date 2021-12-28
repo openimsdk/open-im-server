@@ -381,7 +381,7 @@ func MemberEnterNotification(req *pbGroup.GroupApplicationResponseReq) {
 //}
 
 func getFromToUserNickname(operationID, fromUserID, toUserID string) (string, string) {
-	return
+	return "", ""
 	from, err1 := imdb.GetUserByUserID(fromUserID)
 	to, err2 := imdb.GetUserByUserID(toUserID)
 	if err1 != nil || err2 != nil {
