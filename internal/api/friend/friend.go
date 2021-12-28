@@ -239,8 +239,9 @@ func SetFriendComment(c *gin.Context) {
 		return
 	}
 	resp := api.SetFriendCommentResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
-	c.JSON(http.StatusOK, resp)
+
 	log.NewInfo(req.CommID.OperationID, "SetFriendComment api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 func RemoveBlacklist(c *gin.Context) {
