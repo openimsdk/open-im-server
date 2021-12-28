@@ -27,7 +27,7 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 	req := &rpc.UserRegisterReq{}
-	utils.CopyStructFields(req.UserInfo, params)
+	utils.CopyStructFields(*req.UserInfo, params)
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
