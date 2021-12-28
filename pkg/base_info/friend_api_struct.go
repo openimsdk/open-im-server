@@ -54,7 +54,7 @@ type GetBlackListReq struct {
 }
 type GetBlackListResp struct {
 	CommResp
-	BlackUserInfoList []*blackUserInfo `json:"data"`
+	BlackUserInfoList []*BlackUserInfo `json:"data"`
 }
 
 //type PublicUserInfo struct {
@@ -64,7 +64,7 @@ type GetBlackListResp struct {
 //	Gender   int32  `json:"gender"`
 //}
 
-type blackUserInfo struct {
+type BlackUserInfo struct {
 	open_im_sdk.PublicUserInfo
 }
 
