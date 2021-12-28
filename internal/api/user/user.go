@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	rpc "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -115,8 +116,8 @@ func UpdateUserInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.UpdateUserInfoReq{}
-	utils.CopyStructFields(req, &params)
+	req := &rpc.UpdateUserInfoReq{UserInfo: &open_im_sdk.UserInfo{}}
+	utils.CopyStructFields(req.UserInfo, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
