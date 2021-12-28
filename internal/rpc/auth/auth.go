@@ -48,7 +48,7 @@ func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbA
 	}
 
 	log.NewInfo(req.OperationID, "rpc UserToken return ")
-	return &pbAuth.UserTokenResp{Token: tokens, ExpiredTime: expTime}, nil
+	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }
 
 type rpcAuth struct {

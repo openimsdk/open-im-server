@@ -140,7 +140,7 @@ type User struct {
 	FaceUrl        string    `gorm:"column:face_url"`
 	Gender         int32     `gorm:"column:gender"`
 	PhoneNumber    string    `gorm:"column:phone_number"`
-	Birth          string    `gorm:"column:birth"`
+	Birth          time.Time `gorm:"column:birth"`
 	Email          string    `gorm:"column:email"`
 	Ex             string    `gorm:"column:ex"`
 	CreateTime     time.Time `gorm:"column:create_time"`
