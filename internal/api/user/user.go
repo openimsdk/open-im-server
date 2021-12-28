@@ -118,6 +118,7 @@ func UpdateUserInfo(c *gin.Context) {
 	}
 	req := &rpc.UpdateUserInfoReq{UserInfo: &open_im_sdk.UserInfo{}}
 	utils.CopyStructFields(req.UserInfo, &params)
+	req.OperationID = params.OperationID
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {

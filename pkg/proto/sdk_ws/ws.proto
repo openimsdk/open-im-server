@@ -48,7 +48,7 @@ message UserInfo{
   string FaceUrl = 3;
   int32 Gender = 4;
   string PhoneNumber = 5;
-  string Birth = 6;
+  int64 Birth = 6;
   string Email = 7;
   string Ex = 8;
   int64 CreateTime = 9;
