@@ -91,10 +91,15 @@ func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int32, m map[s
 	_, err := d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
+func (d *DataBases) DeleteTokenByUidPid(userID string, platformID int32, fields []string) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+	_, err := d.Exec("HDEL", key, redis.Args{}.Add().AddFlat(fields)...)
+	return err
+}
 func (d *DataBases) SetSingleConversationMsgOpt(userID, conversationID string, opt int) error {
 	key := conversationReceiveMessageOpt + userID
-	_, err1 := d.Exec("HSet", key, conversationID, opt)
-	return err1
+	_, err := d.Exec("HSet", key, conversationID, opt)
+	return err
 }
 func (d *DataBases) GetSingleConversationMsgOpt(userID, conversationID string) (int, error) {
 	key := conversationReceiveMessageOpt + userID
