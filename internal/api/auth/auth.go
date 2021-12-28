@@ -28,7 +28,7 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 	req := &rpc.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
-	utils.CopyStructFields(*req.UserInfo, params)
+	utils.CopyStructFields(req.UserInfo, &params)
 	//copier.Copy(req.UserInfo, &params)
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
