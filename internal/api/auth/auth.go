@@ -26,7 +26,7 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 	req := &rpc.UserRegisterReq{}
-	log.NewInfo("UserRegister args ", req.String())
+	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserRegister(context.Background(), req)
@@ -64,7 +64,7 @@ func UserToken(c *gin.Context) {
 		return
 	}
 	req := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID}
-	log.NewInfo("UserToken args ", req.String())
+	log.NewInfo(req.OperationID, "UserToken args ", req.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserToken(context.Background(), req)
