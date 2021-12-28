@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	rpc "Open_IM/pkg/proto/auth"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,7 @@ func UserRegister(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "not authorized"})
 		return
 	}
-	req := &rpc.UserRegisterReq{}
+	req := &rpc.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
 	utils.CopyStructFields(*req.UserInfo, params)
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
