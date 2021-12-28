@@ -55,9 +55,11 @@ func CreateToken(userID string, platformID int32) (string, int64, error) {
 			deleteTokenKey = append(deleteTokenKey, k)
 		}
 	}
-	err = commonDB.DB.DeleteTokenByUidPid(userID, platformID, deleteTokenKey)
-	if err != nil {
-		return "", 0, err
+	if len(deleteTokenKey) != 0 {
+		err = commonDB.DB.DeleteTokenByUidPid(userID, platformID, deleteTokenKey)
+		if err != nil {
+			return "", 0, err
+		}
 	}
 	err = commonDB.DB.AddTokenFlag(userID, platformID, tokenString, constant.NormalToken)
 	if err != nil {
