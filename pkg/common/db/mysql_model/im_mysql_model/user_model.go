@@ -33,9 +33,6 @@ func UserRegister(user User) error {
 		return err
 	}
 	user.CreateTime = time.Now()
-	if user.Birth != 0 {
-		user.Birth = utils.UnixSecondToTime(user.Birth)
-	}
 
 	err = dbConn.Table("user").Create(&user).Error
 	if err != nil {
@@ -83,9 +80,7 @@ func UpdateUserInfo(user User) error {
 	if err != nil {
 		return err
 	}
-	if user.Birth != 0 {
-		user.Birth = utils.UnixSecondToTime(user.Birth)
-	}
+
 	err = dbConn.Table("user").Where("user_id=?", user.UserID).Update(&user).Error
 	return err
 }
