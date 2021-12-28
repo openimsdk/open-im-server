@@ -22,7 +22,6 @@ type GetUserInfoReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 	UserIDList  []string `json:"userIDList" binding:"required"`
 }
-
 type GetUserInfoResp struct {
 	CommResp
 	UserInfoList []*open_im_sdk.UserInfo `json:"data"`

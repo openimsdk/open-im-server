@@ -348,7 +348,7 @@ func ApplicationGroupResponse(c *gin.Context) {
 		return
 	}
 
-	resp := api.CommResp{ErrCode: reply.ErrCode, ErrMsg: reply.ErrMsg}
+	resp := api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.OperationID, "ApplicationGroupResponse api return ", resp)
 }
@@ -379,7 +379,7 @@ func JoinGroup(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	resp := api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}
+	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo("JoinGroup api return", RpcResp.String())
 }
@@ -410,7 +410,7 @@ func QuitGroup(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	resp := api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}
+	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo("QuitGroup api return", RpcResp.String())
 }
@@ -441,7 +441,7 @@ func SetGroupInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	resp := api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}
+	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.OperationID, "SetGroupInfo api return ", resp)
 }
@@ -473,7 +473,7 @@ func TransferGroupOwner(c *gin.Context) {
 		return
 	}
 
-	resp := api.CommResp{ErrCode: reply.ErrCode, ErrMsg: reply.ErrMsg}
+	resp := api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.OperationID, "TransferGroupOwner api return ", resp)
 }
