@@ -40,7 +40,9 @@ func UserRegister(user User) error {
 	if user.AppMangerLevel == 0 {
 		user.AppMangerLevel = constant.AppOrdinaryUsers
 	}
-	utils.UnixSecondToTime(0)
+	if user.Birth.Unix() < 0 {
+		user.Birth = utils.UnixSecondToTime(0)
+	}
 	err = dbConn.Table("user").Create(&user).Error
 	if err != nil {
 		return err
