@@ -184,6 +184,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 
 	for _, v := range req.FriendUserIDList {
 		if _, fErr := imdb.GetUserByUserID(v); fErr != nil {
+			log.NewError(req.OperationID, "GetUserByUserID failed", req.FromUserID, fErr.Error(), v)
 			resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
 		} else {
 			if _, err := imdb.GetFriendRelationshipFromFriend(req.FromUserID, v); err != nil {
@@ -202,10 +203,8 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
 					continue
 				}
-				for _, v := range req.FriendUserIDList {
-					chat.FriendAddedNotification(req.OperationID, req.OpUserID, req.FromUserID, v)
-					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: 0})
-				}
+				resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: 0})
+				chat.FriendAddedNotification(req.OperationID, req.OpUserID, req.FromUserID, v)
 			}
 		}
 	}
