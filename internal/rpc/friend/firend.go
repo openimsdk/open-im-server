@@ -408,7 +408,7 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 	}
 	var userInfoList []*sdkws.FriendInfo
 	for _, friendUser := range friends {
-		var friendUserInfo sdkws.FriendInfo
+		friendUserInfo := sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
 		cp.FriendDBCopyOpenIM(&friendUserInfo, &friendUser)
 		log.NewDebug(req.CommID.OperationID, "friends : ", friendUser, "openim friends: ", friendUserInfo)
 		userInfoList = append(userInfoList, &friendUserInfo)
