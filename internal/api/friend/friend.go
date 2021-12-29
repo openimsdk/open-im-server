@@ -272,8 +272,8 @@ func RemoveBlacklist(c *gin.Context) {
 		return
 	}
 	resp := api.RemoveBlackListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
-	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "RemoveBlacklist api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 func IsFriend(c *gin.Context) {
@@ -303,8 +303,8 @@ func IsFriend(c *gin.Context) {
 		return
 	}
 	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Response: RpcResp.Response}
-	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 //
