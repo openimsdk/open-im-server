@@ -68,17 +68,19 @@ func ImportFriend(c *gin.Context) {
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.ImportFriend(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "ImportFriend failed", err.Error(), req.String())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed " + err.Error()})
+		log.NewError(req.OperationID, "ImportFriend failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed "})
 		return
 	}
 	resp := api.ImportFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	if resp.ErrCode == 0 {
 		for _, v := range RpcResp.UserIDResultList {
-			resp.UserIDResultList = append(resp.UserIDResultList, api.UserIDResult{v.UserID, v.Result})
+			resp.UserIDResultList = append(resp.UserIDResultList, api.UserIDResult{UserID: v.UserID, Result: v.Result})
 		}
 	}
-
+	if len(resp.UserIDResultList) == 0 {
+		resp.UserIDResultList = []api.UserIDResult{}
+	}
 	log.NewInfo(req.OperationID, "ImportFriend api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
