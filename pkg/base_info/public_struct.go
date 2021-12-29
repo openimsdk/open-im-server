@@ -16,6 +16,11 @@ type UserInfo struct {
 	Ex          string `json:"ex" binding:"omitempty,max=1024"`
 }
 
+type GroupAddMemberInfo struct {
+	UserID    string `json:"userID" binding:"required"`
+	RoleLevel int32  `json:"roleLevel" binding:"required"`
+}
+
 func SetErrCodeMsg(c *gin.Context, status int) *CommResp {
 	resp := CommResp{ErrCode: int32(status), ErrMsg: http.StatusText(status)}
 	c.JSON(status, resp)

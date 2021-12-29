@@ -227,7 +227,10 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 	req := &rpc.CreateGroupReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
+	for _, v := range params.MemberList {
+		req.InitMemberList = append(req.InitMemberList, &rpc.GroupAddMemberInfo{UserID: v.UserID, RoleLevel: v.RoleLevel})
+	}
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -246,13 +249,12 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 
+	resp := api.CreateGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	if RpcResp.ErrCode == 0 {
-		resp := gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg, "data": gin.H{"groupInfo": RpcResp.GroupInfo}}
-		c.JSON(http.StatusOK, resp)
-	} else {
-		c.JSON(http.StatusOK, gin.H{"errCode": RpcResp.ErrCode, "errMsg": RpcResp.ErrMsg})
+		utils.CopyStructFields(&resp.GroupInfo, &RpcResp.GroupInfo)
 	}
 	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", RpcResp)
+	c.JSON(http.StatusOK, resp)
 }
 
 //my application  我发出去的
