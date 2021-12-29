@@ -27,7 +27,7 @@ func GetAllConversationMessageOpt(c *gin.Context) {
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed or not set token in header"})
 		return
 	}
 	log.NewInfo(params.OperationID, "GetAllConversationMessageOpt args ", req.String())

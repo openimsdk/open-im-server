@@ -139,7 +139,6 @@ func (s *userServer) GetAllConversationMsgOpt(ctx context.Context, req *pbUser.G
 	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt rpc return ", resp.String())
 	return &resp, nil
 }
-
 func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
 	log.NewInfo(req.OperationID, "DeleteUsers args ", req.String())
 	if token_verify.IsMangerUserID(req.OpUserID) {

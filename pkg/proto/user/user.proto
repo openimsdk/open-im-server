@@ -97,7 +97,7 @@ message GetReceiveMessageOptResp{
 
 
 message GetAllConversationMsgOptReq{
-  string FromUserId = 1;
+  string FromUserID = 1;
   string  operationID = 2;
   string OpUserID = 3;
 }
