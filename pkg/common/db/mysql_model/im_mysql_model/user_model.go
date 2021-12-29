@@ -25,7 +25,7 @@ func init() {
 		appMgr.AppMangerLevel = constant.AppAdmin
 		err = UserRegister(appMgr)
 		if err != nil {
-			fmt.Println("AppManager insert error", err.Error())
+			fmt.Println("AppManager insert error", err.Error(), appMgr, "time: ", appMgr.Birth.Unix())
 		}
 
 	}
@@ -40,6 +40,7 @@ func UserRegister(user User) error {
 	if user.AppMangerLevel == 0 {
 		user.AppMangerLevel = constant.AppOrdinaryUsers
 	}
+	utils.UnixSecondToTime(0)
 	err = dbConn.Table("user").Create(&user).Error
 	if err != nil {
 		return err
