@@ -140,7 +140,7 @@ tokenpolicy:
   accessSecret: "open_im_server"
   # Token effective time seconds as a unit
   #Seven days   7*24*60*60
-  accessExpire: 604800
+  accessExpire: 7
 
 messagecallback:
   callbackSwitch: false
