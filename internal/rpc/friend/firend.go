@@ -257,7 +257,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 
 		_, err = imdb.GetFriendRelationshipFromFriend(req.CommID.ToUserID, req.CommID.FromUserID)
 		if err == nil {
-			log.NewWarn(req.CommID.OperationID, "FindFriendRelationshipFromFriend exist", req.CommID.ToUserID, req.CommID.FromUserID)
+			log.NewWarn(req.CommID.OperationID, "GetFriendRelationshipFromFriend exist", req.CommID.ToUserID, req.CommID.FromUserID)
 		} else {
 			toInsertFollow := imdb.Friend{OwnerUserID: req.CommID.ToUserID, FriendUserID: req.CommID.FromUserID, OperatorUserID: req.CommID.OpUserID}
 			err = imdb.InsertToFriend(&toInsertFollow)
