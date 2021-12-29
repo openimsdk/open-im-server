@@ -2,7 +2,6 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/utils"
 	"time"
 )
 
