@@ -68,6 +68,8 @@ func UpdateFriendApplication(friendRequest *FriendRequest) error {
 	if dbConn.Table("friend_request").Where("from_user_id=? and to_user_id=?",
 		friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest).RowsAffected == 0 {
 		return InsertFriendApplication(friendRequest)
+	} else {
+		return nil
 	}
 }
 
