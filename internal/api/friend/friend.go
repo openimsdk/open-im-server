@@ -403,6 +403,9 @@ func GetFriendApplyList(c *gin.Context) {
 	}
 
 	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
+	if len(resp.FriendRequestList) == 0 {
+		resp.FriendRequestList = []*open_im_sdk.FriendRequest{}
+	}
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
