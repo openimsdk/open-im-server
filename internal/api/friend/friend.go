@@ -236,7 +236,7 @@ func SetFriendRemark(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := rpc.NewFriendClient(etcdConn)
-	RpcResp, err := client.SetFriendComment(context.Background(), req)
+	RpcResp, err := client.SetFriendRemark(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "SetFriendComment failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call set friend comment rpc server failed"})
