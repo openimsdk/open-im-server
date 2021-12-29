@@ -109,7 +109,8 @@ type GetFriendListResp struct {
 }
 
 type GetFriendApplyListReq struct {
-	ParamsCommFriend
+	OperationID string `json:"operationID" binding:"required"`
+	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetFriendApplyListResp struct {
 	CommResp
