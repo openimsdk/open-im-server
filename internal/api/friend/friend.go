@@ -72,8 +72,13 @@ func ImportFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed " + err.Error()})
 		return
 	}
+	resp := api.ImportFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+	if resp.ErrCode == 0 {
+		for _, v := range RpcResp.UserIDResultList {
+			resp.UserIDResultList = append(resp.UserIDResultList, api.UserIDResult{v.UserID, v.Result})
+		}
+	}
 
-	resp := api.ImportFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, Data: RpcResp.FailedFriendUserIDList}
 	log.NewInfo(req.OperationID, "ImportFriend api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
