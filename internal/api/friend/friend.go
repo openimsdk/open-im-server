@@ -120,6 +120,8 @@ func AddFriendResponse(c *gin.Context) {
 	}
 	req := &rpc.AddFriendResponseReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
+	req.HandleMsg = params.HandleMsg
+	req.Flag = params.Flag
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {

@@ -31,9 +31,9 @@ func main() {
 	friendRouterGroup := r.Group("/friend")
 	{
 		//	friendRouterGroup.POST("/get_friends_info", friend.GetFriendsInfo)
-		friendRouterGroup.POST("/add_friend", friend.AddFriend) //1
-		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList)
-		friendRouterGroup.POST("/get_self_apply_list", friend.GetSelfApplyList) //1
+		friendRouterGroup.POST("/add_friend", friend.AddFriend)                     //1
+		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList) //1
+		friendRouterGroup.POST("/get_self_apply_list", friend.GetSelfApplyList)     //1
 		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)
 		friendRouterGroup.POST("/add_blacklist", friend.AddBlacklist)
 		friendRouterGroup.POST("/get_blacklist", friend.GetBlacklist)
