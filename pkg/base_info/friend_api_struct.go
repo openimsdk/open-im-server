@@ -50,7 +50,8 @@ type DeleteFriendResp struct {
 }
 
 type GetBlackListReq struct {
-	ParamsCommFriend
+	OperationID string `json:"operationID" binding:"required"`
+	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetBlackListResp struct {
 	CommResp
