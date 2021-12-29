@@ -85,7 +85,7 @@ func AddFriend(c *gin.Context) {
 		return
 	}
 	req := &rpc.AddFriendReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -93,7 +93,7 @@ func AddFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	log.NewInfo("AddFriend args ", req.String())
+	log.NewInfo(req.CommID.OperationID, "AddFriend args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := rpc.NewFriendClient(etcdConn)
