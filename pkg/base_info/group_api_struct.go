@@ -80,6 +80,7 @@ type CreateGroupReq struct {
 	OwnerUserID string                `json:"ownerUserID"`
 	GroupName   string                `json:"groupName"`
 	GroupType   int32                 `json:"groupType"`
+	OperationID string                `json:"operationID"`
 }
 
 type CreateGroupResp struct {
