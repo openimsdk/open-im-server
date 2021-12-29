@@ -443,7 +443,7 @@ func SetGroupInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
+	resp := api.SetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.OperationID, "SetGroupInfo api return ", resp)
 }
