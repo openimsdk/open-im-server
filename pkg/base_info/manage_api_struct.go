@@ -29,8 +29,8 @@ type GetUsersOnlineStatusResp struct {
 	SuccessResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult `json:"data"`
 }
 type AccountCheckReq struct {
-	OperationID string   `json:"operationID" binding:"required"`
-	UserIDList  []string `json:"userIDList" binding:"required,lte=100"`
+	OperationID     string   `json:"operationID" binding:"required"`
+	CheckUserIDList []string `json:"checkUserIDList" binding:"required,lte=100"`
 }
 type AccountCheckResp struct {
 	CommResp
