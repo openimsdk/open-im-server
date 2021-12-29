@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
@@ -105,7 +106,11 @@ func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgRe
 	}, nil
 }
 func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUsersOnlineStatusReq) (*pbRelay.GetUsersOnlineStatusResp, error) {
-	log.NewDebug(req.OperationID, "rpc GetUsersOnlineStatus arrived server", req.String())
+	log.NewInfo(req.OperationID, "rpc GetUsersOnlineStatus arrived server", req.String())
+	if !token_verify.IsMangerUserID(req.OpUserID) {
+		log.NewError(req.OperationID, "no permission GetUsersOnlineStatus ", req.OpUserID)
+		return &pbRelay.GetUsersOnlineStatusResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+	}
 	var resp pbRelay.GetUsersOnlineStatusResp
 	for _, userID := range req.UserIDList {
 		platformList := genPlatformArray()
@@ -125,6 +130,7 @@ func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUser
 			resp.SuccessResult = append(resp.SuccessResult, temp)
 		}
 	}
+	log.NewInfo(req.OperationID, "GetUsersOnlineStatus rpc return ", resp.String())
 	return &resp, nil
 }
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.OnlinePushMsgReq, RecvPlatForm, RecvID string) (ResultCode int64) {

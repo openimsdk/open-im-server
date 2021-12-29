@@ -141,10 +141,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
-		err2 := rpc.sendMsgToKafka(&msgToMQ, msgToMQ.MsgData.SendID)
-		if err2 != nil {
-			log.NewError(msgToMQ.OperationID, "kafka send msg err:SendID", msgToMQ.MsgData.SendID, msgToMQ.String())
-			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+		if msgToMQ.MsgData.SendID != msgToMQ.MsgData.RecvID { //Filter messages sent to yourself
+			err2 := rpc.sendMsgToKafka(&msgToMQ, msgToMQ.MsgData.SendID)
+			if err2 != nil {
+				log.NewError(msgToMQ.OperationID, "kafka send msg err:SendID", msgToMQ.MsgData.SendID, msgToMQ.String())
+				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+			}
 		}
 		return returnMsg(&replay, pb, 0, "", msgToMQ.MsgData.ServerMsgID, msgToMQ.MsgData.SendTime)
 	case constant.GroupChatType:
