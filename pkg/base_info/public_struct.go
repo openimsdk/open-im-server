@@ -27,23 +27,25 @@ func SetErrCodeMsg(c *gin.Context, status int) *CommResp {
 	return &resp
 }
 
-//
+//GroupName    string                `json:"groupName"`
+//	Introduction string                `json:"introduction"`
+//	Notification string                `json:"notification"`
+//	FaceUrl      string                `json:"faceUrl"`
+//	OperationID  string                `json:"operationID" binding:"required"`
+//	GroupType    int32                 `json:"groupType"`
+//	Ex           string                `json:"ex"`
+
 //type GroupInfo struct {
 //	GroupID       string `json:"groupID"`
 //	GroupName     string `json:"groupName"`
 //	Notification  string `json:"notification"`
 //	Introduction  string `json:"introduction"`
 //	FaceUrl       string `json:"faceUrl"`
-//	OperationID   string `json:"operationID"`
 //	OwnerUserID   string `json:"ownerUserID"`
-//	CreateTime    int64  `json:"createTime"`
-//	MemberCount   uint32 `json:"memberCount"`
 //	Ex            string `json:"ex"`
-//	Status        int32  `json:"status"`
-//	CreatorUserID string `json:"creatorUserID"`
 //	GroupType     int32  `json:"groupType"`
 //}
-//
+
 //type GroupMemberFullInfo struct {
 //	GroupID        string `json:"groupID"`
 //	UserID         string `json:"userID"`

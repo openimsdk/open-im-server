@@ -76,15 +76,13 @@ type GetGroupAllMemberResp struct {
 }
 
 type CreateGroupReq struct {
-	MemberList   []*GroupAddMemberInfo `json:"memberList"  binding:"required"`
-	GroupName    string                `json:"groupName"`
-	Introduction string                `json:"introduction"`
-	Notification string                `json:"notification"`
-	FaceUrl      string                `json:"faceUrl"`
-	OperationID  string                `json:"operationID" binding:"required"`
-	GroupType    int32                 `json:"groupType"`
-	Ex           string                `json:"ex"`
+	MemberList  []*GroupAddMemberInfo `json:"memberList"  binding:"required"`
+	OwnerUserID string                `json:"ownerUserID" binding:"required"`
+	GroupName   string                `json:"groupName"`
+	GroupType   int32                 `json:"groupType"`
+	OperationID string                `json:"operationID" binding:"required"`
 }
+
 type CreateGroupResp struct {
 	CommResp
 	GroupInfo open_im_sdk.GroupInfo `json:"data"`
