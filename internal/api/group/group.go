@@ -244,7 +244,7 @@ func CreateGroup(c *gin.Context) {
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.CreateGroup(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "CreateGroup failed", err.Error(), req.String())
+		log.NewError(req.OperationID, "CreateGroup failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
