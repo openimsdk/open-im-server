@@ -195,7 +195,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 
 	_, err := imdb.GetGroupInfoByGroupID(req.GroupID)
 	if err != nil {
-		log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", req.GroupID, err)
+		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", req.GroupID, err)
 		return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
 	//
@@ -209,7 +209,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		resultNode.Result = 0
 		toUserInfo, err := imdb.GetUserByUserID(v)
 		if err != nil {
-			log.NewError(req.OperationID, "FindUserByUID failed ", err.Error(), v)
+			log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), v)
 			resultNode.Result = -1
 			resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
 			continue
@@ -253,7 +253,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 	if err != nil {
 		resp.ErrCode = constant.ErrDB.ErrCode
 		resp.ErrMsg = constant.ErrDB.ErrMsg
-		log.NewError(req.OperationID, "FindGroupMemberListByGroupId failed,", err.Error(), req.GroupID)
+		log.NewError(req.OperationID, "GetGroupMemberListByGroupID failed,", err.Error(), req.GroupID)
 		return &resp, nil
 	}
 
@@ -411,7 +411,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	for _, groupID := range req.GroupIDList {
 		groupInfoFromMysql, err := im_mysql_model.GetGroupInfoByGroupID(groupID)
 		if err != nil {
-			log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", err.Error(), groupID)
+			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupID)
 			continue
 		}
 		var groupInfo open_im_sdk.GroupInfo
@@ -482,7 +482,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 
 	_, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.OpUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "FindGroupMemberInfoByGroupIdAndUserId failed", err.Error(), req.GroupID, req.OpUserID)
+		log.NewError(req.OperationID, "GetGroupMemberInfoByGroupIDAndUserID failed", err.Error(), req.GroupID, req.OpUserID)
 		return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
@@ -509,7 +509,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 	}
 	groupUserInfo, err := im_mysql_model.GetGroupMemberInfoByGroupIDAndUserID(req.GroupInfo.GroupID, req.OpUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "FindGroupMemberInfoByGroupIdAndUserId failed, ", err.Error(), req.GroupInfo.GroupID, req.OpUserID)
+		log.NewError(req.OperationID, "GetGroupMemberInfoByGroupIDAndUserID failed, ", err.Error(), req.GroupInfo.GroupID, req.OpUserID)
 		return false
 
 	}
@@ -528,7 +528,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 
 	group, err := im_mysql_model.GetGroupInfoByGroupID(req.GroupInfo.GroupID)
 	if err != nil {
-		log.NewError(req.OperationID, "FindGroupInfoByGroupId failed ", err.Error(), req.GroupInfo.GroupID)
+		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), req.GroupInfo.GroupID)
 		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
