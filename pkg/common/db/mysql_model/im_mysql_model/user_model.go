@@ -100,7 +100,7 @@ func SelectAllUserID() ([]string, error) {
 		return nil, err
 	}
 	var resultArr []string
-	err = dbConn.Table("user").Select([]string{"user_id"}).Scan(&resultArr).Error
+	err = dbConn.Table("user").Select("user_id").Pluck("user_id", &resultArr).Error
 	if err != nil {
 		return nil, err
 	}

@@ -104,7 +104,7 @@ func (s *userServer) SetReceiveMessageOpt(ctx context.Context, req *pbUser.SetRe
 	resp := pbUser.SetReceiveMessageOptResp{CommonResp: &pbUser.CommonResp{}}
 
 	for _, v := range req.ConversationIDList {
-		resp.ConversationOptResultList = append(resp.ConversationOptResultList, &pbUser.OptResult{ConversationID: v, Result: 0})
+		resp.ConversationOptResultList = append(resp.ConversationOptResultList, &pbUser.OptResult{ConversationID: v, Result: req.Opt})
 	}
 	log.NewInfo(req.OperationID, "SetReceiveMessageOpt rpc return ", resp.String())
 	return &resp, nil
