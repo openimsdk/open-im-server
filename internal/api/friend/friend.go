@@ -69,7 +69,7 @@ func ImportFriend(c *gin.Context) {
 	RpcResp, err := client.ImportFriend(context.Background(), req)
 	if err != nil {
 		log.NewError(req.OperationID, "ImportFriend failed ", err.Error(), req.String())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "cImportFriend failed "})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "ImportFriend failed "})
 		return
 	}
 	resp := api.ImportFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}

@@ -156,10 +156,9 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{}}, nil
 }
 
-//todo
 func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.ImportFriendResp, error) {
 	log.NewInfo(req.OperationID, "ImportFriend failed ", req.String())
-	var resp pbFriend.ImportFriendResp
+	resp := pbFriend.ImportFriendResp{CommonResp: &pbFriend.CommonResp{}}
 	var c pbFriend.CommonResp
 
 	if !utils.IsContain(req.OpUserID, config.Config.Manager.AppManagerUid) {
