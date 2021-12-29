@@ -47,12 +47,10 @@ func DeleteUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call delete users rpc server failed"})
 		return
 	}
-	failedUserIDList := make([]string, 0)
-	for _, v := range RpcResp.FailedUserIDList {
-		failedUserIDList = append(failedUserIDList, v)
+	resp := api.DeleteUsersResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, FailedUserIDList: RpcResp.FailedUserIDList}
+	if len(RpcResp.FailedUserIDList) == 0 {
+		resp.FailedUserIDList = []string{}
 	}
-	resp := api.DeleteUsersResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
-	resp.FailedUserIDList = failedUserIDList
 	log.NewInfo(req.OperationID, "DeleteUser api return", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -80,12 +78,10 @@ func GetAllUsersUid(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call GetAllUsersUid users rpc server failed"})
 		return
 	}
-	userIDList := make([]string, 0)
-	for _, v := range RpcResp.UserIDList {
-		userIDList = append(userIDList, v)
+	resp := api.GetAllUsersUidResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserIDList: RpcResp.UserIDList}
+	if len(RpcResp.UserIDList) == 0 {
+		resp.UserIDList = []string{}
 	}
-	resp := api.GetAllUsersUidResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
-	resp.UserIDList = userIDList
 	log.NewInfo(req.OperationID, "GetAllUsersUid api return", resp)
 	c.JSON(http.StatusOK, resp)
 
@@ -115,8 +111,10 @@ func AccountCheck(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call AccountCheck users rpc server failed"})
 		return
 	}
-	resp := api.AccountCheckResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
-	resp.ResultList = RpcResp.ResultList
+	resp := api.AccountCheckResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, ResultList: RpcResp.ResultList}
+	if len(RpcResp.ResultList) == 0 {
+		resp.ResultList = []*rpc.AccountCheckResp_SingleUserStatus{}
+	}
 	log.NewInfo(req.OperationID, "AccountCheck api return", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -172,8 +170,10 @@ func GetUsersOnlineStatus(c *gin.Context) {
 		}
 		respResult = append(respResult, temp)
 	}
-	resp := api.GetUsersOnlineStatusResp{CommResp: api.CommResp{ErrCode: 0, ErrMsg: ""}}
-	resp.SuccessResult = respResult
+	resp := api.GetUsersOnlineStatusResp{CommResp: api.CommResp{ErrCode: 0, ErrMsg: ""}, SuccessResult: respResult}
+	if len(respResult) == 0 {
+		resp.SuccessResult = []*pbRelay.GetUsersOnlineStatusResp_SuccessResult{}
+	}
 	log.NewInfo(req.OperationID, "GetUsersOnlineStatus api return", resp)
 	c.JSON(http.StatusOK, resp)
 
