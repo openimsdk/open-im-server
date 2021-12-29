@@ -89,9 +89,12 @@ type RemoveBlackListResp struct {
 type IsFriendReq struct {
 	ParamsCommFriend
 }
+type Response struct {
+	Friend bool `json:"isFriend"`
+}
 type IsFriendResp struct {
 	CommResp
-	Response bool `json:"response"`
+	Response Response `json:"data"`
 }
 
 type GetFriendsInfoReq struct {

@@ -305,7 +305,9 @@ func IsFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call add friend rpc server failed"})
 		return
 	}
-	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Response: RpcResp.Response}
+	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp.Response.Friend = RpcResp.Response
+
 	log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
