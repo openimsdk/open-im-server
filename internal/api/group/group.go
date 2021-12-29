@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	rpc "Open_IM/pkg/proto/group"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -424,8 +425,9 @@ func SetGroupInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.SetGroupInfoReq{}
-	utils.CopyStructFields(req, &params.Group)
+	req := &rpc.SetGroupInfoReq{GroupInfo: &open_im_sdk.GroupInfo{}}
+	utils.CopyStructFields(req.GroupInfo, &params.Group)
+	req.OperationID = params.OperationID
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
