@@ -1,7 +1,6 @@
 package base_info
 
 import (
-	pb "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 )
 
@@ -77,18 +76,18 @@ type GetGroupAllMemberResp struct {
 }
 
 type CreateGroupReq struct {
-	MemberList   []*pb.GroupAddMemberInfo `json:"memberList"`
-	GroupName    string                   `json:"groupName"`
-	Introduction string                   `json:"introduction"`
-	Notification string                   `json:"notification"`
-	FaceUrl      string                   `json:"faceUrl"`
-	OperationID  string                   `json:"operationID" binding:"required"`
-	GroupType    int32                    `json:"groupType"`
-	Ex           string                   `json:"ex"`
+	MemberList   []*GroupAddMemberInfo `json:"memberList"  binding:"required"`
+	GroupName    string                `json:"groupName"`
+	Introduction string                `json:"introduction"`
+	Notification string                `json:"notification"`
+	FaceUrl      string                `json:"faceUrl"`
+	OperationID  string                `json:"operationID" binding:"required"`
+	GroupType    int32                 `json:"groupType"`
+	Ex           string                `json:"ex"`
 }
 type CreateGroupResp struct {
 	CommResp
-	Data open_im_sdk.GroupInfo `json:"data"`
+	GroupInfo open_im_sdk.GroupInfo `json:"data"`
 }
 
 type GetGroupApplicationListReq struct {

@@ -42,9 +42,13 @@ message ImportFriendReq{
   string FromUserID = 3;
   string OpUserID = 4;
 }
+message UserIDResult{
+  string UserID = 1;
+  int32 Result = 2;
+}
 message ImportFriendResp{
   CommonResp CommonResp = 1;
-  repeated string FailedFriendUserIDList = 2;
+  repeated UserIDResult UserIDResultList = 2;
 }
 
 

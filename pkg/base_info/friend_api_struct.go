@@ -20,9 +20,13 @@ type ImportFriendReq struct {
 	OperationID      string   `json:"operationID" binding:"required"`
 	FromUserID       string   `json:"fromUserID" binding:"required"`
 }
+type UserIDResult struct {
+	UserID string `json:"userID""`
+	Result int32  `json:"result"`
+}
 type ImportFriendResp struct {
 	CommResp
-	Data []string `json:"data"`
+	UserIDResultList []UserIDResult `json:"data"`
 }
 
 type AddFriendReq struct {
