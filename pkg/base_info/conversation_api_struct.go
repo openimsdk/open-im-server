@@ -22,6 +22,7 @@ type GetReceiveMessageOptResp struct {
 	ConversationOptResultList []*OptResult `json:"data"`
 }
 type SetReceiveMessageOptReq struct {
+	FromUserID         string   `json:"fromUserID" binding:"required"`
 	OperationID        string   `json:"operationID" binding:"required"`
 	Opt                *int32   `json:"opt" binding:"required"`
 	ConversationIDList []string `json:"conversationIDList" binding:"required"`
