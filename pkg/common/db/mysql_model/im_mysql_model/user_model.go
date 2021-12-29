@@ -109,11 +109,13 @@ func SelectAllUserID() ([]string, error) {
 
 func SelectSomeUserID(userIDList []string) ([]string, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	dbConn.LogMode(true)
 	if err != nil {
 		return nil, err
 	}
 	var resultArr []string
-	err = dbConn.Table("user").Where("(user_id) IN ? ", userIDList).Pluck("user_id", &resultArr).Error
+	err = dbConn.Table("user").Where("user_id IN (?) ", userIDList).Pluck("user_id", &resultArr).Error
+
 	if err != nil {
 		return nil, err
 	}
