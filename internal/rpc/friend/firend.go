@@ -410,7 +410,7 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 	for _, friendUser := range friends {
 
 		var friendUserInfo sdkws.FriendInfo
-		utils.CopyStructFields(&friendUserInfo, friendUser)
+		utils.CopyStructFields(&friendUserInfo, &friendUser)
 		userInfoList = append(userInfoList, &friendUserInfo)
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc GetFriendList ok", pbFriend.GetFriendListResp{FriendInfoList: userInfoList})
