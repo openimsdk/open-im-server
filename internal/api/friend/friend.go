@@ -215,14 +215,14 @@ func GetBlacklist(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func SetFriendComment(c *gin.Context) {
-	params := api.SetFriendCommentReq{}
+func SetFriendRemark(c *gin.Context) {
+	params := api.SetFriendRemarkReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.SetFriendCommentReq{CommID: &rpc.CommID{}}
+	req := &rpc.SetFriendRemarkReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	req.Remark = params.Remark
 	var ok bool
@@ -236,13 +236,13 @@ func SetFriendComment(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := rpc.NewFriendClient(etcdConn)
-	RpcResp, err := client.SetFriendComment(context.Background(), req)
+	RpcResp, err := client.SetFriendRemark(context.Background(), req)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "SetFriendComment failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call set friend comment rpc server failed"})
 		return
 	}
-	resp := api.SetFriendCommentResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+	resp := api.SetFriendRemarkResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 
 	log.NewInfo(req.CommID.OperationID, "SetFriendComment api return ", resp)
 	c.JSON(http.StatusOK, resp)
@@ -305,7 +305,9 @@ func IsFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call add friend rpc server failed"})
 		return
 	}
-	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Response: RpcResp.Response}
+	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp.Response.Friend = RpcResp.Response
+
 	log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -352,7 +354,7 @@ func GetFriendList(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetFriendListReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
+	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -372,6 +374,9 @@ func GetFriendList(c *gin.Context) {
 	}
 
 	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendInfoList: RpcResp.FriendInfoList}
+	if len(resp.FriendInfoList) == 0 {
+		resp.FriendInfoList = []*open_im_sdk.FriendInfo{}
+	}
 	log.NewInfo(req.CommID.OperationID, "GetFriendList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }

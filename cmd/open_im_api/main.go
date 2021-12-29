@@ -34,14 +34,14 @@ func main() {
 		friendRouterGroup.POST("/add_friend", friend.AddFriend)                     //1
 		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList) //1
 		friendRouterGroup.POST("/get_self_apply_list", friend.GetSelfApplyList)     //1
-		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)
+		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)            //1
 		friendRouterGroup.POST("/add_blacklist", friend.AddBlacklist)
 		friendRouterGroup.POST("/get_blacklist", friend.GetBlacklist)
 		friendRouterGroup.POST("/remove_blacklist", friend.RemoveBlacklist)
 		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)
-		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)
-		friendRouterGroup.POST("/set_friend_comment", friend.SetFriendComment)
-		friendRouterGroup.POST("/is_friend", friend.IsFriend)
+		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse) //1
+		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)     //1
+		friendRouterGroup.POST("/is_friend", friend.IsFriend)                    //1
 		friendRouterGroup.POST("/import_friend", friend.ImportFriend)
 	}
 	//group related routing group

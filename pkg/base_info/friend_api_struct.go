@@ -35,7 +35,9 @@ type AddFriendResp struct {
 
 type AddFriendResponseReq struct {
 	ParamsCommFriend
-	Flag      int32  `json:"flag" binding:"required"`
+	//binding:"oneof=0 1 2"`
+	//}
+	Flag      int32  `json:"flag" binding:"required,oneof=-1 0 1"`
 	HandleMsg string `json:"handleMsg"`
 }
 type AddFriendResponseResp struct {
@@ -69,11 +71,11 @@ type BlackUserInfo struct {
 	open_im_sdk.PublicUserInfo
 }
 
-type SetFriendCommentReq struct {
+type SetFriendRemarkReq struct {
 	ParamsCommFriend
 	Remark string `json:"remark" binding:"required"`
 }
-type SetFriendCommentResp struct {
+type SetFriendRemarkResp struct {
 	CommResp
 }
 
@@ -87,9 +89,12 @@ type RemoveBlackListResp struct {
 type IsFriendReq struct {
 	ParamsCommFriend
 }
+type Response struct {
+	Friend bool `json:"isFriend"`
+}
 type IsFriendResp struct {
 	CommResp
-	Response bool `json:"response"`
+	Response Response `json:"data"`
 }
 
 type GetFriendsInfoReq struct {
@@ -101,7 +106,8 @@ type GetFriendsInfoResp struct {
 }
 
 type GetFriendListReq struct {
-	ParamsCommFriend
+	OperationID string `json:"operationID" binding:"required"`
+	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetFriendListResp struct {
 	CommResp
