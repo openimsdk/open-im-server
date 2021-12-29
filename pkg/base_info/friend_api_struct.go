@@ -17,7 +17,8 @@ type AddBlacklistResp struct {
 
 type ImportFriendReq struct {
 	FriendUserIDList []string `json:"friendUserIDList" binding:"required"`
-	ParamsCommFriend
+	OperationID      string   `json:"operationID" binding:"required"`
+	FromUserID       string   `json:"fromUserID" binding:"required"`
 }
 type UserIDResult struct {
 	UserID string `json:"userID""`
