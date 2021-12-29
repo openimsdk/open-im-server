@@ -183,6 +183,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	}
 
 	for _, v := range req.FriendUserIDList {
+		log.NewDebug(req.OperationID, "FriendUserIDList ", v)
 		if _, fErr := imdb.GetUserByUserID(v); fErr != nil {
 			log.NewError(req.OperationID, "GetUserByUserID failed", req.FromUserID, fErr.Error(), v)
 			resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
