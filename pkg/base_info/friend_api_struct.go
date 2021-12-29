@@ -112,7 +112,7 @@ type GetFriendApplyListReq struct {
 }
 type GetFriendApplyListResp struct {
 	CommResp
-	FriendRequestList open_im_sdk.FriendRequest `json:"data"`
+	FriendRequestList []*open_im_sdk.FriendRequest `json:"data"`
 }
 
 type GetSelfApplyListReq struct {
@@ -120,5 +120,5 @@ type GetSelfApplyListReq struct {
 }
 type GetSelfApplyListResp struct {
 	CommResp
-	FriendRequestList open_im_sdk.FriendRequest `json:"data"`
+	FriendRequestList []*open_im_sdk.FriendRequest `json:"data"`
 }
