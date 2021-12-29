@@ -251,9 +251,9 @@ func CreateGroup(c *gin.Context) {
 
 	resp := api.CreateGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	if RpcResp.ErrCode == 0 {
-		utils.CopyStructFields(&resp.GroupInfo, &RpcResp.GroupInfo)
+		utils.CopyStructFields(&resp.GroupInfo, RpcResp.GroupInfo)
 	}
-	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", RpcResp)
+	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
 
