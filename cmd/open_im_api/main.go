@@ -24,8 +24,8 @@ func main() {
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
-		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)
-		userRouterGroup.POST("/get_user_info", user.GetUserInfo)
+		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo) //1
+		userRouterGroup.POST("/get_user_info", user.GetUserInfo) //1
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
@@ -35,9 +35,9 @@ func main() {
 		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList) //1
 		friendRouterGroup.POST("/get_self_apply_list", friend.GetSelfApplyList)     //1
 		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)            //1
-		friendRouterGroup.POST("/add_blacklist", friend.AddBlacklist)
-		friendRouterGroup.POST("/get_blacklist", friend.GetBlacklist)
-		friendRouterGroup.POST("/remove_blacklist", friend.RemoveBlacklist)
+		friendRouterGroup.POST("/add_blacklist", friend.AddBlacklist)  //1
+		friendRouterGroup.POST("/get_blacklist", friend.GetBlacklist) //1
+		friendRouterGroup.POST("/remove_blacklist", friend.RemoveBlacklist)  //1
 		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)
 		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse) //1
 		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)     //1
@@ -65,8 +65,8 @@ func main() {
 	//certificate
 	authRouterGroup := r.Group("/auth")
 	{
-		authRouterGroup.POST("/user_register", apiAuth.UserRegister)
-		authRouterGroup.POST("/user_token", apiAuth.UserToken)
+		authRouterGroup.POST("/user_register", apiAuth.UserRegister) //1
+		authRouterGroup.POST("/user_token", apiAuth.UserToken) //1
 	}
 	//Third service
 	thirdGroup := r.Group("/third")
