@@ -35,7 +35,9 @@ type AddFriendResp struct {
 
 type AddFriendResponseReq struct {
 	ParamsCommFriend
-	Flag      int32  `json:"flag" binding:"required, oneof=-1 1"`
+	//binding:"oneof=0 1 2"`
+	//}
+	Flag      int32  `json:"flag" binding:"required,oneof=0 1"`
 	HandleMsg string `json:"handleMsg"`
 }
 type AddFriendResponseResp struct {
