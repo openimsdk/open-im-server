@@ -2,6 +2,7 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"time"
 )
 
@@ -82,7 +83,7 @@ func InsertFriendApplication(friendRequest *FriendRequest) error {
 		friendRequest.CreateTime = time.Now()
 	}
 	if friendRequest.HandleTime.Unix() < 0 {
-		friendRequest.HandleTime = time.Now()
+		friendRequest.HandleTime = utils.UnixSecondToTime(0)
 	}
 	err = dbConn.Table("friend_request").Create(friendRequest).Error
 	if err != nil {
