@@ -2,14 +2,14 @@ package base_info
 
 import open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 
-type paramsCommFriend struct {
+type ParamsCommFriend struct {
 	OperationID string `json:"operationID" binding:"required"`
 	ToUserID    string `json:"toUserID" binding:"required"`
 	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 
 type AddBlacklistReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 }
 type AddBlacklistResp struct {
 	CommResp
@@ -26,7 +26,7 @@ type ImportFriendResp struct {
 }
 
 type AddFriendReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 	ReqMsg string `json:"reqMsg"`
 }
 type AddFriendResp struct {
@@ -34,7 +34,7 @@ type AddFriendResp struct {
 }
 
 type AddFriendResponseReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 	Flag      int32  `json:"flag" binding:"required"`
 	HandleMsg string `json:"handleMsg"`
 }
@@ -43,14 +43,15 @@ type AddFriendResponseResp struct {
 }
 
 type DeleteFriendReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 }
 type DeleteFriendResp struct {
 	CommResp
 }
 
 type GetBlackListReq struct {
-	paramsCommFriend
+	OperationID string `json:"operationID" binding:"required"`
+	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetBlackListResp struct {
 	CommResp
@@ -69,7 +70,7 @@ type BlackUserInfo struct {
 }
 
 type SetFriendCommentReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 	Remark string `json:"remark" binding:"required"`
 }
 type SetFriendCommentResp struct {
@@ -77,14 +78,14 @@ type SetFriendCommentResp struct {
 }
 
 type RemoveBlackListReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 }
 type RemoveBlackListResp struct {
 	CommResp
 }
 
 type IsFriendReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 }
 type IsFriendResp struct {
 	CommResp
@@ -92,7 +93,7 @@ type IsFriendResp struct {
 }
 
 type GetFriendsInfoReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 }
 type GetFriendsInfoResp struct {
 	CommResp
@@ -100,7 +101,7 @@ type GetFriendsInfoResp struct {
 }
 
 type GetFriendListReq struct {
-	paramsCommFriend
+	ParamsCommFriend
 }
 type GetFriendListResp struct {
 	CommResp
@@ -108,17 +109,19 @@ type GetFriendListResp struct {
 }
 
 type GetFriendApplyListReq struct {
-	paramsCommFriend
+	OperationID string `json:"operationID" binding:"required"`
+	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetFriendApplyListResp struct {
 	CommResp
-	FriendRequestList open_im_sdk.FriendRequest `json:"data"`
+	FriendRequestList []*open_im_sdk.FriendRequest `json:"data"`
 }
 
 type GetSelfApplyListReq struct {
-	paramsCommFriend
+	OperationID string `json:"operationID" binding:"required"`
+	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetSelfApplyListResp struct {
 	CommResp
-	FriendRequestList open_im_sdk.FriendRequest `json:"data"`
+	FriendRequestList []*open_im_sdk.FriendRequest `json:"data"`
 }

@@ -2,6 +2,7 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"time"
 )
 
@@ -65,17 +66,24 @@ func UpdateFriendApplication(friendRequest *FriendRequest) error {
 		return err
 	}
 	friendRequest.CreateTime = time.Now()
-	err = dbConn.Table("friend_request").Where("from_user_id=? and to_user_id=?", friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest).Error
-	if err != nil {
-		return err
+	if dbConn.Table("friend_request").Where("from_user_id=? and to_user_id=?",
+		friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest).RowsAffected == 0 {
+		return InsertFriendApplication(friendRequest)
+	} else {
+		return nil
 	}
-	return nil
 }
 
 func InsertFriendApplication(friendRequest *FriendRequest) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
+	}
+	if friendRequest.CreateTime.Unix() < 0 {
+		friendRequest.CreateTime = time.Now()
+	}
+	if friendRequest.HandleTime.Unix() < 0 {
+		friendRequest.HandleTime = utils.UnixSecondToTime(0)
 	}
 	err = dbConn.Table("friend_request").Create(friendRequest).Error
 	if err != nil {

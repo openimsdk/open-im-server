@@ -2,6 +2,7 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
 	"fmt"
@@ -15,13 +16,16 @@ func init() {
 		user, err := GetUserByUserID(v)
 		if err != nil {
 			fmt.Println("GetUserByUserID failed ", err.Error(), v, user)
+		} else {
 			continue
 		}
 		var appMgr User
+		appMgr.UserID = v
 		appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
+		appMgr.AppMangerLevel = constant.AppAdmin
 		err = UserRegister(appMgr)
 		if err != nil {
-			fmt.Println("AppManager insert error", err.Error())
+			fmt.Println("AppManager insert error", err.Error(), appMgr, "time: ", appMgr.Birth.Unix())
 		}
 
 	}
@@ -33,7 +37,12 @@ func UserRegister(user User) error {
 		return err
 	}
 	user.CreateTime = time.Now()
-
+	if user.AppMangerLevel == 0 {
+		user.AppMangerLevel = constant.AppOrdinaryUsers
+	}
+	if user.Birth.Unix() < 0 {
+		user.Birth = utils.UnixSecondToTime(0)
+	}
 	err = dbConn.Table("user").Create(&user).Error
 	if err != nil {
 		return err

@@ -21,7 +21,7 @@ func AddBlacklist(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.AddBlacklistReq{}
+	req := &rpc.AddBlacklistReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -84,8 +84,9 @@ func AddFriend(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.AddFriendReq{}
-	utils.CopyStructFields(req.CommID, params)
+	req := &rpc.AddFriendReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
+	req.ReqMsg = params.ReqMsg
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -93,7 +94,7 @@ func AddFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	log.NewInfo("AddFriend args ", req.String())
+	log.NewInfo(req.CommID.OperationID, "AddFriend args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := rpc.NewFriendClient(etcdConn)
@@ -116,8 +117,8 @@ func AddFriendResponse(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.AddFriendResponseReq{}
-	utils.CopyStructFields(req.CommID, &params)
+	req := &rpc.AddFriendResponseReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -125,7 +126,7 @@ func AddFriendResponse(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	utils.CopyStructFields(&req, &params)
+	utils.CopyStructFields(req, &params)
 	log.NewInfo(req.CommID.OperationID, "AddFriendResponse args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
@@ -149,8 +150,8 @@ func DeleteFriend(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.DeleteFriendReq{}
-	utils.CopyStructFields(req.CommID, &params)
+	req := &rpc.DeleteFriendReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -181,7 +182,7 @@ func GetBlacklist(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.GetBlacklistReq{}
+	req := &rpc.GetBlacklistReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -218,8 +219,8 @@ func SetFriendComment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.SetFriendCommentReq{}
-	utils.CopyStructFields(req.CommID, params)
+	req := &rpc.SetFriendCommentReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	req.Remark = params.Remark
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -251,8 +252,8 @@ func RemoveBlacklist(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.RemoveBlacklistReq{}
-	utils.CopyStructFields(req.CommID, params)
+	req := &rpc.RemoveBlacklistReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -271,8 +272,8 @@ func RemoveBlacklist(c *gin.Context) {
 		return
 	}
 	resp := api.RemoveBlackListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
-	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "RemoveBlacklist api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 func IsFriend(c *gin.Context) {
@@ -282,8 +283,8 @@ func IsFriend(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.IsFriendReq{}
-	utils.CopyStructFields(req.CommID, params)
+	req := &rpc.IsFriendReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -302,8 +303,8 @@ func IsFriend(c *gin.Context) {
 		return
 	}
 	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Response: RpcResp.Response}
-	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 //
@@ -347,8 +348,8 @@ func GetFriendList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.GetFriendListReq{}
-	utils.CopyStructFields(req.CommID, params)
+	req := &rpc.GetFriendListReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -367,9 +368,9 @@ func GetFriendList(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
-	utils.CopyStructFields(&resp, RpcResp)
+	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendInfoList: RpcResp.FriendInfoList}
 	log.NewInfo(req.CommID.OperationID, "GetFriendList api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 func GetFriendApplyList(c *gin.Context) {
@@ -379,8 +380,8 @@ func GetFriendApplyList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.GetFriendApplyListReq{}
-	utils.CopyStructFields(req.CommID, params)
+	req := &rpc.GetFriendApplyListReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -400,10 +401,9 @@ func GetFriendApplyList(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
-	utils.CopyStructFields(&resp, RpcResp)
+	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList api return ", resp)
-
+	c.JSON(http.StatusOK, resp)
 }
 
 func GetSelfApplyList(c *gin.Context) {
@@ -413,8 +413,8 @@ func GetSelfApplyList(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.GetSelfApplyListReq{}
-	utils.CopyStructFields(req.CommID, params)
+	req := &rpc.GetSelfApplyListReq{CommID: &rpc.CommID{}}
+	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -433,9 +433,7 @@ func GetSelfApplyList(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetSelfApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
-	utils.CopyStructFields(resp, RpcResp)
-	c.JSON(http.StatusOK, resp)
+	resp := api.GetSelfApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
 	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList api return ", resp)
-
+	c.JSON(http.StatusOK, resp)
 }

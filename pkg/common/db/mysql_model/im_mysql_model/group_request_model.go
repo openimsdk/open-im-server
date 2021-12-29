@@ -1,6 +1,7 @@
 package im_mysql_model
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"time"
 )
@@ -88,7 +89,7 @@ func GetGroupApplicationList(userID string) ([]GroupRequest, error) {
 		return nil, err
 	}
 	for _, v := range memberList {
-		if v.RoleLevel > 0 {
+		if v.RoleLevel > constant.GroupOrdinaryUsers {
 			list, err := GetGroupRequestByGroupID(v.GroupID)
 			if err != nil {
 				continue
