@@ -372,6 +372,9 @@ func GetFriendList(c *gin.Context) {
 	}
 
 	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendInfoList: RpcResp.FriendInfoList}
+	if len(resp.FriendInfoList) == 0 {
+		resp.FriendInfoList = []*open_im_sdk.FriendInfo{}
+	}
 	log.NewInfo(req.CommID.OperationID, "GetFriendList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
