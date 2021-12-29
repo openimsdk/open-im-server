@@ -118,7 +118,7 @@ func AddFriendResponse(c *gin.Context) {
 		return
 	}
 	req := &rpc.AddFriendResponseReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -151,7 +151,7 @@ func DeleteFriend(c *gin.Context) {
 		return
 	}
 	req := &rpc.DeleteFriendReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -183,7 +183,7 @@ func GetBlacklist(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetBlacklistReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -220,7 +220,7 @@ func SetFriendComment(c *gin.Context) {
 		return
 	}
 	req := &rpc.SetFriendCommentReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	req.Remark = params.Remark
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -253,7 +253,7 @@ func RemoveBlacklist(c *gin.Context) {
 		return
 	}
 	req := &rpc.RemoveBlacklistReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -284,7 +284,7 @@ func IsFriend(c *gin.Context) {
 		return
 	}
 	req := &rpc.IsFriendReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -349,7 +349,7 @@ func GetFriendList(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetFriendListReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -381,7 +381,7 @@ func GetFriendApplyList(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetFriendApplyListReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params)
+	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
