@@ -141,7 +141,7 @@ func (s *userServer) GetAllConversationMsgOpt(ctx context.Context, req *pbUser.G
 }
 func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
 	log.NewInfo(req.OperationID, "DeleteUsers args ", req.String())
-	if token_verify.IsMangerUserID(req.OpUserID) {
+	if !token_verify.IsMangerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
 		return &pbUser.DeleteUsersResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, FailedUserIDList: req.DeleteUserIDList}, nil
 	}
@@ -161,7 +161,7 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 
 func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq) (*pbUser.GetAllUserIDResp, error) {
 	log.NewInfo(req.OperationID, "GetAllUserID args ", req.String())
-	if token_verify.IsMangerUserID(req.OpUserID) {
+	if !token_verify.IsMangerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
 		return &pbUser.GetAllUserIDResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
@@ -177,11 +177,12 @@ func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq
 
 func (s *userServer) AccountCheck(_ context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
 	log.NewInfo(req.OperationID, "AccountCheck args ", req.String())
-	if token_verify.IsMangerUserID(req.OpUserID) {
+	if !token_verify.IsMangerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
 		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	uidList, err := imdb.SelectSomeUserID(req.CheckUserIDList)
+	log.NewDebug(req.OperationID, "from db uid list is:", uidList)
 	if err != nil {
 		log.NewError(req.OperationID, "SelectSomeUserID failed ", err.Error(), req.CheckUserIDList)
 		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
