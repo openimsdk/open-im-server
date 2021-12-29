@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	rpc "Open_IM/pkg/proto/friend"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -432,8 +433,10 @@ func GetSelfApplyList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call get self apply list rpc server failed"})
 		return
 	}
-
 	resp := api.GetSelfApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
+	if len(resp.FriendRequestList) == 0 {
+		resp.FriendRequestList = []*open_im_sdk.FriendRequest{}
+	}
 	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
