@@ -127,9 +127,9 @@ func (s *userServer) GetReceiveMessageOpt(ctx context.Context, req *pbUser.GetRe
 
 func (s *userServer) GetAllConversationMsgOpt(ctx context.Context, req *pbUser.GetAllConversationMsgOptReq) (*pbUser.GetAllConversationMsgOptResp, error) {
 	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt args ", req.String())
-	m, err := db.DB.GetAllConversationMsgOpt(req.FromUserId)
+	m, err := db.DB.GetAllConversationMsgOpt(req.FromUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetAllConversationMsgOpt failed ", err.Error(), req.FromUserId)
+		log.NewError(req.OperationID, "GetAllConversationMsgOpt failed ", err.Error(), req.FromUserID)
 		return &pbUser.GetAllConversationMsgOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	resp := pbUser.GetAllConversationMsgOptResp{CommonResp: &pbUser.CommonResp{}}
