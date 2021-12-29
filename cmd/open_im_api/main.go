@@ -39,7 +39,7 @@ func main() {
 		friendRouterGroup.POST("/get_blacklist", friend.GetBlacklist)
 		friendRouterGroup.POST("/remove_blacklist", friend.RemoveBlacklist)
 		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)
-		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)
+		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse) //1
 		friendRouterGroup.POST("/set_friend_comment", friend.SetFriendComment)
 		friendRouterGroup.POST("/is_friend", friend.IsFriend)
 		friendRouterGroup.POST("/import_friend", friend.ImportFriend)
