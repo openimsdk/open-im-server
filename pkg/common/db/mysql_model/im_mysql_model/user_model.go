@@ -114,7 +114,7 @@ func SelectSomeUserID(userIDList []string) ([]string, error) {
 		return nil, err
 	}
 	var resultArr []string
-	err = dbConn.Table("user").Where("user_id IN (?) ", userIDList).Pluck("user_id", &resultArr).Error
+	err = dbConn.Table("user").Where("user_id IN (?) ", userIDList).Find(&resultArr).Error
 
 	if err != nil {
 		return nil, err
