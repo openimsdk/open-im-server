@@ -54,7 +54,7 @@ func ImportFriend(c *gin.Context) {
 		return
 	}
 	req := &rpc.ImportFriendReq{}
-	utils.CopyStructFields(req, &params)
+	utils.CopyStructFields(req, &params.ParamsCommFriend)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {

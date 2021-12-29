@@ -157,7 +157,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 }
 
 func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.ImportFriendResp, error) {
-	log.NewInfo(req.OperationID, "ImportFriend failed ", req.String())
+	log.NewInfo(req.OperationID, "ImportFriend args ", req.String())
 	resp := pbFriend.ImportFriendResp{CommonResp: &pbFriend.CommonResp{}}
 	var c pbFriend.CommonResp
 
