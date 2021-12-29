@@ -39,10 +39,14 @@ func GetAllConversationMessageOpt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetAllConversationMsgOpt rpc failed, " + err.Error()})
 		return
 	}
-	resp := api.GetAllConversationMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, ConversationOptResultList: RpcResp.ConversationOptResultList}
-	if len(RpcResp.ConversationOptResultList) == 0 {
-		resp.ConversationOptResultList = []*user.OptResult{}
+	optResult := make([]*api.OptResult, 0)
+	for _, v := range RpcResp.ConversationOptResultList {
+		temp := new(api.OptResult)
+		temp.ConversationID = v.ConversationID
+		temp.Result = &v.Result
+		optResult = append(optResult, temp)
 	}
+	resp := api.GetAllConversationMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, ConversationOptResultList: optResult}
 	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt api return: ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -71,10 +75,14 @@ func GetReceiveMessageOpt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetReceiveMessageOpt rpc failed, " + err.Error()})
 		return
 	}
-	resp := api.GetReceiveMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, ConversationOptResultList: RpcResp.ConversationOptResultList}
-	if len(RpcResp.ConversationOptResultList) == 0 {
-		resp.ConversationOptResultList = []*user.OptResult{}
+	optResult := make([]*api.OptResult, 0)
+	for _, v := range RpcResp.ConversationOptResultList {
+		temp := new(api.OptResult)
+		temp.ConversationID = v.ConversationID
+		temp.Result = &v.Result
+		optResult = append(optResult, temp)
 	}
+	resp := api.GetReceiveMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, ConversationOptResultList: optResult}
 	log.NewInfo(req.OperationID, "GetReceiveMessageOpt api return: ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -103,10 +111,14 @@ func SetReceiveMessageOpt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "SetReceiveMessageOpt rpc failed, " + err.Error()})
 		return
 	}
-	resp := api.SetReceiveMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, OptResultList: RpcResp.OptResultList}
-	if len(RpcResp.OptResultList) == 0 {
-		resp.OptResultList = []*user.OptResult{}
+	optResult := make([]*api.OptResult, 0)
+	for _, v := range RpcResp.ConversationOptResultList {
+		temp := new(api.OptResult)
+		temp.ConversationID = v.ConversationID
+		temp.Result = &v.Result
+		optResult = append(optResult, temp)
 	}
+	resp := api.SetReceiveMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, ConversationOptResultList: optResult}
 	log.NewInfo(req.OperationID, "SetReceiveMessageOpt api return: ", resp)
 	c.JSON(http.StatusOK, resp)
 }

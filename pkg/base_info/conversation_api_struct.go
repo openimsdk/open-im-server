@@ -1,14 +1,16 @@
 package base_info
 
-import "Open_IM/pkg/proto/user"
-
+type OptResult struct {
+	ConversationID string `json:"conversationID"`
+	Result         *int32 `json:"result"`
+}
 type GetAllConversationMessageOptReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 	FromUserID  string `json:"fromUserID" binding:"required"`
 }
 type GetAllConversationMessageOptResp struct {
 	CommResp
-	ConversationOptResultList []*user.OptResult `json:"data"`
+	ConversationOptResultList []*OptResult `json:"data"`
 }
 type GetReceiveMessageOptReq struct {
 	ConversationIdList []string `json:"conversationIdList" binding:"required"`
@@ -17,7 +19,7 @@ type GetReceiveMessageOptReq struct {
 }
 type GetReceiveMessageOptResp struct {
 	CommResp
-	ConversationOptResultList []*user.OptResult `json:"data"`
+	ConversationOptResultList []*OptResult `json:"data"`
 }
 type SetReceiveMessageOptReq struct {
 	OperationID        string   `json:"operationID" binding:"required"`
@@ -26,5 +28,5 @@ type SetReceiveMessageOptReq struct {
 }
 type SetReceiveMessageOptResp struct {
 	CommResp
-	OptResultList []*user.OptResult `json:"data"`
+	ConversationOptResultList []*OptResult `json:"data"`
 }
