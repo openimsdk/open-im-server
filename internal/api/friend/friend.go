@@ -86,6 +86,7 @@ func AddFriend(c *gin.Context) {
 	}
 	req := &rpc.AddFriendReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
+	req.ReqMsg = params.ReqMsg
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
