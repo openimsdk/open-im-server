@@ -513,7 +513,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 		return false
 
 	}
-	if groupUserInfo.RoleLevel == constant.GroupAdmin {
+	if groupUserInfo.RoleLevel == constant.GroupOwner || groupUserInfo.RoleLevel == constant.GroupAdmin {
 		return true
 	}
 	return false
@@ -522,7 +522,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
 	log.NewInfo(req.OperationID, "SetGroupInfo args ", req.String())
 	if !hasAccess(req) {
-		log.NewError(req.OperationID, "no access ")
+		log.NewError(req.OperationID, "no access ", req)
 		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
