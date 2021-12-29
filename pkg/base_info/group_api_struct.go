@@ -77,10 +77,10 @@ type GetGroupAllMemberResp struct {
 
 type CreateGroupReq struct {
 	MemberList  []*GroupAddMemberInfo `json:"memberList"  binding:"required"`
-	OwnerUserID string                `json:"ownerUserID"`
+	OwnerUserID string                `json:"ownerUserID" binding:"required"`
 	GroupName   string                `json:"groupName"`
 	GroupType   int32                 `json:"groupType"`
-	OperationID string                `json:"operationID"`
+	OperationID string                `json:"operationID" binding:"required"`
 }
 
 type CreateGroupResp struct {
