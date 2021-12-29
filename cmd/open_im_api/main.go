@@ -12,7 +12,9 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
+	"os"
 	"strconv"
+
 	"github.com/gin-gonic/gin"
 
 	//"syscall"

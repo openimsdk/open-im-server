@@ -1,16 +1,19 @@
 package chat
 
 import (
-	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/kafka"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbChat "Open_IM/pkg/proto/chat"
-	"Open_IM/pkg/utils"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/mq"
+	"Open_IM/pkg/common/mq/kafka"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbChat "Open_IM/pkg/proto/chat"
+	"Open_IM/pkg/utils"
+
+	"google.golang.org/grpc"
 )
 
 type rpcChat struct {
@@ -18,7 +21,7 @@ type rpcChat struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
-	producer        *kafka.Producer
+	producer        mq.Producer
 }
 
 func NewRpcChatServer(port int) *rpcChat {

@@ -8,8 +8,9 @@ package logic
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/mq"
+	"Open_IM/pkg/common/mq/kafka"
 	"Open_IM/pkg/utils"
 )
 
@@ -17,7 +18,7 @@ var (
 	rpcServer    RPCServer
 	pushCh       PushConsumerHandler
 	pushTerminal []int32
-	producer     *kafka.Producer
+	producer     mq.Producer
 )
 
 func Init(rpcPort int) {
@@ -32,5 +33,5 @@ func init() {
 
 func Run() {
 	go rpcServer.run()
-	go pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&pushCh)
+	go pushCh.pushConsumerGroup.Start()
 }
