@@ -112,10 +112,10 @@ func SelectSomeUserID(userIDList []string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var userList []User
-	err = dbConn.Table("user").Where("(user_id) IN ? ", userIDList).Find(&userList).Error
+	var resultArr []string
+	err = dbConn.Table("user").Where("(user_id) IN ? ", userIDList).Pluck("user_id", &resultArr).Error
 	if err != nil {
 		return nil, err
 	}
-	return userIDList, nil
+	return resultArr, nil
 }
