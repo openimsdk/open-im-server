@@ -204,6 +204,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 					continue
 				}
 				resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: 0})
+				log.NewDebug(req.OperationID, "UserIDResultList ", resp.UserIDResultList)
 				chat.FriendAddedNotification(req.OperationID, req.OpUserID, req.FromUserID, v)
 			}
 		}
