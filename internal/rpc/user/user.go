@@ -104,7 +104,7 @@ func (s *userServer) SetReceiveMessageOpt(ctx context.Context, req *pbUser.SetRe
 	resp := pbUser.SetReceiveMessageOptResp{CommonResp: &pbUser.CommonResp{}}
 
 	for _, v := range req.ConversationIDList {
-		resp.OptResultList = append(resp.OptResultList, &pbUser.OptResult{ConversationId: v, Result: 0})
+		resp.ConversationOptResultList = append(resp.ConversationOptResultList, &pbUser.OptResult{ConversationID: v, Result: 0})
 	}
 	log.NewInfo(req.OperationID, "SetReceiveMessageOpt rpc return ", resp.String())
 	return &resp, nil
@@ -112,14 +112,14 @@ func (s *userServer) SetReceiveMessageOpt(ctx context.Context, req *pbUser.SetRe
 
 func (s *userServer) GetReceiveMessageOpt(ctx context.Context, req *pbUser.GetReceiveMessageOptReq) (*pbUser.GetReceiveMessageOptResp, error) {
 	log.NewInfo(req.OperationID, "GetReceiveMessageOpt args ", req.String())
-	m, err := db.DB.GetMultiConversationMsgOpt(req.FromUserID, req.ConversationIdList)
+	m, err := db.DB.GetMultiConversationMsgOpt(req.FromUserID, req.ConversationIDList)
 	if err != nil {
-		log.NewError(req.OperationID, "GetMultiConversationMsgOpt failed ", err.Error(), req.FromUserID, req.ConversationIdList)
+		log.NewError(req.OperationID, "GetMultiConversationMsgOpt failed ", err.Error(), req.FromUserID, req.ConversationIDList)
 		return &pbUser.GetReceiveMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	resp := pbUser.GetReceiveMessageOptResp{CommonResp: &pbUser.CommonResp{}}
 	for k, v := range m {
-		resp.ConversationOptResultList = append(resp.ConversationOptResultList, &pbUser.OptResult{ConversationId: k, Result: int32(v)})
+		resp.ConversationOptResultList = append(resp.ConversationOptResultList, &pbUser.OptResult{ConversationID: k, Result: int32(v)})
 	}
 	log.NewInfo(req.OperationID, "GetReceiveMessageOpt rpc return ", resp.String())
 	return &resp, nil
@@ -127,19 +127,18 @@ func (s *userServer) GetReceiveMessageOpt(ctx context.Context, req *pbUser.GetRe
 
 func (s *userServer) GetAllConversationMsgOpt(ctx context.Context, req *pbUser.GetAllConversationMsgOptReq) (*pbUser.GetAllConversationMsgOptResp, error) {
 	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt args ", req.String())
-	m, err := db.DB.GetAllConversationMsgOpt(req.FromUserId)
+	m, err := db.DB.GetAllConversationMsgOpt(req.FromUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetAllConversationMsgOpt failed ", err.Error(), req.FromUserId)
+		log.NewError(req.OperationID, "GetAllConversationMsgOpt failed ", err.Error(), req.FromUserID)
 		return &pbUser.GetAllConversationMsgOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	resp := pbUser.GetAllConversationMsgOptResp{CommonResp: &pbUser.CommonResp{}}
 	for k, v := range m {
-		resp.ConversationOptResultList = append(resp.ConversationOptResultList, &pbUser.OptResult{ConversationId: k, Result: int32(v)})
+		resp.ConversationOptResultList = append(resp.ConversationOptResultList, &pbUser.OptResult{ConversationID: k, Result: int32(v)})
 	}
 	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt rpc return ", resp.String())
 	return &resp, nil
 }
-
 func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
 	log.NewInfo(req.OperationID, "DeleteUsers args ", req.String())
 	if token_verify.IsMangerUserID(req.OpUserID) {

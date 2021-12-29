@@ -75,18 +75,18 @@ message SetReceiveMessageOptReq{
   string OpUserID = 5;
 }
 message OptResult{
-  string conversationId = 1;
+  string conversationID = 1;
   int32 result = 2; //-1: failed;  0:default; 1: not receive ; 2: not jpush
 }
 message SetReceiveMessageOptResp{
   CommonResp  commonResp = 1;
-  repeated OptResult optResultList = 2;
+  repeated OptResult conversationOptResultList = 2;
 }
 
 
 message GetReceiveMessageOptReq{
   string FromUserID = 1;
-  repeated string conversationIdList = 2;
+  repeated string conversationIDList = 2;
   string  operationID = 3;
   string OpUserID = 4;
 }
@@ -97,7 +97,7 @@ message GetReceiveMessageOptResp{
 
 
 message GetAllConversationMsgOptReq{
-  string FromUserId = 1;
+  string FromUserID = 1;
   string  operationID = 2;
   string OpUserID = 3;
 }
