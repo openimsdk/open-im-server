@@ -23,7 +23,7 @@ func InsertIntoGroupMember(toInsertInfo GroupMember) error {
 	if err != nil {
 		return err
 	}
-	toInsertInfo.JoinSource = time.Now()
+	toInsertInfo.JoinTime = time.Now()
 	if toInsertInfo.RoleLevel == 0 {
 		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
 	}
