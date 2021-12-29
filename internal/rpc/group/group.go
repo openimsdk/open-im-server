@@ -513,7 +513,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 		return false
 
 	}
-	if groupUserInfo.RoleLevel == constant.OrdinaryMember {
+	if groupUserInfo.RoleLevel == constant.GroupAdmin {
 		return true
 	}
 	return false
