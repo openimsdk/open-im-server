@@ -185,7 +185,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	for _, v := range req.FriendUserIDList {
 		log.NewDebug(req.OperationID, "FriendUserIDList ", v)
 		if _, fErr := imdb.GetUserByUserID(v); fErr != nil {
-			log.NewError(req.OperationID, "GetUserByUserID failed", req.FromUserID, fErr.Error(), v)
+			log.NewError(req.OperationID, "GetUserByUserID failed ", fErr.Error(), v)
 			resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
 		} else {
 			if _, err := imdb.GetFriendRelationshipFromFriend(req.FromUserID, v); err != nil {
@@ -193,20 +193,23 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 				toInsertFollow := imdb.Friend{OwnerUserID: req.FromUserID, FriendUserID: v}
 				err1 := imdb.InsertToFriend(&toInsertFollow)
 				if err1 != nil {
-					log.NewError(req.OperationID, "InsertToFriend failed", req.FromUserID, v, err1.Error())
+					log.NewError(req.OperationID, "InsertToFriend failed ", err1.Error(), toInsertFollow)
 					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
 					continue
 				}
 				toInsertFollow = imdb.Friend{OwnerUserID: v, FriendUserID: req.FromUserID}
 				err2 := imdb.InsertToFriend(&toInsertFollow)
 				if err2 != nil {
-					log.NewError(req.OperationID, "InsertToFriend failed", v, req.FromUserID, err2.Error())
+					log.NewError(req.OperationID, "InsertToFriend failed ", err2.Error(), toInsertFollow)
 					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
 					continue
 				}
 				resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: 0})
 				log.NewDebug(req.OperationID, "UserIDResultList ", resp.UserIDResultList)
 				chat.FriendAddedNotification(req.OperationID, req.OpUserID, req.FromUserID, v)
+			} else {
+				log.NewWarn(req.OperationID, "GetFriendRelationshipFromFriend ok", req.FromUserID, v)
+				resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: 0})
 			}
 		}
 	}
