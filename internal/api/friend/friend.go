@@ -403,7 +403,7 @@ func GetFriendApplyList(c *gin.Context) {
 
 	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList api return ", resp)
-
+	c.JSON(http.StatusOK, resp)
 }
 
 func GetSelfApplyList(c *gin.Context) {
