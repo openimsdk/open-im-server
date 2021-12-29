@@ -41,7 +41,7 @@ func main() {
 		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)
 		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse) //1
 		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)     //1
-		friendRouterGroup.POST("/is_friend", friend.IsFriend)
+		friendRouterGroup.POST("/is_friend", friend.IsFriend)                    //1
 		friendRouterGroup.POST("/import_friend", friend.ImportFriend)
 	}
 	//group related routing group

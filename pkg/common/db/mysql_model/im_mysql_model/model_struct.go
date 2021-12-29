@@ -161,6 +161,6 @@ type Black struct {
 	CreateTime     time.Time `gorm:"column:create_time"`
 	BlockUserID    string    `gorm:"column:block_user_id;primaryKey;"`
 	AddSource      int32     `gorm:"column:add_source"`
-	OperatorUserID int32     `gorm:"column:operator_user_id"`
+	OperatorUserID string    `gorm:"column:operator_user_id"`
 	Ex             string    `gorm:"column:ex"`
 }
