@@ -394,7 +394,7 @@ func QuitGroup(c *gin.Context) {
 		return
 	}
 	req := &rpc.QuitGroupReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -425,7 +425,7 @@ func SetGroupInfo(c *gin.Context) {
 		return
 	}
 	req := &rpc.SetGroupInfoReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params.Group)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
