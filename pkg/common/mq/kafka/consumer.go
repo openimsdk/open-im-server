@@ -33,4 +33,5 @@ func NewKafkaConsumer(addr []string, topic string) *Consumer {
 	p.PartitionList = partitionList
 
 	return &p
+
 }

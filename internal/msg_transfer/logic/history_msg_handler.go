@@ -1,16 +1,18 @@
 package logic
 
 import (
+	"Open_IM/pkg/common/mq"
+	"context"
+	"strings"
+
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
+	kfk "Open_IM/pkg/common/mq/kafka"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbMsg "Open_IM/pkg/proto/chat"
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
-	"context"
-	"strings"
 
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
@@ -19,27 +21,24 @@ import (
 type fcb func(msg []byte, msgKey string)
 
 type HistoryConsumerHandler struct {
-	msgHandle            map[string]fcb
-	historyConsumerGroup *kfk.MConsumerGroup
+	historyConsumerGroup mq.Consumer
 }
 
 func (mc *HistoryConsumerHandler) Init() {
-	mc.msgHandle = make(map[string]fcb)
-	mc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = mc.handleChatWs2Mongo
 	mc.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
-		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo)
-
+		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo)
+	mc.historyConsumerGroup.RegisterMessageHandler(config.Config.Kafka.Ws2mschat.Topic, mq.MessageHandleFunc(mc.handleChatWs2Mongo))
 }
 
-func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
+func (mc *HistoryConsumerHandler) handleChatWs2Mongo(message *mq.Message) error {
+	msg, msgKey := message.Value, string(message.Key)
 	log.InfoByKv("chat come mongo!!!", "", "chat", string(msg))
 	time := utils.GetCurrentTimestampByNano()
 	pbData := pbMsg.WSToMsgSvrChatMsg{}
 	err := proto.Unmarshal(msg, &pbData)
 	if err != nil {
 		log.ErrorByKv("msg_transfer Unmarshal chat err", "", "chat", string(msg), "err", err.Error())
-		return
+		return err
 	}
 	pbSaveData := pbMsg.MsgSvrToPushSvrChatMsg{}
 	pbSaveData.SendID = pbData.SendID
@@ -68,14 +67,14 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				err := saveUserChat(pbData.RecvID, &pbSaveData)
 				if err != nil {
 					log.NewError(pbSaveData.OperationID, "single data insert to mongo err", err.Error(), pbSaveData.String())
-					return
+					return err
 				}
 
 			} else if msgKey == pbSaveData.SendID {
 				err := saveUserChat(pbData.SendID, &pbSaveData)
 				if err != nil {
 					log.NewError(pbSaveData.OperationID, "single data insert to mongo err", err.Error(), pbSaveData.String())
-					return
+					return err
 				}
 
 			}
@@ -96,7 +95,7 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 			err := saveUserChat(uidAndGroupID[0], &pbSaveData)
 			if err != nil {
 				log.NewError(pbSaveData.OperationID, "group data insert to mongo err", pbSaveData.String(), uidAndGroupID[0], err.Error())
-				return
+				return err
 			}
 		}
 		pbSaveData.Options = pbData.Options
@@ -104,22 +103,13 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 		go sendMessageToPush(&pbSaveData)
 	default:
 		log.NewError(pbSaveData.OperationID, "SessionType error", pbSaveData.String())
-		return
+		return nil // not retry
 	}
 	log.NewDebug(pbSaveData.OperationID, "msg_transfer handle topic data to database success...", pbSaveData.String())
-}
 
-func (HistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (HistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (mc *HistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
-	claim sarama.ConsumerGroupClaim) error {
-	for msg := range claim.Messages() {
-		log.InfoByKv("kafka get info to mongo", "", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "chat", string(msg.Value))
-		mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
-		sess.MarkMessage(msg, "")
-	}
 	return nil
 }
+
 func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
 	log.InfoByKv("msg_transfer send message to push", message.OperationID, "message", message.String())
 	msg := pbPush.PushMsgReq{}
