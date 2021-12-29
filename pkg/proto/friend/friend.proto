@@ -160,6 +160,6 @@ service friend{
   rpc getBlacklist(GetBlacklistReq) returns(GetBlacklistResp);
   rpc deleteFriend(DeleteFriendReq) returns(DeleteFriendResp);
   rpc addFriendResponse(AddFriendResponseReq) returns(AddFriendResponseResp);
-  rpc setFriendComment(SetFriendRemarkReq) returns(SetFriendRemarkResp);
+  rpc setFriendRemark(SetFriendRemarkReq) returns(SetFriendRemarkResp);
   rpc importFriend(ImportFriendReq)  returns(ImportFriendResp);
 }
