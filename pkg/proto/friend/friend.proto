@@ -130,11 +130,11 @@ message AddFriendResponseResp{
   CommonResp CommonResp = 1;
 }
 
-message SetFriendCommentReq{
+message SetFriendRemarkReq{
   CommID CommID = 1;
   string Remark = 2;
 }
-message SetFriendCommentResp{
+message SetFriendRemarkResp{
   CommonResp CommonResp = 1;
 }
 
@@ -160,6 +160,6 @@ service friend{
   rpc getBlacklist(GetBlacklistReq) returns(GetBlacklistResp);
   rpc deleteFriend(DeleteFriendReq) returns(DeleteFriendResp);
   rpc addFriendResponse(AddFriendResponseReq) returns(AddFriendResponseResp);
-  rpc setFriendComment(SetFriendCommentReq) returns(SetFriendCommentResp);
+  rpc setFriendComment(SetFriendRemarkReq) returns(SetFriendRemarkResp);
   rpc importFriend(ImportFriendReq)  returns(ImportFriendResp);
 }

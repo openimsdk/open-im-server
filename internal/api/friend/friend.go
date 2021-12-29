@@ -215,14 +215,14 @@ func GetBlacklist(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func SetFriendComment(c *gin.Context) {
-	params := api.SetFriendCommentReq{}
+func SetFriendRemark(c *gin.Context) {
+	params := api.SetFriendRemarkReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.SetFriendCommentReq{CommID: &rpc.CommID{}}
+	req := &rpc.SetFriendRemarkReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	req.Remark = params.Remark
 	var ok bool
@@ -242,7 +242,7 @@ func SetFriendComment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call set friend comment rpc server failed"})
 		return
 	}
-	resp := api.SetFriendCommentResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+	resp := api.SetFriendRemarkResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 
 	log.NewInfo(req.CommID.OperationID, "SetFriendComment api return ", resp)
 	c.JSON(http.StatusOK, resp)

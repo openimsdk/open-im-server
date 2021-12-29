@@ -71,11 +71,11 @@ type BlackUserInfo struct {
 	open_im_sdk.PublicUserInfo
 }
 
-type SetFriendCommentReq struct {
+type SetFriendRemarkReq struct {
 	ParamsCommFriend
 	Remark string `json:"remark" binding:"required"`
 }
-type SetFriendCommentResp struct {
+type SetFriendRemarkResp struct {
 	CommResp
 }
 
