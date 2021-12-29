@@ -381,7 +381,7 @@ func GetFriendApplyList(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetFriendApplyListReq{CommID: &rpc.CommID{}}
-	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
+	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
 	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
