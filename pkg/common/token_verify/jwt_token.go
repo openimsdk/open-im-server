@@ -51,7 +51,8 @@ func CreateToken(userID string, platformID int32) (string, int64, error) {
 	}
 	var deleteTokenKey []string
 	for k, v := range m {
-		if v != constant.NormalToken {
+		_, err = GetClaimFromToken(k)
+		if err != nil || v != constant.NormalToken {
 			deleteTokenKey = append(deleteTokenKey, k)
 		}
 	}

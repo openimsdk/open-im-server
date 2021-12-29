@@ -68,7 +68,7 @@ func Test_ParseRedisInterfaceToken(t *testing.T) {
 	config.Config.TokenPolicy.AccessExpire = -80
 	tokenString, _, _ = token_verify.CreateToken(uid, platform)
 	claims, err = token_verify.ParseRedisInterfaceToken([]uint8(tokenString))
-	assert.Equal(t, err, constant.TokenExpired)
+	assert.Equal(t, err, constant.ExpiredToken)
 	assert.Nil(t, claims)
 }
 

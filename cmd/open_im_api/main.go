@@ -94,7 +94,7 @@ func main() {
 	conversationGroup := r.Group("/conversation")
 	{
 		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)
-		//	conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)
+		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)
 		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt)
 	}
 
