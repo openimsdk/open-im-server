@@ -253,7 +253,7 @@ func CreateGroup(c *gin.Context) {
 	if RpcResp.ErrCode == 0 {
 		utils.CopyStructFields(&resp.GroupInfo, RpcResp.GroupInfo)
 	}
-	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", resp)
+	log.NewInfo(req.OperationID, "CreateGroup api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
 

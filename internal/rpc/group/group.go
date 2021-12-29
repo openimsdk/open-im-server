@@ -111,7 +111,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	for _, user := range req.InitMemberList {
 		us, err := im_mysql_model.GetUserByUserID(user.UserID)
 		if err != nil {
-			log.NewError(req.OperationID, "FindUserByUID failed ", err.Error(), user.UserID)
+			log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), user.UserID)
 			continue
 		}
 		if user.RoleLevel == constant.GroupOwner {
@@ -133,7 +133,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 	}
 
-	resp := &pbGroup.CreateGroupResp{}
+	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
 	group, err := im_mysql_model.GetGroupInfoByGroupID(groupId)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupId)
@@ -143,7 +143,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 	chat.GroupCreatedNotification(req.OperationID, req.OpUserID, req.OwnerUserID, groupId, okUserIDList)
 	utils.CopyStructFields(resp.GroupInfo, group)
-	resp.GroupInfo.MemberCount = uint32(imdb.GetGroupMemberNumByGroupID(groupId))
+	resp.GroupInfo.MemberCount = imdb.GetGroupMemberNumByGroupID(groupId)
 	resp.GroupInfo.OwnerUserID = req.OwnerUserID
 
 	log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
