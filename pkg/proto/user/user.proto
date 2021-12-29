@@ -86,7 +86,7 @@ message SetReceiveMessageOptResp{
 
 message GetReceiveMessageOptReq{
   string FromUserID = 1;
-  repeated string conversationId = 2;
+  repeated string conversationIdList = 2;
   string  operationID = 3;
   string OpUserID = 4;
 }

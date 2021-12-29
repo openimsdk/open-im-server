@@ -112,9 +112,9 @@ func (s *userServer) SetReceiveMessageOpt(ctx context.Context, req *pbUser.SetRe
 
 func (s *userServer) GetReceiveMessageOpt(ctx context.Context, req *pbUser.GetReceiveMessageOptReq) (*pbUser.GetReceiveMessageOptResp, error) {
 	log.NewInfo(req.OperationID, "GetReceiveMessageOpt args ", req.String())
-	m, err := db.DB.GetMultiConversationMsgOpt(req.FromUserID, req.ConversationId)
+	m, err := db.DB.GetMultiConversationMsgOpt(req.FromUserID, req.ConversationIdList)
 	if err != nil {
-		log.NewError(req.OperationID, "GetMultiConversationMsgOpt failed ", err.Error(), req.FromUserID, req.ConversationId)
+		log.NewError(req.OperationID, "GetMultiConversationMsgOpt failed ", err.Error(), req.FromUserID, req.ConversationIdList)
 		return &pbUser.GetReceiveMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	resp := pbUser.GetReceiveMessageOptResp{CommonResp: &pbUser.CommonResp{}}

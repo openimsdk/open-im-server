@@ -1,192 +1,106 @@
 package conversation
 
-import "github.com/gin-gonic/gin"
-
-//
-//type paramsSetReceiveMessageOpt struct {
-//	OperationID        string   `json:"operationID" binding:"required"`
-//	Option             *int32   `json:"option" binding:"required"`
-//	ConversationIdList []string `json:"conversationIdList" binding:"required"`
-//}
-//
-//type OptResult struct {
-//	ConversationId string `json:"conversationId" binding:"required"`
-//	Result         int32  `json:"result" binding:"required"`
-//}
-//
-//type SetReceiveMessageOptResp struct {
-//	ErrCode int32       `json:"errCode"`
-//	ErrMsg  string      `json:"errMsg"`
-//	Data    []OptResult `json:"data"`
-//}
-//
-//type paramGetReceiveMessageOpt struct {
-//	ConversationIdList []string `json:"conversationIdList" binding:"required"`
-//	OperationID        string   `json:"operationID" binding:"required"`
-//}
-//
-//type GetReceiveMessageOptResp struct {
-//	SetReceiveMessageOptResp
-//}
-//
-//type paramGetAllConversationMessageOpt struct {
-//	OperationID string `json:"operationID" binding:"required"`
-//}
-//
-//type GetAllConversationMessageOptResp struct {
-//	SetReceiveMessageOptResp
-//}
-//
-////CopyStructFields
+import (
+	api "Open_IM/pkg/base_info"
+	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/proto/user"
+	rpc "Open_IM/pkg/proto/user"
+	"Open_IM/pkg/utils"
+	"context"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"strings"
+)
 
 func GetAllConversationMessageOpt(c *gin.Context) {
-
+	params := api.GetAllConversationMessageOptReq{}
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
+		return
+	}
+	req := &rpc.GetAllConversationMsgOptReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(params.OperationID, "GetAllConversationMessageOpt args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := user.NewUserClient(etcdConn)
+	RpcResp, err := client.GetAllConversationMsgOpt(context.Background(), req)
+	if err != nil {
+		log.NewError(params.OperationID, "GetAllConversationMsgOpt rpc failed, ", req, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetAllConversationMsgOpt rpc failed, " + err.Error()})
+		return
+	}
+	resp := api.GetAllConversationMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+	resp.ConversationOptResultList = RpcResp.ConversationOptResultList
+	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt api return: ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
-//func GetAllConversationMessageOpt(c *gin.Context) {
-//	params := paramGetAllConversationMessageOpt{}
-//	if err := c.BindJSON(&params); err != nil {
-//		log.NewError(params.OperationID, "bind json failed ", err.Error(), c)
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
-//		return
-//	}
-//
-//	claims, err := token_verify.ParseToken(c.Request.Header.Get("token"))
-//	if err != nil {
-//		log.NewError(params.OperationID, "ParseToken failed, ", err.Error(), c.Request.Header.Get("token"))
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "ParseToken failed, " + err.Error()})
-//		return
-//	}
-//
-//	req := &user.GetAllConversationMsgOptReq{
-//		UId:         claims.UID,
-//		OperationID: params.OperationID,
-//	}
-//	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt req: ", req)
-//	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
-//	client := user.NewUserClient(etcdConn)
-//	resp, err := client.GetAllConversationMsgOpt(context.Background(), req)
-//	if err != nil {
-//		log.NewError(params.OperationID, "GetAllConversationMsgOpt rpc failed, ", req, err.Error())
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "GetAllConversationMsgOpt rpc failed, " + err.Error()})
-//		return
-//	}
-//	var ginResp GetAllConversationMessageOptResp
-//	ginResp.ErrCode = resp.ErrCode
-//	ginResp.ErrMsg = resp.ErrMsg
-//	for _, v := range resp.ConversationOptResult {
-//		var opt OptResult
-//		err := utils.CopyStructFields(&opt, *v, "ConversationId", "Result")
-//		if err != nil {
-//			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
-//			continue
-//		}
-//		ginResp.Data = append(ginResp.Data, opt)
-//	}
-//	log.NewInfo(req.OperationID, "GetAllConversationMsgOpt resp: ", ginResp, req)
-//	c.JSON(http.StatusOK, ginResp)
-//}
-//
-//func GetReceiveMessageOpt(c *gin.Context) {
-//	params := paramGetReceiveMessageOpt{}
-//	if err := c.BindJSON(&params); err != nil {
-//		log.NewError(params.OperationID, "bind json failed ", err.Error(), c)
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
-//		return
-//	}
-//
-//	claims, err := token_verify.ParseToken(c.Request.Header.Get("token"))
-//	if err != nil {
-//		log.NewError(params.OperationID, "ParseToken failed, ", err.Error(), c.Request.Header.Get("token"))
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "ParseToken failed, " + err.Error()})
-//		return
-//	}
-//
-//	req := &user.GetReceiveMessageOptReq{
-//		UId:            claims.UID,
-//		ConversationId: params.ConversationIdList,
-//		OperationID:    params.OperationID,
-//	}
-//	log.NewInfo(req.OperationID, "GetReceiveMessageOptReq req: ", req)
-//	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
-//	client := user.NewUserClient(etcdConn)
-//	resp, err := client.GetReceiveMessageOpt(context.Background(), req)
-//	if err != nil {
-//		log.NewError(params.OperationID, "GetReceiveMessageOpt rpc failed, ", req, err.Error())
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "GetReceiveMessageOpt rpc failed, " + err.Error()})
-//		return
-//	}
-//	log.NewInfo(req.OperationID, "GetReceiveMessageOptReq req: ", req, resp)
-//	var ginResp GetReceiveMessageOptResp
-//	ginResp.ErrCode = resp.ErrCode
-//	ginResp.ErrMsg = resp.ErrMsg
-//
-//	for _, v := range resp.ConversationOptResult {
-//		var opt OptResult
-//		log.NewInfo("CopyStructFields begin ", v, req.OperationID)
-//		err := utils.CopyStructFields(&opt, *v, "ConversationId", "Result")
-//		log.NewInfo("CopyStructFields end ", v, req.OperationID)
-//		if err != nil {
-//			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
-//			continue
-//		}
-//		ginResp.Data = append(ginResp.Data, opt)
-//	}
-//	log.NewInfo(req.OperationID, "GetReceiveMessageOpt resp: ", ginResp)
-//	c.JSON(http.StatusOK, ginResp)
-//}
-//
+func GetReceiveMessageOpt(c *gin.Context) {
+	params := api.GetReceiveMessageOptReq{}
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
+		return
+	}
+	req := &rpc.GetReceiveMessageOptReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(params.OperationID, "GetReceiveMessageOpt args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := user.NewUserClient(etcdConn)
+	RpcResp, err := client.GetReceiveMessageOpt(context.Background(), req)
+	if err != nil {
+		log.NewError(params.OperationID, "GetReceiveMessageOpt rpc failed, ", req, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetReceiveMessageOpt rpc failed, " + err.Error()})
+		return
+	}
+	resp := api.GetReceiveMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+	resp.ConversationOptResultList = RpcResp.ConversationOptResultList
+	log.NewInfo(req.OperationID, "GetReceiveMessageOpt api return: ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
 func SetReceiveMessageOpt(c *gin.Context) {
-
+	params := api.SetReceiveMessageOptReq{}
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
+		return
+	}
+	req := &rpc.SetReceiveMessageOptReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(params.OperationID, "SetReceiveMessageOpt args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := user.NewUserClient(etcdConn)
+	RpcResp, err := client.SetReceiveMessageOpt(context.Background(), req)
+	if err != nil {
+		log.NewError(params.OperationID, "SetReceiveMessageOpt rpc failed, ", req, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "SetReceiveMessageOpt rpc failed, " + err.Error()})
+		return
+	}
+	resp := api.SetReceiveMessageOptResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+	resp.OptResultList = RpcResp.OptResultList
+	log.NewInfo(req.OperationID, "SetReceiveMessageOpt api return: ", resp)
+	c.JSON(http.StatusOK, resp)
 }
-
-//func SetReceiveMessageOpt(c *gin.Context) {
-//	params := paramsSetReceiveMessageOpt{}
-//	if err := c.BindJSON(&params); err != nil {
-//		log.NewError(params.OperationID, "bind json failed ", err.Error(), c)
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
-//		return
-//	}
-//
-//	claims, err := token_verify.ParseToken(c.Request.Header.Get("token"))
-//	if err != nil {
-//		log.NewError(params.OperationID, "ParseToken failed, ", err.Error(), c.Request.Header.Get("token"))
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "ParseToken failed, " + err.Error()})
-//		return
-//	}
-//
-//	req := &user.SetReceiveMessageOptReq{
-//		UId:            claims.UID,
-//		Opt:            *params.Option,
-//		ConversationId: params.ConversationIdList,
-//		OperationID:    params.OperationID,
-//	}
-//	log.NewInfo(req.OperationID, "SetReceiveMessageOpt req: ", req)
-//	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
-//	client := user.NewUserClient(etcdConn)
-//	resp, err := client.SetReceiveMessageOpt(context.Background(), req)
-//	if err != nil {
-//		log.NewError(params.OperationID, "SetReceiveMessageOpt rpc failed, ", req, err.Error())
-//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "SetReceiveMessageOpt rpc failed, " + err.Error()})
-//		return
-//	}
-//	log.NewInfo(req.OperationID, "SetReceiveMessageOpt req: ", req, resp)
-//	ginResp := SetReceiveMessageOptResp{
-//		ErrCode: resp.ErrCode,
-//		ErrMsg:  resp.ErrMsg,
-//	}
-//
-//	for _, v := range resp.OptResult {
-//		var opt OptResult
-//		log.NewDebug("CopyStructFields begin ", v, req.OperationID)
-//		err := utils.CopyStructFields(&opt, *v, "ConversationId", "Result")
-//		log.NewDebug("CopyStructFields end ", v, req.OperationID)
-//		if err != nil {
-//			log.NewError(req.OperationID, "CopyStructFields failed ", err.Error())
-//			continue
-//		}
-//		ginResp.Data = append(ginResp.Data, opt)
-//	}
-//	log.NewInfo(req.OperationID, "SetReceiveMessageOpt resp: ", ginResp)
-//	c.JSON(http.StatusOK, ginResp)
-//}
