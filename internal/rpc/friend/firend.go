@@ -144,6 +144,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	//Establish a latest relationship in the friend request table
 	friendRequest := imdb.FriendRequest{ReqMsg: req.ReqMsg}
 	utils.CopyStructFields(&friendRequest, req.CommID)
+	log.NewDebug(req.CommID.OperationID, "UpdateFriendApplication args ", friendRequest)
 	err := imdb.UpdateFriendApplication(&friendRequest)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "UpdateFriendApplication failed ", err.Error(), friendRequest)
