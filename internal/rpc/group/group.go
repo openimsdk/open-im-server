@@ -226,6 +226,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		utils.CopyStructFields(&toInsertInfo, toUserInfo)
 		toInsertInfo.GroupID = req.GroupID
 		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
+		toInsertInfo.OperatorUserID = req.OpUserID
 		err = imdb.InsertIntoGroupMember(toInsertInfo)
 		if err != nil {
 			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", req.GroupID, toUserInfo.UserID, toUserInfo.Nickname, toUserInfo.FaceUrl)
