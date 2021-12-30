@@ -184,7 +184,11 @@ func GetGroupAllMemberList(c *gin.Context) {
 }
 
 func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
-	marshaler := jsonpb.Marshaler{}
+	marshaler := jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: true,
+	}
 	s, _ := marshaler.MarshalToString(pb)
 	out := make(map[string]interface{})
 	json.Unmarshal([]byte(s), &out)
