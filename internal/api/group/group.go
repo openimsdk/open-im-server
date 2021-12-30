@@ -124,6 +124,16 @@ func GetGroupMemberList(c *gin.Context) {
 	if len(memberListResp.MemberList) == 0 {
 		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	}
+	/*
+		jsm := &jsonpb.Marshaler{
+			OrigName:     true,
+			EnumsAsInts:  false,
+			EmitDefaults: true,
+		}
+
+		var b bytes.Buffer
+		err = jsm.MarshalToString(memberListResp.MemberList[0])
+	*/
 	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
