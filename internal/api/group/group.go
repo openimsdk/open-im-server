@@ -176,7 +176,7 @@ func GetGroupAllMemberList(c *gin.Context) {
 		log.NewDebug(req.OperationID, "MarshalToString ", s, err)
 		m := ProtoToMap(memberListResp.MemberList[0], false)
 		log.NewDebug(req.OperationID, "mmm ", m)
-		memberListResp.Test = m
+		memberListResp.Test = append(memberListResp.Test, m)
 	}
 
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
