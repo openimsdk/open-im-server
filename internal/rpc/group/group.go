@@ -551,13 +551,14 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
 	err = imdb.SetGroupInfo(groupInfo)
 	if err != nil {
+		log.NewError(req.OperationID, "SetGroupInfo failed ", err.Error(), groupInfo)
 		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
 	if changedType != 0 {
 		chat.GroupInfoChangedNotification(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, changedType)
 	}
-	log.NewInfo("SetGroupInfo rpc return ", pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}})
+	log.NewInfo(req.OperationID, "SetGroupInfo rpc return ", pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}})
 	return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
 }
 
