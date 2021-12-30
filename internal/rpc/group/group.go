@@ -489,7 +489,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	groupRequest.ReqMsg = req.ReqMessage
 	groupRequest.GroupID = req.GroupID
 
-	err = imdb.UpdateGroupRequest(groupRequest)
+	err = imdb.InsertIntoGroupRequest(groupRequest)
 	if err != nil {
 		log.NewError(req.OperationID, "UpdateGroupRequest ", err.Error(), groupRequest)
 		return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
