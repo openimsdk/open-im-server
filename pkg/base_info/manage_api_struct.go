@@ -6,8 +6,8 @@ import (
 )
 
 type DeleteUsersReq struct {
-	OperationID   string   `json:"operationID" binding:"required"`
-	DeleteUidList []string `json:"deleteUidList" binding:"required"`
+	OperationID      string   `json:"operationID" binding:"required"`
+	DeleteUserIDList []string `json:"deleteUserIDList" binding:"required"`
 }
 type DeleteUsersResp struct {
 	CommResp
