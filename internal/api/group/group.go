@@ -120,9 +120,12 @@ func GetGroupMemberList(c *gin.Context) {
 		return
 	}
 
-	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
-	c.JSON(http.StatusOK, memberListResp)
+	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
+	if len(memberListResp.MemberList) == 0 {
+		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
+	}
 	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
+	c.JSON(http.StatusOK, memberListResp)
 }
 
 func GetGroupAllMember(c *gin.Context) {

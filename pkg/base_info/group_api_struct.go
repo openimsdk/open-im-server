@@ -59,8 +59,8 @@ type GetGroupMemberListReq struct {
 }
 type GetGroupMemberListResp struct {
 	CommResp
-	NextSeq int32                              `json:"nextSeq"`
-	Data    []*open_im_sdk.GroupMemberFullInfo `json:"data"`
+	NextSeq    int32                              `json:"nextSeq"`
+	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"data"`
 }
 
 type GetGroupAllMemberReq struct {

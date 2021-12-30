@@ -59,7 +59,7 @@ func main() {
 		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMember)
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)
-		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)
+		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup) //1
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
 	}
 	//certificate
