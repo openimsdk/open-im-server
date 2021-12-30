@@ -418,8 +418,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 			continue
 		}
 		var groupInfo open_im_sdk.GroupInfo
-		utils.CopyStructFields(&groupInfo, groupInfoFromMysql)
-		groupInfo.CreateTime = groupInfoFromMysql.CreateTime.Unix()
+		cp.GroupDBCopyOpenIM(&groupInfo, groupInfoFromMysql)
 		groupsInfoList = append(groupsInfoList, &groupInfo)
 	}
 
