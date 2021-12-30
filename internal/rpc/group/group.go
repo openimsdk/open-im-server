@@ -269,7 +269,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 }
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (*pbGroup.GetGroupMemberListResp, error) {
-	log.NewInfo(req.OperationID, "GetGroupMemberList, args ", req.String())
+	log.NewInfo(req.OperationID, "GetGroupMemberList args ", req.String())
 	var resp pbGroup.GetGroupMemberListResp
 	memberList, err := imdb.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
 	if err != nil {
@@ -281,7 +281,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 
 	for _, v := range memberList {
 		var node open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(&node, v)
+		utils.CopyStructFields(&node, &v)
 		resp.MemberList = append(resp.MemberList, &node)
 	}
 	//db operate  get db sorted by join time
