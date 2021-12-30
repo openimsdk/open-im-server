@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	rpc "Open_IM/pkg/proto/group"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -382,8 +383,8 @@ func JoinGroup(c *gin.Context) {
 		return
 	}
 	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
+	log.NewInfo(req.OperationID, "JoinGroup api return", RpcResp.String())
 	c.JSON(http.StatusOK, resp)
-	log.NewInfo("JoinGroup api return", RpcResp.String())
 }
 
 func QuitGroup(c *gin.Context) {
@@ -394,7 +395,7 @@ func QuitGroup(c *gin.Context) {
 		return
 	}
 	req := &rpc.QuitGroupReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -413,8 +414,8 @@ func QuitGroup(c *gin.Context) {
 		return
 	}
 	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
+	log.NewInfo(req.OperationID, "QuitGroup api return", RpcResp.String())
 	c.JSON(http.StatusOK, resp)
-	log.NewInfo("QuitGroup api return", RpcResp.String())
 }
 
 func SetGroupInfo(c *gin.Context) {
@@ -424,8 +425,9 @@ func SetGroupInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.SetGroupInfoReq{}
-	utils.CopyStructFields(req, params)
+	req := &rpc.SetGroupInfoReq{GroupInfo: &open_im_sdk.GroupInfo{}}
+	utils.CopyStructFields(req.GroupInfo, &params.Group)
+	req.OperationID = params.OperationID
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -443,7 +445,7 @@ func SetGroupInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
-	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
+	resp := api.SetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.OperationID, "SetGroupInfo api return ", resp)
 }

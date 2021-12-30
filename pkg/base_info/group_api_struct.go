@@ -1,6 +1,7 @@
 package base_info
 
 import (
+	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 )
 
@@ -135,7 +136,7 @@ type QuitGroupResp struct {
 }
 
 type SetGroupInfoReq struct {
-	open_im_sdk.GroupInfo
+	imdb.Group
 	OperationID string `json:"operationID" binding:"required"`
 }
 type SetGroupInfoResp struct {

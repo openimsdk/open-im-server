@@ -478,11 +478,10 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 }
 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) (*pbGroup.QuitGroupResp, error) {
-	log.NewError("QuitGroup args ", req.String())
-
+	log.NewError(req.OperationID, "QuitGroup args ", req.String())
 	_, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.OpUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMemberInfoByGroupIDAndUserID failed", err.Error(), req.GroupID, req.OpUserID)
+		log.NewError(req.OperationID, "GetGroupMemberInfoByGroupIDAndUserID failed ", err.Error(), req.GroupID, req.OpUserID)
 		return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
@@ -499,7 +498,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	}
 
 	chat.MemberLeaveNotification(req)
-	log.NewInfo(req.OperationID, "rpc QuitGroup return ")
+	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}})
 	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
 }
 
@@ -513,7 +512,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 		return false
 
 	}
-	if groupUserInfo.RoleLevel == constant.GroupAdmin {
+	if groupUserInfo.RoleLevel == constant.GroupOwner || groupUserInfo.RoleLevel == constant.GroupAdmin {
 		return true
 	}
 	return false
@@ -522,7 +521,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
 	log.NewInfo(req.OperationID, "SetGroupInfo args ", req.String())
 	if !hasAccess(req) {
-		log.NewError(req.OperationID, "no access ")
+		log.NewError(req.OperationID, "no access ", req)
 		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
@@ -551,13 +550,14 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
 	err = imdb.SetGroupInfo(groupInfo)
 	if err != nil {
-		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		log.NewError(req.OperationID, "SetGroupInfo failed ", err.Error(), groupInfo)
+		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
 	if changedType != 0 {
 		chat.GroupInfoChangedNotification(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, changedType)
 	}
-	log.NewInfo("SetGroupInfo rpc return ", pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}})
+	log.NewInfo(req.OperationID, "SetGroupInfo rpc return ", pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}})
 	return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
 }
 

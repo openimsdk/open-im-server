@@ -79,7 +79,7 @@ func GetGroupMemberInfoByGroupIDAndUserID(groupID, userID string) (*GroupMember,
 		return nil, err
 	}
 	var groupMember GroupMember
-	err = dbConn.Table("group_member").Where("group_id=? and user_id=? limit 1", groupID, userID).Find(&groupMember).Error
+	err = dbConn.Table("group_member").Where("group_id=? and user_id=? ", groupID, userID).Limit(1).Find(&groupMember).Error
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func DeleteGroupMemberByGroupIDAndUserID(groupID, userID string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_member").Where("group_id=? and user_id=? limit 1", groupID, userID).Delete(&GroupMember{}).Error
+	err = dbConn.Table("group_member").Where("group_id=? and user_id=? ", groupID, userID).Delete(&GroupMember{}).Error
 	if err != nil {
 		return err
 	}

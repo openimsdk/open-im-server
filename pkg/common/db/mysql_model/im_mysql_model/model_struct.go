@@ -63,17 +63,19 @@ type FriendRequest struct {
 //}
 //  open_im_sdk.GroupInfo (OwnerUserID ,  MemberCount )> imdb.Group
 type Group struct {
-	GroupID      string `gorm:"column:group_id;primaryKey;"`
-	GroupName    string `gorm:"column:name"`
-	Notification string `gorm:"column:notification"`
-	Introduction string `gorm:"column:introduction"`
-	FaceUrl      string `gorm:"column:face_url"`
+	//`json:"operationID" binding:"required"`
+	//`protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"` `json:"operationID" binding:"required"`
+	GroupID      string `gorm:"column:group_id;primaryKey;" json:"groupID" binding:"required"`
+	GroupName    string `gorm:"column:name" json:"groupName"`
+	Notification string `gorm:"column:notification" json:"notification"`
+	Introduction string `gorm:"column:introduction" json:"introduction"`
+	FaceUrl      string `gorm:"column:face_url" json:"faceUrl"`
 
 	CreateTime    time.Time `gorm:"column:create_time"`
 	Status        int32     `gorm:"column:status"`
 	CreatorUserID string    `gorm:"column:creator_user_id"`
 	GroupType     int32     `gorm:"column:group_type"`
-	Ex            string    `gorm:"column:ex"`
+	Ex            string    `gorm:"column:ex" json:"ex"`
 }
 
 //message GroupMemberFullInfo {

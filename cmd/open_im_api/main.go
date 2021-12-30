@@ -47,8 +47,8 @@ func main() {
 	//group related routing group
 	groupRouterGroup := r.Group("/group")
 	{
-		groupRouterGroup.POST("/create_group", group.CreateGroup)
-		groupRouterGroup.POST("/set_group_info", group.SetGroupInfo)
+		groupRouterGroup.POST("/create_group", group.CreateGroup)    //1
+		groupRouterGroup.POST("/set_group_info", group.SetGroupInfo) //1
 		groupRouterGroup.POST("join_group", group.JoinGroup)
 		groupRouterGroup.POST("/quit_group", group.QuitGroup)
 		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)
