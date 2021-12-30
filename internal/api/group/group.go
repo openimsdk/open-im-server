@@ -24,7 +24,7 @@ func KickGroupMember(c *gin.Context) {
 	}
 
 	req := &rpc.KickGroupMemberReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -39,7 +39,7 @@ func KickGroupMember(c *gin.Context) {
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.KickGroupMember(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMemberList failed ", err.Error())
+		log.NewError(req.OperationID, "GetGroupMemberList failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
@@ -48,8 +48,12 @@ func KickGroupMember(c *gin.Context) {
 	memberListResp.ErrMsg = RpcResp.ErrMsg
 	memberListResp.ErrCode = RpcResp.ErrCode
 	for _, v := range RpcResp.Id2ResultList {
-		memberListResp.Data = append(memberListResp.Data, &api.Id2Result{UserID: v.UserID, Result: v.Result})
+		memberListResp.UserIDResultList = append(memberListResp.UserIDResultList, &api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
+	if len(memberListResp.UserIDResultList) == 0 {
+		memberListResp.UserIDResultList = []*api.UserIDResult{}
+	}
+
 	log.NewInfo(req.OperationID, "KickGroupMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
@@ -180,7 +184,7 @@ func GetJoinedGroupList(c *gin.Context) {
 		return
 	}
 
-	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.GroupList}
+	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
 	c.JSON(http.StatusOK, GroupListResp)
 	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
 }
@@ -214,7 +218,7 @@ func InviteUserToGroup(c *gin.Context) {
 
 	Resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	for _, v := range RpcResp.Id2ResultList {
-		Resp.Data = append(Resp.Data, api.Id2Result{UserID: v.UserID, Result: v.Result})
+		Resp.UserIDResultList = append(Resp.UserIDResultList, api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
 	c.JSON(http.StatusOK, Resp)
 	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", Resp)

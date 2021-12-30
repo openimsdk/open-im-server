@@ -9,10 +9,6 @@ type CommResp struct {
 	ErrCode int32  `json:"errCode"`
 	ErrMsg  string `json:"errMsg"`
 }
-type Id2Result struct {
-	UserID string `json:"userID"`
-	Result int32  `json:"result"`
-}
 
 type KickGroupMemberReq struct {
 	GroupID          string   `json:"groupID" binding:"required"`
@@ -22,7 +18,7 @@ type KickGroupMemberReq struct {
 }
 type KickGroupMemberResp struct {
 	CommResp
-	Data []*Id2Result `json:"data"`
+	UserIDResultList []*UserIDResult `json:"data"`
 }
 
 type GetGroupMembersInfoReq struct {
@@ -43,7 +39,7 @@ type InviteUserToGroupReq struct {
 }
 type InviteUserToGroupResp struct {
 	CommResp
-	Data []Id2Result `json:"data"`
+	UserIDResultList []UserIDResult `json:"data"`
 }
 
 type GetJoinedGroupListReq struct {
@@ -52,7 +48,7 @@ type GetJoinedGroupListReq struct {
 }
 type GetJoinedGroupListResp struct {
 	CommResp
-	Data []*open_im_sdk.GroupInfo `json:"data"`
+	GroupInfoList []*open_im_sdk.GroupInfo `json:"data"`
 }
 
 type GetGroupMemberListReq struct {

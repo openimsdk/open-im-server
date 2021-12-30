@@ -300,7 +300,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 	ownerList, err := imdb.GetOwnerManagerByGroupID(req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetOwnerManagerByGroupId failed ", err.Error(), req.GroupID)
-		return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
 	//op is group owner?
 	var flag = 0
@@ -352,6 +352,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			log.NewError(req.OperationID, "RemoveGroupMember failed ", err.Error(), req.GroupID, v)
 			resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: -1})
 		} else {
+			log.NewDebug(req.OperationID, "kicked ", v)
 			resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: 0})
 			okUserIDList = append(okUserIDList, v)
 		}
