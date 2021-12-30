@@ -414,8 +414,8 @@ func QuitGroup(c *gin.Context) {
 		return
 	}
 	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
+	log.NewInfo(req.OperationID, "QuitGroup api return", RpcResp.String())
 	c.JSON(http.StatusOK, resp)
-	log.NewInfo("QuitGroup api return", RpcResp.String())
 }
 
 func SetGroupInfo(c *gin.Context) {
