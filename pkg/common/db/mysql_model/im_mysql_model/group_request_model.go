@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
-	"fmt"
 	"time"
 )
 
