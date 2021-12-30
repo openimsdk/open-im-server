@@ -149,3 +149,6 @@ type TransferGroupOwnerReq struct {
 	NewOwnerUserID string `json:"newOwnerUserID" binding:"required"`
 	OperationID    string `json:"operationID" binding:"required"`
 }
+type TransferGroupOwnerResp struct {
+	CommResp
+}

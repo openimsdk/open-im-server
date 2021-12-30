@@ -464,7 +464,7 @@ func TransferGroupOwner(c *gin.Context) {
 		return
 	}
 	req := &rpc.TransferGroupOwnerReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -483,7 +483,8 @@ func TransferGroupOwner(c *gin.Context) {
 		return
 	}
 
-	resp := api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}
-	c.JSON(http.StatusOK, resp)
+	resp := api.TransferGroupOwnerResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
 	log.NewInfo(req.OperationID, "TransferGroupOwner api return ", resp)
+	c.JSON(http.StatusOK, resp)
+
 }
