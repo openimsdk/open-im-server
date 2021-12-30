@@ -17,6 +17,7 @@ import (
 	"strings"
 
 	jsonData "Open_IM/internal/utils"
+	"github.com/golang/protobuf/proto"
 )
 
 func KickGroupMember(c *gin.Context) {
@@ -186,6 +187,7 @@ func GetGroupAllMemberList(c *gin.Context) {
 	//}
 
 	memberListResp.Test = jsonData.JsonDataList(memberListResp.MemberList)
+
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }

@@ -8,8 +8,8 @@ import (
 
 func JsonDataList(resp ...interface{}) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0)
-	for _, v := range resp {
-		m := ProtoToMap(v.(proto.Message), false)
+	for _, v := range resp[0].([]proto.Message) {
+		m := ProtoToMap(v, false)
 		result = append(result, m)
 	}
 	return result
