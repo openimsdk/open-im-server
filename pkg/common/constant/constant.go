@@ -125,6 +125,9 @@ const (
 	GroupOwner         = 2
 	GroupAdmin         = 3
 
+	GroupResponseAgree  = 1
+	GroupResponseRefuse = -1
+
 	Male   = 1
 	Female = 2
 )

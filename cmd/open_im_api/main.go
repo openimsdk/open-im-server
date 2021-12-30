@@ -53,8 +53,8 @@ func main() {
 		groupRouterGroup.POST("/quit_group", group.QuitGroup)        //1
 		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)
-		groupRouterGroup.POST("/get_group_applicationList", group.GetGroupApplicationList)
-		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)
+		groupRouterGroup.POST("/get_group_applicationList", group.GetGroupApplicationList) //1
+		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                     //1
 		groupRouterGroup.POST("/kick_group", group.KickGroupMember)
 		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMember)
