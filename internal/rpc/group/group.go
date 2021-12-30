@@ -458,7 +458,10 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	}
 
 	var groupRequest imdb.GroupRequest
-	utils.CopyStructFields(&groupRequest, req)
+	groupRequest.UserID = req.OpUserID
+	groupRequest.ReqMsg = req.ReqMessage
+	groupRequest.GroupID = req.GroupID
+
 	err = imdb.UpdateGroupRequest(groupRequest)
 	if err != nil {
 		log.NewError(req.OperationID, "UpdateGroupRequest ", err.Error(), groupRequest)
