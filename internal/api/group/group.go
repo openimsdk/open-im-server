@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/jsonpb"
 	"net/http"
 	"strings"
 )
@@ -124,16 +125,7 @@ func GetGroupMemberList(c *gin.Context) {
 	if len(memberListResp.MemberList) == 0 {
 		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	}
-	/*
-		jsm := &jsonpb.Marshaler{
-			OrigName:     true,
-			EnumsAsInts:  false,
-			EmitDefaults: true,
-		}
 
-		var b bytes.Buffer
-		err = jsm.MarshalToString(memberListResp.MemberList[0])
-	*/
 	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
@@ -169,6 +161,18 @@ func GetGroupAllMemberList(c *gin.Context) {
 	if len(memberListResp.MemberList) == 0 {
 		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	}
+
+	jsm := &jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: true,
+	}
+
+	if len(memberListResp.MemberList) > 0 {
+		s, err := jsm.MarshalToString(memberListResp.MemberList[0])
+		log.NewDebug(req.OperationID, "MarshalToString ", s, err)
+	}
+
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
