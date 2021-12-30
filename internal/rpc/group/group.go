@@ -9,6 +9,7 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
+	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -390,16 +391,19 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 
 func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())
-	reply, err := im_mysql_model.GetGroupApplicationList(req.OpUserID)
+	reply, err := im_mysql_model.GetGroupApplicationList(req.FromUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.OpUserID)
+		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.FromUserID)
 		return &pbGroup.GetGroupApplicationListResp{ErrCode: 701, ErrMsg: "GetGroupApplicationList failed"}, nil
 	}
 
+	log.NewDebug(req.OperationID, "GetGroupApplicationList reply ", reply)
 	resp := pbGroup.GetGroupApplicationListResp{}
 	for _, v := range reply {
 		var node open_im_sdk.GroupRequest
-		utils.CopyStructFields(&node, v)
+		cp.GroupRequestDBCopyOpenIM(&node, &v)
+		log.NewDebug(req.OperationID, "node ", node, "v ", v)
+		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo rpc return ", resp)
 	return &resp, nil
@@ -415,8 +419,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 			continue
 		}
 		var groupInfo open_im_sdk.GroupInfo
-		utils.CopyStructFields(&groupInfo, groupInfoFromMysql)
-		groupInfo.CreateTime = groupInfoFromMysql.CreateTime.Unix()
+		cp.GroupDBCopyOpenIM(&groupInfo, groupInfoFromMysql)
 		groupsInfoList = append(groupsInfoList, &groupInfo)
 	}
 

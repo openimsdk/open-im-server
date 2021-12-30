@@ -258,7 +258,7 @@ func CreateGroup(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-//my application  我发出去的
+//  群主或管理员收到的
 func GetGroupApplicationList(c *gin.Context) {
 	params := api.GetGroupApplicationListReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -279,16 +279,19 @@ func GetGroupApplicationList(c *gin.Context) {
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := rpc.NewGroupClient(etcdConn)
-
 	reply, err := client.GetGroupApplicationList(context.Background(), req)
 	if err != nil {
+		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 
-	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: reply.ErrCode, ErrMsg: reply.ErrMsg}, Data: reply.GroupRequestList}
-	c.JSON(http.StatusOK, resp)
+	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: reply.ErrCode, ErrMsg: reply.ErrMsg}, GroupRequestList: reply.GroupRequestList}
+	if len(resp.GroupRequestList) == 0 {
+		resp.GroupRequestList = []*open_im_sdk.GroupRequest{}
+	}
 	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 func GetGroupsInfo(c *gin.Context) {
@@ -299,7 +302,7 @@ func GetGroupsInfo(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetGroupsInfoReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -318,9 +321,12 @@ func GetGroupsInfo(c *gin.Context) {
 		return
 	}
 
-	resp := api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}
-	c.JSON(http.StatusOK, resp)
+	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
+	if len(resp.GroupInfoList) == 0 {
+		resp.GroupInfoList = []*open_im_sdk.GroupInfo{}
+	}
 	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 //process application

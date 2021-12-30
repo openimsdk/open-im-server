@@ -91,11 +91,11 @@ type CreateGroupResp struct {
 
 type GetGroupApplicationListReq struct {
 	OperationID string `json:"operationID" binding:"required"`
-	FromUserID  string `json:"fromUserID" binding:"required"` //my application
+	FromUserID  string `json:"fromUserID" binding:"required"` //作为管理员或群主收到的 进群申请
 }
 type GetGroupApplicationListResp struct {
 	CommResp
-	Data []*open_im_sdk.GroupRequest `json:"data"`
+	GroupRequestList []*open_im_sdk.GroupRequest `json:"data"`
 }
 
 type GetGroupInfoReq struct {
@@ -104,7 +104,7 @@ type GetGroupInfoReq struct {
 }
 type GetGroupInfoResp struct {
 	CommResp
-	Data []open_im_sdk.GroupInfo `json:"data"`
+	GroupInfoList []*open_im_sdk.GroupInfo `json:"data"`
 }
 
 type ApplicationGroupResponseReq struct {
