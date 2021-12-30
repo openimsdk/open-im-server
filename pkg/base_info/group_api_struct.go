@@ -64,12 +64,13 @@ type GetGroupMemberListResp struct {
 }
 
 type GetGroupAllMemberReq struct {
-	GroupID     string `json:"groupID"`
-	OperationID string `json:"operationID"`
+	GroupID     string `json:"groupID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 type GetGroupAllMemberResp struct {
 	CommResp
 	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"data"`
+	Test       map[string]interface{}             `json:"data2"`
 }
 
 type CreateGroupReq struct {

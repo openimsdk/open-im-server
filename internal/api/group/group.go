@@ -10,8 +10,10 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	"net/http"
 	"strings"
 )
@@ -170,11 +172,29 @@ func GetGroupAllMemberList(c *gin.Context) {
 
 	if len(memberListResp.MemberList) > 0 {
 		s, err := jsm.MarshalToString(memberListResp.MemberList[0])
+		//{"GroupID":"7836e478bc43ce1d3b8889cac983f59b","UserID":"openIM001","roleLevel":1,"JoinTime":"0","NickName":"","FaceUrl":"https://oss.com.cn/head","AppMangerLevel":0,"JoinSource":0,"OperatorUserID":"","Ex":"xxx"}
 		log.NewDebug(req.OperationID, "MarshalToString ", s, err)
+		m := ProtoToMap(memberListResp.MemberList[0], false)
+		log.NewDebug(req.OperationID, "mmm ", m)
+		memberListResp.Test = m
 	}
 
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
+}
+
+func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
+	marshaler := jsonpb.Marshaler{}
+	s, _ := marshaler.MarshalToString(pb)
+	out := make(map[string]interface{})
+	json.Unmarshal([]byte(s), &out)
+	if idFix {
+		if _, ok := out["id"]; ok {
+			out["_id"] = out["id"]
+			delete(out, "id")
+		}
+	}
+	return out
 }
 
 func GetJoinedGroupList(c *gin.Context) {
