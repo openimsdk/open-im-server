@@ -10,12 +10,13 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
+
 	"github.com/gin-gonic/gin"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
+
 	"net/http"
 	"strings"
+
+	jsonData "Open_IM/internal/utils"
 )
 
 func KickGroupMember(c *gin.Context) {
@@ -167,54 +168,26 @@ func GetGroupAllMemberList(c *gin.Context) {
 		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	}
 
-	jsm := &jsonpb.Marshaler{
-		OrigName:     true,
-		EnumsAsInts:  false,
-		EmitDefaults: true,
-	}
+	//jsm := &jsonpb.Marshaler{
+	//	OrigName:     true,
+	//	EnumsAsInts:  false,
+	//	EmitDefaults: true,
+	//}
+	//
+	//if len(memberListResp.MemberList) > 0 {
+	//	for _, v := range memberListResp.MemberList {
+	//		s, err := jsm.MarshalToString(v)
+	//		log.NewDebug(req.OperationID, "MarshalToString ", s, err)
+	//		m := ProtoToMap(memberListResp.MemberList[0], false)
+	//		log.NewDebug(req.OperationID, "mmm ", m)
+	//		memberListResp.Test = append(memberListResp.Test, m)
+	//	}
+	//
+	//}
 
-	if len(memberListResp.MemberList) > 0 {
-		for _, v := range memberListResp.MemberList {
-			s, err := jsm.MarshalToString(v)
-			log.NewDebug(req.OperationID, "MarshalToString ", s, err)
-			m := ProtoToMap(memberListResp.MemberList[0], false)
-			log.NewDebug(req.OperationID, "mmm ", m)
-			memberListResp.Test = append(memberListResp.Test, m)
-		}
-
-	}
-
-	memberListResp.Test = JsonData(memberListResp.MemberList)
+	memberListResp.Test = jsonData.JsonDataList(memberListResp.MemberList)
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
-}
-
-func JsonData(resp interface{}) []map[string]interface{} {
-	var result []map[string]interface{}
-	for _, v := range resp.([]proto.Message) {
-		m := ProtoToMap(v.(proto.Message), false)
-		result = append(result, m)
-	}
-	return result
-}
-
-func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
-	marshaler := jsonpb.Marshaler{
-		OrigName:     true,
-		EnumsAsInts:  false,
-		EmitDefaults: true,
-	}
-
-	s, _ := marshaler.MarshalToString(pb)
-	out := make(map[string]interface{})
-	json.Unmarshal([]byte(s), &out)
-	if idFix {
-		if _, ok := out["id"]; ok {
-			out["_id"] = out["id"]
-			delete(out, "id")
-		}
-	}
-	return out
 }
 
 func GetJoinedGroupList(c *gin.Context) {
