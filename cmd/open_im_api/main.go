@@ -57,7 +57,7 @@ func main() {
 		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                       //1
 		groupRouterGroup.POST("/kick_group", group.KickGroupMember)                          //1
 		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)            //no use
-		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList)
+		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList)     //1
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup) //1
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
