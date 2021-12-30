@@ -3,6 +3,7 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"time"
 )
 
@@ -23,6 +24,12 @@ func UpdateGroupRequest(groupRequest GroupRequest) error {
 	if err != nil {
 		return err
 	}
+	groupRequest.ReqTime = time.Now()
+
+	if groupRequest.HandledTime.Unix() < 0 {
+		groupRequest.HandledTime = utils.UnixSecondToTime(0)
+	}
+
 	//RowsAffected
 	if dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).RowsAffected == 0 {
 		return InsertIntoGroupRequest(groupRequest)
