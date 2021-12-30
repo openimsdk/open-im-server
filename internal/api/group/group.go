@@ -17,7 +17,6 @@ import (
 	"strings"
 
 	jsonData "Open_IM/internal/utils"
-	"github.com/golang/protobuf/proto"
 )
 
 func KickGroupMember(c *gin.Context) {
