@@ -442,7 +442,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 	}
 	err := imdb.UpdateGroupRequest(groupRequest)
 	if err != nil {
-		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.String())
+		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), groupRequest)
 		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	chat.ApplicationProcessedNotification(req)
