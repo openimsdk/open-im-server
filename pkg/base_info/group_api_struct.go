@@ -104,7 +104,7 @@ type GetGroupInfoReq struct {
 }
 type GetGroupInfoResp struct {
 	CommResp
-	Data []open_im_sdk.GroupInfo `json:"data"`
+	GroupInfoList []*open_im_sdk.GroupInfo `json:"data"`
 }
 
 type ApplicationGroupResponseReq struct {

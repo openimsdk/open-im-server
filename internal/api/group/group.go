@@ -302,7 +302,7 @@ func GetGroupsInfo(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetGroupsInfoReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -321,9 +321,12 @@ func GetGroupsInfo(c *gin.Context) {
 		return
 	}
 
-	resp := api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}
-	c.JSON(http.StatusOK, resp)
+	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
+	if len(resp.GroupInfoList) == 0 {
+		resp.GroupInfoList = []*open_im_sdk.GroupInfo{}
+	}
 	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 //process application
