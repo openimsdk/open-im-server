@@ -108,11 +108,12 @@ type GetGroupInfoResp struct {
 }
 
 type ApplicationGroupResponseReq struct {
-	OperationID  string `json:"operationID" binding:"required"`
-	GroupID      string `json:"groupID" binding:"required"`
-	FromUserID   string `json:"fromUserID" binding:"required"` //application from FromUserID
-	HandledMsg   string `json:"handledMsg"`
-	HandleResult int32  `json:"handleResult" binding:"required, oneof=-1 1"`
+	OperationID string `json:"operationID" binding:"required"`
+	GroupID     string `json:"groupID" binding:"required"`
+	FromUserID  string `json:"fromUserID" binding:"required"` //application from FromUserID
+	HandledMsg  string `json:"handledMsg"`
+	//`json:"flag" binding:"required,oneof=-1 0 1"`
+	HandleResult int32 `json:"handleResult" binding:"required,oneof=-1 1"`
 }
 type ApplicationGroupResponseResp struct {
 	CommResp
