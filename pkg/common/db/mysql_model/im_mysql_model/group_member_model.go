@@ -116,7 +116,7 @@ func GetOwnerManagerByGroupID(groupID string) ([]GroupMember, error) {
 		return nil, err
 	}
 	var groupMemberList []GroupMember
-	err = dbConn.Table("group_member").Where("group_id=? and role_level>0", groupID).Find(&groupMemberList).Error
+	err = dbConn.Table("group_member").Where("group_id=? and role_level>?", groupID, constant.GroupOrdinaryUsers).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
