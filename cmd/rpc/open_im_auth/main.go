@@ -10,4 +10,5 @@ func main() {
 	flag.Parse()
 	rpcServer := rpcAuth.NewRpcAuthServer(*rpcPort)
 	rpcServer.Run()
+
 }

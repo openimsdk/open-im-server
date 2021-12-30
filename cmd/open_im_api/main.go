@@ -38,26 +38,29 @@ func main() {
 		friendRouterGroup.POST("/add_blacklist", friend.AddBlacklist)               //1
 		friendRouterGroup.POST("/get_blacklist", friend.GetBlacklist)               //1
 		friendRouterGroup.POST("/remove_blacklist", friend.RemoveBlacklist)         //1
-		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)
-		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse) //1
-		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)     //1
-		friendRouterGroup.POST("/is_friend", friend.IsFriend)                    //1
-		friendRouterGroup.POST("/import_friend", friend.ImportFriend)            //1
+		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)               //1
+		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)    //1
+		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)        //1
+		friendRouterGroup.POST("/is_friend", friend.IsFriend)                       //1
+		friendRouterGroup.POST("/import_friend", friend.ImportFriend)               //1
 	}
 	//group related routing group
 	groupRouterGroup := r.Group("/group")
 	{
-		groupRouterGroup.POST("/create_group", group.CreateGroup)    //1
-		groupRouterGroup.POST("/set_group_info", group.SetGroupInfo) //1
-		groupRouterGroup.POST("join_group", group.JoinGroup)         //1
-		groupRouterGroup.POST("/quit_group", group.QuitGroup)        //1
-		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)
-		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)
-		groupRouterGroup.POST("/get_group_applicationList", group.GetGroupApplicationList) //1
-		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                     //1
-		groupRouterGroup.POST("/kick_group", group.KickGroupMember)
-		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)
+		groupRouterGroup.POST("/create_group", group.CreateGroup)                            //1
+		groupRouterGroup.POST("/set_group_info", group.SetGroupInfo)                         //1
+		groupRouterGroup.POST("join_group", group.JoinGroup)                                 //1
+		groupRouterGroup.POST("/quit_group", group.QuitGroup)                                //1
+		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse) //1
+		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                   //1
+		groupRouterGroup.POST("/get_group_applicationList", group.GetGroupApplicationList)   //1
+		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                       //1
+		groupRouterGroup.POST("/kick_group", group.KickGroupMember)                          //1
+		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)            //no use
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMember)
+		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)
+		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup) //1
+		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo) //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList) //1

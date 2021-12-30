@@ -210,6 +210,19 @@ func GetJoinedGroupIDListByUserID(userID string) ([]string, error) {
 	return groupIDList, nil
 }
 
+func IsGroupOwnerAdmin(groupID, UserID string) bool {
+	groupMemberList, err := GetOwnerManagerByGroupID(groupID)
+	if err != nil {
+		return false
+	}
+	for _, v := range groupMemberList {
+		if v.UserID == UserID && v.RoleLevel > constant.GroupOrdinaryUsers {
+			return true
+		}
+	}
+	return false
+}
+
 //
 //func SelectGroupList(groupID string) ([]string, error) {
 //	var groupUserID string

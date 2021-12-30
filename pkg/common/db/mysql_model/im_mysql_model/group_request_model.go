@@ -24,17 +24,10 @@ func UpdateGroupRequest(groupRequest GroupRequest) error {
 	if err != nil {
 		return err
 	}
-
 	if groupRequest.HandledTime.Unix() < 0 {
 		groupRequest.HandledTime = utils.UnixSecondToTime(0)
 	}
-
-	//RowsAffected
-	if dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).RowsAffected == 0 {
-		return InsertIntoGroupRequest(groupRequest)
-	} else {
-		return nil
-	}
+	return dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).Error
 }
 
 func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {

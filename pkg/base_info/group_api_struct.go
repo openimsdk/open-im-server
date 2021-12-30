@@ -9,10 +9,6 @@ type CommResp struct {
 	ErrCode int32  `json:"errCode"`
 	ErrMsg  string `json:"errMsg"`
 }
-type Id2Result struct {
-	UserID string `json:"userID"`
-	Result int32  `json:"result"`
-}
 
 type KickGroupMemberReq struct {
 	GroupID          string   `json:"groupID" binding:"required"`
@@ -22,7 +18,7 @@ type KickGroupMemberReq struct {
 }
 type KickGroupMemberResp struct {
 	CommResp
-	Data []*Id2Result `json:"data"`
+	UserIDResultList []*UserIDResult `json:"data"`
 }
 
 type GetGroupMembersInfoReq struct {
@@ -37,13 +33,13 @@ type GetGroupMembersInfoResp struct {
 
 type InviteUserToGroupReq struct {
 	GroupID           string   `json:"groupID" binding:"required"`
-	InvitedUserIDList []string `json:"uidList" binding:"required"`
+	InvitedUserIDList []string `json:"invitedUserIDList" binding:"required"`
 	Reason            string   `json:"reason"`
 	OperationID       string   `json:"operationID" binding:"required"`
 }
 type InviteUserToGroupResp struct {
 	CommResp
-	Data []Id2Result `json:"data"`
+	UserIDResultList []UserIDResult `json:"data"`
 }
 
 type GetJoinedGroupListReq struct {
@@ -52,7 +48,7 @@ type GetJoinedGroupListReq struct {
 }
 type GetJoinedGroupListResp struct {
 	CommResp
-	Data []*open_im_sdk.GroupInfo `json:"data"`
+	GroupInfoList []*open_im_sdk.GroupInfo `json:"data"`
 }
 
 type GetGroupMemberListReq struct {
@@ -63,8 +59,8 @@ type GetGroupMemberListReq struct {
 }
 type GetGroupMemberListResp struct {
 	CommResp
-	NextSeq int32                              `json:"nextSeq"`
-	Data    []*open_im_sdk.GroupMemberFullInfo `json:"data"`
+	NextSeq    int32                              `json:"nextSeq"`
+	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"data"`
 }
 
 type GetGroupAllMemberReq struct {
@@ -73,7 +69,7 @@ type GetGroupAllMemberReq struct {
 }
 type GetGroupAllMemberResp struct {
 	CommResp
-	Data []*open_im_sdk.GroupMemberFullInfo `json:"data"`
+	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"data"`
 }
 
 type CreateGroupReq struct {
@@ -112,7 +108,7 @@ type ApplicationGroupResponseReq struct {
 	GroupID      string `json:"groupID" binding:"required"`
 	FromUserID   string `json:"fromUserID" binding:"required"` //application from FromUserID
 	HandledMsg   string `json:"handledMsg"`
-	HandleResult int32  `json:"handleResult" binding:"required, oneof=-1 1"`
+	HandleResult int32  `json:"handleResult" binding:"required,oneof=-1 1"`
 }
 type ApplicationGroupResponseResp struct {
 	CommResp
@@ -148,4 +144,7 @@ type TransferGroupOwnerReq struct {
 	OldOwnerUserID string `json:"oldOwnerUserID" binding:"required"`
 	NewOwnerUserID string `json:"newOwnerUserID" binding:"required"`
 	OperationID    string `json:"operationID" binding:"required"`
+}
+type TransferGroupOwnerResp struct {
+	CommResp
 }

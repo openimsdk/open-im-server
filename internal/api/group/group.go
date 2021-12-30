@@ -24,7 +24,7 @@ func KickGroupMember(c *gin.Context) {
 	}
 
 	req := &rpc.KickGroupMemberReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -39,7 +39,7 @@ func KickGroupMember(c *gin.Context) {
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.KickGroupMember(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMemberList failed ", err.Error())
+		log.NewError(req.OperationID, "GetGroupMemberList failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
@@ -48,8 +48,12 @@ func KickGroupMember(c *gin.Context) {
 	memberListResp.ErrMsg = RpcResp.ErrMsg
 	memberListResp.ErrCode = RpcResp.ErrCode
 	for _, v := range RpcResp.Id2ResultList {
-		memberListResp.Data = append(memberListResp.Data, &api.Id2Result{UserID: v.UserID, Result: v.Result})
+		memberListResp.UserIDResultList = append(memberListResp.UserIDResultList, &api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
+	if len(memberListResp.UserIDResultList) == 0 {
+		memberListResp.UserIDResultList = []*api.UserIDResult{}
+	}
+
 	log.NewInfo(req.OperationID, "KickGroupMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
@@ -119,9 +123,22 @@ func GetGroupMemberList(c *gin.Context) {
 		return
 	}
 
-	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
-	c.JSON(http.StatusOK, memberListResp)
+	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
+	if len(memberListResp.MemberList) == 0 {
+		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
+	}
+	/*
+		jsm := &jsonpb.Marshaler{
+			OrigName:     true,
+			EnumsAsInts:  false,
+			EmitDefaults: true,
+		}
+
+		var b bytes.Buffer
+		err = jsm.MarshalToString(memberListResp.MemberList[0])
+	*/
 	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
+	c.JSON(http.StatusOK, memberListResp)
 }
 
 func GetGroupAllMember(c *gin.Context) {
@@ -132,7 +149,7 @@ func GetGroupAllMember(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetGroupAllMemberReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -151,9 +168,12 @@ func GetGroupAllMember(c *gin.Context) {
 		return
 	}
 
-	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.MemberList}
-	c.JSON(http.StatusOK, memberListResp)
+	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
+	if len(memberListResp.MemberList) == 0 {
+		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
+	}
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
+	c.JSON(http.StatusOK, memberListResp)
 }
 
 func GetJoinedGroupList(c *gin.Context) {
@@ -199,7 +219,7 @@ func InviteUserToGroup(c *gin.Context) {
 		return
 	}
 	req := &rpc.InviteUserToGroupReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -218,12 +238,12 @@ func InviteUserToGroup(c *gin.Context) {
 		return
 	}
 
-	Resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	for _, v := range RpcResp.Id2ResultList {
-		Resp.Data = append(Resp.Data, api.Id2Result{UserID: v.UserID, Result: v.Result})
+		resp.UserIDResultList = append(resp.UserIDResultList, api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
-	c.JSON(http.StatusOK, Resp)
-	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", Resp)
+	c.JSON(http.StatusOK, resp)
+	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", resp)
 }
 
 func CreateGroup(c *gin.Context) {
@@ -470,7 +490,7 @@ func TransferGroupOwner(c *gin.Context) {
 		return
 	}
 	req := &rpc.TransferGroupOwnerReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -488,7 +508,9 @@ func TransferGroupOwner(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
-	resp := api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}
-	c.JSON(http.StatusOK, resp)
+
+	resp := api.TransferGroupOwnerResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
 	log.NewInfo(req.OperationID, "TransferGroupOwner api return ", resp)
+	c.JSON(http.StatusOK, resp)
+
 }
