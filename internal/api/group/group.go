@@ -338,7 +338,7 @@ func ApplicationGroupResponse(c *gin.Context) {
 		return
 	}
 	req := &rpc.GroupApplicationResponseReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -357,9 +357,9 @@ func ApplicationGroupResponse(c *gin.Context) {
 		return
 	}
 
-	resp := api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}
-	c.JSON(http.StatusOK, resp)
+	resp := api.ApplicationGroupResponseResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
 	log.NewInfo(req.OperationID, "ApplicationGroupResponse api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 func JoinGroup(c *gin.Context) {

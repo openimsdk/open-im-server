@@ -432,23 +432,20 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 	log.NewInfo(req.OperationID, "GroupApplicationResponse args ", req.String())
 
 	groupRequest := imdb.GroupRequest{}
+	utils.CopyStructFields(&groupRequest, req)
 	groupRequest.UserID = req.FromUserID
-	groupRequest.GroupID = req.GroupID
-	groupRequest.HandledTime = time.Now()
-	groupRequest.HandleResult = req.HandleResult
 	groupRequest.HandleUserID = req.OpUserID
-	groupRequest.HandledMsg = req.HandledMsg
 	err := imdb.UpdateGroupRequest(groupRequest)
 	if err != nil {
 		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.String())
 		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	chat.ApplicationProcessedNotification(req)
-	if req.HandleResult == 1 {
+	if req.HandleResult == constant.GroupResponseAgree {
 		chat.MemberEnterNotification(req)
 	}
 
-	log.NewInfo(req.OperationID, "rpc GroupApplicationResponse return ")
+	log.NewInfo(req.OperationID, "rpc GroupApplicationResponse return ", pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}})
 	return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}, nil
 }
 
