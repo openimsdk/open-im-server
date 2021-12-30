@@ -390,9 +390,9 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 
 func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())
-	reply, err := im_mysql_model.GetGroupApplicationList(req.OpUserID)
+	reply, err := im_mysql_model.GetGroupApplicationList(req.FromUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.OpUserID)
+		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.FromUserID)
 		return &pbGroup.GetGroupApplicationListResp{ErrCode: 701, ErrMsg: "GetGroupApplicationList failed"}, nil
 	}
 
