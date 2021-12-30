@@ -10,7 +10,10 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	"net/http"
 	"strings"
 )
@@ -127,21 +130,12 @@ func GetGroupMemberList(c *gin.Context) {
 	if len(memberListResp.MemberList) == 0 {
 		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	}
-	/*
-		jsm := &jsonpb.Marshaler{
-			OrigName:     true,
-			EnumsAsInts:  false,
-			EmitDefaults: true,
-		}
 
-		var b bytes.Buffer
-		err = jsm.MarshalToString(memberListResp.MemberList[0])
-	*/
 	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
 
-func GetGroupAllMember(c *gin.Context) {
+func GetGroupAllMemberList(c *gin.Context) {
 	params := api.GetGroupAllMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
@@ -172,8 +166,45 @@ func GetGroupAllMember(c *gin.Context) {
 	if len(memberListResp.MemberList) == 0 {
 		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	}
+
+	jsm := &jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: true,
+	}
+
+	if len(memberListResp.MemberList) > 0 {
+		for _, v := range memberListResp.MemberList {
+			s, err := jsm.MarshalToString(v)
+			//{"GroupID":"7836e478bc43ce1d3b8889cac983f59b","UserID":"openIM001","roleLevel":1,"JoinTime":"0","NickName":"","FaceUrl":"https://oss.com.cn/head","AppMangerLevel":0,"JoinSource":0,"OperatorUserID":"","Ex":"xxx"}
+			log.NewDebug(req.OperationID, "MarshalToString ", s, err)
+			m := ProtoToMap(memberListResp.MemberList[0], false)
+			log.NewDebug(req.OperationID, "mmm ", m)
+			memberListResp.Test = append(memberListResp.Test, m)
+		}
+
+	}
+
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
+}
+
+func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
+	marshaler := jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: true,
+	}
+	s, _ := marshaler.MarshalToString(pb)
+	out := make(map[string]interface{})
+	json.Unmarshal([]byte(s), &out)
+	if idFix {
+		if _, ok := out["id"]; ok {
+			out["_id"] = out["id"]
+			delete(out, "id")
+		}
+	}
+	return out
 }
 
 func GetJoinedGroupList(c *gin.Context) {
