@@ -183,7 +183,7 @@ func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, tok
 	for _, v := range ws.wsUserToConn {
 		count = count + len(v)
 	}
-	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "uid", uid, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
+	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 
 }
 
@@ -206,9 +206,9 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 			for _, v := range ws.wsUserToConn {
 				count = count + len(v)
 			}
-			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "uid", uid, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
+			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 		} else {
-			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "uid", uid, "online_user_num", len(ws.wsUserToConn))
+			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
 		}
 		delete(ws.wsConnToUser, conn)
 
@@ -272,7 +272,6 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 		http.Error(w, http.StatusText(status), status)
 		return false
 	}
-
 }
 func genMapKey(uid string, platformID int32) string {
 	return uid + " " + constant.PlatformIDToName(platformID)
