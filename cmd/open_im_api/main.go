@@ -49,8 +49,8 @@ func main() {
 	{
 		groupRouterGroup.POST("/create_group", group.CreateGroup)    //1
 		groupRouterGroup.POST("/set_group_info", group.SetGroupInfo) //1
-		groupRouterGroup.POST("join_group", group.JoinGroup)
-		groupRouterGroup.POST("/quit_group", group.QuitGroup) //1
+		groupRouterGroup.POST("join_group", group.JoinGroup)         //1
+		groupRouterGroup.POST("/quit_group", group.QuitGroup)        //1
 		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)
 		groupRouterGroup.POST("/get_group_applicationList", group.GetGroupApplicationList)
