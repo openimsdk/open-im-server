@@ -6,9 +6,9 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func JsonDataList(resp interface{}) []map[string]interface{} {
+func JsonDataList(resp ...interface{}) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0)
-	for _, v := range resp.([]proto.Message) {
+	for _, v := range resp {
 		m := ProtoToMap(v.(proto.Message), false)
 		result = append(result, m)
 	}
