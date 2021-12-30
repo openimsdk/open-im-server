@@ -171,12 +171,15 @@ func GetGroupAllMemberList(c *gin.Context) {
 	}
 
 	if len(memberListResp.MemberList) > 0 {
-		s, err := jsm.MarshalToString(memberListResp.MemberList[0])
-		//{"GroupID":"7836e478bc43ce1d3b8889cac983f59b","UserID":"openIM001","roleLevel":1,"JoinTime":"0","NickName":"","FaceUrl":"https://oss.com.cn/head","AppMangerLevel":0,"JoinSource":0,"OperatorUserID":"","Ex":"xxx"}
-		log.NewDebug(req.OperationID, "MarshalToString ", s, err)
-		m := ProtoToMap(memberListResp.MemberList[0], false)
-		log.NewDebug(req.OperationID, "mmm ", m)
-		memberListResp.Test = append(memberListResp.Test, m)
+		for _, v := range memberListResp.MemberList {
+			s, err := jsm.MarshalToString(v)
+			//{"GroupID":"7836e478bc43ce1d3b8889cac983f59b","UserID":"openIM001","roleLevel":1,"JoinTime":"0","NickName":"","FaceUrl":"https://oss.com.cn/head","AppMangerLevel":0,"JoinSource":0,"OperatorUserID":"","Ex":"xxx"}
+			log.NewDebug(req.OperationID, "MarshalToString ", s, err)
+			m := ProtoToMap(memberListResp.MemberList[0], false)
+			log.NewDebug(req.OperationID, "mmm ", m)
+			memberListResp.Test = append(memberListResp.Test, m)
+		}
+
 	}
 
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
