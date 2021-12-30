@@ -435,6 +435,11 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 	utils.CopyStructFields(&groupRequest, req)
 	groupRequest.UserID = req.FromUserID
 	groupRequest.HandleUserID = req.OpUserID
+
+	if !token_verify.IsMangerUserID(req.OpUserID) && !imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) {
+		log.NewError(req.OperationID, "IsMangerUserID IsGroupOwnerAdmin false ", req.GroupID, req.OpUserID)
+		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+	}
 	err := imdb.UpdateGroupRequest(groupRequest)
 	if err != nil {
 		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.String())
