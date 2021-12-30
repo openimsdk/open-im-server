@@ -52,6 +52,6 @@ func SetGroupInfo(groupInfo Group) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("friend_request").Where("group_id=?", groupInfo.GroupID).Update(&groupInfo).Error
+	err = dbConn.Table("group").Where("group_id=?", groupInfo.GroupID).Update(&groupInfo).Error
 	return err
 }
