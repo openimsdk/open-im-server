@@ -403,6 +403,7 @@ func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.Ge
 		var node open_im_sdk.GroupRequest
 		cp.GroupRequestDBCopyOpenIM(&node, &v)
 		log.NewDebug(req.OperationID, "node ", node, "v ", v)
+		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo rpc return ", resp)
 	return &resp, nil
