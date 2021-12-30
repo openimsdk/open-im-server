@@ -24,7 +24,6 @@ func UpdateGroupRequest(groupRequest GroupRequest) error {
 	if err != nil {
 		return err
 	}
-	groupRequest.ReqTime = time.Now()
 
 	if groupRequest.HandledTime.Unix() < 0 {
 		groupRequest.HandledTime = utils.UnixSecondToTime(0)
@@ -43,7 +42,12 @@ func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 	if err != nil {
 		return err
 	}
-	toInsertInfo.HandledTime = time.Now()
+
+	toInsertInfo.ReqTime = time.Now()
+	if toInsertInfo.HandledTime.Unix() < 0 {
+		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
+	}
+
 	err = dbConn.Table("group_request").Create(&toInsertInfo).Error
 	if err != nil {
 		return err
