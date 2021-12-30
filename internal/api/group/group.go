@@ -383,8 +383,8 @@ func JoinGroup(c *gin.Context) {
 		return
 	}
 	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
+	log.NewInfo(req.OperationID, "JoinGroup api return", RpcResp.String())
 	c.JSON(http.StatusOK, resp)
-	log.NewInfo("JoinGroup api return", RpcResp.String())
 }
 
 func QuitGroup(c *gin.Context) {
