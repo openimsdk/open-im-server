@@ -57,10 +57,10 @@ func main() {
 		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                       //1
 		groupRouterGroup.POST("/kick_group", group.KickGroupMember)                          //1
 		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)            //no use
-		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList)     //1
-		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)
-		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup) //1
-		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
+		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMember)         //1
+		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)          //1
+		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)              //1
+		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)            //1
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
@@ -84,18 +84,18 @@ func main() {
 	//Manager
 	managementGroup := r.Group("/manager")
 	{
-		managementGroup.POST("/delete_user", manage.DeleteUser)
+		managementGroup.POST("/delete_user", manage.DeleteUser) //1
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
-		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
-		managementGroup.POST("/account_check", manage.AccountCheck)
-		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus)
+		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)             //1
+		managementGroup.POST("/account_check", manage.AccountCheck)                   //1
+		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
 	{
-		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)
-		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)
-		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt)
+		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)                  //1
+		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)                  //1
+		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt) //1
 	}
 
 	log.NewPrivateLog("api")

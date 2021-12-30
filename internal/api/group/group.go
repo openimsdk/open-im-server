@@ -91,6 +91,9 @@ func GetGroupMembersInfo(c *gin.Context) {
 	}
 
 	memberListResp := api.GetGroupMembersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.MemberList}
+	if len(RpcResp.MemberList) == 0 {
+		memberListResp.Data = []*open_im_sdk.GroupMemberFullInfo{}
+	}
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
@@ -242,6 +245,9 @@ func GetJoinedGroupList(c *gin.Context) {
 	}
 
 	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
+	if len(RpcResp.GroupList) == 0 {
+		GroupListResp.GroupInfoList = []*open_im_sdk.GroupInfo{}
+	}
 	c.JSON(http.StatusOK, GroupListResp)
 	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
 }
