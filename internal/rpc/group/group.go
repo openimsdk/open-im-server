@@ -447,6 +447,28 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 	}
 	chat.ApplicationProcessedNotification(req)
 	if req.HandleResult == constant.GroupResponseAgree {
+
+		if req.HandleResult == constant.GroupResponseAgree {
+			user, err := imdb.GetUserByUserID(req.FromUserID)
+			if err != nil {
+				log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.FromUserID)
+				return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+			}
+			member := imdb.GroupMember{}
+			member.GroupID = req.GroupID
+			member.UserID = req.FromUserID
+			member.RoleLevel = constant.GroupOrdinaryUsers
+			member.OperatorUserID = req.OpUserID
+			member.FaceUrl = user.FaceUrl
+			member.Nickname = user.Nickname
+
+			err = imdb.InsertIntoGroupMember(member)
+			if err != nil {
+				log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.FromUserID)
+				return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+			}
+		}
+
 		chat.MemberEnterNotification(req)
 	}
 
