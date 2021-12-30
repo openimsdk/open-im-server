@@ -95,7 +95,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 
 	//to group member
-	groupMember := imdb.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner}
+	groupMember := imdb.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
 	utils.CopyStructFields(&groupMember, us)
 	err = im_mysql_model.InsertIntoGroupMember(groupMember)
 	if err != nil {
