@@ -84,18 +84,18 @@ func main() {
 	//Manager
 	managementGroup := r.Group("/manager")
 	{
-		managementGroup.POST("/delete_user", manage.DeleteUser)
+		managementGroup.POST("/delete_user", manage.DeleteUser) //1
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
-		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
-		managementGroup.POST("/account_check", manage.AccountCheck)
-		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus)
+		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)             //1
+		managementGroup.POST("/account_check", manage.AccountCheck)                   //1
+		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
 	{
-		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)
-		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)
-		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt)
+		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)                  //1
+		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)                  //1
+		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt) //1
 	}
 
 	log.NewPrivateLog("api")

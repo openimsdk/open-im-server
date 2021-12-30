@@ -181,6 +181,9 @@ func GetJoinedGroupList(c *gin.Context) {
 	}
 
 	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.GroupList}
+	if len(RpcResp.GroupList) == 0 {
+		GroupListResp.Data = []*open_im_sdk.GroupInfo{}
+	}
 	c.JSON(http.StatusOK, GroupListResp)
 	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
 }
@@ -482,7 +485,6 @@ func TransferGroupOwner(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
-
 	resp := api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.OperationID, "TransferGroupOwner api return ", resp)
