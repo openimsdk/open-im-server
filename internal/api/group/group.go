@@ -234,9 +234,9 @@ func GetJoinedGroupList(c *gin.Context) {
 		return
 	}
 
-	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.GroupList}
+	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
 	if len(RpcResp.GroupList) == 0 {
-		GroupListResp.Data = []*open_im_sdk.GroupInfo{}
+		GroupListResp.GroupInfoList = []*open_im_sdk.GroupInfo{}
 	}
 	c.JSON(http.StatusOK, GroupListResp)
 	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
