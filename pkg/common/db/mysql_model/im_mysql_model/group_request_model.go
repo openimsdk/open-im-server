@@ -3,6 +3,7 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"time"
 )
 
@@ -23,11 +24,17 @@ func UpdateGroupRequest(groupRequest GroupRequest) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).Error
-	if err != nil {
-		return err
+
+	if groupRequest.HandledTime.Unix() < 0 {
+		groupRequest.HandledTime = utils.UnixSecondToTime(0)
 	}
-	return nil
+
+	//RowsAffected
+	if dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).RowsAffected == 0 {
+		return InsertIntoGroupRequest(groupRequest)
+	} else {
+		return nil
+	}
 }
 
 func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
@@ -35,7 +42,12 @@ func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 	if err != nil {
 		return err
 	}
-	toInsertInfo.HandledTime = time.Now()
+
+	toInsertInfo.ReqTime = time.Now()
+	if toInsertInfo.HandledTime.Unix() < 0 {
+		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
+	}
+
 	err = dbConn.Table("group_request").Create(&toInsertInfo).Error
 	if err != nil {
 		return err

@@ -118,7 +118,7 @@ type GroupRequest struct {
 	GroupID      string    `gorm:"column:group_id;primaryKey;"`
 	HandleResult int32     `gorm:"column:handle_result"`
 	ReqMsg       string    `gorm:"column:req_msg"`
-	HandledMsg   string    `gorm:"column:handled_msg"`
+	HandledMsg   string    `gorm:"column:handle_msg"`
 	ReqTime      time.Time `gorm:"column:req_time"`
 	HandleUserID string    `gorm:"column:handle_user_id"`
 	HandledTime  time.Time `gorm:"column:handle_time"`
