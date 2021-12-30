@@ -23,11 +23,10 @@ func UpdateGroupRequest(groupRequest GroupRequest) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).Error
-	if err != nil {
-		return err
+	//RowsAffected
+	if dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).RowsAffected == 0 {
+		return InsertIntoGroupRequest(groupRequest)
 	}
-	return nil
 }
 
 func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {

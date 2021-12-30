@@ -453,7 +453,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	log.NewInfo(req.OperationID, "JoinGroup args ", req.String())
 	_, err := imdb.GetUserByUserID(req.OpUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "FindUserByUID failed ", err.Error(), req.OpUserID)
+		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OpUserID)
 		return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
