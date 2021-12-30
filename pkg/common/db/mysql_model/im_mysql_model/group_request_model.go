@@ -105,12 +105,12 @@ func GetGroupApplicationList(userID string) ([]GroupRequest, error) {
 		if v.RoleLevel > constant.GroupOrdinaryUsers {
 			list, err := GetGroupRequestByGroupID(v.GroupID)
 			if err != nil {
-				fmt.Println("111 GetGroupRequestByGroupID failed ", err.Error())
+				//		fmt.Println("111 GetGroupRequestByGroupID failed ", err.Error())
 				continue
 			}
-			fmt.Println("222 GetGroupRequestByGroupID ok ", list)
+			//	fmt.Println("222 GetGroupRequestByGroupID ok ", list)
 			groupRequestList = append(groupRequestList, list...)
-			fmt.Println("333 GetGroupRequestByGroupID ok ", groupRequestList)
+			//	fmt.Println("333 GetGroupRequestByGroupID ok ", groupRequestList)
 		}
 	}
 	return groupRequestList, nil
