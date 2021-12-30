@@ -197,7 +197,7 @@ func InviteUserToGroup(c *gin.Context) {
 		return
 	}
 	req := &rpc.InviteUserToGroupReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -216,12 +216,12 @@ func InviteUserToGroup(c *gin.Context) {
 		return
 	}
 
-	Resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	for _, v := range RpcResp.Id2ResultList {
-		Resp.UserIDResultList = append(Resp.UserIDResultList, api.UserIDResult{UserID: v.UserID, Result: v.Result})
+		resp.UserIDResultList = append(resp.UserIDResultList, api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
-	c.JSON(http.StatusOK, Resp)
-	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", Resp)
+	c.JSON(http.StatusOK, resp)
+	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", resp)
 }
 
 func CreateGroup(c *gin.Context) {

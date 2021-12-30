@@ -33,7 +33,7 @@ type GetGroupMembersInfoResp struct {
 
 type InviteUserToGroupReq struct {
 	GroupID           string   `json:"groupID" binding:"required"`
-	InvitedUserIDList []string `json:"uidList" binding:"required"`
+	InvitedUserIDList []string `json:"invitedUserIDList" binding:"required"`
 	Reason            string   `json:"reason"`
 	OperationID       string   `json:"operationID" binding:"required"`
 }
