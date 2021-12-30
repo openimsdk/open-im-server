@@ -146,7 +146,7 @@ func GetGroupAllMember(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetGroupAllMemberReq{}
-	utils.CopyStructFields(req, params)
+	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	if !ok {
@@ -165,9 +165,12 @@ func GetGroupAllMember(c *gin.Context) {
 		return
 	}
 
-	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.MemberList}
-	c.JSON(http.StatusOK, memberListResp)
+	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
+	if len(memberListResp.MemberList) == 0 {
+		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
+	}
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
+	c.JSON(http.StatusOK, memberListResp)
 }
 
 func GetJoinedGroupList(c *gin.Context) {

@@ -261,7 +261,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 
 	for _, v := range memberList {
 		var node open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(node, v)
+		utils.CopyStructFields(&node, &v)
 		resp.MemberList = append(resp.MemberList, &node)
 	}
 	log.NewInfo(req.OperationID, "GetGroupAllMember rpc return ", resp.String())
