@@ -148,8 +148,8 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 	var common pbUser.CommonResp
 	resp := pbUser.DeleteUsersResp{CommonResp: &common}
 	for _, userID := range req.DeleteUserIDList {
-		err := imdb.DeleteUser(userID)
-		if err != nil {
+		i := imdb.DeleteUser(userID)
+		if i == 0 {
 			log.NewError(req.OperationID, "delete user error", userID)
 			common.ErrCode = 201
 			common.ErrMsg = "some uid deleted failed"

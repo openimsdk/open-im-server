@@ -62,13 +62,13 @@ func UserRegister(user User) error {
 //	CreateTime  time.Time `gorm:"column:create_time"`
 //}
 
-func DeleteUser(userID string) error {
+func DeleteUser(userID string) (i int64) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
-		return err
+		return 0
 	}
-	err = dbConn.Table("user").Where("user_id=?", userID).Delete(User{}).Error
-	return err
+	i = dbConn.Table("user").Where("user_id=?", userID).Delete(User{}).RowsAffected
+	return i
 }
 
 func GetUserByUserID(userID string) (*User, error) {
