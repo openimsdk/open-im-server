@@ -182,8 +182,18 @@ func GetGroupAllMemberList(c *gin.Context) {
 
 	}
 
+	memberListResp.Test = JsonData(memberListResp.MemberList)
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
+}
+
+func JsonData(resp interface{}) []map[string]interface{} {
+	var result []map[string]interface{}
+	for _, v := range resp.([]proto.Message) {
+		m := ProtoToMap(v.(proto.Message), false)
+		result = append(result, m)
+	}
+	return result
 }
 
 func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
@@ -192,6 +202,7 @@ func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
 		EnumsAsInts:  false,
 		EmitDefaults: true,
 	}
+
 	s, _ := marshaler.MarshalToString(pb)
 	out := make(map[string]interface{})
 	json.Unmarshal([]byte(s), &out)
