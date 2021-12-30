@@ -91,7 +91,7 @@ func DeleteGroupMemberByGroupIDAndUserID(groupID, userID string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_member").Where("group_id=? and user_id=? limit 1", groupID, userID).Delete(&GroupMember{}).Error
+	err = dbConn.Table("group_member").Where("group_id=? and user_id=? ", groupID, userID).Delete(&GroupMember{}).Error
 	if err != nil {
 		return err
 	}
