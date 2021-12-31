@@ -39,8 +39,6 @@ type AddFriendResp struct {
 
 type AddFriendResponseReq struct {
 	ParamsCommFriend
-	//binding:"oneof=0 1 2"`
-	//}
 	Flag      int32  `json:"flag" binding:"required,oneof=-1 0 1"`
 	HandleMsg string `json:"handleMsg"`
 }
@@ -61,7 +59,8 @@ type GetBlackListReq struct {
 }
 type GetBlackListResp struct {
 	CommResp
-	BlackUserInfoList []*BlackUserInfo `json:"data"`
+	BlackUserInfoList []*open_im_sdk.PublicUserInfo
+	Data              []map[string]interface{} `json:"data"`
 }
 
 //type PublicUserInfo struct {
@@ -70,10 +69,6 @@ type GetBlackListResp struct {
 //	FaceUrl  string `json:"faceUrl"`
 //	Gender   int32  `json:"gender"`
 //}
-
-type BlackUserInfo struct {
-	open_im_sdk.PublicUserInfo
-}
 
 type SetFriendRemarkReq struct {
 	ParamsCommFriend
@@ -106,7 +101,8 @@ type GetFriendsInfoReq struct {
 }
 type GetFriendsInfoResp struct {
 	CommResp
-	FriendInfoList []*open_im_sdk.FriendInfo `json:"data"`
+	FriendInfoList []*open_im_sdk.FriendInfo
+	Data           []map[string]interface{} `json:"data"`
 }
 
 type GetFriendListReq struct {
@@ -115,7 +111,8 @@ type GetFriendListReq struct {
 }
 type GetFriendListResp struct {
 	CommResp
-	FriendInfoList []*open_im_sdk.FriendInfo `json:"data"`
+	FriendInfoList []*open_im_sdk.FriendInfo
+	Data           []map[string]interface{} `json:"data"`
 }
 
 type GetFriendApplyListReq struct {
@@ -124,7 +121,8 @@ type GetFriendApplyListReq struct {
 }
 type GetFriendApplyListResp struct {
 	CommResp
-	FriendRequestList []*open_im_sdk.FriendRequest `json:"data"`
+	FriendRequestList []*open_im_sdk.FriendRequest
+	Data              []map[string]interface{} `json:"data"`
 }
 
 type GetSelfApplyListReq struct {
@@ -133,5 +131,6 @@ type GetSelfApplyListReq struct {
 }
 type GetSelfApplyListResp struct {
 	CommResp
-	FriendRequestList []*open_im_sdk.FriendRequest `json:"data"`
+	FriendRequestList []*open_im_sdk.FriendRequest
+	Data              []map[string]interface{} `json:"data"`
 }

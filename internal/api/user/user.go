@@ -1,6 +1,7 @@
 package user
 
 import (
+	jsonData "Open_IM/internal/utils"
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
@@ -43,6 +44,7 @@ func GetUserInfo(c *gin.Context) {
 	}
 
 	resp := api.GetUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: RpcResp.UserInfoList}
+	resp.Data = jsonData.JsonDataList(resp.UserInfoList)
 	log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }

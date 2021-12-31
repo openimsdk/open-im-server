@@ -271,6 +271,7 @@ func CreateGroup(c *gin.Context) {
 	resp := api.CreateGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	if RpcResp.ErrCode == 0 {
 		utils.CopyStructFields(&resp.GroupInfo, RpcResp.GroupInfo)
+		resp.Data = jsonData.JsonDataOne(&resp.GroupInfo)
 	}
 	log.NewInfo(req.OperationID, "CreateGroup api return ", resp)
 	c.JSON(http.StatusOK, resp)
@@ -305,9 +306,7 @@ func GetGroupApplicationList(c *gin.Context) {
 	}
 
 	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: reply.ErrCode, ErrMsg: reply.ErrMsg}, GroupRequestList: reply.GroupRequestList}
-	if len(resp.GroupRequestList) == 0 {
-		resp.GroupRequestList = []*open_im_sdk.GroupRequest{}
-	}
+	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
 	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -340,9 +339,7 @@ func GetGroupsInfo(c *gin.Context) {
 	}
 
 	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
-	if len(resp.GroupInfoList) == 0 {
-		resp.GroupInfoList = []*open_im_sdk.GroupInfo{}
-	}
+	resp.Data = jsonData.JsonDataList(resp.GroupInfoList)
 	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }

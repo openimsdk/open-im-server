@@ -1,6 +1,7 @@
 package friend
 
 import (
+	jsonData "Open_IM/internal/utils"
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
@@ -214,10 +215,11 @@ func GetBlacklist(c *gin.Context) {
 
 	resp := api.GetBlackListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	for _, v := range RpcResp.BlackUserInfoList {
-		black := api.BlackUserInfo{}
+		black := open_im_sdk.PublicUserInfo{}
 		utils.CopyStructFields(&black, v)
 		resp.BlackUserInfoList = append(resp.BlackUserInfoList, &black)
 	}
+	resp.Data = jsonData.JsonDataList(resp.BlackUserInfoList)
 	log.NewInfo(req.CommID.OperationID, "GetBlacklist api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -381,9 +383,7 @@ func GetFriendList(c *gin.Context) {
 	}
 
 	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendInfoList: RpcResp.FriendInfoList}
-	if len(resp.FriendInfoList) == 0 {
-		resp.FriendInfoList = []*open_im_sdk.FriendInfo{}
-	}
+	resp.Data = jsonData.JsonDataList(resp.FriendInfoList)
 	log.NewInfo(req.CommID.OperationID, "GetFriendList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -417,9 +417,7 @@ func GetFriendApplyList(c *gin.Context) {
 	}
 
 	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
-	if len(resp.FriendRequestList) == 0 {
-		resp.FriendRequestList = []*open_im_sdk.FriendRequest{}
-	}
+	resp.Data = jsonData.JsonDataList(resp.FriendRequestList)
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -451,9 +449,7 @@ func GetSelfApplyList(c *gin.Context) {
 		return
 	}
 	resp := api.GetSelfApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
-	if len(resp.FriendRequestList) == 0 {
-		resp.FriendRequestList = []*open_im_sdk.FriendRequest{}
-	}
+	resp.Data = jsonData.JsonDataList(resp.FriendRequestList)
 	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }

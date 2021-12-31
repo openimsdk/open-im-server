@@ -10,7 +10,8 @@ type GetUserInfoReq struct {
 }
 type GetUserInfoResp struct {
 	CommResp
-	UserInfoList []*open_im_sdk.UserInfo `json:"data"`
+	UserInfoList []*open_im_sdk.UserInfo
+	Data         []map[string]interface{} `json:"data"`
 }
 
 type UpdateUserInfoReq struct {

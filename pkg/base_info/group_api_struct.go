@@ -73,8 +73,7 @@ type GetGroupAllMemberReq struct {
 type GetGroupAllMemberResp struct {
 	CommResp
 	MemberList []*open_im_sdk.GroupMemberFullInfo
-
-	Data []map[string]interface{} `json:"data"`
+	Data       []map[string]interface{} `json:"data"`
 }
 
 type CreateGroupReq struct {
@@ -84,10 +83,10 @@ type CreateGroupReq struct {
 	GroupType   int32                 `json:"groupType"`
 	OperationID string                `json:"operationID" binding:"required"`
 }
-
 type CreateGroupResp struct {
 	CommResp
-	GroupInfo open_im_sdk.GroupInfo `json:"data"`
+	GroupInfo open_im_sdk.GroupInfo
+	Data      map[string]interface{} `json:"data"`
 }
 
 type GetGroupApplicationListReq struct {
