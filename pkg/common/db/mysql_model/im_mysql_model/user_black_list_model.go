@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func InsertInToUserBlackList(black Black) error {
+func InsertInToUserBlackList(black db.Black) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func CheckBlack(ownerUserID, blockUserID string) error {
 	if err != nil {
 		return err
 	}
-	var black Black
+	var black db.Black
 	err = dbConn.Table("user_black_list").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
 	return err
 }
@@ -44,12 +44,12 @@ func RemoveBlackList(ownerUserID, blockUserID string) error {
 	return err
 }
 
-func GetBlackListByUserID(ownerUserID string) ([]Black, error) {
+func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var blackListUsersInfo []Black
+	var blackListUsersInfo []db.Black
 	err = dbConn.Table("user_black_list").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
 	if err != nil {
 		return nil, err

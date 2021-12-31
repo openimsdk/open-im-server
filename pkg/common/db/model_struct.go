@@ -1,4 +1,4 @@
-package im_mysql_model
+package db
 
 import "time"
 

@@ -19,7 +19,7 @@ import (
 //	Ex           string    `gorm:"column:ex"`
 //}
 
-func UpdateGroupRequest(groupRequest GroupRequest) error {
+func UpdateGroupRequest(groupRequest db.GroupRequest) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func UpdateGroupRequest(groupRequest GroupRequest) error {
 	return dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).Error
 }
 
-func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
+func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -48,12 +48,12 @@ func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 	return nil
 }
 
-func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*GroupRequest, error) {
+func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*db.GroupRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var groupRequest GroupRequest
+	var groupRequest db.GroupRequest
 	err = dbConn.Table("group_request").Where("user_id=? and group_id=?", userID, groupID).Find(&groupRequest).Error
 	if err != nil {
 		return nil, err
@@ -66,19 +66,19 @@ func DelGroupRequestByGroupIDAndUserID(groupID, userID string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_request").Where("group_id=? and user_id=?", groupID, userID).Delete(&GroupRequest{}).Error
+	err = dbConn.Table("group_request").Where("group_id=? and user_id=?", groupID, userID).Delete(&db.GroupRequest{}).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetGroupRequestByGroupID(groupID string) ([]GroupRequest, error) {
+func GetGroupRequestByGroupID(groupID string) ([]db.GroupRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var groupRequestList []GroupRequest
+	var groupRequestList []db.GroupRequest
 	err = dbConn.Table("group_request").Where("group_id=?", groupID).Find(&groupRequestList).Error
 	if err != nil {
 		return nil, err
@@ -87,8 +87,8 @@ func GetGroupRequestByGroupID(groupID string) ([]GroupRequest, error) {
 }
 
 //received
-func GetGroupApplicationList(userID string) ([]GroupRequest, error) {
-	var groupRequestList []GroupRequest
+func GetGroupApplicationList(userID string) ([]db.GroupRequest, error) {
+	var groupRequestList []db.GroupRequest
 	memberList, err := GetGroupMemberListByUserID(userID)
 	if err != nil {
 		return nil, err

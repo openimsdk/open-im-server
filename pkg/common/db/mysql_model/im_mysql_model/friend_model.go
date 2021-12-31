@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func InsertToFriend(toInsertFollow *Friend) error {
+func InsertToFriend(toInsertFollow *db.Friend) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -20,12 +20,12 @@ func InsertToFriend(toInsertFollow *Friend) error {
 	return nil
 }
 
-func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*Friend, error) {
+func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*db.Friend, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var friend Friend
+	var friend db.Friend
 	err = dbConn.Table("friend").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Find(&friend).Error
 	if err != nil {
 		return nil, err
@@ -33,12 +33,12 @@ func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*Friend,
 	return &friend, err
 }
 
-func GetFriendListByUserID(OwnerUserID string) ([]Friend, error) {
+func GetFriendListByUserID(OwnerUserID string) ([]db.Friend, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var friends []Friend
+	var friends []db.Friend
 	err = dbConn.Table("friend").Where("owner_user_id=?", OwnerUserID).Find(&friends).Error
 	if err != nil {
 		return nil, err

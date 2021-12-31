@@ -19,7 +19,7 @@ func init() {
 		} else {
 			continue
 		}
-		var appMgr User
+		var appMgr db.User
 		appMgr.UserID = v
 		appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
 		appMgr.AppMangerLevel = constant.AppAdmin
@@ -31,7 +31,7 @@ func init() {
 	}
 }
 
-func UserRegister(user User) error {
+func UserRegister(user db.User) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -67,16 +67,16 @@ func DeleteUser(userID string) (i int64) {
 	if err != nil {
 		return 0
 	}
-	i = dbConn.Table("user").Where("user_id=?", userID).Delete(User{}).RowsAffected
+	i = dbConn.Table("user").Where("user_id=?", userID).Delete(db.User{}).RowsAffected
 	return i
 }
 
-func GetUserByUserID(userID string) (*User, error) {
+func GetUserByUserID(userID string) (*db.User, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var user User
+	var user db.User
 	err = dbConn.Table("user").Where("user_id=?", userID).First(&user).Error
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func GetUserByUserID(userID string) (*User, error) {
 	return &user, nil
 }
 
-func UpdateUserInfo(user User) error {
+func UpdateUserInfo(user db.User) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err

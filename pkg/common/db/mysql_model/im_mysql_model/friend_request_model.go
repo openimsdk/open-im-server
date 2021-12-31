@@ -19,12 +19,12 @@ import (
 //}
 
 // who apply to add me
-func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]FriendRequest, error) {
+func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]db.FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var usersInfo []FriendRequest
+	var usersInfo []db.FriendRequest
 	err = dbConn.Table("friend_request").Where("to_user_id=?", ToUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
@@ -33,12 +33,12 @@ func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]FriendRequest
 }
 
 //I apply to add somebody
-func GetSendFriendApplicationListByUserID(FromUserID string) ([]FriendRequest, error) {
+func GetSendFriendApplicationListByUserID(FromUserID string) ([]db.FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var usersInfo []FriendRequest
+	var usersInfo []db.FriendRequest
 	err = dbConn.Table("friend_request").Where("from_user_id=?", FromUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
@@ -47,12 +47,12 @@ func GetSendFriendApplicationListByUserID(FromUserID string) ([]FriendRequest, e
 }
 
 //FromUserId apply to add ToUserID
-func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*FriendRequest, error) {
+func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*db.FriendRequest, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var friendRequest FriendRequest
+	var friendRequest db.FriendRequest
 	err = dbConn.Table("friend_request").Where("from_user_id=? and to_user_id=?", FromUserID, ToUserID).Find(&friendRequest).Error
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*FriendReque
 	return &friendRequest, nil
 }
 
-func UpdateFriendApplication(friendRequest *FriendRequest) error {
+func UpdateFriendApplication(friendRequest *db.FriendRequest) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func UpdateFriendApplication(friendRequest *FriendRequest) error {
 		friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest).Error
 }
 
-func InsertFriendApplication(friendRequest *FriendRequest) error {
+func InsertFriendApplication(friendRequest *db.FriendRequest) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err

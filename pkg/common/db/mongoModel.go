@@ -28,7 +28,7 @@ type UserChat struct {
 	Msg []MsgInfo
 }
 
-type GroupMember struct {
+type GroupMember_x struct {
 	GroupID string
 	UIDList []string
 }
@@ -248,7 +248,7 @@ func (d *DataBases) MgoSkipUID(count int) (string, error) {
 }
 
 func (d *DataBases) GetGroupMember(groupID string) []string {
-	groupInfo := GroupMember{}
+	groupInfo := GroupMember_x{}
 	groupInfo.GroupID = groupID
 	groupInfo.UIDList = make([]string, 0)
 
@@ -282,7 +282,7 @@ func (d *DataBases) AddGroupMember(groupID, uid string) error {
 	}
 
 	if n == 0 {
-		groupInfo := GroupMember{}
+		groupInfo := GroupMember_x{}
 		groupInfo.GroupID = groupID
 		groupInfo.UIDList = append(groupInfo.UIDList, uid)
 		err = c.Insert(&groupInfo)

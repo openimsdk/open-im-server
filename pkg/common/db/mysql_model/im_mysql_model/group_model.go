@@ -18,7 +18,7 @@ import (
 //	Ex            string    `gorm:"column:ex"`
 //}
 
-func InsertIntoGroup(groupInfo Group) error {
+func InsertIntoGroup(groupInfo db.Group) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -34,12 +34,12 @@ func InsertIntoGroup(groupInfo Group) error {
 	return nil
 }
 
-func GetGroupInfoByGroupID(groupId string) (*Group, error) {
+func GetGroupInfoByGroupID(groupId string) (*db.Group, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var groupInfo Group
+	var groupInfo db.Group
 	err = dbConn.Table("group").Where("group_id=?", groupId).Find(&groupInfo).Error
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func GetGroupInfoByGroupID(groupId string) (*Group, error) {
 	return &groupInfo, nil
 }
 
-func SetGroupInfo(groupInfo Group) error {
+func SetGroupInfo(groupInfo db.Group) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err

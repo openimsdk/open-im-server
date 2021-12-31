@@ -23,19 +23,22 @@ func initMysqlDB() {
 	var err1 error
 	db, err := gorm.Open("mysql", dsn)
 	if err != nil {
-		log.Error("", "", dsn)
+		log.NewError("0", "Open failed ", err.Error(), dsn)
 	}
 	if err != nil {
 		time.Sleep(time.Duration(30) * time.Second)
 		db, err1 = gorm.Open("mysql", dsn)
 		if err1 != nil {
+			log.NewError("0", "Open failed ", err1.Error(), dsn)
 			panic(err1.Error())
 		}
 	}
+
 	//Check the database and table during initialization
-	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName)
+	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName+"test1")
 	err = db.Exec(sql).Error
 	if err != nil {
+		log.NewError("0", "Exec failed ", err.Error(), sql)
 		panic(err.Error())
 	}
 	db.Close()
@@ -44,8 +47,21 @@ func initMysqlDB() {
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
+		log.NewError("0", "Open failed ", err.Error(), dsn)
 		panic(err.Error())
 	}
+
+	log.NewInfo("open db ok ", dsn)
+
+	db.AutoMigrate(&Friend{},
+		&FriendRequest{},
+		&Group{},
+		&GroupMember{},
+		&GroupRequest{},
+		&User{},
+		&Black{})
+
+	return
 
 	sqlTable := "CREATE TABLE IF NOT EXISTS `user` (" +
 		" `uid` varchar(64) NOT NULL," +
