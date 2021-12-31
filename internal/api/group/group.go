@@ -91,10 +91,8 @@ func GetGroupMembersInfo(c *gin.Context) {
 		return
 	}
 
-	memberListResp := api.GetGroupMembersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, Data: RpcResp.MemberList}
-	if len(RpcResp.MemberList) == 0 {
-		memberListResp.Data = []*open_im_sdk.GroupMemberFullInfo{}
-	}
+	memberListResp := api.GetGroupMembersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
+	memberListResp.Data = jsonData.JsonDataList(RpcResp.MemberList)
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
@@ -128,9 +126,7 @@ func GetGroupMemberList(c *gin.Context) {
 	}
 
 	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
-	if len(memberListResp.MemberList) == 0 {
-		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
-	}
+	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
 
 	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
@@ -164,12 +160,7 @@ func GetGroupAllMemberList(c *gin.Context) {
 	}
 
 	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
-	if len(memberListResp.MemberList) == 0 {
-		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
-	}
-
-	memberListResp.Test = jsonData.JsonDataList(memberListResp.MemberList)
-
+	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
@@ -202,11 +193,9 @@ func GetJoinedGroupList(c *gin.Context) {
 	}
 
 	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
-	if len(RpcResp.GroupList) == 0 {
-		GroupListResp.GroupInfoList = []*open_im_sdk.GroupInfo{}
-	}
-	c.JSON(http.StatusOK, GroupListResp)
+	GroupListResp.Data = jsonData.JsonDataList(GroupListResp.GroupInfoList)
 	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
+	c.JSON(http.StatusOK, GroupListResp)
 }
 
 func InviteUserToGroup(c *gin.Context) {
@@ -240,8 +229,13 @@ func InviteUserToGroup(c *gin.Context) {
 	for _, v := range RpcResp.Id2ResultList {
 		resp.UserIDResultList = append(resp.UserIDResultList, api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
-	c.JSON(http.StatusOK, resp)
+
+	if len(resp.UserIDResultList) == 0 {
+		resp.UserIDResultList = []api.UserIDResult{}
+	}
+
 	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 func CreateGroup(c *gin.Context) {

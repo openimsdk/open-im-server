@@ -28,7 +28,8 @@ type GetGroupMembersInfoReq struct {
 }
 type GetGroupMembersInfoResp struct {
 	CommResp
-	Data []*open_im_sdk.GroupMemberFullInfo `json:"data"`
+	MemberList []*open_im_sdk.GroupMemberFullInfo
+	Data       []map[string]interface{} `json:"data"`
 }
 
 type InviteUserToGroupReq struct {
@@ -48,7 +49,8 @@ type GetJoinedGroupListReq struct {
 }
 type GetJoinedGroupListResp struct {
 	CommResp
-	GroupInfoList []*open_im_sdk.GroupInfo `json:"data"`
+	GroupInfoList []*open_im_sdk.GroupInfo
+	Data          []map[string]interface{} `json:"data"`
 }
 
 type GetGroupMemberListReq struct {
@@ -59,8 +61,9 @@ type GetGroupMemberListReq struct {
 }
 type GetGroupMemberListResp struct {
 	CommResp
-	NextSeq    int32                              `json:"nextSeq"`
-	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"data"`
+	NextSeq    int32 `json:"nextSeq"`
+	MemberList []*open_im_sdk.GroupMemberFullInfo
+	Data       []map[string]interface{} `json:"data"`
 }
 
 type GetGroupAllMemberReq struct {
@@ -71,7 +74,7 @@ type GetGroupAllMemberResp struct {
 	CommResp
 	MemberList []*open_im_sdk.GroupMemberFullInfo
 
-	Test []map[string]interface{} `json:"data"`
+	Data []map[string]interface{} `json:"data"`
 }
 
 type CreateGroupReq struct {
@@ -93,7 +96,8 @@ type GetGroupApplicationListReq struct {
 }
 type GetGroupApplicationListResp struct {
 	CommResp
-	GroupRequestList []*open_im_sdk.GroupRequest `json:"data"`
+	GroupRequestList []*open_im_sdk.GroupRequest
+	Data             []map[string]interface{} `json:"data"`
 }
 
 type GetGroupInfoReq struct {
@@ -102,7 +106,8 @@ type GetGroupInfoReq struct {
 }
 type GetGroupInfoResp struct {
 	CommResp
-	GroupInfoList []*open_im_sdk.GroupInfo `json:"data"`
+	GroupInfoList []*open_im_sdk.GroupInfo
+	Data          []map[string]interface{} `json:"data"`
 }
 
 type ApplicationGroupResponseReq struct {
