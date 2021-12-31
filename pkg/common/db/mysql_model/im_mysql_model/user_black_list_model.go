@@ -40,7 +40,7 @@ func RemoveBlackList(ownerUserID, blockUserID string) error {
 		return err
 	}
 
-	err = dbConn.Table("user_black_list").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(&Black{}).Error
+	err = dbConn.Table("user_black_list").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(&db.Black{}).Error
 	return err
 }
 
