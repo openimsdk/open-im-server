@@ -72,8 +72,8 @@ type GetGroupAllMemberReq struct {
 }
 type GetGroupAllMemberResp struct {
 	CommResp
-	MemberList []*open_im_sdk.GroupMemberFullInfo
-	Data       []map[string]interface{} `json:"data"`
+	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
+	Data       []map[string]interface{}           `json:"data"`
 }
 
 type CreateGroupReq struct {
