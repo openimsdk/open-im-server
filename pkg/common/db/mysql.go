@@ -53,13 +53,13 @@ func initMysqlDB() {
 
 	log.NewInfo("open db ok ", dsn)
 
-	//db.AutoMigrate(&Friend{},
-	//	&FriendRequest{},
-	//	&Group{},
-	//	&GroupMember{},
-	//	&GroupRequest{},
-	//	&User{},
-	//	&Black{})
+	db.AutoMigrate(&Friend{},
+		&FriendRequest{},
+		&Group{},
+		&GroupMember{},
+		&GroupRequest{},
+		&User{},
+		&Black{})
 
 	if !db.HasTable(&Friend{}) {
 		log.NewInfo("CreateTable Friend")
