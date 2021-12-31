@@ -70,7 +70,8 @@ type GetGroupAllMemberReq struct {
 type GetGroupAllMemberResp struct {
 	CommResp
 	MemberList []*open_im_sdk.GroupMemberFullInfo
-	Test       []map[string]interface{} `json:"data"`
+
+	Test []map[string]interface{} `json:"data"`
 }
 
 type CreateGroupReq struct {

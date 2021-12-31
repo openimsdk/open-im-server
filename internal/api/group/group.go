@@ -168,23 +168,6 @@ func GetGroupAllMemberList(c *gin.Context) {
 		memberListResp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	}
 
-	//jsm := &jsonpb.Marshaler{
-	//	OrigName:     true,
-	//	EnumsAsInts:  false,
-	//	EmitDefaults: true,
-	//}
-	//
-	//if len(memberListResp.MemberList) > 0 {
-	//	for _, v := range memberListResp.MemberList {
-	//		s, err := jsm.MarshalToString(v)
-	//		log.NewDebug(req.OperationID, "MarshalToString ", s, err)
-	//		m := ProtoToMap(memberListResp.MemberList[0], false)
-	//		log.NewDebug(req.OperationID, "mmm ", m)
-	//		memberListResp.Test = append(memberListResp.Test, m)
-	//	}
-	//
-	//}
-
 	memberListResp.Test = jsonData.JsonDataList(memberListResp.MemberList)
 
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)

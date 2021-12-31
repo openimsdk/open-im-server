@@ -4,11 +4,21 @@ import (
 	"encoding/json"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	"reflect"
 )
 
-func JsonDataList(resp ...interface{}) []map[string]interface{} {
+func JsonDataList(resp interface{}) []map[string]interface{} {
+	var list []proto.Message
+	if reflect.TypeOf(resp).Kind() == reflect.Slice {
+		s := reflect.ValueOf(resp)
+		for i := 0; i < s.Len(); i++ {
+			ele := s.Index(i)
+			list = append(list, ele.Interface().(proto.Message))
+		}
+	}
+
 	result := make([]map[string]interface{}, 0)
-	for _, v := range resp[0].([]proto.Message) {
+	for _, v := range list {
 		m := ProtoToMap(v, false)
 		result = append(result, m)
 	}
