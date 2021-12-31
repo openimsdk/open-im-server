@@ -60,7 +60,7 @@ func DeleteSingleFriendInfo(OwnerUserID, FriendUserID string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("friend").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Delete(Friend{}).Error
+	err = dbConn.Table("friend").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Delete(db.Friend{}).Error
 	return err
 }
 
