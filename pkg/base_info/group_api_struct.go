@@ -28,8 +28,8 @@ type GetGroupMembersInfoReq struct {
 }
 type GetGroupMembersInfoResp struct {
 	CommResp
-	MemberList []*open_im_sdk.GroupMemberFullInfo
-	Data       []map[string]interface{} `json:"data"`
+	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
+	Data       []map[string]interface{}           `json:"data"`
 }
 
 type InviteUserToGroupReq struct {
