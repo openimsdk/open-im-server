@@ -2,6 +2,7 @@ package auth
 
 import (
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
@@ -20,7 +21,7 @@ import (
 
 func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq) (*pbAuth.UserRegisterResp, error) {
 	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
-	var user imdb.User
+	var user db.User
 	utils.CopyStructFields(&user, req.UserInfo)
 	if req.UserInfo.Birth != 0 {
 		user.Birth = utils.UnixSecondToTime(req.UserInfo.Birth)

@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
@@ -79,10 +78,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	//Time stamp + MD5 to generate group chat id
 	groupId := utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
 	//to group
-	groupInfo := imdb.Group{GroupID: groupId}
+	groupInfo := db.Group{GroupID: groupId}
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
 	groupInfo.CreatorUserID = req.OpUserID
-	err := im_mysql_model.InsertIntoGroup(groupInfo)
+	err := imdb.InsertIntoGroup(groupInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupInfo)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
@@ -95,9 +94,9 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 
 	//to group member
-	groupMember := imdb.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
+	groupMember := db.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
 	utils.CopyStructFields(&groupMember, us)
-	err = im_mysql_model.InsertIntoGroupMember(groupMember)
+	err = imdb.InsertIntoGroupMember(groupMember)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
@@ -110,7 +109,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	var okUserIDList []string
 	//to group member
 	for _, user := range req.InitMemberList {
-		us, err := im_mysql_model.GetUserByUserID(user.UserID)
+		us, err := imdb.GetUserByUserID(user.UserID)
 		if err != nil {
 			log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), user.UserID)
 			continue
@@ -121,7 +120,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 		groupMember.RoleLevel = user.RoleLevel
 		utils.CopyStructFields(&groupMember, us)
-		err = im_mysql_model.InsertIntoGroupMember(groupMember)
+		err = imdb.InsertIntoGroupMember(groupMember)
 		if err != nil {
 			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
 			continue
@@ -135,7 +134,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
-	group, err := im_mysql_model.GetGroupInfoByGroupID(groupId)
+	group, err := imdb.GetGroupInfoByGroupID(groupId)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupId)
 		resp.ErrCode = constant.ErrDB.ErrCode
@@ -222,7 +221,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
 			continue
 		}
-		var toInsertInfo imdb.GroupMember
+		var toInsertInfo db.GroupMember
 		utils.CopyStructFields(&toInsertInfo, toUserInfo)
 		toInsertInfo.GroupID = req.GroupID
 		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
@@ -393,7 +392,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 
 func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())
-	reply, err := im_mysql_model.GetGroupApplicationList(req.FromUserID)
+	reply, err := imdb.GetGroupApplicationList(req.FromUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.FromUserID)
 		return &pbGroup.GetGroupApplicationListResp{ErrCode: 701, ErrMsg: "GetGroupApplicationList failed"}, nil
@@ -415,7 +414,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
 	groupsInfoList := make([]*open_im_sdk.GroupInfo, 0)
 	for _, groupID := range req.GroupIDList {
-		groupInfoFromMysql, err := im_mysql_model.GetGroupInfoByGroupID(groupID)
+		groupInfoFromMysql, err := imdb.GetGroupInfoByGroupID(groupID)
 		if err != nil {
 			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupID)
 			continue
@@ -433,7 +432,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	log.NewInfo(req.OperationID, "GroupApplicationResponse args ", req.String())
 
-	groupRequest := imdb.GroupRequest{}
+	groupRequest := db.GroupRequest{}
 	utils.CopyStructFields(&groupRequest, req)
 	groupRequest.UserID = req.FromUserID
 	groupRequest.HandleUserID = req.OpUserID
@@ -457,7 +456,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 				log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.FromUserID)
 				return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
-			member := imdb.GroupMember{}
+			member := db.GroupMember{}
 			member.GroupID = req.GroupID
 			member.UserID = req.FromUserID
 			member.RoleLevel = constant.GroupOrdinaryUsers
@@ -486,7 +485,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
-	var groupRequest imdb.GroupRequest
+	var groupRequest db.GroupRequest
 	groupRequest.UserID = req.OpUserID
 	groupRequest.ReqMsg = req.ReqMessage
 	groupRequest.GroupID = req.GroupID
@@ -538,7 +537,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 	if utils.IsContain(req.OpUserID, config.Config.Manager.AppManagerUid) {
 		return true
 	}
-	groupUserInfo, err := im_mysql_model.GetGroupMemberInfoByGroupIDAndUserID(req.GroupInfo.GroupID, req.OpUserID)
+	groupUserInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupInfo.GroupID, req.OpUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupMemberInfoByGroupIDAndUserID failed, ", err.Error(), req.GroupInfo.GroupID, req.OpUserID)
 		return false
@@ -557,7 +556,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
-	group, err := im_mysql_model.GetGroupInfoByGroupID(req.GroupInfo.GroupID)
+	group, err := imdb.GetGroupInfoByGroupID(req.GroupInfo.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), req.GroupInfo.GroupID)
 		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
@@ -578,7 +577,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		changedType = changedType | (1 << 3)
 	}
 	//only administrators can set group information
-	var groupInfo imdb.Group
+	var groupInfo db.Group
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
 	err = imdb.SetGroupInfo(groupInfo)
 	if err != nil {
@@ -600,13 +599,13 @@ func (s *groupServer) TransferGroupOwner(_ context.Context, req *pbGroup.Transfe
 		log.NewError(req.OperationID, "same owner ", req.OldOwnerUserID, req.NewOwnerUserID)
 		return &pbGroup.TransferGroupOwnerResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: constant.ErrArgs.ErrMsg}}, nil
 	}
-	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.OldOwnerUserID, RoleLevel: constant.GroupOrdinaryUsers}
+	groupMemberInfo := db.GroupMember{GroupID: req.GroupID, UserID: req.OldOwnerUserID, RoleLevel: constant.GroupOrdinaryUsers}
 	err := imdb.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "UpdateGroupMemberInfo failed ", groupMemberInfo)
 		return &pbGroup.TransferGroupOwnerResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-	groupMemberInfo = imdb.GroupMember{GroupID: req.GroupID, UserID: req.NewOwnerUserID, RoleLevel: constant.GroupOwner}
+	groupMemberInfo = db.GroupMember{GroupID: req.GroupID, UserID: req.NewOwnerUserID, RoleLevel: constant.GroupOwner}
 	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "UpdateGroupMemberInfo failed ", groupMemberInfo)

@@ -4,6 +4,7 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
@@ -116,7 +117,7 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
 		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
-	black := imdb.Black{OwnerUserID: req.CommID.FromUserID, BlockUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
+	black := db.Black{OwnerUserID: req.CommID.FromUserID, BlockUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
 
 	err := imdb.InsertInToUserBlackList(black)
 	if err != nil {
@@ -142,7 +143,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	}
 
 	//Establish a latest relationship in the friend request table
-	friendRequest := imdb.FriendRequest{ReqMsg: req.ReqMsg}
+	friendRequest := db.FriendRequest{ReqMsg: req.ReqMsg}
 	utils.CopyStructFields(&friendRequest, req.CommID)
 	// {openIM001 openIM002 0 test add friend 0001-01-01 00:00:00 +0000 UTC   0001-01-01 00:00:00 +0000 UTC }]
 	log.NewDebug(req.CommID.OperationID, "UpdateFriendApplication args ", friendRequest)
@@ -190,14 +191,14 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		} else {
 			if _, err := imdb.GetFriendRelationshipFromFriend(req.FromUserID, v); err != nil {
 				//Establish two single friendship
-				toInsertFollow := imdb.Friend{OwnerUserID: req.FromUserID, FriendUserID: v}
+				toInsertFollow := db.Friend{OwnerUserID: req.FromUserID, FriendUserID: v}
 				err1 := imdb.InsertToFriend(&toInsertFollow)
 				if err1 != nil {
 					log.NewError(req.OperationID, "InsertToFriend failed ", err1.Error(), toInsertFollow)
 					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
 					continue
 				}
-				toInsertFollow = imdb.Friend{OwnerUserID: v, FriendUserID: req.FromUserID}
+				toInsertFollow = db.Friend{OwnerUserID: v, FriendUserID: req.FromUserID}
 				err2 := imdb.InsertToFriend(&toInsertFollow)
 				if err2 != nil {
 					log.NewError(req.OperationID, "InsertToFriend failed ", err2.Error(), toInsertFollow)
@@ -253,7 +254,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 			log.NewWarn(req.CommID.OperationID, "GetFriendRelationshipFromFriend exist", req.CommID.FromUserID, req.CommID.ToUserID)
 		} else {
 			//Establish two single friendship
-			toInsertFollow := imdb.Friend{OwnerUserID: req.CommID.FromUserID, FriendUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
+			toInsertFollow := db.Friend{OwnerUserID: req.CommID.FromUserID, FriendUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
 			err = imdb.InsertToFriend(&toInsertFollow)
 			if err != nil {
 				log.NewError(req.CommID.OperationID, "InsertToFriend failed ", err.Error(), toInsertFollow)
@@ -265,7 +266,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 		if err == nil {
 			log.NewWarn(req.CommID.OperationID, "GetFriendRelationshipFromFriend exist", req.CommID.ToUserID, req.CommID.FromUserID)
 		} else {
-			toInsertFollow := imdb.Friend{OwnerUserID: req.CommID.ToUserID, FriendUserID: req.CommID.FromUserID, OperatorUserID: req.CommID.OpUserID}
+			toInsertFollow := db.Friend{OwnerUserID: req.CommID.ToUserID, FriendUserID: req.CommID.FromUserID, OperatorUserID: req.CommID.OpUserID}
 			err = imdb.InsertToFriend(&toInsertFollow)
 			if err != nil {
 				log.NewError(req.CommID.OperationID, "InsertToFriend failed ", err.Error(), toInsertFollow)
