@@ -116,8 +116,8 @@ func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
 	m.ClientMsgID = m.MsgID
 	switch m.SessionType {
 	case constant.SingleChatType:
-		sendMsgToKafka(m, m.SendID, "msgKey--sendID")
-		sendMsgToKafka(m, m.RecvID, "msgKey--recvID")
+		sendMsgToMQ(m, m.SendID, "msgKey--sendID")
+		sendMsgToMQ(m, m.RecvID, "msgKey--recvID")
 	case constant.GroupChatType:
 		etcdConn := getcdv3.GetGroupConn()
 		client := pbGroup.NewGroupClient(etcdConn)
@@ -138,17 +138,17 @@ func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
 		groupID := m.RecvID
 		for i, v := range reply.MemberList {
 			m.RecvID = v.UserId + " " + groupID
-			sendMsgToKafka(m, utils.IntToString(i), "msgKey--recvID+\" \"+groupID")
+			sendMsgToMQ(m, utils.IntToString(i), "msgKey--recvID+\" \"+groupID")
 		}
 	default:
 
 	}
 
 }
-func sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string, flag string) {
+func sendMsgToMQ(m *pbChat.WSToMsgSvrChatMsg, key string, flag string) {
 	pid, offset, err := producer.SendMessage(m, key)
 	if err != nil {
-		log.ErrorByKv("kafka send failed", m.OperationID, "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), flag, key)
+		log.ErrorByKv("mq send failed", m.OperationID, "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), flag, key)
 	}
 
 }

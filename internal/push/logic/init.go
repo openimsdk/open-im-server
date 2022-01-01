@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/mq"
 	"Open_IM/pkg/common/mq/kafka"
+	"Open_IM/pkg/common/mq/nsq"
 	"Open_IM/pkg/utils"
 )
 
@@ -28,7 +29,17 @@ func Init(rpcPort int) {
 	pushTerminal = []int32{utils.IOSPlatformID, utils.AndroidPlatformID}
 }
 func init() {
-	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
+	cfg := config.Config.MQ.Ws2mschat
+	switch cfg.Type {
+	case "kafka":
+		producer = kafka.NewKafkaProducer(cfg.Addr, cfg.Topic)
+	case "nsq":
+		p, err := nsq.NewNsqProducer(cfg.Addr[0], cfg.Topic)
+		if err != nil {
+			panic(err)
+		}
+		producer = p
+	}
 }
 
 func Run() {

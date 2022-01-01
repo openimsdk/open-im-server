@@ -2,7 +2,9 @@ package logic
 
 import (
 	"Open_IM/pkg/common/mq"
+	"Open_IM/pkg/common/mq/nsq"
 	"context"
+	"fmt"
 	"strings"
 
 	"Open_IM/pkg/common/config"
@@ -18,16 +20,27 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-type fcb func(msg []byte, msgKey string)
-
 type HistoryConsumerHandler struct {
 	historyConsumerGroup mq.Consumer
 }
 
 func (mc *HistoryConsumerHandler) Init() {
-	mc.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo)
-	mc.historyConsumerGroup.RegisterMessageHandler(config.Config.Kafka.Ws2mschat.Topic, mq.MessageHandleFunc(mc.handleChatWs2Mongo))
+	cfg := config.Config.MQ.Ws2mschat
+	switch cfg.Type {
+	case "kafka":
+		mc.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
+			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, cfg.Addr, config.Config.MQ.ConsumerGroupID.MsgToMongo)
+	case "nsq":
+		nc, err := nsq.NewNsqConsumer(cfg.Addr, cfg.Topic, cfg.Channel)
+		if err != nil {
+			panic(err)
+		}
+		mc.historyConsumerGroup = nc
+	default:
+		panic(fmt.Sprintf("unsupported mq type: %s", cfg.Type))
+	}
+
+	mc.historyConsumerGroup.RegisterMessageHandler(cfg.Topic, mq.MessageHandleFunc(mc.handleChatWs2Mongo))
 }
 
 func (mc *HistoryConsumerHandler) handleChatWs2Mongo(message *mq.Message) error {
@@ -134,7 +147,7 @@ func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
 		log.ErrorByKv("rpc dial failed", msg.OperationID, "push data", msg.String())
 		pid, offset, err := producer.SendMessage(message)
 		if err != nil {
-			log.ErrorByKv("kafka send failed", msg.OperationID, "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
+			log.ErrorByKv("mq send failed", msg.OperationID, "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
 		}
 		return
 	}
@@ -144,7 +157,7 @@ func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
 		log.ErrorByKv("rpc send failed", msg.OperationID, "push data", msg.String(), "err", err.Error())
 		pid, offset, err := producer.SendMessage(message)
 		if err != nil {
-			log.ErrorByKv("kafka send failed", msg.OperationID, "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
+			log.ErrorByKv("mq send failed", msg.OperationID, "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
 		}
 	} else {
 		log.InfoByKv("rpc send success", msg.OperationID, "push data", msg.String())

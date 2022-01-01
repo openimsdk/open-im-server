@@ -95,10 +95,10 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	}
 	switch pbData.SessionType {
 	case constant.SingleChatType:
-		err1 := rpc.sendMsgToKafka(&pbData, pbData.RecvID)
-		err2 := rpc.sendMsgToKafka(&pbData, pbData.SendID)
+		err1 := rpc.sendMsgToMQ(&pbData, pbData.RecvID)
+		err2 := rpc.sendMsgToMQ(&pbData, pbData.SendID)
 		if err1 != nil || err2 != nil {
-			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+			return returnMsg(&replay, pb, 201, "mq send msg err", "", 0)
 		}
 		return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
 	case constant.GroupChatType:
@@ -144,16 +144,16 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 		groupID := pbData.RecvID
 		for i, v := range reply.MemberList {
 			pbData.RecvID = v.UserId + " " + groupID
-			err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i))
+			err := rpc.sendMsgToMQ(&pbData, utils.IntToString(i))
 			if err != nil {
-				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+				return returnMsg(&replay, pb, 201, "mq send msg err", "", 0)
 			}
 		}
 		for i, v := range addUidList {
 			pbData.RecvID = v + " " + groupID
-			err := rpc.sendMsgToKafka(&pbData, utils.IntToString(i+1))
+			err := rpc.sendMsgToMQ(&pbData, utils.IntToString(i+1))
 			if err != nil {
-				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+				return returnMsg(&replay, pb, 201, "mq send msg err", "", 0)
 			}
 		}
 		return returnMsg(&replay, pb, 0, "", serverMsgID, pbData.SendTime)
@@ -163,10 +163,10 @@ func (rpc *rpcChat) UserSendMsg(_ context.Context, pb *pbChat.UserSendMsgReq) (*
 	}
 
 }
-func (rpc *rpcChat) sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string) error {
+func (rpc *rpcChat) sendMsgToMQ(m *pbChat.WSToMsgSvrChatMsg, key string) error {
 	pid, offset, err := rpc.producer.SendMessage(m, key)
 	if err != nil {
-		log.ErrorByKv("kafka send failed", m.OperationID, "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key)
+		log.ErrorByKv("mq send failed", m.OperationID, "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key)
 	}
 	return err
 }

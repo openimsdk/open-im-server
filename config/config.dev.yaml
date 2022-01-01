@@ -37,18 +37,21 @@ redis:
   dbIdleTimeout: 120
   dbPassWord: openIM
 
-kafka:
+
+mq:
   ws2mschat:
+    type: kafka
     addr: [ kafka:9092 ]
     topic: "ws2ms_chat"
   ms2pschat:
-    addr: [ kafka:9092 ]
+    type: nsq
+    addr: [ nsq:4161 ]
     topic: "ms2ps_chat"
+    channel: "one"
   consumergroupid:
     msgToMongo: mongo
     msgToMySql: mysql
     msgToPush: push
-
 
 
 #---------------Internal service configuration---------------------#

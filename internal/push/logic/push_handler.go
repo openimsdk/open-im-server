@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/mq"
 	kfk "Open_IM/pkg/common/mq/kafka"
+	"Open_IM/pkg/common/mq/nsq"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"github.com/Shopify/sarama"
@@ -22,15 +23,25 @@ type PushConsumerHandler struct {
 }
 
 func (ms *PushConsumerHandler) Init() {
-	ms.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, config.Config.Kafka.Ms2pschat.Addr,
-		config.Config.Kafka.ConsumerGroupID.MsgToPush)
+	cfg:= config.Config.MQ.Ms2pschat
+	switch cfg.Type {
+	case "kafka":
+		ms.pushConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
+			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, cfg.Addr,
+			config.Config.MQ.ConsumerGroupID.MsgToPush)
+	case "nsq":
+		nc, err := nsq.NewNsqConsumer(cfg.Addr,cfg.Topic,cfg.Channel)
+		if err != nil {
+			panic(err)
+		}
+		ms.pushConsumerGroup = nc
+	}
 
-	ms.pushConsumerGroup.RegisterMessageHandler(config.Config.Kafka.Ms2pschat.Topic, mq.MessageHandleFunc(ms.handleMs2PsChat))
+	ms.pushConsumerGroup.RegisterMessageHandler(cfg.Topic, mq.MessageHandleFunc(ms.handleMs2PsChat))
 }
 func (ms *PushConsumerHandler) handleMs2PsChat(message *mq.Message) error {
 	msg := message.Value
-	log.InfoByKv("msg come from kafka  And push!!!", "", "msg", string(msg))
+	log.InfoByKv("msg come from mq  And push!!!", "", "msg", string(msg))
 	pbData := pbChat.MsgSvrToPushSvrChatMsg{}
 	if err := proto.Unmarshal(msg, &pbData); err != nil {
 		log.ErrorByKv("push Unmarshal msg err", "", "msg", string(msg), "err", err.Error())

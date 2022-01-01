@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"Open_IM/pkg/common/mq/nsq"
 	"net"
 	"strconv"
 	"strings"
@@ -32,7 +33,17 @@ func NewRpcChatServer(port int) *rpcChat {
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
-	rc.producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
+	cfg := config.Config.MQ.Ws2mschat
+	switch cfg.Type {
+	case "kafka":
+		rc.producer = kafka.NewKafkaProducer(cfg.Addr, cfg.Topic)
+	case "nsq":
+		p, err := nsq.NewNsqProducer(cfg.Addr[0], cfg.Topic)
+		if err != nil {
+			panic(err)
+		}
+		rc.producer = p
+	}
 	return &rc
 }
 

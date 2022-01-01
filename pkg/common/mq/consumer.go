@@ -1,7 +1,5 @@
 package mq
 
-import "time"
-
 type Consumer interface {
 	// RegisterMessageHandler is used to register message handler
 	// any received messages will be passed to handler to process
@@ -22,19 +20,4 @@ type MessageHandleFunc func(msg *Message) error
 
 func (fn MessageHandleFunc) HandleMessage(msg *Message) error {
 	return fn(msg)
-}
-
-type Message struct {
-	Key, Value     []byte
-	Topic          string
-	Partition      int32
-	Offset         int64
-	Timestamp      time.Time       // only set if kafka is version 0.10+, inner message timestamp
-	BlockTimestamp time.Time       // only set if kafka is version 0.10+, outer (compressed) block timestamp
-	Headers        []*RecordHeader // only set if kafka is version 0.11+
-}
-
-type RecordHeader struct {
-	Key   []byte
-	Value []byte
 }

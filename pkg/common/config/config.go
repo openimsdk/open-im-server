@@ -2,8 +2,8 @@ package config
 
 import (
 	"Open_IM/pkg/base"
-	"io/ioutil"
 	"gopkg.in/yaml.v3"
+	"io/ioutil"
 	//"path/filepath"
 	//"runtime"
 )
@@ -129,21 +129,25 @@ type config struct {
 		AppManagerUid []string `yaml:"appManagerUid"`
 		Secrets       []string `yaml:"secrets"`
 	}
-	Kafka struct {
+	MQ struct {
 		Ws2mschat struct {
+			Type string `yaml:"type"`
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
+			Channel string `yaml:"channel"`
 		}
 		Ms2pschat struct {
+			Type string `yaml:"type"`
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
+			Channel string `yaml:"channel"`
 		}
 		ConsumerGroupID struct {
 			MsgToMongo string `yaml:"msgToMongo"`
 			MsgToMySql string `yaml:"msgToMySql"`
 			MsgToPush  string `yaml:"msgToPush"`
 		}
-	}
+	} `yaml:"mq"`
 	Secret           string `yaml:"secret"`
 	MultiLoginPolicy struct {
 		OnlyOneTerminalAccess                                  bool `yaml:"onlyOneTerminalAccess"`
@@ -161,11 +165,11 @@ type config struct {
 }
 
 func init() {
-	confDir:= base.ConfigDir()
-	logDir:= base.LogDir()
+	confDir := base.ConfigDir()
+	logDir := base.LogDir()
 
 	// fix log dir
-	Config.Log.StorageLocation= logDir
+	Config.Log.StorageLocation = logDir
 
 	// if we cd Open-IM-Server/src/utils and run go test
 	// it will panic cannot find config/config.yaml

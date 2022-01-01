@@ -8,6 +8,7 @@ package logic
 
 import (
 	"Open_IM/pkg/common/mq"
+	"Open_IM/pkg/common/mq/nsq"
 	"strings"
 
 	"Open_IM/pkg/common/config"
@@ -27,11 +28,23 @@ type PersistentConsumerHandler struct {
 }
 
 func (pc *PersistentConsumerHandler) Init() {
-	pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false},
-		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql)
+	cfg := config.Config.MQ.Ws2mschat
+	switch cfg.Type {
+	case "kafka":
+		pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
+			OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false},
+			cfg.Addr, config.Config.MQ.ConsumerGroupID.MsgToMySql)
+	case "nsq":
+		nc, err := nsq.NewNsqConsumer(cfg.Addr, cfg.Topic, cfg.Channel)
+		if err != nil {
+			panic(err)
+		}
+		pc.persistentConsumerGroup = nc
+	default:
+		panic("unsupported mq type: " + cfg.Type)
+	}
 
-	pc.persistentConsumerGroup.RegisterMessageHandler(config.Config.Kafka.Ws2mschat.Topic, mq.MessageHandleFunc(pc.handleChatWs2Mysql))
+	pc.persistentConsumerGroup.RegisterMessageHandler(cfg.Topic, mq.MessageHandleFunc(pc.handleChatWs2Mysql))
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(message *mq.Message) error {
