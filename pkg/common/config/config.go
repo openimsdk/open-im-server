@@ -32,6 +32,14 @@ type config struct {
 			SecretID  string `yaml:"secretID"`
 			SecretKey string `yaml:"secretKey"`
 		}
+		Aliyun struct {
+			AccessKeyId     string `yaml:"accessKeyId"`
+			AccessKeySecret string `yaml:"accessKeySecret"`
+			RoleArn         string `yaml:"roleArn"`
+			RegionId        string `yaml:"regionId"`
+			Region          string `yaml:"region"`
+			Bucket          string `yaml:"bucket"`
+		}
 	}
 
 	Mysql struct {

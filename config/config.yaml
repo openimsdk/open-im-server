@@ -69,7 +69,13 @@ credential:
     bucket: echat-1302656840
     secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
     secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
-
+  aliyun:
+    accessKeyId: LTAI5t6mkas7MHWjESnvYuSS
+    accessKeySecret: lM02hE0NwO8RLXzQM7YETGaxrkx2qH
+    roleArn: "acs:ram::1475303086170749:role/openimoss"
+    regionId: cn-beijing
+    region: oss-cn-beijing
+    bucket: pandagaoxin-im
 
 rpcport:
   openImUserPort: [ 10100 ]

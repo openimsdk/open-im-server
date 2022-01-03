@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/Shopify/sarama v1.19.0
 	github.com/Shopify/toxiproxy v2.1.4+incompatible // indirect
+	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1422
 	github.com/antonfisher/nested-logrus-formatter v1.3.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/coreos/go-semver v0.3.0 // indirect

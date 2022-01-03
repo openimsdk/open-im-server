@@ -79,6 +79,7 @@ func main() {
 	thirdGroup := r.Group("/third")
 	{
 		thirdGroup.POST("/tencent_cloud_storage_credential", apiThird.TencentCloudStorageCredential)
+		thirdGroup.POST("/aliyun_cloud_storage_credential", apiThird.AliyunCloudStorageCredential)
 	}
 	//Message
 	chatGroup := r.Group("/chat")
