@@ -160,8 +160,8 @@ type User struct {
 // open_im_sdk.BlackInfo(BlackUserInfo) != imdb.Black (BlockUserID)
 type Black struct {
 	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`
-	CreateTime     time.Time `gorm:"column:create_time"`
 	BlockUserID    string    `gorm:"column:block_user_id;primary_key;size:64"`
+	CreateTime     time.Time `gorm:"column:create_time"`
 	AddSource      int32     `gorm:"column:add_source"`
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
 	Ex             string    `gorm:"column:ex;size:1024"`
