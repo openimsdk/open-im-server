@@ -43,7 +43,7 @@ func UserRegister(user db.User) error {
 	if user.Birth.Unix() < 0 {
 		user.Birth = utils.UnixSecondToTime(0)
 	}
-	err = dbConn.Table("user").Create(&user).Error
+	err = dbConn.Table("users").Create(&user).Error
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func DeleteUser(userID string) (i int64) {
 	if err != nil {
 		return 0
 	}
-	i = dbConn.Table("user").Where("user_id=?", userID).Delete(db.User{}).RowsAffected
+	i = dbConn.Table("users").Where("user_id=?", userID).Delete(db.User{}).RowsAffected
 	return i
 }
 
@@ -77,7 +77,7 @@ func GetUserByUserID(userID string) (*db.User, error) {
 		return nil, err
 	}
 	var user db.User
-	err = dbConn.Table("user").Where("user_id=?", userID).First(&user).Error
+	err = dbConn.Table("users").Where("user_id=?", userID).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func UpdateUserInfo(user db.User) error {
 		return err
 	}
 
-	err = dbConn.Table("user").Where("user_id=?", user.UserID).Update(&user).Error
+	err = dbConn.Table("users").Where("user_id=?", user.UserID).Update(&user).Error
 	return err
 }
 
@@ -100,7 +100,7 @@ func SelectAllUserID() ([]string, error) {
 		return nil, err
 	}
 	var resultArr []string
-	err = dbConn.Table("user").Pluck("user_id", &resultArr).Error
+	err = dbConn.Table("users").Pluck("user_id", &resultArr).Error
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func SelectSomeUserID(userIDList []string) ([]string, error) {
 		return nil, err
 	}
 	var resultArr []string
-	err = dbConn.Table("user").Where("user_id IN (?) ", userIDList).Pluck("user_id", &resultArr).Error
+	err = dbConn.Table("users").Where("user_id IN (?) ", userIDList).Pluck("user_id", &resultArr).Error
 
 	if err != nil {
 		return nil, err

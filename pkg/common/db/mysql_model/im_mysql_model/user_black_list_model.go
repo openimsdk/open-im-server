@@ -11,7 +11,7 @@ func InsertInToUserBlackList(black db.Black) error {
 		return err
 	}
 	black.CreateTime = time.Now()
-	err = dbConn.Table("user_black_list").Create(black).Error
+	err = dbConn.Table("blacks").Create(black).Error
 	return err
 }
 
@@ -30,7 +30,7 @@ func CheckBlack(ownerUserID, blockUserID string) error {
 		return err
 	}
 	var black db.Black
-	err = dbConn.Table("user_black_list").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
+	err = dbConn.Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
 	return err
 }
 
@@ -40,7 +40,7 @@ func RemoveBlackList(ownerUserID, blockUserID string) error {
 		return err
 	}
 
-	err = dbConn.Table("user_black_list").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(&db.Black{}).Error
+	err = dbConn.Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(&db.Black{}).Error
 	return err
 }
 
@@ -50,7 +50,7 @@ func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
 		return nil, err
 	}
 	var blackListUsersInfo []db.Black
-	err = dbConn.Table("user_black_list").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
+	err = dbConn.Table("blacks").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
 	if err != nil {
 		return nil, err
 	}

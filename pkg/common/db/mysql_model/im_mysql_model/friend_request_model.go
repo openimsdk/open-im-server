@@ -25,7 +25,7 @@ func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]db.FriendRequ
 		return nil, err
 	}
 	var usersInfo []db.FriendRequest
-	err = dbConn.Table("friend_request").Where("to_user_id=?", ToUserID).Find(&usersInfo).Error
+	err = dbConn.Table("friend_requests").Where("to_user_id=?", ToUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func GetSendFriendApplicationListByUserID(FromUserID string) ([]db.FriendRequest
 		return nil, err
 	}
 	var usersInfo []db.FriendRequest
-	err = dbConn.Table("friend_request").Where("from_user_id=?", FromUserID).Find(&usersInfo).Error
+	err = dbConn.Table("friend_requests").Where("from_user_id=?", FromUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*db.FriendRe
 		return nil, err
 	}
 	var friendRequest db.FriendRequest
-	err = dbConn.Table("friend_request").Where("from_user_id=? and to_user_id=?", FromUserID, ToUserID).Find(&friendRequest).Error
+	err = dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?", FromUserID, ToUserID).Find(&friendRequest).Error
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func UpdateFriendApplication(friendRequest *db.FriendRequest) error {
 	}
 	friendRequest.CreateTime = time.Now()
 
-	return dbConn.Table("friend_request").Where("from_user_id=? and to_user_id=?",
+	return dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
 		friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest).Error
 }
 
@@ -82,7 +82,7 @@ func InsertFriendApplication(friendRequest *db.FriendRequest) error {
 	if friendRequest.HandleTime.Unix() < 0 {
 		friendRequest.HandleTime = utils.UnixSecondToTime(0)
 	}
-	err = dbConn.Table("friend_request").Create(friendRequest).Error
+	err = dbConn.Table("friend_requests").Create(friendRequest).Error
 	if err != nil {
 		return err
 	}

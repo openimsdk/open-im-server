@@ -13,7 +13,7 @@ func InsertToFriend(toInsertFollow *db.Friend) error {
 	}
 	toInsertFollow.CreateTime = time.Now()
 
-	err = dbConn.Table("friend").Create(toInsertFollow).Error
+	err = dbConn.Table("friends").Create(toInsertFollow).Error
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*db.Frie
 		return nil, err
 	}
 	var friend db.Friend
-	err = dbConn.Table("friend").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Find(&friend).Error
+	err = dbConn.Table("friends").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Find(&friend).Error
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func GetFriendListByUserID(OwnerUserID string) ([]db.Friend, error) {
 	var friends []db.Friend
 	var x db.Friend
 	x.OwnerUserID = OwnerUserID
-	err = dbConn.Table("friend").Where("owner_user_id=?", OwnerUserID).Find(&friends).Error
+	err = dbConn.Table("friends").Where("owner_user_id=?", OwnerUserID).Find(&friends).Error
 
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func UpdateFriendComment(OwnerUserID, FriendUserID, Remark string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Exec("update friend set remark=? where owner_user_id=? and friend_user_id=?", Remark, OwnerUserID, FriendUserID).Error
+	err = dbConn.Exec("update friends set remark=? where owner_user_id=? and friend_user_id=?", Remark, OwnerUserID, FriendUserID).Error
 	return err
 }
 
@@ -63,7 +63,7 @@ func DeleteSingleFriendInfo(OwnerUserID, FriendUserID string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("friend").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Delete(db.Friend{}).Error
+	err = dbConn.Table("friends").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Delete(db.Friend{}).Error
 	return err
 }
 

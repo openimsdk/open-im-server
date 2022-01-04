@@ -27,7 +27,7 @@ func UpdateGroupRequest(groupRequest db.GroupRequest) error {
 	if groupRequest.HandledTime.Unix() < 0 {
 		groupRequest.HandledTime = utils.UnixSecondToTime(0)
 	}
-	return dbConn.Table("group_request").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).Error
+	return dbConn.Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).Error
 }
 
 func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
@@ -41,7 +41,7 @@ func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
 		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
 	}
 
-	err = dbConn.Table("group_request").Create(&toInsertInfo).Error
+	err = dbConn.Table("group_requests").Create(&toInsertInfo).Error
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*db.GroupRequest
 		return nil, err
 	}
 	var groupRequest db.GroupRequest
-	err = dbConn.Table("group_request").Where("user_id=? and group_id=?", userID, groupID).Find(&groupRequest).Error
+	err = dbConn.Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Find(&groupRequest).Error
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func DelGroupRequestByGroupIDAndUserID(groupID, userID string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_request").Where("group_id=? and user_id=?", groupID, userID).Delete(&db.GroupRequest{}).Error
+	err = dbConn.Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(&db.GroupRequest{}).Error
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func GetGroupRequestByGroupID(groupID string) ([]db.GroupRequest, error) {
 		return nil, err
 	}
 	var groupRequestList []db.GroupRequest
-	err = dbConn.Table("group_request").Where("group_id=?", groupID).Find(&groupRequestList).Error
+	err = dbConn.Table("group_requests").Where("group_id=?", groupID).Find(&groupRequestList).Error
 	if err != nil {
 		return nil, err
 	}

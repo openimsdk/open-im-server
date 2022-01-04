@@ -27,7 +27,7 @@ func InsertIntoGroup(groupInfo db.Group) error {
 		groupInfo.GroupName = "Group Chat"
 	}
 	groupInfo.CreateTime = time.Now()
-	err = dbConn.Table("group").Create(groupInfo).Error
+	err = dbConn.Table("groups").Create(groupInfo).Error
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func GetGroupInfoByGroupID(groupId string) (*db.Group, error) {
 		return nil, err
 	}
 	var groupInfo db.Group
-	err = dbConn.Table("group").Where("group_id=?", groupId).Find(&groupInfo).Error
+	err = dbConn.Table("groups").Where("group_id=?", groupId).Find(&groupInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -52,6 +52,6 @@ func SetGroupInfo(groupInfo db.Group) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group").Where("group_id=?", groupInfo.GroupID).Update(&groupInfo).Error
+	err = dbConn.Table("groups").Where("group_id=?", groupInfo.GroupID).Update(&groupInfo).Error
 	return err
 }

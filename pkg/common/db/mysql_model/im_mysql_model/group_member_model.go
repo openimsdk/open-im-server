@@ -27,7 +27,7 @@ func InsertIntoGroupMember(toInsertInfo db.GroupMember) error {
 	if toInsertInfo.RoleLevel == 0 {
 		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
 	}
-	err = dbConn.Table("group_member").Create(toInsertInfo).Error
+	err = dbConn.Table("group_members").Create(toInsertInfo).Error
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func GetGroupMemberListByUserID(userID string) ([]db.GroupMember, error) {
 		return nil, err
 	}
 	var groupMemberList []db.GroupMember
-	err = dbConn.Table("group_member").Where("user_id=?", userID).Find(&groupMemberList).Error
+	err = dbConn.Table("group_members").Where("user_id=?", userID).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,8 @@ func GetGroupMemberListByGroupID(groupID string) ([]db.GroupMember, error) {
 		return nil, err
 	}
 	var groupMemberList []db.GroupMember
-	err = dbConn.Table("group_member").Where("group_id=?", groupID).Find(&groupMemberList).Error
+	err = dbConn.Table("group_members").Where("group_id=?", groupID).Find(&groupMemberList).Error
+
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,7 @@ func GetGroupMemberListByGroupIDAndRoleLevel(groupID string, roleLevel int32) ([
 		return nil, err
 	}
 	var groupMemberList []db.GroupMember
-	err = dbConn.Table("group_member").Where("group_id=? and role_level=?", groupID, roleLevel).Find(&groupMemberList).Error
+	err = dbConn.Table("group_members").Where("group_id=? and role_level=?", groupID, roleLevel).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func GetGroupMemberInfoByGroupIDAndUserID(groupID, userID string) (*db.GroupMemb
 		return nil, err
 	}
 	var groupMember db.GroupMember
-	err = dbConn.Table("group_member").Where("group_id=? and user_id=? ", groupID, userID).Limit(1).Find(&groupMember).Error
+	err = dbConn.Table("group_members").Where("group_id=? and user_id=? ", groupID, userID).Limit(1).Find(&groupMember).Error
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +92,7 @@ func DeleteGroupMemberByGroupIDAndUserID(groupID, userID string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_member").Where("group_id=? and user_id=? ", groupID, userID).Delete(&db.GroupMember{}).Error
+	err = dbConn.Table("group_members").Where("group_id=? and user_id=? ", groupID, userID).Delete(&db.GroupMember{}).Error
 	if err != nil {
 		return err
 	}
@@ -103,7 +104,7 @@ func UpdateGroupMemberInfo(groupMemberInfo db.GroupMember) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_member").Where("group_id=? and user_id=?", groupMemberInfo.GroupID, groupMemberInfo.UserID).Update(&groupMemberInfo).Error
+	err = dbConn.Table("group_members").Where("group_id=? and user_id=?", groupMemberInfo.GroupID, groupMemberInfo.UserID).Update(&groupMemberInfo).Error
 	if err != nil {
 		return err
 	}
@@ -116,7 +117,7 @@ func GetOwnerManagerByGroupID(groupID string) ([]db.GroupMember, error) {
 		return nil, err
 	}
 	var groupMemberList []db.GroupMember
-	err = dbConn.Table("group_member").Where("group_id=? and role_level>?", groupID, constant.GroupOrdinaryUsers).Find(&groupMemberList).Error
+	err = dbConn.Table("group_members").Where("group_id=? and role_level>?", groupID, constant.GroupOrdinaryUsers).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +130,7 @@ func GetGroupMemberNumByGroupID(groupID string) uint32 {
 		return 0
 	}
 	var number uint32
-	err = dbConn.Table("group_member").Where("group_id=?", groupID).Count(&number).Error
+	err = dbConn.Table("group_members").Where("group_id=?", groupID).Count(&number).Error
 	if err != nil {
 		return 0
 	}
@@ -155,7 +156,7 @@ func IsExistGroupMember(groupID, userID string) bool {
 		return false
 	}
 	var number int32
-	err = dbConn.Table("group_member").Where("group_id = ? and user_id = ?", groupID, userID).Count(&number).Error
+	err = dbConn.Table("group_members").Where("group_id = ? and user_id = ?", groupID, userID).Count(&number).Error
 	if err != nil {
 		return false
 	}
