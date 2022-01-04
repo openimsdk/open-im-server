@@ -14,10 +14,10 @@ import "time"
 //}
 //open_im_sdk.FriendInfo(FriendUser) != imdb.Friend(FriendUserID)
 type Friend struct {
-	OwnerUserID    string    `gorm:"column:owner_user_id;primaryKey;"`
+	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;"`
 	Remark         string    `gorm:"column:remark"`
 	CreateTime     time.Time `gorm:"column:create_time"`
-	FriendUserID   string    `gorm:"column:friend_user_id;primaryKey;"`
+	FriendUserID   string    `gorm:"column:friend_user_id;primary_key;"`
 	AddSource      int32     `gorm:"column:add_source"`
 	OperatorUserID string    `gorm:"column:operator_user_id"`
 	Ex             string    `gorm:"column:ex"`
@@ -159,7 +159,7 @@ type User struct {
 //}
 // open_im_sdk.BlackInfo(BlackUserInfo) != imdb.Black (BlockUserID)
 type Black struct {
-	OwnerUserID    string    `gorm:"column:owner_user_id;primaryKey;"`
+	OwnerUserID    string    `gorm:"column:owner_user_id;primaryKey;size:256"`
 	CreateTime     time.Time `gorm:"column:create_time"`
 	BlockUserID    string    `gorm:"column:block_user_id;primaryKey;"`
 	AddSource      int32     `gorm:"column:add_source"`

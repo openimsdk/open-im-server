@@ -39,7 +39,10 @@ func GetFriendListByUserID(OwnerUserID string) ([]db.Friend, error) {
 		return nil, err
 	}
 	var friends []db.Friend
+	var x db.Friend
+	x.OwnerUserID = OwnerUserID
 	err = dbConn.Table("friend").Where("owner_user_id=?", OwnerUserID).Find(&friends).Error
+
 	if err != nil {
 		return nil, err
 	}
