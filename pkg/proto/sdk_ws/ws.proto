@@ -12,7 +12,7 @@ message GroupInfo{
   string Introduction = 4;
   string FaceUrl = 5;
   string OwnerUserID = 6;
-  int64 CreateTime = 7;
+  uint32 CreateTime = 7;
   uint32 MemberCount = 8;
   string Ex = 9;
   int32 Status = 10;
@@ -48,10 +48,10 @@ message UserInfo{
   string FaceUrl = 3;
   int32 Gender = 4;
   string PhoneNumber = 5;
-  int64 Birth = 6;
+  uint32 Birth = 6;
   string Email = 7;
   string Ex = 8;
-  int64 CreateTime = 9;
+  uint32 CreateTime = 9;
   int32 AppMangerLevel = 10;
 }
 
@@ -67,7 +67,7 @@ message FriendInfo{
 
 message BlackInfo{
   string OwnerUserID = 1;
-  int64 CreateTime = 2;
+  uint32 CreateTime = 2;
   PublicUserInfo BlackUserInfo = 3;
   int32 AddSource = 4;
   string OperatorUserID = 5;
@@ -80,9 +80,9 @@ message GroupRequest{
   string HandleResult = 3;
   string ReqMsg = 4;
   string  HandleMsg = 5;
-  int64 ReqTime = 6;
+  uint32 ReqTime = 6;
   string HandleUserID = 7;
-  int64 HandleTime = 8;
+  uint32 HandleTime = 8;
   string Ex = 9;
 }
 
@@ -91,10 +91,10 @@ message FriendRequest{
   string ToUserID = 2;
   int32 HandleResult = 3;
   string ReqMsg = 4;
-  int64 CreateTime = 5;
+  uint32 CreateTime = 5;
   string HandlerUserID = 6;
   string HandleMsg = 7;
-  int64 HandleTime = 8;
+  uint32 HandleTime = 8;
   string Ex = 9;
 }
 
