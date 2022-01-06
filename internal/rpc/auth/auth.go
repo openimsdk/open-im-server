@@ -24,7 +24,7 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 	var user db.User
 	utils.CopyStructFields(&user, req.UserInfo)
 	if req.UserInfo.Birth != 0 {
-		user.Birth = utils.UnixSecondToTime(req.UserInfo.Birth)
+		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
 	err := imdb.UserRegister(user)
 	if err != nil {
