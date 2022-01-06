@@ -41,7 +41,7 @@ func RemoveBlackList(ownerUserID, blockUserID string) error {
 		return err
 	}
 	black := db.Black{OwnerUserID: ownerUserID, BlockUserID: blockUserID}
-	return utils.Wrap(dbConn.Delete(&black).Error, "RemoveBlackList failed")
+	return utils.Wrap(dbConn.Table("blacks").Delete(&black).Error, "RemoveBlackList failed")
 }
 
 func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
