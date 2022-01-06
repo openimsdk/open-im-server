@@ -383,6 +383,7 @@ func GetFriendList(c *gin.Context) {
 	}
 
 	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendInfoList: RpcResp.FriendInfoList}
+	resp.FriendInfoList[0].CreateTime = resp.FriendInfoList[0].CreateTime / 100
 	resp.Data = jsonData.JsonDataList(resp.FriendInfoList)
 	log.NewInfo(req.CommID.OperationID, "GetFriendList api return ", resp)
 	c.JSON(http.StatusOK, resp)
