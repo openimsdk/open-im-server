@@ -26,8 +26,8 @@ func FriendDBCopyOpenIM(dst *open_im_sdk.FriendInfo, src *db.Friend) {
 	if user != nil {
 		utils.CopyStructFields(dst.FriendUser, user)
 	}
-	dst.CreateTime = src.CreateTime.Unix()
-	dst.FriendUser.CreateTime = user.CreateTime.Unix()
+	dst.CreateTime = uint32(src.CreateTime.Unix())
+	dst.FriendUser.CreateTime = uint32(user.CreateTime.Unix())
 }
 
 //
