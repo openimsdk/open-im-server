@@ -437,7 +437,7 @@ func (m *UserInfo) GetAppMangerLevel() int32 {
 type FriendInfo struct {
 	OwnerUserID          string    `protobuf:"bytes,1,opt,name=OwnerUserID" json:"OwnerUserID,omitempty"`
 	Remark               string    `protobuf:"bytes,2,opt,name=Remark" json:"Remark,omitempty"`
-	CreateTime           int64     `protobuf:"varint,3,opt,name=CreateTime" json:"CreateTime,omitempty"`
+	CreateTime           uint32    `protobuf:"varint,3,opt,name=CreateTime" json:"CreateTime,omitempty"`
 	FriendUser           *UserInfo `protobuf:"bytes,4,opt,name=FriendUser" json:"FriendUser,omitempty"`
 	AddSource            int32     `protobuf:"varint,5,opt,name=AddSource" json:"AddSource,omitempty"`
 	OperatorUserID       string    `protobuf:"bytes,6,opt,name=OperatorUserID" json:"OperatorUserID,omitempty"`
