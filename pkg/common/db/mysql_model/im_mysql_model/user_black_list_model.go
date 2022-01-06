@@ -2,6 +2,7 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"time"
 )
 
@@ -39,9 +40,8 @@ func RemoveBlackList(ownerUserID, blockUserID string) error {
 	if err != nil {
 		return err
 	}
-
-	err = dbConn.Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(&db.Black{}).Error
-	return err
+	black := db.Black{OwnerUserID: ownerUserID, BlockUserID: blockUserID}
+	return utils.Wrap(dbConn.Delete(&black).Error, "RemoveBlackList failed")
 }
 
 func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
