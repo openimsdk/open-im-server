@@ -33,7 +33,7 @@ func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
 	marshaler := jsonpb.Marshaler{
 		OrigName:     true,
 		EnumsAsInts:  false,
-		EmitDefaults: true,
+		EmitDefaults: false,
 	}
 
 	s, _ := marshaler.MarshalToString(pb)
