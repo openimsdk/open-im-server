@@ -10,6 +10,11 @@ type CommResp struct {
 	ErrMsg  string `json:"errMsg"`
 }
 
+type CommDataResp struct {
+	CommResp
+	Data []map[string]interface{} `json:"data"`
+}
+
 type KickGroupMemberReq struct {
 	GroupID          string   `json:"groupID" binding:"required"`
 	KickedUserIDList []string `json:"kickedUserIDList" binding:"required"`

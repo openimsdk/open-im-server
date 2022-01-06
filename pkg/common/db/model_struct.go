@@ -71,7 +71,7 @@ type Group struct {
 	Introduction  string    `gorm:"column:introduction;size:255" json:"introduction"`
 	FaceUrl       string    `gorm:"column:face_url;size:255" json:"faceUrl"`
 	CreateTime    time.Time `gorm:"column:create_time"`
-	Ex            string    `gorm:"column:ex" json:"ex;size:1024"`
+	Ex            string    `gorm:"column:ex" json:"ex;size:1024" json:"ex"`
 	Status        int32     `gorm:"column:status"`
 	CreatorUserID string    `gorm:"column:creator_user_id;size:64"`
 	GroupType     int32     `gorm:"column:group_type"`
