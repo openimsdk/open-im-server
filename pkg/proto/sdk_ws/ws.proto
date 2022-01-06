@@ -58,7 +58,7 @@ message UserInfo{
 message FriendInfo{
   string OwnerUserID = 1;
   string Remark = 2;
-  int64 CreateTime = 3;
+  uint32 CreateTime = 3;
   UserInfo FriendUser = 4;
   int32 AddSource = 5;
   string OperatorUserID = 6;
