@@ -111,7 +111,8 @@ type GetFriendListReq struct {
 }
 type GetFriendListResp struct {
 	CommResp
-	FriendInfoList []*open_im_sdk.FriendInfo `json:"-"`
+	TestTime       uint32                    `json:"test_time"`
+	FriendInfoList []*open_im_sdk.FriendInfo `json:"test_data"`
 	Data           []map[string]interface{}  `json:"data"`
 }
 
