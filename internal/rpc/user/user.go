@@ -216,7 +216,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	var user db.User
 	utils.CopyStructFields(&user, req.UserInfo)
 	if req.UserInfo.Birth != 0 {
-		user.Birth = utils.UnixSecondToTime(req.UserInfo.Birth)
+		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
 	err := imdb.UpdateUserInfo(user)
 	if err != nil {
