@@ -94,6 +94,7 @@ func GetSelfUserInfo(c *gin.Context) {
 		return
 	}
 	req := &rpc.GetUserInfoReq{}
+
 	utils.CopyStructFields(req, &params)
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
@@ -102,6 +103,7 @@ func GetSelfUserInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
+	req.UserIDList = append(req.UserIDList, req.OpUserID)
 	log.NewInfo(params.OperationID, "GetUserInfo args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
