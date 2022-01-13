@@ -16,8 +16,8 @@ import (
 	"strings"
 )
 
-func GetUserInfo(c *gin.Context) {
-	params := api.GetUserInfoReq{}
+func GetUsersInfo(c *gin.Context) {
+	params := api.GetUsersInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
@@ -42,15 +42,20 @@ func GetUserInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
 		return
 	}
+	var publicUserInfoList []*open_im_sdk.PublicUserInfo
+	for _, v := range RpcResp.UserInfoList {
+		publicUserInfoList = append(publicUserInfoList,
+			&open_im_sdk.PublicUserInfo{UserID: v.UserID, Nickname: v.Nickname, FaceUrl: v.FaceUrl, Gender: v.Gender, AppMangerLevel: v.AppMangerLevel})
+	}
 
-	resp := api.GetUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: RpcResp.UserInfoList}
+	resp := api.GetUsersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: publicUserInfoList}
 	resp.Data = jsonData.JsonDataList(resp.UserInfoList)
 	log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
 
 func UpdateUserInfo(c *gin.Context) {
-	params := api.UpdateUserInfoReq{}
+	params := api.UpdateSelfUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -79,4 +84,44 @@ func UpdateUserInfo(c *gin.Context) {
 	resp := api.UpdateUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	log.NewInfo(req.OperationID, "UpdateUserInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
+}
+
+func GetSelfUserInfo(c *gin.Context) {
+	params := api.GetSelfUserInfoReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.GetUserInfoReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(params.OperationID, "GetUserInfo args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := rpc.NewUserClient(etcdConn)
+	RpcResp, err := client.GetUserInfo(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "GetUserInfo failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+	if len(RpcResp.UserInfoList) == 1 {
+		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: RpcResp.UserInfoList[0]}
+		resp.Data = jsonData.JsonDataList(resp.UserInfoList)
+		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
+		c.JSON(http.StatusOK, resp)
+	} else {
+		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+		resp.Data = jsonData.JsonDataList(resp.UserInfoList)
+		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
+		c.JSON(http.StatusOK, resp)
+	}
+
 }

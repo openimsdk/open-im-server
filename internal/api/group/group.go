@@ -227,11 +227,11 @@ func InviteUserToGroup(c *gin.Context) {
 
 	resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	for _, v := range RpcResp.Id2ResultList {
-		resp.UserIDResultList = append(resp.UserIDResultList, api.UserIDResult{UserID: v.UserID, Result: v.Result})
+		resp.UserIDResultList = append(resp.UserIDResultList, &api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
 
 	if len(resp.UserIDResultList) == 0 {
-		resp.UserIDResultList = []api.UserIDResult{}
+		resp.UserIDResultList = *new([]*api.UserIDResult)
 	}
 
 	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", resp)
