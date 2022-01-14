@@ -90,11 +90,11 @@ message FriendRequest{
   string fromUserID = 1;
   string fromNickname = 2;
   string fromFaceURL = 3;
-  string fromGender = 4;
+  int32 fromGender = 4;
   string toUserID = 5;
   string toNickname = 6;
   string toFaceURL = 7;
-  string toGender = 8;
+  int32 toGender = 8;
   int32 handleResult = 9;
   string reqMsg = 10;
   uint32 createTime = 11;

@@ -442,8 +442,17 @@ func (s *friendServer) GetFriendApplyList(ctx context.Context, req *pbFriend.Get
 	for _, applyUserInfo := range ApplyUsersInfo {
 		var userInfo sdkws.FriendRequest
 		utils.CopyStructFields(&userInfo, applyUserInfo)
+		u, err := imdb.GetUserByUserID(userInfo.FromUserID)
+		if err != nil {
+			log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.FromUserID)
+			continue
+		}
+		userInfo.FromNickname = u.Nickname
+		userInfo.FromFaceURL = u.FaceURL
+		userInfo.FromGender = u.Gend
 		appleUserList = append(appleUserList, &userInfo)
 	}
+
 	log.NewInfo(req.CommID.OperationID, "rpc GetFriendApplyList ok", pbFriend.GetFriendApplyListResp{FriendRequestList: appleUserList})
 	return &pbFriend.GetFriendApplyListResp{FriendRequestList: appleUserList}, nil
 }
