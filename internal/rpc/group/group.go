@@ -141,7 +141,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		resp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil
 	}
-	chat.GroupCreatedNotification(req.OperationID, req.OpUserID, req.OwnerUserID, groupId, okUserIDList)
+	chat.GroupCreatedNotification(req.OperationID, req.OpUserID, groupId, okUserIDList)
 	utils.CopyStructFields(resp.GroupInfo, group)
 	resp.GroupInfo.MemberCount, err = imdb.GetGroupMemberNumByGroupID(groupId)
 	if err != nil {
