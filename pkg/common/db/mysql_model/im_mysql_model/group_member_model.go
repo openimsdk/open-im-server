@@ -3,6 +3,7 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"time"
 )
 
@@ -124,17 +125,17 @@ func GetOwnerManagerByGroupID(groupID string) ([]db.GroupMember, error) {
 	return groupMemberList, nil
 }
 
-func GetGroupMemberNumByGroupID(groupID string) uint32 {
+func GetGroupMemberNumByGroupID(groupID string) (uint32, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
-		return 0
+		return 0, utils.Wrap(err, "DefaultGormDB failed")
 	}
 	var number uint32
 	err = dbConn.Table("group_members").Where("group_id=?", groupID).Count(&number).Error
 	if err != nil {
-		return 0
+		return 0, utils.Wrap(err, "")
 	}
-	return number
+	return number, nil
 }
 
 func GetGroupOwnerInfoByGroupID(groupID string) (*db.GroupMember, error) {

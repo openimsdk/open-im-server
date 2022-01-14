@@ -239,7 +239,7 @@ type NotificationMsg struct {
 	OperationID string
 }
 
-func Notification(n *NotificationMsg, onlineUserOnly bool) {
+func Notification(n *NotificationMsg) {
 	var req pbChat.SendMsgReq
 	var msg sdk_ws.MsgData
 	var offlineInfo sdk_ws.OfflinePushInfo

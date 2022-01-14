@@ -31,7 +31,6 @@ func Int32ToString(i int32) string {
 
 //judge a string whether in the  string list
 func IsContain(target string, List []string) bool {
-
 	for _, element := range List {
 
 		if target == element {
@@ -39,7 +38,6 @@ func IsContain(target string, List []string) bool {
 		}
 	}
 	return false
-
 }
 
 func InterfaceArrayToStringArray(data []interface{}) (i []string) {

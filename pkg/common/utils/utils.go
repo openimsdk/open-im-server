@@ -45,30 +45,40 @@ func GroupOpenIMCopyDB(dst *db.Group, src *open_im_sdk.GroupInfo) {
 	utils.CopyStructFields(dst, src)
 }
 
-func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *db.Group) {
+func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *db.Group) error {
 	utils.CopyStructFields(dst, src)
-	user, _ := imdb.GetGroupOwnerInfoByGroupID(src.GroupID)
-	if user != nil {
-		dst.OwnerUserID = user.UserID
+	user, err := imdb.GetGroupOwnerInfoByGroupID(src.GroupID)
+	if err != nil {
+		return utils.Wrap(err, "")
 	}
-	dst.MemberCount = imdb.GetGroupMemberNumByGroupID(src.GroupID)
+	dst.OwnerUserID = user.UserID
+
+	dst.MemberCount, err = imdb.GetGroupMemberNumByGroupID(src.GroupID)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
 	dst.CreateTime = uint32(src.CreateTime.Unix())
+	return nil
 }
 
 func GroupMemberOpenIMCopyDB(dst *db.GroupMember, src *open_im_sdk.GroupMemberFullInfo) {
 	utils.CopyStructFields(dst, src)
 }
 
-func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.GroupMember) {
+func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.GroupMember) error {
 	utils.CopyStructFields(dst, src)
 	if token_verify.IsMangerUserID(src.UserID) {
-		u, _ := imdb.GetUserByUserID(src.UserID)
-		if u != nil {
-			utils.CopyStructFields(dst, u)
+		u, err := imdb.GetUserByUserID(src.UserID)
+		if err != nil {
+			return utils.Wrap(err, "")
 		}
+
+		utils.CopyStructFields(dst, u)
+
 		dst.AppMangerLevel = 1
 	}
 	dst.JoinTime = src.JoinTime.Unix()
+	return nil
 }
 
 func GroupRequestOpenIMCopyDB(dst *db.GroupRequest, src *open_im_sdk.GroupRequest) {

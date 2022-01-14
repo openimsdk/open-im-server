@@ -143,7 +143,13 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 	chat.GroupCreatedNotification(req.OperationID, req.OpUserID, req.OwnerUserID, groupId, okUserIDList)
 	utils.CopyStructFields(resp.GroupInfo, group)
-	resp.GroupInfo.MemberCount = imdb.GetGroupMemberNumByGroupID(groupId)
+	resp.GroupInfo.MemberCount, err = imdb.GetGroupMemberNumByGroupID(groupId)
+	if err != nil {
+		log.NewError(req.OperationID, "GetGroupMemberNumByGroupID failed ", err.Error(), groupId)
+		resp.ErrCode = constant.ErrDB.ErrCode
+		resp.ErrMsg = constant.ErrDB.ErrMsg
+		return resp, nil
+	}
 	resp.GroupInfo.OwnerUserID = req.OwnerUserID
 
 	log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
@@ -166,7 +172,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	var resp pbGroup.GetJoinedGroupListResp
 	for _, v := range joinedGroupList {
 		var groupNode open_im_sdk.GroupInfo
-		num := imdb.GetGroupMemberNumByGroupID(v)
+		num, err := imdb.GetGroupMemberNumByGroupID(v)
 		owner, err2 := imdb.GetGroupOwnerInfoByGroupID(v)
 		group, err := imdb.GetGroupInfoByGroupID(v)
 		if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
