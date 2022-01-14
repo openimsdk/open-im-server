@@ -6,96 +6,96 @@ package open_im_sdk;//The package name to which the proto file belongs
 
 
 message GroupInfo{
-  string GroupID = 1;
-  string GroupName = 2;
-  string Notification = 3;
-  string Introduction = 4;
-  string FaceUrl = 5;
-  string OwnerUserID = 6;
-  uint32 CreateTime = 7;
-  uint32 MemberCount = 8;
-  string Ex = 9;
-  int32 Status = 10;
-  string CreatorUserID = 11;
-  int32 GroupType = 12;
+  string groupID = 1;
+  string groupName = 2;
+  string notification = 3;
+  string introduction = 4;
+  string faceURL = 5;
+  string ownerUserID = 6;
+  uint32 createTime = 7;
+  uint32 memberCount = 8;
+  string ex = 9;
+  int32 status = 10;
+  string creatorUserID = 11;
+  int32 groupType = 12;
 }
 
 
 message GroupMemberFullInfo {
-  string GroupID = 1 ;
-  string UserID = 2 ;
+  string groupID = 1 ;
+  string userID = 2 ;
   int32 roleLevel = 3;
-  int64 JoinTime = 4;
-  string Nickname = 5;
-  string FaceUrl = 6;
-  int32 AppMangerLevel = 7; //if >0
-  int32 JoinSource = 8;
-  string OperatorUserID = 9;
-  string Ex = 10;
+  int64 joinTime = 4;
+  string nickname = 5;
+  string faceURL = 6;
+  int32 appMangerLevel = 7; //if >0
+  int32 joinSource = 8;
+  string operatorUserID = 9;
+  string ex = 10;
 }
 
 message PublicUserInfo{
-  string UserID = 1;
-  string Nickname = 2;
-  string FaceUrl = 3;
-  int32 Gender = 4;
-  int32 AppMangerLevel = 5; //if >0
+  string userID = 1;
+  string nickname = 2;
+  string faceURL = 3;
+  int32 gender = 4;
+  int32 appMangerLevel = 5; //if >0
 }
 
 message UserInfo{
-  string UserID = 1;
-  string Nickname = 2;
-  string FaceUrl = 3;
-  int32 Gender = 4;
-  string PhoneNumber = 5;
-  uint32 Birth = 6;
-  string Email = 7;
-  string Ex = 8;
-  uint32 CreateTime = 9;
-  int32 AppMangerLevel = 10;
+  string userID = 1;
+  string nickname = 2;
+  string faceURL = 3;
+  int32 gender = 4;
+  string phoneNumber = 5;
+  uint32 birth = 6;
+  string email = 7;
+  string ex = 8;
+  uint32 createTime = 9;
+  int32 appMangerLevel = 10;
 }
 
 message FriendInfo{
-  string OwnerUserID = 1;
-  string Remark = 2;
-  uint32 CreateTime = 3;
-  UserInfo FriendUser = 4;
-  int32 AddSource = 5;
-  string OperatorUserID = 6;
-  string Ex = 7;
+  string ownerUserID = 1;
+  string remark = 2;
+  uint32 createTime = 3;
+  UserInfo friendUser = 4;
+  int32 addSource = 5;
+  string operatorUserID = 6;
+  string ex = 7;
 }
 
 message BlackInfo{
-  string OwnerUserID = 1;
-  uint32 CreateTime = 2;
-  PublicUserInfo BlackUserInfo = 3;
-  int32 AddSource = 4;
-  string OperatorUserID = 5;
-  string Ex = 6;
+  string ownerUserID = 1;
+  uint32 createTime = 2;
+  PublicUserInfo blackUserInfo = 3;
+  int32 addSource = 4;
+  string operatorUserID = 5;
+  string ex = 6;
 }
 
 message GroupRequest{
-  string UserID = 1;
-  string GroupID = 2;
-  string HandleResult = 3;
-  string ReqMsg = 4;
-  string  HandleMsg = 5;
-  uint32 ReqTime = 6;
-  string HandleUserID = 7;
-  uint32 HandleTime = 8;
-  string Ex = 9;
+  string userID = 1;
+  string groupID = 2;
+  string handleResult = 3;
+  string reqMsg = 4;
+  string  handleMsg = 5;
+  uint32 reqTime = 6;
+  string handleUserID = 7;
+  uint32 handleTime = 8;
+  string ex = 9;
 }
 
 message FriendRequest{
-  string  FromUserID = 1;
-  string ToUserID = 2;
-  int32 HandleResult = 3;
-  string ReqMsg = 4;
-  uint32 CreateTime = 5;
-  string HandlerUserID = 6;
-  string HandleMsg = 7;
-  uint32 HandleTime = 8;
-  string Ex = 9;
+  string  fromUserID = 1;
+  string toUserID = 2;
+  int32 handleResult = 3;
+  string reqMsg = 4;
+  uint32 createTime = 5;
+  string handlerUserID = 6;
+  string handleMsg = 7;
+  uint32 handleTime = 8;
+  string ex = 9;
 }
 
 ///////////////////////////////////base end/////////////////////////////////////
@@ -169,8 +169,8 @@ message GatherFormat{
 
 
 message UserSendMsgResp {
-  string ServerMsgID = 1;
-  string ClientMsgID = 2;
+  string serverMsgID = 1;
+  string clientMsgID = 2;
   int64  sendTime = 3;
 
 }
@@ -191,14 +191,14 @@ message MsgData {
   int64 seq = 14;
   int64 sendTime = 15;
   int64 createTime = 16;
-  map<string, bool> Options = 17;
+  map<string, bool> options = 17;
   OfflinePushInfo offlinePushInfo = 18;
 }
 
 message OfflinePushInfo{
-  string Title = 1;
-  string Desc = 2;
-  string Ex = 3;
+  string title = 1;
+  string desc = 2;
+  string ex = 3;
   string iOSPushSound = 4;
   bool iOSBadgeCount = 5;
 }
@@ -212,71 +212,71 @@ message OfflinePushInfo{
 
 
 message TipsComm{
-  bytes Detail = 1;
-  string DefaultTips = 2;
+  bytes detail = 1;
+  string defaultTips = 2;
 }
 
 //////////////////////group/////////////////////
 //Actively join the group
 message MemberEnterTips{
-  GroupInfo Group = 1;
-  GroupMemberFullInfo EntrantUser = 2;
-  int64 OperationTime = 3;
+  GroupInfo group = 1;
+  GroupMemberFullInfo entrantUser = 2;
+  int64 operationTime = 3;
 }
 
 //Actively leave the group
 message MemberLeaveTips{
-  GroupInfo Group = 1;
-  GroupMemberFullInfo LeaverUser = 2;
-  int64 OperationTime = 3;
+  GroupInfo group = 1;
+  GroupMemberFullInfo leaverUser = 2;
+  int64 operationTime = 3;
 }
 
 message MemberInvitedTips{
-  GroupInfo Group = 1;
-  GroupMemberFullInfo OpUser = 2;
-  repeated GroupMemberFullInfo InvitedUserList = 3;
-  int64 OperationTime = 4;
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  repeated GroupMemberFullInfo invitedUserList = 3;
+  int64 operationTime = 4;
 }
 
 message MemberKickedTips{
-  GroupInfo Group = 1;
-  GroupMemberFullInfo OpUser = 2;
-  repeated GroupMemberFullInfo KickedUserList = 3;
-  int64 OperationTime = 4;
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  repeated GroupMemberFullInfo kickedUserList = 3;
+  int64 operationTime = 4;
 }
 
 message MemberInfoChangedTips{
-  int32 ChangeType = 1; ///bitwise operators 0001:member info changed; 0010:mute ;
-  GroupMemberFullInfo OpUser = 2; //who do this
-  GroupMemberFullInfo FinalInfo = 3; //
-  int64 MuteTime = 4;
-  GroupInfo Group = 5;
+  int32 changeType = 1; ///bitwise operators 0001:member info changed; 0010:mute ;
+  GroupMemberFullInfo opUser = 2; //who do this
+  GroupMemberFullInfo finalInfo = 3; //
+  int64 muteTime = 4;
+  GroupInfo group = 5;
 }
 
 message GroupCreatedTips{
-  GroupInfo Group = 1;
-  GroupMemberFullInfo Creator = 2;
-  repeated GroupMemberFullInfo MemberList = 3;
-  int64 OperationTime = 4;
+  GroupInfo group = 1;
+  GroupMemberFullInfo creator = 2;
+  repeated GroupMemberFullInfo memberList = 3;
+  int64 operationTime = 4;
 }
 
 message GroupInfoChangedTips{
-  int32 ChangedType = 1; //bitwise operators: 0001:groupName; 0010:Notification  0100:Introduction; 1000:FaceUrl
-  GroupInfo Group = 2;
-  GroupMemberFullInfo OpUser = 3;
+  int32 changedType = 1; //bitwise operators: 0001:groupName; 0010:Notification  0100:Introduction; 1000:FaceUrl
+  GroupInfo group = 2;
+  GroupMemberFullInfo opUser = 3;
 }
 
 message JoinGroupApplicationTips{
-  GroupInfo Group = 1;
-  PublicUserInfo Applicant = 2;
-  string  Reason = 3;
+  GroupInfo group = 1;
+  PublicUserInfo applicant = 2;
+  string  reason = 3;
 }
 
 message ApplicationProcessedTips{
-  GroupInfo Group = 1;
-  GroupMemberFullInfo OpUser = 2;
-  int32 Result = 3;
-  string  Reason = 4;
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int32 result = 3;
+  string  reason = 4;
 }
 
 //////////////////////friend/////////////////////
@@ -288,53 +288,53 @@ message ApplicationProcessedTips{
 //}
 
 message FriendApplication{
-  int64 AddTime = 1;
-  string AddSource = 2;
-  string AddWording = 3;
+  int64 addTime = 1;
+  string addSource = 2;
+  string addWording = 3;
 }
 
 message FromToUserID{
-  string FromUserID = 1;
-  string ToUserID = 2;
+  string fromUserID = 1;
+  string toUserID = 2;
 }
 
 //FromUserID apply to add ToUserID
 message FriendApplicationAddedTips{
-  FromToUserID FromToUserID = 1;
+  FromToUserID fromToUserID = 1;
 }
 
 //FromUserID accept or reject ToUserID
 message FriendApplicationProcessedTips{
-  FromToUserID FromToUserID = 1;
+  FromToUserID fromToUserID = 1;
 }
 
 // FromUserID  Added a friend ToUserID
 message FriendAddedTips{
-  FriendInfo Friend = 1;
-  int64 OperationTime = 2;
-  PublicUserInfo     OpUser = 3;  //who do this
+  FriendInfo friend = 1;
+  int64 operationTime = 2;
+  PublicUserInfo     opUser = 3;  //who do this
 
 }
 
 // FromUserID  deleted a friend ToUserID
 message FriendDeletedTips{
-  FromToUserID FromToUserID = 1;
+  FromToUserID fromToUserID = 1;
 }
 
 
 
 message BlackAddedTips{
-  FromToUserID FromToUserID = 1;
+  FromToUserID fromToUserID = 1;
 }
 
 message BlackDeletedTips{
-  FromToUserID FromToUserID = 1;
+  FromToUserID fromToUserID = 1;
 }
 
 message FriendInfoChangedTips{
-  FromToUserID FromToUserID = 1;
+  FromToUserID fromToUserID = 1;
 }
 //////////////////////user/////////////////////
 message SelfInfoUpdatedTips{
-  string UserID = 1;
+  string userID = 1;
 }
