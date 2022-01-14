@@ -449,7 +449,16 @@ func (s *friendServer) GetFriendApplyList(ctx context.Context, req *pbFriend.Get
 		}
 		userInfo.FromNickname = u.Nickname
 		userInfo.FromFaceURL = u.FaceURL
-		userInfo.FromGender = u.Gend
+		userInfo.FromGender = u.Gender
+
+		u, err = imdb.GetUserByUserID(userInfo.ToUserID)
+		if err != nil {
+			log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.ToUserID)
+			continue
+		}
+		userInfo.ToNickname = u.Nickname
+		userInfo.ToFaceURL = u.FaceURL
+		userInfo.ToGender = u.Gender
 		appleUserList = append(appleUserList, &userInfo)
 	}
 
@@ -475,6 +484,24 @@ func (s *friendServer) GetSelfApplyList(ctx context.Context, req *pbFriend.GetSe
 	for _, selfApplyOtherUserInfo := range usersInfo {
 		var userInfo sdkws.FriendRequest // pbFriend.ApplyUserInfo
 		cp.FriendRequestDBCopyOpenIM(&userInfo, &selfApplyOtherUserInfo)
+		u, err := imdb.GetUserByUserID(userInfo.FromUserID)
+		if err != nil {
+			log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.FromUserID)
+			continue
+		}
+		userInfo.FromNickname = u.Nickname
+		userInfo.FromFaceURL = u.FaceURL
+		userInfo.FromGender = u.Gender
+
+		u, err = imdb.GetUserByUserID(userInfo.ToUserID)
+		if err != nil {
+			log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.ToUserID)
+			continue
+		}
+		userInfo.ToNickname = u.Nickname
+		userInfo.ToFaceURL = u.FaceURL
+		userInfo.ToGender = u.Gender
+
 		selfApplyOtherUserList = append(selfApplyOtherUserList, &userInfo)
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc GetSelfApplyList ok", pbFriend.GetSelfApplyListResp{FriendRequestList: selfApplyOtherUserList})
