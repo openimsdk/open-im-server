@@ -58,7 +58,7 @@ message GetFriendApplyListReq{
 message GetFriendApplyListResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.FriendRequest FriendRequestList = 3;
+  repeated server_api_params.FriendRequest FriendRequestList = 3;
 }
 
 

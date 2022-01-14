@@ -1,5 +1,5 @@
 syntax = "proto3";
-package open_im_sdk;//The package name to which the proto file belongs
+package server_api_params;//The package name to which the proto file belongs
 //option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
 
 ////////////////////////////////base///////////////////////////////
@@ -87,15 +87,21 @@ message GroupRequest{
 }
 
 message FriendRequest{
-  string  fromUserID = 1;
-  string toUserID = 2;
-  int32 handleResult = 3;
-  string reqMsg = 4;
-  uint32 createTime = 5;
-  string handlerUserID = 6;
-  string handleMsg = 7;
-  uint32 handleTime = 8;
-  string ex = 9;
+  string fromUserID = 1;
+  string fromNickname = 2;
+  string fromFaceURL = 3;
+  string fromGender = 4;
+  string toUserID = 5;
+  string toNickname = 6;
+  string toFaceURL = 7;
+  string toGender = 8;
+  int32 handleResult = 9;
+  string reqMsg = 10;
+  uint32 createTime = 11;
+  string handlerUserID = 12;
+  string handleMsg = 13;
+  uint32 handleTime = 14;
+  string ex = 15;
 }
 
 ///////////////////////////////////base end/////////////////////////////////////
