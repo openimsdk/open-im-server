@@ -171,7 +171,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		group, err := imdb.GetGroupInfoByGroupID(v)
 		if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
 			utils.CopyStructFields(&groupNode, group)
-			groupNode.CreateTime = group.CreateTime.Unix()
+			groupNode.CreateTime = uint32(group.CreateTime.Unix())
 			groupNode.MemberCount = uint32(num)
 			groupNode.OwnerUserID = owner.UserID
 			resp.GroupList = append(resp.GroupList, &groupNode)

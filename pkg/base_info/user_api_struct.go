@@ -4,21 +4,31 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 )
 
-type GetUserInfoReq struct {
+type GetUsersInfoReq struct {
 	OperationID string   `json:"operationID" binding:"required"`
 	UserIDList  []string `json:"userIDList" binding:"required"`
 }
-type GetUserInfoResp struct {
+type GetUsersInfoResp struct {
 	CommResp
-	UserInfoList []*open_im_sdk.UserInfo  `json:"-"`
+	UserInfoList []*open_im_sdk.PublicUserInfo
 	Data         []map[string]interface{} `json:"data"`
 }
 
-type UpdateUserInfoReq struct {
+type UpdateSelfUserInfoReq struct {
 	UserInfo
 	OperationID string `json:"operationID" binding:"required"`
 }
 
 type UpdateUserInfoResp struct {
 	CommResp
+}
+
+type GetSelfUserInfoReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	UserID      string `json:"userID" binding:"required"`
+}
+type GetSelfUserInfoResp struct {
+	CommResp
+	UserInfoList *open_im_sdk.UserInfo    `json:"-"`
+	Data         []map[string]interface{} `json:"data"`
 }

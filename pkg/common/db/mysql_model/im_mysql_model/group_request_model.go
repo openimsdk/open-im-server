@@ -66,7 +66,7 @@ func DelGroupRequestByGroupIDAndUserID(groupID, userID string) error {
 	if err != nil {
 		return err
 	}
-	err = dbConn.Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(&db.GroupRequest{}).Error
+	err = dbConn.Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(db.GroupRequest{}).Error
 	if err != nil {
 		return err
 	}
