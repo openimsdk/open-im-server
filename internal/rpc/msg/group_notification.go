@@ -26,13 +26,15 @@ func setOpUserInfo(opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupM
 			return utils.Wrap(err, "GetUserByUserID failed")
 		}
 		utils.CopyStructFields(groupMemberInfo, u)
-		groupMemberInfo.AppMangerLevel = 1
+		groupMemberInfo.GroupID = groupID
 	} else {
 		u, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, opUserID)
 		if err != nil {
 			return utils.Wrap(err, "GetGroupMemberInfoByGroupIDAndUserID failed")
 		}
-		utils.CopyStructFields(groupMemberInfo, u)
+		if err = utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, u); err != nil {
+			return utils.Wrap(err, "")
+		}
 	}
 	return nil
 }
