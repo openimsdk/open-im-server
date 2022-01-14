@@ -579,7 +579,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if group.Introduction != req.GroupInfo.Introduction && req.GroupInfo.Introduction != "" {
 		changedType = changedType | (1 << 2)
 	}
-	if group.FaceUrl != req.GroupInfo.FaceUrl && req.GroupInfo.FaceUrl != "" {
+	if group.FaceUrl != req.GroupInfo.FaceURL && req.GroupInfo.FaceURL != "" {
 		changedType = changedType | (1 << 3)
 	}
 	//only administrators can set group information

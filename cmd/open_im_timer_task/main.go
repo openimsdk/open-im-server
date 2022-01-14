@@ -40,7 +40,7 @@ func main() {
 	//	}
 	//}
 	for {
-		uidList, err := im_mysql_model.SelectAllUID()
+		uidList, err := im_mysql_model.SelectAllUserID()
 		if err != nil {
 			//log.NewError("999999", err.Error())
 		} else {

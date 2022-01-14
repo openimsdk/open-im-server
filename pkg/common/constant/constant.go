@@ -78,13 +78,13 @@ const (
 	ExpiredToken = 3
 
 	//MultiTerminalLogin
-	//全端登录，但是同端互斥
+	//Full-end login, but the same end is mutually exclusive
 	AllLoginButSameTermKick = 1
-	//所有端中只能有一端能够登录
+	//Only one of the endpoints can log in
 	SingleTerminalLogin = 2
-	//web端可以同时在线，其他端只能有一端登录
+	//The web side can be online at the same time, and the other side can only log in at one end
 	WebAndOther = 3
-	//Pc端互斥，移动端互斥，但是web端可以同时在线
+	//The PC side is mutually exclusive, and the mobile side is mutually exclusive, but the web side can be online at the same time
 	PcMobileAndWeb = 4
 
 	OnlineStatus  = "online"

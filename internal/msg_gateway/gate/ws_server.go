@@ -128,7 +128,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 				}
 				delete(ws.wsConnToUser, oldConn)
 				if err != nil {
-					log.NewError("", "conn close err", err.Error())
+					log.NewError("", "conn close err", err.Error(), uid, platformID)
 				}
 
 			}

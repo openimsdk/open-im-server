@@ -19,6 +19,7 @@ import (
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
 	// user routing group, which handles user registration and login services
