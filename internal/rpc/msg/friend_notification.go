@@ -9,6 +9,7 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"encoding/json"
+	"github.com/golang/protobuf/proto"
 )
 
 //message MemberInfoChangedTips{
@@ -75,7 +76,11 @@ func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) 
 	}
 
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(FriendApplicationProcessedTips)
+	tips.Detail, err = proto.Marshal(&FriendApplicationProcessedTips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), FriendApplicationProcessedTips)
+		return
+	}
 	tips.DefaultTips = fromUserNickname + " FriendApplicationProcessedNotification " + toUserNickname
 
 	var n NotificationMsg
@@ -86,6 +91,11 @@ func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) 
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = req.CommID.OperationID
 	n.Content, _ = json.Marshal(tips)
+	n.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), tips)
+		return
+	}
 	Notification(&n)
 }
 

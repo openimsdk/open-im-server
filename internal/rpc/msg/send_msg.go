@@ -232,7 +232,7 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 type NotificationMsg struct {
 	SendID      string
 	RecvID      string
-	Content     []byte
+	Content     []byte //  open_im_sdk.TipsComm
 	MsgFrom     int32
 	ContentType int32
 	SessionType int32

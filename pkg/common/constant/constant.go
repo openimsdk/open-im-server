@@ -45,6 +45,7 @@ const (
 	GroupMsg       = 201
 
 	//SysRelated
+
 	FriendApplicationProcessedNotification = 1201 //AcceptFriendApplicationTip = 201
 	FriendApplicationAddedNotification     = 1202 //AddFriendTip               = 202
 	FriendAddedNotification                = 1203

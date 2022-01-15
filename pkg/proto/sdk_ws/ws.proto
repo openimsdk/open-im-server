@@ -75,8 +75,8 @@ message BlackInfo{
 }
 
 message GroupRequest{
-  string userID = 1;
-  string groupID = 2;
+  PublicUserInfo userInfo = 1;
+  GroupInfo groupInfo = 2;
   string handleResult = 3;
   string reqMsg = 4;
   string  handleMsg = 5;
@@ -312,6 +312,7 @@ message FriendApplicationAddedTips{
 //FromUserID accept or reject ToUserID
 message FriendApplicationProcessedTips{
   FromToUserID fromToUserID = 1;
+  int32 handleResult = 2;
 }
 
 // FromUserID  Added a friend ToUserID
