@@ -33,13 +33,13 @@ func main() {
 	friendRouterGroup := r.Group("/friend")
 	{
 		//	friendRouterGroup.POST("/get_friends_info", friend.GetFriendsInfo)
-		friendRouterGroup.POST("/add_friend", friend.AddFriend)                     //1
-		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)               //1
-		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList) //1
-		friendRouterGroup.POST("/get_self_apply_list", friend.GetSelfApplyList)     //1
-		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)            //1
-		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)    //1
-		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)        //1
+		friendRouterGroup.POST("/add_friend", friend.AddFriend)                              //1
+		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)                        //1
+		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList)          //1
+		friendRouterGroup.POST("/get_self_friend_apply_list", friend.GetSelfFriendApplyList) //1
+		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)                     //1
+		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)             //1
+		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)                 //1
 
 		friendRouterGroup.POST("/add_black", friend.AddBlack)          //1
 		friendRouterGroup.POST("/get_black_list", friend.GetBlacklist) //1

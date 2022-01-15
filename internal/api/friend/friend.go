@@ -423,7 +423,7 @@ func GetFriendApplyList(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func GetSelfApplyList(c *gin.Context) {
+func GetSelfFriendApplyList(c *gin.Context) {
 	params := api.GetSelfApplyListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
