@@ -34,7 +34,7 @@ type Friend struct {
 //int64 HandleTime = 8;
 //string Ex = 9;
 //}
-//open_im_sdk.FriendRequest == imdb.FriendRequest
+//open_im_sdk.FriendRequest(nickname, farce url ...) != imdb.FriendRequest
 type FriendRequest struct {
 	FromUserID    string    `gorm:"column:from_user_id;primary_key;size:64"`
 	ToUserID      string    `gorm:"column:to_user_id;primary_key;size:64"`

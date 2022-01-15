@@ -8,7 +8,6 @@ import (
 	pbFriend "Open_IM/pkg/proto/friend"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
-	"encoding/json"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -42,16 +41,21 @@ func getFromToUserNickname(fromUserID, toUserID string) (string, string, error) 
 }
 
 func FriendApplicationAddedNotification(req *pbFriend.AddFriendReq) {
-	var FriendApplicationAddedTips open_im_sdk.FriendApplicationAddedTips
-	FriendApplicationAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	FriendApplicationAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	log.Info(req.CommID.OperationID, utils.GetSelfFuncName(), "args: ", req.String())
+	var friendApplicationAddedTips open_im_sdk.FriendApplicationAddedTips
+	friendApplicationAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	friendApplicationAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
 	if err != nil {
 		log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
 		return
 	}
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(FriendApplicationAddedTips)
+	tips.Detail, err = proto.Marshal(&friendApplicationAddedTips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), friendApplicationAddedTips.String())
+		return
+	}
 	tips.DefaultTips = fromUserNickname + " FriendApplicationAddedNotification " + toUserNickname
 
 	var n NotificationMsg
@@ -61,14 +65,18 @@ func FriendApplicationAddedNotification(req *pbFriend.AddFriendReq) {
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = req.CommID.OperationID
-	n.Content, _ = json.Marshal(tips)
+	n.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), tips.String())
+		return
+	}
 	Notification(&n)
 }
 
 func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) {
-	var FriendApplicationProcessedTips open_im_sdk.FriendApplicationProcessedTips
-	FriendApplicationProcessedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	FriendApplicationProcessedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	var friendApplicationProcessedTips open_im_sdk.FriendApplicationProcessedTips
+	friendApplicationProcessedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	friendApplicationProcessedTips.FromToUserID.ToUserID = req.CommID.ToUserID
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
 	if err != nil {
 		log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
@@ -76,9 +84,9 @@ func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) 
 	}
 
 	var tips open_im_sdk.TipsComm
-	tips.Detail, err = proto.Marshal(&FriendApplicationProcessedTips)
+	tips.Detail, err = proto.Marshal(&friendApplicationProcessedTips)
 	if err != nil {
-		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), FriendApplicationProcessedTips)
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), friendApplicationProcessedTips.String())
 		return
 	}
 	tips.DefaultTips = fromUserNickname + " FriendApplicationProcessedNotification " + toUserNickname
@@ -90,39 +98,39 @@ func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) 
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = req.CommID.OperationID
-	n.Content, _ = json.Marshal(tips)
 	n.Content, err = proto.Marshal(&tips)
 	if err != nil {
-		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), tips)
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), tips.String())
 		return
 	}
 	Notification(&n)
 }
 
 func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string) {
-	var FriendAddedTips open_im_sdk.FriendAddedTips
+	var friendAddedTips open_im_sdk.FriendAddedTips
 	user, err := imdb.GetUserByUserID(opUserID)
 	if err != nil {
 		log.NewError(operationID, "GetUserByUserID failed ", err.Error(), opUserID)
 		return
 	}
-	utils.CopyStructFields(FriendAddedTips.OpUser, user)
-
+	utils2.UserDBCopyOpenIMPublicUser(friendAddedTips.OpUser, user)
 	friend, err := imdb.GetFriendRelationshipFromFriend(fromUserID, toUserID)
 	if err != nil {
 		log.NewError(operationID, "GetFriendRelationshipFromFriend failed ", err.Error(), fromUserID, toUserID)
 		return
 	}
-	utils2.FriendDBCopyOpenIM(FriendAddedTips.Friend, friend)
-
+	utils2.FriendDBCopyOpenIM(friendAddedTips.Friend, friend)
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(fromUserID, toUserID)
 	if err != nil {
 		log.Error(operationID, "getFromToUserNickname failed ", err.Error(), fromUserID, toUserID)
 		return
 	}
-
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(FriendAddedTips)
+	tips.Detail, err = proto.Marshal(&friendAddedTips)
+	if err != nil {
+		log.Error(operationID, "Marshal failed ", err.Error(), friendAddedTips)
+		return
+	}
 	tips.DefaultTips = fromUserNickname + " FriendAddedNotification " + toUserNickname
 	var n NotificationMsg
 	n.SendID = fromUserID
@@ -131,7 +139,11 @@ func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string)
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = operationID
-	n.Content, _ = json.Marshal(tips)
+	n.Content, _ = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
+		return
+	}
 	Notification(&n)
 }
 
@@ -139,17 +151,20 @@ func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string)
 //  FriendInfo Friend = 1;
 //}
 func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
-
-	var FriendDeletedTips open_im_sdk.FriendDeletedTips
-	FriendDeletedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	FriendDeletedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	var friendDeletedTips open_im_sdk.FriendDeletedTips
+	friendDeletedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	friendDeletedTips.FromToUserID.ToUserID = req.CommID.ToUserID
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
 	if err != nil {
 		log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", req.CommID.FromUserID, req.CommID.ToUserID)
 		return
 	}
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(FriendDeletedTips)
+	tips.Detail, err = proto.Marshal(&friendDeletedTips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), friendDeletedTips.String())
+		return
+	}
 	tips.DefaultTips = fromUserNickname + " FriendDeletedNotification " + toUserNickname
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID
@@ -158,7 +173,11 @@ func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = req.CommID.OperationID
-	n.Content, _ = json.Marshal(tips)
+	n.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), tips.String())
+		return
+	}
 	Notification(&n)
 }
 
@@ -168,17 +187,20 @@ func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
 //  uint64 OperationTime = 3;
 //}
 func FriendInfoChangedNotification(operationID, opUserID, fromUserID, toUserID string) {
-
-	var FriendInfoChangedTips open_im_sdk.FriendInfoChangedTips
-	FriendInfoChangedTips.FromToUserID.FromUserID = fromUserID
-	FriendInfoChangedTips.FromToUserID.ToUserID = toUserID
+	var friendInfoChangedTips open_im_sdk.FriendInfoChangedTips
+	friendInfoChangedTips.FromToUserID.FromUserID = fromUserID
+	friendInfoChangedTips.FromToUserID.ToUserID = toUserID
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(fromUserID, toUserID)
 	if err != nil {
 		log.Error(operationID, "getFromToUserNickname failed ", fromUserID, toUserID)
 		return
 	}
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(FriendInfoChangedTips)
+	tips.Detail, err = proto.Marshal(&friendInfoChangedTips)
+	if err != nil {
+		log.Error(operationID, "Marshal failed ", err.Error(), friendInfoChangedTips.String())
+		return
+	}
 	tips.DefaultTips = fromUserNickname + " FriendDeletedNotification " + toUserNickname
 	var n NotificationMsg
 	n.SendID = fromUserID
@@ -188,22 +210,29 @@ func FriendInfoChangedNotification(operationID, opUserID, fromUserID, toUserID s
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = operationID
 
-	n.Content, _ = json.Marshal(tips)
+	n.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
+		return
+	}
 	Notification(&n)
 }
 
 func BlackAddedNotification(req *pbFriend.AddBlacklistReq) {
-
-	var BlackAddedTips open_im_sdk.BlackAddedTips
-	BlackAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	BlackAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	var blackAddedTips open_im_sdk.BlackAddedTips
+	blackAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	blackAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
 	if err != nil {
 		log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", req.CommID.FromUserID, req.CommID.ToUserID)
 		return
 	}
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(BlackAddedTips)
+	tips.Detail, err = proto.Marshal(&blackAddedTips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), blackAddedTips.String())
+		return
+	}
 	tips.DefaultTips = fromUserNickname + " BlackAddedNotification " + toUserNickname
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID
@@ -212,7 +241,11 @@ func BlackAddedNotification(req *pbFriend.AddBlacklistReq) {
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = req.CommID.OperationID
-	n.Content, _ = json.Marshal(tips)
+	n.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), tips.String())
+		return
+	}
 	Notification(&n)
 }
 
@@ -220,16 +253,20 @@ func BlackAddedNotification(req *pbFriend.AddBlacklistReq) {
 //  BlackInfo Black = 1;
 //}
 func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
-	var BlackDeletedTips open_im_sdk.BlackDeletedTips
-	BlackDeletedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	BlackDeletedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	var blackDeletedTips open_im_sdk.BlackDeletedTips
+	blackDeletedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	blackDeletedTips.FromToUserID.ToUserID = req.CommID.ToUserID
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
 	if err != nil {
 		log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
 		return
 	}
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(BlackDeletedTips)
+	tips.Detail, err = proto.Marshal(&blackDeletedTips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), blackDeletedTips.String())
+		return
+	}
 	tips.DefaultTips = fromUserNickname + " BlackDeletedNotification " + toUserNickname
 	var n NotificationMsg
 	n.SendID = req.CommID.FromUserID
@@ -238,7 +275,11 @@ func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = req.CommID.OperationID
-	n.Content, _ = json.Marshal(tips)
+	n.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), tips.String())
+		return
+	}
 	Notification(&n)
 }
 
@@ -248,15 +289,19 @@ func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
 //  uint64 OperationTime = 3;
 //}
 func SelfInfoUpdatedNotification(operationID, userID string) {
-	var SelfInfoUpdatedTips open_im_sdk.SelfInfoUpdatedTips
-	SelfInfoUpdatedTips.UserID = userID
+	var selfInfoUpdatedTips open_im_sdk.SelfInfoUpdatedTips
+	selfInfoUpdatedTips.UserID = userID
 	u, err := imdb.GetUserByUserID(userID)
 	if err != nil {
 		log.NewError(operationID, "FindUserByUID failed ", err.Error(), userID)
 		return
 	}
 	var tips open_im_sdk.TipsComm
-	tips.Detail, _ = json.Marshal(SelfInfoUpdatedTips)
+	tips.Detail, err = proto.Marshal(&selfInfoUpdatedTips)
+	if err != nil {
+		log.Error(operationID, "Marshal failed ", err.Error(), selfInfoUpdatedTips.String())
+		return
+	}
 	var n NotificationMsg
 	n.SendID = userID
 	n.RecvID = userID
@@ -266,6 +311,10 @@ func SelfInfoUpdatedNotification(operationID, userID string) {
 	n.OperationID = operationID
 
 	tips.DefaultTips = u.Nickname + " SelfInfoUpdatedNotification "
-	n.Content, _ = json.Marshal(tips)
+	n.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
+		return
+	}
 	Notification(&n)
 }
