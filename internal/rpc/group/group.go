@@ -407,8 +407,21 @@ func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.Ge
 	log.NewDebug(req.OperationID, "GetGroupApplicationList reply ", reply)
 	resp := pbGroup.GetGroupApplicationListResp{}
 	for _, v := range reply {
-		var node open_im_sdk.GroupRequest
+		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
+		group, err := imdb.GetGroupInfoByGroupID(v.GroupID)
+		if err != nil {
+			log.Error(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), v.GroupID)
+			continue
+		}
+		user, err := imdb.GetUserByUserID(v.UserID)
+		if err != nil {
+			log.Error(req.OperationID, "GetUserByUserID failed ", err.Error(), v.UserID)
+			continue
+		}
+
 		cp.GroupRequestDBCopyOpenIM(&node, &v)
+		cp.UserDBCopyOpenIMPublic(node.UserInfo, user)
+		cp.GroupDBCopyOpenIM(node.GroupInfo, group)
 		log.NewDebug(req.OperationID, "node ", node, "v ", v)
 		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}

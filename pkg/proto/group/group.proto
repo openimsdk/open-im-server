@@ -16,7 +16,7 @@ message GroupAddMemberInfo{
 
 message CreateGroupReq{
   repeated GroupAddMemberInfo InitMemberList = 1;
-  open_im_sdk.GroupInfo GroupInfo = 2;
+  server_api_params.GroupInfo GroupInfo = 2;
   string OperationID = 3;
   string OpUserID = 4;  //app manager or group owner
   string OwnerUserID = 5; //owner
@@ -24,7 +24,7 @@ message CreateGroupReq{
 message CreateGroupResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  open_im_sdk.GroupInfo GroupInfo = 3;
+  server_api_params.GroupInfo GroupInfo = 3;
 }
 
 
@@ -36,12 +36,12 @@ message GetGroupsInfoReq{
 message GetGroupsInfoResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.GroupInfo GroupInfoList = 3;
+  repeated server_api_params.GroupInfo GroupInfoList = 3;
 }
 
 
 message SetGroupInfoReq{
-  open_im_sdk.GroupInfo GroupInfo = 1;
+  server_api_params.GroupInfo GroupInfo = 1;
   string OpUserID = 2; //app manager or group owner
   string OperationID = 3;
 }
@@ -58,7 +58,7 @@ message GetGroupApplicationListReq {
 message GetGroupApplicationListResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.GroupRequest GroupRequestList = 3;
+  repeated server_api_params.GroupRequest GroupRequestList = 3;
 }
 
 
@@ -120,7 +120,7 @@ message GetGroupMemberListReq {
 message GetGroupMemberListResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.GroupMemberFullInfo memberList = 3;
+  repeated server_api_params.GroupMemberFullInfo memberList = 3;
   int32 nextSeq = 4;
 }
 
@@ -135,7 +135,7 @@ message GetGroupMembersInfoReq {
 message GetGroupMembersInfoResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.GroupMemberFullInfo memberList = 3;
+  repeated server_api_params.GroupMemberFullInfo memberList = 3;
 }
 
 message KickGroupMemberReq {
@@ -166,7 +166,7 @@ message GetJoinedGroupListReq {
 message GetJoinedGroupListResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated  open_im_sdk.GroupInfo GroupList = 3;
+  repeated  server_api_params.GroupInfo GroupList = 3;
 }
 
 
@@ -192,7 +192,7 @@ message GetGroupAllMemberReq {
 message GetGroupAllMemberResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.GroupMemberFullInfo memberList = 3;
+  repeated server_api_params.GroupMemberFullInfo memberList = 3;
 }
 
 

@@ -114,6 +114,10 @@ func BlackDBCopyOpenIM(dst *open_im_sdk.BlackInfo, src *db.Black) {
 	}
 }
 
+func UserDBCopyOpenIMPublic(dst *open_im_sdk.PublicUserInfo, src *db.User) {
+	utils.CopyStructFields(dst, src)
+}
+
 //
 //func PublicUserDBCopyOpenIM(dst *open_im_sdk.PublicUserInfo, src *db.User){
 //

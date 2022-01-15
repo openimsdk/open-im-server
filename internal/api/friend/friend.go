@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func AddBlacklist(c *gin.Context) {
+func AddBlack(c *gin.Context) {
 	params := api.AddBlacklistReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
@@ -257,7 +257,7 @@ func SetFriendRemark(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func RemoveBlacklist(c *gin.Context) {
+func RemoveBlack(c *gin.Context) {
 	params := api.RemoveBlackListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
