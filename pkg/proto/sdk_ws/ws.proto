@@ -228,13 +228,14 @@ message TipsComm{
 //	OnGroupCreated()
 message GroupCreatedTips{
   GroupInfo group = 1;
-  GroupMemberFullInfo creator = 2;
+  GroupMemberFullInfo opUser = 2;
   repeated GroupMemberFullInfo memberList = 3;
   int64 operationTime = 4;
+  GroupMemberFullInfo groupOwnerUser = 5;
 }
 
 //	OnGroupInfoSet()
-message MemberInfoSetTips{
+message GroupInfoSetTips{
   GroupMemberFullInfo opUser = 1; //who do this
   int64 muteTime = 2;
   GroupInfo group = 3;
@@ -244,7 +245,7 @@ message MemberInfoSetTips{
 message JoinGroupApplicationTips{
   GroupInfo group = 1;
   PublicUserInfo applicant = 2;
-  string  reason = 3;
+  string  reqMsg = 3;
 }
 
 //	OnQuitGroup()
@@ -296,30 +297,16 @@ message MemberInvitedTips{
 }
 
 //Actively join the group
-//message MemberEnterTips{
-//  GroupInfo group = 1;
-//  GroupMemberFullInfo entrantUser = 2;
-//  int64 operationTime = 3;
-//}
-
-
-
-
-
-
-
-
-message GroupInfoChangedTips{
-  int32 changedType = 1; //bitwise operators: 0001:groupName; 0010:Notification  0100:Introduction; 1000:FaceUrl
-  GroupInfo group = 2;
-  GroupMemberFullInfo opUser = 3;
-}
-
-message JoinGroupApplicationTips{
+message MemberEnterTips{
   GroupInfo group = 1;
-  PublicUserInfo applicant = 2;
-  string  reason = 3;
+  GroupMemberFullInfo entrantUser = 2;
+  int64 operationTime = 3;
 }
+
+
+
+
+
 
 
 
@@ -351,10 +338,17 @@ message FriendApplicationAddedTips{
 }
 
 //FromUserID accept or reject ToUserID
-message FriendApplicationProcessedTips{
+message FriendApplicationApprovedTips{
   FromToUserID fromToUserID = 1;
-  int32 handleResult = 2;
+  string handleMsg = 2;
 }
+
+//FromUserID accept or reject ToUserID
+message FriendApplicationRejectedTips{
+  FromToUserID fromToUserID = 1;
+   string handleMsg = 2;
+}
+
 
 // FromUserID  Added a friend ToUserID
 message FriendAddedTips{

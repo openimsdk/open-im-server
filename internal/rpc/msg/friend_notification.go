@@ -58,7 +58,7 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 	}
 	cn := config.Config.Notification
 	switch contentType {
-	case constant.FriendApplicationAddedNotification:
+	case constant.FriendApplicationNotification:
 
 		tips.DefaultTips = fromUserNickname + cn.FriendApplicationAdded.DefaultTips.Tips
 	case constant.FriendApplicationApprovedNotification:
@@ -69,7 +69,7 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 		tips.DefaultTips = cn.FriendAdded.DefaultTips.Tips
 	case constant.FriendDeletedNotification:
 		tips.DefaultTips = cn.FriendDeleted.DefaultTips.Tips + toUserNickname
-	case constant.FriendInfoChangedNotification:
+	case constant.FriendRemarkSetNotification:
 		tips.DefaultTips = fromUserNickname + cn.FriendInfoChanged.DefaultTips.Tips
 	case constant.BlackAddedNotification:
 		tips.DefaultTips = cn.BlackAdded.DefaultTips.Tips + toUserNickname
@@ -95,12 +95,12 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 	Notification(&n)
 }
 
-func FriendApplicationAddedNotification(req *pbFriend.AddFriendReq) {
+func FriendApplicationNotification(req *pbFriend.AddFriendReq) {
 	log.Info(req.CommID.OperationID, utils.GetSelfFuncName(), "args: ", req.String())
 	var friendApplicationAddedTips open_im_sdk.FriendApplicationAddedTips
 	friendApplicationAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
 	friendApplicationAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
-	friendNotification(req.CommID, constant.FriendApplicationAddedNotification, &friendApplicationAddedTips)
+	friendNotification(req.CommID, constant.FriendApplicationNotification, &friendApplicationAddedTips)
 	//fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
 	//if err != nil {
 	//	log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
@@ -129,23 +129,18 @@ func FriendApplicationAddedNotification(req *pbFriend.AddFriendReq) {
 	//Notification(&n)
 }
 
-func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) {
-	var friendApplicationProcessedTips open_im_sdk.FriendApplicationProcessedTips
-	friendApplicationProcessedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	friendApplicationProcessedTips.FromToUserID.ToUserID = req.CommID.ToUserID
-	friendApplicationProcessedTips.HandleResult = req.HandleResult
+func FriendApplicationApprovedNotification(req *pbFriend.AddFriendResponseReq) {
+	FriendApplicationApprovedTips := open_im_sdk.FriendApplicationApprovedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
+	FriendApplicationApprovedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	FriendApplicationApprovedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	FriendApplicationApprovedTips.HandleMsg = req.HandleMsg
 	//fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
 	//if err != nil {
 	//	log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
 	//	return
 	//}
-	if friendApplicationProcessedTips.HandleResult == 1 {
-		friendNotification(req.CommID, constant.FriendApplicationApprovedNotification, &friendApplicationProcessedTips)
-	} else if friendApplicationProcessedTips.HandleResult == -1 {
-		friendNotification(req.CommID, constant.FriendApplicationRejectedNotification, &friendApplicationProcessedTips)
-	} else {
-		log.Error(req.CommID.OperationID, "HandleResult failed ", friendApplicationProcessedTips.HandleResult)
-	}
+
+	friendNotification(req.CommID, constant.FriendApplicationApprovedNotification, &FriendApplicationApprovedTips)
 
 	//var tips open_im_sdk.TipsComm
 	//tips.DefaultTips = fromUserNickname + " FriendApplicationProcessedNotification " + toUserNickname
@@ -169,6 +164,58 @@ func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) 
 	//}
 	//Notification(&n)
 }
+
+func FriendApplicationRejectedNotification(req *pbFriend.AddFriendResponseReq) {
+	FriendApplicationApprovedTips := open_im_sdk.FriendApplicationApprovedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
+	FriendApplicationApprovedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	FriendApplicationApprovedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	FriendApplicationApprovedTips.HandleMsg = req.HandleMsg
+
+	friendNotification(req.CommID, constant.FriendApplicationRejectedNotification, &FriendApplicationApprovedTips)
+}
+
+//
+//
+//func FriendApplicationProcessedNotification(req *pbFriend.AddFriendResponseReq) {
+//	var friendApplicationProcessedTips open_im_sdk.FriendApplicationProcessedTips
+//	friendApplicationProcessedTips.FromToUserID.FromUserID = req.CommID.FromUserID
+//	friendApplicationProcessedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+//	friendApplicationProcessedTips.HandleResult = req.HandleResult
+//	//fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
+//	//if err != nil {
+//	//	log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
+//	//	return
+//	//}
+//	if friendApplicationProcessedTips.HandleResult == 1 {
+//		friendNotification(req.CommID, constant.FriendApplicationApprovedNotification, &friendApplicationProcessedTips)
+//	} else if friendApplicationProcessedTips.HandleResult == -1 {
+//		friendNotification(req.CommID, constant.FriendApplicationRejectedNotification, &friendApplicationProcessedTips)
+//	} else {
+//		log.Error(req.CommID.OperationID, "HandleResult failed ", friendApplicationProcessedTips.HandleResult)
+//	}
+//
+//	//var tips open_im_sdk.TipsComm
+//	//tips.DefaultTips = fromUserNickname + " FriendApplicationProcessedNotification " + toUserNickname
+//	//tips.Detail, err = proto.Marshal(&friendApplicationProcessedTips)
+//	//if err != nil {
+//	//	log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), friendApplicationProcessedTips.String())
+//	//	return
+//	//}
+//	//
+//	//var n NotificationMsg
+//	//n.SendID = req.CommID.FromUserID
+//	//n.RecvID = req.CommID.ToUserID
+//	//n.ContentType = constant.FriendApplicationProcessedNotification
+//	//n.SessionType = constant.SingleChatType
+//	//n.MsgFrom = constant.SysMsgType
+//	//n.OperationID = req.CommID.OperationID
+//	//n.Content, err = proto.Marshal(&tips)
+//	//if err != nil {
+//	//	log.Error(req.CommID.OperationID, "Marshal failed ", err.Error(), tips.String())
+//	//	return
+//	//}
+//	//Notification(&n)
+//}
 
 func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string) {
 	var friendAddedTips open_im_sdk.FriendAddedTips
@@ -255,7 +302,7 @@ func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
 //  PublicUserInfo OpUser = 2;
 //  uint64 OperationTime = 3;
 //}
-func FriendInfoChangedNotification(operationID, opUserID, fromUserID, toUserID string) {
+func FriendRemarkSetNotification(operationID, opUserID, fromUserID, toUserID string) {
 	var friendInfoChangedTips open_im_sdk.FriendInfoChangedTips
 	friendInfoChangedTips.FromToUserID.FromUserID = fromUserID
 	friendInfoChangedTips.FromToUserID.ToUserID = toUserID
@@ -265,7 +312,7 @@ func FriendInfoChangedNotification(operationID, opUserID, fromUserID, toUserID s
 	//	return
 	//}
 	commID := pbFriend.CommID{FromUserID: fromUserID, ToUserID: toUserID, OpUserID: opUserID, OperationID: operationID}
-	friendNotification(&commID, constant.FriendInfoChangedNotification, &friendInfoChangedTips)
+	friendNotification(&commID, constant.FriendRemarkSetNotification, &friendInfoChangedTips)
 	//var tips open_im_sdk.TipsComm
 	//tips.DefaultTips = fromUserNickname + " FriendDeletedNotification " + toUserNickname
 	//tips.Detail, err = proto.Marshal(&friendInfoChangedTips)
