@@ -97,10 +97,10 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 
 func FriendApplicationNotification(req *pbFriend.AddFriendReq) {
 	log.Info(req.CommID.OperationID, utils.GetSelfFuncName(), "args: ", req.String())
-	var friendApplicationAddedTips open_im_sdk.FriendApplicationAddedTips
-	friendApplicationAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	friendApplicationAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
-	friendNotification(req.CommID, constant.FriendApplicationNotification, &friendApplicationAddedTips)
+	var FriendApplicationTips open_im_sdk.FriendApplicationTips
+	FriendApplicationTips.FromToUserID.FromUserID = req.CommID.FromUserID
+	FriendApplicationTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	friendNotification(req.CommID, constant.FriendApplicationNotification, &FriendApplicationTips)
 	//fromUserNickname, toUserNickname, err := getFromToUserNickname(req.CommID.FromUserID, req.CommID.ToUserID)
 	//if err != nil {
 	//	log.Error(req.CommID.OperationID, "getFromToUserNickname failed ", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
@@ -408,11 +408,11 @@ func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
 //  PublicUserInfo OpUser = 2;
 //  uint64 OperationTime = 3;
 //}
-func SelfInfoUpdatedNotification(operationID, userID string, opUserID string) {
-	var selfInfoUpdatedTips open_im_sdk.SelfInfoUpdatedTips
+func UserInfoUpdatedNotification(operationID, userID string, needNotifiedUserID string) {
+	var selfInfoUpdatedTips open_im_sdk.UserInfoUpdatedTips
 	selfInfoUpdatedTips.UserID = userID
-	commID := pbFriend.CommID{FromUserID: userID, ToUserID: userID, OpUserID: opUserID, OperationID: operationID}
-	friendNotification(&commID, constant.SelfInfoUpdatedNotification, &selfInfoUpdatedTips)
+	commID := pbFriend.CommID{FromUserID: userID, ToUserID: userID, OpUserID: needNotifiedUserID, OperationID: operationID}
+	friendNotification(&commID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
 	//u, err := imdb.GetUserByUserID(userID)
 	//if err != nil {
 	//	log.NewError(operationID, "FindUserByUID failed ", err.Error(), userID)

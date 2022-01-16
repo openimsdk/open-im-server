@@ -55,7 +55,7 @@ const (
 	BlackAddedNotification                = 1207 //add_black
 	BlackDeletedNotification              = 1208 //remove_black
 
-	SelfInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
+	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
 
 	GroupCreatedNotification             = 1501
 	GroupInfoSetNotification             = 1502

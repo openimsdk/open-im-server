@@ -333,7 +333,7 @@ message FromToUserID{
 }
 
 //FromUserID apply to add ToUserID
-message FriendApplicationAddedTips{
+message FriendApplicationTips{
   FromToUserID fromToUserID = 1;
 }
 
@@ -377,6 +377,6 @@ message FriendInfoChangedTips{
   FromToUserID fromToUserID = 1;
 }
 //////////////////////user/////////////////////
-message SelfInfoUpdatedTips{
+message UserInfoUpdatedTips{
   string userID = 1;
 }
