@@ -237,6 +237,6 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	for _, v := range RpcResp.FriendInfoList {
 		chat.FriendInfoChangedNotification(req.OperationID, req.OpUserID, req.UserInfo.UserID, v.FriendUser.UserID)
 	}
-	chat.SelfInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID)
+	chat.SelfInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID, req.OpUserID)
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }

@@ -127,7 +127,7 @@ message DeleteFriendResp{
 //process
 message AddFriendResponseReq{
   CommID CommID = 1;
-  int32  flag = 2;
+  int32  handleResult = 2;
   string handleMsg = 3;
 }
 message AddFriendResponseResp{

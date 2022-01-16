@@ -223,27 +223,63 @@ message TipsComm{
 }
 
 //////////////////////group/////////////////////
-//Actively join the group
-message MemberEnterTips{
-  GroupInfo group = 1;
-  GroupMemberFullInfo entrantUser = 2;
-  int64 operationTime = 3;
-}
 
-//Actively leave the group
-message MemberLeaveTips{
-  GroupInfo group = 1;
-  GroupMemberFullInfo leaverUser = 2;
-  int64 operationTime = 3;
-}
 
-message MemberInvitedTips{
+//	OnGroupCreated()
+message GroupCreatedTips{
   GroupInfo group = 1;
-  GroupMemberFullInfo opUser = 2;
-  repeated GroupMemberFullInfo invitedUserList = 3;
+  GroupMemberFullInfo creator = 2;
+  repeated GroupMemberFullInfo memberList = 3;
   int64 operationTime = 4;
 }
 
+//	OnGroupInfoSet()
+message MemberInfoSetTips{
+  GroupMemberFullInfo opUser = 1; //who do this
+  int64 muteTime = 2;
+  GroupInfo group = 3;
+}
+
+//	OnJoinGroupApplication()
+message JoinGroupApplicationTips{
+  GroupInfo group = 1;
+  PublicUserInfo applicant = 2;
+  string  reason = 3;
+}
+
+//	OnQuitGroup()
+//Actively leave the group
+message MemberQuitTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo quitUser = 2;
+  int64 operationTime = 3;
+}
+
+
+//	OnApplicationGroupAccepted()
+message GroupApplicationAcceptedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  string  handleMsg = 4;
+}
+
+//	OnApplicationGroupRejected()
+message GroupApplicationRejectedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  string  handleMsg = 4;
+}
+
+//	OnTransferGroupOwner()
+message GroupOwnerTransferredTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  GroupMemberFullInfo newGroupOwner = 3;
+  int64 operationTime = 4;
+}
+
+
+//	OnMemberKicked()
 message MemberKickedTips{
   GroupInfo group = 1;
   GroupMemberFullInfo opUser = 2;
@@ -251,20 +287,27 @@ message MemberKickedTips{
   int64 operationTime = 4;
 }
 
-message MemberInfoChangedTips{
-  int32 changeType = 1; ///bitwise operators 0001:member info changed; 0010:mute ;
-  GroupMemberFullInfo opUser = 2; //who do this
-  GroupMemberFullInfo finalInfo = 3; //
-  int64 muteTime = 4;
-  GroupInfo group = 5;
-}
-
-message GroupCreatedTips{
+//	OnMemberInvited()
+message MemberInvitedTips{
   GroupInfo group = 1;
-  GroupMemberFullInfo creator = 2;
-  repeated GroupMemberFullInfo memberList = 3;
+  GroupMemberFullInfo opUser = 2;
+  repeated GroupMemberFullInfo invitedUserList = 3;
   int64 operationTime = 4;
 }
+
+//Actively join the group
+//message MemberEnterTips{
+//  GroupInfo group = 1;
+//  GroupMemberFullInfo entrantUser = 2;
+//  int64 operationTime = 3;
+//}
+
+
+
+
+
+
+
 
 message GroupInfoChangedTips{
   int32 changedType = 1; //bitwise operators: 0001:groupName; 0010:Notification  0100:Introduction; 1000:FaceUrl
@@ -278,12 +321,10 @@ message JoinGroupApplicationTips{
   string  reason = 3;
 }
 
-message ApplicationProcessedTips{
-  GroupInfo group = 1;
-  GroupMemberFullInfo opUser = 2;
-  int32 result = 3;
-  string  reason = 4;
-}
+
+
+
+
 
 //////////////////////friend/////////////////////
 //message FriendInfo{

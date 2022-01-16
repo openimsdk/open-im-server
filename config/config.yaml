@@ -178,7 +178,7 @@ iOSPush:
 notification:
   groupCreated:
     conversation:
-      type: 1
+      reliabilityLevel: 1
       unreadCount: true
     offlinePush:
       switch: true
@@ -191,7 +191,7 @@ notification:
 
   groupInfoChanged:
     conversation:
-      type: 1
+      reliabilityLevel: 1
       unreadCount: false
     offlinePush:
       switch: false
@@ -200,6 +200,117 @@ notification:
       ext: "group info changed ext"
     defaultTips:
       tips: "group info changed by"  # group info changed by xx
+
+
+
+  FriendApplicationAdded:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Somebody applies to add you as a friend"
+      desc: "Somebody applies to add you as a friend"
+      ext: "Somebody applies to add you as a friend"
+    defaultTips:
+      tips: "I applies to add you as a friend"  #
+
+  FriendApplicationApproved:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Someone applies to add your friend application"
+      desc: "Someone applies to add your friend application"
+      ext: "Someone applies to add your friend application"
+    defaultTips:
+      tips: "I applies to add your friend application"  #
+
+
+  FriendApplicationRejected:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Someone rejected your friend application"
+      desc: "Someone rejected your friend application"
+      ext: "Someone rejected your friend application"
+    defaultTips:
+      tips: "I rejected your friend application"  #
+
+
+
+
+
+  FriendAdded:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: true
+      title: "We have become friends"
+      desc: "We have become friends"
+      ext: "We have become friends"
+    defaultTips:
+      tips: "We have become friends"  #
+
+
+
+  FriendDeleted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Deleted a friend"
+      desc: "Deleted a friend"
+      ext: "Deleted a friend"
+    defaultTips:
+      tips: "Deleted a friend"  #
+
+
+  FriendInfoChanged:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Your friend's profile has been changed"
+      desc: "Your friend's profile has been changed"
+      ext: "Your friend's profile has been changed"
+    defaultTips:
+      tips: "Your friend's profile has been changed"  #
+
+
+
+  BlackAdded:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Blocked a user"
+      desc: "Blocked a user"
+      ext: "Blocked a user"
+    defaultTips:
+      tips: "Blocked a user"  #
+
+
+  BlackDeleted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Remove a blocked user"
+      desc: "Remove a blocked user"
+      ext: "Remove a blocked user"
+    defaultTips:
+      tips: "Remove a blocked user"
+
+"  # xx  applied to add you as a friend
 
 
 

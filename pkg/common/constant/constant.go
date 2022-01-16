@@ -46,24 +46,35 @@ const (
 
 	//SysRelated
 
-	FriendApplicationProcessedNotification = 1201 //AcceptFriendApplicationTip = 201
-	FriendApplicationAddedNotification     = 1202 //AddFriendTip               = 202
-	FriendAddedNotification                = 1203
-	FriendDeletedNotification              = 1204
-	FriendInfoChangedNotification          = 1205
-	BlackAddedNotification                 = 1206
-	BlackDeletedNotification               = 1207
+	FriendApplicationApprovedNotification = 1201
+	FriendApplicationRejectedNotification = 1202
+	FriendApplicationAddedNotification    = 1203 //AddFriendTip               = 202
+	FriendAddedNotification               = 1204
+	FriendDeletedNotification             = 1205
+	FriendInfoChangedNotification         = 1206
+	BlackAddedNotification                = 1207
+	BlackDeletedNotification              = 1208
 
 	SelfInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
 
-	GroupCreatedNotification         = 1501 //CreateGroupTip            = 502
-	JoinApplicationNotification      = 1502 //JoinGroupTip              = 504
-	ApplicationProcessedNotification = 1503 //AcceptGroupApplicationTip = 507 RefuseGroupApplicationTip = 508
-	MemberInvitedNotification        = 1504 //InviteUserToGroupTip      = 510
-	MemberKickedNotification         = 1505 //KickGroupMemberTip        = 509
-	GroupInfoChangedNotification     = 1506 //SetGroupInfoTip           = 506  TransferGroupOwnerTip     = 501
-	MemberLeaveNotification          = 1507 //QuitGroupTip              = 505
-	MemberEnterNotification          = 1508
+	GroupCreatedNotification             = 1501
+	MemberInfoSetNotification            = 1501
+	JoinGroupApplicationNotification     = 1501
+	MemberQuitNotification               = 1501
+	GroupApplicationAcceptedNotification = 1501
+	GroupApplicationRejectedNotification = 1501
+	GroupOwnerTransferredNotification    = 1501
+	MemberKickedNotification             = 1501
+	MemberInvitedNotification            = 1501
+
+	//GroupCreatedNotification         = 1501
+	//JoinApplicationNotification      = 1502
+	//ApplicationProcessedNotification = 1503
+	//MemberInvitedNotification        = 1504
+	//MemberKickedNotification         = 1505
+	//GroupInfoChangedNotification     = 1506
+	//MemberLeaveNotification          = 1507
+	//MemberEnterNotification          = 1508
 
 	//MsgFrom
 	UserMsgType = 100
