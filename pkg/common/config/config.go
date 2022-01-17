@@ -182,12 +182,11 @@ type config struct {
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
 		//////////////////////friend///////////////////////
-		FriendApplicationAdded struct {
+		FriendApplication struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
-
 		FriendApplicationApproved struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
@@ -211,7 +210,7 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
-		FriendInfoChanged struct {
+		FriendRemarkSet struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
