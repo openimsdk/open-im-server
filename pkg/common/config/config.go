@@ -164,23 +164,73 @@ type config struct {
 		BadgeCount bool   `yaml:"badgeCount"`
 	}
 	Notification struct {
+		///////////////////////group/////////////////////////////
 		GroupCreated struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
 
-		GroupInfoChanged struct {
+		GroupInfoSet struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
 
-		ApplyJoinGroup struct {
+		JoinGroupApplication struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		}
+
+		MemberQuit struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		}
+
+		GroupApplicationAccepted struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		}
+
+		GroupApplicationRejected struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		}
+
+		GroupOwnerTransferred struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		}
+
+		MemberKicked struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		}
+
+		MemberInvited struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		}
+
+		MemberEnter struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		}
+		////////////////////////user///////////////////////
+		UserInfoUpdated struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		}
+
 		//////////////////////friend///////////////////////
 		FriendApplication struct {
 			Conversation PConversation `yaml:"conversation"`

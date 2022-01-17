@@ -5,7 +5,7 @@ package relay;
 
 message OnlinePushMsgReq {
   string OperationID = 1;
-  open_im_sdk.MsgData msgData = 2;
+  server_api_params.MsgData msgData = 2;
 }
 message OnlinePushMsgResp{
 repeated SingleMsgToUser resp = 1;
