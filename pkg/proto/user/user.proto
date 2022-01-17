@@ -52,13 +52,13 @@ message GetUserInfoReq{
 }
 message GetUserInfoResp{
   CommonResp  commonResp = 1;
-  repeated open_im_sdk.UserInfo UserInfoList = 3;
+  repeated server_api_params.UserInfo UserInfoList = 3;
 }
 
 
 
 message UpdateUserInfoReq{
-  open_im_sdk.UserInfo UserInfo = 1;
+  server_api_params.UserInfo UserInfo = 1;
   string OpUserID = 2;
   string  operationID = 3;
 }
