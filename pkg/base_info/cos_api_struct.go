@@ -6,7 +6,7 @@ type TencentCloudStorageCredentialReq struct {
 	OperationID string `json:"operationID"`
 }
 
-type tencentCloudStorageCredentialRespData struct {
+type TencentCloudStorageCredentialRespData struct {
 	*sts.CredentialResult
 	Region string `json:"region"`
 	Bucket string `json:"bucket"`
@@ -14,5 +14,5 @@ type tencentCloudStorageCredentialRespData struct {
 
 type TencentCloudStorageCredentialResp struct {
 	CommResp
-	tencentCloudStorageCredentialRespData `json:"data"`
+	Data TencentCloudStorageCredentialRespData `json:"data"`
 }

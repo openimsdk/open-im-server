@@ -57,9 +57,9 @@ func TencentCloudStorageCredential(c *gin.Context) {
 		resp.ErrCode = constant.ErrTencentCredential.ErrCode
 		resp.ErrMsg = err.Error()
 	} else {
-		resp.Bucket = config.Config.Credential.Tencent.Bucket
-		resp.Region = config.Config.Credential.Tencent.Region
-		resp.CredentialResult = res
+		resp.Data.Bucket = config.Config.Credential.Tencent.Bucket
+		resp.Data.Region = config.Config.Credential.Tencent.Region
+		resp.Data.CredentialResult = res
 	}
 	c.JSON(http.StatusOK, resp)
 }
