@@ -7,7 +7,6 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
-	"Open_IM/pkg/utils"
 	"bytes"
 	"context"
 	"encoding/gob"
@@ -51,14 +50,13 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 
 	switch m.ReqIdentifier {
 	case constant.WSGetNewestSeq:
-		go ws.getSeqReq(conn, &m)
+		ws.getSeqReq(conn, &m)
 	case constant.WSPullMsg:
-		go ws.pullMsgReq(conn, &m)
+		ws.pullMsgReq(conn, &m)
 	case constant.WSSendMsg:
-		sendTime := utils.GetCurrentTimestampByNano()
-		go ws.sendMsgReq(conn, &m, sendTime)
+		ws.sendMsgReq(conn, &m)
 	case constant.WSPullMsgBySeqList:
-		go ws.pullMsgBySeqListReq(conn, &m)
+		ws.pullMsgBySeqListReq(conn, &m)
 	default:
 	}
 	log.NewInfo("", "goroutine num is ", runtime.NumGoroutine())
@@ -229,13 +227,12 @@ func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullM
 	ws.sendMsg(conn, mReply)
 
 }
-func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
-	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, sendTime)
+func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
+	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID)
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
 	if isPass {
 		data := pData.(sdk_ws.MsgData)
-		data.SendTime = sendTime
 		pbData := pbChat.SendMsgReq{
 			Token:       m.Token,
 			OperationID: m.OperationID,
@@ -249,26 +246,26 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req, sendTime int64) {
 			log.NewError(pbData.OperationID, "UserSendMsg err", err.Error())
 			nReply.ErrCode = 200
 			nReply.ErrMsg = err.Error()
-			ws.sendMsgResp(conn, m, nReply, sendTime)
+			ws.sendMsgResp(conn, m, nReply)
 		} else {
 			log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
-			ws.sendMsgResp(conn, m, reply, sendTime)
+			ws.sendMsgResp(conn, m, reply)
 		}
 
 	} else {
 		nReply.ErrCode = errCode
 		nReply.ErrMsg = errMsg
-		ws.sendMsgResp(conn, m, nReply, sendTime)
+		ws.sendMsgResp(conn, m, nReply)
 	}
 
 }
-func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp, sendTime int64) {
+func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 	// := make(map[string]interface{})
 
 	var mReplyData sdk_ws.UserSendMsgResp
 	mReplyData.ClientMsgID = pb.GetClientMsgID()
 	mReplyData.ServerMsgID = pb.GetServerMsgID()
-	mReplyData.SendTime = sendTime
+	mReplyData.SendTime = pb.GetSendTime()
 	b, _ := proto.Marshal(&mReplyData)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
