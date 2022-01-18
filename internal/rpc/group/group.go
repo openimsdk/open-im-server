@@ -234,7 +234,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		toInsertInfo.OperatorUserID = req.OpUserID
 		err = imdb.InsertIntoGroupMember(toInsertInfo)
 		if err != nil {
-			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", req.GroupID, toUserInfo.UserID, toUserInfo.Nickname, toUserInfo.FaceUrl)
+			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", req.GroupID, toUserInfo.UserID, toUserInfo.Nickname, toUserInfo.FaceURL)
 			resultNode.Result = -1
 			resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
 			continue
