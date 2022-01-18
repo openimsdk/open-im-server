@@ -245,8 +245,9 @@ func CreateGroup(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.CreateGroupReq{}
-	utils.CopyStructFields(req, &params)
+	req := &rpc.CreateGroupReq{GroupInfo: &open_im_sdk.GroupInfo{}}
+	utils.CopyStructFields(req.GroupInfo, &params)
+
 	for _, v := range params.MemberList {
 		req.InitMemberList = append(req.InitMemberList, &rpc.GroupAddMemberInfo{UserID: v.UserID, RoleLevel: v.RoleLevel})
 	}
