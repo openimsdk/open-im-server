@@ -29,6 +29,6 @@ type GetSelfUserInfoReq struct {
 }
 type GetSelfUserInfoResp struct {
 	CommResp
-	UserInfoList *open_im_sdk.UserInfo    `json:"-"`
-	Data         []map[string]interface{} `json:"data"`
+	UserInfo *open_im_sdk.UserInfo  `json:"-"`
+	Data     map[string]interface{} `json:"data"`
 }
