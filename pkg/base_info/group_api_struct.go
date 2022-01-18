@@ -90,7 +90,7 @@ type CreateGroupReq struct {
 }
 type CreateGroupResp struct {
 	CommResp
-	GroupInfo open_im_sdk.GroupInfo  `json:-`
+	GroupInfo open_im_sdk.GroupInfo  `json:"-"`
 	Data      map[string]interface{} `json:"data"`
 }
 
