@@ -35,7 +35,7 @@ func initMysqlDB() {
 	}
 
 	//Check the database and table during initialization
-	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName)
+	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName+"test1")
 	err = db.Exec(sql).Error
 	if err != nil {
 		log.NewError("0", "Exec failed ", err.Error(), sql)
