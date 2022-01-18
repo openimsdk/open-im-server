@@ -46,7 +46,7 @@ type MsgCallBackResp struct {
 func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
 	if msg.SendTime == 0 {
-		msg.SendTime = utils.GetCurrentTimestampByNano()
+		msg.SendTime = utils.GetCurrentTimestampByMill()
 	}
 	switch msg.ContentType {
 	case constant.Text:
@@ -252,7 +252,7 @@ func Notification(n *NotificationMsg, onlineUserOnly bool) {
 	msg.MsgFrom = n.MsgFrom
 	msg.ContentType = n.ContentType
 	msg.SessionType = n.SessionType
-	msg.CreateTime = utils.GetCurrentTimestampByNano()
+	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(n.SendID)
 	switch n.SessionType {
 	case constant.GroupChatType:
