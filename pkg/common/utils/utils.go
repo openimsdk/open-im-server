@@ -3,7 +3,6 @@ package utils
 import (
 	db "Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
-	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"

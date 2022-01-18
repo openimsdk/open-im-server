@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
-	"Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"errors"
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"

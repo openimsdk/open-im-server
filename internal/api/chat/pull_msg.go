@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/chat"
-	"Open_IM/pkg/proto/sdk_ws"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"

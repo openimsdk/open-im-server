@@ -85,9 +85,9 @@ credential:
 rpcport:
   openImUserPort: [ 10100 ]
   openImFriendPort: [ 10200 ]
-  openImOfflineMessagePort: [ 10300]
+  openImOfflineMessagePort: [ 10300 ]
   openImOnlineRelayPort: [ 10400 ]
-  openImGroupPort: [ 10500  ]
+  openImGroupPort: [ 10500 ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
   c2c:
@@ -144,8 +144,8 @@ push:
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
-  appManagerUid: ["openIM123456","openIM654321"]
-  secrets: ["openIM1","openIM2"]
+  appManagerUid: [ "openIM123456","openIM654321" ]
+  secrets: [ "openIM1","openIM2" ]
 
 secret: tuoyun
 
@@ -176,6 +176,7 @@ iOSPush:
   badgeCount: true
 
 notification:
+
   groupCreated:
     conversation:
       reliabilityLevel: 1
@@ -188,8 +189,7 @@ notification:
     defaultTips:
       tips: "create the group"  # xx create the group
 
-
-  groupInfoChanged:
+  groupInfoSet:
     conversation:
       reliabilityLevel: 1
       unreadCount: false
@@ -201,9 +201,105 @@ notification:
     defaultTips:
       tips: "group info changed by"  # group info changed by xx
 
+  joinGroupApplication:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
 
+  memberQuit:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
 
-  FriendApplicationAdded:
+  groupApplicationAccepted:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  groupApplicationRejected:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  groupOwnerTransferred:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  memberKicked:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  memberInvited:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  memberEnter:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  #############################friend#################################
+
+  friendApplicationAdded:
     conversation:
       reliabilityLevel: 2
       unreadCount: false
@@ -215,7 +311,7 @@ notification:
     defaultTips:
       tips: "I applies to add you as a friend"  #
 
-  FriendApplicationApproved:
+  friendApplicationApproved:
     conversation:
       reliabilityLevel: 2
       unreadCount: false
@@ -228,7 +324,7 @@ notification:
       tips: "I applies to add your friend application"  #
 
 
-  FriendApplicationRejected:
+  friendApplicationRejected:
     conversation:
       reliabilityLevel: 2
       unreadCount: false
@@ -244,7 +340,7 @@ notification:
 
 
 
-  FriendAdded:
+  friendAdded:
     conversation:
       reliabilityLevel: 3
       unreadCount: true
@@ -258,7 +354,7 @@ notification:
 
 
 
-  FriendDeleted:
+  friendDeleted:
     conversation:
       reliabilityLevel: 2
       unreadCount: false
@@ -271,7 +367,7 @@ notification:
       tips: "Deleted a friend"  #
 
 
-  FriendInfoChanged:
+  friendInfoChanged:
     conversation:
       reliabilityLevel: 2
       unreadCount: false
@@ -285,7 +381,7 @@ notification:
 
 
 
-  BlackAdded:
+  blackAdded:
     conversation:
       reliabilityLevel: 2
       unreadCount: false
@@ -298,7 +394,7 @@ notification:
       tips: "Blocked a user"  #
 
 
-  BlackDeleted:
+  blackDeleted:
     conversation:
       reliabilityLevel: 2
       unreadCount: false
@@ -310,7 +406,20 @@ notification:
     defaultTips:
       tips: "Remove a blocked user"
 
-"  # xx  applied to add you as a friend
+  #####################user#########################
+  userInfoUpdated:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Remove a blocked user"
+      desc: "Remove a blocked user"
+      ext: "Remove a blocked user"
+    defaultTips:
+      tips: "Remove a blocked user"
+
+  "  # xx  applied to add you as a friend
 
 
 
@@ -327,9 +436,9 @@ demo:
   superCode: 666666
   mail:
     title: "openIM"
-    senderMail: "1765567899@qq.com"
-    senderAuthorizationCode: "1gxyausfoevlzbfag"
-    smtpAddr: "smtp.qq.com"
-    smtpPort: 25
+senderMail: "1765567899@qq.com"
+senderAuthorizationCode: "1gxyausfoevlzbfag"
+smtpAddr: "smtp.qq.com"
+smtpPort: 25
 
 
