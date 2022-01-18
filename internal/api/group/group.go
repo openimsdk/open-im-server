@@ -167,6 +167,7 @@ func GetGroupAllMemberList(c *gin.Context) {
 
 func GetJoinedGroupList(c *gin.Context) {
 	params := api.GetJoinedGroupListReq{}
+	err := c.BindJSON(&params)
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
