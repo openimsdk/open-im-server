@@ -259,7 +259,7 @@ func Notification(n *NotificationMsg) {
 		msg.RecvID = ""
 		msg.GroupID = n.RecvID
 	}
-	if onlineUserOnly {
+	if true {
 		msg.Options = make(map[string]bool, 10)
 		//utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
@@ -267,23 +267,23 @@ func Notification(n *NotificationMsg) {
 	}
 	offlineInfo.IOSBadgeCount = config.Config.IOSPush.BadgeCount
 	offlineInfo.IOSPushSound = config.Config.IOSPush.PushSound
-	switch msg.ContentType {
-	case constant.GroupCreatedNotification:
-		pushSwitch = config.Config.Notification.GroupCreated.OfflinePush.PushSwitch
-		title = config.Config.Notification.GroupCreated.OfflinePush.Title
-		desc = config.Config.Notification.GroupCreated.OfflinePush.Desc
-		ex = config.Config.Notification.GroupCreated.OfflinePush.Ext
-	case constant.GroupInfoChangedNotification:
-		pushSwitch = config.Config.Notification.GroupInfoChanged.OfflinePush.PushSwitch
-		title = config.Config.Notification.GroupInfoChanged.OfflinePush.Title
-		desc = config.Config.Notification.GroupInfoChanged.OfflinePush.Desc
-		ex = config.Config.Notification.GroupInfoChanged.OfflinePush.Ext
-	case constant.JoinApplicationNotification:
-		pushSwitch = config.Config.Notification.ApplyJoinGroup.OfflinePush.PushSwitch
-		title = config.Config.Notification.ApplyJoinGroup.OfflinePush.Title
-		desc = config.Config.Notification.ApplyJoinGroup.OfflinePush.Desc
-		ex = config.Config.Notification.ApplyJoinGroup.OfflinePush.Ext
-	}
+	//switch msg.ContentType {
+	//case constant.GroupCreatedNotification:
+	//	pushSwitch = config.Config.Notification.GroupCreated.OfflinePush.PushSwitch
+	//	title = config.Config.Notification.GroupCreated.OfflinePush.Title
+	//	desc = config.Config.Notification.GroupCreated.OfflinePush.Desc
+	//	ex = config.Config.Notification.GroupCreated.OfflinePush.Ext
+	//case constant.GroupInfoChangedNotification:
+	//	pushSwitch = config.Config.Notification.GroupInfoChanged.OfflinePush.PushSwitch
+	//	title = config.Config.Notification.GroupInfoChanged.OfflinePush.Title
+	//	desc = config.Config.Notification.GroupInfoChanged.OfflinePush.Desc
+	//	ex = config.Config.Notification.GroupInfoChanged.OfflinePush.Ext
+	//case constant.JoinApplicationNotification:
+	//	pushSwitch = config.Config.Notification.ApplyJoinGroup.OfflinePush.PushSwitch
+	//	title = config.Config.Notification.ApplyJoinGroup.OfflinePush.Title
+	//	desc = config.Config.Notification.ApplyJoinGroup.OfflinePush.Desc
+	//	ex = config.Config.Notification.ApplyJoinGroup.OfflinePush.Ext
+	//}
 	utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, pushSwitch)
 	offlineInfo.Title = title
 	offlineInfo.Desc = desc

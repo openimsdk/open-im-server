@@ -367,7 +367,7 @@ notification:
       tips: "Deleted a friend"  #
 
 
-  friendInfoChanged:
+  friendRemarkSet:
     conversation:
       reliabilityLevel: 2
       unreadCount: false
