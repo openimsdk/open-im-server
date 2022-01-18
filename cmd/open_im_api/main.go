@@ -26,25 +26,27 @@ func main() {
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)    //1
-		userRouterGroup.POST("/get_user_info", user.GetUsersInfo)         //1
+		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)        //1
 		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo) //1
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
 	{
 		//	friendRouterGroup.POST("/get_friends_info", friend.GetFriendsInfo)
-		friendRouterGroup.POST("/add_friend", friend.AddFriend)                     //1
-		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList) //1
-		friendRouterGroup.POST("/get_self_apply_list", friend.GetSelfApplyList)     //1
-		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)            //1
-		friendRouterGroup.POST("/add_blacklist", friend.AddBlacklist)               //1
-		friendRouterGroup.POST("/get_blacklist", friend.GetBlacklist)               //1
-		friendRouterGroup.POST("/remove_blacklist", friend.RemoveBlacklist)         //1
-		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)               //1
-		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)    //1
-		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)        //1
-		friendRouterGroup.POST("/is_friend", friend.IsFriend)                       //1
-		friendRouterGroup.POST("/import_friend", friend.ImportFriend)               //1
+		friendRouterGroup.POST("/add_friend", friend.AddFriend)                              //1
+		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)                        //1
+		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList)          //1
+		friendRouterGroup.POST("/get_self_friend_apply_list", friend.GetSelfFriendApplyList) //1
+		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)                     //1
+		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)             //1
+		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)                 //1
+
+		friendRouterGroup.POST("/add_black", friend.AddBlack)          //1
+		friendRouterGroup.POST("/get_black_list", friend.GetBlacklist) //1
+		friendRouterGroup.POST("/remove_black", friend.RemoveBlack)    //1
+
+		friendRouterGroup.POST("/import_friend", friend.ImportFriend) //1
+		friendRouterGroup.POST("/is_friend", friend.IsFriend)         //1
 	}
 	//group related routing group
 	groupRouterGroup := r.Group("/group")

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package open_im_sdk;//The package name to which the proto file belongs
+package server_api_params;//The package name to which the proto file belongs
 //option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
 
 ////////////////////////////////base///////////////////////////////
@@ -75,8 +75,8 @@ message BlackInfo{
 }
 
 message GroupRequest{
-  string userID = 1;
-  string groupID = 2;
+  PublicUserInfo userInfo = 1;
+  GroupInfo groupInfo = 2;
   string handleResult = 3;
   string reqMsg = 4;
   string  handleMsg = 5;
@@ -87,15 +87,21 @@ message GroupRequest{
 }
 
 message FriendRequest{
-  string  fromUserID = 1;
-  string toUserID = 2;
-  int32 handleResult = 3;
-  string reqMsg = 4;
-  uint32 createTime = 5;
-  string handlerUserID = 6;
-  string handleMsg = 7;
-  uint32 handleTime = 8;
-  string ex = 9;
+  string fromUserID = 1;
+  string fromNickname = 2;
+  string fromFaceURL = 3;
+  int32 fromGender = 4;
+  string toUserID = 5;
+  string toNickname = 6;
+  string toFaceURL = 7;
+  int32 toGender = 8;
+  int32 handleResult = 9;
+  string reqMsg = 10;
+  uint32 createTime = 11;
+  string handlerUserID = 12;
+  string handleMsg = 13;
+  uint32 handleTime = 14;
+  string ex = 15;
 }
 
 ///////////////////////////////////base end/////////////////////////////////////
@@ -217,27 +223,64 @@ message TipsComm{
 }
 
 //////////////////////group/////////////////////
-//Actively join the group
-message MemberEnterTips{
-  GroupInfo group = 1;
-  GroupMemberFullInfo entrantUser = 2;
-  int64 operationTime = 3;
-}
 
-//Actively leave the group
-message MemberLeaveTips{
-  GroupInfo group = 1;
-  GroupMemberFullInfo leaverUser = 2;
-  int64 operationTime = 3;
-}
 
-message MemberInvitedTips{
+//	OnGroupCreated()
+message GroupCreatedTips{
   GroupInfo group = 1;
   GroupMemberFullInfo opUser = 2;
-  repeated GroupMemberFullInfo invitedUserList = 3;
+  repeated GroupMemberFullInfo memberList = 3;
+  int64 operationTime = 4;
+  GroupMemberFullInfo groupOwnerUser = 5;
+}
+
+//	OnGroupInfoSet()
+message GroupInfoSetTips{
+  GroupMemberFullInfo opUser = 1; //who do this
+  int64 muteTime = 2;
+  GroupInfo group = 3;
+}
+
+//	OnJoinGroupApplication()
+message JoinGroupApplicationTips{
+  GroupInfo group = 1;
+  PublicUserInfo applicant = 2;
+  string  reqMsg = 3;
+}
+
+//	OnQuitGroup()
+//Actively leave the group
+message MemberQuitTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo quitUser = 2;
+  int64 operationTime = 3;
+}
+
+
+//	OnApplicationGroupAccepted()
+message GroupApplicationAcceptedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  string  handleMsg = 4;
+}
+
+//	OnApplicationGroupRejected()
+message GroupApplicationRejectedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  string  handleMsg = 4;
+}
+
+//	OnTransferGroupOwner()
+message GroupOwnerTransferredTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  GroupMemberFullInfo newGroupOwner = 3;
   int64 operationTime = 4;
 }
 
+
+//	OnMemberKicked()
 message MemberKickedTips{
   GroupInfo group = 1;
   GroupMemberFullInfo opUser = 2;
@@ -245,39 +288,30 @@ message MemberKickedTips{
   int64 operationTime = 4;
 }
 
-message MemberInfoChangedTips{
-  int32 changeType = 1; ///bitwise operators 0001:member info changed; 0010:mute ;
-  GroupMemberFullInfo opUser = 2; //who do this
-  GroupMemberFullInfo finalInfo = 3; //
-  int64 muteTime = 4;
-  GroupInfo group = 5;
-}
-
-message GroupCreatedTips{
+//	OnMemberInvited()
+message MemberInvitedTips{
   GroupInfo group = 1;
-  GroupMemberFullInfo creator = 2;
-  repeated GroupMemberFullInfo memberList = 3;
+  GroupMemberFullInfo opUser = 2;
+  repeated GroupMemberFullInfo invitedUserList = 3;
   int64 operationTime = 4;
 }
 
-message GroupInfoChangedTips{
-  int32 changedType = 1; //bitwise operators: 0001:groupName; 0010:Notification  0100:Introduction; 1000:FaceUrl
-  GroupInfo group = 2;
-  GroupMemberFullInfo opUser = 3;
+//Actively join the group
+message MemberEnterTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo entrantUser = 2;
+  int64 operationTime = 3;
 }
 
-message JoinGroupApplicationTips{
-  GroupInfo group = 1;
-  PublicUserInfo applicant = 2;
-  string  reason = 3;
-}
 
-message ApplicationProcessedTips{
-  GroupInfo group = 1;
-  GroupMemberFullInfo opUser = 2;
-  int32 result = 3;
-  string  reason = 4;
-}
+
+
+
+
+
+
+
+
 
 //////////////////////friend/////////////////////
 //message FriendInfo{
@@ -299,14 +333,22 @@ message FromToUserID{
 }
 
 //FromUserID apply to add ToUserID
-message FriendApplicationAddedTips{
+message FriendApplicationTips{
   FromToUserID fromToUserID = 1;
 }
 
 //FromUserID accept or reject ToUserID
-message FriendApplicationProcessedTips{
+message FriendApplicationApprovedTips{
   FromToUserID fromToUserID = 1;
+  string handleMsg = 2;
 }
+
+//FromUserID accept or reject ToUserID
+message FriendApplicationRejectedTips{
+  FromToUserID fromToUserID = 1;
+   string handleMsg = 2;
+}
+
 
 // FromUserID  Added a friend ToUserID
 message FriendAddedTips{
@@ -335,6 +377,6 @@ message FriendInfoChangedTips{
   FromToUserID fromToUserID = 1;
 }
 //////////////////////user/////////////////////
-message SelfInfoUpdatedTips{
+message UserInfoUpdatedTips{
   string userID = 1;
 }

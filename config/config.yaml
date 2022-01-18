@@ -85,9 +85,9 @@ credential:
 rpcport:
   openImUserPort: [ 10100 ]
   openImFriendPort: [ 10200 ]
-  openImOfflineMessagePort: [ 10300]
+  openImOfflineMessagePort: [ 10300 ]
   openImOnlineRelayPort: [ 10400 ]
-  openImGroupPort: [ 10500  ]
+  openImGroupPort: [ 10500 ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
   c2c:
@@ -144,8 +144,8 @@ push:
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
-  appManagerUid: ["openIM123456","openIM654321"]
-  secrets: ["openIM1","openIM2"]
+  appManagerUid: [ "openIM123456","openIM654321" ]
+  secrets: [ "openIM1","openIM2" ]
 
 secret: tuoyun
 
@@ -176,30 +176,251 @@ iOSPush:
   badgeCount: true
 
 notification:
+
   groupCreated:
     conversation:
-      conversationChanged: true
+      reliabilityLevel: 1
       unreadCount: true
     offlinePush:
       switch: true
-      title: "create group title"
+      title: "create group title" # xx create the group
       desc: "create group desc"
       ext: "create group ext"
     defaultTips:
       tips: "create the group"  # xx create the group
 
-  groupInfoChanged:
+  groupInfoSet:
     conversation:
-      conversationChanged: true
-      unreadCount: true
+      reliabilityLevel: 1
+      unreadCount: false
     offlinePush:
-      switch: true
+      switch: false
       title: "group info changed title"
       desc: "group info changed desc"
       ext: "group info changed ext"
     defaultTips:
       tips: "group info changed by"  # group info changed by xx
-      conversationChanged: 0
+
+  joinGroupApplication:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  memberQuit:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  groupApplicationAccepted:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  groupApplicationRejected:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  groupOwnerTransferred:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  memberKicked:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  memberInvited:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  memberEnter:
+    conversation:
+      reliabilityLevel: 1
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "group info changed title"
+      desc: "group info changed desc"
+      ext: "group info changed ext"
+    defaultTips:
+      tips: "group info changed by"  # group info changed by xx
+
+  #############################friend#################################
+
+  friendApplicationAdded:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Somebody applies to add you as a friend"
+      desc: "Somebody applies to add you as a friend"
+      ext: "Somebody applies to add you as a friend"
+    defaultTips:
+      tips: "I applies to add you as a friend"  #
+
+  friendApplicationApproved:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Someone applies to add your friend application"
+      desc: "Someone applies to add your friend application"
+      ext: "Someone applies to add your friend application"
+    defaultTips:
+      tips: "I applies to add your friend application"  #
+
+
+  friendApplicationRejected:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Someone rejected your friend application"
+      desc: "Someone rejected your friend application"
+      ext: "Someone rejected your friend application"
+    defaultTips:
+      tips: "I rejected your friend application"  #
+
+
+
+
+
+  friendAdded:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: true
+      title: "We have become friends"
+      desc: "We have become friends"
+      ext: "We have become friends"
+    defaultTips:
+      tips: "We have become friends"  #
+
+
+
+  friendDeleted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Deleted a friend"
+      desc: "Deleted a friend"
+      ext: "Deleted a friend"
+    defaultTips:
+      tips: "Deleted a friend"  #
+
+
+  friendRemarkSet:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Your friend's profile has been changed"
+      desc: "Your friend's profile has been changed"
+      ext: "Your friend's profile has been changed"
+    defaultTips:
+      tips: "Your friend's profile has been changed"  #
+
+
+
+  blackAdded:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Blocked a user"
+      desc: "Blocked a user"
+      ext: "Blocked a user"
+    defaultTips:
+      tips: "Blocked a user"  #
+
+
+  blackDeleted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Remove a blocked user"
+      desc: "Remove a blocked user"
+      ext: "Remove a blocked user"
+    defaultTips:
+      tips: "Remove a blocked user"
+
+  #####################user#########################
+  userInfoUpdated:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Remove a blocked user"
+      desc: "Remove a blocked user"
+      ext: "Remove a blocked user"
+    defaultTips:
+      tips: "Remove a blocked user"
+
+
+
 
 
 #---------------demo configuration---------------------#
@@ -215,9 +436,9 @@ demo:
   superCode: 666666
   mail:
     title: "openIM"
-    senderMail: "1765567899@qq.com"
-    senderAuthorizationCode: "1gxyausfoevlzbfag"
-    smtpAddr: "smtp.qq.com"
-    smtpPort: 25
+senderMail: "1765567899@qq.com"
+senderAuthorizationCode: "1gxyausfoevlzbfag"
+smtpAddr: "smtp.qq.com"
+smtpPort: 25
 
 

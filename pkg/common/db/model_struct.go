@@ -34,7 +34,7 @@ type Friend struct {
 //int64 HandleTime = 8;
 //string Ex = 9;
 //}
-//open_im_sdk.FriendRequest == imdb.FriendRequest
+//open_im_sdk.FriendRequest(nickname, farce url ...) != imdb.FriendRequest
 type FriendRequest struct {
 	FromUserID    string    `gorm:"column:from_user_id;primary_key;size:64"`
 	ToUserID      string    `gorm:"column:to_user_id;primary_key;size:64"`
@@ -138,7 +138,7 @@ type GroupRequest struct {
 type User struct {
 	UserID         string    `gorm:"column:user_id;primary_key;size:64"`
 	Nickname       string    `gorm:"column:name;size:255"`
-	FaceUrl        string    `gorm:"column:face_url;size:255"`
+	FaceURL        string    `gorm:"column:face_url;size:255"`
 	Gender         int32     `gorm:"column:gender"`
 	PhoneNumber    string    `gorm:"column:phone_number;size:32"`
 	Birth          time.Time `gorm:"column:birth"`

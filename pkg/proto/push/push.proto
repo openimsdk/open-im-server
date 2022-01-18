@@ -5,7 +5,7 @@ package push;
 
 message PushMsgReq {
   string operationID = 1;
-  open_im_sdk.MsgData msgData = 2;
+  server_api_params.MsgData msgData = 2;
 }
 message PushMsgResp{
   int32   ResultCode = 1;

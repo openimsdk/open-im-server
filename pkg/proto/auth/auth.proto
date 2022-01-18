@@ -9,7 +9,7 @@ message CommonResp{
 }
 
 message UserRegisterReq {
-    open_im_sdk.UserInfo UserInfo = 1;
+    server_api_params.UserInfo UserInfo = 1;
     string OperationID = 2;
 }
 message UserRegisterResp {

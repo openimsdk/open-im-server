@@ -22,7 +22,7 @@ message GetFriendsInfoReq{
 message GetFriendInfoResp{
   int32  ErrCode = 1;
   string ErrMsg = 2;
-  repeated open_im_sdk.FriendInfo FriendInfoList = 3;
+  repeated server_api_params.FriendInfo FriendInfoList = 3;
 //  int32 IsBlack = 4;
 }
 
@@ -58,7 +58,7 @@ message GetFriendApplyListReq{
 message GetFriendApplyListResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.FriendRequest FriendRequestList = 3;
+  repeated server_api_params.FriendRequest FriendRequestList = 3;
 }
 
 
@@ -68,7 +68,7 @@ message GetFriendListReq{
 message GetFriendListResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.FriendInfo FriendInfoList = 3;
+  repeated server_api_params.FriendInfo FriendInfoList = 3;
 }
 
 
@@ -93,7 +93,7 @@ message GetBlacklistReq{
 message GetBlacklistResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.PublicUserInfo BlackUserInfoList = 3;
+  repeated server_api_params.PublicUserInfo BlackUserInfoList = 3;
 }
 
 
@@ -127,7 +127,7 @@ message DeleteFriendResp{
 //process
 message AddFriendResponseReq{
   CommID CommID = 1;
-  int32  flag = 2;
+  int32  handleResult = 2;
   string handleMsg = 3;
 }
 message AddFriendResponseResp{
@@ -148,7 +148,7 @@ message GetSelfApplyListReq{
 message GetSelfApplyListResp{
   int32   ErrCode = 1;
   string  ErrMsg = 2;
-  repeated open_im_sdk.FriendRequest FriendRequestList = 3;
+  repeated server_api_params.FriendRequest FriendRequestList = 3;
 }
 
 service friend{

@@ -88,33 +88,25 @@ func initRotateLogs(rotationTime time.Duration, maxRemainNum uint, level string,
 	}
 }
 
-//Deprecated
-func Info(token, OperationID, format string, args ...interface{}) {
+func Info(OperationID string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{
-		"PID":         logger.Pid,
 		"OperationID": OperationID,
-	}).Infof(format, args...)
-
+		"PID":         logger.Pid,
+	}).Infoln(args)
 }
 
-//Deprecated
-func Error(token, OperationID, format string, args ...interface{}) {
-
+func Error(OperationID string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{
-		"PID":         logger.Pid,
 		"OperationID": OperationID,
-	}).Errorf(format, args...)
-
+		"PID":         logger.Pid,
+	}).Errorln(args)
 }
 
-//Deprecated
-func Debug(token, OperationID, format string, args ...interface{}) {
-
+func Debug(OperationID string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{
-		"PID":         logger.Pid,
 		"OperationID": OperationID,
-	}).Debugf(format, args...)
-
+		"PID":         logger.Pid,
+	}).Debugln(args)
 }
 
 //Deprecated

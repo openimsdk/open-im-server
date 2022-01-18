@@ -18,57 +18,104 @@ func OperationIDGenerator() string {
 func FriendOpenIMCopyDB(dst *db.Friend, src *open_im_sdk.FriendInfo) {
 	utils.CopyStructFields(dst, src)
 	dst.FriendUserID = src.FriendUser.UserID
+	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
 }
 
-func FriendDBCopyOpenIM(dst *open_im_sdk.FriendInfo, src *db.Friend) {
+func FriendDBCopyOpenIM(dst *open_im_sdk.FriendInfo, src *db.Friend) error {
 	utils.CopyStructFields(dst, src)
-	user, _ := imdb.GetUserByUserID(src.FriendUserID)
-	if user != nil {
-		utils.CopyStructFields(dst.FriendUser, user)
+	user, err := imdb.GetUserByUserID(src.FriendUserID)
+	if err != nil {
+		return utils.Wrap(err, "")
 	}
+	utils.CopyStructFields(dst.FriendUser, user)
 	dst.CreateTime = uint32(src.CreateTime.Unix())
 	dst.FriendUser.CreateTime = uint32(user.CreateTime.Unix())
+	return nil
 }
 
 //
 func FriendRequestOpenIMCopyDB(dst *db.FriendRequest, src *open_im_sdk.FriendRequest) {
 	utils.CopyStructFields(dst, src)
+	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
+	dst.HandleTime = utils.UnixSecondToTime(int64(src.HandleTime))
 }
 
-func FriendRequestDBCopyOpenIM(dst *open_im_sdk.FriendRequest, src *db.FriendRequest) {
+func FriendRequestDBCopyOpenIM(dst *open_im_sdk.FriendRequest, src *db.FriendRequest) error {
 	utils.CopyStructFields(dst, src)
+	user, err := imdb.GetUserByUserID(src.FromUserID)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	dst.FromNickname = user.Nickname
+	dst.FromFaceURL = user.FaceURL
+	dst.FromGender = user.Gender
+	user, err = imdb.GetUserByUserID(src.ToUserID)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	dst.ToNickname = user.Nickname
+	dst.ToFaceURL = user.FaceURL
+	dst.ToGender = user.Gender
 	dst.CreateTime = uint32(src.CreateTime.Unix())
 	dst.HandleTime = uint32(src.HandleTime.Unix())
+	return nil
+}
+
+func BlackOpenIMCopyDB(dst *db.Black, src *open_im_sdk.BlackInfo) {
+	utils.CopyStructFields(dst, src)
+	dst.BlockUserID = src.BlackUserInfo.UserID
+	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
+}
+
+func BlackDBCopyOpenIM(dst *open_im_sdk.BlackInfo, src *db.Black) error {
+	utils.CopyStructFields(dst, src)
+	dst.CreateTime = uint32(src.CreateTime.Unix())
+	user, err := imdb.GetUserByUserID(src.BlockUserID)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	utils.CopyStructFields(dst.BlackUserInfo, user)
+	return nil
 }
 
 func GroupOpenIMCopyDB(dst *db.Group, src *open_im_sdk.GroupInfo) {
 	utils.CopyStructFields(dst, src)
 }
 
-func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *db.Group) {
+func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *db.Group) error {
 	utils.CopyStructFields(dst, src)
-	user, _ := imdb.GetGroupOwnerInfoByGroupID(src.GroupID)
-	if user != nil {
-		dst.OwnerUserID = user.UserID
+	user, err := imdb.GetGroupOwnerInfoByGroupID(src.GroupID)
+	if err != nil {
+		return utils.Wrap(err, "")
 	}
-	dst.MemberCount = imdb.GetGroupMemberNumByGroupID(src.GroupID)
+	dst.OwnerUserID = user.UserID
+
+	dst.MemberCount, err = imdb.GetGroupMemberNumByGroupID(src.GroupID)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
 	dst.CreateTime = uint32(src.CreateTime.Unix())
+	return nil
 }
 
 func GroupMemberOpenIMCopyDB(dst *db.GroupMember, src *open_im_sdk.GroupMemberFullInfo) {
 	utils.CopyStructFields(dst, src)
 }
 
-func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.GroupMember) {
+func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.GroupMember) error {
 	utils.CopyStructFields(dst, src)
 	if token_verify.IsMangerUserID(src.UserID) {
-		u, _ := imdb.GetUserByUserID(src.UserID)
-		if u != nil {
-			utils.CopyStructFields(dst, u)
+		u, err := imdb.GetUserByUserID(src.UserID)
+		if err != nil {
+			return utils.Wrap(err, "")
 		}
+
+		utils.CopyStructFields(dst, u)
+
 		dst.AppMangerLevel = 1
 	}
 	dst.JoinTime = src.JoinTime.Unix()
+	return nil
 }
 
 func GroupRequestOpenIMCopyDB(dst *db.GroupRequest, src *open_im_sdk.GroupRequest) {
@@ -83,23 +130,21 @@ func GroupRequestDBCopyOpenIM(dst *open_im_sdk.GroupRequest, src *db.GroupReques
 
 func UserOpenIMCopyDB(dst *db.User, src *open_im_sdk.UserInfo) {
 	utils.CopyStructFields(dst, src)
+	dst.Birth = utils.UnixSecondToTime(int64(src.Birth))
+	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
 }
 
 func UserDBCopyOpenIM(dst *open_im_sdk.UserInfo, src *db.User) {
 	utils.CopyStructFields(dst, src)
 	dst.CreateTime = uint32(src.CreateTime.Unix())
+	dst.Birth = uint32(src.Birth.Unix())
 }
 
-func BlackOpenIMCopyDB(dst *db.Black, src *open_im_sdk.BlackInfo) {
+func UserDBCopyOpenIMPublicUser(dst *open_im_sdk.PublicUserInfo, src *db.User) {
 	utils.CopyStructFields(dst, src)
-	dst.BlockUserID = src.BlackUserInfo.UserID
 }
 
-func BlackDBCopyOpenIM(dst *open_im_sdk.BlackInfo, src *db.Black) {
-	utils.CopyStructFields(dst, src)
-	dst.CreateTime = uint32(src.CreateTime.Unix())
-	user, _ := imdb.GetUserByUserID(src.BlockUserID)
-	if user != nil {
-		utils.CopyStructFields(dst.BlackUserInfo, user)
-	}
-}
+//
+//func PublicUserDBCopyOpenIM(dst *open_im_sdk.PublicUserInfo, src *db.User){
+//
+//}

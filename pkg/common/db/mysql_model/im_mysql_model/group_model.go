@@ -2,6 +2,7 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"time"
 )
 
@@ -37,7 +38,7 @@ func InsertIntoGroup(groupInfo db.Group) error {
 func GetGroupInfoByGroupID(groupId string) (*db.Group, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
-		return nil, err
+		return nil, utils.Wrap(err, "")
 	}
 	var groupInfo db.Group
 	err = dbConn.Table("groups").Where("group_id=?", groupId).Find(&groupInfo).Error

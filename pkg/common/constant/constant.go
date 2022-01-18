@@ -45,24 +45,28 @@ const (
 	GroupMsg       = 201
 
 	//SysRelated
-	FriendApplicationProcessedNotification = 1201 //AcceptFriendApplicationTip = 201
-	FriendApplicationAddedNotification     = 1202 //AddFriendTip               = 202
-	FriendAddedNotification                = 1203
-	FriendDeletedNotification              = 1204
-	FriendInfoChangedNotification          = 1205
-	BlackAddedNotification                 = 1206
-	BlackDeletedNotification               = 1207
 
-	SelfInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
+	FriendApplicationApprovedNotification = 1201 //add_friend_response
+	FriendApplicationRejectedNotification = 1202 //add_friend_response
+	FriendApplicationNotification         = 1203 //add_friend
+	FriendAddedNotification               = 1204
+	FriendDeletedNotification             = 1205 //delete_friend
+	FriendRemarkSetNotification           = 1206 //set_friend_remark?
+	BlackAddedNotification                = 1207 //add_black
+	BlackDeletedNotification              = 1208 //remove_black
 
-	GroupCreatedNotification         = 1501 //CreateGroupTip            = 502
-	JoinApplicationNotification      = 1502 //JoinGroupTip              = 504
-	ApplicationProcessedNotification = 1503 //AcceptGroupApplicationTip = 507 RefuseGroupApplicationTip = 508
-	MemberInvitedNotification        = 1504 //InviteUserToGroupTip      = 510
-	MemberKickedNotification         = 1505 //KickGroupMemberTip        = 509
-	GroupInfoChangedNotification     = 1506 //SetGroupInfoTip           = 506  TransferGroupOwnerTip     = 501
-	MemberLeaveNotification          = 1507 //QuitGroupTip              = 505
-	MemberEnterNotification          = 1508
+	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
+
+	GroupCreatedNotification             = 1501
+	GroupInfoSetNotification             = 1502
+	JoinGroupApplicationNotification     = 1503
+	MemberQuitNotification               = 1504
+	GroupApplicationAcceptedNotification = 1505
+	GroupApplicationRejectedNotification = 1506
+	GroupOwnerTransferredNotification    = 1507
+	MemberKickedNotification             = 1508
+	MemberInvitedNotification            = 1509
+	MemberEnterNotification              = 1510
 
 	//MsgFrom
 	UserMsgType = 100
@@ -127,6 +131,9 @@ const (
 
 	GroupResponseAgree  = 1
 	GroupResponseRefuse = -1
+
+	FriendResponseAgree  = 1
+	FriendResponseRefuse = -1
 
 	Male   = 1
 	Female = 2
