@@ -240,6 +240,7 @@ type NotificationMsg struct {
 }
 
 func Notification(n *NotificationMsg) {
+	return
 	var req pbChat.SendMsgReq
 	var msg sdk_ws.MsgData
 	var offlineInfo sdk_ws.OfflinePushInfo
