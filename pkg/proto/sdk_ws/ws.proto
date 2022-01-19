@@ -77,7 +77,7 @@ message BlackInfo{
 message GroupRequest{
   PublicUserInfo userInfo = 1;
   GroupInfo groupInfo = 2;
-  string handleResult = 3;
+  int32 handleResult = 3;
   string reqMsg = 4;
   string  handleMsg = 5;
   uint32 reqTime = 6;
