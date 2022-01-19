@@ -52,7 +52,7 @@ func initMysqlDB() {
 	}
 
 	log.NewInfo("open db ok ", dsn)
-
+	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.AutoMigrate(&Friend{},
 		&FriendRequest{},
 		&Group{},
