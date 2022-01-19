@@ -450,7 +450,7 @@ func SetGroupInfo(c *gin.Context) {
 		return
 	}
 	req := &rpc.SetGroupInfoReq{GroupInfo: &open_im_sdk.GroupInfo{}}
-	utils.CopyStructFields(req.GroupInfo, &params.Group)
+	utils.CopyStructFields(req.GroupInfo, &params)
 	req.OperationID = params.OperationID
 	var ok bool
 	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
