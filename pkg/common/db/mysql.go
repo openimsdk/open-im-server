@@ -52,7 +52,6 @@ func initMysqlDB() {
 	}
 
 	log.NewInfo("open db ok ", dsn)
-	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.AutoMigrate(&Friend{},
 		&FriendRequest{},
 		&Group{},
@@ -60,6 +59,8 @@ func initMysqlDB() {
 		&GroupRequest{},
 		&User{},
 		&Black{})
+	db.Set("gorm:table_options", "CHARSET=utf8")
+
 	//
 	//if !db.HasTable(&Friend{}) {
 	//	log.NewInfo("CreateTable Friend")
