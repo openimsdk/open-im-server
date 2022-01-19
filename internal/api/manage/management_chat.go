@@ -60,10 +60,10 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 			MsgFrom:          constant.SysMsgType,
 			ContentType:      params.ContentType,
 			Content:          []byte(newContent),
-			ForceList:        params.ForceList,
-			CreateTime:       utils.GetCurrentTimestampByMill(),
-			Options:          options,
-			OfflinePushInfo:  params.OfflinePushInfo,
+			//	ForceList:        params.ForceList,
+			CreateTime:      utils.GetCurrentTimestampByMill(),
+			Options:         options,
+			OfflinePushInfo: params.OfflinePushInfo,
 		},
 	}
 	return &pbData

@@ -281,7 +281,7 @@ func CreateGroup(c *gin.Context) {
 }
 
 //  群主或管理员收到的
-func GetGroupApplicationList(c *gin.Context) {
+func GetRecvGroupApplicationList(c *gin.Context) {
 	params := api.GetGroupApplicationListReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
