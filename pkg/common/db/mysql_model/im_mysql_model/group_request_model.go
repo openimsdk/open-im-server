@@ -36,6 +36,14 @@ func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
 		return err
 	}
 
+	if toInsertInfo.HandledTime.Unix() < 0 {
+		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
+	}
+	u := dbConn.Table("group_requests").Where("group_id=? and user_id=?", toInsertInfo.GroupID, toInsertInfo.UserID).Update(&toInsertInfo)
+	if u.RowsAffected != 0 {
+		return nil
+	}
+
 	toInsertInfo.ReqTime = time.Now()
 	if toInsertInfo.HandledTime.Unix() < 0 {
 		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
