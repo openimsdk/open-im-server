@@ -1,7 +1,6 @@
 package base_info
 
 import (
-	"Open_IM/pkg/common/db"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 )
 
@@ -143,8 +142,13 @@ type QuitGroupResp struct {
 }
 
 type SetGroupInfoReq struct {
-	db.Group
-	OperationID string `json:"operationID" binding:"required"`
+	GroupID      string `json:"groupID" binding:"required"`
+	GroupName    string `json:"groupName"`
+	Notification string `json:"notification"`
+	Introduction string `json:"introduction"`
+	FaceURL      string `json:"faceURL"`
+	Ex           string `json:"ex"`
+	OperationID  string `json:"operationID" binding:"required"`
 }
 type SetGroupInfoResp struct {
 	CommResp
