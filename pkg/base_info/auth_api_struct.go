@@ -12,7 +12,7 @@ package base_info
 type UserRegisterReq struct {
 	Secret   string `json:"secret" binding:"required,max=32"`
 	Platform int32  `json:"platform" binding:"required,min=1,max=7"`
-	UserInfo
+	ApiUserInfo
 	OperationID string `json:"operationID" binding:"required"`
 }
 
