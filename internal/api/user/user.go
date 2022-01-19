@@ -115,13 +115,12 @@ func GetSelfUserInfo(c *gin.Context) {
 		return
 	}
 	if len(RpcResp.UserInfoList) == 1 {
-		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: RpcResp.UserInfoList[0]}
-		resp.Data = jsonData.JsonDataList(resp.UserInfoList)
+		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfo: RpcResp.UserInfoList[0]}
+		resp.Data = jsonData.JsonDataOne(resp.UserInfo)
 		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
 		c.JSON(http.StatusOK, resp)
 	} else {
 		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
-		resp.Data = jsonData.JsonDataList(resp.UserInfoList)
 		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
 		c.JSON(http.StatusOK, resp)
 	}
