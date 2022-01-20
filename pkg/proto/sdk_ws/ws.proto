@@ -110,10 +110,7 @@ message FriendRequest{
 message PullMessageBySeqListResp {
   int32 errCode = 1;
   string errMsg = 2;
-  int64 maxSeq = 3;
-  int64 minSeq = 4;
-  repeated GatherFormat singleUserMsg = 5;
-  repeated GatherFormat groupUserMsg = 6;
+  repeated MsgData list = 3;
 }
 message PullMessageBySeqListReq{
   string userID = 1;
