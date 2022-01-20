@@ -31,9 +31,7 @@ func UnixNanoSecondToTime(nanoSecond int64) time.Time {
 	return time.Unix(0, nanoSecond)
 }
 func UnixMillSecondToTime(millSecond int64) time.Time {
-	sec := millSecond / 1000
-	msec := millSecond % 1000
-	return time.Unix(sec, msec*int64(time.Millisecond))
+	return time.Unix(0, millSecond*1e6)
 }
 
 //Get the current timestamp by Nano
