@@ -142,7 +142,7 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m *pbMsg.MsgDataToD
 	log.NewDebug("", "find mgo uid cost time", getCurrentTimestampByMill()-newTime)
 	sMsg := MsgInfo{}
 	sMsg.SendTime = sendTime
-	if sMsg.Msg, err = proto.Marshal(m); err != nil {
+	if sMsg.Msg, err = proto.Marshal(m.MsgData); err != nil {
 		return err
 	}
 	if n == 0 {
