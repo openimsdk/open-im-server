@@ -10,7 +10,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"encoding/json"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"runtime"
@@ -51,8 +50,6 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	switch m.ReqIdentifier {
 	case constant.WSGetNewestSeq:
 		ws.getSeqReq(conn, &m)
-	case constant.WSPullMsg:
-		ws.pullMsgReq(conn, &m)
 	case constant.WSSendMsg:
 		ws.sendMsgReq(conn, &m)
 	case constant.WSPullMsgBySeqList:
@@ -63,24 +60,24 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 }
 func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to getNewSeq", m.MsgIncr, m.SendID, m.ReqIdentifier)
-	pbData := pbChat.GetMaxAndMinSeqReq{}
+	rpcReq := pbChat.GetMaxAndMinSeqReq{}
 	nReply := new(pbChat.GetMaxAndMinSeqResp)
-	pbData.UserID = m.SendID
-	pbData.OperationID = m.OperationID
+	rpcReq.UserID = m.SendID
+	rpcReq.OperationID = m.OperationID
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 	if grpcConn == nil {
-		log.ErrorByKv("get grpcConn err", pbData.OperationID, "args", m)
+		log.ErrorByKv("get grpcConn err", rpcReq.OperationID, "args", m)
 	}
 	msgClient := pbChat.NewChatClient(grpcConn)
-	reply, err := msgClient.GetMaxAndMinSeq(context.Background(), &pbData)
+	rpcReply, err := msgClient.GetMaxAndMinSeq(context.Background(), &rpcReq)
 	if err != nil {
-		log.ErrorByKv("rpc call failed to getSeqReq", pbData.OperationID, "err", err, "pbData", pbData.String())
-		nReply.ErrCode = 200
+		log.Error(rpcReq.OperationID, "rpc call failed to getSeqReq", err, rpcReq.String())
+		nReply.ErrCode = 500
 		nReply.ErrMsg = err.Error()
 		ws.getSeqResp(conn, m, nReply)
 	} else {
-		log.InfoByKv("rpc call success to getSeqReq", pbData.OperationID, "replyData", reply.String())
-		ws.getSeqResp(conn, m, reply)
+		log.InfoByKv("rpc call success to getSeqReq", rpcReq.OperationID, "replyData", rpcReply.String())
+		ws.getSeqResp(conn, m, rpcReply)
 	}
 }
 func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeqResp) {
@@ -98,121 +95,38 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeq
 	}
 	ws.sendMsg(conn, mReply)
 }
-func (ws *WServer) pullMsgReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to pullMsgReq", m.ReqIdentifier, m.MsgIncr, m.SendID)
-	nReply := new(sdk_ws.PullMessageResp)
-	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsg)
-	if isPass {
-		pbData := sdk_ws.PullMessageReq{}
-		pbData.UserID = m.SendID
-		pbData.OperationID = m.OperationID
-		pbData.SeqBegin = data.(SeqData).SeqBegin
-		pbData.SeqEnd = data.(SeqData).SeqEnd
-		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
-		msgClient := pbChat.NewChatClient(grpcConn)
-		reply, err := msgClient.PullMessage(context.Background(), &pbData)
-		if err != nil {
-			log.ErrorByKv("PullMessage error", pbData.OperationID, "err", err.Error())
-			nReply.ErrCode = 200
-			nReply.ErrMsg = err.Error()
-			ws.pullMsgResp(conn, m, nReply)
-		} else {
-			log.InfoByKv("rpc call success to pullMsgRep", pbData.OperationID, "ReplyArgs", reply.String(), "maxSeq", reply.GetMaxSeq(),
-				"MinSeq", reply.GetMinSeq(), "singLen", len(reply.GetSingleUserMsg()), "groupLen", len(reply.GetGroupUserMsg()))
-			ws.pullMsgResp(conn, m, reply)
-		}
-	} else {
-		nReply.ErrCode = errCode
-		nReply.ErrMsg = errMsg
-		ws.pullMsgResp(conn, m, nReply)
-	}
-}
-func (ws *WServer) pullMsgResp(conn *UserConn, m *Req, pb *sdk_ws.PullMessageResp) {
-	log.NewInfo(m.OperationID, "pullMsgResp come  here ", pb.String())
-	var mReplyData sdk_ws.PullMessageBySeqListResp
-	a, err := json.Marshal(pb.SingleUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "GetSingleUserMsg,json marshal,err", err.Error())
-	}
-	log.NewInfo(m.OperationID, "pullMsgResp json is ", len(pb.SingleUserMsg))
-	err = json.Unmarshal(a, &mReplyData.SingleUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
-	}
-	b, err := json.Marshal(pb.GroupUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "mReplyData,json marshal,err", err.Error())
-	}
-	err = json.Unmarshal(b, &mReplyData.GroupUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "test SingleUserMsg,json Unmarshal,err", err.Error())
-	}
-	c, err := proto.Marshal(&mReplyData)
-	log.NewInfo(m.OperationID, "test info is ", len(mReplyData.SingleUserMsg), mReplyData.SingleUserMsg)
-	mReply := Resp{
-		ReqIdentifier: m.ReqIdentifier,
-		MsgIncr:       m.MsgIncr,
-		ErrCode:       pb.GetErrCode(),
-		ErrMsg:        pb.GetErrMsg(),
-		OperationID:   m.OperationID,
-		Data:          c,
-	}
-	log.NewInfo(m.OperationID, "pullMsgResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
-		len(mReply.Data))
-	ws.sendMsg(conn, mReply)
 
-}
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr)
-	nReply := new(sdk_ws.PullMessageResp)
+	nReply := new(sdk_ws.PullMessageBySeqListResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
 	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList)
 	if isPass {
-		pbData := sdk_ws.PullMessageBySeqListReq{}
-		pbData.SeqList = data.(sdk_ws.PullMessageBySeqListReq).SeqList
-		pbData.UserID = m.SendID
-		pbData.OperationID = m.OperationID
+		rpcReq := sdk_ws.PullMessageBySeqListReq{}
+		rpcReq.SeqList = data.(sdk_ws.PullMessageBySeqListReq).SeqList
+		rpcReq.UserID = m.SendID
+		rpcReq.OperationID = m.OperationID
 		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		msgClient := pbChat.NewChatClient(grpcConn)
-		reply, err := msgClient.PullMessageBySeqList(context.Background(), &pbData)
+		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
 		if err != nil {
-			log.NewError(pbData.OperationID, "pullMsgBySeqListReq err", err.Error())
+			log.NewError(rpcReq.OperationID, "pullMsgBySeqListReq err", err.Error())
 			nReply.ErrCode = 200
 			nReply.ErrMsg = err.Error()
-			ws.pullMsgResp(conn, m, nReply)
+			ws.pullMsgBySeqListResp(conn, m, nReply)
 		} else {
-			log.NewInfo(pbData.OperationID, "rpc call success to pullMsgBySeqListReq", reply.String(), reply.GetMaxSeq(), reply.GetMinSeq(), len(reply.GetSingleUserMsg()), len(reply.GetGroupUserMsg()))
+			log.NewInfo(rpcReq.OperationID, "rpc call success to pullMsgBySeqListReq", reply.String(), len(reply.List))
 			ws.pullMsgBySeqListResp(conn, m, reply)
 		}
 	} else {
 		nReply.ErrCode = errCode
 		nReply.ErrMsg = errMsg
-		ws.pullMsgResp(conn, m, nReply)
+		ws.pullMsgBySeqListResp(conn, m, nReply)
 	}
 }
 func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullMessageBySeqListResp) {
-	log.NewInfo(m.OperationID, "pullMsgResp come  here ", pb.String())
-	var mReplyData sdk_ws.PullMessageBySeqListResp
-	a, err := json.Marshal(pb.SingleUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "GetSingleUserMsg,json marshal,err", err.Error())
-	}
-	log.NewInfo(m.OperationID, "pullMsgResp json is ", len(pb.SingleUserMsg))
-	err = json.Unmarshal(a, &mReplyData.SingleUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "SingleUserMsg,json Unmarshal,err", err.Error())
-	}
-	b, err := json.Marshal(pb.GroupUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "mReplyData,json marshal,err", err.Error())
-	}
-	err = json.Unmarshal(b, &mReplyData.GroupUserMsg)
-	if err != nil {
-		log.NewError(m.OperationID, "test SingleUserMsg,json Unmarshal,err", err.Error())
-	}
-	c, err := proto.Marshal(&mReplyData)
-	log.NewInfo(m.OperationID, "test info is ", len(mReplyData.SingleUserMsg), mReplyData.SingleUserMsg)
-
+	log.NewInfo(m.OperationID, "pullMsgBySeqListResp come  here ", pb.String())
+	c, _ := proto.Marshal(pb)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
@@ -221,7 +135,7 @@ func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullM
 		OperationID:   m.OperationID,
 		Data:          c,
 	}
-	log.NewInfo(m.OperationID, "pullMsgResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
+	log.NewInfo(m.OperationID, "pullMsgBySeqListResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
 		len(mReply.Data))
 
 	ws.sendMsg(conn, mReply)

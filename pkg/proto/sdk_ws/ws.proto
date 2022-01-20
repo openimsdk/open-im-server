@@ -115,61 +115,14 @@ message PullMessageBySeqListResp {
 message PullMessageBySeqListReq{
   string userID = 1;
   string operationID = 2;
-  repeated int64 seqList = 3;
-}
-message PullMessageReq {
-  string userID = 1;
-  int64 seqBegin = 2;
-  int64 seqEnd = 3;
-  string operationID = 4;
-}
-message PullMessageResp {
-  int32 errCode = 1;
-  string errMsg = 2;
-  int64 maxSeq = 3;
-  int64 minSeq = 4;
-  repeated GatherFormat singleUserMsg = 5;
-  repeated GatherFormat groupUserMsg = 6;
+  repeated uint32 seqList = 3;
 }
 message GetMaxAndMinSeqReq {
 }
 message GetMaxAndMinSeqResp {
-  int64 maxSeq = 1;
-  int64 minSeq = 2;
+  uint32 maxSeq = 1;
+  uint32 minSeq = 2;
 }
-message GatherFormat{
-  // @inject_tag: json:"id"
-  string id = 1;
-  // @inject_tag: json:"list"
-  repeated MsgData list = 2;//detail msg
-}
-//message MsgFormat{
-//  // @inject_tag: json:"sendID"
-//  string SendID = 1;
-//  // @inject_tag: json:"recvID"
-//  string RecvID = 2;
-//  // @inject_tag: json:"msgFrom"
-//  int32 MsgFrom = 3;
-//  // @inject_tag: json:"contentType"
-//  int32 ContentType = 4;
-//  // @inject_tag: json:"serverMsgID"
-//  string ServerMsgID = 5;
-//  // @inject_tag: json:"content"
-//  string Content = 6;
-//  // @inject_tag: json:"seq"
-//  int64 Seq = 7;
-//  // @inject_tag: json:"sendTime"
-//  int64 SendTime = 8;
-//  // @inject_tag: json:"senderPlatformID"
-//  int32 SenderPlatformID = 9;
-//  // @inject_tag: json:"senderNickName"
-//  string SenderNickName = 10;
-//  // @inject_tag: json:"senderFaceUrl"
-//  string SenderFaceURL = 11;
-//  // @inject_tag: json:"clientMsgID"
-//  string ClientMsgID = 12;
-//}
-
 
 message UserSendMsgResp {
   string serverMsgID = 1;
@@ -190,7 +143,7 @@ message MsgData {
   int32 msgFrom = 10;
   int32 contentType = 11;
   bytes content = 12;
-  int64 seq = 14;
+  uint32 seq = 14;
   int64 sendTime = 15;
   int64 createTime = 16;
   int32 status = 17;

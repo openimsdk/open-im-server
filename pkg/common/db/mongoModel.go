@@ -2,10 +2,10 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/utils"
 	"errors"
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
@@ -33,51 +33,8 @@ type GroupMember_x struct {
 	UIDList []string
 }
 
-func (d *DataBases) GetMsgBySeqRange(uid string, seqBegin, seqEnd int64) (SingleMsg []*open_im_sdk.MsgData, GroupMsg []*open_im_sdk.MsgData, MaxSeq int64, MinSeq int64, err error) {
-	var count int64
-	session := d.mgoSession.Clone()
-	if session == nil {
-		return nil, nil, MaxSeq, MinSeq, errors.New("session == nil")
-	}
-	defer session.Close()
-
-	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
-
-	sChat := UserChat{}
-	if err = c.Find(bson.M{"uid": uid}).One(&sChat); err != nil {
-		return nil, nil, MaxSeq, MinSeq, err
-	}
-	for i := 0; i < len(sChat.Msg); i++ {
-		msg := new(open_im_sdk.MsgData)
-		if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
-			return nil, nil, MaxSeq, MinSeq, err
-		}
-		if msg.Seq >= seqBegin && msg.Seq <= seqEnd {
-			if msg.Seq > MaxSeq {
-				MaxSeq = msg.Seq
-			}
-			if count == 0 {
-				MinSeq = msg.Seq
-			}
-			if msg.Seq < MinSeq {
-				MinSeq = msg.Seq
-			}
-			if msg.SessionType == constant.SingleChatType {
-				SingleMsg = append(SingleMsg, msg)
-			} else {
-				GroupMsg = append(GroupMsg, msg)
-			}
-			count++
-			if count == (seqEnd - seqBegin + 1) {
-				break
-			}
-		}
-	}
-
-	return SingleMsg, GroupMsg, MaxSeq, MinSeq, nil
-}
-func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq int64, err error) {
-	var i int64
+func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq uint32, err error) {
+	var i, NB uint32
 	var seqUid string
 	session := d.mgoSession.Clone()
 	if session == nil {
@@ -89,7 +46,7 @@ func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq int64, err error) {
 	if err != nil && err != redis.ErrNil {
 		return MinSeq, err
 	}
-	NB := MaxSeq / singleGocMsgNum
+	NB = uint32(MaxSeq / singleGocMsgNum)
 	for i = 0; i <= NB; i++ {
 		seqUid = indexGen(uid, i)
 		n, err := c.Find(bson.M{"uid": seqUid}).Count()
@@ -97,29 +54,28 @@ func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq int64, err error) {
 			if i == 0 {
 				MinSeq = 1
 			} else {
-				MinSeq = i * singleGocMsgNum
+				MinSeq = uint32(i * singleGocMsgNum)
 			}
 			break
 		}
 	}
 	return MinSeq, nil
 }
-func (d *DataBases) GetMsgBySeqList(uid string, seqList []int64) (SingleMsg []*open_im_sdk.MsgData, GroupMsg []*open_im_sdk.MsgData, MaxSeq int64, MinSeq int64, err error) {
-	allCount := 0
+func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32) (seqMsg []*open_im_sdk.MsgData, err error) {
+	var hasSeqList []uint32
 	singleCount := 0
 	session := d.mgoSession.Clone()
 	if session == nil {
-		return nil, nil, MaxSeq, MinSeq, errors.New("session == nil")
+		return nil, errors.New("session == nil")
 	}
 	defer session.Close()
-
 	c := session.DB(config.Config.Mongo.DBDatabase).C(cChat)
-	m := func(uid string, seqList []int64) map[string][]int64 {
-		t := make(map[string][]int64)
+	m := func(uid string, seqList []uint32) map[string][]uint32 {
+		t := make(map[string][]uint32)
 		for i := 0; i < len(seqList); i++ {
 			seqUid := getSeqUid(uid, seqList[i])
 			if value, ok := t[seqUid]; !ok {
-				var temp []int64
+				var temp []uint32
 				t[seqUid] = append(temp, seqList[i])
 			} else {
 				t[seqUid] = append(value, seqList[i])
@@ -138,24 +94,11 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []int64) (SingleMsg []*o
 			msg := new(open_im_sdk.MsgData)
 			if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
 				log.NewError("", "not find seqUid", seqUid, value, uid, seqList)
-				return nil, nil, MaxSeq, MinSeq, err
+				return nil, err
 			}
-			if isContainInt64(msg.Seq, value) {
-				if msg.Seq > MaxSeq {
-					MaxSeq = msg.Seq
-				}
-				if allCount == 0 {
-					MinSeq = msg.Seq
-				}
-				if msg.Seq < MinSeq {
-					MinSeq = msg.Seq
-				}
-				if msg.SessionType == constant.SingleChatType {
-					SingleMsg = append(SingleMsg, msg)
-				} else {
-					GroupMsg = append(GroupMsg, msg)
-				}
-				allCount++
+			if isContainInt32(msg.Seq, value) {
+				seqMsg = append(seqMsg, msg)
+				hasSeqList = append(hasSeqList, msg.Seq)
 				singleCount++
 				if singleCount == len(value) {
 					break
@@ -163,8 +106,24 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []int64) (SingleMsg []*o
 			}
 		}
 	}
-	return SingleMsg, GroupMsg, MaxSeq, MinSeq, nil
+	if len(hasSeqList) != len(seqList) {
+		var diff []uint32
+		diff = utils.Difference(hasSeqList, seqList)
+		exceptionMSg := genExceptionMessageBySeqList(diff)
+		seqMsg = append(seqMsg, exceptionMSg...)
+
+	}
+	return seqMsg, nil
 }
+func genExceptionMessageBySeqList(seqList []uint32) (exceptionMsg []*open_im_sdk.MsgData) {
+	for _, v := range seqList {
+		msg := new(open_im_sdk.MsgData)
+		msg.Seq = v
+		exceptionMsg = append(exceptionMsg, msg)
+	}
+	return exceptionMsg
+}
+
 func (d *DataBases) SaveUserChat(uid string, sendTime int64, m *pbMsg.MsgDataToDB) error {
 	var seqUid string
 	newTime := getCurrentTimestampByMill()
@@ -318,11 +277,11 @@ func (d *DataBases) DelGroupMember(groupID, uid string) error {
 func getCurrentTimestampByMill() int64 {
 	return time.Now().UnixNano() / 1e6
 }
-func getSeqUid(uid string, seq int64) string {
+func getSeqUid(uid string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return indexGen(uid, seqSuffix)
 }
-func isContainInt64(target int64, List []int64) bool {
+func isContainInt32(target uint32, List []uint32) bool {
 
 	for _, element := range List {
 
@@ -333,6 +292,6 @@ func isContainInt64(target int64, List []int64) bool {
 	return false
 
 }
-func indexGen(uid string, seqSuffix int64) string {
-	return uid + ":" + strconv.FormatInt(seqSuffix, 10)
+func indexGen(uid string, seqSuffix uint32) string {
+	return uid + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }

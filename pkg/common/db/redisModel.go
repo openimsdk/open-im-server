@@ -35,28 +35,28 @@ func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (inte
 }
 
 //Perform seq auto-increment operation of user messages
-func (d *DataBases) IncrUserSeq(uid string) (int64, error) {
+func (d *DataBases) IncrUserSeq(uid string) (uint64, error) {
 	key := userIncrSeq + uid
-	return redis.Int64(d.Exec("INCR", key))
+	return redis.Uint64(d.Exec("INCR", key))
 }
 
 //Get the largest Seq
-func (d *DataBases) GetUserMaxSeq(uid string) (int64, error) {
+func (d *DataBases) GetUserMaxSeq(uid string) (uint64, error) {
 	key := userIncrSeq + uid
-	return redis.Int64(d.Exec("GET", key))
+	return redis.Uint64(d.Exec("GET", key))
 }
 
 //Set the user's minimum seq
-func (d *DataBases) SetUserMinSeq(uid string, minSeq int64) (err error) {
+func (d *DataBases) SetUserMinSeq(uid string, minSeq uint32) (err error) {
 	key := userMinSeq + uid
 	_, err = d.Exec("SET", key, minSeq)
 	return err
 }
 
 //Get the smallest Seq
-func (d *DataBases) GetUserMinSeq(uid string) (int64, error) {
+func (d *DataBases) GetUserMinSeq(uid string) (uint64, error) {
 	key := userMinSeq + uid
-	return redis.Int64(d.Exec("GET", key))
+	return redis.Uint64(d.Exec("GET", key))
 }
 
 //Store Apple's device token to redis
