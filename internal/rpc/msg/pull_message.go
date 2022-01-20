@@ -39,10 +39,10 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeq
 func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.PullMessageBySeqListReq) (*open_im_sdk.PullMessageBySeqListResp, error) {
 	log.NewInfo(in.OperationID, "rpc PullMessageBySeqList is arriving", in.String())
 	resp := new(open_im_sdk.PullMessageBySeqListResp)
-	msgList, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList)
+	msgList, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList, in.OperationID)
 	if err != nil {
 		log.ErrorByKv("PullMessageBySeqList data error", in.OperationID, in.String())
-		resp.ErrCode = 1
+		resp.ErrCode = 201
 		resp.ErrMsg = err.Error()
 		return resp, nil
 	}

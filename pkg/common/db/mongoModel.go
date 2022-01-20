@@ -61,7 +61,7 @@ func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq uint32, err error) {
 	}
 	return MinSeq, nil
 }
-func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32) (seqMsg []*open_im_sdk.MsgData, err error) {
+func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
 	var hasSeqList []uint32
 	singleCount := 0
 	session := d.mgoSession.Clone()
@@ -86,14 +86,14 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32) (seqMsg []*ope
 	sChat := UserChat{}
 	for seqUid, value := range m {
 		if err = c.Find(bson.M{"uid": seqUid}).One(&sChat); err != nil {
-			log.NewError("", "not find seqUid", seqUid, value, uid, seqList)
+			log.NewError(operationID, "not find seqUid", seqUid, value, uid, seqList, err.Error())
 			continue
 		}
 		singleCount = 0
 		for i := 0; i < len(sChat.Msg); i++ {
 			msg := new(open_im_sdk.MsgData)
 			if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
-				log.NewError("", "not find seqUid", seqUid, value, uid, seqList)
+				log.NewError(operationID, "Unmarshal err", seqUid, value, uid, seqList, err.Error())
 				return nil, err
 			}
 			if isContainInt32(msg.Seq, value) {
