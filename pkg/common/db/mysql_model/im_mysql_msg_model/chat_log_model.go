@@ -30,5 +30,5 @@ func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
 	chatLog.Content = string(msg.MsgData.Content)
 	chatLog.CreateTime = utils.UnixNanoSecondToTime(msg.MsgData.CreateTime)
 	chatLog.SendTime = utils.UnixNanoSecondToTime(msg.MsgData.SendTime)
-	return dbConn.Table("chat_log").Create(chatLog).Error
+	return dbConn.Table("chat_logs").Create(chatLog).Error
 }
