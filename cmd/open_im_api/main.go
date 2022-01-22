@@ -12,8 +12,9 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	//"syscall"
 )
 
@@ -87,6 +88,7 @@ func main() {
 		managementGroup.POST("/delete_user", manage.DeleteUser)
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
 		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)
+		managementGroup.POST("/account_check", manage.AccountCheck)
 		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus)
 	}
 	//Conversation
@@ -100,5 +102,5 @@ func main() {
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
-	r.Run(utils.ServerIP + ":" + strconv.Itoa(*ginPort))
+	r.Run(":" + strconv.Itoa(*ginPort))
 }

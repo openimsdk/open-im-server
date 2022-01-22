@@ -63,3 +63,34 @@ func (s *userServer) GetAllUsersUid(_ context.Context, req *pbUser.GetAllUsersUi
 	}
 
 }
+func (s *userServer) AccountCheck(_ context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
+	log.InfoByKv("rpc AccountCheck arrived server", req.OperationID, "args", req.String())
+	c, err := token_verify.ParseToken(req.Token)
+	if err != nil {
+		log.InfoByKv("parse token failed", req.OperationID, "err", err.Error())
+		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrorCode: constant.ErrParseToken.ErrCode, ErrorMsg: err.Error()}}, nil
+	}
+	if !utils.IsContain(c.UID, config.Config.Manager.AppManagerUid) {
+		log.ErrorByKv(" Authentication failed", req.OperationID, "args", c)
+		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrorCode: 401, ErrorMsg: "not authorized"}}, nil
+	}
+	uidList, err := im_mysql_model.SelectSomeUID(req.UidList)
+	if err != nil {
+		log.ErrorByKv("db get SelectSomeUID failed", req.OperationID, "err", err.Error())
+		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrorCode: constant.ErrMysql.ErrCode, ErrorMsg: err.Error()}}, nil
+	} else {
+		var r []*pbUser.AccountCheckResp_SingleUserStatus
+		for _, v := range req.UidList {
+			temp := new(pbUser.AccountCheckResp_SingleUserStatus)
+			temp.UserID = v
+			if utils.IsContain(v, uidList) {
+				temp.AccountStatus = constant.Registered
+			} else {
+				temp.AccountStatus = constant.UnRegistered
+			}
+			r = append(r, temp)
+		}
+		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrorCode: 0, ErrorMsg: ""}, Result: r}, nil
+	}
+
+}

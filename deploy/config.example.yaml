@@ -5,11 +5,11 @@ serverversion: 1.0.3
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openIM
-  etcdAddr: [ 127.0.0.1:2379 ]
+  etcdAddr: [ openim_etcd:2379 ]
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:13306 ]
-  dbMysqlUserName: root
+  dbMysqlAddress: [ openim_mysql:3306 ] # openim_mysql 是对应的mysql服务的host
+  dbMysqlUserName: openIM
   dbMysqlPassword: openIM
   dbMysqlDatabaseName: openIM
   dbTableName: eMsg
@@ -19,7 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:37017 ]
+  dbAddress: [ openim_mongo:27017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
@@ -30,7 +30,7 @@ mongo:
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 127.0.0.1:16379
+  dbAddress: openim_redis:6379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -38,10 +38,10 @@ redis:
 
 kafka:
   ws2mschat:
-    addr: [ 127.0.0.1:9092 ]
+    addr: [ openim_kafka:9092 ]
     topic: "ws2ms_chat"
   ms2pschat:
-    addr: [ 127.0.0.1:9092 ]
+    addr: [ openim_kafka:9092 ]
     topic: "ms2ps_chat"
   consumergroupid:
     msgToMongo: mongo
@@ -58,6 +58,7 @@ kafka:
 serverip: 0.0.0.0
 
 # endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
+#   新增的这一段配置节，主要是位了注册到etcd时，可以使用同一network下的容器名(host)来访问不同的容器，拆分到不同容器后原来全部使用serverip的形式不能用了
 endpoints:
   api: openim_api
   push: openim_push
@@ -90,15 +91,7 @@ rpcport:
   openImGroupPort: [ 10500  ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
-  c2c:
-    callbackBeforeSendMsg:
-      switch: false
-      timeoutStrategy: 1 #1:send
-    callbackAfterSendMsg:
-      switch: false
-  state:
-    stateChange:
-      switch: false
+
 
 rpcregistername:
   openImUserName: User
@@ -158,48 +151,10 @@ tokenpolicy:
   accessExpire: 7
 
 messagecallback:
+  callbackSwitch: false
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
-  c2c:
-    callbackBeforeSendMsg:
-      switch: false
-      timeoutStrategy: 1 #1:send
-    callbackAfterSendMsg:
-      switch: false
-  state:
-    stateChange:
-      switch: false
-
-iOSPush:
-  pushSound: "xxx"
-  badgeCount: 1
-
-notification:
-  groupCreated:
-    conversation:
-      conversationChanged: 1
-      unreadCount: 1
-    offlinePush:
-      switch: true
-      title: "create group title"
-      desc: "create group desc"
-      ext: "create group ext"
-    defaultTips:
-      tips: "create the group"  # xx create the group
-
-  groupInfoChanged:
-    conversation:
-      conversationChanged: 1
-      unreadCount: 1
-    offlinePush:
-      switch: true
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
-    defaultTips:
-      tips: "group info changed by"  # group info changed by xx
-      conversationChanged: 0
 
 
 #---------------demo configuration---------------------#

@@ -133,6 +133,25 @@ func SelectAllUID() ([]string, error) {
 	}
 	return uid, nil
 }
+func SelectSomeUID(uids []string) ([]string, error) {
+	var uid []string
+
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return uid, err
+	}
+	rows, err := dbConn.Raw("select uid from user where uid in (" + sqlStringHandle(uids) + ")").Rows()
+	if err != nil {
+		return uid, err
+	}
+	defer rows.Close()
+	var strUID string
+	for rows.Next() {
+		rows.Scan(&strUID)
+		uid = append(uid, strUID)
+	}
+	return uid, nil
+}
 
 func IsExistUser(uid string) bool {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
@@ -148,4 +167,13 @@ func IsExistUser(uid string) bool {
 		return false
 	}
 	return true
+}
+func sqlStringHandle(ss []string) (s string) {
+	for i := 0; i < len(ss); i++ {
+		s += "'" + ss[i] + "'"
+		if i < len(ss)-1 {
+			s += ","
+		}
+	}
+	return s
 }

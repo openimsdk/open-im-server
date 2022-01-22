@@ -25,6 +25,21 @@ message GetAllUsersUidResp{
   repeated string uidList = 2;
 
 }
+message AccountCheckReq{
+  repeated string uidList = 1;
+  string token = 2;
+  string operationID = 3;
+
+}
+message AccountCheckResp{
+  CommonResp  commonResp = 1;
+  message SingleUserStatus {
+    string userID = 1;
+    string accountStatus = 2;
+  }
+  repeated SingleUserStatus result = 2;
+
+}
 message GetUserInfoReq{
   repeated string userIDList = 1;
   string token = 2;
@@ -116,4 +131,5 @@ service user {
   rpc SetReceiveMessageOpt(SetReceiveMessageOptReq)returns(SetReceiveMessageOptResp);
   rpc GetReceiveMessageOpt(GetReceiveMessageOptReq)returns(GetReceiveMessageOptResp);
   rpc GetAllConversationMsgOpt(GetAllConversationMsgOptReq)returns(GetAllConversationMsgOptResp);
+  rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
 }

@@ -9,10 +9,11 @@ import (
 	"Open_IM/pkg/utils"
 	"bytes"
 	"encoding/gob"
-	"github.com/gorilla/websocket"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type UserConn struct {
@@ -28,8 +29,7 @@ type WServer struct {
 }
 
 func (ws *WServer) onInit(wsPort int) {
-	ip := utils.ServerIP
-	ws.wsAddr = ip + ":" + utils.IntToString(wsPort)
+	ws.wsAddr = ":" + utils.IntToString(wsPort)
 	ws.wsMaxConnNum = config.Config.LongConnSvr.WebsocketMaxConnNum
 	ws.wsConnToUser = make(map[*UserConn]string)
 	ws.wsUserToConn = make(map[string]*UserConn)
