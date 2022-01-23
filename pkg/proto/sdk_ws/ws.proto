@@ -1,4 +1,5 @@
 syntax = "proto3";
+option go_package = "./sdk_ws;server_api_params";
 package server_api_params;//The package name to which the proto file belongs
 //option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
 
@@ -329,4 +330,10 @@ message FriendInfoChangedTips{
 //////////////////////user/////////////////////
 message UserInfoUpdatedTips{
   string userID = 1;
+}
+
+///cms
+message RequestPagination {
+  int32 pageNumber = 1;
+  int32 showNumber = 2;
 }

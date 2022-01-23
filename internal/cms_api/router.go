@@ -8,9 +8,9 @@ import (
 	"Open_IM/internal/cms_api/organization"
 	"Open_IM/internal/cms_api/statistics"
 	"Open_IM/internal/cms_api/user"
+
 	"github.com/gin-gonic/gin"
 )
-
 
 func NewGinRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
@@ -70,7 +70,7 @@ func NewGinRouter() *gin.Engine {
 		groupRouterGroup.POST("/withdraw_message", group.Withdraw)
 		groupRouterGroup.POST("/search_group_message", group.SearchMessage)
 	}
-	userRouterGroup := router.Group("/users")
+	userRouterGroup := router.Group("/user")
 	{
 		userRouterGroup.POST("/resign", user.ResignUser)
 		userRouterGroup.GET("/get_user", user.GetUser)

@@ -13,6 +13,7 @@ message DeleteUsersReq{
   string OpUserID = 3;
   string OperationID = 4;
 }
+
 message DeleteUsersResp{
   CommonResp  CommonResp = 1;
   repeated string FailedUserIDList = 2;
@@ -107,52 +108,83 @@ message GetAllConversationMsgOptResp{
 }
 
 message ResignUserReq{
-    string UserId = 1;
-    string OperationID = 2;
+  string UserId = 1;
+  string OperationID = 2;
 }
 
 message ResignUserResp{
-    CommonResp  commonResp = 1;
+  CommonResp  commonResp = 1;
 }
 
 message GetUserReq{
-    string UserId = 1;
-    string OperationID = 2;
+  string UserId = 1;
+  string OperationID = 2;
 }
 
 message User{
-
+  string ProfilePhoto = 1;
+  string Nickname = 2;
+  string UserID = 3;
+  string CreateTime = 4; 
 }
 
 message GetUserResp{
-    User user = 1
+  User user = 1;
 }
 
 message AlterUserReq{
-    string UserId = 1;
-    string OperationID = 2;
+  string UserId = 1;
+  string OperationID = 2;
 }
 
 message AlterUserResp{
-    CommonResp  commonResp = 1;
+  CommonResp  CommonResp = 1;
 }
 
-message GetUserReq{
-    string OperationID = 1;
+message GetUsersReq {
+  string OperationID = 1;
+  server_api_params.RequestPagination Pagination = 2;
 }
 
 message GetUsersResp{
-    string OperationID = 1;
-    repeated Users User = 2;
+  string OperationID = 1;
+  repeated User user = 2;
 }
 
 message AddUserReq{
-    string OperationID = 1;
+  string OperationID = 1;
 }
 
 message AddUserResp{
-    CommonResp  commonResp = 1;
 }
+
+
+message BlockUserReq{
+  string UserID = 1;
+  string OperationID = 2;
+}
+
+message BlockUserResp{
+}
+
+message UnBlockUserReq{
+  string UserID = 1;
+  string OperationID = 2;
+}
+
+message UnBlockUserResp{
+
+}
+
+message GetBlockUsersReq{
+  server_api_params.RequestPagination Pagination =1;
+  string OperationID = 2;
+}
+
+message GetBlockUsersResp{
+  repeated User user = 2;
+}
+
 
 service user {
   rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
@@ -164,8 +196,8 @@ service user {
   rpc GetAllConversationMsgOpt(GetAllConversationMsgOptReq)returns(GetAllConversationMsgOptResp);
   rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
 
-  rpc ResignUser(ResignUserReq) returns (ResignUserResp);
   rpc GetUser(GetUserReq) returns (GetUserResp);
+  rpc ResignUser(ResignUserReq) returns (ResignUserResp);
   rpc AlterUser(AlterUserReq) returns (AlterUserResp);
   rpc GetUsers(GetUsersReq) returns (GetUsersResp);
   rpc AddUser(AddUserReq) returns (AddUserResp);

@@ -1,21 +1,15 @@
 package group
 
 import (
-	_ "Open_IM_CMS/pkg/req_resp"
-	"Open_IM_CMS/test"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
 func SearchGroups(c *gin.Context) {
-	fake := test.GetSearchGroupsResponseFake()
-	c.JSON(http.StatusOK, gin.H{"code": "0", "data": fake})
+
 }
 
 func SearchGroupsMember(c *gin.Context) {
-	fake := test.GetSearchMemberResponseFake()
-	c.JSON(http.StatusOK, gin.H{"code": "0", "data": fake})
+
 }
 
 func CreateGroup(c *gin.Context) {

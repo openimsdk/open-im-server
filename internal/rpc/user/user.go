@@ -14,10 +14,11 @@ import (
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"google.golang.org/grpc"
 )
 
 type userServer struct {
@@ -239,4 +240,64 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	chat.UserInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID, req.OpUserID)
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
+}
+
+func (s *userServer) GetUser(ctx context.Context, req *pbUser.GetUserReq) (*pbUser.GetUserResp, error) {
+	log.NewInfo(req.OperationID, "GetAllUserID args ", req.String())
+	resp := &pbUser.GetUserResp{}
+	user, err := imdb.GetUserByUserID(req.UserId)
+	if err != nil {
+		log.NewError(req.OperationID, "SelectAllUserID false ", err.Error())
+		return resp, nil
+	}
+	resp.User.CreateTime = user.CreateTime.String()
+	resp.User.ProfilePhoto = ""
+	resp.User.Nickname = user.Nickname
+	resp.User.UserID = user.UserID
+	return resp, nil
+}
+
+func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
+	log.NewInfo(req.OperationID, "GetUsers args ", req.String())
+	resp := &pbUser.GetUsersResp{}
+	users, err := imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	if err != nil {
+		log.NewError(req.OperationID, "SelectAllUserID false ", err.Error())
+		return resp, nil
+	}
+	for _, v := range users {
+		resp.User = append(resp.User, &pbUser.User{
+			ProfilePhoto: "",
+			UserID:       v.UserID,
+			CreateTime:   v.CreateTime.String(),
+			Nickname:     v.Nickname,
+		})
+	}
+	return resp, nil
+}
+
+func (s *userServer) ResignUser(ctx context.Context, req *pbUser.ResignUserReq) (*pbUser.ResignUserResp, error) {
+	log.NewInfo(req.OperationID, "ResignUser args ", req.String())
+
+	return &pbUser.ResignUserResp{}, nil
+}
+
+func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*pbUser.AlterUserResp, error) {
+	return &pbUser.AlterUserResp{}, nil
+}
+
+func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
+	return &pbUser.AddUserResp{}, nil
+}
+
+func (s *userServer) BlockUser(ctx context.Context, req *pbUser.BlockUserReq) (*pbUser.BlockUserResp, error) {
+	return &pbUser.BlockUserResp{}, nil
+}
+
+func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq) (*pbUser.UnBlockUserResp, error) {
+	return &pbUser.UnBlockUserResp{}, nil
+}
+
+func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUsersReq) (*pbUser.GetBlockUsersResp, error) {
+	return &pbUser.GetBlockUsersResp{}, nil
 }

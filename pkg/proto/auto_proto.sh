@@ -7,7 +7,7 @@ for ((i = 0; i < ${#all_proto[*]}; i++)); do
   protoc -I ../../../ -I ./ --go_out=plugins=grpc:. $proto
   s=`echo $proto | sed 's/ //g'`
   v=${s//proto/pb.go}
-  protoc-go-inject-tag -input=./$v
+  # protoc-go-inject-tag -input=./$v
   echo "protoc --go_out=plugins=grpc:." $proto
 done
 echo "proto file generate success..."

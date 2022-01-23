@@ -6,8 +6,9 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
 	"fmt"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"time"
+
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 func init() {
@@ -50,17 +51,17 @@ func UserRegister(user db.User) error {
 	return nil
 }
 
-//type User struct {
-//	UserID      string    `gorm:"column:user_id;primaryKey;"`
-//	Nickname    string    `gorm:"column:name"`
-//	FaceUrl     string    `gorm:"column:icon"`
-//	Gender      int32     `gorm:"column:gender"`
-//	PhoneNumber string    `gorm:"column:phone_number"`
-//	Birth       string    `gorm:"column:birth"`
-//	Email       string    `gorm:"column:email"`
-//	Ex          string    `gorm:"column:ex"`
-//	CreateTime  time.Time `gorm:"column:create_time"`
-//}
+type User struct {
+	UserID      string    `gorm:"column:user_id;primaryKey;"`
+	Nickname    string    `gorm:"column:name"`
+	FaceUrl     string    `gorm:"column:icon"`
+	Gender      int32     `gorm:"column:gender"`
+	PhoneNumber string    `gorm:"column:phone_number"`
+	Birth       string    `gorm:"column:birth"`
+	Email       string    `gorm:"column:email"`
+	Ex          string    `gorm:"column:ex"`
+	CreateTime  time.Time `gorm:"column:create_time"`
+}
 
 func DeleteUser(userID string) (i int64) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
@@ -120,4 +121,18 @@ func SelectSomeUserID(userIDList []string) ([]string, error) {
 		return nil, err
 	}
 	return resultArr, nil
+}
+
+func GetUsers(showNumber, pageNumber int32) ([]User, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	dbConn.LogMode(true)
+	var users []User
+	if err != nil {
+		return users, err
+	}
+	err = dbConn.Limit(showNumber).Offset(pageNumber).Find(&users).Error
+	if err != nil {
+		return users, err
+	}
+	return users, nil
 }
