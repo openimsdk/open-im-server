@@ -124,12 +124,13 @@ message GetUserReq{
 message User{
   string ProfilePhoto = 1;
   string Nickname = 2;
-  string UserID = 3;
+  string UserId = 3;
   string CreateTime = 4; 
 }
 
 message GetUserResp{
-  User user = 1;
+  CommonResp  CommonResp = 1;
+  User user = 2;
 }
 
 message AlterUserReq{
@@ -147,24 +148,30 @@ message GetUsersReq {
 }
 
 message GetUsersResp{
-  string OperationID = 1;
-  repeated User user = 2;
+  CommonResp  CommonResp = 1;
+  string OperationID = 2;
+  repeated User user = 3;
 }
 
 message AddUserReq{
   string OperationID = 1;
+  string PhoneNumber = 2;
+  string UserId = 3;
 }
 
 message AddUserResp{
+ CommonResp  CommonResp = 1;
 }
 
 
 message BlockUserReq{
   string UserID = 1;
-  string OperationID = 2;
+  string EndDisableTime = 2;
+  string OperationID = 3;
 }
 
 message BlockUserResp{
+   CommonResp  CommonResp = 1;
 }
 
 message UnBlockUserReq{
@@ -173,7 +180,7 @@ message UnBlockUserReq{
 }
 
 message UnBlockUserResp{
-
+   CommonResp  CommonResp = 1;
 }
 
 message GetBlockUsersReq{
@@ -182,6 +189,7 @@ message GetBlockUsersReq{
 }
 
 message GetBlockUsersResp{
+  CommonResp  CommonResp = 1;
   repeated User user = 2;
 }
 
