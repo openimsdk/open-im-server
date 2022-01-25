@@ -2,6 +2,7 @@ package http
 
 import (
 	"Open_IM/pkg/common/constant"
+	//"Open_IM/pkg/cms_api_struct"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,11 +14,20 @@ type BaseResp struct {
 	Data   interface{} `json:"data"`
 }
 
-func RespHttp200(ctx *gin.Context, err constant.ErrInfo, data interface{}) {
-	resp := BaseResp{
-		Code:   err.Code(),
-		ErrMsg: err.Error(),
-		Data:   data,
+func RespHttp200(ctx *gin.Context, err error, data interface{}) {
+	var resp BaseResp
+	if v, ok := err.(constant.ErrInfo); ok {
+		resp.Code = v.Code()
+		resp.ErrMsg = v.Error()
+	} else {
+		resp.Code = constant.ErrServer.Code()
+		resp.ErrMsg = constant.ErrServer.Error()
 	}
+	resp.Data=data
 	ctx.JSON(http.StatusOK, resp)
 }
+
+
+//func CheckErr(pb interface{}) constant.ErrInfo{
+//
+//}

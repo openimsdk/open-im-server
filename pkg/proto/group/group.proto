@@ -195,6 +195,28 @@ message GetGroupAllMemberResp {
   repeated server_api_params.GroupMemberFullInfo memberList = 3;
 }
 
+message GetGroupReq {
+    string GroupName = 1;
+    string OperationID = 2;
+}
+
+message GetGroupResp {
+    server_api_params.GroupInfo GroupInfo = 1;
+}
+
+message GetGroupsReq {
+    server_api_params.RequestPagination Pagination =1;
+    string OperationID = 2;
+}
+
+message GetGroupsResp {
+    repeated server_api_params.GroupInfo GroupInfo = 1;
+}
+
+message GetGroupMemberReq {
+    string GroupId = 1;
+    string OperationID = 2;
+}
 
 
 service group{
@@ -212,6 +234,10 @@ service group{
   rpc getJoinedGroupList(GetJoinedGroupListReq) returns (GetJoinedGroupListResp);
   rpc inviteUserToGroup(InviteUserToGroupReq) returns (InviteUserToGroupResp);
   rpc getGroupAllMember(GetGroupAllMemberReq) returns(GetGroupAllMemberResp);
+
+
+  rpc GetGroup(GetGroupReq) returns(GetGroupsResp);
+  rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);
 }
 
 

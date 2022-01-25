@@ -638,3 +638,31 @@ func (s *groupServer) TransferGroupOwner(_ context.Context, req *pbGroup.Transfe
 	return &pbGroup.TransferGroupOwnerResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
 
 }
+
+func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pbGroup.GetGroupResp, error) {
+	log.NewInfo(req.OperationID, "GetGroup ", req.String())
+	group, err := imdb.GetGroupByName(req.GroupName)
+	if err != nil {
+		return nil, err
+	}
+	resp := &pbGroup.GetGroupResp{
+		GroupInfo: &open_im_sdk.GroupInfo{
+		},
+	}
+	utils.CopyStructFields(resp.GroupInfo, group)
+	return resp, nil
+}
+
+func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*pbGroup.GetGroupsResp, error) {
+	log.NewInfo(req.OperationID, "GetGroups ", req.String())
+	groups, err := imdb.GetGroups(int(req.Pagination.PageNumber), int(req.Pagination.ShowNumber))
+	if err != nil {
+		return nil, err
+	}
+	resp := &pbGroup.GetGroupsResp{
+		GroupInfo: []*open_im_sdk.GroupInfo,
+	}
+	utils.CopyStructFields(resp.GroupInfo, groups)
+	return resp, nil
+}
+

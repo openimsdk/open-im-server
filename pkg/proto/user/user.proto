@@ -125,7 +125,8 @@ message User{
   string ProfilePhoto = 1;
   string Nickname = 2;
   string UserId = 3;
-  string CreateTime = 4; 
+  string CreateTime = 4;
+  bool IsBlock = 5;
 }
 
 message GetUserResp{
@@ -151,12 +152,15 @@ message GetUsersResp{
   CommonResp  CommonResp = 1;
   string OperationID = 2;
   repeated User user = 3;
+  int32 UserNum = 4;
+  server_api_params.ResponsePagination Pagination = 5;
 }
 
 message AddUserReq{
   string OperationID = 1;
   string PhoneNumber = 2;
   string UserId = 3;
+  string name = 4;
 }
 
 message AddUserResp{
@@ -165,7 +169,7 @@ message AddUserResp{
 
 
 message BlockUserReq{
-  string UserID = 1;
+  string UserId = 1;
   string EndDisableTime = 2;
   string OperationID = 3;
 }
@@ -175,7 +179,7 @@ message BlockUserResp{
 }
 
 message UnBlockUserReq{
-  string UserID = 1;
+  string UserId = 1;
   string OperationID = 2;
 }
 
@@ -186,11 +190,14 @@ message UnBlockUserResp{
 message GetBlockUsersReq{
   server_api_params.RequestPagination Pagination =1;
   string OperationID = 2;
+  int32 BlockUserNum = 4;
 }
 
 message GetBlockUsersResp{
   CommonResp  CommonResp = 1;
   repeated User user = 2;
+  server_api_params.ResponsePagination Pagination = 3;
+  int32 BlockUserNum = 4;
 }
 
 

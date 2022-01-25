@@ -56,3 +56,27 @@ func SetGroupInfo(groupInfo db.Group) error {
 	err = dbConn.Table("groups").Where("group_id=?", groupInfo.GroupID).Update(&groupInfo).Error
 	return err
 }
+
+func GetGroupByName(groupName string) (db.Group, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	var group db.Group
+	if err != nil {
+		return group, err
+	}
+	dbConn.LogMode(true)
+	err = dbConn.Table("groups").Where("group_id=?", groupName).Find(&group).Error
+	return group, err
+}
+
+func GetGroups(pageNumber, showNumber int) ([]db.Group, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	var groups []db.Group
+	if err != nil {
+		return groups, err
+	}
+	dbConn.LogMode(true)
+	err = dbConn.Table("groups").Limit(showNumber).Offset(showNumber*(pageNumber-1)).Find(&groups).Error
+	if err != nil {
+		return groups, err
+	}
+}

@@ -2839,6 +2839,61 @@ func (x *RequestPagination) GetShowNumber() int32 {
 	return 0
 }
 
+type ResponsePagination struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	CurrentPage int32 `protobuf:"varint,5,opt,name=CurrentPage,proto3" json:"CurrentPage,omitempty"`
+	ShowNumber  int32 `protobuf:"varint,6,opt,name=showNumber,proto3" json:"showNumber,omitempty"`
+}
+
+func (x *ResponsePagination) Reset() {
+	*x = ResponsePagination{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sdk_ws_ws_proto_msgTypes[38]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResponsePagination) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResponsePagination) ProtoMessage() {}
+
+func (x *ResponsePagination) ProtoReflect() protoreflect.Message {
+	mi := &file_sdk_ws_ws_proto_msgTypes[38]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResponsePagination.ProtoReflect.Descriptor instead.
+func (*ResponsePagination) Descriptor() ([]byte, []int) {
+	return file_sdk_ws_ws_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *ResponsePagination) GetCurrentPage() int32 {
+	if x != nil {
+		return x.CurrentPage
+	}
+	return 0
+}
+
+func (x *ResponsePagination) GetShowNumber() int32 {
+	if x != nil {
+		return x.ShowNumber
+	}
+	return 0
+}
+
 var File_sdk_ws_ws_proto protoreflect.FileDescriptor
 
 var file_sdk_ws_ws_proto_rawDesc = []byte{
@@ -3292,10 +3347,15 @@ var file_sdk_ws_ws_proto_rawDesc = []byte{
 	0x70, 0x61, 0x67, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05,
 	0x52, 0x0a, 0x70, 0x61, 0x67, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x1e, 0x0a, 0x0a,
 	0x73, 0x68, 0x6f, 0x77, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05,
-	0x52, 0x0a, 0x73, 0x68, 0x6f, 0x77, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x42, 0x1c, 0x5a, 0x1a,
-	0x2e, 0x2f, 0x73, 0x64, 0x6b, 0x5f, 0x77, 0x73, 0x3b, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x5f,
-	0x61, 0x70, 0x69, 0x5f, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x52, 0x0a, 0x73, 0x68, 0x6f, 0x77, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x22, 0x56, 0x0a, 0x12,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x50, 0x61, 0x67, 0x69, 0x6e, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x12, 0x20, 0x0a, 0x0b, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x50, 0x61, 0x67,
+	0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x43, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74,
+	0x50, 0x61, 0x67, 0x65, 0x12, 0x1e, 0x0a, 0x0a, 0x73, 0x68, 0x6f, 0x77, 0x4e, 0x75, 0x6d, 0x62,
+	0x65, 0x72, 0x18, 0x06, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x73, 0x68, 0x6f, 0x77, 0x4e, 0x75,
+	0x6d, 0x62, 0x65, 0x72, 0x42, 0x1c, 0x5a, 0x1a, 0x2e, 0x2f, 0x73, 0x64, 0x6b, 0x5f, 0x77, 0x73,
+	0x3b, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x5f, 0x61, 0x70, 0x69, 0x5f, 0x70, 0x61, 0x72, 0x61,
+	0x6d, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3310,7 +3370,7 @@ func file_sdk_ws_ws_proto_rawDescGZIP() []byte {
 	return file_sdk_ws_ws_proto_rawDescData
 }
 
-var file_sdk_ws_ws_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_sdk_ws_ws_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
 var file_sdk_ws_ws_proto_goTypes = []interface{}{
 	(*GroupInfo)(nil),                     // 0: server_api_params.GroupInfo
 	(*GroupMemberFullInfo)(nil),           // 1: server_api_params.GroupMemberFullInfo
@@ -3350,7 +3410,8 @@ var file_sdk_ws_ws_proto_goTypes = []interface{}{
 	(*FriendInfoChangedTips)(nil),         // 35: server_api_params.FriendInfoChangedTips
 	(*UserInfoUpdatedTips)(nil),           // 36: server_api_params.UserInfoUpdatedTips
 	(*RequestPagination)(nil),             // 37: server_api_params.RequestPagination
-	nil,                                   // 38: server_api_params.MsgData.OptionsEntry
+	(*ResponsePagination)(nil),            // 38: server_api_params.ResponsePagination
+	nil,                                   // 39: server_api_params.MsgData.OptionsEntry
 }
 var file_sdk_ws_ws_proto_depIdxs = []int32{
 	3,  // 0: server_api_params.FriendInfo.friendUser:type_name -> server_api_params.UserInfo
@@ -3358,7 +3419,7 @@ var file_sdk_ws_ws_proto_depIdxs = []int32{
 	2,  // 2: server_api_params.GroupRequest.userInfo:type_name -> server_api_params.PublicUserInfo
 	0,  // 3: server_api_params.GroupRequest.groupInfo:type_name -> server_api_params.GroupInfo
 	13, // 4: server_api_params.PullMessageBySeqListResp.list:type_name -> server_api_params.MsgData
-	38, // 5: server_api_params.MsgData.options:type_name -> server_api_params.MsgData.OptionsEntry
+	39, // 5: server_api_params.MsgData.options:type_name -> server_api_params.MsgData.OptionsEntry
 	14, // 6: server_api_params.MsgData.offlinePushInfo:type_name -> server_api_params.OfflinePushInfo
 	0,  // 7: server_api_params.GroupCreatedTips.group:type_name -> server_api_params.GroupInfo
 	1,  // 8: server_api_params.GroupCreatedTips.opUser:type_name -> server_api_params.GroupMemberFullInfo
@@ -3863,6 +3924,18 @@ func file_sdk_ws_ws_proto_init() {
 				return nil
 			}
 		}
+		file_sdk_ws_ws_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ResponsePagination); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -3870,7 +3943,7 @@ func file_sdk_ws_ws_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_sdk_ws_ws_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   39,
+			NumMessages:   40,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

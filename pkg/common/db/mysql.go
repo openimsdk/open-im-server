@@ -57,7 +57,7 @@ func initMysqlDB() {
 		&Group{},
 		&GroupMember{},
 		&GroupRequest{},
-		&User{},
+		&Users{},
 		&Black{}, &ChatLog{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
 

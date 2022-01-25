@@ -103,7 +103,7 @@ rpcport:
       switch: false
 
 rpcregistername:
-  openImUserName: User
+  remainLogLevel: User
   openImFriendName: Friend
   openImOfflineMessageName: OfflineMessage
   openImPushName: Push

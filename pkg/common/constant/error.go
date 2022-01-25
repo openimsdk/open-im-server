@@ -10,6 +10,7 @@ type ErrInfo struct {
 
 var (
 	OK = ErrInfo{0, ""}
+	ErrServer = ErrInfo{500, "server error"}
 
 	//	ErrMysql             = ErrInfo{100, ""}
 	//	ErrMongo             = ErrInfo{110, ""}

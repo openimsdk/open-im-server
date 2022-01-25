@@ -14,11 +14,11 @@ import (
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"fmt"
+	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
-
-	"google.golang.org/grpc"
 )
 
 type userServer struct {
@@ -214,7 +214,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
-	var user db.User
+	var user db.Users
 	utils.CopyStructFields(&user, req.UserInfo)
 	if req.UserInfo.Birth != 0 {
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
@@ -243,61 +243,122 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 }
 
 func (s *userServer) GetUser(ctx context.Context, req *pbUser.GetUserReq) (*pbUser.GetUserResp, error) {
-	log.NewInfo(req.OperationID, "GetAllUserID args ", req.String())
-	resp := &pbUser.GetUserResp{}
+	log.NewInfo(req.OperationID, "GetUser args ", req.String())
+	resp := &pbUser.GetUserResp{User:&pbUser.User{}}
 	user, err := imdb.GetUserByUserID(req.UserId)
 	if err != nil {
-		log.NewError(req.OperationID, "SelectAllUserID false ", err.Error())
 		return resp, nil
 	}
-	resp.User.CreateTime = user.CreateTime.String()
-	resp.User.ProfilePhoto = ""
-	resp.User.Nickname = user.Nickname
-	resp.User.UserID = user.UserID
+	resp.User = &pbUser.User{
+		ProfilePhoto: user.FaceURL,
+		Nickname:     user.Nickname,
+		UserId:       user.UserID,
+		CreateTime:   user.CreateTime.String(),
+	}
 	return resp, nil
 }
 
 func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
 	log.NewInfo(req.OperationID, "GetUsers args ", req.String())
-	resp := &pbUser.GetUsersResp{}
+	resp := &pbUser.GetUsersResp{User:[]*pbUser.User{}}
 	users, err := imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
-		log.NewError(req.OperationID, "SelectAllUserID false ", err.Error())
 		return resp, nil
 	}
-	for _, v := range users {
-		resp.User = append(resp.User, &pbUser.User{
-			ProfilePhoto: "",
-			UserID:       v.UserID,
-			CreateTime:   v.CreateTime.String(),
-			Nickname:     v.Nickname,
-		})
+	usersNum, err := imdb.GetUsersNumCount()
+	if err != nil {
+		return resp, nil
 	}
+	resp.UserNum = int32(usersNum)
+	for _, v := range users {
+		isBlock, err := imdb.UserIsBlock(v.UserID)
+		if err == nil {
+			user := &pbUser.User{
+				ProfilePhoto: v.FaceURL,
+				UserId:       v.UserID,
+				CreateTime:   v.CreateTime.String(),
+				Nickname:     v.Nickname,
+				IsBlock:	isBlock,
+			}
+			resp.User = append(resp.User, user)
+		}
+	}
+
+	resp.Pagination = &sdkws.ResponsePagination{}
+	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
+	resp.Pagination.CurrentPage = req.Pagination.PageNumber
 	return resp, nil
 }
 
 func (s *userServer) ResignUser(ctx context.Context, req *pbUser.ResignUserReq) (*pbUser.ResignUserResp, error) {
 	log.NewInfo(req.OperationID, "ResignUser args ", req.String())
-
 	return &pbUser.ResignUserResp{}, nil
 }
 
 func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*pbUser.AlterUserResp, error) {
+	log.NewInfo(req.OperationID, "AlterUser args ", req.String())
 	return &pbUser.AlterUserResp{}, nil
 }
 
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
-	return &pbUser.AddUserResp{}, nil
+	log.NewInfo(req.OperationID, "AddUser args ", req.String())
+	resp := &pbUser.AddUserResp{}
+	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name)
+	if err != nil {
+		return resp, constant.ErrDB
+	}
+	return resp, nil
 }
 
 func (s *userServer) BlockUser(ctx context.Context, req *pbUser.BlockUserReq) (*pbUser.BlockUserResp, error) {
-	return &pbUser.BlockUserResp{}, nil
+	log.NewInfo(req.OperationID, "BlockUser args ", req.String())
+	fmt.Println("BlockUser args ", req.String())
+	resp := &pbUser.BlockUserResp{}
+	err := imdb.BlockUser(req.UserId, req.EndDisableTime)
+	if err != nil {
+		return resp, constant.ErrDB
+	}
+	return resp, nil
 }
 
 func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq) (*pbUser.UnBlockUserResp, error) {
-	return &pbUser.UnBlockUserResp{}, nil
+	log.NewInfo(req.OperationID, "UnBlockUser args ", req.String())
+	fmt.Println(req.UserId)
+	resp := &pbUser.UnBlockUserResp{}
+	err := imdb.UnBlockUser(req.UserId)
+	if err != nil {
+		return resp, constant.ErrDB
+	}
+	return resp, nil
 }
 
 func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUsersReq) (*pbUser.GetBlockUsersResp, error) {
-	return &pbUser.GetBlockUsersResp{}, nil
+	log.NewInfo(req.OperationID, "GetBlockUsers args ", req.String())
+	resp := &pbUser.GetBlockUsersResp{}
+	blockUserIds, err := imdb.GetBlockUsersID(req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	if err != nil {
+		return resp, constant.ErrDB
+	}
+	usersNum, err := imdb.GetBlockUsersNumCount()
+	if err != nil {
+		return resp, constant.ErrDB
+	}
+	resp.BlockUserNum = int32(usersNum)
+	blockUsers, err := imdb.GetBlockUsers(blockUserIds)
+	if err != nil {
+		return resp, constant.ErrDB
+	}
+	for _, v := range blockUsers {
+		resp.User = append(resp.User, &pbUser.User{
+			ProfilePhoto: v.FaceURL,
+			Nickname:     v.Nickname,
+			UserId:       v.UserID,
+			CreateTime:   v.CreateTime.String(),
+			IsBlock:      true,
+		})
+	}
+	resp.Pagination = &sdkws.ResponsePagination{}
+	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
+	resp.Pagination.CurrentPage = req.Pagination.PageNumber
+	return resp, nil
 }

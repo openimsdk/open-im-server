@@ -337,3 +337,8 @@ message RequestPagination {
   int32 pageNumber = 1;
   int32 showNumber = 2;
 }
+
+message ResponsePagination {
+  int32 CurrentPage = 5;
+  int32 showNumber = 6;
+}

@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,27 +24,26 @@ func GetUser(c *gin.Context) {
 		req    cms_api_struct.GetUserRequest
 		resp   cms_api_struct.GetUserResponse
 		reqPb  pb.GetUserReq
-		respPb *pb.GetUserResp
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+		log.NewError("0", "ShouldBindQuery failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
-	utils.CopyStructFields(&reqPb, req)
+	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetUser(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError("s", "GetUserInfo failed ", err.Error())
-		openIMHttp.RespHttp200(c, err.(constant.ErrInfo), nil)
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
-	// resp.UserId = resp.UserId
-	// resp.Nickname = resp.UserId
-	// resp.ProfilePhoto = resp.ProfilePhoto
-	// resp.UserResponse =
-	utils.CopyStructFields(&resp, respPb)
+	if respPb.User.UserId == "" {
+		openIMHttp.RespHttp200(c, constant.OK, nil)
+		return
+	}
+	utils.CopyStructFields(&resp, respPb.User)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -52,11 +52,10 @@ func GetUsers(c *gin.Context) {
 		req    cms_api_struct.GetUsersRequest
 		resp   cms_api_struct.GetUsersResponse
 		reqPb  pb.GetUsersReq
-		respPb *pb.GetUsersResp
 	)
 	reqPb.Pagination = &commonPb.RequestPagination{}
 	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+		log.NewError("0", "ShouldBindQuery failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -64,18 +63,14 @@ func GetUsers(c *gin.Context) {
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetUsers(context.Background(), &reqPb)
-	for _, v := range respPb.User {
-		resp.Users = append(resp.Users, &cms_api_struct.UserResponse{
-			ProfilePhoto: v.ProfilePhoto,
-			Nickname:     v.Nickname,
-			UserId:       v.UserID,
-			CreateTime:   v.CreateTime,
-		})
-	}
 	if err != nil {
-		openIMHttp.RespHttp200(c, err.(constant.ErrInfo), resp)
+		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		return
 	}
-	fmt.Println(resp)
+	utils.CopyStructFields(&resp.Users, respPb.User)
+	resp.UserNum = int(respPb.UserNum)
+	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
+	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 
 }
@@ -92,11 +87,12 @@ func ResignUser(c *gin.Context) {
 		return
 	}
 	utils.CopyStructFields(&reqPb, &req)
+	fmt.Println(reqPb.UserId)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
 	_, err := client.ResignUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrDB, resp)
+		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
 	}
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
@@ -106,7 +102,7 @@ func AlterUser(c *gin.Context) {
 		req    cms_api_struct.AlterUserRequest
 		resp   cms_api_struct.AlterUserResponse
 		reqPb  pb.AlterUserReq
-		respPb *pb.AlterUserResp
+		_ *pb.AlterUserResp
 	)
 	if err := c.ShouldBind(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
@@ -116,10 +112,9 @@ func AlterUser(c *gin.Context) {
 	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
-	respPb, err := client.AlterUser(context.Background(), &reqPb)
-	fmt.Println(respPb)
+	_, err := client.AlterUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, err.(constant.ErrInfo), resp)
+		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
 	}
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
@@ -127,23 +122,23 @@ func AlterUser(c *gin.Context) {
 func AddUser(c *gin.Context) {
 	var (
 		req    cms_api_struct.AddUserRequest
-		resp   cms_api_struct.AddUserResponse
 		reqPb  pb.AddUserReq
-		respPb *pb.AddUserResp
 	)
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
+		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	fmt.Println(time.Now().String())
+	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
-	respPb, err := client.AddUser(context.Background(), &reqPb)
-	fmt.Println(respPb)
+	_, err := client.AddUser(context.Background(), &reqPb)
 	if err != nil {
-
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		return
 	}
-	openIMHttp.RespHttp200(c, constant.OK, resp)
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
 func BlockUser(c *gin.Context) {
@@ -151,21 +146,23 @@ func BlockUser(c *gin.Context) {
 		req    cms_api_struct.BlockUserRequest
 		resp   cms_api_struct.BlockUserResponse
 		reqPb  pb.BlockUserReq
-		respPb *pb.BlockUserResp
 	)
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
+		fmt.Println(err)
 		log.NewError("0", "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
-	utils.CopyStructFields(&reqPb, req)
+	utils.CopyStructFields(&reqPb, &req)
+	fmt.Println(reqPb, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
-	respPb, err := client.BlockUser(context.Background(), &reqPb)
+	fmt.Println(reqPb)
+	_, err := client.BlockUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, err.(constant.ErrInfo), resp)
+		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		return
 	}
-	fmt.Println(respPb)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -174,43 +171,48 @@ func UnblockUser(c *gin.Context) {
 		req    cms_api_struct.UnblockUserRequest
 		resp   cms_api_struct.UnBlockUserResponse
 		reqPb  pb.UnBlockUserReq
-		respPb *pb.UnBlockUserResp
 	)
-	utils.CopyStructFields(&reqPb, req)
 	if err := c.ShouldBind(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
 		return
 	}
+	fmt.Println(reqPb, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
-	respPb, err := client.UnBlockUser(context.Background(), &reqPb)
+	_, err := client.UnBlockUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, err.(constant.ErrInfo), resp)
+		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		return
 	}
-	fmt.Println(respPb)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
 func GetBlockUsers(c *gin.Context) {
 	var (
 		req    cms_api_struct.GetBlockUsersRequest
-		resp   cms_api_struct.GetOrganizationsResponse
+		resp   cms_api_struct.GetBlockUsersResponse
 		reqPb  pb.GetBlockUsersReq
 		respPb *pb.GetBlockUsersResp
 	)
+	reqPb.Pagination = &commonPb.RequestPagination{}
 	if err := c.ShouldBindQuery(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
-	utils.CopyStructFields(&reqPb, &req)
+	utils.CopyStructFields(&reqPb.Pagination, &req)
+	log.NewInfo("0", "blockUsers", reqPb.Pagination, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetBlockUsers(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, err.(constant.ErrInfo), resp)
+		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		return
 	}
-	fmt.Println(respPb)
+	utils.CopyStructFields(&resp.BlockUsers, respPb.User)
+	resp.BlockUserNum = int(respPb.BlockUserNum)
+	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
+	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
