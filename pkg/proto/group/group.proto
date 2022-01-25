@@ -218,6 +218,42 @@ message GetGroupMemberReq {
     string OperationID = 2;
 }
 
+message BanGroupChatReq {
+  string GroupId = 1;
+  string OperationID = 2;
+}
+
+message BanGroupChatResp {
+
+}
+
+message BanPrivateChatReq {
+  string GroupId = 1;
+  string OperationID = 2;
+}
+
+message BanPrivateChatResp {
+
+}
+
+message SetMasterReq {
+  string GroupId = 1;
+  string UserId = 2;
+  string OperationID = 3;
+}
+ 
+message SetMasterResp {
+
+}
+
+message DeleteGroupReq {
+  string GroupId = 1;
+  string OperationID = 2;
+}
+
+message DeleteGroupResp {
+
+}
 
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -238,6 +274,10 @@ service group{
 
   rpc GetGroup(GetGroupReq) returns(GetGroupsResp);
   rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);
+  rpc BanGroupChat(BanGroupChatReq) returns(BanGroupChatResp);
+  rpc BanPrivateChat(BanPrivateChatReq) returns(BanPrivateChatReq);
+  rpc SetMaster(SetMasterReq) returns(SetMasterResp);
+  rpc DeleteGroup(DeleteGroupReq) returns(DeleteGroupResp);
 }
 
 
