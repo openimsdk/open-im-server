@@ -203,15 +203,18 @@ message GetGroupReq {
 
 message GetGroupResp {
     repeated server_api_params.GroupInfo GroupInfo = 1;
+    server_api_params.RequestPagination Pagination = 2;
 }
 
 message GetGroupsReq {
-    server_api_params.RequestPagination Pagination =1;
+    server_api_params.RequestPagination Pagination = 1;
     string OperationID = 2;
 }
 
 message GetGroupsResp {
     repeated server_api_params.GroupInfo GroupInfo = 1;
+    server_api_params.RequestPagination Pagination = 2;
+    int32 GroupNum = 3;
 }
 
 message GetGroupMemberReq {

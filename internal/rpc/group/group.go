@@ -14,11 +14,12 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc"
 )
 
 type groupServer struct {
@@ -648,7 +649,7 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 	if err != nil {
 		return nil, err
 	}
-	for _, v:= range groups {
+	for _, v := range groups {
 		resp.GroupInfo = append(resp.GroupInfo, &open_im_sdk.GroupInfo{
 			GroupID:       v.GroupID,
 			GroupName:     v.GroupName,
@@ -664,14 +665,23 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 
 func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*pbGroup.GetGroupsResp, error) {
 	log.NewInfo(req.OperationID, "GetGroups ", req.String())
+	resp := &pbGroup.GetGroupsResp{
+		GroupInfo:  []*open_im_sdk.GroupInfo{},
+		Pagination: &open_im_sdk.RequestPagination{},
+	}
 	groups, err := imdb.GetGroups(int(req.Pagination.PageNumber), int(req.Pagination.ShowNumber))
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
-	resp := &pbGroup.GetGroupsResp{
-		GroupInfo: []*open_im_sdk.GroupInfo{},
+	groupsCountNum, err := imdb.GetGroupsCountNum()
+	log.NewInfo(req.OperationID, "groupsCountNum ", groupsCountNum)
+	if err != nil {
+		return resp, err
 	}
-	for _, v:= range groups {
+	resp.GroupNum = int32(groupsCountNum)
+	resp.Pagination.PageNumber = req.Pagination.PageNumber
+	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
+	for _, v := range groups {
 		resp.GroupInfo = append(resp.GroupInfo, &open_im_sdk.GroupInfo{
 			GroupID:       v.GroupID,
 			GroupName:     v.GroupName,
@@ -681,11 +691,11 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 			CreatorUserID: v.CreatorUserID,
 		})
 	}
-	utils.CopyStructFields(resp.GroupInfo, groups)
+
 	return resp, nil
 }
 
-func (s *groupServer) BanGroupChat(_ context.Context, req *pbGroup.BanGroupChatReq) (*pbGroup.BanGroupChatResp, error){
+func (s *groupServer) BanGroupChat(_ context.Context, req *pbGroup.BanGroupChatReq) (*pbGroup.BanGroupChatResp, error) {
 	log.NewInfo(req.OperationID, "BanGroupChat ", req.String())
 	resp := &pbGroup.BanGroupChatResp{}
 	if err := imdb.BanGroupChat(req.GroupId); err != nil {

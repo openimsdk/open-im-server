@@ -5,7 +5,7 @@ type UserResponse struct {
 	Nickname     string `json:"nick_name"`
 	UserId       string `json:"user_id"`
 	CreateTime   string `json:"create_time,omitempty"`
-	IsBlock bool `json:"is_block"`
+	IsBlock      bool   `json:"is_block"`
 }
 
 type GetUserRequest struct {
@@ -21,8 +21,8 @@ type GetUsersRequest struct {
 }
 
 type GetUsersResponse struct {
-	Users []*UserResponse `json:"users"`
-	UserNum int `json:"user_num"`
+	Users   []*UserResponse `json:"users"`
+	UserNum int             `json:"user_num"`
 	ResponsePagination
 }
 
@@ -34,7 +34,10 @@ type ResignUserResponse struct {
 }
 
 type AlterUserRequest struct {
-	UserId string `json:"user_id"`
+	UserId      string `json:"user_id" binding:"required"`
+	Nickname    string `json:"nickname"`
+	PhoneNumber int    `json:"phone_number" validate:"len=11"`
+	Email       string `json:"email"`
 }
 
 type AlterUserResponse struct {
@@ -42,8 +45,8 @@ type AlterUserResponse struct {
 
 type AddUserRequest struct {
 	PhoneNumber string `json:"phone_number" binding:"required"`
-	UserId string `json:"user_id" binding:"required"`
-	Name string `json:"name" binding:"required"`
+	UserId      string `json:"user_id" binding:"required"`
+	Name        string `json:"name" binding:"required"`
 }
 
 type AddUserResponse struct {
@@ -52,11 +55,11 @@ type AddUserResponse struct {
 type BlockUser struct {
 	UserResponse
 	BeginDisableTime string `json:"begin_disable_time"`
-	EndDisableTime string `json:"end_disable_time"`
+	EndDisableTime   string `json:"end_disable_time"`
 }
 
 type BlockUserRequest struct {
-	UserId string `json:"user_id" binding:"required"`
+	UserId         string `json:"user_id" binding:"required"`
 	EndDisableTime string `json:"end_disable_time" binding:"required"`
 }
 
@@ -75,8 +78,8 @@ type GetBlockUsersRequest struct {
 }
 
 type GetBlockUsersResponse struct {
-	BlockUsers []BlockUser `json:"block_users"`
-	BlockUserNum int `json:"block_user_num"`
+	BlockUsers   []BlockUser `json:"block_users"`
+	BlockUserNum int         `json:"block_user_num"`
 	ResponsePagination
 }
 

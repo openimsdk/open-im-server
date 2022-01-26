@@ -137,6 +137,9 @@ message GetUserResp{
 message AlterUserReq{
   string UserId = 1;
   string OperationID = 2;
+  int64 PhoneNumber = 3;
+  string Nickname = 4;
+  string Email = 5;
 }
 
 message AlterUserResp{

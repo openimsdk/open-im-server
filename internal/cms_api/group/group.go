@@ -7,6 +7,7 @@ import (
 	openIMHttp "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
@@ -28,6 +29,7 @@ func GetGroups(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	reqPb.Pagination = &commonPb.RequestPagination{}
 	utils.CopyStructFields(&reqPb.Pagination, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pbGroup.NewGroupClient(etcdConn)
@@ -46,11 +48,13 @@ func GetGroups(c *gin.Context) {
 			CreateTime:       (utils.UnixSecondToTime(int64(v.CreateTime))).String(),
 			IsBanChat:        false,
 			IsBanPrivateChat: false,
-			ProfilePhoto: v.FaceURL,
+			ProfilePhoto:     v.FaceURL,
 		})
 	}
+	resp.GroupNums = int(respPb.GroupNum)
+	resp.CurrentPage = int(respPb.Pagination.PageNumber)
+	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
-
 }
 
 func GetGroup(c *gin.Context) {
@@ -83,7 +87,7 @@ func GetGroup(c *gin.Context) {
 			CreateTime:       (utils.UnixSecondToTime(int64(v.CreateTime))).String(),
 			IsBanChat:        false,
 			IsBanPrivateChat: false,
-			ProfilePhoto: v.FaceURL,
+			ProfilePhoto:     v.FaceURL,
 		})
 	}
 	openIMHttp.RespHttp200(c, constant.OK, resp)
@@ -116,7 +120,7 @@ func CreateGroup(c *gin.Context) {
 
 func BanGroupChat(c *gin.Context) {
 	var (
-		req  cms_api_struct.BanGroupChatRequest
+		req   cms_api_struct.BanGroupChatRequest
 		reqPb pbGroup.BanGroupChatReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -139,7 +143,7 @@ func BanGroupChat(c *gin.Context) {
 
 func BanPrivateChat(c *gin.Context) {
 	var (
-		req  cms_api_struct.BanPrivateChatRequest
+		req   cms_api_struct.BanPrivateChatRequest
 		reqPb pbGroup.BanPrivateChatReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -162,7 +166,7 @@ func BanPrivateChat(c *gin.Context) {
 func GetGroupsMember(c *gin.Context) {
 	var (
 		req cms_api_struct.GetGroupMembersRequest
-		_ cms_api_struct.GetGroupMembersResponse
+		_   cms_api_struct.GetGroupMembersResponse
 	)
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
@@ -170,7 +174,6 @@ func GetGroupsMember(c *gin.Context) {
 		return
 	}
 }
-
 
 func InquireMember(c *gin.Context) {
 
@@ -180,11 +183,9 @@ func InquireGroup(c *gin.Context) {
 
 }
 
-
 func AddMembers(c *gin.Context) {
 
 }
-
 
 func RemoveUser(c *gin.Context) {
 

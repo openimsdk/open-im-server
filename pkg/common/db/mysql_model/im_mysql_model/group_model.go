@@ -66,7 +66,7 @@ func GetGroupsByName(groupName string, pageNumber, showNumber int32) ([]db.Group
 		return groups, err
 	}
 	dbConn.LogMode(true)
-	err = dbConn.Table("groups").Where("name=?", groupName).Limit(showNumber).Offset(showNumber*(pageNumber-1)).Find(&groups).Error
+	err = dbConn.Table("groups").Where("name=?", groupName).Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&groups).Error
 	return groups, err
 }
 
@@ -77,7 +77,7 @@ func GetGroups(pageNumber, showNumber int) ([]db.Group, error) {
 		return groups, err
 	}
 	dbConn.LogMode(true)
-	if err = dbConn.Table("groups").Limit(showNumber).Offset(showNumber*(pageNumber-1)).Find(&groups).Error; err != nil {
+	if err = dbConn.Table("groups").Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&groups).Error; err != nil {
 		return groups, err
 	}
 	return groups, nil
@@ -121,14 +121,27 @@ func SetGroupMaster(userId, groupId string) error {
 	}
 	dbConn.LogMode(true)
 	groupMember := db.GroupMember{
-		UserID: userId,
+		UserID:  userId,
 		GroupID: groupId,
 	}
 	updateInfo := db.GroupMember{
-		RoleLevel:constant.GroupOwner,
+		RoleLevel: constant.GroupOwner,
 	}
 	if err := dbConn.Find(&groupMember).Update(updateInfo).Error; err != nil {
 		return err
 	}
-	return  nil
+	return nil
+}
+
+func GetGroupsCountNum() (int, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return 0, err
+	}
+	dbConn.LogMode(true)
+	var count int
+	if err := dbConn.Model(&db.Group{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }

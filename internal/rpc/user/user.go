@@ -15,10 +15,11 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"google.golang.org/grpc"
 )
 
 type userServer struct {
@@ -244,7 +245,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 
 func (s *userServer) GetUser(ctx context.Context, req *pbUser.GetUserReq) (*pbUser.GetUserResp, error) {
 	log.NewInfo(req.OperationID, "GetUser args ", req.String())
-	resp := &pbUser.GetUserResp{User:&pbUser.User{}}
+	resp := &pbUser.GetUserResp{User: &pbUser.User{}}
 	user, err := imdb.GetUserByUserID(req.UserId)
 	if err != nil {
 		return resp, nil
@@ -260,7 +261,7 @@ func (s *userServer) GetUser(ctx context.Context, req *pbUser.GetUserReq) (*pbUs
 
 func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
 	log.NewInfo(req.OperationID, "GetUsers args ", req.String())
-	resp := &pbUser.GetUsersResp{User:[]*pbUser.User{}}
+	resp := &pbUser.GetUsersResp{User: []*pbUser.User{}}
 	users, err := imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		return resp, nil
@@ -278,7 +279,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 				UserId:       v.UserID,
 				CreateTime:   v.CreateTime.String(),
 				Nickname:     v.Nickname,
-				IsBlock:	isBlock,
+				IsBlock:      isBlock,
 			}
 			resp.User = append(resp.User, user)
 		}
@@ -297,7 +298,18 @@ func (s *userServer) ResignUser(ctx context.Context, req *pbUser.ResignUserReq) 
 
 func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*pbUser.AlterUserResp, error) {
 	log.NewInfo(req.OperationID, "AlterUser args ", req.String())
-	return &pbUser.AlterUserResp{}, nil
+	resp := &pbUser.AlterUserResp{}
+	user := db.Users{
+		PhoneNumber: strconv.FormatInt(req.PhoneNumber, 10),
+		Nickname:    req.Nickname,
+		Email:       req.Email,
+		UserID:      req.UserId,
+	}
+	if err := imdb.UpdateUserInfo(user); err != nil {
+		log.NewError(req.OperationID, err)
+		return resp, err
+	}
+	return resp, nil
 }
 
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
@@ -332,8 +344,6 @@ func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq
 	return resp, nil
 }
 
-//func (s *userServer) GetBlockUser(ctx context.Context, req *pbUser.GetBlockUserReq)
-
 func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUsersReq) (*pbUser.GetBlockUsersResp, error) {
 	log.NewInfo(req.OperationID, "GetBlockUsers args ", req.String())
 	resp := &pbUser.GetBlockUsersResp{}
@@ -355,7 +365,7 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 				IsBlock:      true,
 			},
 			BeginDisableTime: (v.BeginDisableTime).String(),
-			EndDisableTime: (v.EndDisableTime).String(),
+			EndDisableTime:   (v.EndDisableTime).String(),
 		})
 	}
 	resp.Pagination = &sdkws.ResponsePagination{}
@@ -368,8 +378,8 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 func (s *userServer) GetBlockUser(_ context.Context, req *pbUser.GetBlockUserReq) (*pbUser.GetBlockUserResp, error) {
 	log.NewInfo(req.OperationID, "GetBlockUser args ", req.String())
 	resp := &pbUser.GetBlockUserResp{}
-	user, err  := imdb.GetBlockUserById(req.UserId)
-	if err != nil{
+	user, err := imdb.GetBlockUserById(req.UserId)
+	if err != nil {
 		return resp, err
 	}
 	resp.BlockUser = &pbUser.BlockUser{}

@@ -12,16 +12,17 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetUser(c *gin.Context) {
 	var (
-		req    cms_api_struct.GetUserRequest
-		resp   cms_api_struct.GetUserResponse
-		reqPb  pb.GetUserReq
+		req   cms_api_struct.GetUserRequest
+		resp  cms_api_struct.GetUserResponse
+		reqPb pb.GetUserReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
 		log.NewError("0", "ShouldBindQuery failed ", err.Error())
@@ -47,9 +48,9 @@ func GetUser(c *gin.Context) {
 
 func GetUsers(c *gin.Context) {
 	var (
-		req    cms_api_struct.GetUsersRequest
-		resp   cms_api_struct.GetUsersResponse
-		reqPb  pb.GetUsersReq
+		req   cms_api_struct.GetUsersRequest
+		resp  cms_api_struct.GetUsersResponse
+		reqPb pb.GetUsersReq
 	)
 	reqPb.Pagination = &commonPb.RequestPagination{}
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -97,12 +98,12 @@ func ResignUser(c *gin.Context) {
 
 func AlterUser(c *gin.Context) {
 	var (
-		req    cms_api_struct.AlterUserRequest
-		resp   cms_api_struct.AlterUserResponse
-		reqPb  pb.AlterUserReq
-		_ *pb.AlterUserResp
+		req   cms_api_struct.AlterUserRequest
+		resp  cms_api_struct.AlterUserResponse
+		reqPb pb.AlterUserReq
+		_     *pb.AlterUserResp
 	)
-	if err := c.ShouldBind(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
@@ -112,15 +113,16 @@ func AlterUser(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	_, err := client.AlterUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		log.NewError("0", "microserver failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 	}
-	openIMHttp.RespHttp200(c, constant.OK, resp)
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
 func AddUser(c *gin.Context) {
 	var (
-		req    cms_api_struct.AddUserRequest
-		reqPb  pb.AddUserReq
+		req   cms_api_struct.AddUserRequest
+		reqPb pb.AddUserReq
 	)
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
@@ -140,9 +142,9 @@ func AddUser(c *gin.Context) {
 
 func BlockUser(c *gin.Context) {
 	var (
-		req    cms_api_struct.BlockUserRequest
-		resp   cms_api_struct.BlockUserResponse
-		reqPb  pb.BlockUserReq
+		req   cms_api_struct.BlockUserRequest
+		resp  cms_api_struct.BlockUserResponse
+		reqPb pb.BlockUserReq
 	)
 	if err := c.BindJSON(&req); err != nil {
 		fmt.Println(err)
@@ -165,9 +167,9 @@ func BlockUser(c *gin.Context) {
 
 func UnblockUser(c *gin.Context) {
 	var (
-		req    cms_api_struct.UnblockUserRequest
-		resp   cms_api_struct.UnBlockUserResponse
-		reqPb  pb.UnBlockUserReq
+		req   cms_api_struct.UnblockUserRequest
+		resp  cms_api_struct.UnBlockUserResponse
+		reqPb pb.UnBlockUserReq
 	)
 	if err := c.ShouldBind(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
@@ -207,14 +209,14 @@ func GetBlockUsers(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
 		return
 	}
-	for _, v := range respPb.BlockUsers{
+	for _, v := range respPb.BlockUsers {
 		resp.BlockUsers = append(resp.BlockUsers, cms_api_struct.BlockUser{
-			UserResponse:     cms_api_struct.UserResponse{
-				UserId:v.User.UserId,
-				ProfilePhoto:v.User.ProfilePhoto,
-				Nickname: v.User.Nickname,
-				IsBlock: v.User.IsBlock,
-				CreateTime: v.User.CreateTime,
+			UserResponse: cms_api_struct.UserResponse{
+				UserId:       v.User.UserId,
+				ProfilePhoto: v.User.ProfilePhoto,
+				Nickname:     v.User.Nickname,
+				IsBlock:      v.User.IsBlock,
+				CreateTime:   v.User.CreateTime,
 			},
 			BeginDisableTime: v.BeginDisableTime,
 			EndDisableTime:   v.EndDisableTime,
@@ -226,11 +228,10 @@ func GetBlockUsers(c *gin.Context) {
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
-
 func GetBlockUser(c *gin.Context) {
 	var (
-		req cms_api_struct.GetBlockUserRequest
-		resp cms_api_struct.GetBlockUserResponse
+		req   cms_api_struct.GetBlockUserRequest
+		resp  cms_api_struct.GetBlockUserResponse
 		reqPb pb.GetBlockUserReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
