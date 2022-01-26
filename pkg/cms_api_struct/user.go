@@ -4,7 +4,7 @@ type UserResponse struct {
 	ProfilePhoto string `json:"profile_photo"`
 	Nickname     string `json:"nick_name"`
 	UserId       string `json:"user_id"`
-	CreateTime   string `json:"create_time"`
+	CreateTime   string `json:"create_time,omitempty"`
 	IsBlock bool `json:"is_block"`
 }
 
@@ -49,6 +49,12 @@ type AddUserRequest struct {
 type AddUserResponse struct {
 }
 
+type BlockUser struct {
+	UserResponse
+	BeginDisableTime string `json:"begin_disable_time"`
+	EndDisableTime string `json:"end_disable_time"`
+}
+
 type BlockUserRequest struct {
 	UserId string `json:"user_id" binding:"required"`
 	EndDisableTime string `json:"end_disable_time" binding:"required"`
@@ -69,7 +75,15 @@ type GetBlockUsersRequest struct {
 }
 
 type GetBlockUsersResponse struct {
-	BlockUsers []UserResponse `json:"block_users"`
+	BlockUsers []BlockUser `json:"block_users"`
 	BlockUserNum int `json:"block_user_num"`
 	ResponsePagination
+}
+
+type GetBlockUserRequest struct {
+	UserId string `form:"user_id" binding:"required"`
+}
+
+type GetBlockUserResponse struct {
+	BlockUser
 }

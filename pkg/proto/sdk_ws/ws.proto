@@ -340,5 +340,5 @@ message RequestPagination {
 
 message ResponsePagination {
   int32 CurrentPage = 5;
-  int32 showNumber = 6;
+  int32 ShowNumber = 6;
 }

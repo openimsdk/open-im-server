@@ -28,14 +28,26 @@ func GetGroups(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	utils.CopyStructFields(&reqPb.Pagination, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.GetGroups(context.Background(), &reqPb)
-	fmt.Println(respPb)
 	if err != nil {
 		log.NewError("s", "GetUserInfo failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
+	}
+	for _, v := range respPb.GroupInfo {
+		resp.Groups = append(resp.Groups, cms_api_struct.GroupResponse{
+			GroupName:        v.GroupName,
+			GroupID:          v.GroupID,
+			GroupMasterName:  v.OwnerUserID,
+			GroupMasterId:    v.OwnerUserID,
+			CreateTime:       (utils.UnixSecondToTime(int64(v.CreateTime))).String(),
+			IsBanChat:        false,
+			IsBanPrivateChat: false,
+			ProfilePhoto: v.FaceURL,
+		})
 	}
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 
@@ -52,15 +64,27 @@ func GetGroup(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
-	utils.CopyStructFields(&reqPb, req)
+	reqPb.GroupName = req.GroupName
+	fmt.Println(reqPb)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.GetGroup(context.Background(), &reqPb)
-	fmt.Println(respPb)
 	if err != nil {
 		log.NewError("s", "GetUserInfo failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
+	}
+	for _, v := range respPb.GroupInfo {
+		resp.Groups = append(resp.Groups, cms_api_struct.GroupResponse{
+			GroupName:        v.GroupName,
+			GroupID:          v.GroupID,
+			GroupMasterName:  v.OwnerUserID,
+			GroupMasterId:    v.OwnerUserID,
+			CreateTime:       (utils.UnixSecondToTime(int64(v.CreateTime))).String(),
+			IsBanChat:        false,
+			IsBanPrivateChat: false,
+			ProfilePhoto: v.FaceURL,
+		})
 	}
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
@@ -86,32 +110,67 @@ func CreateGroup(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
+	fmt.Println(respPb)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
 func BanGroupChat(c *gin.Context) {
 	var (
 		req  cms_api_struct.BanGroupChatRequest
-		resp cms_api_struct.BanGroupChatResponse
+		reqPb pbGroup.BanGroupChatReq
 	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError("0", "ShouldBindQuery failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		return
+	}
+	reqPb.GroupId = req.GroupId
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := pbGroup.NewGroupClient(etcdConn)
+	_, err := client.BanGroupChat(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError("s", "GetUserInfo failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		return
+	}
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 
 }
 
 func BanPrivateChat(c *gin.Context) {
 	var (
 		req  cms_api_struct.BanPrivateChatRequest
-		resp cms_api_struct.BanPrivateChatResponse
+		reqPb pbGroup.BanPrivateChatReq
 	)
-
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		return
+	}
+	reqPb.GroupId = req.GroupId
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := pbGroup.NewGroupClient(etcdConn)
+	_, err := client.BanPrivateChat(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError("s", "GetUserInfo failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		return
+	}
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
-func SearchGroupsMember(c *gin.Context) {
-
+func GetGroupsMember(c *gin.Context) {
+	var (
+		req cms_api_struct.GetGroupMembersRequest
+		_ cms_api_struct.GetGroupMembersResponse
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		return
+	}
 }
 
-func AddUsers(c *gin.Context) {
-
-}
 
 func InquireMember(c *gin.Context) {
 
@@ -121,27 +180,13 @@ func InquireGroup(c *gin.Context) {
 
 }
 
-func AddGroupMember(c *gin.Context) {
-
-}
 
 func AddMembers(c *gin.Context) {
 
 }
 
-func SetMaster(c *gin.Context) {
-
-}
-
-func BlockUser(c *gin.Context) {
-
-}
 
 func RemoveUser(c *gin.Context) {
-
-}
-
-func BanPrivateChat(c *gin.Context) {
 
 }
 

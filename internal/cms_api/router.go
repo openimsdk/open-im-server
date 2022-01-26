@@ -55,7 +55,7 @@ func NewGinRouter() *gin.Engine {
 		messageRouterGroup.GET("/search_message_by_group", message.SearchMessageByGroup)
 		messageRouterGroup.POST("/withdraw_message", message.Withdraw)
 	}
-	groupRouterGroup := router.Group("/groups")
+	groupRouterGroup := router.Group("/group")
 	{
 		groupRouterGroup.GET("/get_groups", group.GetGroups)
 		groupRouterGroup.GET("/get_group", group.GetGroup)
@@ -70,6 +70,7 @@ func NewGinRouter() *gin.Engine {
 		groupRouterGroup.POST("/ban_private_chat", group.BanPrivateChat)
 		groupRouterGroup.POST("/withdraw_message", group.Withdraw)
 		groupRouterGroup.POST("/search_group_message", group.SearchMessage)
+		groupRouterGroup.POST("/ban_group_chat", group.BanGroupChat)
 	}
 	userRouterGroup := router.Group("/user")
 	{
@@ -81,6 +82,7 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.POST("/unblock_user", user.UnblockUser)
 		userRouterGroup.POST("/block_user", user.BlockUser)
 		userRouterGroup.GET("/get_block_users", user.GetBlockUsers)
+		userRouterGroup.GET("/get_block_user", user.GetBlockUser)
 	}
 	return baseRouter
 }

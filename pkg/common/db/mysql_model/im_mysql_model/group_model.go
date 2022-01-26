@@ -1,6 +1,7 @@
 package im_mysql_model
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
 	"time"
@@ -53,19 +54,20 @@ func SetGroupInfo(groupInfo db.Group) error {
 	if err != nil {
 		return err
 	}
+	dbConn.LogMode(true)
 	err = dbConn.Table("groups").Where("group_id=?", groupInfo.GroupID).Update(&groupInfo).Error
 	return err
 }
 
-func GetGroupByName(groupName string) (db.Group, error) {
+func GetGroupsByName(groupName string, pageNumber, showNumber int32) ([]db.Group, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	var group db.Group
+	var groups []db.Group
 	if err != nil {
-		return group, err
+		return groups, err
 	}
 	dbConn.LogMode(true)
-	err = dbConn.Table("groups").Where("group_id=?", groupName).Find(&group).Error
-	return group, err
+	err = dbConn.Table("groups").Where("name=?", groupName).Limit(showNumber).Offset(showNumber*(pageNumber-1)).Find(&groups).Error
+	return groups, err
 }
 
 func GetGroups(pageNumber, showNumber int) ([]db.Group, error) {
@@ -75,8 +77,58 @@ func GetGroups(pageNumber, showNumber int) ([]db.Group, error) {
 		return groups, err
 	}
 	dbConn.LogMode(true)
-	err = dbConn.Table("groups").Limit(showNumber).Offset(showNumber*(pageNumber-1)).Find(&groups).Error
-	if err != nil {
+	if err = dbConn.Table("groups").Limit(showNumber).Offset(showNumber*(pageNumber-1)).Find(&groups).Error; err != nil {
 		return groups, err
 	}
+	return groups, nil
+}
+
+func BanGroupChat(groupId string) error {
+	var group db.Group
+	group.Status = constant.GroupBanChat
+	if err := SetGroupInfo(group); err != nil {
+		return err
+	}
+	return nil
+}
+
+func BanPrivateChat(groupId string) error {
+	var group db.Group
+	group.Status = constant.GroupBanPrivateChat
+	if err := SetGroupInfo(group); err != nil {
+		return err
+	}
+	return nil
+}
+
+func DeleteGroup(groupId string) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	dbConn.LogMode(true)
+	var group db.Group
+	if err := dbConn.Table("groups").Where("").Delete(&group).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func SetGroupMaster(userId, groupId string) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	dbConn.LogMode(true)
+	groupMember := db.GroupMember{
+		UserID: userId,
+		GroupID: groupId,
+	}
+	updateInfo := db.GroupMember{
+		RoleLevel:constant.GroupOwner,
+	}
+	if err := dbConn.Find(&groupMember).Update(updateInfo).Error; err != nil {
+		return err
+	}
+	return  nil
 }

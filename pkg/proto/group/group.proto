@@ -197,11 +197,12 @@ message GetGroupAllMemberResp {
 
 message GetGroupReq {
     string GroupName = 1;
-    string OperationID = 2;
+    server_api_params.RequestPagination Pagination = 2;
+    string OperationID = 3;
 }
 
 message GetGroupResp {
-    server_api_params.GroupInfo GroupInfo = 1;
+    repeated server_api_params.GroupInfo GroupInfo = 1;
 }
 
 message GetGroupsReq {
@@ -272,10 +273,10 @@ service group{
   rpc getGroupAllMember(GetGroupAllMemberReq) returns(GetGroupAllMemberResp);
 
 
-  rpc GetGroup(GetGroupReq) returns(GetGroupsResp);
+  rpc GetGroup(GetGroupReq) returns(GetGroupResp);
   rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);
   rpc BanGroupChat(BanGroupChatReq) returns(BanGroupChatResp);
-  rpc BanPrivateChat(BanPrivateChatReq) returns(BanPrivateChatReq);
+  rpc BanPrivateChat(BanPrivateChatReq) returns(BanPrivateChatResp);
   rpc SetMaster(SetMasterReq) returns(SetMasterResp);
   rpc DeleteGroup(DeleteGroupReq) returns(DeleteGroupResp);
 }

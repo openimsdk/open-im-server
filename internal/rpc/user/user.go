@@ -316,6 +316,7 @@ func (s *userServer) BlockUser(ctx context.Context, req *pbUser.BlockUserReq) (*
 	resp := &pbUser.BlockUserResp{}
 	err := imdb.BlockUser(req.UserId, req.EndDisableTime)
 	if err != nil {
+		fmt.Println(err)
 		return resp, constant.ErrDB
 	}
 	return resp, nil
@@ -323,7 +324,6 @@ func (s *userServer) BlockUser(ctx context.Context, req *pbUser.BlockUserReq) (*
 
 func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq) (*pbUser.UnBlockUserResp, error) {
 	log.NewInfo(req.OperationID, "UnBlockUser args ", req.String())
-	fmt.Println(req.UserId)
 	resp := &pbUser.UnBlockUserResp{}
 	err := imdb.UnBlockUser(req.UserId)
 	if err != nil {
@@ -332,10 +332,12 @@ func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq
 	return resp, nil
 }
 
+//func (s *userServer) GetBlockUser(ctx context.Context, req *pbUser.GetBlockUserReq)
+
 func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUsersReq) (*pbUser.GetBlockUsersResp, error) {
 	log.NewInfo(req.OperationID, "GetBlockUsers args ", req.String())
 	resp := &pbUser.GetBlockUsersResp{}
-	blockUserIds, err := imdb.GetBlockUsersID(req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	blockUsers, err := imdb.GetBlockUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		return resp, constant.ErrDB
 	}
@@ -344,21 +346,35 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 		return resp, constant.ErrDB
 	}
 	resp.BlockUserNum = int32(usersNum)
-	blockUsers, err := imdb.GetBlockUsers(blockUserIds)
-	if err != nil {
-		return resp, constant.ErrDB
-	}
 	for _, v := range blockUsers {
-		resp.User = append(resp.User, &pbUser.User{
-			ProfilePhoto: v.FaceURL,
-			Nickname:     v.Nickname,
-			UserId:       v.UserID,
-			CreateTime:   v.CreateTime.String(),
-			IsBlock:      true,
+		resp.BlockUsers = append(resp.BlockUsers, &pbUser.BlockUser{
+			User: &pbUser.User{
+				ProfilePhoto: v.User.FaceURL,
+				Nickname:     v.User.Nickname,
+				UserId:       v.User.UserID,
+				IsBlock:      true,
+			},
+			BeginDisableTime: (v.BeginDisableTime).String(),
+			EndDisableTime: (v.EndDisableTime).String(),
 		})
 	}
 	resp.Pagination = &sdkws.ResponsePagination{}
 	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
 	resp.Pagination.CurrentPage = req.Pagination.PageNumber
+	fmt.Println(resp)
 	return resp, nil
+}
+
+func (s *userServer) GetBlockUser(_ context.Context, req *pbUser.GetBlockUserReq) (*pbUser.GetBlockUserResp, error) {
+	log.NewInfo(req.OperationID, "GetBlockUser args ", req.String())
+	resp := &pbUser.GetBlockUserResp{}
+	user, err  := imdb.GetBlockUserById(req.UserId)
+	if err != nil{
+		return resp, err
+	}
+	resp.BlockUser = &pbUser.BlockUser{}
+	resp.BlockUser.BeginDisableTime = (user.BeginDisableTime).String()
+	resp.BlockUser.EndDisableTime = (user.EndDisableTime).String()
+	return resp, nil
+
 }

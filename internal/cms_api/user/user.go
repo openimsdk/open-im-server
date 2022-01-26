@@ -12,11 +12,9 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
-	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 func GetUser(c *gin.Context) {
@@ -129,7 +127,6 @@ func AddUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
-	fmt.Println(time.Now().String())
 	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
@@ -174,10 +171,10 @@ func UnblockUser(c *gin.Context) {
 	)
 	if err := c.ShouldBind(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
+		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
-	fmt.Println(reqPb, req)
+	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
 	_, err := client.UnBlockUser(context.Background(), &reqPb)
@@ -210,9 +207,46 @@ func GetBlockUsers(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
 		return
 	}
-	utils.CopyStructFields(&resp.BlockUsers, respPb.User)
+	for _, v := range respPb.BlockUsers{
+		resp.BlockUsers = append(resp.BlockUsers, cms_api_struct.BlockUser{
+			UserResponse:     cms_api_struct.UserResponse{
+				UserId:v.User.UserId,
+				ProfilePhoto:v.User.ProfilePhoto,
+				Nickname: v.User.Nickname,
+				IsBlock: v.User.IsBlock,
+				CreateTime: v.User.CreateTime,
+			},
+			BeginDisableTime: v.BeginDisableTime,
+			EndDisableTime:   v.EndDisableTime,
+		})
+	}
 	resp.BlockUserNum = int(respPb.BlockUserNum)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
+	openIMHttp.RespHttp200(c, constant.OK, resp)
+}
+
+
+func GetBlockUser(c *gin.Context) {
+	var (
+		req cms_api_struct.GetBlockUserRequest
+		resp cms_api_struct.GetBlockUserResponse
+		reqPb pb.GetBlockUserReq
+	)
+	if err := c.ShouldBindQuery(&req); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		return
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := pb.NewUserClient(etcdConn)
+	respPb, err := client.GetBlockUser(context.Background(), &reqPb)
+	if err != nil {
+		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		return
+	}
+	resp.EndDisableTime = respPb.BlockUser.EndDisableTime
+	resp.BeginDisableTime = respPb.BlockUser.BeginDisableTime
+	utils.CopyStructFields(&resp, respPb.BlockUser.User)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }

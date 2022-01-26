@@ -8,14 +8,18 @@ type GroupResponse struct {
 	CreateTime       string `json:"create_time"`
 	IsBanChat        bool   `json:"is_ban_chat"`
 	IsBanPrivateChat bool   `json:"is_ban_private_chat"`
+	ProfilePhoto string `json:"profile_photo"`
 }
 
 type GetGroupRequest struct {
-	GroupName string `form:"group_name"`
+	GroupName string `form:"group_name" binding:"required"`
+	RequestPagination
 }
 
 type GetGroupResponse struct {
-	GroupResponse
+	Groups    []GroupResponse `json:"groups"`
+	GroupNums int             `json:"group_nums"`
+	ResponsePagination
 }
 
 type GetGroupsRequest struct {
@@ -66,8 +70,9 @@ type DeleteGroupRequest struct {
 type DeleteGroupResponse struct {
 }
 
-type GetGroupMemberRequest struct {
+type GetGroupMembersRequest struct {
 	GroupId string `json:"group_id"`
+	RequestPagination
 }
 
 type GroupMemberResponse struct {
@@ -77,7 +82,7 @@ type GroupMemberResponse struct {
 	JoinTime       string `json:"join_time"`
 }
 
-type GetGroupMemberResponse struct {
+type GetGroupMembersResponse struct {
 	GroupMemberList []GroupMemberResponse `json:"group_member_list"`
 	GroupMemberNums int                   `json:"group_member_nums"`
 	ResponsePagination

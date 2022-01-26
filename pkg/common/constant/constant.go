@@ -107,6 +107,13 @@ const (
 	IsUnreadCount        = "unreadCount"
 	IsConversationUpdate = "conversationUpdate"
 	IsSenderSync         = "senderSync"
+
+	//GroupStatus
+	GroupOk = 0
+	GroupBanChat = 1
+	GroupDisband = 2
+	GroupBaned = 3
+	GroupBanPrivateChat = 4
 )
 
 var ContentType2PushContent = map[int64]string{
@@ -139,3 +146,17 @@ const (
 )
 
 const FriendAcceptTip = "You have successfully become friends, so start chatting"
+
+func GroupIsBanChat(status int32) bool {
+	if status != GroupBanChat {
+		return false
+	}
+	return true
+}
+
+func GroupIsBanPrivateChat(status int32) bool {
+	if status != GroupBanPrivateChat {
+		return false
+	}
+	return true
+}

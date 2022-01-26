@@ -193,13 +193,27 @@ message GetBlockUsersReq{
   int32 BlockUserNum = 4;
 }
 
+message BlockUser {
+    User User = 1;
+    string BeginDisableTime = 2;
+    string EndDisableTime = 3;
+}
+
 message GetBlockUsersResp{
   CommonResp  CommonResp = 1;
-  repeated User user = 2;
+  repeated BlockUser BlockUsers = 2;
   server_api_params.ResponsePagination Pagination = 3;
   int32 BlockUserNum = 4;
 }
 
+message GetBlockUserReq {
+    string User_id = 1;
+    string OperationID = 2;
+}
+
+message GetBlockUserResp {
+    BlockUser BlockUser = 2;
+}
 
 service user {
   rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
@@ -219,4 +233,5 @@ service user {
   rpc BlockUser(BlockUserReq) returns (BlockUserResp);
   rpc UnBlockUser(UnBlockUserReq) returns (UnBlockUserResp);
   rpc GetBlockUsers(GetBlockUsersReq) returns (GetBlockUsersResp);
+  rpc GetBlockUser(GetBlockUserReq) returns (GetBlockUserResp);
 }
