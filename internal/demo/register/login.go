@@ -65,7 +65,7 @@ func Login(c *gin.Context) {
 	defer resp.Body.Close()
 	if err != nil {
 		log.ErrorByKv("Failed to read file", account, "err", err.Error())
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.IoErrot, "errMsg": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.IoError, "errMsg": err.Error()})
 		return
 	}
 	imRep := IMRegisterResp{}

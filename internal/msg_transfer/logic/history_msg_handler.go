@@ -32,80 +32,60 @@ func (mc *HistoryConsumerHandler) Init() {
 }
 
 func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
-	log.InfoByKv("chat come mongo!!!", "", "chat", string(msg))
+	log.InfoByKv("msg come mongo!!!", "", "msg", string(msg))
 	time := utils.GetCurrentTimestampByNano()
-	pbData := pbMsg.WSToMsgSvrChatMsg{}
-	err := proto.Unmarshal(msg, &pbData)
+	msgFromMQ := pbMsg.MsgDataToMQ{}
+	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
-		log.ErrorByKv("msg_transfer Unmarshal chat err", "", "chat", string(msg), "err", err.Error())
+		log.ErrorByKv("msg_transfer Unmarshal msg err", "", "msg", string(msg), "err", err.Error())
 		return
 	}
-	pbSaveData := pbMsg.MsgSvrToPushSvrChatMsg{}
-	pbSaveData.SendID = pbData.SendID
-	pbSaveData.SenderNickName = pbData.SenderNickName
-	pbSaveData.SenderFaceURL = pbData.SenderFaceURL
-	pbSaveData.ClientMsgID = pbData.ClientMsgID
-	pbSaveData.SendTime = pbData.SendTime
-	pbSaveData.Content = pbData.Content
-	pbSaveData.MsgFrom = pbData.MsgFrom
-	pbSaveData.ContentType = pbData.ContentType
-	pbSaveData.SessionType = pbData.SessionType
-	pbSaveData.MsgID = pbData.MsgID
-	pbSaveData.OperationID = pbData.OperationID
-	pbSaveData.RecvID = pbData.RecvID
-	pbSaveData.PlatformID = pbData.PlatformID
-	options := utils.JsonStringToMap(pbData.Options)
+	operationID := msgFromMQ.OperationID
 	//Control whether to store offline messages (mongo)
-	isHistory := utils.GetSwitchFromOptions(options, "history")
+	isHistory := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsHistory)
 	//Control whether to store history messages (mysql)
-	isPersist := utils.GetSwitchFromOptions(options, "persistent")
-	switch pbData.SessionType {
+	isPersist := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsPersistent)
+	switch msgFromMQ.MsgData.SessionType {
 	case constant.SingleChatType:
-		log.NewDebug(pbSaveData.OperationID, "msg_transfer chat type = SingleChatType", isHistory, isPersist)
+		log.NewDebug(msgFromMQ.OperationID, "msg_transfer msg type = SingleChatType", isHistory, isPersist)
 		if isHistory {
-			if msgKey == pbSaveData.RecvID {
-				err := saveUserChat(pbData.RecvID, &pbSaveData)
+			if msgKey == msgFromMQ.MsgData.RecvID {
+				err := saveUserChat(msgFromMQ.MsgData.RecvID, &msgFromMQ)
 				if err != nil {
-					log.NewError(pbSaveData.OperationID, "single data insert to mongo err", err.Error(), pbSaveData.String())
+					log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
 					return
 				}
 
-			} else if msgKey == pbSaveData.SendID {
-				err := saveUserChat(pbData.SendID, &pbSaveData)
+			} else if msgKey == msgFromMQ.MsgData.SendID {
+				err := saveUserChat(msgFromMQ.MsgData.SendID, &msgFromMQ)
 				if err != nil {
-					log.NewError(pbSaveData.OperationID, "single data insert to mongo err", err.Error(), pbSaveData.String())
+					log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
 					return
 				}
-
 			}
 
-			log.NewDebug(pbSaveData.OperationID, "saveUserChat cost time ", utils.GetCurrentTimestampByNano()-time)
+			log.NewDebug(operationID, "saveUserChat cost time ", utils.GetCurrentTimestampByNano()-time)
 		}
-		if msgKey == pbSaveData.RecvID {
-			pbSaveData.Options = pbData.Options
-			pbSaveData.OfflineInfo = pbData.OfflineInfo
-			go sendMessageToPush(&pbSaveData)
-			log.NewDebug(pbSaveData.OperationID, "sendMessageToPush cost time ", utils.GetCurrentTimestampByNano()-time)
+		if msgKey == msgFromMQ.MsgData.RecvID {
+			go sendMessageToPush(&msgFromMQ)
+			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", utils.GetCurrentTimestampByNano()-time)
 		}
 
 	case constant.GroupChatType:
-		log.NewDebug(pbSaveData.OperationID, "msg_transfer chat type = GroupChatType", isHistory, isPersist)
+		log.NewDebug(msgFromMQ.OperationID, "msg_transfer msg type = GroupChatType", isHistory, isPersist)
 		if isHistory {
-			uidAndGroupID := strings.Split(pbData.RecvID, " ")
-			err := saveUserChat(uidAndGroupID[0], &pbSaveData)
+			err := saveUserChat(msgFromMQ.MsgData.RecvID, &msgFromMQ)
 			if err != nil {
-				log.NewError(pbSaveData.OperationID, "group data insert to mongo err", pbSaveData.String(), uidAndGroupID[0], err.Error())
+				log.NewError(operationID, "group data insert to mongo err", msgFromMQ.String(), msgFromMQ.MsgData.RecvID, err.Error())
 				return
 			}
 		}
-		pbSaveData.Options = pbData.Options
-		pbSaveData.OfflineInfo = pbData.OfflineInfo
-		go sendMessageToPush(&pbSaveData)
+		go sendMessageToPush(&msgFromMQ)
 	default:
-		log.NewError(pbSaveData.OperationID, "SessionType error", pbSaveData.String())
+		log.NewError(msgFromMQ.OperationID, "SessionType error", msgFromMQ.String())
 		return
 	}
-	log.NewDebug(pbSaveData.OperationID, "msg_transfer handle topic data to database success...", pbSaveData.String())
+	log.NewDebug(msgFromMQ.OperationID, "msg_transfer handle topic data to database success...", msgFromMQ.String())
 }
 
 func (HistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
@@ -113,50 +93,35 @@ func (HistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { ret
 func (mc *HistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.InfoByKv("kafka get info to mongo", "", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "chat", string(msg.Value))
+		log.InfoByKv("kafka get info to mongo", "", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
 		mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 		sess.MarkMessage(msg, "")
 	}
 	return nil
 }
-func sendMessageToPush(message *pbMsg.MsgSvrToPushSvrChatMsg) {
+func sendMessageToPush(message *pbMsg.MsgDataToMQ) {
 	log.InfoByKv("msg_transfer send message to push", message.OperationID, "message", message.String())
-	msg := pbPush.PushMsgReq{}
-	msg.OperationID = message.OperationID
-	msg.PlatformID = message.PlatformID
-	msg.Content = message.Content
-	msg.ContentType = message.ContentType
-	msg.SessionType = message.SessionType
-	msg.RecvID = message.RecvID
-	msg.SendID = message.SendID
-	msg.SenderNickName = message.SenderNickName
-	msg.SenderFaceURL = message.SenderFaceURL
-	msg.ClientMsgID = message.ClientMsgID
-	msg.MsgFrom = message.MsgFrom
-	msg.Options = message.Options
-	msg.RecvSeq = message.RecvSeq
-	msg.SendTime = message.SendTime
-	msg.MsgID = message.MsgID
-	msg.OfflineInfo = message.OfflineInfo
+	rpcPushMsg := pbPush.PushMsgReq{OperationID: message.OperationID, MsgData: message.MsgData}
+	mqPushMsg := pbMsg.PushMsgDataToMQ{OperationID: message.OperationID, MsgData: message.MsgData}
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName)
 	if grpcConn == nil {
-		log.ErrorByKv("rpc dial failed", msg.OperationID, "push data", msg.String())
-		pid, offset, err := producer.SendMessage(message)
+		log.ErrorByKv("rpc dial failed", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
+		pid, offset, err := producer.SendMessage(&mqPushMsg)
 		if err != nil {
-			log.ErrorByKv("kafka send failed", msg.OperationID, "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
+			log.ErrorByKv("kafka send failed", mqPushMsg.OperationID, "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
 		}
 		return
 	}
 	msgClient := pbPush.NewPushMsgServiceClient(grpcConn)
-	_, err := msgClient.PushMsg(context.Background(), &msg)
+	_, err := msgClient.PushMsg(context.Background(), &rpcPushMsg)
 	if err != nil {
-		log.ErrorByKv("rpc send failed", msg.OperationID, "push data", msg.String(), "err", err.Error())
-		pid, offset, err := producer.SendMessage(message)
+		log.ErrorByKv("rpc send failed", rpcPushMsg.OperationID, "push data", rpcPushMsg.String(), "err", err.Error())
+		pid, offset, err := producer.SendMessage(&mqPushMsg)
 		if err != nil {
-			log.ErrorByKv("kafka send failed", msg.OperationID, "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
+			log.ErrorByKv("kafka send failed", mqPushMsg.OperationID, "send data", mqPushMsg.String(), "pid", pid, "offset", offset, "err", err.Error())
 		}
 	} else {
-		log.InfoByKv("rpc send success", msg.OperationID, "push data", msg.String())
+		log.InfoByKv("rpc send success", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
 
 	}
 }

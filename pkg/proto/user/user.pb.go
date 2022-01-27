@@ -6,6 +6,7 @@ package user // import "./user"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
+import sdk_ws "Open_IM/pkg/proto/sdk_ws"
 
 import (
 	context "golang.org/x/net/context"
@@ -24,8 +25,8 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type CommonResp struct {
-	ErrorCode            int32    `protobuf:"varint,1,opt,name=errorCode" json:"errorCode,omitempty"`
-	ErrorMsg             string   `protobuf:"bytes,2,opt,name=errorMsg" json:"errorMsg,omitempty"`
+	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -35,7 +36,7 @@ func (m *CommonResp) Reset()         { *m = CommonResp{} }
 func (m *CommonResp) String() string { return proto.CompactTextString(m) }
 func (*CommonResp) ProtoMessage()    {}
 func (*CommonResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{0}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{0}
 }
 func (m *CommonResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CommonResp.Unmarshal(m, b)
@@ -55,23 +56,77 @@ func (m *CommonResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CommonResp proto.InternalMessageInfo
 
-func (m *CommonResp) GetErrorCode() int32 {
+func (m *CommonResp) GetErrCode() int32 {
 	if m != nil {
-		return m.ErrorCode
+		return m.ErrCode
 	}
 	return 0
 }
 
-func (m *CommonResp) GetErrorMsg() string {
+func (m *CommonResp) GetErrMsg() string {
 	if m != nil {
-		return m.ErrorMsg
+		return m.ErrMsg
+	}
+	return ""
+}
+
+type DeleteUsersReq struct {
+	DeleteUserIDList     []string `protobuf:"bytes,2,rep,name=DeleteUserIDList" json:"DeleteUserIDList,omitempty"`
+	OpUserID             string   `protobuf:"bytes,3,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID" json:"OperationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteUsersReq) Reset()         { *m = DeleteUsersReq{} }
+func (m *DeleteUsersReq) String() string { return proto.CompactTextString(m) }
+func (*DeleteUsersReq) ProtoMessage()    {}
+func (*DeleteUsersReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{1}
+}
+func (m *DeleteUsersReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteUsersReq.Unmarshal(m, b)
+}
+func (m *DeleteUsersReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteUsersReq.Marshal(b, m, deterministic)
+}
+func (dst *DeleteUsersReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteUsersReq.Merge(dst, src)
+}
+func (m *DeleteUsersReq) XXX_Size() int {
+	return xxx_messageInfo_DeleteUsersReq.Size(m)
+}
+func (m *DeleteUsersReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteUsersReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteUsersReq proto.InternalMessageInfo
+
+func (m *DeleteUsersReq) GetDeleteUserIDList() []string {
+	if m != nil {
+		return m.DeleteUserIDList
+	}
+	return nil
+}
+
+func (m *DeleteUsersReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
+	}
+	return ""
+}
+
+func (m *DeleteUsersReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
 	}
 	return ""
 }
 
 type DeleteUsersResp struct {
-	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
-	FailedUidList        []string    `protobuf:"bytes,2,rep,name=failedUidList" json:"failedUidList,omitempty"`
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	FailedUserIDList     []string    `protobuf:"bytes,2,rep,name=FailedUserIDList" json:"FailedUserIDList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -81,7 +136,7 @@ func (m *DeleteUsersResp) Reset()         { *m = DeleteUsersResp{} }
 func (m *DeleteUsersResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteUsersResp) ProtoMessage()    {}
 func (*DeleteUsersResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{1}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{2}
 }
 func (m *DeleteUsersResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteUsersResp.Unmarshal(m, b)
@@ -108,163 +163,109 @@ func (m *DeleteUsersResp) GetCommonResp() *CommonResp {
 	return nil
 }
 
-func (m *DeleteUsersResp) GetFailedUidList() []string {
+func (m *DeleteUsersResp) GetFailedUserIDList() []string {
 	if m != nil {
-		return m.FailedUidList
+		return m.FailedUserIDList
 	}
 	return nil
 }
 
-type DeleteUsersReq struct {
-	DeleteUidList        []string `protobuf:"bytes,2,rep,name=deleteUidList" json:"deleteUidList,omitempty"`
-	Token                string   `protobuf:"bytes,3,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,4,opt,name=OperationID" json:"OperationID,omitempty"`
+type GetAllUserIDReq struct {
+	OpUserID             string   `protobuf:"bytes,1,opt,name=opUserID" json:"opUserID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *DeleteUsersReq) Reset()         { *m = DeleteUsersReq{} }
-func (m *DeleteUsersReq) String() string { return proto.CompactTextString(m) }
-func (*DeleteUsersReq) ProtoMessage()    {}
-func (*DeleteUsersReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{2}
+func (m *GetAllUserIDReq) Reset()         { *m = GetAllUserIDReq{} }
+func (m *GetAllUserIDReq) String() string { return proto.CompactTextString(m) }
+func (*GetAllUserIDReq) ProtoMessage()    {}
+func (*GetAllUserIDReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{3}
 }
-func (m *DeleteUsersReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_DeleteUsersReq.Unmarshal(m, b)
+func (m *GetAllUserIDReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAllUserIDReq.Unmarshal(m, b)
 }
-func (m *DeleteUsersReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_DeleteUsersReq.Marshal(b, m, deterministic)
+func (m *GetAllUserIDReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAllUserIDReq.Marshal(b, m, deterministic)
 }
-func (dst *DeleteUsersReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeleteUsersReq.Merge(dst, src)
+func (dst *GetAllUserIDReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAllUserIDReq.Merge(dst, src)
 }
-func (m *DeleteUsersReq) XXX_Size() int {
-	return xxx_messageInfo_DeleteUsersReq.Size(m)
+func (m *GetAllUserIDReq) XXX_Size() int {
+	return xxx_messageInfo_GetAllUserIDReq.Size(m)
 }
-func (m *DeleteUsersReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_DeleteUsersReq.DiscardUnknown(m)
+func (m *GetAllUserIDReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAllUserIDReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_DeleteUsersReq proto.InternalMessageInfo
+var xxx_messageInfo_GetAllUserIDReq proto.InternalMessageInfo
 
-func (m *DeleteUsersReq) GetDeleteUidList() []string {
+func (m *GetAllUserIDReq) GetOpUserID() string {
 	if m != nil {
-		return m.DeleteUidList
-	}
-	return nil
-}
-
-func (m *DeleteUsersReq) GetToken() string {
-	if m != nil {
-		return m.Token
+		return m.OpUserID
 	}
 	return ""
 }
 
-func (m *DeleteUsersReq) GetOperationID() string {
+func (m *GetAllUserIDReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
 	}
 	return ""
 }
 
-type GetAllUsersUidReq struct {
-	Token                string   `protobuf:"bytes,2,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GetAllUsersUidReq) Reset()         { *m = GetAllUsersUidReq{} }
-func (m *GetAllUsersUidReq) String() string { return proto.CompactTextString(m) }
-func (*GetAllUsersUidReq) ProtoMessage()    {}
-func (*GetAllUsersUidReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{3}
-}
-func (m *GetAllUsersUidReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetAllUsersUidReq.Unmarshal(m, b)
-}
-func (m *GetAllUsersUidReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetAllUsersUidReq.Marshal(b, m, deterministic)
-}
-func (dst *GetAllUsersUidReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetAllUsersUidReq.Merge(dst, src)
-}
-func (m *GetAllUsersUidReq) XXX_Size() int {
-	return xxx_messageInfo_GetAllUsersUidReq.Size(m)
-}
-func (m *GetAllUsersUidReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetAllUsersUidReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetAllUsersUidReq proto.InternalMessageInfo
-
-func (m *GetAllUsersUidReq) GetToken() string {
-	if m != nil {
-		return m.Token
-	}
-	return ""
-}
-
-func (m *GetAllUsersUidReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
-type GetAllUsersUidResp struct {
-	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
-	UidList              []string    `protobuf:"bytes,2,rep,name=uidList" json:"uidList,omitempty"`
+type GetAllUserIDResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	UserIDList           []string    `protobuf:"bytes,2,rep,name=UserIDList" json:"UserIDList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
 }
 
-func (m *GetAllUsersUidResp) Reset()         { *m = GetAllUsersUidResp{} }
-func (m *GetAllUsersUidResp) String() string { return proto.CompactTextString(m) }
-func (*GetAllUsersUidResp) ProtoMessage()    {}
-func (*GetAllUsersUidResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{4}
+func (m *GetAllUserIDResp) Reset()         { *m = GetAllUserIDResp{} }
+func (m *GetAllUserIDResp) String() string { return proto.CompactTextString(m) }
+func (*GetAllUserIDResp) ProtoMessage()    {}
+func (*GetAllUserIDResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{4}
 }
-func (m *GetAllUsersUidResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetAllUsersUidResp.Unmarshal(m, b)
+func (m *GetAllUserIDResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAllUserIDResp.Unmarshal(m, b)
 }
-func (m *GetAllUsersUidResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetAllUsersUidResp.Marshal(b, m, deterministic)
+func (m *GetAllUserIDResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAllUserIDResp.Marshal(b, m, deterministic)
 }
-func (dst *GetAllUsersUidResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetAllUsersUidResp.Merge(dst, src)
+func (dst *GetAllUserIDResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAllUserIDResp.Merge(dst, src)
 }
-func (m *GetAllUsersUidResp) XXX_Size() int {
-	return xxx_messageInfo_GetAllUsersUidResp.Size(m)
+func (m *GetAllUserIDResp) XXX_Size() int {
+	return xxx_messageInfo_GetAllUserIDResp.Size(m)
 }
-func (m *GetAllUsersUidResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetAllUsersUidResp.DiscardUnknown(m)
+func (m *GetAllUserIDResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAllUserIDResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetAllUsersUidResp proto.InternalMessageInfo
+var xxx_messageInfo_GetAllUserIDResp proto.InternalMessageInfo
 
-func (m *GetAllUsersUidResp) GetCommonResp() *CommonResp {
+func (m *GetAllUserIDResp) GetCommonResp() *CommonResp {
 	if m != nil {
 		return m.CommonResp
 	}
 	return nil
 }
 
-func (m *GetAllUsersUidResp) GetUidList() []string {
+func (m *GetAllUserIDResp) GetUserIDList() []string {
 	if m != nil {
-		return m.UidList
+		return m.UserIDList
 	}
 	return nil
 }
 
 type AccountCheckReq struct {
-	UidList              []string `protobuf:"bytes,1,rep,name=uidList" json:"uidList,omitempty"`
-	Token                string   `protobuf:"bytes,2,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	CheckUserIDList      []string `protobuf:"bytes,1,rep,name=CheckUserIDList" json:"CheckUserIDList,omitempty"`
+	OpUserID             string   `protobuf:"bytes,2,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID" json:"OperationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -274,7 +275,7 @@ func (m *AccountCheckReq) Reset()         { *m = AccountCheckReq{} }
 func (m *AccountCheckReq) String() string { return proto.CompactTextString(m) }
 func (*AccountCheckReq) ProtoMessage()    {}
 func (*AccountCheckReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{5}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{5}
 }
 func (m *AccountCheckReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AccountCheckReq.Unmarshal(m, b)
@@ -294,16 +295,16 @@ func (m *AccountCheckReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AccountCheckReq proto.InternalMessageInfo
 
-func (m *AccountCheckReq) GetUidList() []string {
+func (m *AccountCheckReq) GetCheckUserIDList() []string {
 	if m != nil {
-		return m.UidList
+		return m.CheckUserIDList
 	}
 	return nil
 }
 
-func (m *AccountCheckReq) GetToken() string {
+func (m *AccountCheckReq) GetOpUserID() string {
 	if m != nil {
-		return m.Token
+		return m.OpUserID
 	}
 	return ""
 }
@@ -317,7 +318,7 @@ func (m *AccountCheckReq) GetOperationID() string {
 
 type AccountCheckResp struct {
 	CommonResp           *CommonResp                          `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
-	Result               []*AccountCheckResp_SingleUserStatus `protobuf:"bytes,2,rep,name=result" json:"result,omitempty"`
+	ResultList           []*AccountCheckResp_SingleUserStatus `protobuf:"bytes,2,rep,name=ResultList" json:"ResultList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                             `json:"-"`
 	XXX_unrecognized     []byte                               `json:"-"`
 	XXX_sizecache        int32                                `json:"-"`
@@ -327,7 +328,7 @@ func (m *AccountCheckResp) Reset()         { *m = AccountCheckResp{} }
 func (m *AccountCheckResp) String() string { return proto.CompactTextString(m) }
 func (*AccountCheckResp) ProtoMessage()    {}
 func (*AccountCheckResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{6}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{6}
 }
 func (m *AccountCheckResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AccountCheckResp.Unmarshal(m, b)
@@ -354,9 +355,9 @@ func (m *AccountCheckResp) GetCommonResp() *CommonResp {
 	return nil
 }
 
-func (m *AccountCheckResp) GetResult() []*AccountCheckResp_SingleUserStatus {
+func (m *AccountCheckResp) GetResultList() []*AccountCheckResp_SingleUserStatus {
 	if m != nil {
-		return m.Result
+		return m.ResultList
 	}
 	return nil
 }
@@ -373,7 +374,7 @@ func (m *AccountCheckResp_SingleUserStatus) Reset()         { *m = AccountCheckR
 func (m *AccountCheckResp_SingleUserStatus) String() string { return proto.CompactTextString(m) }
 func (*AccountCheckResp_SingleUserStatus) ProtoMessage()    {}
 func (*AccountCheckResp_SingleUserStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{6, 0}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{6, 0}
 }
 func (m *AccountCheckResp_SingleUserStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AccountCheckResp_SingleUserStatus.Unmarshal(m, b)
@@ -409,7 +410,7 @@ func (m *AccountCheckResp_SingleUserStatus) GetAccountStatus() string {
 
 type GetUserInfoReq struct {
 	UserIDList           []string `protobuf:"bytes,1,rep,name=userIDList" json:"userIDList,omitempty"`
-	Token                string   `protobuf:"bytes,2,opt,name=token" json:"token,omitempty"`
+	OpUserID             string   `protobuf:"bytes,2,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	OperationID          string   `protobuf:"bytes,3,opt,name=OperationID" json:"OperationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -420,7 +421,7 @@ func (m *GetUserInfoReq) Reset()         { *m = GetUserInfoReq{} }
 func (m *GetUserInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserInfoReq) ProtoMessage()    {}
 func (*GetUserInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{7}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{7}
 }
 func (m *GetUserInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInfoReq.Unmarshal(m, b)
@@ -447,9 +448,9 @@ func (m *GetUserInfoReq) GetUserIDList() []string {
 	return nil
 }
 
-func (m *GetUserInfoReq) GetToken() string {
+func (m *GetUserInfoReq) GetOpUserID() string {
 	if m != nil {
-		return m.Token
+		return m.OpUserID
 	}
 	return ""
 }
@@ -462,19 +463,18 @@ func (m *GetUserInfoReq) GetOperationID() string {
 }
 
 type GetUserInfoResp struct {
-	ErrorCode            int32       `protobuf:"varint,1,opt,name=errorCode" json:"errorCode,omitempty"`
-	ErrorMsg             string      `protobuf:"bytes,2,opt,name=errorMsg" json:"errorMsg,omitempty"`
-	Data                 []*UserInfo `protobuf:"bytes,3,rep,name=Data" json:"Data,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	CommonResp           *CommonResp        `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	UserInfoList         []*sdk_ws.UserInfo `protobuf:"bytes,3,rep,name=UserInfoList" json:"UserInfoList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *GetUserInfoResp) Reset()         { *m = GetUserInfoResp{} }
 func (m *GetUserInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserInfoResp) ProtoMessage()    {}
 func (*GetUserInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{8}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{8}
 }
 func (m *GetUserInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInfoResp.Unmarshal(m, b)
@@ -494,188 +494,34 @@ func (m *GetUserInfoResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetUserInfoResp proto.InternalMessageInfo
 
-func (m *GetUserInfoResp) GetErrorCode() int32 {
+func (m *GetUserInfoResp) GetCommonResp() *CommonResp {
 	if m != nil {
-		return m.ErrorCode
-	}
-	return 0
-}
-
-func (m *GetUserInfoResp) GetErrorMsg() string {
-	if m != nil {
-		return m.ErrorMsg
-	}
-	return ""
-}
-
-func (m *GetUserInfoResp) GetData() []*UserInfo {
-	if m != nil {
-		return m.Data
+		return m.CommonResp
 	}
 	return nil
 }
 
-type UserInfo struct {
-	Uid                  string   `protobuf:"bytes,1,opt,name=uid" json:"uid,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
-	Icon                 string   `protobuf:"bytes,3,opt,name=icon" json:"icon,omitempty"`
-	Gender               int32    `protobuf:"varint,4,opt,name=gender" json:"gender,omitempty"`
-	Mobile               string   `protobuf:"bytes,5,opt,name=mobile" json:"mobile,omitempty"`
-	Birth                string   `protobuf:"bytes,6,opt,name=birth" json:"birth,omitempty"`
-	Email                string   `protobuf:"bytes,7,opt,name=email" json:"email,omitempty"`
-	Ex                   string   `protobuf:"bytes,8,opt,name=ex" json:"ex,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *UserInfo) Reset()         { *m = UserInfo{} }
-func (m *UserInfo) String() string { return proto.CompactTextString(m) }
-func (*UserInfo) ProtoMessage()    {}
-func (*UserInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{9}
-}
-func (m *UserInfo) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_UserInfo.Unmarshal(m, b)
-}
-func (m *UserInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_UserInfo.Marshal(b, m, deterministic)
-}
-func (dst *UserInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UserInfo.Merge(dst, src)
-}
-func (m *UserInfo) XXX_Size() int {
-	return xxx_messageInfo_UserInfo.Size(m)
-}
-func (m *UserInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_UserInfo.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UserInfo proto.InternalMessageInfo
-
-func (m *UserInfo) GetUid() string {
+func (m *GetUserInfoResp) GetUserInfoList() []*sdk_ws.UserInfo {
 	if m != nil {
-		return m.Uid
+		return m.UserInfoList
 	}
-	return ""
-}
-
-func (m *UserInfo) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *UserInfo) GetIcon() string {
-	if m != nil {
-		return m.Icon
-	}
-	return ""
-}
-
-func (m *UserInfo) GetGender() int32 {
-	if m != nil {
-		return m.Gender
-	}
-	return 0
-}
-
-func (m *UserInfo) GetMobile() string {
-	if m != nil {
-		return m.Mobile
-	}
-	return ""
-}
-
-func (m *UserInfo) GetBirth() string {
-	if m != nil {
-		return m.Birth
-	}
-	return ""
-}
-
-func (m *UserInfo) GetEmail() string {
-	if m != nil {
-		return m.Email
-	}
-	return ""
-}
-
-func (m *UserInfo) GetEx() string {
-	if m != nil {
-		return m.Ex
-	}
-	return ""
-}
-
-type LogoutReq struct {
-	OperationID          string   `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
-	Token                string   `protobuf:"bytes,2,opt,name=token" json:"token,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *LogoutReq) Reset()         { *m = LogoutReq{} }
-func (m *LogoutReq) String() string { return proto.CompactTextString(m) }
-func (*LogoutReq) ProtoMessage()    {}
-func (*LogoutReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{10}
-}
-func (m *LogoutReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_LogoutReq.Unmarshal(m, b)
-}
-func (m *LogoutReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_LogoutReq.Marshal(b, m, deterministic)
-}
-func (dst *LogoutReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LogoutReq.Merge(dst, src)
-}
-func (m *LogoutReq) XXX_Size() int {
-	return xxx_messageInfo_LogoutReq.Size(m)
-}
-func (m *LogoutReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_LogoutReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_LogoutReq proto.InternalMessageInfo
-
-func (m *LogoutReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
-func (m *LogoutReq) GetToken() string {
-	if m != nil {
-		return m.Token
-	}
-	return ""
+	return nil
 }
 
 type UpdateUserInfoReq struct {
-	Icon                 string   `protobuf:"bytes,1,opt,name=icon" json:"icon,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
-	Gender               int32    `protobuf:"varint,3,opt,name=gender" json:"gender,omitempty"`
-	Mobile               string   `protobuf:"bytes,4,opt,name=mobile" json:"mobile,omitempty"`
-	Birth                string   `protobuf:"bytes,5,opt,name=birth" json:"birth,omitempty"`
-	Email                string   `protobuf:"bytes,6,opt,name=email" json:"email,omitempty"`
-	Ex                   string   `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
-	Token                string   `protobuf:"bytes,8,opt,name=token" json:"token,omitempty"`
-	OperationID          string   `protobuf:"bytes,9,opt,name=OperationID" json:"OperationID,omitempty"`
-	Uid                  string   `protobuf:"bytes,10,opt,name=Uid" json:"Uid,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	UserInfo             *sdk_ws.UserInfo `protobuf:"bytes,1,opt,name=UserInfo" json:"UserInfo,omitempty"`
+	OpUserID             string           `protobuf:"bytes,2,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	OperationID          string           `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
 func (m *UpdateUserInfoReq) Reset()         { *m = UpdateUserInfoReq{} }
 func (m *UpdateUserInfoReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInfoReq) ProtoMessage()    {}
 func (*UpdateUserInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{11}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{9}
 }
 func (m *UpdateUserInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInfoReq.Unmarshal(m, b)
@@ -695,58 +541,16 @@ func (m *UpdateUserInfoReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_UpdateUserInfoReq proto.InternalMessageInfo
 
-func (m *UpdateUserInfoReq) GetIcon() string {
+func (m *UpdateUserInfoReq) GetUserInfo() *sdk_ws.UserInfo {
 	if m != nil {
-		return m.Icon
+		return m.UserInfo
 	}
-	return ""
+	return nil
 }
 
-func (m *UpdateUserInfoReq) GetName() string {
+func (m *UpdateUserInfoReq) GetOpUserID() string {
 	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *UpdateUserInfoReq) GetGender() int32 {
-	if m != nil {
-		return m.Gender
-	}
-	return 0
-}
-
-func (m *UpdateUserInfoReq) GetMobile() string {
-	if m != nil {
-		return m.Mobile
-	}
-	return ""
-}
-
-func (m *UpdateUserInfoReq) GetBirth() string {
-	if m != nil {
-		return m.Birth
-	}
-	return ""
-}
-
-func (m *UpdateUserInfoReq) GetEmail() string {
-	if m != nil {
-		return m.Email
-	}
-	return ""
-}
-
-func (m *UpdateUserInfoReq) GetEx() string {
-	if m != nil {
-		return m.Ex
-	}
-	return ""
-}
-
-func (m *UpdateUserInfoReq) GetToken() string {
-	if m != nil {
-		return m.Token
+		return m.OpUserID
 	}
 	return ""
 }
@@ -758,18 +562,50 @@ func (m *UpdateUserInfoReq) GetOperationID() string {
 	return ""
 }
 
-func (m *UpdateUserInfoReq) GetUid() string {
+type UpdateUserInfoResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *UpdateUserInfoResp) Reset()         { *m = UpdateUserInfoResp{} }
+func (m *UpdateUserInfoResp) String() string { return proto.CompactTextString(m) }
+func (*UpdateUserInfoResp) ProtoMessage()    {}
+func (*UpdateUserInfoResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{10}
+}
+func (m *UpdateUserInfoResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateUserInfoResp.Unmarshal(m, b)
+}
+func (m *UpdateUserInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateUserInfoResp.Marshal(b, m, deterministic)
+}
+func (dst *UpdateUserInfoResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateUserInfoResp.Merge(dst, src)
+}
+func (m *UpdateUserInfoResp) XXX_Size() int {
+	return xxx_messageInfo_UpdateUserInfoResp.Size(m)
+}
+func (m *UpdateUserInfoResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateUserInfoResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateUserInfoResp proto.InternalMessageInfo
+
+func (m *UpdateUserInfoResp) GetCommonResp() *CommonResp {
 	if m != nil {
-		return m.Uid
+		return m.CommonResp
 	}
-	return ""
+	return nil
 }
 
 type SetReceiveMessageOptReq struct {
-	UId                  string   `protobuf:"bytes,1,opt,name=uId" json:"uId,omitempty"`
+	FromUserID           string   `protobuf:"bytes,1,opt,name=FromUserID" json:"FromUserID,omitempty"`
 	Opt                  int32    `protobuf:"varint,2,opt,name=opt" json:"opt,omitempty"`
-	ConversationId       []string `protobuf:"bytes,3,rep,name=conversationId" json:"conversationId,omitempty"`
+	ConversationIDList   []string `protobuf:"bytes,3,rep,name=conversationIDList" json:"conversationIDList,omitempty"`
 	OperationID          string   `protobuf:"bytes,4,opt,name=operationID" json:"operationID,omitempty"`
+	OpUserID             string   `protobuf:"bytes,5,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -779,7 +615,7 @@ func (m *SetReceiveMessageOptReq) Reset()         { *m = SetReceiveMessageOptReq
 func (m *SetReceiveMessageOptReq) String() string { return proto.CompactTextString(m) }
 func (*SetReceiveMessageOptReq) ProtoMessage()    {}
 func (*SetReceiveMessageOptReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{12}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{11}
 }
 func (m *SetReceiveMessageOptReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetReceiveMessageOptReq.Unmarshal(m, b)
@@ -799,9 +635,9 @@ func (m *SetReceiveMessageOptReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetReceiveMessageOptReq proto.InternalMessageInfo
 
-func (m *SetReceiveMessageOptReq) GetUId() string {
+func (m *SetReceiveMessageOptReq) GetFromUserID() string {
 	if m != nil {
-		return m.UId
+		return m.FromUserID
 	}
 	return ""
 }
@@ -813,9 +649,9 @@ func (m *SetReceiveMessageOptReq) GetOpt() int32 {
 	return 0
 }
 
-func (m *SetReceiveMessageOptReq) GetConversationId() []string {
+func (m *SetReceiveMessageOptReq) GetConversationIDList() []string {
 	if m != nil {
-		return m.ConversationId
+		return m.ConversationIDList
 	}
 	return nil
 }
@@ -827,116 +663,15 @@ func (m *SetReceiveMessageOptReq) GetOperationID() string {
 	return ""
 }
 
-type SetReceiveMessageOptResp struct {
-	ErrCode              int32        `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string       `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	OptResult            []*OptResult `protobuf:"bytes,3,rep,name=optResult" json:"optResult,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
-	XXX_unrecognized     []byte       `json:"-"`
-	XXX_sizecache        int32        `json:"-"`
-}
-
-func (m *SetReceiveMessageOptResp) Reset()         { *m = SetReceiveMessageOptResp{} }
-func (m *SetReceiveMessageOptResp) String() string { return proto.CompactTextString(m) }
-func (*SetReceiveMessageOptResp) ProtoMessage()    {}
-func (*SetReceiveMessageOptResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{13}
-}
-func (m *SetReceiveMessageOptResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SetReceiveMessageOptResp.Unmarshal(m, b)
-}
-func (m *SetReceiveMessageOptResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SetReceiveMessageOptResp.Marshal(b, m, deterministic)
-}
-func (dst *SetReceiveMessageOptResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SetReceiveMessageOptResp.Merge(dst, src)
-}
-func (m *SetReceiveMessageOptResp) XXX_Size() int {
-	return xxx_messageInfo_SetReceiveMessageOptResp.Size(m)
-}
-func (m *SetReceiveMessageOptResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_SetReceiveMessageOptResp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_SetReceiveMessageOptResp proto.InternalMessageInfo
-
-func (m *SetReceiveMessageOptResp) GetErrCode() int32 {
+func (m *SetReceiveMessageOptReq) GetOpUserID() string {
 	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *SetReceiveMessageOptResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
-func (m *SetReceiveMessageOptResp) GetOptResult() []*OptResult {
-	if m != nil {
-		return m.OptResult
-	}
-	return nil
-}
-
-type GetReceiveMessageOptReq struct {
-	UId                  string   `protobuf:"bytes,1,opt,name=uId" json:"uId,omitempty"`
-	ConversationId       []string `protobuf:"bytes,2,rep,name=conversationId" json:"conversationId,omitempty"`
-	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *GetReceiveMessageOptReq) Reset()         { *m = GetReceiveMessageOptReq{} }
-func (m *GetReceiveMessageOptReq) String() string { return proto.CompactTextString(m) }
-func (*GetReceiveMessageOptReq) ProtoMessage()    {}
-func (*GetReceiveMessageOptReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{14}
-}
-func (m *GetReceiveMessageOptReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetReceiveMessageOptReq.Unmarshal(m, b)
-}
-func (m *GetReceiveMessageOptReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetReceiveMessageOptReq.Marshal(b, m, deterministic)
-}
-func (dst *GetReceiveMessageOptReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetReceiveMessageOptReq.Merge(dst, src)
-}
-func (m *GetReceiveMessageOptReq) XXX_Size() int {
-	return xxx_messageInfo_GetReceiveMessageOptReq.Size(m)
-}
-func (m *GetReceiveMessageOptReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetReceiveMessageOptReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GetReceiveMessageOptReq proto.InternalMessageInfo
-
-func (m *GetReceiveMessageOptReq) GetUId() string {
-	if m != nil {
-		return m.UId
-	}
-	return ""
-}
-
-func (m *GetReceiveMessageOptReq) GetConversationId() []string {
-	if m != nil {
-		return m.ConversationId
-	}
-	return nil
-}
-
-func (m *GetReceiveMessageOptReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
+		return m.OpUserID
 	}
 	return ""
 }
 
 type OptResult struct {
-	ConversationId       string   `protobuf:"bytes,1,opt,name=conversationId" json:"conversationId,omitempty"`
+	ConversationID       string   `protobuf:"bytes,1,opt,name=conversationID" json:"conversationID,omitempty"`
 	Result               int32    `protobuf:"varint,2,opt,name=result" json:"result,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -947,7 +682,7 @@ func (m *OptResult) Reset()         { *m = OptResult{} }
 func (m *OptResult) String() string { return proto.CompactTextString(m) }
 func (*OptResult) ProtoMessage()    {}
 func (*OptResult) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{15}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{12}
 }
 func (m *OptResult) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OptResult.Unmarshal(m, b)
@@ -967,9 +702,9 @@ func (m *OptResult) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_OptResult proto.InternalMessageInfo
 
-func (m *OptResult) GetConversationId() string {
+func (m *OptResult) GetConversationID() string {
 	if m != nil {
-		return m.ConversationId
+		return m.ConversationID
 	}
 	return ""
 }
@@ -981,20 +716,127 @@ func (m *OptResult) GetResult() int32 {
 	return 0
 }
 
+type SetReceiveMessageOptResp struct {
+	CommonResp                *CommonResp  `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	ConversationOptResultList []*OptResult `protobuf:"bytes,2,rep,name=conversationOptResultList" json:"conversationOptResultList,omitempty"`
+	XXX_NoUnkeyedLiteral      struct{}     `json:"-"`
+	XXX_unrecognized          []byte       `json:"-"`
+	XXX_sizecache             int32        `json:"-"`
+}
+
+func (m *SetReceiveMessageOptResp) Reset()         { *m = SetReceiveMessageOptResp{} }
+func (m *SetReceiveMessageOptResp) String() string { return proto.CompactTextString(m) }
+func (*SetReceiveMessageOptResp) ProtoMessage()    {}
+func (*SetReceiveMessageOptResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{13}
+}
+func (m *SetReceiveMessageOptResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetReceiveMessageOptResp.Unmarshal(m, b)
+}
+func (m *SetReceiveMessageOptResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetReceiveMessageOptResp.Marshal(b, m, deterministic)
+}
+func (dst *SetReceiveMessageOptResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetReceiveMessageOptResp.Merge(dst, src)
+}
+func (m *SetReceiveMessageOptResp) XXX_Size() int {
+	return xxx_messageInfo_SetReceiveMessageOptResp.Size(m)
+}
+func (m *SetReceiveMessageOptResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetReceiveMessageOptResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetReceiveMessageOptResp proto.InternalMessageInfo
+
+func (m *SetReceiveMessageOptResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+func (m *SetReceiveMessageOptResp) GetConversationOptResultList() []*OptResult {
+	if m != nil {
+		return m.ConversationOptResultList
+	}
+	return nil
+}
+
+type GetReceiveMessageOptReq struct {
+	FromUserID           string   `protobuf:"bytes,1,opt,name=FromUserID" json:"FromUserID,omitempty"`
+	ConversationIDList   []string `protobuf:"bytes,2,rep,name=conversationIDList" json:"conversationIDList,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	OpUserID             string   `protobuf:"bytes,4,opt,name=OpUserID" json:"OpUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetReceiveMessageOptReq) Reset()         { *m = GetReceiveMessageOptReq{} }
+func (m *GetReceiveMessageOptReq) String() string { return proto.CompactTextString(m) }
+func (*GetReceiveMessageOptReq) ProtoMessage()    {}
+func (*GetReceiveMessageOptReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{14}
+}
+func (m *GetReceiveMessageOptReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetReceiveMessageOptReq.Unmarshal(m, b)
+}
+func (m *GetReceiveMessageOptReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetReceiveMessageOptReq.Marshal(b, m, deterministic)
+}
+func (dst *GetReceiveMessageOptReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetReceiveMessageOptReq.Merge(dst, src)
+}
+func (m *GetReceiveMessageOptReq) XXX_Size() int {
+	return xxx_messageInfo_GetReceiveMessageOptReq.Size(m)
+}
+func (m *GetReceiveMessageOptReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetReceiveMessageOptReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetReceiveMessageOptReq proto.InternalMessageInfo
+
+func (m *GetReceiveMessageOptReq) GetFromUserID() string {
+	if m != nil {
+		return m.FromUserID
+	}
+	return ""
+}
+
+func (m *GetReceiveMessageOptReq) GetConversationIDList() []string {
+	if m != nil {
+		return m.ConversationIDList
+	}
+	return nil
+}
+
+func (m *GetReceiveMessageOptReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GetReceiveMessageOptReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
+	}
+	return ""
+}
+
 type GetReceiveMessageOptResp struct {
-	ErrCode               int32        `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg                string       `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	ConversationOptResult []*OptResult `protobuf:"bytes,3,rep,name=conversationOptResult" json:"conversationOptResult,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}     `json:"-"`
-	XXX_unrecognized      []byte       `json:"-"`
-	XXX_sizecache         int32        `json:"-"`
+	CommonResp                *CommonResp  `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	ConversationOptResultList []*OptResult `protobuf:"bytes,3,rep,name=conversationOptResultList" json:"conversationOptResultList,omitempty"`
+	XXX_NoUnkeyedLiteral      struct{}     `json:"-"`
+	XXX_unrecognized          []byte       `json:"-"`
+	XXX_sizecache             int32        `json:"-"`
 }
 
 func (m *GetReceiveMessageOptResp) Reset()         { *m = GetReceiveMessageOptResp{} }
 func (m *GetReceiveMessageOptResp) String() string { return proto.CompactTextString(m) }
 func (*GetReceiveMessageOptResp) ProtoMessage()    {}
 func (*GetReceiveMessageOptResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{16}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{15}
 }
 func (m *GetReceiveMessageOptResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetReceiveMessageOptResp.Unmarshal(m, b)
@@ -1014,30 +856,24 @@ func (m *GetReceiveMessageOptResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetReceiveMessageOptResp proto.InternalMessageInfo
 
-func (m *GetReceiveMessageOptResp) GetErrCode() int32 {
+func (m *GetReceiveMessageOptResp) GetCommonResp() *CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
+	return nil
 }
 
-func (m *GetReceiveMessageOptResp) GetErrMsg() string {
+func (m *GetReceiveMessageOptResp) GetConversationOptResultList() []*OptResult {
 	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
-func (m *GetReceiveMessageOptResp) GetConversationOptResult() []*OptResult {
-	if m != nil {
-		return m.ConversationOptResult
+		return m.ConversationOptResultList
 	}
 	return nil
 }
 
 type GetAllConversationMsgOptReq struct {
-	UId                  string   `protobuf:"bytes,1,opt,name=uId" json:"uId,omitempty"`
+	FromUserID           string   `protobuf:"bytes,1,opt,name=FromUserID" json:"FromUserID,omitempty"`
 	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	OpUserID             string   `protobuf:"bytes,3,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -1047,7 +883,7 @@ func (m *GetAllConversationMsgOptReq) Reset()         { *m = GetAllConversationM
 func (m *GetAllConversationMsgOptReq) String() string { return proto.CompactTextString(m) }
 func (*GetAllConversationMsgOptReq) ProtoMessage()    {}
 func (*GetAllConversationMsgOptReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{17}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{16}
 }
 func (m *GetAllConversationMsgOptReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAllConversationMsgOptReq.Unmarshal(m, b)
@@ -1067,9 +903,9 @@ func (m *GetAllConversationMsgOptReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetAllConversationMsgOptReq proto.InternalMessageInfo
 
-func (m *GetAllConversationMsgOptReq) GetUId() string {
+func (m *GetAllConversationMsgOptReq) GetFromUserID() string {
 	if m != nil {
-		return m.UId
+		return m.FromUserID
 	}
 	return ""
 }
@@ -1081,20 +917,26 @@ func (m *GetAllConversationMsgOptReq) GetOperationID() string {
 	return ""
 }
 
+func (m *GetAllConversationMsgOptReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
+	}
+	return ""
+}
+
 type GetAllConversationMsgOptResp struct {
-	ErrCode               int32        `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg                string       `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	ConversationOptResult []*OptResult `protobuf:"bytes,3,rep,name=conversationOptResult" json:"conversationOptResult,omitempty"`
-	XXX_NoUnkeyedLiteral  struct{}     `json:"-"`
-	XXX_unrecognized      []byte       `json:"-"`
-	XXX_sizecache         int32        `json:"-"`
+	CommonResp                *CommonResp  `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	ConversationOptResultList []*OptResult `protobuf:"bytes,3,rep,name=conversationOptResultList" json:"conversationOptResultList,omitempty"`
+	XXX_NoUnkeyedLiteral      struct{}     `json:"-"`
+	XXX_unrecognized          []byte       `json:"-"`
+	XXX_sizecache             int32        `json:"-"`
 }
 
 func (m *GetAllConversationMsgOptResp) Reset()         { *m = GetAllConversationMsgOptResp{} }
 func (m *GetAllConversationMsgOptResp) String() string { return proto.CompactTextString(m) }
 func (*GetAllConversationMsgOptResp) ProtoMessage()    {}
 func (*GetAllConversationMsgOptResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_04b52567a288fdb7, []int{18}
+	return fileDescriptor_user_9cd4aaf870b6d3b5, []int{17}
 }
 func (m *GetAllConversationMsgOptResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetAllConversationMsgOptResp.Unmarshal(m, b)
@@ -1114,45 +956,37 @@ func (m *GetAllConversationMsgOptResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetAllConversationMsgOptResp proto.InternalMessageInfo
 
-func (m *GetAllConversationMsgOptResp) GetErrCode() int32 {
+func (m *GetAllConversationMsgOptResp) GetCommonResp() *CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
+	return nil
 }
 
-func (m *GetAllConversationMsgOptResp) GetErrMsg() string {
+func (m *GetAllConversationMsgOptResp) GetConversationOptResultList() []*OptResult {
 	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
-func (m *GetAllConversationMsgOptResp) GetConversationOptResult() []*OptResult {
-	if m != nil {
-		return m.ConversationOptResult
+		return m.ConversationOptResultList
 	}
 	return nil
 }
 
 func init() {
 	proto.RegisterType((*CommonResp)(nil), "user.CommonResp")
-	proto.RegisterType((*DeleteUsersResp)(nil), "user.DeleteUsersResp")
 	proto.RegisterType((*DeleteUsersReq)(nil), "user.DeleteUsersReq")
-	proto.RegisterType((*GetAllUsersUidReq)(nil), "user.GetAllUsersUidReq")
-	proto.RegisterType((*GetAllUsersUidResp)(nil), "user.GetAllUsersUidResp")
+	proto.RegisterType((*DeleteUsersResp)(nil), "user.DeleteUsersResp")
+	proto.RegisterType((*GetAllUserIDReq)(nil), "user.GetAllUserIDReq")
+	proto.RegisterType((*GetAllUserIDResp)(nil), "user.GetAllUserIDResp")
 	proto.RegisterType((*AccountCheckReq)(nil), "user.AccountCheckReq")
 	proto.RegisterType((*AccountCheckResp)(nil), "user.AccountCheckResp")
 	proto.RegisterType((*AccountCheckResp_SingleUserStatus)(nil), "user.AccountCheckResp.SingleUserStatus")
 	proto.RegisterType((*GetUserInfoReq)(nil), "user.GetUserInfoReq")
 	proto.RegisterType((*GetUserInfoResp)(nil), "user.GetUserInfoResp")
-	proto.RegisterType((*UserInfo)(nil), "user.UserInfo")
-	proto.RegisterType((*LogoutReq)(nil), "user.LogoutReq")
 	proto.RegisterType((*UpdateUserInfoReq)(nil), "user.UpdateUserInfoReq")
+	proto.RegisterType((*UpdateUserInfoResp)(nil), "user.UpdateUserInfoResp")
 	proto.RegisterType((*SetReceiveMessageOptReq)(nil), "user.SetReceiveMessageOptReq")
+	proto.RegisterType((*OptResult)(nil), "user.OptResult")
 	proto.RegisterType((*SetReceiveMessageOptResp)(nil), "user.SetReceiveMessageOptResp")
 	proto.RegisterType((*GetReceiveMessageOptReq)(nil), "user.GetReceiveMessageOptReq")
-	proto.RegisterType((*OptResult)(nil), "user.OptResult")
 	proto.RegisterType((*GetReceiveMessageOptResp)(nil), "user.GetReceiveMessageOptResp")
 	proto.RegisterType((*GetAllConversationMsgOptReq)(nil), "user.GetAllConversationMsgOptReq")
 	proto.RegisterType((*GetAllConversationMsgOptResp)(nil), "user.GetAllConversationMsgOptResp")
@@ -1170,9 +1004,9 @@ const _ = grpc.SupportPackageIsVersion4
 
 type UserClient interface {
 	GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoResp, error)
-	UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq, opts ...grpc.CallOption) (*CommonResp, error)
+	UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq, opts ...grpc.CallOption) (*UpdateUserInfoResp, error)
 	DeleteUsers(ctx context.Context, in *DeleteUsersReq, opts ...grpc.CallOption) (*DeleteUsersResp, error)
-	GetAllUsersUid(ctx context.Context, in *GetAllUsersUidReq, opts ...grpc.CallOption) (*GetAllUsersUidResp, error)
+	GetAllUserID(ctx context.Context, in *GetAllUserIDReq, opts ...grpc.CallOption) (*GetAllUserIDResp, error)
 	SetReceiveMessageOpt(ctx context.Context, in *SetReceiveMessageOptReq, opts ...grpc.CallOption) (*SetReceiveMessageOptResp, error)
 	GetReceiveMessageOpt(ctx context.Context, in *GetReceiveMessageOptReq, opts ...grpc.CallOption) (*GetReceiveMessageOptResp, error)
 	GetAllConversationMsgOpt(ctx context.Context, in *GetAllConversationMsgOptReq, opts ...grpc.CallOption) (*GetAllConversationMsgOptResp, error)
@@ -1189,15 +1023,15 @@ func NewUserClient(cc *grpc.ClientConn) UserClient {
 
 func (c *userClient) GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoResp, error) {
 	out := new(GetUserInfoResp)
-	err := grpc.Invoke(ctx, "/user.user/getUserInfo", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/user.user/GetUserInfo", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *userClient) UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq, opts ...grpc.CallOption) (*CommonResp, error) {
-	out := new(CommonResp)
+func (c *userClient) UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq, opts ...grpc.CallOption) (*UpdateUserInfoResp, error) {
+	out := new(UpdateUserInfoResp)
 	err := grpc.Invoke(ctx, "/user.user/UpdateUserInfo", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
@@ -1214,9 +1048,9 @@ func (c *userClient) DeleteUsers(ctx context.Context, in *DeleteUsersReq, opts .
 	return out, nil
 }
 
-func (c *userClient) GetAllUsersUid(ctx context.Context, in *GetAllUsersUidReq, opts ...grpc.CallOption) (*GetAllUsersUidResp, error) {
-	out := new(GetAllUsersUidResp)
-	err := grpc.Invoke(ctx, "/user.user/GetAllUsersUid", in, out, c.cc, opts...)
+func (c *userClient) GetAllUserID(ctx context.Context, in *GetAllUserIDReq, opts ...grpc.CallOption) (*GetAllUserIDResp, error) {
+	out := new(GetAllUserIDResp)
+	err := grpc.Invoke(ctx, "/user.user/GetAllUserID", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1263,9 +1097,9 @@ func (c *userClient) AccountCheck(ctx context.Context, in *AccountCheckReq, opts
 
 type UserServer interface {
 	GetUserInfo(context.Context, *GetUserInfoReq) (*GetUserInfoResp, error)
-	UpdateUserInfo(context.Context, *UpdateUserInfoReq) (*CommonResp, error)
+	UpdateUserInfo(context.Context, *UpdateUserInfoReq) (*UpdateUserInfoResp, error)
 	DeleteUsers(context.Context, *DeleteUsersReq) (*DeleteUsersResp, error)
-	GetAllUsersUid(context.Context, *GetAllUsersUidReq) (*GetAllUsersUidResp, error)
+	GetAllUserID(context.Context, *GetAllUserIDReq) (*GetAllUserIDResp, error)
 	SetReceiveMessageOpt(context.Context, *SetReceiveMessageOptReq) (*SetReceiveMessageOptResp, error)
 	GetReceiveMessageOpt(context.Context, *GetReceiveMessageOptReq) (*GetReceiveMessageOptResp, error)
 	GetAllConversationMsgOpt(context.Context, *GetAllConversationMsgOptReq) (*GetAllConversationMsgOptResp, error)
@@ -1330,20 +1164,20 @@ func _User_DeleteUsers_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _User_GetAllUsersUid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAllUsersUidReq)
+func _User_GetAllUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllUserIDReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServer).GetAllUsersUid(ctx, in)
+		return srv.(UserServer).GetAllUserID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user.user/GetAllUsersUid",
+		FullMethod: "/user.user/GetAllUserID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).GetAllUsersUid(ctx, req.(*GetAllUsersUidReq))
+		return srv.(UserServer).GetAllUserID(ctx, req.(*GetAllUserIDReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1425,7 +1259,7 @@ var _User_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "getUserInfo",
+			MethodName: "GetUserInfo",
 			Handler:    _User_GetUserInfo_Handler,
 		},
 		{
@@ -1437,8 +1271,8 @@ var _User_serviceDesc = grpc.ServiceDesc{
 			Handler:    _User_DeleteUsers_Handler,
 		},
 		{
-			MethodName: "GetAllUsersUid",
-			Handler:    _User_GetAllUsersUid_Handler,
+			MethodName: "GetAllUserID",
+			Handler:    _User_GetAllUserID_Handler,
 		},
 		{
 			MethodName: "SetReceiveMessageOpt",
@@ -1461,64 +1295,60 @@ var _User_serviceDesc = grpc.ServiceDesc{
 	Metadata: "user/user.proto",
 }
 
-func init() { proto.RegisterFile("user/user.proto", fileDescriptor_user_04b52567a288fdb7) }
+func init() { proto.RegisterFile("user/user.proto", fileDescriptor_user_9cd4aaf870b6d3b5) }
 
-var fileDescriptor_user_04b52567a288fdb7 = []byte{
-	// 896 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x56, 0xdd, 0x6e, 0xdb, 0x36,
-	0x14, 0x86, 0xfc, 0x17, 0xeb, 0x78, 0xb1, 0x1d, 0x22, 0x3f, 0x82, 0x96, 0x05, 0x1e, 0x31, 0x6c,
-	0xb9, 0x99, 0x37, 0x64, 0x77, 0x0b, 0x86, 0x21, 0xb5, 0x5b, 0xc3, 0x48, 0x02, 0xb7, 0x0a, 0x7c,
-	0xd3, 0xab, 0x2a, 0x12, 0xe3, 0x08, 0x91, 0x45, 0x45, 0x3f, 0x41, 0x80, 0x3e, 0x40, 0x1f, 0xa0,
-	0x17, 0x7d, 0x8d, 0x3e, 0x4a, 0xef, 0xfa, 0x1c, 0x7d, 0x83, 0x82, 0xa4, 0x64, 0x53, 0x3f, 0x76,
-	0x82, 0xb4, 0x40, 0x6f, 0x04, 0x9e, 0x43, 0xf2, 0x3b, 0xfc, 0x3e, 0x1e, 0x1e, 0x1d, 0xe8, 0xc4,
-	0x21, 0x09, 0xfe, 0x62, 0x9f, 0xbe, 0x1f, 0xd0, 0x88, 0xa2, 0x1a, 0x1b, 0xe3, 0x17, 0x00, 0x03,
-	0x3a, 0x9f, 0x53, 0xcf, 0x20, 0xa1, 0x8f, 0xf6, 0x41, 0x25, 0x41, 0x40, 0x83, 0x01, 0xb5, 0x89,
-	0xa6, 0xf4, 0x94, 0xc3, 0xba, 0xb1, 0x74, 0x20, 0x1d, 0x9a, 0xdc, 0x38, 0x0f, 0x67, 0x5a, 0xa5,
-	0xa7, 0x1c, 0xaa, 0xc6, 0xc2, 0xc6, 0x0e, 0x74, 0x86, 0xc4, 0x25, 0x11, 0x99, 0x86, 0x24, 0x08,
-	0x39, 0xd8, 0xdf, 0x00, 0xd6, 0x02, 0x9a, 0xa3, 0xb5, 0x8e, 0xba, 0x7d, 0x7e, 0x82, 0x65, 0x48,
-	0x43, 0x5a, 0x83, 0x7e, 0x83, 0xcd, 0x2b, 0xd3, 0x71, 0x89, 0x3d, 0x75, 0xec, 0x33, 0x27, 0x8c,
-	0xb4, 0x4a, 0xaf, 0x7a, 0xa8, 0x1a, 0x59, 0x27, 0xf6, 0xa0, 0x9d, 0x09, 0x75, 0xcb, 0xf6, 0xd9,
-	0xc2, 0x93, 0xdd, 0x97, 0x71, 0xa2, 0x6d, 0xa8, 0x47, 0xf4, 0x86, 0x78, 0x5a, 0x95, 0x9f, 0x5d,
-	0x18, 0xa8, 0x07, 0xad, 0x89, 0x4f, 0x02, 0x33, 0x72, 0xa8, 0x37, 0x1e, 0x6a, 0x35, 0x3e, 0x27,
-	0xbb, 0xf0, 0x29, 0x6c, 0x8d, 0x48, 0x74, 0xe2, 0xba, 0x3c, 0xde, 0xd4, 0xb1, 0x59, 0xc8, 0x05,
-	0x58, 0x25, 0x07, 0x46, 0x25, 0x30, 0x11, 0x48, 0x76, 0xe1, 0x37, 0x80, 0xf2, 0x60, 0x4f, 0x92,
-	0x4a, 0x83, 0x8d, 0x38, 0x43, 0x36, 0x35, 0xb1, 0x05, 0x9d, 0x13, 0xcb, 0xa2, 0xb1, 0x17, 0x0d,
-	0xae, 0x89, 0x75, 0xc3, 0x0e, 0x2b, 0x2d, 0x56, 0x32, 0x8b, 0x9f, 0x4c, 0xe3, 0xb3, 0x02, 0xdd,
-	0x6c, 0x94, 0x27, 0xb1, 0xf8, 0x1f, 0x1a, 0x01, 0x09, 0x63, 0x57, 0x90, 0x68, 0x1d, 0xfd, 0x21,
-	0x56, 0xe7, 0x91, 0xfb, 0x17, 0x8e, 0x37, 0x73, 0xf9, 0x7d, 0x5f, 0x44, 0x66, 0x14, 0x87, 0x46,
-	0xb2, 0x4d, 0x7f, 0x09, 0xdd, 0xfc, 0x1c, 0xda, 0x85, 0x06, 0x43, 0x19, 0x0f, 0xf9, 0x11, 0x54,
-	0x23, 0xb1, 0x58, 0x96, 0x98, 0x02, 0x58, 0x2c, 0x4c, 0x38, 0x67, 0x9d, 0xf8, 0x1a, 0xda, 0x23,
-	0x12, 0x31, 0xb8, 0xb1, 0x77, 0x45, 0x99, 0x7a, 0x07, 0x00, 0x02, 0x41, 0x12, 0x50, 0xf2, 0xac,
-	0xd6, 0x70, 0x52, 0xd4, 0x50, 0xce, 0x2b, 0x0a, 0x9d, 0x4c, 0xa4, 0x6f, 0x79, 0x7f, 0x08, 0x43,
-	0x6d, 0x68, 0x46, 0xa6, 0x56, 0xe5, 0x3a, 0xb6, 0x85, 0x8e, 0x0b, 0x6c, 0x3e, 0x87, 0x3f, 0x2a,
-	0xd0, 0x4c, 0x5d, 0xa8, 0x0b, 0xd5, 0xd8, 0xb1, 0x13, 0x89, 0xd8, 0x10, 0x21, 0xa8, 0x79, 0xe6,
-	0x9c, 0x24, 0xd0, 0x7c, 0xcc, 0x7c, 0x8e, 0x45, 0xd3, 0x27, 0xc3, 0xc7, 0x4c, 0xdf, 0x19, 0xf1,
-	0x6c, 0x12, 0xf0, 0xc7, 0x52, 0x37, 0x12, 0x8b, 0xf9, 0xe7, 0xf4, 0xd2, 0x71, 0x89, 0x56, 0x17,
-	0xba, 0x0b, 0x8b, 0xe9, 0x73, 0xe9, 0x04, 0xd1, 0xb5, 0xd6, 0x10, 0xfa, 0x70, 0x83, 0x79, 0xc9,
-	0xdc, 0x74, 0x5c, 0x6d, 0x43, 0x78, 0xb9, 0x81, 0xda, 0x50, 0x21, 0xf7, 0x5a, 0x93, 0xbb, 0x2a,
-	0xe4, 0x1e, 0x0f, 0x40, 0x3d, 0xa3, 0x33, 0x1a, 0x47, 0xec, 0x22, 0x72, 0x92, 0x2a, 0x05, 0x49,
-	0xcb, 0xaf, 0x02, 0x7f, 0x51, 0x60, 0x6b, 0xea, 0xdb, 0xa6, 0xa8, 0x18, 0xe9, 0xb5, 0xa6, 0xd4,
-	0x14, 0x89, 0x5a, 0x99, 0x04, 0x4b, 0xba, 0xd5, 0x15, 0x74, 0x6b, 0xe5, 0x74, 0xeb, 0xa5, 0x74,
-	0x1b, 0x45, 0xba, 0x1b, 0x29, 0xdd, 0xe5, 0xf9, 0x9b, 0x6b, 0x52, 0x49, 0x2d, 0xf2, 0xee, 0x42,
-	0x75, 0xea, 0xd8, 0x1a, 0x88, 0xcb, 0x9c, 0x3a, 0x36, 0x7e, 0xa7, 0xc0, 0xde, 0x05, 0x89, 0x0c,
-	0x62, 0x11, 0xe7, 0x8e, 0x9c, 0x93, 0x30, 0x34, 0x67, 0x64, 0xe2, 0x73, 0x1d, 0xd9, 0xd5, 0x8f,
-	0x97, 0x57, 0x3f, 0xb6, 0x99, 0x87, 0xfa, 0x11, 0xa7, 0x5d, 0x37, 0xd8, 0x10, 0xfd, 0x0e, 0x6d,
-	0x8b, 0x7a, 0x77, 0x24, 0x08, 0x45, 0x0c, 0x9b, 0x67, 0x96, 0x6a, 0xe4, 0xbc, 0xf9, 0x52, 0x51,
-	0x2b, 0x96, 0x8a, 0xb7, 0xa0, 0x95, 0x1f, 0x44, 0x54, 0x31, 0x12, 0xc8, 0xd9, 0x9e, 0x9a, 0x4c,
-	0x5d, 0x12, 0x48, 0x99, 0x9e, 0x58, 0xe8, 0x4f, 0x50, 0x29, 0xdf, 0xcc, 0x8a, 0x86, 0x48, 0xf6,
-	0x8e, 0x48, 0xf6, 0x49, 0xea, 0x36, 0x96, 0x2b, 0x70, 0x0c, 0x7b, 0xa3, 0x47, 0xab, 0x50, 0xe4,
-	0x5c, 0x79, 0x0c, 0xe7, 0x92, 0xf2, 0x78, 0x0a, 0xea, 0xe2, 0x38, 0x25, 0xb0, 0x22, 0x66, 0x1e,
-	0x76, 0x57, 0x2a, 0x86, 0x3c, 0xd1, 0x84, 0x85, 0xdf, 0x2b, 0xa0, 0x8d, 0xbe, 0x9f, 0x82, 0xcf,
-	0x61, 0x47, 0x0e, 0x3c, 0x79, 0x48, 0xcd, 0xf2, 0xd5, 0xf8, 0x15, 0xfc, 0x2c, 0x7e, 0x64, 0x03,
-	0x69, 0xfa, 0x3c, 0x9c, 0xad, 0x54, 0x37, 0xa7, 0x5a, 0xa5, 0xa8, 0xda, 0x07, 0x05, 0xf6, 0x57,
-	0x63, 0xfe, 0x40, 0xb2, 0x47, 0x9f, 0x6a, 0xc0, 0xdb, 0x25, 0xf4, 0x2f, 0xb4, 0x66, 0xcb, 0x9a,
-	0x8d, 0xb6, 0xc5, 0xfe, 0xec, 0x0f, 0x43, 0xdf, 0x29, 0xf1, 0x86, 0x3e, 0x3a, 0x86, 0x76, 0xb6,
-	0x0a, 0xa1, 0xbd, 0xa4, 0x4c, 0xe7, 0x6b, 0x93, 0x5e, 0xf8, 0x6b, 0xb2, 0xc0, 0x52, 0xd3, 0x93,
-	0x06, 0xce, 0xf6, 0x41, 0x69, 0xe0, 0x7c, 0x23, 0x36, 0xe0, 0xbf, 0x34, 0xa9, 0xe7, 0x48, 0x03,
-	0x17, 0xda, 0x1a, 0x5d, 0x2b, 0x9f, 0x08, 0x7d, 0x34, 0x85, 0xed, 0xb2, 0x67, 0x8c, 0x7e, 0x11,
-	0x3b, 0x56, 0xd4, 0x1a, 0xfd, 0x60, 0xdd, 0xb4, 0x80, 0x1d, 0xad, 0x81, 0x1d, 0xad, 0x87, 0x5d,
-	0xf9, 0x2c, 0x4c, 0xfe, 0x64, 0x4a, 0x33, 0x09, 0xfd, 0x2a, 0x73, 0x2c, 0xcd, 0x5e, 0x1d, 0x3f,
-	0xb4, 0x24, 0xf4, 0xd1, 0x7f, 0xf0, 0x93, 0xdc, 0xa7, 0xa0, 0x9d, 0xb2, 0xde, 0xe5, 0x56, 0xdf,
-	0x2d, 0x6f, 0x69, 0x9e, 0x6d, 0xbe, 0x6e, 0xf5, 0x79, 0x3b, 0x7e, 0xcc, 0x3e, 0x97, 0x0d, 0xde,
-	0x94, 0xff, 0xf3, 0x35, 0x00, 0x00, 0xff, 0xff, 0x24, 0xd7, 0xfe, 0x0d, 0xa7, 0x0b, 0x00, 0x00,
+var fileDescriptor_user_9cd4aaf870b6d3b5 = []byte{
+	// 819 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x56, 0xcd, 0x6e, 0x13, 0x3b,
+	0x14, 0xd6, 0x24, 0x69, 0x6f, 0x73, 0xd2, 0x26, 0xb9, 0x56, 0x6f, 0x3b, 0x77, 0x0a, 0x55, 0x6a,
+	0x21, 0x88, 0xba, 0x48, 0x50, 0x59, 0x20, 0x81, 0x00, 0x95, 0x54, 0x8d, 0x2a, 0x88, 0x82, 0xa6,
+	0xea, 0x86, 0x4d, 0x34, 0x24, 0x26, 0x44, 0x4d, 0xc6, 0xc6, 0x9e, 0xb4, 0x02, 0xb6, 0xac, 0x78,
+	0x05, 0x16, 0x2c, 0x79, 0x06, 0x5e, 0x83, 0x17, 0xe0, 0x55, 0xd0, 0xd8, 0x33, 0x89, 0xe7, 0x27,
+	0xd3, 0x12, 0x24, 0xc4, 0x66, 0x34, 0x3e, 0x3e, 0x3e, 0xfe, 0xbe, 0xef, 0x1c, 0xdb, 0x07, 0x2a,
+	0x53, 0x41, 0x78, 0xd3, 0xff, 0x34, 0x18, 0xa7, 0x1e, 0x45, 0x05, 0xff, 0xdf, 0xda, 0xeb, 0x32,
+	0xe2, 0xf6, 0x4e, 0x3a, 0x4d, 0x76, 0x3e, 0x6c, 0xca, 0x89, 0xa6, 0x18, 0x9c, 0xf7, 0x2e, 0x45,
+	0xf3, 0x52, 0x28, 0x47, 0xfc, 0x18, 0xa0, 0x45, 0x27, 0x13, 0xea, 0xda, 0x44, 0x30, 0x64, 0xc2,
+	0x3f, 0x84, 0xf3, 0x16, 0x1d, 0x10, 0xd3, 0xa8, 0x19, 0xf5, 0x15, 0x3b, 0x1c, 0xa2, 0x2d, 0x58,
+	0x25, 0x9c, 0x77, 0xc4, 0xd0, 0xcc, 0xd5, 0x8c, 0x7a, 0xd1, 0x0e, 0x46, 0xf8, 0x3d, 0x94, 0x8f,
+	0xc8, 0x98, 0x78, 0xe4, 0x4c, 0x10, 0x2e, 0x6c, 0xf2, 0x16, 0xed, 0x43, 0x75, 0x6e, 0x39, 0x39,
+	0x7a, 0x3e, 0x12, 0x9e, 0x99, 0xab, 0xe5, 0xeb, 0x45, 0x3b, 0x61, 0x47, 0x16, 0xac, 0x75, 0x99,
+	0x1a, 0x9b, 0x79, 0x19, 0x77, 0x36, 0x46, 0x35, 0x28, 0x75, 0x19, 0xe1, 0x8e, 0x37, 0xa2, 0xee,
+	0xc9, 0x91, 0x59, 0x90, 0xd3, 0xba, 0x09, 0x53, 0xa8, 0x44, 0xf6, 0x16, 0x0c, 0xdd, 0xd5, 0xe9,
+	0x48, 0x0e, 0xa5, 0x83, 0x6a, 0x43, 0x0a, 0x33, 0xb7, 0xdb, 0x3a, 0xe5, 0x7d, 0xa8, 0x1e, 0x3b,
+	0xa3, 0x31, 0x19, 0x24, 0xe1, 0xc6, 0xed, 0xb8, 0x0b, 0x95, 0x36, 0xf1, 0x0e, 0xc7, 0x63, 0x65,
+	0xf3, 0xd9, 0x5a, 0xb0, 0x46, 0x43, 0x06, 0x86, 0x62, 0x40, 0x35, 0x06, 0x54, 0x63, 0xa0, 0x84,
+	0xd3, 0x4d, 0x78, 0x00, 0xd5, 0x68, 0xc0, 0xa5, 0x28, 0xec, 0x02, 0x24, 0xc0, 0x6b, 0x16, 0xfc,
+	0x0e, 0x2a, 0x87, 0xfd, 0x3e, 0x9d, 0xba, 0x5e, 0xeb, 0x0d, 0xe9, 0x9f, 0xfb, 0xb0, 0xeb, 0x50,
+	0x91, 0xff, 0xda, 0x3a, 0x43, 0xae, 0x8b, 0x9b, 0x23, 0x29, 0xca, 0x65, 0xa7, 0x28, 0x9f, 0x4c,
+	0xd1, 0x0f, 0x03, 0xaa, 0xd1, 0xbd, 0x15, 0xc3, 0xfe, 0x35, 0x18, 0xce, 0x7d, 0x50, 0x1b, 0xc0,
+	0x26, 0x62, 0x3a, 0xf6, 0x66, 0x0c, 0x4b, 0x07, 0x77, 0xd4, 0x8a, 0x78, 0xf4, 0xc6, 0xe9, 0xc8,
+	0x1d, 0x8e, 0x65, 0x49, 0x9c, 0x7a, 0x8e, 0x37, 0x15, 0xb6, 0xb6, 0xd4, 0x7a, 0x01, 0xd5, 0xf8,
+	0xbc, 0x5f, 0xda, 0x53, 0x3d, 0x81, 0xc1, 0x08, 0xdd, 0x82, 0x0d, 0x47, 0x05, 0x57, 0x8e, 0x01,
+	0xfd, 0xa8, 0x11, 0xbb, 0x50, 0x6e, 0x13, 0x4f, 0x0a, 0xe2, 0xbe, 0xa6, 0xbe, 0xb6, 0xbb, 0x00,
+	0xd3, 0xb8, 0xac, 0x9a, 0xe5, 0x37, 0x15, 0xfd, 0x68, 0xc8, 0x22, 0x9c, 0x6f, 0xb8, 0x94, 0xa0,
+	0x4f, 0x60, 0x3d, 0x8c, 0x20, 0x51, 0xe6, 0xa5, 0xa4, 0x3b, 0x0d, 0x41, 0xf8, 0x05, 0xe1, 0x3d,
+	0x87, 0x8d, 0x7a, 0xcc, 0xe1, 0xce, 0x44, 0x34, 0x66, 0x1b, 0x45, 0x16, 0xe0, 0x4f, 0x06, 0xfc,
+	0x7b, 0xc6, 0x06, 0x4e, 0x70, 0x9c, 0x03, 0xea, 0xf7, 0x61, 0x2d, 0x1c, 0x06, 0x30, 0x32, 0x43,
+	0xce, 0x9c, 0xaf, 0xd2, 0x84, 0x26, 0x35, 0xd1, 0x8f, 0xd1, 0x31, 0xa0, 0x38, 0x96, 0x65, 0x54,
+	0xc1, 0xdf, 0x0c, 0xd8, 0x3e, 0x25, 0x9e, 0x4d, 0xfa, 0x64, 0x74, 0x41, 0x3a, 0x44, 0x08, 0x67,
+	0x48, 0xba, 0xcc, 0x0b, 0xb2, 0x7a, 0xcc, 0xe9, 0x24, 0x72, 0xd4, 0x35, 0x0b, 0xaa, 0x42, 0x9e,
+	0x32, 0x4f, 0x82, 0x5f, 0xb1, 0xfd, 0x5f, 0xd4, 0x00, 0xd4, 0xa7, 0xee, 0x05, 0xe1, 0x22, 0xc0,
+	0x39, 0x53, 0xba, 0x68, 0xa7, 0xcc, 0xc4, 0x79, 0x16, 0x12, 0x3c, 0x23, 0x2a, 0xad, 0x44, 0x55,
+	0xc2, 0xcf, 0xa0, 0x28, 0x91, 0xfa, 0xa5, 0x8e, 0x6e, 0x43, 0x39, 0xba, 0x41, 0x00, 0x38, 0x66,
+	0xf5, 0x4b, 0x9f, 0xcb, 0x15, 0x01, 0xee, 0x60, 0x84, 0x3f, 0x1b, 0x60, 0xa6, 0x0b, 0xb1, 0x54,
+	0xb5, 0x75, 0xe0, 0x7f, 0x7d, 0xe3, 0x19, 0x4e, 0xed, 0x34, 0x57, 0x54, 0x80, 0xd9, 0x94, 0xbd,
+	0x78, 0x05, 0xfe, 0x6a, 0xc0, 0x76, 0x7b, 0xc9, 0x34, 0xa5, 0x27, 0x25, 0x77, 0xdd, 0xa4, 0xe4,
+	0xb3, 0x93, 0x52, 0x88, 0x25, 0xc5, 0xd7, 0xb1, 0xfd, 0x87, 0x74, 0xcc, 0xff, 0xb2, 0x8e, 0x1f,
+	0x60, 0x47, 0xbd, 0x3e, 0x2d, 0xcd, 0xa5, 0x23, 0x86, 0xd7, 0x94, 0xf2, 0xca, 0xe7, 0x2d, 0xeb,
+	0x79, 0xc7, 0x5f, 0x0c, 0xb8, 0xb1, 0x78, 0xf7, 0xbf, 0x40, 0x9e, 0x83, 0xef, 0x05, 0x90, 0x6d,
+	0x14, 0x7a, 0x00, 0x25, 0xed, 0xc6, 0x45, 0x9b, 0x2a, 0x46, 0xf4, 0xd6, 0xb7, 0xfe, 0x4b, 0xb1,
+	0x0a, 0x86, 0x5a, 0x50, 0x8e, 0x5e, 0x4d, 0x68, 0x5b, 0x39, 0x26, 0x2e, 0x4f, 0xcb, 0x4c, 0x9f,
+	0x10, 0xcc, 0x07, 0xa0, 0x35, 0x3a, 0x21, 0x80, 0x68, 0xdf, 0x15, 0x02, 0x88, 0x77, 0x44, 0x8f,
+	0x60, 0x5d, 0x6f, 0x31, 0xd0, 0x1c, 0xa7, 0xde, 0xc7, 0x58, 0x5b, 0x69, 0x66, 0xc1, 0xd0, 0x19,
+	0x6c, 0xa6, 0x5d, 0x04, 0xe8, 0xa6, 0xf2, 0x5f, 0x70, 0x5b, 0x5a, 0xbb, 0x59, 0xd3, 0x2a, 0x6c,
+	0x3b, 0x23, 0x6c, 0x3b, 0x3b, 0xec, 0xc2, 0x23, 0xe5, 0xc8, 0xe3, 0x96, 0x5a, 0x53, 0x68, 0x4f,
+	0x67, 0x98, 0x5a, 0xf1, 0x16, 0xbe, 0xca, 0x45, 0xe9, 0xa9, 0xb7, 0x1c, 0xa1, 0x9e, 0xb1, 0x06,
+	0x2b, 0xd4, 0x33, 0xde, 0x9d, 0x3c, 0xdd, 0x78, 0x59, 0x6a, 0xc8, 0x46, 0xfd, 0xa1, 0xff, 0x79,
+	0xb5, 0x2a, 0xbb, 0xf0, 0x7b, 0x3f, 0x03, 0x00, 0x00, 0xff, 0xff, 0x95, 0x5e, 0xfc, 0xe6, 0xc1,
+	0x0b, 0x00, 0x00,
 }

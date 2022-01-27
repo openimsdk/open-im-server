@@ -23,19 +23,22 @@ func initMysqlDB() {
 	var err1 error
 	db, err := gorm.Open("mysql", dsn)
 	if err != nil {
-		log.Error("", "", dsn)
+		log.NewError("0", "Open failed ", err.Error(), dsn)
 	}
 	if err != nil {
 		time.Sleep(time.Duration(30) * time.Second)
 		db, err1 = gorm.Open("mysql", dsn)
 		if err1 != nil {
+			log.NewError("0", "Open failed ", err1.Error(), dsn)
 			panic(err1.Error())
 		}
 	}
+
 	//Check the database and table during initialization
-	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName)
+	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName+"test1")
 	err = db.Exec(sql).Error
 	if err != nil {
+		log.NewError("0", "Exec failed ", err.Error(), sql)
 		panic(err.Error())
 	}
 	db.Close()
@@ -44,8 +47,57 @@ func initMysqlDB() {
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
+		log.NewError("0", "Open failed ", err.Error(), dsn)
 		panic(err.Error())
 	}
+
+	log.NewInfo("open db ok ", dsn)
+	db.AutoMigrate(&Friend{},
+		&FriendRequest{},
+		&Group{},
+		&GroupMember{},
+		&GroupRequest{},
+		&User{},
+		&Black{}, &ChatLog{})
+	db.Set("gorm:table_options", "CHARSET=utf8")
+
+	//
+	//if !db.HasTable(&Friend{}) {
+	//	log.NewInfo("CreateTable Friend")
+	//	db.CreateTable(&Friend{})
+	//}
+	//
+	//if !db.HasTable(&FriendRequest{}) {
+	//	log.NewInfo("CreateTable FriendRequest")
+	//	db.CreateTable(&FriendRequest{})
+	//}
+	//
+	//if !db.HasTable(&Group{}) {
+	//	log.NewInfo("CreateTable Group")
+	//	db.CreateTable(&Group{})
+	//}
+	//
+	//if !db.HasTable(&GroupMember{}) {
+	//	log.NewInfo("CreateTable GroupMember")
+	//	db.CreateTable(&GroupMember{})
+	//}
+	//
+	//if !db.HasTable(&GroupRequest{}) {
+	//	log.NewInfo("CreateTable GroupRequest")
+	//	db.CreateTable(&GroupRequest{})
+	//}
+	//
+	//if !db.HasTable(&User{}) {
+	//	log.NewInfo("CreateTable User")
+	//	db.CreateTable(&User{})
+	//}
+	//
+	//if !db.HasTable(&Black{}) {
+	//	log.NewInfo("CreateTable Black")
+	//	db.CreateTable(&Black{})
+	//}
+
+	return
 
 	sqlTable := "CREATE TABLE IF NOT EXISTS `user` (" +
 		" `uid` varchar(64) NOT NULL," +
@@ -85,18 +137,6 @@ func initMysqlDB() {
 		" `req_message` varchar(255) DEFAULT NULL," +
 		" `create_time` datetime NOT NULL," +
 		" PRIMARY KEY (`user_id`,`req_id`) USING BTREE" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS `black_list` (" +
-		" `uid` varchar(32) NOT NULL COMMENT 'uid'," +
-		" `begin_disable_time` datetime DEFAULT NULL," +
-		" `end_disable_time` datetime DEFAULT NULL," +
-		" `ex` varchar(1024) DEFAULT NULL," +
-		" PRIMARY KEY (`uid`) USING BTREE" +
 		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
 	err = db.Exec(sqlTable).Error
 	if err != nil {

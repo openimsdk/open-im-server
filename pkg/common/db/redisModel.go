@@ -35,28 +35,28 @@ func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (inte
 }
 
 //Perform seq auto-increment operation of user messages
-func (d *DataBases) IncrUserSeq(uid string) (int64, error) {
+func (d *DataBases) IncrUserSeq(uid string) (uint64, error) {
 	key := userIncrSeq + uid
-	return redis.Int64(d.Exec("INCR", key))
+	return redis.Uint64(d.Exec("INCR", key))
 }
 
 //Get the largest Seq
-func (d *DataBases) GetUserMaxSeq(uid string) (int64, error) {
+func (d *DataBases) GetUserMaxSeq(uid string) (uint64, error) {
 	key := userIncrSeq + uid
-	return redis.Int64(d.Exec("GET", key))
+	return redis.Uint64(d.Exec("GET", key))
 }
 
 //Set the user's minimum seq
-func (d *DataBases) SetUserMinSeq(uid string, minSeq int64) (err error) {
+func (d *DataBases) SetUserMinSeq(uid string, minSeq uint32) (err error) {
 	key := userMinSeq + uid
 	_, err = d.Exec("SET", key, minSeq)
 	return err
 }
 
 //Get the smallest Seq
-func (d *DataBases) GetUserMinSeq(uid string) (int64, error) {
+func (d *DataBases) GetUserMinSeq(uid string) (uint64, error) {
 	key := userMinSeq + uid
-	return redis.Int64(d.Exec("GET", key))
+	return redis.Uint64(d.Exec("GET", key))
 }
 
 //Store Apple's device token to redis
@@ -91,10 +91,15 @@ func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int32, m map[s
 	_, err := d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
+func (d *DataBases) DeleteTokenByUidPid(userID string, platformID int32, fields []string) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+	_, err := d.Exec("HDEL", key, redis.Args{}.Add().AddFlat(fields)...)
+	return err
+}
 func (d *DataBases) SetSingleConversationMsgOpt(userID, conversationID string, opt int) error {
 	key := conversationReceiveMessageOpt + userID
-	_, err1 := d.Exec("HSet", key, conversationID, opt)
-	return err1
+	_, err := d.Exec("HSet", key, conversationID, opt)
+	return err
 }
 func (d *DataBases) GetSingleConversationMsgOpt(userID, conversationID string) (int, error) {
 	key := conversationReceiveMessageOpt + userID

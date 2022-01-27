@@ -1,52 +1,73 @@
 package utils
 
 import (
-	"fmt"
-	"math/rand"
-	"reflect"
+	"github.com/jinzhu/copier"
+	"github.com/pkg/errors"
+	"runtime"
 	"strconv"
-	"time"
+	"strings"
 )
 
 // copy a by b  b->a
 func CopyStructFields(a interface{}, b interface{}, fields ...string) (err error) {
-	at := reflect.TypeOf(a)
-	av := reflect.ValueOf(a)
-	bt := reflect.TypeOf(b)
-	bv := reflect.ValueOf(b)
-
-	if at.Kind() != reflect.Ptr {
-		err = fmt.Errorf("a must be a struct pointer")
-		return err
-	}
-	av = reflect.ValueOf(av.Interface())
-
-	_fields := make([]string, 0)
-	if len(fields) > 0 {
-		_fields = fields
-	} else {
-		for i := 0; i < bv.NumField(); i++ {
-			_fields = append(_fields, bt.Field(i).Name)
-		}
-	}
-
-	if len(_fields) == 0 {
-		err = fmt.Errorf("no fields to copy")
-		return err
-	}
-
-	for i := 0; i < len(_fields); i++ {
-		name := _fields[i]
-		f := av.Elem().FieldByName(name)
-		bValue := bv.FieldByName(name)
-
-		if f.IsValid() && f.Kind() == bValue.Kind() {
-			f.Set(bValue)
-		}
-	}
-	return nil
+	return copier.Copy(a, b)
 }
 
-func OperationIDGenerator() string {
-	return strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10)
+func Wrap(err error, message string) error {
+	return errors.Wrap(err, "==> "+printCallerNameAndLine()+message)
+}
+
+func WithMessage(err error, message string) error {
+	return errors.WithMessage(err, "==> "+printCallerNameAndLine()+message)
+}
+
+func printCallerNameAndLine() string {
+	pc, _, line, _ := runtime.Caller(2)
+	return runtime.FuncForPC(pc).Name() + "()@" + strconv.Itoa(line) + ": "
+}
+
+func GetSelfFuncName() string {
+	pc, _, _, _ := runtime.Caller(1)
+	return cleanUpFuncName(runtime.FuncForPC(pc).Name())
+}
+func cleanUpFuncName(funcName string) string {
+	end := strings.LastIndex(funcName, ".")
+	if end == -1 {
+		return ""
+	}
+	return funcName[end+1:]
+}
+func Intersect(slice1, slice2 []uint32) []uint32 {
+	m := make(map[uint32]bool)
+	n := make([]uint32, 0)
+	for _, v := range slice1 {
+		m[v] = true
+	}
+	for _, v := range slice2 {
+		flag, _ := m[v]
+		if flag {
+			n = append(n, v)
+		}
+	}
+	return n
+}
+func Difference(slice1, slice2 []uint32) []uint32 {
+	m := make(map[uint32]bool)
+	n := make([]uint32, 0)
+	inter := Intersect(slice1, slice2)
+	for _, v := range inter {
+		m[v] = true
+	}
+	for _, v := range slice1 {
+		if !m[v] {
+			n = append(n, v)
+		}
+	}
+
+	for _, v := range slice2 {
+		if !m[v] {
+			n = append(n, v)
+		}
+	}
+	return n
 }

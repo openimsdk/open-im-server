@@ -31,7 +31,6 @@ func Int32ToString(i int32) string {
 
 //judge a string whether in the  string list
 func IsContain(target string, List []string) bool {
-
 	for _, element := range List {
 
 		if target == element {
@@ -39,7 +38,6 @@ func IsContain(target string, List []string) bool {
 		}
 	}
 	return false
-
 }
 
 func InterfaceArrayToStringArray(data []interface{}) (i []string) {
@@ -52,6 +50,11 @@ func StructToJsonString(param interface{}) string {
 	dataType, _ := json.Marshal(param)
 	dataString := string(dataType)
 	return dataString
+}
+
+func StructToJsonBytes(param interface{}) []byte {
+	dataType, _ := json.Marshal(param)
+	return dataType
 }
 
 //The incoming parameter must be a pointer

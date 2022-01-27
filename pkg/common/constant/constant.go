@@ -3,14 +3,14 @@ package constant
 const (
 
 	//group admin
-	OrdinaryMember = 0
-	GroupOwner     = 1
-	Administrator  = 2
+	//	OrdinaryMember = 0
+	//	GroupOwner     = 1
+	//	Administrator  = 2
 	//group application
-	Application      = 0
-	AgreeApplication = 1
+	//	Application      = 0
+	//	AgreeApplication = 1
 
-	//feiend related
+	//friend related
 	BlackListFlag         = 1
 	ApplicationFriendFlag = 0
 	FriendFlag            = 1
@@ -18,9 +18,8 @@ const (
 
 	//Websocket Protocol
 	WSGetNewestSeq     = 1001
-	WSPullMsg          = 1002
+	WSPullMsgBySeqList = 1002
 	WSSendMsg          = 1003
-	WSPullMsgBySeqList = 1004
 	WSPushMsg          = 2001
 	WSKickOnlineMsg    = 2002
 	WSDataError        = 3001
@@ -37,6 +36,7 @@ const (
 	Card           = 108
 	Location       = 109
 	Custom         = 110
+	Revoke         = 111
 	HasReadReceipt = 112
 	Typing         = 113
 	Quote          = 114
@@ -44,23 +44,28 @@ const (
 	GroupMsg       = 201
 
 	//SysRelated
-	AcceptFriendApplicationTip = 201
-	AddFriendTip               = 202
-	RefuseFriendApplicationTip = 203
-	SetSelfInfoTip             = 204
-	Revoke                     = 205
-	C2CMessageAsRead           = 206
 
-	TransferGroupOwnerTip       = 501
-	CreateGroupTip              = 502
-	GroupApplicationResponseTip = 503
-	JoinGroupTip                = 504
-	QuitGroupTip                = 505
-	SetGroupInfoTip             = 506
-	AcceptGroupApplicationTip   = 507
-	RefuseGroupApplicationTip   = 508
-	KickGroupMemberTip          = 509
-	InviteUserToGroupTip        = 510
+	FriendApplicationApprovedNotification = 1201 //add_friend_response
+	FriendApplicationRejectedNotification = 1202 //add_friend_response
+	FriendApplicationNotification         = 1203 //add_friend
+	FriendAddedNotification               = 1204
+	FriendDeletedNotification             = 1205 //delete_friend
+	FriendRemarkSetNotification           = 1206 //set_friend_remark?
+	BlackAddedNotification                = 1207 //add_black
+	BlackDeletedNotification              = 1208 //remove_black
+
+	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
+
+	GroupCreatedNotification             = 1501
+	GroupInfoSetNotification             = 1502
+	JoinGroupApplicationNotification     = 1503
+	MemberQuitNotification               = 1504
+	GroupApplicationAcceptedNotification = 1505
+	GroupApplicationRejectedNotification = 1506
+	GroupOwnerTransferredNotification    = 1507
+	MemberKickedNotification             = 1508
+	MemberInvitedNotification            = 1509
+	MemberEnterNotification              = 1510
 
 	//MsgFrom
 	UserMsgType = 100
@@ -76,13 +81,13 @@ const (
 	ExpiredToken = 3
 
 	//MultiTerminalLogin
-	//全端登录，但是同端互斥
+	//Full-end login, but the same end is mutually exclusive
 	AllLoginButSameTermKick = 1
-	//所有端中只能有一端能够登录
+	//Only one of the endpoints can log in
 	SingleTerminalLogin = 2
-	//web端可以同时在线，其他端只能有一端登录
+	//The web side can be online at the same time, and the other side can only log in at one end
 	WebAndOther = 3
-	//Pc端互斥，移动端互斥，但是web端可以同时在线
+	//The PC side is mutually exclusive, and the mobile side is mutually exclusive, but the web side can be online at the same time
 	PcMobileAndWeb = 4
 
 	OnlineStatus  = "online"
@@ -94,6 +99,14 @@ const (
 	ReceiveMessage          = 0
 	NotReceiveMessage       = 1
 	ReceiveNotNotifyMessage = 2
+
+	//OptionsKey
+	IsHistory            = "history"
+	IsPersistent         = "persistent"
+	IsOfflinePush        = "offlinePush"
+	IsUnreadCount        = "unreadCount"
+	IsConversationUpdate = "conversationUpdate"
+	IsSenderSync         = "senderSync"
 )
 
 var ContentType2PushContent = map[int64]string{
@@ -106,5 +119,23 @@ var ContentType2PushContent = map[int64]string{
 	GroupMsg: "你收到一条群聊消息",
 	Common:   "你收到一条新消息",
 }
+
+const (
+	AppOrdinaryUsers = 1
+	AppAdmin         = 2
+
+	GroupOrdinaryUsers = 1
+	GroupOwner         = 2
+	GroupAdmin         = 3
+
+	GroupResponseAgree  = 1
+	GroupResponseRefuse = -1
+
+	FriendResponseAgree  = 1
+	FriendResponseRefuse = -1
+
+	Male   = 1
+	Female = 2
+)
 
 const FriendAcceptTip = "You have successfully become friends, so start chatting"

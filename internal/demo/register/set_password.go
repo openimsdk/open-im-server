@@ -86,7 +86,7 @@ openIMRegisterTab:
 	response, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.IoErrot, "errMsg": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.IoError, "errMsg": err.Error()})
 		return
 	}
 	imrep := IMRegisterResp{}

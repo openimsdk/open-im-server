@@ -1,33 +1,34 @@
 syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 package pbAuth;
 option go_package = "./auth;pbAuth";
 
-message UserRegisterReq {
-    string UID = 1;
-    string Name = 2;
-    string Icon = 3;
-    int32  Gender = 4;
-    string Mobile = 5;
-    string Birth = 6;
-    string Email = 7;
-    string Ex = 8;
+message CommonResp{
+    int32   errCode = 1;
+    string  errMsg = 2;
 }
 
-message UserRegisterResp {
-    bool Success = 1;
+message UserRegisterReq {
+    server_api_params.UserInfo UserInfo = 1;
+    string OperationID = 2;
 }
+message UserRegisterResp {
+    CommonResp CommonResp = 1;
+}
+
 
 message UserTokenReq {
     int32  Platform = 1;
-    string UID = 2;
+    string FromUserID = 2;
+    string OpUserID = 3;
+    string OperationID = 4;
+}
+message UserTokenResp {
+    CommonResp CommonResp = 1;
+    string Token = 2;
+    int64  ExpiredTime = 3;
 }
 
-message UserTokenResp {
-    int32  ErrCode = 1;
-    string ErrMsg = 2;
-    string Token = 3;
-    int64  ExpiredTime = 4;
-}
 
 service Auth {
     rpc UserRegister(UserRegisterReq) returns(UserRegisterResp);

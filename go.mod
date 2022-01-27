@@ -18,11 +18,14 @@ require (
 	github.com/garyburd/redigo v1.6.2
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
+	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/websocket v1.4.2
+	github.com/jinzhu/copier v0.3.4
 	github.com/jinzhu/gorm v1.9.16
+	github.com/jinzhu/now v1.1.3 // indirect
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.4 // indirect
@@ -32,6 +35,7 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/olivere/elastic/v7 v7.0.23
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.8.1

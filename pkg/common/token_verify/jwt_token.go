@@ -5,6 +5,8 @@ import (
 	"Open_IM/pkg/common/constant"
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
+	"github.com/garyburd/redigo/redis"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
@@ -42,6 +44,24 @@ func CreateToken(userID string, platformID int32) (string, int64, error) {
 	if err != nil {
 		return "", 0, err
 	}
+	//remove Invalid token
+	m, err := commonDB.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
+	if err != nil && err != redis.ErrNil {
+		return "", 0, err
+	}
+	var deleteTokenKey []string
+	for k, v := range m {
+		_, err = GetClaimFromToken(k)
+		if err != nil || v != constant.NormalToken {
+			deleteTokenKey = append(deleteTokenKey, k)
+		}
+	}
+	if len(deleteTokenKey) != 0 {
+		err = commonDB.DB.DeleteTokenByUidPid(userID, platformID, deleteTokenKey)
+		if err != nil {
+			return "", 0, err
+		}
+	}
 	err = commonDB.DB.AddTokenFlag(userID, platformID, tokenString, constant.NormalToken)
 	if err != nil {
 		return "", 0, err
@@ -78,6 +98,43 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 		}
 		return nil, &constant.ErrTokenNotValidYet
 	}
+}
+
+func IsAppManagerAccess(token string, OpUserID string) bool {
+	claims, err := ParseToken(token)
+	if err != nil {
+		return false
+	}
+	if utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) && claims.UID == OpUserID {
+		return true
+	}
+	return false
+}
+
+func IsMangerUserID(OpUserID string) bool {
+	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func CheckAccess(OpUserID string, OwnerUserID string) bool {
+	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
+		return true
+	}
+	if OpUserID == OwnerUserID {
+		return true
+	}
+	return false
+}
+
+func GetUserIDFromToken(token string) (bool, string) {
+	claims, err := ParseToken(token)
+	if err != nil {
+		return false, ""
+	}
+	return true, claims.UID
 }
 
 func ParseToken(tokensString string) (claims *Claims, err error) {
