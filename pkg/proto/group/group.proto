@@ -222,31 +222,24 @@ message GetGroupMemberReq {
     string OperationID = 2;
 }
 
-message BanGroupChatReq {
-  string GroupId = 1;
-  string OperationID = 2;
+message OperateGroupStatusReq {
+    string GroupId = 1;
+    int32 Status = 2;
+    string OperationID = 3;
 }
 
-message BanGroupChatResp {
-
-}
-
-message BanPrivateChatReq {
-  string GroupId = 1;
-  string OperationID = 2;
-}
-
-message BanPrivateChatResp {
+message OperateGroupStatusResp {
 
 }
 
-message SetMasterReq {
+message OperateUserRoleReq {
   string GroupId = 1;
   string UserId = 2;
-  string OperationID = 3;
+  int32 RoleLevel = 3;
+  string OperationID = 4;
 }
  
-message SetMasterResp {
+message OperateUserRoleResp {
 
 }
 
@@ -257,6 +250,15 @@ message DeleteGroupReq {
 
 message DeleteGroupResp {
 
+}
+
+message GetGroupByIdReq {
+  string GroupId = 1;
+  string OperationID = 2;
+}
+
+message GetGroupByIdResp {
+  server_api_params.GroupInfo GroupInfo = 1;
 }
 
 service group{
@@ -275,12 +277,11 @@ service group{
   rpc inviteUserToGroup(InviteUserToGroupReq) returns (InviteUserToGroupResp);
   rpc getGroupAllMember(GetGroupAllMemberReq) returns(GetGroupAllMemberResp);
 
-
+  rpc GetGroupById(GetGroupByIdReq) returns(GetGroupByIdResp);
   rpc GetGroup(GetGroupReq) returns(GetGroupResp);
   rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);
-  rpc BanGroupChat(BanGroupChatReq) returns(BanGroupChatResp);
-  rpc BanPrivateChat(BanPrivateChatReq) returns(BanPrivateChatResp);
-  rpc SetMaster(SetMasterReq) returns(SetMasterResp);
+  rpc OperateGroupStatus(OperateGroupStatusReq) returns(OperateGroupStatusResp);
+  rpc OperateUserRole(OperateUserRoleReq) returns(OperateUserRoleResp);
   rpc DeleteGroup(DeleteGroupReq) returns(DeleteGroupResp);
 }
 

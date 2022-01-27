@@ -250,11 +250,16 @@ func (s *userServer) GetUser(ctx context.Context, req *pbUser.GetUserReq) (*pbUs
 	if err != nil {
 		return resp, nil
 	}
+	isBlock, err := imdb.UserIsBlock(req.UserId)
+	if err != nil {
+		return resp, err
+	}
 	resp.User = &pbUser.User{
 		ProfilePhoto: user.FaceURL,
 		Nickname:     user.Nickname,
 		UserId:       user.UserID,
 		CreateTime:   user.CreateTime.String(),
+		IsBlock: isBlock,
 	}
 	return resp, nil
 }

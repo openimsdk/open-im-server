@@ -11,6 +11,14 @@ type GroupResponse struct {
 	ProfilePhoto string `json:"profile_photo"`
 }
 
+type GetGroupByIdRequest struct {
+	GroupId string `form:"group_id" binding:"required"`
+}
+
+type GetGroupByIdResponse struct {
+	GroupResponse
+}
+
 type GetGroupRequest struct {
 	GroupName string `form:"group_name" binding:"required"`
 	RequestPagination

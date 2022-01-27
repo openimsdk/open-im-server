@@ -20,16 +20,16 @@ func NewGinRouter() *gin.Engine {
 	router.Use(middleware.CorsHandler())
 	adminRouterGroup := router.Group("/admin")
 	{
-		adminRouterGroup.POST("/register", admin.UserRegister)
-		adminRouterGroup.POST("/login", admin.UserLogin)
-		adminRouterGroup.GET("/get_user_settings", admin.GetUserSettings)
-		adminRouterGroup.POST("/alter_user_settings", admin.AlterUserSettings)
+		adminRouterGroup.POST("/register", admin.AdminRegister)
+		adminRouterGroup.POST("/login", admin.AdminLogin)
+		adminRouterGroup.GET("/get_user_settings", admin.GetAdminSettings)
+		adminRouterGroup.POST("/alter_user_settings", admin.AlterAdminSettings)
 	}
 	statisticsRouterGroup := router.Group("/statistics")
 	{
-		statisticsRouterGroup.GET("/get_messages_statistics", statistics.MessagesStatistics)
-		statisticsRouterGroup.GET("/get_users_statistics", statistics.UsersStatistics)
-		statisticsRouterGroup.GET("/get_groups_statistics", statistics.GroupsStatistics)
+		statisticsRouterGroup.GET("/get_messages_statistics", statistics.GetMessagesStatistics)
+		statisticsRouterGroup.GET("/get_users_statistics", statistics.GetUsersStatistics)
+		statisticsRouterGroup.GET("/get_groups_statistics", statistics.GetGroupsStatistics)
 		statisticsRouterGroup.GET("/get_active_user", statistics.GetActiveUser)
 		statisticsRouterGroup.GET("/get_active_group", statistics.GetActiveGroup)
 	}
@@ -57,18 +57,20 @@ func NewGinRouter() *gin.Engine {
 	}
 	groupRouterGroup := router.Group("/group")
 	{
+		groupRouterGroup.GET("/get_group_by_id", group.GetGroupById)
 		groupRouterGroup.GET("/get_groups", group.GetGroups)
-		groupRouterGroup.GET("/get_group", group.GetGroup)
-		groupRouterGroup.GET("/search_groups_member", group.GetGroupsMember)
+		groupRouterGroup.GET("/get_group_by_name", group.GetGroupByName)
+		groupRouterGroup.GET("/get_group_members", group.GetGroupsMember)
 		groupRouterGroup.POST("/create_group", group.CreateGroup)
 		groupRouterGroup.GET("/inquire_group", group.InquireGroup)
-		groupRouterGroup.GET("/inquire_member_by_group", group.InquireMember)
 		groupRouterGroup.POST("/add_members", group.AddMembers)
-		groupRouterGroup.POST("/remove_user", group.RemoveUser)
-		groupRouterGroup.POST("/ban_private_chat", group.BanPrivateChat)
+		groupRouterGroup.POST("/remove_member", group.RemoveUser)
+		groupRouterGroup.POST("/ban_group_private_chat", group.BanPrivateChat)
+		groupRouterGroup.POST("/open_group_private_chat", group.OpenPrivateChat)
 		groupRouterGroup.POST("/withdraw_message", group.Withdraw)
 		groupRouterGroup.POST("/search_group_message", group.SearchMessage)
 		groupRouterGroup.POST("/ban_group_chat", group.BanGroupChat)
+		groupRouterGroup.POST("/open_group_chat", group.OpenGroupChat)
 	}
 	userRouterGroup := router.Group("/user")
 	{

@@ -7,18 +7,18 @@ import (
 )
 
 // register
-func UserLogin(c *gin.Context) {
+func AdminLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "someJSON", "status": 200})
 }
 
-func UserRegister(c *gin.Context) {
+func AdminRegister(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "someJSON", "status": 200})
 }
 
-func GetUserSettings(c *gin.Context) {
+func GetAdminSettings(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "someJSON", "status": 200})
 }
 
-func AlterUserSettings(c *gin.Context) {
+func AlterAdminSettings(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "someJSON", "status": 200})
 }

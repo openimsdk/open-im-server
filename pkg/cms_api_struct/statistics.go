@@ -1,12 +1,12 @@
 package cms_api_struct
 
-type StatisticsRequest struct {
-	From string `json:"from"`
-	To   string `json:"to"`
+type GetStatisticsRequest struct {
+	FromTime string `json:"from"`
+	ToTime   string `json:"to"`
 }
 
 // 单聊
-type MessageStatisticsResponse struct {
+type GetMessageStatisticsResponse struct {
 	PrivateMessageNum     int `json:"private_message_num"`
 	GroupMessageNum       int `json:"group_message_num"`
 	PrivateMessageNumList []struct {
@@ -20,7 +20,7 @@ type MessageStatisticsResponse struct {
 }
 
 // 用户统计
-type UserStatisticsResponse struct {
+type GetUserStatisticsResponse struct {
 	IncreaseUserNum     int `json:"increase_user_num"`
 	ActiveUserNum       int `json:"active_user_num"`
 	TotalUserNum        int `json:"total_user_num"`
@@ -39,7 +39,7 @@ type UserStatisticsResponse struct {
 }
 
 // 群聊统计
-type GroupMessageStatisticsResponse struct {
+type GetGroupMessageStatisticsResponse struct {
 	IncreaseGroupNum     int `json:"increase_group_num"`
 	TotalGroupNum        int `json:"total_group_num"`
 	IncreaseGroupNumList []struct {
@@ -52,7 +52,7 @@ type GroupMessageStatisticsResponse struct {
 	} `json:"total_group_num_list"`
 }
 
-type ActiveUserStatisticsResponse struct {
+type GetActiveUserStatisticsResponse struct {
 	ActiveUserList []struct {
 		NickName   string `json:"nick_name"`
 		Id         int    `json:"id"`
@@ -60,7 +60,7 @@ type ActiveUserStatisticsResponse struct {
 	} `json:"active_user_list"`
 }
 
-type ActiveGroupStatisticsResponse struct {
+type GetActiveGroupStatisticsResponse struct {
 	ActiveGroupList []struct {
 		GroupNickName string `json:"group_nick_name"`
 		GroupId       int    `json:"group_id"`

@@ -640,6 +640,28 @@ func (s *groupServer) TransferGroupOwner(_ context.Context, req *pbGroup.Transfe
 
 }
 
+func (s *groupServer) GetGroupById(_ context.Context, req *pbGroup.GetGroupByIdReq) (*pbGroup.GetGroupByIdResp, error) {
+	log.NewInfo(req.OperationID, "GetGroup ", req.String())
+	resp := &pbGroup.GetGroupByIdResp{}
+	group, err := imdb.GetGroupsById(req.GroupId)
+	if err != nil {
+		return resp, err
+	}
+	resp.GroupInfo = &open_im_sdk.GroupInfo{
+		GroupID:        group.GroupID,
+		GroupName:      group.GroupName,
+		FaceURL:        group.FaceUrl,
+		OwnerUserID:    group.CreatorUserID,
+		MemberCount:   0,
+		Status:        group.Status,
+		CreatorUserID: group.CreatorUserID,
+		GroupType: group.GroupType,
+	}
+
+	resp.GroupInfo.CreatorUserID = group.CreatorUserID
+	return resp, nil
+}
+
 func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pbGroup.GetGroupResp, error) {
 	log.NewInfo(req.OperationID, "GetGroup ", req.String())
 	resp := &pbGroup.GetGroupResp{
@@ -648,6 +670,10 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 	groups, err := imdb.GetGroupsByName(req.GroupName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
+	}
+	resp.Pagination = &open_im_sdk.RequestPagination{
+		PageNumber: req.Pagination.PageNumber,
+		ShowNumber: req.Pagination.ShowNumber,
 	}
 	for _, v := range groups {
 		resp.GroupInfo = append(resp.GroupInfo, &open_im_sdk.GroupInfo{
@@ -659,7 +685,6 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 			CreatorUserID: v.CreatorUserID,
 		})
 	}
-	utils.CopyStructFields(resp.GroupInfo, groups)
 	return resp, nil
 }
 
@@ -695,26 +720,17 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 	return resp, nil
 }
 
-func (s *groupServer) BanGroupChat(_ context.Context, req *pbGroup.BanGroupChatReq) (*pbGroup.BanGroupChatResp, error) {
-	log.NewInfo(req.OperationID, "BanGroupChat ", req.String())
-	resp := &pbGroup.BanGroupChatResp{}
-	if err := imdb.BanGroupChat(req.GroupId); err != nil {
-		return resp, err
-	}
-	return resp, nil
-}
-
-func (s *groupServer) BanPrivateChat(_ context.Context, req *pbGroup.BanPrivateChatReq) (*pbGroup.BanPrivateChatResp, error) {
-	log.NewInfo(req.OperationID, "BanPrivateChat ", req.String())
-	resp := &pbGroup.BanPrivateChatResp{}
-	if err := imdb.BanPrivateChat(req.GroupId); err != nil {
+func (s *groupServer) OperateGroupStatus(_ context.Context, req *pbGroup.OperateGroupStatusReq) (*pbGroup.OperateGroupStatusResp, error) {
+	log.NewInfo(req.OperationID,  utils.GetSelfFuncName(), req.String())
+	resp := &pbGroup.OperateGroupStatusResp{}
+	if err := imdb.OperateGroupStatus(req.GroupId, req.Status); err != nil {
 		return resp, err
 	}
 	return resp, nil
 }
 
 func (s *groupServer) DeleteGroup(_ context.Context, req *pbGroup.DeleteGroupReq) (*pbGroup.DeleteGroupResp, error) {
-	log.NewInfo(req.OperationID, "DeleteGroup ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp := &pbGroup.DeleteGroupResp{}
 	if err := imdb.DeleteGroup(req.GroupId); err != nil {
 		return resp, err
@@ -722,10 +738,10 @@ func (s *groupServer) DeleteGroup(_ context.Context, req *pbGroup.DeleteGroupReq
 	return resp, nil
 }
 
-func (s *groupServer) SetMaster(_ context.Context, req *pbGroup.SetMasterReq) (*pbGroup.SetMasterResp, error) {
+func (s *groupServer) OperateUserRole(_ context.Context, req *pbGroup.OperateUserRoleReq) (*pbGroup.OperateUserRoleResp, error) {
 	log.NewInfo(req.OperationID, "DeleteGroup ", req.String())
-	resp := &pbGroup.SetMasterResp{}
-	if err := imdb.SetGroupMaster(req.UserId, req.GroupId); err != nil {
+	resp := &pbGroup.OperateUserRoleResp{}
+	if err := imdb.OperateGroupRole(req.UserId, req.GroupId, req.RoleLevel); err != nil {
 		return resp, err
 	}
 	return resp, nil

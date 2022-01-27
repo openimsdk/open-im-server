@@ -83,23 +83,18 @@ func GetGroups(pageNumber, showNumber int) ([]db.Group, error) {
 	return groups, nil
 }
 
-func BanGroupChat(groupId string) error {
-	var group db.Group
-	group.Status = constant.GroupBanChat
+
+func OperateGroupStatus(groupId string, groupStatus int32) error {
+	group := db.Group{
+		GroupID: groupId,
+		Status: groupStatus,
+	}
 	if err := SetGroupInfo(group); err != nil {
 		return err
 	}
 	return nil
 }
 
-func BanPrivateChat(groupId string) error {
-	var group db.Group
-	group.Status = constant.GroupBanPrivateChat
-	if err := SetGroupInfo(group); err != nil {
-		return err
-	}
-	return nil
-}
 
 func DeleteGroup(groupId string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
@@ -114,7 +109,7 @@ func DeleteGroup(groupId string) error {
 	return nil
 }
 
-func SetGroupMaster(userId, groupId string) error {
+func OperateGroupRole(userId, groupId string, roleLevel int32) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -123,6 +118,7 @@ func SetGroupMaster(userId, groupId string) error {
 	groupMember := db.GroupMember{
 		UserID:  userId,
 		GroupID: groupId,
+		RoleLevel: roleLevel,
 	}
 	updateInfo := db.GroupMember{
 		RoleLevel: constant.GroupOwner,
@@ -144,4 +140,19 @@ func GetGroupsCountNum() (int, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func GetGroupsById(groupId string) (db.Group, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	group := db.Group{
+		GroupID: groupId,
+	}
+	if err != nil {
+		return group, err
+	}
+	dbConn.LogMode(true)
+	if err := dbConn.Find(&group).First(&group).Error; err != nil {
+		return group, err
+	}
+	return group, nil
 }
