@@ -101,7 +101,6 @@ func FriendApplicationRejectedNotification(req *pbFriend.AddFriendResponseReq) {
 }
 
 func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string) {
-	return
 	friendAddedTips := open_im_sdk.FriendAddedTips{Friend: &open_im_sdk.FriendInfo{}, OpUser: &open_im_sdk.PublicUserInfo{}}
 	user, err := imdb.GetUserByUserID(opUserID)
 	if err != nil {
