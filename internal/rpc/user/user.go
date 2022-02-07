@@ -374,7 +374,7 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 }
 
 func (s *userServer) GetBlockUserById(_ context.Context, req *pbUser.GetBlockUserByIdReq) (*pbUser.GetBlockUserByIdResp, error) {
-	log.NewInfo(req.OperationID, "GetBlockUser args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetBlockUserById args ", req.String())
 	resp := &pbUser.GetBlockUserByIdResp{}
 	user, err := imdb.GetBlockUserById(req.UserId)
 	if err != nil {

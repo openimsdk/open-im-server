@@ -115,10 +115,8 @@ const (
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
 
-	//timeInterval
-	Day   = 1
-	Week  = 7
-	Month = 31
+	//UserJoinGroupSource
+	JoinByAdmin = 1
 )
 
 var ContentType2PushContent = map[int64]string{

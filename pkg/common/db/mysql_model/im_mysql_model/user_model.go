@@ -222,7 +222,7 @@ func GetBlockUserById(userId string) (BlockUserInfo, error) {
 	if err != nil {
 		return blockUserInfo, err
 	}
-	if err = dbConn.Find(&blockUser).First(&blockUser).Error; err != nil {
+	if err = dbConn.Table("black_list").Where("uid=?", userId).Find(&blockUser).Error; err != nil {
 		return blockUserInfo, err
 	}
 	user := db.Users{

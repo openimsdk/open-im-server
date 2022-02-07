@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
+	"fmt"
 	"time"
 )
 
@@ -66,7 +67,7 @@ func GetGroupsByName(groupName string, pageNumber, showNumber int32) ([]db.Group
 		return groups, err
 	}
 	dbConn.LogMode(true)
-	err = dbConn.Table("groups").Where("name=?", groupName).Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&groups).Error
+	err = dbConn.Table("groups").Where(fmt.Sprintf(" name like '%%%s%%' ", groupName)).Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&groups).Error
 	return groups, err
 }
 
@@ -103,7 +104,11 @@ func DeleteGroup(groupId string) error {
 	}
 	dbConn.LogMode(true)
 	var group db.Group
+	var groupMembers []db.GroupMember
 	if err := dbConn.Table("groups").Where("").Delete(&group).Error; err != nil {
+		return err
+	}
+	if err := dbConn.Table("group_Members").Where("group_id=?", groupId).Delete(groupMembers).Error; err != nil {
 		return err
 	}
 	return nil
@@ -136,7 +141,7 @@ func GetGroupsCountNum() (int, error) {
 	}
 	dbConn.LogMode(true)
 	var count int
-	if err := dbConn.Model(&db.Group{}).Count(&count).Error; err != nil {
+	if err := dbConn.Table("groups").Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return count, nil
@@ -151,8 +156,21 @@ func GetGroupsById(groupId string) (db.Group, error) {
 		return group, err
 	}
 	dbConn.LogMode(true)
-	if err := dbConn.Find(&group).First(&group).Error; err != nil {
+	if err := dbConn.Table("groups").Find(&group).Error; err != nil {
 		return group, err
 	}
 	return group, nil
+}
+
+func GetGroupMaster(groupId string) (db.GroupMember, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	groupMember := db.GroupMember{}
+	if err != nil {
+		return groupMember, err
+	}
+	dbConn.LogMode(true)
+	if err := dbConn.Table("group_members").Where("role_level=? and group_id=?", constant.GroupOwner, groupId).Find(&groupMember).Error; err != nil {
+		return groupMember, err
+	}
+	return groupMember, nil
 }

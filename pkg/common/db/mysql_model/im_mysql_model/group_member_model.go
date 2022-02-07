@@ -225,6 +225,19 @@ func IsGroupOwnerAdmin(groupID, UserID string) bool {
 	return false
 }
 
+func GetGroupMembersByGroupIdCMS(groupId string, showNumber, pageNumber int32) ([]db.GroupMember, error) {
+	var groupMembers []db.GroupMember
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return groupMembers, err
+	}
+	err = dbConn.Table("group_members").Where("group_id=?", groupId).Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&groupMembers).Error
+	if err != nil {
+		return nil, err
+	}
+	return groupMembers, nil
+}
+
 //
 //func SelectGroupList(groupID string) ([]string, error) {
 //	var groupUserID string

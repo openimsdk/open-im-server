@@ -641,13 +641,16 @@ func (s *groupServer) TransferGroupOwner(_ context.Context, req *pbGroup.Transfe
 }
 
 func (s *groupServer) GetGroupById(_ context.Context, req *pbGroup.GetGroupByIdReq) (*pbGroup.GetGroupByIdResp, error) {
-	log.NewInfo(req.OperationID, "GetGroup ", req.String())
-	resp := &pbGroup.GetGroupByIdResp{}
+	log.NewInfo(req.OperationID,  utils.GetSelfFuncName(), "GetGroup ", req.String())
+	resp := &pbGroup.GetGroupByIdResp{CMSGroup: &pbGroup.CMSGroup{
+		GroupInfo:	&open_im_sdk.GroupInfo{},
+	}}
 	group, err := imdb.GetGroupsById(req.GroupId)
 	if err != nil {
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		return resp, err
 	}
-	resp.GroupInfo = &open_im_sdk.GroupInfo{
+	resp.CMSGroup.GroupInfo = &open_im_sdk.GroupInfo{
 		GroupID:       group.GroupID,
 		GroupName:     group.GroupName,
 		FaceURL:       group.FaceUrl,
@@ -657,31 +660,47 @@ func (s *groupServer) GetGroupById(_ context.Context, req *pbGroup.GetGroupByIdR
 		CreatorUserID: group.CreatorUserID,
 		GroupType:     group.GroupType,
 	}
-	resp.GroupInfo.CreatorUserID = group.CreatorUserID
+	groupMember, err := imdb.GetGroupMaster(group.GroupID)
+	if err != nil {
+		return resp, err
+	}
+	resp.CMSGroup.GroupMasterName = groupMember.Nickname
+	resp.CMSGroup.GroupMasterId = groupMember.UserID
+	resp.CMSGroup.GroupInfo.CreatorUserID = group.CreatorUserID
 	return resp, nil
 }
 
 func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pbGroup.GetGroupResp, error) {
 	log.NewInfo(req.OperationID, "GetGroup ", req.String())
 	resp := &pbGroup.GetGroupResp{
-		GroupInfo: []*open_im_sdk.GroupInfo{},
+		CMSGroups: []*pbGroup.CMSGroup{},
 	}
 	groups, err := imdb.GetGroupsByName(req.GroupName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
+	log.NewInfo(req.OperationID, groups)
 	resp.Pagination = &open_im_sdk.RequestPagination{
 		PageNumber: req.Pagination.PageNumber,
 		ShowNumber: req.Pagination.ShowNumber,
 	}
 	for _, v := range groups {
-		resp.GroupInfo = append(resp.GroupInfo, &open_im_sdk.GroupInfo{
-			GroupID:       v.GroupID,
-			GroupName:     v.GroupName,
-			FaceURL:       v.FaceUrl,
-			OwnerUserID:   v.CreatorUserID,
-			Status:        v.Status,
-			CreatorUserID: v.CreatorUserID,
+		groupMember, err := imdb.GetGroupMaster(v.GroupID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+			continue
+		}
+		resp.CMSGroups = append(resp.CMSGroups, &pbGroup.CMSGroup{
+			GroupInfo: &open_im_sdk.GroupInfo{
+				GroupID:       v.GroupID,
+				GroupName:     v.GroupName,
+				FaceURL:       v.FaceUrl,
+				OwnerUserID:   v.CreatorUserID,
+				Status:        v.Status,
+				CreatorUserID: v.CreatorUserID,
+			},
+			GroupMasterName: groupMember.Nickname,
+			GroupMasterId: groupMember.UserID,
 		})
 	}
 	return resp, nil
@@ -690,7 +709,7 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*pbGroup.GetGroupsResp, error) {
 	log.NewInfo(req.OperationID, "GetGroups ", req.String())
 	resp := &pbGroup.GetGroupsResp{
-		GroupInfo:  []*open_im_sdk.GroupInfo{},
+		CMSGroups:  []*pbGroup.CMSGroup{},
 		Pagination: &open_im_sdk.RequestPagination{},
 	}
 	groups, err := imdb.GetGroups(int(req.Pagination.PageNumber), int(req.Pagination.ShowNumber))
@@ -706,13 +725,22 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 	resp.Pagination.PageNumber = req.Pagination.PageNumber
 	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
 	for _, v := range groups {
-		resp.GroupInfo = append(resp.GroupInfo, &open_im_sdk.GroupInfo{
-			GroupID:       v.GroupID,
-			GroupName:     v.GroupName,
-			FaceURL:       v.FaceUrl,
-			OwnerUserID:   v.CreatorUserID,
-			Status:        v.Status,
-			CreatorUserID: v.CreatorUserID,
+		groupMember, err := imdb.GetGroupMaster(v.GroupID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+			continue
+		}
+		resp.CMSGroups = append(resp.CMSGroups, &pbGroup.CMSGroup{
+			GroupInfo: &open_im_sdk.GroupInfo{
+				GroupID:       v.GroupID,
+				GroupName:     v.GroupName,
+				FaceURL:       v.FaceUrl,
+				OwnerUserID:   v.CreatorUserID,
+				Status:        v.Status,
+				CreatorUserID: v.CreatorUserID,
+			},
+			GroupMasterId: groupMember.UserID,
+			GroupMasterName: groupMember.Nickname,
 		})
 	}
 
@@ -723,6 +751,7 @@ func (s *groupServer) OperateGroupStatus(_ context.Context, req *pbGroup.Operate
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp := &pbGroup.OperateGroupStatusResp{}
 	if err := imdb.OperateGroupStatus(req.GroupId, req.Status); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		return resp, err
 	}
 	return resp, nil
@@ -732,16 +761,79 @@ func (s *groupServer) DeleteGroup(_ context.Context, req *pbGroup.DeleteGroupReq
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp := &pbGroup.DeleteGroupResp{}
 	if err := imdb.DeleteGroup(req.GroupId); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		return resp, err
 	}
 	return resp, nil
 }
 
 func (s *groupServer) OperateUserRole(_ context.Context, req *pbGroup.OperateUserRoleReq) (*pbGroup.OperateUserRoleResp, error) {
-	log.NewInfo(req.OperationID, "DeleteGroup ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "args:", req.String())
 	resp := &pbGroup.OperateUserRoleResp{}
 	if err := imdb.OperateGroupRole(req.UserId, req.GroupId, req.RoleLevel); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		return resp, err
+	}
+	return resp, nil
+}
+
+func (s *groupServer) GetGroupMembersCMS(_ context.Context, req *pbGroup.GetGroupMembersCMSReq) (*pbGroup.GetGroupMembersCMSResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "args:",  req.String())
+	resp := &pbGroup.GetGroupMembersCMSResp{}
+	groupMembers, err := imdb.GetGroupMembersByGroupIdCMS(req.GroupId, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		return resp, err
+	}
+	for _, groupMember := range groupMembers {
+		resp.Members = append(resp.Members, &open_im_sdk.GroupMemberFullInfo{
+			GroupID:        req.GroupId,
+			UserID:         groupMember.UserID,
+			RoleLevel:      groupMember.RoleLevel,
+			JoinTime:       groupMember.JoinTime.Unix(),
+			Nickname:       groupMember.Nickname,
+			FaceURL:        groupMember.FaceUrl,
+			JoinSource:     groupMember.JoinSource,
+		})
+	}
+	return resp, nil
+}
+
+func (s *groupServer) RemoveGroupMembersCMS(_ context.Context, req *pbGroup.RemoveGroupMembersCMSReq) (*pbGroup.RemoveGroupMembersCMSResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "args:", req.String())
+	resp := &pbGroup.RemoveGroupMembersCMSResp{}
+	for _, userId := range req.UserIds {
+		err := imdb.RemoveGroupMember(req.GroupId, userId)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+			resp.Failed = append(resp.Failed, userId)
+		} else {
+			resp.Success = append(resp.Success, userId)
+		}
+	}
+	return resp, nil
+}
+
+func (s *groupServer) AddGroupMembersCMS(_ context.Context, req *pbGroup.AddGroupMembersCMSReq) (*pbGroup.AddGroupMembersCMSResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "args:", req.String())
+	resp := &pbGroup.AddGroupMembersCMSResp{}
+	for _, userIds := range req.UserIds {
+		groupMember := db.GroupMember{
+			GroupID:        req.GroupId,
+			UserID:         userIds,
+			Nickname:       "",
+			FaceUrl:        "",
+			RoleLevel:      1,
+			JoinTime:       time.Time{},
+			JoinSource:     constant.JoinByAdmin,
+			OperatorUserID: "CmsAdmin",
+			Ex:             "",
+		}
+		if err := imdb.InsertIntoGroupMember(groupMember); err != nil {
+			resp.Failed = append(resp.Failed, userIds)
+		} else  {
+			resp.Success = append(resp.Success, userIds)
+		}
 	}
 	return resp, nil
 }

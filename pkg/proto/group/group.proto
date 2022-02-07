@@ -195,6 +195,12 @@ message GetGroupAllMemberResp {
   repeated server_api_params.GroupMemberFullInfo memberList = 3;
 }
 
+message CMSGroup {
+    server_api_params.GroupInfo GroupInfo = 1;
+    string GroupMasterName = 2;
+    string GroupMasterId = 3;
+}
+
 message GetGroupReq {
     string GroupName = 1;
     server_api_params.RequestPagination Pagination = 2;
@@ -202,7 +208,7 @@ message GetGroupReq {
 }
 
 message GetGroupResp {
-    repeated server_api_params.GroupInfo GroupInfo = 1;
+    repeated CMSGroup CMSGroups = 1;
     server_api_params.RequestPagination Pagination = 2;
 }
 
@@ -212,7 +218,7 @@ message GetGroupsReq {
 }
 
 message GetGroupsResp {
-    repeated server_api_params.GroupInfo GroupInfo = 1;
+    repeated CMSGroup CMSGroups = 1;
     server_api_params.RequestPagination Pagination = 2;
     int32 GroupNum = 3;
 }
@@ -258,7 +264,40 @@ message GetGroupByIdReq {
 }
 
 message GetGroupByIdResp {
-  server_api_params.GroupInfo GroupInfo = 1;
+  CMSGroup CMSGroup = 1;
+}
+
+message GetGroupMembersCMSReq {
+   string GroupId = 1;
+   server_api_params.RequestPagination Pagination = 2;
+   string OperationID = 3;
+}
+
+message GetGroupMembersCMSResp {
+   repeated server_api_params.GroupMemberFullInfo members = 3;
+   server_api_params.RequestPagination Pagination = 2;
+}
+
+message RemoveGroupMembersCMSReq {
+  string GroupId = 1;
+  repeated string UserIds = 2;
+  string OperationID = 3;
+}
+
+message RemoveGroupMembersCMSResp {
+  repeated string success = 1;
+  repeated string failed = 2;
+}
+
+message AddGroupMembersCMSReq {
+  string GroupId = 1;
+  repeated string UserIds = 2;
+  string OperationID = 3;
+}
+
+message AddGroupMembersCMSResp {
+  repeated string success = 1;
+  repeated string failed = 2;
 }
 
 service group{
@@ -283,6 +322,9 @@ service group{
   rpc OperateGroupStatus(OperateGroupStatusReq) returns(OperateGroupStatusResp);
   rpc OperateUserRole(OperateUserRoleReq) returns(OperateUserRoleResp);
   rpc DeleteGroup(DeleteGroupReq) returns(DeleteGroupResp);
+  rpc GetGroupMembersCMS(GetGroupMembersCMSReq) returns(GetGroupMembersCMSResp);
+  rpc RemoveGroupMembersCMS(RemoveGroupMembersCMSReq) returns(RemoveGroupMembersCMSResp);
+  rpc AddGroupMembersCMS(AddGroupMembersCMSReq) returns(AddGroupMembersCMSResp);
 }
 
 

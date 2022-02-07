@@ -86,12 +86,38 @@ type GetGroupMembersRequest struct {
 type GroupMemberResponse struct {
 	MemberPosition int    `json:"member_position"`
 	MemberNickName string `json:"member_nick_name"`
-	MemberId       int    `json:"member_id"`
+	MemberId       string    `json:"member_id"`
 	JoinTime       string `json:"join_time"`
 }
 
 type GetGroupMembersResponse struct {
-	GroupMemberList []GroupMemberResponse `json:"group_member_list"`
+	GroupMembers []GroupMemberResponse    `json:"group_members"`
 	GroupMemberNums int                   `json:"group_member_nums"`
 	ResponsePagination
+}
+
+type GroupMemberRequest struct {
+	GroupId string `json:"group_id"`
+	Members []string `json:"members"`
+}
+
+type GroupMemberOperateResponse struct {
+	Success []string `json:"success"`
+	Failed []string `json:"failed"`
+}
+
+type AddGroupMembersRequest struct {
+	GroupMemberRequest
+}
+
+type AddGroupMembersResponse struct {
+	GroupMemberOperateResponse
+}
+
+type RemoveGroupMembersRequest struct {
+	GroupMemberRequest
+}
+
+type RemoveGroupMembersResponse struct{
+	GroupMemberOperateResponse
 }
