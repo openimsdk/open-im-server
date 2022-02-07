@@ -1,8 +1,15 @@
 package cms_api_struct
 
+type BroadcastRequest struct {
+	Message string `json:"message"`
+}
+
+type BroadcastResponse struct {
+}
+
 type CommonMessage struct {
-	ChatType       int    `json:"chat_type"`
-	MessageType    int    `json:"message_type"`
+	SessionType    int    `json:"session_type"`
+	ContentType    int    `json:"content_type"`
 	SenderNickName string `json:"sender_nick_name"`
 	SenderId       int    `json:"sender_id"`
 	SearchContent  string `json:"search_content"`
@@ -21,6 +28,6 @@ type SearchMessageByUserResponse struct {
 type SearchMessageByGroupResponse struct {
 	MessageList []struct {
 		CommonMessage
-		Date           string `json:"date"`
+		Date string `json:"date"`
 	} `json:"massage_list"`
 }

@@ -243,9 +243,9 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
 
-func (s *userServer) GetUser(ctx context.Context, req *pbUser.GetUserReq) (*pbUser.GetUserResp, error) {
+func (s *userServer) GetUserById(ctx context.Context, req *pbUser.GetUserByIdReq) (*pbUser.GetUserByIdResp, error) {
 	log.NewInfo(req.OperationID, "GetUser args ", req.String())
-	resp := &pbUser.GetUserResp{User: &pbUser.User{}}
+	resp := &pbUser.GetUserByIdResp{User: &pbUser.User{}}
 	user, err := imdb.GetUserByUserID(req.UserId)
 	if err != nil {
 		return resp, nil
@@ -259,7 +259,7 @@ func (s *userServer) GetUser(ctx context.Context, req *pbUser.GetUserReq) (*pbUs
 		Nickname:     user.Nickname,
 		UserId:       user.UserID,
 		CreateTime:   user.CreateTime.String(),
-		IsBlock: isBlock,
+		IsBlock:      isBlock,
 	}
 	return resp, nil
 }
@@ -271,11 +271,6 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	if err != nil {
 		return resp, nil
 	}
-	usersNum, err := imdb.GetUsersNumCount()
-	if err != nil {
-		return resp, nil
-	}
-	resp.UserNum = int32(usersNum)
 	for _, v := range users {
 		isBlock, err := imdb.UserIsBlock(v.UserID)
 		if err == nil {
@@ -356,11 +351,9 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 	if err != nil {
 		return resp, constant.ErrDB
 	}
-	usersNum, err := imdb.GetBlockUsersNumCount()
 	if err != nil {
 		return resp, constant.ErrDB
 	}
-	resp.BlockUserNum = int32(usersNum)
 	for _, v := range blockUsers {
 		resp.BlockUsers = append(resp.BlockUsers, &pbUser.BlockUser{
 			User: &pbUser.User{
@@ -380,16 +373,33 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 	return resp, nil
 }
 
-func (s *userServer) GetBlockUser(_ context.Context, req *pbUser.GetBlockUserReq) (*pbUser.GetBlockUserResp, error) {
+func (s *userServer) GetBlockUserById(_ context.Context, req *pbUser.GetBlockUserByIdReq) (*pbUser.GetBlockUserByIdResp, error) {
 	log.NewInfo(req.OperationID, "GetBlockUser args ", req.String())
-	resp := &pbUser.GetBlockUserResp{}
+	resp := &pbUser.GetBlockUserByIdResp{}
 	user, err := imdb.GetBlockUserById(req.UserId)
 	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err)
 		return resp, err
 	}
-	resp.BlockUser = &pbUser.BlockUser{}
-	resp.BlockUser.BeginDisableTime = (user.BeginDisableTime).String()
-	resp.BlockUser.EndDisableTime = (user.EndDisableTime).String()
+	resp.BlockUser = &pbUser.BlockUser{
+		User: &pbUser.User{
+			ProfilePhoto: user.User.FaceURL,
+			Nickname:     user.User.Nickname,
+			UserId:       user.User.UserID,
+			IsBlock:      true,
+		},
+		BeginDisableTime: (user.BeginDisableTime).String(),
+		EndDisableTime:   (user.EndDisableTime).String(),
+	}
 	return resp, nil
+}
 
+func (s *userServer) DeleteUser(_ context.Context, req *pbUser.DeleteUserReq) (*pbUser.DeleteUserResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
+	resp := &pbUser.DeleteUserResp{}
+	if row := imdb.DeleteUser(req.UserId); row == 0 {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "delete error", row)
+		return resp, constant.ErrDB
+	}
+	return resp, nil
 }

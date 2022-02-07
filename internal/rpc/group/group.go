@@ -648,16 +648,15 @@ func (s *groupServer) GetGroupById(_ context.Context, req *pbGroup.GetGroupByIdR
 		return resp, err
 	}
 	resp.GroupInfo = &open_im_sdk.GroupInfo{
-		GroupID:        group.GroupID,
-		GroupName:      group.GroupName,
-		FaceURL:        group.FaceUrl,
-		OwnerUserID:    group.CreatorUserID,
+		GroupID:       group.GroupID,
+		GroupName:     group.GroupName,
+		FaceURL:       group.FaceUrl,
+		OwnerUserID:   group.CreatorUserID,
 		MemberCount:   0,
 		Status:        group.Status,
 		CreatorUserID: group.CreatorUserID,
-		GroupType: group.GroupType,
+		GroupType:     group.GroupType,
 	}
-
 	resp.GroupInfo.CreatorUserID = group.CreatorUserID
 	return resp, nil
 }
@@ -721,7 +720,7 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 }
 
 func (s *groupServer) OperateGroupStatus(_ context.Context, req *pbGroup.OperateGroupStatusReq) (*pbGroup.OperateGroupStatusResp, error) {
-	log.NewInfo(req.OperationID,  utils.GetSelfFuncName(), req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp := &pbGroup.OperateGroupStatusResp{}
 	if err := imdb.OperateGroupStatus(req.GroupId, req.Status); err != nil {
 		return resp, err

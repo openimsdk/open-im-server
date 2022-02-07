@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+// import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 option go_package = "./statistics;statistics";
 package statistics;
 
@@ -9,35 +9,33 @@ message StatisticsReq {
 }
 
 message GetActiveUserReq{
-    server_api_params.ResponsePagination Pagination = 1;
+    StatisticsReq StatisticsReq = 1;
     string OperationID = 2;
 }
 
 message UserResp{
     string NickName = 1;
     string UserId = 2;
-    string MessageNum = 3;
+    int32 MessageNum = 3;
 }
 
 message GetActiveUserResp {
     repeated UserResp Users = 1;
-    server_api_params.ResponsePagination Pagination = 2;
 }
 
 message GetActiveGroupReq{
-    server_api_params.ResponsePagination Pagination = 1;
+    StatisticsReq StatisticsReq = 1;
     string OperationID = 2;
 }
 
 message GroupResp {
     string GroupName = 1;
     string GroupId = 2;
-    string MessageNum = 3;
+    int32 MessageNum = 3;
 }
 
 message GetActiveGroupResp {
     repeated GroupResp Groups = 1;
-    server_api_params.ResponsePagination Pagination = 2;
 }
 
 message DateNumList {

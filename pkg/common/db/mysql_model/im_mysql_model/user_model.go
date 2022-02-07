@@ -137,19 +137,6 @@ func GetUsers(showNumber, pageNumber int32) ([]db.Users, error) {
 	return users, err
 }
 
-func GetUsersNumCount() (int, error) {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return 0, err
-	}
-	dbConn.LogMode(true)
-	var count int
-	if err := dbConn.Model(&db.Users{}).Count(&count).Error; err != nil {
-		return 0, err
-	}
-	return count, nil
-}
-
 func AddUser(userId, phoneNumber, name string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
@@ -235,7 +222,7 @@ func GetBlockUserById(userId string) (BlockUserInfo, error) {
 	if err != nil {
 		return blockUserInfo, err
 	}
-	if err = dbConn.Find(&blockUser).Error; err != nil {
+	if err = dbConn.Find(&blockUser).First(&blockUser).Error; err != nil {
 		return blockUserInfo, err
 	}
 	user := db.Users{
@@ -247,6 +234,8 @@ func GetBlockUserById(userId string) (BlockUserInfo, error) {
 	blockUserInfo.User.UserID = user.UserID
 	blockUserInfo.User.FaceURL = user.UserID
 	blockUserInfo.User.Nickname = user.Nickname
+	blockUserInfo.BeginDisableTime = blockUser.BeginDisableTime
+	blockUserInfo.EndDisableTime = blockUser.EndDisableTime
 	return blockUserInfo, nil
 }
 
@@ -258,7 +247,9 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 		return blockUserInfos, err
 	}
 	dbConn.LogMode(true)
-	err = dbConn.Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&blockUsers).Error
+	if err = dbConn.Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&blockUsers).Error; err != nil {
+		return blockUserInfos, err
+	}
 	for _, blockUser := range blockUsers {
 		var user db.Users
 		if err := dbConn.Table("users").Where("user_id=?", blockUser.UserId).First(&user).Error; err == nil {

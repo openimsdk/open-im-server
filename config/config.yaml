@@ -92,6 +92,7 @@ rpcport:
   openImGroupPort: [ 10500 ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
+  openImOpenImStatisticPort: [ 10800 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -110,6 +111,7 @@ rpcregistername:
   openImOnlineMessageRelayName: OnlineMessageRelay
   openImGroupName: Group
   openImAuthName: Auth
+  OpenImStatisticsName: Statistics
 
 log:
   storageLocation: ../logs/

@@ -18,23 +18,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetUser(c *gin.Context) {
+func GetUserById(c *gin.Context) {
 	var (
 		req   cms_api_struct.GetUserRequest
 		resp  cms_api_struct.GetUserResponse
-		reqPb pb.GetUserReq
+		reqPb pb.GetUserByIdReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError("0", "ShouldBindQuery failed ", err.Error())
+		log.NewError("GetUser", utils.GetSelfFuncName(), "ShouldBindQuery failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
 	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
-	respPb, err := client.GetUser(context.Background(), &reqPb)
+	respPb, err := client.GetUserById(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError("s", "GetUserInfo failed ", err.Error())
+		log.NewError("GetUserFailed", utils.GetSelfFuncName(), err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -67,7 +67,6 @@ func GetUsers(c *gin.Context) {
 		return
 	}
 	utils.CopyStructFields(&resp.Users, respPb.User)
-	resp.UserNum = int(respPb.UserNum)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
@@ -101,7 +100,6 @@ func AlterUser(c *gin.Context) {
 		req   cms_api_struct.AlterUserRequest
 		resp  cms_api_struct.AlterUserResponse
 		reqPb pb.AlterUserReq
-		_     *pb.AlterUserResp
 	)
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
@@ -222,32 +220,55 @@ func GetBlockUsers(c *gin.Context) {
 			EndDisableTime:   v.EndDisableTime,
 		})
 	}
-	resp.BlockUserNum = int(respPb.BlockUserNum)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
-func GetBlockUser(c *gin.Context) {
+func GetBlockUserById(c *gin.Context) {
 	var (
 		req   cms_api_struct.GetBlockUserRequest
 		resp  cms_api_struct.GetBlockUserResponse
-		reqPb pb.GetBlockUserReq
+		reqPb pb.GetBlockUserByIdReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	reqPb.UserId = req.UserId
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
-	respPb, err := client.GetBlockUser(context.Background(), &reqPb)
+	respPb, err := client.GetBlockUserById(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		log.NewError("0", "GetBlockUserById rpc failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
 	resp.EndDisableTime = respPb.BlockUser.EndDisableTime
 	resp.BeginDisableTime = respPb.BlockUser.BeginDisableTime
 	utils.CopyStructFields(&resp, respPb.BlockUser.User)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
+}
+
+func DeleteUser(c *gin.Context) {
+	var (
+		req   cms_api_struct.DeleteUserRequest
+		reqPb pb.DeleteUserReq
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		return
+	}
+	reqPb.UserId = req.UserId
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := pb.NewUserClient(etcdConn)
+	_, err := client.DeleteUser(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError("0", "DeleteUser rpc failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		return
+	}
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 }

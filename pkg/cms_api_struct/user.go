@@ -21,8 +21,7 @@ type GetUsersRequest struct {
 }
 
 type GetUsersResponse struct {
-	Users   []*UserResponse `json:"users"`
-	UserNum int             `json:"user_num"`
+	Users []*UserResponse `json:"users"`
 	ResponsePagination
 }
 
@@ -78,8 +77,7 @@ type GetBlockUsersRequest struct {
 }
 
 type GetBlockUsersResponse struct {
-	BlockUsers   []BlockUser `json:"block_users"`
-	BlockUserNum int         `json:"block_user_num"`
+	BlockUsers []BlockUser `json:"block_users"`
 	ResponsePagination
 }
 
@@ -89,4 +87,11 @@ type GetBlockUserRequest struct {
 
 type GetBlockUserResponse struct {
 	BlockUser
+}
+
+type DeleteUserRequest struct {
+	UserId string `json:"user_id" binding:"required"`
+}
+
+type DeleteUserResponse struct {
 }

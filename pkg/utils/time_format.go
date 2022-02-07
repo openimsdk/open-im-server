@@ -78,3 +78,8 @@ func TimeStringFormatTimeUnix(timeFormat string, timeSrc string) int64 {
 	tm, _ := time.Parse(timeFormat, timeSrc)
 	return tm.Unix()
 }
+
+func TimeStringToTime(timeString string) (time.Time, error) {
+	t, err := time.Parse("2006-01-02", timeString)
+	return t, err
+}

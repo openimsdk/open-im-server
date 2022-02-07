@@ -1,0 +1,57 @@
+syntax = "proto3";
+option go_package = "./message;message";
+package message;
+
+message BoradcastMessageReq {
+    string Message = 1;
+    string OperationID = 2;
+}
+
+message BoradcastMessageResp {
+
+}
+
+message MassSendMessageReq {
+    string Message = 1;
+    repeated string UserIds = 2;
+    string OperationID = 3;
+}
+
+message MassSendMessageResp {
+    
+}
+
+message GetChatLogsReq {
+    string content = 1;
+    string UserId = 2;
+    string Date = 3;
+    int32 SessionType = 4;
+    int32 ContentType = 5;
+    string OperationID = 6;
+}
+
+message GetChatLogsResp {
+    int32 SessionType = 1;
+    int32 ContentType = 2;
+    string SenderNickName = 3;
+    string ReciverNickName = 4;
+    string SearchContent = 5;
+    string Content = 6;
+    string Date = 7;
+}
+
+message WithdrawMessageReq  {
+    string ServerMsgId = 1;
+    string OperationID = 2;
+}
+
+message WithdrawMessageResp {
+    
+}
+
+service message {
+    rpc BoradcastMessage(BoradcastMessageReq) returns(BoradcastMessageResp);
+    rpc MassSendMessage(MassSendMessageReq) returns(MassSendMessageResp);
+    rpc GetChatLogs(GetChatLogsReq) returns(GetChatLogsResp);
+    rpc WithdrawMessage(WithdrawMessageReq) returns(WithdrawMessageResp);
+}

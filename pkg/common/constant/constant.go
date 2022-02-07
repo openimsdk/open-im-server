@@ -109,11 +109,16 @@ const (
 	IsSenderSync         = "senderSync"
 
 	//GroupStatus
-	GroupOk = 0
-	GroupBanChat = 1
-	GroupDisband = 2
-	GroupBaned = 3
+	GroupOk             = 0
+	GroupBanChat        = 1
+	GroupDisband        = 2
+	GroupBaned          = 3
 	GroupBanPrivateChat = 4
+
+	//timeInterval
+	Day   = 1
+	Week  = 7
+	Month = 31
 )
 
 var ContentType2PushContent = map[int64]string{

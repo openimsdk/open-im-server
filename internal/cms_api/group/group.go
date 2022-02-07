@@ -20,8 +20,8 @@ import (
 
 func GetGroupById(c *gin.Context) {
 	var (
-		req cms_api_struct.GetGroupByIdRequest
-		resp cms_api_struct.GetGroupByIdResponse
+		req   cms_api_struct.GetGroupByIdRequest
+		resp  cms_api_struct.GetGroupByIdResponse
 		reqPb pbGroup.GetGroupByIdReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -33,7 +33,7 @@ func GetGroupById(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.GetGroupById(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(utils.GetSelfFuncName(), "GetUserInfo failed ", err.Error())
+		log.NewError(utils.GetSelfFuncName(), "GetGroupById	 failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -43,7 +43,7 @@ func GetGroupById(c *gin.Context) {
 	resp.CreateTime = (utils.UnixSecondToTime(int64(respPb.GroupInfo.CreateTime))).String()
 	resp.ProfilePhoto = respPb.GroupInfo.FaceURL
 	resp.GroupMasterName = respPb.GroupInfo.OwnerUserID
-	openIMHttp.RespHttp200(c, constant.OK, nil)
+	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
 func GetGroups(c *gin.Context) {
@@ -141,7 +141,7 @@ func CreateGroup(c *gin.Context) {
 	reqPb.GroupInfo.CreatorUserID = req.GroupMasterId
 	for _, v := range req.GroupMembers {
 		reqPb.InitMemberList = append(reqPb.InitMemberList, &pbGroup.GroupAddMemberInfo{
-			UserID:  v,
+			UserID:    v,
 			RoleLevel: 1,
 		})
 	}
@@ -248,7 +248,6 @@ func OpenPrivateChat(c *gin.Context) {
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
-
 
 func GetGroupsMember(c *gin.Context) {
 	var (

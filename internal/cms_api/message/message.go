@@ -1,25 +1,21 @@
 package message
 
 import (
+	openIMHttp "Open_IM/pkg/common/http"
+
+	"Open_IM/pkg/common/constant"
+
 	"github.com/gin-gonic/gin"
 )
 
-func Broadcast(c *gin.Context) {
-
-}
-
-func SearchMessageByUser(c *gin.Context) {
-
-}
-
-func SearchMessageByGroup(c *gin.Context) {
-
+func BroadcastMessage(c *gin.Context) {
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
 func MassSendMassage(c *gin.Context) {
-
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
-func Withdraw(c *gin.Context) {
-
+func WithdrawMessage(c *gin.Context) {
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 }

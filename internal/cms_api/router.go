@@ -21,15 +21,14 @@ func NewGinRouter() *gin.Engine {
 	adminRouterGroup := router.Group("/admin")
 	{
 		adminRouterGroup.POST("/register", admin.AdminRegister)
-		adminRouterGroup.POST("/login", admin.AdminLogin)
 		adminRouterGroup.GET("/get_user_settings", admin.GetAdminSettings)
 		adminRouterGroup.POST("/alter_user_settings", admin.AlterAdminSettings)
 	}
 	statisticsRouterGroup := router.Group("/statistics")
 	{
 		statisticsRouterGroup.GET("/get_messages_statistics", statistics.GetMessagesStatistics)
-		statisticsRouterGroup.GET("/get_users_statistics", statistics.GetUsersStatistics)
-		statisticsRouterGroup.GET("/get_groups_statistics", statistics.GetGroupsStatistics)
+		statisticsRouterGroup.GET("/get_user_statistics", statistics.GetUserStatistics)
+		statisticsRouterGroup.GET("/get_group_statistics", statistics.GetGroupStatistics)
 		statisticsRouterGroup.GET("/get_active_user", statistics.GetActiveUser)
 		statisticsRouterGroup.GET("/get_active_group", statistics.GetActiveGroup)
 	}
@@ -49,11 +48,9 @@ func NewGinRouter() *gin.Engine {
 	}
 	messageRouterGroup := router.Group("/message")
 	{
-		messageRouterGroup.POST("/broadcast", message.Broadcast)
-		messageRouterGroup.GET("/search_message_by_user", message.SearchMessageByUser)
-		messageRouterGroup.POST("/message_mass_send", message.MassSendMassage)
-		messageRouterGroup.GET("/search_message_by_group", message.SearchMessageByGroup)
-		messageRouterGroup.POST("/withdraw_message", message.Withdraw)
+		messageRouterGroup.POST("/broadcast_message", message.BroadcastMessage)
+		messageRouterGroup.POST("/mass_send_message", message.MassSendMassage)
+		messageRouterGroup.POST("/withdraw_message", message.WithdrawMessage)
 	}
 	groupRouterGroup := router.Group("/group")
 	{
@@ -75,14 +72,15 @@ func NewGinRouter() *gin.Engine {
 	userRouterGroup := router.Group("/user")
 	{
 		userRouterGroup.POST("/resign", user.ResignUser)
-		userRouterGroup.GET("/get_user", user.GetUser)
+		userRouterGroup.GET("/get_user_by_id", user.GetUserById)
 		userRouterGroup.POST("/alter_user", user.AlterUser)
 		userRouterGroup.GET("/get_users", user.GetUsers)
 		userRouterGroup.POST("/add_user", user.AddUser)
 		userRouterGroup.POST("/unblock_user", user.UnblockUser)
 		userRouterGroup.POST("/block_user", user.BlockUser)
 		userRouterGroup.GET("/get_block_users", user.GetBlockUsers)
-		userRouterGroup.GET("/get_block_user", user.GetBlockUser)
+		userRouterGroup.GET("/get_block_user_by_id", user.GetBlockUserById)
+		userRouterGroup.POST("/delete_user", user.DeleteUser)
 	}
 	return baseRouter
 }

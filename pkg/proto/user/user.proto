@@ -116,7 +116,7 @@ message ResignUserResp{
   CommonResp  commonResp = 1;
 }
 
-message GetUserReq{
+message GetUserByIdReq{
   string UserId = 1;
   string OperationID = 2;
 }
@@ -129,7 +129,7 @@ message User{
   bool IsBlock = 5;
 }
 
-message GetUserResp{
+message GetUserByIdResp{
   CommonResp  CommonResp = 1;
   User user = 2;
 }
@@ -149,14 +149,14 @@ message AlterUserResp{
 message GetUsersReq {
   string OperationID = 1;
   server_api_params.RequestPagination Pagination = 2;
+  string UserName = 3;
 }
 
 message GetUsersResp{
   CommonResp  CommonResp = 1;
-  string OperationID = 2;
-  repeated User user = 3;
-  int32 UserNum = 4;
-  server_api_params.ResponsePagination Pagination = 5;
+  repeated User user = 2;
+  server_api_params.ResponsePagination Pagination = 3;
+  string OperationID = 4;
 }
 
 message AddUserReq{
@@ -206,16 +206,24 @@ message GetBlockUsersResp{
   CommonResp  CommonResp = 1;
   repeated BlockUser BlockUsers = 2;
   server_api_params.ResponsePagination Pagination = 3;
-  int32 BlockUserNum = 4;
 }
 
-message GetBlockUserReq {
+message GetBlockUserByIdReq {
     string User_id = 1;
     string OperationID = 2;
 }
 
-message GetBlockUserResp {
+message GetBlockUserByIdResp {
     BlockUser BlockUser = 2;
+}
+
+message DeleteUserReq {
+    string User_id = 1;
+    string OperationID = 2;
+}
+
+message DeleteUserResp {
+
 }
 
 service user {
@@ -228,7 +236,7 @@ service user {
   rpc GetAllConversationMsgOpt(GetAllConversationMsgOptReq)returns(GetAllConversationMsgOptResp);
   rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
 
-  rpc GetUser(GetUserReq) returns (GetUserResp);
+  rpc GetUserById(GetUserByIdReq) returns (GetUserByIdResp);  
   rpc ResignUser(ResignUserReq) returns (ResignUserResp);
   rpc AlterUser(AlterUserReq) returns (AlterUserResp);
   rpc GetUsers(GetUsersReq) returns (GetUsersResp);
@@ -236,5 +244,6 @@ service user {
   rpc BlockUser(BlockUserReq) returns (BlockUserResp);
   rpc UnBlockUser(UnBlockUserReq) returns (UnBlockUserResp);
   rpc GetBlockUsers(GetBlockUsersReq) returns (GetBlockUsersResp);
-  rpc GetBlockUser(GetBlockUserReq) returns (GetBlockUserResp);
+  rpc GetBlockUserById(GetBlockUserByIdReq) returns (GetBlockUserByIdResp);
+  rpc DeleteUser(DeleteUserReq) returns (DeleteUserResp);
 }
