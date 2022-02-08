@@ -96,7 +96,7 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 
 	from, err := imdb.GetUserByUserID(sendID)
 	if err != nil {
-		log.Error(operationID, "GetUserByUserID failed ", err.Error())
+		log.Error(operationID, "GetUserByUserID failed ", err.Error(), sendID)
 	}
 	nickname := ""
 	if from != nil {
@@ -105,7 +105,7 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 
 	to, err := imdb.GetUserByUserID(recvUserID)
 	if err != nil {
-		log.Error(operationID, "GetUserByUserID failed ", err.Error())
+		log.Error(operationID, "GetUserByUserID failed ", err.Error(), recvUserID)
 	}
 	toNickname := ""
 	if to != nil {
