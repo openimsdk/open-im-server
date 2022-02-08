@@ -244,7 +244,8 @@ func Notification(n *NotificationMsg) {
 	var msg sdk_ws.MsgData
 	var offlineInfo sdk_ws.OfflinePushInfo
 	var title, desc, ex string
-	var pushSwitch bool
+	var pushSwitch, unReadCount bool
+	var reliabilityLevel int
 	req.OperationID = n.OperationID
 	msg.SendID = n.SendID
 	msg.RecvID = n.RecvID
@@ -254,36 +255,111 @@ func Notification(n *NotificationMsg) {
 	msg.SessionType = n.SessionType
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(n.SendID)
+	msg.Options = make(map[string]bool, 7)
 	switch n.SessionType {
 	case constant.GroupChatType:
 		msg.RecvID = ""
 		msg.GroupID = n.RecvID
 	}
-	if true {
-		msg.Options = make(map[string]bool, 10)
-		//utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
-		//utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
-		//utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
-	}
 	offlineInfo.IOSBadgeCount = config.Config.IOSPush.BadgeCount
 	offlineInfo.IOSPushSound = config.Config.IOSPush.PushSound
-	//switch msg.ContentType {
-	//case constant.GroupCreatedNotification:
-	//	pushSwitch = config.Config.Notification.GroupCreated.OfflinePush.PushSwitch
-	//	title = config.Config.Notification.GroupCreated.OfflinePush.Title
-	//	desc = config.Config.Notification.GroupCreated.OfflinePush.Desc
-	//	ex = config.Config.Notification.GroupCreated.OfflinePush.Ext
-	//case constant.GroupInfoChangedNotification:
-	//	pushSwitch = config.Config.Notification.GroupInfoChanged.OfflinePush.PushSwitch
-	//	title = config.Config.Notification.GroupInfoChanged.OfflinePush.Title
-	//	desc = config.Config.Notification.GroupInfoChanged.OfflinePush.Desc
-	//	ex = config.Config.Notification.GroupInfoChanged.OfflinePush.Ext
-	//case constant.JoinApplicationNotification:
-	//	pushSwitch = config.Config.Notification.ApplyJoinGroup.OfflinePush.PushSwitch
-	//	title = config.Config.Notification.ApplyJoinGroup.OfflinePush.Title
-	//	desc = config.Config.Notification.ApplyJoinGroup.OfflinePush.Desc
-	//	ex = config.Config.Notification.ApplyJoinGroup.OfflinePush.Ext
-	//}
+	switch msg.ContentType {
+	case constant.GroupCreatedNotification:
+		pushSwitch = config.Config.Notification.GroupCreated.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupCreated.OfflinePush.Title
+		desc = config.Config.Notification.GroupCreated.OfflinePush.Desc
+		ex = config.Config.Notification.GroupCreated.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupCreated.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupCreated.Conversation.UnreadCount
+	case constant.GroupInfoSetNotification:
+		pushSwitch = config.Config.Notification.GroupInfoSet.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupInfoSet.OfflinePush.Title
+		desc = config.Config.Notification.GroupInfoSet.OfflinePush.Desc
+		ex = config.Config.Notification.GroupInfoSet.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupInfoSet.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupInfoSet.Conversation.UnreadCount
+	case constant.JoinGroupApplicationNotification:
+		pushSwitch = config.Config.Notification.JoinGroupApplication.OfflinePush.PushSwitch
+		title = config.Config.Notification.JoinGroupApplication.OfflinePush.Title
+		desc = config.Config.Notification.JoinGroupApplication.OfflinePush.Desc
+		ex = config.Config.Notification.JoinGroupApplication.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.JoinGroupApplication.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.JoinGroupApplication.Conversation.UnreadCount
+	case constant.MemberQuitNotification:
+		pushSwitch = config.Config.Notification.MemberQuit.OfflinePush.PushSwitch
+		title = config.Config.Notification.MemberQuit.OfflinePush.Title
+		desc = config.Config.Notification.MemberQuit.OfflinePush.Desc
+		ex = config.Config.Notification.MemberQuit.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.MemberQuit.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.MemberQuit.Conversation.UnreadCount
+	case constant.GroupApplicationAcceptedNotification:
+		pushSwitch = config.Config.Notification.GroupApplicationAccepted.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupApplicationAccepted.OfflinePush.Title
+		desc = config.Config.Notification.GroupApplicationAccepted.OfflinePush.Desc
+		ex = config.Config.Notification.GroupApplicationAccepted.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupApplicationAccepted.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupApplicationAccepted.Conversation.UnreadCount
+	case constant.GroupApplicationRejectedNotification:
+		pushSwitch = config.Config.Notification.GroupApplicationRejected.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupApplicationRejected.OfflinePush.Title
+		desc = config.Config.Notification.GroupApplicationRejected.OfflinePush.Desc
+		ex = config.Config.Notification.GroupApplicationRejected.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupApplicationRejected.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupApplicationRejected.Conversation.UnreadCount
+	case constant.GroupOwnerTransferredNotification:
+		pushSwitch = config.Config.Notification.GroupOwnerTransferred.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupOwnerTransferred.OfflinePush.Title
+		desc = config.Config.Notification.GroupOwnerTransferred.OfflinePush.Desc
+		ex = config.Config.Notification.GroupOwnerTransferred.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupOwnerTransferred.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupOwnerTransferred.Conversation.UnreadCount
+	case constant.MemberKickedNotification:
+		pushSwitch = config.Config.Notification.MemberKicked.OfflinePush.PushSwitch
+		title = config.Config.Notification.MemberKicked.OfflinePush.Title
+		desc = config.Config.Notification.MemberKicked.OfflinePush.Desc
+		ex = config.Config.Notification.MemberKicked.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.MemberKicked.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.MemberKicked.Conversation.UnreadCount
+	case constant.MemberInvitedNotification:
+		pushSwitch = config.Config.Notification.MemberInvited.OfflinePush.PushSwitch
+		title = config.Config.Notification.MemberInvited.OfflinePush.Title
+		desc = config.Config.Notification.MemberInvited.OfflinePush.Desc
+		ex = config.Config.Notification.MemberInvited.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.MemberInvited.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.MemberInvited.Conversation.UnreadCount
+	case constant.MemberEnterNotification:
+		pushSwitch = config.Config.Notification.MemberEnter.OfflinePush.PushSwitch
+		title = config.Config.Notification.MemberEnter.OfflinePush.Title
+		desc = config.Config.Notification.MemberEnter.OfflinePush.Desc
+		ex = config.Config.Notification.MemberEnter.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.MemberEnter.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.MemberEnter.Conversation.UnreadCount
+	case constant.UserInfoUpdatedNotification:
+		pushSwitch = config.Config.Notification.UserInfoUpdated.OfflinePush.PushSwitch
+		title = config.Config.Notification.UserInfoUpdated.OfflinePush.Title
+		desc = config.Config.Notification.UserInfoUpdated.OfflinePush.Desc
+		ex = config.Config.Notification.UserInfoUpdated.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.UserInfoUpdated.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.UserInfoUpdated.Conversation.UnreadCount
+	case constant.FriendApplicationNotification:
+		pushSwitch = config.Config.Notification.FriendApplication.OfflinePush.PushSwitch
+		title = config.Config.Notification.FriendApplication.OfflinePush.Title
+		desc = config.Config.Notification.FriendApplication.OfflinePush.Desc
+		ex = config.Config.Notification.FriendApplication.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.FriendApplication.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.FriendApplication.Conversation.UnreadCount
+
+	}
+	switch reliabilityLevel {
+	case constant.UnreliableNotification:
+		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+	case constant.ReliableNotificationNoMsg:
+		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+	case constant.ReliableNotificationMsg:
+	}
+	utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, unReadCount)
 	utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, pushSwitch)
 	offlineInfo.Title = title
 	offlineInfo.Desc = desc
