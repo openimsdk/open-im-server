@@ -161,15 +161,15 @@ messagecallback:
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
-  c2c:
-    callbackBeforeSendMsg:
-      switch: false
-      timeoutStrategy: 1 #1:send
-    callbackAfterSendMsg:
-      switch: false
-  state:
-    stateChange:
-      switch: false
+#  c2c:
+#    callbackBeforeSendMsg:
+#      switch: false
+#      timeoutStrategy: 1 #1:send
+#    callbackAfterSendMsg:
+#      switch: false
+#  state:
+#    stateChange:
+#      switch: false
 
 iOSPush:
   pushSound: "xxx"
