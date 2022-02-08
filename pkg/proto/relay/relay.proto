@@ -6,6 +6,7 @@ package relay;
 message OnlinePushMsgReq {
   string OperationID = 1;
   server_api_params.MsgData msgData = 2;
+  string pushToUserID = 3;
 }
 message OnlinePushMsgResp{
 repeated SingleMsgToUser resp = 1;
