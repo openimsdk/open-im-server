@@ -61,41 +61,40 @@ func initMysqlDB() {
 		&Black{}, &ChatLog{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
 
-	//
-	//if !db.HasTable(&Friend{}) {
-	//	log.NewInfo("CreateTable Friend")
-	//	db.CreateTable(&Friend{})
-	//}
-	//
-	//if !db.HasTable(&FriendRequest{}) {
-	//	log.NewInfo("CreateTable FriendRequest")
-	//	db.CreateTable(&FriendRequest{})
-	//}
-	//
-	//if !db.HasTable(&Group{}) {
-	//	log.NewInfo("CreateTable Group")
-	//	db.CreateTable(&Group{})
-	//}
-	//
-	//if !db.HasTable(&GroupMember{}) {
-	//	log.NewInfo("CreateTable GroupMember")
-	//	db.CreateTable(&GroupMember{})
-	//}
-	//
-	//if !db.HasTable(&GroupRequest{}) {
-	//	log.NewInfo("CreateTable GroupRequest")
-	//	db.CreateTable(&GroupRequest{})
-	//}
-	//
-	//if !db.HasTable(&User{}) {
-	//	log.NewInfo("CreateTable User")
-	//	db.CreateTable(&User{})
-	//}
-	//
-	//if !db.HasTable(&Black{}) {
-	//	log.NewInfo("CreateTable Black")
-	//	db.CreateTable(&Black{})
-	//}
+	if !db.HasTable(&Friend{}) {
+		log.NewInfo("CreateTable Friend")
+		db.CreateTable(&Friend{})
+	}
+
+	if !db.HasTable(&FriendRequest{}) {
+		log.NewInfo("CreateTable FriendRequest")
+		db.CreateTable(&FriendRequest{})
+	}
+
+	if !db.HasTable(&Group{}) {
+		log.NewInfo("CreateTable Group")
+		db.CreateTable(&Group{})
+	}
+
+	if !db.HasTable(&GroupMember{}) {
+		log.NewInfo("CreateTable GroupMember")
+		db.CreateTable(&GroupMember{})
+	}
+
+	if !db.HasTable(&GroupRequest{}) {
+		log.NewInfo("CreateTable GroupRequest")
+		db.CreateTable(&GroupRequest{})
+	}
+
+	if !db.HasTable(&User{}) {
+		log.NewInfo("CreateTable User")
+		db.CreateTable(&User{})
+	}
+
+	if !db.HasTable(&Black{}) {
+		log.NewInfo("CreateTable Black")
+		db.CreateTable(&Black{})
+	}
 
 	return
 
