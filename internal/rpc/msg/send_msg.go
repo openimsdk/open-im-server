@@ -348,6 +348,55 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.FriendApplication.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.FriendApplication.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.FriendApplication.Conversation.UnreadCount
+	case constant.FriendApplicationApprovedNotification:
+		pushSwitch = config.Config.Notification.FriendApplicationApproved.OfflinePush.PushSwitch
+		title = config.Config.Notification.FriendApplicationApproved.OfflinePush.Title
+		desc = config.Config.Notification.FriendApplicationApproved.OfflinePush.Desc
+		ex = config.Config.Notification.FriendApplicationApproved.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.FriendApplicationApproved.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.FriendApplicationApproved.Conversation.UnreadCount
+	case constant.FriendApplicationRejectedNotification:
+		pushSwitch = config.Config.Notification.FriendApplicationRejected.OfflinePush.PushSwitch
+		title = config.Config.Notification.FriendApplicationRejected.OfflinePush.Title
+		desc = config.Config.Notification.FriendApplicationRejected.OfflinePush.Desc
+		ex = config.Config.Notification.FriendApplicationRejected.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.FriendApplicationRejected.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.FriendApplicationRejected.Conversation.UnreadCount
+	case constant.FriendAddedNotification:
+		pushSwitch = config.Config.Notification.FriendAdded.OfflinePush.PushSwitch
+		title = config.Config.Notification.FriendAdded.OfflinePush.Title
+		desc = config.Config.Notification.FriendAdded.OfflinePush.Desc
+		ex = config.Config.Notification.FriendAdded.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.FriendAdded.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.FriendAdded.Conversation.UnreadCount
+	case constant.FriendDeletedNotification:
+		pushSwitch = config.Config.Notification.FriendDeleted.OfflinePush.PushSwitch
+		title = config.Config.Notification.FriendDeleted.OfflinePush.Title
+		desc = config.Config.Notification.FriendDeleted.OfflinePush.Desc
+		ex = config.Config.Notification.FriendDeleted.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.FriendDeleted.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.FriendDeleted.Conversation.UnreadCount
+	case constant.FriendRemarkSetNotification:
+		pushSwitch = config.Config.Notification.FriendRemarkSet.OfflinePush.PushSwitch
+		title = config.Config.Notification.FriendRemarkSet.OfflinePush.Title
+		desc = config.Config.Notification.FriendRemarkSet.OfflinePush.Desc
+		ex = config.Config.Notification.FriendRemarkSet.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.FriendRemarkSet.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.FriendRemarkSet.Conversation.UnreadCount
+	case constant.BlackAddedNotification:
+		pushSwitch = config.Config.Notification.BlackAdded.OfflinePush.PushSwitch
+		title = config.Config.Notification.BlackAdded.OfflinePush.Title
+		desc = config.Config.Notification.BlackAdded.OfflinePush.Desc
+		ex = config.Config.Notification.BlackAdded.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.BlackAdded.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.BlackAdded.Conversation.UnreadCount
+	case constant.BlackDeletedNotification:
+		pushSwitch = config.Config.Notification.BlackDeleted.OfflinePush.PushSwitch
+		title = config.Config.Notification.BlackDeleted.OfflinePush.Title
+		desc = config.Config.Notification.BlackDeleted.OfflinePush.Desc
+		ex = config.Config.Notification.BlackDeleted.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.BlackDeleted.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.BlackDeleted.Conversation.UnreadCount
 
 	}
 	switch reliabilityLevel {
@@ -358,6 +407,7 @@ func Notification(n *NotificationMsg) {
 	case constant.ReliableNotificationNoMsg:
 		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
 	case constant.ReliableNotificationMsg:
+
 	}
 	utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, unReadCount)
 	utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, pushSwitch)
