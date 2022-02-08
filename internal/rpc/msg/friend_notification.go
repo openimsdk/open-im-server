@@ -54,7 +54,7 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 	case constant.FriendRemarkSetNotification:
 		tips.DefaultTips = fromUserNickname + cn.FriendRemarkSet.DefaultTips.Tips
 	case constant.BlackAddedNotification:
-		tips.DefaultTips = cn.BlackAdded.DefaultTips.Tips + toUserNickname
+		tips.DefaultTips = cn.BlackAdded.DefaultTips.Tips
 	case constant.BlackDeletedNotification:
 		tips.DefaultTips = cn.BlackDeleted.DefaultTips.Tips + toUserNickname
 	default:
