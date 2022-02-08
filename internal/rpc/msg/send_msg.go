@@ -240,7 +240,6 @@ type NotificationMsg struct {
 }
 
 func Notification(n *NotificationMsg) {
-	return
 	var req pbChat.SendMsgReq
 	var msg sdk_ws.MsgData
 	var offlineInfo sdk_ws.OfflinePushInfo
@@ -263,8 +262,8 @@ func Notification(n *NotificationMsg) {
 	if true {
 		msg.Options = make(map[string]bool, 10)
 		//utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
-		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
+		//utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
+		//utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
 	}
 	offlineInfo.IOSBadgeCount = config.Config.IOSPush.BadgeCount
 	offlineInfo.IOSPushSound = config.Config.IOSPush.PushSound
