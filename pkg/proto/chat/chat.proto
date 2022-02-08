@@ -18,6 +18,7 @@ message MsgDataToDB {
 message PushMsgDataToMQ{
   string OperationID = 1;
   server_api_params.MsgData msgData = 2;
+  string pushToUserID = 3;
 }
 
 //message PullMessageReq {
