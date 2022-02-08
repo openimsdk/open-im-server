@@ -176,7 +176,6 @@ iOSPush:
   badgeCount: true
 
 notification:
-
   groupCreated:
     conversation:
       reliabilityLevel: 3
