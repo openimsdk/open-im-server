@@ -94,8 +94,8 @@ func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgRe
 	}
 	//Single chat sender synchronization message
 	if in.MsgData.GetSessionType() == constant.SingleChatType {
-		for k, v := range ws.getSingleUserAllConn(recvID) {
-			_ = sendMsgToUser(v, replyBytes.Bytes(), in, k, recvID)
+		for k, v := range ws.getSingleUserAllConn(in.MsgData.SendID) {
+			_ = sendMsgToUser(v, replyBytes.Bytes(), in, k, in.MsgData.SendID)
 		}
 	}
 	if !tag {

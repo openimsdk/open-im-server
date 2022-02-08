@@ -121,6 +121,9 @@ func GetSwitchFromOptions(Options map[string]bool, key string) (result bool) {
 	}
 	return false
 }
-func SetSwitchFromOptions(Options map[string]bool, key string, value bool) {
-	Options[key] = value
+func SetSwitchFromOptions(options map[string]bool, key string, value bool) {
+	if options == nil {
+		options = make(map[string]bool, 5)
+	}
+	options[key] = value
 }

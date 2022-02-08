@@ -24,7 +24,7 @@ type OpenIMContent struct {
 	SessionType int    `json:"sessionType"`
 	From        string `json:"from"`
 	To          string `json:"to"`
-	Seq         int64  `json:"seq"`
+	Seq         uint32 `json:"seq"`
 }
 type AtContent struct {
 	Text       string   `json:"text"`

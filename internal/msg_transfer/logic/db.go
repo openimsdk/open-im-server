@@ -14,7 +14,7 @@ func saveUserChat(uid string, msg *pbMsg.MsgDataToMQ) error {
 		log.NewError(msg.OperationID, "data insert to redis err", err.Error(), msg.String())
 		return err
 	}
-	msg.MsgData.Seq = seq
+	msg.MsgData.Seq = uint32(seq)
 	pbSaveData := pbMsg.MsgDataToDB{}
 	pbSaveData.MsgData = msg.MsgData
 	log.NewInfo(msg.OperationID, "IncrUserSeq cost time", utils.GetCurrentTimestampByMill()-time)

@@ -218,7 +218,7 @@ func MemberQuitNotification(req *pbGroup.QuitGroupReq) {
 	}
 
 	groupNotification(constant.MemberQuitNotification, &MemberQuitTips, req.OpUserID, req.GroupID, "", req.OperationID)
-	groupNotification(constant.MemberQuitNotification, &MemberQuitTips, req.OpUserID, "", req.OpUserID, req.OperationID)
+	//	groupNotification(constant.MemberQuitNotification, &MemberQuitTips, req.OpUserID, "", req.OpUserID, req.OperationID)
 
 }
 

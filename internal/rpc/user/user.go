@@ -80,6 +80,7 @@ func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq
 				continue
 			}
 			utils.CopyStructFields(&userInfo, user)
+			userInfo.Birth = uint32(user.Birth.Unix())
 			userInfoList = append(userInfoList, &userInfo)
 		}
 	} else {
