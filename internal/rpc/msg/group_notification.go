@@ -94,18 +94,44 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		return
 	}
 
+	from, err := imdb.GetUserByUserID(sendID)
+	if err != nil {
+		log.Error(operationID, "GetUserByUserID failed ", err.Error())
+	}
+	nickname := ""
+	if from != nil {
+		nickname = from.Nickname
+	}
+
+	to, err := imdb.GetUserByUserID(recvUserID)
+	if err != nil {
+		log.Error(operationID, "GetUserByUserID failed ", err.Error())
+	}
+	toNickname := ""
+	if from != nil {
+		toNickname = to.Nickname
+	}
+
 	cn := config.Config.Notification
 	switch contentType {
 	case constant.GroupCreatedNotification:
-		tips.DefaultTips = cn.GroupCreated.DefaultTips.Tips
+		tips.DefaultTips = nickname + " " + cn.GroupCreated.DefaultTips.Tips
 	case constant.GroupInfoSetNotification:
+		tips.DefaultTips = nickname + " " + cn.GroupInfoSet.DefaultTips.Tips
 	case constant.JoinGroupApplicationNotification:
+		tips.DefaultTips = nickname + " " + cn.JoinGroupApplication.DefaultTips.Tips
 	case constant.MemberQuitNotification:
-	case constant.GroupApplicationAcceptedNotification:
-	case constant.GroupApplicationRejectedNotification:
-	case constant.GroupOwnerTransferredNotification:
-	case constant.MemberKickedNotification:
-	case constant.MemberInvitedNotification:
+		tips.DefaultTips = nickname + " " + cn.MemberQuit.DefaultTips.Tips
+	case constant.GroupApplicationAcceptedNotification: //
+		tips.DefaultTips = toNickname + " " + cn.GroupApplicationAccepted.DefaultTips.Tips
+	case constant.GroupApplicationRejectedNotification: //
+		tips.DefaultTips = toNickname + " " + cn.GroupApplicationRejected.DefaultTips.Tips
+	case constant.GroupOwnerTransferredNotification: //
+		tips.DefaultTips = toNickname + " " + cn.GroupOwnerTransferred.DefaultTips.Tips
+	case constant.MemberKickedNotification: //
+		tips.DefaultTips = toNickname + " " + cn.MemberKicked.DefaultTips.Tips
+	case constant.MemberInvitedNotification: //
+		tips.DefaultTips = toNickname + " " + cn.MemberInvited.DefaultTips.Tips
 	default:
 		log.Error(operationID, "contentType failed ", contentType)
 		return
