@@ -138,4 +138,10 @@ const (
 	Female = 2
 )
 
+const (
+	UnreliableNotification    = 1
+	ReliableNotificationNoMsg = 2
+	ReliableNotificationMsg   = 3
+)
+
 const FriendAcceptTip = "You have successfully become friends, so start chatting"
