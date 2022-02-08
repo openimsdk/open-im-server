@@ -60,11 +60,14 @@ func NewGinRouter() *gin.Engine {
 		groupRouterGroup.GET("/get_group_members", group.GetGroupMembers)
 		groupRouterGroup.POST("/create_group", group.CreateGroup)
 		groupRouterGroup.POST("/add_members", group.AddGroupMembers)
-		groupRouterGroup.POST("/remove_member", group.RemoveGroupMembers)
+		groupRouterGroup.POST("/remove_members", group.RemoveGroupMembers)
 		groupRouterGroup.POST("/ban_group_private_chat", group.BanPrivateChat)
 		groupRouterGroup.POST("/open_group_private_chat", group.OpenPrivateChat)
 		groupRouterGroup.POST("/ban_group_chat", group.BanGroupChat)
 		groupRouterGroup.POST("/open_group_chat", group.OpenGroupChat)
+		groupRouterGroup.POST("/delete_group", group.DeleteGroup)
+		groupRouterGroup.POST("/get_members_in_group", group.GetMemberInGroup)
+		groupRouterGroup.POST("/set_group_master", group.SetGroupMaster)
 	}
 	userRouterGroup := router.Group("/user")
 	{
@@ -78,6 +81,13 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.GET("/get_block_users", user.GetBlockUsers)
 		userRouterGroup.GET("/get_block_user", user.GetBlockUserById)
 		userRouterGroup.POST("/delete_user", user.DeleteUser)
+		userRouterGroup.GET("/get_users_by_name", user.GetUsersByName)
+	}
+	friendRouterGroup := router.Group("/friend")
+	{
+		friendRouterGroup.POST("/get_friends_by_id")
+		friendRouterGroup.POST("/set_friend")
+		friendRouterGroup.POST("/remove_friend")
 	}
 	return baseRouter
 }

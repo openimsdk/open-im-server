@@ -23,6 +23,18 @@ type GetUsersRequest struct {
 type GetUsersResponse struct {
 	Users []*UserResponse `json:"users"`
 	ResponsePagination
+	UserNums int32 `json:"user_nums"`
+}
+
+type GetUsersByNameRequest struct {
+	UserName string `form:"user_name" binding:"required"`
+	RequestPagination
+}
+
+type GetUsersByNameResponse struct {
+	Users []*UserResponse `json:"users"`
+	ResponsePagination
+	UserNums int32 `json:"user_nums"`
 }
 
 type ResignUserRequest struct {
@@ -79,6 +91,7 @@ type GetBlockUsersRequest struct {
 type GetBlockUsersResponse struct {
 	BlockUsers []BlockUser `json:"block_users"`
 	ResponsePagination
+	UserNums int32 `json:"user_nums"`
 }
 
 type GetBlockUserRequest struct {

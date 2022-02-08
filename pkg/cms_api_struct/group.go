@@ -41,45 +41,46 @@ type GetGroupsResponse struct {
 }
 
 type CreateGroupRequest struct {
-	GroupName     string   `json:"group_name"`
-	GroupMasterId string   `json:"group_master_id"`
-	GroupMembers  []string `json:"group_members"`
+	GroupName     string   `json:"group_name" binding:"required"`
+	GroupMasterId string   `json:"group_master_id" binding:"required"`
+	GroupMembers  []string `json:"group_members" binding:"required"`
 }
 
 type CreateGroupResponse struct {
 }
 
 type SetGroupMasterRequest struct {
-	GroupId string `json:"group_id"`
-	UserId  string `json:"user_id"`
+	GroupId string `json:"group_id" binding:"required"`
+	UserId  string `json:"user_id" binding:"required"`
 }
 
 type SetGroupMasterResponse struct {
 }
 
 type BanGroupChatRequest struct {
-	GroupId string `json:"group_id"`
+	GroupId string `json:"group_id" binding:"required"`
 }
 
 type BanGroupChatResponse struct {
 }
 
 type BanPrivateChatRequest struct {
-	GroupId string `json:"group_id"`
+	GroupId string `json:"group_id" binding:"required"`
 }
 
 type BanPrivateChatResponse struct {
 }
 
 type DeleteGroupRequest struct {
-	GroupId string `json:"group_id"`
+	GroupId string `json:"group_id" binding:"required"`
 }
 
 type DeleteGroupResponse struct {
 }
 
 type GetGroupMembersRequest struct {
-	GroupId string `json:"group_id"`
+	GroupId string `form:"group_id" binding:"required"`
+	UserName string `form:"user_name"`
 	RequestPagination
 }
 
@@ -92,13 +93,13 @@ type GroupMemberResponse struct {
 
 type GetGroupMembersResponse struct {
 	GroupMembers []GroupMemberResponse    `json:"group_members"`
-	GroupMemberNums int                   `json:"group_member_nums"`
 	ResponsePagination
+	MemberNums int `json:"member_nums"`
 }
 
 type GroupMemberRequest struct {
-	GroupId string `json:"group_id"`
-	Members []string `json:"members"`
+	GroupId string `json:"group_id" binding:"required"`
+	Members []string `json:"members" binding:"required"`
 }
 
 type GroupMemberOperateResponse struct {

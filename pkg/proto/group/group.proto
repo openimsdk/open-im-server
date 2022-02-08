@@ -210,6 +210,7 @@ message GetGroupReq {
 message GetGroupResp {
     repeated CMSGroup CMSGroups = 1;
     server_api_params.RequestPagination Pagination = 2;
+    int32 GroupNums = 3;
 }
 
 message GetGroupsReq {
@@ -269,13 +270,15 @@ message GetGroupByIdResp {
 
 message GetGroupMembersCMSReq {
    string GroupId = 1;
-   server_api_params.RequestPagination Pagination = 2;
-   string OperationID = 3;
+   string UserName = 2;
+   server_api_params.RequestPagination Pagination = 3;
+   string OperationID = 4;
 }
 
 message GetGroupMembersCMSResp {
-   repeated server_api_params.GroupMemberFullInfo members = 3;
-   server_api_params.RequestPagination Pagination = 2;
+   repeated server_api_params.GroupMemberFullInfo members = 1;
+   server_api_params.ResponsePagination Pagination = 2;
+   int32 MemberNums = 3;
 }
 
 message RemoveGroupMembersCMSReq {
@@ -292,12 +295,22 @@ message RemoveGroupMembersCMSResp {
 message AddGroupMembersCMSReq {
   string GroupId = 1;
   repeated string UserIds = 2;
-  string OperationID = 3;
+  string OperationId = 3;
 }
 
 message AddGroupMembersCMSResp {
   repeated string success = 1;
   repeated string failed = 2;
+}
+
+message SetGroupMasterReq {
+  string GroupId = 1;
+  string UserId = 2;
+  string OperationId = 3;
+}
+
+message SetGroupMasterResp {
+
 }
 
 service group{

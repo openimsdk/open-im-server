@@ -243,8 +243,44 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
 
+func (s *userServer) GetUsersByName(ctx context.Context, req *pbUser.GetUsersByNameReq) (*pbUser.GetUsersByNameResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req.String())
+	resp := &pbUser.GetUsersByNameResp{}
+	users, err := imdb.GetUserByName(req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserByName failed", err.Error())
+		return resp, err
+	}
+	for _, user := range users {
+		isBlock, err := imdb.UserIsBlock(user.UserID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+			continue
+		}
+		resp.Users = append(resp.Users, &pbUser.User{
+			ProfilePhoto: user.FaceURL,
+			Nickname:     user.Nickname,
+			UserId:       user.UserID,
+			CreateTime:   user.CreateTime.String(),
+			IsBlock:      isBlock,
+		})
+	}
+	user := db.Users{Nickname:req.UserName}
+	userNums, err := imdb.GetUsersCount(user)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "", err.Error())
+		return resp, err
+	}
+	resp.UserNums = userNums
+	resp.Pagination = &sdkws.ResponsePagination{
+		CurrentPage: req.Pagination.PageNumber,
+		ShowNumber:  req.Pagination.ShowNumber,
+	}
+	return resp, err
+}
+
 func (s *userServer) GetUserById(ctx context.Context, req *pbUser.GetUserByIdReq) (*pbUser.GetUserByIdResp, error) {
-	log.NewInfo(req.OperationID, "GetUser args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req.String())
 	resp := &pbUser.GetUserByIdResp{User: &pbUser.User{}}
 	user, err := imdb.GetUserByUserID(req.UserId)
 	if err != nil {
@@ -284,10 +320,14 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			resp.User = append(resp.User, user)
 		}
 	}
-
-	resp.Pagination = &sdkws.ResponsePagination{}
-	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
-	resp.Pagination.CurrentPage = req.Pagination.PageNumber
+	user := db.Users{}
+	nums, err := imdb.GetUsersCount(user)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsersCount failed", err.Error())
+		return resp, err
+	}
+	resp.UserNums = nums
+	resp.Pagination = &sdkws.ResponsePagination{ShowNumber:req.Pagination.ShowNumber, CurrentPage:req.Pagination.ShowNumber}
 	return resp, nil
 }
 
@@ -369,7 +409,12 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 	resp.Pagination = &sdkws.ResponsePagination{}
 	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
 	resp.Pagination.CurrentPage = req.Pagination.PageNumber
-	fmt.Println(resp)
+	nums, err := imdb.GetBlockUsersNumCount()
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetBlockUsersNumCount failed", err.Error())
+		return resp, err
+	}
+	resp.UserNums = nums
 	return resp, nil
 }
 
@@ -398,8 +443,9 @@ func (s *userServer) DeleteUser(_ context.Context, req *pbUser.DeleteUserReq) (*
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp := &pbUser.DeleteUserResp{}
 	if row := imdb.DeleteUser(req.UserId); row == 0 {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "delete error", row)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "delete failed", "delete rows:", row)
 		return resp, constant.ErrDB
 	}
 	return resp, nil
 }
+

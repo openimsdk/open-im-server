@@ -267,13 +267,37 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 	return blockUserInfos, nil
 }
 
-func GetBlockUsersNumCount() (int, error) {
+func GetUserByName(userName string, showNumber, pageNumber int32) ([]db.Users, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	var users []db.Users
+	if err != nil {
+		return users, err
+	}
+	dbConn.LogMode(true)
+	err = dbConn.Table("users").Where(fmt.Sprintf(" name like '%%%s%%' ", userName)).Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&users).Error
+	return users, err
+}
+
+func GetUsersCount(user db.Users) (int32, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return 0, err
 	}
 	dbConn.LogMode(true)
-	var count int
+	var count int32
+	if err := dbConn.Model(user).Where(fmt.Sprintf(" name like '%%%s%%' ", user.Nickname)).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func GetBlockUsersNumCount() (int32, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return 0, err
+	}
+	dbConn.LogMode(true)
+	var count int32
 	if err := dbConn.Model(&db.BlackList{}).Count(&count).Error; err != nil {
 		return 0, err
 	}

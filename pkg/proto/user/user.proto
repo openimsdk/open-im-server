@@ -99,7 +99,7 @@ message GetReceiveMessageOptResp{
 
 message GetAllConversationMsgOptReq{
   string FromUserID = 1;
-  string  operationID = 2;
+  string operationID = 2;
   string OpUserID = 3;
 }
 message GetAllConversationMsgOptResp{
@@ -134,6 +134,18 @@ message GetUserByIdResp{
   User user = 2;
 }
 
+message GetUsersByNameReq {
+ string UserName = 1;
+ server_api_params.RequestPagination Pagination =2;
+ string OperationID = 3;
+}
+
+message GetUsersByNameResp {
+  repeated User users = 1;
+  server_api_params.ResponsePagination Pagination = 2;
+  int32 UserNums = 3;
+}
+
 message AlterUserReq{
   string UserId = 1;
   string OperationID = 2;
@@ -156,7 +168,7 @@ message GetUsersResp{
   CommonResp  CommonResp = 1;
   repeated User user = 2;
   server_api_params.ResponsePagination Pagination = 3;
-  string OperationID = 4;
+  int32 UserNums = 4;
 }
 
 message AddUserReq{
@@ -193,7 +205,7 @@ message UnBlockUserResp{
 message GetBlockUsersReq{
   server_api_params.RequestPagination Pagination =1;
   string OperationID = 2;
-  int32 BlockUserNum = 4;
+  int32 BlockUserNum = 3;
 }
 
 message BlockUser {
@@ -206,6 +218,7 @@ message GetBlockUsersResp{
   CommonResp  CommonResp = 1;
   repeated BlockUser BlockUsers = 2;
   server_api_params.ResponsePagination Pagination = 3;
+  int32 UserNums = 4;
 }
 
 message GetBlockUserByIdReq {
@@ -236,7 +249,8 @@ service user {
   rpc GetAllConversationMsgOpt(GetAllConversationMsgOptReq)returns(GetAllConversationMsgOptResp);
   rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
 
-  rpc GetUserById(GetUserByIdReq) returns (GetUserByIdResp);  
+  rpc GetUserById(GetUserByIdReq) returns (GetUserByIdResp);
+  rpc GetUsersByName(GetUsersByNameReq) returns (GetUsersByNameResp);
   rpc ResignUser(ResignUserReq) returns (ResignUserResp);
   rpc AlterUser(AlterUserReq) returns (AlterUserResp);
   rpc GetUsers(GetUsersReq) returns (GetUsersResp);

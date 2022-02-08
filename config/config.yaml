@@ -148,8 +148,8 @@ push:
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
-  appManagerUid: [ "openIM123456","openIM654321" ]
-  secrets: [ "openIM1","openIM2" ]
+  appManagerUid: [ "openIM123456","openIM654321", "openIM333" ]
+  secrets: [ "openIM1","openIM2", "openIM333" ]
 
 secret: tuoyun
 

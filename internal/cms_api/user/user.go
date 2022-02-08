@@ -25,7 +25,7 @@ func GetUserById(c *gin.Context) {
 		reqPb pb.GetUserByIdReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError("GetUser", utils.GetSelfFuncName(), "ShouldBindQuery failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "ShouldBindQuery failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -34,7 +34,7 @@ func GetUserById(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetUserById(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError("GetUserFailed", utils.GetSelfFuncName(), err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -43,6 +43,38 @@ func GetUserById(c *gin.Context) {
 		return
 	}
 	utils.CopyStructFields(&resp, respPb.User)
+	openIMHttp.RespHttp200(c, constant.OK, resp)
+}
+
+func GetUsersByName(c *gin.Context) {
+	var (
+		req cms_api_struct.GetUsersByNameRequest
+		resp cms_api_struct.GetUsersByNameResponse
+		reqPb pb.GetUsersByNameReq
+	)
+	if err := c.ShouldBindQuery(&req); err != nil {
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "ShouldBindQuery failed", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		return
+	}
+	reqPb.UserName = req.UserName
+	reqPb.Pagination = &commonPb.RequestPagination{
+		PageNumber: int32(req.PageNumber),
+		ShowNumber: int32(req.ShowNumber),
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := pb.NewUserClient(etcdConn)
+	respPb, err := client.GetUsersByName(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "rpc", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		return
+	}
+	fmt.Println(respPb)
+	utils.CopyStructFields(&resp.Users, respPb.Users)
+	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
+	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
+	resp.UserNums = respPb.UserNums
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -69,6 +101,7 @@ func GetUsers(c *gin.Context) {
 	utils.CopyStructFields(&resp.Users, respPb.User)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
+	resp.UserNums = respPb.UserNums
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 
 }
@@ -194,12 +227,12 @@ func GetBlockUsers(c *gin.Context) {
 	)
 	reqPb.Pagination = &commonPb.RequestPagination{}
 	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "ShouldBindQuery failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
 	utils.CopyStructFields(&reqPb.Pagination, &req)
-	log.NewInfo("0", "blockUsers", reqPb.Pagination, req)
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "blockUsers", reqPb.Pagination, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetBlockUsers(context.Background(), &reqPb)
@@ -222,6 +255,7 @@ func GetBlockUsers(c *gin.Context) {
 	}
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
+	resp.UserNums = respPb.UserNums
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 

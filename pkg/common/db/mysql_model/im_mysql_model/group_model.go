@@ -105,10 +105,10 @@ func DeleteGroup(groupId string) error {
 	dbConn.LogMode(true)
 	var group db.Group
 	var groupMembers []db.GroupMember
-	if err := dbConn.Table("groups").Where("").Delete(&group).Error; err != nil {
+	if err := dbConn.Table("groups").Where("group_id=?", groupId).Delete(&group).Error; err != nil {
 		return err
 	}
-	if err := dbConn.Table("group_Members").Where("group_id=?", groupId).Delete(groupMembers).Error; err != nil {
+	if err := dbConn.Table("group_members").Where("group_id=?", groupId).Delete(groupMembers).Error; err != nil {
 		return err
 	}
 	return nil
@@ -134,14 +134,14 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) error {
 	return nil
 }
 
-func GetGroupsCountNum() (int, error) {
+func GetGroupsCountNum(group db.Group) (int32, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return 0, err
 	}
 	dbConn.LogMode(true)
-	var count int
-	if err := dbConn.Table("groups").Count(&count).Error; err != nil {
+	var count int32
+	if err := dbConn.Table("groups").Where(fmt.Sprintf(" name like '%%%s%%' ", group.GroupName)).Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return count, nil

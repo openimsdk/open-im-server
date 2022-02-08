@@ -10,7 +10,6 @@ import (
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"fmt"
 	"strings"
 
 	pbGroup "Open_IM/pkg/proto/group"
@@ -25,7 +24,7 @@ func GetGroupById(c *gin.Context) {
 		reqPb pbGroup.GetGroupByIdReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError(reqPb.OperationID, "ShouldBindQuery failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "ShouldBindQuery failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -34,7 +33,7 @@ func GetGroupById(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.GetGroupById(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetGroupById	 failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetGroupById failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -64,7 +63,7 @@ func GetGroups(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.GetGroups(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, "GetUserInfo failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetUserInfo failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -93,19 +92,18 @@ func GetGroupByName(c *gin.Context) {
 		reqPb pbGroup.GetGroupReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError("0", "ShouldBindQuery failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "ShouldBindQuery failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
 	reqPb.GroupName = req.GroupName
 	reqPb.Pagination = &commonPb.RequestPagination{}
 	utils.CopyStructFields(&reqPb.Pagination, req)
-	fmt.Println(reqPb)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.GetGroup(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError("s", "GetUserInfo failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetGroup failed", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -123,13 +121,14 @@ func GetGroupByName(c *gin.Context) {
 	}
 	resp.CurrentPage = int(respPb.Pagination.PageNumber)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
+	resp.GroupNums = int(respPb.GroupNums)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
 func CreateGroup(c *gin.Context) {
 	var (
 		req   cms_api_struct.CreateGroupRequest
-		resp  cms_api_struct.CreateGroupResponse
+		_  cms_api_struct.CreateGroupResponse
 		reqPb pbGroup.CreateGroupReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -140,6 +139,8 @@ func CreateGroup(c *gin.Context) {
 	reqPb.GroupInfo = &commonPb.GroupInfo{}
 	reqPb.GroupInfo.GroupName = req.GroupName
 	reqPb.GroupInfo.CreatorUserID = req.GroupMasterId
+	reqPb.OwnerUserID = req.GroupMasterId
+	reqPb.OpUserID = req.GroupMasterId
 	for _, v := range req.GroupMembers {
 		reqPb.InitMemberList = append(reqPb.InitMemberList, &pbGroup.GroupAddMemberInfo{
 			UserID:    v,
@@ -150,11 +151,11 @@ func CreateGroup(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	_, err := client.CreateGroup(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, "GetUserInfo failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "CreateGroup failed", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
-	openIMHttp.RespHttp200(c, constant.OK, resp)
+	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
 func BanGroupChat(c *gin.Context) {
@@ -163,7 +164,7 @@ func BanGroupChat(c *gin.Context) {
 		reqPb pbGroup.OperateGroupStatusReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError(reqPb.OperationID, "ShouldBindQuery failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "BindJSON failed", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -173,7 +174,7 @@ func BanGroupChat(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	_, err := client.OperateGroupStatus(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, "GetUserInfo failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "BanGroupChat failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -187,7 +188,7 @@ func BanPrivateChat(c *gin.Context) {
 		reqPb pbGroup.OperateGroupStatusReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -197,7 +198,7 @@ func BanPrivateChat(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	_, err := client.OperateGroupStatus(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError("s", "GetUserInfo failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "OperateGroupStatus failed", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -210,7 +211,7 @@ func OpenGroupChat(c *gin.Context) {
 		reqPb pbGroup.OperateGroupStatusReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -220,7 +221,7 @@ func OpenGroupChat(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	_, err := client.OperateGroupStatus(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError("s", "GetUserInfo failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "OperateGroupStatus failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -233,7 +234,7 @@ func OpenPrivateChat(c *gin.Context) {
 		reqPb pbGroup.OperateGroupStatusReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "OpenPrivateChat failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -243,7 +244,7 @@ func OpenPrivateChat(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	_, err := client.OperateGroupStatus(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, "GetUserInfo failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "OperateGroupStatus failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -252,12 +253,12 @@ func OpenPrivateChat(c *gin.Context) {
 
 func GetGroupMembers(c *gin.Context) {
 	var (
-		req cms_api_struct.GetGroupMembersRequest
+		req  cms_api_struct.GetGroupMembersRequest
 		reqPb pbGroup.GetGroupMembersCMSReq
 		resp   cms_api_struct.GetGroupMembersResponse
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "ShouldBindQuery failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -265,16 +266,21 @@ func GetGroupMembers(c *gin.Context) {
 		PageNumber: int32(req.PageNumber),
 		ShowNumber: int32(req.ShowNumber),
 	}
+	reqPb.GroupId = req.GroupId
+	reqPb.UserName = req.UserName
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.GetGroupMembersCMS(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "rpc:", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetGroupMembersCMS failed:", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
-	resp.ResponsePagination.ShowNumber = int(respPb.Pagination.ShowNumber)
-	resp.ResponsePagination.CurrentPage = int(respPb.Pagination.PageNumber)
+	resp.ResponsePagination = cms_api_struct.ResponsePagination{
+		CurrentPage: int(respPb.Pagination.CurrentPage),
+		ShowNumber:  int(respPb.Pagination.ShowNumber),
+	}
+	resp.MemberNums = int(respPb.MemberNums)
 	for _, groupMembers := range respPb.Members {
 		resp.GroupMembers = append(resp.GroupMembers, cms_api_struct.GroupMemberResponse{
 			MemberPosition: int(groupMembers.RoleLevel),
@@ -294,7 +300,7 @@ func AddGroupMembers(c *gin.Context) {
 		reqPb pbGroup.AddGroupMembersCMSReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(),"BindJSON failed ", err.Error())
+		log.NewError(reqPb.OperationId, utils.GetSelfFuncName(),"BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -304,7 +310,7 @@ func AddGroupMembers(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.AddGroupMembersCMS(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "rpc:", err.Error())
+		log.NewError(reqPb.OperationId, utils.GetSelfFuncName(), "AddGroupMembersCMS failed", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
@@ -330,13 +336,13 @@ func RemoveGroupMembers(c *gin.Context) {
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.RemoveGroupMembersCMS(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "rpc:", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "RemoveGroupMembersCMS failed", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
 	resp.Success = respPb.Success
 	resp.Failed = respPb.Failed
-	openIMHttp.RespHttp200(c, constant.OK, respPb)
+	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
 func DeleteGroup(c *gin.Context) {
@@ -350,13 +356,42 @@ func DeleteGroup(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	reqPb.GroupId = req.GroupId
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pbGroup.NewGroupClient(etcdConn)
 	_, err := client.DeleteGroup(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "rpc:", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "DeleteGroup failed", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
+}
+
+func SetGroupMaster(c *gin.Context) {
+	var (
+		req cms_api_struct.SetGroupMasterRequest
+		_ cms_api_struct.SetGroupMasterResponse
+		reqPb pbGroup.SetGroupMasterReq
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(reqPb.OperationId, utils.GetSelfFuncName(),"BindJSON failed ", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		return
+	}
+	reqPb.GroupId = req.GroupId
+	reqPb.UserId = req.UserId
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := pbGroup.NewGroupClient(etcdConn)
+	_, err := client.SetGroupMaster(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(reqPb.OperationId, utils.GetSelfFuncName(), "DeleteGroup failed", err.Error())
+		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		return
+	}
+	openIMHttp.RespHttp200(c, constant.OK, nil)
+}
+
+func GetMemberInGroup(c *gin.Context) {
+
 }
