@@ -41,7 +41,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	log.InfoByKv("test", pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
 	for _, v := range grpcCons {
 		msgClient := pbRelay.NewOnlineMessageRelayServiceClient(v)
-		reply, err := msgClient.OnlinePushMsg(context.Background(), &pbRelay.OnlinePushMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData})
+		reply, err := msgClient.OnlinePushMsg(context.Background(), &pbRelay.OnlinePushMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserID: pushMsg.PushToUserID})
 		if err != nil {
 			log.InfoByKv("push data to client rpc err", pushMsg.OperationID, "err", err)
 			continue
@@ -51,7 +51,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		}
 	}
 	log.InfoByKv("push_result", pushMsg.OperationID, "result", wsResult, "sendData", pushMsg.MsgData)
-	if isOfflinePush {
+	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
 		for _, v := range wsResult {
 			if v.ResultCode == 0 {
 				continue

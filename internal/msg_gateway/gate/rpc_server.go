@@ -71,7 +71,7 @@ func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgRe
 		log.NewError(in.OperationID, "data encode err", err.Error())
 	}
 	var tag bool
-	recvID := in.MsgData.RecvID
+	recvID := in.PushToUserID
 	platformList := genPlatformArray()
 	for _, v := range platformList {
 		if conn := ws.getUserConn(recvID, v); conn != nil {
@@ -90,12 +90,6 @@ func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgRe
 				RecvPlatFormID: constant.PlatformNameToID(v),
 			}
 			resp = append(resp, temp)
-		}
-	}
-	//Single chat sender synchronization message
-	if in.MsgData.GetSessionType() == constant.SingleChatType {
-		for k, v := range ws.getSingleUserAllConn(in.MsgData.SendID) {
-			_ = sendMsgToUser(v, replyBytes.Bytes(), in, k, in.MsgData.SendID)
 		}
 	}
 	if !tag {
