@@ -169,7 +169,7 @@ type config struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"groupCreated"`
 
 		GroupInfoSet struct {
 			Conversation PConversation `yaml:"conversation"`
