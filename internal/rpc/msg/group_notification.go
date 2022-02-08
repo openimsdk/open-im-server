@@ -108,7 +108,7 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		log.Error(operationID, "GetUserByUserID failed ", err.Error())
 	}
 	toNickname := ""
-	if from != nil {
+	if to != nil {
 		toNickname = to.Nickname
 	}
 
