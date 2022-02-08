@@ -71,15 +71,18 @@ func UpdateFriendApplication(friendRequest *db.FriendRequest) error {
 		friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest).Error
 }
 
-func InsertFriendApplication(friendRequest *db.FriendRequest) error {
+func InsertFriendApplication(friendRequest *db.FriendRequest, args map[string]interface{}) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
 
 	friendRequest.CreateTime = time.Now()
-	u := dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
-		friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest)
+	u := dbConn.Model(&friendRequest).Updates(args)
+	//u := dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
+	// friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest)
+	//u := dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
+	//	friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest)
 	if u.RowsAffected != 0 {
 		return nil
 	}
