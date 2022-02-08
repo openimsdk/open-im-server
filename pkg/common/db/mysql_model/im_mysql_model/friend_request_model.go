@@ -76,6 +76,14 @@ func InsertFriendApplication(friendRequest *db.FriendRequest) error {
 	if err != nil {
 		return err
 	}
+
+	friendRequest.CreateTime = time.Now()
+	u := dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
+		friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest)
+	if u.RowsAffected != 0 {
+		return nil
+	}
+
 	if friendRequest.CreateTime.Unix() < 0 {
 		friendRequest.CreateTime = time.Now()
 	}
