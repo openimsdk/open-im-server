@@ -148,6 +148,8 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		tips.DefaultTips = toNickname + " " + cn.MemberKicked.DefaultTips.Tips
 	case constant.MemberInvitedNotification: //
 		tips.DefaultTips = toNickname + " " + cn.MemberInvited.DefaultTips.Tips
+	case constant.MemberEnterNotification:
+		tips.DefaultTips = toNickname + " " + cn.MemberInvited.DefaultTips.Tips
 	default:
 		log.Error(operationID, "contentType failed ", contentType)
 		return
