@@ -31,6 +31,7 @@ func UpdateGroupRequest(groupRequest db.GroupRequest) error {
 }
 
 func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
+	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
