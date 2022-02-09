@@ -35,7 +35,7 @@ func initMysqlDB() {
 	}
 
 	//Check the database and table during initialization
-	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName+"test1")
+	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", config.Config.Mysql.DBDatabaseName+"test1")
 	err = db.Exec(sql).Error
 	if err != nil {
 		log.NewError("0", "Exec failed ", err.Error(), sql)
@@ -60,6 +60,7 @@ func initMysqlDB() {
 		&User{},
 		&Black{}, &ChatLog{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
+	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 
 	if !db.HasTable(&Friend{}) {
 		log.NewInfo("CreateTable Friend")
