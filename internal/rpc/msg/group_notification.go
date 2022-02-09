@@ -302,7 +302,7 @@ func GroupOwnerTransferredNotification(req *pbGroup.TransferGroupOwnerReq) {
 		log.Error(req.OperationID, "setGroupMemberInfo failed", req.GroupID, req.NewOwnerUserID)
 		return
 	}
-	groupNotification(constant.GroupOwnerTransferredNotification, &GroupOwnerTransferredTips, req.OpUserID, "", req.NewOwnerUserID, req.OperationID)
+	groupNotification(constant.GroupOwnerTransferredNotification, &GroupOwnerTransferredTips, req.OpUserID, req.GroupID, "", req.OperationID)
 }
 
 //message MemberKickedTips{
