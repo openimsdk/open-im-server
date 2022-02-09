@@ -54,12 +54,19 @@ func setGroupInfo(groupID string, groupInfo *open_im_sdk.GroupInfo) error {
 
 func setGroupMemberInfo(groupID, userID string, groupMemberInfo *open_im_sdk.GroupMemberFullInfo) error {
 	groupMember, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
+	if err == nil {
+		return utils.Wrap(utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, groupMember), "")
+	}
+
+	user, err := imdb.GetUserByUserID(userID)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	if err = utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, groupMember); err != nil {
-		return utils.Wrap(err, "")
-	}
+	groupMemberInfo.GroupID = groupID
+	groupMemberInfo.UserID = user.UserID
+	groupMemberInfo.Nickname = user.Nickname
+	groupMemberInfo.AppMangerLevel = user.AppMangerLevel
+	groupMemberInfo.FaceURL = user.FaceURL
 	return nil
 }
 
