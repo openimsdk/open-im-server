@@ -117,6 +117,18 @@ func GetGroupApplicationList(userID string) ([]db.GroupRequest, error) {
 	return groupRequestList, nil
 }
 
+func GetUserReqGroupByUserID(userID string) ([]db.GroupRequest, error) {
+	var groupRequestList []db.GroupRequest
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	dbConn.LogMode(true)
+	err = dbConn.Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
+	return groupRequestList, err
+}
+
+
 //
 //func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.CommonResp, error) {
 //

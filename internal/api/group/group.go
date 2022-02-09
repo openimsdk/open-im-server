@@ -290,13 +290,13 @@ func GetRecvGroupApplicationList(c *gin.Context) {
 	}
 	req := &rpc.GetGroupApplicationListReq{}
 	utils.CopyStructFields(req, params)
-	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
-	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
-		return
-	}
+	//var ok bool
+	//ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	//if !ok {
+	//	log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+	//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+	//	return
+	//}
 	log.NewInfo(req.OperationID, "GetGroupApplicationList args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -311,6 +311,37 @@ func GetRecvGroupApplicationList(c *gin.Context) {
 	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: reply.ErrCode, ErrMsg: reply.ErrMsg}, GroupRequestList: reply.GroupRequestList}
 	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
 	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+func GetUserReqGroupApplicationList(c *gin.Context) {
+	var params api.GetUserReqGroupApplicationListReq
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.GetUserReqApplicationListReq{}
+	utils.CopyStructFields(req, params)
+	//ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	//if !ok {
+	//	log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+	//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+	//	return
+	//}
+	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	RpcResp, err := client.GetUserReqApplicationList(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "GetGroupsInfo failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, RpcResp)
+	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupRequestList: RpcResp.GroupRequestList}
+	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
+	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
 	c.JSON(http.StatusOK, resp)
 }
 

@@ -61,6 +61,17 @@ message GetGroupApplicationListResp {
   repeated server_api_params.GroupRequest GroupRequestList = 3;
 }
 
+message GetUserReqApplicationListReq{
+  string UserID = 1;
+  string OpUserID = 2;
+  string OperationID = 3;
+}
+
+message GetUserReqApplicationListResp{
+  CommonResp CommonResp = 1;
+  repeated server_api_params.GroupRequest GroupRequestList = 2;
+}
+
 
 message TransferGroupOwnerReq {
   string GroupID = 1;
@@ -204,6 +215,7 @@ service group{
   rpc getGroupsInfo(GetGroupsInfoReq) returns(GetGroupsInfoResp);
   rpc setGroupInfo(SetGroupInfoReq) returns(SetGroupInfoResp);
   rpc getGroupApplicationList(GetGroupApplicationListReq) returns(GetGroupApplicationListResp);
+  rpc getUserReqApplicationList(GetUserReqApplicationListReq) returns(GetUserReqApplicationListResp);
   rpc transferGroupOwner(TransferGroupOwnerReq) returns(TransferGroupOwnerResp);
   rpc groupApplicationResponse(GroupApplicationResponseReq) returns(GroupApplicationResponseResp);
   rpc getGroupMemberList(GetGroupMemberListReq) returns(GetGroupMemberListResp);
