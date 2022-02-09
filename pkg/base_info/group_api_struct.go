@@ -103,6 +103,16 @@ type GetGroupApplicationListResp struct {
 	Data             []map[string]interface{}    `json:"data"`
 }
 
+type GetUserReqGroupApplicationListReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	UserID string `json:"userID" binding:"required"`
+}
+
+type GetUserRespGroupApplicationResp struct {
+	CommResp
+	GroupRequestList []*open_im_sdk.GroupRequest `json:"-"`
+}
+
 type GetGroupInfoReq struct {
 	GroupIDList []string `json:"groupIDList" binding:"required"`
 	OperationID string   `json:"operationID" binding:"required"`
