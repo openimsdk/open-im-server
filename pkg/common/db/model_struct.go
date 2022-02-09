@@ -73,7 +73,7 @@ type Group struct {
 	GroupName     string    `gorm:"column:name;size:255" json:"groupName"`
 	Notification  string    `gorm:"column:notification;size:255" json:"notification"`
 	Introduction  string    `gorm:"column:introduction;size:255" json:"introduction"`
-	FaceUrl       string    `gorm:"column:face_url;size:255" json:"faceUrl"`
+	FaceURL       string    `gorm:"column:face_url;size:255" json:"faceURL"`
 	CreateTime    time.Time `gorm:"column:create_time"`
 	Ex            string    `gorm:"column:ex" json:"ex;size:1024" json:"ex"`
 	Status        int32     `gorm:"column:status"`
@@ -97,7 +97,7 @@ type GroupMember struct {
 	GroupID        string    `gorm:"column:group_id;primary_key;size:64"`
 	UserID         string    `gorm:"column:user_id;primary_key;size:64"`
 	Nickname       string    `gorm:"column:nickname;size:255"`
-	FaceUrl        string    `gorm:"column:user_group_face_url;size:255"`
+	FaceURL        string    `gorm:"column:user_group_face_url;size:255"`
 	RoleLevel      int32     `gorm:"column:role_level"`
 	JoinTime       time.Time `gorm:"column:join_time"`
 	JoinSource     int32     `gorm:"column:join_source"`
