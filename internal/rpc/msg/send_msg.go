@@ -171,8 +171,15 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		case constant.MemberKickedNotification:
 			var tips sdk_ws.TipsComm
 			var memberKickedTips sdk_ws.MemberKickedTips
-			_ = proto.Unmarshal(pb.MsgData.Content, &tips)
-			_ = proto.Unmarshal(tips.Detail, &memberKickedTips)
+			err := proto.Unmarshal(pb.MsgData.Content, &tips)
+			if err != nil {
+				log.Error(pb.OperationID, "Unmarshal err", err.Error())
+			}
+			err = proto.Unmarshal(tips.Detail, &memberKickedTips)
+			if err != nil {
+				log.Error(pb.OperationID, "Unmarshal err", err.Error())
+			}
+			log.Info(pb.OperationID, "data is ", memberKickedTips)
 			for _, v := range memberKickedTips.KickedUserList {
 				addUidList = append(addUidList, v.UserID)
 			}
