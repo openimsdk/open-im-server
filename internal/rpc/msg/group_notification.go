@@ -30,12 +30,21 @@ func setOpUserInfo(opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupM
 		groupMemberInfo.GroupID = groupID
 	} else {
 		u, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, opUserID)
-		if err != nil {
-			return utils.Wrap(err, "GetGroupMemberInfoByGroupIDAndUserID failed")
+		if err == nil {
+			if err = utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, u); err != nil {
+				return utils.Wrap(err, "")
+			}
 		}
-		if err = utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, u); err != nil {
+
+		user, err := imdb.GetUserByUserID(opUserID)
+		if err != nil {
 			return utils.Wrap(err, "")
 		}
+		groupMemberInfo.GroupID = groupID
+		groupMemberInfo.UserID = user.UserID
+		groupMemberInfo.Nickname = user.Nickname
+		groupMemberInfo.AppMangerLevel = user.AppMangerLevel
+		groupMemberInfo.FaceURL = user.FaceURL
 	}
 	return nil
 }
