@@ -93,6 +93,7 @@ rpcport:
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
   openImOpenImStatisticPort: [ 10800 ]
+  OpenImMessageCMSPort: [ 10900 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -104,7 +105,7 @@ rpcport:
       switch: false
 
 rpcregistername:
-  remainLogLevel: User
+  openImUserName: User
   openImFriendName: Friend
   openImOfflineMessageName: OfflineMessage
   openImPushName: Push
@@ -112,6 +113,7 @@ rpcregistername:
   openImGroupName: Group
   openImAuthName: Auth
   OpenImStatisticsName: Statistics
+  OpenImMessageCMSName: MessageCMS
 
 log:
   storageLocation: ../logs/

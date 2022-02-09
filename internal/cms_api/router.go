@@ -3,7 +3,7 @@ package cms_api
 import (
 	"Open_IM/internal/cms_api/admin"
 	"Open_IM/internal/cms_api/group"
-	"Open_IM/internal/cms_api/message"
+	messageCMS "Open_IM/internal/cms_api/message_cms"
 	"Open_IM/internal/cms_api/middleware"
 	"Open_IM/internal/cms_api/organization"
 	"Open_IM/internal/cms_api/statistics"
@@ -46,12 +46,6 @@ func NewGinRouter() *gin.Engine {
 		organizationRouterGroup.PATCH("/alter_corps_info", organization.AlterStaffsInfo)
 		organizationRouterGroup.POST("/add_child_org", organization.AddChildOrganization)
 	}
-	messageRouterGroup := router.Group("/message")
-	{
-		messageRouterGroup.POST("/broadcast_message", message.BroadcastMessage)
-		messageRouterGroup.POST("/mass_send_message", message.MassSendMassage)
-		messageRouterGroup.POST("/withdraw_message", message.WithdrawMessage)
-	}
 	groupRouterGroup := router.Group("/group")
 	{
 		groupRouterGroup.GET("/get_group_by_id", group.GetGroupById)
@@ -88,6 +82,13 @@ func NewGinRouter() *gin.Engine {
 		friendRouterGroup.POST("/get_friends_by_id")
 		friendRouterGroup.POST("/set_friend")
 		friendRouterGroup.POST("/remove_friend")
+	}
+	messageCMSRouterGroup := router.Group("/message")
+	{
+		messageCMSRouterGroup.GET("/get_chat_logs", messageCMS.GetChatLogs)
+		messageCMSRouterGroup.POST("/broadcast_message", messageCMS.BroadcastMessage)
+		messageCMSRouterGroup.POST("/mass_send_message", messageCMS.MassSendMassage)
+		messageCMSRouterGroup.POST("/withdraw_message", messageCMS.WithdrawMessage)
 	}
 	return baseRouter
 }

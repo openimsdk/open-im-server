@@ -147,7 +147,7 @@ func GetGroupsCountNum(group db.Group) (int32, error) {
 	return count, nil
 }
 
-func GetGroupsById(groupId string) (db.Group, error) {
+func GetGroupById(groupId string) (db.Group, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	group := db.Group{
 		GroupID: groupId,

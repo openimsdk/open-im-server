@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	rpcPort := flag.Int("port", 11200, "rpc listening port")
+	rpcPort := flag.Int("port", 10900, "rpc listening port")
 	flag.Parse()
 	rpcServer := rpcMessageCMS.NewMessageCMSServer(*rpcPort)
 	rpcServer.Run()

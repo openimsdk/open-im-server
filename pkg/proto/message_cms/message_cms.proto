@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-option go_package = "./message_cms;messageCMS";
-package message;
+option go_package = "./message_cms;message_cms";
+package message_cms;
 
 message BoradcastMessageReq {
     string Message = 1;
@@ -62,7 +62,7 @@ message WithdrawMessageResp {
     
 }
 
-service message {
+service messageCMS {
     rpc BoradcastMessage(BoradcastMessageReq) returns(BoradcastMessageResp);
     rpc MassSendMessage(MassSendMessageReq) returns(MassSendMessageResp);
     rpc GetChatLogs(GetChatLogsReq) returns(GetChatLogsResp);

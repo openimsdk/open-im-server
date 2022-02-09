@@ -70,7 +70,6 @@ func GetUsersByName(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
 		return
 	}
-	fmt.Println(respPb)
 	utils.CopyStructFields(&resp.Users, respPb.Users)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)

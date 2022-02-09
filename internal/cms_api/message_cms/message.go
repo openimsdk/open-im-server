@@ -1,4 +1,4 @@
-package message
+package messageCMS
 
 import (
 	"Open_IM/pkg/cms_api_struct"
@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbMessage "Open_IM/pkg/proto/message_cms"
+	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"strings"
@@ -17,6 +18,17 @@ import (
 )
 
 func BroadcastMessage(c *gin.Context) {
+	var (
+		reqPb pbMessage.BoradcastMessageReq
+	)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName)
+	client := pbMessage.NewMessageCMSClient(etcdConn)
+	_, err := client.BoradcastMessage(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetChatLogs rpc failed", err.Error())
+		openIMHttp.RespHttp200S(c, err, nil)
+		return
+	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
@@ -39,13 +51,17 @@ func GetChatLogs(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
+	reqPb.Pagination = &pbCommon.RequestPagination{
+		PageNumber: int32(req.PageNumber),
+		ShowNumber: int32(req.ShowNumber),
+	}
 	utils.CopyStructFields(&reqPb, &req)
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
-	client := pbMessage.NewMessageClient(etcdConn)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName)
+	client := pbMessage.NewMessageCMSClient(etcdConn)
 	respPb, err := client.GetChatLogs(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetChatLogs rpc failed", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		openIMHttp.RespHttp200S(c, constant.ErrServer, resp)
 		return
 	}
 	utils.CopyStructFields(&resp, &respPb)

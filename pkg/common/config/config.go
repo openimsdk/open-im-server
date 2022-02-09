@@ -85,6 +85,7 @@ type config struct {
 		OpenImOnlineMessageRelayName string `yaml:"openImOnlineMessageRelayName"`
 		OpenImGroupName              string `yaml:"openImGroupName"`
 		OpenImAuthName               string `yaml:"openImAuthName"`
+		OpenImMessageCMSName 		 string `yaml:"openImMessageCMSName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
