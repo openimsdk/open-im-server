@@ -78,7 +78,7 @@ func InsertFriendApplication(friendRequest *db.FriendRequest, args map[string]in
 	}
 
 	friendRequest.CreateTime = time.Now()
-	u := dbConn.Debug().Model(friendRequest).Updates(args)
+	u := dbConn.Model(friendRequest).Updates(args)
 	//u := dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
 	// friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest)
 	//u := dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
