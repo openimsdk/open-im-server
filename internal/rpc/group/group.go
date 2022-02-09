@@ -479,7 +479,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 		member.UserID = req.FromUserID
 		member.RoleLevel = constant.GroupOrdinaryUsers
 		member.OperatorUserID = req.OpUserID
-		member.FaceUrl = user.FaceURL
+		member.FaceURL = user.FaceURL
 		member.Nickname = user.Nickname
 
 		err = imdb.InsertIntoGroupMember(member)
@@ -596,7 +596,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if group.Introduction != req.GroupInfo.Introduction && req.GroupInfo.Introduction != "" {
 		changedType = changedType | (1 << 2)
 	}
-	if group.FaceUrl != req.GroupInfo.FaceURL && req.GroupInfo.FaceURL != "" {
+	if group.FaceURL != req.GroupInfo.FaceURL && req.GroupInfo.FaceURL != "" {
 		changedType = changedType | (1 << 3)
 	}
 	//only administrators can set group information
