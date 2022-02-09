@@ -47,6 +47,10 @@ type FriendRequest struct {
 	Ex            string    `gorm:"column:ex;size:1024"`
 }
 
+func (FriendRequest) TableName() string {
+	return "friend_requests"
+}
+
 //message GroupInfo{
 //  string GroupID = 1;
 //  string GroupName = 2;
