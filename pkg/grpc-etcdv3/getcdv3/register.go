@@ -64,9 +64,9 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 	//keepalive
 	kresp, err := cli.KeepAlive(ctx, resp.ID)
 	if err != nil {
-		return fmt.Errorf("keepalive faild, errmsg:%v, lease id:%d", err, resp.ID)
+		return fmt.Errorf("keepalive failed, errmsg:%v, lease id:%d", err, resp.ID)
 	}
-
+	fmt.Println("RegisterEtcd ok")
 	go func() {
 	FLOOP:
 		for {
