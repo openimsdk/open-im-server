@@ -194,9 +194,11 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			}
 
 		}
+		log.Info(msgToMQ.OperationID, "addUidList", addUidList)
 		for _, v := range addUidList {
 			pb.MsgData.RecvID = v
 			isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, pb)
+			log.Info(msgToMQ.OperationID, "isSend", isSend)
 			if isSend {
 				msgToMQ.MsgData = pb.MsgData
 				err := rpc.sendMsgToKafka(&msgToMQ, v)
