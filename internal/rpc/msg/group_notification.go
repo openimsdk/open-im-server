@@ -324,10 +324,10 @@ func MemberKickedNotification(req *pbGroup.KickGroupMemberReq, kickedUserIDList 
 		MemberKickedTips.KickedUserList = append(MemberKickedTips.KickedUserList, &groupMemberInfo)
 	}
 	groupNotification(constant.MemberKickedNotification, &MemberKickedTips, req.OpUserID, req.GroupID, "", req.OperationID)
-
-	for _, v := range kickedUserIDList {
-		groupNotification(constant.MemberKickedNotification, &MemberKickedTips, req.OpUserID, "", v, req.OperationID)
-	}
+	//
+	//for _, v := range kickedUserIDList {
+	//	groupNotification(constant.MemberKickedNotification, &MemberKickedTips, req.OpUserID, "", v, req.OperationID)
+	//}
 }
 
 //message MemberInvitedTips{
