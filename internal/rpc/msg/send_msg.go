@@ -14,6 +14,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/garyburd/redigo/redis"
+	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -165,6 +166,20 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.Error(pb.Token, pb.OperationID, "rpc send_msg getGroupInfo failed, err = %s", reply.ErrMsg)
 			return returnMsg(&replay, pb, reply.ErrCode, reply.ErrMsg, "", 0)
 		}
+		var addUidList []string
+		switch pb.MsgData.ContentType {
+		case constant.MemberKickedNotification:
+			var tips sdk_ws.TipsComm
+			var memberKickedTips sdk_ws.MemberKickedTips
+			_ = proto.Unmarshal(pb.MsgData.Content, &tips)
+			_ = proto.Unmarshal(tips.Detail, &memberKickedTips)
+			for _, v := range memberKickedTips.KickedUserList {
+				addUidList = append(addUidList, v.UserID)
+			}
+		case constant.MemberQuitNotification:
+			addUidList = append(addUidList, pb.MsgData.SendID)
+		default:
+		}
 		groupID := pb.MsgData.GroupID
 		for _, v := range reply.MemberList {
 			pb.MsgData.RecvID = v.UserID
@@ -174,6 +189,19 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 				err := rpc.sendMsgToKafka(&msgToMQ, v.UserID)
 				if err != nil {
 					log.NewError(msgToMQ.OperationID, "kafka send msg err:UserId", v.UserID, msgToMQ.String())
+					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+				}
+			}
+
+		}
+		for _, v := range addUidList {
+			pb.MsgData.RecvID = v
+			isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, pb)
+			if isSend {
+				msgToMQ.MsgData = pb.MsgData
+				err := rpc.sendMsgToKafka(&msgToMQ, v)
+				if err != nil {
+					log.NewError(msgToMQ.OperationID, "kafka send msg err:UserId", v, msgToMQ.String())
 					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 				}
 			}
