@@ -95,7 +95,10 @@ func initMysqlDB() {
 		log.NewInfo("CreateTable Black")
 		db.CreateTable(&Black{})
 	}
-
+	if !db.HasTable(&ChatLog{}) {
+		log.NewInfo("CreateTable Black")
+		db.CreateTable(&ChatLog{})
+	}
 	return
 
 	sqlTable := "CREATE TABLE IF NOT EXISTS `user` (" +
