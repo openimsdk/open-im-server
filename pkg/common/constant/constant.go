@@ -44,6 +44,7 @@ const (
 	GroupMsg       = 201
 
 	//SysRelated
+	NotificationBegin = 1000
 
 	FriendApplicationApprovedNotification = 1201 //add_friend_response
 	FriendApplicationRejectedNotification = 1202 //add_friend_response
@@ -66,6 +67,7 @@ const (
 	MemberKickedNotification             = 1508
 	MemberInvitedNotification            = 1509
 	MemberEnterNotification              = 1510
+	NotificationEnd                      = 2000
 
 	//MsgFrom
 	UserMsgType = 100
