@@ -403,7 +403,7 @@ func MemberEnterNotification(req *pbGroup.GroupApplicationResponseReq) {
 		log.Error(req.OperationID, "setGroupInfo failed ", err.Error(), req.GroupID, MemberEnterTips.Group)
 		return
 	}
-	if err := setOpUserInfo(req.OpUserID, req.GroupID, MemberEnterTips.EntrantUser); err != nil {
+	if err := setGroupMemberInfo(req.GroupID, req.FromUserID, MemberEnterTips.EntrantUser); err != nil {
 		log.Error(req.OperationID, "setOpUserInfo failed ", err.Error(), req.OpUserID, req.GroupID, MemberEnterTips.EntrantUser)
 		return
 	}

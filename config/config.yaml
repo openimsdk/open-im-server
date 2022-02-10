@@ -226,7 +226,7 @@ notification:
 
   groupApplicationAccepted:
     conversation:
-      reliabilityLevel: 3
+      reliabilityLevel: 2
       unreadCount: true
     offlinePush:
       switch: false
