@@ -17,33 +17,32 @@ type mysqlDB struct {
 
 func initMysqlDB() {
 	//When there is no open IM database, connect to the mysql built-in database to create openIM database
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
-		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], "mysql")
+	//dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+	//	config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], "mysql")
 	var db *gorm.DB
-	var err1 error
-	db, err := gorm.Open("mysql", dsn)
-	if err != nil {
-		log.NewError("0", "Open failed ", err.Error(), dsn)
-	}
-	if err != nil {
-		time.Sleep(time.Duration(30) * time.Second)
-		db, err1 = gorm.Open("mysql", dsn)
-		if err1 != nil {
-			log.NewError("0", "Open failed ", err1.Error(), dsn)
-			panic(err1.Error())
-		}
-	}
+	//db, err := gorm.Open("mysql", dsn)
+	//if err != nil {
+	//	log.NewError("0", "Open failed ", err.Error(), dsn)
+	//}
+	//if err != nil {
+	//	time.Sleep(time.Duration(30) * time.Second)
+	//	db, err1 = gorm.Open("mysql", dsn)
+	//	if err1 != nil {
+	//		log.NewError("0", "Open failed ", err1.Error(), dsn)
+	//		panic(err1.Error())
+	//	}
+	//}
 
 	//Check the database and table during initialization
-	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", config.Config.Mysql.DBDatabaseName+"test1")
-	err = db.Exec(sql).Error
+	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", config.Config.Mysql.DBDatabaseName)
+	err := db.Exec(sql).Error
 	if err != nil {
 		log.NewError("0", "Exec failed ", err.Error(), sql)
 		panic(err.Error())
 	}
 	db.Close()
 
-	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
