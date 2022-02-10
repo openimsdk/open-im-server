@@ -245,6 +245,7 @@ func CreateGroup(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
+	//
 	req := &rpc.CreateGroupReq{GroupInfo: &open_im_sdk.GroupInfo{}}
 	utils.CopyStructFields(req.GroupInfo, &params)
 
