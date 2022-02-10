@@ -9,6 +9,7 @@ import (
 	pbFriend "Open_IM/pkg/proto/friend"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -33,6 +34,14 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 		log.Error(commID.OperationID, "Marshal failed ", err.Error(), m.String())
 		return
 	}
+
+	marshaler := jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: false,
+	}
+
+	tips.JsonDetail, _ = marshaler.MarshalToString(m)
 
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(commID.FromUserID, commID.ToUserID)
 	if err != nil {
