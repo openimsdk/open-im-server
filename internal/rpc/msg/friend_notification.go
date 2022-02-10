@@ -57,6 +57,8 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 		tips.DefaultTips = cn.BlackAdded.DefaultTips.Tips
 	case constant.BlackDeletedNotification:
 		tips.DefaultTips = cn.BlackDeleted.DefaultTips.Tips + toUserNickname
+	case constant.UserInfoUpdatedNotification:
+		tips.DefaultTips = cn.UserInfoUpdated.DefaultTips.Tips
 	default:
 		log.Error(commID.OperationID, "contentType failed ", contentType)
 		return
