@@ -106,7 +106,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	// {openIM001 openIM002 0 test add friend 0001-01-01 00:00:00 +0000 UTC   0001-01-01 00:00:00 +0000 UTC }]
 	log.NewDebug(req.CommID.OperationID, "UpdateFriendApplication args ", friendRequest)
 	//err := imdb.InsertFriendApplication(&friendRequest)
-	err := imdb.InsertFriendApplication(&friendRequest)
+	err := imdb.InsertFriendApplication(&friendRequest, map[string]interface{}{"handle_result": 0})
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "UpdateFriendApplication failed ", err.Error(), friendRequest)
 		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
@@ -449,23 +449,23 @@ func (s *friendServer) GetSelfApplyList(ctx context.Context, req *pbFriend.GetSe
 	for _, selfApplyOtherUserInfo := range usersInfo {
 		var userInfo sdkws.FriendRequest // pbFriend.ApplyUserInfo
 		cp.FriendRequestDBCopyOpenIM(&userInfo, &selfApplyOtherUserInfo)
-		u, err := imdb.GetUserByUserID(userInfo.FromUserID)
-		if err != nil {
-			log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.FromUserID)
-			continue
-		}
-		userInfo.FromNickname = u.Nickname
-		userInfo.FromFaceURL = u.FaceURL
-		userInfo.FromGender = u.Gender
-
-		u, err = imdb.GetUserByUserID(userInfo.ToUserID)
-		if err != nil {
-			log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.ToUserID)
-			continue
-		}
-		userInfo.ToNickname = u.Nickname
-		userInfo.ToFaceURL = u.FaceURL
-		userInfo.ToGender = u.Gender
+		//u, err := imdb.GetUserByUserID(userInfo.FromUserID)
+		//if err != nil {
+		//	log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.FromUserID)
+		//	continue
+		//}
+		//userInfo.FromNickname = u.Nickname
+		//userInfo.FromFaceURL = u.FaceURL
+		//userInfo.FromGender = u.Gender
+		//
+		//u, err = imdb.GetUserByUserID(userInfo.ToUserID)
+		//if err != nil {
+		//	log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.ToUserID)
+		//	continue
+		//}
+		//userInfo.ToNickname = u.Nickname
+		//userInfo.ToFaceURL = u.FaceURL
+		//userInfo.ToGender = u.Gender
 
 		selfApplyOtherUserList = append(selfApplyOtherUserList, &userInfo)
 	}
