@@ -6,7 +6,6 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 
-	"github.com/garyburd/redigo/redis"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,14 +14,13 @@ type paramsCertification struct {
 	Email            string `json:"email"`
 	PhoneNumber      string `json:"phoneNumber"`
 	VerificationCode string `json:"verificationCode"`
+	OperationID      string `json:"operationID" binding:"required"`
 }
 
 func Verify(c *gin.Context) {
-	log.InfoByKv("Verify api is statrting...", "")
 	params := paramsCertification{}
-
 	if err := c.BindJSON(&params); err != nil {
-		log.ErrorByKv("request params json parsing failed", "", "err", err.Error())
+		log.NewError("", "request params json parsing failed", "", "err", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
 		return
 	}
@@ -44,27 +42,28 @@ func Verify(c *gin.Context) {
 		return
 	}
 	log.NewInfo("0", " params.VerificationCode != config.Config.Demo.SuperCode", params.VerificationCode, config.Config.Demo)
-	log.InfoByKv("begin get form redis", account)
-	v, err := redis.String(db.DB.Exec("GET", account))
-	log.InfoByKv("redis phone number and verificating Code", account, v)
+	log.NewInfo(params.OperationID, "begin get form redis", account)
+
+	code, err := db.DB.GetAccountCode(account)
+	log.NewInfo(params.OperationID, "redis phone number and verificating Code", account, code)
 	if err != nil {
-		log.ErrorByKv("Verification code expired", account, "err", err.Error())
+		log.NewError(params.OperationID, "Verification code expired", account, "err", err.Error())
 		data := make(map[string]interface{})
 		data["account"] = account
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.LogicalError, "errMsg": "Verification code expired!", "data": data})
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.CodeInvalidOrExpired, "errMsg": "Verification code expired!", "data": data})
 		return
 	}
-	if params.VerificationCode == v {
-		log.InfoByKv("Verified successfully", account)
+	if params.VerificationCode == code {
+		log.Info(params.OperationID, "Verified successfully", account)
 		data := make(map[string]interface{})
 		data["account"] = account
 		data["verificationCode"] = params.VerificationCode
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "Verified successfully!", "data": data})
 		return
 	} else {
-		log.InfoByKv("Verification code error", account, params.VerificationCode)
+		log.Info(params.OperationID, "Verification code error", account, params.VerificationCode)
 		data := make(map[string]interface{})
 		data["account"] = account
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.LogicalError, "errMsg": "Verification code error!", "data": data})
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.CodeInvalidOrExpired, "errMsg": "Verification code error!", "data": data})
 	}
 }

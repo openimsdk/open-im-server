@@ -1,16 +1,16 @@
 package register
 
 import (
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
 	"net/http"
 )
 
@@ -19,16 +19,15 @@ type ParamsLogin struct {
 	PhoneNumber string `json:"phoneNumber"`
 	Password    string `json:"password"`
 	Platform    int32  `json:"platform"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
 func Login(c *gin.Context) {
-	log.NewDebug("Login api is statrting...")
 	params := ParamsLogin{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
 		return
 	}
-
 	var account string
 	if params.Email != "" {
 		account = params.Email
@@ -36,77 +35,36 @@ func Login(c *gin.Context) {
 		account = params.PhoneNumber
 	}
 
-	log.InfoByKv("api Login get params", account)
-
-	queryParams := im_mysql_model.Register{
-		Account:  account,
-		Password: params.Password,
-	}
-
-	canLogin := im_mysql_model.Login(&queryParams)
-	if canLogin == 1 {
-		log.ErrorByKv("Incorrect phone number password", account, "err", "Mobile phone number is not registered")
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.LogicalError, "errMsg": "Mobile phone number is not registered"})
-		return
-	}
-	if canLogin == 2 {
-		log.ErrorByKv("Incorrect phone number password", account, "err", "Incorrect password")
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.LogicalError, "errMsg": "Incorrect password"})
-		return
-	}
-
-	resp, err := OpenIMToken(account, params.Platform)
+	r, err := im_mysql_model.GetRegister(account)
 	if err != nil {
-		log.ErrorByKv("get token by phone number err", account, "err", err.Error())
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.HttpError, "errMsg": err.Error()})
+		log.NewError(params.OperationID, "user have not register", params.Password, account)
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.NotRegistered, "errMsg": "Mobile phone number is not registered"})
 		return
 	}
-	response, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if err != nil {
-		log.ErrorByKv("Failed to read file", account, "err", err.Error())
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.IoError, "errMsg": err.Error()})
+	if r.Password != params.Password {
+		log.NewError(params.OperationID, "password err", params.Password, account, r.Password, r.Account)
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.PasswordErr, "errMsg": "Mobile phone number is not registered"})
 		return
 	}
-	imRep := IMRegisterResp{}
-	err = json.Unmarshal(response, &imRep)
-	if err != nil {
-		log.ErrorByKv("json parsing failed", account, "err", err.Error())
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
-		return
-	}
-
-	if imRep.ErrCode != 0 {
-		log.ErrorByKv("openIM Login request failed", account, "err")
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.HttpError, "errMsg": imRep.ErrMsg})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": imRep.Data})
-	return
-
-}
-
-func OpenIMToken(Account string, platform int32) (*http.Response, error) {
 	url := fmt.Sprintf("http://%s:10000/auth/user_token", utils.ServerIP)
-
-	client := &http.Client{}
-	params := make(map[string]interface{})
-
-	params["secret"] = config.Config.Secret
-	params["platform"] = platform
-	params["uid"] = Account
-	con, err := json.Marshal(params)
+	openIMGetUserToken := api.UserTokenReq{}
+	openIMGetUserToken.OperationID = params.OperationID
+	openIMGetUserToken.Platform = params.Platform
+	openIMGetUserToken.Secret = config.Config.Secret
+	openIMGetUserToken.UserID = account
+	openIMGetUserTokenResp := api.UserTokenResp{}
+	bMsg, err := http2.Post(url, openIMGetUserToken, config.Config.MessageCallBack.CallBackTimeOut)
 	if err != nil {
-		log.ErrorByKv("json parsing failed", Account, "err", err.Error())
-		return nil, err
+		log.NewError(params.OperationID, "request openIM get user token error", account, "err", err.Error())
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.GetIMTokenErr, "errMsg": err.Error()})
+		return
 	}
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(con)))
-	if err != nil {
-		log.ErrorByKv("request error", "/auth/user_token", "err", err.Error())
-		return nil, err
+	err = json.Unmarshal(bMsg, &openIMGetUserTokenResp)
+	if err != nil || openIMGetUserTokenResp.ErrCode != 0 {
+		log.NewError(params.OperationID, "request get user token", account, "err", "")
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.GetIMTokenErr, "errMsg": ""})
+		return
 	}
+	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": openIMGetUserTokenResp.UserToken})
 
-	resp, err := client.Do(req)
-	return resp, err
 }

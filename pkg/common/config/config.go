@@ -285,6 +285,7 @@ type config struct {
 			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
 		}
 		SuperCode string `yaml:"superCode"`
+		CodeTTL   int    `yaml:"codeTTL"`
 		Mail      struct {
 			Title                   string `yaml:"title"`
 			SenderMail              string `yaml:"senderMail"`
