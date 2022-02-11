@@ -82,7 +82,7 @@ func InsertFriendApplication(friendRequest *db.FriendRequest) error {
 		return nil
 	}
 
-	t := dbConn.Model(friendRequest).Select("*").Updates(*friendRequest)
+	t := dbConn.Debug().Table("friend_requests").Select("*").Updates(*friendRequest)
 	if t.RowsAffected == 0 {
 		return utils.Wrap(errors.New("RowsAffected == 0"), "no update")
 	}
