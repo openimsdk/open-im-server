@@ -293,10 +293,6 @@ type config struct {
 			SmtpAddr                string `yaml:"smtpAddr"`
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
-		ErrMsg struct {
-			HasRegistered   string `yaml:"hasRegistered"`
-			MailSendCodeErr string `yaml:"mailSendCodeErr"`
-		}
 	}
 }
 type PConversation struct {

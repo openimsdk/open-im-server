@@ -441,9 +441,6 @@ demo:
     senderAuthorizationCode: "1gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
     smtpPort: 25
-  errMsg:
-    hasRegistered: "用户已经注册"
-    mailSendCodeErr: "邮件发送失败"
 
 
 

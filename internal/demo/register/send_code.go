@@ -39,13 +39,13 @@ func SendVerificationCode(c *gin.Context) {
 	_, err := im_mysql_model.GetRegister(account)
 	if err == nil {
 		log.NewError(params.OperationID, "The phone number has been registered", params)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": getErrMsg(constant.HasRegistered)})
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": ""})
 		return
 	}
 	ok, err := db.DB.JudgeAccountEXISTS(account)
 	if ok || err != nil {
 		log.NewError(params.OperationID, "The phone number has been registered", params)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": getErrMsg(constant.RepeatSendCode)})
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": ""})
 		return
 	}
 	log.InfoByKv("begin sendSms", account)
@@ -67,7 +67,7 @@ func SendVerificationCode(c *gin.Context) {
 		m.SetBody(`text/html`, fmt.Sprintf("%d", code))
 		if err := gomail.NewDialer(config.Config.Demo.Mail.SmtpAddr, config.Config.Demo.Mail.SmtpPort, config.Config.Demo.Mail.SenderMail, config.Config.Demo.Mail.SenderAuthorizationCode).DialAndSend(m); err != nil {
 			log.ErrorByKv("send mail error", account, "err", err.Error())
-			c.JSON(http.StatusOK, gin.H{"errCode": constant.MailSendCodeErr, "errMsg": getErrMsg(constant.MailSendCodeErr)})
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.MailSendCodeErr, "errMsg": ""})
 			return
 		}
 	} else {
@@ -116,14 +116,4 @@ func CreateClient(accessKeyId *string, accessKeySecret *string) (result *dysmsap
 	result = &dysmsapi20170525.Client{}
 	result, err = dysmsapi20170525.NewClient(c)
 	return result, err
-}
-func getErrMsg(errCode int) string {
-	switch errCode {
-	case constant.HasRegistered:
-		return config.Config.Demo.ErrMsg.HasRegistered
-	case constant.MailSendCodeErr:
-		return config.Config.Demo.ErrMsg.MailSendCodeErr
-	default:
-		return ""
-	}
 }

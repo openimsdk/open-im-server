@@ -22,6 +22,7 @@ type ParamsSetPassword struct {
 	Password         string `json:"password"`
 	VerificationCode string `json:"verificationCode"`
 	Platform         int32  `json:"platform" binding:"required,min=1,max=7"`
+	Ex               string `json:"ex"`
 	OperationID      string `json:"operationID" binding:"required"`
 }
 
@@ -68,7 +69,7 @@ func SetPassword(c *gin.Context) {
 		return
 	}
 	log.Info(params.OperationID, "begin store mysql", account, params.Password)
-	err = im_mysql_model.SetPassword(account, params.Password)
+	err = im_mysql_model.SetPassword(account, params.Password, params.Ex)
 	if err != nil {
 		log.NewError(params.OperationID, "set phone number password error", account, "err", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": err.Error()})
