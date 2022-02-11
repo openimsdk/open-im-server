@@ -40,7 +40,7 @@ func SetPassword(c *gin.Context) {
 	if params.VerificationCode != config.Config.Demo.SuperCode {
 		v, err := redis.String(db.DB.Exec("GET", account))
 		if err != nil || v != params.VerificationCode {
-			log.InfoByKv("password Verification code error", account, params.VerificationCode)
+			log.NewError(params.OperationID, "password Verification code error", account, params.VerificationCode)
 			data := make(map[string]interface{})
 			data["PhoneNumber"] = account
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.CodeInvalidOrExpired, "errMsg": "Verification code error!", "data": data})
