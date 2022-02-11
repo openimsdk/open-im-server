@@ -52,7 +52,7 @@ func SendVerificationCode(c *gin.Context) {
 	rand.Seed(time.Now().UnixNano())
 	code := 100000 + rand.Intn(900000)
 	log.NewInfo(params.OperationID, "begin store redis", account)
-	err = db.DB.SetAccountCode(account, code, config.Config.Demo.SuperCodeTTL)
+	err = db.DB.SetAccountCode(account, code, config.Config.Demo.CodeTTL)
 	if err != nil {
 		log.NewError(params.OperationID, "set redis error", account, "err", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.SmsSendCodeErr, "errMsg": "Enter the superCode directly in the verification code box, SuperCode can be configured in config.xml"})
