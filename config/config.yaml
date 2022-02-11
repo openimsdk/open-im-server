@@ -433,11 +433,17 @@ demo:
     signName: OpenIM Corporation
     verificationCodeTemplateCode: SMS_2268101641
   superCode: 666666
+  #  second
+  superCodeTTL: 60
   mail:
     title: "openIM"
-senderMail: "1765567899@qq.com"
-senderAuthorizationCode: "1gxyausfoevlzbfag"
-smtpAddr: "smtp.qq.com"
-smtpPort: 25
+    senderMail: "1765567899@qq.com"
+    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    smtpAddr: "smtp.qq.com"
+    smtpPort: 25
+  errMsg:
+    hasRegistered: "用户已经注册"
+    mailSendCodeErr: "邮件发送失败"
+
 
 

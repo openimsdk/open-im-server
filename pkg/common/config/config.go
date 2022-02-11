@@ -284,13 +284,18 @@ type config struct {
 			SignName                     string `yaml:"signName"`
 			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
 		}
-		SuperCode string `yaml:"superCode"`
-		Mail      struct {
+		SuperCode    string `yaml:"superCode"`
+		SuperCodeTTL int    `yaml:"superCodeTTL"`
+		Mail         struct {
 			Title                   string `yaml:"title"`
 			SenderMail              string `yaml:"senderMail"`
 			SenderAuthorizationCode string `yaml:"senderAuthorizationCode"`
 			SmtpAddr                string `yaml:"smtpAddr"`
 			SmtpPort                int    `yaml:"smtpPort"`
+		}
+		ErrMsg struct {
+			HasRegistered   string `yaml:"hasRegistered"`
+			MailSendCodeErr string `yaml:"mailSendCodeErr"`
 		}
 	}
 }

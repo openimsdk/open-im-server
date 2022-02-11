@@ -2,6 +2,12 @@ package db
 
 import "time"
 
+type Register struct {
+	Account  string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
+	Password string `gorm:"column:password;type:varchar(255)" json:"password"`
+	Ex       string `gorm:"column:ex;size:1024" json:"ex"`
+}
+
 //
 //message FriendInfo{
 //string OwnerUserID = 1;
@@ -183,7 +189,6 @@ type ChatLog struct {
 	ContentType      int32     `gorm:"column:content_type" json:"contentType"`
 	Content          string    `gorm:"column:content;type:varchar(1000)" json:"content"`
 	Status           int32     `gorm:"column:status" json:"status"`
-	Seq              uint32    `gorm:"column:seq;index:index_seq;default:0" json:"seq"`
 	SendTime         time.Time `gorm:"column:send_time" json:"sendTime"`
 	CreateTime       time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex               string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
