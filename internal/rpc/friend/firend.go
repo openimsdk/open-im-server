@@ -405,24 +405,25 @@ func (s *friendServer) GetFriendApplyList(ctx context.Context, req *pbFriend.Get
 	var appleUserList []*sdkws.FriendRequest
 	for _, applyUserInfo := range ApplyUsersInfo {
 		var userInfo sdkws.FriendRequest
-		utils.CopyStructFields(&userInfo, applyUserInfo)
-		u, err := imdb.GetUserByUserID(userInfo.FromUserID)
-		if err != nil {
-			log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.FromUserID)
-			continue
-		}
-		userInfo.FromNickname = u.Nickname
-		userInfo.FromFaceURL = u.FaceURL
-		userInfo.FromGender = u.Gender
-
-		u, err = imdb.GetUserByUserID(userInfo.ToUserID)
-		if err != nil {
-			log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.ToUserID)
-			continue
-		}
-		userInfo.ToNickname = u.Nickname
-		userInfo.ToFaceURL = u.FaceURL
-		userInfo.ToGender = u.Gender
+		cp.FriendRequestDBCopyOpenIM(&userInfo, &applyUserInfo)
+		//	utils.CopyStructFields(&userInfo, applyUserInfo)
+		//	u, err := imdb.GetUserByUserID(userInfo.FromUserID)
+		//	if err != nil {
+		//		log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.FromUserID)
+		//		continue
+		//	}
+		//	userInfo.FromNickname = u.Nickname
+		//	userInfo.FromFaceURL = u.FaceURL
+		//	userInfo.FromGender = u.Gender
+		//
+		//	u, err = imdb.GetUserByUserID(userInfo.ToUserID)
+		//	if err != nil {
+		//		log.Error(req.CommID.OperationID, "GetUserByUserID", userInfo.ToUserID)
+		//		continue
+		//	}
+		//	userInfo.ToNickname = u.Nickname
+		//	userInfo.ToFaceURL = u.FaceURL
+		//	userInfo.ToGender = u.Gender
 		appleUserList = append(appleUserList, &userInfo)
 	}
 
