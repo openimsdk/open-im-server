@@ -10,6 +10,7 @@ import (
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -109,6 +110,13 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		log.Error(operationID, "Marshal failed ", err.Error(), m.String())
 		return
 	}
+	marshaler := jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: false,
+	}
+
+	tips.JsonDetail, _ = marshaler.MarshalToString(m)
 
 	from, err := imdb.GetUserByUserID(sendID)
 	if err != nil {

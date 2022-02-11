@@ -170,6 +170,7 @@ message OfflinePushInfo{
 message TipsComm{
   bytes detail = 1;
   string defaultTips = 2;
+  string jsonDetail = 3;
 }
 
 //////////////////////group/////////////////////
