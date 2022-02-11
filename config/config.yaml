@@ -434,7 +434,7 @@ demo:
     verificationCodeTemplateCode: SMS_2268101641
   superCode: 666666
   #  second
-  superCodeTTL: 60
+  codeTTL: 60
   mail:
     title: "openIM"
     senderMail: "1765567899@qq.com"
