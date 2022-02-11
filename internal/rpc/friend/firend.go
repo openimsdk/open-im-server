@@ -101,12 +101,12 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	}
 
 	//Establish a latest relationship in the friend request table
-	friendRequest := db.FriendRequest{ReqMsg: req.ReqMsg, HandleResult: 0}
+	friendRequest := db.FriendRequest{ReqMsg: req.ReqMsg, HandleResult: 0, CreateTime: time.Now()}
 	utils.CopyStructFields(&friendRequest, req.CommID)
 	// {openIM001 openIM002 0 test add friend 0001-01-01 00:00:00 +0000 UTC   0001-01-01 00:00:00 +0000 UTC }]
 	log.NewDebug(req.CommID.OperationID, "UpdateFriendApplication args ", friendRequest)
 	//err := imdb.InsertFriendApplication(&friendRequest)
-	err := imdb.InsertFriendApplication(&friendRequest, map[string]interface{}{"handle_result": 0})
+	err := imdb.InsertFriendApplication(&friendRequest)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "UpdateFriendApplication failed ", err.Error(), friendRequest)
 		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
