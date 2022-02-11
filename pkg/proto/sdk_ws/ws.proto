@@ -39,7 +39,6 @@ message PublicUserInfo{
   string nickname = 2;
   string faceURL = 3;
   int32 gender = 4;
-  int32 appMangerLevel = 5; //if >0
 }
 
 message UserInfo{

@@ -20,6 +20,8 @@ message CreateGroupReq{
   string OperationID = 3;
   string OpUserID = 4;  //app manager or group owner
   string OwnerUserID = 5; //owner
+
+
 }
 message CreateGroupResp{
   int32   ErrCode = 1;
