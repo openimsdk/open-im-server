@@ -72,7 +72,7 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 			select {
 			case v, ok := <-kresp:
 				if ok == true {
-					fmt.Println(" kresp ok ", v)
+					//	fmt.Println(" kresp ok ", v)
 				} else {
 					fmt.Println(" kresp failed ", v)
 				}
