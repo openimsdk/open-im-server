@@ -11,7 +11,7 @@ mysql:
   dbMysqlAddress: [ 43.128.5.63:13306 ]
   dbMysqlUserName: root
   dbMysqlPassword: openIM
-  dbMysqlDatabaseName: openIM
+  dbMysqlDatabaseName: openIMtest1
   dbTableName: eMsg
   dbMsgTableNum: 1
   dbMaxOpenConns: 20
@@ -30,7 +30,7 @@ mongo:
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 127.0.0.1:16379
+  dbAddress: 43.128.5.63:16379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -94,6 +94,7 @@ rpcport:
   openImPushPort: [ 10700 ]
   openImOpenImStatisticPort: [ 10800 ]
   OpenImMessageCMSPort: [ 10900 ]
+  openImAdminCMSPort: [10100]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -114,6 +115,7 @@ rpcregistername:
   openImAuthName: Auth
   OpenImStatisticsName: Statistics
   OpenImMessageCMSName: MessageCMS
+  openImAdminCMSName: AdminCMS
 
 log:
   storageLocation: ../logs/
@@ -150,7 +152,7 @@ push:
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
-  appManagerUid: [ "openIM123456","openIM654321", "openIM333" ]
+  appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]
   secrets: [ "openIM1","openIM2", "openIM333" ]
 
 secret: tuoyun

@@ -159,7 +159,7 @@ func UserIsBlock(userId string) (bool, error) {
 		return false, err
 	}
 	var user db.BlackList
-	rows := dbConn.Table("black_list").Where("uid=?", userId).First(&user).RowsAffected
+	rows := dbConn.Table("black_lists").Where("uid=?", userId).First(&user).RowsAffected
 	if rows >= 1 {
 		return true, nil
 	}
@@ -183,7 +183,7 @@ func BlockUser(userId, endDisableTime string) error {
 		return constant.ErrDB
 	}
 	var blockUser db.BlackList
-	dbConn.Table("black_list").Where("uid=?", userId).First(&blockUser)
+	dbConn.Table("black_lists").Where("uid=?", userId).First(&blockUser)
 	if blockUser.UserId != "" {
 		dbConn.Model(&blockUser).Where("uid=?", blockUser.UserId).Update("end_disable_time", end)
 		return nil
@@ -222,7 +222,7 @@ func GetBlockUserById(userId string) (BlockUserInfo, error) {
 	if err != nil {
 		return blockUserInfo, err
 	}
-	if err = dbConn.Table("black_list").Where("uid=?", userId).Find(&blockUser).Error; err != nil {
+	if err = dbConn.Table("black_lists").Where("uid=?", userId).Find(&blockUser).Error; err != nil {
 		return blockUserInfo, err
 	}
 	user := db.Users{

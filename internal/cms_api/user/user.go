@@ -35,7 +35,7 @@ func GetUserById(c *gin.Context) {
 	respPb, err := client.GetUserById(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	if respPb.User.UserId == "" {
@@ -67,7 +67,7 @@ func GetUsersByName(c *gin.Context) {
 	respPb, err := client.GetUsersByName(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "rpc", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	utils.CopyStructFields(&resp.Users, respPb.Users)
@@ -94,7 +94,7 @@ func GetUsers(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetUsers(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		openIMHttp.RespHttp200(c, err, resp)
 		return
 	}
 	utils.CopyStructFields(&resp.Users, respPb.User)
@@ -122,7 +122,7 @@ func ResignUser(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	_, err := client.ResignUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		openIMHttp.RespHttp200(c, err, resp)
 	}
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
@@ -144,7 +144,7 @@ func AlterUser(c *gin.Context) {
 	_, err := client.AlterUser(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError("0", "microserver failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
@@ -164,7 +164,7 @@ func AddUser(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	_, err := client.AddUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
@@ -189,7 +189,7 @@ func BlockUser(c *gin.Context) {
 	fmt.Println(reqPb)
 	_, err := client.BlockUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		openIMHttp.RespHttp200(c, err, resp)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, resp)
@@ -211,7 +211,7 @@ func UnblockUser(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	_, err := client.UnBlockUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		openIMHttp.RespHttp200(c, err, resp)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, resp)
@@ -236,7 +236,8 @@ func GetBlockUsers(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetBlockUsers(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetBlockUsers rpc", err.Error())
+		openIMHttp.RespHttp200(c, err, resp)
 		return
 	}
 	for _, v := range respPb.BlockUsers {
@@ -275,7 +276,7 @@ func GetBlockUserById(c *gin.Context) {
 	respPb, err := client.GetBlockUserById(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError("0", "GetBlockUserById rpc failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	resp.EndDisableTime = respPb.BlockUser.EndDisableTime
@@ -300,7 +301,7 @@ func DeleteUser(c *gin.Context) {
 	_, err := client.DeleteUser(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError("0", "DeleteUser rpc failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)

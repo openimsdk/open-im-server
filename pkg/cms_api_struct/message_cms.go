@@ -43,6 +43,6 @@ type ChatLog struct {
 
 type GetChatLogsResponse struct {
 	ChatLogs []ChatLog `json:"chat_logs"`
-
+	logNums int `json:"log_nums"`
 	ResponsePagination
 }

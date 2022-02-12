@@ -834,11 +834,22 @@ func (s *groupServer) RemoveGroupMembersCMS(_ context.Context, req *pbGroup.Remo
 func (s *groupServer) AddGroupMembersCMS(_ context.Context, req *pbGroup.AddGroupMembersCMSReq) (*pbGroup.AddGroupMembersCMSResp, error) {
 	log.NewInfo(req.OperationId, utils.GetSelfFuncName(), "args:", req.String())
 	resp := &pbGroup.AddGroupMembersCMSResp{}
-	for _, userIds := range req.UserIds {
+	for _, userId := range req.UserIds {
+		if isExist := imdb.IsExistGroupMember(req.GroupId, userId); isExist {
+			log.NewError(req.OperationId, utils.GetSelfFuncName(), "user is exist in group", userId, req.GroupId)
+			resp.Failed = append(resp.Failed, userId)
+			continue
+		}
+		user, err := imdb.GetUserByUserID(userId)
+		if err != nil {
+			log.NewError(req.OperationId, utils.GetSelfFuncName(), "GetUserByUserID", err.Error())
+			resp.Failed = append(resp.Failed, userId)
+			continue
+		}
 		groupMember := db.GroupMember{
 			GroupID:        req.GroupId,
-			UserID:         userIds,
-			Nickname:       "",
+			UserID:         userId,
+			Nickname:       user.Nickname,
 			FaceUrl:        "",
 			RoleLevel:      1,
 			JoinTime:       time.Time{},
@@ -848,9 +859,9 @@ func (s *groupServer) AddGroupMembersCMS(_ context.Context, req *pbGroup.AddGrou
 		}
 		if err := imdb.InsertIntoGroupMember(groupMember); err != nil {
 			log.NewError(req.OperationId, utils.GetSelfFuncName(), "InsertIntoGroupMember failed", req.String())
-			resp.Failed = append(resp.Failed, userIds)
+			resp.Failed = append(resp.Failed, userId)
 		} else  {
-			resp.Success = append(resp.Success, userIds)
+			resp.Success = append(resp.Success, userId)
 		}
 	}
 	return resp, nil
@@ -862,7 +873,7 @@ func (s *groupServer) SetGroupMaster(_ context.Context, req *pbGroup.SetGroupMas
 	err := imdb.OperateGroupRole(req.UserId, req.GroupId, constant.GroupOwner)
 	if err != nil {
 		log.NewError(req.OperationId, utils.GetSelfFuncName(),"OperateGroupRole failed", err.Error())
-		return resp, nil
+		return resp, constant.ErrDB
 	}
 	return resp, nil
 }

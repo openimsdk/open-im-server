@@ -4,7 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/common/http"
+	errors "Open_IM/pkg/common/http"
 	"context"
 
 	"Open_IM/pkg/common/log"
@@ -73,19 +73,24 @@ func (s *messageCMSServer) Run() {
 func (s *messageCMSServer) BoradcastMessage(_ context.Context, req *pbMessageCMS.BoradcastMessageReq) (*pbMessageCMS.BoradcastMessageResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "BoradcastMessage", req.String())
 	resp := &pbMessageCMS.BoradcastMessageResp{}
-	return resp, http.WarpError(constant.ErrDB)
+	return resp, errors.WrapError(constant.ErrDB)
 }
 
 func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetChatLogsReq) (*pbMessageCMS.GetChatLogsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetChatLogs", req.String())
 	resp := &pbMessageCMS.GetChatLogsResp{}
+	time, err := utils.TimeStringToTime(req.Date)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "time string parse error", err.Error())
+	}
 	chatLog := db.ChatLog{
 		Content: req.Content,
+		SendTime: time,
 	}
-	chatLogs, err := imdb.GetChatLog(chatLog, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	chatLogs, err := imdb.GetChatLog(chatLog, req.Pagination.PageNumber,  req.Pagination.ShowNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLog", err.Error())
-		return resp, http.WarpError(constant.ErrDB)
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	for _, chatLog := range chatLogs {
 		pbChatLog := &pbMessageCMS.ChatLogs{
@@ -134,6 +139,5 @@ func (s *messageCMSServer) MassSendMessage(_ context.Context, req *pbMessageCMS.
 func (s *messageCMSServer) WithdrawMessage(_ context.Context, req *pbMessageCMS.WithdrawMessageReq) (*pbMessageCMS.WithdrawMessageResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "WithdrawMessage", req.String())
 	resp := &pbMessageCMS.WithdrawMessageResp{}
-
 	return resp, nil
 }

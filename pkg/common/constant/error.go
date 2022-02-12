@@ -15,7 +15,7 @@ var (
 	//	ErrMysql             = ErrInfo{100, ""}
 	//	ErrMongo             = ErrInfo{110, ""}
 	//	ErrRedis             = ErrInfo{120, ""}
-	ErrParseToken = ErrInfo{200, ParseTokenMsg.Error()}
+	ErrParseToken = ErrInfo{700, ParseTokenMsg.Error()}
 	//	ErrCreateToken       = ErrInfo{201, "Create token failed"}
 	//	ErrAppServerKey      = ErrInfo{300, "key error"}
 	ErrTencentCredential = ErrInfo{400, ThirdPartyMsg.Error()}

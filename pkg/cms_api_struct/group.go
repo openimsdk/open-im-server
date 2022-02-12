@@ -57,6 +57,15 @@ type SetGroupMasterRequest struct {
 type SetGroupMasterResponse struct {
 }
 
+type SetGroupMemberRequest struct {
+	GroupId string `json:"group_id" binding:"required"`
+	UserId  string `json:"user_id" binding:"required"`
+}
+
+type SetGroupMemberRespones struct {
+
+}
+
 type BanGroupChatRequest struct {
 	GroupId string `json:"group_id" binding:"required"`
 }

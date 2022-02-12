@@ -273,7 +273,7 @@ func GetGroupMembers(c *gin.Context) {
 	respPb, err := client.GetGroupMembersCMS(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetGroupMembersCMS failed:", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	resp.ResponsePagination = cms_api_struct.ResponsePagination{
@@ -392,6 +392,6 @@ func SetGroupMaster(c *gin.Context) {
 	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
-func GetMemberInGroup(c *gin.Context) {
+func SetMemberInGroup(c *gin.Context) {
 
 }

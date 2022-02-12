@@ -16,15 +16,14 @@ func NewGinRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	baseRouter := gin.Default()
 	router := baseRouter.Group("/api")
-	router.Use(middleware.JWTAuth())
 	router.Use(middleware.CorsHandler())
 	adminRouterGroup := router.Group("/admin")
 	{
-		adminRouterGroup.POST("/register", admin.AdminRegister)
-		adminRouterGroup.GET("/get_user_settings", admin.GetAdminSettings)
-		adminRouterGroup.POST("/alter_user_settings", admin.AlterAdminSettings)
+		adminRouterGroup.POST("/login", admin.AdminLogin)
 	}
-	statisticsRouterGroup := router.Group("/statistics")
+	r2 := router.Group("")
+	r2.Use(middleware.JWTAuth())
+	statisticsRouterGroup := r2.Group("/statistics")
 	{
 		statisticsRouterGroup.GET("/get_messages_statistics", statistics.GetMessagesStatistics)
 		statisticsRouterGroup.GET("/get_user_statistics", statistics.GetUserStatistics)
@@ -32,7 +31,7 @@ func NewGinRouter() *gin.Engine {
 		statisticsRouterGroup.GET("/get_active_user", statistics.GetActiveUser)
 		statisticsRouterGroup.GET("/get_active_group", statistics.GetActiveGroup)
 	}
-	organizationRouterGroup := router.Group("/organization")
+	organizationRouterGroup := r2.Group("/organization")
 	{
 		organizationRouterGroup.GET("/get_staffs", organization.GetStaffs)
 		organizationRouterGroup.GET("/get_organizations", organization.GetOrganizations)
@@ -46,7 +45,7 @@ func NewGinRouter() *gin.Engine {
 		organizationRouterGroup.PATCH("/alter_corps_info", organization.AlterStaffsInfo)
 		organizationRouterGroup.POST("/add_child_org", organization.AddChildOrganization)
 	}
-	groupRouterGroup := router.Group("/group")
+	groupRouterGroup := r2.Group("/group")
 	{
 		groupRouterGroup.GET("/get_group_by_id", group.GetGroupById)
 		groupRouterGroup.GET("/get_groups", group.GetGroups)
@@ -60,10 +59,10 @@ func NewGinRouter() *gin.Engine {
 		groupRouterGroup.POST("/ban_group_chat", group.BanGroupChat)
 		groupRouterGroup.POST("/open_group_chat", group.OpenGroupChat)
 		groupRouterGroup.POST("/delete_group", group.DeleteGroup)
-		groupRouterGroup.POST("/get_members_in_group", group.GetMemberInGroup)
+		groupRouterGroup.POST("/get_members_in_group", group.GetGroupMembers)
 		groupRouterGroup.POST("/set_group_master", group.SetGroupMaster)
 	}
-	userRouterGroup := router.Group("/user")
+	userRouterGroup := r2.Group("/user")
 	{
 		userRouterGroup.POST("/resign", user.ResignUser)
 		userRouterGroup.GET("/get_user", user.GetUserById)
@@ -77,13 +76,13 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.POST("/delete_user", user.DeleteUser)
 		userRouterGroup.GET("/get_users_by_name", user.GetUsersByName)
 	}
-	friendRouterGroup := router.Group("/friend")
+	friendRouterGroup := r2.Group("/friend")
 	{
 		friendRouterGroup.POST("/get_friends_by_id")
 		friendRouterGroup.POST("/set_friend")
 		friendRouterGroup.POST("/remove_friend")
 	}
-	messageCMSRouterGroup := router.Group("/message")
+	messageCMSRouterGroup := r2.Group("/message")
 	{
 		messageCMSRouterGroup.GET("/get_chat_logs", messageCMS.GetChatLogs)
 		messageCMSRouterGroup.POST("/broadcast_message", messageCMS.BroadcastMessage)

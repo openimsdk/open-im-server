@@ -26,7 +26,7 @@ func BroadcastMessage(c *gin.Context) {
 	_, err := client.BoradcastMessage(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetChatLogs rpc failed", err.Error())
-		openIMHttp.RespHttp200S(c, err, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
@@ -61,7 +61,7 @@ func GetChatLogs(c *gin.Context) {
 	respPb, err := client.GetChatLogs(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetChatLogs rpc failed", err.Error())
-		openIMHttp.RespHttp200S(c, constant.ErrServer, resp)
+		openIMHttp.RespHttp200(c, err, resp)
 		return
 	}
 	utils.CopyStructFields(&resp, &respPb)
