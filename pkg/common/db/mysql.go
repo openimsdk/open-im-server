@@ -4,10 +4,11 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"sync"
 	"time"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 type mysqlDB struct {
@@ -57,7 +58,7 @@ func initMysqlDB() {
 		&Group{},
 		&GroupMember{},
 		&GroupRequest{},
-		&Users{},
+		&User{},
 		&Black{}, &ChatLog{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
 

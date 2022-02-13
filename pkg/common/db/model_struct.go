@@ -135,7 +135,7 @@ type GroupRequest struct {
 //int64 CreateTime = 9;
 //int32 AppMangerLevel = 10;
 //open_im_sdk.User == imdb.User
-type Users struct {
+type User struct {
 	UserID         string    `gorm:"column:user_id;primary_key;size:64"`
 	Nickname       string    `gorm:"column:name;size:255"`
 	FaceURL        string    `gorm:"column:face_url;size:255"`
@@ -186,7 +186,7 @@ type ChatLog struct {
 }
 
 type BlackList struct {
-	UserId string `gorm:"column:uid"`
+	UserId           string    `gorm:"column:uid"`
 	BeginDisableTime time.Time `gorm:"column:begin_disable_time"`
-	EndDisableTime time.Time `gorm:"column:end_disable_time"`
+	EndDisableTime   time.Time `gorm:"column:end_disable_time"`
 }

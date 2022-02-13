@@ -217,7 +217,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
-	var user db.Users
+	var user db.User
 	utils.CopyStructFields(&user, req.UserInfo)
 	if req.UserInfo.Birth != 0 {
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
@@ -267,7 +267,7 @@ func (s *userServer) GetUsersByName(ctx context.Context, req *pbUser.GetUsersByN
 			IsBlock:      isBlock,
 		})
 	}
-	user := db.Users{Nickname:req.UserName}
+	user := db.User{Nickname: req.UserName}
 	userNums, err := imdb.GetUsersCount(user)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "", err.Error())
@@ -324,14 +324,14 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			resp.User = append(resp.User, user)
 		}
 	}
-	user := db.Users{}
+	user := db.User{}
 	nums, err := imdb.GetUsersCount(user)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsersCount failed", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	resp.UserNums = nums
-	resp.Pagination = &sdkws.ResponsePagination{ShowNumber:req.Pagination.ShowNumber, CurrentPage:req.Pagination.PageNumber}
+	resp.Pagination = &sdkws.ResponsePagination{ShowNumber: req.Pagination.ShowNumber, CurrentPage: req.Pagination.PageNumber}
 	return resp, nil
 }
 
@@ -343,7 +343,7 @@ func (s *userServer) ResignUser(ctx context.Context, req *pbUser.ResignUserReq) 
 func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*pbUser.AlterUserResp, error) {
 	log.NewInfo(req.OperationID, "AlterUser args ", req.String())
 	resp := &pbUser.AlterUserResp{}
-	user := db.Users{
+	user := db.User{
 		PhoneNumber: strconv.FormatInt(req.PhoneNumber, 10),
 		Nickname:    req.Nickname,
 		Email:       req.Email,
@@ -452,4 +452,3 @@ func (s *userServer) DeleteUser(_ context.Context, req *pbUser.DeleteUserReq) (*
 	}
 	return resp, nil
 }
-

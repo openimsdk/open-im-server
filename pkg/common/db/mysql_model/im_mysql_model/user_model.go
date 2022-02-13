@@ -20,7 +20,7 @@ func init() {
 		} else {
 			continue
 		}
-		var appMgr db.Users
+		var appMgr db.User
 		appMgr.UserID = v
 		appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
 		appMgr.AppMangerLevel = constant.AppAdmin
@@ -32,7 +32,7 @@ func init() {
 	}
 }
 
-func UserRegister(user db.Users) error {
+func UserRegister(user db.User) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -68,16 +68,16 @@ func DeleteUser(userID string) (i int64) {
 	if err != nil {
 		return 0
 	}
-	i = dbConn.Table("users").Where("user_id=?", userID).Delete(db.Users{}).RowsAffected
+	i = dbConn.Table("users").Where("user_id=?", userID).Delete(db.User{}).RowsAffected
 	return i
 }
 
-func GetUserByUserID(userID string) (*db.Users, error) {
+func GetUserByUserID(userID string) (*db.User, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var user db.Users
+	var user db.User
 	err = dbConn.Table("users").Where("user_id=?", userID).First(&user).Error
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func GetUserByUserID(userID string) (*db.Users, error) {
 	return &user, nil
 }
 
-func UpdateUserInfo(user db.Users) error {
+func UpdateUserInfo(user db.User) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -123,14 +123,14 @@ func SelectSomeUserID(userIDList []string) ([]string, error) {
 	return resultArr, nil
 }
 
-func GetUsers(showNumber, pageNumber int32) ([]db.Users, error) {
+func GetUsers(showNumber, pageNumber int32) ([]db.User, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	var users []db.Users
+	var users []db.User
 	if err != nil {
 		return users, err
 	}
 	dbConn.LogMode(true)
-	err = dbConn.Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&users).Error
+	err = dbConn.Table("users").Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&users).Error
 	if err != nil {
 		return users, err
 	}
@@ -142,14 +142,14 @@ func AddUser(userId, phoneNumber, name string) error {
 	if err != nil {
 		return err
 	}
-	user := db.Users{
+	user := db.User{
 		PhoneNumber: phoneNumber,
 		Birth:       time.Now(),
 		CreateTime:  time.Now(),
 		UserID:      userId,
 		Nickname:    name,
 	}
-	result := dbConn.Create(&user)
+	result := dbConn.Table("users").Create(&user)
 	return result.Error
 }
 
@@ -208,7 +208,7 @@ func UnBlockUser(userId string) error {
 }
 
 type BlockUserInfo struct {
-	User             db.Users
+	User             db.User
 	BeginDisableTime time.Time
 	EndDisableTime   time.Time
 }
@@ -225,7 +225,7 @@ func GetBlockUserById(userId string) (BlockUserInfo, error) {
 	if err = dbConn.Table("black_lists").Where("uid=?", userId).Find(&blockUser).Error; err != nil {
 		return blockUserInfo, err
 	}
-	user := db.Users{
+	user := db.User{
 		UserID: blockUser.UserId,
 	}
 	if err := dbConn.Find(&user).Error; err != nil {
@@ -251,10 +251,10 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 		return blockUserInfos, err
 	}
 	for _, blockUser := range blockUsers {
-		var user db.Users
+		var user db.User
 		if err := dbConn.Table("users").Where("user_id=?", blockUser.UserId).First(&user).Error; err == nil {
 			blockUserInfos = append(blockUserInfos, BlockUserInfo{
-				User: db.Users{
+				User: db.User{
 					UserID:   user.UserID,
 					Nickname: user.Nickname,
 					FaceURL:  user.FaceURL,
@@ -267,9 +267,9 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 	return blockUserInfos, nil
 }
 
-func GetUserByName(userName string, showNumber, pageNumber int32) ([]db.Users, error) {
+func GetUserByName(userName string, showNumber, pageNumber int32) ([]db.User, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	var users []db.Users
+	var users []db.User
 	if err != nil {
 		return users, err
 	}
@@ -278,14 +278,14 @@ func GetUserByName(userName string, showNumber, pageNumber int32) ([]db.Users, e
 	return users, err
 }
 
-func GetUsersCount(user db.Users) (int32, error) {
+func GetUsersCount(user db.User) (int32, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return 0, err
 	}
 	dbConn.LogMode(true)
 	var count int32
-	if err := dbConn.Model(user).Where(fmt.Sprintf(" name like '%%%s%%' ", user.Nickname)).Count(&count).Error; err != nil {
+	if err := dbConn.Table("users").Where(fmt.Sprintf(" name like '%%%s%%' ", user.Nickname)).Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return count, nil

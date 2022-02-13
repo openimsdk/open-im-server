@@ -128,19 +128,19 @@ func GroupRequestDBCopyOpenIM(dst *open_im_sdk.GroupRequest, src *db.GroupReques
 	dst.HandleTime = uint32(src.HandledTime.Unix())
 }
 
-func UserOpenIMCopyDB(dst *db.Users, src *open_im_sdk.UserInfo) {
+func UserOpenIMCopyDB(dst *db.User, src *open_im_sdk.UserInfo) {
 	utils.CopyStructFields(dst, src)
 	dst.Birth = utils.UnixSecondToTime(int64(src.Birth))
 	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
 }
 
-func UserDBCopyOpenIM(dst *open_im_sdk.UserInfo, src *db.Users) {
+func UserDBCopyOpenIM(dst *open_im_sdk.UserInfo, src *db.User) {
 	utils.CopyStructFields(dst, src)
 	dst.CreateTime = uint32(src.CreateTime.Unix())
 	dst.Birth = uint32(src.Birth.Unix())
 }
 
-func UserDBCopyOpenIMPublicUser(dst *open_im_sdk.PublicUserInfo, src *db.Users) {
+func UserDBCopyOpenIMPublicUser(dst *open_im_sdk.PublicUserInfo, src *db.User) {
 	utils.CopyStructFields(dst, src)
 }
 

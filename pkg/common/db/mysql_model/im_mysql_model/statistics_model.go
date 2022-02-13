@@ -143,10 +143,10 @@ func GetActiveUsers(from, to time.Time, limit int) ([]*activeUser, error) {
 	dbConn.LogMode(true)
 	err = dbConn.Table("chat_logs").Select("send_id, count(*) as message_num").Where("create_time >= ? and create_time <= ? and session_type = ?", from, to, 1).Group("send_id").Limit(limit).Order("message_num DESC").Find(&activeUsers).Error
 	for _, activeUser := range activeUsers {
-		user := db.Users{
+		user := db.User{
 			UserID: activeUser.Id,
 		}
-		dbConn.Model(&user).Select("user_id, name").Find(&user)
+		dbConn.Table("users").Select("user_id, name").Find(&user)
 		activeUser.Name = user.Nickname
 	}
 	return activeUsers, err
