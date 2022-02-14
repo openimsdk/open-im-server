@@ -316,15 +316,6 @@ message AddGroupMembersCMSResp {
   repeated string failed = 2;
 }
 
-message SetGroupMasterReq {
-  string GroupId = 1;
-  string UserId = 2;
-  string OperationId = 3;
-}
-
-message SetGroupMasterResp {
-
-}
 
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);

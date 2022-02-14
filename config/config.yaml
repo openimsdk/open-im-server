@@ -94,7 +94,7 @@ rpcport:
   openImPushPort: [ 10700 ]
   openImOpenImStatisticPort: [ 10800 ]
   OpenImMessageCMSPort: [ 10900 ]
-  openImAdminCMSPort: [10100]
+  openImAdminCMSPort: [11000]
   c2c:
     callbackBeforeSendMsg:
       switch: false

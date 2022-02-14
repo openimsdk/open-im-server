@@ -131,3 +131,16 @@ type RemoveGroupMembersRequest struct {
 type RemoveGroupMembersResponse struct{
 	GroupMemberOperateResponse
 }
+
+type AlterGroupInfoRequest struct {
+	GroupID       string `json:"group_id"`
+	GroupName     string `json:"group_name"`
+	Notification  string `json:"notification"`
+		Introduction  string `json:"introduction"`
+	ProfilePhoto  string `json:"profile_photo"`
+	GroupType     int `json:"group_type"`
+}
+
+type AlterGroupInfoResponse struct {
+
+}

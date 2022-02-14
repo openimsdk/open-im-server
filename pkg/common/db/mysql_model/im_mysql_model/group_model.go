@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -126,10 +127,14 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) error {
 		RoleLevel: roleLevel,
 	}
 	updateInfo := db.GroupMember{
-		RoleLevel: constant.GroupOwner,
+		RoleLevel: roleLevel,
 	}
-	if err := dbConn.Find(&groupMember).Update(updateInfo).Error; err != nil {
-		return err
+	result := dbConn.Table("group_members").Find(&groupMember).Update(updateInfo)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
 	}
 	return nil
 }

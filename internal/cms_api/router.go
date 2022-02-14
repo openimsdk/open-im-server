@@ -61,6 +61,8 @@ func NewGinRouter() *gin.Engine {
 		groupRouterGroup.POST("/delete_group", group.DeleteGroup)
 		groupRouterGroup.POST("/get_members_in_group", group.GetGroupMembers)
 		groupRouterGroup.POST("/set_group_master", group.SetGroupMaster)
+		groupRouterGroup.POST("/set_group_ordinary_user", group.SetGroupOrdinaryUsers)
+		groupRouterGroup.POST("/alter_group_info", group.AlterGroupInfo)
 	}
 	userRouterGroup := r2.Group("/user")
 	{

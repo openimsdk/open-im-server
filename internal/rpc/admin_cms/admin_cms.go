@@ -70,11 +70,10 @@ func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLogi
 		if adminID == req.AdminID {
 			for _, secret := range config.Config.Manager.Secrets {
 				if secret == req.Secret {
-					str := secret+adminID
-					token, expTime, err := token_verify.CreateToken(str,9843)
+					token, expTime, err := token_verify.CreateToken(adminID,9843)
 					log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "generate token success", "token: ", token, "expTime:", expTime)
 					if err != nil {
-						log.NewError(req.OperationID, utils.GetSelfFuncName(), "generate token failed", "str: ", str,  err.Error())
+						log.NewError(req.OperationID, utils.GetSelfFuncName(), "generate token failed", "adminID: ", adminID,  err.Error())
 						return resp, openIMHttp.WrapError(constant.ErrTokenUnknown)
 					}
 					resp.Token = token
