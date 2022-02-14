@@ -78,9 +78,11 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 	case constant.HasReadReceipt:
+		log.Info("", "this is a test start", msg, msg.Options)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
+		log.Info("", "this is a test end", msg, msg.Options)
 	case constant.Typing:
 		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
@@ -97,6 +99,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	//if !utils.VerifyToken(pb.Token, pb.SendID) {
 	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
 	rpc.encapsulateMsgData(pb.MsgData)
+	log.Info("", "this is a test MsgData ", pb.MsgData)
 	msgToMQ := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID}
 	//options := utils.JsonStringToMap(pbData.Options)
 	isHistory := utils.GetSwitchFromOptions(pb.MsgData.Options, constant.IsHistory)
