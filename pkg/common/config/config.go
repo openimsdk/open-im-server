@@ -77,6 +77,7 @@ type config struct {
 		RpcGetTokenPort       []int `yaml:"rpcGetTokenPort"`
 	}
 	RpcRegisterName struct {
+		OpenImStatisticsName         string `yaml:"OpenImStatisticsName"`
 		OpenImUserName               string `yaml:"openImUserName"`
 		OpenImFriendName             string `yaml:"openImFriendName"`
 		OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`
@@ -84,6 +85,8 @@ type config struct {
 		OpenImOnlineMessageRelayName string `yaml:"openImOnlineMessageRelayName"`
 		OpenImGroupName              string `yaml:"openImGroupName"`
 		OpenImAuthName               string `yaml:"openImAuthName"`
+		OpenImMessageCMSName 		 string `yaml:"openImMessageCMSName"`
+		OpenImAdminCMSName           string `yaml:"openImAdminCMSName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`

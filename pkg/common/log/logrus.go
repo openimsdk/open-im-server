@@ -2,14 +2,14 @@ package log
 
 import (
 	"Open_IM/pkg/common/config"
-	"bufio"
 	"fmt"
+	"os"
+	"time"
+
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
-	"os"
-	"time"
 )
 
 var logger *Logger
@@ -32,12 +32,13 @@ func loggerInit(moduleName string) *Logger {
 	//All logs will be printed
 	logger.SetLevel(logrus.Level(config.Config.Log.RemainLogLevel))
 	//Close std console output
-	src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		panic(err.Error())
-	}
-	writer := bufio.NewWriter(src)
-	logger.SetOutput(writer)
+	// src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+	// writer := bufio.NewWriter(src)
+	// logger.SetOutput(writer)
+	logger.SetOutput(os.Stdout)
 	//Log Console Print Style Setting
 	logger.SetFormatter(&nested.Formatter{
 		TimestampFormat: "2006-01-02 15:04:05.000",

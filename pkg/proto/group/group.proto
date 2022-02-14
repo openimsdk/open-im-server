@@ -208,6 +208,113 @@ message GetGroupAllMemberResp {
   repeated server_api_params.GroupMemberFullInfo memberList = 3;
 }
 
+message CMSGroup {
+    server_api_params.GroupInfo GroupInfo = 1;
+    string GroupMasterName = 2;
+    string GroupMasterId = 3;
+}
+
+message GetGroupReq {
+    string GroupName = 1;
+    server_api_params.RequestPagination Pagination = 2;
+    string OperationID = 3;
+}
+
+message GetGroupResp {
+    repeated CMSGroup CMSGroups = 1;
+    server_api_params.RequestPagination Pagination = 2;
+    int32 GroupNums = 3;
+}
+
+message GetGroupsReq {
+    server_api_params.RequestPagination Pagination = 1;
+    string OperationID = 2;
+}
+
+message GetGroupsResp {
+    repeated CMSGroup CMSGroups = 1;
+    server_api_params.RequestPagination Pagination = 2;
+    int32 GroupNum = 3;
+}
+
+message GetGroupMemberReq {
+    string GroupId = 1;
+    string OperationID = 2;
+}
+
+message OperateGroupStatusReq {
+    string GroupId = 1;
+    int32 Status = 2;
+    string OperationID = 3;
+}
+
+message OperateGroupStatusResp {
+
+}
+
+message OperateUserRoleReq {
+  string GroupId = 1;
+  string UserId = 2;
+  int32 RoleLevel = 3;
+  string OperationID = 4;
+}
+ 
+message OperateUserRoleResp {
+
+}
+
+message DeleteGroupReq {
+  string GroupId = 1;
+  string OperationID = 2;
+}
+
+message DeleteGroupResp {
+
+}
+
+message GetGroupByIdReq {
+  string GroupId = 1;
+  string OperationID = 2;
+}
+
+message GetGroupByIdResp {
+  CMSGroup CMSGroup = 1;
+}
+
+message GetGroupMembersCMSReq {
+   string GroupId = 1;
+   string UserName = 2;
+   server_api_params.RequestPagination Pagination = 3;
+   string OperationID = 4;
+}
+
+message GetGroupMembersCMSResp {
+   repeated server_api_params.GroupMemberFullInfo members = 1;
+   server_api_params.ResponsePagination Pagination = 2;
+   int32 MemberNums = 3;
+}
+
+message RemoveGroupMembersCMSReq {
+  string GroupId = 1;
+  repeated string UserIds = 2;
+  string OperationID = 3;
+}
+
+message RemoveGroupMembersCMSResp {
+  repeated string success = 1;
+  repeated string failed = 2;
+}
+
+message AddGroupMembersCMSReq {
+  string GroupId = 1;
+  repeated string UserIds = 2;
+  string OperationId = 3;
+}
+
+message AddGroupMembersCMSResp {
+  repeated string success = 1;
+  repeated string failed = 2;
+}
 
 
 service group{
@@ -226,6 +333,16 @@ service group{
   rpc getJoinedGroupList(GetJoinedGroupListReq) returns (GetJoinedGroupListResp);
   rpc inviteUserToGroup(InviteUserToGroupReq) returns (InviteUserToGroupResp);
   rpc getGroupAllMember(GetGroupAllMemberReq) returns(GetGroupAllMemberResp);
+
+  rpc GetGroupById(GetGroupByIdReq) returns(GetGroupByIdResp);
+  rpc GetGroup(GetGroupReq) returns(GetGroupResp);
+  rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);
+  rpc OperateGroupStatus(OperateGroupStatusReq) returns(OperateGroupStatusResp);
+  rpc OperateUserRole(OperateUserRoleReq) returns(OperateUserRoleResp);
+  rpc DeleteGroup(DeleteGroupReq) returns(DeleteGroupResp);
+  rpc GetGroupMembersCMS(GetGroupMembersCMSReq) returns(GetGroupMembersCMSResp);
+  rpc RemoveGroupMembersCMS(RemoveGroupMembersCMSReq) returns(RemoveGroupMembersCMSResp);
+  rpc AddGroupMembersCMS(AddGroupMembersCMSReq) returns(AddGroupMembersCMSResp);
 }
 
 

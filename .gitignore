@@ -5,6 +5,7 @@ components
 logs
 out-test
 .github
+.idea
 
 deploy/open_im_demo
 deploy/open_im_api

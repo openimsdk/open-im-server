@@ -121,12 +121,12 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 //	case constant.GroupChatType:
 //		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 //		client := pbGroup.NewGroupClient(etcdConn)
-//		req := &pbGroup.GetGroupAllMemberReq{
+//		req := &pbGroup.Req{
 //			GroupID:     m.RecvID,
 //			Token:       config.Config.Secret,
 //			OperationID: m.OperationID,
 //		}
-//		reply, err := client.GetGroupAllMember(context.Background(), req)
+//		reply, err := client.(context.Background(), req)
 //		if err != nil {
 //			log.Error(m.Token, m.OperationID, "rpc  getGroupInfo failed, err = %s", err.Error())
 //			return

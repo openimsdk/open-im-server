@@ -193,3 +193,9 @@ type ChatLog struct {
 	CreateTime       time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex               string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }
+
+type BlackList struct {
+	UserId           string    `gorm:"column:uid"`
+	BeginDisableTime time.Time `gorm:"column:begin_disable_time"`
+	EndDisableTime   time.Time `gorm:"column:end_disable_time"`
+}
