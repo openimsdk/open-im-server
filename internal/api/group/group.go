@@ -363,7 +363,6 @@ func GetGroupsInfo(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
-
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.GetGroupsInfo(context.Background(), req)
@@ -536,5 +535,4 @@ func TransferGroupOwner(c *gin.Context) {
 	resp := api.TransferGroupOwnerResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
 	log.NewInfo(req.OperationID, "TransferGroupOwner api return ", resp)
 	c.JSON(http.StatusOK, resp)
-
 }

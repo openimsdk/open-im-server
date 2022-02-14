@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
+	"fmt"
 	"time"
 )
 
@@ -225,6 +226,31 @@ func IsGroupOwnerAdmin(groupID, UserID string) bool {
 	return false
 }
 
+func GetGroupMembersByGroupIdCMS(groupId string, userName string, showNumber, pageNumber int32) ([]db.GroupMember, error) {
+	var groupMembers []db.GroupMember
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return groupMembers, err
+	}
+	err = dbConn.Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Limit(showNumber).Offset(showNumber * (pageNumber - 1)).Find(&groupMembers).Error
+	if err != nil {
+		return nil, err
+	}
+	return groupMembers, nil
+}
+
+func GetGroupMembersCount(groupId, userName string) (int32, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	var count int32
+	if err != nil {
+		return count, err
+	}
+	dbConn.LogMode(true)
+	if err := dbConn.Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
+		return count, err
+	}
+	return count, nil
+}
 
 //
 //func SelectGroupList(groupID string) ([]string, error) {

@@ -10,11 +10,12 @@ type ErrInfo struct {
 
 var (
 	OK = ErrInfo{0, ""}
+	ErrServer = ErrInfo{500, "server error"}
 
 	//	ErrMysql             = ErrInfo{100, ""}
 	//	ErrMongo             = ErrInfo{110, ""}
 	//	ErrRedis             = ErrInfo{120, ""}
-	ErrParseToken = ErrInfo{200, ParseTokenMsg.Error()}
+	ErrParseToken = ErrInfo{700, ParseTokenMsg.Error()}
 	//	ErrCreateToken       = ErrInfo{201, "Create token failed"}
 	//	ErrAppServerKey      = ErrInfo{300, "key error"}
 	ErrTencentCredential = ErrInfo{400, ThirdPartyMsg.Error()}
@@ -86,6 +87,10 @@ const (
 	IntentionalError     = 10007
 )
 
-func (e *ErrInfo) Error() string {
+func (e ErrInfo) Error() string {
 	return e.ErrMsg
+}
+
+func (e *ErrInfo) Code() int32 {
+	return e.ErrCode
 }

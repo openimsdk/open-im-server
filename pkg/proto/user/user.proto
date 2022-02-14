@@ -13,6 +13,7 @@ message DeleteUsersReq{
   string OpUserID = 3;
   string OperationID = 4;
 }
+
 message DeleteUsersResp{
   CommonResp  CommonResp = 1;
   repeated string FailedUserIDList = 2;
@@ -98,7 +99,7 @@ message GetReceiveMessageOptResp{
 
 message GetAllConversationMsgOptReq{
   string FromUserID = 1;
-  string  operationID = 2;
+  string operationID = 2;
   string OpUserID = 3;
 }
 message GetAllConversationMsgOptResp{
@@ -106,6 +107,137 @@ message GetAllConversationMsgOptResp{
   repeated OptResult conversationOptResultList = 3;
 }
 
+message ResignUserReq{
+  string UserId = 1;
+  string OperationID = 2;
+}
+
+message ResignUserResp{
+  CommonResp  commonResp = 1;
+}
+
+message GetUserByIdReq{
+  string UserId = 1;
+  string OperationID = 2;
+}
+
+message User{
+  string ProfilePhoto = 1;
+  string Nickname = 2;
+  string UserId = 3;
+  string CreateTime = 4;
+  bool IsBlock = 5;
+}
+
+message GetUserByIdResp{
+  CommonResp  CommonResp = 1;
+  User user = 2;
+}
+
+message GetUsersByNameReq {
+ string UserName = 1;
+ server_api_params.RequestPagination Pagination =2;
+ string OperationID = 3;
+}
+
+message GetUsersByNameResp {
+  repeated User users = 1;
+  server_api_params.ResponsePagination Pagination = 2;
+  int32 UserNums = 3;
+}
+
+message AlterUserReq{
+  string UserId = 1;
+  string OperationID = 2;
+  int64 PhoneNumber = 3;
+  string Nickname = 4;
+  string Email = 5;
+}
+
+message AlterUserResp{
+  CommonResp  CommonResp = 1;
+}
+
+message GetUsersReq {
+  string OperationID = 1;
+  server_api_params.RequestPagination Pagination = 2;
+  string UserName = 3;
+}
+
+message GetUsersResp{
+  CommonResp  CommonResp = 1;
+  repeated User user = 2;
+  server_api_params.ResponsePagination Pagination = 3;
+  int32 UserNums = 4;
+}
+
+message AddUserReq{
+  string OperationID = 1;
+  string PhoneNumber = 2;
+  string UserId = 3;
+  string name = 4;
+}
+
+message AddUserResp{
+ CommonResp  CommonResp = 1;
+}
+
+
+message BlockUserReq{
+  string UserId = 1;
+  string EndDisableTime = 2;
+  string OperationID = 3;
+}
+
+message BlockUserResp{
+   CommonResp  CommonResp = 1;
+}
+
+message UnBlockUserReq{
+  string UserId = 1;
+  string OperationID = 2;
+}
+
+message UnBlockUserResp{
+   CommonResp  CommonResp = 1;
+}
+
+message GetBlockUsersReq{
+  server_api_params.RequestPagination Pagination =1;
+  string OperationID = 2;
+  int32 BlockUserNum = 3;
+}
+
+message BlockUser {
+    User User = 1;
+    string BeginDisableTime = 2;
+    string EndDisableTime = 3;
+}
+
+message GetBlockUsersResp{
+  CommonResp  CommonResp = 1;
+  repeated BlockUser BlockUsers = 2;
+  server_api_params.ResponsePagination Pagination = 3;
+  int32 UserNums = 4;
+}
+
+message GetBlockUserByIdReq {
+    string User_id = 1;
+    string OperationID = 2;
+}
+
+message GetBlockUserByIdResp {
+    BlockUser BlockUser = 2;
+}
+
+message DeleteUserReq {
+    string User_id = 1;
+    string OperationID = 2;
+}
+
+message DeleteUserResp {
+
+}
 
 service user {
   rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
@@ -116,4 +248,16 @@ service user {
   rpc GetReceiveMessageOpt(GetReceiveMessageOptReq)returns(GetReceiveMessageOptResp);
   rpc GetAllConversationMsgOpt(GetAllConversationMsgOptReq)returns(GetAllConversationMsgOptResp);
   rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
+
+  rpc GetUserById(GetUserByIdReq) returns (GetUserByIdResp);
+  rpc GetUsersByName(GetUsersByNameReq) returns (GetUsersByNameResp);
+  rpc ResignUser(ResignUserReq) returns (ResignUserResp);
+  rpc AlterUser(AlterUserReq) returns (AlterUserResp);
+  rpc GetUsers(GetUsersReq) returns (GetUsersResp);
+  rpc AddUser(AddUserReq) returns (AddUserResp);
+  rpc BlockUser(BlockUserReq) returns (BlockUserResp);
+  rpc UnBlockUser(UnBlockUserReq) returns (UnBlockUserResp);
+  rpc GetBlockUsers(GetBlockUsersReq) returns (GetBlockUsersResp);
+  rpc GetBlockUserById(GetBlockUserByIdReq) returns (GetBlockUserByIdResp);
+  rpc DeleteUser(DeleteUserReq) returns (DeleteUserResp);
 }
