@@ -11,7 +11,7 @@ mysql:
   dbMysqlAddress: [ 43.128.5.63:13306 ]
   dbMysqlUserName: root
   dbMysqlPassword: openIM
-  dbMysqlDatabaseName: openIMtest1
+  dbMysqlDatabaseName: openIM
   dbTableName: eMsg
   dbMsgTableNum: 1
   dbMaxOpenConns: 20
@@ -30,7 +30,7 @@ mongo:
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 43.128.5.63:16379
+  dbAddress: 127.0.0.1:16379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
