@@ -44,7 +44,7 @@ func UserRegister(user db.User) error {
 	if user.Birth.Unix() < 0 {
 		user.Birth = utils.UnixSecondToTime(0)
 	}
-	err = dbConn.Table("users").Create(&user).Error
+	err = dbConn.Debug().Table("users").Create(&user).Error
 	if err != nil {
 		return err
 	}
