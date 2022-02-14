@@ -172,112 +172,112 @@ type config struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"groupCreated"`
 
 		GroupInfoSet struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"groupInfoSet"`
 
 		JoinGroupApplication struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"joinGroupApplication"`
 
 		MemberQuit struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"memberQuit"`
 
 		GroupApplicationAccepted struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"groupApplicationAccepted"`
 
 		GroupApplicationRejected struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"groupApplicationRejected"`
 
 		GroupOwnerTransferred struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"groupOwnerTransferred"`
 
 		MemberKicked struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"memberKicked"`
 
 		MemberInvited struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"memberInvited"`
 
 		MemberEnter struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"memberEnter"`
 		////////////////////////user///////////////////////
 		UserInfoUpdated struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"userInfoUpdated"`
 
 		//////////////////////friend///////////////////////
 		FriendApplication struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"friendApplicationAdded"`
 		FriendApplicationApproved struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"friendApplicationApproved"`
 
 		FriendApplicationRejected struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"friendApplicationRejected"`
 
 		FriendAdded struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"friendAdded"`
 
 		FriendDeleted struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"friendDeleted"`
 		FriendRemarkSet struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"friendRemarkSet"`
 		BlackAdded struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"blackAdded"`
 		BlackDeleted struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
-		}
+		} `yaml:"blackDeleted"`
 	}
 	Demo struct {
 		Port         []int `yaml:"openImDemoPort"`
@@ -288,6 +288,7 @@ type config struct {
 			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
 		}
 		SuperCode string `yaml:"superCode"`
+		CodeTTL   int    `yaml:"codeTTL"`
 		Mail      struct {
 			Title                   string `yaml:"title"`
 			SenderMail              string `yaml:"senderMail"`

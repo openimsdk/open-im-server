@@ -480,7 +480,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 		member.UserID = req.FromUserID
 		member.RoleLevel = constant.GroupOrdinaryUsers
 		member.OperatorUserID = req.OpUserID
-		member.FaceUrl = user.FaceURL
+		member.FaceURL = user.FaceURL
 		member.Nickname = user.Nickname
 
 		err = imdb.InsertIntoGroupMember(member)
@@ -597,7 +597,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if group.Introduction != req.GroupInfo.Introduction && req.GroupInfo.Introduction != "" {
 		changedType = changedType | (1 << 2)
 	}
-	if group.FaceUrl != req.GroupInfo.FaceURL && req.GroupInfo.FaceURL != "" {
+	if group.FaceURL != req.GroupInfo.FaceURL && req.GroupInfo.FaceURL != "" {
 		changedType = changedType | (1 << 3)
 	}
 	//only administrators can set group information
@@ -874,6 +874,45 @@ func (s *groupServer) SetGroupMaster(_ context.Context, req *pbGroup.SetGroupMas
 	if err != nil {
 		log.NewError(req.OperationId, utils.GetSelfFuncName(),"OperateGroupRole failed", err.Error())
 		return resp, constant.ErrDB
+	}
+	return resp, nil
+}
+
+
+func (s *groupServer) GetUserReqApplicationList(_ context.Context, req *pbGroup.GetUserReqApplicationListReq) (*pbGroup.GetUserReqApplicationListResp, error) {
+	log.NewInfo(req.OperationID,  utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbGroup.GetUserReqApplicationListResp{}
+	groupRequests, err := imdb.GetUserReqGroupByUserID(req.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserReqGroupByUserID failed ", err.Error())
+		resp.CommonResp = &pbGroup.CommonResp{
+			ErrCode: constant.ErrDB.ErrCode,
+			ErrMsg:  constant.ErrDB.ErrMsg,
+		}
+		return resp, nil
+	}
+	for _, groupReq := range groupRequests {
+		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
+		group, err := imdb.GetGroupInfoByGroupID(groupReq.GroupID)
+		if err != nil {
+			log.Error(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupReq.GroupID)
+			continue
+		}
+		user, err := imdb.GetUserByUserID(groupReq.UserID)
+		if err != nil {
+			log.Error(req.OperationID, "GetUserByUserID failed ", err.Error(), groupReq.UserID)
+			continue
+		}
+		cp.GroupRequestDBCopyOpenIM(&node, &groupReq)
+		cp.UserDBCopyOpenIMPublicUser(node.UserInfo, user)
+		cp.GroupDBCopyOpenIM(node.GroupInfo, group)
+		resp.GroupRequestList = append(resp.GroupRequestList, &node)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupRequests)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "output:", resp)
+	resp.CommonResp = &pbGroup.CommonResp{
+		ErrCode: 0,
+		ErrMsg:  "",
 	}
 	return resp, nil
 }

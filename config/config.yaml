@@ -169,25 +169,24 @@ messagecallback:
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
-  c2c:
-    callbackBeforeSendMsg:
-      switch: false
-      timeoutStrategy: 1 #1:send
-    callbackAfterSendMsg:
-      switch: false
-  state:
-    stateChange:
-      switch: false
+#  c2c:
+#    callbackBeforeSendMsg:
+#      switch: false
+#      timeoutStrategy: 1 #1:send
+#    callbackAfterSendMsg:
+#      switch: false
+#  state:
+#    stateChange:
+#      switch: false
 
-iOSPush:
+iospush:
   pushSound: "xxx"
   badgeCount: true
 
 notification:
-
   groupCreated:
     conversation:
-      reliabilityLevel: 1
+      reliabilityLevel: 3
       unreadCount: true
     offlinePush:
       switch: true
@@ -199,111 +198,111 @@ notification:
 
   groupInfoSet:
     conversation:
-      reliabilityLevel: 1
-      unreadCount: false
+      reliabilityLevel: 3
+      unreadCount: true
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: "groupInfoSet title"
+      desc: "groupInfoSet desc"
+      ext: "groupInfoSet ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "modified the group profile"  # group info changed by xx
 
   joinGroupApplication:
     conversation:
-      reliabilityLevel: 1
+      reliabilityLevel: 2
       unreadCount: false
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: "joinGroupApplication title"
+      desc: "joinGroupApplication desc"
+      ext: "joinGroupApplication ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "apply to join the group"  # group info changed by xx
 
   memberQuit:
     conversation:
-      reliabilityLevel: 1
-      unreadCount: false
+      reliabilityLevel: 3
+      unreadCount: true
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: "memberQuit title"
+      desc: "memberQuit desc"
+      ext: "memberQuit ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "quit group chat"  # group info changed by xx
 
   groupApplicationAccepted:
     conversation:
-      reliabilityLevel: 1
-      unreadCount: false
+      reliabilityLevel: 2
+      unreadCount: true
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: "groupApplicationAccepted title"
+      desc: "groupApplicationAccepted desc"
+      ext: "groupApplicationAccepted ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "was allowed to join the group"  # group info changed by xx
 
   groupApplicationRejected:
     conversation:
-      reliabilityLevel: 1
+      reliabilityLevel: 2
       unreadCount: false
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: " title"
+      desc: " desc"
+      ext: " ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "was rejected into the group"  # group info changed by xx
 
   groupOwnerTransferred:
     conversation:
-      reliabilityLevel: 1
-      unreadCount: false
+      reliabilityLevel: 3
+      unreadCount: true
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: "groupOwnerTransferred title"
+      desc: "groupOwnerTransferred desc"
+      ext: "groupOwnerTransferred ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "become a new group owner"  # group info changed by xx
 
   memberKicked:
     conversation:
-      reliabilityLevel: 1
-      unreadCount: false
+      reliabilityLevel: 3
+      unreadCount: true
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: "memberKicked title"
+      desc: "memberKicked desc"
+      ext: "memberKicked ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "was kicked out of the group"  # group info changed by xx
 
   memberInvited:
     conversation:
-      reliabilityLevel: 1
-      unreadCount: false
+      reliabilityLevel: 3
+      unreadCount: true
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: "memberInvited title"
+      desc: "memberInvited desc"
+      ext: "memberInvited ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "was invited into the group"  # group info changed by xx
 
   memberEnter:
     conversation:
-      reliabilityLevel: 1
-      unreadCount: false
+      reliabilityLevel: 3
+      unreadCount: true
     offlinePush:
       switch: false
-      title: "group info changed title"
-      desc: "group info changed desc"
-      ext: "group info changed ext"
+      title: "memberEnter title"
+      desc: "memberEnter desc"
+      ext: "memberEnter ext"
     defaultTips:
-      tips: "group info changed by"  # group info changed by xx
+      tips: "entered the group"  # group info changed by xx
 
   #############################friend#################################
 
@@ -442,11 +441,14 @@ demo:
     signName: OpenIM Corporation
     verificationCodeTemplateCode: SMS_2268101641
   superCode: 666666
+  #  second
+  codeTTL: 60
   mail:
     title: "openIM"
-senderMail: "1765567899@qq.com"
-senderAuthorizationCode: "1gxyausfoevlzbfag"
-smtpAddr: "smtp.qq.com"
-smtpPort: 25
+    senderMail: "1765567899@qq.com"
+    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    smtpAddr: "smtp.qq.com"
+    smtpPort: 25
+
 
 

@@ -10,6 +10,7 @@ import (
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -30,12 +31,21 @@ func setOpUserInfo(opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupM
 		groupMemberInfo.GroupID = groupID
 	} else {
 		u, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, opUserID)
-		if err != nil {
-			return utils.Wrap(err, "GetGroupMemberInfoByGroupIDAndUserID failed")
+		if err == nil {
+			if err = utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, u); err != nil {
+				return utils.Wrap(err, "")
+			}
 		}
-		if err = utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, u); err != nil {
+
+		user, err := imdb.GetUserByUserID(opUserID)
+		if err != nil {
 			return utils.Wrap(err, "")
 		}
+		groupMemberInfo.GroupID = groupID
+		groupMemberInfo.UserID = user.UserID
+		groupMemberInfo.Nickname = user.Nickname
+		groupMemberInfo.AppMangerLevel = user.AppMangerLevel
+		groupMemberInfo.FaceURL = user.FaceURL
 	}
 	return nil
 }
@@ -54,12 +64,19 @@ func setGroupInfo(groupID string, groupInfo *open_im_sdk.GroupInfo) error {
 
 func setGroupMemberInfo(groupID, userID string, groupMemberInfo *open_im_sdk.GroupMemberFullInfo) error {
 	groupMember, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
+	if err == nil {
+		return utils.Wrap(utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, groupMember), "")
+	}
+
+	user, err := imdb.GetUserByUserID(userID)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	if err = utils2.GroupMemberDBCopyOpenIM(groupMemberInfo, groupMember); err != nil {
-		return utils.Wrap(err, "")
-	}
+	groupMemberInfo.GroupID = groupID
+	groupMemberInfo.UserID = user.UserID
+	groupMemberInfo.Nickname = user.Nickname
+	groupMemberInfo.AppMangerLevel = user.AppMangerLevel
+	groupMemberInfo.FaceURL = user.FaceURL
 	return nil
 }
 
@@ -93,19 +110,54 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		log.Error(operationID, "Marshal failed ", err.Error(), m.String())
 		return
 	}
+	marshaler := jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: false,
+	}
+
+	tips.JsonDetail, _ = marshaler.MarshalToString(m)
+
+	from, err := imdb.GetUserByUserID(sendID)
+	if err != nil {
+		log.Error(operationID, "GetUserByUserID failed ", err.Error(), sendID)
+	}
+	nickname := ""
+	if from != nil {
+		nickname = from.Nickname
+	}
+
+	to, err := imdb.GetUserByUserID(recvUserID)
+	if err != nil {
+		log.Error(operationID, "GetUserByUserID failed ", err.Error(), recvUserID)
+	}
+	toNickname := ""
+	if to != nil {
+		toNickname = to.Nickname
+	}
 
 	cn := config.Config.Notification
 	switch contentType {
 	case constant.GroupCreatedNotification:
-		tips.DefaultTips = cn.GroupCreated.DefaultTips.Tips
+		tips.DefaultTips = nickname + " " + cn.GroupCreated.DefaultTips.Tips
 	case constant.GroupInfoSetNotification:
+		tips.DefaultTips = nickname + " " + cn.GroupInfoSet.DefaultTips.Tips
 	case constant.JoinGroupApplicationNotification:
+		tips.DefaultTips = nickname + " " + cn.JoinGroupApplication.DefaultTips.Tips
 	case constant.MemberQuitNotification:
-	case constant.GroupApplicationAcceptedNotification:
-	case constant.GroupApplicationRejectedNotification:
-	case constant.GroupOwnerTransferredNotification:
-	case constant.MemberKickedNotification:
-	case constant.MemberInvitedNotification:
+		tips.DefaultTips = nickname + " " + cn.MemberQuit.DefaultTips.Tips
+	case constant.GroupApplicationAcceptedNotification: //
+		tips.DefaultTips = toNickname + " " + cn.GroupApplicationAccepted.DefaultTips.Tips
+	case constant.GroupApplicationRejectedNotification: //
+		tips.DefaultTips = toNickname + " " + cn.GroupApplicationRejected.DefaultTips.Tips
+	case constant.GroupOwnerTransferredNotification: //
+		tips.DefaultTips = toNickname + " " + cn.GroupOwnerTransferred.DefaultTips.Tips
+	case constant.MemberKickedNotification: //
+		tips.DefaultTips = toNickname + " " + cn.MemberKicked.DefaultTips.Tips
+	case constant.MemberInvitedNotification: //
+		tips.DefaultTips = toNickname + " " + cn.MemberInvited.DefaultTips.Tips
+	case constant.MemberEnterNotification:
+		tips.DefaultTips = toNickname + " " + cn.MemberInvited.DefaultTips.Tips
 	default:
 		log.Error(operationID, "contentType failed ", contentType)
 		return
@@ -218,7 +270,7 @@ func MemberQuitNotification(req *pbGroup.QuitGroupReq) {
 	}
 
 	groupNotification(constant.MemberQuitNotification, &MemberQuitTips, req.OpUserID, req.GroupID, "", req.OperationID)
-	groupNotification(constant.MemberQuitNotification, &MemberQuitTips, req.OpUserID, "", req.OpUserID, req.OperationID)
+	//	groupNotification(constant.MemberQuitNotification, &MemberQuitTips, req.OpUserID, "", req.OpUserID, req.OperationID)
 
 }
 
@@ -269,7 +321,7 @@ func GroupOwnerTransferredNotification(req *pbGroup.TransferGroupOwnerReq) {
 		log.Error(req.OperationID, "setGroupMemberInfo failed", req.GroupID, req.NewOwnerUserID)
 		return
 	}
-	groupNotification(constant.GroupOwnerTransferredNotification, &GroupOwnerTransferredTips, req.OpUserID, "", req.NewOwnerUserID, req.OperationID)
+	groupNotification(constant.GroupOwnerTransferredNotification, &GroupOwnerTransferredTips, req.OpUserID, req.GroupID, "", req.OperationID)
 }
 
 //message MemberKickedTips{
@@ -298,10 +350,10 @@ func MemberKickedNotification(req *pbGroup.KickGroupMemberReq, kickedUserIDList 
 		MemberKickedTips.KickedUserList = append(MemberKickedTips.KickedUserList, &groupMemberInfo)
 	}
 	groupNotification(constant.MemberKickedNotification, &MemberKickedTips, req.OpUserID, req.GroupID, "", req.OperationID)
-
-	for _, v := range kickedUserIDList {
-		groupNotification(constant.MemberKickedNotification, &MemberKickedTips, req.OpUserID, "", v, req.OperationID)
-	}
+	//
+	//for _, v := range kickedUserIDList {
+	//	groupNotification(constant.MemberKickedNotification, &MemberKickedTips, req.OpUserID, "", v, req.OperationID)
+	//}
 }
 
 //message MemberInvitedTips{
@@ -359,7 +411,7 @@ func MemberEnterNotification(req *pbGroup.GroupApplicationResponseReq) {
 		log.Error(req.OperationID, "setGroupInfo failed ", err.Error(), req.GroupID, MemberEnterTips.Group)
 		return
 	}
-	if err := setOpUserInfo(req.OpUserID, req.GroupID, MemberEnterTips.EntrantUser); err != nil {
+	if err := setGroupMemberInfo(req.GroupID, req.FromUserID, MemberEnterTips.EntrantUser); err != nil {
 		log.Error(req.OperationID, "setOpUserInfo failed ", err.Error(), req.OpUserID, req.GroupID, MemberEnterTips.EntrantUser)
 		return
 	}

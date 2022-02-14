@@ -69,14 +69,22 @@ var (
 )
 
 const (
-	NoError          = 0
-	FormattingError  = 10001
-	DatabaseError    = 10002
-	LogicalError     = 10003
-	ServerError      = 10004
-	HttpError        = 10005
-	IoError          = 10006
-	IntentionalError = 10007
+	NoError              = 0
+	FormattingError      = 10001
+	HasRegistered        = 10002
+	NotRegistered        = 10003
+	PasswordErr          = 10004
+	GetIMTokenErr        = 10005
+	RepeatSendCode       = 10006
+	MailSendCodeErr      = 10007
+	SmsSendCodeErr       = 10008
+	CodeInvalidOrExpired = 10009
+	RegisterFailed       = 10010
+	DatabaseError        = 10002
+	ServerError          = 10004
+	HttpError            = 10005
+	IoError              = 10006
+	IntentionalError     = 10007
 )
 
 func (e ErrInfo) Error() string {

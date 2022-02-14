@@ -31,9 +31,18 @@ func UpdateGroupRequest(groupRequest db.GroupRequest) error {
 }
 
 func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
+	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
+	}
+
+	if toInsertInfo.HandledTime.Unix() < 0 {
+		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
+	}
+	u := dbConn.Table("group_requests").Where("group_id=? and user_id=?", toInsertInfo.GroupID, toInsertInfo.UserID).Update(&toInsertInfo)
+	if u.RowsAffected != 0 {
+		return nil
 	}
 
 	toInsertInfo.ReqTime = time.Now()
@@ -107,6 +116,18 @@ func GetGroupApplicationList(userID string) ([]db.GroupRequest, error) {
 	}
 	return groupRequestList, nil
 }
+
+func GetUserReqGroupByUserID(userID string) ([]db.GroupRequest, error) {
+	var groupRequestList []db.GroupRequest
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	dbConn.LogMode(true)
+	err = dbConn.Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
+	return groupRequestList, err
+}
+
 
 //
 //func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.CommonResp, error) {

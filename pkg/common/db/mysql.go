@@ -36,7 +36,7 @@ func initMysqlDB() {
 	}
 
 	//Check the database and table during initialization
-	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s ;", config.Config.Mysql.DBDatabaseName+"test1")
+	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", config.Config.Mysql.DBDatabaseName)
 	err = db.Exec(sql).Error
 	if err != nil {
 		log.NewError("0", "Exec failed ", err.Error(), sql)
@@ -59,44 +59,52 @@ func initMysqlDB() {
 		&GroupMember{},
 		&GroupRequest{},
 		&User{},
-		&Black{}, &ChatLog{})
+		&Black{}, &ChatLog{}, &Register{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
+	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 
-	//
-	//if !db.HasTable(&Friend{}) {
-	//	log.NewInfo("CreateTable Friend")
-	//	db.CreateTable(&Friend{})
-	//}
-	//
-	//if !db.HasTable(&FriendRequest{}) {
-	//	log.NewInfo("CreateTable FriendRequest")
-	//	db.CreateTable(&FriendRequest{})
-	//}
-	//
-	//if !db.HasTable(&Group{}) {
-	//	log.NewInfo("CreateTable Group")
-	//	db.CreateTable(&Group{})
-	//}
-	//
-	//if !db.HasTable(&GroupMember{}) {
-	//	log.NewInfo("CreateTable GroupMember")
-	//	db.CreateTable(&GroupMember{})
-	//}
-	//
-	//if !db.HasTable(&GroupRequest{}) {
-	//	log.NewInfo("CreateTable GroupRequest")
-	//	db.CreateTable(&GroupRequest{})
-	//}
-	//
-	//if !db.HasTable(&User{}) {
-	//	log.NewInfo("CreateTable User")
-	//	db.CreateTable(&User{})
-	//}
-	//
-	//if !db.HasTable(&Black{}) {
-	//	log.NewInfo("CreateTable Black")
-	//	db.CreateTable(&Black{})
-	//}
+	if !db.HasTable(&Friend{}) {
+		log.NewInfo("CreateTable Friend")
+		db.CreateTable(&Friend{})
+	}
+
+	if !db.HasTable(&FriendRequest{}) {
+		log.NewInfo("CreateTable FriendRequest")
+		db.CreateTable(&FriendRequest{})
+	}
+
+	if !db.HasTable(&Group{}) {
+		log.NewInfo("CreateTable Group")
+		db.CreateTable(&Group{})
+	}
+
+	if !db.HasTable(&GroupMember{}) {
+		log.NewInfo("CreateTable GroupMember")
+		db.CreateTable(&GroupMember{})
+	}
+
+	if !db.HasTable(&GroupRequest{}) {
+		log.NewInfo("CreateTable GroupRequest")
+		db.CreateTable(&GroupRequest{})
+	}
+
+	if !db.HasTable(&User{}) {
+		log.NewInfo("CreateTable User")
+		db.CreateTable(&User{})
+	}
+
+	if !db.HasTable(&Black{}) {
+		log.NewInfo("CreateTable Black")
+		db.CreateTable(&Black{})
+	}
+	if !db.HasTable(&ChatLog{}) {
+		log.NewInfo("CreateTable Black")
+		db.CreateTable(&ChatLog{})
+	}
+	if !db.HasTable(&Register{}) {
+		log.NewInfo("CreateTable Black")
+		db.CreateTable(&Register{})
+	}
 
 	return
 

@@ -58,6 +58,7 @@ func main() {
 		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)        //1
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                          //1
 		groupRouterGroup.POST("/get_recv_group_applicationList", group.GetRecvGroupApplicationList) //1
+		groupRouterGroup.POST("/get_user_req_group_applicationList", group.GetUserReqGroupApplicationList)
 		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                              //1
 		groupRouterGroup.POST("/kick_group", group.KickGroupMember)                                 //1
 		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)                   //no use

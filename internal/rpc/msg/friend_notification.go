@@ -9,6 +9,7 @@ import (
 	pbFriend "Open_IM/pkg/proto/friend"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -34,6 +35,14 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 		return
 	}
 
+	marshaler := jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: false,
+	}
+
+	tips.JsonDetail, _ = marshaler.MarshalToString(m)
+
 	fromUserNickname, toUserNickname, err := getFromToUserNickname(commID.FromUserID, commID.ToUserID)
 	if err != nil {
 		log.Error(commID.OperationID, "getFromToUserNickname failed ", err.Error(), commID.FromUserID, commID.ToUserID)
@@ -54,9 +63,11 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 	case constant.FriendRemarkSetNotification:
 		tips.DefaultTips = fromUserNickname + cn.FriendRemarkSet.DefaultTips.Tips
 	case constant.BlackAddedNotification:
-		tips.DefaultTips = cn.BlackAdded.DefaultTips.Tips + toUserNickname
+		tips.DefaultTips = cn.BlackAdded.DefaultTips.Tips
 	case constant.BlackDeletedNotification:
 		tips.DefaultTips = cn.BlackDeleted.DefaultTips.Tips + toUserNickname
+	case constant.UserInfoUpdatedNotification:
+		tips.DefaultTips = cn.UserInfoUpdated.DefaultTips.Tips
 	default:
 		log.Error(commID.OperationID, "contentType failed ", contentType)
 		return
@@ -101,7 +112,6 @@ func FriendApplicationRejectedNotification(req *pbFriend.AddFriendResponseReq) {
 }
 
 func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string) {
-	return
 	friendAddedTips := open_im_sdk.FriendAddedTips{Friend: &open_im_sdk.FriendInfo{}, OpUser: &open_im_sdk.PublicUserInfo{}}
 	user, err := imdb.GetUserByUserID(opUserID)
 	if err != nil {
@@ -150,6 +160,6 @@ func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
 
 func UserInfoUpdatedNotification(operationID, userID string, needNotifiedUserID string) {
 	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: userID}
-	commID := pbFriend.CommID{FromUserID: userID, ToUserID: userID, OpUserID: needNotifiedUserID, OperationID: operationID}
+	commID := pbFriend.CommID{FromUserID: userID, ToUserID: needNotifiedUserID, OpUserID: userID, OperationID: operationID}
 	friendNotification(&commID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
 }

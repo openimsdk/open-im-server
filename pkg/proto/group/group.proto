@@ -20,6 +20,8 @@ message CreateGroupReq{
   string OperationID = 3;
   string OpUserID = 4;  //app manager or group owner
   string OwnerUserID = 5; //owner
+
+
 }
 message CreateGroupResp{
   int32   ErrCode = 1;
@@ -59,6 +61,17 @@ message GetGroupApplicationListResp {
   int32   ErrCode = 1;
   string  ErrMsg = 2;
   repeated server_api_params.GroupRequest GroupRequestList = 3;
+}
+
+message GetUserReqApplicationListReq{
+  string UserID = 1;
+  string OpUserID = 2;
+  string OperationID = 3;
+}
+
+message GetUserReqApplicationListResp{
+  CommonResp CommonResp = 1;
+  repeated server_api_params.GroupRequest GroupRequestList = 2;
 }
 
 
@@ -320,6 +333,7 @@ service group{
   rpc getGroupsInfo(GetGroupsInfoReq) returns(GetGroupsInfoResp);
   rpc setGroupInfo(SetGroupInfoReq) returns(SetGroupInfoResp);
   rpc getGroupApplicationList(GetGroupApplicationListReq) returns(GetGroupApplicationListResp);
+  rpc getUserReqApplicationList(GetUserReqApplicationListReq) returns(GetUserReqApplicationListResp);
   rpc transferGroupOwner(TransferGroupOwnerReq) returns(TransferGroupOwnerResp);
   rpc groupApplicationResponse(GroupApplicationResponseReq) returns(GroupApplicationResponseResp);
   rpc getGroupMemberList(GetGroupMemberListReq) returns(GetGroupMemberListResp);

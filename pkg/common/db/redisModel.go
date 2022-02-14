@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	registerAccountTempCode       = "REGISTER_ACCOUNT_TEMP_CODE"
 	userIncrSeq                   = "REDIS_USER_INCR_SEQ:" // user incr seq
 	appleDeviceToken              = "DEVICE_TOKEN"
 	userMinSeq                    = "REDIS_USER_MIN_SEQ:"
@@ -32,6 +33,19 @@ func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (inte
 	}
 
 	return con.Do(cmd, params...)
+}
+func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
+	key := registerAccountTempCode + account
+	return redis.Bool(d.Exec("EXISTS", key))
+}
+func (d *DataBases) SetAccountCode(account string, code, ttl int) (err error) {
+	key := registerAccountTempCode + account
+	_, err = d.Exec("Set", key, code, ttl)
+	return err
+}
+func (d *DataBases) GetAccountCode(account string) (string, error) {
+	key := userIncrSeq + account
+	return redis.String(d.Exec("GET", key))
 }
 
 //Perform seq auto-increment operation of user messages

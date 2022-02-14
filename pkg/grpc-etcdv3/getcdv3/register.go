@@ -7,6 +7,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type RegEtcd struct {
@@ -37,8 +38,7 @@ func RegisterEtcd4Unique(schema, etcdAddr, myHost string, myPort int, serviceNam
 //etcdAddr separated by commas
 func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName string, ttl int) error {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints: strings.Split(etcdAddr, ","),
-	})
+		Endpoints: strings.Split(etcdAddr, ","), DialTimeout: 5 * time.Second})
 	fmt.Println("RegisterEtcd")
 	if err != nil {
 		//		return fmt.Errorf("grpclb: create clientv3 client failed: %v", err)
@@ -64,17 +64,17 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 	//keepalive
 	kresp, err := cli.KeepAlive(ctx, resp.ID)
 	if err != nil {
-		return fmt.Errorf("keepalive faild, errmsg:%v, lease id:%d", err, resp.ID)
+		return fmt.Errorf("keepalive failed, errmsg:%v, lease id:%d", err, resp.ID)
 	}
-
+	fmt.Println("RegisterEtcd ok")
 	go func() {
-	FLOOP:
 		for {
 			select {
-			case _, ok := <-kresp:
+			case v, ok := <-kresp:
 				if ok == true {
+					//	fmt.Println(" kresp ok ", v)
 				} else {
-					break FLOOP
+					fmt.Println(" kresp failed ", v)
 				}
 			}
 		}

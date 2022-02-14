@@ -2,6 +2,12 @@ package db
 
 import "time"
 
+type Register struct {
+	Account  string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
+	Password string `gorm:"column:password;type:varchar(255)" json:"password"`
+	Ex       string `gorm:"column:ex;size:1024" json:"ex"`
+}
+
 //
 //message FriendInfo{
 //string OwnerUserID = 1;
@@ -47,6 +53,10 @@ type FriendRequest struct {
 	Ex            string    `gorm:"column:ex;size:1024"`
 }
 
+func (FriendRequest) TableName() string {
+	return "friend_requests"
+}
+
 //message GroupInfo{
 //  string GroupID = 1;
 //  string GroupName = 2;
@@ -69,7 +79,7 @@ type Group struct {
 	GroupName     string    `gorm:"column:name;size:255" json:"groupName"`
 	Notification  string    `gorm:"column:notification;size:255" json:"notification"`
 	Introduction  string    `gorm:"column:introduction;size:255" json:"introduction"`
-	FaceUrl       string    `gorm:"column:face_url;size:255" json:"faceUrl"`
+	FaceURL       string    `gorm:"column:face_url;size:255" json:"faceURL"`
 	CreateTime    time.Time `gorm:"column:create_time"`
 	Ex            string    `gorm:"column:ex" json:"ex;size:1024" json:"ex"`
 	Status        int32     `gorm:"column:status"`
@@ -93,7 +103,7 @@ type GroupMember struct {
 	GroupID        string    `gorm:"column:group_id;primary_key;size:64"`
 	UserID         string    `gorm:"column:user_id;primary_key;size:64"`
 	Nickname       string    `gorm:"column:nickname;size:255"`
-	FaceUrl        string    `gorm:"column:user_group_face_url;size:255"`
+	FaceURL        string    `gorm:"column:user_group_face_url;size:255"`
 	RoleLevel      int32     `gorm:"column:role_level"`
 	JoinTime       time.Time `gorm:"column:join_time"`
 	JoinSource     int32     `gorm:"column:join_source"`
@@ -179,7 +189,6 @@ type ChatLog struct {
 	ContentType      int32     `gorm:"column:content_type" json:"contentType"`
 	Content          string    `gorm:"column:content;type:varchar(1000)" json:"content"`
 	Status           int32     `gorm:"column:status" json:"status"`
-	Seq              uint32    `gorm:"column:seq;index:index_seq;default:0" json:"seq"`
 	SendTime         time.Time `gorm:"column:send_time" json:"sendTime"`
 	CreateTime       time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex               string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`

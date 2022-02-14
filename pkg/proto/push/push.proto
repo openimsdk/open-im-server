@@ -6,6 +6,7 @@ package push;
 message PushMsgReq {
   string operationID = 1;
   server_api_params.MsgData msgData = 2;
+  string pushToUserID = 3;
 }
 message PushMsgResp{
   int32   ResultCode = 1;
