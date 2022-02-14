@@ -77,7 +77,7 @@ func GetUserByUserID(userID string) (*db.User, error) {
 		return nil, err
 	}
 	var user db.User
-	err = dbConn.Table("users").Where("user_id=?", userID).First(&user).Error
+	err = dbConn.Table("users").Where("user_id=?", userID).Take(&user).Error
 	if err != nil {
 		return nil, err
 	}
