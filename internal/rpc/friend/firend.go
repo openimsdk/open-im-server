@@ -106,7 +106,8 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	// {openIM001 openIM002 0 test add friend 0001-01-01 00:00:00 +0000 UTC   0001-01-01 00:00:00 +0000 UTC }]
 	log.NewDebug(req.CommID.OperationID, "UpdateFriendApplication args ", friendRequest)
 	//err := imdb.InsertFriendApplication(&friendRequest)
-	err := imdb.InsertFriendApplication(&friendRequest, map[string]interface{}{"handle_result": 0})
+	err := imdb.InsertFriendApplication(&friendRequest,
+		map[string]interface{}{"handle_result": 0, "req_msg": friendRequest.ReqMsg, "create_time": friendRequest.CreateTime})
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "UpdateFriendApplication failed ", err.Error(), friendRequest)
 		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
