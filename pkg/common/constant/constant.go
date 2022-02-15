@@ -57,6 +57,8 @@ const (
 
 	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
 
+	ConversationOptChangeNotification    = 1300 // change conversation opt
+
 	GroupCreatedNotification             = 1501
 	GroupInfoSetNotification             = 1502
 	JoinGroupApplicationNotification     = 1503

@@ -139,6 +139,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		isSend := modifyMessageByUserMessageReceiveOpt(pb.MsgData.RecvID, pb.MsgData.SendID, constant.SingleChatType, pb)
 		if isSend {
 			msgToMQ.MsgData = pb.MsgData
+			log.NewInfo(msgToMQ.OperationID, msgToMQ)
 			err1 := rpc.sendMsgToKafka(&msgToMQ, msgToMQ.MsgData.RecvID)
 			if err1 != nil {
 				log.NewError(msgToMQ.OperationID, "kafka send msg err:RecvID", msgToMQ.MsgData.RecvID, msgToMQ.String())
@@ -437,7 +438,13 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.BlackDeleted.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.BlackDeleted.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.BlackDeleted.Conversation.UnreadCount
-
+	case constant.ConversationOptChangeNotification:
+		pushSwitch = config.Config.Notification.ConversationOptUpdate.OfflinePush.PushSwitch
+		title = config.Config.Notification.ConversationOptUpdate.OfflinePush.Title
+		desc = config.Config.Notification.ConversationOptUpdate.OfflinePush.Desc
+		ex = config.Config.Notification.ConversationOptUpdate.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.ConversationOptUpdate.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.ConversationOptUpdate.Conversation.UnreadCount
 	}
 	switch reliabilityLevel {
 	case constant.UnreliableNotification:

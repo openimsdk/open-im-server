@@ -155,7 +155,7 @@ func AddUser(c *gin.Context) {
 		reqPb pb.AddUserReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -183,7 +183,6 @@ func BlockUser(c *gin.Context) {
 		return
 	}
 	utils.CopyStructFields(&reqPb, &req)
-	fmt.Println(reqPb, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
 	fmt.Println(reqPb)

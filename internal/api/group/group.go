@@ -324,7 +324,7 @@ func GetUserReqGroupApplicationList(c *gin.Context) {
 	}
 	req := &rpc.GetUserReqApplicationListReq{}
 	utils.CopyStructFields(req, params)
-	//ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	//ok, req.OpUserID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
 	//if !ok {
 	//	log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 	//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
