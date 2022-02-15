@@ -8,7 +8,7 @@ etcd:
   etcdAddr: [ 127.0.0.1:2379 ]
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:13306 ]
+  dbMysqlAddress: [ 43.128.5.63:13306 ]
   dbMysqlUserName: root
   dbMysqlPassword: openIM
   dbMysqlDatabaseName: openIM
@@ -19,7 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:37017 ]
+  dbAddress: [ 43.128.5.63:37017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
@@ -30,7 +30,7 @@ mongo:
   dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 127.0.0.1:16379
+  dbAddress: 43.128.5.63:16379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
