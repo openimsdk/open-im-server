@@ -332,6 +332,14 @@ message UserInfoUpdatedTips{
   string userID = 1;
 }
 
+//////////////////////conversation/////////////////////
+message ConversationUpdateTips{
+ string UserID = 1;
+
+}
+
+
+
 ///cms
 message RequestPagination {
   int32 pageNumber = 1;

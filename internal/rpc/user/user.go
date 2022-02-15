@@ -111,6 +111,7 @@ func (s *userServer) SetReceiveMessageOpt(ctx context.Context, req *pbUser.SetRe
 	for _, v := range req.ConversationIDList {
 		resp.ConversationOptResultList = append(resp.ConversationOptResultList, &pbUser.OptResult{ConversationID: v, Result: req.Opt})
 	}
+	chat.SetReceiveMessageOptNotification(req.OperationID, req.OpUserID, req.FromUserID)
 	log.NewInfo(req.OperationID, "SetReceiveMessageOpt rpc return ", resp.String())
 	return &resp, nil
 }
