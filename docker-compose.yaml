@@ -64,6 +64,8 @@ services:
     image: wurstmeister/kafka
     container_name: kafka
     restart: always
+    ports:
+      - 9092:9092
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
@@ -96,6 +98,7 @@ services:
       - ./db/sdk:/Open-IM-Server/db/sdk
       - ./script:/Open-IM-Server/script
     ports:
+      - 17778:17778
       - 30000:30000
       - 42233:42233
       - 10000:10000
