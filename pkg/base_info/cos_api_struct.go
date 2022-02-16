@@ -7,12 +7,14 @@ type TencentCloudStorageCredentialReq struct {
 }
 
 type TencentCloudStorageCredentialRespData struct {
-	*sts.CredentialResult `json:"credentialResult"`
-	Region                string `json:"region"`
-	Bucket                string `json:"bucket"`
+	*sts.CredentialResult
+	Region string `json:"region"`
+	Bucket string `json:"bucket"`
 }
 
 type TencentCloudStorageCredentialResp struct {
 	CommResp
-	Data TencentCloudStorageCredentialRespData `json:"data"`
+	CosData TencentCloudStorageCredentialRespData `json:"-"`
+
+	Data map[string]interface{} `json:"data"`
 }
