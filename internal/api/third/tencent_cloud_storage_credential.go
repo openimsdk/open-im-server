@@ -61,5 +61,6 @@ func TencentCloudStorageCredential(c *gin.Context) {
 		resp.Data.Region = config.Config.Credential.Tencent.Region
 		resp.Data.CredentialResult = res
 	}
+	log.NewInfo(req.OperationID, "TencentCloudStorageCredential return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
