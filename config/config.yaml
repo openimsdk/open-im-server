@@ -99,7 +99,7 @@ rpcport:
   openImOpenImStatisticPort: [ 10800 ]
   OpenImMessageCMSPort: [ 10900 ]
   openImAdminCMSPort: [ 11000 ]
-  c2c:git
+  c2c:
     callbackBeforeSendMsg:
       switch: false
       timeoutStrategy: 1 #1:send
