@@ -75,7 +75,7 @@ endpoints:
 api:
   openImApiPort: [ 10000 ]
 cmsapi:
-  openImCMSPort: [ 8000 ]
+  openImCmsApiPort: [ 8000 ]
 sdk:
   openImSdkWsPort: [ 30000 ]
 
@@ -97,7 +97,7 @@ rpcport:
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
   openImStatisticsPort: [ 10800 ]
-  OpenImMessageCmsPort: [ 10900 ]
+  openImMessageCmsPort: [ 10900 ]
   openImAdminCmsPort: [ 11000 ]
   c2c:
     callbackBeforeSendMsg:
