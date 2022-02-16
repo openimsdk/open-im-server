@@ -696,7 +696,6 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 		groupMember, err := imdb.GetGroupMaster(v.GroupID)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMaster error", err.Error())
-			continue
 		}
 		resp.CMSGroups = append(resp.CMSGroups, &pbGroup.CMSGroup{
 			GroupInfo: &open_im_sdk.GroupInfo{
@@ -738,7 +737,6 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 		groupMember, err := imdb.GetGroupMaster(v.GroupID)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-			continue
 		}
 		resp.CMSGroups = append(resp.CMSGroups, &pbGroup.CMSGroup{
 			GroupInfo: &open_im_sdk.GroupInfo{

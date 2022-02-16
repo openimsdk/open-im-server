@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/utils"
 	"errors"
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -124,17 +125,56 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) error {
 	groupMember := db.GroupMember{
 		UserID:  userId,
 		GroupID: groupId,
-		RoleLevel: roleLevel,
 	}
 	updateInfo := db.GroupMember{
 		RoleLevel: roleLevel,
 	}
-	result := dbConn.Table("group_members").Find(&groupMember).Update(updateInfo)
-	if result.Error != nil {
-		return result.Error
+	groupMaster := db.GroupMember{
 	}
-	if result.RowsAffected == 0 {
-		return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+	switch roleLevel {
+	case constant.GroupOwner:
+		return dbConn.Transaction(func(tx *gorm.DB) error {
+			result := dbConn.Table("group_members").Where("group_id = ? and role_level = ?", groupId, constant.GroupOwner).First(&groupMaster).Update(&db.GroupMember{
+				RoleLevel: constant.GroupOrdinaryUsers,
+			})
+			if result.Error != nil  {
+				return result.Error
+			}
+			if result.RowsAffected == 0 {
+				return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+			}
+
+			result = dbConn.Table("group_members").First(&groupMember).Update(updateInfo)
+			if result.Error != nil  {
+				return result.Error
+			}
+			if result.RowsAffected == 0 {
+				return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+			}
+			return nil
+		})
+	case constant.GroupOrdinaryUsers:
+		return dbConn.Transaction(func(tx *gorm.DB) error {
+			result := dbConn.Table("group_members").Where("group_id = ? and role_level = ?", groupId, constant.GroupOwner).First(&groupMaster)
+			if result.Error != nil {
+				return result.Error
+			}
+			if result.RowsAffected == 0 {
+				return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+			}
+			if groupMaster.UserID == userId {
+				return errors.New(fmt.Sprintf("user %s is master of %s, cant set to ordinary user", userId, groupId))
+			} else {
+				result = dbConn.Table("group_members").Find(&groupMember).Update(updateInfo)
+				if result.Error != nil {
+					return result.Error
+				}
+				if result.RowsAffected == 0 {
+					return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+				}
+			}
+			return nil
+		})
 	}
 	return nil
 }

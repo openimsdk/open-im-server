@@ -60,6 +60,7 @@ serverip: 0.0.0.0
 # endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
 endpoints:
   api: openim_api
+  cmsapi: openim_cms_api
   push: openim_push
   msg_gateway: openim_msg_gateway
   rpc_auth: openim_rpc_auth
@@ -67,11 +68,14 @@ endpoints:
   rpc_group: openim_rpc_group
   rpc_msg: openim_rpc_msg
   rpc_user: openim_rpc_user
+  rpc_statistic: openim_rpc_statistic
+  rpc_admin_cms: openim_rpc_admin_cms
+  rpc_message_cms: openim_rpc_admin_cms
 
 api:
   openImApiPort: [ 10000 ]
 cmsapi:
-  openImCMSPort: [ 8000 ]
+  openImCmsApiPort: [ 8000 ]
 sdk:
   openImSdkWsPort: [ 30000 ]
 
@@ -92,9 +96,9 @@ rpcport:
   openImGroupPort: [ 10500 ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
-  openImOpenImStatisticPort: [ 10800 ]
-  OpenImMessageCMSPort: [ 10900 ]
-  openImAdminCMSPort: [11000]
+  openImStatisticsPort: [ 10800 ]
+  openImMessageCmsPort: [ 10900 ]
+  openImAdminCmsPort: [ 11000 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -153,7 +157,7 @@ push:
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
   appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]
-  secrets: [ "openIM1","openIM2", "openIM333" ]
+  secrets: [ "openIM1","openIM2", "openIM333", "openIMAdmin"]
 
 secret: tuoyun
 
