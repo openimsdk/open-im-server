@@ -67,10 +67,9 @@ services:
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-    network_mode: "host"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://kafka:9092
     depends_on:
       - zookeeper
 
@@ -93,10 +92,13 @@ services:
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
-      - ./config/config.yaml:/Open-IM-Server/config/config.yaml
+      - ./config/config.docker.yaml:/Open-IM-Server/config/config.yaml
       - ./db/sdk:/Open-IM-Server/db/sdk
       - ./script:/Open-IM-Server/script
-
+    ports:
+      - 30000:30000
+      - 42233:42233
+      - 10000:10000
     restart: always
     depends_on:
       - kafka
@@ -104,7 +106,6 @@ services:
       - mongodb
       - redis
       - etcd
-    network_mode: "host"
     logging:
       driver: json-file
       options:
