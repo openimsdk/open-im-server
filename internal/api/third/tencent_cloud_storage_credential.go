@@ -6,10 +6,11 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
-	"github.com/gin-gonic/gin"
-	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 )
 
 func TencentCloudStorageCredential(c *gin.Context) {
