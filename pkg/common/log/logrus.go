@@ -2,6 +2,7 @@ package log
 
 import (
 	"Open_IM/pkg/common/config"
+	"bufio"
 	"fmt"
 	"os"
 	"time"
@@ -32,12 +33,12 @@ func loggerInit(moduleName string) *Logger {
 	//All logs will be printed
 	logger.SetLevel(logrus.Level(config.Config.Log.RemainLogLevel))
 	//Close std console output
-	// src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	// if err != nil {
-	// 	panic(err.Error())
-	// }
-	// writer := bufio.NewWriter(src)
-	// logger.SetOutput(writer)
+	src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	if err != nil {
+		panic(err.Error())
+	}
+	writer := bufio.NewWriter(src)
+	logger.SetOutput(writer)
 	logger.SetOutput(os.Stdout)
 	//Log Console Print Style Setting
 	logger.SetFormatter(&nested.Formatter{
