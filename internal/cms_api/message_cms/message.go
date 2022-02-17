@@ -33,10 +33,32 @@ func BroadcastMessage(c *gin.Context) {
 }
 
 func MassSendMassage(c *gin.Context) {
+	var (
+		reqPb pbMessage.MassSendMessageReq
+	)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName)
+	client := pbMessage.NewMessageCMSClient(etcdConn)
+	_, err := client.MassSendMessage(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetChatLogs rpc failed", err.Error())
+		openIMHttp.RespHttp200(c, err, nil)
+		return
+	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
 func WithdrawMessage(c *gin.Context) {
+	var (
+		reqPb pbMessage.WithdrawMessageReq
+	)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName)
+	client := pbMessage.NewMessageCMSClient(etcdConn)
+	_, err := client.WithdrawMessage(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetChatLogs rpc failed", err.Error())
+		openIMHttp.RespHttp200(c, err, nil)
+		return
+	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
 }
 
@@ -64,6 +86,24 @@ func GetChatLogs(c *gin.Context) {
 		openIMHttp.RespHttp200(c, err, resp)
 		return
 	}
-	utils.CopyStructFields(&resp, &respPb)
+	//utils.CopyStructFields(&resp, &respPb)
+	for _, chatLog := range respPb.ChatLogs {
+		resp.ChatLogs = append(resp.ChatLogs, cms_api_struct.ChatLog{
+			SessionType:      int(chatLog.SessionType),
+			ContentType:      int(chatLog.ContentType),
+			SenderNickName:   chatLog.SenderNickName,
+			SenderId:         chatLog.SenderId,
+			SearchContent:    chatLog.SearchContent,
+			WholeContent:     chatLog.WholeContent,
+			ReceiverNickName: chatLog.ReciverNickName,
+			ReceiverID:       chatLog.ReciverId,
+			GroupName:        chatLog.GroupName,
+			GroupId:          chatLog.GroupId,
+			Date:             chatLog.Date,
+		})
+	}
+	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
+	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
+	resp.ChatLogsNum = int(respPb.ChatLogsNum)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }

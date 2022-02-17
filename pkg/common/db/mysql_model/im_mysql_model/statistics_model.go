@@ -122,7 +122,7 @@ func GetActiveGroups(from, to time.Time, limit int) ([]*activeGroup, error) {
 		group := db.Group{
 			GroupID: activeGroup.Id,
 		}
-		dbConn.Model(&group).Select("group_id", "name").Find(&group)
+		dbConn.Table("groups").Where("group_id= ? ", group.GroupID).Find(&group)
 		activeGroup.Name = group.GroupName
 	}
 	return activeGroups, err

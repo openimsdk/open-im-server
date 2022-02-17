@@ -219,7 +219,6 @@ func (s *statisticsServer) GetGroupStatistics(_ context.Context, req *pbStatisti
 	wg := &sync.WaitGroup{}
 	resp.IncreaseGroupNumList = make([]*pbStatistics.DateNumList, len(times), len(times))
 	resp.TotalGroupNumList = make([]*pbStatistics.DateNumList, len(times), len(times))
-	log.NewInfo(req.OperationID, resp.TotalGroupNumList, resp.TotalGroupNumList)
 	wg.Add(len(times))
 	for i, v := range times {
 		go func(wg *sync.WaitGroup, index int, v [2]time.Time) {
@@ -232,7 +231,7 @@ func (s *statisticsServer) GetGroupStatistics(_ context.Context, req *pbStatisti
 				Date: v[0].String(),
 				Num:  num,
 			}
-			num, err = imdb.GetGroupNum(v[0])
+			num, err = imdb.GetGroupNum(v[1])
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseGroupNum", v, err.Error())
 			}
@@ -273,6 +272,7 @@ func (s *statisticsServer) GetMessageStatistics(_ context.Context, req *pbStatis
 	for i, v := range times {
 		go func(wg *sync.WaitGroup, index int, v [2]time.Time) {
 			defer wg.Done()
+
 			num, err := imdb.GetPrivateMessageNum(v[0], v[1])
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseGroupNum", v, err.Error())
@@ -338,7 +338,8 @@ func (s *statisticsServer) GetUserStatistics(_ context.Context, req *pbStatistic
 				Date: v[0].String(),
 				Num:  num,
 			}
-			num, err = imdb.GetTotalUserNumByDate(v[0])
+
+			num, err = imdb.GetTotalUserNumByDate(v[1])
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTotalUserNumByDate", v, err.Error())
 			}

@@ -298,6 +298,7 @@ message RemoveGroupMembersCMSReq {
   string GroupId = 1;
   repeated string UserIds = 2;
   string OperationID = 3;
+  string OpUserId = 4;
 }
 
 message RemoveGroupMembersCMSResp {
@@ -309,6 +310,7 @@ message AddGroupMembersCMSReq {
   string GroupId = 1;
   repeated string UserIds = 2;
   string OperationId = 3;
+  string OpUserId = 4;
 }
 
 message AddGroupMembersCMSResp {

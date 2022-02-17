@@ -87,13 +87,13 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	err := imdb.InsertIntoGroup(groupInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupInfo)
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 	}
 
 	us, err := imdb.GetUserByUserID(req.OwnerUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OwnerUserID)
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 	}
 
 	//to group member
@@ -102,7 +102,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	err = imdb.InsertIntoGroupMember(groupMember)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 	}
 
 	err = db.DB.AddGroupMember(groupId, req.OwnerUserID)
@@ -830,6 +830,14 @@ func (s *groupServer) RemoveGroupMembersCMS(_ context.Context, req *pbGroup.Remo
 			resp.Success = append(resp.Success, userId)
 		}
 	}
+	reqKick := &pbGroup.KickGroupMemberReq{
+		GroupID:          req.GroupId,
+		KickedUserIDList: resp.Success,
+		Reason:           "admin kick",
+		OperationID:      req.OperationID,
+		OpUserID:         req.OpUserId,
+	}
+	chat.MemberKickedNotification(reqKick, resp.Success)
 	return resp, nil
 }
 
@@ -864,7 +872,9 @@ func (s *groupServer) AddGroupMembersCMS(_ context.Context, req *pbGroup.AddGrou
 			resp.Failed = append(resp.Failed, userId)
 		} else  {
 			resp.Success = append(resp.Success, userId)
+			chat.MemberInvitedNotification(req.OperationId, req.GroupId, req.OpUserId, "admin add", resp.Success)
 		}
+
 	}
 	return resp, nil
 }
@@ -899,8 +909,6 @@ func (s *groupServer) GetUserReqApplicationList(_ context.Context, req *pbGroup.
 		cp.GroupDBCopyOpenIM(node.GroupInfo, group)
 		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupRequests)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "output:", resp)
 	resp.CommonResp = &pbGroup.CommonResp{
 		ErrCode: 0,
 		ErrMsg:  "",

@@ -51,6 +51,7 @@ message ChatLogs {
 message GetChatLogsResp {
     repeated ChatLogs ChatLogs = 1;
     server_api_params.ResponsePagination Pagination = 2;
+    int32 ChatLogsNum = 3;
 }
 
 message WithdrawMessageReq  {
