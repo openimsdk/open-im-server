@@ -357,6 +357,7 @@ func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateUserInfo", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
 	}
+	chat.UserInfoUpdatedNotification(req.OperationID, req.UserId, req.OpUserId)
 	return resp, nil
 }
 

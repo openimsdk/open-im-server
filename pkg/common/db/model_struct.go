@@ -194,6 +194,10 @@ type ChatLog struct {
 	Ex               string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }
 
+func (ChatLog) TableName() string {
+	return "chat_logs"
+}
+
 type BlackList struct {
 	UserId           string    `gorm:"column:uid"`
 	BeginDisableTime time.Time `gorm:"column:begin_disable_time"`

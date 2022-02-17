@@ -152,6 +152,7 @@ message AlterUserReq{
   int64 PhoneNumber = 3;
   string Nickname = 4;
   string Email = 5;
+  string OpUserId = 6;
 }
 
 message AlterUserResp{
@@ -176,6 +177,7 @@ message AddUserReq{
   string PhoneNumber = 2;
   string UserId = 3;
   string name = 4;
+  string OpUserId = 5;
 }
 
 message AddUserResp{
@@ -187,6 +189,7 @@ message BlockUserReq{
   string UserId = 1;
   string EndDisableTime = 2;
   string OperationID = 3;
+  string OpUserId = 4;
 }
 
 message BlockUserResp{
@@ -196,6 +199,7 @@ message BlockUserResp{
 message UnBlockUserReq{
   string UserId = 1;
   string OperationID = 2;
+  string OpUserId = 3;
 }
 
 message UnBlockUserResp{
@@ -233,6 +237,7 @@ message GetBlockUserByIdResp {
 message DeleteUserReq {
     string User_id = 1;
     string OperationID = 2;
+    string OpUserId = 3;
 }
 
 message DeleteUserResp {
