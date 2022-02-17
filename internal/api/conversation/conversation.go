@@ -90,6 +90,7 @@ func GetReceiveMessageOpt(c *gin.Context) {
 func SetReceiveMessageOpt(c *gin.Context) {
 	params := api.SetReceiveMessageOptReq{}
 	if err := c.BindJSON(&params); err != nil {
+		log.NewError(params.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
