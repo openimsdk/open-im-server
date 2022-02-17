@@ -6,6 +6,9 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
+	"github.com/fatih/structs"
+
+	//"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"net/http"
@@ -57,9 +60,13 @@ func TencentCloudStorageCredential(c *gin.Context) {
 		resp.ErrCode = constant.ErrTencentCredential.ErrCode
 		resp.ErrMsg = err.Error()
 	} else {
-		resp.Data.Bucket = config.Config.Credential.Tencent.Bucket
-		resp.Data.Region = config.Config.Credential.Tencent.Region
-		resp.Data.CredentialResult = res
+		resp.CosData.Bucket = config.Config.Credential.Tencent.Bucket
+		resp.CosData.Region = config.Config.Credential.Tencent.Region
+		resp.CosData.CredentialResult = res
 	}
+
+	resp.Data = structs.Map(&resp.CosData)
+	log.NewInfo(req.OperationID, "TencentCloudStorageCredential return ", resp)
+
 	c.JSON(http.StatusOK, resp)
 }

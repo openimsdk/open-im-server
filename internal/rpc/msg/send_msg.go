@@ -250,7 +250,7 @@ func returnMsg(replay *pbChat.SendMsgResp, pb *pbChat.SendMsgReq, errCode int32,
 func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *pbChat.SendMsgReq) bool {
 	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
 	opt, err := db.DB.GetSingleConversationMsgOpt(userID, conversationID)
-	if err != nil || err != redis.ErrNil {
+	if err != nil && err != redis.ErrNil {
 		log.NewError(pb.OperationID, "GetSingleConversationMsgOpt from redis err", conversationID, pb.String(), err.Error())
 		return true
 	}
