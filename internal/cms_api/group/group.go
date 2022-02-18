@@ -34,7 +34,7 @@ func GetGroupById(c *gin.Context) {
 	respPb, err := client.GetGroupById(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetGroupById failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	resp.GroupName = respPb.CMSGroup.GroupInfo.GroupName
@@ -64,7 +64,7 @@ func GetGroups(c *gin.Context) {
 	respPb, err := client.GetGroups(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetUserInfo failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	for _, v := range respPb.CMSGroups {
@@ -175,7 +175,7 @@ func BanGroupChat(c *gin.Context) {
 	_, err := client.OperateGroupStatus(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "BanGroupChat failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
@@ -199,7 +199,7 @@ func BanPrivateChat(c *gin.Context) {
 	_, err := client.OperateGroupStatus(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "OperateGroupStatus failed", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
@@ -222,7 +222,7 @@ func OpenGroupChat(c *gin.Context) {
 	_, err := client.OperateGroupStatus(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "OperateGroupStatus failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
@@ -245,7 +245,7 @@ func OpenPrivateChat(c *gin.Context) {
 	_, err := client.OperateGroupStatus(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "OperateGroupStatus failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)
@@ -311,7 +311,7 @@ func AddGroupMembers(c *gin.Context) {
 	respPb, err := client.AddGroupMembersCMS(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationId, utils.GetSelfFuncName(), "AddGroupMembersCMS failed", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	resp.Success = respPb.Success
@@ -337,7 +337,7 @@ func RemoveGroupMembers(c *gin.Context) {
 	respPb, err := client.RemoveGroupMembersCMS(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "RemoveGroupMembersCMS failed", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	resp.Success = respPb.Success
@@ -362,7 +362,7 @@ func DeleteGroup(c *gin.Context) {
 	_, err := client.DeleteGroup(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "DeleteGroup failed", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	openIMHttp.RespHttp200(c, constant.OK, nil)

@@ -86,6 +86,20 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 	chatLog := db.ChatLog{
 		Content: req.Content,
 		SendTime: time,
+		ContentType: req.ContentType,
+		SessionType: req.SessionType,
+	}
+	switch chatLog.SessionType {
+	case constant.SingleChatType:
+		chatLog.SendID = req.UserId
+	case constant.GroupChatType:
+		chatLog.RecvID = req.GroupId
+		chatLog.SendID = req.UserId
+	}
+	nums, err := imdb.GetChatLogCount(chatLog)
+	resp.ChatLogsNum = int32(nums)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLogCount", err.Error())
 	}
 	chatLogs, err := imdb.GetChatLog(chatLog, req.Pagination.PageNumber,  req.Pagination.ShowNumber)
 	if err != nil {
@@ -96,11 +110,19 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 		pbChatLog := &pbMessageCMS.ChatLogs{
 			SessionType:     chatLog.SessionType,
 			ContentType:     chatLog.ContentType,
-			SenderNickName:  chatLog.SenderNickname,
-			SenderId:        chatLog.SendID,
 			SearchContent:   req.Content,
 			WholeContent:    chatLog.Content,
 			Date:            chatLog.CreateTime.String(),
+			SenderNickName: chatLog.SenderNickname,
+			SenderId: chatLog.SendID,
+		}
+		if chatLog.SenderNickname == "" {
+			sendUser, err := imdb.GetUserByUserID(chatLog.SendID)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserByUserID failed", err.Error())
+				continue
+			}
+			pbChatLog.SenderNickName = sendUser.Nickname
 		}
 		switch chatLog.SessionType {
 		case constant.SingleChatType:
@@ -111,6 +133,7 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 			}
 			pbChatLog.ReciverId = recvUser.UserID
 			pbChatLog.ReciverNickName = recvUser.Nickname
+
 		case constant.GroupChatType:
 			group, err := imdb.GetGroupById(chatLog.RecvID)
 			if err != nil {
@@ -126,6 +149,7 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 		CurrentPage: req.Pagination.PageNumber,
 		ShowNumber:  req.Pagination.ShowNumber,
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp output: ", resp.String())
 	return resp, nil
 }
