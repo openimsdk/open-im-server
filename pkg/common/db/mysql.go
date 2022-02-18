@@ -32,7 +32,7 @@ func initMysqlDB() {
 		&GroupMember{},
 		&GroupRequest{},
 		&User{},
-		&Black{}, &ChatLog{}, &Register{})
+		&Black{}, &ChatLog{}, &Register{}, &Conversation{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 
@@ -77,6 +77,10 @@ func initMysqlDB() {
 	if !db.HasTable(&Register{}) {
 		log.NewInfo("CreateTable Black")
 		db.CreateTable(&Register{})
+	}
+	if !db.HasTable(&Conversation{}) {
+		log.NewInfo("CreateTable Black")
+		db.CreateTable(&Conversation{})
 	}
 
 	return
