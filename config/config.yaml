@@ -173,6 +173,8 @@ messagecallback:
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
+messagejudge:
+  isJudgeFriend: true
 #  c2c:
 #    callbackBeforeSendMsg:
 #      switch: false
