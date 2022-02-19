@@ -121,6 +121,9 @@ const (
 
 	//UserJoinGroupSource
 	JoinByAdmin = 1
+
+	//Minio
+	MinioDurationTimes = 3600
 )
 
 var ContentType2PushContent = map[int64]string{
