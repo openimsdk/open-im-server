@@ -1,12 +1,13 @@
 package base_info
 
 type MinioStorageCredentialReq struct {
-	Action string `form:"Action";binding:"required"`
-	DurationSeconds int `form:"DurationSeconds"`
-	Version string `form:"Version"`
-	Policy string
+	OperationID string `json:"operationID"`
 }
 
 type MiniostorageCredentialResp struct {
-
+	SecretAccessKey string `json:"secretAccessKey"`
+	AccessKeyID string `json:"accessKeyID"`
+	SessionToken string `json:"sessionToken"`
+	BucketName string `json:"bucketName"`
+	StsEndpointURL string `json:"stsEndpointURL"`
 }
