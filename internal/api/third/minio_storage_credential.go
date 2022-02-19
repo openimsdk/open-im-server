@@ -6,13 +6,14 @@ import (
 	http "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
+
 	"github.com/gin-gonic/gin"
-	_ cr "github.com/minio/minio-go/v7/pkg/credentials"
+	_ "github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 func MinioStorageCredential(c *gin.Context) {
 	var (
-		req apiStruct.MinioStorageCredentialReq
+		req  apiStruct.MinioStorageCredentialReq
 		resp apiStruct.MiniostorageCredentialResp
 	)
 	ok, _ := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
