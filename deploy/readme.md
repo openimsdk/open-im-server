@@ -3,8 +3,8 @@
 ```sh
 # 查看 ./Makefile ，先编译各个需要的源码到 ../bin 
 
-# 目前没有处理 Open-IM-SDK-Core ，如果需要的话，建议单独拉取代码，然后执行其Makefile中的命令编译打包镜像
-# make build-win
+# 目前没有处理 Open-IM-SDK-Core ，如果需要的话，建议单独拉取代码，然后执行其Makefile中的命令编译打包镜像,sdk目前依赖sqlite，需要启用cgo，目前测试通过的是在linux环境编译,win下可以在wsl中执行编译
+# make build-linux
 # make build-image
 
 # win-* 表示在win平台编译位linux二进制，其实就是处理了 go env -w GOOS=linux 
