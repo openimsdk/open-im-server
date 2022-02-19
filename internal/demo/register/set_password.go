@@ -8,12 +8,13 @@ import (
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/utils"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/spf13/viper"
 )
 
 type ParamsSetPassword struct {
@@ -48,7 +49,7 @@ func SetPassword(c *gin.Context) {
 			return
 		}
 	}
-	url := fmt.Sprintf("http://%s:10000/auth/user_register", utils.ServerIP)
+	url := fmt.Sprintf("http://%s:10000/auth/user_register", viper.GetString("endpoints.api"))
 	openIMRegisterReq := api.UserRegisterReq{}
 	openIMRegisterReq.OperationID = params.OperationID
 	openIMRegisterReq.Platform = params.Platform
