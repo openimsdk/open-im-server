@@ -36,6 +36,13 @@ type config struct {
 			SecretID  string `yaml:"secretID"`
 			SecretKey string `yaml:"secretKey"`
 		}
+		Minio struct {
+			Bucket          string `yaml:"bucket"`
+			Location        string `yaml:"location"`
+			Endpoint        string `yaml:"endpoint"`
+			AccessKeyID     string `yaml:"accessKeyID"`
+			SecretAccessKey string `yaml:"secretAccessKey"`
+		} `yaml:"minio"`
 	}
 
 	Mysql struct {
@@ -85,7 +92,7 @@ type config struct {
 		OpenImOnlineMessageRelayName string `yaml:"openImOnlineMessageRelayName"`
 		OpenImGroupName              string `yaml:"openImGroupName"`
 		OpenImAuthName               string `yaml:"openImAuthName"`
-		OpenImMessageCMSName 		 string `yaml:"openImMessageCMSName"`
+		OpenImMessageCMSName         string `yaml:"openImMessageCMSName"`
 		OpenImAdminCMSName           string `yaml:"openImAdminCMSName"`
 	}
 	Etcd struct {
@@ -161,6 +168,9 @@ type config struct {
 		CallbackSwitch  bool   `yaml:"callbackSwitch"`
 		CallbackUrl     string `yaml:"callbackUrl"`
 		CallBackTimeOut int    `yaml:"callbackTimeOut"`
+	}
+	MessageJudge struct {
+		IsJudgeFriend bool `yaml:"isJudgeFriend"`
 	}
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
@@ -278,7 +288,7 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"blackDeleted"`
-		ConversationOptUpdate struct{
+		ConversationOptUpdate struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
