@@ -65,7 +65,7 @@ func init() {
 		Password:  config.Config.Mongo.DBPassword,
 		PoolLimit: config.Config.Mongo.DBMaxPoolSize,
 	}
-	mgoSession, err = mgo.DialWithInfo(mgoDailInfo)
+	mgoSession, err := mgo.DialWithInfo(mgoDailInfo)
 
 	if err != nil {
 
