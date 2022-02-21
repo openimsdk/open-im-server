@@ -71,7 +71,7 @@ func init() {
 
 		mgoSession, err1 = mgo.DialWithInfo(mgoDailInfo)
 		if err1 != nil {
-			log.NewError(" mongo.Connect  failed, panic", err.Error(), uri)
+//			log.NewError(" mongo.Connect  failed, panic", err.Error(), uri)
 			panic(err1.Error())
 		}
 	}
