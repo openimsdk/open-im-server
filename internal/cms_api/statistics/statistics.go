@@ -32,7 +32,7 @@ func GetMessagesStatistics(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetMessageStatistics(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, resp)
+		openIMHttp.RespHttp200(c, err, resp)
 		log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		return
 	}
@@ -78,7 +78,7 @@ func GetUserStatistics(c *gin.Context) {
 	respPb, err := client.GetUserStatistics(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError("0", utils.GetSelfFuncName(), err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	// utils.CopyStructFields(&resp, respPb)
@@ -132,7 +132,7 @@ func GetGroupStatistics(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetGroupStatistics(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	// utils.CopyStructFields(&resp, respPb)
@@ -179,7 +179,7 @@ func GetActiveUser(c *gin.Context) {
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetActiveUser(context.Background(), &reqPb)
 	if err != nil {
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	utils.CopyStructFields(&resp.ActiveUserList, respPb.Users)
@@ -204,7 +204,7 @@ func GetActiveGroup(c *gin.Context) {
 	respPb, err := client.GetActiveGroup(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrServer, nil)
+		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
 	for _, group := range respPb.Groups {

@@ -15,6 +15,7 @@ type paramsCertification struct {
 	PhoneNumber      string `json:"phoneNumber"`
 	VerificationCode string `json:"verificationCode"`
 	OperationID      string `json:"operationID" binding:"required"`
+	UsedFor          int `json:"usedFor" binding:"required"`
 }
 
 func Verify(c *gin.Context) {
