@@ -15,7 +15,7 @@ type paramsCertification struct {
 	PhoneNumber      string `json:"phoneNumber"`
 	VerificationCode string `json:"verificationCode"`
 	OperationID      string `json:"operationID" binding:"required"`
-	UsedFor          int `json:"usedFor"`
+	UsedFor          int    `json:"usedFor"`
 }
 
 func Verify(c *gin.Context) {
@@ -47,7 +47,7 @@ func Verify(c *gin.Context) {
 	if params.UsedFor == 0 {
 		params.UsedFor = 1
 	}
-	accountKey := account + "_" + constant.VerificationCodeForResetSuffix
+	accountKey := account + "_" + constant.VerificationCodeForRegisterSuffix
 	code, err := db.DB.GetAccountCode(accountKey)
 	log.NewInfo(params.OperationID, "redis phone number and verificating Code", account, code)
 	if err != nil {
