@@ -43,13 +43,13 @@ func SendVerificationCode(c *gin.Context) {
 		_, err := im_mysql_model.GetRegister(account)
 		if err == nil {
 			log.NewError(params.OperationID, "The phone number has been registered", params)
-			c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": ""})
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": "The phone number has been registered"})
 			return
 		}
 		ok, err := db.DB.JudgeAccountEXISTS(account)
 		if ok || err != nil {
 			log.NewError(params.OperationID, "The phone number has been registered", params)
-			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": ""})
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "The phone number has been registered"})
 			return
 		}
 		accountKey = account + "_" + constant.VerificationCodeForRegisterSuffix
