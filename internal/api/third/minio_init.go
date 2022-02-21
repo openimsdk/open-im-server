@@ -7,7 +7,6 @@ import (
 	"context"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/minio/minio-go/v7/pkg/policy"
 	url2 "net/url"
 )
 
@@ -39,10 +38,10 @@ func init() {
 			return
 		}
 	}
-	err = minioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
-	if err != nil {
-		log.NewError("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in 	", err.Error())
-		return
-	}
+	//err = minioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
+	//if err != nil {
+	//	log.NewError("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in 	", err.Error())
+	//	return
+	//}
 	log.NewInfo("", utils.GetSelfFuncName(), "minio create and set policy success")
 }

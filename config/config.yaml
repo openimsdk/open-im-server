@@ -1,47 +1,47 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-serverversion: 3.0.0
+serverversion: 1.0.3
 #---------------Infrastructure configuration---------------------#
 etcd:
-  etcdSchema: openIM #默认即可
-  etcdAddr: [127.0.0.1:2379] #单机部署时，默认即可
+  etcdSchema: openIM
+  etcdAddr: [127.0.0.1:2379]
 
 mysql:
-  dbMysqlAddress: [127.0.0.1:13306] #mysql地址 目前仅支持单机，默认即可
-  dbMysqlUserName: root #mysql用户名，建议修改
-  dbMysqlPassword: openIM # mysql密码，建议修改
-  dbMysqlDatabaseName: openIM #默认即可
-  dbTableName: eMsg #默认即可
+  dbMysqlAddress: [127.0.0.1:13306]
+  dbMysqlUserName: root
+  dbMysqlPassword: openIM
+  dbMysqlDatabaseName: openIM
+  dbTableName: eMsg
   dbMsgTableNum: 1
   dbMaxOpenConns: 20
   dbMaxIdleConns: 10
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [127.0.0.1:37017] #redis地址 目前仅支持单机，默认即可
+  dbAddress: [127.0.0.1:37017]
   dbDirect: false
   dbTimeout: 10
-  dbDatabase: openIM #mongo db 默认即可
+  dbDatabase: openIM
   dbSource: admin
-  dbUserName: #mongo用户名，建议修改
-  dbPassword: #mongo密码，建议修改
+  dbUserName:
+  dbPassword:
   dbMaxPoolSize: 20
-  dbRetainChatRecords: 3650 #mongo保存离线消息时间（天）
+  dbRetainChatRecords: 7
 
 redis:
-  dbAddress: 127.0.0.1:16379 #redis地址 目前仅支持单机，默认即可
+  dbAddress: 127.0.0.1:16379
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
-  dbPassWord: openIM #redis密码 建议修改
+  dbPassWord: openIM
 
 kafka:
   ws2mschat:
-    addr: [127.0.0.1:9092] #kafka配置，默认即可
+    addr: [127.0.0.1:9092]
     topic: "ws2ms_chat"
   ms2pschat:
-    addr: [127.0.0.1:9092] #kafka配置，默认即可
+    addr: [127.0.0.1:9092]
     topic: "ms2ps_chat"
   consumergroupid:
     msgToMongo: mongo
@@ -53,7 +53,6 @@ kafka:
 # The service ip default is empty,
 # automatically obtain the machine's valid network card ip as the service ip,
 # otherwise the configuration ip is preferred
-#如果是单机模式，用0.0.0.0或者不填，默认即可
 serverip: 0.0.0.0
 
 # endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
@@ -72,13 +71,13 @@ endpoints:
   rpc_message_cms: openim_rpc_admin_cms
 
 api:
-  openImApiPort: [10000] #api服务端口，默认即可，注意开放此端口或做nginx转发
+  openImApiPort: [10000]
 cmsapi:
-  openImCmsApiPort: [8000] #管理后台api服务端口，默认即可，注意开放此端口或做nginx转发
+  openImCmsApiPort: [8000]
 sdk:
-  openImSdkWsPort: [30000] #jssdk服务端口，默认即可，项目中使用jssdk才需开放此端口或做nginx转发
+  openImSdkWsPort: [30000]
 
-credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
+credential:
   tencent:
     appID: 1302656840
     region: ap-chengdu
@@ -92,7 +91,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     accessKeyID: minioadmin
     secretAccessKey: minioadmin
 
-rpcport: #rpc服务端口 默认即可
+rpcport:
   openImUserPort: [10100]
   openImFriendPort: [10200]
   openImOfflineMessagePort: [10300]
@@ -113,7 +112,7 @@ rpcport: #rpc服务端口 默认即可
     stateChange:
       switch: false
 
-rpcregistername: #rpc注册服务名，默认即可
+rpcregistername:
   openImUserName: User
   openImFriendName: Friend
   openImOfflineMessageName: OfflineMessage
@@ -128,54 +127,52 @@ rpcregistername: #rpc注册服务名，默认即可
 log:
   storageLocation: ../logs/
   rotationTime: 24
-  remainRotationCount: 5 #日志数量
-  remainLogLevel: 6 #日志级别 6表示全都打印，测试阶段建议设置为6
+  remainRotationCount: 5
+  remainLogLevel: 6
   elasticSearchSwitch: false
   elasticSearchAddr: [127.0.0.1:9201]
   elasticSearchUser: ""
   elasticSearchPassword: ""
 
-modulename: #日志文件按模块命名，默认即可
+modulename:
   longConnSvrName: msg_gateway
   msgTransferName: msg_transfer
   pushName: push
 
 longconnsvr:
-  openImWsPort: [17778] # ws服务端口，默认即可，要开放此端口或做nginx转发
+  openImWsPort: [17778]
   websocketMaxConnNum: 10000
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10
 
 push:
-  tpns: #腾讯推送，暂未测试 暂不要使用
+  tpns:
     ios:
       accessID: 1600018281
       secretKey: 3cd68a77a95b89e5089a1aca523f318f
     android:
       accessID: 111
       secretKey: 111
-  jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
+  jpns:
     appKey: cf47465a368f24c659608e7e
     masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
-  #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
   appManagerUid: ["openIM123456", "openIM654321", "openIM333", "openIMAdmin"]
   secrets: ["openIM1", "openIM2", "openIM333", "openIMAdmin"]
 
 secret: tuoyun
-# 多端互踢策略
-# 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
+
 multiloginpolicy: 1
 
 #token config
 tokenpolicy:
-  accessSecret: "open_im_server" #token生成相关，默认即可
+  accessSecret: "open_im_server"
   # Token effective time day as a unit
-  accessExpire: 3650 #token过期时间（天）
+  accessExpire: 7
 
-messagecallback: #暂时不要使用 还需完善
+messagecallback:
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
@@ -190,7 +187,7 @@ messagejudge:
 #  state:
 #    stateChange:
 #      switch: false
-#ios系统推送声音以及标记计数
+
 iospush:
   pushSound: "xxx"
   badgeCount: true
@@ -254,7 +251,7 @@ notification:
       desc: "groupApplicationAccepted desc"
       ext: "groupApplicationAccepted ext"
     defaultTips:
-      tips: "allowed to join the group" # group info changed by xx
+      tips: "was allowed to join the group" # group info changed by xx
 
   groupApplicationRejected:
     conversation:
@@ -266,7 +263,7 @@ notification:
       desc: " desc"
       ext: " ext"
     defaultTips:
-      tips: "rejected into the group" # group info changed by xx
+      tips: "was rejected into the group" # group info changed by xx
 
   groupOwnerTransferred:
     conversation:
@@ -290,7 +287,7 @@ notification:
       desc: "memberKicked desc"
       ext: "memberKicked ext"
     defaultTips:
-      tips: "kicked out of the group" # group info changed by xx
+      tips: "was kicked out of the group" # group info changed by xx
 
   memberInvited:
     conversation:
@@ -302,7 +299,7 @@ notification:
       desc: "memberInvited desc"
       ext: "memberInvited ext"
     defaultTips:
-      tips: "invited into the group" # group info changed by xx
+      tips: "was invited into the group" # group info changed by xx
 
   memberEnter:
     conversation:
@@ -372,11 +369,11 @@ notification:
       unreadCount: false
     offlinePush:
       switch: true
-      title: "deleted a friend"
-      desc: "deleted a friend"
-      ext: "deleted a friend"
+      title: "Deleted a friend"
+      desc: "Deleted a friend"
+      ext: "Deleted a friend"
     defaultTips:
-      tips: "deleted a friend" #
+      tips: "Deleted a friend" #
 
   friendRemarkSet:
     conversation:
@@ -396,11 +393,11 @@ notification:
       unreadCount: false
     offlinePush:
       switch: true
-      title: "blocked a user"
-      desc: "blocked a user"
-      ext: "blocked a user"
+      title: "Blocked a user"
+      desc: "Blocked a user"
+      ext: "Blocked a user"
     defaultTips:
-      tips: "blocked a user" #
+      tips: "Blocked a user" #
 
   blackDeleted:
     conversation:
@@ -425,7 +422,7 @@ notification:
       desc: "Remove a blocked user"
       ext: "Remove a blocked user"
     defaultTips:
-      tips: "remove a blocked user"
+      tips: "Remove a blocked user"
 
   #####################conversation#########################
   conversationOptUpdate:
@@ -442,22 +439,20 @@ notification:
 
 #---------------demo configuration---------------------#
 #The following configuration items are applied to openIM Demo configuration
-#是否启动demo，如果自身没有账号体系，设置为true
 demoswitch: true
 demo:
-  openImDemoPort: [42233] #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
-  alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，必须修改
+  openImDemoPort: [42233]
+  alismsverify:
     accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
     accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
     signName: OpenIM Corporation
     verificationCodeTemplateCode: SMS_2268101641
-  superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
+  superCode: 666666
   #  second
   codeTTL: 60
-  mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
+  mail:
     title: "openIM"
     senderMail: "1765567899@qq.com"
     senderAuthorizationCode: "1gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
-    smtpPort: 25 #需开放此端口 出口方向
-
+    smtpPort: 25
