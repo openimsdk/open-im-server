@@ -176,3 +176,5 @@ func GroupIsBanPrivateChat(status int32) bool {
 	}
 	return true
 }
+
+ const BigVersion = "v3"
