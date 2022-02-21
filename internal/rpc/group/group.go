@@ -778,9 +778,25 @@ func (s *groupServer) DeleteGroup(_ context.Context, req *pbGroup.DeleteGroupReq
 func (s *groupServer) OperateUserRole(_ context.Context, req *pbGroup.OperateUserRoleReq) (*pbGroup.OperateUserRoleResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "args:", req.String())
 	resp := &pbGroup.OperateUserRoleResp{}
-	if err := imdb.OperateGroupRole(req.UserId, req.GroupId, req.RoleLevel); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "OperateGroupRole error", err.Error())
+	oldOwnerUserID, err := imdb.GetGroupMaster(req.GroupId)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMaster failed", err.Error())
 		return resp, http.WrapError(constant.ErrDB)
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := pbGroup.NewGroupClient(etcdConn)
+	var reqPb pbGroup.TransferGroupOwnerReq
+	reqPb.OperationID = req.OperationID
+	reqPb.NewOwnerUserID = req.UserId
+	reqPb.GroupID = req.GroupId
+	reqPb.OpUserID = "cms admin"
+	reqPb.OldOwnerUserID = oldOwnerUserID.UserID
+	reply, err := client.TransferGroupOwner(context.Background(), &reqPb)
+	if reply.CommonResp.ErrCode != 0 || err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "TransferGroupOwner rpc failed")
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		}
 	}
 	return resp, nil
 }

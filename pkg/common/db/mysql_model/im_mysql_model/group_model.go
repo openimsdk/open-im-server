@@ -116,10 +116,10 @@ func DeleteGroup(groupId string) error {
 	return nil
 }
 
-func OperateGroupRole(userId, groupId string, roleLevel int32) error {
+func OperateGroupRole(userId, groupId string, roleLevel int32) (string, string, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	dbConn.LogMode(true)
 	groupMember := db.GroupMember{
@@ -133,7 +133,7 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) error {
 	}
 	switch roleLevel {
 	case constant.GroupOwner:
-		return dbConn.Transaction(func(tx *gorm.DB) error {
+		err = dbConn.Transaction(func(tx *gorm.DB) error {
 			result := dbConn.Table("group_members").Where("group_id = ? and role_level = ?", groupId, constant.GroupOwner).First(&groupMaster).Update(&db.GroupMember{
 				RoleLevel: constant.GroupOrdinaryUsers,
 			})
@@ -153,14 +153,15 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) error {
 			}
 			return nil
 		})
+
 	case constant.GroupOrdinaryUsers:
-		return dbConn.Transaction(func(tx *gorm.DB) error {
+		err = dbConn.Transaction(func(tx *gorm.DB) error {
 			result := dbConn.Table("group_members").Where("group_id = ? and role_level = ?", groupId, constant.GroupOwner).First(&groupMaster)
 			if result.Error != nil {
 				return result.Error
 			}
 			if result.RowsAffected == 0 {
-				return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+				return  errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
 			}
 			if groupMaster.UserID == userId {
 				return errors.New(fmt.Sprintf("user %s is master of %s, cant set to ordinary user", userId, groupId))
@@ -170,13 +171,13 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) error {
 					return result.Error
 				}
 				if result.RowsAffected == 0 {
-					return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+					return  errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
 				}
 			}
 			return nil
 		})
 	}
-	return nil
+	return "", "", nil
 }
 
 func GetGroupsCountNum(group db.Group) (int32, error) {
