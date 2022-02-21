@@ -3,9 +3,16 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"context"
+	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/mgo.v2"
 	"time"
+
+	//"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 )
 
 var DB DataBases
@@ -14,6 +21,7 @@ type DataBases struct {
 	MysqlDB    mysqlDB
 	mgoSession *mgo.Session
 	redisPool  *redis.Pool
+	mongoClient *mongo.Client
 }
 
 func key(dbAddress, dbName string) string {
@@ -22,10 +30,21 @@ func key(dbAddress, dbName string) string {
 
 func init() {
 	var mgoSession *mgo.Session
+	var mongoClient *mongo.Client
 	var err1 error
 	//mysql init
 	initMysqlDB()
 	// mongo init
+	// "mongodb://sysop:moon@localhost/records"
+	// uri := "mongodb://user:pass@sample.host:27017/?maxPoolSize=20&w=majority"
+	uri := fmt.Sprintf("mongodb://%s:%s@%s/%s/?maxPoolSize=%d",
+		config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword,
+		config.Config.Mongo.DBAddress[0],config.Config.Mongo.DBDatabase,
+		config.Config.Mongo.DBMaxPoolSize)
+
+	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+
+
 	mgoDailInfo := &mgo.DialInfo{
 		Addrs:     config.Config.Mongo.DBAddress,
 		Direct:    config.Config.Mongo.DBDirect,
@@ -36,17 +55,19 @@ func init() {
 		Password:  config.Config.Mongo.DBPassword,
 		PoolLimit: config.Config.Mongo.DBMaxPoolSize,
 	}
-	mgoSession, err := mgo.DialWithInfo(mgoDailInfo)
+	mgoSession, err = mgo.DialWithInfo(mgoDailInfo)
+
 	if err != nil {
-		log.NewError("mgo init err", err.Error(), mgoDailInfo)
-	}
-	if err != nil {
+		log.NewError(" mongo.Connect  failed, try ", err.Error(), uri)
 		time.Sleep(time.Duration(30) * time.Second)
+		mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 		mgoSession, err1 = mgo.DialWithInfo(mgoDailInfo)
 		if err1 != nil {
+			log.NewError(" mongo.Connect  failed, panic", err.Error(), uri)
 			panic(err1.Error())
 		}
 	}
+	DB.mongoClient = mongoClient
 	DB.mgoSession = mgoSession
 	DB.mgoSession.SetMode(mgo.Monotonic, true)
 	c := DB.mgoSession.DB(config.Config.Mongo.DBDatabase).C(cChat)
@@ -54,6 +75,7 @@ func init() {
 	if err != nil {
 		panic(err.Error())
 	}
+
 
 	// redis pool init
 	DB.redisPool = &redis.Pool{
