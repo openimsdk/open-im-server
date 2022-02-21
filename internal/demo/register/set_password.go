@@ -65,7 +65,10 @@ func SetPassword(c *gin.Context) {
 	}
 	err = json.Unmarshal(bMsg, &openIMRegisterResp)
 	if err != nil || openIMRegisterResp.ErrCode != 0 {
-		log.NewError(params.OperationID, "request openIM register error", account, "err", "")
+		log.NewError(params.OperationID, "request openIM register error", account, "err", "resp: ", openIMRegisterResp.ErrCode)
+		if err != nil {
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), err.Error())
+		}
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register failed: "+openIMRegisterResp.ErrMsg})
 		return
 	}

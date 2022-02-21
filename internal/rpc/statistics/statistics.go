@@ -2,6 +2,7 @@ package statistics
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"context"
 	"sync"
 	"time"
@@ -21,6 +22,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	errors "Open_IM/pkg/common/http"
 
 	"google.golang.org/grpc"
 )
@@ -77,13 +79,13 @@ func (s *statisticsServer) GetActiveGroup(_ context.Context, req *pbStatistics.G
 	resp := &pbStatistics.GetActiveGroupResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
+		return resp, errors.WrapError(constant.ErrArgs)
 	}
 	activeGroups, err := imdb.GetActiveGroups(fromTime, toTime, 12)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveGroups failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	for _, activeGroup := range activeGroups {
 		resp.Groups = append(resp.Groups,
@@ -101,13 +103,13 @@ func (s *statisticsServer) GetActiveUser(_ context.Context, req *pbStatistics.Ge
 	resp := &pbStatistics.GetActiveUserResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	activeUsers, err := imdb.GetActiveUsers(fromTime, toTime, 12)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveUsers failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	for _, activeUser := range activeUsers {
 		resp.Users = append(resp.Users,
@@ -199,18 +201,18 @@ func (s *statisticsServer) GetGroupStatistics(_ context.Context, req *pbStatisti
 	resp := &pbStatistics.GetGroupStatisticsResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupStatistics failed", err.Error())
+		return resp, errors.WrapError(constant.ErrArgs)
 	}
 	increaseGroupNum, err := imdb.GetIncreaseGroupNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseGroupNum failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	totalGroupNum, err := imdb.GetTotalGroupNum()
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	resp.IncreaseGroupNum = increaseGroupNum
 	resp.TotalGroupNum = totalGroupNum
@@ -250,17 +252,18 @@ func (s *statisticsServer) GetMessageStatistics(_ context.Context, req *pbStatis
 	resp := &pbStatistics.GetMessageStatisticsResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
+		return resp, errors.WrapError(constant.ErrArgs)
 	}
 	privateMessageNum, err := imdb.GetPrivateMessageNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetPrivateMessageNum failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	groupMessageNum, err := imdb.GetGroupMessageNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMessageNum failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	resp.PrivateMessageNum = privateMessageNum
 	resp.GroupMessageNum = groupMessageNum
@@ -300,23 +303,23 @@ func (s *statisticsServer) GetUserStatistics(_ context.Context, req *pbStatistic
 	resp := &pbStatistics.GetUserStatisticsResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo", err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
+		return resp, errors.WrapError(constant.ErrArgs)
 	}
 	activeUserNum, err := imdb.GetActiveUserNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveUserNum", err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveUserNum failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	increaseUserNum, err := imdb.GetIncreaseUserNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseUserNum error", err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseUserNum failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	totalUserNum, err := imdb.GetTotalUserNum()
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTotalUserNum error", err.Error())
-		return resp, err
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTotalUserNum failed", err.Error())
+		return resp, errors.WrapError(constant.ErrDB)
 	}
 	resp.ActiveUserNum = activeUserNum
 	resp.TotalUserNum = totalUserNum
