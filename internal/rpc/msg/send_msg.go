@@ -44,6 +44,17 @@ type MsgCallBackResp struct {
 	}
 }
 
+func userRelationshipVerification(data *pbChat.SendMsgReq) {
+
+	//etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	//client := pbChat.NewChatClient(etcdConn)
+	//reply, err := client.SendMsg(context.Background(), &req)
+	//if err != nil {
+	//	log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String(), err.Error())
+	//} else if reply.ErrCode != 0 {
+	//	log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String())
+	//}
+}
 func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
 	if msg.SendTime == 0 {
@@ -96,6 +107,7 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
 	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
+	userRelationshipVerification(pb)
 	//if !utils.VerifyToken(pb.Token, pb.SendID) {
 	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
 	rpc.encapsulateMsgData(pb.MsgData)
