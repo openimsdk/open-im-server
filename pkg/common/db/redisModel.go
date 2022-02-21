@@ -3,7 +3,6 @@ package db
 import (
 	"Open_IM/pkg/common/constant"
 	log2 "Open_IM/pkg/common/log"
-	"fmt"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -47,7 +46,6 @@ func (d *DataBases) SetAccountCode(account string, code, ttl int) (err error) {
 }
 func (d *DataBases) GetAccountCode(account string) (string, error) {
 	key := AccountTempCode + account
-	fmt.Println(key)
 	return redis.String(d.Exec("GET", key))
 }
 
