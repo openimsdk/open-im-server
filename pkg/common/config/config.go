@@ -36,6 +36,13 @@ type config struct {
 			SecretID  string `yaml:"secretID"`
 			SecretKey string `yaml:"secretKey"`
 		}
+		Minio struct {
+			Bucket          string `yaml:"bucket"`
+			Location        string `yaml:"location"`
+			Endpoint        string `yaml:"endpoint"`
+			AccessKeyID     string `yaml:"accessKeyID"`
+			SecretAccessKey string `yaml:"secretAccessKey"`
+		} `yaml:"minio"`
 	}
 
 	Mysql struct {

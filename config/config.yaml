@@ -19,7 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:37017 ]
+  dbAddress: [  127.0.0.1:37017 ]
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM
@@ -86,7 +86,12 @@ credential:
     bucket: echat-1302656840
     secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
     secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
-
+  minio:
+    bucket: openim
+    location: us-east-1
+    endpoint: http://127.0.0.1:9000
+    accessKeyID: minioadmin
+    secretAccessKey: minioadmin
 
 rpcport:
   openImUserPort: [ 10100 ]
