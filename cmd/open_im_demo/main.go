@@ -21,6 +21,7 @@ func main() {
 		authRouterGroup.POST("/verify", register.Verify)
 		authRouterGroup.POST("/password", register.SetPassword)
 		authRouterGroup.POST("/login", register.Login)
+		authRouterGroup.POST("/reset_password", register.ResetPassword)
 	}
 	log.NewPrivateLog("demo")
 	ginPort := flag.Int("port", 42233, "get ginServerPort from cmd,default 42233 as port")
