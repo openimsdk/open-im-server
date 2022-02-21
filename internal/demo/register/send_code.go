@@ -21,7 +21,7 @@ type paramsVerificationCode struct {
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNumber"`
 	OperationID string `json:"operationID" binding:"required"`
-	UsedFor     int `json:"usedFor" binding:"required"`
+	UsedFor     int `json:"usedFor"`
 }
 
 func SendVerificationCode(c *gin.Context) {
@@ -38,6 +38,9 @@ func SendVerificationCode(c *gin.Context) {
 		account = params.PhoneNumber
 	}
 	var accountKey string
+	if params.UsedFor == 0 {
+		params.UsedFor = constant.VerificationCodeForRegister
+	}
 	switch params.UsedFor {
 	case constant.VerificationCodeForRegister:
 		_, err := im_mysql_model.GetRegister(account)

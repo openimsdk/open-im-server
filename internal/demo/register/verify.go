@@ -15,7 +15,7 @@ type paramsCertification struct {
 	PhoneNumber      string `json:"phoneNumber"`
 	VerificationCode string `json:"verificationCode"`
 	OperationID      string `json:"operationID" binding:"required"`
-	UsedFor          int `json:"usedFor" binding:"required"`
+	UsedFor          int `json:"usedFor"`
 }
 
 func Verify(c *gin.Context) {
@@ -44,8 +44,11 @@ func Verify(c *gin.Context) {
 	}
 	log.NewInfo("0", " params.VerificationCode != config.Config.Demo.SuperCode", params.VerificationCode, config.Config.Demo)
 	log.NewInfo(params.OperationID, "begin get form redis", account)
-
-	code, err := db.DB.GetAccountCode(account)
+	if params.UsedFor == 0 {
+		params.UsedFor = 1
+	}
+	accountKey := account + "_" + constant.VerificationCodeForResetSuffix
+	code, err := db.DB.GetAccountCode(accountKey)
 	log.NewInfo(params.OperationID, "redis phone number and verificating Code", account, code)
 	if err != nil {
 		log.NewError(params.OperationID, "Verification code expired", account, "err", err.Error())
