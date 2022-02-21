@@ -43,6 +43,16 @@ func init() {
 		config.Config.Mongo.DBMaxPoolSize)
 
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil{
+		log.NewError(" mongo.Connect  failed, try ", err.Error(), uri)
+		time.Sleep(time.Duration(30) * time.Second)
+		mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+		if err1 != nil {
+			log.NewError(" mongo.Connect  failed, panic", err.Error(), uri)
+			panic(err1.Error())
+		}
+	}
+
 
 
 	mgoDailInfo := &mgo.DialInfo{
@@ -58,13 +68,7 @@ func init() {
 	mgoSession, err = mgo.DialWithInfo(mgoDailInfo)
 
 	if err != nil {
-		log.NewError(" mongo.Connect  failed, try ", err.Error(), uri)
-		time.Sleep(time.Duration(30) * time.Second)
-		mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-		if err1 != nil {
-			log.NewError(" mongo.Connect  failed, panic", err.Error(), uri)
-			panic(err1.Error())
-		}
+
 		mgoSession, err1 = mgo.DialWithInfo(mgoDailInfo)
 		if err1 != nil {
 			log.NewError(" mongo.Connect  failed, panic", err.Error(), uri)
