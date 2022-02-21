@@ -442,7 +442,8 @@ notification:
 
 #---------------demo configuration---------------------#
 #The following configuration items are applied to openIM Demo configuration
-demoswitch: true #是否启动demo，如果自身没有账号体系，设置为true
+#是否启动demo，如果自身没有账号体系，设置为true
+demoswitch: true
 demo:
   openImDemoPort: [42233] #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
   alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，必须修改
