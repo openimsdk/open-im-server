@@ -25,6 +25,9 @@ type config struct {
 	Api           struct {
 		GinPort []int `yaml:"openImApiPort"`
 	}
+	CmsApi        struct{
+		GinPort []int `yaml:"openImCmsApiPort"`
+	}
 	Sdk struct {
 		WsPort []int `yaml:"openImSdkWsPort"`
 	}

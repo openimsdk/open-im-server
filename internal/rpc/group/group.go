@@ -854,6 +854,8 @@ func (s *groupServer) RemoveGroupMembersCMS(_ context.Context, req *pbGroup.Remo
 		OpUserID:         req.OpUserId,
 	}
 	chat.MemberKickedNotification(reqKick, resp.Success)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "success: ", resp.Success)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "failed: ", resp.Failed)
 	return resp, nil
 }
 
