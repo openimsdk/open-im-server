@@ -57,9 +57,7 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) {
 }
 func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
-	if msg.SendTime == 0 {
-		msg.SendTime = utils.GetCurrentTimestampByMill()
-	}
+	msg.SendTime = utils.GetCurrentTimestampByMill()
 	switch msg.ContentType {
 	case constant.Text:
 		fallthrough
