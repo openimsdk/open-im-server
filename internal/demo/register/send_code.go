@@ -60,9 +60,9 @@ func SendVerificationCode(c *gin.Context) {
 	case constant.VerificationCodeForReset:
 		accountKey = account + "_" + constant.VerificationCodeForResetSuffix
 	}
-	log.NewInfo(params.OperationID, params.UsedFor,"begin store redis", accountKey)
 	rand.Seed(time.Now().UnixNano())
 	code := 100000 + rand.Intn(900000)
+	log.NewInfo(params.OperationID, params.UsedFor,"begin store redis", accountKey, code)
 	err := db.DB.SetAccountCode(accountKey, code, config.Config.Demo.CodeTTL)
 	if err != nil {
 		log.NewError(params.OperationID, "set redis error", accountKey, "err", err.Error())

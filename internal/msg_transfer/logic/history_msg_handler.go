@@ -32,7 +32,7 @@ func (mc *HistoryConsumerHandler) Init() {
 }
 
 func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
-	log.InfoByKv("msg come mongo!!!", "", "msg", string(msg))
+	log.NewInfo("msg come mongo!!!", "", "msg", string(msg))
 	time := utils.GetCurrentTimestampByNano()
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)

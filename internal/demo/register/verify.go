@@ -49,9 +49,9 @@ func Verify(c *gin.Context) {
 	}
 	accountKey := account + "_" + constant.VerificationCodeForRegisterSuffix
 	code, err := db.DB.GetAccountCode(accountKey)
-	log.NewInfo(params.OperationID, "redis phone number and verificating Code", account, code)
+	log.NewInfo(params.OperationID, "redis phone number and verificating Code", accountKey, code, params)
 	if err != nil {
-		log.NewError(params.OperationID, "Verification code expired", account, "err", err.Error())
+		log.NewError(params.OperationID, "Verification code expired", accountKey, "err", err.Error())
 		data := make(map[string]interface{})
 		data["account"] = account
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.CodeInvalidOrExpired, "errMsg": "Verification code expired!", "data": data})
