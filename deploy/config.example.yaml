@@ -73,6 +73,8 @@ api:
   openImApiPort: [ 10000 ]
 sdk:
   openImSdkWsPort: [ 30000 ]
+cmsapi:
+  openImCmsApiPort: [ 8000 ]
 
 credential:
   tencent:
@@ -91,7 +93,9 @@ rpcport:
   openImGroupPort: [ 10500  ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
-
+  openImStatisticsPort: [ 10800 ]
+  openImMessageCmsPort: [ 10900 ]
+  openImAdminCmsPort: [ 11000 ]
 
 rpcregistername:
   openImUserName: User

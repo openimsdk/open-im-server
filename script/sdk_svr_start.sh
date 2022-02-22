@@ -6,13 +6,15 @@ source ./function.sh
 list1=$(cat $config_path | grep openImApiPort | awk -F '[:]' '{print $NF}')
 list2=$(cat $config_path | grep openImWsPort | awk -F '[:]' '{print $NF}')
 list3=$(cat $config_path | grep openImSdkWsPort | awk -F '[:]' '{print $NF}')
+list4=$(cat $config_path | grep openImCmsApiPort | awk - F '[:]' '{print $NF}')
 list_to_string $list1
 api_ports=($ports_array)
 list_to_string $list2
 ws_ports=($ports_array)
 list_to_string $list3
 sdk_ws_ports=($ports_array)
-
+list_to_string $list4
+cms_api_ports=($ports_array)
 
 
 
