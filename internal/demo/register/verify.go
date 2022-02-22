@@ -45,9 +45,16 @@ func Verify(c *gin.Context) {
 	log.NewInfo("0", " params.VerificationCode != config.Config.Demo.SuperCode", params.VerificationCode, config.Config.Demo)
 	log.NewInfo(params.OperationID, "begin get form redis", account)
 	if params.UsedFor == 0 {
-		params.UsedFor = 1
+		params.UsedFor = constant.VerificationCodeForRegister
 	}
-	accountKey := account + "_" + constant.VerificationCodeForRegisterSuffix
+	var accountKey string
+	switch params.UsedFor {
+	case constant.VerificationCodeForRegister:
+		accountKey = account + "_" + constant.VerificationCodeForRegisterSuffix
+	case constant.VerificationCodeForReset:
+		accountKey = account + "_" + constant.VerificationCodeForResetSuffix
+	}
+
 	code, err := db.DB.GetAccountCode(accountKey)
 	log.NewInfo(params.OperationID, "redis phone number and verificating Code", accountKey, code, params)
 	if err != nil {
