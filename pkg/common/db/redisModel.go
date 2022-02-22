@@ -41,14 +41,13 @@ func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
 }
 func (d *DataBases) SetAccountCode(account string, code, ttl int) (err error) {
 	key := AccountTempCode + account
-	_, err = d.Exec("SET", key, code)
+	_, err = d.Exec("SET", key, code, "ex", ttl)
 	return err
 }
 func (d *DataBases) GetAccountCode(account string) (string, error) {
 	key := AccountTempCode + account
 	return redis.String(d.Exec("GET", key))
 }
-
 
 //Perform seq auto-increment operation of user messages
 func (d *DataBases) IncrUserSeq(uid string) (uint64, error) {
