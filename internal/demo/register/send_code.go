@@ -51,8 +51,13 @@ func SendVerificationCode(c *gin.Context) {
 			return
 		}
 		ok, err := db.DB.JudgeAccountEXISTS(account)
-		if ok || err != nil {
-			log.NewError(params.OperationID, "The phone number has been registered", params, err.Error())
+		if err != nil {
+			log.NewError(params.OperationID, "check account is exists fail", params, err.Error())
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "The phone number has been registered"})
+			return
+		}
+		if ok {
+			log.NewError(params.OperationID, "The phone number has been registered", params)
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "The phone number has been registered"})
 			return
 		}
