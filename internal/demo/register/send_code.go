@@ -7,21 +7,22 @@ import (
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"fmt"
+	"math/rand"
+	"net/http"
+	"time"
+
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
 	dysmsapi20170525 "github.com/alibabacloud-go/dysmsapi-20170525/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/gomail.v2"
-	"math/rand"
-	"net/http"
-	"time"
 )
 
 type paramsVerificationCode struct {
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNumber"`
 	OperationID string `json:"operationID" binding:"required"`
-	UsedFor     int `json:"usedFor"`
+	UsedFor     int    `json:"usedFor"`
 }
 
 func SendVerificationCode(c *gin.Context) {
@@ -45,13 +46,13 @@ func SendVerificationCode(c *gin.Context) {
 	case constant.VerificationCodeForRegister:
 		_, err := im_mysql_model.GetRegister(account)
 		if err == nil {
-			log.NewError(params.OperationID, "The phone number has been registered", params)
+			log.NewError(params.OperationID, "The phone number has been registered", params, err.Error())
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": "The phone number has been registered"})
 			return
 		}
 		ok, err := db.DB.JudgeAccountEXISTS(account)
 		if ok || err != nil {
-			log.NewError(params.OperationID, "The phone number has been registered", params)
+			log.NewError(params.OperationID, "The phone number has been registered", params, err.Error())
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "The phone number has been registered"})
 			return
 		}
@@ -62,7 +63,7 @@ func SendVerificationCode(c *gin.Context) {
 	}
 	rand.Seed(time.Now().UnixNano())
 	code := 100000 + rand.Intn(900000)
-	log.NewInfo(params.OperationID, params.UsedFor,"begin store redis", accountKey, code)
+	log.NewInfo(params.OperationID, params.UsedFor, "begin store redis", accountKey, code)
 	err := db.DB.SetAccountCode(accountKey, code, config.Config.Demo.CodeTTL)
 	if err != nil {
 		log.NewError(params.OperationID, "set redis error", accountKey, "err", err.Error())
