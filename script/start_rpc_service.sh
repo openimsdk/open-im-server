@@ -29,7 +29,7 @@ service_port_name=(
   openImUserPort
   openImFriendPort
   openImGroupPort
-
+  openImAuthPort
   openImAdminCmsPort
   openImMessageCmsPort
   openImStatisticsPort
