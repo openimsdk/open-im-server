@@ -54,10 +54,16 @@ const (
 	FriendRemarkSetNotification           = 1206 //set_friend_remark?
 	BlackAddedNotification                = 1207 //add_black
 	BlackDeletedNotification              = 1208 //remove_black
+	ConversationOptChangeNotification     = 1300 // change conversation opt
 
+	UserNotificationBegin       = 1301
 	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
+	ConversationNotification    = 1307
+	ConversationNotNotification = 1308
+	ConversationDefault         = 0
+	UserNotificationEnd         = 1399
 
-	ConversationOptChangeNotification    = 1300 // change conversation opt
+	GroupNotificationBegin = 1500
 
 	GroupCreatedNotification             = 1501
 	GroupInfoSetNotification             = 1502
@@ -126,10 +132,10 @@ const (
 	MinioDurationTimes = 3600
 
 	// verificationCode used for
-	VerificationCodeForRegister = 1
-	VerificationCodeForReset = 2
+	VerificationCodeForRegister       = 1
+	VerificationCodeForReset          = 2
 	VerificationCodeForRegisterSuffix = "_forRegister"
-	VerificationCodeForResetSuffix = "_forReset"
+	VerificationCodeForResetSuffix    = "_forReset"
 )
 
 var ContentType2PushContent = map[int64]string{
@@ -183,4 +189,4 @@ func GroupIsBanPrivateChat(status int32) bool {
 	return true
 }
 
- const BigVersion = "v3"
+const BigVersion = "v3"
