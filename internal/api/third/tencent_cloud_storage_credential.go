@@ -6,14 +6,10 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
-<<<<<<< HEAD
-=======
+
 	"github.com/fatih/structs"
 
 	//"github.com/fatih/structs"
-	"github.com/gin-gonic/gin"
-	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
->>>>>>> 17954df (Refactoring code)
 	"net/http"
 	"time"
 
