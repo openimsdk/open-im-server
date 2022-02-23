@@ -41,9 +41,8 @@ func init() {
 	initMysqlDB()
 	// mongo init
 	// "mongodb://sysop:moon@localhost/records"
-	uri := "mongodb://user:pass@sample.host:27017/?maxPoolSize=20&w=majority"
-	uri = fmt.Sprintf("mongodb://%s:%s@%s/%s/?maxPoolSize=%d",
-		config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword,
+	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
+	uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
 		config.Config.Mongo.DBAddress[0],config.Config.Mongo.DBDatabase,
 		config.Config.Mongo.DBMaxPoolSize)
 
