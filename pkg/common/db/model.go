@@ -3,15 +3,15 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-//	"context"
-//	"fmt"
+	//	"context"
+	//	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/mgo.v2"
 	"time"
 
 	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-//	"go.mongodb.org/mongo-driver/mongo/options"
+	//	"go.mongodb.org/mongo-driver/mongo/options"
 
 )
 
@@ -36,7 +36,7 @@ func init() {
 	initMysqlDB()
 	// mongo init
 	// "mongodb://sysop:moon@localhost/records"
-	// uri := "mongodb://user:pass@sample.host:27017/?maxPoolSize=20&w=majority"
+	//uri := "mongodb://user:pass@sample.host:27017/?maxPoolSize=20&w=majority"
 	//uri := fmt.Sprintf("mongodb://%s:%s@%s/%s/?maxPoolSize=%d",
 	//	config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword,
 	//	config.Config.Mongo.DBAddress[0],config.Config.Mongo.DBDatabase,
