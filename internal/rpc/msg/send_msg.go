@@ -13,13 +13,14 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"github.com/garyburd/redigo/redis"
-	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/garyburd/redigo/redis"
+	"github.com/golang/protobuf/proto"
 )
 
 type MsgCallBackReq struct {
@@ -102,9 +103,18 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 
 	}
 }
-func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
+func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
 	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
+
+	res, ok, err := rpc.callWidgetBeforeSend(ctx, pb)
+	if err != nil {
+		return returnMsg(&replay, pb, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), err.Error(), 0)
+	}
+	if !ok {
+		return res, nil
+	}
+
 	userRelationshipVerification(pb)
 	//if !utils.VerifyToken(pb.Token, pb.SendID) {
 	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
