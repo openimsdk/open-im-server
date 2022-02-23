@@ -464,13 +464,13 @@ demo:
     verificationCodeTemplateCode: SMS_226810164
   superCode: 666666
   #  second
-  codeTTL: 60
+  codeTTL: 300
   mail:
     title: "openIM"
     senderMail: "765567899@qq.com"
     senderAuthorizationCode: "gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
-    smtpPort:
+    smtpPort: 25
 
 
 
