@@ -58,37 +58,37 @@ func init() {
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "mongo driver client init success")
-
-
-	mgoDailInfo := &mgo.DialInfo{
-		Addrs:     config.Config.Mongo.DBAddress,
-		Direct:    config.Config.Mongo.DBDirect,
-		Timeout:   time.Second * time.Duration(config.Config.Mongo.DBTimeout),
-		Database:  config.Config.Mongo.DBDatabase,
-		Source:    config.Config.Mongo.DBSource,
-		Username:  config.Config.Mongo.DBUserName,
-		Password:  config.Config.Mongo.DBPassword,
-		PoolLimit: config.Config.Mongo.DBMaxPoolSize,
-	}
-	mgoSession, err := mgo.DialWithInfo(mgoDailInfo)
-
-	if err != nil {
-
-		mgoSession, err1 = mgo.DialWithInfo(mgoDailInfo)
-		if err1 != nil {
-			log.NewError(" mongo.Connect  failed, panic", err.Error())
-			panic(err1.Error())
-		}
-	}
 	DB.mongoClient = mongoClient
-	DB.mgoSession = mgoSession
-	DB.mgoSession.SetMode(mgo.Monotonic, true)
-	c := DB.mgoSession.DB(config.Config.Mongo.DBDatabase).C(cChat)
-	err = c.EnsureIndexKey("uid")
-	if err != nil {
-		panic(err.Error())
-	}
 
+	//mgoDailInfo := &mgo.DialInfo{
+	//	Addrs:     config.Config.Mongo.DBAddress,
+	//	Direct:    config.Config.Mongo.DBDirect,
+	//	Timeout:   time.Second * time.Duration(config.Config.Mongo.DBTimeout),
+	//	Database:  config.Config.Mongo.DBDatabase,
+	//	Source:    config.Config.Mongo.DBSource,
+	//	Username:  config.Config.Mongo.DBUserName,
+	//	Password:  config.Config.Mongo.DBPassword,
+	//	PoolLimit: config.Config.Mongo.DBMaxPoolSize,
+	//}
+	//mgoSession, err = mgo.DialWithInfo(mgoDailInfo)
+	//
+	//if err != nil {
+	//
+	//	mgoSession, err1 = mgo.DialWithInfo(mgoDailInfo)
+	//	if err1 != nil {
+	//		log.NewError(" mongo.Connect  failed, panic", err.Error())
+	//		panic(err1.Error())
+	//	}
+	//}
+
+	//DB.mgoSession = mgoSession
+	//DB.mgoSession.SetMode(mgo.Monotonic, true)
+	//c := DB.mgoSession.DB(config.Config.Mongo.DBDatabase).C(cChat)
+	//err = c.EnsureIndexKey("uid")
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+	//
 
 	// redis pool init
 	DB.redisPool = &redis.Pool{
