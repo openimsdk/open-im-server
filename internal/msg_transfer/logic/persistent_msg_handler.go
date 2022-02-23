@@ -33,7 +33,7 @@ func (pc *PersistentConsumerHandler) Init() {
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey string) {
-	log.InfoByKv("msg come here mysql!!!", "", "msg", string(msg))
+	log.NewInfo("msg come here mysql!!!", "", "msg", string(msg))
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {

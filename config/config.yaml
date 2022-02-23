@@ -1,7 +1,7 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-serverversion: 1.0.3
+serverversion: 2.0.0
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openIM
@@ -11,7 +11,7 @@ mysql:
   dbMysqlAddress: [ 127.0.0.1:13306 ]
   dbMysqlUserName: root
   dbMysqlPassword: openIM
-  dbMysqlDatabaseName: openIM
+  dbMysqlDatabaseName: openIM_v2
   dbTableName: eMsg
   dbMsgTableNum: 1
   dbMaxOpenConns: 20
@@ -87,7 +87,12 @@ credential:
     bucket: echat-1302656840
     secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
     secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
-
+  minio:
+    bucket: openim
+    location: us-east-1
+    endpoint: http://127.0.0.1:9000
+    accessKeyID: minioadmin
+    secretAccessKey: minioadmin
 
 rpcport:
   openImUserPort: [ 10100 ]
@@ -454,17 +459,17 @@ demoswitch: true
 demo:
   openImDemoPort: [ 42233 ]
   alismsverify:
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
-    signName: OpenIM Corporation
-    verificationCodeTemplateCode: SMS_2268101641
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+    signName: 托云信息技术
+    verificationCodeTemplateCode: SMS_226810164
   superCode: 666666
   #  second
-  codeTTL: 60
+  codeTTL: 300
   mail:
     title: "openIM"
-    senderMail: "1765567899@qq.com"
-    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    senderMail: "765567899@qq.com"
+    senderAuthorizationCode: "gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
     smtpPort: 25
 

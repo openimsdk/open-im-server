@@ -12,7 +12,7 @@ list_to_string $list2
 ws_ports=($ports_array)
 list_to_string $list3
 sdk_ws_ports=($ports_array)
-
+list_to_string $list4
 
 
 

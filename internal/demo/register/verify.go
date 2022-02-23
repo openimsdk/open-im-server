@@ -15,6 +15,7 @@ type paramsCertification struct {
 	PhoneNumber      string `json:"phoneNumber"`
 	VerificationCode string `json:"verificationCode"`
 	OperationID      string `json:"operationID" binding:"required"`
+	UsedFor          int    `json:"usedFor"`
 }
 
 func Verify(c *gin.Context) {
@@ -43,11 +44,21 @@ func Verify(c *gin.Context) {
 	}
 	log.NewInfo("0", " params.VerificationCode != config.Config.Demo.SuperCode", params.VerificationCode, config.Config.Demo)
 	log.NewInfo(params.OperationID, "begin get form redis", account)
+	if params.UsedFor == 0 {
+		params.UsedFor = constant.VerificationCodeForRegister
+	}
+	var accountKey string
+	switch params.UsedFor {
+	case constant.VerificationCodeForRegister:
+		accountKey = account + "_" + constant.VerificationCodeForRegisterSuffix
+	case constant.VerificationCodeForReset:
+		accountKey = account + "_" + constant.VerificationCodeForResetSuffix
+	}
 
-	code, err := db.DB.GetAccountCode(account)
-	log.NewInfo(params.OperationID, "redis phone number and verificating Code", account, code)
+	code, err := db.DB.GetAccountCode(accountKey)
+	log.NewInfo(params.OperationID, "redis phone number and verificating Code", accountKey, code, params)
 	if err != nil {
-		log.NewError(params.OperationID, "Verification code expired", account, "err", err.Error())
+		log.NewError(params.OperationID, "Verification code expired", accountKey, "err", err.Error())
 		data := make(map[string]interface{})
 		data["account"] = account
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.CodeInvalidOrExpired, "errMsg": "Verification code expired!", "data": data})

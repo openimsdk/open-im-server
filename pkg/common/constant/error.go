@@ -80,6 +80,7 @@ const (
 	SmsSendCodeErr       = 10008
 	CodeInvalidOrExpired = 10009
 	RegisterFailed       = 10010
+	ResetPasswordFailed  = 10011
 	DatabaseError        = 10002
 	ServerError          = 10004
 	HttpError            = 10005

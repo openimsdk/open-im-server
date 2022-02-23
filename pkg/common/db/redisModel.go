@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	registerAccountTempCode       = "REGISTER_ACCOUNT_TEMP_CODE"
+	AccountTempCode               = "ACCOUNT_TEMP_CODE"
+	resetPwdTempCode              = "RESET_PWD_TEMP_CODE"
 	userIncrSeq                   = "REDIS_USER_INCR_SEQ:" // user incr seq
 	appleDeviceToken              = "DEVICE_TOKEN"
 	userMinSeq                    = "REDIS_USER_MIN_SEQ:"
@@ -35,16 +36,16 @@ func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (inte
 	return con.Do(cmd, params...)
 }
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
-	key := registerAccountTempCode + account
+	key := AccountTempCode + account
 	return redis.Bool(d.Exec("EXISTS", key))
 }
 func (d *DataBases) SetAccountCode(account string, code, ttl int) (err error) {
-	key := registerAccountTempCode + account
-	_, err = d.Exec("Set", key, code, ttl)
+	key := AccountTempCode + account
+	_, err = d.Exec("SET", key, code, "ex", ttl)
 	return err
 }
 func (d *DataBases) GetAccountCode(account string) (string, error) {
-	key := userIncrSeq + account
+	key := AccountTempCode + account
 	return redis.String(d.Exec("GET", key))
 }
 

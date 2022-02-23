@@ -21,6 +21,7 @@ type paramsVerificationCode struct {
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNumber"`
 	OperationID string `json:"operationID" binding:"required"`
+	UsedFor     int `json:"usedFor"`
 }
 
 func SendVerificationCode(c *gin.Context) {
@@ -36,25 +37,35 @@ func SendVerificationCode(c *gin.Context) {
 	} else {
 		account = params.PhoneNumber
 	}
-	_, err := im_mysql_model.GetRegister(account)
-	if err == nil {
-		log.NewError(params.OperationID, "The phone number has been registered", params)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": ""})
-		return
+	var accountKey string
+	if params.UsedFor == 0 {
+		params.UsedFor = constant.VerificationCodeForRegister
 	}
-	ok, err := db.DB.JudgeAccountEXISTS(account)
-	if ok || err != nil {
-		log.NewError(params.OperationID, "The phone number has been registered", params)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": ""})
-		return
+	switch params.UsedFor {
+	case constant.VerificationCodeForRegister:
+		_, err := im_mysql_model.GetRegister(account)
+		if err == nil {
+			log.NewError(params.OperationID, "The phone number has been registered", params)
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": "The phone number has been registered"})
+			return
+		}
+		ok, err := db.DB.JudgeAccountEXISTS(account)
+		if ok || err != nil {
+			log.NewError(params.OperationID, "The phone number has been registered", params)
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "The phone number has been registered"})
+			return
+		}
+		accountKey = account + "_" + constant.VerificationCodeForRegisterSuffix
+
+	case constant.VerificationCodeForReset:
+		accountKey = account + "_" + constant.VerificationCodeForResetSuffix
 	}
-	log.InfoByKv("begin sendSms", account)
 	rand.Seed(time.Now().UnixNano())
 	code := 100000 + rand.Intn(900000)
-	log.NewInfo(params.OperationID, "begin store redis", account)
-	err = db.DB.SetAccountCode(account, code, config.Config.Demo.CodeTTL)
+	log.NewInfo(params.OperationID, params.UsedFor,"begin store redis", accountKey, code)
+	err := db.DB.SetAccountCode(accountKey, code, config.Config.Demo.CodeTTL)
 	if err != nil {
-		log.NewError(params.OperationID, "set redis error", account, "err", err.Error())
+		log.NewError(params.OperationID, "set redis error", accountKey, "err", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.SmsSendCodeErr, "errMsg": "Enter the superCode directly in the verification code box, SuperCode can be configured in config.xml"})
 		return
 	}

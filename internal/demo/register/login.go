@@ -44,7 +44,7 @@ func Login(c *gin.Context) {
 	}
 	if r.Password != params.Password {
 		log.NewError(params.OperationID, "password err", params.Password, account, r.Password, r.Account)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.PasswordErr, "errMsg": "Mobile phone number is not registered"})
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.PasswordErr, "errMsg": "password err"})
 		return
 	}
 	url := fmt.Sprintf("http://%s:10000/auth/user_token", viper.GetString("endpoints.api"))
