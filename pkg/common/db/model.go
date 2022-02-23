@@ -3,12 +3,17 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
+	"fmt"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	//	"context"
 	//	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"gopkg.in/mgo.v2"
 	"time"
 
+	"context"
 	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	//	"go.mongodb.org/mongo-driver/mongo/options"
@@ -36,23 +41,23 @@ func init() {
 	initMysqlDB()
 	// mongo init
 	// "mongodb://sysop:moon@localhost/records"
-	//uri := "mongodb://user:pass@sample.host:27017/?maxPoolSize=20&w=majority"
-	//uri := fmt.Sprintf("mongodb://%s:%s@%s/%s/?maxPoolSize=%d",
-	//	config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword,
-	//	config.Config.Mongo.DBAddress[0],config.Config.Mongo.DBDatabase,
-	//	config.Config.Mongo.DBMaxPoolSize)
-	//
-	//mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	//if err != nil{
-	//	log.NewError(" mongo.Connect  failed, try ", err.Error(), uri)
-	//	time.Sleep(time.Duration(30) * time.Second)
-	//	mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	//	if err1 != nil {
-	//		log.NewError(" mongo.Connect  failed, panic", err.Error(), uri)
-	//		panic(err1.Error())
-	//	}
-	//}
+	uri := "mongodb://user:pass@sample.host:27017/?maxPoolSize=20&w=majority"
+	uri = fmt.Sprintf("mongodb://%s:%s@%s/%s/?maxPoolSize=%d",
+		config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword,
+		config.Config.Mongo.DBAddress[0],config.Config.Mongo.DBDatabase,
+		config.Config.Mongo.DBMaxPoolSize)
 
+	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil{
+		log.NewError(" mongo.Connect  failed, try ", utils.GetSelfFuncName(), err.Error(), uri)
+		time.Sleep(time.Duration(30) * time.Second)
+		mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+		if err1 != nil {
+			log.NewError(" mongo.Connect retry failed, panic", err.Error(), uri)
+			panic(err1.Error())
+		}
+	}
+	log.NewInfo("0", utils.GetSelfFuncName(), "mongo driver client init success")
 
 
 	mgoDailInfo := &mgo.DialInfo{
