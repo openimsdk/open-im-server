@@ -34,7 +34,7 @@ func key(dbAddress, dbName string) string {
 }
 
 func init() {
-	var mgoSession *mgo.Session
+	//var mgoSession *mgo.Session
 	var mongoClient *mongo.Client
 	var err1 error
 	//mysql init
