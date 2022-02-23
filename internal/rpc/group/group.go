@@ -890,10 +890,9 @@ func (s *groupServer) AddGroupMembersCMS(_ context.Context, req *pbGroup.AddGrou
 			resp.Failed = append(resp.Failed, userId)
 		} else  {
 			resp.Success = append(resp.Success, userId)
-			chat.MemberInvitedNotification(req.OperationId, req.GroupId, req.OpUserId, "admin add", resp.Success)
 		}
-
 	}
+	chat.MemberInvitedNotification(req.OperationId, req.GroupId, req.OpUserId, "admin add you to group", resp.Success)
 	return resp, nil
 }
 
