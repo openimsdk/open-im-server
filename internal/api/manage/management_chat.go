@@ -7,12 +7,14 @@
 package manage
 
 import (
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
+	"Open_IM/pkg/proto/sdk_ws"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
@@ -40,11 +42,13 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 		newContent = utils.StructToJsonString(params.Content)
 	default:
 	}
-	options := make(map[string]bool, 2)
+	var options map[string]bool
 	if params.IsOnlineOnly {
+		options = make(map[string]bool, 5)
 		utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 		utils.SetSwitchFromOptions(options, constant.IsHistory, false)
 		utils.SetSwitchFromOptions(options, constant.IsPersistent, false)
+		utils.SetSwitchFromOptions(options, constant.IsSenderSync, false)
 	}
 	pbData := pbChat.SendMsgReq{
 		OperationID: params.OperationID,
@@ -152,20 +156,16 @@ func ManagementSendMsg(c *gin.Context) {
 
 	log.Info("", "", "api ManagementSendMsg call, api call rpc...")
 
-	reply, err := client.SendMsg(context.Background(), pbData)
+	RpcResp, err := client.SendMsg(context.Background(), pbData)
 	if err != nil {
 		log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call UserSendMsg  rpc server failed"})
 		return
 	}
-	log.Info("", "", "api ManagementSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
-
-	c.JSON(http.StatusOK, gin.H{
-		"errCode":  reply.ErrCode,
-		"errMsg":   reply.ErrMsg,
-		"sendTime": reply.SendTime,
-		"msgID":    reply.ClientMsgID,
-	})
+	log.Info("", "", "api ManagementSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
+	resp := api.ManagementSendMsgResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, ResultList: server_api_params.UserSendMsgResp{ServerMsgID: RpcResp.ServerMsgID, ClientMsgID: RpcResp.ClientMsgID, SendTime: RpcResp.SendTime}}
+	log.Info(params.OperationID, "ManagementSendMsg return", resp)
+	c.JSON(http.StatusOK, resp)
 
 }
 
