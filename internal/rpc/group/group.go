@@ -746,6 +746,7 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 				OwnerUserID:   v.CreatorUserID,
 				Status:        v.Status,
 				CreatorUserID: v.CreatorUserID,
+				CreateTime:    uint32(v.CreateTime.Unix()),
 			},
 			GroupMasterId: groupMember.UserID,
 			GroupMasterName: groupMember.Nickname,
