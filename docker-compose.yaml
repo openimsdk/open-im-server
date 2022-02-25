@@ -1,4 +1,4 @@
-version: "2"
+version: "3"
 #fixme  Clone openIM Server project before using docker-compose,project address：https://github.com/OpenIMSDK/Open-IM-Server.git
 
 services:
