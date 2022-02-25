@@ -464,17 +464,17 @@ demoswitch: true
 demo:
   openImDemoPort: [ 42233 ] #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
   alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，必须修改
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
-    signName: OpenIM Corporation
-    verificationCodeTemplateCode: SMS_2268101641
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+    signName: 托云信息技术
+    verificationCodeTemplateCode: SMS_226810164
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   #  second
   codeTTL: 300
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
     title: "openIM"
-    senderMail: "1765567899@qq.com"
-    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    senderMail: "765567899@qq.com"
+    senderAuthorizationCode: "gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
     smtpPort: 25   #需开放此端口 出口方向
 
