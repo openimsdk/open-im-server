@@ -11,7 +11,8 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
-	"time"
+	"Open_IM/pkg/statistics"
+	"fmt"
 )
 
 var (
@@ -19,6 +20,7 @@ var (
 	pushCh       PushConsumerHandler
 	pushTerminal []int32
 	producer     *kafka.Producer
+	count        uint64
 )
 
 func Init(rpcPort int) {
@@ -29,20 +31,10 @@ func Init(rpcPort int) {
 }
 func init() {
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
+	statistics.NewStatistics(&count, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", count), 10)
 }
 
 func Run() {
 	go rpcServer.run()
 	go pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&pushCh)
-	go stat()
-}
-func stat() {
-	t := time.NewTicker(time.Second * 10)
-	defer t.Stop()
-	for {
-		select {
-		case <-t.C:
-		}
-		log.Debug("", "10 second handle msg to mongo is ")
-	}
 }

@@ -47,6 +47,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		}
 	}
 	log.InfoByKv("push_result", pushMsg.OperationID, "result", wsResult, "sendData", pushMsg.MsgData)
+	count++
 	//if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
 	//	for _, v := range wsResult {
 	//		if v.ResultCode == 0 {
