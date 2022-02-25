@@ -245,7 +245,7 @@ func (rpc *rpcChat) sendMsgToKafka(m *pbChat.MsgDataToMQ, key string) error {
 }
 func GetMsgID(sendID string) string {
 	t := time.Now().Format("2006-01-02 15:04:05")
-	return t + "-" + sendID + "-" + strconv.Itoa(rand.Int())
+	return utils.Md5(t + "-" + sendID + "-" + strconv.Itoa(rand.Int()))
 }
 
 func returnMsg(replay *pbChat.SendMsgResp, pb *pbChat.SendMsgReq, errCode int32, errMsg, serverMsgID string, sendTime int64) (*pbChat.SendMsgResp, error) {
