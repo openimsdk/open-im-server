@@ -12,7 +12,7 @@ func main() {
 	rpcServer := rpcChat.NewRpcChatServer(*rpcPort)
 	// register widgets
 
-	// mock
+	// mock 注册发送前的拦截器
 	rpcServer.UseWidgetBeforSend(widget.MockBeforeSendHandler)
 
 	//
