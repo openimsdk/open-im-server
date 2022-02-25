@@ -38,7 +38,7 @@ func Login(c *gin.Context) {
 
 	r, err := im_mysql_model.GetRegister(account)
 	if err != nil {
-		log.NewError(params.OperationID, "user have not register", params.Password, account)
+		log.NewError(params.OperationID, "user have not register", params.Password, account, err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.NotRegistered, "errMsg": "Mobile phone number is not registered"})
 		return
 	}
