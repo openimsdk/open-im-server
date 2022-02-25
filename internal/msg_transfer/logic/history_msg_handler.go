@@ -27,7 +27,7 @@ type HistoryConsumerHandler struct {
 
 func (mc *HistoryConsumerHandler) Init() {
 	statistics.NewStatistics(&mc.singleMsgCount, config.Config.ModuleName.MsgTransferName, "singleMsgCount insert to mongo ", 10)
-	statistics.NewStatistics(&mc.singleMsgCount, config.Config.ModuleName.MsgTransferName, "groupMsgCount insert to mongo ", 10)
+	statistics.NewStatistics(&mc.groupMsgCount, config.Config.ModuleName.MsgTransferName, "groupMsgCount insert to mongo ", 10)
 
 	mc.msgHandle = make(map[string]fcb)
 	mc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = mc.handleChatWs2Mongo
