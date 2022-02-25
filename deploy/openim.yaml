@@ -39,7 +39,7 @@ services:
       - 30000:30000 # sdk，必须开
     environment:
       - "API_ENDPOINT=http://openim_api:10000"
-      - "WS_ENDPOINT=http://openim_msg_gateway:17778"
+      - "WS_ENDPOINT=ws://openim_msg_gateway:17778"
     volumes:
       - ./logs:/app/logs
       - ./db/sdk:/app/db/sdk
