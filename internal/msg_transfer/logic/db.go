@@ -18,6 +18,6 @@ func saveUserChat(uid string, msg *pbMsg.MsgDataToMQ) error {
 	pbSaveData := pbMsg.MsgDataToDB{}
 	pbSaveData.MsgData = msg.MsgData
 	log.NewInfo(msg.OperationID, "IncrUserSeq cost time", utils.GetCurrentTimestampByMill()-time)
-	return db.DB.SaveUserChat(uid, pbSaveData.MsgData.SendTime, &pbSaveData)
+	return db.DB.SaveUserChatMongo2(uid, pbSaveData.MsgData.SendTime, &pbSaveData)
 //	return db.DB.SaveUserChatMongo2(uid, pbSaveData.MsgData.SendTime, &pbSaveData)
 }

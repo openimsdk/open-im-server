@@ -2,6 +2,7 @@ package base_info
 
 import (
 	pbRelay "Open_IM/pkg/proto/relay"
+	"Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 )
 
@@ -35,4 +36,9 @@ type AccountCheckReq struct {
 type AccountCheckResp struct {
 	CommResp
 	ResultList []*pbUser.AccountCheckResp_SingleUserStatus `json:"data"`
+}
+
+type ManagementSendMsgResp struct {
+	CommResp
+	ResultList server_api_params.UserSendMsgResp `json:"data"`
 }

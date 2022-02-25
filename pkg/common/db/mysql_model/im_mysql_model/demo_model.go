@@ -30,7 +30,7 @@ func SetPassword(account, password, ex string) error {
 
 func ResetPassword(account, password string) error {
 	r := db.Register{
-		Password:password,
+		Password: password,
 	}
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	dbConn.LogMode(true)
