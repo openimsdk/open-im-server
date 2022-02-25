@@ -1,20 +1,33 @@
 package statistics
 
-import "time"
+import (
+	"Open_IM/pkg/common/log"
+	"time"
+)
 
 type Statistics struct {
-	Count *uint64
-	Dr    int
+	Count      *uint64
+	ModuleName string
+	PrintArgs  string
+	SleepTime  int
 }
 
 func (s *Statistics) output() {
+	t := time.NewTicker(time.Duration(s.SleepTime) * time.Second)
+	defer t.Stop()
+	var sum uint64
 	for {
-		time.Sleep(time.Duration(s.Dr) * time.Second)
+		sum = *s.Count
+		select {
+		case <-t.C:
+		}
+		log.Debug(s.ModuleName, s.PrintArgs, *s.Count-sum)
 
 	}
 }
 
-func NewStatistics(count *uint64, dr int) *Statistics {
-	p := &Statistics{Count: count}
+func NewStatistics(count *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
+	p := &Statistics{Count: count, ModuleName: moduleName, SleepTime: sleepTime, PrintArgs: printArgs}
 	go p.output()
+	return p
 }

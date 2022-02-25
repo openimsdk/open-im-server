@@ -7,16 +7,12 @@
 package logic
 
 import (
-	push "Open_IM/internal/push/jpush"
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
-	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
 	"strings"
 )
 
@@ -34,7 +30,7 @@ type AtContent struct {
 
 func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingleMsgToUser
-	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
+	//isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
 	log.InfoByKv("Get msg from msg_transfer And push msg", pushMsg.OperationID, "PushData", pushMsg.String())
 	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
 	//Online push message
@@ -51,66 +47,66 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		}
 	}
 	log.InfoByKv("push_result", pushMsg.OperationID, "result", wsResult, "sendData", pushMsg.MsgData)
-	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
-		for _, v := range wsResult {
-			if v.ResultCode == 0 {
-				continue
-			}
-			//supported terminal
-			for _, t := range pushTerminal {
-				if v.RecvPlatFormID == t {
-					//Use offline push messaging
-					var UIDList []string
-					UIDList = append(UIDList, v.RecvID)
-					customContent := OpenIMContent{
-						SessionType: int(pushMsg.MsgData.SessionType),
-						From:        pushMsg.MsgData.SendID,
-						To:          pushMsg.MsgData.RecvID,
-						Seq:         pushMsg.MsgData.Seq,
-					}
-					bCustomContent, _ := json.Marshal(customContent)
-					jsonCustomContent := string(bCustomContent)
-					var content string
-					if pushMsg.MsgData.OfflinePushInfo != nil {
-						content = pushMsg.MsgData.OfflinePushInfo.Title
-
-					} else {
-						switch pushMsg.MsgData.ContentType {
-						case constant.Text:
-							content = constant.ContentType2PushContent[constant.Text]
-						case constant.Picture:
-							content = constant.ContentType2PushContent[constant.Picture]
-						case constant.Voice:
-							content = constant.ContentType2PushContent[constant.Voice]
-						case constant.Video:
-							content = constant.ContentType2PushContent[constant.Video]
-						case constant.File:
-							content = constant.ContentType2PushContent[constant.File]
-						case constant.AtText:
-							a := AtContent{}
-							_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
-							if utils.IsContain(v.RecvID, a.AtUserList) {
-								content = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
-							} else {
-								content = constant.ContentType2PushContent[constant.GroupMsg]
-							}
-						default:
-							content = constant.ContentType2PushContent[constant.Common]
-						}
-					}
-
-					pushResult, err := push.JGAccountListPush(UIDList, content, jsonCustomContent, constant.PlatformIDToName(t))
-					if err != nil {
-						log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error(), constant.PlatformIDToName(t))
-					} else {
-						log.NewDebug(pushMsg.OperationID, "offline push return result is ", string(pushResult), pushMsg.MsgData, constant.PlatformIDToName(t))
-					}
-
-				}
-			}
-		}
-
-	}
+	//if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
+	//	for _, v := range wsResult {
+	//		if v.ResultCode == 0 {
+	//			continue
+	//		}
+	//		//supported terminal
+	//		for _, t := range pushTerminal {
+	//			if v.RecvPlatFormID == t {
+	//				//Use offline push messaging
+	//				var UIDList []string
+	//				UIDList = append(UIDList, v.RecvID)
+	//				customContent := OpenIMContent{
+	//					SessionType: int(pushMsg.MsgData.SessionType),
+	//					From:        pushMsg.MsgData.SendID,
+	//					To:          pushMsg.MsgData.RecvID,
+	//					Seq:         pushMsg.MsgData.Seq,
+	//				}
+	//				bCustomContent, _ := json.Marshal(customContent)
+	//				jsonCustomContent := string(bCustomContent)
+	//				var content string
+	//				if pushMsg.MsgData.OfflinePushInfo != nil {
+	//					content = pushMsg.MsgData.OfflinePushInfo.Title
+	//
+	//				} else {
+	//					switch pushMsg.MsgData.ContentType {
+	//					case constant.Text:
+	//						content = constant.ContentType2PushContent[constant.Text]
+	//					case constant.Picture:
+	//						content = constant.ContentType2PushContent[constant.Picture]
+	//					case constant.Voice:
+	//						content = constant.ContentType2PushContent[constant.Voice]
+	//					case constant.Video:
+	//						content = constant.ContentType2PushContent[constant.Video]
+	//					case constant.File:
+	//						content = constant.ContentType2PushContent[constant.File]
+	//					case constant.AtText:
+	//						a := AtContent{}
+	//						_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
+	//						if utils.IsContain(v.RecvID, a.AtUserList) {
+	//							content = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
+	//						} else {
+	//							content = constant.ContentType2PushContent[constant.GroupMsg]
+	//						}
+	//					default:
+	//						content = constant.ContentType2PushContent[constant.Common]
+	//					}
+	//				}
+	//
+	//				pushResult, err := push.JGAccountListPush(UIDList, content, jsonCustomContent, constant.PlatformIDToName(t))
+	//				if err != nil {
+	//					log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error(), constant.PlatformIDToName(t))
+	//				} else {
+	//					log.NewDebug(pushMsg.OperationID, "offline push return result is ", string(pushResult), pushMsg.MsgData, constant.PlatformIDToName(t))
+	//				}
+	//
+	//			}
+	//		}
+	//	}
+	//
+	//}
 }
 
 //func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
