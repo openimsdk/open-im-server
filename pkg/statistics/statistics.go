@@ -21,7 +21,7 @@ func (s *Statistics) output() {
 		select {
 		case <-t.C:
 		}
-		log.Debug(s.ModuleName, s.PrintArgs, *s.Count-sum)
+		log.NewWarn(s.ModuleName, s.PrintArgs, *s.Count-sum)
 
 	}
 }
