@@ -11,7 +11,7 @@ func GetRegister(account string) (*db.Register, error) {
 		return nil, err
 	}
 	var r db.Register
-	return &r, dbConn.Table("registers").Where("account = ?",
+	return &r, dbConn.Debug().Table("registers").Where("account = ?",
 		account).Take(&r).Error
 }
 
@@ -30,7 +30,7 @@ func SetPassword(account, password, ex string) error {
 
 func ResetPassword(account, password string) error {
 	r := db.Register{
-		Password:password,
+		Password: password,
 	}
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	dbConn.LogMode(true)

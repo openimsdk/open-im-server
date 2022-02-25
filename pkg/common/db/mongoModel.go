@@ -65,7 +65,12 @@ func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq uint32, err error) {
 	//return MinSeq, nil
 }
 
+func (d *DataBases) GetMinSeqFromMongo2(uid string) (MinSeq uint32, err error) {
+	return 1, nil
+}
+
 func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
+	log.NewInfo(operationID, utils.GetSelfFuncName(), uid, seqList)
 	var hasSeqList []uint32
 	singleCount := 0
 	session := d.mgoSession.Clone()
