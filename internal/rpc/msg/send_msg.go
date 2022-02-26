@@ -104,16 +104,13 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	}
 }
 func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
+	c := NewSendContext(ctx, rpc)
+	return c.SendMsg(pb)
+}
+
+func (rpc *rpcChat) doSendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
 	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
-
-	res, ok, err := rpc.callWidgetBeforeSend(ctx, pb)
-	if err != nil {
-		return returnMsg(&replay, pb, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), err.Error(), 0)
-	}
-	if !ok {
-		return res, nil
-	}
 
 	userRelationshipVerification(pb)
 	//if !utils.VerifyToken(pb.Token, pb.SendID) {

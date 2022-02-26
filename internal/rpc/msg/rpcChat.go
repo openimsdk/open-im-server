@@ -1,14 +1,12 @@
 package msg
 
 import (
-	"Open_IM/internal/rpc/msg/widget"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/utils"
-	"context"
 	"net"
 	"strconv"
 	"strings"
@@ -24,7 +22,7 @@ type rpcChat struct {
 	etcdAddr        []string
 	producer        *kafka.Producer
 	// beforeSenders are filters which will be triggered before send msg
-	beforeSenders []widget.BeforeSendHandler
+	beforeSenders []BeforeSendFilter
 }
 
 func NewRpcChatServer(port int) *rpcChat {
@@ -39,22 +37,9 @@ func NewRpcChatServer(port int) *rpcChat {
 	return &rc
 }
 
-func (rpc *rpcChat) UseWidgetBeforSend(hs ...widget.BeforeSendHandler) {
+// UseBeforSendFilters attaches a global filter to the BeforSendFilter logic
+func (rpc *rpcChat) UseBeforSendFilters(hs ...BeforeSendFilter) {
 	rpc.beforeSenders = append(rpc.beforeSenders, hs...)
-}
-
-func (rpc *rpcChat) callWidgetBeforeSend(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, bool, error) {
-	for _, handler := range rpc.beforeSenders {
-		res, ok, err := handler(ctx, pb)
-		if err != nil {
-			return nil, false, err
-		}
-		if !ok {
-			return res, ok, nil
-		}
-	}
-
-	return nil, true, nil
 }
 
 func (rpc *rpcChat) Run() {
