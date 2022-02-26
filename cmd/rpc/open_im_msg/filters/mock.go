@@ -11,7 +11,7 @@ import (
 func MockBeforeSendFilter1(ctx *rpcChat.SendContext, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, bool, error) {
 	ctxKey := "test_key"
 	v := true
-	fmt.Printf("MockBeforeSendFilter1:%s set value to ctx,value is :%v\n", ctxKey, v)
+	// fmt.Printf("MockBeforeSendFilter1:%s set value to ctx,value is :%v\n", ctxKey, v)
 	ctx.WithValue(ctxKey, v)
 
 	return nil, true, nil
@@ -25,10 +25,10 @@ func MockBeforeSendFilter2(ctx *rpcChat.SendContext, pb *pbChat.SendMsgReq) (*pb
 		fmt.Printf("MockBeforeSendFilter2:%s selected from ctx,value is :%v\n", ctxKey, v)
 	}
 
-	fmt.Printf("MockBeforeSendHandler trigger,contentType:%d\n", pb.MsgData.GetContentType())
+	// fmt.Printf("MockBeforeSendHandler trigger,contentType:%d\n", pb.MsgData.GetContentType())
 	if pb.MsgData.ContentType == constant.Text {
 		msg := string(pb.MsgData.Content)
-		fmt.Printf("text msg:%s", msg)
+		// fmt.Printf("text msg:%s\n", msg)
 		if msg == "this is a m..m..mock msg" {
 			fmt.Println(".==>msg had banned")
 			return nil, false, errors.New("BANG! This msg has been banned by MockBeforeSendHandler")

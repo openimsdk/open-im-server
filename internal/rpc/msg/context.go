@@ -60,6 +60,8 @@ func (c *SendContext) SendMsg(pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error
 		return res, nil
 	}
 
+	// fmt.Println("SEND_MSG:before send filters do over")
+
 	res, err = c.rpc.doSendMsg(c.ctx, pb)
 	if err != nil {
 		return res, err
