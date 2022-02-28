@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -43,6 +44,7 @@ func GetGroupMemberListByUserID(userID string) ([]db.GroupMember, error) {
 	}
 	var groupMemberList []db.GroupMember
 	err = dbConn.Table("group_members").Where("user_id=?", userID).Find(&groupMemberList).Error
+	//err = dbConn.Table("group_members").Where("user_id=?", userID).Take(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +84,7 @@ func GetGroupMemberInfoByGroupIDAndUserID(groupID, userID string) (*db.GroupMemb
 		return nil, err
 	}
 	var groupMember db.GroupMember
-	err = dbConn.Table("group_members").Where("group_id=? and user_id=? ", groupID, userID).Limit(1).Find(&groupMember).Error
+	err = dbConn.Table("group_members").Where("group_id=? and user_id=? ", groupID, userID).Limit(1).Take(&groupMember).Error
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +151,8 @@ func GetGroupOwnerInfoByGroupID(groupID string) (*db.GroupMember, error) {
 			return &v, nil
 		}
 	}
-	return nil, nil
+
+	return nil, utils.Wrap(errors.New("no owner"), "")
 }
 
 func IsExistGroupMember(groupID, userID string) bool {

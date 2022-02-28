@@ -132,7 +132,7 @@ log:
   storageLocation: ../logs/
   rotationTime: 24
   remainRotationCount: 5 #日志数量
-  remainLogLevel: 6 #日志级别 6表示全都打印，测试阶段建议设置为6
+  remainLogLevel: 4 #日志级别 6表示全都打印，测试阶段建议设置为6
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
@@ -178,10 +178,13 @@ tokenpolicy:
   # Token effective time day as a unit
   accessExpire: 3650 #token过期时间（天） 默认即可
 
-messagecallback:  #暂时不要使用 还需完善
+messagecallback:
+  callbackSwitch: false
   callbackUrl: "http://www.xxx.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
+messagejudge:
+  isJudgeFriend: true
 #  c2c:
 #    callbackBeforeSendMsg:
 #      switch: false
@@ -255,7 +258,7 @@ notification:
       desc: "groupApplicationAccepted desc"
       ext: "groupApplicationAccepted ext"
     defaultTips:
-      tips: "allowed to join the group"  # group info changed by xx
+      tips: "was allowed to join the group"  # group info changed by xx
 
   groupApplicationRejected:
     conversation:
@@ -267,7 +270,7 @@ notification:
       desc: " desc"
       ext: " ext"
     defaultTips:
-      tips: "rejected into the group"  # group info changed by xx
+      tips: "was rejected into the group"  # group info changed by xx
 
   groupOwnerTransferred:
     conversation:
@@ -291,7 +294,7 @@ notification:
       desc: "memberKicked desc"
       ext: "memberKicked ext"
     defaultTips:
-      tips: "kicked out of the group"  # group info changed by xx
+      tips: "was kicked out of the group"  # group info changed by xx
 
   memberInvited:
     conversation:
@@ -303,7 +306,7 @@ notification:
       desc: "memberInvited desc"
       ext: "memberInvited ext"
     defaultTips:
-      tips: "invited into the group"  # group info changed by xx
+      tips: "was invited into the group"  # group info changed by xx
 
   memberEnter:
     conversation:
@@ -459,19 +462,20 @@ notification:
 #是否启动demo，如果自身没有账号体系，设置为true
 demoswitch: true
 demo:
-  openImDemoPort: [ 42233 ] #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
+  #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
+  openImDemoPort: [ 42233 ]
   alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，必须修改
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
-    signName: OpenIM Corporation
-    verificationCodeTemplateCode: SMS_2268101641
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+    signName: 托云信息技术
+    verificationCodeTemplateCode: SMS_226810164
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   #  second
-  codeTTL: 60
+  codeTTL: 300
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
     title: "openIM"
-    senderMail: "1765567899@qq.com"
-    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    senderMail: "765567899@qq.com"
+    senderAuthorizationCode: "gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
     smtpPort: 25   #需开放此端口 出口方向
 

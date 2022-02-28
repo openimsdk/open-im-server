@@ -63,7 +63,7 @@ func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*db.GroupRequest
 		return nil, err
 	}
 	var groupRequest db.GroupRequest
-	err = dbConn.Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Find(&groupRequest).Error
+	err = dbConn.Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Take(&groupRequest).Error
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,6 @@ func GetUserReqGroupByUserID(userID string) ([]db.GroupRequest, error) {
 	err = dbConn.Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
 	return groupRequestList, err
 }
-
 
 //
 //func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.CommonResp, error) {

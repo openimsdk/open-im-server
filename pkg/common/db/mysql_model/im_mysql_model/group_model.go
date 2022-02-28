@@ -45,7 +45,7 @@ func GetGroupInfoByGroupID(groupId string) (*db.Group, error) {
 		return nil, utils.Wrap(err, "")
 	}
 	var groupInfo db.Group
-	err = dbConn.Table("groups").Where("group_id=?", groupId).Find(&groupInfo).Error
+	err = dbConn.Table("groups").Where("group_id=?", groupId).Take(&groupInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -86,18 +86,16 @@ func GetGroups(pageNumber, showNumber int) ([]db.Group, error) {
 	return groups, nil
 }
 
-
 func OperateGroupStatus(groupId string, groupStatus int32) error {
 	group := db.Group{
 		GroupID: groupId,
-		Status: groupStatus,
+		Status:  groupStatus,
 	}
 	if err := SetGroupInfo(group); err != nil {
 		return err
 	}
 	return nil
 }
-
 
 func DeleteGroup(groupId string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
@@ -129,15 +127,14 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) (string, string, 
 	updateInfo := db.GroupMember{
 		RoleLevel: roleLevel,
 	}
-	groupMaster := db.GroupMember{
-	}
+	groupMaster := db.GroupMember{}
 	switch roleLevel {
 	case constant.GroupOwner:
 		err = dbConn.Transaction(func(tx *gorm.DB) error {
 			result := dbConn.Table("group_members").Where("group_id = ? and role_level = ?", groupId, constant.GroupOwner).First(&groupMaster).Update(&db.GroupMember{
 				RoleLevel: constant.GroupOrdinaryUsers,
 			})
-			if result.Error != nil  {
+			if result.Error != nil {
 				return result.Error
 			}
 			if result.RowsAffected == 0 {
@@ -145,7 +142,7 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) (string, string, 
 			}
 
 			result = dbConn.Table("group_members").First(&groupMember).Update(updateInfo)
-			if result.Error != nil  {
+			if result.Error != nil {
 				return result.Error
 			}
 			if result.RowsAffected == 0 {
@@ -161,7 +158,7 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) (string, string, 
 				return result.Error
 			}
 			if result.RowsAffected == 0 {
-				return  errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+				return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
 			}
 			if groupMaster.UserID == userId {
 				return errors.New(fmt.Sprintf("user %s is master of %s, cant set to ordinary user", userId, groupId))
@@ -171,7 +168,7 @@ func OperateGroupRole(userId, groupId string, roleLevel int32) (string, string, 
 					return result.Error
 				}
 				if result.RowsAffected == 0 {
-					return  errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
+					return errors.New(fmt.Sprintf("user %s not exist in group %s or already operate", userId, groupId))
 				}
 			}
 			return nil

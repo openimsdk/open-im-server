@@ -11,6 +11,8 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/statistics"
+	"fmt"
 )
 
 var (
@@ -18,6 +20,7 @@ var (
 	pushCh       PushConsumerHandler
 	pushTerminal []int32
 	producer     *kafka.Producer
+	count        uint64
 )
 
 func Init(rpcPort int) {
@@ -28,6 +31,7 @@ func Init(rpcPort int) {
 }
 func init() {
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
+	statistics.NewStatistics(&count, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", 10), 10)
 }
 
 func Run() {
