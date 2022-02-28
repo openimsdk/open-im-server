@@ -26,7 +26,7 @@ func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*db.Frie
 		return nil, err
 	}
 	var friend db.Friend
-	err = dbConn.Table("friends").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Find(&friend).Error
+	err = dbConn.Table("friends").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Take(&friend).Error
 	if err != nil {
 		return nil, err
 	}
