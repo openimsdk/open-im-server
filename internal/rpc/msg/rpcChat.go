@@ -23,6 +23,9 @@ type rpcChat struct {
 	producer        *kafka.Producer
 	// beforeSenders are filters which will be triggered before send msg
 	beforeSenders []BeforeSendFilter
+
+	// afterSenders are filters which will be triggered after send msg
+	afterSenders []AfterSendFilter
 }
 
 func NewRpcChatServer(port int) *rpcChat {
@@ -40,6 +43,11 @@ func NewRpcChatServer(port int) *rpcChat {
 // UseBeforSendFilters attaches a global filter to the BeforSendFilter logic
 func (rpc *rpcChat) UseBeforSendFilters(hs ...BeforeSendFilter) {
 	rpc.beforeSenders = append(rpc.beforeSenders, hs...)
+}
+
+// UseAfterSendFilters attaches a global filter to the AfterSendFilter logic
+func (rpc *rpcChat) UseAfterSendFilters(hs ...AfterSendFilter) {
+	rpc.afterSenders = append(rpc.afterSenders, hs...)
 }
 
 func (rpc *rpcChat) Run() {
