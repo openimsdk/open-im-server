@@ -15,6 +15,8 @@ func main() {
 	// mock 注册发送前的拦截器
 	rpcServer.UseBeforSendFilters(filters.MockBeforeSendFilter1, filters.MockBeforeSendFilter2)
 
+	rpcServer.UseAfterSendFilters(filters.MockAfterSendFilter)
+
 	//
 	rpcServer.Run()
 }

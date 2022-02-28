@@ -37,3 +37,16 @@ func MockBeforeSendFilter2(ctx *rpcChat.SendContext, pb *pbChat.SendMsgReq) (*pb
 
 	return nil, true, nil
 }
+
+// MockAfterSendFilter is a mock handle that handles custom logic after send msg.
+func MockAfterSendFilter(ctx *rpcChat.SendContext, pb *pbChat.SendMsgReq, res *pbChat.SendMsgResp) (*pbChat.SendMsgResp, bool, error) {
+	ctxKey := "test_key"
+	v, ok := ctx.Value(ctxKey).(bool)
+	if ok {
+		fmt.Printf("MockAfterSendFilter:%s selected from ctx,value is :%v\n", ctxKey, v)
+	}
+
+	fmt.Printf("MockAfterSendFilter trigger,contentType:%d\n", pb.MsgData.GetContentType())
+
+	return res, true, nil
+}
