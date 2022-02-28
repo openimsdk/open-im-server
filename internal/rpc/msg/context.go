@@ -95,6 +95,19 @@ func (c *SendContext) WithValue(key, val interface{}) {
 	c.SetCtx(ctx)
 }
 
+// Copy returns a copy of the current context that can be safely used outside the request's scope.
+// This has to be used when the context has to be passed to a goroutine or wrapped by WithTimeout etc.
+func (c *SendContext) Copy() *SendContext {
+	cp := SendContext{
+		ctx:           c.ctx,
+		rpc:           c.rpc,
+		beforeFilters: c.beforeFilters,
+		afterSenders:  c.afterSenders,
+	}
+
+	return &cp
+}
+
 /************************************/
 /***** context *****/
 /************************************/
