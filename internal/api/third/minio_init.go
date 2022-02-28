@@ -30,11 +30,15 @@ func init() {
 	}
 	err = minioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.Bucket, opt)
 	if err != nil {
+		log.NewInfo("", utils.GetSelfFuncName(), err.Error())
 		exists, err := minioClient.BucketExists(context.Background(), config.Config.Credential.Minio.Bucket)
 		if err == nil && exists {
 			log.NewInfo("", utils.GetSelfFuncName(), "We already own %s\n", config.Config.Credential.Minio.Bucket)
 		} else {
-			log.NewError("", utils.GetSelfFuncName(), "create bucket failed and bucket not exists", err.Error())
+			if err != nil {
+				log.NewError("", utils.GetSelfFuncName(), err.Error())
+			}
+			log.NewError("", utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
 			return
 		}
 	}
