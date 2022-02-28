@@ -1,6 +1,7 @@
 package getcdv3
 
 import (
+	"Open_IM/pkg/common/log"
 	"context"
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
@@ -39,9 +40,9 @@ func RegisterEtcd4Unique(schema, etcdAddr, myHost string, myPort int, serviceNam
 func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName string, ttl int) error {
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: strings.Split(etcdAddr, ","), DialTimeout: 5 * time.Second})
-	fmt.Println("RegisterEtcd")
+
+	log.Info("", "RegisterEtcd, ", schema, etcdAddr, myHost, myPort, serviceName, ttl)
 	if err != nil {
-		//		return fmt.Errorf("grpclb: create clientv3 client failed: %v", err)
 		return fmt.Errorf("create etcd clientv3 client failed, errmsg:%v, etcd addr:%s", err, etcdAddr)
 	}
 
@@ -66,15 +67,16 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 	if err != nil {
 		return fmt.Errorf("keepalive failed, errmsg:%v, lease id:%d", err, resp.ID)
 	}
-	fmt.Println("RegisterEtcd ok")
+	log.Info("", "RegisterEtcd ok ")
+
 	go func() {
 		for {
 			select {
 			case v, ok := <-kresp:
 				if ok == true {
-					//	fmt.Println(" kresp ok ", v)
+					log.Debug("", "KeepAlive kresp ok", v, schema, etcdAddr, myHost, myPort, serviceName, ttl)
 				} else {
-					fmt.Println(" kresp failed ", v)
+					log.Error("", "KeepAlive kresp failed", schema, etcdAddr, myHost, myPort, serviceName, ttl)
 				}
 			}
 		}
