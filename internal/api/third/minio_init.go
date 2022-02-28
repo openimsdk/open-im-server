@@ -34,7 +34,7 @@ func init() {
 		if err == nil && exists {
 			log.NewInfo("", utils.GetSelfFuncName(), "We already own %s\n", config.Config.Credential.Minio.Bucket)
 		} else {
-			log.NewError("", utils.GetSelfFuncName(), "create bucket failed and bucket not exists", err.Error())
+			log.NewError("", utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
 			return
 		}
 	}
