@@ -51,18 +51,6 @@ func UserRegister(user db.User) error {
 	return nil
 }
 
-type User struct {
-	UserID      string    `gorm:"column:user_id;primaryKey;"`
-	Nickname    string    `gorm:"column:name"`
-	FaceUrl     string    `gorm:"column:icon"`
-	Gender      int32     `gorm:"column:gender"`
-	PhoneNumber string    `gorm:"column:phone_number"`
-	Birth       string    `gorm:"column:birth"`
-	Email       string    `gorm:"column:email"`
-	Ex          string    `gorm:"column:ex"`
-	CreateTime  time.Time `gorm:"column:create_time"`
-}
-
 func DeleteUser(userID string) (i int64) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
