@@ -62,4 +62,5 @@ func PostReturn(url string, input, output interface{}, timeOut int) error {
 	if err = json.Unmarshal(b, output); err != nil {
 		return err
 	}
+	return nil
 }
