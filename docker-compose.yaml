@@ -24,6 +24,10 @@ services:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
       - ./components/mongodb/data/conf:/etc/mongo
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
 #    environment:
 #      - MONGO_INITDB_ROOT_USERNAME=openIM
 #      - MONGO_INITDB_ROOT_PASSWORD=openIM
