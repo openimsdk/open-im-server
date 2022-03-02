@@ -46,7 +46,7 @@ func init() {
 	//err = minioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
 	//if err != nil {
 	//	log.NewError("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in 	", err.Error())
-	//	return
+	//	return`z
 	//}
 	log.NewInfo("", utils.GetSelfFuncName(), "minio create and set policy success")
 }

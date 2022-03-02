@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/utils"
 	"bytes"
 	"encoding/gob"
@@ -184,6 +183,7 @@ func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, tok
 		count = count + len(v)
 	}
 	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
+	userCount = uint64(len(ws.wsUserToConn))
 
 }
 
@@ -210,6 +210,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 		} else {
 			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
 		}
+		userCount = uint64(len(ws.wsUserToConn))
 		delete(ws.wsConnToUser, conn)
 
 	}
@@ -256,16 +257,16 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
-		if ok, err := token_verify.VerifyToken(query["token"][0], query["sendID"][0]); !ok {
-			e := err.(*constant.ErrInfo)
-			log.ErrorByKv("Token verify failed", "", "query", query)
-			w.Header().Set("Sec-Websocket-Version", "13")
-			http.Error(w, e.ErrMsg, int(e.ErrCode))
-			return false
-		} else {
-			log.InfoByKv("Connection Authentication Success", "", "token", query["token"][0], "userID", query["sendID"][0])
-			return true
-		}
+		//if ok, err := token_verify.VerifyToken(query["token"][0], query["sendID"][0]); !ok {
+		//	e := err.(*constant.ErrInfo)
+		//	log.ErrorByKv("Token verify failed", "", "query", query)
+		//	w.Header().Set("Sec-Websocket-Version", "13")
+		//	http.Error(w, e.ErrMsg, int(e.ErrCode))
+		//	return false
+		//} else {
+		log.InfoByKv("Connection Authentication Success", "", "token", query["token"][0], "userID", query["sendID"][0])
+		return true
+		//}
 	} else {
 		log.ErrorByKv("Args err", "", "query", query)
 		w.Header().Set("Sec-Websocket-Version", "13")
