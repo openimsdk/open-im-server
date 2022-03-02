@@ -1,12 +1,16 @@
 package call_back_struct
 
-type singleMsg struct {
+type msg struct {
 	SendID      string `json:"sendID"`
-	RecvID      string `json:"recvID"`
 	ClientMsgID string `json:"clientMsgID"`
 	ServerMsgID string `json:"serverMsgId"`
-	SendTime    int64  `json:"sendTime"`
 	CreateTime  int64  `json:"createTime"`
+	Content    	[]byte `json:"content"`
+}
+
+type singleMsg struct {
+	msg
+	RecvID      string `json:"recvID"`
 }
 
 type CallbackBeforeSendSingleMsgReq struct {
@@ -16,6 +20,7 @@ type CallbackBeforeSendSingleMsgReq struct {
 
 type CallbackBeforeSendSingleMsgResp struct {
 	CommonCallbackResp
+	singleMsg
 }
 
 type CallbackAfterSendSingleMsgReq struct {
@@ -28,18 +33,22 @@ type CallbackAfterSendSingleMsgResp struct {
 }
 
 type groupMsg struct {
-
+	msg
+	GroupID string `json:"groupID"`
 }
 
 type CallbackBeforeSendGroupMsgReq struct {
 	CommonCallbackReq
+	groupMsg
 }
 
 type CallbackBeforeSendGroupMsgResp struct {
 	CommonCallbackResp
+	groupMsg
 }
 
 type CallbackAfterSendGroupMsgReq struct {
+	groupMsg
 	CommonCallbackReq
 }
 
@@ -47,15 +56,12 @@ type CallbackAfterSendGroupMsgResp struct {
 	CommonCallbackResp
 }
 
-type CallBackWordFilterReq struct {
+type CallbackWordFilterReq struct {
 	CommonCallbackReq
 	Content []byte `json:"content"`
-	SendID  string `json:"SendID"`
-	RecvID  string `json:"RecvID"`
-	GroupID string `json:"GroupID"`
 }
 
-type CallBackWordFilterResp struct {
+type CallbackWordFilterResp struct {
 	CommonCallbackResp
 	Content []byte `json:"content"`
 }
