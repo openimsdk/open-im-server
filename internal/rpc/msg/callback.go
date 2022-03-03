@@ -20,9 +20,9 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 	}}
 	resp := &cbApi.CallbackBeforeSendSingleMsgResp{CommonCallbackResp:cbApi.CommonCallbackResp{
 	}}
-	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	utils.CopyStructFields(req, msg.MsgData)
 	req.Content = string(msg.MsgData.Content)
+	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackbeforeSendSingleMsg.CallbackTimeOut); err != nil{
 		if !config.Config.Callback.CallbackbeforeSendSingleMsg.CallbackFailedContinue {
 			return false, err
@@ -43,9 +43,9 @@ func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackAfterSendSingleMsgReq{CommonCallbackReq: cbApi.CommonCallbackReq{CallbackCommand:constant.CallbackAfterSendSingleMsgCommand}}
 	resp := &cbApi.CallbackAfterSendSingleMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
-	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	utils.CopyStructFields(req, msg.MsgData)
 	req.Content = string(msg.MsgData.Content)
+	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackAfterSendSingleMsg.CallbackTimeOut); err != nil{
 		return err
 	}
@@ -60,9 +60,9 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackBeforeSendSingleMsgReq{CommonCallbackReq: cbApi.CommonCallbackReq{CallbackCommand:constant.CallbackBeforeSendGroupMsgCommand}}
 	resp := &cbApi.CallbackBeforeSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
-	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	utils.CopyStructFields(req, msg.MsgData)
 	req.Content = string(msg.MsgData.Content)
+	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue {
 			return false, nil
@@ -82,9 +82,9 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackAfterSendGroupMsgReq{CommonCallbackReq: cbApi.CommonCallbackReq{CallbackCommand:constant.CallbackAfterSendGroupMsgCommand}}
 	resp := &cbApi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
-	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	utils.CopyStructFields(req, msg.MsgData)
 	req.Content = string(msg.MsgData.Content)
+	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut); err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func callBackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 			return false, nil
 		}
 		msg.MsgData.Content = []byte(resp.Content)
-		log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg.MsgData.Content)
+		log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), string(msg.MsgData.Content))
 	}
 	return true, nil
 }
