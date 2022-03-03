@@ -180,7 +180,7 @@ tokenpolicy:
 
 messagecallback:
   callbackSwitch: false
-  callbackUrl: "http://www.xxx.com/msg/judge"
+  callbackUrl: "http://www.uuu.com/msg/judge"
   #TimeOut use second as unit
   callbackTimeOut: 10
 messagejudge:
