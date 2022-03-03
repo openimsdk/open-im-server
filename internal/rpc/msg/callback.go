@@ -88,12 +88,12 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 			OperationID: msg.OperationID,
 
 		},
-		GroupMsg: cbApi.GroupMsg{
-			Msg:     cbApi.Msg{
-				SendID: msg.MsgData.
-			},
-			GroupID: msg.MsgData.GroupID,
-		}
+		//GroupMsg: cbApi.GroupMsg{
+		//	Msg:     cbApi.Msg{
+		//		SendID: msg.MsgData.
+		//	},
+		//	GroupID: msg.MsgData.GroupID,
+		//}
 	}
 	resp := &cbApi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 
