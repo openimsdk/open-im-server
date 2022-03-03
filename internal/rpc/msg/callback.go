@@ -80,9 +80,24 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 		return nil
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
-	req := cbApi.CallbackAfterSendGroupMsgReq{CommonCallbackReq: cbApi.CommonCallbackReq{CallbackCommand:constant.CallbackAfterSendGroupMsgCommand}}
+	req := cbApi.CallbackAfterSendGroupMsgReq{
+		CommonCallbackReq: cbApi.CommonCallbackReq{
+			CallbackCommand:constant.CallbackAfterSendGroupMsgCommand,
+			ServerMsgID: msg.MsgData.ServerMsgID,
+			ClientMsgID: msg.MsgData.ClientMsgID,
+			OperationID: msg.OperationID,
+
+		},
+		GroupMsg: cbApi.GroupMsg{
+			Msg:     cbApi.Msg{
+				SendID: msg.MsgData.
+			},
+			GroupID: msg.MsgData.GroupID,
+		}
+	}
 	resp := &cbApi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
-	utils.CopyStructFields(req, msg.MsgData)
+
+	//utils.CopyStructFields(req, msg.MsgData)
 	req.Content = string(msg.MsgData.Content)
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut); err != nil {
@@ -97,10 +112,21 @@ func callBackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 		return true, nil
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
-	req := cbApi.CallbackWordFilterReq{CommonCallbackReq: cbApi.CommonCallbackReq{CallbackCommand:constant.CallbackWordFilterCommand}}
+	//req := cbApi.CallbackWordFilterReq{
+	//	CommonCallbackReq: cbApi.CommonCallbackReq{
+	//		CallbackCommand: constant.CallbackWordFilterCommand,
+	//		ServerMsgID: msg.MsgData.ServerMsgID,
+	//		ClientMsgID: msg.MsgData.ClientMsgID,
+	//		OperationID: msg.OperationID,
+	//	},
+	//	Content: string(msg.MsgData.Content),
+	//}
+	req := cbApi.CallbackWordFilterReq{
+		CommonCallbackReq: cbApi.CommonCallbackReq{},
+	}
+	utils.CopyStructFields(req.CommonCallbackReq, msg.MsgData)
 	resp := &cbApi.CallbackWordFilterResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
-	utils.CopyStructFields(&req, msg.MsgData)
-	req.Content = string(msg.MsgData.Content)
+	//utils.CopyStructFields(&req., msg.MsgData)
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackWordFilter.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackWordFilter.CallbackFailedContinue {

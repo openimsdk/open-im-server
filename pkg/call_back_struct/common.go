@@ -1,10 +1,16 @@
 package call_back_struct
 
 type CommonCallbackReq struct {
-	CallbackCommand string `json:"callbackCommand"`
-	ServerMsgID string `json:"serverID"`
-	ClientID string `json:"clientID"`
-	OperationID string `json:"operationID"`
+	CallbackCommand  string `json:"callbackCommand"`
+	ServerMsgID      string `json:"serverID"`
+	ClientMsgID      string `json:"clientID"`
+	OperationID      string `json:"operationID"`
+	SenderPlatformID int32  `json:"senderPlatformID"`
+	SenderNickname   string `json:"senderNickname"`
+	SessionType      int32  `json:"sessionType"`
+	MsgFrom          int32  `json:"MsgFrom"`
+	ContentType      int32  `json:"contentType"`
+	Status           int32  `json:"status"`
 }
 
 type CommonCallbackResp struct {

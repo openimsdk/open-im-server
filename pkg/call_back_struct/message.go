@@ -1,54 +1,52 @@
 package call_back_struct
 
-type msg struct {
+type Msg struct {
 	SendID      string `json:"sendID"`
-	ClientMsgID string `json:"clientMsgID"`
-	ServerMsgID string `json:"serverMsgId"`
 	CreateTime  int64  `json:"createTime"`
 	Content    	string `json:"content"`
 }
 
-type singleMsg struct {
-	msg
+type SingleMsg struct {
+	Msg
 	RecvID      string `json:"recvID"`
 }
 
 type CallbackBeforeSendSingleMsgReq struct {
 	CommonCallbackReq
-	singleMsg
+	SingleMsg
 }
 
 type CallbackBeforeSendSingleMsgResp struct {
 	CommonCallbackResp
-	singleMsg
+	SingleMsg
 }
 
 type CallbackAfterSendSingleMsgReq struct {
 	CommonCallbackReq
-	singleMsg
+	SingleMsg
 }
 
 type CallbackAfterSendSingleMsgResp struct {
 	CommonCallbackResp
 }
 
-type groupMsg struct {
-	msg
+type GroupMsg struct {
+	Msg
 	GroupID string `json:"groupID"`
 }
 
 type CallbackBeforeSendGroupMsgReq struct {
 	CommonCallbackReq
-	groupMsg
+	GroupMsg
 }
 
 type CallbackBeforeSendGroupMsgResp struct {
 	CommonCallbackResp
-	groupMsg
+	GroupMsg
 }
 
 type CallbackAfterSendGroupMsgReq struct {
-	groupMsg
+	GroupMsg
 	CommonCallbackReq
 }
 
