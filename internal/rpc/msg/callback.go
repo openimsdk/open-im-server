@@ -28,7 +28,8 @@ func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq
 }
 
 func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err error) {
-	if !config.Config.Callback.CallbackbeforeSendSingleMsg.Enable {
+	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackBeforeSendSingleMsg.Enable)
+	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return true, nil
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
@@ -43,8 +44,8 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 	}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackbeforeSendSingleMsg.CallbackTimeOut); err != nil{
-		if !config.Config.Callback.CallbackbeforeSendSingleMsg.CallbackFailedContinue {
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackTimeOut); err != nil{
+		if !config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue {
 			return false, err
 		}
 	} else {
@@ -57,6 +58,7 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 
 
 func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
+	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackAfterSendSingleMsg.Enable)
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return nil
 	}
@@ -78,6 +80,7 @@ func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
 
 
 func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error) {
+	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackBeforeSendGroupMsg.Enable)
 	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
 		return true, nil
 	}
@@ -104,6 +107,7 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 }
 
 func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
+	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackAfterSendGroupMsg.Enable)
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -125,7 +129,8 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 }
 
 
-func callBackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
+func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
+	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackWordFilter.Enable)
 	if !config.Config.Callback.CallbackWordFilter.Enable || msg.MsgData.ContentType != constant.Text {
 		return true, nil
 	}

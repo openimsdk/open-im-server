@@ -183,7 +183,7 @@ type config struct {
 
 	Callback struct {
 		CallbackUrl string                         `yaml:"callbackUrl"`
-		CallbackbeforeSendSingleMsg callBackConfig `yaml:"callbackSendGroupMsg"`
+		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackSendGroupMsg"`
 		CallbackAfterSendSingleMsg callBackConfig  `yaml:"callbackSendSingleMsg"`
 		CallbackBeforeSendGroupMsg callBackConfig  `yaml:"CallbackBeforeSendGroupMsg"`
 		CallbackAfterSendGroupMsg callBackConfig   `yaml:"callbackAfterSendGroupMsg"`

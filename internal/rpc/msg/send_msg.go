@@ -126,7 +126,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	}
 
 	// callback
-	canSend, err := callBackWordFilter(pb)
+	canSend, err := callbackWordFilter(pb)
 	if err != nil {
 		log.NewError(pb.OperationID, utils.GetSelfFuncName(), "CallbackBeforeSendMsg failed", err.Error(), pb.MsgData)
 	}
