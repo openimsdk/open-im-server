@@ -202,7 +202,6 @@ callback:
   callbackAfterSendSingleMsg:
     enable: true
     callbackTimeOut: 5
-    CallbackFailedContinue: true
   callbackBeforeSendGroupMsg:
     enable: true
     callbackTimeOut: 5
@@ -210,7 +209,6 @@ callback:
   callbackAfterSendGroupMsg:
     enable: true
     callbackTimeOut: 5
-    CallbackFailedContinue: true
   callbackWordFilter:
     enable: true
     callbackTimeOut: 5

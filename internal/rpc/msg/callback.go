@@ -62,9 +62,10 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 		if !config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue {
 			return false, nil
 		}
-	}
-	if resp.ActionCode == constant.ActionForbidden {
-		return false, nil
+	} else {
+		if resp.ActionCode == constant.ActionForbidden {
+			return false, nil
+		}
 	}
 	return true, nil
 }
@@ -94,15 +95,17 @@ func callBackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 	resp := &cbApi.CallbackWordFilterResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, resp)
 	utils.CopyStructFields(&req, msg.MsgData)
+	req.Content = string(msg.MsgData.Content)
 	if err := http.PostReturn(msg.OperationID, req, resp, config.Config.Callback.CallbackWordFilter.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackWordFilter.CallbackFailedContinue {
 			return false, err
 		}
+	} else {
+		msg.MsgData.Content = []byte(resp.Content)
+		if resp.ActionCode == constant.ActionForbidden {
+			return false, nil
+		}
 	}
-	if resp.ActionCode == constant.ActionForbidden {
-		return false, nil
-	}
-	msg.MsgData.Content = resp.Content
 	return true, nil
 }
 

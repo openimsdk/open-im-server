@@ -5,7 +5,7 @@ type msg struct {
 	ClientMsgID string `json:"clientMsgID"`
 	ServerMsgID string `json:"serverMsgId"`
 	CreateTime  int64  `json:"createTime"`
-	Content    	[]byte `json:"content"`
+	Content    	string `json:"content"`
 }
 
 type singleMsg struct {
@@ -58,10 +58,10 @@ type CallbackAfterSendGroupMsgResp struct {
 
 type CallbackWordFilterReq struct {
 	CommonCallbackReq
-	Content []byte `json:"content"`
+	Content string `json:"content"`
 }
 
 type CallbackWordFilterResp struct {
 	CommonCallbackResp
-	Content []byte `json:"content"`
+	Content string `json:"content"`
 }
