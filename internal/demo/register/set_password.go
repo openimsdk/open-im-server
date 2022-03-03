@@ -57,7 +57,7 @@ func SetPassword(c *gin.Context) {
 	openIMRegisterReq.Nickname = account
 	openIMRegisterReq.Secret = config.Config.Secret
 	openIMRegisterResp := api.UserRegisterResp{}
-	bMsg, err := http2.Post(url, openIMRegisterReq, config.Config.MessageCallBack.CallBackTimeOut)
+	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
 	if err != nil {
 		log.NewError(params.OperationID, "request openIM register error", account, "err", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": err.Error()})

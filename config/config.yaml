@@ -193,7 +193,7 @@ iospush:
   badgeCount: true
 
 callback:
-  callbackUrl : "http://127.0.0.1:8080"
+  callbackUrl : "http://127.0.0.1:8080/callback"
   # 开启关闭操作前后回调的配置
   callbackbeforeSendSingleMsg:
     enable: false # 回调是否启用

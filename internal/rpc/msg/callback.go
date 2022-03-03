@@ -11,10 +11,10 @@ import (
 )
 
 func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err error) {
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	if !config.Config.Callback.CallbackbeforeSendSingleMsg.Enable {
 		return true, nil
 	}
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackBeforeSendSingleMsgReq{CommonCallbackReq:cbApi.CommonCallbackReq{
 	}}
 	resp := &cbApi.CallbackBeforeSendSingleMsgResp{CommonCallbackResp:cbApi.CommonCallbackResp{
@@ -36,10 +36,10 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 
 
 func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return nil
 	}
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackAfterSendSingleMsgReq{CommonCallbackReq: cbApi.CommonCallbackReq{}}
 	resp := &cbApi.CallbackAfterSendSingleMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, resp)
@@ -53,10 +53,10 @@ func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
 
 
 func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error) {
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
 		return true, nil
 	}
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackBeforeSendSingleMsgReq{CommonCallbackReq: cbApi.CommonCallbackReq{}}
 	resp := &cbApi.CallbackBeforeSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, resp)
@@ -75,10 +75,10 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 }
 
 func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackAfterSendGroupMsgReq{CommonCallbackReq: cbApi.CommonCallbackReq{}}
 	resp := &cbApi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, resp)
@@ -92,10 +92,10 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 
 
 func callBackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	if !config.Config.Callback.CallbackWordFilter.Enable || msg.MsgData.ContentType != constant.Text {
 		return true, nil
 	}
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackWordFilterReq{CommonCallbackReq: cbApi.CommonCallbackReq{}}
 	resp := &cbApi.CallbackWordFilterResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, resp)
