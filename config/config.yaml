@@ -132,7 +132,7 @@ log:
   storageLocation: ../logs/
   rotationTime: 24
   remainRotationCount: 5 #日志数量
-  remainLogLevel: 4 #日志级别 6表示全都打印，测试阶段建议设置为6
+  remainLogLevel: 6 #日志级别 6表示全都打印，测试阶段建议设置为6
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
