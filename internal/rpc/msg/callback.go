@@ -101,8 +101,9 @@ func callBackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, resp)
 	utils.CopyStructFields(&req, msg.MsgData)
 	req.Content = string(msg.MsgData.Content)
-	if err := http.PostReturn(msg.OperationID, req, resp, config.Config.Callback.CallbackWordFilter.CallbackTimeOut); err != nil {
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackWordFilter.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackWordFilter.CallbackFailedContinue {
+			log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), "config disable, stop this operation")
 			return false, err
 		}
 	} else {

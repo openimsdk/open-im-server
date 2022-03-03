@@ -196,18 +196,18 @@ callback:
   callbackUrl : "http://127.0.0.1:8080"
   # 开启关闭操作前后回调的配置
   callbackbeforeSendSingleMsg:
-    enable: true # 回调是否启用
+    enable: false # 回调是否启用
     callbackTimeOut: 5 # 回调超时时间
     CallbackFailedContinue: true # 回调超时是否继续执行代码
   callbackAfterSendSingleMsg:
-    enable: true
+    enable: false
     callbackTimeOut: 5
   callbackBeforeSendGroupMsg:
-    enable: true
+    enable: false
     callbackTimeOut: 5
     CallbackFailedContinue: true
   callbackAfterSendGroupMsg:
-    enable: true
+    enable: false
     callbackTimeOut: 5
   callbackWordFilter:
     enable: true
