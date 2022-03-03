@@ -178,13 +178,6 @@ tokenpolicy:
   # Token effective time day as a unit
   accessExpire: 3650 #token过期时间（天） 默认即可
 
-messagecallback:
-  callbackSwitch: false
-  callbackUrl: "http://www.uuu.com/msg/judge"
-  #TimeOut use second as unit
-  callbackTimeOut: 10
-messagejudge:
-  isJudgeFriend: true
 #  c2c:
 #    callbackBeforeSendMsg:
 #      switch: false
@@ -198,6 +191,31 @@ messagejudge:
 iospush:
   pushSound: "xxx"
   badgeCount: true
+
+callback:
+  callbackUrl : "http://xxx.com"
+  # 开启关闭操作前后回调的配置
+  callbackbeforeSendSingleMsg:
+    enable: true # 回调是否启用
+    callbackTimeOut: 5 # 回调超时时间
+    CallbackFailedContinue: true # 回调超时是否继续执行代码
+  callbackAfterSendSingleMsg:
+    enable: true
+    callbackTimeOut: 5
+    CallbackFailedContinue: true
+  callbackBeforeSendGroupMsg:
+    enable: true
+    callbackTimeOut: 5
+    CallbackFailedContinue: true
+  callbackAfterSendGroupMsg:
+    enable: true
+    callbackTimeOut: 5
+    CallbackFailedContinue: true
+  callbackWordFilter:
+    enable: true
+    callbackTimeOut: 5
+    CallbackFailedContinue: true
+
 
 notification:
   groupCreated:

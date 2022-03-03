@@ -182,7 +182,7 @@ func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, tok
 	for _, v := range ws.wsUserToConn {
 		count = count + len(v)
 	}
-	log.WarnByKv("WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
+	log.Debug("WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 	userCount = uint64(len(ws.wsUserToConn))
 
 }

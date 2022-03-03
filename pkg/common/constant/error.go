@@ -51,6 +51,7 @@ var (
 	ErrAccess = ErrInfo{ErrCode: 801, ErrMsg: AccessMsg.Error()}
 	ErrDB     = ErrInfo{ErrCode: 802, ErrMsg: DBMsg.Error()}
 	ErrArgs   = ErrInfo{ErrCode: 8003, ErrMsg: ArgsMsg.Error()}
+	ErrCallback = ErrInfo{ErrCode: 809, ErrMsg: CallBackMsg.Error()}
 )
 
 var (
@@ -64,6 +65,7 @@ var (
 	AccessMsg = errors.New("no permission")
 	DBMsg     = errors.New("db failed")
 	ArgsMsg   = errors.New("args failed")
+	CallBackMsg = errors.New("callback failed")
 
 	ThirdPartyMsg = errors.New("third party error")
 )
