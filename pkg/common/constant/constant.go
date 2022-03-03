@@ -146,6 +146,9 @@ const (
 	//actionCode
 	ActionAllow = 0
 	ActionForbidden = 1
+	//callbackHandleCode
+	CallbackHandleSuccess = 0
+	CallbackHandleFailed = 1
 )
 
 var ContentType2PushContent = map[int64]string{
