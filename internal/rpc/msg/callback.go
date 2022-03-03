@@ -99,9 +99,9 @@ func callBackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	req := cbApi.CallbackWordFilterReq{CommonCallbackReq: cbApi.CommonCallbackReq{CallbackCommand:constant.CallbackWordFilterCommand}}
 	resp := &cbApi.CallbackWordFilterResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
-	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	utils.CopyStructFields(&req, msg.MsgData)
 	req.Content = string(msg.MsgData.Content)
+	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackWordFilter.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackWordFilter.CallbackFailedContinue {
 			log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), "config disable, stop this operation")
@@ -112,6 +112,7 @@ func callBackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 			return false, nil
 		}
 		msg.MsgData.Content = []byte(resp.Content)
+		log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg.MsgData.Content)
 	}
 	return true, nil
 }
