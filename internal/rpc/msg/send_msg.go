@@ -126,14 +126,14 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	}
 
 	// callback
-	canSend, err := callBackWordFilter(pb)
-	if err != nil {
-		log.NewError(pb.OperationID, utils.GetSelfFuncName(), "CallbackBeforeSendMsg failed", err.Error(), pb.MsgData)
-	}
-	if !canSend {
-		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callback result", canSend, "end rpc and return", pb.MsgData)
-		return returnMsg(&replay, pb, 201, "callback result stop rpc and return", "", 0)
-	}
+	//canSend, err := callBackWordFilter(pb)
+	//if err != nil {
+	//	log.NewError(pb.OperationID, utils.GetSelfFuncName(), "CallbackBeforeSendMsg failed", err.Error(), pb.MsgData)
+	//}
+	//if !canSend {
+	//	log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callback result", canSend, "end rpc and return", pb.MsgData)
+	//	return returnMsg(&replay, pb, 201, "callback result stop rpc and return", "", 0)
+	//}
 	switch pb.MsgData.SessionType {
 	case constant.SingleChatType:
 		canSend, err := callbackBeforeSendSingleMsg(pb)
