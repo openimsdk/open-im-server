@@ -67,16 +67,16 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 	if err != nil {
 		return fmt.Errorf("keepalive failed, errmsg:%v, lease id:%d", err, resp.ID)
 	}
-	log.Info("", "RegisterEtcd ok ")
+	//log.Info("", "RegisterEtcd ok ")
 
 	go func() {
 		for {
 			select {
-			case v, ok := <-kresp:
+			case _, ok := <-kresp:
 				if ok == true {
-					log.Debug("", "KeepAlive kresp ok", v, schema, etcdAddr, myHost, myPort, serviceName, ttl)
+					//log.Debug("", "KeepAlive kresp ok", v, schema, etcdAddr, myHost, myPort, serviceName, ttl)
 				} else {
-					log.Error("", "KeepAlive kresp failed", schema, etcdAddr, myHost, myPort, serviceName, ttl)
+					//log.Error("", "KeepAlive kresp failed", schema, etcdAddr, myHost, myPort, serviceName, ttl)
 				}
 			}
 		}
