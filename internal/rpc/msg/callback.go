@@ -52,7 +52,7 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 			return false, nil
 		}
 	}
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), err.Error())
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName())
 	return true, err
 }
 
