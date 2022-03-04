@@ -214,7 +214,7 @@ callback:
   callbackWordFilter:
     enable: false
     callbackTimeOut: 2
-    CallbackFailedContinue: false
+    CallbackFailedContinue: true
 
 
 notification:
