@@ -53,7 +53,7 @@ func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*db.FriendRe
 		return nil, err
 	}
 	var friendRequest db.FriendRequest
-	err = dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?", FromUserID, ToUserID).Find(&friendRequest).Error
+	err = dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?", FromUserID, ToUserID).Take(&friendRequest).Error
 	if err != nil {
 		return nil, err
 	}

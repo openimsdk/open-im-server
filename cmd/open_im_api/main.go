@@ -102,7 +102,7 @@ func main() {
 		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)                  //1
 		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt) //1
 	}
-
+	apiThird.MinioInit()
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()

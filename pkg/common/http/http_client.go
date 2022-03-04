@@ -53,3 +53,14 @@ func Post(url string, data interface{}, timeOutSecond int) (content []byte, err 
 	}
 	return result, nil
 }
+
+func PostReturn(url string, input, output interface{}, timeOut int) error {
+	b, err := Post(url, input, timeOut)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(b, output); err != nil {
+		return err
+	}
+	return nil
+}

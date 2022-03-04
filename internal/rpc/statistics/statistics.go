@@ -164,28 +164,41 @@ func GetRangeDate(from, to time.Time) [][2]time.Time {
 		}
 	// month
 	case !isInOneMonth(from, to):
-		for i := 0; ; i++ {
-			if i == 0 {
-				fromTime := from
-				toTime := getFirstDateOfNextNMonth(fromTime, 1)
-				times = append(times, [2]time.Time{
-					fromTime, toTime,
-				})
-			} else {
-				fromTime := getFirstDateOfNextNMonth(from, i)
-				toTime := getFirstDateOfNextNMonth(fromTime, 1)
-				if toTime.After(to) {
-					toTime = to
-					times = append(times, [2]time.Time{
-						fromTime, toTime,
-					})
+		if to.Sub(from) < time.Hour * 24 * 30 {
+			for i := 0; ; i++ {
+				fromTime := from.Add(time.Hour * 24 * time.Duration(i))
+				toTime := from.Add(time.Hour * 24 * time.Duration(i+1))
+				if toTime.After(to.Add(time.Hour * 24)) {
 					break
 				}
 				times = append(times, [2]time.Time{
 					fromTime, toTime,
 				})
 			}
+		} else {
+			for i := 0; ; i++ {
+				if i == 0 {
+					fromTime := from
+					toTime := getFirstDateOfNextNMonth(fromTime, 1)
+					times = append(times, [2]time.Time{
+						fromTime, toTime,
+					})
+				} else {
+					fromTime := getFirstDateOfNextNMonth(from, i)
+					toTime := getFirstDateOfNextNMonth(fromTime, 1)
+					if toTime.After(to) {
+						toTime = to
+						times = append(times, [2]time.Time{
+							fromTime, toTime,
+						})
+						break
+					}
+					times = append(times, [2]time.Time{
+						fromTime, toTime,
+					})
+				}
 
+			}
 		}
 	}
 	return times

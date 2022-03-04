@@ -9,6 +9,7 @@ package im_mysql_msg_model
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
 	"Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -45,5 +46,6 @@ func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
 	}
 	chatLog.CreateTime = utils.UnixMillSecondToTime(msg.MsgData.CreateTime)
 	chatLog.SendTime = utils.UnixMillSecondToTime(msg.MsgData.SendTime)
+	log.NewDebug("test", "this is ", chatLog)
 	return dbConn.Table("chat_logs").Create(chatLog).Error
 }

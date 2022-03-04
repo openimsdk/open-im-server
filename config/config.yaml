@@ -91,8 +91,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     bucket: openim
     location: us-east-1
     endpoint: http://127.0.0.1:9000
-    accessKeyID: minioadmin
-    secretAccessKey: minioadmin
+    accessKeyID: user12345
+    secretAccessKey: key12345
 
 
 rpcport: #rpc服务端口 默认即可
@@ -131,8 +131,9 @@ rpcregistername: #rpc注册服务名，默认即可
 log:
   storageLocation: ../logs/
   rotationTime: 24
-  remainRotationCount: 5 #日志数量
-  remainLogLevel: 6 #日志级别 6表示全都打印，测试阶段建议设置为6
+  remainRotationCount: 3 #日志数量
+  #日志级别 6表示全都打印，测试阶段建议设置为6
+  remainLogLevel: 6
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
@@ -178,13 +179,6 @@ tokenpolicy:
   # Token effective time day as a unit
   accessExpire: 3650 #token过期时间（天） 默认即可
 
-messagecallback:
-  callbackSwitch: false
-  callbackUrl: "http://www.xxx.com/msg/judge"
-  #TimeOut use second as unit
-  callbackTimeOut: 10
-messagejudge:
-  isJudgeFriend: true
 #  c2c:
 #    callbackBeforeSendMsg:
 #      switch: false
@@ -198,6 +192,30 @@ messagejudge:
 iospush:
   pushSound: "xxx"
   badgeCount: true
+
+callback:
+  # callback url 需要自行更换callback url
+  callbackUrl : "http://127.0.0.1:8080/callback"
+  # 开启关闭操作前后回调的配置
+  callbackbeforeSendSingleMsg:
+    enable: false # 回调是否启用
+    callbackTimeOut: 2 # 回调超时时间
+    CallbackFailedContinue: true # 回调超时是否继续执行代码
+  callbackAfterSendSingleMsg:
+    enable: false
+    callbackTimeOut: 2
+  callbackBeforeSendGroupMsg:
+    enable: false
+    callbackTimeOut: 2
+    CallbackFailedContinue: true
+  callbackAfterSendGroupMsg:
+    enable: false
+    callbackTimeOut: 2
+  callbackWordFilter:
+    enable: false
+    callbackTimeOut: 2
+    CallbackFailedContinue: true
+
 
 notification:
   groupCreated:

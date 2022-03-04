@@ -12,10 +12,10 @@ import (
 )
 
 type resetPasswordRequest struct {
-	VerificationCode string `json:"verificationCode"`
+	VerificationCode string `json:"verificationCode" binding:"required"`
 	Email            string `json:"email"`
 	PhoneNumber      string `json:"phoneNumber"`
-	NewPassword string `json:"newPassword"`
+	NewPassword string `json:"newPassword" binding:"required"`
 	OperationID string `json:"operationID"`
 }
 

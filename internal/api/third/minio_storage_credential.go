@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	_ "Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/utils"
 	"github.com/gin-gonic/gin"
@@ -23,12 +24,12 @@ func MinioStorageCredential(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-		//ok, _ := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
-		//if !ok {
-		//	log.NewError("", utils.GetSelfFuncName(), "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
-		//	return
-		//}
+	ok, _ := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError("", utils.GetSelfFuncName(), "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
 	var stsOpts cr.STSAssumeRoleOptions
 	stsOpts.AccessKey = config.Config.Credential.Minio.AccessKeyID
 	stsOpts.SecretKey = config.Config.Credential.Minio.SecretAccessKey
@@ -42,11 +43,6 @@ func MinioStorageCredential(c *gin.Context) {
 	v, err := li.Get()
 	if err != nil {
 		log.NewError("0", utils.GetSelfFuncName(), "li.Get error", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-		return
-	}
-	if err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}

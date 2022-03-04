@@ -19,6 +19,12 @@ var (
 
 var Config config
 
+type callBackConfig struct {
+	Enable bool `yaml:"enable"`
+	CallbackTimeOut int `yaml:"callbackTimeOut"`
+	CallbackFailedContinue bool `CallbackFailedContinue`
+}
+
 type config struct {
 	ServerIP      string `yaml:"serverip"`
 	ServerVersion string `yaml:"serverversion"`
@@ -167,11 +173,6 @@ type config struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
 	}
-	MessageCallBack struct {
-		CallbackSwitch  bool   `yaml:"callbackSwitch"`
-		CallbackUrl     string `yaml:"callbackUrl"`
-		CallBackTimeOut int    `yaml:"callbackTimeOut"`
-	}
 	MessageJudge struct {
 		IsJudgeFriend bool `yaml:"isJudgeFriend"`
 	}
@@ -179,6 +180,15 @@ type config struct {
 		PushSound  string `yaml:"pushSound"`
 		BadgeCount bool   `yaml:"badgeCount"`
 	}
+
+	Callback struct {
+		CallbackUrl string                         `yaml:"callbackUrl"`
+		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackbeforeSendSingleMsg"`
+		CallbackAfterSendSingleMsg callBackConfig  `yaml:"callbackAfterSendSingleMsg"`
+		CallbackBeforeSendGroupMsg callBackConfig  `yaml:"callbackBeforeSendGroupMsg"`
+		CallbackAfterSendGroupMsg callBackConfig   `yaml:"callbackAfterSendGroupMsg"`
+		CallbackWordFilter callBackConfig          `yaml:"callbackWordFilter"`
+	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
 		GroupCreated struct {
