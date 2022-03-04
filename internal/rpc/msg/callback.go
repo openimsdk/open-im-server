@@ -28,7 +28,6 @@ func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq
 }
 
 func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err error) {
-	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackBeforeSendSingleMsg.Enable)
 	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return true, nil
 	}
@@ -58,7 +57,6 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 
 
 func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
-	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackAfterSendSingleMsg.Enable)
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return nil
 	}
@@ -80,7 +78,6 @@ func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
 
 
 func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error) {
-	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackBeforeSendGroupMsg.Enable)
 	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
 		return true, nil
 	}
@@ -103,11 +100,11 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 			return false, nil
 		}
 	}
+	log.NewInfo()
 	return true, err
 }
 
 func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
-	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackAfterSendGroupMsg.Enable)
 	if !config.Config.Callback.CallbackAfterSendGroupMsg.Enable {
 		return nil
 	}
@@ -130,7 +127,6 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 
 
 func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
-	log.NewDebug(msg.OperationID, config.Config.Callback.CallbackWordFilter.Enable)
 	if !config.Config.Callback.CallbackWordFilter.Enable || msg.MsgData.ContentType != constant.Text {
 		return true, nil
 	}
@@ -157,6 +153,7 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 		}
 		log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), string(msg.MsgData.Content))
 	}
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), err.Error())
 	return true, err
 }
 
