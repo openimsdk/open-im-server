@@ -7,7 +7,7 @@
 package log
 
 import (
-	"fmt"
+	"Open_IM/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"runtime"
 	"strings"
@@ -23,38 +23,49 @@ func (f *fileHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
+//func (f *fileHook) Fire(entry *logrus.Entry) error {
+//	entry.Data["FilePath"] = findCaller(6)
+//	return nil
+//}
+
 func (f *fileHook) Fire(entry *logrus.Entry) error {
-	entry.Data["FilePath"] = findCaller(6)
+	var s string
+	_, b, c, _ := runtime.Caller(8)
+	i := strings.LastIndex(b, "/")
+	if i != -1 {
+		s = b[i+1:len(b)] + ":" + utils.IntToString(c)
+	}
+	entry.Data["FilePath"] = s
 	return nil
 }
 
-func findCaller(skip int) string {
-	file := ""
-	line := 0
-	for i := 0; i < 10; i++ {
-		file, line = getCaller(skip + i)
-		if !strings.HasPrefix(file, "log") {
-			break
-		}
-	}
-	return fmt.Sprintf("%s:%d", file, line)
-}
-
-func getCaller(skip int) (string, int) {
-	_, file, line, ok := runtime.Caller(skip)
-	if !ok {
-		return "", 0
-	}
-
-	n := 0
-	for i := len(file) - 1; i > 0; i-- {
-		if file[i] == '/' {
-			n++
-			if n >= 2 {
-				file = file[i+1:]
-				break
-			}
-		}
-	}
-	return file, line
-}
+//func findCaller(skip int) string {
+//	file := ""
+//	line := 0
+//	for i := 0; i < 10; i++ {
+//		file, line = getCaller(skip + i)
+//		if !strings.HasPrefix(file, "log") {
+//			break
+//		}
+//	}
+//	return fmt.Sprintf("%s:%d", file, line)
+//}
+//
+//func getCaller(skip int) (string, int) {
+//	_, file, line, ok := runtime.Caller(skip)
+//	if !ok {
+//		return "", 0
+//	}
+//
+//	n := 0
+//	for i := len(file) - 1; i > 0; i-- {
+//		if file[i] == '/' {
+//			n++
+//			if n >= 2 {
+//				file = file[i+1:]
+//				break
+//			}
+//		}
+//	}
+//	return file, line
+//}
