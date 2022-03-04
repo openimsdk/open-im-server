@@ -113,10 +113,10 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
-	commonCallbackReq.CallbackCommand = constant.CallbackBeforeSendGroupMsgCommand
-	req := cbApi.CallbackBeforeSendSingleMsgReq{
+	commonCallbackReq.CallbackCommand = constant.CallbackAfterSendGroupMsgCommand
+	req := cbApi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: commonCallbackReq,
-		RecvID: msg.MsgData.RecvID,
+		GroupID: msg.MsgData.GroupID,
 	}
 	resp := &cbApi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 
@@ -152,7 +152,9 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 		if resp.ActionCode == constant.ActionForbidden && resp.ErrCode == constant.CallbackHandleSuccess {
 			return false, nil
 		}
-		msg.MsgData.Content = []byte(resp.Content)
+		if resp.ErrCode == constant.CallbackHandleSuccess {
+			msg.MsgData.Content = []byte(resp.Content)
+		}
 		log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), string(msg.MsgData.Content))
 	}
 	return true, nil

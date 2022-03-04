@@ -10,7 +10,7 @@ import (
 	url2 "net/url"
 )
 
-func init() {
+func MinioInit() {
 	minioUrl, err := url2.Parse(config.Config.Credential.Minio.Endpoint)
 	if err != nil {
 		log.NewError("", utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())

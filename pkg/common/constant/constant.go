@@ -138,15 +138,15 @@ const (
 	VerificationCodeForResetSuffix    = "_forReset"
 
 	//callbackCommand
-	CallbackBeforeSendSingleMsgCommand = "callbackBeforeSendSingleMsg"
-	CallbackAfterSendSingleMsgCommand = "callbackAfterSendSingleMsg"
-	CallbackBeforeSendGroupMsgCommand = "callbackBeforeSendGroupMsg"
+	CallbackBeforeSendSingleMsgCommand = "callbackBeforeSendSingleMsgCommand"
+	CallbackAfterSendSingleMsgCommand = "callbackAfterSendSingleMsgCommand"
+	CallbackBeforeSendGroupMsgCommand = "callbackBeforeSendGroupMsgCommand"
 	CallbackAfterSendGroupMsgCommand = "callbackAfterSendGroupMsgCommand"
 	CallbackWordFilterCommand = "callbackWordFilterCommand"
-	//actionCode
+	//callback actionCode
 	ActionAllow = 0
 	ActionForbidden = 1
-	//callbackHandleCode
+	//callback callbackHandleCode
 	CallbackHandleSuccess = 0
 	CallbackHandleFailed = 1
 )
