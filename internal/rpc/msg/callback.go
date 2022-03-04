@@ -150,6 +150,6 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 		}
 		log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), string(msg.MsgData.Content))
 	}
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), err.Error())
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName())
 	return true, err
 }
