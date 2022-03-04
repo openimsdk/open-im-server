@@ -46,13 +46,14 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue {
 			return false, err
+		} else {
+			return true, err
 		}
 	} else {
 		if resp.ActionCode == constant.ActionForbidden && resp.ErrCode == constant.CallbackHandleSuccess {
 			return false, nil
 		}
 	}
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName())
 	return true, err
 }
 
@@ -93,13 +94,14 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue {
 			return false, err
+		} else {
+			return true, err
 		}
 	} else {
 		if resp.ActionCode == constant.ActionForbidden && resp.ErrCode == constant.CallbackHandleSuccess {
 			return false, nil
 		}
 	}
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), err.Error())
 	return true, err
 }
 
@@ -141,6 +143,8 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 		if !config.Config.Callback.CallbackWordFilter.CallbackFailedContinue {
 			log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), "callback failed and config disable, stop this operation")
 			return false, err
+		} else {
+			return true, err
 		}
 	} else {
 		if resp.ActionCode == constant.ActionForbidden && resp.ErrCode == constant.CallbackHandleSuccess {
@@ -151,6 +155,5 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 		}
 		log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), string(msg.MsgData.Content))
 	}
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), err.Error())
 	return true, err
 }
