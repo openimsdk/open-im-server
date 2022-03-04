@@ -194,26 +194,27 @@ iospush:
   badgeCount: true
 
 callback:
+  # callback url 需要自行更换callback url
   callbackUrl : "http://127.0.0.1:8080/callback"
   # 开启关闭操作前后回调的配置
   callbackbeforeSendSingleMsg:
-    enable: false # 回调是否启用
+    enable: true # 回调是否启用
     callbackTimeOut: 2 # 回调超时时间
     CallbackFailedContinue: true # 回调超时是否继续执行代码
   callbackAfterSendSingleMsg:
-    enable: false
+    enable: true
     callbackTimeOut: 2
   callbackBeforeSendGroupMsg:
-    enable: false
+    enable: true
     callbackTimeOut: 2
     CallbackFailedContinue: true
   callbackAfterSendGroupMsg:
-    enable: false
+    enable: true
     callbackTimeOut: 2
   callbackWordFilter:
     enable: true
     callbackTimeOut: 2
-    CallbackFailedContinue: true
+    CallbackFailedContinue: false
 
 
 notification:
