@@ -12,18 +12,18 @@ import (
 
 func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq {
 	return cbApi.CommonCallbackReq{
-		SendID: msg.MsgData.SendID,
-		ServerMsgID: msg.MsgData.ServerMsgID,
-		ClientMsgID: msg.MsgData.ClientMsgID,
-		OperationID: msg.OperationID,
+		SendID:           msg.MsgData.SendID,
+		ServerMsgID:      msg.MsgData.ServerMsgID,
+		ClientMsgID:      msg.MsgData.ClientMsgID,
+		OperationID:      msg.OperationID,
 		SenderPlatformID: msg.MsgData.SenderPlatformID,
-		SenderNickname: msg.MsgData.SenderNickname,
-		SessionType: msg.MsgData.SessionType,
-		MsgFrom: msg.MsgData.MsgFrom,
-		ContentType: msg.MsgData.ContentType,
-		Status: msg.MsgData.Status,
-		CreateTime: msg.MsgData.CreateTime,
-		Content: string(msg.MsgData.Content),
+		SenderNickname:   msg.MsgData.SenderNickname,
+		SessionType:      msg.MsgData.SessionType,
+		MsgFrom:          msg.MsgData.MsgFrom,
+		ContentType:      msg.MsgData.ContentType,
+		Status:           msg.MsgData.Status,
+		CreateTime:       msg.MsgData.CreateTime,
+		Content:          string(msg.MsgData.Content),
 	}
 }
 
@@ -36,14 +36,14 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 	commonCallbackReq.CallbackCommand = constant.CallbackBeforeSendSingleMsgCommand
 	req := cbApi.CallbackBeforeSendSingleMsgReq{
 		CommonCallbackReq: commonCallbackReq,
-		RecvID: msg.MsgData.RecvID,
+		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbApi.CallbackBeforeSendSingleMsgResp{
 		CommonCallbackResp: cbApi.CommonCallbackResp{},
 	}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackTimeOut); err != nil{
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue {
 			return false, err
 		}
@@ -55,7 +55,6 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 	return true, err
 }
 
-
 func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
 	if !config.Config.Callback.CallbackAfterSendSingleMsg.Enable {
 		return nil
@@ -65,17 +64,16 @@ func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) error {
 	commonCallbackReq.CallbackCommand = constant.CallbackAfterSendSingleMsgCommand
 	req := cbApi.CallbackAfterSendSingleMsgReq{
 		CommonCallbackReq: commonCallbackReq,
-		RecvID: msg.MsgData.RecvID,
+		RecvID:            msg.MsgData.RecvID,
 	}
 	resp := &cbApi.CallbackAfterSendSingleMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackAfterSendSingleMsg.CallbackTimeOut); err != nil{
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackAfterSendSingleMsg.CallbackTimeOut); err != nil {
 		return err
 	}
 	return nil
 }
-
 
 func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 	if !config.Config.Callback.CallbackBeforeSendGroupMsg.Enable {
@@ -86,7 +84,7 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 	commonCallbackReq.CallbackCommand = constant.CallbackBeforeSendGroupMsgCommand
 	req := cbApi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: commonCallbackReq,
-		GroupID: msg.MsgData.GroupID,
+		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbApi.CallbackBeforeSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	//utils.CopyStructFields(req, msg.MsgData)
@@ -100,7 +98,7 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 			return false, nil
 		}
 	}
-	log.NewInfo()
+	//log.NewInfo()
 	return true, err
 }
 
@@ -113,7 +111,7 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 	commonCallbackReq.CallbackCommand = constant.CallbackAfterSendGroupMsgCommand
 	req := cbApi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: commonCallbackReq,
-		GroupID: msg.MsgData.GroupID,
+		GroupID:           msg.MsgData.GroupID,
 	}
 	resp := &cbApi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 
@@ -124,7 +122,6 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
 	}
 	return nil
 }
-
 
 func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 	if !config.Config.Callback.CallbackWordFilter.Enable || msg.MsgData.ContentType != constant.Text {
@@ -156,8 +153,3 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), err.Error())
 	return true, err
 }
-
-
-
-
-
