@@ -99,7 +99,7 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 			return false, nil
 		}
 	}
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), err.Error())
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName())
 	return true, err
 }
 
