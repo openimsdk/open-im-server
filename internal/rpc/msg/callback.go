@@ -53,7 +53,7 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 			return false, nil
 		}
 	}
-	return true, nil
+	return true, err
 }
 
 
@@ -87,23 +87,23 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) (canSend bool, err error
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
 	commonCallbackReq.CallbackCommand = constant.CallbackBeforeSendGroupMsgCommand
-	req := cbApi.CallbackBeforeSendSingleMsgReq{
+	req := cbApi.CallbackAfterSendGroupMsgReq{
 		CommonCallbackReq: commonCallbackReq,
-		RecvID: msg.MsgData.RecvID,
+		GroupID: msg.MsgData.GroupID,
 	}
 	resp := &cbApi.CallbackBeforeSendGroupMsgResp{CommonCallbackResp: cbApi.CommonCallbackResp{}}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue {
-			return false, nil
+			return false, err
 		}
 	} else {
 		if resp.ActionCode == constant.ActionForbidden && resp.ErrCode == constant.CallbackHandleSuccess {
 			return false, nil
 		}
 	}
-	return true, nil
+	return true, err
 }
 
 func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) error {
@@ -145,7 +145,7 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackWordFilter.CallbackTimeOut); err != nil {
 		if !config.Config.Callback.CallbackWordFilter.CallbackFailedContinue {
-			log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), "config disable, stop this operation")
+			log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), "callback failed and config disable, stop this operation")
 			return false, err
 		}
 	} else {
@@ -157,7 +157,7 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) (canSend bool, err error) {
 		}
 		log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), string(msg.MsgData.Content))
 	}
-	return true, nil
+	return true, err
 }
 
 
