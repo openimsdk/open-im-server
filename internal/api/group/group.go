@@ -260,6 +260,10 @@ func CreateGroup(c *gin.Context) {
 		return
 	}
 	req.OwnerUserID = req.OpUserID
+	if params.OwnerUserID != "" {
+		req.OwnerUserID = params.OwnerUserID
+	}
+
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "CreateGroup args ", req.String())
 
