@@ -38,6 +38,7 @@ func RegisterEtcd4Unique(schema, etcdAddr, myHost string, myPort int, serviceNam
 
 //etcdAddr separated by commas
 func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName string, ttl int) error {
+	ttl = ttl * 3
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: strings.Split(etcdAddr, ","), DialTimeout: 5 * time.Second})
 
@@ -72,11 +73,11 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 	go func() {
 		for {
 			select {
-			case _, ok := <-kresp:
+			case pv, ok := <-kresp:
 				if ok == true {
-					//log.Debug("", "KeepAlive kresp ok", v, schema, etcdAddr, myHost, myPort, serviceName, ttl)
+					log.Debug("", "KeepAlive kresp ok", pv)
 				} else {
-					//log.Error("", "KeepAlive kresp failed", schema, etcdAddr, myHost, myPort, serviceName, ttl)
+					log.Error("", "KeepAlive kresp failed", pv)
 				}
 			}
 		}

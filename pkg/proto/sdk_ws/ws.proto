@@ -40,6 +40,7 @@ message PublicUserInfo{
   string nickname = 2;
   string faceURL = 3;
   int32 gender = 4;
+  string ex = 5;
 }
 
 message UserInfo{
@@ -336,37 +337,6 @@ message UserInfoUpdatedTips{
 message ConversationUpdateTips{
  string UserID = 1;
 
-}
-
-///callback
-message CommonCallbackURLReq {
- string CallbackCommand = 1 [json_name = "code"];
- string OpenIMServerID = 2;
- string OperationID = 3;
-}
-
-message CommonCallbackURLResp {
- string Code = 1 [json_name = "code"];
- string Msg = 2  [json_name = "msg"];
- string OperationID = 3 [json_name = "operationID"];
-}
-
-message CallbackBeforeSendMsgReq {
- commonReq CommonCallbackURLReq = 1;
-
-}
-
-message CallbackBeforeSendMsgResp {
- commonResp CommonCallbackURLResp = 1;
- string FromUserID = 2;
-}
-
-message CallbackAfterAddFriendReq {
-  commonReq CommonCallbackURLReq = 1;
-}
-
-message CallbackAfterAddFriendResp {
- commonResp CommonCallbackURLResp = 1;
 }
 
 
