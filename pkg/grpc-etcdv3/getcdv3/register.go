@@ -78,6 +78,16 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 					log.Debug("", "KeepAlive kresp ok", pv)
 				} else {
 					log.Error("", "KeepAlive kresp failed", pv)
+					t := time.NewTicker(time.Duration(ttl) * time.Second)
+					for {
+						select {
+						case <-t.C:
+						}
+						if _, err := cli.Put(ctx, serviceKey, serviceValue, clientv3.WithLease(resp.ID)); err != nil {
+							log.Error("", "etcd Put failed ", err.Error(), serviceKey, serviceValue, resp.ID)
+						}
+						log.Info("", "etcd Put ok", serviceKey, serviceValue, resp.ID)
+					}
 				}
 			}
 		}
