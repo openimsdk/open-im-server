@@ -26,7 +26,7 @@ message GroupMemberFullInfo {
   string groupID = 1 ;
   string userID = 2 ;
   int32 roleLevel = 3;
-  int64 joinTime = 4;
+  int32 joinTime = 4;
   string nickname = 5;
   string faceURL = 6;
   int32 appMangerLevel = 7; //if >0
