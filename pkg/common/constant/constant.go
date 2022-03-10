@@ -136,6 +136,19 @@ const (
 	VerificationCodeForReset          = 2
 	VerificationCodeForRegisterSuffix = "_forRegister"
 	VerificationCodeForResetSuffix    = "_forReset"
+
+	//callbackCommand
+	CallbackBeforeSendSingleMsgCommand = "callbackBeforeSendSingleMsgCommand"
+	CallbackAfterSendSingleMsgCommand = "callbackAfterSendSingleMsgCommand"
+	CallbackBeforeSendGroupMsgCommand = "callbackBeforeSendGroupMsgCommand"
+	CallbackAfterSendGroupMsgCommand = "callbackAfterSendGroupMsgCommand"
+	CallbackWordFilterCommand = "callbackWordFilterCommand"
+	//callback actionCode
+	ActionAllow = 0
+	ActionForbidden = 1
+	//callback callbackHandleCode
+	CallbackHandleSuccess = 0
+	CallbackHandleFailed = 1
 )
 
 var ContentType2PushContent = map[int64]string{

@@ -102,7 +102,7 @@ func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts re
 	if err == nil {
 		var addrList []resolver.Address
 		for i := range resp.Kvs {
-			fmt.Println("init addr: ", string(resp.Kvs[i].Value))
+			//log.Debug("", "init addr: ", string(resp.Kvs[i].Value))
 			addrList = append(addrList, resolver.Address{Addr: string(resp.Kvs[i].Value)})
 		}
 		r.cc.UpdateState(resolver.State{Addresses: addrList})
@@ -148,27 +148,27 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 				if !exists(addrList, string(ev.Kv.Value)) {
 					flag = 1
 					addrList = append(addrList, resolver.Address{Addr: string(ev.Kv.Value)})
-					fmt.Println("after add, new list: ", addrList)
+					//log.Debug("", "after add, new list: ", addrList)
 				}
 			case mvccpb.DELETE:
-				fmt.Println("remove addr key: ", string(ev.Kv.Key), "value:", string(ev.Kv.Value))
+				//log.Debug("remove addr key: ", string(ev.Kv.Key), "value:", string(ev.Kv.Value))
 				i := strings.LastIndexAny(string(ev.Kv.Key), "/")
 				if i < 0 {
 					return
 				}
 				t := string(ev.Kv.Key)[i+1:]
-				fmt.Println("remove addr key: ", string(ev.Kv.Key), "value:", string(ev.Kv.Value), "addr:", t)
+				//log.Debug("remove addr key: ", string(ev.Kv.Key), "value:", string(ev.Kv.Value), "addr:", t)
 				if s, ok := remove(addrList, t); ok {
 					flag = 1
 					addrList = s
-					fmt.Println("after remove, new list: ", addrList)
+					//log.Debug("after remove, new list: ", addrList)
 				}
 			}
 		}
 
 		if flag == 1 {
 			r.cc.UpdateState(resolver.State{Addresses: addrList})
-			fmt.Println("update: ", addrList)
+			//log.Debug("update: ", addrList)
 		}
 	}
 }
@@ -176,7 +176,7 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 func GetConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
 	gEtcdCli, err := clientv3.New(clientv3.Config{Endpoints: strings.Split(etcdaddr, ",")})
 	if err != nil {
-		fmt.Println("eeeeeeeeeeeee", err.Error())
+		//log.Error("clientv3.New failed", err.Error())
 		return nil
 	}
 
@@ -200,7 +200,7 @@ func GetConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
 		}
 	} else {
 		gEtcdCli.Close()
-		fmt.Println("rrrrrrrrrrr", err.Error())
+		//log.Error("gEtcdCli.Get failed", err.Error())
 		return nil
 	}
 	gEtcdCli.Close()
@@ -236,7 +236,7 @@ func GetConnPool(schema, etcdaddr, servicename string) (*ClientConn, error) {
 	ctx, _ := context.WithDeadline(context.Background(), time.Now().Add(1000*time.Millisecond))
 
 	c, err := p.Get(ctx)
-	fmt.Println(err)
+	//log.Info("", "Get ", err)
 	return c, err
 
 }

@@ -1,6 +1,7 @@
 package getcdv3
 
 import (
+	"Open_IM/pkg/common/log"
 	"context"
 	"fmt"
 	"go.etcd.io/etcd/clientv3"
@@ -37,11 +38,12 @@ func RegisterEtcd4Unique(schema, etcdAddr, myHost string, myPort int, serviceNam
 
 //etcdAddr separated by commas
 func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName string, ttl int) error {
+	ttl = ttl * 3
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: strings.Split(etcdAddr, ","), DialTimeout: 5 * time.Second})
-	fmt.Println("RegisterEtcd")
+
+	log.Info("", "RegisterEtcd, ", schema, etcdAddr, myHost, myPort, serviceName, ttl)
 	if err != nil {
-		//		return fmt.Errorf("grpclb: create clientv3 client failed: %v", err)
 		return fmt.Errorf("create etcd clientv3 client failed, errmsg:%v, etcd addr:%s", err, etcdAddr)
 	}
 
@@ -66,15 +68,26 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 	if err != nil {
 		return fmt.Errorf("keepalive failed, errmsg:%v, lease id:%d", err, resp.ID)
 	}
-	fmt.Println("RegisterEtcd ok")
+	//log.Info("", "RegisterEtcd ok ")
+
 	go func() {
 		for {
 			select {
-			case v, ok := <-kresp:
+			case pv, ok := <-kresp:
 				if ok == true {
-					//	fmt.Println(" kresp ok ", v)
+					log.Debug("", "KeepAlive kresp ok", pv)
 				} else {
-					fmt.Println(" kresp failed ", v)
+					log.Error("", "KeepAlive kresp failed", pv)
+					t := time.NewTicker(time.Duration(ttl) * time.Second)
+					for {
+						select {
+						case <-t.C:
+						}
+						if _, err := cli.Put(ctx, serviceKey, serviceValue, clientv3.WithLease(resp.ID)); err != nil {
+							log.Error("", "etcd Put failed ", err.Error(), serviceKey, serviceValue, resp.ID)
+						}
+						log.Info("", "etcd Put ok", serviceKey, serviceValue, resp.ID)
+					}
 				}
 			}
 		}

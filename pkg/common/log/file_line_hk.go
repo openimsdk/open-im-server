@@ -28,6 +28,17 @@ func (f *fileHook) Fire(entry *logrus.Entry) error {
 	return nil
 }
 
+//func (f *fileHook) Fire(entry *logrus.Entry) error {
+//	var s string
+//	_, b, c, _ := runtime.Caller(10)
+//	i := strings.SplitAfter(b, "/")
+//	if len(i) > 3 {
+//		s = i[len(i)-3] + i[len(i)-2] + i[len(i)-1] + ":" + utils.IntToString(c)
+//	}
+//	entry.Data["FilePath"] = s
+//	return nil
+//}
+
 func findCaller(skip int) string {
 	file := ""
 	line := 0

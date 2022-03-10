@@ -78,7 +78,12 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.OwnerUserID)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
-
+	canCreate, err := callbackBeforeCreateGroup(req)
+	if err != nil || !canCreate {
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeCreateGroup failed")
+		}
+	}
 	//Time stamp + MD5 to generate group chat id
 	groupId := utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
 	//to group
@@ -86,7 +91,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
 	groupInfo.CreatorUserID = req.OpUserID
 	groupInfo.GroupID = groupId
-	err := imdb.InsertIntoGroup(groupInfo)
+	err = imdb.InsertIntoGroup(groupInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupInfo)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
@@ -271,7 +276,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 
 	for _, v := range memberList {
 		var node open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(&node, &v)
+		cp.GroupMemberDBCopyOpenIM(&node, &v)
 		resp.MemberList = append(resp.MemberList, &node)
 	}
 	log.NewInfo(req.OperationID, "GetGroupAllMember rpc return ", resp.String())

@@ -54,7 +54,7 @@ func Login(c *gin.Context) {
 	openIMGetUserToken.Secret = config.Config.Secret
 	openIMGetUserToken.UserID = account
 	openIMGetUserTokenResp := api.UserTokenResp{}
-	bMsg, err := http2.Post(url, openIMGetUserToken, config.Config.MessageCallBack.CallBackTimeOut)
+	bMsg, err := http2.Post(url, openIMGetUserToken, 2)
 	if err != nil {
 		log.NewError(params.OperationID, "request openIM get user token error", account, "err", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.GetIMTokenErr, "errMsg": err.Error()})
