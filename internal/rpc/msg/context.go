@@ -45,17 +45,21 @@ func (c *SendContext) doBeforeFilters(pb *pbChat.SendMsgReq) (*pbChat.SendMsgRes
 
 // doAfterFilters executes the pending filters in the chain inside the calling handler.
 func (c *SendContext) doAfterFilters(req *pbChat.SendMsgReq, res *pbChat.SendMsgResp) (*pbChat.SendMsgResp, bool, error) {
+	var (
+		ok  bool
+		err error
+	)
 	for _, handler := range c.afterSenders {
-		res, ok, err := handler(c, req, res)
+		res, ok, err = handler(c, req, res)
 		if err != nil {
-			return nil, false, err
+			return res, false, err
 		}
 		if !ok {
 			return res, ok, nil
 		}
 	}
 
-	return nil, true, nil
+	return res, true, nil
 }
 
 func (c *SendContext) SendMsg(pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {

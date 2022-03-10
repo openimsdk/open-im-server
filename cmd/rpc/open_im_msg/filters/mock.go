@@ -47,9 +47,10 @@ func MockBeforeSendFilter2(ctx *rpcChat.SendContext, pb *pbChat.SendMsgReq) (*pb
 	}
 
 	fmt.Printf("MockBeforeSendFilter2 trigger,contentType:%d\n", pb.MsgData.GetContentType())
+	msg := string(pb.MsgData.Content)
+	fmt.Printf("msg content:%s\n", msg)
 	if pb.MsgData.ContentType == constant.Text {
 		msg := string(pb.MsgData.Content)
-		// fmt.Printf("text msg:%s\n", msg)
 		if msg == "this is a m..m..mock msg" {
 			fmt.Println(".==>msg had banned")
 			return nil, false, errors.New("BANG! This msg has been banned by MockBeforeSendHandler")
