@@ -395,7 +395,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 			continue
 		} else {
 			utils.CopyStructFields(&memberNode, memberInfo)
-			memberNode.JoinTime = memberInfo.JoinTime.Unix()
+			memberNode.JoinTime = int32(memberInfo.JoinTime.Unix())
 			resp.MemberList = append(resp.MemberList, &memberNode)
 		}
 	}
@@ -827,7 +827,7 @@ func (s *groupServer) GetGroupMembersCMS(_ context.Context, req *pbGroup.GetGrou
 			GroupID:    req.GroupId,
 			UserID:     groupMember.UserID,
 			RoleLevel:  groupMember.RoleLevel,
-			JoinTime:   groupMember.JoinTime.Unix(),
+			JoinTime:   int32(groupMember.JoinTime.Unix()),
 			Nickname:   groupMember.Nickname,
 			FaceURL:    groupMember.FaceURL,
 			JoinSource: groupMember.JoinSource,
