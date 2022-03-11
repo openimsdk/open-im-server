@@ -19,6 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
+  dbUri: ""
   dbAddress: [ openim_mongo:27017 ]
   dbDirect: false
   dbTimeout: 10
