@@ -1,4 +1,4 @@
-# openim开源项目k8s部署
+# openim开源项目k8s集群部署
 ## 需要的环境
     MacOS OR Linux
 ## 需要安装的软件
@@ -30,3 +30,6 @@ bash build.sh
 ```shell
 go run .
 ```
+
+## Ingress 负载均衡
+    ...
