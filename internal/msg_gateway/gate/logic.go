@@ -52,6 +52,8 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 		ws.getSeqReq(conn, &m)
 	case constant.WSSendMsg:
 		ws.sendMsgReq(conn, &m)
+	case constant.WSSendSignalMsg:
+		ws.sendSignalMsgReq(conn, &m)
 	case constant.WSPullMsgBySeqList:
 		ws.pullMsgBySeqListReq(conn, &m)
 	default:
@@ -193,6 +195,57 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 	ws.sendMsg(conn, mReply)
 }
 
+func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
+	sendMsgCount++
+	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID)
+	nReply := new(pbChat.SendMsgResp)
+	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
+	if isPass {
+		data := pData.(sdk_ws.MsgData)
+		pbData := pbChat.SendMsgReq{
+			Token:       m.Token,
+			OperationID: m.OperationID,
+			MsgData:     &data,
+		}
+		log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+		client := pbChat.NewChatClient(etcdConn)
+		reply, err := client.SendMsg(context.Background(), &pbData)
+		if err != nil {
+			log.NewError(pbData.OperationID, "rpc sendMsg err", err.Error())
+			nReply.ErrCode = 200
+			nReply.ErrMsg = err.Error()
+			ws.sendSignalMsgResp(conn, m, nReply)
+		} else {
+			log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
+			ws.sendSignalMsgResp(conn, m, reply)
+		}
+
+	} else {
+		nReply.ErrCode = errCode
+		nReply.ErrMsg = errMsg
+		ws.sendSignalMsgResp(conn, m, nReply)
+	}
+
+}
+func (ws *WServer) sendSignalMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
+	// := make(map[string]interface{})
+
+	var mReplyData sdk_ws.UserSendMsgResp
+	mReplyData.ClientMsgID = pb.GetClientMsgID()
+	mReplyData.ServerMsgID = pb.GetServerMsgID()
+	mReplyData.SendTime = pb.GetSendTime()
+	b, _ := proto.Marshal(&mReplyData)
+	mReply := Resp{
+		ReqIdentifier: m.ReqIdentifier,
+		MsgIncr:       m.MsgIncr,
+		ErrCode:       pb.GetErrCode(),
+		ErrMsg:        pb.GetErrMsg(),
+		OperationID:   m.OperationID,
+		Data:          b,
+	}
+	ws.sendMsg(conn, mReply)
+}
 func (ws *WServer) sendMsg(conn *UserConn, mReply interface{}) {
 	var b bytes.Buffer
 	enc := gob.NewEncoder(&b)

@@ -1,6 +1,7 @@
 package statistics
 
 import (
+	"Open_IM/pkg/common/log"
 	"time"
 )
 
@@ -14,13 +15,13 @@ type Statistics struct {
 func (s *Statistics) output() {
 	t := time.NewTicker(time.Duration(s.SleepTime) * time.Second)
 	defer t.Stop()
-	//var sum uint64
+	var sum uint64
 	for {
-		//sum = *s.Count
+		sum = *s.Count
 		select {
 		case <-t.C:
 		}
-		//log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, *s.Count-sum, "total:", *s.Count)
+		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, *s.Count-sum, "total:", *s.Count)
 	}
 }
 
