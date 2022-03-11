@@ -97,14 +97,19 @@ func main() {
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
-	{
-		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)                  //1
-		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)                  //1
-		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt) //1
+	{ 		//1
+		conversationGroup.POST("/get_all_conversations", conversation.GetAllConversations)
+		conversationGroup.POST("/get_conversation", conversation.GetConversation)
+		conversationGroup.POST("/get_conversations", conversation.GetConversations)
+		conversationGroup.POST("/set_conversation", conversation.SetConversation)
+		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
 	}
 	apiThird.MinioInit()
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
-	r.Run(":" + strconv.Itoa(*ginPort))
+	err := r.Run(":" + strconv.Itoa(*ginPort))
+	if err != nil {
+		log.NewError("", utils.GetSelfFuncName(), "start gin failed", err.Error())
+	}
 }

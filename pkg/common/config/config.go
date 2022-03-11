@@ -22,7 +22,7 @@ var Config config
 type callBackConfig struct {
 	Enable bool `yaml:"enable"`
 	CallbackTimeOut int `yaml:"callbackTimeOut"`
-	CallbackFailedContinue bool `CallbackFailedContinue`
+	CallbackFailedContinue bool `callbackFailedContinue`
 }
 
 type config struct {
