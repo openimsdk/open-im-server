@@ -1,0 +1,119 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: msg-gateway
+
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: msg-gateway
+      workload.user.cattle.io/workloadselector: statefulSet-openim-msg-gateway
+  serviceName: msg-gateway
+  template:
+    metadata:
+      labels:
+        app: msg-gateway
+        workload.user.cattle.io/workloadselector: statefulSet-openim-msg-gateway
+    spec:
+      containers:
+        - image: "IMAGE_TAG"
+          env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          ports:
+          - name: p10400
+            protocol: TCP
+            containerPort: 10400
+          - name: p17778
+            protocol: TCP
+            containerPort: 17778
+          imagePullPolicy: Always
+          name: msg-gateway
+          stdin: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: true
+          volumeMounts:
+            - mountPath: /Open-IM-Server/config.tmp.yaml
+              name: vol2
+              readOnly: true
+              subPath: config.yaml
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 256
+            name: config.yaml
+            optional: false
+          name: vol2
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: msg-gateway
+
+spec:
+  ports:
+    - name: p10400
+      port: 10400
+      protocol: TCP
+      targetPort: 10400
+    - name: p17778
+      port: 17778
+      protocol: TCP
+      targetPort: 17778
+  selector:
+    app: msg-gateway
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: msg-gateway-remote
+
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+    - name: p17778
+      nodePort: NODE_PORT_MSG_GATEWAY
+      port: 17778
+      protocol: TCP
+      targetPort: 17778
+  selector:
+    app: msg-gateway
+  type: NodePort

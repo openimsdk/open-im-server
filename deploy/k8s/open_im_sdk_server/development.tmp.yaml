@@ -1,0 +1,96 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sdk-server
+
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: sdk-server
+      workload.user.cattle.io/workloadselector: statefulSet-openim-sdk-server
+  serviceName: sdk-server
+  template:
+    metadata:
+      labels:
+        app: sdk-server
+        workload.user.cattle.io/workloadselector: statefulSet-openim-sdk-server
+    spec:
+      containers:
+        - image: "IMAGE_TAG"
+          env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          ports:
+          - name: p30000
+            protocol: TCP
+            containerPort: 30000
+          imagePullPolicy: Always
+          name: sdk-server
+          stdin: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: true
+          volumeMounts:
+            - mountPath: /Open-IM-Server/config.tmp.yaml
+              name: vol2
+              readOnly: true
+              subPath: config.yaml
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 256
+            name: config.yaml
+            optional: false
+          name: vol2
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sdk-server-remote
+
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+    - name: p30000
+      nodePort: NODE_PORT_SDK_SERVER
+      port: 30000
+      protocol: TCP
+      targetPort: 30000
+  selector:
+    app: sdk-server
+  type: NodePort

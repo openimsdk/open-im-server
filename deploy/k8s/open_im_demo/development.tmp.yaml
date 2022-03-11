@@ -1,0 +1,96 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: demo
+
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: demo
+      workload.user.cattle.io/workloadselector: statefulSet-openim-demo
+  serviceName: demo
+  template:
+    metadata:
+      labels:
+        app: demo
+        workload.user.cattle.io/workloadselector: statefulSet-openim-demo
+    spec:
+      containers:
+        - image: "IMAGE_TAG"
+          env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          ports:
+          - name: p42233
+            protocol: TCP
+            containerPort: 42233
+          imagePullPolicy: Always
+          name: demo
+          stdin: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: true
+          volumeMounts:
+            - mountPath: /Open-IM-Server/config.tmp.yaml
+              name: vol2
+              readOnly: true
+              subPath: config.yaml
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 256
+            name: config.yaml
+            optional: false
+          name: vol2
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-remote
+
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+    - name: p42233
+      nodePort: NODE_PORT_DEMO
+      port: 42233
+      protocol: TCP
+      targetPort: 42233
+  selector:
+    app: demo
+  type: NodePort

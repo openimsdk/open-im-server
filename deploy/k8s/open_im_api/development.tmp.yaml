@@ -1,0 +1,94 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: api
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: api
+      workload.user.cattle.io/workloadselector: statefulSet-openim-api
+  serviceName: api
+  template:
+    metadata:
+      labels:
+        app: api
+        workload.user.cattle.io/workloadselector: statefulSet-openim-api
+    spec:
+      containers:
+        - image: "IMAGE_TAG"
+          env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.hostIP
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          ports:
+          - name: p10000
+            protocol: TCP
+            containerPort: 10000
+          imagePullPolicy: Always
+          name: api
+          stdin: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: true
+          volumeMounts:
+            - mountPath: /Open-IM-Server/config.tmp.yaml
+              name: vol2
+              readOnly: true
+              subPath: config.yaml
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 256
+            name: config.yaml
+            optional: false
+          name: vol2
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+    - name: p10000
+      nodePort: NODE_PORT_API
+      port: 10000
+      protocol: TCP
+      targetPort: 10000
+  selector:
+    app: api
+  type: NodePort
