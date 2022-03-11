@@ -7,6 +7,7 @@ require (
 	github.com/Shopify/toxiproxy v2.1.4+incompatible // indirect
 	github.com/alibabacloud-go/darabonba-openapi v0.1.11
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.8
+	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.1.17
 	github.com/antonfisher/nested-logrus-formatter v1.3.0
 	github.com/bwmarrin/snowflake v0.3.0
@@ -52,6 +53,7 @@ require (
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
+	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	sigs.k8s.io/yaml v1.2.0 // indirect

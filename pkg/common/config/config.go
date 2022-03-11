@@ -45,6 +45,17 @@ type config struct {
 			SecretID  string `yaml:"secretID"`
 			SecretKey string `yaml:"secretKey"`
 		}
+		Ali struct {
+			RegionID           string `yaml:"regionID"`
+			AccessKeyID        string `yaml:"accessKeyID"`
+			AccessKeySecret    string `yaml:"accessKeySecret"`
+			StsEndpoint        string `yaml:"stsEndpoint"`
+			OssEndpoint        string `yaml:"ossEndpoint"`
+			Bucket             string `yaml:"bucket"`
+			FinalHost          string `yaml:"finalHost"`
+			StsDurationSeconds int64  `yaml:"stsDurationSeconds"`
+			OssRoleArn         string `yaml:"OssRoleArn"`
+		}
 		Minio struct {
 			Bucket          string `yaml:"bucket"`
 			Location        string `yaml:"location"`
