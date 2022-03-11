@@ -20,8 +20,8 @@ var (
 var Config config
 
 type callBackConfig struct {
-	Enable bool `yaml:"enable"`
-	CallbackTimeOut int `yaml:"callbackTimeOut"`
+	Enable                 bool `yaml:"enable"`
+	CallbackTimeOut        int  `yaml:"callbackTimeOut"`
 	CallbackFailedContinue bool `CallbackFailedContinue`
 }
 
@@ -31,7 +31,7 @@ type config struct {
 	Api           struct {
 		GinPort []int `yaml:"openImApiPort"`
 	}
-	CmsApi        struct{
+	CmsApi struct {
 		GinPort []int `yaml:"openImCmsApiPort"`
 	}
 	Sdk struct {
@@ -66,6 +66,7 @@ type config struct {
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
 	}
 	Mongo struct {
+		DBUri               string   `yaml:"dbUri"` // 当dbUri值不为空则直接使用该值
 		DBAddress           []string `yaml:"dbAddress"`
 		DBDirect            bool     `yaml:"dbDirect"`
 		DBTimeout           int      `yaml:"dbTimeout"`
@@ -182,12 +183,12 @@ type config struct {
 	}
 
 	Callback struct {
-		CallbackUrl string                         `yaml:"callbackUrl"`
+		CallbackUrl                 string         `yaml:"callbackUrl"`
 		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackbeforeSendSingleMsg"`
-		CallbackAfterSendSingleMsg callBackConfig  `yaml:"callbackAfterSendSingleMsg"`
-		CallbackBeforeSendGroupMsg callBackConfig  `yaml:"callbackBeforeSendGroupMsg"`
-		CallbackAfterSendGroupMsg callBackConfig   `yaml:"callbackAfterSendGroupMsg"`
-		CallbackWordFilter callBackConfig          `yaml:"callbackWordFilter"`
+		CallbackAfterSendSingleMsg  callBackConfig `yaml:"callbackAfterSendSingleMsg"`
+		CallbackBeforeSendGroupMsg  callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
+		CallbackAfterSendGroupMsg   callBackConfig `yaml:"callbackAfterSendGroupMsg"`
+		CallbackWordFilter          callBackConfig `yaml:"callbackWordFilter"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
