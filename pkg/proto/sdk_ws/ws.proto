@@ -350,3 +350,97 @@ message ResponsePagination {
   int32 CurrentPage = 5;
   int32 ShowNumber = 6;
 }
+
+
+///////////////////signal//////////////
+message SignalReq {
+  oneof payload {
+      SignalInviteReq invite = 1;
+      SignalInviteInGroupReq inviteInGroup= 2;
+      SignalCancelReq  cancel = 3;
+      SignalAcceptReq accept = 4;
+      SignalHungUpReq hungUp = 5;
+      SignalRejectReq reject = 6;
+  }
+}
+
+message SignalResp {
+  oneof payload {
+    SignalInviteReply invite = 1;
+    SignalInviteInGroupReply inviteInGroup= 2;
+    SignalCancelReply  cancel = 3;
+    SignalAcceptReply accept = 4;
+    SignalHungUpReply hungUp = 5;
+    SignalRejectReply reject = 6;
+  }
+}
+
+message InvitationInfo  {
+    string inviterUserID = 1;
+    repeated string inviteeUserIDList = 2;
+    string customData = 3;
+    string  groupID = 4;
+}
+
+
+message SignalInviteReq {
+    InvitationInfo invitation = 1;
+}
+
+message SignalInviteReply {
+  string token = 1;
+  string roomID = 2;
+  string liveURL = 3;
+}
+
+message SignalInviteInGroupReq {
+  InvitationInfo invitation = 1;
+}
+
+message SignalInviteInGroupReply {
+  string token = 1;
+  string roomID = 2;
+  string liveURL = 3;
+}
+
+message SignalCancelReq {
+  string inviterUserID = 1;
+  SignalInviteReq invitation = 2;
+}
+
+message SignalCancelReply {
+
+}
+
+message SignalAcceptReq {
+  string inviteeUserID = 1;
+  SignalInviteReq invitation = 2;
+}
+
+message SignalAcceptReply {
+
+}
+
+message SignalHungUpReq {
+  string UserID = 1;
+  SignalInviteReq invitation = 2;
+}
+
+message SignalHungUpReply {
+
+}
+
+
+message SignalRejectReq {
+  string inviteeUserID = 1;
+  SignalInviteReq invitation = 2;
+}
+
+message SignalRejectReply {
+
+}
+
+
+
+
+
