@@ -8,7 +8,7 @@ etcd:
   etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
+  dbMysqlAddress: [ 43.128.5.63:13306 ] #mysql地址 目前仅支持单机，默认即可
   dbMysqlUserName: root #mysql用户名，建议修改
   dbMysqlPassword: openIM # mysql密码，建议修改
   dbMysqlDatabaseName: openIM_v2 #默认即可
@@ -19,7 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:37017 ] #redis地址 目前仅支持单机，默认即可
+  dbAddress: [ 43.128.5.63:37017 ] #redis地址 目前仅支持单机，默认即可
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM  #mongo db 默认即可
@@ -30,7 +30,7 @@ mongo:
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
 
 redis:
-  dbAddress: 127.0.0.1:16379 #redis地址 目前仅支持单机，默认即可
+  dbAddress: 43.128.5.63:16379 #redis地址 目前仅支持单机，默认即可
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -133,7 +133,7 @@ log:
   rotationTime: 24
   remainRotationCount: 3 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
-  remainLogLevel: 4
+  remainLogLevel: 6
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
@@ -200,21 +200,21 @@ callback:
   callbackbeforeSendSingleMsg:
     enable: false # 回调是否启用
     callbackTimeOut: 2 # 回调超时时间
-    CallbackFailedContinue: true # 回调超时是否继续执行代码
+    callbackFailedContinue: true # 回调超时是否继续执行代码
   callbackAfterSendSingleMsg:
     enable: false
     callbackTimeOut: 2
   callbackBeforeSendGroupMsg:
     enable: false
     callbackTimeOut: 2
-    CallbackFailedContinue: true
+    callbackFailedContinue: true
   callbackAfterSendGroupMsg:
     enable: false
     callbackTimeOut: 2
   callbackWordFilter:
     enable: false
     callbackTimeOut: 2
-    CallbackFailedContinue: true
+    callbackFailedContinue: true
 
 
 notification:

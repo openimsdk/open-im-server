@@ -2,6 +2,8 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
 	"fmt"
 )
 
@@ -30,7 +32,6 @@ func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog,
 	if chatLog.SendTime.Unix() > 0 {
 		db = db.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
 	}
-
 	err = db.Find(&chatLogs).Error
 	return chatLogs, err
 }
@@ -58,6 +59,7 @@ func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
 		db = db.Where("recv_id = ?", chatLog.RecvID)
 	}
 	if chatLog.SendTime.Unix() > 0 {
+		log.NewDebug("", utils.GetSelfFuncName(), chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
 		db = db.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
 	}
 
