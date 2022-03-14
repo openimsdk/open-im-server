@@ -380,21 +380,24 @@ message InvitationInfo  {
     repeated string inviteeUserIDList = 2;
     string customData = 3;
     string  groupID = 4;
+    string roomID = 5;
+    int32 timeout = 6;
 }
 
 
 message SignalInviteReq {
     InvitationInfo invitation = 1;
+    OfflinePushInfo offlinePushInfo  = 2;
 }
 
 message SignalInviteReply {
   string token = 1;
-  string roomID = 2;
   string liveURL = 3;
 }
 
 message SignalInviteInGroupReq {
   InvitationInfo invitation = 1;
+  OfflinePushInfo offlinePushInfo  = 2;
 }
 
 message SignalInviteInGroupReply {
