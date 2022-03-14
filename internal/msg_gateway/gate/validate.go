@@ -195,16 +195,16 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 	case *open_im_sdk.SignalReq_Cancel:
 		cancel := open_im_sdk.SignalResp_Cancel{&open_im_sdk.SignalCancelReply{}}
 		resp.Payload = &cancel
-		msg.OfflinePushInfo = payload.Cancel.Invitation.OfflinePushInfo
-		msg.SendID = payload.Cancel.Invitation.Invitation.InviterUserID
-		msg.SenderPlatformID = payload.Cancel.Invitation.Invitation.PlatformID
-		msg.SessionType = payload.Cancel.Invitation.Invitation.SessionType
-		if len(payload.Cancel.Invitation.Invitation.InviteeUserIDList) > 0 {
-			switch payload.Cancel.Invitation.Invitation.SessionType {
+		msg.OfflinePushInfo = payload.Cancel.OfflinePushInfo
+		msg.SendID = payload.Cancel.Invitation.InviterUserID
+		msg.SenderPlatformID = payload.Cancel.Invitation.PlatformID
+		msg.SessionType = payload.Cancel.Invitation.SessionType
+		if len(payload.Cancel.Invitation.InviteeUserIDList) > 0 {
+			switch payload.Cancel.Invitation.SessionType {
 			case constant.SingleChatType:
-				msg.RecvID = payload.Cancel.Invitation.Invitation.InviteeUserIDList[0]
+				msg.RecvID = payload.Cancel.Invitation.InviteeUserIDList[0]
 			case constant.GroupChatType:
-				msg.GroupID = payload.Cancel.Invitation.Invitation.GroupID
+				msg.GroupID = payload.Cancel.Invitation.GroupID
 			}
 		} else {
 			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
@@ -212,26 +212,26 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 		msg.ClientMsgID = utils.GetMsgID(payload.Cancel.InviterUserID)
 		return true, 0, "", &resp, &msg
 	case *open_im_sdk.SignalReq_Accept:
-		token, err2 := media.GetJoinToken(payload.Accept.Invitation.Invitation.RoomID, payload.Accept.InviteeUserID)
+		token, err2 := media.GetJoinToken(payload.Accept.Invitation.RoomID, payload.Accept.InviteeUserID)
 		if err2 != nil {
 			return false, 201, err2.Error(), nil, nil
 		}
 		cancel := open_im_sdk.SignalResp_Accept{&open_im_sdk.SignalAcceptReply{
 			Token:   token,
 			LiveURL: media.GetUrl(),
-			RoomID:  payload.Accept.Invitation.Invitation.RoomID,
+			RoomID:  payload.Accept.Invitation.RoomID,
 		}}
 		resp.Payload = &cancel
-		msg.OfflinePushInfo = payload.Accept.Invitation.OfflinePushInfo
+		msg.OfflinePushInfo = payload.Accept.OfflinePushInfo
 		msg.SendID = payload.Accept.InviteeUserID
-		msg.SenderPlatformID = payload.Accept.Invitation.Invitation.PlatformID
-		msg.SessionType = payload.Accept.Invitation.Invitation.SessionType
-		if len(payload.Accept.Invitation.Invitation.InviteeUserIDList) > 0 {
-			switch payload.Accept.Invitation.Invitation.SessionType {
+		msg.SenderPlatformID = payload.Accept.Invitation.PlatformID
+		msg.SessionType = payload.Accept.Invitation.SessionType
+		if len(payload.Accept.Invitation.InviteeUserIDList) > 0 {
+			switch payload.Accept.Invitation.SessionType {
 			case constant.SingleChatType:
-				msg.RecvID = payload.Accept.Invitation.Invitation.InviterUserID
+				msg.RecvID = payload.Accept.Invitation.InviterUserID
 			case constant.GroupChatType:
-				msg.GroupID = payload.Accept.Invitation.Invitation.GroupID
+				msg.GroupID = payload.Accept.Invitation.GroupID
 			}
 		} else {
 			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
@@ -242,16 +242,16 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 	case *open_im_sdk.SignalReq_Reject:
 		cancel := open_im_sdk.SignalResp_Reject{&open_im_sdk.SignalRejectReply{}}
 		resp.Payload = &cancel
-		msg.OfflinePushInfo = payload.Reject.Invitation.OfflinePushInfo
+		msg.OfflinePushInfo = payload.Reject.OfflinePushInfo
 		msg.SendID = payload.Reject.InviteeUserID
-		msg.SenderPlatformID = payload.Reject.Invitation.Invitation.PlatformID
-		msg.SessionType = payload.Reject.Invitation.Invitation.SessionType
-		if len(payload.Reject.Invitation.Invitation.InviteeUserIDList) > 0 {
-			switch payload.Reject.Invitation.Invitation.SessionType {
+		msg.SenderPlatformID = payload.Reject.Invitation.PlatformID
+		msg.SessionType = payload.Reject.Invitation.SessionType
+		if len(payload.Reject.Invitation.InviteeUserIDList) > 0 {
+			switch payload.Reject.Invitation.SessionType {
 			case constant.SingleChatType:
-				msg.RecvID = payload.Reject.Invitation.Invitation.InviterUserID
+				msg.RecvID = payload.Reject.Invitation.InviterUserID
 			case constant.GroupChatType:
-				msg.GroupID = payload.Reject.Invitation.Invitation.GroupID
+				msg.GroupID = payload.Reject.Invitation.GroupID
 			}
 		} else {
 			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
