@@ -77,7 +77,11 @@ const (
 	MemberKickedNotification             = 1508
 	MemberInvitedNotification            = 1509
 	MemberEnterNotification              = 1510
-	NotificationEnd                      = 2000
+
+	SignalingNotificationBegin = 1600
+	SignalingNotification      = 1601
+	SignalingNotificationEnd   = 1699
+	NotificationEnd            = 2000
 
 	//MsgFrom
 	UserMsgType = 100
