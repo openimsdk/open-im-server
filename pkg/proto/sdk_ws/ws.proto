@@ -404,7 +404,8 @@ message SignalInviteInGroupReply {
 
 message SignalCancelReq {
   string inviterUserID = 1;
-  SignalInviteReq invitation = 2;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
 }
 
 message SignalCancelReply {
@@ -413,7 +414,8 @@ message SignalCancelReply {
 
 message SignalAcceptReq {
   string inviteeUserID = 1;
-  SignalInviteReq invitation = 2;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
 }
 
 message SignalAcceptReply {
@@ -424,7 +426,8 @@ message SignalAcceptReply {
 
 message SignalHungUpReq {
   string UserID = 1;
-  SignalInviteReq invitation = 2;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
 }
 
 message SignalHungUpReply {
@@ -434,7 +437,8 @@ message SignalHungUpReply {
 
 message SignalRejectReq {
   string inviteeUserID = 1;
-  SignalInviteReq invitation = 2;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
 }
 
 message SignalRejectReply {
