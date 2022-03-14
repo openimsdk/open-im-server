@@ -1,7 +1,5 @@
 package open_im_media
 
-import "github.com/livekit/protocol/livekit"
-
 const (
 	MediaAddress = "ws://43.128.5.63:7880"
 	ApiKey       = "APIGPW3gnFTzqHH"
@@ -42,7 +40,7 @@ func init() {
 	//roomClient = lksdk.NewRoomServiceClient(MediaAddress, ApiKey, ApiSecret)
 }
 
-func (m *Media) CreateRoom(roomName string) (*livekit.Room, error) {
+func (m *Media) CreateRoom(roomName string) (error, error) {
 	return nil, nil
 	//return roomClient.CreateRoom(context.Background(), &livekit.CreateRoomRequest{
 	//	Name:         roomName,
