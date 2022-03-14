@@ -383,6 +383,8 @@ message InvitationInfo  {
     string roomID = 5;
     int32 timeout = 6;
     string mediaType = 7;
+     int32 PlatformID = 8;
+
 }
 
 
