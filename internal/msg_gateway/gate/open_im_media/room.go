@@ -1,8 +1,6 @@
 package open_im_media
 
-import (
-	"github.com/livekit/protocol/livekit"
-)
+import "github.com/livekit/protocol/livekit"
 
 const (
 	MediaAddress = "ws://43.128.5.63:7880"
