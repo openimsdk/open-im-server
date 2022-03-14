@@ -60,4 +60,4 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.34.0
+replace google.golang.org/grpc => google.golang.org/grpc v1.32.0
