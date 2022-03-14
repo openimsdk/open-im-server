@@ -11,8 +11,8 @@ import (
 
 const (
 	MediaAddress = "ws://43.128.5.63:7880"
-	ApiKey       = ""
-	ApiSecret    = ""
+	ApiKey       = "APIGPW3gnFTzqHH"
+	ApiSecret    = "23ztfSqsfQ8hKkHzHTl3Z4bvaxro0snjk5jwbp5p6Q3"
 )
 
 var roomClient *lksdk.RoomServiceClient
