@@ -196,18 +196,17 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 }
 
 func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
-	sendMsgCount++
 	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID)
 	nReply := new(pbChat.SendMsgResp)
-	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
-	if isPass {
-		data := pData.(sdk_ws.MsgData)
+	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
+	isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq))
+	if isPass && isPass2 {
 		pbData := pbChat.SendMsgReq{
 			Token:       m.Token,
 			OperationID: m.OperationID,
-			MsgData:     &data,
+			MsgData:     msgData,
 		}
-		log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data)
+		log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		client := pbChat.NewChatClient(etcdConn)
 		reply, err := client.SendMsg(context.Background(), &pbData)
@@ -215,32 +214,31 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 			log.NewError(pbData.OperationID, "rpc sendMsg err", err.Error())
 			nReply.ErrCode = 200
 			nReply.ErrMsg = err.Error()
-			ws.sendSignalMsgResp(conn, m, nReply)
+			ws.sendSignalMsgResp(conn, 200, err.Error(), m, signalResp)
 		} else {
 			log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
-			ws.sendSignalMsgResp(conn, m, reply)
+			ws.sendSignalMsgResp(conn, 0, "", m, signalResp)
 		}
 
 	} else {
-		nReply.ErrCode = errCode
-		nReply.ErrMsg = errMsg
-		ws.sendSignalMsgResp(conn, m, nReply)
+		if isPass {
+			log.NewError(m.OperationID, isPass2, errCode2, errMsg2, *signalResp, *msgData)
+			ws.sendSignalMsgResp(conn, errCode2, errMsg2, m, signalResp)
+		} else {
+			ws.sendSignalMsgResp(conn, errCode, errMsg, m, signalResp)
+		}
 	}
 
 }
-func (ws *WServer) sendSignalMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
+func (ws *WServer) sendSignalMsgResp(conn *UserConn, errCode int32, errMsg string, m *Req, pb *sdk_ws.SignalResp) {
 	// := make(map[string]interface{})
 
-	var mReplyData sdk_ws.UserSendMsgResp
-	mReplyData.ClientMsgID = pb.GetClientMsgID()
-	mReplyData.ServerMsgID = pb.GetServerMsgID()
-	mReplyData.SendTime = pb.GetSendTime()
-	b, _ := proto.Marshal(&mReplyData)
+	b, _ := proto.Marshal(pb)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
-		ErrCode:       pb.GetErrCode(),
-		ErrMsg:        pb.GetErrMsg(),
+		ErrCode:       errCode,
+		ErrMsg:        errMsg,
 		OperationID:   m.OperationID,
 		Data:          b,
 	}
