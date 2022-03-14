@@ -1,0 +1,26 @@
+syntax = "proto3";
+option go_package = "./rtc;rtc";
+package rtc;
+
+message CommonResp{
+  int32  errCode = 1;
+  string errMsg = 2;
+}
+
+message GetJoinTokenReq{
+  string apiKey = 1;
+  string apiSecret = 2;
+  string room = 3;
+  string identity = 4;
+  string operationID = 5;
+}
+
+message GetJoinTokenResp{
+  CommonResp CommonResp = 1;
+  string jwt = 2;
+}
+
+service RtcService {
+  rpc GetJoinToken(GetJoinTokenReq) returns(GetJoinTokenResp);
+}
+
