@@ -222,7 +222,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 
 	} else {
 		if isPass {
-			log.NewError(m.OperationID, isPass2, errCode2, errMsg2, *signalResp, *msgData)
+			log.NewError(m.OperationID, isPass2, errCode2, errMsg2)
 			ws.sendSignalMsgResp(conn, errCode2, errMsg2, m, signalResp)
 		} else {
 			ws.sendSignalMsgResp(conn, errCode, errMsg, m, signalResp)
