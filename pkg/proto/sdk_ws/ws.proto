@@ -376,8 +376,6 @@ message InvitationInfo  {
     string mediaType = 7;
      int32 PlatformID = 8;
     int32   sessionType = 9;
-
-
 }
 
 
@@ -444,5 +442,10 @@ message SignalRejectReq {
 message SignalRejectReply {
 
 }
+
+
+
+
+
 
 
