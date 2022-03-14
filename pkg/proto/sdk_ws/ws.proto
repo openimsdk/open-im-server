@@ -380,8 +380,9 @@ message InvitationInfo  {
 
 
 message SignalInviteReq {
-    InvitationInfo invitation = 1;
-    OfflinePushInfo offlinePushInfo  = 2;
+    string opUserID = 1;
+    InvitationInfo invitation = 2;
+    OfflinePushInfo offlinePushInfo  = 3;
 }
 
 message SignalInviteReply {
@@ -390,8 +391,9 @@ message SignalInviteReply {
 }
 
 message SignalInviteInGroupReq {
-  InvitationInfo invitation = 1;
-  OfflinePushInfo offlinePushInfo  = 2;
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
 }
 
 message SignalInviteInGroupReply {
@@ -401,7 +403,7 @@ message SignalInviteInGroupReply {
 }
 
 message SignalCancelReq {
-  string inviterUserID = 1;
+  string opUserID = 1;
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
 }
@@ -411,7 +413,7 @@ message SignalCancelReply {
 }
 
 message SignalAcceptReq {
-  string inviteeUserID = 1;
+  string opUserID = 1;
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
 }
@@ -423,7 +425,7 @@ message SignalAcceptReply {
 }
 
 message SignalHungUpReq {
-  string UserID = 1;
+  string opUserID = 1;
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
 }
