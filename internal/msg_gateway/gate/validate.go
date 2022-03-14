@@ -84,7 +84,7 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 			return false, 204, err.Error(), nil
 
 		}
-		return true, 0, "", data
+		return true, 0, "", &data
 	case constant.WSPullMsgBySeqList:
 		data := open_im_sdk.PullMessageBySeqListReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
