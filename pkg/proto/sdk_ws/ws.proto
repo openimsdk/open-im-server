@@ -384,6 +384,8 @@ message InvitationInfo  {
     int32 timeout = 6;
     string mediaType = 7;
      int32 PlatformID = 8;
+    int32   sessionType = 9;
+
 
 }
 
