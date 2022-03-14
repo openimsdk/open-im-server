@@ -382,6 +382,7 @@ message InvitationInfo  {
     string  groupID = 4;
     string roomID = 5;
     int32 timeout = 6;
+    string mediaType = 7;
 }
 
 
