@@ -48,8 +48,8 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20210325043845-84a0811633ca
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
-	go.etcd.io/etcd v3.3.27+incompatible
-	//go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698
+	//go.etcd.io/etcd v3.3.27+incompatible
+	go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698
 	go.mongodb.org/mongo-driver v1.8.3
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
