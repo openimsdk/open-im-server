@@ -93,7 +93,7 @@ services:
     command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
   open_im_server:
-    image: openim/open_im_server:v2.0.2
+    image: openim/open_im_server:v2.0.3
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
