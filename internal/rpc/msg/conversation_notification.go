@@ -44,9 +44,8 @@ func conversationNotification(contentType int32, m proto.Message, operationID, u
 	Notification(&n)
 }
 
-// 客户端调用设置opt接口后调用
-func SetReceiveMessageOptNotification(operationID, opUserID, userID string) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), "operation user: ", opUserID, "operation id: ", userID)
+func SetConversationNotification(operationID, userID string) {
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "userID: ", userID)
 	conversationUpdateTips := open_im_sdk.ConversationUpdateTips{
 		UserID: userID,
 	}

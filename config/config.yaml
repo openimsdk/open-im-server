@@ -133,7 +133,7 @@ log:
   rotationTime: 24
   remainRotationCount: 3 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
-  remainLogLevel: 4
+  remainLogLevel: 6
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
@@ -200,21 +200,21 @@ callback:
   callbackbeforeSendSingleMsg:
     enable: false # 回调是否启用
     callbackTimeOut: 2 # 回调超时时间
-    CallbackFailedContinue: true # 回调超时是否继续执行代码
+    callbackFailedContinue: true # 回调超时是否继续执行代码
   callbackAfterSendSingleMsg:
     enable: false
     callbackTimeOut: 2
   callbackBeforeSendGroupMsg:
     enable: false
     callbackTimeOut: 2
-    CallbackFailedContinue: true
+    callbackFailedContinue: true
   callbackAfterSendGroupMsg:
     enable: false
     callbackTimeOut: 2
   callbackWordFilter:
     enable: false
     callbackTimeOut: 2
-    CallbackFailedContinue: true
+    callbackFailedContinue: true
 
 
 notification:

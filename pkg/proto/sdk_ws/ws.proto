@@ -256,15 +256,6 @@ message MemberEnterTips{
 }
 
 
-
-
-
-
-
-
-
-
-
 //////////////////////friend/////////////////////
 //message FriendInfo{
 //  UserInfo OwnerUser = 1;

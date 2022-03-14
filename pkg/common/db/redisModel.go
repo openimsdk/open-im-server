@@ -111,12 +111,14 @@ func (d *DataBases) DeleteTokenByUidPid(userID string, platformID int32, fields 
 	_, err := d.Exec("HDEL", key, redis.Args{}.Add().AddFlat(fields)...)
 	return err
 }
-func (d *DataBases) SetSingleConversationMsgOpt(userID, conversationID string, opt int) error {
+
+func (d *DataBases) SetSingleConversationRecvMsgOpt(userID, conversationID string, opt int32) error {
 	key := conversationReceiveMessageOpt + userID
 	_, err := d.Exec("HSet", key, conversationID, opt)
 	return err
 }
-func (d *DataBases) GetSingleConversationMsgOpt(userID, conversationID string) (int, error) {
+
+func (d *DataBases) GetSingleConversationRecvMsgOpt(userID, conversationID string) (int, error) {
 	key := conversationReceiveMessageOpt + userID
 	return redis.Int(d.Exec("HGet", key, conversationID))
 }
