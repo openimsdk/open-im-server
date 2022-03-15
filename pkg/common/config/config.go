@@ -20,8 +20,8 @@ var (
 var Config config
 
 type callBackConfig struct {
-	Enable bool `yaml:"enable"`
-	CallbackTimeOut int `yaml:"callbackTimeOut"`
+	Enable                 bool `yaml:"enable"`
+	CallbackTimeOut        int  `yaml:"callbackTimeOut"`
 	CallbackFailedContinue bool `callbackFailedContinue`
 }
 
@@ -31,7 +31,7 @@ type config struct {
 	Api           struct {
 		GinPort []int `yaml:"openImApiPort"`
 	}
-	CmsApi        struct{
+	CmsApi struct {
 		GinPort []int `yaml:"openImCmsApiPort"`
 	}
 	Sdk struct {
@@ -173,8 +173,8 @@ type config struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
 	}
-	MessageJudge struct {
-		IsJudgeFriend bool `yaml:"isJudgeFriend"`
+	MessageVerify struct {
+		FriendVerify bool `yaml:"friendVerify"`
 	}
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
@@ -182,12 +182,12 @@ type config struct {
 	}
 
 	Callback struct {
-		CallbackUrl string                         `yaml:"callbackUrl"`
+		CallbackUrl                 string         `yaml:"callbackUrl"`
 		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackbeforeSendSingleMsg"`
-		CallbackAfterSendSingleMsg callBackConfig  `yaml:"callbackAfterSendSingleMsg"`
-		CallbackBeforeSendGroupMsg callBackConfig  `yaml:"callbackBeforeSendGroupMsg"`
-		CallbackAfterSendGroupMsg callBackConfig   `yaml:"callbackAfterSendGroupMsg"`
-		CallbackWordFilter callBackConfig          `yaml:"callbackWordFilter"`
+		CallbackAfterSendSingleMsg  callBackConfig `yaml:"callbackAfterSendSingleMsg"`
+		CallbackBeforeSendGroupMsg  callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
+		CallbackAfterSendGroupMsg   callBackConfig `yaml:"callbackAfterSendGroupMsg"`
+		CallbackWordFilter          callBackConfig `yaml:"callbackWordFilter"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
