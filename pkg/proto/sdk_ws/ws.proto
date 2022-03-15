@@ -451,4 +451,16 @@ message SignalRejectReply {
 
 
 
+message DelMsgListReq{
+    string opUserID = 1;
+    string userID = 2;
+    repeated uint32 seqList = 3;
+    string operationID = 4;
+}
+
+message DelMsgListResp{
+ int32 errCode = 1;
+  string errMsg = 2;
+}
+
 
