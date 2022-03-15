@@ -200,7 +200,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
 	log.NewInfo(m.OperationID, "args is ", pData.(*sdk_ws.SignalReq))
-	isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq))
+	isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
 	if isPass && isPass2 {
 		pbData := pbChat.SendMsgReq{
 			Token:       m.Token,

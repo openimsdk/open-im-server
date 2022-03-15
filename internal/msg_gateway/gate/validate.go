@@ -117,7 +117,7 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 
 }
 
-func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool, errCode int32, errMsg string, r *open_im_sdk.SignalResp, msgData *open_im_sdk.MsgData) {
+func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID string) (isPass bool, errCode int32, errMsg string, r *open_im_sdk.SignalResp, msgData *open_im_sdk.MsgData) {
 	var msg open_im_sdk.MsgData
 	var resp open_im_sdk.SignalResp
 	media := open_im_media.NewMedia()
@@ -139,12 +139,13 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 	msg.Options = options
 	switch payload := s.Payload.(type) {
 	case *open_im_sdk.SignalReq_Invite:
-		_, err := media.CreateRoom(payload.Invite.Invitation.RoomID)
-		if err != nil {
-			return false, 201, err.Error(), nil, nil
+		//_, err := media.CreateRoom(payload.Invite.Invitation.RoomID)
+		//if err != nil {
+		//	return false, 201, err.Error(), nil, nil
+		//
+		//}
 
-		}
-		token, err2 := media.GetJoinToken(payload.Invite.Invitation.RoomID, payload.Invite.Invitation.InviterUserID)
+		token, err2 := media.GetJoinToken(payload.Invite.Invitation.RoomID, payload.Invite.Invitation.InviterUserID, operationID)
 		if err2 != nil {
 			return false, 201, err2.Error(), nil, nil
 		}
@@ -166,12 +167,12 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 		msg.ClientMsgID = utils.GetMsgID(payload.Invite.Invitation.InviterUserID)
 		return true, 0, "", &resp, &msg
 	case *open_im_sdk.SignalReq_InviteInGroup:
-		_, err := media.CreateRoom(payload.InviteInGroup.Invitation.RoomID)
-		if err != nil {
-			return false, 201, err.Error(), nil, nil
-
-		}
-		token, err2 := media.GetJoinToken(payload.InviteInGroup.Invitation.RoomID, payload.InviteInGroup.Invitation.InviterUserID)
+		//_, err := media.CreateRoom(payload.InviteInGroup.Invitation.RoomID)
+		//if err != nil {
+		//	return false, 201, err.Error(), nil, nil
+		//
+		//}
+		token, err2 := media.GetJoinToken(payload.InviteInGroup.Invitation.RoomID, payload.InviteInGroup.Invitation.InviterUserID, operationID)
 		if err2 != nil {
 			return false, 201, err2.Error(), nil, nil
 		}
@@ -213,7 +214,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 		msg.ClientMsgID = utils.GetMsgID(payload.Cancel.OpUserID)
 		return true, 0, "", &resp, &msg
 	case *open_im_sdk.SignalReq_Accept:
-		token, err2 := media.GetJoinToken(payload.Accept.Invitation.RoomID, payload.Accept.OpUserID)
+		token, err2 := media.GetJoinToken(payload.Accept.Invitation.RoomID, payload.Accept.OpUserID, operationID)
 		if err2 != nil {
 			return false, 201, err2.Error(), nil, nil
 		}
