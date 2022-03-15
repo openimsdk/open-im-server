@@ -150,6 +150,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 		}
 		invite := open_im_sdk.SignalResp_Invite{&open_im_sdk.SignalInviteReply{
 			Token:   token,
+			RoomID:  payload.Invite.Invitation.RoomID,
 			LiveURL: media.GetUrl(),
 		}}
 		resp.Payload = &invite
