@@ -387,6 +387,7 @@ message SignalInviteReq {
 
 message SignalInviteReply {
   string token = 1;
+  string roomID = 2;
   string liveURL = 3;
 }
 
