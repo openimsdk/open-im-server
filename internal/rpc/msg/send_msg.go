@@ -107,7 +107,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
 	rpc.encapsulateMsgData(pb.MsgData)
 	log.Info("", "this is a test MsgData ", pb.MsgData)
-	msgToMQ := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID}
+	msgToMQ := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: pb.MsgData}
 	//options := utils.JsonStringToMap(pbData.Options)
 	isHistory := utils.GetSwitchFromOptions(pb.MsgData.Options, constant.IsHistory)
 	mReq := MsgCallBackReq{
