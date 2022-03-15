@@ -437,7 +437,7 @@ message SignalHungUpReply {
 
 
 message SignalRejectReq {
-  string inviteeUserID = 1;
+  string opUserID = 1;
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
 }
