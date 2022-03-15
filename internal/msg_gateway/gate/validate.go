@@ -217,12 +217,12 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 		if err2 != nil {
 			return false, 201, err2.Error(), nil, nil
 		}
-		cancel := open_im_sdk.SignalResp_Accept{&open_im_sdk.SignalAcceptReply{
+		accept := open_im_sdk.SignalResp_Accept{&open_im_sdk.SignalAcceptReply{
 			Token:   token,
 			LiveURL: media.GetUrl(),
 			RoomID:  payload.Accept.Invitation.RoomID,
 		}}
-		resp.Payload = &cancel
+		resp.Payload = &accept
 		msg.OfflinePushInfo = payload.Accept.OfflinePushInfo
 		msg.SendID = payload.Accept.OpUserID
 		msg.SenderPlatformID = payload.Accept.Invitation.PlatformID
@@ -241,10 +241,10 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 		return true, 0, "", &resp, &msg
 	case *open_im_sdk.SignalReq_HungUp:
 	case *open_im_sdk.SignalReq_Reject:
-		cancel := open_im_sdk.SignalResp_Reject{&open_im_sdk.SignalRejectReply{}}
-		resp.Payload = &cancel
+		reject := open_im_sdk.SignalResp_Reject{&open_im_sdk.SignalRejectReply{}}
+		resp.Payload = &reject
 		msg.OfflinePushInfo = payload.Reject.OfflinePushInfo
-		msg.SendID = payload.Reject.InviteeUserID
+		msg.SendID = payload.Reject.OpUserID
 		msg.SenderPlatformID = payload.Reject.Invitation.PlatformID
 		msg.SessionType = payload.Reject.Invitation.SessionType
 		if len(payload.Reject.Invitation.InviteeUserIDList) > 0 {
@@ -257,7 +257,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq) (isPass bool,
 		} else {
 			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
 		}
-		msg.ClientMsgID = utils.GetMsgID(payload.Reject.InviteeUserID)
+		msg.ClientMsgID = utils.GetMsgID(payload.Reject.OpUserID)
 		return true, 0, "", &resp, &msg
 	}
 	return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
