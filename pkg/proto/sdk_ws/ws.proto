@@ -447,10 +447,6 @@ message SignalRejectReply {
 }
 
 
-
-
-
-
 message DelMsgListReq{
     string opUserID = 1;
     string userID = 2;
