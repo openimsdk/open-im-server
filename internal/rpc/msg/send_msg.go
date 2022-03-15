@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
+	rpc "Open_IM/pkg/proto/friend"
 	pbGroup "Open_IM/pkg/proto/group"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -41,16 +42,43 @@ type MsgCallBackResp struct {
 	}
 }
 
-func userRelationshipVerification(data *pbChat.SendMsgReq) {
-
-	//etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
-	//client := pbChat.NewChatClient(etcdConn)
-	//reply, err := client.SendMsg(context.Background(), &req)
-	//if err != nil {
-	//	log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String(), err.Error())
-	//} else if reply.ErrCode != 0 {
-	//	log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String())
-	//}
+func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string) {
+	if data.MsgData.SessionType == constant.GroupChatType {
+		return true, 0, ""
+	}
+	req := &rpc.IsInBlackListReq{CommID: &rpc.CommID{}}
+	req.CommID.OperationID = data.OperationID
+	req.CommID.OpUserID = data.MsgData.RecvID
+	req.CommID.FromUserID = data.MsgData.RecvID
+	req.CommID.ToUserID = data.MsgData.SendID
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	client := rpc.NewFriendClient(etcdConn)
+	reply, err := client.IsInBlackList(context.Background(), req)
+	if err != nil {
+		log.NewDebug(data.OperationID, "IsInBlackListReq rpc failed, ", req.String(), err.Error())
+		return false, 600, err.Error()
+	} else if reply.Response == false {
+		log.NewDebug(data.OperationID, "IsInBlackListReq  ", req.String())
+		return reply.Response, 600, "in black list"
+	}
+	if config.Config.MessageVerify.FriendVerify {
+		friendReq := &rpc.IsFriendReq{CommID: &rpc.CommID{}}
+		friendReq.CommID.OperationID = data.OperationID
+		friendReq.CommID.OpUserID = data.MsgData.RecvID
+		friendReq.CommID.FromUserID = data.MsgData.RecvID
+		friendReq.CommID.ToUserID = data.MsgData.SendID
+		friendReply, err := client.IsFriend(context.Background(), friendReq)
+		if err != nil {
+			log.NewDebug(data.OperationID, "IsFriendReq rpc failed, ", req.String(), err.Error())
+			return false, 601, err.Error()
+		} else if friendReply.Response == false {
+			log.NewDebug(data.OperationID, "not friend  ", req.String())
+			return friendReply.Response, 601, "not friend"
+		}
+	} else {
+		return true, 0, ""
+	}
+	return true, 0, ""
 }
 func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
@@ -102,7 +130,10 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
 	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
-	userRelationshipVerification(pb)
+	flag, errCode, errMsg := userRelationshipVerification(pb)
+	if !flag {
+		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
+	}
 	//if !utils.VerifyToken(pb.Token, pb.SendID) {
 	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
 	rpc.encapsulateMsgData(pb.MsgData)
