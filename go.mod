@@ -33,7 +33,7 @@ require (
 	github.com/lestrrat-go/strftime v1.0.4 // indirect
 	github.com/lib/pq v1.2.0 // indirect
 	github.com/livekit/protocol v0.11.14-0.20220223195254-d8c251e13231 // indirect
-	github.com/livekit/server-sdk-go v0.9.1
+	//github.com/livekit/server-sdk-go v0.9.1
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/minio/minio-go/v7 v7.0.22
 	github.com/mitchellh/mapstructure v1.4.2
