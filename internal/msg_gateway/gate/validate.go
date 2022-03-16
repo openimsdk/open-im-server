@@ -145,7 +145,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 		//
 		//}
 
-		token, err2 := media.GetJoinToken(payload.Invite.Invitation.RoomID, payload.Invite.Invitation.InviterUserID, operationID)
+		token, err2 := media.GetJoinToken(payload.Invite.Invitation.RoomID, payload.Invite.Invitation.InviterUserID, operationID, payload.Invite.Participant)
 		if err2 != nil {
 			return false, 201, err2.Error(), nil, nil
 		}
@@ -172,7 +172,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 		//	return false, 201, err.Error(), nil, nil
 		//
 		//}
-		token, err2 := media.GetJoinToken(payload.InviteInGroup.Invitation.RoomID, payload.InviteInGroup.Invitation.InviterUserID, operationID)
+		token, err2 := media.GetJoinToken(payload.InviteInGroup.Invitation.RoomID, payload.InviteInGroup.Invitation.InviterUserID, operationID, payload.InviteInGroup.Participant)
 		if err2 != nil {
 			return false, 201, err2.Error(), nil, nil
 		}
@@ -214,7 +214,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 		msg.ClientMsgID = utils.GetMsgID(payload.Cancel.OpUserID)
 		return true, 0, "", &resp, &msg
 	case *open_im_sdk.SignalReq_Accept:
-		token, err2 := media.GetJoinToken(payload.Accept.Invitation.RoomID, payload.Accept.OpUserID, operationID)
+		token, err2 := media.GetJoinToken(payload.Accept.Invitation.RoomID, payload.Accept.OpUserID, operationID, payload.Accept.Participant)
 		if err2 != nil {
 			return false, 201, err2.Error(), nil, nil
 		}

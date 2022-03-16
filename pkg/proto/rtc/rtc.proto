@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 option go_package = "./rtc;rtc";
 package rtc;
 
@@ -12,7 +13,8 @@ message GetJoinTokenReq{
   string apiSecret = 2;
   string room = 3;
   string identity = 4;
-  string operationID = 5;
+  server_api_params.ParticipantMetaData metaData = 5;
+  string operationID = 6;
 }
 
 message GetJoinTokenResp{
@@ -23,4 +25,3 @@ message GetJoinTokenResp{
 service RtcService {
   rpc GetJoinToken(GetJoinTokenReq) returns(GetJoinTokenResp);
 }
-

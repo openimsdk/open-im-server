@@ -2,6 +2,7 @@ package open_im_media
 
 import (
 	pbRtc "Open_IM/pkg/proto/rtc"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"context"
 	"errors"
 	"google.golang.org/grpc"
@@ -32,14 +33,14 @@ func (m *Media) GetUrl() string {
 	return m.MediaAddress
 }
 
-func (m *Media) GetJoinToken(room, identity string, operationID string) (string, error) {
+func (m *Media) GetJoinToken(room, identity string, operationID string, data *open_im_sdk.ParticipantMetaData) (string, error) {
 	conn, err := grpc.Dial(Address, grpc.WithInsecure())
 	if err != nil {
 		return "", err
 	}
 	defer conn.Close()
 	c := pbRtc.NewRtcServiceClient(conn)
-	req := &pbRtc.GetJoinTokenReq{ApiKey: m.ApiKey, ApiSecret: m.ApiSecret, Room: room, OperationID: operationID, Identity: identity}
+	req := &pbRtc.GetJoinTokenReq{ApiKey: m.ApiKey, ApiSecret: m.ApiSecret, Room: room, OperationID: operationID, Identity: identity, MetaData: data}
 	resp, err := c.GetJoinToken(context.Background(), req)
 	if err != nil {
 		return "", err
