@@ -130,10 +130,10 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
 	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
-	flag, errCode, errMsg := userRelationshipVerification(pb)
-	if !flag {
-		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
-	}
+	//flag, errCode, errMsg := userRelationshipVerification(pb)
+	//if !flag {
+	//	return returnMsg(&replay, pb, errCode, errMsg, "", 0)
+	//}
 	//if !utils.VerifyToken(pb.Token, pb.SendID) {
 	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
 	rpc.encapsulateMsgData(pb.MsgData)
