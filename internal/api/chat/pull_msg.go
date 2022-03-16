@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/chat"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -39,7 +40,10 @@ func PullMsgBySeqList(c *gin.Context) {
 
 	token := c.Request.Header.Get("token")
 	if ok, err := token_verify.VerifyToken(token, params.SendID); !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err" + err.Error()})
+		if err != nil {
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), err.Error(), token, params.SendID)
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
 		return
 	}
 	pbData := open_im_sdk.PullMessageBySeqListReq{}

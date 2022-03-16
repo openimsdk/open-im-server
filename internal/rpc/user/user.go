@@ -214,7 +214,7 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 		return resp, nil
 	}
 	chat.SetConversationNotification(req.OperationID, req.OwnerUserID)
-	log.NewError(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	resp.CommonResp = &pbUser.CommonResp{}
 	return resp, nil
 }
