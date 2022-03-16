@@ -377,11 +377,17 @@ message InvitationInfo  {
     int32   sessionType = 9;
 }
 
+message ParticipantMetaData{
+    GroupInfo groupInfo = 1;
+    GroupMemberFullInfo groupMemberInfo = 2;
+    PublicUserInfo userInfo = 3;
+}
 
 message SignalInviteReq {
     string opUserID = 1;
     InvitationInfo invitation = 2;
     OfflinePushInfo offlinePushInfo  = 3;
+    ParticipantMetaData participant = 4;
 }
 
 message SignalInviteReply {
@@ -394,6 +400,7 @@ message SignalInviteInGroupReq {
   string opUserID = 1;
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
 }
 
 message SignalInviteInGroupReply {
@@ -406,6 +413,7 @@ message SignalCancelReq {
   string opUserID = 1;
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
 }
 
 message SignalCancelReply {
@@ -416,6 +424,7 @@ message SignalAcceptReq {
   string opUserID = 1;
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
 }
 
 message SignalAcceptReply {
