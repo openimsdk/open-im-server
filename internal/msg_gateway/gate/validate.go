@@ -145,9 +145,9 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 		//
 		//}
 
-		token, err2 := media.GetJoinToken(payload.Invite.Invitation.RoomID, payload.Invite.Invitation.InviterUserID, operationID)
+		token, err2 := media.GetJoinToken(payload.Invite.Invitation.RoomID, payload.Invite.Invitation.InviterUserID, operationID, payload.Invite.Participant)
 		if err2 != nil {
-			return false, 201, err2.Error(), nil, nil
+			return false, 202, err2.Error(), nil, nil
 		}
 		invite := open_im_sdk.SignalResp_Invite{&open_im_sdk.SignalInviteReply{
 			Token:   token,
@@ -162,7 +162,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 		if len(payload.Invite.Invitation.InviteeUserIDList) > 0 {
 			msg.RecvID = payload.Invite.Invitation.InviteeUserIDList[0]
 		} else {
-			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
+			return false, 203, errors.New("InviteeUserIDList is null").Error(), nil, nil
 		}
 		msg.ClientMsgID = utils.GetMsgID(payload.Invite.Invitation.InviterUserID)
 		return true, 0, "", &resp, &msg
@@ -172,9 +172,9 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 		//	return false, 201, err.Error(), nil, nil
 		//
 		//}
-		token, err2 := media.GetJoinToken(payload.InviteInGroup.Invitation.RoomID, payload.InviteInGroup.Invitation.InviterUserID, operationID)
+		token, err2 := media.GetJoinToken(payload.InviteInGroup.Invitation.RoomID, payload.InviteInGroup.Invitation.InviterUserID, operationID, payload.InviteInGroup.Participant)
 		if err2 != nil {
-			return false, 201, err2.Error(), nil, nil
+			return false, 204, err2.Error(), nil, nil
 		}
 		inviteGroup := open_im_sdk.SignalResp_InviteInGroup{&open_im_sdk.SignalInviteInGroupReply{
 			RoomID:  payload.InviteInGroup.Invitation.RoomID,
@@ -189,7 +189,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 		if len(payload.InviteInGroup.Invitation.InviteeUserIDList) > 0 {
 			msg.GroupID = payload.InviteInGroup.Invitation.GroupID
 		} else {
-			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
+			return false, 205, errors.New("InviteeUserIDList is null").Error(), nil, nil
 		}
 		msg.ClientMsgID = utils.GetMsgID(payload.InviteInGroup.Invitation.InviterUserID)
 
@@ -209,14 +209,14 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 				msg.GroupID = payload.Cancel.Invitation.GroupID
 			}
 		} else {
-			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
+			return false, 206, errors.New("InviteeUserIDList is null").Error(), nil, nil
 		}
 		msg.ClientMsgID = utils.GetMsgID(payload.Cancel.OpUserID)
 		return true, 0, "", &resp, &msg
 	case *open_im_sdk.SignalReq_Accept:
-		token, err2 := media.GetJoinToken(payload.Accept.Invitation.RoomID, payload.Accept.OpUserID, operationID)
+		token, err2 := media.GetJoinToken(payload.Accept.Invitation.RoomID, payload.Accept.OpUserID, operationID, payload.Accept.Participant)
 		if err2 != nil {
-			return false, 201, err2.Error(), nil, nil
+			return false, 207, err2.Error(), nil, nil
 		}
 		accept := open_im_sdk.SignalResp_Accept{&open_im_sdk.SignalAcceptReply{
 			Token:   token,
@@ -236,7 +236,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 				msg.GroupID = payload.Accept.Invitation.GroupID
 			}
 		} else {
-			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
+			return false, 208, errors.New("InviteeUserIDList is null").Error(), nil, nil
 		}
 		msg.ClientMsgID = utils.GetMsgID(payload.Accept.OpUserID)
 		return true, 0, "", &resp, &msg
@@ -256,10 +256,10 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 				msg.GroupID = payload.Reject.Invitation.GroupID
 			}
 		} else {
-			return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
+			return false, 209, errors.New("InviteeUserIDList is null").Error(), nil, nil
 		}
 		msg.ClientMsgID = utils.GetMsgID(payload.Reject.OpUserID)
 		return true, 0, "", &resp, &msg
 	}
-	return false, 201, errors.New("InviteeUserIDList is null").Error(), nil, nil
+	return false, 210, errors.New("InviteeUserIDList is null").Error(), nil, nil
 }
