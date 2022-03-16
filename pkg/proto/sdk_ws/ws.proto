@@ -426,7 +426,7 @@ message SignalAcceptReq {
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
   ParticipantMetaData participant = 4;
-  string opUserPlatformID = 5;
+  int32 opUserPlatformID = 5;
 }
 
 message SignalAcceptReply {
@@ -451,7 +451,7 @@ message SignalRejectReq {
   InvitationInfo invitation = 2;
   OfflinePushInfo offlinePushInfo  = 3;
   ParticipantMetaData participant = 4;
-  string opUserPlatformID = 5;
+  int32 opUserPlatformID = 5;
 }
 
 message SignalRejectReply {
