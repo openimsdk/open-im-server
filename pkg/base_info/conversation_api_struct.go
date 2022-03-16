@@ -38,10 +38,10 @@ type Conversation struct {
 	ConversationType int32  `json:"conversationType"`
 	UserID           string `json:"userID"`
 	GroupID          string `json:"groupID"`
-	RecvMsgOpt       int32  `json:"recvMsgOpt"`
-	UnreadCount      int32  `json:"unreadCount"`
+	RecvMsgOpt       int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
+	UnreadCount      int32  `json:"unreadCount"  binding:"omitempty"`
 	DraftTextTime    int64  `json:"draftTextTime"`
-	IsPinned         bool   `json:"isPinned"`
+	IsPinned         bool   `json:"isPinned" binding:"omitempty"`
 	IsPrivateChat    bool   `json:"isPrivateChat"`
 	AttachedInfo     string `json:"attachedInfo"`
 	Ex               string `json:"ex"`
@@ -49,7 +49,7 @@ type Conversation struct {
 
 type SetConversationReq struct {
 	Conversation
-	OperationID  string `json:"operationID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
 type SetConversationResp struct {
@@ -58,13 +58,13 @@ type SetConversationResp struct {
 
 type BatchSetConversationsReq struct {
 	Conversations []Conversation `json:"conversations" binding:"required"`
-	OwnerUserID    string `json:"ownerUserID" binding:"required"`
-	OperationID    string `json:"operationID" binding:"required"`
+	OwnerUserID   string         `json:"ownerUserID" binding:"required"`
+	OperationID   string         `json:"operationID" binding:"required"`
 }
 
 type BatchSetConversationsResp struct {
 	CommResp
-	Data struct{
+	Data struct {
 		Success []string `json:"success"`
 		Failed  []string `json:"failed"`
 	} `json:"data"`
@@ -93,11 +93,22 @@ type GetAllConversationsResp struct {
 
 type GetConversationsReq struct {
 	ConversationIDs []string `json:"conversationIDs" binding:"required"`
-	OwnerUserID string `json:"ownerUserID" binding:"required"`
-	OperationID string `json:"operationID" binding:"required"`
+	OwnerUserID     string   `json:"ownerUserID" binding:"required"`
+	OperationID     string   `json:"operationID" binding:"required"`
 }
 
 type GetConversationsResp struct {
 	CommResp
 	Conversations []Conversation `json:"data"`
+}
+
+type SetRecvMsgOptReq struct {
+	OwnerUserID    string `json:"ownerUserID" binding:"required"`
+	ConversationID string `json:"conversationID"`
+	RecvMsgOpt     int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
+	OperationID    string `json:"operationID" binding:"required"`
+}
+
+type SetRecvMsgOptResp struct {
+	CommResp
 }

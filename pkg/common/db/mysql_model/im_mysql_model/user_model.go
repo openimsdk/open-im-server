@@ -307,8 +307,27 @@ func SetConversation(conversation db.Conversation) error {
 	} else {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
 		//force update
-		return dbConn.Model(&db.Conversation{}).Update(conversation).
+		return dbConn.Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
 			Update(map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt, "is_pinned": conversation.IsPinned, "is_private_chat": conversation.IsPrivateChat}).Error
+	}
+}
+
+func SetRecvMsgOpt(conversation db.Conversation) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	dbConn.LogMode(true)
+	newConversation := conversation
+	if dbConn.Model(&db.Conversation{}).Find(&newConversation).RowsAffected == 0 {
+		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "not exist in db, create")
+		return dbConn.Model(&db.Conversation{}).Create(conversation).Error
+		// if exist, then update record
+	} else {
+		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
+		//force update
+		return dbConn.Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
+			Update(map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt}).Error
 	}
 }
 
@@ -330,7 +349,7 @@ func GetConversation(OwnerUserID, conversationID string) (db.Conversation, error
 		return conversation, err
 	}
 	err = dbConn.Model(&db.Conversation{
-		OwnerUserID: OwnerUserID,
+		OwnerUserID:    OwnerUserID,
 		ConversationID: conversationID,
 	}).Find(&conversation).Error
 	return conversation, err

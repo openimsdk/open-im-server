@@ -15,8 +15,8 @@ import (
 
 func SetConversation(c *gin.Context) {
 	var (
-		req api.SetConversationReq
-		resp api.SetConversationResp
+		req   api.SetConversationReq
+		resp  api.SetConversationResp
 		reqPb pbUser.SetConversationReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -47,8 +47,8 @@ func SetConversation(c *gin.Context) {
 
 func BatchSetConversations(c *gin.Context) {
 	var (
-		req api.BatchSetConversationsReq
-		resp api.BatchSetConversationsResp
+		req   api.BatchSetConversationsReq
+		resp  api.BatchSetConversationsResp
 		reqPb pbUser.BatchSetConversationsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -79,8 +79,8 @@ func BatchSetConversations(c *gin.Context) {
 
 func GetAllConversations(c *gin.Context) {
 	var (
-		req api.GetAllConversationsReq
-		resp api.GetAllConversationsResp
+		req   api.GetAllConversationsReq
+		resp  api.GetAllConversationsResp
 		reqPb pbUser.GetAllConversationsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -111,8 +111,8 @@ func GetAllConversations(c *gin.Context) {
 
 func GetConversation(c *gin.Context) {
 	var (
-		req api.GetConversationReq
-		resp api.GetConversationResp
+		req   api.GetConversationReq
+		resp  api.GetConversationResp
 		reqPb pbUser.GetConversationReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -141,11 +141,10 @@ func GetConversation(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-
 func GetConversations(c *gin.Context) {
 	var (
-		req api.GetConversationsReq
-		resp api.GetConversationsResp
+		req   api.GetConversationsReq
+		resp  api.GetConversationsResp
 		reqPb pbUser.GetConversationsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -174,33 +173,31 @@ func GetConversations(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-
-
-
-
-
-
-
-func GetAllConversationMessageOpt(c *gin.Context) {
+func SetRecvMsgOpt(c *gin.Context) {
 	var (
-		_ api.GetAllConversationMessageOptReq
-		resp api.GetAllConversationMessageOptResp
+		req   api.SetRecvMsgOptReq
+		resp  api.SetRecvMsgOptResp
+		reqPb pbUser.SetRecvMsgOptReq
 	)
-	c.JSON(http.StatusOK, resp)
-}
-
-func GetReceiveMessageOpt(c *gin.Context) {
-	var (
-		_ api.GetReceiveMessageOptReq
-		resp api.GetReceiveMessageOptResp
-	)
-	c.JSON(http.StatusOK, resp)
-}
-
-func SetReceiveMessageOpt(c *gin.Context) {
-	var (
-		_ api.SetReceiveMessageOptReq
-		resp api.SetReceiveMessageOptResp
-	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
+		return
+	}
+	if err := utils.CopyStructFields(&reqPb, req); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := pbUser.NewUserClient(etcdConn)
+	respPb, err := client.SetRecvMsgOpt(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetAllConversationMsgOpt rpc failed, " + err.Error()})
+		return
+	}
+	resp.ErrMsg = respPb.CommonResp.ErrMsg
+	resp.ErrCode = respPb.CommonResp.ErrCode
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, resp)
 }

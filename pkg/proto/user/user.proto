@@ -91,6 +91,17 @@ message SetConversationResp{
   CommonResp  commonResp = 1;
 }
 
+message SetRecvMsgOptReq {
+  string OwnerUserID = 1;
+  string ConversationID = 2;
+  int32 RecvMsgOpt = 3;
+  string OperationID = 4;
+}
+
+message SetRecvMsgOptResp {
+  CommonResp  commonResp = 1;
+}
+
 message GetConversationReq{
   string ConversationID = 1;
   string OwnerUserID = 2;
@@ -272,6 +283,8 @@ message DeleteUserResp {
     CommonResp  CommonResp = 1;
 }
 
+
+
 service user {
   rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
@@ -284,6 +297,7 @@ service user {
   rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
   rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
   rpc SetConversation(SetConversationReq)returns(SetConversationResp);
+  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
 
   rpc GetUserById(GetUserByIdReq) returns (GetUserByIdResp);
   rpc GetUsersByName(GetUsersByNameReq) returns (GetUsersByNameResp);

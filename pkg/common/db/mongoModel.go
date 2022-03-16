@@ -125,7 +125,6 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID st
 	return seqMsg, nil
 }
 
-
 func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
 	var hasSeqList []uint32
 	singleCount := 0
@@ -178,7 +177,6 @@ func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operatio
 	return seqMsg, nil
 }
 
-
 func genExceptionMessageBySeqList(seqList []uint32) (exceptionMsg []*open_im_sdk.MsgData) {
 	for _, v := range seqList {
 		msg := new(open_im_sdk.MsgData)
@@ -199,7 +197,7 @@ func (d *DataBases) SaveUserChatMongo2(uid string, sendTime int64, m *pbMsg.MsgD
 	sMsg := MsgInfo{}
 	sMsg.SendTime = sendTime
 	if sMsg.Msg, err = proto.Marshal(m.MsgData); err != nil {
-		return  utils.Wrap(err,"")
+		return utils.Wrap(err, "")
 	}
 	err = c.FindOneAndUpdate(ctx, filter, bson.M{"$push": bson.M{"msg": sMsg}}).Err()
 	log.NewDebug(operationID, "get mgoSession cost time", getCurrentTimestampByMill()-newTime)
@@ -207,11 +205,11 @@ func (d *DataBases) SaveUserChatMongo2(uid string, sendTime int64, m *pbMsg.MsgD
 		sChat := UserChat{}
 		sChat.UID = seqUid
 		sChat.Msg = append(sChat.Msg, sMsg)
-		if _, err = c.InsertOne(ctx, &sChat) ; err != nil{
+		if _, err = c.InsertOne(ctx, &sChat); err != nil {
 			log.NewDebug(operationID, "InsertOne failed", filter)
 			return utils.Wrap(err, "")
 		}
-	}else{
+	} else {
 		log.NewDebug(operationID, "FindOneAndUpdate ok", filter)
 	}
 
@@ -258,7 +256,6 @@ func (d *DataBases) SaveUserChat(uid string, sendTime int64, m *pbMsg.MsgDataToD
 	return nil
 }
 
-
 func (d *DataBases) DelUserChat(uid string) error {
 	return nil
 	//session := d.mgoSession.Clone()
@@ -277,7 +274,6 @@ func (d *DataBases) DelUserChat(uid string) error {
 	//return nil
 }
 
-
 func (d *DataBases) DelUserChatMongo2(uid string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
@@ -289,8 +285,6 @@ func (d *DataBases) DelUserChatMongo2(uid string) error {
 	}
 	return nil
 }
-
-
 
 func (d *DataBases) MgoUserCount() (int, error) {
 	return 0, nil

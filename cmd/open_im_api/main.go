@@ -59,13 +59,13 @@ func main() {
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                          //1
 		groupRouterGroup.POST("/get_recv_group_applicationList", group.GetRecvGroupApplicationList) //1
 		groupRouterGroup.POST("/get_user_req_group_applicationList", group.GetUserReqGroupApplicationList)
-		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                              //1
-		groupRouterGroup.POST("/kick_group", group.KickGroupMember)                                 //1
-		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)                   //no use
-		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList)            //1
-		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)                 //1
-		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)                     //1
-		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)                   //1
+		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                   //1
+		groupRouterGroup.POST("/kick_group", group.KickGroupMember)                      //1
+		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)        //no use
+		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
+		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
+		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
+		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)        //1
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
@@ -97,12 +97,13 @@ func main() {
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
-	{ 		//1
+	{ //1
 		conversationGroup.POST("/get_all_conversations", conversation.GetAllConversations)
 		conversationGroup.POST("/get_conversation", conversation.GetConversation)
 		conversationGroup.POST("/get_conversations", conversation.GetConversations)
 		conversationGroup.POST("/set_conversation", conversation.SetConversation)
 		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
+		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
 	}
 	apiThird.MinioInit()
 	log.NewPrivateLog("api")
