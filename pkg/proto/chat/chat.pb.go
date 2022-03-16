@@ -6,7 +6,7 @@ package pbChat // import "./chat"
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import sdk_ws "./sdk_ws"
+import sdk_ws "Open_IM/pkg/proto/sdk_ws"
 
 import (
 	context "golang.org/x/net/context"
