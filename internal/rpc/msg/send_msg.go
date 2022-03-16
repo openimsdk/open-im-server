@@ -56,10 +56,9 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 	reply, err := client.IsInBlackList(context.Background(), req)
 	if err != nil {
 		log.NewDebug(data.OperationID, "IsInBlackListReq rpc failed, ", req.String(), err.Error())
-		return false, 600, err.Error()
-	} else if reply.Response == false {
+	} else if reply.Response == true {
 		log.NewDebug(data.OperationID, "IsInBlackListReq  ", req.String())
-		return reply.Response, 600, "in black list"
+		return false, 600, "in black list"
 	}
 	if config.Config.MessageVerify.FriendVerify {
 		friendReq := &rpc.IsFriendReq{CommID: &rpc.CommID{}}
@@ -70,7 +69,7 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 		friendReply, err := client.IsFriend(context.Background(), friendReq)
 		if err != nil {
 			log.NewDebug(data.OperationID, "IsFriendReq rpc failed, ", req.String(), err.Error())
-			return false, 601, err.Error()
+			return true, 0, ""
 		} else if friendReply.Response == false {
 			log.NewDebug(data.OperationID, "not friend  ", req.String())
 			return friendReply.Response, 601, "not friend"
