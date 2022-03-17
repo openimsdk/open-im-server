@@ -41,7 +41,7 @@ func init() {
 	// mongo init
 	// "mongodb://sysop:moon@localhost/records"
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&connect=direct",
+	uri = fmt.Sprintf("mongodb://%s/%s/?connect=direct&maxPoolSize=%d",
 		config.Config.Mongo.DBAddress[0], config.Config.Mongo.DBDatabase,
 		config.Config.Mongo.DBMaxPoolSize)
 
