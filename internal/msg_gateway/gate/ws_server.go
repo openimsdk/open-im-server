@@ -93,20 +93,20 @@ func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	return conn.WriteMessage(a, msg)
 
 }
-func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newConn *UserConn, token string) {
+func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
 	case constant.AllLoginButSameTermKick:
-		if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
+		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[constant.PlatformIDToName(platformID)]; ok {
-				log.NewDebug("", uid, platformID, "kick old conn")
+				log.NewDebug(operationID, uid, platformID, "kick old conn")
 				ws.sendKickMsg(oldConn, newConn)
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != redis.ErrNil {
-					log.NewError("", "get token from redis err", err.Error())
+					log.NewError(operationID, "get token from redis err", err.Error())
 					return
 				}
 				if m == nil {
-					log.NewError("", "get token from redis err", "m is nil")
+					log.NewError(operationID, "get token from redis err", "m is nil")
 					return
 				}
 				for k, _ := range m {
@@ -114,10 +114,10 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 						m[k] = constant.KickedToken
 					}
 				}
-				log.NewDebug("get map is ", m)
+				log.NewDebug(operationID, "get map is ", m)
 				err = db.DB.SetTokenMapByUidPid(uid, platformID, m)
 				if err != nil {
-					log.NewError("", "SetTokenMapByUidPid err", err.Error())
+					log.NewError(operationID, "SetTokenMapByUidPid err", err.Error())
 					return
 				}
 				err = oldConn.Close()
@@ -128,15 +128,15 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 				}
 				delete(ws.wsConnToUser, oldConn)
 				if err != nil {
-					log.NewError("", "conn close err", err.Error(), uid, platformID)
+					log.NewError(operationID, "conn close err", err.Error(), uid, platformID)
 				}
 
 			} else {
-				log.NewWarn("", "abnormal uid-conn  ", uid, platformID, oldConnMap[constant.PlatformIDToName(platformID)])
+				log.NewWarn(operationID, "abnormal uid-conn  ", uid, platformID, oldConnMap[constant.PlatformIDToName(platformID)])
 			}
 
 		} else {
-			log.NewDebug("no other conn", ws.wsUserToConn, uid, platformID)
+			log.NewDebug(operationID, "no other conn", ws.wsUserToConn, uid, platformID)
 		}
 
 	case constant.SingleTerminalLogin:
@@ -164,14 +164,17 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, token string) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
-	ws.MultiTerminalLoginChecker(uid, platformID, conn, token)
+	operationID := utils.OperationIDGenerator()
+	ws.MultiTerminalLoginChecker(uid, platformID, conn, token, operationID)
 	if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
 		oldConnMap[constant.PlatformIDToName(platformID)] = conn
 		ws.wsUserToConn[uid] = oldConnMap
+		log.Debug(operationID, "user not first come in, add conn ", uid, platformID, conn, oldConnMap)
 	} else {
 		i := make(map[string]*UserConn)
 		i[constant.PlatformIDToName(platformID)] = conn
 		ws.wsUserToConn[uid] = i
+		log.Debug(operationID, "user first come in, new user, conn", uid, platformID, conn, ws.wsUserToConn[uid])
 	}
 	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
 		oldStringMap[constant.PlatformIDToName(platformID)] = uid
@@ -185,7 +188,7 @@ func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, tok
 	for _, v := range ws.wsUserToConn {
 		count = count + len(v)
 	}
-	log.Debug("WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
+	log.Debug(operationID, "WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 	userCount = uint64(len(ws.wsUserToConn))
 
 }

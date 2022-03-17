@@ -3,9 +3,11 @@ package utils
 import (
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
+	"math/rand"
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // copy a by b  b->a
@@ -70,4 +72,7 @@ func Difference(slice1, slice2 []uint32) []uint32 {
 		}
 	}
 	return n
+}
+func OperationIDGenerator() string {
+	return strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10)
 }
