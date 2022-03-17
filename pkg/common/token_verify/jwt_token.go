@@ -129,9 +129,10 @@ func CheckAccess(OpUserID string, OwnerUserID string) bool {
 	return false
 }
 
-func GetUserIDFromToken(token string) (bool, string) {
+func GetUserIDFromToken(token string, operationID string) (bool, string) {
 	claims, err := ParseToken(token)
 	if err != nil {
+		log.Error(operationID, "ParseToken failed, ", err.Error(), token)
 		return false, ""
 	}
 	return true, claims.UID
@@ -162,7 +163,7 @@ func ParseToken(tokensString string) (claims *Claims, err error) {
 		case constant.InValidToken:
 			return nil, &constant.ErrTokenInvalid
 		case constant.KickedToken:
-			return nil, &constant.ErrTokenInvalid
+			return nil, &constant.ErrTokenKicked
 		case constant.ExpiredToken:
 			return nil, &constant.ErrTokenExpired
 		default:
