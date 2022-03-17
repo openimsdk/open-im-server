@@ -263,9 +263,9 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
-		if ok, err := token_verify.VerifyToken(query["token"][0], query["sendID"][0]); !ok {
+		if ok, err, msg := token_verify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0]); !ok {
 			e := err.(*constant.ErrInfo)
-			log.ErrorByKv("Token verify failed", "", "query", query)
+			log.ErrorByKv("Token verify failed", "", "query", query, msg)
 			w.Header().Set("Sec-Websocket-Version", "13")
 			http.Error(w, e.ErrMsg, int(e.ErrCode))
 			return false
