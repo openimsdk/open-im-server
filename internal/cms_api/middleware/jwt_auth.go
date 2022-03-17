@@ -11,7 +11,7 @@ import (
 
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+		ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), "")
 		log.NewInfo("0", utils.GetSelfFuncName(), "userID: ", userID)
 		c.Set("userID", userID)
 		if !ok {
