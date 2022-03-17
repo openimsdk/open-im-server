@@ -17,15 +17,14 @@ import (
 	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	//	"go.mongodb.org/mongo-driver/mongo/options"
-
 )
 
 var DB DataBases
 
 type DataBases struct {
-	MysqlDB    mysqlDB
-	mgoSession *mgo.Session
-	redisPool  *redis.Pool
+	MysqlDB     mysqlDB
+	mgoSession  *mgo.Session
+	redisPool   *redis.Pool
 	mongoClient *mongo.Client
 }
 
@@ -42,12 +41,12 @@ func init() {
 	// mongo init
 	// "mongodb://sysop:moon@localhost/records"
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
-		config.Config.Mongo.DBAddress[0],config.Config.Mongo.DBDatabase,
+	uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&connect=direct",
+		config.Config.Mongo.DBAddress[0], config.Config.Mongo.DBDatabase,
 		config.Config.Mongo.DBMaxPoolSize)
 
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	if err != nil{
+	if err != nil {
 		log.NewError(" mongo.Connect  failed, try ", utils.GetSelfFuncName(), err.Error(), uri)
 		time.Sleep(time.Duration(30) * time.Second)
 		mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
