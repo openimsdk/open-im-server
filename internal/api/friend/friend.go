@@ -26,7 +26,7 @@ func AddBlack(c *gin.Context) {
 	req := &rpc.AddBlacklistReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -57,7 +57,7 @@ func ImportFriend(c *gin.Context) {
 	req := &rpc.ImportFriendReq{}
 	utils.CopyStructFields(req, &params)
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -97,7 +97,7 @@ func AddFriend(c *gin.Context) {
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	req.ReqMsg = params.ReqMsg
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -131,7 +131,7 @@ func AddFriendResponse(c *gin.Context) {
 	req.HandleMsg = params.HandleMsg
 	req.HandleResult = params.Flag
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -164,7 +164,7 @@ func DeleteFriend(c *gin.Context) {
 	req := &rpc.DeleteFriendReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -196,7 +196,7 @@ func GetBlacklist(c *gin.Context) {
 	req := &rpc.GetBlacklistReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -235,7 +235,7 @@ func SetFriendRemark(c *gin.Context) {
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	req.Remark = params.Remark
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -267,7 +267,7 @@ func RemoveBlack(c *gin.Context) {
 	req := &rpc.RemoveBlacklistReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -298,7 +298,7 @@ func IsFriend(c *gin.Context) {
 	req := &rpc.IsFriendReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params.ParamsCommFriend)
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -365,7 +365,7 @@ func GetFriendList(c *gin.Context) {
 	req := &rpc.GetFriendListReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -399,7 +399,7 @@ func GetFriendApplyList(c *gin.Context) {
 	req := &rpc.GetFriendApplyListReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -433,7 +433,7 @@ func GetSelfFriendApplyList(c *gin.Context) {
 	req := &rpc.GetSelfApplyListReq{CommID: &rpc.CommID{}}
 	utils.CopyStructFields(req.CommID, &params)
 	var ok bool
-	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.CommID.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.CommID.OperationID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
