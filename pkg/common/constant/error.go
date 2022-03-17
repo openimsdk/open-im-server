@@ -91,7 +91,7 @@ const (
 	IntentionalError     = 10007
 )
 
-func (e *ErrInfo) Error() string {
+func (e ErrInfo) Error() string {
 	return e.ErrMsg
 }
 
