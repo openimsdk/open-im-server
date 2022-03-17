@@ -1,0 +1,69 @@
+syntax = "proto3";
+option go_package = "./rtc;rtc";
+package rtc;
+
+message CommonResp{
+  int32  errCode = 1;
+  string errMsg = 2;
+}
+
+message GroupInfo{
+  string groupID = 1;
+  string groupName = 2;
+  string notification = 3;
+  string introduction = 4;
+  string faceURL = 5;
+  string ownerUserID = 6;
+  uint32 createTime = 7;
+  uint32 memberCount = 8;
+  string ex = 9;
+  int32 status = 10;
+  string creatorUserID = 11;
+  int32 groupType = 12;
+}
+
+message GroupMemberFullInfo {
+  string groupID = 1 ;
+  string userID = 2 ;
+  int32 roleLevel = 3;
+  int32 joinTime = 4;
+  string nickname = 5;
+  string faceURL = 6;
+  int32 appMangerLevel = 7; //if >0
+  int32 joinSource = 8;
+  string operatorUserID = 9;
+  string ex = 10;
+}
+
+message ParticipantMetaData{
+    GroupInfo groupInfo = 1;
+    GroupMemberFullInfo groupMemberInfo = 2;
+    PublicUserInfo userInfo = 3;
+}
+
+message PublicUserInfo{
+  string userID = 1;
+  string nickname = 2;
+  string faceURL = 3;
+  int32 gender = 4;
+  string ex = 5;
+}
+
+message GetJoinTokenReq{
+  string room = 1;
+  string identity = 2;
+  ParticipantMetaData metaData = 3;
+  string operationID = 4;
+}
+
+message GetJoinTokenResp{
+  CommonResp CommonResp = 1;
+  string jwt = 2;
+  string liveURL = 3;
+}
+
+service RtcService {
+  rpc GetJoinToken(GetJoinTokenReq) returns(GetJoinTokenResp);
+}
+
+
