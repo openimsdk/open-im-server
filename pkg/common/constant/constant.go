@@ -85,7 +85,7 @@ const (
 
 	//status
 	MsgNormal  = 1
-	MsgDeleted = 3
+	MsgDeleted = 4
 
 	//MsgFrom
 	UserMsgType = 100
