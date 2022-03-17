@@ -83,6 +83,10 @@ const (
 	SignalingNotificationEnd   = 1699
 	NotificationEnd            = 2000
 
+	//status
+	MsgNormal  = 1
+	MsgDeleted = 3
+
 	//MsgFrom
 	UserMsgType = 100
 	SysMsgType  = 200

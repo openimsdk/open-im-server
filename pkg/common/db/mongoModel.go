@@ -2,12 +2,16 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
+	"fmt"
+	"github.com/gogo/protobuf/sortkeys"
+
 	//"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
 	"gopkg.in/mgo.v2/bson"
@@ -67,6 +71,41 @@ func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq uint32, err error) {
 
 func (d *DataBases) GetMinSeqFromMongo2(uid string) (MinSeq uint32, err error) {
 	return 1, nil
+}
+
+// deleteMsgByLogic
+func (d *DataBases) DelMsgLogic(uid string, seqList []uint32, operationID string) error {
+	sortkeys.Uint32s(seqList)
+	seqMsgs, err := d.GetMsgBySeqListMongo2(uid, seqList, operationID)
+	if err != nil {
+		return err
+	}
+	for _, seqMsg := range seqMsgs {
+		seqMsg.Status = constant.MsgDeleted
+		if err = d.ReplaceMsgBySeq(uid, seqMsg, operationID); err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "ReplaceMsgListBySeq error", err.Error())
+		}
+	}
+	return nil
+}
+
+func (d *DataBases) ReplaceMsgBySeq(uid string, msg *open_im_sdk.MsgData, operationID string) error {
+	log.NewInfo(operationID, utils.GetSelfFuncName(), uid, msg)
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	uid = getSeqUid(uid, msg.Seq)
+	seqIndex := getMsgIndex(msg.Seq)
+	s := fmt.Sprintf("msg.%d.msg", seqIndex)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), seqIndex, s)
+	updateResult, err := c.UpdateOne(
+		ctx, bson.M{"uid": uid},
+		bson.M{"$set": bson.M{s: msg}})
+	log.NewInfo(operationID, utils.GetSelfFuncName(), updateResult)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "UpdateOne", err.Error())
+		return err
+	}
+	return nil
 }
 
 func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
@@ -392,6 +431,18 @@ func getSeqUid(uid string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return indexGen(uid, seqSuffix)
 }
+
+func getMsgIndex(seq uint32) int {
+	seqSuffix := seq / singleGocMsgNum
+	var index uint32
+	if seqSuffix == 0 {
+		index = (seq - seqSuffix*5000) - 1
+	} else {
+		index = seq - seqSuffix*singleGocMsgNum
+	}
+	return int(index)
+}
+
 func isContainInt32(target uint32, List []uint32) bool {
 
 	for _, element := range List {
