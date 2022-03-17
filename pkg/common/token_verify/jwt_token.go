@@ -202,6 +202,21 @@ func VerifyToken(token, uid string) (bool, error) {
 	if claims.UID != uid {
 		return false, &constant.ErrTokenUnknown
 	}
+
 	log.NewDebug("", claims.UID, claims.Platform)
 	return true, nil
+}
+func WsVerifyToken(token, uid string, platformID string) (bool, error, string) {
+	claims, err := ParseToken(token)
+	if err != nil {
+		return false, err, "parse token err"
+	}
+	if claims.UID != uid {
+		return false, &constant.ErrTokenUnknown, "uid is not same to token uid"
+	}
+	if claims.Platform != constant.PlatformIDToName(utils.StringToInt32(platformID)) {
+		return false, &constant.ErrTokenUnknown, "platform is not same to token platform"
+	}
+	log.NewDebug("", claims.UID, claims.Platform)
+	return true, nil, ""
 }
