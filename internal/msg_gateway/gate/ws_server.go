@@ -131,10 +131,12 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 					log.NewError("", "conn close err", err.Error(), uid, platformID)
 				}
 
+			} else {
+				log.NewWarn("", "abnormal uid-conn  ", uid, platformID, oldConnMap[constant.PlatformIDToName(platformID)])
 			}
 
 		} else {
-			log.NewDebug("no other conn", ws.wsUserToConn)
+			log.NewDebug("no other conn", ws.wsUserToConn, uid, platformID)
 		}
 
 	case constant.SingleTerminalLogin:

@@ -31,7 +31,7 @@ func DeleteUser(c *gin.Context) {
 	req := &rpc.DeleteUsersReq{}
 	utils.CopyStructFields(req, &params)
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -63,7 +63,7 @@ func GetAllUsersUid(c *gin.Context) {
 	req := &rpc.GetAllUserIDReq{}
 	utils.CopyStructFields(req, &params)
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -95,7 +95,7 @@ func AccountCheck(c *gin.Context) {
 	req := &rpc.AccountCheckReq{}
 	utils.CopyStructFields(req, &params)
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -127,7 +127,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	req := &pbRelay.GetUsersOnlineStatusReq{}
 	utils.CopyStructFields(req, &params)
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
