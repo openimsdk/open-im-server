@@ -37,7 +37,7 @@ func (m *MsgDataToMQ) Reset()         { *m = MsgDataToMQ{} }
 func (m *MsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMQ) ProtoMessage()    {}
 func (*MsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_89690664d189a305, []int{0}
+	return fileDescriptor_chat_83f286704599d5b1, []int{0}
 }
 func (m *MsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMQ.Unmarshal(m, b)
@@ -90,7 +90,7 @@ func (m *MsgDataToDB) Reset()         { *m = MsgDataToDB{} }
 func (m *MsgDataToDB) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToDB) ProtoMessage()    {}
 func (*MsgDataToDB) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_89690664d189a305, []int{1}
+	return fileDescriptor_chat_83f286704599d5b1, []int{1}
 }
 func (m *MsgDataToDB) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToDB.Unmarshal(m, b)
@@ -137,7 +137,7 @@ func (m *PushMsgDataToMQ) Reset()         { *m = PushMsgDataToMQ{} }
 func (m *PushMsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*PushMsgDataToMQ) ProtoMessage()    {}
 func (*PushMsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_89690664d189a305, []int{2}
+	return fileDescriptor_chat_83f286704599d5b1, []int{2}
 }
 func (m *PushMsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PushMsgDataToMQ.Unmarshal(m, b)
@@ -210,7 +210,7 @@ func (m *GetMaxAndMinSeqReq) Reset()         { *m = GetMaxAndMinSeqReq{} }
 func (m *GetMaxAndMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqReq) ProtoMessage()    {}
 func (*GetMaxAndMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_89690664d189a305, []int{3}
+	return fileDescriptor_chat_83f286704599d5b1, []int{3}
 }
 func (m *GetMaxAndMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqReq.Unmarshal(m, b)
@@ -258,7 +258,7 @@ func (m *GetMaxAndMinSeqResp) Reset()         { *m = GetMaxAndMinSeqResp{} }
 func (m *GetMaxAndMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqResp) ProtoMessage()    {}
 func (*GetMaxAndMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_89690664d189a305, []int{4}
+	return fileDescriptor_chat_83f286704599d5b1, []int{4}
 }
 func (m *GetMaxAndMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqResp.Unmarshal(m, b)
@@ -319,7 +319,7 @@ func (m *SendMsgReq) Reset()         { *m = SendMsgReq{} }
 func (m *SendMsgReq) String() string { return proto.CompactTextString(m) }
 func (*SendMsgReq) ProtoMessage()    {}
 func (*SendMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_89690664d189a305, []int{5}
+	return fileDescriptor_chat_83f286704599d5b1, []int{5}
 }
 func (m *SendMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgReq.Unmarshal(m, b)
@@ -375,7 +375,7 @@ func (m *SendMsgResp) Reset()         { *m = SendMsgResp{} }
 func (m *SendMsgResp) String() string { return proto.CompactTextString(m) }
 func (*SendMsgResp) ProtoMessage()    {}
 func (*SendMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_chat_89690664d189a305, []int{6}
+	return fileDescriptor_chat_83f286704599d5b1, []int{6}
 }
 func (m *SendMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgResp.Unmarshal(m, b)
@@ -611,9 +611,9 @@ var _Chat_serviceDesc = grpc.ServiceDesc{
 	Metadata: "chat/chat.proto",
 }
 
-func init() { proto.RegisterFile("chat/chat.proto", fileDescriptor_chat_89690664d189a305) }
+func init() { proto.RegisterFile("chat/chat.proto", fileDescriptor_chat_83f286704599d5b1) }
 
-var fileDescriptor_chat_89690664d189a305 = []byte{
+var fileDescriptor_chat_83f286704599d5b1 = []byte{
 	// 507 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x54, 0xcd, 0x6e, 0xda, 0x40,
 	0x10, 0x96, 0x49, 0x80, 0x32, 0x34, 0x42, 0xda, 0x44, 0x95, 0xe5, 0x5e, 0x1c, 0x9f, 0x50, 0x2b,
