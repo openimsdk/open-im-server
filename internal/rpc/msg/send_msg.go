@@ -46,6 +46,7 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 	if data.MsgData.SessionType == constant.GroupChatType {
 		return true, 0, ""
 	}
+	log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 	req := &rpc.IsInBlackListReq{CommID: &rpc.CommID{}}
 	req.CommID.OperationID = data.OperationID
 	req.CommID.OpUserID = data.MsgData.RecvID
@@ -76,10 +77,10 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 			return friendReply.Response, 601, "not friend"
 		}
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify, friendReply.Response)
+		return true, 0, ""
 	} else {
 		return true, 0, ""
 	}
-	return true, 0, ""
 }
 func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
