@@ -351,7 +351,7 @@ func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlac
 }
 
 func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) (*pbFriend.IsFriendResp, error) {
-	log.NewInfo("IsFriend args ", req.String())
+	log.NewInfo(req.CommID.OperationID, req.String())
 	var isFriend bool
 	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
@@ -363,7 +363,7 @@ func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) 
 	} else {
 		isFriend = false
 	}
-	log.NewInfo("IsFriend rpc ok ", pbFriend.IsFriendResp{Response: isFriend})
+	log.NewInfo(req.CommID.OperationID, pbFriend.IsFriendResp{Response: isFriend})
 	return &pbFriend.IsFriendResp{Response: isFriend}, nil
 }
 
