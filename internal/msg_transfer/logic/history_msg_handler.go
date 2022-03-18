@@ -38,15 +38,15 @@ func (mc *HistoryConsumerHandler) Init() {
 }
 
 func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
-	log.NewInfo("msg come mongo!!!", "", "msg", string(msg))
 	time := utils.GetCurrentTimestampByNano()
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
-		log.ErrorByKv("msg_transfer Unmarshal msg err", "", "msg", string(msg), "err", err.Error())
+		log.Error("msg_transfer Unmarshal msg err", "", "msg", string(msg), "err", err.Error())
 		return
 	}
 	operationID := msgFromMQ.OperationID
+	log.NewInfo(operationID, "msg come mongo!!!", "", "msg", string(msg))
 	//Control whether to store offline messages (mongo)
 	isHistory := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsHistory)
 	//Control whether to store history messages (mysql)
@@ -99,28 +99,28 @@ func (mc *HistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	return nil
 }
 func sendMessageToPush(message *pbMsg.MsgDataToMQ, pushToUserID string) {
-	log.InfoByKv("msg_transfer send message to push", message.OperationID, "message", message.String())
+	log.Info(message.OperationID, "msg_transfer send message to push", "message", message.String())
 	rpcPushMsg := pbPush.PushMsgReq{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
 	mqPushMsg := pbMsg.PushMsgDataToMQ{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName)
 	if grpcConn == nil {
-		log.ErrorByKv("rpc dial failed", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
+		log.Error(rpcPushMsg.OperationID, "rpc dial failed", "push data", rpcPushMsg.String())
 		pid, offset, err := producer.SendMessage(&mqPushMsg)
 		if err != nil {
-			log.ErrorByKv("kafka send failed", mqPushMsg.OperationID, "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
+			log.Error(mqPushMsg.OperationID, "kafka send failed", "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
 		}
 		return
 	}
 	msgClient := pbPush.NewPushMsgServiceClient(grpcConn)
 	_, err := msgClient.PushMsg(context.Background(), &rpcPushMsg)
 	if err != nil {
-		log.ErrorByKv("rpc send failed", rpcPushMsg.OperationID, "push data", rpcPushMsg.String(), "err", err.Error())
+		log.Error(rpcPushMsg.OperationID, "rpc send failed", rpcPushMsg.OperationID, "push data", rpcPushMsg.String(), "err", err.Error())
 		pid, offset, err := producer.SendMessage(&mqPushMsg)
 		if err != nil {
-			log.ErrorByKv("kafka send failed", mqPushMsg.OperationID, "send data", mqPushMsg.String(), "pid", pid, "offset", offset, "err", err.Error())
+			log.Error("kafka send failed", mqPushMsg.OperationID, "send data", mqPushMsg.String(), "pid", pid, "offset", offset, "err", err.Error())
 		}
 	} else {
-		log.InfoByKv("rpc send success", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
+		log.Info("rpc send success", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
 
 	}
 }
