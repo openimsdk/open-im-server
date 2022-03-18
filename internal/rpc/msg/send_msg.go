@@ -60,6 +60,7 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 		log.NewDebug(data.OperationID, "IsInBlackListReq  ", req.String())
 		return false, 600, "in black list"
 	}
+	log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 	if config.Config.MessageVerify.FriendVerify {
 		friendReq := &rpc.IsFriendReq{CommID: &rpc.CommID{}}
 		friendReq.CommID.OperationID = data.OperationID
@@ -74,6 +75,7 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 			log.NewDebug(data.OperationID, "not friend  ", req.String())
 			return friendReply.Response, 601, "not friend"
 		}
+		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify, friendReply.Response)
 	} else {
 		return true, 0, ""
 	}
