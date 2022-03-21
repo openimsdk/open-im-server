@@ -8,3 +8,4 @@ sleep 30
 echo "check OpenIM................................"
 ./check_all.sh
 
+

@@ -74,6 +74,7 @@ endpoints:
   rpc_admin_cms: openim_rpc_admin_cms
   rpc_message_cms: openim_rpc_admin_cms
 
+
 api:
   openImApiPort: [ 10000 ] #api服务端口，默认即可，需要开放此端口或做nginx转发
 cmsapi:
@@ -104,6 +105,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     finalHost: "http://bucket1.oss-cn-beijing.aliyuncs.com"
     stsDurationSeconds: 3600
     OssRoleArn: "acs:ram::xxx:role/xxx"
+
 
 
 rpcport: #rpc服务端口 默认即可
@@ -508,6 +510,7 @@ demo:
     senderAuthorizationCode: "gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
     smtpPort: 25   #需开放此端口 出口方向
+
 
 
 

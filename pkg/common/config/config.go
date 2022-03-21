@@ -64,7 +64,6 @@ type config struct {
 			SecretAccessKey string `yaml:"secretAccessKey"`
 		} `yaml:"minio"`
 	}
-
 	Mysql struct {
 		DBAddress      []string `yaml:"dbMysqlAddress"`
 		DBUserName     string   `yaml:"dbMysqlUserName"`
