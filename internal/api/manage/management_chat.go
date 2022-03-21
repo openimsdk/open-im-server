@@ -122,7 +122,7 @@ func ManagementSendMsg(c *gin.Context) {
 		log.ErrorByKv("data args validate  err", "", "err", err.Error())
 		return
 	}
-
+	log.NewInfo("", data, params)
 	token := c.Request.Header.Get("token")
 	claims, err := token_verify.ParseToken(token)
 	if err != nil {
