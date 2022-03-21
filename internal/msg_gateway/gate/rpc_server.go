@@ -92,17 +92,6 @@ func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgRe
 			resp = append(resp, temp)
 		}
 	}
-	//Single chat sender synchronization message
-	if in.GetSessionType() == constant.SingleChatType {
-		userIDList = genUidPlatformArray(in.SendID)
-		for _, v := range userIDList {
-			UIDAndPID = strings.Split(v, " ")
-			if conn := ws.getUserConn(v); conn != nil {
-				_ = sendMsgToUser(conn, replyBytes.Bytes(), in, UIDAndPID[1], UIDAndPID[0])
-			}
-		}
-	}
-
 	if !tag {
 		log.NewError(in.OperationID, "push err ,no matched ws conn not in map", in.String())
 	}
