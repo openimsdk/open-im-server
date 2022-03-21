@@ -103,7 +103,8 @@ func ManagementSendMsg(c *gin.Context) {
 	//case constant.Location:
 	case constant.Custom:
 		data = CustomElem{}
-	//case constant.Revoke:
+	case constant.Revoke:
+		data = RevokeElem{}
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
 	//case constant.Quote:
@@ -255,5 +256,9 @@ type CustomElem struct {
 	Extension   string `mapstructure:"extension"`
 }
 type TextElem struct {
+	Text string `mapstructure:"text" validate:"required"`
+}
+
+type RevokeElem struct {
 	Text string `mapstructure:"text" validate:"required"`
 }

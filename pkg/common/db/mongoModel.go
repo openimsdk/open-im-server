@@ -78,9 +78,10 @@ func (d *DataBases) DelMsgLogic(uid string, seqList []uint32, operationID string
 	sortkeys.Uint32s(seqList)
 	seqMsgs, err := d.GetMsgBySeqListMongo2(uid, seqList, operationID)
 	if err != nil {
-		return err
+		return utils.Wrap(err, "")
 	}
 	for _, seqMsg := range seqMsgs {
+		log.NewDebug(operationID, utils.GetSelfFuncName(), *seqMsg)
 		seqMsg.Status = constant.MsgDeleted
 		if err = d.ReplaceMsgBySeq(uid, seqMsg, operationID); err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), "ReplaceMsgListBySeq error", err.Error())
@@ -90,20 +91,25 @@ func (d *DataBases) DelMsgLogic(uid string, seqList []uint32, operationID string
 }
 
 func (d *DataBases) ReplaceMsgBySeq(uid string, msg *open_im_sdk.MsgData, operationID string) error {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), uid, msg)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), uid, *msg)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 	uid = getSeqUid(uid, msg.Seq)
 	seqIndex := getMsgIndex(msg.Seq)
 	s := fmt.Sprintf("msg.%d.msg", seqIndex)
 	log.NewDebug(operationID, utils.GetSelfFuncName(), seqIndex, s)
+	bytes, err := proto.Marshal(msg)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "proto marshal", err.Error())
+		return utils.Wrap(err, "")
+	}
 	updateResult, err := c.UpdateOne(
 		ctx, bson.M{"uid": uid},
-		bson.M{"$set": bson.M{s: msg}})
+		bson.M{"$set": bson.M{s: bytes}})
 	log.NewInfo(operationID, utils.GetSelfFuncName(), updateResult)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "UpdateOne", err.Error())
-		return err
+		return utils.Wrap(err, "")
 	}
 	return nil
 }
