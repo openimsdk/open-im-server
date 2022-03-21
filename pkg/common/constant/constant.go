@@ -20,8 +20,10 @@ const (
 	WSGetNewestSeq     = 1001
 	WSPullMsgBySeqList = 1002
 	WSSendMsg          = 1003
+	WSSendSignalMsg    = 1004
 	WSPushMsg          = 2001
 	WSKickOnlineMsg    = 2002
+	WsLogoutMsg        = 2003
 	WSDataError        = 3001
 
 	///ContentType
@@ -139,16 +141,16 @@ const (
 
 	//callbackCommand
 	CallbackBeforeSendSingleMsgCommand = "callbackBeforeSendSingleMsgCommand"
-	CallbackAfterSendSingleMsgCommand = "callbackAfterSendSingleMsgCommand"
-	CallbackBeforeSendGroupMsgCommand = "callbackBeforeSendGroupMsgCommand"
-	CallbackAfterSendGroupMsgCommand = "callbackAfterSendGroupMsgCommand"
-	CallbackWordFilterCommand = "callbackWordFilterCommand"
+	CallbackAfterSendSingleMsgCommand  = "callbackAfterSendSingleMsgCommand"
+	CallbackBeforeSendGroupMsgCommand  = "callbackBeforeSendGroupMsgCommand"
+	CallbackAfterSendGroupMsgCommand   = "callbackAfterSendGroupMsgCommand"
+	CallbackWordFilterCommand          = "callbackWordFilterCommand"
 	//callback actionCode
-	ActionAllow = 0
+	ActionAllow     = 0
 	ActionForbidden = 1
 	//callback callbackHandleCode
 	CallbackHandleSuccess = 0
-	CallbackHandleFailed = 1
+	CallbackHandleFailed  = 1
 )
 
 var ContentType2PushContent = map[int64]string{

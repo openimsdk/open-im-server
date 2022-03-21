@@ -21,7 +21,7 @@ type ImportFriendReq struct {
 	FromUserID       string   `json:"fromUserID" binding:"required"`
 }
 type UserIDResult struct {
-	UserID string `json:"userID""`
+	UserID string `json:"userID"`
 	Result int32  `json:"result"`
 }
 type ImportFriendResp struct {

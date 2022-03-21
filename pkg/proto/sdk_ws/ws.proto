@@ -26,7 +26,7 @@ message GroupMemberFullInfo {
   string groupID = 1 ;
   string userID = 2 ;
   int32 roleLevel = 3;
-  int64 joinTime = 4;
+  int32 joinTime = 4;
   string nickname = 5;
   string faceURL = 6;
   int32 appMangerLevel = 7; //if >0
@@ -40,6 +40,7 @@ message PublicUserInfo{
   string nickname = 2;
   string faceURL = 3;
   int32 gender = 4;
+  string ex = 5;
 }
 
 message UserInfo{
@@ -338,37 +339,6 @@ message ConversationUpdateTips{
 
 }
 
-///callback
-message CommonCallbackURLReq {
- string CallbackCommand = 1 [json_name = "code"];
- string OpenIMServerID = 2;
- string OperationID = 3;
-}
-
-message CommonCallbackURLResp {
- string Code = 1 [json_name = "code"];
- string Msg = 2  [json_name = "msg"];
- string OperationID = 3 [json_name = "operationID"];
-}
-
-message CallbackBeforeSendMsgReq {
- commonReq CommonCallbackURLReq = 1;
-
-}
-
-message CallbackBeforeSendMsgResp {
- commonResp CommonCallbackURLResp = 1;
- string FromUserID = 2;
-}
-
-message CallbackAfterAddFriendReq {
-  commonReq CommonCallbackURLReq = 1;
-}
-
-message CallbackAfterAddFriendResp {
- commonResp CommonCallbackURLResp = 1;
-}
-
 
 ///cms
 message RequestPagination {
@@ -380,3 +350,99 @@ message ResponsePagination {
   int32 CurrentPage = 5;
   int32 ShowNumber = 6;
 }
+
+
+///////////////////signal//////////////
+message SignalReq {
+  oneof payload {
+      SignalInviteReq invite = 1;
+      SignalInviteInGroupReq inviteInGroup= 2;
+      SignalCancelReq  cancel = 3;
+      SignalAcceptReq accept = 4;
+      SignalHungUpReq hungUp = 5;
+      SignalRejectReq reject = 6;
+  }
+}
+
+message SignalResp {
+  oneof payload {
+    SignalInviteReply invite = 1;
+    SignalInviteInGroupReply inviteInGroup= 2;
+    SignalCancelReply  cancel = 3;
+    SignalAcceptReply accept = 4;
+    SignalHungUpReply hungUp = 5;
+    SignalRejectReply reject = 6;
+  }
+}
+
+message InvitationInfo  {
+    string inviterUserID = 1;
+    repeated string inviteeUserIDList = 2;
+    string customData = 3;
+    string  groupID = 4;
+}
+
+
+message SignalInviteReq {
+    InvitationInfo invitation = 1;
+}
+
+message SignalInviteReply {
+  string token = 1;
+  string roomID = 2;
+  string liveURL = 3;
+}
+
+message SignalInviteInGroupReq {
+  InvitationInfo invitation = 1;
+}
+
+message SignalInviteInGroupReply {
+  string token = 1;
+  string roomID = 2;
+  string liveURL = 3;
+}
+
+message SignalCancelReq {
+  string inviterUserID = 1;
+  SignalInviteReq invitation = 2;
+}
+
+message SignalCancelReply {
+
+}
+
+message SignalAcceptReq {
+  string inviteeUserID = 1;
+  SignalInviteReq invitation = 2;
+}
+
+message SignalAcceptReply {
+  string token = 1;
+  string roomID = 2;
+  string liveURL = 3;
+}
+
+message SignalHungUpReq {
+  string UserID = 1;
+  SignalInviteReq invitation = 2;
+}
+
+message SignalHungUpReply {
+
+}
+
+
+message SignalRejectReq {
+  string inviteeUserID = 1;
+  SignalInviteReq invitation = 2;
+}
+
+message SignalRejectReply {
+
+}
+
+
+
+
+

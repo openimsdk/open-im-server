@@ -19,6 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
+  dbUri: ""#当dbUri值不为空则直接使用该值
   dbAddress: [ 127.0.0.1:37017 ] #mongo地址 目前仅支持单机，默认即可
   dbDirect: false
   dbTimeout: 10
@@ -93,6 +94,16 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     endpoint: http://127.0.0.1:9000
     accessKeyID: user12345
     secretAccessKey: key12345
+  ali: # ali oss
+    regionID: "oss-cn-beijing"
+    accessKeyID: ""
+    accessKeySecret: ""
+    stsEndpoint: "sts.cn-beijing.aliyun.com"
+    ossEndpoint: "oss-cn-beijing.aliyuncs.com"
+    bucket: "bucket1"
+    finalHost: "http://bucket1.oss-cn-beijing.aliyuncs.com"
+    stsDurationSeconds: 3600
+    OssRoleArn: "acs:ram::xxx:role/xxx"
 
 
 rpcport: #rpc服务端口 默认即可
@@ -178,7 +189,8 @@ tokenpolicy:
   accessSecret: "open_im_server" #token生成相关，默认即可
   # Token effective time day as a unit
   accessExpire: 3650 #token过期时间（天） 默认即可
-
+messageverify:
+  friendVerify: false
 #  c2c:
 #    callbackBeforeSendMsg:
 #      switch: false

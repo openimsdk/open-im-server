@@ -23,8 +23,8 @@ func Init(rpcPort, wsPort int) {
 	log.NewPrivateLog(config.Config.ModuleName.LongConnSvrName)
 	rwLock = new(sync.RWMutex)
 	validate = validator.New()
-	statistics.NewStatistics(&sendMsgCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second recv to msg_gateway sendMsgCount", sendMsgCount), 10)
-	statistics.NewStatistics(&userCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second add user conn", userCount), 10)
+	statistics.NewStatistics(&sendMsgCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second recv to msg_gateway sendMsgCount", sendMsgCount), 300)
+	statistics.NewStatistics(&userCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second add user conn", userCount), 300)
 	ws.onInit(wsPort)
 	rpcSvr.onInit(rpcPort)
 }
