@@ -1,0 +1,183 @@
+# The class cannot be named by Pascal or camel case.
+# If it is not used, the corresponding structure will not be set,
+# and it will not be read naturally.
+serverversion: 1.0.3
+#---------------Infrastructure configuration---------------------#
+etcd:
+  etcdSchema: openIM
+  etcdAddr: [ openim_etcd:2379 ]
+
+mysql:
+  dbMysqlAddress: [ openim_mysql:3306 ] # openim_mysql 是对应的mysql服务的host
+  dbMysqlUserName: openIM
+  dbMysqlPassword: openIM
+  dbMysqlDatabaseName: openIM
+  dbTableName: eMsg
+  dbMsgTableNum: 1
+  dbMaxOpenConns: 20
+  dbMaxIdleConns: 10
+  dbMaxLifeTime: 120
+
+mongo:
+  dbUri: ""#当dbUri值不为空则直接使用该值
+  dbAddress: [ openim_mongo:27017 ]
+  dbDirect: false
+  dbTimeout: 10
+  dbDatabase: openIM
+  dbSource: admin
+  dbUserName:
+  dbPassword:
+  dbMaxPoolSize: 20
+  dbRetainChatRecords: 7
+
+redis:
+  dbAddress: openim_redis:6379
+  dbMaxIdle: 128
+  dbMaxActive: 0
+  dbIdleTimeout: 120
+  dbPassWord: openIM
+
+kafka:
+  ws2mschat:
+    addr: [ openim_kafka:9092 ]
+    topic: "ws2ms_chat"
+  ms2pschat:
+    addr: [ openim_kafka:9092 ]
+    topic: "ms2ps_chat"
+  consumergroupid:
+    msgToMongo: mongo
+    msgToMySql: mysql
+    msgToPush: push
+
+
+
+#---------------Internal service configuration---------------------#
+
+# The service ip default is empty,
+# automatically obtain the machine's valid network card ip as the service ip,
+# otherwise the configuration ip is preferred
+serverip: 0.0.0.0
+
+# endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
+#   新增的这一段配置节，主要是位了注册到etcd时，可以使用同一network下的容器名(host)来访问不同的容器，拆分到不同容器后原来全部使用serverip的形式不能用了
+endpoints:
+  api: openim_api
+  push: openim_push
+  msg_gateway: openim_msg_gateway
+  rpc_auth: openim_rpc_auth
+  rpc_friend: openim_rpc_friend
+  rpc_group: openim_rpc_group
+  rpc_msg: openim_rpc_msg
+  rpc_user: openim_rpc_user
+
+api:
+  openImApiPort: [ 10000 ]
+sdk:
+  openImSdkWsPort: [ 30000 ]
+cmsapi:
+  openImCmsApiPort: [ 8000 ]
+
+credential:
+  tencent:
+    appID: 1302656840
+    region: ap-chengdu
+    bucket: echat-1302656840
+    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
+    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
+
+
+rpcport:
+  openImUserPort: [ 10100 ]
+  openImFriendPort: [ 10200 ]
+  openImOfflineMessagePort: [ 10300]
+  openImOnlineRelayPort: [ 10400 ]
+  openImGroupPort: [ 10500  ]
+  openImAuthPort: [ 10600 ]
+  openImPushPort: [ 10700 ]
+  openImStatisticsPort: [ 10800 ]
+  openImMessageCmsPort: [ 10900 ]
+  openImAdminCmsPort: [ 11000 ]
+
+rpcregistername:
+  openImUserName: User
+  openImFriendName: Friend
+  openImOfflineMessageName: OfflineMessage
+  openImPushName: Push
+  openImOnlineMessageRelayName: OnlineMessageRelay
+  openImGroupName: Group
+  openImAuthName: Auth
+
+log:
+  storageLocation: ../logs/
+  rotationTime: 24
+  remainRotationCount: 5
+  remainLogLevel: 6
+  elasticSearchSwitch: false
+  elasticSearchAddr: [ 127.0.0.1:9201 ]
+  elasticSearchUser: ""
+  elasticSearchPassword: ""
+
+modulename:
+  longConnSvrName: msg_gateway
+  msgTransferName: msg_transfer
+  pushName: push
+
+longconnsvr:
+  openImWsPort: [ 17778 ]
+  websocketMaxConnNum: 10000
+  websocketMaxMsgLen: 4096
+  websocketTimeOut: 10
+
+push:
+  tpns:
+    ios:
+      accessID: 1600018281
+      secretKey: 3cd68a77a95b89e5089a1aca523f318f
+    android:
+      accessID: 111
+      secretKey: 111
+  jpns:
+    appKey: cf47465a368f24c659608e7e
+    masterSecret: 02204efe3f3832947a236ee5
+    pushUrl: "https://api.jpush.cn/v3/push"
+    pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
+manager:
+  appManagerUid: ["openIM123456","openIM654321"]
+  secrets: ["openIM1","openIM2"]
+
+secret: tuoyun
+
+multiloginpolicy: 1
+
+#token config
+tokenpolicy:
+  accessSecret: "open_im_server"
+  # Token effective time day as a unit
+  accessExpire: 7
+
+messagecallback:
+  callbackSwitch: false
+  callbackUrl: "http://www.xxx.com/msg/judge"
+  #TimeOut use second as unit
+  callbackTimeOut: 10
+
+
+#---------------demo configuration---------------------#
+#The following configuration items are applied to openIM Demo configuration
+demoswitch: true
+demo:
+  openImDemoPort: [ 42233 ]
+  alismsverify:
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
+    signName: OpenIM Corporation
+    verificationCodeTemplateCode: SMS_2268101641
+  superCode: 666666
+  mail:
+    title: "openIM"
+    senderMail: "1765567899@qq.com"
+    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    smtpAddr: "smtp.qq.com"
+    smtpPort: 25
+
+

@@ -24,9 +24,14 @@ services:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
       - ./components/mongodb/data/conf:/etc/mongo
-  #  environment:
-   #   - MONGO_INITDB_ROOT_USERNAME=openIM
-    #  - MONGO_INITDB_ROOT_PASSWORD=openIM
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
+#    environment:
+#      - MONGO_INITDB_ROOT_USERNAME=openIM
+#      - MONGO_INITDB_ROOT_PASSWORD=openIM
+
 
       #TZ: Asia/Shanghai
     restart: always
@@ -89,14 +94,13 @@ services:
     command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
   open_im_server:
-    image: openim/open_im_server:v1.0.8
+    image: openim/open_im_server:v2.0.4
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
       - ./db/sdk:/Open-IM-Server/db/sdk
       - ./script:/Open-IM-Server/script
-
     restart: always
     depends_on:
       - kafka

@@ -4,12 +4,13 @@ import (
 	"Open_IM/pkg/common/config"
 	"bufio"
 	"fmt"
+	"os"
+	"time"
+
 	nested "github.com/antonfisher/nested-logrus-formatter"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
-	"os"
-	"time"
 )
 
 var logger *Logger
@@ -34,10 +35,11 @@ func loggerInit(moduleName string) *Logger {
 	//Close std console output
 	src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	writer := bufio.NewWriter(src)
 	logger.SetOutput(writer)
+	//logger.SetOutput(os.Stdout)
 	//Log Console Print Style Setting
 	logger.SetFormatter(&nested.Formatter{
 		TimestampFormat: "2006-01-02 15:04:05.000",
@@ -82,39 +84,31 @@ func initRotateLogs(rotationTime time.Duration, maxRemainNum uint, level string,
 		rotatelogs.WithRotationCount(maxRemainNum),
 	)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	} else {
 		return writer
 	}
 }
 
-//Deprecated
-func Info(token, OperationID, format string, args ...interface{}) {
+func Info(OperationID string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{
-		"PID":         logger.Pid,
 		"OperationID": OperationID,
-	}).Infof(format, args...)
-
+		"PID":         logger.Pid,
+	}).Infoln(args)
 }
 
-//Deprecated
-func Error(token, OperationID, format string, args ...interface{}) {
-
+func Error(OperationID string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{
-		"PID":         logger.Pid,
 		"OperationID": OperationID,
-	}).Errorf(format, args...)
-
+		"PID":         logger.Pid,
+	}).Errorln(args)
 }
 
-//Deprecated
-func Debug(token, OperationID, format string, args ...interface{}) {
-
+func Debug(OperationID string, args ...interface{}) {
 	logger.WithFields(logrus.Fields{
-		"PID":         logger.Pid,
 		"OperationID": OperationID,
-	}).Debugf(format, args...)
-
+		"PID":         logger.Pid,
+	}).Debugln(args)
 }
 
 //Deprecated

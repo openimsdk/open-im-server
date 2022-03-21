@@ -111,13 +111,19 @@ func MapIntToJsonString(param map[string]int32) string {
 	dataString := string(dataType)
 	return dataString
 }
-func JsonStringToMap(str string) (tempMap map[string]interface{}) {
+func JsonStringToMap(str string) (tempMap map[string]int32) {
 	_ = json.Unmarshal([]byte(str), &tempMap)
 	return tempMap
 }
-func GetSwitchFromOptions(Options map[string]interface{}, key string) (result bool) {
-	if flag, ok := Options[key]; !ok || flag == 1 {
+func GetSwitchFromOptions(Options map[string]bool, key string) (result bool) {
+	if flag, ok := Options[key]; !ok || flag {
 		return true
 	}
 	return false
+}
+func SetSwitchFromOptions(options map[string]bool, key string, value bool) {
+	if options == nil {
+		options = make(map[string]bool, 5)
+	}
+	options[key] = value
 }

@@ -11,7 +11,7 @@ import (
 	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/chat"
-	pbRelay "Open_IM/pkg/proto/relay"
+	pbPush "Open_IM/pkg/proto/push"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )
@@ -32,28 +32,13 @@ func (ms *PushConsumerHandler) Init() {
 }
 func (ms *PushConsumerHandler) handleMs2PsChat(msg []byte) {
 	log.InfoByKv("msg come from kafka  And push!!!", "", "msg", string(msg))
-	pbData := pbChat.MsgSvrToPushSvrChatMsg{}
-	if err := proto.Unmarshal(msg, &pbData); err != nil {
+	msgFromMQ := pbChat.PushMsgDataToMQ{}
+	if err := proto.Unmarshal(msg, &msgFromMQ); err != nil {
 		log.ErrorByKv("push Unmarshal msg err", "", "msg", string(msg), "err", err.Error())
 		return
 	}
-	sendPbData := pbRelay.MsgToUserReq{}
-	sendPbData.SendTime = pbData.SendTime
-	sendPbData.OperationID = pbData.OperationID
-	sendPbData.ServerMsgID = pbData.MsgID
-	sendPbData.MsgFrom = pbData.MsgFrom
-	sendPbData.ContentType = pbData.ContentType
-	sendPbData.SessionType = pbData.SessionType
-	sendPbData.RecvID = pbData.RecvID
-	sendPbData.Content = pbData.Content
-	sendPbData.SendID = pbData.SendID
-	sendPbData.SenderNickName = pbData.SenderNickName
-	sendPbData.SenderFaceURL = pbData.SenderFaceURL
-	sendPbData.ClientMsgID = pbData.ClientMsgID
-	sendPbData.PlatformID = pbData.PlatformID
-	sendPbData.RecvSeq = pbData.RecvSeq
 	//Call push module to send message to the user
-	MsgToUser(&sendPbData, pbData.OfflineInfo, pbData.Options)
+	MsgToUser((*pbPush.PushMsgReq)(&msgFromMQ))
 }
 func (PushConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
 func (PushConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }

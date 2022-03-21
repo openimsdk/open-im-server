@@ -2,7 +2,8 @@ package utils
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/utils"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/token_verify"
 	"testing"
 	"time"
 
@@ -13,7 +14,7 @@ func Test_BuildClaims(t *testing.T) {
 	uid := "1"
 	platform := "PC"
 	ttl := int64(-1)
-	claim := utils.BuildClaims(uid, platform, ttl)
+	claim := token_verify.BuildClaims(uid, platform, ttl)
 	now := time.Now().Unix()
 
 	assert.Equal(t, claim.UID, uid, "uid should equal")
@@ -25,7 +26,7 @@ func Test_BuildClaims(t *testing.T) {
 
 	ttl = int64(60)
 	now = time.Now().Unix()
-	claim = utils.BuildClaims(uid, platform, ttl)
+	claim = token_verify.BuildClaims(uid, platform, ttl)
 	// time difference within 1s
 	assert.Equal(t, claim.RegisteredClaims.ExpiresAt, int64(60)+now, "StandardClaims.ExpiresAt should be equal")
 	assert.Equal(t, claim.RegisteredClaims.IssuedAt, now, "StandardClaims.IssuedAt should be equal")
@@ -37,7 +38,7 @@ func Test_CreateToken(t *testing.T) {
 	platform := int32(1)
 	now := time.Now().Unix()
 
-	tokenString, expiresAt, err := utils.CreateToken(uid, platform)
+	tokenString, expiresAt, err := token_verify.CreateToken(uid, platform)
 
 	assert.NotEmpty(t, tokenString)
 	assert.Equal(t, expiresAt, 604800+now)
@@ -47,36 +48,42 @@ func Test_CreateToken(t *testing.T) {
 func Test_VerifyToken(t *testing.T) {
 	uid := "1"
 	platform := int32(1)
-	tokenString, _, _ := utils.CreateToken(uid, platform)
-	result := utils.VerifyToken(tokenString, uid)
+	tokenString, _, _ := token_verify.CreateToken(uid, platform)
+	result, _ := token_verify.VerifyToken(tokenString, uid)
 	assert.True(t, result)
-	result = utils.VerifyToken(tokenString, "2")
+	result, _ = token_verify.VerifyToken(tokenString, "2")
 	assert.False(t, result)
 }
 
 func Test_ParseRedisInterfaceToken(t *testing.T) {
 	uid := "1"
 	platform := int32(1)
-	tokenString, _, _ := utils.CreateToken(uid, platform)
+	tokenString, _, _ := token_verify.CreateToken(uid, platform)
 
-	claims, err := utils.ParseRedisInterfaceToken([]uint8(tokenString))
+	claims, err := token_verify.ParseRedisInterfaceToken([]uint8(tokenString))
 	assert.Nil(t, err)
 	assert.Equal(t, claims.UID, uid)
 
 	// timeout
 	config.Config.TokenPolicy.AccessExpire = -80
-	tokenString, _, _ = utils.CreateToken(uid, platform)
-	claims, err = utils.ParseRedisInterfaceToken([]uint8(tokenString))
-	assert.Equal(t, err, utils.TokenExpired)
+	tokenString, _, _ = token_verify.CreateToken(uid, platform)
+	claims, err = token_verify.ParseRedisInterfaceToken([]uint8(tokenString))
+	assert.Equal(t, err, constant.ExpiredToken)
 	assert.Nil(t, claims)
 }
 
 func Test_ParseToken(t *testing.T) {
 	uid := "1"
 	platform := int32(1)
-	tokenString, _, _ := utils.CreateToken(uid, platform)
-	claims, err := utils.ParseToken(tokenString)
+	tokenString, _, _ := token_verify.CreateToken(uid, platform)
+	claims, err := token_verify.ParseToken(tokenString)
 	if err == nil {
 		assert.Equal(t, claims.UID, uid)
 	}
+}
+func Test_GetClaimFromToken(t *testing.T) {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVSUQiOiJvcGVuSU0xMjM0NTYiLCJQbGF0Zm9ybSI6IiIsImV4cCI6MTYzODg0NjQ3NiwibmJmIjoxNjM4MjQxNjc2LCJpYXQiOjE2MzgyNDE2NzZ9.W8RZB7ec5ySFj-rGE2Aho2z32g3MprQMdCyPiQu_C2I"
+	c, err := token_verify.GetClaimFromToken(token)
+	assert.Nil(t, c)
+	assert.Nil(t, err)
 }

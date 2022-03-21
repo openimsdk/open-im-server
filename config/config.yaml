@@ -1,47 +1,48 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-serverversion: 1.0.3
+serverversion: 2.0.0
 #---------------Infrastructure configuration---------------------#
 etcd:
-  etcdSchema: openIM
-  etcdAddr: [ 127.0.0.1:2379 ]
+  etcdSchema: openIM  #默认即可
+  etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
 
 mysql:
-  dbMysqlAddress: [ 127.0.0.1:13306 ]
-  dbMysqlUserName: root
-  dbMysqlPassword: openIM
-  dbMysqlDatabaseName: openIM
-  dbTableName: eMsg
+  dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
+  dbMysqlUserName: root #mysql用户名，建议修改
+  dbMysqlPassword: openIM # mysql密码，建议修改
+  dbMysqlDatabaseName: openIM_v2 #默认即可
+  dbTableName: eMsg #默认即可
   dbMsgTableNum: 1
   dbMaxOpenConns: 20
   dbMaxIdleConns: 10
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:37017 ]
+  dbUri: ""#当dbUri值不为空则直接使用该值
+  dbAddress: [ 127.0.0.1:37017 ] #mongo地址 目前仅支持单机，默认即可
   dbDirect: false
   dbTimeout: 10
-  dbDatabase: openIM
+  dbDatabase: openIM  #mongo db 默认即可
   dbSource: admin
-  dbUserName:
-  dbPassword:
+  dbUserName: #mongo用户名，建议先不设置
+  dbPassword: #mongo密码，建议先不设置
   dbMaxPoolSize: 20
-  dbRetainChatRecords: 7
+  dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
 
 redis:
-  dbAddress: 127.0.0.1:16379
+  dbAddress: 127.0.0.1:16379 #redis地址 目前仅支持单机，默认即可
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
-  dbPassWord: openIM
+  dbPassWord: openIM #redis密码 建议修改
 
 kafka:
   ws2mschat:
-    addr: [ 127.0.0.1:9092 ]
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat"
   ms2pschat:
-    addr: [ 127.0.0.1:9092 ]
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ms2ps_chat"
   consumergroupid:
     msgToMongo: mongo
@@ -55,39 +56,80 @@ kafka:
 # The service ip default is empty,
 # automatically obtain the machine's valid network card ip as the service ip,
 # otherwise the configuration ip is preferred
+#如果是单机模式，用0.0.0.0或者不填，默认即可
 serverip: 0.0.0.0
 
-api:
-  openImApiPort: [ 10000 ]
-sdk:
-  openImSdkWsPort: [ 30000 ]
+# endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
+endpoints:
+  api: openim_api
+  cmsapi: openim_cms_api
+  push: openim_push
+  msg_gateway: openim_msg_gateway
+  rpc_auth: openim_rpc_auth
+  rpc_friend: openim_rpc_friend
+  rpc_group: openim_rpc_group
+  rpc_msg: openim_rpc_msg
+  rpc_user: openim_rpc_user
+  rpc_statistic: openim_rpc_statistic
+  rpc_admin_cms: openim_rpc_admin_cms
+  rpc_message_cms: openim_rpc_admin_cms
 
-credential:
+
+api:
+  openImApiPort: [ 10000 ] #api服务端口，默认即可，需要开放此端口或做nginx转发
+cmsapi:
+  openImCmsApiPort: [ 8000 ] #管理后台api服务端口，默认即可，需要开放此端口或做nginx转发
+sdk:
+  openImSdkWsPort: [ 30000 ] #jssdk服务端口，默认即可，项目中使用jssdk才需开放此端口或做nginx转发
+
+credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
   tencent:
     appID: 1302656840
     region: ap-chengdu
     bucket: echat-1302656840
     secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
     secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
-  aliyun:
-    accessKeyId:
-    accessKeySecret:
-    roleArn:
-    regionId:
-    region:
-    bucket:
+  minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化时相应改动
+    bucket: openim
+    location: us-east-1
+    endpoint: http://127.0.0.1:9000
+    accessKeyID: user12345
+    secretAccessKey: key12345
+  ali: # ali oss
+    regionID: "oss-cn-beijing"
+    accessKeyID: ""
+    accessKeySecret: ""
+    stsEndpoint: "sts.cn-beijing.aliyun.com"
+    ossEndpoint: "oss-cn-beijing.aliyuncs.com"
+    bucket: "bucket1"
+    finalHost: "http://bucket1.oss-cn-beijing.aliyuncs.com"
+    stsDurationSeconds: 3600
+    OssRoleArn: "acs:ram::xxx:role/xxx"
 
-rpcport:
+
+
+rpcport: #rpc服务端口 默认即可
   openImUserPort: [ 10100 ]
   openImFriendPort: [ 10200 ]
-  openImOfflineMessagePort: [ 10300]
+  openImOfflineMessagePort: [ 10300 ]
   openImOnlineRelayPort: [ 10400 ]
-  openImGroupPort: [ 10500  ]
+  openImGroupPort: [ 10500 ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
+  openImStatisticsPort: [ 10800 ]
+  openImMessageCmsPort: [ 10900 ]
+  openImAdminCmsPort: [ 11000 ]
+  c2c:
+    callbackBeforeSendMsg:
+      switch: false
+      timeoutStrategy: 1 #1:send
+    callbackAfterSendMsg:
+      switch: false
+  state:
+    stateChange:
+      switch: false
 
-
-rpcregistername:
+rpcregistername: #rpc注册服务名，默认即可
   openImUserName: User
   openImFriendName: Friend
   openImOfflineMessageName: OfflineMessage
@@ -95,78 +137,380 @@ rpcregistername:
   openImOnlineMessageRelayName: OnlineMessageRelay
   openImGroupName: Group
   openImAuthName: Auth
+  OpenImStatisticsName: Statistics
+  OpenImMessageCMSName: MessageCMS
+  openImAdminCMSName: AdminCMS
 
 log:
   storageLocation: ../logs/
   rotationTime: 24
-  remainRotationCount: 5
-  remainLogLevel: 6
+  remainRotationCount: 3 #日志数量
+  #日志级别 6表示全都打印，测试阶段建议设置为6
+  remainLogLevel: 4
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
   elasticSearchPassword: ""
 
-modulename:
+modulename: #日志文件按模块命名，默认即可
   longConnSvrName: msg_gateway
   msgTransferName: msg_transfer
   pushName: push
 
 longconnsvr:
-  openImWsPort: [ 17778 ]
+  openImWsPort: [ 17778 ] # ws服务端口，默认即可，要开放此端口或做nginx转发
   websocketMaxConnNum: 10000
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10
 
 push:
-  tpns:
+  tpns: #腾讯推送，暂未测试 暂不要使用
     ios:
       accessID: 1600018281
       secretKey: 3cd68a77a95b89e5089a1aca523f318f
     android:
       accessID: 111
       secretKey: 111
-  jpns:
+  jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
     appKey: cf47465a368f24c659608e7e
     masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
 manager:
-  appManagerUid: ["openIM123456","openIM654321"]
-  secrets: ["openIM1","openIM2"]
+  #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
+  appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]
+  secrets: [ "openIM1","openIM2", "openIM333", "openIMAdmin"]
 
 secret: tuoyun
-
+# 多端互踢策略
+# 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
 multiloginpolicy: 1
 
 #token config
 tokenpolicy:
-  accessSecret: "open_im_server"
+  accessSecret: "open_im_server" #token生成相关，默认即可
   # Token effective time day as a unit
-  accessExpire: 7
+  accessExpire: 3650 #token过期时间（天） 默认即可
+messageverify:
+  friendVerify: false
+#  c2c:
+#    callbackBeforeSendMsg:
+#      switch: false
+#      timeoutStrategy: 1 #1:send
+#    callbackAfterSendMsg:
+#      switch: false
+#  state:
+#    stateChange:
+#      switch: false
+#ios系统推送声音以及标记计数
+iospush:
+  pushSound: "xxx"
+  badgeCount: true
 
-messagecallback:
-  callbackSwitch: false
-  callbackUrl: "http://www.xxx.com/msg/judge"
-  #TimeOut use second as unit
-  callbackTimeOut: 10
+callback:
+  # callback url 需要自行更换callback url
+  callbackUrl : "http://127.0.0.1:8080/callback"
+  # 开启关闭操作前后回调的配置
+  callbackbeforeSendSingleMsg:
+    enable: false # 回调是否启用
+    callbackTimeOut: 2 # 回调超时时间
+    CallbackFailedContinue: true # 回调超时是否继续执行代码
+  callbackAfterSendSingleMsg:
+    enable: false
+    callbackTimeOut: 2
+  callbackBeforeSendGroupMsg:
+    enable: false
+    callbackTimeOut: 2
+    CallbackFailedContinue: true
+  callbackAfterSendGroupMsg:
+    enable: false
+    callbackTimeOut: 2
+  callbackWordFilter:
+    enable: false
+    callbackTimeOut: 2
+    CallbackFailedContinue: true
+
+
+notification:
+  groupCreated:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: true
+      title: "create group title" # xx create the group
+      desc: "create group desc"
+      ext: "create group ext"
+    defaultTips:
+      tips: "create the group"  # xx create the group
+
+  groupInfoSet:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupInfoSet title"
+      desc: "groupInfoSet desc"
+      ext: "groupInfoSet ext"
+    defaultTips:
+      tips: "modified the group profile"  # group info changed by xx
+
+  joinGroupApplication:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "joinGroupApplication title"
+      desc: "joinGroupApplication desc"
+      ext: "joinGroupApplication ext"
+    defaultTips:
+      tips: "apply to join the group"  # group info changed by xx
+
+  memberQuit:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "memberQuit title"
+      desc: "memberQuit desc"
+      ext: "memberQuit ext"
+    defaultTips:
+      tips: "quit group chat"  # group info changed by xx
+
+  groupApplicationAccepted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupApplicationAccepted title"
+      desc: "groupApplicationAccepted desc"
+      ext: "groupApplicationAccepted ext"
+    defaultTips:
+      tips: "was allowed to join the group"  # group info changed by xx
+
+  groupApplicationRejected:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: " title"
+      desc: " desc"
+      ext: " ext"
+    defaultTips:
+      tips: "was rejected into the group"  # group info changed by xx
+
+  groupOwnerTransferred:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupOwnerTransferred title"
+      desc: "groupOwnerTransferred desc"
+      ext: "groupOwnerTransferred ext"
+    defaultTips:
+      tips: "become a new group owner"  # group info changed by xx
+
+  memberKicked:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "memberKicked title"
+      desc: "memberKicked desc"
+      ext: "memberKicked ext"
+    defaultTips:
+      tips: "was kicked out of the group"  # group info changed by xx
+
+  memberInvited:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "memberInvited title"
+      desc: "memberInvited desc"
+      ext: "memberInvited ext"
+    defaultTips:
+      tips: "was invited into the group"  # group info changed by xx
+
+  memberEnter:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "memberEnter title"
+      desc: "memberEnter desc"
+      ext: "memberEnter ext"
+    defaultTips:
+      tips: "entered the group"  # group info changed by xx
+
+  #############################friend#################################
+
+  friendApplicationAdded:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Somebody applies to add you as a friend"
+      desc: "Somebody applies to add you as a friend"
+      ext: "Somebody applies to add you as a friend"
+    defaultTips:
+      tips: "I applies to add you as a friend"  #
+
+  friendApplicationApproved:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Someone applies to add your friend application"
+      desc: "Someone applies to add your friend application"
+      ext: "Someone applies to add your friend application"
+    defaultTips:
+      tips: "I applies to add your friend application"  #
+
+
+  friendApplicationRejected:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Someone rejected your friend application"
+      desc: "Someone rejected your friend application"
+      ext: "Someone rejected your friend application"
+    defaultTips:
+      tips: "I rejected your friend application"  #
+
+
+
+
+
+  friendAdded:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: true
+      title: "We have become friends"
+      desc: "We have become friends"
+      ext: "We have become friends"
+    defaultTips:
+      tips: "We have become friends"  #
+
+
+
+  friendDeleted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "deleted a friend"
+      desc: "deleted a friend"
+      ext: "deleted a friend"
+    defaultTips:
+      tips: "deleted a friend"  #
+
+
+  friendRemarkSet:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Your friend's profile has been changed"
+      desc: "Your friend's profile has been changed"
+      ext: "Your friend's profile has been changed"
+    defaultTips:
+      tips: "Your friend's profile has been changed"  #
+
+
+
+  blackAdded:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "blocked a user"
+      desc: "blocked a user"
+      ext: "blocked a user"
+    defaultTips:
+      tips: "blocked a user"  #
+
+
+  blackDeleted:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Remove a blocked user"
+      desc: "Remove a blocked user"
+      ext: "Remove a blocked user"
+    defaultTips:
+      tips: "Remove a blocked user"
+
+  #####################user#########################
+  userInfoUpdated:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "Remove a blocked user"
+      desc: "Remove a blocked user"
+      ext: "Remove a blocked user"
+    defaultTips:
+      tips: "remove a blocked user"
+
+  #####################conversation#########################
+  conversationOptUpdate:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+      offlinePush:
+        switch: true
+        title: "conversation opt update"
+        desc: "conversation opt update"
+        ext: "conversation opt update"
+      defaultTips:
+        tips: "conversation opt update"
+
 
 
 #---------------demo configuration---------------------#
 #The following configuration items are applied to openIM Demo configuration
+#是否启动demo，如果自身没有账号体系，设置为true
 demoswitch: true
 demo:
+  #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
   openImDemoPort: [ 42233 ]
-  alismsverify:
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
-    signName: OpenIM Corporation
-    verificationCodeTemplateCode: SMS_2268101641
-  superCode: 666666
-  mail:
+  alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，必须修改
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+    signName: 托云信息技术
+    verificationCodeTemplateCode: SMS_226810164
+  superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
+  #  second
+  codeTTL: 300
+  mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
     title: "openIM"
-    senderMail: "1765567899@qq.com"
-    senderAuthorizationCode: "1gxyausfoevlzbfag"
+    senderMail: "765567899@qq.com"
+    senderAuthorizationCode: "gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
-    smtpPort: 25
+    smtpPort: 25   #需开放此端口 出口方向
+
+
 
 

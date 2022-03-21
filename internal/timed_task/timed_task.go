@@ -17,7 +17,7 @@ func (t *TimeTask) timedDeleteUserChat() {
 	for i := 0; i < count; i++ {
 		time.Sleep(10 * time.Millisecond)
 		uid, _ := db.DB.MgoSkipUID(i)
-		db.DB.DelUserChat(uid)
+		db.DB.DelUserChatMongo2(uid)
 	}
 
 	go func() {

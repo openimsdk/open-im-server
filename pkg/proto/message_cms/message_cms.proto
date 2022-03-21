@@ -1,0 +1,71 @@
+syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./message_cms;message_cms";
+package message_cms;
+
+message BoradcastMessageReq {
+    string Message = 1;
+    string OperationID = 2;
+}
+
+message BoradcastMessageResp {
+
+}
+
+message MassSendMessageReq {
+    string Message = 1;
+    repeated string UserIds = 2;
+    string OperationID = 3;
+}
+
+message MassSendMessageResp {
+    
+}
+
+message GetChatLogsReq {
+    string Content = 1;
+    string UserId = 2;
+    string GroupId = 3;
+    string Date = 4;
+    int32 SessionType = 5;
+    int32 ContentType = 6;
+    server_api_params.RequestPagination Pagination = 7;
+    string OperationID = 8;
+
+}
+
+message ChatLogs {
+    int32 SessionType = 1;
+    int32 ContentType = 2;
+    string SenderNickName = 3;
+    string SenderId = 4;
+    string ReciverNickName = 5;
+    string ReciverId = 6;
+    string SearchContent = 7;
+    string WholeContent = 8;
+    string GroupId = 9;
+    string GroupName = 10;
+    string Date = 11;
+}
+
+message GetChatLogsResp {
+    repeated ChatLogs ChatLogs = 1;
+    server_api_params.ResponsePagination Pagination = 2;
+    int32 ChatLogsNum = 3;
+}
+
+message WithdrawMessageReq  {
+    string ServerMsgId = 1;
+    string OperationID = 2;
+}
+
+message WithdrawMessageResp {
+    
+}
+
+service messageCMS {
+    rpc BoradcastMessage(BoradcastMessageReq) returns(BoradcastMessageResp);
+    rpc MassSendMessage(MassSendMessageReq) returns(MassSendMessageResp);
+    rpc GetChatLogs(GetChatLogsReq) returns(GetChatLogsResp);
+    rpc WithdrawMessage(WithdrawMessageReq) returns(WithdrawMessageResp);
+}

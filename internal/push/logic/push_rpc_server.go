@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/push"
-	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"context"
 	"google.golang.org/grpc"
@@ -49,23 +48,8 @@ func (r *RPCServer) run() {
 	}
 }
 func (r *RPCServer) PushMsg(_ context.Context, pbData *pbPush.PushMsgReq) (*pbPush.PushMsgResp, error) {
-	sendPbData := pbRelay.MsgToUserReq{}
-	sendPbData.SendTime = pbData.SendTime
-	sendPbData.OperationID = pbData.OperationID
-	sendPbData.ServerMsgID = pbData.MsgID
-	sendPbData.MsgFrom = pbData.MsgFrom
-	sendPbData.ContentType = pbData.ContentType
-	sendPbData.SenderNickName = pbData.SenderNickName
-	sendPbData.SenderFaceURL = pbData.SenderFaceURL
-	sendPbData.ClientMsgID = pbData.ClientMsgID
-	sendPbData.SessionType = pbData.SessionType
-	sendPbData.RecvID = pbData.RecvID
-	sendPbData.Content = pbData.Content
-	sendPbData.SendID = pbData.SendID
-	sendPbData.PlatformID = pbData.PlatformID
-	sendPbData.RecvSeq = pbData.RecvSeq
 	//Call push module to send message to the user
-	MsgToUser(&sendPbData, pbData.OfflineInfo, pbData.Options)
+	MsgToUser(pbData)
 	return &pbPush.PushMsgResp{
 		ResultCode: 0,
 	}, nil

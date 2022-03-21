@@ -1,24 +1,12 @@
 syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 option go_package = "./push;pbPush";
 package push;
 
 message PushMsgReq {
-  string SendID = 1;
-  string RecvID = 2;
-  string Content = 3;
-  int64 RecvSeq = 4;
-  int64 SendTime = 5;
-  int32 MsgFrom = 6;
-  int32 ContentType = 7;
-  int32 SessionType = 8;
-  string OperationID = 9;
-  string MsgID = 10;
-  string OfflineInfo = 11;
-  string Options =12;
-  int32  PlatformID =13;
-  string SenderNickName = 14;
-  string SenderFaceURL = 15;
-  string ClientMsgID = 16;
+  string operationID = 1;
+  server_api_params.MsgData msgData = 2;
+  string pushToUserID = 3;
 }
 message PushMsgResp{
   int32   ResultCode = 1;

@@ -1,19 +1,11 @@
 #!/usr/bin/env bash
-source ./style_info.cfg
-
-echo "docker-compose ps..................................."
+echo "docker-compose ps..........................."
 docker-compose ps
 
+echo "check OpenIM, waiting 30s...................."
+sleep 30
 
-echo  -e "check OpenIM result............................."
-i=1
-t=10
-while [ $i -le $t ]
-do
-        p=`awk 'BEGIN{printf "%.2f%\n",('$i'/'$t')*100}'`
-        echo -e ${GREEN_PREFIX} "=> $p"${COLOR_SUFFIX}
-        sleep 5
-        let i++
-done
-
+echo "check OpenIM................................"
 ./check_all.sh
+
+

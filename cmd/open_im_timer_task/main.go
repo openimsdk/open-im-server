@@ -40,19 +40,19 @@ func main() {
 	//	}
 	//}
 	for {
-		uidList, err := im_mysql_model.SelectAllUID()
+		uidList, err := im_mysql_model.SelectAllUserID()
 		if err != nil {
-			log.NewError("999999", err.Error())
+			//log.NewError("999999", err.Error())
 		} else {
 			for _, v := range uidList {
 				minSeq, err := commonDB.DB.GetMinSeqFromMongo(v)
 				if err != nil {
-					log.NewError("999999", "get user minSeq err", err.Error(), v)
+					//log.NewError("999999", "get user minSeq err", err.Error(), v)
 					continue
 				} else {
 					err := commonDB.DB.SetUserMinSeq(v, minSeq)
 					if err != nil {
-						log.NewError("999999", "set user minSeq err", err.Error(), v)
+						//log.NewError("999999", "set user minSeq err", err.Error(), v)
 					}
 				}
 				time.Sleep(time.Duration(100) * time.Millisecond)

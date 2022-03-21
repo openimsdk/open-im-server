@@ -1,27 +1,16 @@
 syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 option go_package = "./relay;pbRelay";
 package relay;
 
-message MsgToUserReq {
-  string SendID = 1;
-  string RecvID = 2;
-  string Content = 5;
-  int64  RecvSeq = 6;
-  int64 SendTime = 7;
-  int32  MsgFrom = 8;
-  int32  ContentType = 9;
-  int32  SessionType = 10;
-  string OperationID = 11;
-  string ServerMsgID = 12;
-  int32  PlatformID = 13;
-  string SenderNickName = 14;
-  string SenderFaceURL = 15;
-  string ClientMsgID = 16;
+message OnlinePushMsgReq {
+  string OperationID = 1;
+  server_api_params.MsgData msgData = 2;
+  string pushToUserID = 3;
 }
-message MsgToUserResp{
+message OnlinePushMsgResp{
 repeated SingleMsgToUser resp = 1;
-}
-//message SendMsgByWSReq{
+}//message SendMsgByWSReq{
 //  string SendID = 1;
 //  string RecvID = 2;
 //  string Content = 3;
@@ -32,13 +21,41 @@ repeated SingleMsgToUser resp = 1;
 //  string OperationID = 8;
 //  int64  PlatformID = 9;
 //}
+
 message SingleMsgToUser{
   int64   ResultCode = 1;
   string  RecvID = 2;
   int32   RecvPlatFormID = 3;
 }
+message GetUsersOnlineStatusReq{
+  repeated string  userIDList = 1;
+  string  operationID = 2;
+  string opUserID = 3;
+}
+message GetUsersOnlineStatusResp{
+  int32  errCode = 1;
+  string errMsg = 2;
+  repeated SuccessResult successResult = 3;
+  repeated FailedDetail failedResult = 4;
+  message SuccessDetail{
+    string platform = 1;
+    string status = 2;
+  }
+  message FailedDetail{
+    string userID = 3;
+    int32  errCode = 1;
+    string errMsg = 2;
+  }
+  message SuccessResult{
+    string userID = 1;
+    string status = 2;
+    repeated SuccessDetail detailPlatformStatus = 3;
+
+  }
+}
 service OnlineMessageRelayService {
-  rpc MsgToUser(MsgToUserReq) returns(MsgToUserResp);
+  rpc OnlinePushMsg(OnlinePushMsgReq) returns(OnlinePushMsgResp);
+  rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq)returns(GetUsersOnlineStatusResp);
 //  rpc SendMsgByWS(SendMsgByWSReq)  returns(MsgToUserResp);
 }
 

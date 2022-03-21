@@ -1,50 +1,40 @@
 package apiThird
 
 import (
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
-	log2 "Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
+	"github.com/fatih/structs"
+
+	//"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 	sts "github.com/tencentyun/qcloud-cos-sts-sdk/go"
 	"net/http"
 	"time"
 )
 
-type paramsTencentCloudStorageCredential struct {
-	Token       string `json:"token"`
-	OperationID string `json:"operationID"`
-}
-
-var lastTime int64
-var lastRes *sts.CredentialResult
-
 func TencentCloudStorageCredential(c *gin.Context) {
-	params := paramsTencentCloudStorageCredential{}
-	if err := c.BindJSON(&params); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Parameter parsing error，please check the parameters and request service again"})
+	req := api.TencentCloudStorageCredentialReq{}
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-
-	log2.Info(params.Token, params.OperationID, "api TencentUpLoadCredential call start...")
-
-	if time.Now().Unix()-lastTime < 10 && lastRes != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"errCode": 0,
-			"errMsg":  "",
-			"region":  config.Config.Credential.Tencent.Region,
-			"bucket":  config.Config.Credential.Tencent.Bucket,
-			"data":    lastRes,
-		})
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-
-	lastTime = time.Now().Unix()
+	log.NewInfo(req.OperationID, "TencentCloudStorageCredential args ", userID)
 
 	cli := sts.NewClient(
 		config.Config.Credential.Tencent.SecretID,
 		config.Config.Credential.Tencent.SecretKey,
 		nil,
 	)
-	log2.Info(c.Request.Header.Get("token"), c.PostForm("optionID"), "api TencentUpLoadCredential sts.NewClient cli = %v", cli)
 
 	opt := &sts.CredentialOptions{
 		DurationSeconds: int64(time.Hour.Seconds()),
@@ -64,29 +54,19 @@ func TencentCloudStorageCredential(c *gin.Context) {
 			},
 		},
 	}
-	log2.Info(c.Request.Header.Get("token"), c.PostForm("optionID"), "api TencentUpLoadCredential sts.CredentialOptions opt = %v", opt)
-
 	res, err := cli.GetCredential(opt)
+	resp := api.TencentCloudStorageCredentialResp{}
 	if err != nil {
-		log2.Error(c.Request.Header.Get("token"), c.PostForm("optionID"), "api TencentUpLoadCredential cli.GetCredential err = %s", err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"errCode": config.ErrTencentCredential.ErrCode,
-			"errMsg":  err.Error(),
-			"bucket":  "",
-			"region":  "",
-			"data":    res,
-		})
-		return
+		resp.ErrCode = constant.ErrTencentCredential.ErrCode
+		resp.ErrMsg = err.Error()
+	} else {
+		resp.CosData.Bucket = config.Config.Credential.Tencent.Bucket
+		resp.CosData.Region = config.Config.Credential.Tencent.Region
+		resp.CosData.CredentialResult = res
 	}
-	log2.Info(c.Request.Header.Get("token"), c.PostForm("optionID"), "api TencentUpLoadCredential cli.GetCredential success res = %v, res.Credentials = %v", res, res.Credentials)
 
-	lastRes = res
+	resp.Data = structs.Map(&resp.CosData)
+	log.NewInfo(req.OperationID, "TencentCloudStorageCredential return ", resp)
 
-	c.JSON(http.StatusOK, gin.H{
-		"errCode": 0,
-		"errMsg":  "",
-		"region":  config.Config.Credential.Tencent.Region,
-		"bucket":  config.Config.Credential.Tencent.Bucket,
-		"data":    res,
-	})
+	c.JSON(http.StatusOK, resp)
 }

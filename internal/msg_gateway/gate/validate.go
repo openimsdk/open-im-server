@@ -58,8 +58,8 @@ type SeqListData struct {
 
 func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, errMsg string, returnData interface{}) {
 	switch r {
-	case constant.WSSendMsg:
-		data := open_im_sdk.UserSendMsgReq{}
+	case constant.WSSendMsg | constant.WSSendSignalMsg:
+		data := open_im_sdk.MsgData{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
 			log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
 			return false, 203, err.Error(), nil

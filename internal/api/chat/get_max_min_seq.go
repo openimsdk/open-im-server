@@ -3,9 +3,9 @@ package apiChat
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbMsg "Open_IM/pkg/proto/chat"
-	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -19,7 +19,7 @@ type paramsUserNewestSeq struct {
 	MsgIncr       int    `json:"msgIncr" binding:"required"`
 }
 
-func UserGetSeq(c *gin.Context) {
+func GetSeq(c *gin.Context) {
 	params := paramsUserNewestSeq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -27,8 +27,8 @@ func UserGetSeq(c *gin.Context) {
 	}
 
 	token := c.Request.Header.Get("token")
-	if !utils.VerifyToken(token, params.SendID) {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err"})
+	if ok, err := token_verify.VerifyToken(token, params.SendID); !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "token validate err" + err.Error()})
 		return
 	}
 	pbData := pbMsg.GetMaxAndMinSeqReq{}
@@ -42,7 +42,8 @@ func UserGetSeq(c *gin.Context) {
 	msgClient := pbMsg.NewChatClient(grpcConn)
 	reply, err := msgClient.GetMaxAndMinSeq(context.Background(), &pbData)
 	if err != nil {
-		log.ErrorByKv("rpc call failed to getNewSeq", pbData.OperationID, "err", err, "pbData", pbData.String())
+		log.NewError(params.OperationID, "UserGetSeq rpc failed, ", params, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "UserGetSeq rpc failed, " + err.Error()})
 		return
 	}
 

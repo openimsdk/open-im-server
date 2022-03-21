@@ -13,21 +13,24 @@ import (
 type JPushResp struct {
 }
 
-func JGAccountListPush(accounts []string, content, detailContent, platform string) ([]byte, error) {
+func JGAccountListPush(accounts []string, alert, detailContent, platform string) ([]byte, error) {
 
 	var pf requestBody.Platform
 	_ = pf.SetPlatform(platform)
 	var au requestBody.Audience
 	au.SetAlias(accounts)
 	var no requestBody.Notification
-	no.SetAlert(content)
+	no.SetAlert(alert, platform)
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)
+	var o requestBody.Options
+	o.SetApnsProduction(false)
 	var po requestBody.PushObj
 	po.SetPlatform(&pf)
 	po.SetAudience(&au)
 	po.SetNotification(&no)
 	po.SetMessage(&me)
+	po.SetOptions(&o)
 
 	con, err := json.Marshal(po)
 	if err != nil {

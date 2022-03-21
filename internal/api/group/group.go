@@ -1,351 +1,538 @@
 package group
 
 import (
-	pb "Open_IM/pkg/proto/group"
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	rpc "Open_IM/pkg/proto/group"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/utils"
 	"context"
-	"fmt"
+
 	"github.com/gin-gonic/gin"
+
 	"net/http"
 	"strings"
+
+	jsonData "Open_IM/internal/utils"
 )
 
-type InviteUserToGroupReq struct {
-	GroupID     string   `json:"groupID" binding:"required"`
-	UidList     []string `json:"uidList" binding:"required"`
-	Reason      string   `json:"reason"`
-	OperationID string   `json:"operationID" binding:"required"`
-}
-
-type GetJoinedGroupListReq struct {
-	OperationID string `json:"operationID" binding:"required"`
-}
-
-type KickGroupMemberReq struct {
-	GroupID     string                    `json:"groupID"`
-	UidListInfo []*pb.GroupMemberFullInfo `json:"uidListInfo" binding:"required"`
-	Reason      string                    `json:"reason"`
-	OperationID string                    `json:"operationID" binding:"required"`
-}
-
 func KickGroupMember(c *gin.Context) {
-	log.Info("", "", "KickGroupMember start....")
-
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-	client := pb.NewGroupClient(etcdConn)
-
-	params := KickGroupMemberReq{}
+	params := api.KickGroupMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 
-	req := &pb.KickGroupMemberReq{
-		OperationID: params.OperationID,
-		GroupID:     params.GroupID,
-		Token:       c.Request.Header.Get("token"),
-
-		UidListInfo: params.UidListInfo,
+	req := &rpc.KickGroupMemberReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
 	}
-	log.Info(req.Token, req.OperationID, "recv req: ", req.String())
 
+	log.NewInfo(req.OperationID, "KickGroupMember args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.KickGroupMember(context.Background(), req)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "GetGroupMemberList failed, err: ", err.Error())
+		log.NewError(req.OperationID, "GetGroupMemberList failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 
-	type KickGroupMemberResp struct {
-		ErrorCode int32       `json:"errCode"`
-		ErrorMsg  string      `json:"errMsg"`
-		Data      []Id2Result `json:"data"`
+	var memberListResp api.KickGroupMemberResp
+	memberListResp.ErrMsg = RpcResp.ErrMsg
+	memberListResp.ErrCode = RpcResp.ErrCode
+	for _, v := range RpcResp.Id2ResultList {
+		memberListResp.UserIDResultList = append(memberListResp.UserIDResultList, &api.UserIDResult{UserID: v.UserID, Result: v.Result})
+	}
+	if len(memberListResp.UserIDResultList) == 0 {
+		memberListResp.UserIDResultList = []*api.UserIDResult{}
 	}
 
-	var memberListResp KickGroupMemberResp
-	memberListResp.ErrorMsg = RpcResp.ErrorMsg
-	memberListResp.ErrorCode = RpcResp.ErrorCode
-	for _, v := range RpcResp.Id2Result {
-		memberListResp.Data = append(memberListResp.Data,
-			Id2Result{UId: v.UId,
-				Result: v.Result})
-	}
+	log.NewInfo(req.OperationID, "KickGroupMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
-}
-
-type GetGroupMembersInfoReq struct {
-	GroupID     string   `json:"groupID"`
-	MemberList  []string `json:"memberList"`
-	OperationID string   `json:"operationID"`
-}
-type GetGroupMembersInfoResp struct {
-	ErrorCode int32          `json:"errCode"`
-	ErrorMsg  string         `json:"errMsg"`
-	Data      []MemberResult `json:"data"`
 }
 
 func GetGroupMembersInfo(c *gin.Context) {
-	log.Info("", "", "GetGroupMembersInfo start....")
-
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-	client := pb.NewGroupClient(etcdConn)
-
-	params := GetGroupMembersInfoReq{}
+	params := api.GetGroupMembersInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-
-	req := &pb.GetGroupMembersInfoReq{
-		OperationID: params.OperationID,
-		GroupID:     params.GroupID,
-		MemberList:  params.MemberList,
-		Token:       c.Request.Header.Get("token"),
+	req := &rpc.GetGroupMembersInfoReq{}
+	utils.CopyStructFields(req, params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		//c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		api.SetErrCodeMsg(c, http.StatusInternalServerError)
+		return
 	}
-	log.Info(req.Token, req.OperationID, "recv req: ", len(params.MemberList))
+	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
 
 	RpcResp, err := client.GetGroupMembersInfo(context.Background(), req)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "GetGroupMemberList failed, err: ", err.Error())
+		log.NewError(req.OperationID, "GetGroupMemberList failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 
-	var memberListResp GetGroupMembersInfoResp
-	memberListResp.ErrorMsg = RpcResp.ErrorMsg
-	memberListResp.ErrorCode = RpcResp.ErrorCode
-	for _, v := range RpcResp.MemberList {
-		memberListResp.Data = append(memberListResp.Data,
-			MemberResult{GroupId: req.GroupID,
-				UserId:   v.UserId,
-				Role:     v.Role,
-				JoinTime: uint64(v.JoinTime),
-				Nickname: v.NickName,
-				FaceUrl:  v.FaceUrl})
-	}
+	memberListResp := api.GetGroupMembersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
+	memberListResp.Data = jsonData.JsonDataList(RpcResp.MemberList)
+	log.NewInfo(req.OperationID, "GetGroupMembersInfo api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
-}
-
-type GetGroupMemberListReq struct {
-	GroupID     string `json:"groupID"`
-	Filter      int32  `json:"filter"`
-	NextSeq     int32  `json:"nextSeq"`
-	OperationID string `json:"operationID"`
-}
-type getGroupAllMemberReq struct {
-	GroupID     string `json:"groupID"`
-	OperationID string `json:"operationID"`
-}
-
-type MemberResult struct {
-	GroupId  string `json:"groupID"`
-	UserId   string `json:"userId"`
-	Role     int32  `json:"role"`
-	JoinTime uint64 `json:"joinTime"`
-	Nickname string `json:"nickName"`
-	FaceUrl  string `json:"faceUrl"`
 }
 
 func GetGroupMemberList(c *gin.Context) {
-	log.Info("", "", "GetGroupMemberList start....")
-
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-	client := pb.NewGroupClient(etcdConn)
-
-	params := GetGroupMemberListReq{}
+	params := api.GetGroupMemberListReq{}
 	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pb.GetGroupMemberListReq{
-		OperationID: params.OperationID,
-		Filter:      params.Filter,
-		NextSeq:     params.NextSeq,
-		GroupID:     params.GroupID,
-		Token:       c.Request.Header.Get("token"),
+	req := &rpc.GetGroupMemberListReq{}
+	utils.CopyStructFields(req, params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
 	}
-	log.Info(req.Token, req.OperationID, "recv req: ", req.String())
+	log.NewInfo(req.OperationID, "GetGroupMemberList args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+
 	RpcResp, err := client.GetGroupMemberList(context.Background(), req)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "GetGroupMemberList failed, err: ", err.Error())
+		log.NewError(req.OperationID, "GetGroupMemberList failed, ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 
-	type GetGroupMemberListResp struct {
-		ErrorCode int32          `json:"errCode"`
-		ErrorMsg  string         `json:"errMsg"`
-		NextSeq   int32          `json:"nextSeq"`
-		Data      []MemberResult `json:"data"`
-	}
+	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
+	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
 
-	var memberListResp GetGroupMemberListResp
-	memberListResp.ErrorMsg = RpcResp.ErrorMsg
-	memberListResp.ErrorCode = RpcResp.ErrorCode
-	memberListResp.NextSeq = RpcResp.NextSeq
-	for _, v := range RpcResp.MemberList {
-		memberListResp.Data = append(memberListResp.Data,
-			MemberResult{GroupId: req.GroupID,
-				UserId:   v.UserId,
-				Role:     v.Role,
-				JoinTime: uint64(v.JoinTime),
-				Nickname: v.NickName,
-				FaceUrl:  v.FaceUrl})
-	}
+	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
-
 }
 
-func GetGroupAllMember(c *gin.Context) {
-	log.Info("", "", "GetGroupAllMember start....")
-
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-	client := pb.NewGroupClient(etcdConn)
-
-	params := getGroupAllMemberReq{}
+func GetGroupAllMemberList(c *gin.Context) {
+	params := api.GetGroupAllMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pb.GetGroupAllMemberReq{
-		GroupID:     params.GroupID,
-		OperationID: params.OperationID,
-		Token:       c.Request.Header.Get("token"),
+	req := &rpc.GetGroupAllMemberReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
 	}
-	log.Info(req.Token, req.OperationID, "recv req: ", req.String())
+	log.NewInfo(req.OperationID, "GetGroupAllMember args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.GetGroupAllMember(context.Background(), req)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "GetGroupAllMember failed, err: ", err.Error())
+		log.NewError(req.OperationID, "GetGroupAllMember failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 
-	type GetGroupMemberListResp struct {
-		ErrorCode int32          `json:"errCode"`
-		ErrorMsg  string         `json:"errMsg"`
-		Data      []MemberResult `json:"data"`
-	}
-
-	var memberListResp GetGroupMemberListResp
-	memberListResp.ErrorMsg = RpcResp.ErrorMsg
-	memberListResp.ErrorCode = RpcResp.ErrorCode
-	for _, v := range RpcResp.MemberList {
-		memberListResp.Data = append(memberListResp.Data,
-			MemberResult{GroupId: req.GroupID,
-				UserId:   v.UserId,
-				Role:     v.Role,
-				JoinTime: uint64(v.JoinTime),
-				Nickname: v.NickName,
-				FaceUrl:  v.FaceUrl})
-	}
+	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
+	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
+	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
-}
-
-type groupResult struct {
-	GroupId      string `json:"groupId"`
-	GroupName    string `json:"groupName"`
-	Notification string `json:"notification"`
-	Introduction string `json:"introduction"`
-	FaceUrl      string `json:"faceUrl"`
-	OwnerId      string `json:"ownerId"`
-	CreateTime   uint64 `json:"createTime"`
-	MemberCount  uint32 `json:"memberCount"`
 }
 
 func GetJoinedGroupList(c *gin.Context) {
-	log.Info("", "", "GetJoinedGroupList start....")
-
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-	fmt.Println("config:    ", etcdConn, config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-	client := pb.NewGroupClient(etcdConn)
-
-	params := GetJoinedGroupListReq{}
+	params := api.GetJoinedGroupListReq{}
 	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pb.GetJoinedGroupListReq{
-		OperationID: params.OperationID,
-		Token:       c.Request.Header.Get("token"),
+	req := &rpc.GetJoinedGroupListReq{}
+	utils.CopyStructFields(req, params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
 	}
-	log.Info(req.Token, req.OperationID, "recv req: ", req.String())
+	log.NewInfo(req.OperationID, "GetJoinedGroupList args ", req.String())
 
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.GetJoinedGroupList(context.Background(), req)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "GetJoinedGroupList failed, err: ", err.Error())
+		log.NewError(req.OperationID, "GetJoinedGroupList failed  ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
-	log.Info(req.Token, req.OperationID, "GetJoinedGroupList: ", RpcResp)
 
-	type GetJoinedGroupListResp struct {
-		ErrorCode int32         `json:"errCode"`
-		ErrorMsg  string        `json:"errMsg"`
-		Data      []groupResult `json:"data"`
-	}
-
-	var GroupListResp GetJoinedGroupListResp
-	GroupListResp.ErrorCode = RpcResp.ErrorCode
-	GroupListResp.ErrorMsg = RpcResp.ErrorMsg
-	for _, v := range RpcResp.GroupList {
-		GroupListResp.Data = append(GroupListResp.Data,
-			groupResult{GroupId: v.GroupId, GroupName: v.GroupName,
-				Notification: v.Notification,
-				Introduction: v.Introduction,
-				FaceUrl:      v.FaceUrl,
-				OwnerId:      v.OwnerId,
-				CreateTime:   v.CreateTime,
-				MemberCount:  v.MemberCount})
-	}
+	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
+	GroupListResp.Data = jsonData.JsonDataList(GroupListResp.GroupInfoList)
+	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
 	c.JSON(http.StatusOK, GroupListResp)
 }
 
-type Id2Result struct {
-	UId    string `json:"uid"`
-	Result int32  `json:"result"`
-}
-
 func InviteUserToGroup(c *gin.Context) {
-	log.Info("", "", "InviteUserToGroup start....")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-	client := pb.NewGroupClient(etcdConn)
-
-	params := InviteUserToGroupReq{}
+	params := api.InviteUserToGroupReq{}
 	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &pb.InviteUserToGroupReq{
-		OperationID: params.OperationID,
-		GroupID:     params.GroupID,
-		Reason:      params.Reason,
-		UidList:     params.UidList,
-		Token:       c.Request.Header.Get("token"),
+	req := &rpc.InviteUserToGroupReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
 	}
-	log.Info(req.Token, req.OperationID, "recv req: ", req.String())
+	log.NewInfo(req.OperationID, "InviteUserToGroup args ", req.String())
 
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.InviteUserToGroup(context.Background(), req)
 	if err != nil {
-		log.Error(req.Token, req.OperationID, "InviteUserToGroup failed, err: ", err.Error())
+		log.NewError(req.OperationID, "InviteUserToGroup failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 
-	type InviteUserToGroupResp struct {
-		ErrorCode int32       `json:"errCode"`
-		ErrorMsg  string      `json:"errMsg"`
-		I2R       []Id2Result `json:"data"`
+	resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	for _, v := range RpcResp.Id2ResultList {
+		resp.UserIDResultList = append(resp.UserIDResultList, &api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
 
-	var iResp InviteUserToGroupResp
-	iResp.ErrorMsg = RpcResp.ErrorMsg
-	iResp.ErrorCode = RpcResp.ErrorCode
-	for _, v := range RpcResp.Id2Result {
-		iResp.I2R = append(iResp.I2R, Id2Result{UId: v.UId, Result: v.Result})
+	if len(resp.UserIDResultList) == 0 {
+		resp.UserIDResultList = *new([]*api.UserIDResult)
 	}
 
-	//resp := gin.H{"errCode": RpcResp.ErrorCode, "errMsg": RpcResp.ErrorMsg, "data": RpcResp.Id2Result}
-	c.JSON(http.StatusOK, iResp)
+	log.NewInfo(req.OperationID, "InviteUserToGroup api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+func CreateGroup(c *gin.Context) {
+	params := api.CreateGroupReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	//
+	req := &rpc.CreateGroupReq{GroupInfo: &open_im_sdk.GroupInfo{}}
+	utils.CopyStructFields(req.GroupInfo, &params)
+
+	for _, v := range params.MemberList {
+		req.InitMemberList = append(req.InitMemberList, &rpc.GroupAddMemberInfo{UserID: v.UserID, RoleLevel: v.RoleLevel})
+	}
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	req.OwnerUserID = req.OpUserID
+	req.OperationID = params.OperationID
+	log.NewInfo(req.OperationID, "CreateGroup args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	RpcResp, err := client.CreateGroup(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "CreateGroup failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+
+	resp := api.CreateGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	if RpcResp.ErrCode == 0 {
+		utils.CopyStructFields(&resp.GroupInfo, RpcResp.GroupInfo)
+		resp.Data = jsonData.JsonDataOne(&resp.GroupInfo)
+	}
+	log.NewInfo(req.OperationID, "CreateGroup api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+//  群主或管理员收到的
+func GetRecvGroupApplicationList(c *gin.Context) {
+	params := api.GetGroupApplicationListReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.GetGroupApplicationListReq{}
+	utils.CopyStructFields(req, params)
+	//var ok bool
+	//ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	//if !ok {
+	//	log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+	//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+	//	return
+	//}
+	log.NewInfo(req.OperationID, "GetGroupApplicationList args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.GetGroupApplicationList(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: reply.ErrCode, ErrMsg: reply.ErrMsg}, GroupRequestList: reply.GroupRequestList}
+	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
+	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+func GetUserReqGroupApplicationList(c *gin.Context) {
+	var params api.GetUserReqGroupApplicationListReq
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.GetUserReqApplicationListReq{}
+	utils.CopyStructFields(req, params)
+	//ok, req.OpUserID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	//if !ok {
+	//	log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+	//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+	//	return
+	//}
+	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	RpcResp, err := client.GetUserReqApplicationList(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "GetGroupsInfo failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, RpcResp)
+	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupRequestList: RpcResp.GroupRequestList}
+	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
+	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
+	c.JSON(http.StatusOK, resp)
+}
+
+func GetGroupsInfo(c *gin.Context) {
+	params := api.GetGroupInfoReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.GetGroupsInfoReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	RpcResp, err := client.GetGroupsInfo(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "GetGroupsInfo failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+
+	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
+	resp.Data = jsonData.JsonDataList(resp.GroupInfoList)
+	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+//process application
+func ApplicationGroupResponse(c *gin.Context) {
+	params := api.ApplicationGroupResponseReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.GroupApplicationResponseReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, "ApplicationGroupResponse args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.GroupApplicationResponse(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "GroupApplicationResponse failed ", req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp := api.ApplicationGroupResponseResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
+	log.NewInfo(req.OperationID, "ApplicationGroupResponse api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+func JoinGroup(c *gin.Context) {
+	params := api.JoinGroupReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.JoinGroupReq{}
+	utils.CopyStructFields(req, params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, "JoinGroup args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+
+	RpcResp, err := client.JoinGroup(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "JoinGroup failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
+	log.NewInfo(req.OperationID, "JoinGroup api return", RpcResp.String())
+	c.JSON(http.StatusOK, resp)
+}
+
+func QuitGroup(c *gin.Context) {
+	params := api.QuitGroupReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.QuitGroupReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, "QuitGroup args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	RpcResp, err := client.QuitGroup(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "call quit group rpc server failed,err=%s", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+	resp := api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}
+	log.NewInfo(req.OperationID, "QuitGroup api return", RpcResp.String())
+	c.JSON(http.StatusOK, resp)
+}
+
+func SetGroupInfo(c *gin.Context) {
+	params := api.SetGroupInfoReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.SetGroupInfoReq{GroupInfo: &open_im_sdk.GroupInfo{}}
+	utils.CopyStructFields(req.GroupInfo, &params)
+	req.OperationID = params.OperationID
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, "SetGroupInfo args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	RpcResp, err := client.SetGroupInfo(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "SetGroupInfo failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+	resp := api.SetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+	c.JSON(http.StatusOK, resp)
+	log.NewInfo(req.OperationID, "SetGroupInfo api return ", resp)
+}
+
+func TransferGroupOwner(c *gin.Context) {
+	params := api.TransferGroupOwnerReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.TransferGroupOwnerReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, "TransferGroupOwner args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.TransferGroupOwner(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "TransferGroupOwner failed ", req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp := api.TransferGroupOwnerResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
+	log.NewInfo(req.OperationID, "TransferGroupOwner api return ", resp)
+	c.JSON(http.StatusOK, resp)
 }

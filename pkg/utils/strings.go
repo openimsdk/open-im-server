@@ -7,6 +7,7 @@
 package utils
 
 import (
+	"Open_IM/pkg/common/constant"
 	"encoding/json"
 	"math/rand"
 	"strconv"
@@ -24,10 +25,12 @@ func StringToInt64(i string) int64 {
 	j, _ := strconv.ParseInt(i, 10, 64)
 	return j
 }
+func Int32ToString(i int32) string {
+	return strconv.FormatInt(int64(i), 10)
+}
 
 //judge a string whether in the  string list
 func IsContain(target string, List []string) bool {
-
 	for _, element := range List {
 
 		if target == element {
@@ -35,7 +38,6 @@ func IsContain(target string, List []string) bool {
 		}
 	}
 	return false
-
 }
 
 func InterfaceArrayToStringArray(data []interface{}) (i []string) {
@@ -50,6 +52,11 @@ func StructToJsonString(param interface{}) string {
 	return dataString
 }
 
+func StructToJsonBytes(param interface{}) []byte {
+	dataType, _ := json.Marshal(param)
+	return dataType
+}
+
 //The incoming parameter must be a pointer
 func JsonStringToStruct(s string, args interface{}) error {
 	err := json.Unmarshal([]byte(s), args)
@@ -59,6 +66,15 @@ func JsonStringToStruct(s string, args interface{}) error {
 func GetMsgID(sendID string) string {
 	t := int64ToString(GetCurrentTimestampByNano())
 	return Md5(t + sendID + int64ToString(rand.Int63n(GetCurrentTimestampByNano())))
+}
+func GetConversationIDBySessionType(sourceID string, sessionType int) string {
+	switch sessionType {
+	case constant.SingleChatType:
+		return "single_" + sourceID
+	case constant.GroupChatType:
+		return "group_" + sourceID
+	}
+	return ""
 }
 func int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)

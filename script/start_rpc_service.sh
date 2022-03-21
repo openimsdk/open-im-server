@@ -8,11 +8,15 @@ source ./function.sh
 service_filename=(
   #api
   open_im_api
+  open_im_cms_api
   #rpc
   open_im_user
   open_im_friend
   open_im_group
   open_im_auth
+  open_im_admin_cms
+  open_im_message_cms
+  open_im_statistics
   ${msg_name}
 )
 
@@ -20,11 +24,15 @@ service_filename=(
 service_port_name=(
   #api port name
   openImApiPort
+  openImCmsApiPort
   #rpc port name
   openImUserPort
   openImFriendPort
   openImGroupPort
   openImAuthPort
+  openImAdminCmsPort
+  openImMessageCmsPort
+  openImStatisticsPort
   openImOfflineMessagePort
 )
 
