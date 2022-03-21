@@ -40,6 +40,8 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 		fallthrough
 	case constant.File:
 		newContent = utils.StructToJsonString(params.Content)
+	case constant.Revoke:
+		newContent = params.Content["revokeMsgClientID"].(string)
 	default:
 	}
 	var options map[string]bool
@@ -260,5 +262,5 @@ type TextElem struct {
 }
 
 type RevokeElem struct {
-	Text string `mapstructure:"text" validate:"required"`
+	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
 }
