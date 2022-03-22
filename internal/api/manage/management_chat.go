@@ -130,6 +130,7 @@ func ManagementSendMsg(c *gin.Context) {
 	if err != nil {
 		log.NewError(params.OperationID, "parse token failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
+		return
 	}
 	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not authorized", "sendTime": 0, "MsgID": ""})
@@ -141,11 +142,13 @@ func ManagementSendMsg(c *gin.Context) {
 		if len(params.RecvID) == 0 {
 			log.NewError(params.OperationID, "recvID is a null string")
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "recvID is a null string", "sendTime": 0, "MsgID": ""})
+			return
 		}
 	case constant.GroupChatType:
 		if len(params.GroupID) == 0 {
 			log.NewError(params.OperationID, "groupID is a null string")
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "groupID is a null string", "sendTime": 0, "MsgID": ""})
+			return
 		}
 
 	}
