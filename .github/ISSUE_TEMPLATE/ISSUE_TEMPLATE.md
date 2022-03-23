@@ -1,8 +1,8 @@
 ---
-name: 🐞 Bug
+name: "\U0001F41E Bug"
 about: File a bug/issue
-title: '[BUG] <title>'
-labels: Bug, Needs Triage
+title: "[BUG] <title>"
+labels: ''
 assignees: ''
 
 ---
