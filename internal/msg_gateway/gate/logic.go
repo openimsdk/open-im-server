@@ -199,34 +199,33 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
-	isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
-	if isPass && isPass2 {
-		pbData := pbChat.SendMsgReq{
-			Token:       m.Token,
-			OperationID: m.OperationID,
-			MsgData:     msgData,
-		}
-		log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
-		client := pbChat.NewChatClient(etcdConn)
-		reply, err := client.SendMsg(context.Background(), &pbData)
-		if err != nil {
-			log.NewError(pbData.OperationID, "rpc sendMsg err", err.Error())
-			nReply.ErrCode = 200
-			nReply.ErrMsg = err.Error()
-			ws.sendSignalMsgResp(conn, 200, err.Error(), m, signalResp)
+	if isPass {
+		isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
+		if isPass2 {
+			pbData := pbChat.SendMsgReq{
+				Token:       m.Token,
+				OperationID: m.OperationID,
+				MsgData:     msgData,
+			}
+			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
+			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+			client := pbChat.NewChatClient(etcdConn)
+			reply, err := client.SendMsg(context.Background(), &pbData)
+			if err != nil {
+				log.NewError(pbData.OperationID, "rpc sendMsg err", err.Error())
+				nReply.ErrCode = 200
+				nReply.ErrMsg = err.Error()
+				ws.sendSignalMsgResp(conn, 200, err.Error(), m, signalResp)
+			} else {
+				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
+				ws.sendSignalMsgResp(conn, 0, "", m, signalResp)
+			}
 		} else {
-			log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
-			ws.sendSignalMsgResp(conn, 0, "", m, signalResp)
-		}
-
-	} else {
-		if isPass {
 			log.NewError(m.OperationID, isPass2, errCode2, errMsg2)
 			ws.sendSignalMsgResp(conn, errCode2, errMsg2, m, signalResp)
-		} else {
-			ws.sendSignalMsgResp(conn, errCode, errMsg, m, signalResp)
 		}
+	} else {
+		ws.sendSignalMsgResp(conn, errCode, errMsg, m, nil)
 	}
 
 }
