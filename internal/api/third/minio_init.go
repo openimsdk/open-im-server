@@ -10,13 +10,18 @@ import (
 	url2 "net/url"
 )
 
+var (
+	minioClient *minio.Client
+)
+
 func MinioInit() {
+	log.NewInfo("", utils.GetSelfFuncName())
 	minioUrl, err := url2.Parse(config.Config.Credential.Minio.Endpoint)
 	if err != nil {
 		log.NewError("", utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
 		return
 	}
-	minioClient, err := minio.New(minioUrl.Host, &minio.Options{
+	minioClient, err = minio.New(minioUrl.Host, &minio.Options{
 		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
 		Secure: false,
 	})

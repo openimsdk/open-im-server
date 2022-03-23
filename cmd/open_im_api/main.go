@@ -78,6 +78,7 @@ func main() {
 	{
 		thirdGroup.POST("/tencent_cloud_storage_credential", apiThird.TencentCloudStorageCredential)
 		thirdGroup.POST("/minio_storage_credential", apiThird.MinioStorageCredential)
+		thirdGroup.POST("/minio_upload", apiThird.MinioUploadFile)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
