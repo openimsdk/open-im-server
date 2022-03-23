@@ -28,7 +28,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	dec := gob.NewDecoder(b)
 	err := dec.Decode(&m)
 	if err != nil {
-		log.ErrorByKv("ws Decode  err", "", "err", err.Error())
+		log.NewError("", "ws Decode  err", err.Error())
 		ws.sendErrMsg(conn, 200, err.Error(), constant.WSDataError, "", "")
 		err = conn.Close()
 		if err != nil {
@@ -37,7 +37,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 		return
 	}
 	if err := validate.Struct(m); err != nil {
-		log.ErrorByKv("ws args validate  err", "", "err", err.Error())
+		log.NewError("", "ws args validate  err", err.Error())
 		ws.sendErrMsg(conn, 201, err.Error(), m.ReqIdentifier, m.MsgIncr, m.OperationID)
 		return
 	}
@@ -45,7 +45,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	//	ws.sendErrMsg(conn, 202, "token validate err", m.ReqIdentifier, m.MsgIncr,m.OperationID)
 	//	return
 	//}
-	log.InfoByKv("Basic Info Authentication Success", m.OperationID, "reqIdentifier", m.ReqIdentifier, "sendID", m.SendID, "msgIncr", m.MsgIncr)
+	log.NewInfo(m.OperationID, "Basic Info Authentication Success", m)
 
 	switch m.ReqIdentifier {
 	case constant.WSGetNewestSeq:
@@ -61,7 +61,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	log.NewInfo("", "goroutine num is ", runtime.NumGoroutine())
 }
 func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to getNewSeq", m.MsgIncr, m.SendID, m.ReqIdentifier)
+	log.NewInfo(m.OperationID, "Ws call success to getNewSeq", m.MsgIncr, m.SendID, m.ReqIdentifier, m.Data)
 	rpcReq := pbChat.GetMaxAndMinSeqReq{}
 	nReply := new(pbChat.GetMaxAndMinSeqResp)
 	rpcReq.UserID = m.SendID
@@ -99,15 +99,15 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeq
 }
 
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr)
+	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr, m.Data)
 	nReply := new(sdk_ws.PullMessageBySeqListResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
-	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList)
 	if isPass {
 		rpcReq := sdk_ws.PullMessageBySeqListReq{}
 		rpcReq.SeqList = data.(sdk_ws.PullMessageBySeqListReq).SeqList
 		rpcReq.UserID = m.SendID
 		rpcReq.OperationID = m.OperationID
+		log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList)
 		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		msgClient := pbChat.NewChatClient(grpcConn)
 		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
@@ -145,7 +145,7 @@ func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullM
 }
 func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 	sendMsgCount++
-	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID)
+	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
 	if isPass {
@@ -196,38 +196,36 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 }
 
 func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID)
+	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
-	log.NewInfo(m.OperationID, "args is ", pData.(*sdk_ws.SignalReq))
-	isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
-	if isPass && isPass2 {
-		pbData := pbChat.SendMsgReq{
-			Token:       m.Token,
-			OperationID: m.OperationID,
-			MsgData:     msgData,
-		}
-		log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
-		client := pbChat.NewChatClient(etcdConn)
-		reply, err := client.SendMsg(context.Background(), &pbData)
-		if err != nil {
-			log.NewError(pbData.OperationID, "rpc sendMsg err", err.Error())
-			nReply.ErrCode = 200
-			nReply.ErrMsg = err.Error()
-			ws.sendSignalMsgResp(conn, 200, err.Error(), m, signalResp)
+	if isPass {
+		isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
+		if isPass2 {
+			pbData := pbChat.SendMsgReq{
+				Token:       m.Token,
+				OperationID: m.OperationID,
+				MsgData:     msgData,
+			}
+			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
+			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+			client := pbChat.NewChatClient(etcdConn)
+			reply, err := client.SendMsg(context.Background(), &pbData)
+			if err != nil {
+				log.NewError(pbData.OperationID, "rpc sendMsg err", err.Error())
+				nReply.ErrCode = 200
+				nReply.ErrMsg = err.Error()
+				ws.sendSignalMsgResp(conn, 200, err.Error(), m, signalResp)
+			} else {
+				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
+				ws.sendSignalMsgResp(conn, 0, "", m, signalResp)
+			}
 		} else {
-			log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
-			ws.sendSignalMsgResp(conn, 0, "", m, signalResp)
-		}
-
-	} else {
-		if isPass {
 			log.NewError(m.OperationID, isPass2, errCode2, errMsg2)
 			ws.sendSignalMsgResp(conn, errCode2, errMsg2, m, signalResp)
-		} else {
-			ws.sendSignalMsgResp(conn, errCode, errMsg, m, signalResp)
 		}
+	} else {
+		ws.sendSignalMsgResp(conn, errCode, errMsg, m, nil)
 	}
 
 }
