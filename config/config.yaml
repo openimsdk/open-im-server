@@ -90,7 +90,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim
     location: us-east-1
-`    endpoint: http://43.128.5.63:9000
+    endpoint: http://43.128.5.63:9000
     accessKeyID: user12345
     secretAccessKey: key12345
 
