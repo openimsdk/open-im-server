@@ -21,7 +21,15 @@ func MinioUploadFile(c *gin.Context) {
 		req  apiStruct.MinioUploadFileReq
 		resp apiStruct.MinioUploadFileResp
 	)
-	if err := c.BindJSON(&req); err != nil {
+	defer func() {
+		if r := recover(); r != nil {
+			log.NewError(req.OperationID, recover())
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), r)
+			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": r})
+			return
+		}
+	}()
+	if err := c.Bind(&req); err != nil {
 		log.NewError("0", utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
@@ -34,12 +42,14 @@ func MinioUploadFile(c *gin.Context) {
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+			return
 		}
 		snapShotNewName, snapShotNewType := utils.GetNewFileNameAndContentType(snapShotFile.Filename)
 		_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, snapShotNewName, snapShotFileObj, snapShotFile.Size, minio.PutObjectOptions{ContentType: snapShotNewType})
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject snapShotFile error", err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+			return
 		}
 		resp.SnapshotURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.Bucket + "/" + snapShotNewName
 		resp.SnapshotNewName = snapShotNewName
