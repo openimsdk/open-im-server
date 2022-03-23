@@ -47,7 +47,7 @@ func MinioUploadFile(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 			return
 		}
-		snapShotNewName, snapShotNewType := utils.GetNewFileNameAndContentType(snapShotFile.Filename)
+		snapShotNewName, snapShotNewType := utils.GetNewFileNameAndContentType(snapShotFile.Filename, constant.ImageType)
 		log.Debug(req.OperationID, utils.GetSelfFuncName(), snapShotNewName, snapShotNewType)
 		_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, snapShotNewName, snapShotFileObj, snapShotFile.Size, minio.PutObjectOptions{ContentType: snapShotNewType})
 		if err != nil {
@@ -60,7 +60,7 @@ func MinioUploadFile(c *gin.Context) {
 	}
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing snapshot arg: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
 		return
 	}
 	fileObj, err := file.Open()
@@ -69,7 +69,7 @@ func MinioUploadFile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
 		return
 	}
-	newName, newType := utils.GetNewFileNameAndContentType(file.Filename)
+	newName, newType := utils.GetNewFileNameAndContentType(file.Filename, req.FileType)
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), newName, newType)
 	_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, newName, fileObj, file.Size, minio.PutObjectOptions{ContentType: newType})
 	if err != nil {

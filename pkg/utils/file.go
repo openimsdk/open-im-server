@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"Open_IM/pkg/common/constant"
 	"fmt"
 	"math/rand"
 	"os"
+	"path"
 	"time"
 )
 
@@ -26,11 +28,12 @@ func MkDir(path string) error {
 	return os.MkdirAll(path, os.ModePerm)
 }
 
-func GetNewFileNameAndContentType(fileType string) (string, string) {
-	newName := fmt.Sprintf("%d-%d%s", time.Now().UnixNano(), rand.Int(), fileType)
+func GetNewFileNameAndContentType(fileName string, fileType int) (string, string) {
+	suffix := path.Ext(fileName)
+	newName := fmt.Sprintf("%d-%d%s", time.Now().UnixNano(), rand.Int(), fileName)
 	contentType := ""
-	if fileType == "img" {
-		contentType = "image/" + fileType[1:]
+	if fileType == constant.ImageType {
+		contentType = "image/" + suffix[1:]
 	}
 	return newName, contentType
 }

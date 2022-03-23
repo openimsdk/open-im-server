@@ -163,6 +163,7 @@ const (
 	// minioUpload
 	OtherType = 1
 	VideoType = 2
+	ImageType = 3
 )
 
 var ContentType2PushContent = map[int64]string{
