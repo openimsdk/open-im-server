@@ -23,9 +23,8 @@ func MinioUploadFile(c *gin.Context) {
 	)
 	defer func() {
 		if r := recover(); r != nil {
-			log.NewError(req.OperationID, recover())
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), r)
-			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": r})
+			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file or snapShot args"})
 			return
 		}
 	}()
@@ -37,7 +36,11 @@ func MinioUploadFile(c *gin.Context) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
 	switch req.FileType {
 	case constant.VideoType:
-		snapShotFile, _ := c.FormFile("snapShot")
+		snapShotFile, err := c.FormFile("snapShot")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing snapshot arg: " + err.Error()})
+			return
+		}
 		snapShotFileObj, err := snapShotFile.Open()
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
@@ -45,6 +48,7 @@ func MinioUploadFile(c *gin.Context) {
 			return
 		}
 		snapShotNewName, snapShotNewType := utils.GetNewFileNameAndContentType(snapShotFile.Filename)
+		log.Debug(req.OperationID, utils.GetSelfFuncName(), snapShotNewName, snapShotNewType)
 		_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, snapShotNewName, snapShotFileObj, snapShotFile.Size, minio.PutObjectOptions{ContentType: snapShotNewType})
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject snapShotFile error", err.Error())
@@ -54,7 +58,11 @@ func MinioUploadFile(c *gin.Context) {
 		resp.SnapshotURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.Bucket + "/" + snapShotNewName
 		resp.SnapshotNewName = snapShotNewName
 	}
-	file, _ := c.FormFile("file")
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing snapshot arg: " + err.Error()})
+		return
+	}
 	fileObj, err := file.Open()
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
@@ -62,6 +70,7 @@ func MinioUploadFile(c *gin.Context) {
 		return
 	}
 	newName, newType := utils.GetNewFileNameAndContentType(file.Filename)
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), newName, newType)
 	_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, newName, fileObj, file.Size, minio.PutObjectOptions{ContentType: newType})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "open file error")

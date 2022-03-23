@@ -20,6 +20,6 @@ type MinioUploadFileReq struct {
 type MinioUploadFileResp struct {
 	URL             string `json:"URL"`
 	NewName         string `json:"newName"`
-	SnapshotURL     string `json:"snapshotURL" binding:"omitempty"`
-	SnapshotNewName string `json:"snapshotName" binding:"omitempty"`
+	SnapshotURL     string `json:"snapshotURL,omitempty"`
+	SnapshotNewName string `json:"snapshotName,omitempty"`
 }
