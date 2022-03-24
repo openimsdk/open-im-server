@@ -177,3 +177,11 @@ type TransferGroupOwnerReq struct {
 type TransferGroupOwnerResp struct {
 	CommResp
 }
+
+type DismissGroupReq struct {
+	GroupID     string `json:"groupID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
+}
+type DismissGroupResp struct {
+	CommResp
+}

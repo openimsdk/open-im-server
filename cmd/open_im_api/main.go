@@ -66,6 +66,7 @@ func main() {
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)        //1
+		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
