@@ -1,0 +1,108 @@
+syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./office;office";
+package office;
+
+message CommonResp{
+  int32  errCode = 1;
+  string errMsg = 2;
+}
+
+message TagUser {
+  string userID = 1;
+  string userName = 2;
+}
+
+message Tag {
+  string tagID = 1;
+  string tagName = 2;
+  repeated TagUser userList = 3;
+}
+
+message GetUserTagsReq{
+  string userID = 1;
+  string operationID = 2;
+}
+
+message GetUserTagsResp{
+  CommonResp commonResp = 1;
+  repeated Tag tags = 2;
+}
+
+message CreateTagReq {
+  string tagName = 1;
+  string userID = 2;
+  repeated string userIDList = 3;
+  string operationID = 4;
+}
+
+message CreateTagResp {
+  CommonResp commonResp = 1;
+}
+
+message DeleteTagReq {
+  string userID = 1;
+  string tagID = 2;
+  string operationID = 3;
+}
+
+message DeleteTagResp {
+  CommonResp commonResp = 1;
+}
+
+message SetTagReq {
+ string userID = 1;
+ string tagID = 2;
+ string newName = 3;
+ repeated string increaseUserIDList = 4;
+ repeated string reduceUserIDList = 5;
+ string operationID = 6;
+}
+
+message SetTagResp {
+  CommonResp commonResp = 1;
+}
+
+message SendMsg2TagReq {
+  string tagID = 1;
+  string sendID = 2;
+  int32 senderPlatformID = 3;
+  string content = 4;
+  int32 contentType = 5;
+  string operationID = 6;
+}
+
+message SendMsg2TagResp {
+  CommonResp commonResp = 1;
+}
+
+message GetTagSendLogsReq {
+  server_api_params.RequestPagination Pagination = 1;
+  string userID = 2;
+  string operationID = 3;
+}
+
+message TagSendLog {
+  string tagID = 1;
+  string tagName = 2;
+  int32 contentType = 3;
+  string content = 4;
+  int64 sendTime = 5;
+  repeated string userList = 6;
+}
+
+message GetTagSendLogsResp {
+  CommonResp commonResp = 1;
+  server_api_params.ResponsePagination Pagination = 2;
+  repeated TagSendLog tagSendLogs = 3;
+}
+
+service OfficeService {
+  rpc GetUserTags(GetUserTagsReq) returns(GetUserTagsResp);
+  rpc CreateTag(CreateTagReq) returns(CreateTagResp);
+  rpc DeleteTag(DeleteTagReq) returns(DeleteTagResp);
+  rpc SetTag(SetTagReq) returns(SetTagResp);
+  rpc SendMsg2Tag(SendMsg2TagReq) returns(SendMsg2TagResp);
+  rpc GetTagSendLogs(GetTagSendLogsReq) returns(GetTagSendLogsResp);
+}
+

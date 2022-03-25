@@ -17,6 +17,7 @@ service_filename=(
   open_im_admin_cms
   open_im_message_cms
   open_im_statistics
+  open_im_office
   ${msg_name}
 )
 
@@ -34,6 +35,7 @@ service_port_name=(
   openImMessageCmsPort
   openImStatisticsPort
   openImOfflineMessagePort
+  openImOfficePort
 )
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do

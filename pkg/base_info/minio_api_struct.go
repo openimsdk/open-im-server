@@ -13,8 +13,8 @@ type MiniostorageCredentialResp struct {
 }
 
 type MinioUploadFileReq struct {
-	OperationID string `form:"operationID"`
-	FileType    int    `form:"fileType"`
+	OperationID string `form:"operationID" binding:"required"`
+	FileType    int    `form:"fileType" binding:"required"`
 }
 
 type MinioUploadFileResp struct {

@@ -74,6 +74,19 @@ func GetUserByUserID(userID string) (*db.User, error) {
 	return &user, nil
 }
 
+func GetUserNameByUserID(userID string) (string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return "", err
+	}
+	var userName string
+	err = dbConn.Table("users").Select("name").Where("user_id=?", userID).Find(&userName).Error
+	if err != nil {
+		return "", err
+	}
+	return userName, nil
+}
+
 func UpdateUserInfo(user db.User) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {

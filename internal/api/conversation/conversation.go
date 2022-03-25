@@ -201,3 +201,18 @@ func SetRecvMsgOpt(c *gin.Context) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
+//Deprecated
+func SetReceiveMessageOpt(c *gin.Context) {
+
+}
+
+//Deprecated
+func GetReceiveMessageOpt(c *gin.Context) {
+
+}
+
+//Deprecated
+func GetAllConversationMessageOpt(c *gin.Context) {
+
+}

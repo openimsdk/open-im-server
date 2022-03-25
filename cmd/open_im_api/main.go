@@ -7,6 +7,7 @@ import (
 	"Open_IM/internal/api/friend"
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
+	"Open_IM/internal/api/office"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/log"
@@ -106,7 +107,23 @@ func main() {
 		conversationGroup.POST("/set_conversation", conversation.SetConversation)
 		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
 		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
+
+		// Deprecated
+		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)                  //1
+		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)                  //1
+		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt) //1
 	}
+	// office
+	officeGroup := r.Group("/office")
+	{
+		officeGroup.POST("/get_user_tags", office.GetUserTags)
+		officeGroup.POST("/create_tag", office.CreateTag)
+		officeGroup.POST("/delete_tag", office.DeleteTag)
+		officeGroup.POST("/set_tag", office.SetTag)
+		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
+		officeGroup.POST("/get_send_tag_log", office.GetSendTagLogs)
+	}
+
 	apiThird.MinioInit()
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")

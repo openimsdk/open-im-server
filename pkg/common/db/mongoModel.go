@@ -5,12 +5,14 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
+	officePb "Open_IM/pkg/proto/office"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
 	"github.com/gogo/protobuf/sortkeys"
+	"math/rand"
 
 	//"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
@@ -22,6 +24,8 @@ import (
 
 const cChat = "msg"
 const cGroup = "group"
+const cTag = "tag"
+const cSendLog = "sendLog"
 const singleGocMsgNum = 5000
 
 type MsgInfo struct {
@@ -430,9 +434,135 @@ func (d *DataBases) DelGroupMember(groupID, uid string) error {
 	//return nil
 }
 
+type Tag struct {
+	TagID    string   `bson:"tagID"`
+	TagName  string   `bson:"tagName"`
+	UserList []string `bson:"userList"`
+}
+
+type TagsStruct struct {
+	Uid  string         `bson:"uid"`
+	Tags map[string]Tag `bson:"tags"`
+}
+
+type TagSendLogStruct struct {
+}
+
+func (d *DataBases) GetUserTags(userID string) ([]Tag, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
+	var tagStruct TagsStruct
+	var tags []Tag
+	_ = c.FindOne(ctx, bson.M{"uid": userID}).Decode(&tagStruct)
+	for _, v := range tagStruct.Tags {
+		tags = append(tags, v)
+	}
+	return tags, nil
+}
+
+func (d *DataBases) CreateTag(userID, tagName string, userList []string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
+	tagID := generateTagID(tagName, userID)
+	tag := Tag{
+		TagID:    tagID,
+		TagName:  tagName,
+		UserList: userList,
+	}
+	_, err := c.InsertOne(ctx, TagsStruct{
+		Uid:  userID,
+		Tags: map[string]Tag{tagID: tag},
+	})
+	return err
+}
+
+func (d *DataBases) DeleteTag(userID, tagID string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
+	_, err := c.DeleteOne(ctx, bson.M{"uid": userID, "tags": bson.M{"$unset": tagID}})
+	return err
+}
+
+func (d *DataBases) SetTag(userID, tagID, newName string, increaseUserList []string, reduceUserIDList []string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
+	_, err := c.UpdateOne(ctx, bson.M{"uid": userID, "tags": tagID}, bson.M{"tagName": newName})
+	if err != nil {
+		return err
+	}
+	_, err = c.InsertOne(ctx, bson.M{"uid": userID, "tags": bson.M{tagID: ""}})
+	if err != nil {
+		return err
+	}
+	//_, err = c.InsertOne(ctx)
+	//if err != nil {
+	//	return err
+	//}
+	return nil
+}
+
+func (d *DataBases) GetUserIDListByTagID(userID, tagID string) ([]string, error) {
+	var tagIDList []string
+	var tagStruct TagsStruct
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
+	_ = c.FindOne(ctx, bson.M{"uid": userID}).Decode(&tagStruct)
+	for k, tag := range tagStruct.Tags {
+		if k == tagID {
+			tagIDList = tag.UserList
+		}
+	}
+	return tagIDList, nil
+}
+
+type TagSendLog struct {
+	TagID            string   `bson:"tagID"`
+	SendID           string   `bson:"sendID"`
+	SenderPlatformID int32    `bson:"senderPlatformID"`
+	Content          string   `bson:"content"`
+	ContentType      int32    `bson:"contentType"`
+	SendTime         int64    `bson:"sendTime"`
+	UserList         []string `bson:"userList"`
+}
+
+func (d *DataBases) SaveTagSendLog(sendReq *officePb.SendMsg2TagReq) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
+	tagSendLog := TagSendLog{
+		TagID:            sendReq.TagID,
+		SendID:           sendReq.SendID,
+		SenderPlatformID: sendReq.SenderPlatformID,
+		Content:          sendReq.Content,
+		ContentType:      sendReq.ContentType,
+		SendTime:         time.Now().Unix(),
+	}
+	_, err := c.InsertOne(ctx, tagSendLog)
+	return err
+}
+
+func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) ([]*TagSendLog, error) {
+	var tagSendLogs []*TagSendLog
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
+	cursor, err := c.Find(ctx, bson.M{"sendID": userID})
+	if err != nil {
+		return tagSendLogs, err
+	}
+	err = cursor.Decode(&tagSendLogs)
+	if err != nil {
+		return tagSendLogs, err
+	}
+	return tagSendLogs, nil
+}
+
+func generateTagID(tagName, userID string) string {
+	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()))
+}
+
 func getCurrentTimestampByMill() int64 {
 	return time.Now().UnixNano() / 1e6
 }
+
 func getSeqUid(uid string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return indexGen(uid, seqSuffix)
