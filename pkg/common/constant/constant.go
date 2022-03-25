@@ -77,6 +77,7 @@ const (
 	MemberKickedNotification             = 1508
 	MemberInvitedNotification            = 1509
 	MemberEnterNotification              = 1510
+	GroupDismissedNotification           = 1511
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601
@@ -129,9 +130,10 @@ const (
 	IsSenderSync         = "senderSync"
 
 	//GroupStatus
-	GroupOk             = 0
-	GroupBanChat        = 1
-	GroupDisband        = 2
+	GroupOk              = 0
+	GroupBanChat         = 1
+	GroupStatusDismissed = 2
+
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
 

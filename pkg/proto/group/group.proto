@@ -318,6 +318,15 @@ message AddGroupMembersCMSResp {
   repeated string failed = 2;
 }
 
+message DismissGroupReq{
+  string opUserID = 1; //group member or app manager
+  string operationID = 2;
+  string groupID = 3;
+}
+
+message DismissGroupResp{
+  CommonResp commonResp = 1;
+}
 
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -345,6 +354,8 @@ service group{
   rpc GetGroupMembersCMS(GetGroupMembersCMSReq) returns(GetGroupMembersCMSResp);
   rpc RemoveGroupMembersCMS(RemoveGroupMembersCMSReq) returns(RemoveGroupMembersCMSResp);
   rpc AddGroupMembersCMS(AddGroupMembersCMSReq) returns(AddGroupMembersCMSResp);
+
+  rpc DismissGroup(DismissGroupReq) returns(DismissGroupResp);
 }
 
 

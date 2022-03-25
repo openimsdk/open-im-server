@@ -503,6 +503,14 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.ConversationOptUpdate.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.ConversationOptUpdate.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.ConversationOptUpdate.Conversation.UnreadCount
+
+	case constant.GroupDismissedNotification:
+		pushSwitch = config.Config.Notification.GroupDismissed.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupDismissed.OfflinePush.Title
+		desc = config.Config.Notification.GroupDismissed.OfflinePush.Desc
+		ex = config.Config.Notification.GroupDismissed.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupDismissed.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupDismissed.Conversation.UnreadCount
 	}
 	switch reliabilityLevel {
 	case constant.UnreliableNotification:

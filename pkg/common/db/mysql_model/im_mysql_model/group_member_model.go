@@ -103,6 +103,18 @@ func DeleteGroupMemberByGroupIDAndUserID(groupID, userID string) error {
 	return nil
 }
 
+func DeleteGroupMemberByGroupID(groupID string) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	err = dbConn.Table("group_members").Where("group_id=?  ", groupID).Delete(db.GroupMember{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func UpdateGroupMemberInfo(groupMemberInfo db.GroupMember) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
