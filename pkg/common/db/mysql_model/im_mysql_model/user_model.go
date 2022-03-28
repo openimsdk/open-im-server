@@ -79,12 +79,12 @@ func GetUserNameByUserID(userID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var userName string
-	err = dbConn.Table("users").Select("name").Where("user_id=?", userID).First(&userName).Error
+	var user db.User
+	err = dbConn.Table("users").Select("name").Where("user_id=?", userID).First(&user).Error
 	if err != nil {
 		return "", err
 	}
-	return userName, nil
+	return user.Nickname, nil
 }
 
 func UpdateUserInfo(user db.User) error {
