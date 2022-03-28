@@ -26,7 +26,7 @@ import (
 const cChat = "msg"
 const cGroup = "group"
 const cTag = "tag"
-const cSendLog = "sendLog"
+const cSendLog = "send_log"
 const singleGocMsgNum = 5000
 
 type MsgInfo struct {
