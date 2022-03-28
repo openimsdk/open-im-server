@@ -178,9 +178,10 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
-	if err := utils.CopyStructFields(resp.TagSendLogs, tagSendLogs); err != nil {
+	if err := utils.CopyStructFields(&resp.TagSendLogs, tagSendLogs); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
