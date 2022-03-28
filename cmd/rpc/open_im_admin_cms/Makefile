@@ -1,6 +1,6 @@
 .PHONY: all build run gotool install clean help
 
-BINARY_NAME=open_im_office
+BINARY_NAME=open_im_admin_cms
 BIN_DIR=../../../bin/
 
 all: gotool build
