@@ -78,7 +78,7 @@ func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsR
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "tags: ", tags)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "tags: ", tags)
 	for _, v := range tags {
 		tag := &pbOffice.Tag{
 			TagID:   v.TagID,
@@ -149,7 +149,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	resp = &pbOffice.SendMsg2TagResp{CommonResp: &pbOffice.CommonResp{}}
 	userIDList, err := db.DB.GetUserIDListByTagID(req.SendID, req.TagID)
 	for _, userID := range userIDList {
-		msg.SetTagNotification(req.OperationID, req.SendID, userID, req.Content, req.ContentType)
+		msg.TagSendMessage(req.OperationID, req.SendID, userID, req.Content, req.ContentType)
 	}
 	if err := db.DB.SaveTagSendLog(req); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", err.Error())
@@ -178,10 +178,23 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
-	if err := utils.CopyStructFields(&resp.TagSendLogs, tagSendLogs); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	for _, v := range tagSendLogs {
+		var userList []*pbOffice.TagUser
+		for _, v2 := range v.TagUserList {
+			userList = append(userList, &pbOffice.TagUser{
+				UserID:   v2.UserID,
+				UserName: v2.UserName,
+			})
+		}
+		resp.TagSendLogs = append(resp.TagSendLogs, &pbOffice.TagSendLog{
+			TagID:       v.TagID,
+			TagName:     v.TagName,
+			ContentType: v.ContentType,
+			Content:     v.Content,
+			SendTime:    v.SendTime,
+			TagUserList: userList,
+		})
 	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
