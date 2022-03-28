@@ -78,6 +78,7 @@ func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsR
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "tags: ", tags)
 	for _, v := range tags {
 		tag := &pbOffice.Tag{
 			TagID:   v.TagID,

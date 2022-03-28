@@ -505,7 +505,7 @@ func (d *DataBases) SetTag(userID, tagID, newName string, increaseUserIDList []s
 			newUserList = append(newUserList, v)
 		}
 	}
-	_, err := c.UpdateOne(ctx, bson.M{"userID": userID, "tagID": tagID}, bson.M{"$set": bson.M{"userIDList": newUserList}})
+	_, err := c.UpdateOne(ctx, bson.M{"userID": userID, "tagID": tagID}, bson.M{"$set": bson.M{"userList": newUserList}})
 	if err != nil {
 		return err
 	}
@@ -556,7 +556,7 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
 	findOpts := options.Find().SetSort(-1).SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1))
-	cursor, err := c.Find(ctx, bson.M{"sendID": userID}, findOpts)
+	cursor, err := c.Find(ctx, bson.D{{"sendID", userID}}, findOpts)
 	if err != nil {
 		return tagSendLogs, err
 	}
