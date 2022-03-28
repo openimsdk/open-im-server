@@ -9,3 +9,7 @@ sub_s3=${sub_s2#*[}
 sub_s4=${sub_s3%]*}
 ports_array=$sub_s4
 }
+remove_space(){
+  value=$*
+  result=`echo $value | sed 's/ //g'`
+}
