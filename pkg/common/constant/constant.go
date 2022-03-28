@@ -64,6 +64,7 @@ const (
 	ConversationNotNotification = 1308
 	ConversationDefault         = 0
 	UserNotificationEnd         = 1399
+	OANotification              = 1400
 
 	GroupNotificationBegin = 1500
 
@@ -95,6 +96,8 @@ const (
 	//SessionType
 	SingleChatType = 1
 	GroupChatType  = 2
+
+	NotificationChatType = 4
 	//token
 	NormalToken  = 0
 	InValidToken = 1
