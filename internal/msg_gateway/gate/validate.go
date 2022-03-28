@@ -134,6 +134,7 @@ func (ws *WServer) signalMessageAssemble(s *open_im_sdk.SignalReq, operationID s
 	utils.SetSwitchFromOptions(options, constant.IsPersistent, false)
 	utils.SetSwitchFromOptions(options, constant.IsSenderSync, true)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
+	utils.SetSwitchFromOptions(options, constant.IsSenderConversationUpdate, false)
 	utils.SetSwitchFromOptions(options, constant.IsUnreadCount, false)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, true)
 	msg.Options = options
