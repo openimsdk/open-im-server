@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
 	"net/http"
 	"strings"
@@ -29,6 +30,7 @@ var validate *validator.Validate
 
 func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 	var newContent string
+	var err error
 	switch params.ContentType {
 	case constant.Text:
 		newContent = params.Content["text"].(string)
@@ -42,6 +44,7 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 		newContent = utils.StructToJsonString(params.Content)
 	case constant.Revoke:
 		newContent = params.Content["revokeMsgClientID"].(string)
+
 	default:
 	}
 	var options map[string]bool
@@ -71,6 +74,14 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 			Options:         options,
 			OfflinePushInfo: params.OfflinePushInfo,
 		},
+	}
+	if params.ContentType == constant.OANotification {
+		var tips open_im_sdk.TipsComm
+		tips.JsonDetail = utils.StructToJsonString(params.Content)
+		pbData.MsgData.Content, err = proto.Marshal(&tips)
+		if err != nil {
+			log.Error(params.OperationID, "Marshal failed ", err.Error(), tips.String())
+		}
 	}
 	return &pbData
 }
@@ -107,6 +118,9 @@ func ManagementSendMsg(c *gin.Context) {
 		data = CustomElem{}
 	case constant.Revoke:
 		data = RevokeElem{}
+	case constant.OANotification:
+		data = OANotificationElem{}
+		params.SessionType = constant.NotificationChatType
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
 	//case constant.Quote:
@@ -266,4 +280,27 @@ type TextElem struct {
 
 type RevokeElem struct {
 	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
+}
+type OANotificationElem struct {
+	NotificationName    string `mapstructure:"notificationName" validate:"required"`
+	NotificationFaceURL string `mapstructure:"notificationFaceURL" validate:"required"`
+	NotificationType    int32  `mapstructure:"notificationType" validate:"required"`
+	Text                string `mapstructure:"text" validate:"required"`
+	Url                 string `mapstructure:"url"`
+	MixType             int32  `mapstructure:"mixType"`
+	Image               struct {
+		SourceUrl   string `mapstructure:"sourceUrl"`
+		SnapshotUrl string `mapstructure:"snapshotUrl"`
+	} `mapstructure:"image"`
+	Video struct {
+		SourceUrl   string `mapstructure:"sourceUrl"`
+		SnapshotUrl string `mapstructure:"snapshotUrl"`
+		Duration    int64  `mapstructure:"duration"`
+	} `mapstructure:"video"`
+	File struct {
+		SourceUrl string `mapstructure:"sourceUrl"`
+		FileName  string `mapstructure:"fileName"`
+		FileSize  int64  `mapstructure:"fileSize"`
+	} `mapstructure:"file"`
+	Ex string `mapstructure:"ex"`
 }
