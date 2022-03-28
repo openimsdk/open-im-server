@@ -116,6 +116,7 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	case constant.HasReadReceipt:
 		log.Info("", "this is a test start", msg, msg.Options)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 		log.Info("", "this is a test end", msg, msg.Options)
@@ -124,6 +125,7 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderSync, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
 
@@ -517,8 +519,10 @@ func Notification(n *NotificationMsg) {
 		utils.SetSwitchFromOptions(msg.Options, constant.IsHistory, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsPersistent, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
 	case constant.ReliableNotificationNoMsg:
 		utils.SetSwitchFromOptions(msg.Options, constant.IsConversationUpdate, false)
+		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
 	case constant.ReliableNotificationMsg:
 
 	}
