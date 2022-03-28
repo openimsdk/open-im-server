@@ -108,6 +108,7 @@ type GroupMember struct {
 	JoinTime       time.Time `gorm:"column:join_time"`
 	JoinSource     int32     `gorm:"column:join_source"`
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
+	MuteEndTime    time.Time `gorm:"column:mute_end_time"`
 	Ex             string    `gorm:"column:ex;size:1024"`
 }
 
