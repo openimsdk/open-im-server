@@ -17,8 +17,8 @@ service_filename=(
   open_im_admin_cms
   open_im_message_cms
   open_im_statistics
-  open_im_office
   ${msg_name}
+  open_im_office
 )
 
 #service config port name
