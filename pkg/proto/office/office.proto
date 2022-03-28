@@ -88,7 +88,6 @@ message TagSendLog {
   int32 contentType = 3;
   string content = 4;
   int64 sendTime = 5;
-  repeated TagUser TagUserList = 6;
 }
 
 message GetTagSendLogsResp {

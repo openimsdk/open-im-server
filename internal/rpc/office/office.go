@@ -178,23 +178,7 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
-	for _, v := range tagSendLogs {
-		var userList []*pbOffice.TagUser
-		for _, v2 := range v.TagUserList {
-			userList = append(userList, &pbOffice.TagUser{
-				UserID:   v2.UserID,
-				UserName: v2.UserName,
-			})
-		}
-		resp.TagSendLogs = append(resp.TagSendLogs, &pbOffice.TagSendLog{
-			TagID:       v.TagID,
-			TagName:     v.TagName,
-			ContentType: v.ContentType,
-			Content:     v.Content,
-			SendTime:    v.SendTime,
-			TagUserList: userList,
-		})
-	}
+	utils.CopyStructFields(resp.TagSendLogs, tagSendLogs)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
