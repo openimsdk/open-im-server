@@ -2,11 +2,10 @@ package base_info
 
 import (
 	pbOffice "Open_IM/pkg/proto/office"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
 )
 
 type GetUserTagsReq struct {
-	pbOffice.GetUserTagsReq
+	OperationID string `json:"operationID"`
 }
 
 type GetUserTagsResp struct {
@@ -17,7 +16,9 @@ type GetUserTagsResp struct {
 }
 
 type CreateTagReq struct {
-	pbOffice.CreateTagReq
+	TagName     string   `json:"tagName" binding:"required"`
+	UserIDList  []string `json:"userIDList" binding:"required"`
+	OperationID string   `json:"operationID" binding:"required"`
 }
 
 type CreateTagResp struct {
@@ -25,7 +26,8 @@ type CreateTagResp struct {
 }
 
 type DeleteTagReq struct {
-	pbOffice.DeleteTagReq
+	TagID       string `json:"tagID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
 type DeleteTagResp struct {
@@ -33,7 +35,11 @@ type DeleteTagResp struct {
 }
 
 type SetTagReq struct {
-	pbOffice.SetTagReq
+	TagID              string   `json:"tagID" binding:"required"`
+	NewName            string   `json:"newName" binding:"required"`
+	IncreaseUserIDList []string `json:"increaseUserIDList" binding:"required"`
+	ReduceUserIDList   []string `json:"reduceUserIDList" binding:"required"`
+	OperationID        string   `json:"operationID" binding:"required"`
 }
 
 type SetTagResp struct {
@@ -41,7 +47,11 @@ type SetTagResp struct {
 }
 
 type SendMsg2TagReq struct {
-	pbOffice.SendMsg2TagReq
+	TagID            string `json:"tagID" binding:"required"`
+	SenderPlatformID int32  `json:"senderPlatformID" binding:"required"`
+	Content          string `json:"content" binding:"required"`
+	ContentType      int32  `json:"contentType" binding:"required"`
+	OperationID      string `json:"operationID" binding:"required"`
 }
 
 type SendMsg2TagResp struct {
@@ -49,9 +59,9 @@ type SendMsg2TagResp struct {
 }
 
 type GetTagSendLogsReq struct {
-	server_api_params.RequestPagination
-	UserID      string `json:"userID"`
-	OperationID string `json:"operationID"`
+	PageNumber  int32  `json:"pageNumber" binding:"required"`
+	ShowNumber  int32  `json:"showNumber" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
 type GetTagSendLogsResp struct {

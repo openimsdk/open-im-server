@@ -4,8 +4,10 @@ import (
 	apistruct "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbOffice "Open_IM/pkg/proto/office"
+	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -25,9 +27,14 @@ func GetUserTags(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
-	if err := utils.CopyStructFields(&reqPb, req); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
 	}
+	reqPb.UserID = userID
+	reqPb.OperationID = req.OperationID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.GetUserTags(context.Background(), &reqPb)
@@ -58,6 +65,13 @@ func CreateTag(c *gin.Context) {
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	reqPb.UserID = userID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.CreateTag(context.Background(), &reqPb)
@@ -87,6 +101,13 @@ func DeleteTag(c *gin.Context) {
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	reqPb.UserID = userID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.DeleteTag(context.Background(), &reqPb)
@@ -116,6 +137,13 @@ func SetTag(c *gin.Context) {
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	reqPb.UserID = userID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.SetTag(context.Background(), &reqPb)
@@ -145,6 +173,13 @@ func SendMsg2Tag(c *gin.Context) {
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	reqPb.SendID = userID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.SendMsg2Tag(context.Background(), &reqPb)
@@ -171,8 +206,17 @@ func GetTagSendLogs(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
-	if err := utils.CopyStructFields(&reqPb, req); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	reqPb.UserID = userID
+	reqPb.OperationID = req.OperationID
+	reqPb.Pagination = &pbCommon.RequestPagination{
+		PageNumber: req.PageNumber,
+		ShowNumber: req.ShowNumber,
 	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
