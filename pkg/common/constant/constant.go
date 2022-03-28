@@ -136,6 +136,7 @@ const (
 	GroupOk              = 0
 	GroupBanChat         = 1
 	GroupStatusDismissed = 2
+	GroupStatusMuted     = 3
 
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
