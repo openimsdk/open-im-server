@@ -178,7 +178,7 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
-	utils.CopyStructFields(resp.TagSendLogs, tagSendLogs)
+	utils.CopyStructFields(&resp.TagSendLogs, tagSendLogs)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
