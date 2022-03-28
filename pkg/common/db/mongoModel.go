@@ -3,6 +3,7 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
 	officePb "Open_IM/pkg/proto/office"
@@ -520,15 +521,20 @@ func (d *DataBases) GetUserIDListByTagID(userID, tagID string) ([]string, error)
 	return tag.UserList, nil
 }
 
+type TagUser struct {
+	UserID   string `bson:"userID"`
+	UserName string `bson:"userName"`
+}
+
 type TagSendLog struct {
-	TagID            string   `bson:"tagID"`
-	TagName          string   `bson:"tagName"`
-	SendID           string   `bson:"sendID"`
-	SenderPlatformID int32    `bson:"senderPlatformID"`
-	Content          string   `bson:"content"`
-	ContentType      int32    `bson:"contentType"`
-	SendTime         int64    `bson:"sendTime"`
-	UserList         []string `bson:"userList"`
+	TagID            string    `bson:"tagID"`
+	TagName          string    `bson:"tagName"`
+	SendID           string    `bson:"sendID"`
+	SenderPlatformID int32     `bson:"senderPlatformID"`
+	Content          string    `bson:"content"`
+	ContentType      int32     `bson:"contentType"`
+	SendTime         int64     `bson:"sendTime"`
+	TagUserList      []TagUser `bson:"userList"`
 }
 
 func (d *DataBases) SaveTagSendLog(sendReq *officePb.SendMsg2TagReq) error {
@@ -545,7 +551,18 @@ func (d *DataBases) SaveTagSendLog(sendReq *officePb.SendMsg2TagReq) error {
 		Content:          sendReq.Content,
 		ContentType:      sendReq.ContentType,
 		SendTime:         time.Now().Unix(),
-		UserList:         tag.UserList,
+	}
+	for _, userID := range tag.UserList {
+		userName, err := im_mysql_model.GetUserNameByUserID(userID)
+		if err != nil {
+			log.NewError("", utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+			continue
+		}
+		tagUser := TagUser{
+			UserID:   userID,
+			UserName: userName,
+		}
+		tagSendLog.TagUserList = append(tagSendLog.TagUserList, tagUser)
 	}
 	_, err := c.InsertOne(ctx, tagSendLog)
 	return err
