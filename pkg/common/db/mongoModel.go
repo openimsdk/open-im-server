@@ -560,7 +560,7 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 	if err != nil {
 		return tagSendLogs, err
 	}
-	err = cursor.All(ctx, tagSendLogs)
+	err = cursor.All(ctx, &tagSendLogs)
 	if err != nil {
 		return tagSendLogs, err
 	}
