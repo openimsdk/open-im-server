@@ -80,7 +80,7 @@ func GetUserNameByUserID(userID string) (string, error) {
 		return "", err
 	}
 	var userName string
-	err = dbConn.Table("users").Select("name").Where("user_id=?", userID).Find(&userName).Error
+	err = dbConn.Table("users").Select("name").Where("user_id=?", userID).First(&userName).Error
 	if err != nil {
 		return "", err
 	}
