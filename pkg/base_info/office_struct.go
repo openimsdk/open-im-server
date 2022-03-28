@@ -1,6 +1,9 @@
 package base_info
 
-import pbOffice "Open_IM/pkg/proto/office"
+import (
+	pbOffice "Open_IM/pkg/proto/office"
+	server_api_params "Open_IM/pkg/proto/sdk_ws"
+)
 
 type GetUserTagsReq struct {
 	pbOffice.GetUserTagsReq
@@ -43,4 +46,19 @@ type SendMsg2TagReq struct {
 
 type SendMsg2TagResp struct {
 	CommResp
+}
+
+type GetTagSendLogsReq struct {
+	server_api_params.RequestPagination
+	UserID      string `json:"userID"`
+	OperationID string `json:"operationID"`
+}
+
+type GetTagSendLogsResp struct {
+	CommResp
+	Data struct {
+		Logs        []*pbOffice.TagSendLog `json:"logs"`
+		CurrentPage int32                  `json:"currentPage"`
+		ShowNumber  int32                  `json:"showNumber"`
+	} `json:"data"`
 }
