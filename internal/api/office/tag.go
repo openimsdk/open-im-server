@@ -227,7 +227,7 @@ func GetTagSendLogs(c *gin.Context) {
 		return
 	}
 	if err := utils.CopyStructFields(&resp.CommResp, respPb.CommonResp); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
 	resp.Data.Logs = respPb.TagSendLogs
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber

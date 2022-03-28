@@ -36,9 +36,9 @@ type DeleteTagResp struct {
 
 type SetTagReq struct {
 	TagID              string   `json:"tagID" binding:"required"`
-	NewName            string   `json:"newName" binding:"required"`
-	IncreaseUserIDList []string `json:"increaseUserIDList" binding:"required"`
-	ReduceUserIDList   []string `json:"reduceUserIDList" binding:"required"`
+	NewName            string   `json:"newName"`
+	IncreaseUserIDList []string `json:"increaseUserIDList"`
+	ReduceUserIDList   []string `json:"reduceUserIDList"`
 	OperationID        string   `json:"operationID" binding:"required"`
 }
 

@@ -78,6 +78,7 @@ func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsR
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "tags: ", tags)
 	for _, v := range tags {
 		tag := &pbOffice.Tag{
 			TagID:   v.TagID,
@@ -164,6 +165,11 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.GetTagSendLogsResp{
 		CommonResp: &pbOffice.CommonResp{},
+		Pagination: &pbCommon.ResponsePagination{
+			CurrentPage: req.Pagination.PageNumber,
+			ShowNumber:  req.Pagination.ShowNumber,
+		},
+		TagSendLogs: []*pbOffice.TagSendLog{},
 	}
 	tagSendLogs, err := db.DB.GetTagSendLogs(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
@@ -174,10 +180,6 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 	}
 	if err := utils.CopyStructFields(resp.TagSendLogs, tagSendLogs); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
-	}
-	resp.Pagination = &pbCommon.ResponsePagination{
-		CurrentPage: req.Pagination.PageNumber,
-		ShowNumber:  req.Pagination.ShowNumber,
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
