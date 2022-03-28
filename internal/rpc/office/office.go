@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbOffice "Open_IM/pkg/proto/office"
@@ -77,11 +78,23 @@ func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsR
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
-	if err := utils.CopyStructFields(resp.Tags, tags); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
-	}
-	for _, v := range resp.Tags {
-
+	for _, v := range tags {
+		tag := &pbOffice.Tag{
+			TagID:   v.TagID,
+			TagName: v.TagName,
+		}
+		for _, userID := range v.UserList {
+			UserName, err := im_mysql_model.GetUserNameByUserID(userID)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+				continue
+			}
+			tag.UserList = append(tag.UserList, &pbOffice.TagUser{
+				UserID:   userID,
+				UserName: UserName,
+			})
+		}
+		resp.Tags = append(resp.Tags, tag)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp ", resp.String())
 	return resp, nil
@@ -89,8 +102,10 @@ func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsR
 
 func (s *officeServer) CreateTag(_ context.Context, req *pbOffice.CreateTagReq) (resp *pbOffice.CreateTagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "CreateTag req", req.String())
+	userIDList := utils.RemoveUserIDRepByMap(req.UserIDList)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
 	resp = &pbOffice.CreateTagResp{CommonResp: &pbOffice.CommonResp{}}
-	if err := db.DB.CreateTag(req.UserID, req.TagName, req.UserIDList); err != nil {
+	if err := db.DB.CreateTag(req.UserID, req.TagName, userIDList); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserTags failed", err.Error())
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
@@ -116,14 +131,16 @@ func (s *officeServer) DeleteTag(_ context.Context, req *pbOffice.DeleteTagReq) 
 func (s *officeServer) SetTag(_ context.Context, req *pbOffice.SetTagReq) (resp *pbOffice.SetTagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SetTagResp{CommonResp: &pbOffice.CommonResp{}}
-	if err := db.DB.SetTag(req.UserID, req.TagID, req.NewName, req.ReduceUserIDList, req.ReduceUserIDList); err != nil {
+	IncreaseUserIDList := utils.RemoveUserIDRepByMap(req.IncreaseUserIDList)
+	reduceUserIDList := utils.RemoveUserIDRepByMap(req.ReduceUserIDList)
+	if err := db.DB.SetTag(req.UserID, req.TagID, req.NewName, IncreaseUserIDList, reduceUserIDList); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetTag failed", err.Error())
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, err
+	return resp, nil
 }
 
 func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagReq) (resp *pbOffice.SendMsg2TagResp, err error) {
@@ -135,9 +152,12 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	}
 	if err := db.DB.SaveTagSendLog(req); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		return resp, nil
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, err
+	return resp, nil
 }
 
 func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSendLogsReq) (resp *pbOffice.GetTagSendLogsResp, err error) {
@@ -150,6 +170,7 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTagSendLogs", err.Error())
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
 	}
 	if err := utils.CopyStructFields(resp.TagSendLogs, tagSendLogs); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())

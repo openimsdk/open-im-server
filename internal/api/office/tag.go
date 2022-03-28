@@ -159,12 +159,12 @@ func SendMsg2Tag(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func GetSendTagLogs(c *gin.Context) {
+func GetTagSendLogs(c *gin.Context) {
 	var (
-		req    apistruct.SendMsg2TagReq
-		resp   apistruct.SendMsg2TagResp
-		reqPb  pbOffice.SendMsg2TagReq
-		respPb *pbOffice.SendMsg2TagResp
+		req    apistruct.GetTagSendLogsReq
+		resp   apistruct.GetTagSendLogsResp
+		reqPb  pbOffice.GetTagSendLogsReq
+		respPb *pbOffice.GetTagSendLogsResp
 	)
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
@@ -176,7 +176,7 @@ func GetSendTagLogs(c *gin.Context) {
 	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
-	respPb, err := client.SendMsg2Tag(context.Background(), &reqPb)
+	respPb, err := client.GetTagSendLogs(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserTags failed", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "CreateTag rpc server failed" + err.Error()})
@@ -185,5 +185,8 @@ func GetSendTagLogs(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp.CommResp, respPb.CommonResp); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	resp.Data.Logs = respPb.TagSendLogs
+	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
+	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
 	c.JSON(http.StatusOK, resp)
 }

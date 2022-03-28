@@ -76,3 +76,16 @@ func Difference(slice1, slice2 []uint32) []uint32 {
 func OperationIDGenerator() string {
 	return strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10)
 }
+
+func RemoveUserIDRepByMap(slc []string) []string {
+	var result []string
+	tempMap := map[string]byte{}
+	for _, e := range slc {
+		l := len(tempMap)
+		tempMap[e] = 0
+		if len(tempMap) != l {
+			result = append(result, e)
+		}
+	}
+	return result
+}
