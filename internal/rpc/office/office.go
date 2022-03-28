@@ -181,6 +181,16 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 	if err := utils.CopyStructFields(&resp.TagSendLogs, tagSendLogs); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	for _, sendLog := range tagSendLogs {
+		resp.TagSendLogs = append(resp.TagSendLogs, &pbOffice.TagSendLog{
+			TagID:       sendLog.SendID,
+			TagName:     sendLog.TagName,
+			ContentType: sendLog.ContentType,
+			Content:     sendLog.Content,
+			SendTime:    sendLog.SendTime,
+			UserList:    sendLog.UserList,
+		})
+	}
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
