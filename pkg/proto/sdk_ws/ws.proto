@@ -254,6 +254,12 @@ message MemberEnterTips{
   int64 operationTime = 3;
 }
 
+message GroupDismissedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+}
+
 
 //////////////////////friend/////////////////////
 //message FriendInfo{

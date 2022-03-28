@@ -937,3 +937,27 @@ func (s *groupServer) GetUserReqApplicationList(_ context.Context, req *pbGroup.
 	}
 	return resp, nil
 }
+
+func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
+	if !token_verify.IsMangerUserID(req.OpUserID) && !imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) {
+		log.NewError(req.OperationID, "verify failed ", req.OpUserID, req.GroupID)
+		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+	}
+
+	err := imdb.OperateGroupStatus(req.GroupID, constant.GroupStatusDismissed)
+	if err != nil {
+		log.NewError(req.OperationID, "OperateGroupStatus failed ", req.GroupID, constant.GroupStatusDismissed)
+		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+	chat.GroupDismissedNotification(req)
+
+	err = imdb.DeleteGroupMemberByGroupID(req.GroupID)
+	if err != nil {
+		log.NewError(req.OperationID, "DeleteGroupMemberByGroupID failed ", req.GroupID)
+		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
+	return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+}

@@ -340,6 +340,17 @@ notification:
     defaultTips:
       tips: "entered the group"  # group info changed by xx
 
+  groupDismissed:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupDismissed title"
+      desc: "groupDismissed desc"
+      ext: "groupDismissed ext"
+    defaultTips:
+      tips: "group dismissed"
   #############################friend#################################
 
   friendApplicationAdded:

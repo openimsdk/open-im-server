@@ -157,7 +157,9 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 	case constant.MemberInvitedNotification: //
 		tips.DefaultTips = toNickname + " " + cn.MemberInvited.DefaultTips.Tips
 	case constant.MemberEnterNotification:
-		tips.DefaultTips = toNickname + " " + cn.MemberInvited.DefaultTips.Tips
+		tips.DefaultTips = toNickname + " " + cn.MemberEnter.DefaultTips.Tips
+	case constant.GroupDismissedNotification:
+		tips.DefaultTips = toNickname + "" + cn.GroupDismissed.DefaultTips.Tips
 	default:
 		log.Error(operationID, "contentType failed ", contentType)
 		return
@@ -322,6 +324,19 @@ func GroupOwnerTransferredNotification(req *pbGroup.TransferGroupOwnerReq) {
 		return
 	}
 	groupNotification(constant.GroupOwnerTransferredNotification, &GroupOwnerTransferredTips, req.OpUserID, req.GroupID, "", req.OperationID)
+}
+
+func GroupDismissedNotification(req *pbGroup.DismissGroupReq) {
+	tips := open_im_sdk.GroupDismissedTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
+	if err := setGroupInfo(req.GroupID, tips.Group); err != nil {
+		log.NewError(req.OperationID, "setGroupInfo failed ", err.Error(), req.GroupID)
+		return
+	}
+	if err := setOpUserInfo(req.OpUserID, req.GroupID, tips.OpUser); err != nil {
+		log.Error(req.OperationID, "setOpUserInfo failed", req.OpUserID, req.GroupID)
+		return
+	}
+	groupNotification(constant.GroupDismissedNotification, &tips, req.OpUserID, req.GroupID, "", req.OperationID)
 }
 
 //message MemberKickedTips{

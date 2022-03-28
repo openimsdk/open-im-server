@@ -536,3 +536,35 @@ func TransferGroupOwner(c *gin.Context) {
 	log.NewInfo(req.OperationID, "TransferGroupOwner api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
+func DismissGroup(c *gin.Context) {
+	params := api.DismissGroupReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.DismissGroupReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.DismissGroup(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp := api.DismissGroupResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
