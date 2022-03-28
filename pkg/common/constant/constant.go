@@ -125,12 +125,14 @@ const (
 	ReceiveNotNotifyMessage = 2
 
 	//OptionsKey
-	IsHistory            = "history"
-	IsPersistent         = "persistent"
-	IsOfflinePush        = "offlinePush"
-	IsUnreadCount        = "unreadCount"
-	IsConversationUpdate = "conversationUpdate"
-	IsSenderSync         = "senderSync"
+	IsHistory                  = "history"
+	IsPersistent               = "persistent"
+	IsOfflinePush              = "offlinePush"
+	IsUnreadCount              = "unreadCount"
+	IsConversationUpdate       = "conversationUpdate"
+	IsSenderSync               = "senderSync"
+	IsNotPrivate               = "notPrivate"
+	IsSenderConversationUpdate = "senderConversationUpdate"
 
 	//GroupStatus
 	GroupOk              = 0

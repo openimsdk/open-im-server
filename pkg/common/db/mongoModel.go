@@ -26,7 +26,7 @@ import (
 const cChat = "msg"
 const cGroup = "group"
 const cTag = "tag"
-const cSendLog = "sendLog"
+const cSendLog = "send_log"
 const singleGocMsgNum = 5000
 
 type MsgInfo struct {
@@ -436,17 +436,17 @@ func (d *DataBases) DelGroupMember(groupID, uid string) error {
 }
 
 type Tag struct {
-	UserID   string   `bson:"userID"`
-	TagID    string   `bson:"tagID"`
-	TagName  string   `bson:"tagName"`
-	UserList []string `bson:"userList"`
+	UserID   string   `bson:"user_id"`
+	TagID    string   `bson:"tag_id"`
+	TagName  string   `bson:"tag_name"`
+	UserList []string `bson:"user_list"`
 }
 
 func (d *DataBases) GetUserTags(userID string) ([]Tag, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
 	var tags []Tag
-	cursor, err := c.Find(ctx, bson.M{"userID": userID})
+	cursor, err := c.Find(ctx, bson.M{"user_id": userID})
 	if err != nil {
 		return tags, err
 	}
@@ -473,7 +473,7 @@ func (d *DataBases) CreateTag(userID, tagName string, userList []string) error {
 func (d *DataBases) DeleteTag(userID, tagID string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
-	_, err := c.DeleteOne(ctx, bson.M{"userID": userID, "tagID": tagID})
+	_, err := c.DeleteOne(ctx, bson.M{"user_id": userID, "tag_id": tagID})
 	return err
 }
 
@@ -481,11 +481,11 @@ func (d *DataBases) SetTag(userID, tagID, newName string, increaseUserIDList []s
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
 	var tag Tag
-	if err := c.FindOne(ctx, bson.M{"tagID": tagID, "userID": userID}).Decode(&tag); err != nil {
+	if err := c.FindOne(ctx, bson.M{"tag_id": tagID, "user_id": userID}).Decode(&tag); err != nil {
 		return err
 	}
 	if newName != "" {
-		_, err := c.UpdateOne(ctx, bson.M{"userID": userID, "tagID": tagID}, bson.M{"$set": bson.M{"tagName": newName}})
+		_, err := c.UpdateOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}, bson.M{"$set": bson.M{"tag_name": newName}})
 		if err != nil {
 			return err
 		}
@@ -505,7 +505,7 @@ func (d *DataBases) SetTag(userID, tagID, newName string, increaseUserIDList []s
 			newUserList = append(newUserList, v)
 		}
 	}
-	_, err := c.UpdateOne(ctx, bson.M{"userID": userID, "tagID": tagID}, bson.M{"$set": bson.M{"userList": newUserList}})
+	_, err := c.UpdateOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}, bson.M{"$set": bson.M{"user_list": newUserList}})
 	if err != nil {
 		return err
 	}
@@ -516,26 +516,30 @@ func (d *DataBases) GetUserIDListByTagID(userID, tagID string) ([]string, error)
 	var tag Tag
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
-	_ = c.FindOne(ctx, bson.M{"userID": userID, "tagID": tagID}).Decode(&tag)
+	_ = c.FindOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}).Decode(&tag)
 	return tag.UserList, nil
 }
 
+type TagUser struct {
+	UserID   string `bson:"user_id"`
+	UserName string `bson:"user_name"`
+}
+
 type TagSendLog struct {
-	TagID            string   `bson:"tagID"`
-	TagName          string   `bson:"tagName"`
-	SendID           string   `bson:"sendID"`
-	SenderPlatformID int32    `bson:"senderPlatformID"`
-	Content          string   `bson:"content"`
-	ContentType      int32    `bson:"contentType"`
-	SendTime         int64    `bson:"sendTime"`
-	UserList         []string `bson:"userList"`
+	TagID            string `bson:"tag_id"`
+	TagName          string `bson:"tag_name"`
+	SendID           string `bson:"send_id"`
+	SenderPlatformID int32  `bson:"sender_platform_id"`
+	Content          string `bson:"content"`
+	ContentType      int32  `bson:"content_type"`
+	SendTime         int64  `bson:"send_time"`
 }
 
 func (d *DataBases) SaveTagSendLog(sendReq *officePb.SendMsg2TagReq) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
 	var tag Tag
-	_ = c.FindOne(ctx, bson.M{"userID": sendReq.SendID, "tagID": sendReq.TagID}).Decode(&tag)
+	_ = c.FindOne(ctx, bson.M{"user_id": sendReq.SendID, "tag_id": sendReq.TagID}).Decode(&tag)
 	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
 	tagSendLog := TagSendLog{
 		TagID:            sendReq.TagID,
@@ -545,7 +549,6 @@ func (d *DataBases) SaveTagSendLog(sendReq *officePb.SendMsg2TagReq) error {
 		Content:          sendReq.Content,
 		ContentType:      sendReq.ContentType,
 		SendTime:         time.Now().Unix(),
-		UserList:         tag.UserList,
 	}
 	_, err := c.InsertOne(ctx, tagSendLog)
 	return err
@@ -555,12 +558,12 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 	var tagSendLogs []TagSendLog
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
-	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1))
-	cursor, err := c.Find(ctx, bson.M{"sendID": userID}, findOpts)
+	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"send_time": -1})
+	cursor, err := c.Find(ctx, bson.M{"send_id": userID}, findOpts)
 	if err != nil {
 		return tagSendLogs, err
 	}
-	err = cursor.All(ctx, tagSendLogs)
+	err = cursor.All(ctx, &tagSendLogs)
 	if err != nil {
 		return tagSendLogs, err
 	}
