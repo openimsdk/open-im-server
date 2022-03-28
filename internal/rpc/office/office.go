@@ -26,10 +26,10 @@ type officeServer struct {
 }
 
 func NewOfficeServer(port int) *officeServer {
-	log.NewPrivateLog("officeServer")
+	log.NewPrivateLog("office")
 	return &officeServer{
 		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImMessageCMSName,
+		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfficeName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
