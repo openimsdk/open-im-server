@@ -67,7 +67,11 @@ func main() {
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)        //1
-		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)
+		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)                      //
+		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)
+		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
+		groupRouterGroup.POST("/mute_group", group.MuteGroup)
+		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
@@ -79,6 +83,7 @@ func main() {
 	thirdGroup := r.Group("/third")
 	{
 		thirdGroup.POST("/tencent_cloud_storage_credential", apiThird.TencentCloudStorageCredential)
+		thirdGroup.POST("/ali_oss_credential", apiThird.AliOSSCredential)
 		thirdGroup.POST("/minio_storage_credential", apiThird.MinioStorageCredential)
 		thirdGroup.POST("/minio_upload", apiThird.MinioUploadFile)
 	}
@@ -119,13 +124,9 @@ func main() {
 		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 	}
-
 	apiThird.MinioInit()
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
-	err := r.Run(":" + strconv.Itoa(*ginPort))
-	if err != nil {
-		log.NewError("", utils.GetSelfFuncName(), "start gin failed", err.Error())
-	}
+	r.Run(":" + strconv.Itoa(*ginPort))
 }

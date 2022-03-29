@@ -16,4 +16,3 @@ for i in ${need_to_start_server_shell[*]}; do
   chmod +x $i
   ./$i
 done
-

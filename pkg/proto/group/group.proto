@@ -319,7 +319,7 @@ message AddGroupMembersCMSResp {
 }
 
 message DismissGroupReq{
-  string opUserID = 1; //group member or app manager
+  string opUserID = 1; //group  or app manager
   string operationID = 2;
   string groupID = 3;
 }
@@ -327,6 +327,59 @@ message DismissGroupReq{
 message DismissGroupResp{
   CommonResp commonResp = 1;
 }
+
+
+message MuteGroupMemberReq{
+  string opUserID = 1; //group  or app manager
+  string operationID = 2;
+  string groupID = 3;
+  string userID = 4;
+  uint32 mutedSeconds = 5;
+}
+
+message MuteGroupMemberResp{
+  CommonResp commonResp = 1;
+}
+
+
+
+message CancelMuteGroupMemberReq{
+  string opUserID = 1; //group  or app manager
+  string operationID = 2;
+  string groupID = 3;
+  string userID = 4;
+}
+
+message CancelMuteGroupMemberResp{
+  CommonResp commonResp = 1;
+}
+
+
+message MuteGroupReq{
+  string opUserID = 1; //group  or app manager
+  string operationID = 2;
+  string groupID = 3;
+}
+
+message MuteGroupResp{
+  CommonResp commonResp = 1;
+}
+
+
+
+message CancelMuteGroupReq{
+  string opUserID = 1; //group  or app manager
+  string operationID = 2;
+  string groupID = 3;
+}
+
+message CancelMuteGroupResp{
+  CommonResp commonResp = 1;
+}
+
+
+
+
 
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -356,6 +409,10 @@ service group{
   rpc AddGroupMembersCMS(AddGroupMembersCMSReq) returns(AddGroupMembersCMSResp);
 
   rpc DismissGroup(DismissGroupReq) returns(DismissGroupResp);
+  rpc MuteGroupMember(MuteGroupMemberReq) returns(MuteGroupMemberResp);
+  rpc CancelMuteGroupMember(CancelMuteGroupMemberReq) returns(CancelMuteGroupMemberResp);
+  rpc MuteGroup(MuteGroupReq) returns(MuteGroupResp);
+  rpc CancelMuteGroup(CancelMuteGroupReq) returns(CancelMuteGroupResp);
 }
 
 

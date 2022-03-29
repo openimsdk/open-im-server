@@ -30,6 +30,9 @@ func InsertIntoGroupMember(toInsertInfo db.GroupMember) error {
 	if toInsertInfo.RoleLevel == 0 {
 		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
 	}
+	if toInsertInfo.MuteEndTime.Unix() == 0 {
+		toInsertInfo.MuteEndTime = time.Unix(0, 0)
+	}
 	err = dbConn.Table("group_members").Create(toInsertInfo).Error
 	if err != nil {
 		return err
@@ -279,6 +282,14 @@ func GetGroupMembersCount(groupId, userName string) (int32, error) {
 		return count, err
 	}
 	return count, nil
+}
+
+func UpdateGroupMemberInfoDefaultZero(groupMemberInfo db.GroupMember, args map[string]interface{}) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	return dbConn.Model(groupMemberInfo).Updates(args).Error
 }
 
 //

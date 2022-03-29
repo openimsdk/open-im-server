@@ -17,4 +17,3 @@ if [ $available -lt 2000 ] ; then
 else
         echo -e ${GREEN_PREFIX} "Memory is ok, available is: "$available"m${COLOR_SUFFIX}"
 fi
-

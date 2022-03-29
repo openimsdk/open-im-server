@@ -19,7 +19,8 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
-  dbAddress: [ 127.0.0.1:37017 ] #redis地址 目前仅支持单机，默认即可
+  dbUri: ""#当dbUri值不为空则直接使用该值
+  dbAddress: [ 127.0.0.1:37017 ] #mongo地址 目前仅支持单机，默认即可
   dbDirect: false
   dbTimeout: 10
   dbDatabase: openIM  #mongo db 默认即可
@@ -91,9 +92,20 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim
     location: us-east-1
-    endpoint: http://43.128.5.63:9000
+    endpoint: http://127.0.0.1:9000
     accessKeyID: user12345
     secretAccessKey: key12345
+  ali: # ali oss
+    regionID: "oss-cn-beijing"
+    accessKeyID: ""
+    accessKeySecret: ""
+    stsEndpoint: "sts.cn-beijing.aliyun.com"
+    ossEndpoint: "oss-cn-beijing.aliyuncs.com"
+    bucket: "bucket1"
+    finalHost: "http://bucket1.oss-cn-beijing.aliyuncs.com"
+    stsDurationSeconds: 3600
+    OssRoleArn: "acs:ram::xxx:role/xxx"
+
 
 
 rpcport: #rpc服务端口 默认即可
@@ -136,7 +148,7 @@ log:
   rotationTime: 24
   remainRotationCount: 3 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
-  remainLogLevel: 6
+  remainLogLevel: 4
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
