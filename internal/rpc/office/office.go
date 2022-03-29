@@ -165,7 +165,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 		}
 		groupUserIDList = append(groupUserIDList, userIDList...)
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
 	var userIDList []string
 	userIDList = append(userIDList, tagUserIDList...)
 	userIDList = append(userIDList, groupUserIDList...)

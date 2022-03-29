@@ -93,6 +93,7 @@ func syncPeerUserConversation(conversation *pbUser.Conversation, operationID str
 			log.NewError(operationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 			return err
 		}
+
 		chat.SetConversationNotification(operationID, conversation.UserID)
 	}
 	return nil
