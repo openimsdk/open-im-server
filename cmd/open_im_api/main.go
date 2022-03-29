@@ -67,7 +67,11 @@ func main() {
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)        //1
-		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)
+		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)                      //
+		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)
+		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
+		groupRouterGroup.POST("/mute_group", group.MuteGroup)
+		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")

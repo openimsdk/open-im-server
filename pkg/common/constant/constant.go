@@ -79,6 +79,7 @@ const (
 	MemberInvitedNotification            = 1509
 	MemberEnterNotification              = 1510
 	GroupDismissedNotification           = 1511
+	GroupMemberInfoChangedNotification   = 1512
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601
