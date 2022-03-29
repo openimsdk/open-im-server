@@ -513,6 +513,38 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.GroupDismissed.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.GroupDismissed.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.GroupDismissed.Conversation.UnreadCount
+
+	case constant.GroupMutedNotification:
+		pushSwitch = config.Config.Notification.GroupMuted.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupMuted.OfflinePush.Title
+		desc = config.Config.Notification.GroupMuted.OfflinePush.Desc
+		ex = config.Config.Notification.GroupMuted.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupMuted.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupMuted.Conversation.UnreadCount
+
+	case constant.GroupCancelMutedNotification:
+		pushSwitch = config.Config.Notification.GroupCancelMuted.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupCancelMuted.OfflinePush.Title
+		desc = config.Config.Notification.GroupCancelMuted.OfflinePush.Desc
+		ex = config.Config.Notification.GroupCancelMuted.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupCancelMuted.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupCancelMuted.Conversation.UnreadCount
+
+	case constant.GroupMemberMutedNotification:
+		pushSwitch = config.Config.Notification.GroupMemberMuted.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupMemberMuted.OfflinePush.Title
+		desc = config.Config.Notification.GroupMemberMuted.OfflinePush.Desc
+		ex = config.Config.Notification.GroupMemberMuted.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupMemberMuted.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupMemberMuted.Conversation.UnreadCount
+
+	case constant.GroupMemberCancelMutedNotification:
+		pushSwitch = config.Config.Notification.GroupMemberCancelMuted.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupMemberCancelMuted.OfflinePush.Title
+		desc = config.Config.Notification.GroupMemberCancelMuted.OfflinePush.Desc
+		ex = config.Config.Notification.GroupMemberCancelMuted.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupMemberCancelMuted.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupMemberCancelMuted.Conversation.UnreadCount
 	}
 	switch reliabilityLevel {
 	case constant.UnreliableNotification:
