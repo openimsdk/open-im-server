@@ -30,9 +30,7 @@ func InsertIntoGroupMember(toInsertInfo db.GroupMember) error {
 	if toInsertInfo.RoleLevel == 0 {
 		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
 	}
-	if toInsertInfo.MuteEndTime.Unix() == 0 {
-		toInsertInfo.MuteEndTime = time.Unix(1, 1)
-	}
+	toInsertInfo.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
 	err = dbConn.Table("group_members").Create(toInsertInfo).Error
 	if err != nil {
 		return err
