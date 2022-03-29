@@ -969,7 +969,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 
 func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (*pbGroup.MuteGroupMemberResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
-	if !imdb.IsGroupOwnerAdmin(req.GroupID, req.UserID) && !token_verify.IsMangerUserID(req.OpUserID) {
+	if !imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) && !token_verify.IsMangerUserID(req.OpUserID) {
 		log.Error(req.OperationID, "verify failed ", req.GroupID, req.UserID)
 		return &pbGroup.MuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
@@ -987,7 +987,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 
 func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (*pbGroup.CancelMuteGroupMemberResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
-	if !imdb.IsGroupOwnerAdmin(req.GroupID, req.UserID) && !token_verify.IsMangerUserID(req.OpUserID) {
+	if !imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) && !token_verify.IsMangerUserID(req.OpUserID) {
 		log.Error(req.OperationID, "verify failed ", req.OpUserID, req.GroupID)
 		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
