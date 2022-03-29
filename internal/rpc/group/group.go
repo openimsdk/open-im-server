@@ -1029,11 +1029,10 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 		log.Error(req.OperationID, "verify failed ", req.OpUserID, req.GroupID)
 		return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
-	groupInfo := db.Group{GroupID: req.GroupID}
 
-	err := imdb.UpdateGroupInfoDefaultZero(groupInfo, map[string]interface{}{"status": constant.GroupOk})
+	err := imdb.UpdateGroupInfoDefaultZero(req.GroupID, map[string]interface{}{"status": constant.GroupOk})
 	if err != nil {
-		log.Error(req.OperationID, "UpdateGroupInfoDefaultZero failed ", err.Error(), groupInfo)
+		log.Error(req.OperationID, "UpdateGroupInfoDefaultZero failed ", err.Error(), req.GroupID)
 		return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	chat.GroupCancelMutedNotification(req.OperationID, req.OpUserID, req.GroupID)
