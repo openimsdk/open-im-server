@@ -72,6 +72,32 @@ func (s *userServer) Run() {
 	log.NewInfo("0", "rpc  user success")
 }
 
+func syncPeerUserConversation(conversation *pbUser.Conversation, operationID string) error {
+	if conversation.ConversationType == constant.SingleChatType {
+		peerUserConversation := db.Conversation{
+			OwnerUserID:      conversation.UserID,
+			ConversationID:   "single_" + conversation.OwnerUserID,
+			ConversationType: constant.SingleChatType,
+			UserID:           conversation.OwnerUserID,
+			GroupID:          "",
+			RecvMsgOpt:       0,
+			UnreadCount:      0,
+			DraftTextTime:    0,
+			IsPinned:         false,
+			IsPrivateChat:    conversation.IsPrivateChat,
+			AttachedInfo:     "",
+			Ex:               "",
+		}
+		err := imdb.CreateConversationIfNotExist(peerUserConversation)
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
+			return err
+		}
+		chat.SetConversationNotification(operationID, conversation.UserID)
+	}
+	return nil
+}
+
 func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq) (*pbUser.GetUserInfoResp, error) {
 	log.NewInfo(req.OperationID, "GetUserInfo args ", req.String())
 	var userInfoList []*sdkws.UserInfo
@@ -113,6 +139,9 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 			continue
 		}
 		resp.Success = append(resp.Success, v.ConversationID)
+		//if err := syncPeerUserConversation(v, req.OperationID); err != nil {
+		//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())
+		//}
 	}
 	chat.SetConversationNotification(req.OperationID, req.OwnerUserID)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return", resp.String())
@@ -189,6 +218,10 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
+	// sync peer user conversation if conversation is singleChatType
+	//if err := syncPeerUserConversation(req.Conversation, req.OperationID); err != nil {
+	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())
+	//}
 	chat.SetConversationNotification(req.OperationID, req.Conversation.OwnerUserID)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return", resp.String())
 	resp.CommonResp = &pbUser.CommonResp{}

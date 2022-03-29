@@ -5,7 +5,7 @@ import (
 )
 
 type GetUserTagsReq struct {
-	OperationID string `json:"operationID"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
 type GetUserTagsResp struct {
@@ -47,7 +47,10 @@ type SetTagResp struct {
 }
 
 type SendMsg2TagReq struct {
-	TagID            string `json:"tagID" binding:"required"`
+	TagList   []string `json:"tagList"`
+	UserList  []string `json:"userList"`
+	GroupList []string `json:"groupList"`
+
 	SenderPlatformID int32  `json:"senderPlatformID" binding:"required"`
 	Content          string `json:"content" binding:"required"`
 	ContentType      int32  `json:"contentType" binding:"required"`

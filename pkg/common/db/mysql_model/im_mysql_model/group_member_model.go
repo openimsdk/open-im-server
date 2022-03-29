@@ -68,6 +68,20 @@ func GetGroupMemberListByGroupID(groupID string) ([]db.GroupMember, error) {
 	return groupMemberList, nil
 }
 
+func GetGroupMemberIDListByGroupID(groupID string) ([]string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	dbConn.LogMode(true)
+	var groupMemberIDList []string
+	err = dbConn.Table("group_members").Select("user_id").Where("group_id=?", groupID).Find(&groupMemberIDList).Error
+	if err != nil {
+		return nil, err
+	}
+	return groupMemberIDList, nil
+}
+
 func GetGroupMemberListByGroupIDAndRoleLevel(groupID string, roleLevel int32) ([]db.GroupMember, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
