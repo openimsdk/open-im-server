@@ -261,6 +261,13 @@ message GroupDismissedTips{
   int64 operationTime = 3;
 }
 
+message GroupMemberInfoChangedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo changedUserList = 4;
+}
+
 
 //////////////////////friend/////////////////////
 //message FriendInfo{
