@@ -1,7 +1,6 @@
 syntax = "proto3";
 option go_package = "./sdk_ws;server_api_params";
-package server_api_params;//The package name to which the proto file belongs
-//option go_package = "./sdk_ws;open_im_sdk";//The generated go pb file is in the current directory, and the package name is open_im_sdk
+package server_api_params;
 
 ////////////////////////////////base///////////////////////////////
 
@@ -33,6 +32,7 @@ message GroupMemberFullInfo {
   int32 joinSource = 8;
   string operatorUserID = 9;
   string ex = 10;
+  uint32 muteEndTime = 11;
 }
 
 message PublicUserInfo{
@@ -255,14 +255,11 @@ message MemberEnterTips{
   int64 operationTime = 3;
 }
 
-
-
-
-
-
-
-
-
+message GroupDismissedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+}
 
 
 //////////////////////friend/////////////////////
@@ -380,11 +377,25 @@ message InvitationInfo  {
     repeated string inviteeUserIDList = 2;
     string customData = 3;
     string  groupID = 4;
+    string roomID = 5;
+    int32 timeout = 6;
+    string mediaType = 7;
+     int32 platformID = 8;
+    int32   sessionType = 9;
 }
 
+message ParticipantMetaData{
+    GroupInfo groupInfo = 1;
+    GroupMemberFullInfo groupMemberInfo = 2;
+    PublicUserInfo userInfo = 3;
+}
 
 message SignalInviteReq {
-    InvitationInfo invitation = 1;
+    string opUserID = 1;
+    InvitationInfo invitation = 2;
+    OfflinePushInfo offlinePushInfo  = 3;
+    ParticipantMetaData participant = 4;
+
 }
 
 message SignalInviteReply {
@@ -394,7 +405,10 @@ message SignalInviteReply {
 }
 
 message SignalInviteInGroupReq {
-  InvitationInfo invitation = 1;
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
 }
 
 message SignalInviteInGroupReply {
@@ -404,8 +418,10 @@ message SignalInviteInGroupReply {
 }
 
 message SignalCancelReq {
-  string inviterUserID = 1;
-  SignalInviteReq invitation = 2;
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
 }
 
 message SignalCancelReply {
@@ -413,8 +429,11 @@ message SignalCancelReply {
 }
 
 message SignalAcceptReq {
-  string inviteeUserID = 1;
-  SignalInviteReq invitation = 2;
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
+  int32 opUserPlatformID = 5;
 }
 
 message SignalAcceptReply {
@@ -424,8 +443,9 @@ message SignalAcceptReply {
 }
 
 message SignalHungUpReq {
-  string UserID = 1;
-  SignalInviteReq invitation = 2;
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
 }
 
 message SignalHungUpReply {
@@ -434,8 +454,11 @@ message SignalHungUpReply {
 
 
 message SignalRejectReq {
-  string inviteeUserID = 1;
-  SignalInviteReq invitation = 2;
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
+  int32 opUserPlatformID = 5;
 }
 
 message SignalRejectReply {
@@ -443,6 +466,16 @@ message SignalRejectReply {
 }
 
 
+message DelMsgListReq{
+    string opUserID = 1;
+    string userID = 2;
+    repeated uint32 seqList = 3;
+    string operationID = 4;
+}
 
+message DelMsgListResp{
+ int32 errCode = 1;
+  string errMsg = 2;
+}
 
 

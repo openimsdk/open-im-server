@@ -108,6 +108,7 @@ type GroupMember struct {
 	JoinTime       time.Time `gorm:"column:join_time"`
 	JoinSource     int32     `gorm:"column:join_source"`
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
+	MuteEndTime    time.Time `gorm:"column:mute_end_time"`
 	Ex             string    `gorm:"column:ex;size:1024"`
 }
 
@@ -213,6 +214,11 @@ type Conversation struct {
 	UnreadCount      int32  `gorm:"column:unread_count" json:"unreadCount"`
 	DraftTextTime    int64  `gorm:"column:draft_text_time" json:"draftTextTime"`
 	IsPinned         bool   `gorm:"column:is_pinned" json:"isPinned"`
+	IsPrivateChat    bool   `gorm:"column:is_private_chat" json:"isPrivateChat"`
 	AttachedInfo     string `gorm:"column:attached_info;type:varchar(1024)" json:"attachedInfo"`
 	Ex               string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+}
+
+func (Conversation) TableName() string {
+	return "conversations"
 }

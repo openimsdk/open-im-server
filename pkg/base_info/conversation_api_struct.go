@@ -32,17 +32,83 @@ type SetReceiveMessageOptResp struct {
 	ConversationOptResultList []*OptResult `json:"data"`
 }
 
-//type Conversation struct {
-//	OwnerUserID      string `gorm:"column:owner_user_id;primary_key;type:char(128)" json:"OwnerUserID"`
-//	ConversationID   string `gorm:"column:conversation_id;primary_key;type:char(128)" json:"conversationID"`
-//	ConversationType int32  `gorm:"column:conversation_type" json:"conversationType"`
-//	UserID           string `gorm:"column:user_id;type:char(64)" json:"userID"`
-//	GroupID          string `gorm:"column:group_id;type:char(128)" json:"groupID"`
-//	RecvMsgOpt       int32  `gorm:"column:recv_msg_opt" json:"recvMsgOpt"`
-//	UnreadCount      int32  `gorm:"column:unread_count" json:"unreadCount"`
-//	DraftTextTime    int64  `gorm:"column:draft_text_time" json:"draftTextTime"`
-//	IsPinned         bool   `gorm:"column:is_pinned" json:"isPinned"`
-//	AttachedInfo     string `gorm:"column:attached_info;type:varchar(1024)" json:"attachedInfo"`
-//	Ex               string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
-//}
+type Conversation struct {
+	OwnerUserID      string `json:"ownerUserID" binding:"required"`
+	ConversationID   string `json:"conversationID"`
+	ConversationType int32  `json:"conversationType"`
+	UserID           string `json:"userID"`
+	GroupID          string `json:"groupID"`
+	RecvMsgOpt       int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
+	UnreadCount      int32  `json:"unreadCount"  binding:"omitempty"`
+	DraftTextTime    int64  `json:"draftTextTime"`
+	IsPinned         bool   `json:"isPinned" binding:"omitempty"`
+	IsPrivateChat    bool   `json:"isPrivateChat"`
+	AttachedInfo     string `json:"attachedInfo"`
+	Ex               string `json:"ex"`
+}
 
+type SetConversationReq struct {
+	Conversation
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type SetConversationResp struct {
+	CommResp
+}
+
+type BatchSetConversationsReq struct {
+	Conversations []Conversation `json:"conversations" binding:"required"`
+	OwnerUserID   string         `json:"ownerUserID" binding:"required"`
+	OperationID   string         `json:"operationID" binding:"required"`
+}
+
+type BatchSetConversationsResp struct {
+	CommResp
+	Data struct {
+		Success []string `json:"success"`
+		Failed  []string `json:"failed"`
+	} `json:"data"`
+}
+
+type GetConversationReq struct {
+	ConversationID string `json:"conversationID" binding:"required"`
+	OwnerUserID    string `json:"ownerUserID" binding:"required"`
+	OperationID    string `json:"operationID" binding:"required"`
+}
+
+type GetConversationResp struct {
+	CommResp
+	Conversation Conversation `json:"data"`
+}
+
+type GetAllConversationsReq struct {
+	OwnerUserID string `json:"ownerUserID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type GetAllConversationsResp struct {
+	CommResp
+	Conversations []Conversation `json:"data"`
+}
+
+type GetConversationsReq struct {
+	ConversationIDs []string `json:"conversationIDs" binding:"required"`
+	OwnerUserID     string   `json:"ownerUserID" binding:"required"`
+	OperationID     string   `json:"operationID" binding:"required"`
+}
+
+type GetConversationsResp struct {
+	CommResp
+	Conversations []Conversation `json:"data"`
+}
+
+type SetRecvMsgOptReq struct {
+	OwnerUserID    string `json:"ownerUserID" binding:"required"`
+	ConversationID string `json:"conversationID"`
+	RecvMsgOpt     int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
+	OperationID    string `json:"operationID" binding:"required"`
+}
+
+type SetRecvMsgOptResp struct {
+	CommResp
+}

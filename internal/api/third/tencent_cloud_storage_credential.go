@@ -22,7 +22,7 @@ func TencentCloudStorageCredential(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"))
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})

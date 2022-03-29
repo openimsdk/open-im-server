@@ -17,15 +17,14 @@ import (
 	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	//	"go.mongodb.org/mongo-driver/mongo/options"
-
 )
 
 var DB DataBases
 
 type DataBases struct {
-	MysqlDB    mysqlDB
-	mgoSession *mgo.Session
-	redisPool  *redis.Pool
+	MysqlDB     mysqlDB
+	mgoSession  *mgo.Session
+	redisPool   *redis.Pool
 	mongoClient *mongo.Client
 }
 

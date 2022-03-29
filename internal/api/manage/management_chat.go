@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
 	"net/http"
 	"strings"
@@ -29,6 +30,7 @@ var validate *validator.Validate
 
 func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 	var newContent string
+	var err error
 	switch params.ContentType {
 	case constant.Text:
 		newContent = params.Content["text"].(string)
@@ -40,6 +42,9 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 		fallthrough
 	case constant.File:
 		newContent = utils.StructToJsonString(params.Content)
+	case constant.Revoke:
+		newContent = params.Content["revokeMsgClientID"].(string)
+
 	default:
 	}
 	var options map[string]bool
@@ -69,6 +74,14 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 			Options:         options,
 			OfflinePushInfo: params.OfflinePushInfo,
 		},
+	}
+	if params.ContentType == constant.OANotification {
+		var tips open_im_sdk.TipsComm
+		tips.JsonDetail = utils.StructToJsonString(params.Content)
+		pbData.MsgData.Content, err = proto.Marshal(&tips)
+		if err != nil {
+			log.Error(params.OperationID, "Marshal failed ", err.Error(), tips.String())
+		}
 	}
 	return &pbData
 }
@@ -103,7 +116,11 @@ func ManagementSendMsg(c *gin.Context) {
 	//case constant.Location:
 	case constant.Custom:
 		data = CustomElem{}
-	//case constant.Revoke:
+	case constant.Revoke:
+		data = RevokeElem{}
+	case constant.OANotification:
+		data = OANotificationElem{}
+		params.SessionType = constant.NotificationChatType
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
 	//case constant.Quote:
@@ -121,12 +138,13 @@ func ManagementSendMsg(c *gin.Context) {
 		log.ErrorByKv("data args validate  err", "", "err", err.Error())
 		return
 	}
-
+	log.NewInfo("", data, params)
 	token := c.Request.Header.Get("token")
 	claims, err := token_verify.ParseToken(token)
 	if err != nil {
 		log.NewError(params.OperationID, "parse token failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
+		return
 	}
 	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not authorized", "sendTime": 0, "MsgID": ""})
@@ -138,11 +156,13 @@ func ManagementSendMsg(c *gin.Context) {
 		if len(params.RecvID) == 0 {
 			log.NewError(params.OperationID, "recvID is a null string")
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "recvID is a null string", "sendTime": 0, "MsgID": ""})
+			return
 		}
 	case constant.GroupChatType:
 		if len(params.GroupID) == 0 {
 			log.NewError(params.OperationID, "groupID is a null string")
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "groupID is a null string", "sendTime": 0, "MsgID": ""})
+			return
 		}
 
 	}
@@ -256,4 +276,31 @@ type CustomElem struct {
 }
 type TextElem struct {
 	Text string `mapstructure:"text" validate:"required"`
+}
+
+type RevokeElem struct {
+	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
+}
+type OANotificationElem struct {
+	NotificationName    string `mapstructure:"notificationName" validate:"required"`
+	NotificationFaceURL string `mapstructure:"notificationFaceURL" validate:"required"`
+	NotificationType    int32  `mapstructure:"notificationType" validate:"required"`
+	Text                string `mapstructure:"text" validate:"required"`
+	Url                 string `mapstructure:"url"`
+	MixType             int32  `mapstructure:"mixType"`
+	Image               struct {
+		SourceUrl   string `mapstructure:"sourceUrl"`
+		SnapshotUrl string `mapstructure:"snapshotUrl"`
+	} `mapstructure:"image"`
+	Video struct {
+		SourceUrl   string `mapstructure:"sourceUrl"`
+		SnapshotUrl string `mapstructure:"snapshotUrl"`
+		Duration    int64  `mapstructure:"duration"`
+	} `mapstructure:"video"`
+	File struct {
+		SourceUrl string `mapstructure:"sourceUrl"`
+		FileName  string `mapstructure:"fileName"`
+		FileSize  int64  `mapstructure:"fileSize"`
+	} `mapstructure:"file"`
+	Ex string `mapstructure:"ex"`
 }

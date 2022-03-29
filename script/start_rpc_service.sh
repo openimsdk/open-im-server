@@ -18,6 +18,7 @@ service_filename=(
   open_im_message_cms
   open_im_statistics
   ${msg_name}
+  open_im_office
 )
 
 #service config port name
@@ -34,6 +35,7 @@ service_port_name=(
   openImMessageCmsPort
   openImStatisticsPort
   openImOfflineMessagePort
+  openImOfficePort
 )
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do

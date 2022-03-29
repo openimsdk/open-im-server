@@ -10,13 +10,18 @@ import (
 	url2 "net/url"
 )
 
+var (
+	minioClient *minio.Client
+)
+
 func MinioInit() {
+	log.NewInfo("", utils.GetSelfFuncName())
 	minioUrl, err := url2.Parse(config.Config.Credential.Minio.Endpoint)
 	if err != nil {
 		log.NewError("", utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
 		return
 	}
-	minioClient, err := minio.New(minioUrl.Host, &minio.Options{
+	minioClient, err = minio.New(minioUrl.Host, &minio.Options{
 		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
 		Secure: false,
 	})
@@ -45,8 +50,8 @@ func MinioInit() {
 	// 自动化桶public的代码
 	//err = minioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
 	//if err != nil {
-	//	log.NewError("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in 	", err.Error())
-	//	return`z
+	//	log.NewError("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+	//	return
 	//}
 	log.NewInfo("", utils.GetSelfFuncName(), "minio create and set policy success")
 }

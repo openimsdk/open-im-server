@@ -1,7 +1,9 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-package pbChat;//The package name to which the proto file belongs
-option go_package = "./chat;pbChat";//The generated go pb file is in the current directory, and the package name is pbChat
+option go_package = "./chat;pbChat";
+package pbChat;
+
+
 
 message MsgDataToMQ{
   string token =1;
@@ -69,8 +71,12 @@ message SendMsgResp {
   int64  sendTime = 6;
 
 }
+
+
+
 service Chat {
   rpc GetMaxAndMinSeq(GetMaxAndMinSeqReq) returns(GetMaxAndMinSeqResp);
   rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
+  rpc DelMsgList(server_api_params.DelMsgListReq) returns(server_api_params.DelMsgListResp);
 }

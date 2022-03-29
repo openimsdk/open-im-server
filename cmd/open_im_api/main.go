@@ -7,6 +7,7 @@ import (
 	"Open_IM/internal/api/friend"
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
+	"Open_IM/internal/api/office"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/log"
@@ -66,6 +67,7 @@ func main() {
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)        //1
+		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
@@ -79,6 +81,7 @@ func main() {
 		thirdGroup.POST("/tencent_cloud_storage_credential", apiThird.TencentCloudStorageCredential)
 		thirdGroup.POST("/ali_oss_credential", apiThird.AliOSSCredential)
 		thirdGroup.POST("/minio_storage_credential", apiThird.MinioStorageCredential)
+		thirdGroup.POST("/minio_upload", apiThird.MinioUploadFile)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
@@ -86,6 +89,7 @@ func main() {
 		chatGroup.POST("/newest_seq", apiChat.GetSeq)
 		chatGroup.POST("/send_msg", apiChat.SendMsg)
 		chatGroup.POST("/pull_msg_by_seq", apiChat.PullMsgBySeqList)
+		chatGroup.POST("/del_msg", apiChat.DelMsg)
 	}
 	//Manager
 	managementGroup := r.Group("/manager")
@@ -98,10 +102,23 @@ func main() {
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
+	{ //1
+		conversationGroup.POST("/get_all_conversations", conversation.GetAllConversations)
+		conversationGroup.POST("/get_conversation", conversation.GetConversation)
+		conversationGroup.POST("/get_conversations", conversation.GetConversations)
+		conversationGroup.POST("/set_conversation", conversation.SetConversation)
+		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
+		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
+	}
+	// office
+	officeGroup := r.Group("/office")
 	{
-		conversationGroup.POST("/set_receive_message_opt", conversation.SetReceiveMessageOpt)                  //1
-		conversationGroup.POST("/get_receive_message_opt", conversation.GetReceiveMessageOpt)                  //1
-		conversationGroup.POST("/get_all_conversation_message_opt", conversation.GetAllConversationMessageOpt) //1
+		officeGroup.POST("/get_user_tags", office.GetUserTags)
+		officeGroup.POST("/create_tag", office.CreateTag)
+		officeGroup.POST("/delete_tag", office.DeleteTag)
+		officeGroup.POST("/set_tag", office.SetTag)
+		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
+		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 	}
 	apiThird.MinioInit()
 	log.NewPrivateLog("api")

@@ -22,7 +22,7 @@ var Config config
 type callBackConfig struct {
 	Enable                 bool `yaml:"enable"`
 	CallbackTimeOut        int  `yaml:"callbackTimeOut"`
-	CallbackFailedContinue bool `CallbackFailedContinue`
+	CallbackFailedContinue bool `yaml:"callbackFailedContinue"`
 }
 
 type config struct {
@@ -64,6 +64,7 @@ type config struct {
 			SecretAccessKey string `yaml:"secretAccessKey"`
 		} `yaml:"minio"`
 	}
+
 	Mysql struct {
 		DBAddress      []string `yaml:"dbMysqlAddress"`
 		DBUserName     string   `yaml:"dbMysqlUserName"`
@@ -114,6 +115,7 @@ type config struct {
 		OpenImAuthName               string `yaml:"openImAuthName"`
 		OpenImMessageCMSName         string `yaml:"openImMessageCMSName"`
 		OpenImAdminCMSName           string `yaml:"openImAdminCMSName"`
+		OpenImOfficeName             string `yaml:"openImOfficeName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
@@ -184,8 +186,8 @@ type config struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
 	}
-	MessageJudge struct {
-		IsJudgeFriend bool `yaml:"isJudgeFriend"`
+	MessageVerify struct {
+		FriendVerify bool `yaml:"friendVerify"`
 	}
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
@@ -261,6 +263,13 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"memberEnter"`
+
+		GroupDismissed struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupDismissed"`
+
 		////////////////////////user///////////////////////
 		UserInfoUpdated struct {
 			Conversation PConversation `yaml:"conversation"`

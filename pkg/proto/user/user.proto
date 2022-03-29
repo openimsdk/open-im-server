@@ -67,44 +67,83 @@ message UpdateUserInfoResp{
   CommonResp  commonResp = 1;
 }
 
+message Conversation{
+  string OwnerUserID = 1;
+  string ConversationID = 2;
+  int32 RecvMsgOpt = 3;
+  int32 ConversationType = 4;
+  string UserID = 5;
+  string GroupID = 6;
+  int32 UnreadCount = 7;
+  int64 DraftTextTime = 8;
+  bool IsPinned = 9;
+  string AttachedInfo = 10;
+  bool IsPrivateChat = 11;
+  string Ex = 12;
+}
 
-message SetReceiveMessageOptReq{
-  string FromUserID = 1;
-  int32  opt = 2;
-  repeated string conversationIDList = 3;
-  string  operationID = 4;
-  string OpUserID = 5;
+message SetConversationReq{
+  Conversation Conversation = 1;
+  string OperationID = 2;
 }
-message OptResult{
-  string conversationID = 1;
-  int32 result = 2; //-1: failed;  0:default; 1: not receive ; 2: not jpush
-}
-message SetReceiveMessageOptResp{
+
+message SetConversationResp{
   CommonResp  commonResp = 1;
-  repeated OptResult conversationOptResultList = 2;
 }
 
-
-message GetReceiveMessageOptReq{
-  string FromUserID = 1;
-  repeated string conversationIDList = 2;
-  string  operationID = 3;
-  string OpUserID = 4;
+message SetRecvMsgOptReq {
+  string OwnerUserID = 1;
+  string ConversationID = 2;
+  int32 RecvMsgOpt = 3;
+  string OperationID = 4;
 }
-message GetReceiveMessageOptResp{
+
+message SetRecvMsgOptResp {
   CommonResp  commonResp = 1;
-  repeated OptResult conversationOptResultList = 3;
 }
 
-
-message GetAllConversationMsgOptReq{
-  string FromUserID = 1;
-  string operationID = 2;
-  string OpUserID = 3;
+message GetConversationReq{
+  string ConversationID = 1;
+  string OwnerUserID = 2;
+  string OperationID = 3;
 }
-message GetAllConversationMsgOptResp{
+
+message GetConversationResp{
   CommonResp  commonResp = 1;
-  repeated OptResult conversationOptResultList = 3;
+  Conversation Conversation = 2;
+}
+
+message GetConversationsReq{
+  string OwnerUserID = 1;
+  repeated string ConversationIDs = 2;
+  string OperationID = 3;
+}
+
+message GetConversationsResp{
+  CommonResp  commonResp = 1;
+  repeated Conversation Conversations = 2;
+}
+
+message GetAllConversationsReq{
+  string OwnerUserID = 1;
+  string OperationID = 2;
+}
+
+message GetAllConversationsResp{
+  CommonResp  commonResp = 1;
+  repeated Conversation Conversations = 2;
+}
+
+message BatchSetConversationsReq{
+  repeated Conversation Conversations = 1;
+  string OwnerUserID = 2;
+  string OperationID = 3;
+}
+
+message BatchSetConversationsResp{
+   CommonResp  commonResp = 1;
+   repeated string Success = 2;
+   repeated string Failed = 3;
 }
 
 message ResignUserReq{
@@ -130,7 +169,7 @@ message User{
 }
 
 message GetUserByIdResp{
-  CommonResp  CommonResp = 1;
+  CommonResp CommonResp = 1;
   User user = 2;
 }
 
@@ -241,18 +280,24 @@ message DeleteUserReq {
 }
 
 message DeleteUserResp {
-
+    CommonResp  CommonResp = 1;
 }
+
+
 
 service user {
   rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
   rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
   rpc GetAllUserID(GetAllUserIDReq)returns(GetAllUserIDResp);
-  rpc SetReceiveMessageOpt(SetReceiveMessageOptReq)returns(SetReceiveMessageOptResp);
-  rpc GetReceiveMessageOpt(GetReceiveMessageOptReq)returns(GetReceiveMessageOptResp);
-  rpc GetAllConversationMsgOpt(GetAllConversationMsgOptReq)returns(GetAllConversationMsgOptResp);
+
   rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
+  rpc GetConversation(GetConversationReq)returns(GetConversationResp);
+  rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
+  rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
+  rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
+  rpc SetConversation(SetConversationReq)returns(SetConversationResp);
+  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
 
   rpc GetUserById(GetUserByIdReq) returns (GetUserByIdResp);
   rpc GetUsersByName(GetUsersByNameReq) returns (GetUsersByNameResp);

@@ -11,6 +11,8 @@ require (
 	github.com/alibabacloud-go/tea v1.1.17
 	github.com/antonfisher/nested-logrus-formatter v1.3.0
 	github.com/bwmarrin/snowflake v0.3.0
+	github.com/coreos/etcd v3.3.27+incompatible // indirect
+	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/eapache/go-resiliency v1.2.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
@@ -20,6 +22,7 @@ require (
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4 // indirect
@@ -31,6 +34,8 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.4 // indirect
 	github.com/lib/pq v1.2.0 // indirect
+	//github.com/livekit/protocol v0.11.14-0.20220223195254-d8c251e13231 // indirect
+	//github.com/livekit/server-sdk-go v0.9.1
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/minio/minio-go/v7 v7.0.22
 	github.com/mitchellh/mapstructure v1.4.2
@@ -45,11 +50,13 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20210325043845-84a0811633ca
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5 // indirect
+	//go.etcd.io/etcd v3.3.27+incompatible
 	go.etcd.io/etcd v0.0.0-20200402134248-51bdeb39e698
 	go.mongodb.org/mongo-driver v1.8.3
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
-	golang.org/x/net v0.0.0-20210917221730-978cfadd31cf
-	google.golang.org/grpc v1.40.0
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
+	google.golang.org/grpc v1.42.0
+	google.golang.org/grpc/examples v0.0.0-20220311002955-722367c4a737 // indirect
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
@@ -59,4 +66,4 @@ require (
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
+replace google.golang.org/grpc => google.golang.org/grpc v1.29.0

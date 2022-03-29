@@ -937,3 +937,74 @@ func (s *groupServer) GetUserReqApplicationList(_ context.Context, req *pbGroup.
 	}
 	return resp, nil
 }
+
+func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
+	if !token_verify.IsMangerUserID(req.OpUserID) && !imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) {
+		log.NewError(req.OperationID, "verify failed ", req.OpUserID, req.GroupID)
+		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+	}
+
+	err := imdb.OperateGroupStatus(req.GroupID, constant.GroupStatusDismissed)
+	if err != nil {
+		log.NewError(req.OperationID, "OperateGroupStatus failed ", req.GroupID, constant.GroupStatusDismissed)
+		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+	chat.GroupDismissedNotification(req)
+
+	err = imdb.DeleteGroupMemberByGroupID(req.GroupID)
+	if err != nil {
+		log.NewError(req.OperationID, "DeleteGroupMemberByGroupID failed ", req.GroupID)
+		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
+	return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+}
+
+//  rpc MuteGroupMember(MuteGroupMemberReq) returns(MuteGroupMemberResp);
+//  rpc CancelMuteGroupMember(CancelMuteGroupMemberReq) returns(CancelMuteGroupMemberResp);
+//  rpc MuteGroup(MuteGroupReq) returns(MuteGroupResp);
+//  rpc CancelMuteGroup(CancelMuteGroupReq) returns(CancelMuteGroupResp);
+
+func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (*pbGroup.MuteGroupMemberResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
+	if !imdb.IsGroupOwnerAdmin(req.GroupID, req.UserID) && !token_verify.IsMangerUserID(req.OpUserID) {
+		log.Error(req.OperationID, "verify failed ", req.OpUserID, req.GroupID)
+		return &pbGroup.MuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+	}
+	groupMemberInfo := db.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
+	groupMemberInfo.MuteEndTime = time.Unix(int64(time.Now().Second())+int64(req.MutedSeconds), 0)
+	err := imdb.UpdateGroupMemberInfo(groupMemberInfo)
+	if err != nil {
+		log.Error(req.OperationID, "UpdateGroupMemberInfo failed ", err.Error(), groupMemberInfo)
+		return &pbGroup.MuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
+	return &pbGroup.MuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+}
+
+func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (*pbGroup.CancelMuteGroupMemberResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
+	if !imdb.IsGroupOwnerAdmin(req.GroupID, req.UserID) && !token_verify.IsMangerUserID(req.OpUserID) {
+		log.Error(req.OperationID, "verify failed ", req.OpUserID, req.GroupID)
+		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+	}
+	groupMemberInfo := db.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
+	groupMemberInfo.MuteEndTime = time.Unix(0, 0)
+	err := imdb.UpdateGroupMemberInfo(groupMemberInfo)
+	if err != nil {
+		log.Error(req.OperationID, "UpdateGroupMemberInfo failed ", err.Error(), groupMemberInfo)
+		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
+	return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+}
+
+func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) (*pbGroup.MuteGroupResp, error) {
+	return nil, nil
+}
+
+func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMuteGroupReq) (*pbGroup.CancelMuteGroupResp, error) {
+	return nil, nil
+}

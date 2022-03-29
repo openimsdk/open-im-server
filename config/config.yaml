@@ -73,7 +73,7 @@ endpoints:
   rpc_statistic: openim_rpc_statistic
   rpc_admin_cms: openim_rpc_admin_cms
   rpc_message_cms: openim_rpc_admin_cms
-
+  rpc_office: openim_rpc_office
 
 api:
   openImApiPort: [ 10000 ] #api服务端口，默认即可，需要开放此端口或做nginx转发
@@ -81,7 +81,7 @@ cmsapi:
   openImCmsApiPort: [ 8000 ] #管理后台api服务端口，默认即可，需要开放此端口或做nginx转发
 sdk:
   openImSdkWsPort: [ 30000 ] #jssdk服务端口，默认即可，项目中使用jssdk才需开放此端口或做nginx转发
-
+#对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
 credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
   tencent:
     appID: 1302656840
@@ -89,7 +89,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     bucket: echat-1302656840
     secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
     secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
-  minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化时相应改动
+  minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim
     location: us-east-1
     endpoint: http://127.0.0.1:9000
@@ -119,6 +119,7 @@ rpcport: #rpc服务端口 默认即可
   openImStatisticsPort: [ 10800 ]
   openImMessageCmsPort: [ 10900 ]
   openImAdminCmsPort: [ 11000 ]
+  openImOfficePort: [ 11100 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -140,6 +141,7 @@ rpcregistername: #rpc注册服务名，默认即可
   OpenImStatisticsName: Statistics
   OpenImMessageCMSName: MessageCMS
   openImAdminCMSName: AdminCMS
+  openImOfficeName: Office
 
 log:
   storageLocation: ../logs/
@@ -193,6 +195,7 @@ tokenpolicy:
   accessExpire: 3650 #token过期时间（天） 默认即可
 messageverify:
   friendVerify: false
+
 #  c2c:
 #    callbackBeforeSendMsg:
 #      switch: false
@@ -214,21 +217,21 @@ callback:
   callbackbeforeSendSingleMsg:
     enable: false # 回调是否启用
     callbackTimeOut: 2 # 回调超时时间
-    CallbackFailedContinue: true # 回调超时是否继续执行代码
+    callbackFailedContinue: true # 回调超时是否继续执行代码
   callbackAfterSendSingleMsg:
     enable: false
     callbackTimeOut: 2
   callbackBeforeSendGroupMsg:
     enable: false
     callbackTimeOut: 2
-    CallbackFailedContinue: true
+    callbackFailedContinue: true
   callbackAfterSendGroupMsg:
     enable: false
     callbackTimeOut: 2
   callbackWordFilter:
     enable: false
     callbackTimeOut: 2
-    CallbackFailedContinue: true
+    callbackFailedContinue: true
 
 
 notification:
@@ -352,6 +355,17 @@ notification:
     defaultTips:
       tips: "entered the group"  # group info changed by xx
 
+  groupDismissed:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupDismissed title"
+      desc: "groupDismissed desc"
+      ext: "groupDismissed ext"
+    defaultTips:
+      tips: "group dismissed"
   #############################friend#################################
 
   friendApplicationAdded:
@@ -510,7 +524,6 @@ demo:
     senderAuthorizationCode: "gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
     smtpPort: 25   #需开放此端口 出口方向
-
 
 
 
