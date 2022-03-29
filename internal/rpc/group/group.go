@@ -276,7 +276,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 		log.Debug(req.OperationID, v)
 		var node open_im_sdk.GroupMemberFullInfo
 		cp.GroupMemberDBCopyOpenIM(&node, &v)
-		log.Debug(req.OperationID, "db value:", v)
+		log.Debug(req.OperationID, "db value:", v.MuteEndTime, "seconds: ", v.MuteEndTime.Unix())
 		log.Debug(req.OperationID, "cp value: ", node)
 		resp.MemberList = append(resp.MemberList, &node)
 	}
