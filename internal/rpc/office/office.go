@@ -147,10 +147,39 @@ func (s *officeServer) SetTag(_ context.Context, req *pbOffice.SetTagReq) (resp 
 func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagReq) (resp *pbOffice.SendMsg2TagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SendMsg2TagResp{CommonResp: &pbOffice.CommonResp{}}
-	userIDList, err := db.DB.GetUserIDListByTagID(req.SendID, req.TagID)
-	for _, userID := range userIDList {
-		msg.TagSendMessage(req.OperationID, req.SendID, userID, req.Content, req.ContentType)
+	var tagUserIDList []string
+	for _, tagID := range req.TagList {
+		userIDList, err := db.DB.GetUserIDListByTagID(req.SendID, tagID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserIDListByTagID failed", err.Error())
+			continue
+		}
+		tagUserIDList = append(tagUserIDList, userIDList...)
 	}
+	var groupUserIDList []string
+	for _, groupID := range req.GroupList {
+		userIDList, err := im_mysql_model.GetGroupMemberIDListByGroupID(groupID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error())
+			continue
+		}
+		groupUserIDList = append(groupUserIDList, userIDList...)
+	}
+	var userIDList []string
+	userIDList = append(groupUserIDList, tagUserIDList...)
+	userIDList = append(groupUserIDList, groupUserIDList...)
+	userIDList = append(groupUserIDList, req.UserList...)
+	userIDList = utils.RemoveUserIDRepByMap(userIDList)
+	for i, userID := range userIDList {
+		if userID == req.SendID {
+			userIDList = append(userIDList[:i], userIDList[i+1:]...)
+		}
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
+	for _, userID := range userIDList {
+		msg.TagSendMessage(req.OperationID, req.SendID, userID, req.Content, req.SenderPlatformID)
+	}
+
 	if err := db.DB.SaveTagSendLog(req); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode

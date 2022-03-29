@@ -81,7 +81,7 @@ func MinioUploadFile(c *gin.Context) {
 	_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, newName, fileObj, file.Size, minio.PutObjectOptions{ContentType: newType})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "open file error")
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "invalid file path" + err.Error()})
 		return
 	}
 	resp.NewName = newName

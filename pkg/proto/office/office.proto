@@ -64,12 +64,13 @@ message SetTagResp {
 }
 
 message SendMsg2TagReq {
-  string tagID = 1;
-  string sendID = 2;
-  int32 senderPlatformID = 3;
-  string content = 4;
-  int32 contentType = 5;
-  string operationID = 6;
+  repeated string tagList = 1;
+  repeated string UserList = 2;
+  repeated string GroupList = 3;
+  string sendID = 4;
+  int32 senderPlatformID = 5;
+  string content = 6;
+  string operationID = 7;
 }
 
 message SendMsg2TagResp {
@@ -83,9 +84,9 @@ message GetTagSendLogsReq {
 }
 
 message TagSendLog {
-  string tagID = 1;
-  string tagName = 2;
-  int32 contentType = 3;
+  repeated string userList = 1;
+  repeated string tagList = 2;
+  repeated string groupList =3;
   string content = 4;
   int64 sendTime = 5;
 }

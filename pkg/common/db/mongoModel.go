@@ -526,28 +526,25 @@ type TagUser struct {
 }
 
 type TagSendLog struct {
-	TagID            string `bson:"tag_id"`
-	TagName          string `bson:"tag_name"`
-	SendID           string `bson:"send_id"`
-	SenderPlatformID int32  `bson:"sender_platform_id"`
-	Content          string `bson:"content"`
-	ContentType      int32  `bson:"content_type"`
-	SendTime         int64  `bson:"send_time"`
+	TagList          []string `bson:"tag_list"`
+	GroupList        []string `bson:"group_list"`
+	UserList         []string `bson:"user_list"`
+	SendID           string   `bson:"send_id"`
+	SenderPlatformID int32    `bson:"sender_platform_id"`
+	Content          string   `bson:"content"`
+	SendTime         int64    `bson:"send_time"`
 }
 
 func (d *DataBases) SaveTagSendLog(sendReq *officePb.SendMsg2TagReq) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
-	var tag Tag
-	_ = c.FindOne(ctx, bson.M{"user_id": sendReq.SendID, "tag_id": sendReq.TagID}).Decode(&tag)
-	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
 	tagSendLog := TagSendLog{
-		TagID:            sendReq.TagID,
-		TagName:          tag.TagName,
+		TagList:          sendReq.TagList,
+		GroupList:        sendReq.GroupList,
+		UserList:         sendReq.UserList,
 		SendID:           sendReq.SendID,
 		SenderPlatformID: sendReq.SenderPlatformID,
 		Content:          sendReq.Content,
-		ContentType:      sendReq.ContentType,
 		SendTime:         time.Now().Unix(),
 	}
 	_, err := c.InsertOne(ctx, tagSendLog)
