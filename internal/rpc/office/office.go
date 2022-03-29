@@ -166,9 +166,9 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 		groupUserIDList = append(groupUserIDList, userIDList...)
 	}
 	var userIDList []string
-	userIDList = append(groupUserIDList, tagUserIDList...)
-	userIDList = append(groupUserIDList, groupUserIDList...)
-	userIDList = append(groupUserIDList, req.UserList...)
+	userIDList = append(userIDList, tagUserIDList...)
+	userIDList = append(userIDList, groupUserIDList...)
+	userIDList = append(userIDList, req.UserList...)
 	userIDList = utils.RemoveUserIDRepByMap(userIDList)
 	for i, userID := range userIDList {
 		if userID == req.SendID {

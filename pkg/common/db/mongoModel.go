@@ -568,7 +568,7 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 }
 
 func generateTagID(tagName, userID string) string {
-	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()))
+	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()) + time.Now().String())
 }
 
 func getCurrentTimestampByMill() int64 {
