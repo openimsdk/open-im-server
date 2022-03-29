@@ -118,6 +118,7 @@ func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.Group
 		dst.AppMangerLevel = 1
 	}
 	dst.JoinTime = int32(src.JoinTime.Unix())
+	dst.MuteEndTime = uint32(src.JoinTime.Unix())
 	return nil
 }
 
