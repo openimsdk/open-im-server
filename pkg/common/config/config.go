@@ -45,6 +45,17 @@ type config struct {
 			SecretID  string `yaml:"secretID"`
 			SecretKey string `yaml:"secretKey"`
 		}
+		Ali struct {
+			RegionID           string `yaml:"regionID"`
+			AccessKeyID        string `yaml:"accessKeyID"`
+			AccessKeySecret    string `yaml:"accessKeySecret"`
+			StsEndpoint        string `yaml:"stsEndpoint"`
+			OssEndpoint        string `yaml:"ossEndpoint"`
+			Bucket             string `yaml:"bucket"`
+			FinalHost          string `yaml:"finalHost"`
+			StsDurationSeconds int64  `yaml:"stsDurationSeconds"`
+			OssRoleArn         string `yaml:"OssRoleArn"`
+		}
 		Minio struct {
 			Bucket          string `yaml:"bucket"`
 			Location        string `yaml:"location"`
@@ -66,6 +77,7 @@ type config struct {
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
 	}
 	Mongo struct {
+		DBUri               string   `yaml:"dbUri"` // 当dbUri值不为空则直接使用该值
 		DBAddress           []string `yaml:"dbAddress"`
 		DBDirect            bool     `yaml:"dbDirect"`
 		DBTimeout           int      `yaml:"dbTimeout"`

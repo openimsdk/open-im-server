@@ -41,12 +41,17 @@ func init() {
 	// mongo init
 	// "mongodb://sysop:moon@localhost/records"
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	uri = fmt.Sprintf("mongodb://%s/%s/?connect=direct&maxPoolSize=%d",
-		config.Config.Mongo.DBAddress[0], config.Config.Mongo.DBDatabase,
-		config.Config.Mongo.DBMaxPoolSize)
+	if config.Config.Mongo.DBUri != "" {
+		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
+		uri = config.Config.Mongo.DBUri
+	} else {
+		uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
+			config.Config.Mongo.DBAddress[0], config.Config.Mongo.DBDatabase,
+			config.Config.Mongo.DBMaxPoolSize)
+	}
 
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	if err != nil {
+	if err != nil{
 		log.NewError(" mongo.Connect  failed, try ", utils.GetSelfFuncName(), err.Error(), uri)
 		time.Sleep(time.Duration(30) * time.Second)
 		mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))

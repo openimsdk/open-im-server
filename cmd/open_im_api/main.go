@@ -79,6 +79,7 @@ func main() {
 	thirdGroup := r.Group("/third")
 	{
 		thirdGroup.POST("/tencent_cloud_storage_credential", apiThird.TencentCloudStorageCredential)
+		thirdGroup.POST("/ali_oss_credential", apiThird.AliOSSCredential)
 		thirdGroup.POST("/minio_storage_credential", apiThird.MinioStorageCredential)
 		thirdGroup.POST("/minio_upload", apiThird.MinioUploadFile)
 	}
@@ -119,13 +120,9 @@ func main() {
 		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 	}
-
 	apiThird.MinioInit()
 	log.NewPrivateLog("api")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
-	err := r.Run(":" + strconv.Itoa(*ginPort))
-	if err != nil {
-		log.NewError("", utils.GetSelfFuncName(), "start gin failed", err.Error())
-	}
+	r.Run(":" + strconv.Itoa(*ginPort))
 }

@@ -19,6 +19,7 @@ mysql:
   dbMaxLifeTime: 120
 
 mongo:
+  dbUri: ""#当dbUri值不为空则直接使用该值
   dbAddress: [ openim_mongo:27017 ]
   dbDirect: false
   dbTimeout: 10

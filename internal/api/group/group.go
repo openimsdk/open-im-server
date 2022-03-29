@@ -259,7 +259,7 @@ func CreateGroup(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	req.OwnerUserID = req.OpUserID
+	req.OwnerUserID = params.OwnerUserID
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "CreateGroup args ", req.String())
 
