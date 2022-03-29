@@ -53,7 +53,6 @@ type SendMsg2TagReq struct {
 
 	SenderPlatformID int32  `json:"senderPlatformID" binding:"required"`
 	Content          string `json:"content" binding:"required"`
-	ContentType      int32  `json:"contentType" binding:"required"`
 	OperationID      string `json:"operationID" binding:"required"`
 }
 

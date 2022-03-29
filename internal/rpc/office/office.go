@@ -163,6 +163,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error())
 			continue
 		}
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), userIDList)
 		groupUserIDList = append(groupUserIDList, userIDList...)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
@@ -172,7 +173,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	userIDList = append(userIDList, req.UserList...)
 	userIDList = utils.RemoveUserIDRepByMap(userIDList)
 	for i, userID := range userIDList {
-		if userID == req.SendID {
+		if userID == req.SendID || userID == "" {
 			userIDList = append(userIDList[:i], userIDList[i+1:]...)
 		}
 	}
