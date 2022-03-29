@@ -379,10 +379,10 @@ func GetConversations(OwnerUserID string, conversationIDs []string) ([]db.Conver
 }
 
 func CreateConversationIfNotExist(conversation db.Conversation) error {
-	//dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	//if err != nil {
-	//	return err
-	//}
-	//err = dbConn.Model(&db.Conversation{}).Where().Find().Error
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	err = dbConn.Model(&db.Conversation{}).Create(conversation).Error
 	return nil
 }
