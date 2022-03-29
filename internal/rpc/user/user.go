@@ -88,12 +88,11 @@ func syncPeerUserConversation(conversation *pbUser.Conversation, operationID str
 			AttachedInfo:     "",
 			Ex:               "",
 		}
-		err := imdb.CreateConversationIfNotExist(peerUserConversation)
+		err := imdb.PeerUserSetConversation(peerUserConversation)
 		if err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 			return err
 		}
-
 		chat.SetConversationNotification(operationID, conversation.UserID)
 	}
 	return nil
@@ -140,9 +139,9 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 			continue
 		}
 		resp.Success = append(resp.Success, v.ConversationID)
-		//if err := syncPeerUserConversation(v, req.OperationID); err != nil {
-		//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())
-		//}
+		if err := syncPeerUserConversation(v, req.OperationID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())
+		}
 	}
 	chat.SetConversationNotification(req.OperationID, req.OwnerUserID)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return", resp.String())
@@ -219,10 +218,12 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	// sync peer user conversation if conversation is singleChatType
-	//if err := syncPeerUserConversation(req.Conversation, req.OperationID); err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())
-	//}
+	//sync peer user conversation if conversation is singleChatType
+	if err := syncPeerUserConversation(req.Conversation, req.OperationID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())
+		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
 	chat.SetConversationNotification(req.OperationID, req.Conversation.OwnerUserID)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return", resp.String())
 	resp.CommonResp = &pbUser.CommonResp{}
@@ -240,6 +241,17 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
+	}
+	stringList := strings.Split(req.ConversationID, "_")
+	if len(stringList) > 1 {
+		switch stringList[0] {
+		case "single_":
+			conversation.UserID = stringList[1]
+			conversation.ConversationType = constant.SingleChatType
+		case "group":
+			conversation.GroupID = stringList[1]
+			conversation.ConversationType = constant.GroupChatType
+		}
 	}
 	err := imdb.SetRecvMsgOpt(conversation)
 	if err != nil {

@@ -325,6 +325,25 @@ func SetConversation(conversation db.Conversation) error {
 	}
 }
 
+func PeerUserSetConversation(conversation db.Conversation) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	dbConn.LogMode(true)
+	newConversation := conversation
+	if dbConn.Model(&db.Conversation{}).Find(&newConversation).RowsAffected == 0 {
+		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "not exist in db, create")
+		return dbConn.Model(&db.Conversation{}).Create(conversation).Error
+		// if exist, then update record
+	}
+	log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
+	//force update
+	return dbConn.Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
+		Update(map[string]interface{}{"is_private_chat": conversation.IsPrivateChat}).Error
+
+}
+
 func SetRecvMsgOpt(conversation db.Conversation) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
@@ -376,13 +395,4 @@ func GetConversations(OwnerUserID string, conversationIDs []string) ([]db.Conver
 	}
 	err = dbConn.Model(&db.Conversation{}).Where("conversation_id IN (?) and  owner_user_id=?", conversationIDs, OwnerUserID).Find(&conversations).Error
 	return conversations, err
-}
-
-func CreateConversationIfNotExist(conversation db.Conversation) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
-	err = dbConn.Model(&db.Conversation{}).Create(conversation).Error
-	return nil
 }
