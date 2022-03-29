@@ -366,6 +366,56 @@ notification:
       ext: "groupDismissed ext"
     defaultTips:
       tips: "group dismissed"
+
+
+  groupMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMuted title"
+      desc: "groupMuted desc"
+      ext: "groupMuted ext"
+    defaultTips:
+      tips: "group Muted"
+
+  groupCancelMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupCancelMuted title"
+      desc: "groupCancelMuted desc"
+      ext: "groupCancelMuted ext"
+    defaultTips:
+      tips: "group Cancel Muted"
+
+
+  groupMemberMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMemberMuted title"
+      desc: "groupMemberMuted desc"
+      ext: "groupMemberMuted ext"
+    defaultTips:
+      tips: "group Member Muted"
+
+  groupMemberCancelMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMemberCancelMuted title"
+      desc: "groupMemberCancelMuted desc"
+      ext: "groupMemberCancelMuted ext"
+    defaultTips:
+      tips: "group Member Cancel Muted"
   #############################friend#################################
 
   friendApplicationAdded:
