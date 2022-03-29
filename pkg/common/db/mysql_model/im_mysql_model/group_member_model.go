@@ -73,9 +73,9 @@ func GetGroupMemberIDListByGroupID(groupID string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	dbConn.LogMode(true)
 	var groupMemberIDList []string
 	err = dbConn.Table("group_members").Select("user_id").Where("group_id=?", groupID).Find(&groupMemberIDList).Error
-
 	if err != nil {
 		return nil, err
 	}
