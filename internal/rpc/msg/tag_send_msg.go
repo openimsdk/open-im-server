@@ -10,20 +10,24 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"strings"
+	"time"
 )
 
-func TagSendMessage(operationID, sendID, recvID, content string, contentType int32) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), "args: ", sendID, recvID, content, contentType)
+func TagSendMessage(operationID, sendID, recvID, content string, senderPlatformID int32) {
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "args: ", sendID, recvID, content)
 	var req pbChat.SendMsgReq
 	var msgData pbCommon.MsgData
 	msgData.SendID = sendID
 	msgData.RecvID = recvID
-	msgData.ContentType = contentType
+	msgData.ContentType = constant.Custom
 	msgData.SessionType = constant.SingleChatType
 	msgData.MsgFrom = constant.UserMsgType
 	msgData.Content = []byte(content)
 	msgData.Options = map[string]bool{}
 	msgData.Options[constant.IsSenderConversationUpdate] = false
+	msgData.SendTime = time.Now().Unix()
+	msgData.CreateTime = time.Now().Unix()
+	msgData.SenderPlatformID = senderPlatformID
 	req.MsgData = &msgData
 	req.OperationID = operationID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)

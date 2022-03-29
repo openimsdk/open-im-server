@@ -147,10 +147,41 @@ func (s *officeServer) SetTag(_ context.Context, req *pbOffice.SetTagReq) (resp 
 func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagReq) (resp *pbOffice.SendMsg2TagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SendMsg2TagResp{CommonResp: &pbOffice.CommonResp{}}
-	userIDList, err := db.DB.GetUserIDListByTagID(req.SendID, req.TagID)
-	for _, userID := range userIDList {
-		msg.TagSendMessage(req.OperationID, req.SendID, userID, req.Content, req.ContentType)
+	var tagUserIDList []string
+	for _, tagID := range req.TagList {
+		userIDList, err := db.DB.GetUserIDListByTagID(req.SendID, tagID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserIDListByTagID failed", err.Error())
+			continue
+		}
+		tagUserIDList = append(tagUserIDList, userIDList...)
 	}
+	var groupUserIDList []string
+	for _, groupID := range req.GroupList {
+		userIDList, err := im_mysql_model.GetGroupMemberIDListByGroupID(groupID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error())
+			continue
+		}
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), userIDList)
+		groupUserIDList = append(groupUserIDList, userIDList...)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
+	var userIDList []string
+	userIDList = append(userIDList, tagUserIDList...)
+	userIDList = append(userIDList, groupUserIDList...)
+	userIDList = append(userIDList, req.UserList...)
+	userIDList = utils.RemoveUserIDRepByMap(userIDList)
+	for i, userID := range userIDList {
+		if userID == req.SendID || userID == "" {
+			userIDList = append(userIDList[:i], userIDList[i+1:]...)
+		}
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
+	for _, userID := range userIDList {
+		msg.TagSendMessage(req.OperationID, req.SendID, userID, req.Content, req.SenderPlatformID)
+	}
+
 	if err := db.DB.SaveTagSendLog(req); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
