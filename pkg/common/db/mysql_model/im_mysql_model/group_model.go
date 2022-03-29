@@ -221,5 +221,5 @@ func UpdateGroupInfoDefaultZero(groupID string, args map[string]interface{}) err
 	if err != nil {
 		return err
 	}
-	return dbConn.Model(&db.Group{}).Where("group_id = ? ", groupID).Update(args).Error
+	return dbConn.Table("groups").Where("group_id = ? ", groupID).Update(args).Error
 }
