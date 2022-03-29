@@ -261,11 +261,31 @@ message GroupDismissedTips{
   int64 operationTime = 3;
 }
 
-message GroupMemberInfoChangedTips{
+message GroupMemberMutedTips{
   GroupInfo group = 1;
   GroupMemberFullInfo opUser = 2;
   int64 operationTime = 3;
-  GroupMemberFullInfo changedUserList = 4;
+  GroupMemberFullInfo mutedUser = 4;
+  uint32 mutedSeconds = 5;
+}
+
+message GroupMemberCancelMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo mutedUser = 4;
+}
+
+message GroupMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+}
+
+message GroupCancelMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
 }
 
 
