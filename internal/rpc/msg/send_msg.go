@@ -571,6 +571,6 @@ func Notification(n *NotificationMsg) {
 	if err != nil {
 		log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String(), err.Error())
 	} else if reply.ErrCode != 0 {
-		log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String())
+		log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String(), reply.ErrCode, reply.ErrMsg)
 	}
 }

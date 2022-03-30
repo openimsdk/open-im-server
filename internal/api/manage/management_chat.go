@@ -140,7 +140,7 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 	log.NewInfo("", data, params)
 	token := c.Request.Header.Get("token")
-	claims, err := token_verify.ParseToken(token)
+	claims, err := token_verify.ParseToken(token, params.OperationID)
 	if err != nil {
 		log.NewError(params.OperationID, "parse token failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
