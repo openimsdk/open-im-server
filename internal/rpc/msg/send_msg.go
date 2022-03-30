@@ -281,6 +281,23 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendGroupMsg failed", err.Error())
 		}
 		return returnMsg(&replay, pb, 0, "", msgToMQ.MsgData.ServerMsgID, msgToMQ.MsgData.SendTime)
+	case constant.NotificationChatType:
+		msgToMQ.MsgData = pb.MsgData
+		log.NewInfo(msgToMQ.OperationID, msgToMQ)
+		err1 := rpc.sendMsgToKafka(&msgToMQ, msgToMQ.MsgData.RecvID)
+		if err1 != nil {
+			log.NewError(msgToMQ.OperationID, "kafka send msg err:RecvID", msgToMQ.MsgData.RecvID, msgToMQ.String())
+			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+		}
+
+		if msgToMQ.MsgData.SendID != msgToMQ.MsgData.RecvID { //Filter messages sent to yourself
+			err2 := rpc.sendMsgToKafka(&msgToMQ, msgToMQ.MsgData.SendID)
+			if err2 != nil {
+				log.NewError(msgToMQ.OperationID, "kafka send msg err:SendID", msgToMQ.MsgData.SendID, msgToMQ.String())
+				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+			}
+		}
+		return returnMsg(&replay, pb, 0, "", msgToMQ.MsgData.ServerMsgID, msgToMQ.MsgData.SendTime)
 	default:
 		return returnMsg(&replay, pb, 203, "unkonwn sessionType", "", 0)
 	}
