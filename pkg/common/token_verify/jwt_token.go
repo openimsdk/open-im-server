@@ -139,7 +139,6 @@ func GetUserIDFromToken(token string, operationID string) (bool, string) {
 }
 
 func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
-
 	claims, err = GetClaimFromToken(tokensString)
 	if err != nil {
 		log.NewError(operationID, "token validate err", err.Error(), tokensString)
@@ -158,11 +157,12 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 	if v, ok := m[tokensString]; ok {
 		switch v {
 		case constant.NormalToken:
-			log.NewDebug("", "this is normal return", claims)
+			log.NewDebug(operationID, "this is normal return", claims)
 			return claims, nil
 		case constant.InValidToken:
 			return nil, &constant.ErrTokenInvalid
 		case constant.KickedToken:
+			log.Error(operationID, "this token has been kicked by other same terminal ", constant.ErrTokenKicked)
 			return nil, &constant.ErrTokenKicked
 		case constant.ExpiredToken:
 			return nil, &constant.ErrTokenExpired
@@ -170,6 +170,7 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 			return nil, &constant.ErrTokenUnknown
 		}
 	}
+	log.NewError(operationID, "redis token map not find", constant.ErrTokenUnknown)
 	return nil, &constant.ErrTokenUnknown
 }
 
