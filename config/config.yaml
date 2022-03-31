@@ -551,6 +551,18 @@ notification:
       defaultTips:
         tips: "conversation opt update"
 
+  conversationSetPrivate:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: true
+      offlinePush:
+        switch: true
+        title: "conversation was set to private "
+        desc: "conversation was set to private "
+        ext: "conversation was set to private "
+      defaultTips:
+        tips: "conversation was set to private "
+
 
 
 #---------------demo configuration---------------------#

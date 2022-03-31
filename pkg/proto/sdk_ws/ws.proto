@@ -360,7 +360,12 @@ message UserInfoUpdatedTips{
 //////////////////////conversation/////////////////////
 message ConversationUpdateTips{
  string UserID = 1;
+}
 
+message ConversationSetPrivateTips{
+ string recvID = 1;
+ string sendID = 2;
+ bool isPrivate = 3;
 }
 
 

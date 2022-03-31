@@ -118,6 +118,7 @@ func main() {
 	officeGroup := r.Group("/office")
 	{
 		officeGroup.POST("/get_user_tags", office.GetUserTags)
+		officeGroup.POST("/get_user_tag_by_id", office.GetUserTagByID)
 		officeGroup.POST("/create_tag", office.CreateTag)
 		officeGroup.POST("/delete_tag", office.DeleteTag)
 		officeGroup.POST("/set_tag", office.SetTag)

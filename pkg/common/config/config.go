@@ -350,6 +350,11 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"conversationOptUpdate"`
+		ConversationSetPrivate struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"conversationSetPrivate"`
 	}
 	Demo struct {
 		Port         []int `yaml:"openImDemoPort"`

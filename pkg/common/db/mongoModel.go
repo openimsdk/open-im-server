@@ -470,6 +470,14 @@ func (d *DataBases) CreateTag(userID, tagName string, userList []string) error {
 	return err
 }
 
+func (d *DataBases) GetTagByID(userID, tagID string) (Tag, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
+	var tag Tag
+	err := c.FindOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}).Decode(&tag)
+	return tag, err
+}
+
 func (d *DataBases) DeleteTag(userID, tagID string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)

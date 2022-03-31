@@ -97,6 +97,17 @@ message GetTagSendLogsResp {
   repeated TagSendLog tagSendLogs = 3;
 }
 
+message GetUserTagByIDReq {
+  string userID = 1;
+  string tagID = 2;
+  string operationID = 3;
+}
+
+message GetUserTagByIDResp {
+  CommonResp commonResp = 1;
+  Tag tag = 2;
+}
+
 service OfficeService {
   rpc GetUserTags(GetUserTagsReq) returns(GetUserTagsResp);
   rpc CreateTag(CreateTagReq) returns(CreateTagResp);
@@ -104,5 +115,6 @@ service OfficeService {
   rpc SetTag(SetTagReq) returns(SetTagResp);
   rpc SendMsg2Tag(SendMsg2TagReq) returns(SendMsg2TagResp);
   rpc GetTagSendLogs(GetTagSendLogsReq) returns(GetTagSendLogsResp);
+  rpc GetUserTagByID(GetUserTagByIDReq) returns(GetUserTagByIDResp);
 }
 

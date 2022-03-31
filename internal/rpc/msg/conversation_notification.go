@@ -10,12 +10,12 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func conversationNotification(contentType int32, m proto.Message, operationID, userID string) {
+func SetConversationNotification(operationID, sendID, recvID string, contentType int, m proto.Message, tips open_im_sdk.TipsComm) {
+	log.NewInfo(operationID, "args: ", sendID, recvID, contentType, m.String(), tips.String())
 	var err error
-	var tips open_im_sdk.TipsComm
 	tips.Detail, err = proto.Marshal(m)
 	if err != nil {
-		log.Error(operationID, utils.GetSelfFuncName(), "Marshal failed ", err.Error(), m.String())
+		log.NewError(operationID, "Marshal failed ", err.Error(), m.String())
 		return
 	}
 	marshaler := jsonpb.Marshaler{
@@ -24,15 +24,10 @@ func conversationNotification(contentType int32, m proto.Message, operationID, u
 		EmitDefaults: false,
 	}
 	tips.JsonDetail, _ = marshaler.MarshalToString(m)
-	cn := config.Config.Notification
-	switch contentType {
-	case constant.ConversationOptChangeNotification:
-		tips.DefaultTips = cn.ConversationOptUpdate.DefaultTips.Tips
-	}
 	var n NotificationMsg
-	n.SendID = userID
-	n.RecvID = userID
-	n.ContentType = contentType
+	n.SendID = sendID
+	n.RecvID = recvID
+	n.ContentType = int32(contentType)
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
 	n.OperationID = operationID
@@ -44,10 +39,27 @@ func conversationNotification(contentType int32, m proto.Message, operationID, u
 	Notification(&n)
 }
 
-func SetConversationNotification(operationID, userID string) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), "userID: ", userID)
-	conversationUpdateTips := open_im_sdk.ConversationUpdateTips{
+// SetPrivate调用
+func ConversationSetPrivateNotification(operationID, sendID, recvID string, isPrivateChat bool) {
+	log.NewInfo(operationID, utils.GetSelfFuncName())
+	conversationSetPrivateTips := &open_im_sdk.ConversationSetPrivateTips{
+		RecvID:    recvID,
+		SendID:    sendID,
+		IsPrivate: isPrivateChat,
+	}
+	var tips open_im_sdk.TipsComm
+	strMap := map[bool]string{true: "true", false: "false"}
+	tips.DefaultTips = config.Config.Notification.ConversationSetPrivate.DefaultTips.Tips + strMap[isPrivateChat] + " by " + sendID
+	SetConversationNotification(operationID, sendID, recvID, constant.ConversationPrivateChatNotification, conversationSetPrivateTips, tips)
+}
+
+// 会话改变
+func ConversationChangeNotification(operationID, userID string) {
+	log.NewInfo(operationID, utils.GetSelfFuncName())
+	ConversationChangedTips := &open_im_sdk.ConversationUpdateTips{
 		UserID: userID,
 	}
-	conversationNotification(constant.ConversationOptChangeNotification, &conversationUpdateTips, operationID, userID)
+	var tips open_im_sdk.TipsComm
+	tips.DefaultTips = config.Config.Notification.ConversationOptUpdate.DefaultTips.Tips
+	SetConversationNotification(operationID, userID, userID, constant.ConversationOptChangeNotification, ConversationChangedTips, tips)
 }

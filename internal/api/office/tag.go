@@ -234,3 +234,39 @@ func GetTagSendLogs(c *gin.Context) {
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
 	c.JSON(http.StatusOK, resp)
 }
+
+func GetUserTagByID(c *gin.Context) {
+	var (
+		req    apistruct.GetUserTagByIDReq
+		resp   apistruct.GetUserTagByIDResp
+		reqPb  pbOffice.GetUserTagByIDReq
+		respPb *pbOffice.GetUserTagByIDResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
+		return
+	}
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	reqPb.UserID = userID
+	reqPb.OperationID = req.OperationID
+	reqPb.TagID = req.TagID
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	client := pbOffice.NewOfficeServiceClient(etcdConn)
+	respPb, err := client.GetUserTagByID(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserTagByID failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "CreateTag rpc server failed" + err.Error()})
+		return
+	}
+	if err := utils.CopyStructFields(&resp.CommResp, respPb.CommonResp); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	resp.Data.Tag = respPb.Tag
+	c.JSON(http.StatusOK, resp)
+}
