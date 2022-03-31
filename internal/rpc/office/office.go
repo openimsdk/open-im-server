@@ -26,7 +26,7 @@ type officeServer struct {
 }
 
 func NewOfficeServer(port int) *officeServer {
-	log.NewPrivateLog("office")
+	log.NewPrivateLog(constant.LogFileName)
 	return &officeServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfficeName,

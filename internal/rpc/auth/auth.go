@@ -63,7 +63,7 @@ type rpcAuth struct {
 }
 
 func NewRpcAuthServer(port int) *rpcAuth {
-	log.NewPrivateLog("auth")
+	log.NewPrivateLog(constant.LogFileName)
 	return &rpcAuth{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImAuthName,
