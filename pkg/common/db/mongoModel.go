@@ -533,7 +533,7 @@ type TagUser struct {
 }
 
 type TagSendLog struct {
-	Users            []TagUser `bson:"tag_list"`
+	UserList         []TagUser `bson:"tag_list"`
 	SendID           string    `bson:"send_id"`
 	SenderPlatformID int32     `bson:"sender_platform_id"`
 	Content          string    `bson:"content"`
