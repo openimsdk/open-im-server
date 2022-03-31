@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
-	officePb "Open_IM/pkg/proto/office"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
@@ -470,6 +469,14 @@ func (d *DataBases) CreateTag(userID, tagName string, userList []string) error {
 	return err
 }
 
+func (d *DataBases) GetTagByID(userID, tagID string) (Tag, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
+	var tag Tag
+	err := c.FindOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}).Decode(&tag)
+	return tag, err
+}
+
 func (d *DataBases) DeleteTag(userID, tagID string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
@@ -526,27 +533,16 @@ type TagUser struct {
 }
 
 type TagSendLog struct {
-	TagList          []string `bson:"tag_list"`
-	GroupList        []string `bson:"group_list"`
-	UserList         []string `bson:"user_list"`
-	SendID           string   `bson:"send_id"`
-	SenderPlatformID int32    `bson:"sender_platform_id"`
-	Content          string   `bson:"content"`
-	SendTime         int64    `bson:"send_time"`
+	Users            []TagUser `bson:"tag_list"`
+	SendID           string    `bson:"send_id"`
+	SenderPlatformID int32     `bson:"sender_platform_id"`
+	Content          string    `bson:"content"`
+	SendTime         int64     `bson:"send_time"`
 }
 
-func (d *DataBases) SaveTagSendLog(sendReq *officePb.SendMsg2TagReq) error {
+func (d *DataBases) SaveTagSendLog(tagSendLog *TagSendLog) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
-	tagSendLog := TagSendLog{
-		TagList:          sendReq.TagList,
-		GroupList:        sendReq.GroupList,
-		UserList:         sendReq.UserList,
-		SendID:           sendReq.SendID,
-		SenderPlatformID: sendReq.SenderPlatformID,
-		Content:          sendReq.Content,
-		SendTime:         time.Now().Unix(),
-	}
 	_, err := c.InsertOne(ctx, tagSendLog)
 	return err
 }

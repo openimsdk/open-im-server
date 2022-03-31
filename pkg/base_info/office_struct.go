@@ -74,3 +74,15 @@ type GetTagSendLogsResp struct {
 		ShowNumber  int32                  `json:"showNumber"`
 	} `json:"data"`
 }
+
+type GetUserTagByIDReq struct {
+	TagID       string `json:"tagID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type GetUserTagByIDResp struct {
+	CommResp
+	Data struct {
+		Tag *pbOffice.Tag `json:"tag"`
+	} `json:"data"`
+}
