@@ -84,11 +84,9 @@ message GetTagSendLogsReq {
 }
 
 message TagSendLog {
-  repeated string userList = 1;
-  repeated string tagList = 2;
-  repeated string groupList =3;
-  string content = 4;
-  int64 sendTime = 5;
+  repeated TagUser users = 1;
+  string content = 2;
+  int64 sendTime = 3;
 }
 
 message GetTagSendLogsResp {
