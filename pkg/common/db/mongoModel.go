@@ -491,7 +491,7 @@ func (d *DataBases) SetTag(userID, tagID, newName string, increaseUserIDList []s
 		}
 	}
 	tag.UserList = append(tag.UserList, increaseUserIDList...)
-	tag.UserList = utils.RemoveUserIDRepByMap(tag.UserList)
+	tag.UserList = utils.RemoveRepeatedStringInList(tag.UserList)
 	for _, v := range reduceUserIDList {
 		for i2, v2 := range tag.UserList {
 			if v == v2 {

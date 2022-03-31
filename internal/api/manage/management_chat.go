@@ -289,16 +289,16 @@ type OANotificationElem struct {
 	Url                 string `mapstructure:"url"`
 	MixType             int32  `mapstructure:"mixType"`
 	Image               struct {
-		SourceUrl   string `mapstructure:"sourceUrl"`
-		SnapshotUrl string `mapstructure:"snapshotUrl"`
+		SourceUrl   string `mapstructure:"sourceURL"`
+		SnapshotUrl string `mapstructure:"snapshotURL"`
 	} `mapstructure:"image"`
 	Video struct {
-		SourceUrl   string `mapstructure:"sourceUrl"`
-		SnapshotUrl string `mapstructure:"snapshotUrl"`
+		SourceUrl   string `mapstructure:"sourceURL"`
+		SnapshotUrl string `mapstructure:"snapshotURL"`
 		Duration    int64  `mapstructure:"duration"`
 	} `mapstructure:"video"`
 	File struct {
-		SourceUrl string `mapstructure:"sourceUrl"`
+		SourceUrl string `mapstructure:"sourceURL"`
 		FileName  string `mapstructure:"fileName"`
 		FileSize  int64  `mapstructure:"fileSize"`
 	} `mapstructure:"file"`

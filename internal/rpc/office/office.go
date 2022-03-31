@@ -103,7 +103,7 @@ func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsR
 
 func (s *officeServer) CreateTag(_ context.Context, req *pbOffice.CreateTagReq) (resp *pbOffice.CreateTagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "CreateTag req", req.String())
-	userIDList := utils.RemoveUserIDRepByMap(req.UserIDList)
+	userIDList := utils.RemoveRepeatedStringInList(req.UserIDList)
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
 	resp = &pbOffice.CreateTagResp{CommonResp: &pbOffice.CommonResp{}}
 	if err := db.DB.CreateTag(req.UserID, req.TagName, userIDList); err != nil {
@@ -132,8 +132,8 @@ func (s *officeServer) DeleteTag(_ context.Context, req *pbOffice.DeleteTagReq) 
 func (s *officeServer) SetTag(_ context.Context, req *pbOffice.SetTagReq) (resp *pbOffice.SetTagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SetTagResp{CommonResp: &pbOffice.CommonResp{}}
-	IncreaseUserIDList := utils.RemoveUserIDRepByMap(req.IncreaseUserIDList)
-	reduceUserIDList := utils.RemoveUserIDRepByMap(req.ReduceUserIDList)
+	IncreaseUserIDList := utils.RemoveRepeatedStringInList(req.IncreaseUserIDList)
+	reduceUserIDList := utils.RemoveRepeatedStringInList(req.ReduceUserIDList)
 	if err := db.DB.SetTag(req.UserID, req.TagID, req.NewName, IncreaseUserIDList, reduceUserIDList); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetTag failed", err.Error())
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
@@ -171,7 +171,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	userIDList = append(userIDList, tagUserIDList...)
 	userIDList = append(userIDList, groupUserIDList...)
 	userIDList = append(userIDList, req.UserList...)
-	userIDList = utils.RemoveUserIDRepByMap(userIDList)
+	userIDList = utils.RemoveRepeatedStringInList(userIDList)
 	for i, userID := range userIDList {
 		if userID == req.SendID || userID == "" {
 			userIDList = append(userIDList[:i], userIDList[i+1:]...)
