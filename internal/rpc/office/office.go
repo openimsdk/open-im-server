@@ -218,7 +218,7 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 
 func (s *officeServer) GetUserTagByID(_ context.Context, req *pbOffice.GetUserTagByIDReq) (resp *pbOffice.GetUserTagByIDResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbOffice.GetUserTagByIDResp{CommonResp: &pbOffice.CommonResp{}}
+	resp = &pbOffice.GetUserTagByIDResp{CommonResp: &pbOffice.CommonResp{}, Tag: &pbOffice.Tag{}}
 	tag, err := db.DB.GetTagByID(req.UserID, req.TagID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTagByID failed", err.Error())
