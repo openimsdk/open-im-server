@@ -189,7 +189,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
 			continue
 		}
-		tagSendLogs.Users = append(tagSendLogs.Users, db.TagUser{
+		tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
 			UserID:   userID,
 			UserName: userName,
 		})
