@@ -31,7 +31,7 @@ type messageCMSServer struct {
 }
 
 func NewMessageCMSServer(port int) *messageCMSServer {
-	log.NewPrivateLog("MessageCMS")
+	log.NewPrivateLog(constant.LogFileName)
 	return &messageCMSServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImMessageCMSName,
@@ -84,8 +84,8 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "time string parse error", err.Error())
 	}
 	chatLog := db.ChatLog{
-		Content: req.Content,
-		SendTime: time,
+		Content:     req.Content,
+		SendTime:    time,
 		ContentType: req.ContentType,
 		SessionType: req.SessionType,
 	}
@@ -101,20 +101,20 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLogCount", err.Error())
 	}
-	chatLogs, err := imdb.GetChatLog(chatLog, req.Pagination.PageNumber,  req.Pagination.ShowNumber)
+	chatLogs, err := imdb.GetChatLog(chatLog, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLog", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	for _, chatLog := range chatLogs {
 		pbChatLog := &pbMessageCMS.ChatLogs{
-			SessionType:     chatLog.SessionType,
-			ContentType:     chatLog.ContentType,
-			SearchContent:   req.Content,
-			WholeContent:    chatLog.Content,
-			Date:            chatLog.CreateTime.String(),
+			SessionType:    chatLog.SessionType,
+			ContentType:    chatLog.ContentType,
+			SearchContent:  req.Content,
+			WholeContent:   chatLog.Content,
+			Date:           chatLog.CreateTime.String(),
 			SenderNickName: chatLog.SenderNickname,
-			SenderId: chatLog.SendID,
+			SenderId:       chatLog.SendID,
 		}
 		if chatLog.SenderNickname == "" {
 			sendUser, err := imdb.GetUserByUserID(chatLog.SendID)

@@ -31,7 +31,7 @@ type groupServer struct {
 }
 
 func NewGroupServer(port int) *groupServer {
-	log.NewPrivateLog("group")
+	log.NewPrivateLog(constant.LogFileName)
 	return &groupServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImGroupName,
@@ -276,7 +276,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 		log.Debug(req.OperationID, v)
 		var node open_im_sdk.GroupMemberFullInfo
 		cp.GroupMemberDBCopyOpenIM(&node, &v)
-		log.Debug(req.OperationID, "db value:", v)
+		log.Debug(req.OperationID, "db value:", v.MuteEndTime, "seconds: ", v.MuteEndTime.Unix())
 		log.Debug(req.OperationID, "cp value: ", node)
 		resp.MemberList = append(resp.MemberList, &node)
 	}
@@ -1029,11 +1029,10 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 		log.Error(req.OperationID, "verify failed ", req.OpUserID, req.GroupID)
 		return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
-	groupInfo := db.Group{GroupID: req.GroupID}
 
-	err := imdb.UpdateGroupInfoDefaultZero(groupInfo, map[string]interface{}{"status": constant.GroupOk})
+	err := imdb.UpdateGroupInfoDefaultZero(req.GroupID, map[string]interface{}{"status": constant.GroupOk})
 	if err != nil {
-		log.Error(req.OperationID, "UpdateGroupInfoDefaultZero failed ", err.Error(), groupInfo)
+		log.Error(req.OperationID, "UpdateGroupInfoDefaultZero failed ", err.Error(), req.GroupID)
 		return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	chat.GroupCancelMutedNotification(req.OperationID, req.OpUserID, req.GroupID)

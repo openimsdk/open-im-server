@@ -216,10 +216,10 @@ func GetGroupMaster(groupId string) (db.GroupMember, error) {
 	return groupMember, nil
 }
 
-func UpdateGroupInfoDefaultZero(groupInfo db.Group, args map[string]interface{}) error {
+func UpdateGroupInfoDefaultZero(groupID string, args map[string]interface{}) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
-	return dbConn.Model(groupInfo).Updates(args).Error
+	return dbConn.Table("groups").Where("group_id = ? ", groupID).Update(args).Error
 }

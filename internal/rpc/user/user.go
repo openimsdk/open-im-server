@@ -32,7 +32,7 @@ type userServer struct {
 }
 
 func NewUserServer(port int) *userServer {
-	log.NewPrivateLog("user")
+	log.NewPrivateLog(constant.LogFileName)
 	return &userServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,

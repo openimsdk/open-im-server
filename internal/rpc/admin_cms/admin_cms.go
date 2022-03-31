@@ -24,7 +24,7 @@ type adminCMSServer struct {
 }
 
 func NewAdminCMSServer(port int) *adminCMSServer {
-	log.NewPrivateLog("AdminCMS")
+	log.NewPrivateLog(constant.LogFileName)
 	return &adminCMSServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImAdminCMSName,
@@ -66,12 +66,12 @@ func (s *adminCMSServer) Run() {
 func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLoginReq) (*pbAdminCMS.AdminLoginResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbAdminCMS.AdminLoginResp{}
-	for i, adminID := range config.Config.Manager.AppManagerUid{
+	for i, adminID := range config.Config.Manager.AppManagerUid {
 		if adminID == req.AdminID && config.Config.Manager.Secrets[i] == req.Secret {
 			token, expTime, err := token_verify.CreateToken(adminID, constant.SingleChatType)
 			log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "generate token success", "token: ", token, "expTime:", expTime)
 			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "generate token failed", "adminID: ", adminID,  err.Error())
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "generate token failed", "adminID: ", adminID, err.Error())
 				return resp, openIMHttp.WrapError(constant.ErrTokenUnknown)
 			}
 			resp.Token = token
