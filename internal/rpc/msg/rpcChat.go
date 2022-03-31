@@ -2,6 +2,7 @@ package msg
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -22,7 +23,7 @@ type rpcChat struct {
 }
 
 func NewRpcChatServer(port int) *rpcChat {
-	log.NewPrivateLog("msg")
+	log.NewPrivateLog(constant.LogFileName)
 	rc := rpcChat{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfflineMessageName,

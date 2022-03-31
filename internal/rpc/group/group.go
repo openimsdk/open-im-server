@@ -31,7 +31,7 @@ type groupServer struct {
 }
 
 func NewGroupServer(port int) *groupServer {
-	log.NewPrivateLog("group")
+	log.NewPrivateLog(constant.LogFileName)
 	return &groupServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImGroupName,

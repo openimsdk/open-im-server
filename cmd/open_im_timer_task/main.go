@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Open_IM/pkg/common/constant"
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
@@ -8,7 +9,7 @@ import (
 )
 
 func main() {
-	log.NewPrivateLog("timer")
+	log.NewPrivateLog(constant.LogFileName)
 	//for {
 	//	fmt.Println("start delete mongodb expired record")
 	//	timeUnixBegin := time.Now().Unix()

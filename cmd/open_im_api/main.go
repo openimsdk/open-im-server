@@ -10,6 +10,7 @@ import (
 	"Open_IM/internal/api/office"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
@@ -125,7 +126,7 @@ func main() {
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 	}
 	apiThird.MinioInit()
-	log.NewPrivateLog("api")
+	log.NewPrivateLog(constant.LogFileName)
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
 	r.Run(":" + strconv.Itoa(*ginPort))

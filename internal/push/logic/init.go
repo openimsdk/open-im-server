@@ -24,7 +24,7 @@ var (
 )
 
 func Init(rpcPort int) {
-	log.NewPrivateLog(config.Config.ModuleName.PushName)
+	log.NewPrivateLog(constant.LogFileName)
 	rpcServer.Init(rpcPort)
 	pushCh.Init()
 	pushTerminal = []int32{constant.IOSPlatformID, constant.AndroidPlatformID}

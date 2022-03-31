@@ -19,10 +19,10 @@ import (
 	//open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	//"context"
+	errors "Open_IM/pkg/common/http"
 	"net"
 	"strconv"
 	"strings"
-	errors "Open_IM/pkg/common/http"
 
 	"google.golang.org/grpc"
 )
@@ -35,7 +35,7 @@ type statisticsServer struct {
 }
 
 func NewStatisticsServer(port int) *statisticsServer {
-	log.NewPrivateLog("Statistics")
+	log.NewPrivateLog(constant.LogFileName)
 	return &statisticsServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImStatisticsName,
@@ -164,7 +164,7 @@ func GetRangeDate(from, to time.Time) [][2]time.Time {
 		}
 	// month
 	case !isInOneMonth(from, to):
-		if to.Sub(from) < time.Hour * 24 * 30 {
+		if to.Sub(from) < time.Hour*24*30 {
 			for i := 0; ; i++ {
 				fromTime := from.Add(time.Hour * 24 * time.Duration(i))
 				toTime := from.Add(time.Hour * 24 * time.Duration(i+1))
@@ -251,7 +251,7 @@ func (s *statisticsServer) GetGroupStatistics(_ context.Context, req *pbStatisti
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseGroupNum", v, err.Error())
 			}
 			resp.TotalGroupNumList[index] = &pbStatistics.DateNumList{
-				Date:  v[0].String(),
+				Date: v[0].String(),
 				Num:  num,
 			}
 		}(wg, i, v)

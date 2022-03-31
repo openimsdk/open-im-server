@@ -2,6 +2,7 @@ package main
 
 import (
 	"Open_IM/internal/demo/register"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
@@ -23,7 +24,7 @@ func main() {
 		authRouterGroup.POST("/login", register.Login)
 		authRouterGroup.POST("/reset_password", register.ResetPassword)
 	}
-	log.NewPrivateLog("demo")
+	log.NewPrivateLog(constant.LogFileName)
 	ginPort := flag.Int("port", 42233, "get ginServerPort from cmd,default 42233 as port")
 	flag.Parse()
 	r.Run(":" + strconv.Itoa(*ginPort))
