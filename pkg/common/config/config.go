@@ -353,7 +353,10 @@ type config struct {
 		ConversationSetPrivate struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
-			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+			DefaultTips  struct {
+				OpenTips  string `yaml:"openTips"`
+				CloseTips string `yaml:"closeTips"`
+			} `yaml:"defaultTips"`
 		} `yaml:"conversationSetPrivate"`
 	}
 	Demo struct {
