@@ -270,6 +270,30 @@ type config struct {
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"groupDismissed"`
 
+		GroupMuted struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMuted"`
+
+		GroupCancelMuted struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupCancelMuted"`
+
+		GroupMemberMuted struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberMuted"`
+
+		GroupMemberCancelMuted struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberCancelMuted"`
+
 		////////////////////////user///////////////////////
 		UserInfoUpdated struct {
 			Conversation PConversation `yaml:"conversation"`
@@ -326,6 +350,14 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"conversationOptUpdate"`
+		ConversationSetPrivate struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  struct {
+				OpenTips  string `yaml:"openTips"`
+				CloseTips string `yaml:"closeTips"`
+			} `yaml:"defaultTips"`
+		} `yaml:"conversationSetPrivate"`
 	}
 	Demo struct {
 		Port         []int `yaml:"openImDemoPort"`

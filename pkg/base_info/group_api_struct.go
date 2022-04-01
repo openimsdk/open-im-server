@@ -185,3 +185,38 @@ type DismissGroupReq struct {
 type DismissGroupResp struct {
 	CommResp
 }
+
+type MuteGroupMemberReq struct {
+	OperationID  string `json:"operationID" binding:"required"`
+	GroupID      string `json:"groupID" binding:"required"`
+	UserID       string `json:"userID" binding:"required"`
+	MutedSeconds uint32 `json:"mutedSeconds" binding:"required"`
+}
+type MuteGroupMemberResp struct {
+	CommResp
+}
+
+type CancelMuteGroupMemberReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	GroupID     string `json:"groupID" binding:"required"`
+	UserID      string `json:"userID" binding:"required"`
+}
+type CancelMuteGroupMemberResp struct {
+	CommResp
+}
+
+type MuteGroupReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	GroupID     string `json:"groupID" binding:"required"`
+}
+type MuteGroupResp struct {
+	CommResp
+}
+
+type CancelMuteGroupReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	GroupID     string `json:"groupID" binding:"required"`
+}
+type CancelMuteGroupResp struct {
+	CommResp
+}

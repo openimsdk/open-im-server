@@ -128,7 +128,7 @@ func GetConversation(c *gin.Context) {
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.GetConversation(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversation rpc failed, ", reqPb.String(), err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetAllConversationMsgOpt rpc failed, " + err.Error()})
 		return
 	}
@@ -192,7 +192,7 @@ func SetRecvMsgOpt(c *gin.Context) {
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.SetRecvMsgOpt(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetRecvMsgOpt rpc failed, ", reqPb.String(), err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetAllConversationMsgOpt rpc failed, " + err.Error()})
 		return
 	}

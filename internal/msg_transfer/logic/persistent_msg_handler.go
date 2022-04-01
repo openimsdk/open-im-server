@@ -34,26 +34,31 @@ func (pc *PersistentConsumerHandler) Init() {
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey string) {
 	log.NewInfo("msg come here mysql!!!", "", "msg", string(msg))
+	var tag bool
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
-		log.ErrorByKv("msg_transfer Unmarshal msg err", "", "msg", string(msg), "err", err.Error())
+		log.NewError(msgFromMQ.OperationID, "msg_transfer Unmarshal msg err", "msg", string(msg), "err", err.Error())
 		return
 	}
 	//Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsPersistent)
 	//Only process receiver data
 	if isPersist {
-		if msgKey == msgFromMQ.MsgData.RecvID && msgFromMQ.MsgData.SessionType == constant.SingleChatType {
-			log.InfoByKv("msg_transfer msg persisting", msgFromMQ.OperationID)
-			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
-				log.ErrorByKv("Message insert failed", msgFromMQ.OperationID, "err", err.Error(), "msg", msgFromMQ.String())
-				return
+		switch msgFromMQ.MsgData.SessionType {
+		case constant.SingleChatType, constant.NotificationChatType:
+			if msgKey == msgFromMQ.MsgData.RecvID {
+				tag = true
 			}
-		} else if msgFromMQ.MsgData.SessionType == constant.GroupChatType && msgKey == msgFromMQ.MsgData.SendID {
-			log.InfoByKv("msg_transfer msg persisting", msgFromMQ.OperationID)
+		case constant.GroupChatType:
+			if msgKey == msgFromMQ.MsgData.SendID || utils.IsContain(msgFromMQ.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+				tag = true
+			}
+		}
+		if tag {
+			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
 			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
-				log.ErrorByKv("Message insert failed", msgFromMQ.OperationID, "err", err.Error(), "msg", msgFromMQ.String())
+				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
 				return
 			}
 		}

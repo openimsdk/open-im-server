@@ -16,6 +16,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type officeServer struct {
@@ -26,7 +27,7 @@ type officeServer struct {
 }
 
 func NewOfficeServer(port int) *officeServer {
-	log.NewPrivateLog("office")
+	log.NewPrivateLog(constant.LogFileName)
 	return &officeServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfficeName,
@@ -103,7 +104,7 @@ func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsR
 
 func (s *officeServer) CreateTag(_ context.Context, req *pbOffice.CreateTagReq) (resp *pbOffice.CreateTagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "CreateTag req", req.String())
-	userIDList := utils.RemoveUserIDRepByMap(req.UserIDList)
+	userIDList := utils.RemoveRepeatedStringInList(req.UserIDList)
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
 	resp = &pbOffice.CreateTagResp{CommonResp: &pbOffice.CommonResp{}}
 	if err := db.DB.CreateTag(req.UserID, req.TagName, userIDList); err != nil {
@@ -132,8 +133,8 @@ func (s *officeServer) DeleteTag(_ context.Context, req *pbOffice.DeleteTagReq) 
 func (s *officeServer) SetTag(_ context.Context, req *pbOffice.SetTagReq) (resp *pbOffice.SetTagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SetTagResp{CommonResp: &pbOffice.CommonResp{}}
-	IncreaseUserIDList := utils.RemoveUserIDRepByMap(req.IncreaseUserIDList)
-	reduceUserIDList := utils.RemoveUserIDRepByMap(req.ReduceUserIDList)
+	IncreaseUserIDList := utils.RemoveRepeatedStringInList(req.IncreaseUserIDList)
+	reduceUserIDList := utils.RemoveRepeatedStringInList(req.ReduceUserIDList)
 	if err := db.DB.SetTag(req.UserID, req.TagID, req.NewName, IncreaseUserIDList, reduceUserIDList); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetTag failed", err.Error())
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
@@ -147,11 +148,57 @@ func (s *officeServer) SetTag(_ context.Context, req *pbOffice.SetTagReq) (resp 
 func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagReq) (resp *pbOffice.SendMsg2TagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SendMsg2TagResp{CommonResp: &pbOffice.CommonResp{}}
-	userIDList, err := db.DB.GetUserIDListByTagID(req.SendID, req.TagID)
-	for _, userID := range userIDList {
-		msg.TagSendMessage(req.OperationID, req.SendID, userID, req.Content, req.ContentType)
+	var tagUserIDList []string
+	for _, tagID := range req.TagList {
+		userIDList, err := db.DB.GetUserIDListByTagID(req.SendID, tagID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserIDListByTagID failed", err.Error())
+			continue
+		}
+		tagUserIDList = append(tagUserIDList, userIDList...)
 	}
-	if err := db.DB.SaveTagSendLog(req); err != nil {
+	var groupUserIDList []string
+	for _, groupID := range req.GroupList {
+		userIDList, err := im_mysql_model.GetGroupMemberIDListByGroupID(groupID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error())
+			continue
+		}
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), userIDList)
+		groupUserIDList = append(groupUserIDList, userIDList...)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
+	var userIDList []string
+	userIDList = append(userIDList, tagUserIDList...)
+	userIDList = append(userIDList, groupUserIDList...)
+	userIDList = append(userIDList, req.UserList...)
+	userIDList = utils.RemoveRepeatedStringInList(userIDList)
+	for i, userID := range userIDList {
+		if userID == req.SendID || userID == "" {
+			userIDList = append(userIDList[:i], userIDList[i+1:]...)
+		}
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
+	for _, userID := range userIDList {
+		msg.TagSendMessage(req.OperationID, req.SendID, userID, req.Content, req.SenderPlatformID)
+	}
+	var tagSendLogs db.TagSendLog
+	for _, userID := range userIDList {
+		userName, err := im_mysql_model.GetUserNameByUserID(userID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+			continue
+		}
+		tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
+			UserID:   userID,
+			UserName: userName,
+		})
+	}
+	tagSendLogs.SendID = req.SendID
+	tagSendLogs.Content = req.Content
+	tagSendLogs.SenderPlatformID = req.SenderPlatformID
+	tagSendLogs.SendTime = time.Now().Unix()
+	if err := db.DB.SaveTagSendLog(&tagSendLogs); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
@@ -181,6 +228,36 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 	if err := utils.CopyStructFields(&resp.TagSendLogs, tagSendLogs); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), err.Error())
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *officeServer) GetUserTagByID(_ context.Context, req *pbOffice.GetUserTagByIDReq) (resp *pbOffice.GetUserTagByIDResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.GetUserTagByIDResp{
+		CommonResp: &pbOffice.CommonResp{},
+		Tag:        &pbOffice.Tag{},
+	}
+	tag, err := db.DB.GetTagByID(req.UserID, req.TagID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTagByID failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		return resp, nil
+	}
+	for _, userID := range tag.UserList {
+		userName, err := im_mysql_model.GetUserNameByUserID(userID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+			continue
+		}
+		resp.Tag.UserList = append(resp.Tag.UserList, &pbOffice.TagUser{
+			UserID:   userID,
+			UserName: userName,
+		})
+	}
+	resp.Tag.TagID = tag.TagID
+	resp.Tag.TagName = tag.TagName
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }

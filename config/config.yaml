@@ -148,7 +148,7 @@ log:
   rotationTime: 24
   remainRotationCount: 3 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
-  remainLogLevel: 4
+  remainLogLevel: 6
   elasticSearchSwitch: false
   elasticSearchAddr: [ 127.0.0.1:9201 ]
   elasticSearchUser: ""
@@ -366,6 +366,56 @@ notification:
       ext: "groupDismissed ext"
     defaultTips:
       tips: "group dismissed"
+
+
+  groupMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMuted title"
+      desc: "groupMuted desc"
+      ext: "groupMuted ext"
+    defaultTips:
+      tips: "group Muted"
+
+  groupCancelMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupCancelMuted title"
+      desc: "groupCancelMuted desc"
+      ext: "groupCancelMuted ext"
+    defaultTips:
+      tips: "group Cancel Muted"
+
+
+  groupMemberMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMemberMuted title"
+      desc: "groupMemberMuted desc"
+      ext: "groupMemberMuted ext"
+    defaultTips:
+      tips: "group Member Muted"
+
+  groupMemberCancelMuted:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+    offlinePush:
+      switch: false
+      title: "groupMemberCancelMuted title"
+      desc: "groupMemberCancelMuted desc"
+      ext: "groupMemberCancelMuted ext"
+    defaultTips:
+      tips: "group Member Cancel Muted"
   #############################friend#################################
 
   friendApplicationAdded:
@@ -500,6 +550,19 @@ notification:
         ext: "conversation opt update"
       defaultTips:
         tips: "conversation opt update"
+
+  conversationSetPrivate:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: true
+    offlinePush:
+      switch: true
+      title: "burn after reading"
+      desc: "burn after reading"
+      ext: "burn after reading"
+    defaultTips:
+      openTips: "burn after reading was opened"
+      closeTips: "burn after reading was closed"
 
 
 

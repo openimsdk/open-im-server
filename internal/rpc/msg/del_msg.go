@@ -16,7 +16,7 @@ func (rpc *rpcChat) DelMsgList(_ context.Context, req *commonPb.DelMsgListReq) (
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelMsg failed", err.Error())
 		resp.ErrMsg = constant.ErrDB.ErrMsg
 		resp.ErrCode = constant.ErrDB.ErrCode
-		return resp, err
+		return resp, nil
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil

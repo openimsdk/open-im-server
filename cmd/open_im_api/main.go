@@ -10,6 +10,7 @@ import (
 	"Open_IM/internal/api/office"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
@@ -67,7 +68,11 @@ func main() {
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
 		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)        //1
-		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)
+		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)                      //
+		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)
+		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
+		groupRouterGroup.POST("/mute_group", group.MuteGroup)
+		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
@@ -114,6 +119,7 @@ func main() {
 	officeGroup := r.Group("/office")
 	{
 		officeGroup.POST("/get_user_tags", office.GetUserTags)
+		officeGroup.POST("/get_user_tag_by_id", office.GetUserTagByID)
 		officeGroup.POST("/create_tag", office.CreateTag)
 		officeGroup.POST("/delete_tag", office.DeleteTag)
 		officeGroup.POST("/set_tag", office.SetTag)
@@ -121,7 +127,7 @@ func main() {
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 	}
 	apiThird.MinioInit()
-	log.NewPrivateLog("api")
+	log.NewPrivateLog(constant.LogFileName)
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
 	r.Run(":" + strconv.Itoa(*ginPort))

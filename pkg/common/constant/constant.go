@@ -56,13 +56,11 @@ const (
 	FriendRemarkSetNotification           = 1206 //set_friend_remark?
 	BlackAddedNotification                = 1207 //add_black
 	BlackDeletedNotification              = 1208 //remove_black
-	ConversationOptChangeNotification     = 1300 // change conversation opt
+
+	ConversationOptChangeNotification = 1300 // change conversation opt
 
 	UserNotificationBegin       = 1301
 	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
-	ConversationNotification    = 1307
-	ConversationNotNotification = 1308
-	ConversationDefault         = 0
 	UserNotificationEnd         = 1399
 	OANotification              = 1400
 
@@ -79,11 +77,18 @@ const (
 	MemberInvitedNotification            = 1509
 	MemberEnterNotification              = 1510
 	GroupDismissedNotification           = 1511
+	GroupMemberMutedNotification         = 1512
+	GroupMemberCancelMutedNotification   = 1513
+	GroupMutedNotification               = 1514
+	GroupCancelMutedNotification         = 1515
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601
 	SignalingNotificationEnd   = 1699
-	NotificationEnd            = 2000
+
+	ConversationPrivateChatNotification = 1701
+
+	NotificationEnd = 2000
 
 	//status
 	MsgNormal  = 1
@@ -226,3 +231,5 @@ func GroupIsBanPrivateChat(status int32) bool {
 }
 
 const BigVersion = "v3"
+
+const LogFileName = "OpenIM.log"
