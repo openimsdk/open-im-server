@@ -46,7 +46,11 @@ func GetUserTags(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp.CommResp, respPb.CommonResp); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.Tags = respPb.Tags
+	if respPb.Tags != nil {
+		resp.Data.Tags = respPb.Tags
+	} else {
+		resp.Data.Tags = []*pbOffice.Tag{}
+	}
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -229,7 +233,11 @@ func GetTagSendLogs(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp.CommResp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.Logs = respPb.TagSendLogs
+	if respPb.TagSendLogs != nil {
+		resp.Data.Logs = respPb.TagSendLogs
+	} else {
+		resp.Data.Logs = []*pbOffice.TagSendLog{}
+	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
 	c.JSON(http.StatusOK, resp)

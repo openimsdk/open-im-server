@@ -70,9 +70,8 @@ func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsR
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req ", req.String())
 	resp = &pbOffice.GetUserTagsResp{
 		CommonResp: &pbOffice.CommonResp{},
-		//Tags:       []*pbOffice.Tag{},
+		Tags:       []*pbOffice.Tag{},
 	}
-	resp.Tags = make([]*pbOffice.Tag, 0)
 	tags, err := db.DB.GetUserTags(req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserTags failed", err.Error())
@@ -217,9 +216,8 @@ func (s *officeServer) GetTagSendLogs(_ context.Context, req *pbOffice.GetTagSen
 			CurrentPage: req.Pagination.PageNumber,
 			ShowNumber:  req.Pagination.ShowNumber,
 		},
-		//TagSendLogs: []*pbOffice.TagSendLog{},
+		TagSendLogs: []*pbOffice.TagSendLog{},
 	}
-	resp.TagSendLogs = make([]*pbOffice.TagSendLog, 0)
 	tagSendLogs, err := db.DB.GetTagSendLogs(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTagSendLogs", err.Error())
