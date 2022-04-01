@@ -555,13 +555,14 @@ notification:
     conversation:
       reliabilityLevel: 2
       unreadCount: true
-      offlinePush:
-        switch: true
-        title: "conversation was set to private "
-        desc: "conversation was set to private "
-        ext: "conversation was set to private "
-      defaultTips:
-        tips: "conversation was set to private "
+    offlinePush:
+      switch: true
+      title: "burn after reading"
+      desc: "burn after reading"
+      ext: "burn after reading"
+    defaultTips:
+      openTips: "burn after reading was opened"
+      closeTips: "burn after reading was closed"
 
 
 

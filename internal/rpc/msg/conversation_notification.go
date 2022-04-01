@@ -48,8 +48,19 @@ func ConversationSetPrivateNotification(operationID, sendID, recvID string, isPr
 		IsPrivate: isPrivateChat,
 	}
 	var tips open_im_sdk.TipsComm
-	strMap := map[bool]string{true: "true", false: "false"}
-	tips.DefaultTips = config.Config.Notification.ConversationSetPrivate.DefaultTips.Tips + strMap[isPrivateChat] + " by " + sendID
+	var tipsMsg string
+	//var senderName string
+	//senderName, err := im_mysql_model.GetUserNameByUserID(sendID)
+	//if err != nil {
+	//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
+	//	senderName = sendID
+	//}
+	if isPrivateChat == true {
+		tipsMsg = config.Config.Notification.ConversationSetPrivate.DefaultTips.OpenTips
+	} else {
+		tipsMsg = config.Config.Notification.ConversationSetPrivate.DefaultTips.CloseTips
+	}
+	tips.DefaultTips = tipsMsg
 	SetConversationNotification(operationID, sendID, recvID, constant.ConversationPrivateChatNotification, conversationSetPrivateTips, tips)
 }
 
