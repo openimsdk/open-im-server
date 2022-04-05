@@ -22,10 +22,12 @@ func MinioInit() {
 		log.NewError(operationID, utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
 		return
 	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "Parse ok ", config.Config.Credential.Minio)
 	minioClient, err = minio.New(minioUrl.Host, &minio.Options{
 		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
 		Secure: false,
 	})
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "new ok ", config.Config.Credential.Minio)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "init minio client failed", err.Error())
 		return
