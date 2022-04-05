@@ -258,7 +258,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 }
 func (ws *WServer) sendSignalMsgResp(conn *UserConn, errCode int32, errMsg string, m *Req, pb *pbRtc.SignalResp) {
 	// := make(map[string]interface{})
-	log.Info(m.OperationID, "this is a test", pb.String())
+	log.Debug(m.OperationID, "SignalMsgResp is", pb.String())
 	b, _ := proto.Marshal(pb)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
