@@ -6,13 +6,17 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
+	pbRtc "Open_IM/pkg/proto/rtc"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/utils"
 	"bytes"
 	"context"
 	"encoding/gob"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
+	"google.golang.org/grpc"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -200,8 +204,28 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
 	if isPass {
-		isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
-		if isPass2 {
+		signalResp := pbRtc.SignalResp{}
+		//isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
+		connGrpc, err := grpc.Dial(config.Config.Rtc.Address+":"+strconv.Itoa(config.Config.Rtc.Port), grpc.WithInsecure())
+		if err != nil {
+			log.NewError(m.OperationID, utils.GetSelfFuncName(), "grpc.Dial failed", err.Error())
+			ws.sendSignalMsgResp(conn, 204, "create grpc failed"+err.Error(), m, nil)
+			return
+		}
+		rtcClient := pbRtc.NewRtcServiceClient(connGrpc)
+		req := &pbRtc.SignalMessageAssembleReq{
+			SignalReq: pData.(*pbRtc.SignalReq),
+		}
+		respPb, err := rtcClient.SignalMessageAssemble(context.Background(), req)
+		if err != nil {
+			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error())
+			ws.sendSignalMsgResp(conn, 204, "grpc SignalMessageAssemble failed: "+err.Error(), m, &signalResp)
+			return
+		}
+		signalResp.Payload = respPb.SignalResp.Payload
+		msgData := &sdk_ws.MsgData{}
+		utils.CopyStructFields(msgData, respPb.MsgData)
+		if respPb.IsPass {
 			pbData := pbChat.SendMsgReq{
 				Token:       m.Token,
 				OperationID: m.OperationID,
@@ -212,24 +236,24 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 			client := pbChat.NewChatClient(etcdConn)
 			reply, err := client.SendMsg(context.Background(), &pbData)
 			if err != nil {
-				log.NewError(pbData.OperationID, "rpc sendMsg err", err.Error())
+				log.NewError(pbData.OperationID, utils.GetSelfFuncName(), "rpc sendMsg err", err.Error())
 				nReply.ErrCode = 200
 				nReply.ErrMsg = err.Error()
-				ws.sendSignalMsgResp(conn, 200, err.Error(), m, signalResp)
+				ws.sendSignalMsgResp(conn, 200, err.Error(), m, &signalResp)
 			} else {
 				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
-				ws.sendSignalMsgResp(conn, 0, "", m, signalResp)
+				ws.sendSignalMsgResp(conn, 0, "", m, &signalResp)
 			}
 		} else {
-			log.NewError(m.OperationID, isPass2, errCode2, errMsg2)
-			ws.sendSignalMsgResp(conn, errCode2, errMsg2, m, signalResp)
+			log.NewError(m.OperationID, utils.GetSelfFuncName(), respPb.IsPass, respPb.CommonResp.ErrCode, respPb.CommonResp.ErrMsg)
+			ws.sendSignalMsgResp(conn, respPb.CommonResp.ErrCode, respPb.CommonResp.ErrMsg, m, &signalResp)
 		}
 	} else {
 		ws.sendSignalMsgResp(conn, errCode, errMsg, m, nil)
 	}
 
 }
-func (ws *WServer) sendSignalMsgResp(conn *UserConn, errCode int32, errMsg string, m *Req, pb *sdk_ws.SignalResp) {
+func (ws *WServer) sendSignalMsgResp(conn *UserConn, errCode int32, errMsg string, m *Req, pb *pbRtc.SignalResp) {
 	// := make(map[string]interface{})
 
 	b, _ := proto.Marshal(pb)
