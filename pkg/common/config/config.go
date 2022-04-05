@@ -377,6 +377,10 @@ type config struct {
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
 	}
+	Rtc struct {
+		Port    int    `yaml:"port"`
+		Address string `yaml:"address"`
+	} `yaml:"rtc"`
 }
 type PConversation struct {
 	ReliabilityLevel int  `yaml:"reliabilityLevel"`

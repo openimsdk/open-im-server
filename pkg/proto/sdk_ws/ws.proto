@@ -506,7 +506,7 @@ message DelMsgListReq{
 }
 
 message DelMsgListResp{
- int32 errCode = 1;
+  int32 errCode = 1;
   string errMsg = 2;
 }
 
