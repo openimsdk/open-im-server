@@ -6,12 +6,17 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
+	"io"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
+	f, _ := os.Create("../logs/api.log")
+	gin.DefaultWriter = io.MultiWriter(f)
 
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
