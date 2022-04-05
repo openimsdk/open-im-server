@@ -214,23 +214,26 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 		}
 		rtcClient := pbRtc.NewRtcServiceClient(connGrpc)
 		req := &pbRtc.SignalMessageAssembleReq{
-			SignalReq: pData.(*pbRtc.SignalReq),
+			SignalReq:   pData.(*pbRtc.SignalReq),
+			OperationID: m.OperationID,
 		}
 		respPb, err := rtcClient.SignalMessageAssemble(context.Background(), req)
 		if err != nil {
-			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error())
+			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error(), config.Config.Rtc.Address+":"+strconv.Itoa(config.Config.Rtc.Port))
 			ws.sendSignalMsgResp(conn, 204, "grpc SignalMessageAssemble failed: "+err.Error(), m, &signalResp)
 			return
 		}
 		signalResp.Payload = respPb.SignalResp.Payload
-		msgData := &sdk_ws.MsgData{}
-		utils.CopyStructFields(msgData, respPb.MsgData)
+		msgData := sdk_ws.MsgData{}
+		utils.CopyStructFields(&msgData, respPb.MsgData)
+		log.NewInfo(m.OperationID, utils.GetSelfFuncName(), respPb.String())
 		if respPb.IsPass {
 			pbData := pbChat.SendMsgReq{
 				Token:       m.Token,
 				OperationID: m.OperationID,
-				MsgData:     msgData,
+				MsgData:     &msgData,
 			}
+			log.NewInfo(m.OperationID, utils.GetSelfFuncName(), "pbData: ", pbData)
 			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
 			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 			client := pbChat.NewChatClient(etcdConn)

@@ -378,7 +378,7 @@ type config struct {
 		}
 	}
 	Rtc struct {
-		Port    int    `yaml:"rtcPort"`
+		Port    int    `yaml:"port"`
 		Address string `yaml:"address"`
 	} `yaml:"rtc"`
 }
