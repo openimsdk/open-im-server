@@ -15,10 +15,11 @@ var (
 )
 
 func MinioInit() {
-	log.NewInfo("", utils.GetSelfFuncName())
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, utils.GetSelfFuncName())
 	minioUrl, err := url2.Parse(config.Config.Credential.Minio.Endpoint)
 	if err != nil {
-		log.NewError("", utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
+		log.NewError(operationID, utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
 		return
 	}
 	minioClient, err = minio.New(minioUrl.Host, &minio.Options{
@@ -26,7 +27,7 @@ func MinioInit() {
 		Secure: false,
 	})
 	if err != nil {
-		log.NewError("", utils.GetSelfFuncName(), "init minio client failed", err.Error())
+		log.NewError(operationID, utils.GetSelfFuncName(), "init minio client failed", err.Error())
 		return
 	}
 	opt := minio.MakeBucketOptions{
@@ -35,15 +36,15 @@ func MinioInit() {
 	}
 	err = minioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.Bucket, opt)
 	if err != nil {
-		log.NewInfo("", utils.GetSelfFuncName(), err.Error())
+		log.NewInfo(operationID, utils.GetSelfFuncName(), err.Error())
 		exists, err := minioClient.BucketExists(context.Background(), config.Config.Credential.Minio.Bucket)
 		if err == nil && exists {
-			log.NewInfo("", utils.GetSelfFuncName(), "We already own %s\n", config.Config.Credential.Minio.Bucket)
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "We already own %s\n", config.Config.Credential.Minio.Bucket)
 		} else {
 			if err != nil {
-				log.NewError("", utils.GetSelfFuncName(), err.Error())
+				log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 			}
-			log.NewError("", utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
+			log.NewError(operationID, utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
 			return
 		}
 	}
@@ -53,5 +54,5 @@ func MinioInit() {
 	//	log.NewError("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
 	//	return
 	//}
-	log.NewInfo("", utils.GetSelfFuncName(), "minio create and set policy success")
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio create and set policy success")
 }

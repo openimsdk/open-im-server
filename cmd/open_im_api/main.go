@@ -11,7 +11,6 @@ import (
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
@@ -21,10 +20,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	//"syscall"
+	"Open_IM/pkg/common/constant"
 )
 
 func main() {
-
+	log.NewPrivateLog(constant.LogFileName)
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
 	gin.DefaultWriter = io.MultiWriter(f)
@@ -136,7 +136,7 @@ func main() {
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 	}
 	apiThird.MinioInit()
-	log.NewPrivateLog(constant.LogFileName)
+	log.Info("", "MinioInit fin")
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
 	r.Run(":" + strconv.Itoa(*ginPort))
