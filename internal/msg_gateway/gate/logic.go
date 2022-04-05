@@ -224,13 +224,13 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 			return
 		}
 		signalResp.Payload = respPb.SignalResp.Payload
-		msgData := &sdk_ws.MsgData{}
-		utils.CopyStructFields(msgData, respPb.MsgData)
+		msgData := sdk_ws.MsgData{}
+		utils.CopyStructFields(&msgData, respPb.MsgData)
 		if respPb.IsPass {
 			pbData := pbChat.SendMsgReq{
 				Token:       m.Token,
 				OperationID: m.OperationID,
-				MsgData:     msgData,
+				MsgData:     &msgData,
 			}
 			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
 			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
