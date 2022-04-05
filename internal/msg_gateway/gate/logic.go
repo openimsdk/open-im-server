@@ -223,6 +223,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 			ws.sendSignalMsgResp(conn, 204, "grpc SignalMessageAssemble failed: "+err.Error(), m, &signalResp)
 			return
 		}
+		log.NewInfo(m.OperationID, utils.GetSelfFuncName(), respPb.String())
 		signalResp.Payload = respPb.SignalResp.Payload
 		msgData := sdk_ws.MsgData{}
 		utils.CopyStructFields(&msgData, respPb.MsgData)
