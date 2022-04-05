@@ -9,6 +9,7 @@ package gate
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	pbRtc "Open_IM/pkg/proto/rtc"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"github.com/golang/protobuf/proto"
 )
@@ -71,7 +72,7 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 		}
 		return true, 0, "", data
 	case constant.WSSendSignalMsg:
-		data := open_im_sdk.SignalReq{}
+		data := pbRtc.SignalReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
 			log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
 			return false, 203, err.Error(), nil

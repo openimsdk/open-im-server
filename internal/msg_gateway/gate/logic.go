@@ -214,7 +214,8 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 		}
 		rtcClient := pbRtc.NewRtcServiceClient(connGrpc)
 		req := &pbRtc.SignalMessageAssembleReq{
-			SignalReq: pData.(*pbRtc.SignalReq),
+			SignalReq:   pData.(*pbRtc.SignalReq),
+			OperationID: m.OperationID,
 		}
 		respPb, err := rtcClient.SignalMessageAssemble(context.Background(), req)
 		if err != nil {
