@@ -10,7 +10,6 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
-	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/statistics"
 	"fmt"
 )
@@ -24,7 +23,7 @@ var (
 )
 
 func Init(rpcPort int) {
-	log.NewPrivateLog(constant.LogFileName)
+
 	rpcServer.Init(rpcPort)
 	pushCh.Init()
 	pushTerminal = []int32{constant.IOSPlatformID, constant.AndroidPlatformID}
