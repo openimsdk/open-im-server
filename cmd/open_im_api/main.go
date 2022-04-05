@@ -135,8 +135,7 @@ func main() {
 		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 	}
-	apiThird.MinioInit()
-	log.Info("", "MinioInit fin")
+	go apiThird.MinioInit()
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
 	r.Run(":" + strconv.Itoa(*ginPort))
