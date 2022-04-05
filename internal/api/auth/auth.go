@@ -35,10 +35,16 @@ func UserRegister(c *gin.Context) {
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserRegister(context.Background(), req)
-	if err != nil || reply.CommonResp.ErrCode != 0 {
-		log.NewError(req.OperationID, "UserRegister failed ", err, reply.CommonResp.ErrCode)
+	if err != nil {
+		log.NewError(req.OperationID, "call rpc err ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "internal service err"})
+		return
+	}
+	if reply.CommonResp.ErrCode != 0 {
+		log.NewError(req.OperationID, "UserRegister failed ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": reply.CommonResp.ErrMsg})
 		return
+
 	}
 
 	pbDataToken := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID}
