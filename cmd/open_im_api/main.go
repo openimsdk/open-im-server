@@ -10,6 +10,7 @@ import (
 	"Open_IM/internal/api/office"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
@@ -30,6 +31,8 @@ func main() {
 
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
+
+	log.Info("load config: ", config.Config)
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
