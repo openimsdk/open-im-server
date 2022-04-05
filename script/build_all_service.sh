@@ -28,3 +28,4 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
   make install && echo -e "${SKY_BLUE_PREFIX}build ${service_names[$i]} success,moving binary file to the bin directory${COLOR_SUFFIX}" &&
     echo -e "${SKY_BLUE_PREFIX}Successful moved ${service_names[$i]} to the bin directory${COLOR_SUFFIX}\n"
 done
+echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}
