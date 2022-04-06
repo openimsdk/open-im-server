@@ -4,6 +4,7 @@ import (
 	"Open_IM/internal/demo/register"
 	"Open_IM/pkg/utils"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -33,5 +34,9 @@ func main() {
 
 	ginPort := flag.Int("port", 42233, "get ginServerPort from cmd,default 42233 as port")
 	flag.Parse()
-	r.Run(":" + strconv.Itoa(*ginPort))
+	fmt.Println("start demo api server, port: ", *ginPort)
+	err := r.Run(":" + strconv.Itoa(*ginPort))
+	if err != nil {
+		log.Error("", "run failed ", *ginPort, err.Error())
+	}
 }
