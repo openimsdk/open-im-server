@@ -15,7 +15,14 @@ need_to_start_server_shell=(
 #fixme The 10 second delay to start the project is for the docker-compose one-click to start openIM when the infrastructure dependencies are not started
 
 sleep 10
-
+time=`date +"%Y-%m-%d %H:%M:%S"`
+echo "==========================================================">>../logs/openIM.log 2>&1 &
+echo "==========================================================">>../logs/openIM.log 2>&1 &
+echo "==========================================================">>../logs/openIM.log 2>&1 &
+echo "==========server start time:${time}===========">>../logs/openIM.log 2>&1 &
+echo "==========================================================">>../logs/openIM.log 2>&1 &
+echo "==========================================================">>../logs/openIM.log 2>&1 &
+echo "==========================================================">>../logs/openIM.log 2>&1 &
 for i in ${need_to_start_server_shell[*]}; do
   chmod +x $i
   ./$i
