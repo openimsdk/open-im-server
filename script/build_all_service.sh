@@ -32,6 +32,5 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
         else
          echo -e "${GREEN_PREFIX}${service_names[$i]} successfully be built ${COLOR_SUFFIX}\n"
   fi
-
-
 done
+echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}

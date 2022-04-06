@@ -2,7 +2,7 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/log"
+
 	"fmt"
 	"sync"
 	"time"
@@ -24,13 +24,13 @@ func initMysqlDB() {
 	var err1 error
 	db, err := gorm.Open("mysql", dsn)
 	if err != nil {
-		log.NewError("0", "Open failed ", err.Error(), dsn)
+		fmt.Println("0", "Open failed ", err.Error(), dsn)
 	}
 	if err != nil {
 		time.Sleep(time.Duration(30) * time.Second)
 		db, err1 = gorm.Open("mysql", dsn)
 		if err1 != nil {
-			log.NewError("0", "Open failed ", err1.Error(), dsn)
+			fmt.Println("0", "Open failed ", err1.Error(), dsn)
 			panic(err1.Error())
 		}
 	}
@@ -39,7 +39,7 @@ func initMysqlDB() {
 	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", config.Config.Mysql.DBDatabaseName)
 	err = db.Exec(sql).Error
 	if err != nil {
-		log.NewError("0", "Exec failed ", err.Error(), sql)
+		fmt.Println("0", "Exec failed ", err.Error(), sql)
 		panic(err.Error())
 	}
 	db.Close()
@@ -48,11 +48,11 @@ func initMysqlDB() {
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
 	db, err = gorm.Open("mysql", dsn)
 	if err != nil {
-		log.NewError("0", "Open failed ", err.Error(), dsn)
+		fmt.Println("0", "Open failed ", err.Error(), dsn)
 		panic(err.Error())
 	}
 
-	log.NewInfo("open db ok ", dsn)
+	fmt.Println("open db ok ", dsn)
 	db.AutoMigrate(&Friend{},
 		&FriendRequest{},
 		&Group{},
@@ -64,49 +64,49 @@ func initMysqlDB() {
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 
 	if !db.HasTable(&Friend{}) {
-		log.NewInfo("CreateTable Friend")
+		fmt.Println("CreateTable Friend")
 		db.CreateTable(&Friend{})
 	}
 
 	if !db.HasTable(&FriendRequest{}) {
-		log.NewInfo("CreateTable FriendRequest")
+		fmt.Println("CreateTable FriendRequest")
 		db.CreateTable(&FriendRequest{})
 	}
 
 	if !db.HasTable(&Group{}) {
-		log.NewInfo("CreateTable Group")
+		fmt.Println("CreateTable Group")
 		db.CreateTable(&Group{})
 	}
 
 	if !db.HasTable(&GroupMember{}) {
-		log.NewInfo("CreateTable GroupMember")
+		fmt.Println("CreateTable GroupMember")
 		db.CreateTable(&GroupMember{})
 	}
 
 	if !db.HasTable(&GroupRequest{}) {
-		log.NewInfo("CreateTable GroupRequest")
+		fmt.Println("CreateTable GroupRequest")
 		db.CreateTable(&GroupRequest{})
 	}
 
 	if !db.HasTable(&User{}) {
-		log.NewInfo("CreateTable User")
+		fmt.Println("CreateTable User")
 		db.CreateTable(&User{})
 	}
 
 	if !db.HasTable(&Black{}) {
-		log.NewInfo("CreateTable Black")
+		fmt.Println("CreateTable Black")
 		db.CreateTable(&Black{})
 	}
 	if !db.HasTable(&ChatLog{}) {
-		log.NewInfo("CreateTable Black")
+		fmt.Println("CreateTable Black")
 		db.CreateTable(&ChatLog{})
 	}
 	if !db.HasTable(&Register{}) {
-		log.NewInfo("CreateTable Black")
+		fmt.Println("CreateTable Black")
 		db.CreateTable(&Register{})
 	}
 	if !db.HasTable(&Conversation{}) {
-		log.NewInfo("CreateTable Black")
+		fmt.Println("CreateTable Black")
 		db.CreateTable(&Conversation{})
 	}
 
