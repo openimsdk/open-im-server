@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbOffice "Open_IM/pkg/proto/office"
@@ -179,8 +180,12 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 		}
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
+	us, err := imdb.GetUserByUserID(req.SendID)
+	if err != nil {
+		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.SendID)
+	}
 	for _, userID := range userIDList {
-		msg.TagSendMessage(req.OperationID, req.SendID, userID, req.Content, req.SenderPlatformID)
+		msg.TagSendMessage(req.OperationID, us, userID, req.Content, req.SenderPlatformID)
 	}
 	var tagSendLogs db.TagSendLog
 	for _, userID := range userIDList {
