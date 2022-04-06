@@ -13,7 +13,7 @@ func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog,
 	if err != nil {
 		return chatLogs, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	db := dbConn.Table("chat_logs").
 		Where(fmt.Sprintf(" content like '%%%s%%'", chatLog.Content)).
 		Limit(showNumber).Offset(showNumber * (pageNumber - 1))
@@ -43,7 +43,7 @@ func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
 	if err != nil {
 		return count, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	db := dbConn.Table("chat_logs").
 		Where(fmt.Sprintf(" content like '%%%s%%'", chatLog.Content))
 	if chatLog.SessionType != 0 {

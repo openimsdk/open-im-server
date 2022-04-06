@@ -123,7 +123,7 @@ func GetUserReqGroupByUserID(userID string) ([]db.GroupRequest, error) {
 	if err != nil {
 		return nil, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	err = dbConn.Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
 	return groupRequestList, err
 }

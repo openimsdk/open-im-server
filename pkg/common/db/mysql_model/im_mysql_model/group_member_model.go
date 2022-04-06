@@ -71,7 +71,7 @@ func GetGroupMemberIDListByGroupID(groupID string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var groupMembers []db.GroupMember
 	err = dbConn.Table("group_members").Select("user_id").Where("group_id=?", groupID).Find(&groupMembers).Error
 	if err != nil {
@@ -279,7 +279,7 @@ func GetGroupMembersCount(groupId, userName string) (int32, error) {
 	if err != nil {
 		return count, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	if err := dbConn.Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
 		return count, err
 	}

@@ -10,7 +10,7 @@ func GetActiveUserNum(from, to time.Time) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("chat_logs").Select("count(distinct(send_id))").Where("create_time >= ? and create_time <= ?", from, to).Count(&num).Error
 	return num, err
@@ -21,7 +21,7 @@ func GetIncreaseUserNum(from, to time.Time) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("users").Where("create_time >= ? and create_time <= ?", from, to).Count(&num).Error
 	return num, err
@@ -32,7 +32,7 @@ func GetTotalUserNum() (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("users").Count(&num).Error
 	return num, err
@@ -43,7 +43,7 @@ func GetTotalUserNumByDate(to time.Time) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("users").Where("create_time <= ?", to).Count(&num).Error
 	return num, err
@@ -54,7 +54,7 @@ func GetPrivateMessageNum(from, to time.Time) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("chat_logs").Where("create_time >= ? and create_time <= ? and session_type = ?", from, to, 1).Count(&num).Error
 	return num, err
@@ -65,7 +65,7 @@ func GetGroupMessageNum(from, to time.Time) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("chat_logs").Where("create_time >= ? and create_time <= ? and session_type = ?", from, to, 2).Count(&num).Error
 	return num, err
@@ -76,7 +76,7 @@ func GetIncreaseGroupNum(from, to time.Time) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("groups").Where("create_time >= ? and create_time <= ?", from, to).Count(&num).Error
 	return num, err
@@ -87,7 +87,7 @@ func GetTotalGroupNum() (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("groups").Count(&num).Error
 	return num, err
@@ -98,7 +98,7 @@ func GetGroupNum(to time.Time) (int32, error) {
 	if err != nil {
 		return 0, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	var num int32
 	err = dbConn.Table("groups").Where("create_time <= ?", to).Count(&num).Error
 	return num, err
@@ -116,7 +116,7 @@ func GetActiveGroups(from, to time.Time, limit int) ([]*activeGroup, error) {
 	if err != nil {
 		return activeGroups, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	err = dbConn.Table("chat_logs").Select("recv_id, count(*) as message_num").Where("create_time >= ? and create_time <= ? and session_type = ?", from, to, 2).Group("recv_id").Limit(limit).Order("message_num DESC").Find(&activeGroups).Error
 	for _, activeGroup := range activeGroups {
 		group := db.Group{
@@ -140,7 +140,7 @@ func GetActiveUsers(from, to time.Time, limit int) ([]*activeUser, error) {
 	if err != nil {
 		return activeUsers, err
 	}
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	err = dbConn.Table("chat_logs").Select("send_id, count(*) as message_num").Where("create_time >= ? and create_time <= ? and session_type = ?", from, to, 1).Group("send_id").Limit(limit).Order("message_num DESC").Find(&activeUsers).Error
 	for _, activeUser := range activeUsers {
 		user := db.User{
