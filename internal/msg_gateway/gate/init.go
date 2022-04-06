@@ -2,8 +2,7 @@ package gate
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
+
 	"Open_IM/pkg/statistics"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -21,7 +20,7 @@ var (
 
 func Init(rpcPort, wsPort int) {
 	//log initialization
-	log.NewPrivateLog(constant.LogFileName)
+
 	rwLock = new(sync.RWMutex)
 	validate = validator.New()
 	statistics.NewStatistics(&sendMsgCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second recv to msg_gateway sendMsgCount", sendMsgCount), 300)

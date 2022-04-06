@@ -2,8 +2,7 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
+	//"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,7 +33,7 @@ func key(dbAddress, dbName string) string {
 }
 
 func init() {
-	log.NewPrivateLog(constant.LogFileName)
+	//log.NewPrivateLog(constant.LogFileName)
 	//var mgoSession *mgo.Session
 	var mongoClient *mongo.Client
 	var err1 error
@@ -54,15 +53,16 @@ func init() {
 
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
-		log.NewError(" mongo.Connect  failed, try ", utils.GetSelfFuncName(), err.Error(), uri)
+		fmt.Println(" mongo.Connect  failed, try ", utils.GetSelfFuncName(), err.Error(), uri)
 		time.Sleep(time.Duration(30) * time.Second)
 		mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 		if err1 != nil {
-			log.NewError(" mongo.Connect retry failed, panic", err.Error(), uri)
+			fmt.Println(" mongo.Connect retry failed, panic", err.Error(), uri)
 			panic(err1.Error())
 		}
 	}
-	log.NewInfo("0", utils.GetSelfFuncName(), "mongo driver client init success")
+	fmt.Println("0", utils.GetSelfFuncName(), "mongo driver client init success")
+
 	DB.mongoClient = mongoClient
 
 	//mgoDailInfo := &mgo.DialInfo{

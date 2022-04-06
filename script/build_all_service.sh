@@ -24,8 +24,15 @@ begin_path=$PWD
 for ((i = 0; i < ${#service_source_root[*]}; i++)); do
   cd $begin_path
   service_path=${service_source_root[$i]}
-  cd $service_path && echo -e "${SKY_BLUE_PREFIX}Current directory: $PWD $COLOR_SUFFIX"
-  make install && echo -e "${SKY_BLUE_PREFIX}build ${service_names[$i]} success,moving binary file to the bin directory${COLOR_SUFFIX}" &&
-    echo -e "${SKY_BLUE_PREFIX}Successful moved ${service_names[$i]} to the bin directory${COLOR_SUFFIX}\n"
+  cd $service_path
+  make install
+  if [ $? -ne 0 ]; then
+        echo -e "${RED_PREFIX}${service_names[$i]} build failed ${COLOR_SUFFIX}\n"
+        exit -1
+        else
+         echo -e "${GREEN_PREFIX}${service_names[$i]} successfully be built ${COLOR_SUFFIX}\n"
+  fi
+
+
 done
 echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}

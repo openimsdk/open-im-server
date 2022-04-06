@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -377,6 +376,10 @@ type config struct {
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
 	}
+	Rtc struct {
+		Port    int    `yaml:"port"`
+		Address string `yaml:"address"`
+	} `yaml:"rtc"`
 }
 type PConversation struct {
 	ReliabilityLevel int  `yaml:"reliabilityLevel"`
@@ -416,5 +419,4 @@ func init() {
 	if err = yaml.Unmarshal(bytes, &Config); err != nil {
 		panic(err.Error())
 	}
-	fmt.Println("load config: ", Config)
 }

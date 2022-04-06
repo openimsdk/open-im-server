@@ -1,11 +1,33 @@
 syntax = "proto3";
 option go_package = "./rtc;rtc";
-package rtc;
+package proto;
 
 message CommonResp{
   int32  errCode = 1;
   string errMsg = 2;
 }
+
+message MsgData {
+  string  sendID = 1;
+  string  recvID = 2;
+  string groupID = 3;
+  string clientMsgID = 4;
+  string serverMsgID = 5;
+  int32 senderPlatformID = 6;
+  string  senderNickname = 7;
+  string  senderFaceURL = 8;
+  int32   sessionType = 9;
+  int32 msgFrom = 10;
+  int32 contentType = 11;
+  bytes content = 12;
+  uint32 seq = 14;
+  int64 sendTime = 15;
+  int64 createTime = 16;
+  int32 status = 17;
+  map<string, bool> options = 18;
+  OfflinePushInfo offlinePushInfo = 19;
+}
+
 
 message GroupInfo{
   string groupID = 1;
@@ -62,8 +84,136 @@ message GetJoinTokenResp{
   string liveURL = 3;
 }
 
-service RtcService {
-  rpc GetJoinToken(GetJoinTokenReq) returns(GetJoinTokenResp);
+message OfflinePushInfo{
+  string title = 1;
+  string desc = 2;
+  string ex = 3;
+  string iOSPushSound = 4;
+  bool iOSBadgeCount = 5;
+}
+
+message SignalReq {
+  oneof payload {
+      SignalInviteReq invite = 1;
+      SignalInviteInGroupReq inviteInGroup= 2;
+      SignalCancelReq  cancel = 3;
+      SignalAcceptReq accept = 4;
+      SignalHungUpReq hungUp = 5;
+      SignalRejectReq reject = 6;
+  }
+}
+
+message SignalResp {
+  oneof payload {
+    SignalInviteReply invite = 1;
+    SignalInviteInGroupReply inviteInGroup= 2;
+    SignalCancelReply  cancel = 3;
+    SignalAcceptReply accept = 4;
+    SignalHungUpReply hungUp = 5;
+    SignalRejectReply reject = 6;
+  }
+}
+
+message InvitationInfo  {
+    string inviterUserID = 1;
+    repeated string inviteeUserIDList = 2;
+    string customData = 3;
+    string  groupID = 4;
+    string roomID = 5;
+    int32 timeout = 6;
+    string mediaType = 7;
+     int32 platformID = 8;
+    int32   sessionType = 9;
 }
 
 
+message SignalInviteReq {
+    string opUserID = 1;
+    InvitationInfo invitation = 2;
+    OfflinePushInfo offlinePushInfo  = 3;
+    ParticipantMetaData participant = 4;
+
+}
+
+message SignalInviteReply {
+  string token = 1;
+  string roomID = 2;
+  string liveURL = 3;
+}
+
+message SignalInviteInGroupReq {
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
+}
+
+message SignalInviteInGroupReply {
+  string token = 1;
+  string roomID = 2;
+  string liveURL = 3;
+}
+
+message SignalCancelReq {
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
+}
+
+message SignalCancelReply {
+
+}
+
+message SignalAcceptReq {
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
+  int32 opUserPlatformID = 5;
+}
+
+message SignalAcceptReply {
+  string token = 1;
+  string roomID = 2;
+  string liveURL = 3;
+}
+
+message SignalHungUpReq {
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+}
+
+message SignalHungUpReply {
+
+}
+
+
+message SignalRejectReq {
+  string opUserID = 1;
+  InvitationInfo invitation = 2;
+  OfflinePushInfo offlinePushInfo  = 3;
+  ParticipantMetaData participant = 4;
+  int32 opUserPlatformID = 5;
+}
+
+message SignalRejectReply {
+
+}
+
+message SignalMessageAssembleReq {
+ SignalReq signalReq = 1;
+ string operationID = 2;
+}
+
+message SignalMessageAssembleResp {
+ CommonResp commonResp = 1;
+ bool isPass = 2;
+ SignalResp signalResp = 3;
+ MsgData msgData = 4;
+}
+
+service RtcService {
+ rpc SignalMessageAssemble(SignalMessageAssembleReq) returns(SignalMessageAssembleResp);
+}

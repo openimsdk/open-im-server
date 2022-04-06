@@ -588,5 +588,6 @@ demo:
     smtpAddr: "smtp.qq.com"
     smtpPort: 25   #需开放此端口 出口方向
 
-
-
+rtc:
+  port: 11300
+  address: 127.0.0.1

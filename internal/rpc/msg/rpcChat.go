@@ -43,7 +43,7 @@ func (rpc *rpcChat) Run() {
 		log.Error("", "", "listen network failed, err = %s, address = %s", err.Error(), address)
 		return
 	}
-	log.Info("", "", "listen network success, address = %s", address)
+	log.Info("", "", "listen network success, address = ", address)
 
 	//grpc server
 	srv := grpc.NewServer()

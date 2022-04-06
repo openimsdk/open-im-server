@@ -14,7 +14,7 @@ ws_ports=($ports_array)
 if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} ]; then
 
   echo -e ${RED_PREFIX}"ws_ports does not match push_rpc_ports in quantity!!!"${COLOR_SUFFIX}
-  exit 0
+  exit -1
 
 fi
 #Check if the service exists
