@@ -10,7 +10,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"strings"
-	"time"
 )
 
 func TagSendMessage(operationID, sendID, recvID, content string, senderPlatformID int32) {
@@ -25,8 +24,8 @@ func TagSendMessage(operationID, sendID, recvID, content string, senderPlatformI
 	msgData.Content = []byte(content)
 	msgData.Options = map[string]bool{}
 	msgData.Options[constant.IsSenderConversationUpdate] = false
-	msgData.SendTime = time.Now().Unix()
-	msgData.CreateTime = time.Now().Unix()
+	msgData.CreateTime = utils.GetCurrentTimestampByMill()
+	msgData.ClientMsgID = utils.GetMsgID(sendID)
 	msgData.SenderPlatformID = senderPlatformID
 	req.MsgData = &msgData
 	req.OperationID = operationID
