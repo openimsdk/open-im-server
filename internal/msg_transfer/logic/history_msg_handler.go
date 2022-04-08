@@ -80,6 +80,22 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 			mc.groupMsgCount++
 		}
 		go sendMessageToPush(&msgFromMQ, msgFromMQ.MsgData.RecvID)
+	case constant.NotificationChatType:
+		log.NewDebug(msgFromMQ.OperationID, "msg_transfer msg type = NotificationChatType", isHistory, isPersist)
+		if isHistory {
+			err := saveUserChat(msgKey, &msgFromMQ)
+			if err != nil {
+				log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
+				return
+			}
+			mc.singleMsgCount++
+			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", utils.GetCurrentTimestampByNano()-time)
+		}
+		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
+		} else {
+			go sendMessageToPush(&msgFromMQ, msgKey)
+		}
+		log.NewDebug(operationID, "saveUserChat cost time ", utils.GetCurrentTimestampByNano()-time)
 	default:
 		log.NewError(msgFromMQ.OperationID, "SessionType error", msgFromMQ.String())
 		return

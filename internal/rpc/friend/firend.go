@@ -29,7 +29,7 @@ type friendServer struct {
 }
 
 func NewFriendServer(port int) *friendServer {
-	log.NewPrivateLog("friend")
+	log.NewPrivateLog(constant.LogFileName)
 	return &friendServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImFriendName,

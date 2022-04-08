@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
-	officePb "Open_IM/pkg/proto/office"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
@@ -470,6 +469,14 @@ func (d *DataBases) CreateTag(userID, tagName string, userList []string) error {
 	return err
 }
 
+func (d *DataBases) GetTagByID(userID, tagID string) (Tag, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
+	var tag Tag
+	err := c.FindOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}).Decode(&tag)
+	return tag, err
+}
+
 func (d *DataBases) DeleteTag(userID, tagID string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
@@ -491,7 +498,7 @@ func (d *DataBases) SetTag(userID, tagID, newName string, increaseUserIDList []s
 		}
 	}
 	tag.UserList = append(tag.UserList, increaseUserIDList...)
-	tag.UserList = utils.RemoveUserIDRepByMap(tag.UserList)
+	tag.UserList = utils.RemoveRepeatedStringInList(tag.UserList)
 	for _, v := range reduceUserIDList {
 		for i2, v2 := range tag.UserList {
 			if v == v2 {
@@ -526,30 +533,16 @@ type TagUser struct {
 }
 
 type TagSendLog struct {
-	TagID            string `bson:"tag_id"`
-	TagName          string `bson:"tag_name"`
-	SendID           string `bson:"send_id"`
-	SenderPlatformID int32  `bson:"sender_platform_id"`
-	Content          string `bson:"content"`
-	ContentType      int32  `bson:"content_type"`
-	SendTime         int64  `bson:"send_time"`
+	UserList         []TagUser `bson:"tag_list"`
+	SendID           string    `bson:"send_id"`
+	SenderPlatformID int32     `bson:"sender_platform_id"`
+	Content          string    `bson:"content"`
+	SendTime         int64     `bson:"send_time"`
 }
 
-func (d *DataBases) SaveTagSendLog(sendReq *officePb.SendMsg2TagReq) error {
+func (d *DataBases) SaveTagSendLog(tagSendLog *TagSendLog) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cTag)
-	var tag Tag
-	_ = c.FindOne(ctx, bson.M{"user_id": sendReq.SendID, "tag_id": sendReq.TagID}).Decode(&tag)
-	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
-	tagSendLog := TagSendLog{
-		TagID:            sendReq.TagID,
-		TagName:          tag.TagName,
-		SendID:           sendReq.SendID,
-		SenderPlatformID: sendReq.SenderPlatformID,
-		Content:          sendReq.Content,
-		ContentType:      sendReq.ContentType,
-		SendTime:         time.Now().Unix(),
-	}
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSendLog)
 	_, err := c.InsertOne(ctx, tagSendLog)
 	return err
 }
@@ -571,7 +564,7 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 }
 
 func generateTagID(tagName, userID string) string {
-	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()))
+	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()) + time.Now().String())
 }
 
 func getCurrentTimestampByMill() int64 {

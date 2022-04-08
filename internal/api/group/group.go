@@ -568,3 +568,131 @@ func DismissGroup(c *gin.Context) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
+func MuteGroupMember(c *gin.Context) {
+	params := api.MuteGroupMemberReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.MuteGroupMemberReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.MuteGroupMember(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp := api.MuteGroupMemberResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+func CancelMuteGroupMember(c *gin.Context) {
+	params := api.CancelMuteGroupMemberReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.CancelMuteGroupMemberReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.CancelMuteGroupMember(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp := api.CancelMuteGroupMemberResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+func MuteGroup(c *gin.Context) {
+	params := api.MuteGroupReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.MuteGroupReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.MuteGroup(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp := api.MuteGroupResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+func CancelMuteGroup(c *gin.Context) {
+	params := api.CancelMuteGroupReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.CancelMuteGroupReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.CancelMuteGroup(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp := api.CancelMuteGroupResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}

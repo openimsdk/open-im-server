@@ -34,8 +34,8 @@ type SetReceiveMessageOptResp struct {
 
 type Conversation struct {
 	OwnerUserID      string `json:"ownerUserID" binding:"required"`
-	ConversationID   string `json:"conversationID"`
-	ConversationType int32  `json:"conversationType"`
+	ConversationID   string `json:"conversationID" binding:"required"`
+	ConversationType int32  `json:"conversationType" binding:"required"`
 	UserID           string `json:"userID"`
 	GroupID          string `json:"groupID"`
 	RecvMsgOpt       int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
@@ -49,7 +49,8 @@ type Conversation struct {
 
 type SetConversationReq struct {
 	Conversation
-	OperationID string `json:"operationID" binding:"required"`
+	NotificationType int32  `json:"notificationType"`
+	OperationID      string `json:"operationID" binding:"required"`
 }
 
 type SetConversationResp struct {
@@ -57,9 +58,10 @@ type SetConversationResp struct {
 }
 
 type BatchSetConversationsReq struct {
-	Conversations []Conversation `json:"conversations" binding:"required"`
-	OwnerUserID   string         `json:"ownerUserID" binding:"required"`
-	OperationID   string         `json:"operationID" binding:"required"`
+	Conversations    []Conversation `json:"conversations" binding:"required"`
+	NotificationType int32          `json:"notificationType"`
+	OwnerUserID      string         `json:"ownerUserID" binding:"required"`
+	OperationID      string         `json:"operationID" binding:"required"`
 }
 
 type BatchSetConversationsResp struct {
@@ -103,10 +105,11 @@ type GetConversationsResp struct {
 }
 
 type SetRecvMsgOptReq struct {
-	OwnerUserID    string `json:"ownerUserID" binding:"required"`
-	ConversationID string `json:"conversationID"`
-	RecvMsgOpt     int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
-	OperationID    string `json:"operationID" binding:"required"`
+	OwnerUserID      string `json:"ownerUserID" binding:"required"`
+	ConversationID   string `json:"conversationID"`
+	RecvMsgOpt       int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
+	OperationID      string `json:"operationID" binding:"required"`
+	NotificationType int32  `json:"notificationType"`
 }
 
 type SetRecvMsgOptResp struct {

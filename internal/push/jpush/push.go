@@ -13,6 +13,9 @@ import (
 type JPushResp struct {
 }
 
+type JPush struct {
+}
+
 func JGAccountListPush(accounts []string, alert, detailContent, platform string) ([]byte, error) {
 
 	var pf requestBody.Platform

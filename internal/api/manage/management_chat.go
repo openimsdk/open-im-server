@@ -140,7 +140,7 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 	log.NewInfo("", data, params)
 	token := c.Request.Header.Get("token")
-	claims, err := token_verify.ParseToken(token)
+	claims, err := token_verify.ParseToken(token, params.OperationID)
 	if err != nil {
 		log.NewError(params.OperationID, "parse token failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
@@ -218,16 +218,16 @@ type ManagementSendMsgReq struct {
 
 type PictureBaseInfo struct {
 	UUID   string `mapstructure:"uuid"`
-	Type   string `mapstructure:"type" validate:"required"`
-	Size   int64  `mapstructure:"size" validate:"required"`
-	Width  int32  `mapstructure:"width" validate:"required"`
-	Height int32  `mapstructure:"height" validate:"required"`
-	Url    string `mapstructure:"url" validate:"required"`
+	Type   string `mapstructure:"type" `
+	Size   int64  `mapstructure:"size" `
+	Width  int32  `mapstructure:"width" `
+	Height int32  `mapstructure:"height"`
+	Url    string `mapstructure:"url" `
 }
 
 type PictureElem struct {
 	SourcePath      string          `mapstructure:"sourcePath"`
-	SourcePicture   PictureBaseInfo `mapstructure:"sourcePicture" validate:"required"`
+	SourcePicture   PictureBaseInfo `mapstructure:"sourcePicture"`
 	BigPicture      PictureBaseInfo `mapstructure:"bigPicture" `
 	SnapshotPicture PictureBaseInfo `mapstructure:"snapshotPicture"`
 }
@@ -282,25 +282,15 @@ type RevokeElem struct {
 	RevokeMsgClientID string `mapstructure:"revokeMsgClientID" validate:"required"`
 }
 type OANotificationElem struct {
-	NotificationName    string `mapstructure:"notificationName" validate:"required"`
-	NotificationFaceURL string `mapstructure:"notificationFaceURL" validate:"required"`
-	NotificationType    int32  `mapstructure:"notificationType" validate:"required"`
-	Text                string `mapstructure:"text" validate:"required"`
-	Url                 string `mapstructure:"url"`
-	MixType             int32  `mapstructure:"mixType"`
-	Image               struct {
-		SourceUrl   string `mapstructure:"sourceUrl"`
-		SnapshotUrl string `mapstructure:"snapshotUrl"`
-	} `mapstructure:"image"`
-	Video struct {
-		SourceUrl   string `mapstructure:"sourceUrl"`
-		SnapshotUrl string `mapstructure:"snapshotUrl"`
-		Duration    int64  `mapstructure:"duration"`
-	} `mapstructure:"video"`
-	File struct {
-		SourceUrl string `mapstructure:"sourceUrl"`
-		FileName  string `mapstructure:"fileName"`
-		FileSize  int64  `mapstructure:"fileSize"`
-	} `mapstructure:"file"`
-	Ex string `mapstructure:"ex"`
+	NotificationName    string      `mapstructure:"notificationName" validate:"required"`
+	NotificationFaceURL string      `mapstructure:"notificationFaceURL" validate:"required"`
+	NotificationType    int32       `mapstructure:"notificationType" validate:"required"`
+	Text                string      `mapstructure:"text" validate:"required"`
+	Url                 string      `mapstructure:"url"`
+	MixType             int32       `mapstructure:"mixType"`
+	PictureElem         PictureElem `mapstructure:"pictureElem"`
+	SoundElem           SoundElem   `mapstructure:"soundElem"`
+	VideoElem           VideoElem   `mapstructure:"videoElem"`
+	FileElem            FileElem    `mapstructure:"fileElem"`
+	Ex                  string      `mapstructure:"ex"`
 }

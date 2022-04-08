@@ -76,7 +76,7 @@ func Test_ParseToken(t *testing.T) {
 	uid := "1"
 	platform := int32(1)
 	tokenString, _, _ := token_verify.CreateToken(uid, platform)
-	claims, err := token_verify.ParseToken(tokenString)
+	claims, err := token_verify.ParseToken(tokenString, "")
 	if err == nil {
 		assert.Equal(t, claims.UID, uid)
 	}

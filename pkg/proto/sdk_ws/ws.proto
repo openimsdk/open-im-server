@@ -261,6 +261,33 @@ message GroupDismissedTips{
   int64 operationTime = 3;
 }
 
+message GroupMemberMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo mutedUser = 4;
+  uint32 mutedSeconds = 5;
+}
+
+message GroupMemberCancelMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo mutedUser = 4;
+}
+
+message GroupMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+}
+
+message GroupCancelMutedTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+}
+
 
 //////////////////////friend/////////////////////
 //message FriendInfo{
@@ -333,7 +360,12 @@ message UserInfoUpdatedTips{
 //////////////////////conversation/////////////////////
 message ConversationUpdateTips{
  string UserID = 1;
+}
 
+message ConversationSetPrivateTips{
+ string recvID = 1;
+ string sendID = 2;
+ bool isPrivate = 3;
 }
 
 
@@ -474,7 +506,7 @@ message DelMsgListReq{
 }
 
 message DelMsgListResp{
- int32 errCode = 1;
+  int32 errCode = 1;
   string errMsg = 2;
 }
 

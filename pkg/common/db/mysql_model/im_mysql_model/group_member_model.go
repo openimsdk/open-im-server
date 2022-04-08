@@ -30,9 +30,7 @@ func InsertIntoGroupMember(toInsertInfo db.GroupMember) error {
 	if toInsertInfo.RoleLevel == 0 {
 		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
 	}
-	if toInsertInfo.MuteEndTime.Unix() == 0 {
-		toInsertInfo.MuteEndTime = time.Unix(0, 0)
-	}
+	toInsertInfo.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
 	err = dbConn.Table("group_members").Create(toInsertInfo).Error
 	if err != nil {
 		return err
@@ -66,6 +64,24 @@ func GetGroupMemberListByGroupID(groupID string) ([]db.GroupMember, error) {
 		return nil, err
 	}
 	return groupMemberList, nil
+}
+
+func GetGroupMemberIDListByGroupID(groupID string) ([]string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	dbConn.LogMode(true)
+	var groupMembers []db.GroupMember
+	err = dbConn.Table("group_members").Select("user_id").Where("group_id=?", groupID).Find(&groupMembers).Error
+	if err != nil {
+		return nil, err
+	}
+	var groupMemberIDList []string
+	for _, v := range groupMembers {
+		groupMemberIDList = append(groupMemberIDList, v.UserID)
+	}
+	return groupMemberIDList, nil
 }
 
 func GetGroupMemberListByGroupIDAndRoleLevel(groupID string, roleLevel int32) ([]db.GroupMember, error) {
