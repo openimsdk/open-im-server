@@ -149,7 +149,6 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 		req.Header.Set(token, token)
 	}
 	req.Header.Set("content-type", "application/json")
-	req.Header.Set("content-type", "charset=utf-8")
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
@@ -159,7 +158,7 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 	if err != nil {
 		return err
 	}
-	log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), string(result))
+	log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), "resp, ", string(result))
 	if err := json.Unmarshal(result, returnStruct); err != nil {
 		return err
 	}
