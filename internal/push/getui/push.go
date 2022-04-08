@@ -140,6 +140,7 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 		return err
 	}
 	client := &http.Client{}
+	log.Debug(operationID, utils.GetSelfFuncName(), "json:", string(con))
 	req, err := http.NewRequest("POST", config.Config.Push.Getui.PushUrl+url, bytes.NewBuffer(con))
 	if err != nil {
 		return err
