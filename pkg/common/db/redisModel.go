@@ -14,6 +14,7 @@ const (
 	userMinSeq                    = "REDIS_USER_MIN_SEQ:"
 	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
 	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
+	GetuiToken                    = "GETUI"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -143,4 +144,14 @@ func (d *DataBases) GetMultiConversationMsgOpt(userID string, conversationIDs []
 	}
 	return m, nil
 
+}
+
+func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
+	_, err := d.Exec("SET", GetuiToken, token, "ex", expireTime)
+	return err
+}
+
+func (d *DataBases) GetGetuiToken() (string, error) {
+	result, err := redis.String(d.Exec("GET", GetuiToken))
+	return result, err
 }

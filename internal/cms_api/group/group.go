@@ -43,6 +43,7 @@ func GetGroupById(c *gin.Context) {
 	resp.ProfilePhoto = respPb.CMSGroup.GroupInfo.FaceURL
 	resp.GroupMasterName = respPb.CMSGroup.GroupMasterName
 	resp.GroupMasterId = respPb.CMSGroup.GroupMasterId
+	resp.IsBanChat = constant.GroupIsBanChat(respPb.CMSGroup.GroupInfo.Status)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -74,7 +75,7 @@ func GetGroups(c *gin.Context) {
 			GroupMasterName:  v.GroupMasterName,
 			GroupMasterId:    v.GroupMasterId,
 			CreateTime:       (utils.UnixSecondToTime(int64(v.GroupInfo.CreateTime))).String(),
-			IsBanChat:        false,
+			IsBanChat:        constant.GroupIsBanChat(v.GroupInfo.Status),
 			IsBanPrivateChat: false,
 			ProfilePhoto:     v.GroupInfo.FaceURL,
 		})
@@ -114,7 +115,7 @@ func GetGroupByName(c *gin.Context) {
 			GroupMasterName:  v.GroupMasterName,
 			GroupMasterId:    v.GroupMasterId,
 			CreateTime:       (utils.UnixSecondToTime(int64(v.GroupInfo.CreateTime))).String(),
-			IsBanChat:        false,
+			IsBanChat:        constant.GroupIsBanChat(v.GroupInfo.Status),
 			IsBanPrivateChat: false,
 			ProfilePhoto:     v.GroupInfo.FaceURL,
 		})

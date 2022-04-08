@@ -8,7 +8,7 @@ type GroupResponse struct {
 	CreateTime       string `json:"create_time"`
 	IsBanChat        bool   `json:"is_ban_chat"`
 	IsBanPrivateChat bool   `json:"is_ban_private_chat"`
-	ProfilePhoto string `json:"profile_photo"`
+	ProfilePhoto     string `json:"profile_photo"`
 }
 
 type GetGroupByIdRequest struct {
@@ -63,7 +63,6 @@ type SetGroupMemberRequest struct {
 }
 
 type SetGroupMemberRespones struct {
-
 }
 
 type BanGroupChatRequest struct {
@@ -88,7 +87,7 @@ type DeleteGroupResponse struct {
 }
 
 type GetGroupMembersRequest struct {
-	GroupId string `form:"group_id" binding:"required"`
+	GroupId  string `form:"group_id" binding:"required"`
 	UserName string `form:"user_name"`
 	RequestPagination
 }
@@ -96,24 +95,24 @@ type GetGroupMembersRequest struct {
 type GroupMemberResponse struct {
 	MemberPosition int    `json:"member_position"`
 	MemberNickName string `json:"member_nick_name"`
-	MemberId       string    `json:"member_id"`
+	MemberId       string `json:"member_id"`
 	JoinTime       string `json:"join_time"`
 }
 
 type GetGroupMembersResponse struct {
-	GroupMembers []GroupMemberResponse    `json:"group_members"`
+	GroupMembers []GroupMemberResponse `json:"group_members"`
 	ResponsePagination
 	MemberNums int `json:"member_nums"`
 }
 
 type GroupMemberRequest struct {
-	GroupId string `json:"group_id" binding:"required"`
+	GroupId string   `json:"group_id" binding:"required"`
 	Members []string `json:"members" binding:"required"`
 }
 
 type GroupMemberOperateResponse struct {
 	Success []string `json:"success"`
-	Failed []string `json:"failed"`
+	Failed  []string `json:"failed"`
 }
 
 type AddGroupMembersRequest struct {
@@ -128,19 +127,18 @@ type RemoveGroupMembersRequest struct {
 	GroupMemberRequest
 }
 
-type RemoveGroupMembersResponse struct{
+type RemoveGroupMembersResponse struct {
 	GroupMemberOperateResponse
 }
 
 type AlterGroupInfoRequest struct {
-	GroupID       string `json:"group_id"`
-	GroupName     string `json:"group_name"`
-	Notification  string `json:"notification"`
-		Introduction  string `json:"introduction"`
-	ProfilePhoto  string `json:"profile_photo"`
-	GroupType     int `json:"group_type"`
+	GroupID      string `json:"group_id"`
+	GroupName    string `json:"group_name"`
+	Notification string `json:"notification"`
+	Introduction string `json:"introduction"`
+	ProfilePhoto string `json:"profile_photo"`
+	GroupType    int    `json:"group_type"`
 }
 
 type AlterGroupInfoResponse struct {
-
 }

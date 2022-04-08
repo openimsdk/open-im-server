@@ -165,6 +165,7 @@ longconnsvr:
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10
 
+## 推送只能开启一个
 push:
   tpns: #腾讯推送，暂未测试 暂不要使用
     ios:
@@ -173,11 +174,20 @@ push:
     android:
       accessID: 111
       secretKey: 111
+    enable: false
   jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
     appKey: cf47465a368f24c659608e7e
     masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
+    enable: false
+  getui:  #个推推送，暂未测试 暂不要使用
+    pushUrl: "https://restapi.getui.com/v2/$appId"
+    sign: ""
+    appKey: ""
+    enable: true
+    intent: ""
+
 manager:
   #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
   appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]

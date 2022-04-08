@@ -13,7 +13,7 @@ import (
 )
 
 func TagSendMessage(operationID, sendID, recvID, content string, senderPlatformID int32) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), "args: ", sendID, recvID, content)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "args: ", sendID, recvID, content, senderPlatformID)
 	var req pbChat.SendMsgReq
 	var msgData pbCommon.MsgData
 	msgData.SendID = sendID

@@ -7,3 +7,7 @@ import (
 func callbackBeforeCreateGroup(req *pbGroup.CreateGroupReq) (bool, error) {
 	return true, nil
 }
+
+func callbackAfterCreateGroup(req *pbGroup.CreateGroupReq) {
+
+}

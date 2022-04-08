@@ -152,12 +152,21 @@ type config struct {
 				AccessID  string `yaml:"accessID"`
 				SecretKey string `yaml:"secretKey"`
 			}
+			Enable bool `yaml:"enable"`
 		}
 		Jpns struct {
 			AppKey       string `yaml:"appKey"`
 			MasterSecret string `yaml:"masterSecret"`
 			PushUrl      string `yaml:"pushUrl"`
 			PushIntent   string `yaml:"pushIntent"`
+			Enable       bool   `yaml:"enable"`
+		}
+		Getui struct {
+			PushUrl string `yaml:"pushUrl"`
+			Sign    string `yaml:"sign"`
+			AppKey  string `yaml:"appkey"`
+			Enable  bool   `yaml:"enable"`
+			Intent  string `yaml:"intent"`
 		}
 	}
 	Manager struct {

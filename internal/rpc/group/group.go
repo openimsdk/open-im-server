@@ -668,6 +668,7 @@ func (s *groupServer) GetGroupById(_ context.Context, req *pbGroup.GetGroupByIdR
 		Status:        group.Status,
 		CreatorUserID: group.CreatorUserID,
 		GroupType:     group.GroupType,
+		CreateTime:    uint32(group.CreateTime.Unix()),
 	}
 	groupMember, err := imdb.GetGroupMaster(group.GroupID)
 	if err != nil {
@@ -677,6 +678,7 @@ func (s *groupServer) GetGroupById(_ context.Context, req *pbGroup.GetGroupByIdR
 	resp.CMSGroup.GroupMasterName = groupMember.Nickname
 	resp.CMSGroup.GroupMasterId = groupMember.UserID
 	resp.CMSGroup.GroupInfo.CreatorUserID = group.CreatorUserID
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
@@ -704,6 +706,7 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 		groupMember, err := imdb.GetGroupMaster(v.GroupID)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMaster error", err.Error())
+			continue
 		}
 		resp.CMSGroups = append(resp.CMSGroups, &pbGroup.CMSGroup{
 			GroupInfo: &open_im_sdk.GroupInfo{
@@ -713,11 +716,13 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 				OwnerUserID:   v.CreatorUserID,
 				Status:        v.Status,
 				CreatorUserID: v.CreatorUserID,
+				CreateTime:    uint32(v.CreateTime.Unix()),
 			},
 			GroupMasterName: groupMember.Nickname,
 			GroupMasterId:   groupMember.UserID,
 		})
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
