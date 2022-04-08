@@ -84,7 +84,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 			return "", utils.Wrap(err, "Auth failed")
 		}
 		log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), token, expireTime, err)
-		err = db.DB.SetGetuiToken(token, expireTime-time.Now().Unix()-20)
+		err = db.DB.SetGetuiToken(token, 60*60*23)
 		if err != nil {
 			return "", utils.Wrap(err, "Auth failed")
 		}
@@ -114,7 +114,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 }
 
 func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireTime int64, err error) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), timeStamp)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), config.Config.Push.Getui.AppKey, timeStamp, config.Config.Push.Getui.MasterSecret)
 	h := sha256.New()
 	h.Write([]byte(config.Config.Push.Getui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.Getui.MasterSecret))
 	sum := h.Sum(nil)
