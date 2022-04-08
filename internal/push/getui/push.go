@@ -70,7 +70,7 @@ func newGetuiClient() *Getui {
 func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operationID string) (resp string, err error) {
 	token, err := db.DB.GetGetuiToken()
 	if err != nil {
-		log.NewError(operationID, utils.OperationIDGenerator(), "GetGetuiToken", err.Error())
+		log.NewError(operationID, utils.OperationIDGenerator(), "GetGetuiToken failed", err.Error())
 	}
 	if token == "" || err != nil {
 		token, expireTime, err := g.Auth(operationID, time.Now().Unix())
@@ -101,7 +101,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 	pushResp := PushResp{}
 	err = g.request(pushReq, token, &pushResp, operationID)
 	if err != nil {
-		return "", utils.Wrap(err, "")
+		return "", utils.Wrap(err, "push failed")
 	}
 	respBytes, err := json.Marshal(pushResp)
 	return string(respBytes), err
@@ -121,6 +121,10 @@ func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireT
 	}
 	respAuth := AuthResp{}
 	err = g.request(reqAuth, "", &respAuth, operationID)
+	if err != nil {
+		return "", 0, err
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "result: ", respAuth)
 	expire, err := strconv.Atoi(respAuth.ExpireTime)
 	return respAuth.Token, int64(expire), err
 }
@@ -135,7 +139,9 @@ func (g *Getui) request(content interface{}, token string, returnStruct interfac
 	if err != nil {
 		return err
 	}
-	req.Header.Set(token, token)
+	if token != "" {
+		req.Header.Set(token, token)
+	}
 	req.Header.Set("content-type", "application/json")
 	req.Header.Set("content-type", "charset=utf-8")
 	resp, err := client.Do(req)
