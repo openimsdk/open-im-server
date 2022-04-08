@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/utils"
 	"bytes"
 	"crypto/sha256"
-	"crypto/sha512"
+	//"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
