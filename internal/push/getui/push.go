@@ -126,6 +126,7 @@ func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireT
 		Appkey:    config.Config.Push.Getui.AppKey,
 	}
 	respAuth := AuthResp{}
+
 	err = g.request(AuthURL, reqAuth, "", &respAuth, operationID)
 	if err != nil {
 		return "", 0, err
@@ -160,7 +161,9 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 		return err
 	}
 	log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), "resp, ", string(result))
-	if err := json.Unmarshal(result, returnStruct); err != nil {
+	commonResp := GetuiCommonResp{}
+	commonResp.Data = returnStruct
+	if err := json.Unmarshal(result, commonResp); err != nil {
 		return err
 	}
 	return nil
