@@ -134,13 +134,13 @@ func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireT
 	return respAuth.Token, int64(expire), err
 }
 
-func (g *Getui) request(url, content interface{}, token string, returnStruct interface{}, operationID string) error {
+func (g *Getui) request(url string, content interface{}, token string, returnStruct interface{}, operationID string) error {
 	con, err := json.Marshal(content)
 	if err != nil {
 		return err
 	}
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", config.Config.Push.Getui.PushUrl, bytes.NewBuffer(con))
+	req, err := http.NewRequest("POST", config.Config.Push.Getui.PushUrl+url, bytes.NewBuffer(con))
 	if err != nil {
 		return err
 	}
