@@ -33,7 +33,7 @@ func ResetPassword(account, password string) error {
 		Password: password,
 	}
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	dbConn.LogMode(true)
+	dbConn.LogMode(false)
 	if err != nil {
 		return err
 	}

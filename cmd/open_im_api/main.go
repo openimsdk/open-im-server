@@ -14,6 +14,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -138,5 +139,9 @@ func main() {
 	go apiThird.MinioInit()
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
-	r.Run(":" + strconv.Itoa(*ginPort))
+	fmt.Println("start api server, port: ", *ginPort)
+	err := r.Run(":" + strconv.Itoa(*ginPort))
+	if err != nil {
+		log.Error("", "run failed ", *ginPort, err.Error())
+	}
 }

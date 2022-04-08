@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"flag"
+	"fmt"
 	"sync"
 )
 
@@ -15,6 +16,7 @@ func main() {
 	flag.Parse()
 	var wg sync.WaitGroup
 	wg.Add(1)
+	fmt.Println("start rpc/msg_gateway server, port: ", *rpcPort, *wsPort)
 	gate.Init(*rpcPort, *wsPort)
 	gate.Run()
 	wg.Wait()
