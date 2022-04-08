@@ -163,7 +163,7 @@ type config struct {
 		}
 		Getui struct {
 			PushUrl      string `yaml:"pushUrl"`
-			AppKey       string `yaml:"appkey"`
+			AppKey       string `yaml:"appKey"`
 			Enable       bool   `yaml:"enable"`
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
