@@ -217,7 +217,7 @@ const (
 const FriendAcceptTip = "You have successfully become friends, so start chatting"
 
 func GroupIsBanChat(status int32) bool {
-	if status != GroupBanChat {
+	if status != GroupStatusMuted {
 		return false
 	}
 	return true

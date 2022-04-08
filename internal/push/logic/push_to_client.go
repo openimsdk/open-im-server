@@ -7,7 +7,9 @@
 package logic
 
 import (
-	push "Open_IM/internal/push/jpush"
+	pusher "Open_IM/internal/push"
+	"Open_IM/internal/push/getui"
+	jpush "Open_IM/internal/push/jpush"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
@@ -99,12 +101,22 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 							content = constant.ContentType2PushContent[constant.Common]
 						}
 					}
-
-					pushResult, err := push.JGAccountListPush(UIDList, content, jsonCustomContent, constant.PlatformIDToName(t))
+					var offlinePusher pusher.OfflinePusher
+					if config.Config.Push.Getui.Enable {
+						log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), config.Config.Push.Getui)
+						offlinePusher = getui.GetuiClient
+					}
+					if config.Config.Push.Jpns.Enable {
+						offlinePusher = jpush.JPushClient
+					}
+					if offlinePusher == nil {
+						offlinePusher = jpush.JPushClient
+					}
+					pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, constant.PlatformIDToName(t), pushMsg.OperationID)
 					if err != nil {
 						log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error(), constant.PlatformIDToName(t))
 					} else {
-						log.NewDebug(pushMsg.OperationID, "offline push return result is ", string(pushResult), pushMsg.MsgData, constant.PlatformIDToName(t))
+						log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData, constant.PlatformIDToName(t))
 					}
 
 				}
