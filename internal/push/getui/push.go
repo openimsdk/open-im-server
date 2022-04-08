@@ -6,6 +6,8 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"bytes"
+	"crypto/sha512"
+	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -71,7 +73,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 		log.NewError(operationID, utils.OperationIDGenerator(), "GetGetuiToken", err.Error())
 	}
 	if token == "" || err != nil {
-		token, expireTime, err := g.Auth(config.Config.Push.Getui.AppKey, config.Config.Push.Getui.Sign, operationID, time.Now().Unix())
+		token, expireTime, err := g.Auth(+operationID, time.Now().Unix())
 		if err != nil {
 			return "", utils.Wrap(err, "Auth failed")
 		}
@@ -105,12 +107,17 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 	return string(respBytes), err
 }
 
-func (g *Getui) Auth(appKey, sign, operationID string, timeStamp int64) (token string, expireTime int64, err error) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), appKey, sign, timeStamp)
+func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireTime int64, err error) {
+	log.NewInfo(operationID, utils.GetSelfFuncName(), timeStamp)
+	h := sha512.New()
+	h.Write([]byte(config.Config.Push.Getui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.Getui.MasterSecret))
+	sum := h.Sum(nil)
+	sign := hex.EncodeToString(sum)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "sha256 result", sign)
 	reqAuth := AuthReq{
 		Sign:      sign,
 		Timestamp: strconv.Itoa(int(timeStamp)),
-		Appkey:    appKey,
+		Appkey:    config.Config.Push.Getui.AppKey,
 	}
 	respAuth := AuthResp{}
 	err = g.request(reqAuth, "", &respAuth, operationID)

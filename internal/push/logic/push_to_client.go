@@ -103,6 +103,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 					}
 					var offlinePusher pusher.OfflinePusher
 					if config.Config.Push.Getui.Enable {
+						log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), config.Config.Push.Getui)
 						offlinePusher = getui.GetuiClient
 					}
 					if config.Config.Push.Jpns.Enable {

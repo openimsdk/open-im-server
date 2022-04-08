@@ -162,11 +162,11 @@ type config struct {
 			Enable       bool   `yaml:"enable"`
 		}
 		Getui struct {
-			PushUrl string `yaml:"pushUrl"`
-			Sign    string `yaml:"sign"`
-			AppKey  string `yaml:"appkey"`
-			Enable  bool   `yaml:"enable"`
-			Intent  string `yaml:"intent"`
+			PushUrl      string `yaml:"pushUrl"`
+			AppKey       string `yaml:"appkey"`
+			Enable       bool   `yaml:"enable"`
+			Intent       string `yaml:"intent"`
+			MasterSecret string `yaml:"masterSecret"`
 		}
 	}
 	Manager struct {

@@ -183,10 +183,12 @@ push:
     enable: false
   getui:  #个推推送，暂未测试 暂不要使用
     pushUrl: "https://restapi.getui.com/v2/$appId"
-    sign: ""
+    masterSecret: ""
     appKey: ""
-    enable: true
     intent: ""
+    enable: true
+
+
 
 manager:
   #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
