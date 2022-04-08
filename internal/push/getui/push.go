@@ -78,7 +78,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 		log.NewError(operationID, utils.OperationIDGenerator(), "GetGetuiToken failed", err.Error())
 	}
 	if token == "" || err != nil {
-		token, expireTime, err := g.Auth(operationID, time.Now().Unix())
+		token, expireTime, err := g.Auth(operationID, time.Now().UnixNano()/1e6)
 		if err != nil {
 			return "", utils.Wrap(err, "Auth failed")
 		}
