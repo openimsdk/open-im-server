@@ -163,7 +163,7 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 	log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), "resp, ", string(result))
 	commonResp := GetuiCommonResp{}
 	commonResp.Data = returnStruct
-	if err := json.Unmarshal(result, commonResp); err != nil {
+	if err := json.Unmarshal(result, &commonResp); err != nil {
 		return err
 	}
 	return nil
