@@ -19,6 +19,11 @@ var (
 	GetuiClient *Getui
 )
 
+const (
+	PushURL = "/push/single/cid"
+	AuthURL = "/auth"
+)
+
 func init() {
 	GetuiClient = newGetuiClient()
 }
@@ -99,7 +104,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 		pushReq.PushMssage.Notification.ClickType = "intent"
 	}
 	pushResp := PushResp{}
-	err = g.request(pushReq, token, &pushResp, operationID)
+	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	if err != nil {
 		return "", utils.Wrap(err, "push failed")
 	}
@@ -120,7 +125,7 @@ func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireT
 		Appkey:    config.Config.Push.Getui.AppKey,
 	}
 	respAuth := AuthResp{}
-	err = g.request(reqAuth, "", &respAuth, operationID)
+	err = g.request(AuthURL, reqAuth, "", &respAuth, operationID)
 	if err != nil {
 		return "", 0, err
 	}
@@ -129,7 +134,7 @@ func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireT
 	return respAuth.Token, int64(expire), err
 }
 
-func (g *Getui) request(content interface{}, token string, returnStruct interface{}, operationID string) error {
+func (g *Getui) request(url, content interface{}, token string, returnStruct interface{}, operationID string) error {
 	con, err := json.Marshal(content)
 	if err != nil {
 		return err
