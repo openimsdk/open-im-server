@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"bytes"
+	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
@@ -114,7 +115,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 
 func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireTime int64, err error) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), timeStamp)
-	h := sha512.New()
+	h := sha256.New()
 	h.Write([]byte(config.Config.Push.Getui.AppKey + strconv.Itoa(int(timeStamp)) + config.Config.Push.Getui.MasterSecret))
 	sum := h.Sum(nil)
 	sign := hex.EncodeToString(sum)
