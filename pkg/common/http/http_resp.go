@@ -38,6 +38,6 @@ func RespHttp200(ctx *gin.Context, err error, data interface{}) {
 }
 
 // warp error
-func WrapError(err constant.ErrInfo, msg ...string) error {
-	return status.Error(codes.Code(err.ErrCode), err.ErrMsg+msg[0])
+func WrapError(err constant.ErrInfo) error {
+	return status.Error(codes.Code(err.ErrCode), err.ErrMsg)
 }

@@ -656,7 +656,7 @@ func (s *groupServer) GetGroupById(_ context.Context, req *pbGroup.GetGroupByIdR
 	}}
 	group, err := imdb.GetGroupById(req.GroupId)
 	if err != nil {
-		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetGroupById error", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupById error", err.Error())
 		return resp, http.WrapError(constant.ErrDB)
 	}
 	resp.CMSGroup.GroupInfo = &open_im_sdk.GroupInfo{

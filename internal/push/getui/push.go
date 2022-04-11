@@ -53,8 +53,9 @@ type PushReq struct {
 	Audience  struct {
 		Cid []string `json:"cid"`
 	} `json:"audience"`
-	PushMssage struct {
-		Notification Notification `json:"notification"`
+	PushMessage struct {
+		Notification Notification `json:"notification,omitempty"`
+		Transmission string       `json:"transmission,omitempty"`
 	} `json:"push_message"`
 }
 
@@ -62,11 +63,12 @@ type Notification struct {
 	Title     string `json:"title"`
 	Body      string `json:"body"`
 	ClickType string `json:"click_type"`
-	Intent    string `json:"intent"`
-	Url       string `json:"url"`
+	//Intent    string `json:"intent,omitempty"`
+	//Url       string `json:"url,omitempty"`
 }
 
 type PushResp struct {
+	GetuiCommonResp
 }
 
 func newGetuiClient() *Getui {
@@ -75,18 +77,15 @@ func newGetuiClient() *Getui {
 
 func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operationID string) (resp string, err error) {
 	token, err := db.DB.GetGetuiToken()
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
 	if err != nil {
 		log.NewError(operationID, utils.OperationIDGenerator(), "GetGetuiToken failed", err.Error())
 	}
 	if token == "" || err != nil {
-		token, expireTime, err := g.Auth(operationID, time.Now().UnixNano()/1e6)
+		token, err = g.getTokenAndSave2Redis(operationID)
 		if err != nil {
-			return "", utils.Wrap(err, "Auth failed")
-		}
-		log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), token, expireTime, err)
-		err = db.DB.SetGetuiToken(token, 60*60*23)
-		if err != nil {
-			return "", utils.Wrap(err, "Auth failed")
+			log.NewError(operationID, utils.GetSelfFuncName(), "getTokenAndSave2Redis failed", err.Error())
+			return "", utils.Wrap(err, "")
 		}
 	}
 	pushReq := PushReq{
@@ -95,22 +94,22 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 			Cid []string `json:"cid"`
 		}{Cid: []string{userIDList[0]}},
 	}
-	pushReq.PushMssage.Notification = Notification{
+	pushReq.PushMessage.Notification = Notification{
 		Title:     alert,
 		Body:      alert,
-		ClickType: "none",
-	}
-	if config.Config.Push.Getui.Intent != "" {
-		pushReq.PushMssage.Notification.Intent = config.Config.Push.Getui.Intent
-		pushReq.PushMssage.Notification.ClickType = "intent"
+		ClickType: "startapp",
 	}
 	pushResp := PushResp{}
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	if err != nil {
 		return "", utils.Wrap(err, "push failed")
 	}
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "resp: ", pushResp)
+	if pushResp.Code == 10001 {
+		_, _ = g.getTokenAndSave2Redis(operationID)
+	}
 	respBytes, err := json.Marshal(pushResp)
-	return string(respBytes), err
+	return string(respBytes), utils.Wrap(err, "")
 }
 
 func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireTime int64, err error) {
@@ -147,7 +146,7 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 		return err
 	}
 	if token != "" {
-		req.Header.Set(token, token)
+		req.Header.Set("token", token)
 	}
 	req.Header.Set("content-type", "application/json")
 	resp, err := client.Do(req)
@@ -160,8 +159,23 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 		return err
 	}
 	log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), "resp, ", string(result))
-	if err := json.Unmarshal(result, returnStruct); err != nil {
+	commonResp := GetuiCommonResp{}
+	commonResp.Data = returnStruct
+	if err := json.Unmarshal(result, &commonResp); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (g *Getui) getTokenAndSave2Redis(operationID string) (token string, err error) {
+	token, expireTime, err := g.Auth(operationID, time.Now().UnixNano()/1e6)
+	if err != nil {
+		return "", utils.Wrap(err, "Auth failed")
+	}
+	log.NewDebug(operationID, "getui", utils.GetSelfFuncName(), token, expireTime, err)
+	err = db.DB.SetGetuiToken(token, 60*60*23)
+	if err != nil {
+		return "", utils.Wrap(err, "Auth failed")
+	}
+	return token, nil
 }
