@@ -53,8 +53,9 @@ type PushReq struct {
 	Audience  struct {
 		Cid []string `json:"cid"`
 	} `json:"audience"`
-	PushMssage struct {
-		Notification Notification `json:"notification"`
+	PushMessage struct {
+		Notification Notification `json:"notification,omitempty"`
+		Transmission string       `json:"transmission,omitempty"`
 	} `json:"push_message"`
 }
 
@@ -62,8 +63,8 @@ type Notification struct {
 	Title     string `json:"title"`
 	Body      string `json:"body"`
 	ClickType string `json:"click_type"`
-	Intent    string `json:"intent"`
-	Url       string `json:"url"`
+	//Intent    string `json:"intent,omitempty"`
+	//Url       string `json:"url,omitempty"`
 }
 
 type PushResp struct {
@@ -96,14 +97,10 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 			Cid []string `json:"cid"`
 		}{Cid: []string{userIDList[0]}},
 	}
-	pushReq.PushMssage.Notification = Notification{
+	pushReq.PushMessage.Notification = Notification{
 		Title:     alert,
 		Body:      alert,
-		ClickType: "none",
-	}
-	if config.Config.Push.Getui.Intent != "" {
-		pushReq.PushMssage.Notification.Intent = config.Config.Push.Getui.Intent
-		pushReq.PushMssage.Notification.ClickType = "intent"
+		ClickType: "startapp",
 	}
 	pushResp := PushResp{}
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
