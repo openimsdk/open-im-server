@@ -51,7 +51,7 @@ type AuthResp struct {
 type PushReq struct {
 	RequestID string `json:"request_id"`
 	Audience  struct {
-		Cid []string `json:"cid"`
+		Alias []string `json:"alias"`
 	} `json:"audience"`
 	PushMessage struct {
 		Notification Notification `json:"notification,omitempty"`
@@ -91,8 +91,8 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 	pushReq := PushReq{
 		RequestID: utils.OperationIDGenerator(),
 		Audience: struct {
-			Cid []string `json:"cid"`
-		}{Cid: []string{userIDList[0]}},
+			Alias []string `json:"alias"`
+		}{Alias: []string{userIDList[0]}},
 	}
 	pushReq.PushMessage.Notification = Notification{
 		Title:     alert,
