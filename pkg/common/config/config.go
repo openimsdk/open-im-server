@@ -56,11 +56,13 @@ type config struct {
 			OssRoleArn         string `yaml:"OssRoleArn"`
 		}
 		Minio struct {
-			Bucket          string `yaml:"bucket"`
-			Location        string `yaml:"location"`
-			Endpoint        string `yaml:"endpoint"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			SecretAccessKey string `yaml:"secretAccessKey"`
+			Bucket              string `yaml:"bucket"`
+			Location            string `yaml:"location"`
+			Endpoint            string `yaml:"endpoint"`
+			AccessKeyID         string `yaml:"accessKeyID"`
+			SecretAccessKey     string `yaml:"secretAccessKey"`
+			EndpointInner       string `yaml:"endpointInner"`
+			EndpointInnerEnable bool   `yaml:"endpointInnerEnable"`
 		} `yaml:"minio"`
 	}
 

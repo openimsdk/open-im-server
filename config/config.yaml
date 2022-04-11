@@ -93,6 +93,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     bucket: openim
     location: us-east-1
     endpoint: http://127.0.0.1:9000
+    endpointInner: http://127.0.0.1:9000 #minio内网地址
+    endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID: user12345
     secretAccessKey: key12345
   ali: # ali oss

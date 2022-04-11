@@ -17,7 +17,14 @@ var (
 func MinioInit() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio config: ", config.Config.Credential.Minio)
-	minioUrl, err := url2.Parse(config.Config.Credential.Minio.Endpoint)
+	var initUrl string
+	if config.Config.Credential.Minio.EndpointInnerEnable {
+		initUrl = config.Config.Credential.Minio.EndpointInner
+	} else {
+		initUrl = config.Config.Credential.Minio.Endpoint
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "use initUrl: ", initUrl)
+	minioUrl, err := url2.Parse(initUrl)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
 		return
