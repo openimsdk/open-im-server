@@ -21,7 +21,7 @@ var (
 )
 
 const (
-	PushURL = "/push/single/cid"
+	PushURL = "/push/single/alias"
 	AuthURL = "/auth"
 )
 
