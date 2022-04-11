@@ -82,169 +82,43 @@ func initMysqlDB() {
 		fmt.Println("CreateTable GroupMember")
 		db.CreateTable(&GroupMember{})
 	}
-
 	if !db.HasTable(&GroupRequest{}) {
 		fmt.Println("CreateTable GroupRequest")
 		db.CreateTable(&GroupRequest{})
 	}
-
 	if !db.HasTable(&User{}) {
 		fmt.Println("CreateTable User")
 		db.CreateTable(&User{})
 	}
-
 	if !db.HasTable(&Black{}) {
 		fmt.Println("CreateTable Black")
 		db.CreateTable(&Black{})
 	}
 	if !db.HasTable(&ChatLog{}) {
-		fmt.Println("CreateTable Black")
+		fmt.Println("CreateTable ChatLog")
 		db.CreateTable(&ChatLog{})
 	}
 	if !db.HasTable(&Register{}) {
-		fmt.Println("CreateTable Black")
+		fmt.Println("CreateTable Register")
 		db.CreateTable(&Register{})
 	}
 	if !db.HasTable(&Conversation{}) {
-		fmt.Println("CreateTable Black")
+		fmt.Println("CreateTable Conversation")
 		db.CreateTable(&Conversation{})
 	}
-
+	if db.HasTable(&Department{}) {
+		fmt.Println("CreateTable Department")
+		db.CreateTable(&Department{})
+	}
+	if db.HasTable(&DepartmentUser{}) {
+		fmt.Println("CreateTable DepartmentUser")
+		db.CreateTable(&DepartmentUser{})
+	}
+	if db.HasTable(&DepartmentMember{}) {
+		fmt.Println("CreateTable DepartmentMember")
+		db.CreateTable(&DepartmentMember{})
+	}
 	return
-
-	sqlTable := "CREATE TABLE IF NOT EXISTS `user` (" +
-		" `uid` varchar(64) NOT NULL," +
-		" `name` varchar(64) DEFAULT NULL," +
-		" `icon` varchar(1024) DEFAULT NULL," +
-		" `gender` tinyint(4) unsigned zerofill DEFAULT NULL," +
-		" `mobile` varchar(32) DEFAULT NULL," +
-		" `birth` varchar(16) DEFAULT NULL," +
-		" `email` varchar(64) DEFAULT NULL," +
-		" `ex` varchar(1024) DEFAULT NULL," +
-		" `create_time` datetime DEFAULT NULL," +
-		" PRIMARY KEY (`uid`)," +
-		" UNIQUE KEY `uk_uid` (`uid`)" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS `friend` (" +
-		" `owner_id` varchar(64) NOT NULL," +
-		" `friend_id` varchar(64) NOT NULL," +
-		" `comment` varchar(255) DEFAULT NULL," +
-		" `friend_flag` int(11) NOT NULL," +
-		" `create_time` datetime NOT NULL," +
-		" PRIMARY KEY (`owner_id`,`friend_id`) USING BTREE" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS  `friend_request` (" +
-		" `req_id` varchar(64) NOT NULL," +
-		" `user_id` varchar(64) NOT NULL," +
-		" `flag` int(11) NOT NULL DEFAULT '0'," +
-		" `req_message` varchar(255) DEFAULT NULL," +
-		" `create_time` datetime NOT NULL," +
-		" PRIMARY KEY (`user_id`,`req_id`) USING BTREE" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS `user_black_list` (" +
-		" `owner_id` varchar(64) NOT NULL," +
-		" `block_id` varchar(64) NOT NULL," +
-		" `create_time` datetime NOT NULL," +
-		" PRIMARY KEY (`owner_id`,`block_id`) USING BTREE" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS `group` (" +
-		" `group_id` varchar(64) NOT NULL," +
-		" `name` varchar(255) DEFAULT NULL," +
-		" `introduction` varchar(255) DEFAULT NULL," +
-		" `notification` varchar(255) DEFAULT NULL," +
-		" `face_url` varchar(255) DEFAULT NULL," +
-		" `create_time` datetime DEFAULT NULL," +
-		" `ex` varchar(255) DEFAULT NULL," +
-		" PRIMARY KEY (`group_id`)" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS `group_member` (" +
-		" `group_id` varchar(64) NOT NULL," +
-		" `uid` varchar(64) NOT NULL," +
-		" `nickname` varchar(255) DEFAULT NULL," +
-		" `user_group_face_url` varchar(255) DEFAULT NULL," +
-		" `administrator_level` int(11) NOT NULL," +
-		" `join_time` datetime NOT NULL," +
-		"  PRIMARY KEY (`group_id`,`uid`) USING BTREE" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS `group_request` (" +
-		" `id` int(11) NOT NULL AUTO_INCREMENT," +
-		" `group_id` varchar(64) NOT NULL," +
-		" `from_user_id` varchar(255) NOT NULL," +
-		" `to_user_id` varchar(255) NOT NULL," +
-		" `flag` int(10) NOT NULL DEFAULT '0'," +
-		" `req_msg` varchar(255) DEFAULT ''," +
-		" `handled_msg` varchar(255) DEFAULT ''," +
-		" `create_time` datetime NOT NULL," +
-		" `from_user_nickname` varchar(255) DEFAULT ''," +
-		" `to_user_nickname` varchar(255) DEFAULT NULL," +
-		" `from_user_face_url` varchar(255) DEFAULT ''," +
-		" `to_user_face_url` varchar(255) DEFAULT ''," +
-		" `handled_user` varchar(255) DEFAULT ''," +
-		" PRIMARY KEY (`id`)" +
-		" ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS  `chat_log` (" +
-		" `msg_id` varchar(128) NOT NULL," +
-		" `send_id` varchar(255) NOT NULL," +
-		" `session_type` int(11) NOT NULL," +
-		" `recv_id` varchar(255) NOT NULL," +
-		" `content_type` int(11) NOT NULL," +
-		" `msg_from` int(11) NOT NULL," +
-		" `content` varchar(1000) NOT NULL," +
-		" `remark` varchar(100) DEFAULT NULL," +
-		" `sender_platform_id` int(11) NOT NULL," +
-		" `send_time` datetime NOT NULL," +
-		" PRIMARY KEY (`msg_id`) USING BTREE" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
-	sqlTable = "CREATE TABLE IF NOT EXISTS `register` (" +
-		" `account` varchar(255) NOT NULL," +
-		" `password` varchar(255) NOT NULL," +
-		" PRIMARY KEY (`account`)  USING BTREE" +
-		" ) ENGINE=InnoDB DEFAULT CHARSET=latin1 ROW_FORMAT=DYNAMIC;"
-	err = db.Exec(sqlTable).Error
-	if err != nil {
-		panic(err.Error())
-	}
-
 }
 
 func (m *mysqlDB) DefaultGormDB() (*gorm.DB, error) {

@@ -222,3 +222,50 @@ type Conversation struct {
 func (Conversation) TableName() string {
 	return "conversations"
 }
+
+type Department struct {
+	DepartmentID   string    `gorm:"column:department_id;primary_key;size:64" json:"departmentID"`
+	FaceURL        string    `gorm:"column:face_url;size:255" json:"faceURL"`
+	Name           string    `gorm:"column:name;size:256" json:"name" binding:"required"`
+	ParentID       string    `gorm:"column:parent_id;size:64" json:"parentID" binding:"required"`
+	Order          int32     `gorm:"column:order" json:"order" `
+	DepartmentType int32     `gorm:"column:department_type" json:"departmentType"`
+	CreateTime     time.Time `gorm:"column:create_time" json:"createTime"`
+	Ex             string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+}
+
+func (Department) TableName() string {
+	return "departments"
+}
+
+type DepartmentUser struct {
+	UserID      string    `gorm:"column:user_id;primary_key;size:64"`
+	Nickname    string    `gorm:"column:nickname;size:256"`
+	EnglishName string    `gorm:"column:english_name;size:256"`
+	FaceURL     string    `gorm:"column:face_url;size:256"`
+	Gender      int32     `gorm:"column:gender"`
+	mobile      string    `gorm:"column:mobile;size:32"`
+	telephone   string    `gorm:"column:telephone;size:32"`
+	Birth       time.Time `gorm:"column:birth"`
+	Email       string    `gorm:"column:email;size:64"`
+	CreateTime  time.Time `gorm:"column:create_time"`
+	Ex          string    `gorm:"column:ex;size:1024"`
+}
+
+func (DepartmentUser) TableName() string {
+	return "Department_users"
+}
+
+type DepartmentMember struct {
+	userID       string `gorm:"column:user_id;primary_key;size:64"`
+	DepartmentID string `gorm:"column:department_id;primary_key;size:64"`
+	Order        int32  `gorm:"column:order" json:"order"`
+	Position     string `gorm:"column:position;size:256" json:"position"`
+	Leader       int32  `gorm:"column:leader" json:"leader"`
+	Status       int32  `gorm:"column:status" json:"status"`
+	Ex           string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+}
+
+func (DepartmentMember) TableName() string {
+	return "department_members"
+}
