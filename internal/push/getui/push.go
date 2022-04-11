@@ -75,6 +75,7 @@ func newGetuiClient() *Getui {
 
 func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operationID string) (resp string, err error) {
 	token, err := db.DB.GetGetuiToken()
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
 	if err != nil {
 		log.NewError(operationID, utils.OperationIDGenerator(), "GetGetuiToken failed", err.Error())
 	}
@@ -83,7 +84,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 		if err != nil {
 			return "", utils.Wrap(err, "Auth failed")
 		}
-		log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), token, expireTime, err)
+		log.NewDebug(operationID, "getui", utils.GetSelfFuncName(), token, expireTime, err)
 		err = db.DB.SetGetuiToken(token, 60*60*23)
 		if err != nil {
 			return "", utils.Wrap(err, "Auth failed")
@@ -148,7 +149,7 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 		return err
 	}
 	if token != "" {
-		req.Header.Set(token, token)
+		req.Header.Set("token", token)
 	}
 	req.Header.Set("content-type", "application/json")
 	resp, err := client.Do(req)
