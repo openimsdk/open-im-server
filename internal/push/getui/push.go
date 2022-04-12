@@ -7,6 +7,8 @@ import (
 	"Open_IM/pkg/utils"
 	"bytes"
 	"crypto/sha256"
+	"errors"
+
 	//"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
@@ -18,6 +20,8 @@ import (
 
 var (
 	GetuiClient *Getui
+
+	TokenExpireError = errors.New("token expire")
 )
 
 const (
@@ -68,7 +72,6 @@ type Notification struct {
 }
 
 type PushResp struct {
-	GetuiCommonResp
 }
 
 func newGetuiClient() *Getui {
@@ -101,12 +104,15 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 	}
 	pushResp := PushResp{}
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
+	switch err {
+	case TokenExpireError:
+		_, err = g.getTokenAndSave2Redis(operationID)
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "getTokenAndSave2Redis failed, ", err.Error())
+		}
+	}
 	if err != nil {
 		return "", utils.Wrap(err, "push failed")
-	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "resp: ", pushResp)
-	if pushResp.Code == 10001 {
-		_, _ = g.getTokenAndSave2Redis(operationID)
 	}
 	respBytes, err := json.Marshal(pushResp)
 	return string(respBytes), utils.Wrap(err, "")
@@ -163,6 +169,9 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 	commonResp.Data = returnStruct
 	if err := json.Unmarshal(result, &commonResp); err != nil {
 		return err
+	}
+	if commonResp.Code == 10001 {
+		return TokenExpireError
 	}
 	return nil
 }
