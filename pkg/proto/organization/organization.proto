@@ -1,0 +1,157 @@
+syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./organization;organization";
+package organization;
+
+
+message CreateDepartmentReq{
+  server_api_params.Department departmentInfo = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+
+message CreateDepartmentResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+  server_api_params.Department departmentInfo = 3;
+}
+
+message UpdateDepartmentReq{
+  server_api_params.Department departmentInfo = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+
+message UpdateDepartmentResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+
+message GetDepartmentReq{
+  string departmentID = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+
+message GetDepartmentResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+  repeated server_api_params.Department departmentList = 3;
+}
+
+message DeleteDepartmentReq{
+  string departmentID = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+
+message DeleteDepartmentResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+
+message CreateOrganizationUserReq{
+  server_api_params.OrganizationUser organizationUser = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+
+
+message CreateOrganizationUserResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+
+message UpdateOrganizationUserReq{
+  server_api_params.OrganizationUser organizationUser = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+
+
+message UpdateOrganizationUserResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+
+
+
+message CreateDepartmentMemberReq{
+  server_api_params.UserInDepartment userInDepartment = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+message CreateDepartmentMemberResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+
+message GetUserInDepartmentReq{
+  string userID = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+message GetUserInDepartmentResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+  server_api_params.UserInDepartment userInDepartment = 3;
+}
+
+
+message UpdateUserInDepartmentReq{
+  server_api_params.UserInDepartment userInDepartment = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+message UpdateUserInDepartmentResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+
+message DeleteOrganizationReq{
+  string userID = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+message DeleteOrganizationResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+
+message GetDepartmentMemberReq{
+  string departmentID = 1;
+  string operationID = 2;
+  string opUserID = 3;
+}
+
+message GetDepartmentMemberResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+  repeated  server_api_params.UserInDepartment userInDepartmentList = 3;
+}
+
+
+service organization{
+  rpc createDepartment(CreateDepartmentReq) returns(CreateDepartmentResp);
+  rpc UpdateDepartment(UpdateDepartmentReq) returns(UpdateDepartmentResp);
+  rpc GetDepartment(GetDepartmentReq) returns(GetDepartmentResp);
+  rpc DeleteDepartment(DeleteDepartmentReq) returns(DeleteDepartmentResp);
+  rpc CreateOrganizationUser(CreateOrganizationUserReq) returns(CreateOrganizationUserResp);
+  rpc UpdateOrganizationUser(UpdateOrganizationUserReq) returns(UpdateOrganizationUserResp);
+  rpc CreateDepartmentMember(CreateDepartmentMemberReq) returns(CreateDepartmentMemberResp);
+  rpc GetUserInDepartment(GetUserInDepartmentReq) returns(GetUserInDepartmentResp);
+  rpc UpdateUserInDepartment(UpdateUserInDepartmentReq) returns(UpdateUserInDepartmentResp);
+  rpc DeleteOrganization(DeleteOrganizationReq) returns(DeleteOrganizationResp);
+  rpc GetDepartmentMember(GetDepartmentMemberReq) returns(GetDepartmentMemberResp);
+}
+
+
+
+

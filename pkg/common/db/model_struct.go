@@ -238,26 +238,26 @@ func (Department) TableName() string {
 	return "departments"
 }
 
-type DepartmentUser struct {
+type OrganizationUser struct {
 	UserID      string    `gorm:"column:user_id;primary_key;size:64"`
 	Nickname    string    `gorm:"column:nickname;size:256"`
 	EnglishName string    `gorm:"column:english_name;size:256"`
 	FaceURL     string    `gorm:"column:face_url;size:256"`
 	Gender      int32     `gorm:"column:gender"`
-	mobile      string    `gorm:"column:mobile;size:32"`
-	telephone   string    `gorm:"column:telephone;size:32"`
+	Mobile      string    `gorm:"column:mobile;size:32"`
+	Telephone   string    `gorm:"column:telephone;size:32"`
 	Birth       time.Time `gorm:"column:birth"`
 	Email       string    `gorm:"column:email;size:64"`
 	CreateTime  time.Time `gorm:"column:create_time"`
 	Ex          string    `gorm:"column:ex;size:1024"`
 }
 
-func (DepartmentUser) TableName() string {
-	return "Department_users"
+func (OrganizationUser) TableName() string {
+	return "organization_users"
 }
 
 type DepartmentMember struct {
-	userID       string `gorm:"column:user_id;primary_key;size:64"`
+	UserID       string `gorm:"column:user_id;primary_key;size:64"`
 	DepartmentID string `gorm:"column:department_id;primary_key;size:64"`
 	Order        int32  `gorm:"column:order" json:"order"`
 	Position     string `gorm:"column:position;size:256" json:"position"`
