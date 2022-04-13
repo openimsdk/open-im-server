@@ -61,14 +61,34 @@ type PushReq struct {
 		Notification Notification `json:"notification,omitempty"`
 		Transmission string       `json:"transmission,omitempty"`
 	} `json:"push_message"`
+	PushChannel struct {
+		Ios     Ios     `json:"ios"`
+		Android Android `json:"android"`
+	} `json:"push_channel"`
+}
+
+type Ios struct {
+	Aps struct {
+		Sound string `json:"sound"`
+		Alert Alert  `json:"alert"`
+	} `json:"aps"`
+}
+
+type Alert struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}
+
+type Android struct {
+	Ups struct {
+		Notification Notification `json:"notification"`
+	} `json:"ups"`
 }
 
 type Notification struct {
 	Title     string `json:"title"`
 	Body      string `json:"body"`
 	ClickType string `json:"click_type"`
-	//Intent    string `json:"intent,omitempty"`
-	//Url       string `json:"url,omitempty"`
 }
 
 type PushResp struct {
@@ -98,6 +118,16 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 		}{Alias: []string{userIDList[0]}},
 	}
 	pushReq.PushMessage.Notification = Notification{
+		Title:     alert,
+		Body:      alert,
+		ClickType: "startapp",
+	}
+	pushReq.PushChannel.Ios.Aps.Sound = "default"
+	pushReq.PushChannel.Ios.Aps.Alert = Alert{
+		Title: alert,
+		Body:  alert,
+	}
+	pushReq.PushChannel.Android.Ups.Notification = Notification{
 		Title:     alert,
 		Body:      alert,
 		ClickType: "startapp",
