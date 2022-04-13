@@ -136,9 +136,11 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, operationID stri
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	switch err {
 	case TokenExpireError:
-		_, err = g.getTokenAndSave2Redis(operationID)
+		token, err = g.getTokenAndSave2Redis(operationID)
 		if err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), "getTokenAndSave2Redis failed, ", err.Error())
+		} else {
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "getTokenAndSave2Redis: ", token)
 		}
 	}
 	if err != nil {
