@@ -32,13 +32,13 @@ func (j *JPush) SetAlias(cid, alias string) (resp string, err error) {
 	return resp, nil
 }
 
-func (j *JPush) Push(accounts []string, alert, detailContent, platform, operationID string) (string, error) {
+func (j *JPush) Push(accounts []string, alert, detailContent, operationID string) (string, error) {
 	var pf requestBody.Platform
-	_ = pf.SetPlatform(platform)
+	pf.SetAll()
 	var au requestBody.Audience
 	au.SetAlias(accounts)
 	var no requestBody.Notification
-	no.SetAlert(alert, platform)
+	no.SetAlert(alert)
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)
 	var o requestBody.Options

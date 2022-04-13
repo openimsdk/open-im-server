@@ -2,7 +2,6 @@ package requestBody
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
 )
 
 type Notification struct {
@@ -23,18 +22,14 @@ type Ios struct {
 	Badge string `json:"badge,omitempty"`
 }
 
-func (n *Notification) SetAlert(alert, platform string) {
+func (n *Notification) SetAlert(alert string) {
 	n.Alert = alert
-	switch platform {
-	case constant.AndroidPlatformStr:
-		n.Android.Alert = alert
-		n.SetAndroidIntent()
-	case constant.IOSPlatformStr:
-		n.IOS.Alert = alert
-		n.IOS.Sound = "default"
-		n.IOS.Badge = "+1"
-	default:
-	}
+	n.Android.Alert = alert
+	n.SetAndroidIntent()
+	n.IOS.Alert = alert
+	n.IOS.Sound = "default"
+	n.IOS.Badge = "+1"
+
 }
 func (n *Notification) SetAndroidIntent() {
 	n.Android.Intent.URL = config.Config.Push.Jpns.PushIntent
