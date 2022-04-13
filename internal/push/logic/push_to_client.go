@@ -116,6 +116,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				} else {
 					log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
 				}
+				break
 			}
 
 		}
