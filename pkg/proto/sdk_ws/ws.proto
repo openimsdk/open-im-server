@@ -105,8 +105,66 @@ message FriendRequest{
   string ex = 15;
 }
 
-///////////////////////////////////base end/////////////////////////////////////
+///////////////////////////////////organization/////////////////////////////////////
 
+message Department {
+  string departmentID = 1;
+  string faceURL = 2;
+  string name = 3;
+  string parentID = 4;
+  int32 order = 5;
+  int32 departmentType = 6;
+  uint32 createTime = 7;
+  uint32 subDepartmentNum = 8;
+  uint32 memberNum = 9;
+  string ex        = 10;
+}
+
+
+
+message OrganizationUser  {
+    string userID      = 1;
+    string  nickname    = 2;
+    string   englishName = 3;
+    string  faceURL    = 4;
+    int32   gender     = 5;
+    string   mobile      = 6;
+    string telephone   = 7;
+    uint32 birth     = 8;
+    string  email    = 9;
+    uint32   createTime = 10;
+    string ex      = 11;
+}
+
+message DepartmentMember {
+      string userID = 1;
+      string DepartmentID = 2;
+      int32 Order = 3;
+      string Position = 4;
+      int32 Leader = 5;
+      int32 Status = 6;
+      string Ex     = 7;
+}
+
+
+
+message  UserInDepartment {
+  OrganizationUser departmentUser = 1;
+  repeated DepartmentMember departmentMemberList = 2;
+}
+
+
+
+
+
+///////////////////////////////////organization end//////////////////////////////////
+
+
+
+
+
+
+///////////////////////////////////base end/////////////////////////////////////
 
 message PullMessageBySeqListResp {
   int32 errCode = 1;
