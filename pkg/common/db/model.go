@@ -49,10 +49,11 @@ func init() {
 		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
 			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s/?maxPoolSize=%d", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress[0],
 				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
+		} else {
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
+				config.Config.Mongo.DBAddress[0], config.Config.Mongo.DBDatabase,
+				config.Config.Mongo.DBMaxPoolSize)
 		}
-		uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
-			config.Config.Mongo.DBAddress[0], config.Config.Mongo.DBDatabase,
-			config.Config.Mongo.DBMaxPoolSize)
 	}
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
@@ -64,7 +65,7 @@ func init() {
 			panic(err1.Error())
 		}
 	}
-	fmt.Println("0", utils.GetSelfFuncName(), "mongo driver client init success")
+	fmt.Println("0", utils.GetSelfFuncName(), "mongo driver client init success: ", uri)
 
 	DB.mongoClient = mongoClient
 

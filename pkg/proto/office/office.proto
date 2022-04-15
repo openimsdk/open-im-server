@@ -120,7 +120,7 @@ message Comment {
   string replyUserName = 4;
   string contentID = 5;
   string content = 6;
-  string createTime = 7;
+  int32 createTime = 7;
 }
 
 message WorkMoment {
@@ -169,8 +169,9 @@ message LikeOneWorkMomentResp {
 message CommentOneWorkMomentReq {
   string userID = 1;
   string workMomentID = 2;
-  string content = 3;
-  string operationID = 4;
+  string replyUserID = 3;
+  string content = 4;
+  string operationID = 5;
 }
 
 message CommentOneWorkMomentResp {
@@ -203,7 +204,7 @@ message GetUserFriendWorkMomentsResp {
 
 message CommentsMsg {
   Comment comment = 1;
-  string workMomentsID = 2;
+  string workMomentID = 2;
   string content = 3;
 }
 
@@ -215,7 +216,7 @@ message GetUserWorkMomentsCommentsMsgReq {
 
 message GetUserWorkMomentsCommentsMsgResp {
   CommonResp commonResp = 1;
-  repeated CommentsMsg commentsMsg = 2;
+  repeated CommentsMsg commentsMsgs = 2;
   server_api_params.ResponsePagination Pagination = 3;
 }
 

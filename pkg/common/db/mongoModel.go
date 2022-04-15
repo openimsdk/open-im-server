@@ -564,14 +564,85 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 }
 
 type WorkMoment struct {
+	WorkMomentID         string      `bson:"work_moment_id"`
+	UserID               string      `bson:"user_id"`
+	Content              string      `bson:"content"`
+	LikeUsers            []*LikeUser `bson:"like_users"`
+	Comments             []*Comment  `bson:"comments"`
+	WhoCanSeeUserIDList  []string    `bson:"who_can_see_user_id_list"`
+	WhoCantSeeUserIDList []string    `bson:"who_cant_see_user_id_list"`
+	IsPrivate            bool
+	IsPublic             bool
+	CreateTime           int32
+}
+
+type LikeUser struct {
+	UserID   string
+	UserName string
+}
+
+type Comment struct {
+	UserID        string
+	UserName      string
+	ReplyUserID   string
+	ReplyUserName string
+	ContentID     string
+	Content       string
+	CreateTime    int32
 }
 
 func (d *DataBases) CreateOneWorkMoment(workMoment *WorkMoment) error {
 	return nil
 }
 
+func (d *DataBases) DeleteOneWorkMoment(workMomentID string) error {
+	return nil
+}
+
+func (d *DataBases) GetWorkMomentByID(workMomentID string) (*WorkMoment, error) {
+	return nil, nil
+}
+
+func (d *DataBases) LikeOneWorkMoment(likeUserID, workMomentID string) error {
+	return nil
+}
+
+func (d *DataBases) SetUserWorkMomentsLevel(userID string, level int32) error {
+	return nil
+}
+
+func (d *DataBases) ClearUserWorkMomentsCommentsMsg(userID string) error {
+	return nil
+}
+
+type CommentMsg struct {
+	WorkMomentID   string `bson:"workMoment"`
+	CommentContent string `bson:"content"`
+	Comment
+}
+
+func (d *DataBases) GetUserWorkMomentsCommentsMsg(userID string, showNumber, pageNumber int32) ([]CommentMsg, error) {
+	return nil, nil
+}
+
+func (d *DataBases) CommentOneWorkMoment(comment Comment, workMomentID string) error {
+	return nil
+}
+
+func (d *DataBases) GetUserWorkMoments(userID string, showNumber, pageNumber int32) ([]WorkMoment, error) {
+	return nil, nil
+}
+
+func (d *DataBases) GetUserFriendWorkMoments(friendIDList []string, showNumber, pageNumber int32) ([]WorkMoment, error) {
+	return nil, nil
+}
+
 func generateTagID(tagName, userID string) string {
 	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()) + time.Now().String())
+}
+
+func generateWorkMomentID(userID string) string {
+	return utils.Md5(userID + strconv.Itoa(rand.Int()) + time.Now().String())
 }
 
 func getCurrentTimestampByMill() int64 {
