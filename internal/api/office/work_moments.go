@@ -290,8 +290,8 @@ func GetUserWorkMomentsCommentsMsg(c *gin.Context) {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
-	resp.Data.ShowNumber  = respPb.Pagination.ShowNumber
-	resp.Data.CommentsMsg = respPb.CommentsMsg
+	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
+	resp.Data.CommentMsgs = respPb.CommentsMsgs
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, resp)
 }

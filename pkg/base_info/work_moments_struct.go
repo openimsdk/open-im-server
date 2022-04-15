@@ -74,9 +74,9 @@ type GetUserWorkMomentsCommentsMsgReq struct {
 type GetUserWorkMomentsCommentsMsgResp struct {
 	CommResp
 	Data struct {
-		CommentsMsg    []*office.CommentsMsg `json:"comments"`
-		CurrentPage int32             `json:"currentPage"`
-		ShowNumber  int32             `json:"showNumber"`
+		CommentMsgs []*office.CommentsMsg `json:"comments"`
+		CurrentPage int32                 `json:"currentPage"`
+		ShowNumber  int32                 `json:"showNumber"`
 	} `json:"data"`
 }
 
