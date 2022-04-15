@@ -167,7 +167,7 @@ longconnsvr:
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10
 
-## 推送只能开启一个
+## 推送只能开启一个 enable代表开启
 push:
   tpns: #腾讯推送，暂未测试 暂不要使用
     ios:

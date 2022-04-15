@@ -49,6 +49,19 @@ func GetFriendListByUserID(OwnerUserID string) ([]db.Friend, error) {
 	return friends, nil
 }
 
+func GetFriendIDListByUserID(OwnerUserID string) ([]string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	var friendIDList []string
+	err = dbConn.Table("friends").Select("friend_user_id").Where("owner_user_id=?", OwnerUserID).Find(&friendIDList).Error
+	if err != nil {
+		return nil, err
+	}
+	return friendIDList, nil
+}
+
 func UpdateFriendComment(OwnerUserID, FriendUserID, Remark string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {

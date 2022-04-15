@@ -93,7 +93,7 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 		}
 	} else {
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-			log.NewDebug("", claims.UID, claims.Platform)
+			//log.NewDebug("", claims.UID, claims.Platform)
 			return claims, nil
 		}
 		return nil, &constant.ErrTokenNotValidYet

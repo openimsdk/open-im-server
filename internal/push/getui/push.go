@@ -61,14 +61,34 @@ type PushReq struct {
 		Notification Notification `json:"notification,omitempty"`
 		Transmission string       `json:"transmission,omitempty"`
 	} `json:"push_message"`
+	PushChannel struct {
+		Ios     Ios     `json:"ios"`
+		Android Android `json:"android"`
+	} `json:"push_channel"`
+}
+
+type Ios struct {
+	Aps struct {
+		Sound string `json:"sound"`
+		Alert Alert  `json:"alert"`
+	} `json:"aps"`
+}
+
+type Alert struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}
+
+type Android struct {
+	Ups struct {
+		Notification Notification `json:"notification"`
+	} `json:"ups"`
 }
 
 type Notification struct {
 	Title     string `json:"title"`
 	Body      string `json:"body"`
 	ClickType string `json:"click_type"`
-	//Intent    string `json:"intent,omitempty"`
-	//Url       string `json:"url,omitempty"`
 }
 
 type PushResp struct {
@@ -78,7 +98,7 @@ func newGetuiClient() *Getui {
 	return &Getui{}
 }
 
-func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operationID string) (resp string, err error) {
+func (g *Getui) Push(userIDList []string, alert, detailContent, operationID string) (resp string, err error) {
 	token, err := db.DB.GetGetuiToken()
 	log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
 	if err != nil {
@@ -102,13 +122,25 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 		Body:      alert,
 		ClickType: "startapp",
 	}
+	pushReq.PushChannel.Ios.Aps.Sound = "default"
+	pushReq.PushChannel.Ios.Aps.Alert = Alert{
+		Title: alert,
+		Body:  alert,
+	}
+	pushReq.PushChannel.Android.Ups.Notification = Notification{
+		Title:     alert,
+		Body:      alert,
+		ClickType: "startapp",
+	}
 	pushResp := PushResp{}
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	switch err {
 	case TokenExpireError:
-		_, err = g.getTokenAndSave2Redis(operationID)
+		token, err = g.getTokenAndSave2Redis(operationID)
 		if err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), "getTokenAndSave2Redis failed, ", err.Error())
+		} else {
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "getTokenAndSave2Redis: ", token)
 		}
 	}
 	if err != nil {
