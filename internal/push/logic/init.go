@@ -8,23 +8,25 @@ package logic
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/statistics"
 	"fmt"
 )
 
 var (
-	rpcServer RPCServer
-	pushCh    PushConsumerHandler
-	producer  *kafka.Producer
-	count     uint64
+	rpcServer    RPCServer
+	pushCh       PushConsumerHandler
+	pushTerminal []int32
+	producer     *kafka.Producer
+	count        uint64
 )
 
 func Init(rpcPort int) {
 
 	rpcServer.Init(rpcPort)
 	pushCh.Init()
-
+	pushTerminal = []int32{constant.IOSPlatformID, constant.AndroidPlatformID}
 }
 func init() {
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
