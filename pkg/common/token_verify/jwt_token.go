@@ -138,6 +138,14 @@ func GetUserIDFromToken(token string, operationID string) (bool, string) {
 	return true, claims.UID
 }
 
+func ParseTokenGetUserID(token string, operationID string) (error, string) {
+	claims, err := ParseToken(token, operationID)
+	if err != nil {
+		return utils.Wrap(err, ""), ""
+	}
+	return nil, claims.UID
+}
+
 func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 	claims, err = GetClaimFromToken(tokensString)
 	if err != nil {

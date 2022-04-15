@@ -8,6 +8,7 @@ import (
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
 	"Open_IM/internal/api/office"
+	"Open_IM/internal/api/organization"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/config"
@@ -136,6 +137,22 @@ func main() {
 		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
 	}
+
+	organizationGroup := r.Group("/organization")
+	{
+		organizationGroup.POST("/create_department", organization.CreateDepartment)
+		organizationGroup.POST("/update_department", organization.UpdateDepartment)
+		organizationGroup.POST("/get_department", organization.GetDepartment)
+		organizationGroup.POST("/delete_department", organization.DeleteDepartment)
+		organizationGroup.POST("/create_organization_user", organization.CreateOrganizationUser)
+		organizationGroup.POST("/update_organization_user", organization.UpdateOrganizationUser)
+		organizationGroup.POST("/create_department_member", organization.CreateDepartmentMember)
+		organizationGroup.POST("/get_user_in_department", organization.GetUserInDepartment)
+		organizationGroup.POST("/update_user_In_department", organization.UpdateUserInDepartment)
+		organizationGroup.POST("/delete_organization_user", organization.DeleteOrganizationUser)
+		organizationGroup.POST("/get_department_member", organization.GetDepartmentMember)
+	}
+
 	go apiThird.MinioInit()
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()

@@ -257,13 +257,14 @@ func (OrganizationUser) TableName() string {
 }
 
 type DepartmentMember struct {
-	UserID       string `gorm:"column:user_id;primary_key;size:64"`
-	DepartmentID string `gorm:"column:department_id;primary_key;size:64"`
-	Order        int32  `gorm:"column:order" json:"order"`
-	Position     string `gorm:"column:position;size:256" json:"position"`
-	Leader       int32  `gorm:"column:leader" json:"leader"`
-	Status       int32  `gorm:"column:status" json:"status"`
-	Ex           string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+	UserID       string    `gorm:"column:user_id;primary_key;size:64"`
+	DepartmentID string    `gorm:"column:department_id;primary_key;size:64"`
+	Order        int32     `gorm:"column:order" json:"order"`
+	Position     string    `gorm:"column:position;size:256" json:"position"`
+	Leader       int32     `gorm:"column:leader" json:"leader"`
+	Status       int32     `gorm:"column:status" json:"status"`
+	CreateTime   time.Time `gorm:"column:create_time"`
+	Ex           string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }
 
 func (DepartmentMember) TableName() string {

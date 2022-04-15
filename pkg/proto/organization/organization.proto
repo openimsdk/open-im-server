@@ -114,12 +114,12 @@ message UpdateUserInDepartmentResp{
 }
 
 
-message DeleteOrganizationReq{
+message DeleteOrganizationUserReq{
   string userID = 1;
   string operationID = 2;
   string opUserID = 3;
 }
-message DeleteOrganizationResp{
+message DeleteOrganizationUserResp{
   int32   errCode = 1;
   string  errMsg = 2;
 }
@@ -139,7 +139,7 @@ message GetDepartmentMemberResp{
 
 
 service organization{
-  rpc createDepartment(CreateDepartmentReq) returns(CreateDepartmentResp);
+  rpc CreateDepartment(CreateDepartmentReq) returns(CreateDepartmentResp);
   rpc UpdateDepartment(UpdateDepartmentReq) returns(UpdateDepartmentResp);
   rpc GetDepartment(GetDepartmentReq) returns(GetDepartmentResp);
   rpc DeleteDepartment(DeleteDepartmentReq) returns(DeleteDepartmentResp);
@@ -148,7 +148,7 @@ service organization{
   rpc CreateDepartmentMember(CreateDepartmentMemberReq) returns(CreateDepartmentMemberResp);
   rpc GetUserInDepartment(GetUserInDepartmentReq) returns(GetUserInDepartmentResp);
   rpc UpdateUserInDepartment(UpdateUserInDepartmentReq) returns(UpdateUserInDepartmentResp);
-  rpc DeleteOrganization(DeleteOrganizationReq) returns(DeleteOrganizationResp);
+  rpc DeleteOrganizationUser(DeleteOrganizationUserReq) returns(DeleteOrganizationUserResp);
   rpc GetDepartmentMember(GetDepartmentMemberReq) returns(GetDepartmentMemberResp);
 }
 
