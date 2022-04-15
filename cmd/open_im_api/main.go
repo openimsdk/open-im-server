@@ -135,6 +135,16 @@ func main() {
 		officeGroup.POST("/set_tag", office.SetTag)
 		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
+
+		officeGroup.POST("/create_one_work_moment", office.CreateOneWorkMoment)
+		officeGroup.POST("/delete_one_work_moment", office.DeleteOneWorkMoment)
+		officeGroup.POST("/like_one_work_moment", office.LikeOneWorkMoment)
+		officeGroup.POST("/comment_one_work_moment", office.CommentOneWorkMoment)
+		officeGroup.POST("/get_user_work_moments", office.GetUserWorkMoments)
+		officeGroup.POST("/get_user_friend_work_moments", office.GetUserFriendWorkMoments)
+		officeGroup.POST("/get_user_work_moments_comments_msg", office.GetUserWorkMomentsCommentsMsg)
+		officeGroup.POST("/clear_user_work_moments_comments_msg", office.ClearUserWorkMomentsCommentsMsg)
+		officeGroup.POST("/set_user_work_moments_level", office.SetUserWorkMomentsLevel)
 	}
 	go apiThird.MinioInit()
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")

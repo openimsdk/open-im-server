@@ -563,6 +563,14 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 	return tagSendLogs, nil
 }
 
+type WorkMoment struct {
+
+}
+
+func (d *DataBases) CreateOneWorkMoment(workMoment WorkMoment) error {
+
+}
+
 func generateTagID(tagName, userID string) string {
 	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()) + time.Now().String())
 }

@@ -36,7 +36,7 @@ func (m *CommonResp) Reset()         { *m = CommonResp{} }
 func (m *CommonResp) String() string { return proto.CompactTextString(m) }
 func (*CommonResp) ProtoMessage()    {}
 func (*CommonResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{0}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{0}
 }
 func (m *CommonResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CommonResp.Unmarshal(m, b)
@@ -82,7 +82,7 @@ func (m *TagUser) Reset()         { *m = TagUser{} }
 func (m *TagUser) String() string { return proto.CompactTextString(m) }
 func (*TagUser) ProtoMessage()    {}
 func (*TagUser) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{1}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{1}
 }
 func (m *TagUser) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TagUser.Unmarshal(m, b)
@@ -129,7 +129,7 @@ func (m *Tag) Reset()         { *m = Tag{} }
 func (m *Tag) String() string { return proto.CompactTextString(m) }
 func (*Tag) ProtoMessage()    {}
 func (*Tag) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{2}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{2}
 }
 func (m *Tag) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Tag.Unmarshal(m, b)
@@ -182,7 +182,7 @@ func (m *GetUserTagsReq) Reset()         { *m = GetUserTagsReq{} }
 func (m *GetUserTagsReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserTagsReq) ProtoMessage()    {}
 func (*GetUserTagsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{3}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{3}
 }
 func (m *GetUserTagsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserTagsReq.Unmarshal(m, b)
@@ -228,7 +228,7 @@ func (m *GetUserTagsResp) Reset()         { *m = GetUserTagsResp{} }
 func (m *GetUserTagsResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserTagsResp) ProtoMessage()    {}
 func (*GetUserTagsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{4}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{4}
 }
 func (m *GetUserTagsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserTagsResp.Unmarshal(m, b)
@@ -276,7 +276,7 @@ func (m *CreateTagReq) Reset()         { *m = CreateTagReq{} }
 func (m *CreateTagReq) String() string { return proto.CompactTextString(m) }
 func (*CreateTagReq) ProtoMessage()    {}
 func (*CreateTagReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{5}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{5}
 }
 func (m *CreateTagReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateTagReq.Unmarshal(m, b)
@@ -335,7 +335,7 @@ func (m *CreateTagResp) Reset()         { *m = CreateTagResp{} }
 func (m *CreateTagResp) String() string { return proto.CompactTextString(m) }
 func (*CreateTagResp) ProtoMessage()    {}
 func (*CreateTagResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{6}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{6}
 }
 func (m *CreateTagResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateTagResp.Unmarshal(m, b)
@@ -375,7 +375,7 @@ func (m *DeleteTagReq) Reset()         { *m = DeleteTagReq{} }
 func (m *DeleteTagReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteTagReq) ProtoMessage()    {}
 func (*DeleteTagReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{7}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{7}
 }
 func (m *DeleteTagReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteTagReq.Unmarshal(m, b)
@@ -427,7 +427,7 @@ func (m *DeleteTagResp) Reset()         { *m = DeleteTagResp{} }
 func (m *DeleteTagResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteTagResp) ProtoMessage()    {}
 func (*DeleteTagResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{8}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{8}
 }
 func (m *DeleteTagResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteTagResp.Unmarshal(m, b)
@@ -470,7 +470,7 @@ func (m *SetTagReq) Reset()         { *m = SetTagReq{} }
 func (m *SetTagReq) String() string { return proto.CompactTextString(m) }
 func (*SetTagReq) ProtoMessage()    {}
 func (*SetTagReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{9}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{9}
 }
 func (m *SetTagReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetTagReq.Unmarshal(m, b)
@@ -543,7 +543,7 @@ func (m *SetTagResp) Reset()         { *m = SetTagResp{} }
 func (m *SetTagResp) String() string { return proto.CompactTextString(m) }
 func (*SetTagResp) ProtoMessage()    {}
 func (*SetTagResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{10}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{10}
 }
 func (m *SetTagResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetTagResp.Unmarshal(m, b)
@@ -587,7 +587,7 @@ func (m *SendMsg2TagReq) Reset()         { *m = SendMsg2TagReq{} }
 func (m *SendMsg2TagReq) String() string { return proto.CompactTextString(m) }
 func (*SendMsg2TagReq) ProtoMessage()    {}
 func (*SendMsg2TagReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{11}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{11}
 }
 func (m *SendMsg2TagReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsg2TagReq.Unmarshal(m, b)
@@ -667,7 +667,7 @@ func (m *SendMsg2TagResp) Reset()         { *m = SendMsg2TagResp{} }
 func (m *SendMsg2TagResp) String() string { return proto.CompactTextString(m) }
 func (*SendMsg2TagResp) ProtoMessage()    {}
 func (*SendMsg2TagResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{12}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{12}
 }
 func (m *SendMsg2TagResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsg2TagResp.Unmarshal(m, b)
@@ -707,7 +707,7 @@ func (m *GetTagSendLogsReq) Reset()         { *m = GetTagSendLogsReq{} }
 func (m *GetTagSendLogsReq) String() string { return proto.CompactTextString(m) }
 func (*GetTagSendLogsReq) ProtoMessage()    {}
 func (*GetTagSendLogsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{13}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{13}
 }
 func (m *GetTagSendLogsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetTagSendLogsReq.Unmarshal(m, b)
@@ -761,7 +761,7 @@ func (m *TagSendLog) Reset()         { *m = TagSendLog{} }
 func (m *TagSendLog) String() string { return proto.CompactTextString(m) }
 func (*TagSendLog) ProtoMessage()    {}
 func (*TagSendLog) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{14}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{14}
 }
 func (m *TagSendLog) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TagSendLog.Unmarshal(m, b)
@@ -815,7 +815,7 @@ func (m *GetTagSendLogsResp) Reset()         { *m = GetTagSendLogsResp{} }
 func (m *GetTagSendLogsResp) String() string { return proto.CompactTextString(m) }
 func (*GetTagSendLogsResp) ProtoMessage()    {}
 func (*GetTagSendLogsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{15}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{15}
 }
 func (m *GetTagSendLogsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetTagSendLogsResp.Unmarshal(m, b)
@@ -869,7 +869,7 @@ func (m *GetUserTagByIDReq) Reset()         { *m = GetUserTagByIDReq{} }
 func (m *GetUserTagByIDReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserTagByIDReq) ProtoMessage()    {}
 func (*GetUserTagByIDReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{16}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{16}
 }
 func (m *GetUserTagByIDReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserTagByIDReq.Unmarshal(m, b)
@@ -922,7 +922,7 @@ func (m *GetUserTagByIDResp) Reset()         { *m = GetUserTagByIDResp{} }
 func (m *GetUserTagByIDResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserTagByIDResp) ProtoMessage()    {}
 func (*GetUserTagByIDResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_office_7f5adce6bc494f97, []int{17}
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{17}
 }
 func (m *GetUserTagByIDResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserTagByIDResp.Unmarshal(m, b)
@@ -956,6 +956,1178 @@ func (m *GetUserTagByIDResp) GetTag() *Tag {
 	return nil
 }
 
+type LikeUser struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	UserName             string   `protobuf:"bytes,2,opt,name=userName" json:"userName,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LikeUser) Reset()         { *m = LikeUser{} }
+func (m *LikeUser) String() string { return proto.CompactTextString(m) }
+func (*LikeUser) ProtoMessage()    {}
+func (*LikeUser) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{18}
+}
+func (m *LikeUser) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LikeUser.Unmarshal(m, b)
+}
+func (m *LikeUser) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LikeUser.Marshal(b, m, deterministic)
+}
+func (dst *LikeUser) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LikeUser.Merge(dst, src)
+}
+func (m *LikeUser) XXX_Size() int {
+	return xxx_messageInfo_LikeUser.Size(m)
+}
+func (m *LikeUser) XXX_DiscardUnknown() {
+	xxx_messageInfo_LikeUser.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LikeUser proto.InternalMessageInfo
+
+func (m *LikeUser) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *LikeUser) GetUserName() string {
+	if m != nil {
+		return m.UserName
+	}
+	return ""
+}
+
+type Comment struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	UserName             string   `protobuf:"bytes,2,opt,name=userName" json:"userName,omitempty"`
+	ReplyUserID          string   `protobuf:"bytes,3,opt,name=replyUserID" json:"replyUserID,omitempty"`
+	ReplyUserName        string   `protobuf:"bytes,4,opt,name=replyUserName" json:"replyUserName,omitempty"`
+	ContentID            string   `protobuf:"bytes,5,opt,name=contentID" json:"contentID,omitempty"`
+	Content              string   `protobuf:"bytes,6,opt,name=content" json:"content,omitempty"`
+	CreateTime           string   `protobuf:"bytes,7,opt,name=createTime" json:"createTime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Comment) Reset()         { *m = Comment{} }
+func (m *Comment) String() string { return proto.CompactTextString(m) }
+func (*Comment) ProtoMessage()    {}
+func (*Comment) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{19}
+}
+func (m *Comment) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Comment.Unmarshal(m, b)
+}
+func (m *Comment) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Comment.Marshal(b, m, deterministic)
+}
+func (dst *Comment) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Comment.Merge(dst, src)
+}
+func (m *Comment) XXX_Size() int {
+	return xxx_messageInfo_Comment.Size(m)
+}
+func (m *Comment) XXX_DiscardUnknown() {
+	xxx_messageInfo_Comment.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Comment proto.InternalMessageInfo
+
+func (m *Comment) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *Comment) GetUserName() string {
+	if m != nil {
+		return m.UserName
+	}
+	return ""
+}
+
+func (m *Comment) GetReplyUserID() string {
+	if m != nil {
+		return m.ReplyUserID
+	}
+	return ""
+}
+
+func (m *Comment) GetReplyUserName() string {
+	if m != nil {
+		return m.ReplyUserName
+	}
+	return ""
+}
+
+func (m *Comment) GetContentID() string {
+	if m != nil {
+		return m.ContentID
+	}
+	return ""
+}
+
+func (m *Comment) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *Comment) GetCreateTime() string {
+	if m != nil {
+		return m.CreateTime
+	}
+	return ""
+}
+
+type WorkMoment struct {
+	WorkMomentID         string      `protobuf:"bytes,1,opt,name=workMomentID" json:"workMomentID,omitempty"`
+	UserID               string      `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	Content              string      `protobuf:"bytes,3,opt,name=content" json:"content,omitempty"`
+	LikeUsers            []*LikeUser `protobuf:"bytes,4,rep,name=likeUsers" json:"likeUsers,omitempty"`
+	Comments             []*Comment  `protobuf:"bytes,5,rep,name=comments" json:"comments,omitempty"`
+	WhoCanSeeUserIDList  []string    `protobuf:"bytes,6,rep,name=whoCanSeeUserIDList" json:"whoCanSeeUserIDList,omitempty"`
+	WhoCantSeeUserIDList []string    `protobuf:"bytes,7,rep,name=whoCantSeeUserIDList" json:"whoCantSeeUserIDList,omitempty"`
+	IsPrivate            bool        `protobuf:"varint,8,opt,name=isPrivate" json:"isPrivate,omitempty"`
+	IsPublic             bool        `protobuf:"varint,9,opt,name=isPublic" json:"isPublic,omitempty"`
+	CreateTime           int32       `protobuf:"varint,10,opt,name=CreateTime" json:"CreateTime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *WorkMoment) Reset()         { *m = WorkMoment{} }
+func (m *WorkMoment) String() string { return proto.CompactTextString(m) }
+func (*WorkMoment) ProtoMessage()    {}
+func (*WorkMoment) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{20}
+}
+func (m *WorkMoment) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_WorkMoment.Unmarshal(m, b)
+}
+func (m *WorkMoment) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_WorkMoment.Marshal(b, m, deterministic)
+}
+func (dst *WorkMoment) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WorkMoment.Merge(dst, src)
+}
+func (m *WorkMoment) XXX_Size() int {
+	return xxx_messageInfo_WorkMoment.Size(m)
+}
+func (m *WorkMoment) XXX_DiscardUnknown() {
+	xxx_messageInfo_WorkMoment.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_WorkMoment proto.InternalMessageInfo
+
+func (m *WorkMoment) GetWorkMomentID() string {
+	if m != nil {
+		return m.WorkMomentID
+	}
+	return ""
+}
+
+func (m *WorkMoment) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *WorkMoment) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *WorkMoment) GetLikeUsers() []*LikeUser {
+	if m != nil {
+		return m.LikeUsers
+	}
+	return nil
+}
+
+func (m *WorkMoment) GetComments() []*Comment {
+	if m != nil {
+		return m.Comments
+	}
+	return nil
+}
+
+func (m *WorkMoment) GetWhoCanSeeUserIDList() []string {
+	if m != nil {
+		return m.WhoCanSeeUserIDList
+	}
+	return nil
+}
+
+func (m *WorkMoment) GetWhoCantSeeUserIDList() []string {
+	if m != nil {
+		return m.WhoCantSeeUserIDList
+	}
+	return nil
+}
+
+func (m *WorkMoment) GetIsPrivate() bool {
+	if m != nil {
+		return m.IsPrivate
+	}
+	return false
+}
+
+func (m *WorkMoment) GetIsPublic() bool {
+	if m != nil {
+		return m.IsPublic
+	}
+	return false
+}
+
+func (m *WorkMoment) GetCreateTime() int32 {
+	if m != nil {
+		return m.CreateTime
+	}
+	return 0
+}
+
+type CreateOneWorkMomentReq struct {
+	WorkMoment           *WorkMoment `protobuf:"bytes,1,opt,name=workMoment" json:"workMoment,omitempty"`
+	UserID               string      `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	OperationID          string      `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *CreateOneWorkMomentReq) Reset()         { *m = CreateOneWorkMomentReq{} }
+func (m *CreateOneWorkMomentReq) String() string { return proto.CompactTextString(m) }
+func (*CreateOneWorkMomentReq) ProtoMessage()    {}
+func (*CreateOneWorkMomentReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{21}
+}
+func (m *CreateOneWorkMomentReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateOneWorkMomentReq.Unmarshal(m, b)
+}
+func (m *CreateOneWorkMomentReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateOneWorkMomentReq.Marshal(b, m, deterministic)
+}
+func (dst *CreateOneWorkMomentReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateOneWorkMomentReq.Merge(dst, src)
+}
+func (m *CreateOneWorkMomentReq) XXX_Size() int {
+	return xxx_messageInfo_CreateOneWorkMomentReq.Size(m)
+}
+func (m *CreateOneWorkMomentReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateOneWorkMomentReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateOneWorkMomentReq proto.InternalMessageInfo
+
+func (m *CreateOneWorkMomentReq) GetWorkMoment() *WorkMoment {
+	if m != nil {
+		return m.WorkMoment
+	}
+	return nil
+}
+
+func (m *CreateOneWorkMomentReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *CreateOneWorkMomentReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type CreateOneWorkMomentResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *CreateOneWorkMomentResp) Reset()         { *m = CreateOneWorkMomentResp{} }
+func (m *CreateOneWorkMomentResp) String() string { return proto.CompactTextString(m) }
+func (*CreateOneWorkMomentResp) ProtoMessage()    {}
+func (*CreateOneWorkMomentResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{22}
+}
+func (m *CreateOneWorkMomentResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateOneWorkMomentResp.Unmarshal(m, b)
+}
+func (m *CreateOneWorkMomentResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateOneWorkMomentResp.Marshal(b, m, deterministic)
+}
+func (dst *CreateOneWorkMomentResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateOneWorkMomentResp.Merge(dst, src)
+}
+func (m *CreateOneWorkMomentResp) XXX_Size() int {
+	return xxx_messageInfo_CreateOneWorkMomentResp.Size(m)
+}
+func (m *CreateOneWorkMomentResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateOneWorkMomentResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateOneWorkMomentResp proto.InternalMessageInfo
+
+func (m *CreateOneWorkMomentResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type DeleteOneWorkMomentReq struct {
+	WorkMomentID         string   `protobuf:"bytes,1,opt,name=workMomentID" json:"workMomentID,omitempty"`
+	UserID               string   `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeleteOneWorkMomentReq) Reset()         { *m = DeleteOneWorkMomentReq{} }
+func (m *DeleteOneWorkMomentReq) String() string { return proto.CompactTextString(m) }
+func (*DeleteOneWorkMomentReq) ProtoMessage()    {}
+func (*DeleteOneWorkMomentReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{23}
+}
+func (m *DeleteOneWorkMomentReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteOneWorkMomentReq.Unmarshal(m, b)
+}
+func (m *DeleteOneWorkMomentReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteOneWorkMomentReq.Marshal(b, m, deterministic)
+}
+func (dst *DeleteOneWorkMomentReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteOneWorkMomentReq.Merge(dst, src)
+}
+func (m *DeleteOneWorkMomentReq) XXX_Size() int {
+	return xxx_messageInfo_DeleteOneWorkMomentReq.Size(m)
+}
+func (m *DeleteOneWorkMomentReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteOneWorkMomentReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteOneWorkMomentReq proto.InternalMessageInfo
+
+func (m *DeleteOneWorkMomentReq) GetWorkMomentID() string {
+	if m != nil {
+		return m.WorkMomentID
+	}
+	return ""
+}
+
+func (m *DeleteOneWorkMomentReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *DeleteOneWorkMomentReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type DeleteOneWorkMomentResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *DeleteOneWorkMomentResp) Reset()         { *m = DeleteOneWorkMomentResp{} }
+func (m *DeleteOneWorkMomentResp) String() string { return proto.CompactTextString(m) }
+func (*DeleteOneWorkMomentResp) ProtoMessage()    {}
+func (*DeleteOneWorkMomentResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{24}
+}
+func (m *DeleteOneWorkMomentResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteOneWorkMomentResp.Unmarshal(m, b)
+}
+func (m *DeleteOneWorkMomentResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteOneWorkMomentResp.Marshal(b, m, deterministic)
+}
+func (dst *DeleteOneWorkMomentResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteOneWorkMomentResp.Merge(dst, src)
+}
+func (m *DeleteOneWorkMomentResp) XXX_Size() int {
+	return xxx_messageInfo_DeleteOneWorkMomentResp.Size(m)
+}
+func (m *DeleteOneWorkMomentResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteOneWorkMomentResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteOneWorkMomentResp proto.InternalMessageInfo
+
+func (m *DeleteOneWorkMomentResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type LikeOneWorkMomentReq struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	WorkMomentID         string   `protobuf:"bytes,2,opt,name=WorkMomentID" json:"WorkMomentID,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LikeOneWorkMomentReq) Reset()         { *m = LikeOneWorkMomentReq{} }
+func (m *LikeOneWorkMomentReq) String() string { return proto.CompactTextString(m) }
+func (*LikeOneWorkMomentReq) ProtoMessage()    {}
+func (*LikeOneWorkMomentReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{25}
+}
+func (m *LikeOneWorkMomentReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LikeOneWorkMomentReq.Unmarshal(m, b)
+}
+func (m *LikeOneWorkMomentReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LikeOneWorkMomentReq.Marshal(b, m, deterministic)
+}
+func (dst *LikeOneWorkMomentReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LikeOneWorkMomentReq.Merge(dst, src)
+}
+func (m *LikeOneWorkMomentReq) XXX_Size() int {
+	return xxx_messageInfo_LikeOneWorkMomentReq.Size(m)
+}
+func (m *LikeOneWorkMomentReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_LikeOneWorkMomentReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LikeOneWorkMomentReq proto.InternalMessageInfo
+
+func (m *LikeOneWorkMomentReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *LikeOneWorkMomentReq) GetWorkMomentID() string {
+	if m != nil {
+		return m.WorkMomentID
+	}
+	return ""
+}
+
+func (m *LikeOneWorkMomentReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type LikeOneWorkMomentResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *LikeOneWorkMomentResp) Reset()         { *m = LikeOneWorkMomentResp{} }
+func (m *LikeOneWorkMomentResp) String() string { return proto.CompactTextString(m) }
+func (*LikeOneWorkMomentResp) ProtoMessage()    {}
+func (*LikeOneWorkMomentResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{26}
+}
+func (m *LikeOneWorkMomentResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LikeOneWorkMomentResp.Unmarshal(m, b)
+}
+func (m *LikeOneWorkMomentResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LikeOneWorkMomentResp.Marshal(b, m, deterministic)
+}
+func (dst *LikeOneWorkMomentResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LikeOneWorkMomentResp.Merge(dst, src)
+}
+func (m *LikeOneWorkMomentResp) XXX_Size() int {
+	return xxx_messageInfo_LikeOneWorkMomentResp.Size(m)
+}
+func (m *LikeOneWorkMomentResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_LikeOneWorkMomentResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LikeOneWorkMomentResp proto.InternalMessageInfo
+
+func (m *LikeOneWorkMomentResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type CommentOneWorkMomentReq struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	WorkMomentID         string   `protobuf:"bytes,2,opt,name=workMomentID" json:"workMomentID,omitempty"`
+	Content              string   `protobuf:"bytes,3,opt,name=content" json:"content,omitempty"`
+	OperationID          string   `protobuf:"bytes,4,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CommentOneWorkMomentReq) Reset()         { *m = CommentOneWorkMomentReq{} }
+func (m *CommentOneWorkMomentReq) String() string { return proto.CompactTextString(m) }
+func (*CommentOneWorkMomentReq) ProtoMessage()    {}
+func (*CommentOneWorkMomentReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{27}
+}
+func (m *CommentOneWorkMomentReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CommentOneWorkMomentReq.Unmarshal(m, b)
+}
+func (m *CommentOneWorkMomentReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CommentOneWorkMomentReq.Marshal(b, m, deterministic)
+}
+func (dst *CommentOneWorkMomentReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CommentOneWorkMomentReq.Merge(dst, src)
+}
+func (m *CommentOneWorkMomentReq) XXX_Size() int {
+	return xxx_messageInfo_CommentOneWorkMomentReq.Size(m)
+}
+func (m *CommentOneWorkMomentReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_CommentOneWorkMomentReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CommentOneWorkMomentReq proto.InternalMessageInfo
+
+func (m *CommentOneWorkMomentReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *CommentOneWorkMomentReq) GetWorkMomentID() string {
+	if m != nil {
+		return m.WorkMomentID
+	}
+	return ""
+}
+
+func (m *CommentOneWorkMomentReq) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *CommentOneWorkMomentReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type CommentOneWorkMomentResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *CommentOneWorkMomentResp) Reset()         { *m = CommentOneWorkMomentResp{} }
+func (m *CommentOneWorkMomentResp) String() string { return proto.CompactTextString(m) }
+func (*CommentOneWorkMomentResp) ProtoMessage()    {}
+func (*CommentOneWorkMomentResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{28}
+}
+func (m *CommentOneWorkMomentResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CommentOneWorkMomentResp.Unmarshal(m, b)
+}
+func (m *CommentOneWorkMomentResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CommentOneWorkMomentResp.Marshal(b, m, deterministic)
+}
+func (dst *CommentOneWorkMomentResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CommentOneWorkMomentResp.Merge(dst, src)
+}
+func (m *CommentOneWorkMomentResp) XXX_Size() int {
+	return xxx_messageInfo_CommentOneWorkMomentResp.Size(m)
+}
+func (m *CommentOneWorkMomentResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_CommentOneWorkMomentResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CommentOneWorkMomentResp proto.InternalMessageInfo
+
+func (m *CommentOneWorkMomentResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type GetUserWorkMomentsReq struct {
+	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=Pagination" json:"Pagination,omitempty"`
+	OperationID          string                    `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
+	XXX_unrecognized     []byte                    `json:"-"`
+	XXX_sizecache        int32                     `json:"-"`
+}
+
+func (m *GetUserWorkMomentsReq) Reset()         { *m = GetUserWorkMomentsReq{} }
+func (m *GetUserWorkMomentsReq) String() string { return proto.CompactTextString(m) }
+func (*GetUserWorkMomentsReq) ProtoMessage()    {}
+func (*GetUserWorkMomentsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{29}
+}
+func (m *GetUserWorkMomentsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetUserWorkMomentsReq.Unmarshal(m, b)
+}
+func (m *GetUserWorkMomentsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetUserWorkMomentsReq.Marshal(b, m, deterministic)
+}
+func (dst *GetUserWorkMomentsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserWorkMomentsReq.Merge(dst, src)
+}
+func (m *GetUserWorkMomentsReq) XXX_Size() int {
+	return xxx_messageInfo_GetUserWorkMomentsReq.Size(m)
+}
+func (m *GetUserWorkMomentsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserWorkMomentsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserWorkMomentsReq proto.InternalMessageInfo
+
+func (m *GetUserWorkMomentsReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *GetUserWorkMomentsReq) GetPagination() *sdk_ws.RequestPagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+func (m *GetUserWorkMomentsReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetUserWorkMomentsResp struct {
+	CommonResp           *CommonResp                `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	WorkMoments          []*WorkMoment              `protobuf:"bytes,2,rep,name=workMoments" json:"workMoments,omitempty"`
+	Pagination           *sdk_ws.ResponsePagination `protobuf:"bytes,3,opt,name=Pagination" json:"Pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
+	XXX_unrecognized     []byte                     `json:"-"`
+	XXX_sizecache        int32                      `json:"-"`
+}
+
+func (m *GetUserWorkMomentsResp) Reset()         { *m = GetUserWorkMomentsResp{} }
+func (m *GetUserWorkMomentsResp) String() string { return proto.CompactTextString(m) }
+func (*GetUserWorkMomentsResp) ProtoMessage()    {}
+func (*GetUserWorkMomentsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{30}
+}
+func (m *GetUserWorkMomentsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetUserWorkMomentsResp.Unmarshal(m, b)
+}
+func (m *GetUserWorkMomentsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetUserWorkMomentsResp.Marshal(b, m, deterministic)
+}
+func (dst *GetUserWorkMomentsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserWorkMomentsResp.Merge(dst, src)
+}
+func (m *GetUserWorkMomentsResp) XXX_Size() int {
+	return xxx_messageInfo_GetUserWorkMomentsResp.Size(m)
+}
+func (m *GetUserWorkMomentsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserWorkMomentsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserWorkMomentsResp proto.InternalMessageInfo
+
+func (m *GetUserWorkMomentsResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+func (m *GetUserWorkMomentsResp) GetWorkMoments() []*WorkMoment {
+	if m != nil {
+		return m.WorkMoments
+	}
+	return nil
+}
+
+func (m *GetUserWorkMomentsResp) GetPagination() *sdk_ws.ResponsePagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+type GetUserFriendWorkMomentsReq struct {
+	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=Pagination" json:"Pagination,omitempty"`
+	OperationID          string                    `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
+	XXX_unrecognized     []byte                    `json:"-"`
+	XXX_sizecache        int32                     `json:"-"`
+}
+
+func (m *GetUserFriendWorkMomentsReq) Reset()         { *m = GetUserFriendWorkMomentsReq{} }
+func (m *GetUserFriendWorkMomentsReq) String() string { return proto.CompactTextString(m) }
+func (*GetUserFriendWorkMomentsReq) ProtoMessage()    {}
+func (*GetUserFriendWorkMomentsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{31}
+}
+func (m *GetUserFriendWorkMomentsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetUserFriendWorkMomentsReq.Unmarshal(m, b)
+}
+func (m *GetUserFriendWorkMomentsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetUserFriendWorkMomentsReq.Marshal(b, m, deterministic)
+}
+func (dst *GetUserFriendWorkMomentsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserFriendWorkMomentsReq.Merge(dst, src)
+}
+func (m *GetUserFriendWorkMomentsReq) XXX_Size() int {
+	return xxx_messageInfo_GetUserFriendWorkMomentsReq.Size(m)
+}
+func (m *GetUserFriendWorkMomentsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserFriendWorkMomentsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserFriendWorkMomentsReq proto.InternalMessageInfo
+
+func (m *GetUserFriendWorkMomentsReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *GetUserFriendWorkMomentsReq) GetPagination() *sdk_ws.RequestPagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+func (m *GetUserFriendWorkMomentsReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetUserFriendWorkMomentsResp struct {
+	CommonResp           *CommonResp                `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	WorkMoments          []*WorkMoment              `protobuf:"bytes,2,rep,name=workMoments" json:"workMoments,omitempty"`
+	Pagination           *sdk_ws.ResponsePagination `protobuf:"bytes,3,opt,name=Pagination" json:"Pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
+	XXX_unrecognized     []byte                     `json:"-"`
+	XXX_sizecache        int32                      `json:"-"`
+}
+
+func (m *GetUserFriendWorkMomentsResp) Reset()         { *m = GetUserFriendWorkMomentsResp{} }
+func (m *GetUserFriendWorkMomentsResp) String() string { return proto.CompactTextString(m) }
+func (*GetUserFriendWorkMomentsResp) ProtoMessage()    {}
+func (*GetUserFriendWorkMomentsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{32}
+}
+func (m *GetUserFriendWorkMomentsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetUserFriendWorkMomentsResp.Unmarshal(m, b)
+}
+func (m *GetUserFriendWorkMomentsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetUserFriendWorkMomentsResp.Marshal(b, m, deterministic)
+}
+func (dst *GetUserFriendWorkMomentsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserFriendWorkMomentsResp.Merge(dst, src)
+}
+func (m *GetUserFriendWorkMomentsResp) XXX_Size() int {
+	return xxx_messageInfo_GetUserFriendWorkMomentsResp.Size(m)
+}
+func (m *GetUserFriendWorkMomentsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserFriendWorkMomentsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserFriendWorkMomentsResp proto.InternalMessageInfo
+
+func (m *GetUserFriendWorkMomentsResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+func (m *GetUserFriendWorkMomentsResp) GetWorkMoments() []*WorkMoment {
+	if m != nil {
+		return m.WorkMoments
+	}
+	return nil
+}
+
+func (m *GetUserFriendWorkMomentsResp) GetPagination() *sdk_ws.ResponsePagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+type CommentsMsg struct {
+	Comment              *Comment `protobuf:"bytes,1,opt,name=comment" json:"comment,omitempty"`
+	WorkMomentsID        string   `protobuf:"bytes,2,opt,name=workMomentsID" json:"workMomentsID,omitempty"`
+	Content              string   `protobuf:"bytes,3,opt,name=content" json:"content,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CommentsMsg) Reset()         { *m = CommentsMsg{} }
+func (m *CommentsMsg) String() string { return proto.CompactTextString(m) }
+func (*CommentsMsg) ProtoMessage()    {}
+func (*CommentsMsg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{33}
+}
+func (m *CommentsMsg) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CommentsMsg.Unmarshal(m, b)
+}
+func (m *CommentsMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CommentsMsg.Marshal(b, m, deterministic)
+}
+func (dst *CommentsMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CommentsMsg.Merge(dst, src)
+}
+func (m *CommentsMsg) XXX_Size() int {
+	return xxx_messageInfo_CommentsMsg.Size(m)
+}
+func (m *CommentsMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_CommentsMsg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CommentsMsg proto.InternalMessageInfo
+
+func (m *CommentsMsg) GetComment() *Comment {
+	if m != nil {
+		return m.Comment
+	}
+	return nil
+}
+
+func (m *CommentsMsg) GetWorkMomentsID() string {
+	if m != nil {
+		return m.WorkMomentsID
+	}
+	return ""
+}
+
+func (m *CommentsMsg) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+type GetUserWorkMomentsCommentsMsgReq struct {
+	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	OperationID          string                    `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,3,opt,name=Pagination" json:"Pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
+	XXX_unrecognized     []byte                    `json:"-"`
+	XXX_sizecache        int32                     `json:"-"`
+}
+
+func (m *GetUserWorkMomentsCommentsMsgReq) Reset()         { *m = GetUserWorkMomentsCommentsMsgReq{} }
+func (m *GetUserWorkMomentsCommentsMsgReq) String() string { return proto.CompactTextString(m) }
+func (*GetUserWorkMomentsCommentsMsgReq) ProtoMessage()    {}
+func (*GetUserWorkMomentsCommentsMsgReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{34}
+}
+func (m *GetUserWorkMomentsCommentsMsgReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetUserWorkMomentsCommentsMsgReq.Unmarshal(m, b)
+}
+func (m *GetUserWorkMomentsCommentsMsgReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetUserWorkMomentsCommentsMsgReq.Marshal(b, m, deterministic)
+}
+func (dst *GetUserWorkMomentsCommentsMsgReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserWorkMomentsCommentsMsgReq.Merge(dst, src)
+}
+func (m *GetUserWorkMomentsCommentsMsgReq) XXX_Size() int {
+	return xxx_messageInfo_GetUserWorkMomentsCommentsMsgReq.Size(m)
+}
+func (m *GetUserWorkMomentsCommentsMsgReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserWorkMomentsCommentsMsgReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserWorkMomentsCommentsMsgReq proto.InternalMessageInfo
+
+func (m *GetUserWorkMomentsCommentsMsgReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *GetUserWorkMomentsCommentsMsgReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GetUserWorkMomentsCommentsMsgReq) GetPagination() *sdk_ws.RequestPagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+type GetUserWorkMomentsCommentsMsgResp struct {
+	CommonResp           *CommonResp                `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	CommentsMsg          []*CommentsMsg             `protobuf:"bytes,2,rep,name=commentsMsg" json:"commentsMsg,omitempty"`
+	Pagination           *sdk_ws.ResponsePagination `protobuf:"bytes,3,opt,name=Pagination" json:"Pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
+	XXX_unrecognized     []byte                     `json:"-"`
+	XXX_sizecache        int32                      `json:"-"`
+}
+
+func (m *GetUserWorkMomentsCommentsMsgResp) Reset()         { *m = GetUserWorkMomentsCommentsMsgResp{} }
+func (m *GetUserWorkMomentsCommentsMsgResp) String() string { return proto.CompactTextString(m) }
+func (*GetUserWorkMomentsCommentsMsgResp) ProtoMessage()    {}
+func (*GetUserWorkMomentsCommentsMsgResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{35}
+}
+func (m *GetUserWorkMomentsCommentsMsgResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetUserWorkMomentsCommentsMsgResp.Unmarshal(m, b)
+}
+func (m *GetUserWorkMomentsCommentsMsgResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetUserWorkMomentsCommentsMsgResp.Marshal(b, m, deterministic)
+}
+func (dst *GetUserWorkMomentsCommentsMsgResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserWorkMomentsCommentsMsgResp.Merge(dst, src)
+}
+func (m *GetUserWorkMomentsCommentsMsgResp) XXX_Size() int {
+	return xxx_messageInfo_GetUserWorkMomentsCommentsMsgResp.Size(m)
+}
+func (m *GetUserWorkMomentsCommentsMsgResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserWorkMomentsCommentsMsgResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserWorkMomentsCommentsMsgResp proto.InternalMessageInfo
+
+func (m *GetUserWorkMomentsCommentsMsgResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+func (m *GetUserWorkMomentsCommentsMsgResp) GetCommentsMsg() []*CommentsMsg {
+	if m != nil {
+		return m.CommentsMsg
+	}
+	return nil
+}
+
+func (m *GetUserWorkMomentsCommentsMsgResp) GetPagination() *sdk_ws.ResponsePagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+type ClearUserWorkMomentsCommentsMsgReq struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ClearUserWorkMomentsCommentsMsgReq) Reset()         { *m = ClearUserWorkMomentsCommentsMsgReq{} }
+func (m *ClearUserWorkMomentsCommentsMsgReq) String() string { return proto.CompactTextString(m) }
+func (*ClearUserWorkMomentsCommentsMsgReq) ProtoMessage()    {}
+func (*ClearUserWorkMomentsCommentsMsgReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{36}
+}
+func (m *ClearUserWorkMomentsCommentsMsgReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ClearUserWorkMomentsCommentsMsgReq.Unmarshal(m, b)
+}
+func (m *ClearUserWorkMomentsCommentsMsgReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ClearUserWorkMomentsCommentsMsgReq.Marshal(b, m, deterministic)
+}
+func (dst *ClearUserWorkMomentsCommentsMsgReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClearUserWorkMomentsCommentsMsgReq.Merge(dst, src)
+}
+func (m *ClearUserWorkMomentsCommentsMsgReq) XXX_Size() int {
+	return xxx_messageInfo_ClearUserWorkMomentsCommentsMsgReq.Size(m)
+}
+func (m *ClearUserWorkMomentsCommentsMsgReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClearUserWorkMomentsCommentsMsgReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ClearUserWorkMomentsCommentsMsgReq proto.InternalMessageInfo
+
+func (m *ClearUserWorkMomentsCommentsMsgReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *ClearUserWorkMomentsCommentsMsgReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type ClearUserWorkMomentsCommentsMsgResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *ClearUserWorkMomentsCommentsMsgResp) Reset()         { *m = ClearUserWorkMomentsCommentsMsgResp{} }
+func (m *ClearUserWorkMomentsCommentsMsgResp) String() string { return proto.CompactTextString(m) }
+func (*ClearUserWorkMomentsCommentsMsgResp) ProtoMessage()    {}
+func (*ClearUserWorkMomentsCommentsMsgResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{37}
+}
+func (m *ClearUserWorkMomentsCommentsMsgResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ClearUserWorkMomentsCommentsMsgResp.Unmarshal(m, b)
+}
+func (m *ClearUserWorkMomentsCommentsMsgResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ClearUserWorkMomentsCommentsMsgResp.Marshal(b, m, deterministic)
+}
+func (dst *ClearUserWorkMomentsCommentsMsgResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClearUserWorkMomentsCommentsMsgResp.Merge(dst, src)
+}
+func (m *ClearUserWorkMomentsCommentsMsgResp) XXX_Size() int {
+	return xxx_messageInfo_ClearUserWorkMomentsCommentsMsgResp.Size(m)
+}
+func (m *ClearUserWorkMomentsCommentsMsgResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClearUserWorkMomentsCommentsMsgResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ClearUserWorkMomentsCommentsMsgResp proto.InternalMessageInfo
+
+func (m *ClearUserWorkMomentsCommentsMsgResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type SetUserWorkMomentsLevelReq struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	Level                int32    `protobuf:"varint,2,opt,name=level" json:"level,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SetUserWorkMomentsLevelReq) Reset()         { *m = SetUserWorkMomentsLevelReq{} }
+func (m *SetUserWorkMomentsLevelReq) String() string { return proto.CompactTextString(m) }
+func (*SetUserWorkMomentsLevelReq) ProtoMessage()    {}
+func (*SetUserWorkMomentsLevelReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{38}
+}
+func (m *SetUserWorkMomentsLevelReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetUserWorkMomentsLevelReq.Unmarshal(m, b)
+}
+func (m *SetUserWorkMomentsLevelReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetUserWorkMomentsLevelReq.Marshal(b, m, deterministic)
+}
+func (dst *SetUserWorkMomentsLevelReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetUserWorkMomentsLevelReq.Merge(dst, src)
+}
+func (m *SetUserWorkMomentsLevelReq) XXX_Size() int {
+	return xxx_messageInfo_SetUserWorkMomentsLevelReq.Size(m)
+}
+func (m *SetUserWorkMomentsLevelReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetUserWorkMomentsLevelReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetUserWorkMomentsLevelReq proto.InternalMessageInfo
+
+func (m *SetUserWorkMomentsLevelReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *SetUserWorkMomentsLevelReq) GetLevel() int32 {
+	if m != nil {
+		return m.Level
+	}
+	return 0
+}
+
+func (m *SetUserWorkMomentsLevelReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type SetUserWorkMomentsLevelResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *SetUserWorkMomentsLevelResp) Reset()         { *m = SetUserWorkMomentsLevelResp{} }
+func (m *SetUserWorkMomentsLevelResp) String() string { return proto.CompactTextString(m) }
+func (*SetUserWorkMomentsLevelResp) ProtoMessage()    {}
+func (*SetUserWorkMomentsLevelResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_office_cc8e5928e4910f0f, []int{39}
+}
+func (m *SetUserWorkMomentsLevelResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetUserWorkMomentsLevelResp.Unmarshal(m, b)
+}
+func (m *SetUserWorkMomentsLevelResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetUserWorkMomentsLevelResp.Marshal(b, m, deterministic)
+}
+func (dst *SetUserWorkMomentsLevelResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetUserWorkMomentsLevelResp.Merge(dst, src)
+}
+func (m *SetUserWorkMomentsLevelResp) XXX_Size() int {
+	return xxx_messageInfo_SetUserWorkMomentsLevelResp.Size(m)
+}
+func (m *SetUserWorkMomentsLevelResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetUserWorkMomentsLevelResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetUserWorkMomentsLevelResp proto.InternalMessageInfo
+
+func (m *SetUserWorkMomentsLevelResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*CommonResp)(nil), "office.CommonResp")
 	proto.RegisterType((*TagUser)(nil), "office.TagUser")
@@ -975,6 +2147,28 @@ func init() {
 	proto.RegisterType((*GetTagSendLogsResp)(nil), "office.GetTagSendLogsResp")
 	proto.RegisterType((*GetUserTagByIDReq)(nil), "office.GetUserTagByIDReq")
 	proto.RegisterType((*GetUserTagByIDResp)(nil), "office.GetUserTagByIDResp")
+	proto.RegisterType((*LikeUser)(nil), "office.LikeUser")
+	proto.RegisterType((*Comment)(nil), "office.Comment")
+	proto.RegisterType((*WorkMoment)(nil), "office.WorkMoment")
+	proto.RegisterType((*CreateOneWorkMomentReq)(nil), "office.CreateOneWorkMomentReq")
+	proto.RegisterType((*CreateOneWorkMomentResp)(nil), "office.CreateOneWorkMomentResp")
+	proto.RegisterType((*DeleteOneWorkMomentReq)(nil), "office.DeleteOneWorkMomentReq")
+	proto.RegisterType((*DeleteOneWorkMomentResp)(nil), "office.DeleteOneWorkMomentResp")
+	proto.RegisterType((*LikeOneWorkMomentReq)(nil), "office.LikeOneWorkMomentReq")
+	proto.RegisterType((*LikeOneWorkMomentResp)(nil), "office.LikeOneWorkMomentResp")
+	proto.RegisterType((*CommentOneWorkMomentReq)(nil), "office.CommentOneWorkMomentReq")
+	proto.RegisterType((*CommentOneWorkMomentResp)(nil), "office.CommentOneWorkMomentResp")
+	proto.RegisterType((*GetUserWorkMomentsReq)(nil), "office.GetUserWorkMomentsReq")
+	proto.RegisterType((*GetUserWorkMomentsResp)(nil), "office.GetUserWorkMomentsResp")
+	proto.RegisterType((*GetUserFriendWorkMomentsReq)(nil), "office.GetUserFriendWorkMomentsReq")
+	proto.RegisterType((*GetUserFriendWorkMomentsResp)(nil), "office.GetUserFriendWorkMomentsResp")
+	proto.RegisterType((*CommentsMsg)(nil), "office.CommentsMsg")
+	proto.RegisterType((*GetUserWorkMomentsCommentsMsgReq)(nil), "office.GetUserWorkMomentsCommentsMsgReq")
+	proto.RegisterType((*GetUserWorkMomentsCommentsMsgResp)(nil), "office.GetUserWorkMomentsCommentsMsgResp")
+	proto.RegisterType((*ClearUserWorkMomentsCommentsMsgReq)(nil), "office.ClearUserWorkMomentsCommentsMsgReq")
+	proto.RegisterType((*ClearUserWorkMomentsCommentsMsgResp)(nil), "office.ClearUserWorkMomentsCommentsMsgResp")
+	proto.RegisterType((*SetUserWorkMomentsLevelReq)(nil), "office.SetUserWorkMomentsLevelReq")
+	proto.RegisterType((*SetUserWorkMomentsLevelResp)(nil), "office.SetUserWorkMomentsLevelResp")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -995,6 +2189,17 @@ type OfficeServiceClient interface {
 	SendMsg2Tag(ctx context.Context, in *SendMsg2TagReq, opts ...grpc.CallOption) (*SendMsg2TagResp, error)
 	GetTagSendLogs(ctx context.Context, in *GetTagSendLogsReq, opts ...grpc.CallOption) (*GetTagSendLogsResp, error)
 	GetUserTagByID(ctx context.Context, in *GetUserTagByIDReq, opts ...grpc.CallOption) (*GetUserTagByIDResp, error)
+	CreateOneWorkMoment(ctx context.Context, in *CreateOneWorkMomentReq, opts ...grpc.CallOption) (*CreateOneWorkMomentResp, error)
+	DeleteOneWorkMoment(ctx context.Context, in *DeleteOneWorkMomentReq, opts ...grpc.CallOption) (*DeleteOneWorkMomentResp, error)
+	LikeOneWorkMoment(ctx context.Context, in *LikeOneWorkMomentReq, opts ...grpc.CallOption) (*LikeOneWorkMomentResp, error)
+	CommentOneWorkMoment(ctx context.Context, in *CommentOneWorkMomentReq, opts ...grpc.CallOption) (*CommentOneWorkMomentResp, error)
+	// / user self
+	GetUserWorkMoments(ctx context.Context, in *GetUserWorkMomentsReq, opts ...grpc.CallOption) (*GetUserWorkMomentsResp, error)
+	// / users friend
+	GetUserFriendWorkMoments(ctx context.Context, in *GetUserFriendWorkMomentsReq, opts ...grpc.CallOption) (*GetUserFriendWorkMomentsResp, error)
+	GetUserWorkMomentsCommentsMsg(ctx context.Context, in *GetUserWorkMomentsCommentsMsgReq, opts ...grpc.CallOption) (*GetUserWorkMomentsCommentsMsgResp, error)
+	ClearUserWorkMomentsCommentsMsg(ctx context.Context, in *ClearUserWorkMomentsCommentsMsgReq, opts ...grpc.CallOption) (*ClearUserWorkMomentsCommentsMsgResp, error)
+	SetUserWorkMomentsLevel(ctx context.Context, in *SetUserWorkMomentsLevelReq, opts ...grpc.CallOption) (*SetUserWorkMomentsLevelResp, error)
 }
 
 type officeServiceClient struct {
@@ -1068,6 +2273,87 @@ func (c *officeServiceClient) GetUserTagByID(ctx context.Context, in *GetUserTag
 	return out, nil
 }
 
+func (c *officeServiceClient) CreateOneWorkMoment(ctx context.Context, in *CreateOneWorkMomentReq, opts ...grpc.CallOption) (*CreateOneWorkMomentResp, error) {
+	out := new(CreateOneWorkMomentResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/CreateOneWorkMoment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *officeServiceClient) DeleteOneWorkMoment(ctx context.Context, in *DeleteOneWorkMomentReq, opts ...grpc.CallOption) (*DeleteOneWorkMomentResp, error) {
+	out := new(DeleteOneWorkMomentResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/DeleteOneWorkMoment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *officeServiceClient) LikeOneWorkMoment(ctx context.Context, in *LikeOneWorkMomentReq, opts ...grpc.CallOption) (*LikeOneWorkMomentResp, error) {
+	out := new(LikeOneWorkMomentResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/LikeOneWorkMoment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *officeServiceClient) CommentOneWorkMoment(ctx context.Context, in *CommentOneWorkMomentReq, opts ...grpc.CallOption) (*CommentOneWorkMomentResp, error) {
+	out := new(CommentOneWorkMomentResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/CommentOneWorkMoment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *officeServiceClient) GetUserWorkMoments(ctx context.Context, in *GetUserWorkMomentsReq, opts ...grpc.CallOption) (*GetUserWorkMomentsResp, error) {
+	out := new(GetUserWorkMomentsResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/GetUserWorkMoments", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *officeServiceClient) GetUserFriendWorkMoments(ctx context.Context, in *GetUserFriendWorkMomentsReq, opts ...grpc.CallOption) (*GetUserFriendWorkMomentsResp, error) {
+	out := new(GetUserFriendWorkMomentsResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/GetUserFriendWorkMoments", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *officeServiceClient) GetUserWorkMomentsCommentsMsg(ctx context.Context, in *GetUserWorkMomentsCommentsMsgReq, opts ...grpc.CallOption) (*GetUserWorkMomentsCommentsMsgResp, error) {
+	out := new(GetUserWorkMomentsCommentsMsgResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/GetUserWorkMomentsCommentsMsg", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *officeServiceClient) ClearUserWorkMomentsCommentsMsg(ctx context.Context, in *ClearUserWorkMomentsCommentsMsgReq, opts ...grpc.CallOption) (*ClearUserWorkMomentsCommentsMsgResp, error) {
+	out := new(ClearUserWorkMomentsCommentsMsgResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/ClearUserWorkMomentsCommentsMsg", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *officeServiceClient) SetUserWorkMomentsLevel(ctx context.Context, in *SetUserWorkMomentsLevelReq, opts ...grpc.CallOption) (*SetUserWorkMomentsLevelResp, error) {
+	out := new(SetUserWorkMomentsLevelResp)
+	err := grpc.Invoke(ctx, "/office.OfficeService/SetUserWorkMomentsLevel", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for OfficeService service
 
 type OfficeServiceServer interface {
@@ -1078,6 +2364,17 @@ type OfficeServiceServer interface {
 	SendMsg2Tag(context.Context, *SendMsg2TagReq) (*SendMsg2TagResp, error)
 	GetTagSendLogs(context.Context, *GetTagSendLogsReq) (*GetTagSendLogsResp, error)
 	GetUserTagByID(context.Context, *GetUserTagByIDReq) (*GetUserTagByIDResp, error)
+	CreateOneWorkMoment(context.Context, *CreateOneWorkMomentReq) (*CreateOneWorkMomentResp, error)
+	DeleteOneWorkMoment(context.Context, *DeleteOneWorkMomentReq) (*DeleteOneWorkMomentResp, error)
+	LikeOneWorkMoment(context.Context, *LikeOneWorkMomentReq) (*LikeOneWorkMomentResp, error)
+	CommentOneWorkMoment(context.Context, *CommentOneWorkMomentReq) (*CommentOneWorkMomentResp, error)
+	// / user self
+	GetUserWorkMoments(context.Context, *GetUserWorkMomentsReq) (*GetUserWorkMomentsResp, error)
+	// / users friend
+	GetUserFriendWorkMoments(context.Context, *GetUserFriendWorkMomentsReq) (*GetUserFriendWorkMomentsResp, error)
+	GetUserWorkMomentsCommentsMsg(context.Context, *GetUserWorkMomentsCommentsMsgReq) (*GetUserWorkMomentsCommentsMsgResp, error)
+	ClearUserWorkMomentsCommentsMsg(context.Context, *ClearUserWorkMomentsCommentsMsgReq) (*ClearUserWorkMomentsCommentsMsgResp, error)
+	SetUserWorkMomentsLevel(context.Context, *SetUserWorkMomentsLevelReq) (*SetUserWorkMomentsLevelResp, error)
 }
 
 func RegisterOfficeServiceServer(s *grpc.Server, srv OfficeServiceServer) {
@@ -1210,6 +2507,168 @@ func _OfficeService_GetUserTagByID_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OfficeService_CreateOneWorkMoment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOneWorkMomentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).CreateOneWorkMoment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/CreateOneWorkMoment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).CreateOneWorkMoment(ctx, req.(*CreateOneWorkMomentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OfficeService_DeleteOneWorkMoment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteOneWorkMomentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).DeleteOneWorkMoment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/DeleteOneWorkMoment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).DeleteOneWorkMoment(ctx, req.(*DeleteOneWorkMomentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OfficeService_LikeOneWorkMoment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LikeOneWorkMomentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).LikeOneWorkMoment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/LikeOneWorkMoment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).LikeOneWorkMoment(ctx, req.(*LikeOneWorkMomentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OfficeService_CommentOneWorkMoment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CommentOneWorkMomentReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).CommentOneWorkMoment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/CommentOneWorkMoment",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).CommentOneWorkMoment(ctx, req.(*CommentOneWorkMomentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OfficeService_GetUserWorkMoments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserWorkMomentsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).GetUserWorkMoments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/GetUserWorkMoments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).GetUserWorkMoments(ctx, req.(*GetUserWorkMomentsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OfficeService_GetUserFriendWorkMoments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserFriendWorkMomentsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).GetUserFriendWorkMoments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/GetUserFriendWorkMoments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).GetUserFriendWorkMoments(ctx, req.(*GetUserFriendWorkMomentsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OfficeService_GetUserWorkMomentsCommentsMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserWorkMomentsCommentsMsgReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).GetUserWorkMomentsCommentsMsg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/GetUserWorkMomentsCommentsMsg",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).GetUserWorkMomentsCommentsMsg(ctx, req.(*GetUserWorkMomentsCommentsMsgReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OfficeService_ClearUserWorkMomentsCommentsMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ClearUserWorkMomentsCommentsMsgReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).ClearUserWorkMomentsCommentsMsg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/ClearUserWorkMomentsCommentsMsg",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).ClearUserWorkMomentsCommentsMsg(ctx, req.(*ClearUserWorkMomentsCommentsMsgReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OfficeService_SetUserWorkMomentsLevel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetUserWorkMomentsLevelReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OfficeServiceServer).SetUserWorkMomentsLevel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/office.OfficeService/SetUserWorkMomentsLevel",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OfficeServiceServer).SetUserWorkMomentsLevel(ctx, req.(*SetUserWorkMomentsLevelReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _OfficeService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "office.OfficeService",
 	HandlerType: (*OfficeServiceServer)(nil),
@@ -1242,64 +2701,143 @@ var _OfficeService_serviceDesc = grpc.ServiceDesc{
 			MethodName: "GetUserTagByID",
 			Handler:    _OfficeService_GetUserTagByID_Handler,
 		},
+		{
+			MethodName: "CreateOneWorkMoment",
+			Handler:    _OfficeService_CreateOneWorkMoment_Handler,
+		},
+		{
+			MethodName: "DeleteOneWorkMoment",
+			Handler:    _OfficeService_DeleteOneWorkMoment_Handler,
+		},
+		{
+			MethodName: "LikeOneWorkMoment",
+			Handler:    _OfficeService_LikeOneWorkMoment_Handler,
+		},
+		{
+			MethodName: "CommentOneWorkMoment",
+			Handler:    _OfficeService_CommentOneWorkMoment_Handler,
+		},
+		{
+			MethodName: "GetUserWorkMoments",
+			Handler:    _OfficeService_GetUserWorkMoments_Handler,
+		},
+		{
+			MethodName: "GetUserFriendWorkMoments",
+			Handler:    _OfficeService_GetUserFriendWorkMoments_Handler,
+		},
+		{
+			MethodName: "GetUserWorkMomentsCommentsMsg",
+			Handler:    _OfficeService_GetUserWorkMomentsCommentsMsg_Handler,
+		},
+		{
+			MethodName: "ClearUserWorkMomentsCommentsMsg",
+			Handler:    _OfficeService_ClearUserWorkMomentsCommentsMsg_Handler,
+		},
+		{
+			MethodName: "SetUserWorkMomentsLevel",
+			Handler:    _OfficeService_SetUserWorkMomentsLevel_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "office/office.proto",
 }
 
-func init() { proto.RegisterFile("office/office.proto", fileDescriptor_office_7f5adce6bc494f97) }
+func init() { proto.RegisterFile("office/office.proto", fileDescriptor_office_cc8e5928e4910f0f) }
 
-var fileDescriptor_office_7f5adce6bc494f97 = []byte{
-	// 810 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xd1, 0x6a, 0xdb, 0x4a,
-	0x10, 0x45, 0x76, 0x6c, 0xc7, 0xe3, 0x24, 0xbe, 0xd9, 0x9b, 0x9b, 0xeb, 0x2b, 0x6e, 0x5b, 0x57,
-	0xb4, 0x10, 0x5a, 0xb0, 0xc1, 0xed, 0x43, 0xa1, 0x34, 0x94, 0xd8, 0xc1, 0xb8, 0x24, 0x4d, 0x50,
-	0x9c, 0x97, 0x3e, 0xd4, 0x6c, 0xec, 0xb1, 0x10, 0x89, 0x25, 0x65, 0x57, 0x4e, 0xe8, 0x6b, 0x7f,
-	0xa1, 0xdf, 0xd4, 0xbe, 0xf7, 0x1f, 0xfa, 0x21, 0x45, 0x2b, 0x69, 0xb5, 0x2b, 0xdb, 0x04, 0x0c,
-	0x7d, 0x92, 0x66, 0x76, 0x66, 0x74, 0xe6, 0xec, 0xec, 0x59, 0xc1, 0xdf, 0xfe, 0x74, 0xea, 0x8e,
-	0xb1, 0x1d, 0x3f, 0x5a, 0x01, 0xf3, 0x43, 0x9f, 0x94, 0x63, 0xcb, 0x7c, 0x7a, 0x16, 0xa0, 0x37,
-	0x1a, 0x9c, 0xb6, 0x83, 0x6b, 0xa7, 0x2d, 0x96, 0xda, 0x7c, 0x72, 0x3d, 0xba, 0xe7, 0xed, 0x7b,
-	0x1e, 0x87, 0x5a, 0x87, 0x00, 0x5d, 0x7f, 0x36, 0xf3, 0x3d, 0x1b, 0x79, 0x40, 0x1a, 0x50, 0x41,
-	0xc6, 0xba, 0xfe, 0x04, 0x1b, 0x46, 0xd3, 0x38, 0x28, 0xd9, 0xa9, 0x49, 0xf6, 0xa1, 0x8c, 0x8c,
-	0x9d, 0x72, 0xa7, 0x51, 0x68, 0x1a, 0x07, 0x55, 0x3b, 0xb1, 0xac, 0x77, 0x50, 0x19, 0x52, 0xe7,
-	0x92, 0x23, 0x8b, 0x42, 0xe6, 0x1c, 0xd9, 0xa0, 0x27, 0x72, 0xab, 0x76, 0x62, 0x11, 0x13, 0x36,
-	0xa3, 0xb7, 0x8f, 0x74, 0x86, 0x49, 0xb2, 0xb4, 0xad, 0x2b, 0x28, 0x0e, 0xa9, 0x43, 0xf6, 0xa0,
-	0x14, 0x52, 0x47, 0x66, 0xc6, 0x46, 0x84, 0x26, 0xa4, 0x8e, 0x92, 0x97, 0x9a, 0xe4, 0x65, 0x5c,
-	0xf2, 0xc4, 0xe5, 0x61, 0xa3, 0xd8, 0x2c, 0x1e, 0xd4, 0x3a, 0xf5, 0x56, 0xc2, 0x40, 0x82, 0xc6,
-	0x96, 0x01, 0xd6, 0x07, 0xd8, 0xe9, 0x63, 0x18, 0x39, 0x87, 0xd4, 0xe1, 0x36, 0xde, 0xae, 0x44,
-	0xda, 0x84, 0x9a, 0x1f, 0x20, 0xa3, 0xa1, 0xeb, 0x7b, 0x83, 0x5e, 0xf2, 0x51, 0xd5, 0x65, 0x4d,
-	0xa1, 0xae, 0xd5, 0xe2, 0x01, 0xe9, 0x00, 0x8c, 0x25, 0x83, 0xa2, 0x60, 0xad, 0x43, 0x52, 0x34,
-	0x19, 0xb7, 0xb6, 0x12, 0x45, 0x9e, 0xc0, 0x46, 0x48, 0x1d, 0xde, 0x28, 0x08, 0xec, 0x35, 0x05,
-	0xbb, 0x2d, 0x16, 0xac, 0xaf, 0x06, 0x6c, 0x75, 0x19, 0xd2, 0x10, 0x23, 0x1f, 0xde, 0xaa, 0x5c,
-	0x18, 0x3a, 0x17, 0x59, 0x33, 0x05, 0xad, 0x99, 0xc7, 0x00, 0xf1, 0x9b, 0x64, 0xa9, 0x6a, 0x2b,
-	0x9e, 0x7c, 0xb3, 0x1b, 0x8b, 0xcd, 0x76, 0x61, 0x5b, 0xc1, 0xb0, 0x5e, 0xab, 0xd6, 0x67, 0xd8,
-	0xea, 0xe1, 0x0d, 0xca, 0x46, 0x56, 0x71, 0x2f, 0x47, 0xa0, 0xa0, 0x8e, 0x40, 0x0e, 0x64, 0x71,
-	0x29, 0x48, 0xa5, 0xfe, 0x9a, 0x20, 0x7f, 0x1a, 0x50, 0xbd, 0xc0, 0x70, 0x2d, 0x88, 0x0d, 0xa8,
-	0x78, 0x78, 0x2f, 0x76, 0x26, 0x86, 0x97, 0x9a, 0xa4, 0x05, 0xc4, 0xf5, 0xc6, 0x0c, 0x29, 0xc7,
-	0xcb, 0x6c, 0x27, 0x36, 0xc4, 0x4e, 0x2c, 0x59, 0x21, 0x2f, 0xe0, 0x2f, 0x86, 0x93, 0xf9, 0x58,
-	0x8d, 0x2e, 0x89, 0xe8, 0x05, 0x7f, 0x9e, 0x98, 0xf2, 0x22, 0x31, 0xef, 0x01, 0xd2, 0x96, 0xd6,
-	0x64, 0xe5, 0x97, 0x01, 0x3b, 0x17, 0xe8, 0x4d, 0x4e, 0xb9, 0xd3, 0xd1, 0xc6, 0x50, 0x20, 0x33,
-	0x04, 0xb2, 0xd4, 0x8c, 0x4e, 0xf9, 0x65, 0x7a, 0x24, 0x0b, 0x62, 0x49, 0xda, 0xe4, 0x7f, 0xa8,
-	0xf6, 0x99, 0x3f, 0x0f, 0x94, 0x49, 0xcc, 0x1c, 0x11, 0xdd, 0x1c, 0xbd, 0x89, 0x9c, 0xc1, 0xc4,
-	0x8a, 0xe8, 0x88, 0xde, 0x90, 0x9d, 0xdf, 0xd0, 0x70, 0xea, 0xb3, 0xd9, 0xa0, 0xd7, 0x28, 0x09,
-	0x55, 0x5a, 0xf0, 0x47, 0xb8, 0xc6, 0xbe, 0x17, 0xa2, 0x17, 0x26, 0x54, 0xa4, 0x66, 0x9e, 0xa8,
-	0xca, 0x22, 0x51, 0xc7, 0x50, 0xd7, 0xba, 0x5c, 0x93, 0xad, 0x6f, 0x06, 0xec, 0xf6, 0x05, 0xe1,
-	0x51, 0xb5, 0x13, 0x3f, 0x96, 0x9a, 0x1e, 0xc0, 0x39, 0x75, 0x5c, 0x4f, 0x7c, 0x2c, 0xa9, 0xf4,
-	0xac, 0xc5, 0x91, 0xdd, 0x21, 0x1b, 0xd1, 0xc0, 0x1d, 0x05, 0x94, 0xd1, 0x19, 0x6f, 0xd9, 0x78,
-	0x3b, 0x47, 0x1e, 0x66, 0xb1, 0xb6, 0x92, 0xb7, 0xf2, 0x8c, 0x3f, 0x7c, 0x3c, 0x7c, 0x80, 0x0c,
-	0x91, 0xa6, 0x9b, 0xc6, 0x03, 0xba, 0xa9, 0x72, 0x5a, 0xd0, 0x39, 0x35, 0x61, 0x33, 0xda, 0x81,
-	0xa1, 0x9b, 0xcc, 0x7c, 0xd1, 0x96, 0xb6, 0xf5, 0xdd, 0x00, 0x92, 0xa7, 0x61, 0x4d, 0x95, 0x3c,
-	0xd6, 0xb8, 0x2b, 0x88, 0x9c, 0xe7, 0x4b, 0xb9, 0xe3, 0x81, 0xef, 0x71, 0x5c, 0x41, 0xde, 0x6b,
-	0xa8, 0x85, 0x19, 0x9a, 0xe4, 0xbe, 0x20, 0x4a, 0xdf, 0xc9, 0x92, 0xad, 0x86, 0x59, 0x63, 0xb1,
-	0x9b, 0x89, 0xd2, 0x1f, 0x7d, 0x19, 0xf4, 0xfe, 0x84, 0x78, 0x39, 0x82, 0x2b, 0xed, 0x23, 0x6b,
-	0x72, 0xf5, 0x08, 0x8a, 0x21, 0x75, 0x12, 0x92, 0xb4, 0x0b, 0x25, 0xf2, 0x77, 0x7e, 0x14, 0x61,
-	0xfb, 0x4c, 0xf8, 0x2e, 0x90, 0xdd, 0xb9, 0x63, 0x24, 0x87, 0x50, 0x53, 0x6e, 0x32, 0xb2, 0x9f,
-	0xa6, 0xe8, 0x57, 0xa5, 0xf9, 0xef, 0x52, 0x3f, 0x0f, 0xc8, 0x1b, 0xa8, 0xca, 0xcb, 0x81, 0xec,
-	0x49, 0x74, 0xca, 0x9d, 0x65, 0xfe, 0xb3, 0xc4, 0x1b, 0x67, 0x4a, 0xc5, 0xce, 0x32, 0xd5, 0x4b,
-	0x22, 0xcb, 0xd4, 0xa5, 0xbd, 0x0d, 0xe5, 0x58, 0xd2, 0xc8, 0x6e, 0x1a, 0x20, 0x55, 0xdb, 0x24,
-	0x79, 0x17, 0x0f, 0xa2, 0x26, 0x95, 0xa3, 0x9d, 0x35, 0xa9, 0xab, 0x5a, 0xd6, 0x64, 0x5e, 0x07,
-	0xfa, 0xe2, 0xd7, 0x41, 0x99, 0x65, 0xf2, 0x9f, 0xc2, 0x87, 0x7e, 0xd4, 0x4d, 0x73, 0xd5, 0x92,
-	0x2c, 0xa4, 0x6c, 0xb4, 0x56, 0x48, 0x9f, 0x32, 0xad, 0x50, 0x6e, 0x36, 0x8e, 0x76, 0x3f, 0xd5,
-	0x5b, 0xc9, 0xcf, 0xde, 0xdb, 0xf8, 0x71, 0x55, 0x16, 0x7f, 0x72, 0xaf, 0x7e, 0x07, 0x00, 0x00,
-	0xff, 0xff, 0xed, 0x02, 0x0a, 0x32, 0x0b, 0x0a, 0x00, 0x00,
+var fileDescriptor_office_cc8e5928e4910f0f = []byte{
+	// 1490 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x59, 0x4f, 0x6f, 0x1b, 0x45,
+	0x14, 0xd7, 0xda, 0x4d, 0x1c, 0x3f, 0xa7, 0x4d, 0x33, 0x49, 0x13, 0xb3, 0x6d, 0x12, 0x77, 0x5b,
+	0xa4, 0xb4, 0x95, 0x6c, 0x64, 0x8a, 0x84, 0x84, 0xa8, 0x50, 0xed, 0x12, 0x05, 0xe2, 0x36, 0xac,
+	0x53, 0xaa, 0x72, 0x68, 0xb4, 0xb1, 0x27, 0xcb, 0x2a, 0xf6, 0xee, 0x76, 0x67, 0x13, 0x53, 0x8e,
+	0x1c, 0xb8, 0x23, 0x0e, 0x9c, 0xb8, 0xf0, 0x1d, 0xf8, 0x08, 0x1c, 0x38, 0x21, 0x0e, 0x1c, 0xb9,
+	0xf1, 0x3d, 0x40, 0x33, 0x3b, 0xbb, 0x3b, 0xb3, 0x7f, 0xec, 0x74, 0x43, 0x25, 0x38, 0x79, 0xdf,
+	0x9b, 0x37, 0x6f, 0xde, 0xfb, 0xbd, 0x79, 0x6f, 0x66, 0x9e, 0x61, 0xc5, 0x39, 0x3e, 0xb6, 0x06,
+	0xb8, 0x15, 0xfc, 0x34, 0x5d, 0xcf, 0xf1, 0x1d, 0x34, 0x1f, 0x50, 0xea, 0xcd, 0x27, 0x2e, 0xb6,
+	0x0f, 0x77, 0x7b, 0x2d, 0xf7, 0xc4, 0x6c, 0xb1, 0xa1, 0x16, 0x19, 0x9e, 0x1c, 0x4e, 0x48, 0x6b,
+	0x42, 0x02, 0x51, 0xed, 0x01, 0x40, 0xc7, 0x19, 0x8f, 0x1d, 0x5b, 0xc7, 0xc4, 0x45, 0x75, 0xa8,
+	0x60, 0xcf, 0xeb, 0x38, 0x43, 0x5c, 0x57, 0x1a, 0xca, 0xf6, 0x9c, 0x1e, 0x92, 0x68, 0x0d, 0xe6,
+	0xb1, 0xe7, 0xf5, 0x88, 0x59, 0x2f, 0x35, 0x94, 0xed, 0xaa, 0xce, 0x29, 0xed, 0x43, 0xa8, 0x1c,
+	0x18, 0xe6, 0x53, 0x82, 0x3d, 0x2a, 0x72, 0x4a, 0xb0, 0xb7, 0xdb, 0x65, 0x73, 0xab, 0x3a, 0xa7,
+	0x90, 0x0a, 0x0b, 0xf4, 0xeb, 0xb1, 0x31, 0xc6, 0x7c, 0x72, 0x44, 0x6b, 0x47, 0x50, 0x3e, 0x30,
+	0x4c, 0xb4, 0x0a, 0x73, 0xbe, 0x61, 0x46, 0x33, 0x03, 0x82, 0x5a, 0xe3, 0x1b, 0xa6, 0x30, 0x2f,
+	0x24, 0xd1, 0xbd, 0x40, 0xe5, 0x9e, 0x45, 0xfc, 0x7a, 0xb9, 0x51, 0xde, 0xae, 0xb5, 0x97, 0x9a,
+	0x1c, 0x01, 0x6e, 0x8d, 0x1e, 0x09, 0x68, 0x9f, 0xc0, 0x95, 0x1d, 0xec, 0x53, 0xe6, 0x81, 0x61,
+	0x12, 0x1d, 0xbf, 0xcc, 0xb5, 0xb4, 0x01, 0x35, 0xc7, 0xc5, 0x9e, 0xe1, 0x5b, 0x8e, 0xbd, 0xdb,
+	0xe5, 0x8b, 0x8a, 0x2c, 0xed, 0x18, 0x96, 0x24, 0x5d, 0xc4, 0x45, 0x6d, 0x80, 0x41, 0x84, 0x20,
+	0x53, 0x58, 0x6b, 0xa3, 0xd0, 0x9a, 0x18, 0x5b, 0x5d, 0x90, 0x42, 0x5b, 0x70, 0xc9, 0x37, 0x4c,
+	0x52, 0x2f, 0x31, 0xdb, 0x6b, 0x82, 0xed, 0x3a, 0x1b, 0xd0, 0xbe, 0x51, 0x60, 0xb1, 0xe3, 0x61,
+	0xc3, 0xc7, 0x94, 0x87, 0x5f, 0x8a, 0x58, 0x28, 0x32, 0x16, 0xb1, 0x33, 0x25, 0xc9, 0x99, 0x4d,
+	0x80, 0xe0, 0x2b, 0x42, 0xa9, 0xaa, 0x0b, 0x9c, 0xa4, 0xb3, 0x97, 0xd2, 0xce, 0x76, 0xe0, 0xb2,
+	0x60, 0x43, 0x31, 0x57, 0xb5, 0x17, 0xb0, 0xd8, 0xc5, 0x23, 0x1c, 0x39, 0x92, 0x87, 0x7d, 0xb4,
+	0x05, 0x4a, 0xe2, 0x16, 0x48, 0x18, 0x59, 0xce, 0x34, 0x52, 0xd0, 0x5f, 0xd0, 0xc8, 0xdf, 0x15,
+	0xa8, 0xf6, 0xb1, 0x5f, 0xc8, 0xc4, 0x3a, 0x54, 0x6c, 0x3c, 0x61, 0x91, 0x09, 0xcc, 0x0b, 0x49,
+	0xd4, 0x04, 0x64, 0xd9, 0x03, 0x0f, 0x1b, 0x04, 0x3f, 0x8d, 0x23, 0x71, 0x89, 0x45, 0x22, 0x63,
+	0x04, 0xdd, 0x85, 0xab, 0x1e, 0x1e, 0x9e, 0x0e, 0x44, 0xe9, 0x39, 0x26, 0x9d, 0xe2, 0x27, 0x81,
+	0x99, 0x4f, 0x03, 0xf3, 0x11, 0x40, 0xe8, 0x52, 0x41, 0x54, 0xfe, 0x52, 0xe0, 0x4a, 0x1f, 0xdb,
+	0xc3, 0x1e, 0x31, 0xdb, 0xd2, 0x36, 0x64, 0x96, 0x29, 0xcc, 0xb2, 0x90, 0xa4, 0x59, 0xfe, 0x34,
+	0x4c, 0xc9, 0x12, 0x1b, 0x8a, 0x68, 0x74, 0x03, 0xaa, 0x3b, 0x9e, 0x73, 0xea, 0x0a, 0x3b, 0x31,
+	0x66, 0x50, 0xb8, 0x09, 0xb6, 0x87, 0xd1, 0x1e, 0xe4, 0x14, 0x85, 0x83, 0x7e, 0x61, 0x6f, 0x7f,
+	0x64, 0xf8, 0xc7, 0x8e, 0x37, 0xde, 0xed, 0xd6, 0xe7, 0x58, 0x55, 0x4a, 0xf1, 0xa9, 0x5d, 0x03,
+	0xc7, 0xf6, 0xb1, 0xed, 0x73, 0x28, 0x42, 0x32, 0x09, 0x54, 0x25, 0x0d, 0xd4, 0x23, 0x58, 0x92,
+	0xbc, 0x2c, 0x88, 0xd6, 0xf7, 0x0a, 0x2c, 0xef, 0x30, 0xc0, 0xa9, 0xb6, 0x3d, 0x27, 0x28, 0x35,
+	0x5d, 0x80, 0x7d, 0xc3, 0xb4, 0x6c, 0xb6, 0x18, 0xd7, 0x74, 0xbb, 0x49, 0xb0, 0x77, 0x86, 0xbd,
+	0x43, 0xc3, 0xb5, 0x0e, 0x5d, 0xc3, 0x33, 0xc6, 0xa4, 0xa9, 0xe3, 0x97, 0xa7, 0x98, 0xf8, 0xb1,
+	0xac, 0x2e, 0xcc, 0xcb, 0xcd, 0xf1, 0xd9, 0xe9, 0xe1, 0x00, 0xc4, 0x16, 0x49, 0x75, 0x53, 0x99,
+	0x51, 0x37, 0x45, 0x4c, 0x4b, 0x32, 0xa6, 0x2a, 0x2c, 0xd0, 0x08, 0x1c, 0x58, 0x7c, 0xcf, 0x97,
+	0xf5, 0x88, 0xd6, 0x7e, 0x51, 0x00, 0x25, 0x61, 0x28, 0x58, 0x25, 0x1f, 0x49, 0xd8, 0x95, 0xd8,
+	0x9c, 0xb7, 0x33, 0xb1, 0x23, 0xae, 0x63, 0x13, 0x9c, 0x03, 0xde, 0x7d, 0xa8, 0xf9, 0xb1, 0x35,
+	0xfc, 0xbc, 0x40, 0x82, 0xdf, 0x7c, 0x48, 0x17, 0xc5, 0xb4, 0x01, 0x8b, 0x26, 0xaf, 0xf4, 0x0f,
+	0x5f, 0xed, 0x76, 0xdf, 0x44, 0xf1, 0x32, 0x19, 0x56, 0xd2, 0x22, 0x05, 0xb1, 0xda, 0x80, 0xb2,
+	0x6f, 0x98, 0x1c, 0x24, 0xe9, 0x40, 0xa1, 0x7c, 0xed, 0x01, 0x2c, 0xec, 0x59, 0x27, 0xb8, 0xf0,
+	0x39, 0xfd, 0xa7, 0x02, 0x15, 0xba, 0x32, 0x8d, 0x7e, 0x81, 0xf9, 0x14, 0x0a, 0x0f, 0xbb, 0xa3,
+	0x57, 0x41, 0x05, 0x0b, 0xa1, 0x10, 0x58, 0xe8, 0x36, 0x5c, 0x8e, 0x48, 0xa6, 0x22, 0x28, 0x06,
+	0x32, 0x93, 0x56, 0x12, 0xbe, 0x09, 0x79, 0x31, 0xa8, 0xea, 0x31, 0x63, 0x4a, 0x15, 0xd8, 0x04,
+	0x18, 0x04, 0x47, 0x19, 0xdd, 0xb3, 0x41, 0x11, 0x10, 0x38, 0xda, 0xdf, 0x25, 0x80, 0x67, 0x8e,
+	0x77, 0xd2, 0x73, 0x98, 0x8b, 0x1a, 0x2c, 0x4e, 0x22, 0x2a, 0x72, 0x54, 0xe2, 0xe5, 0xe6, 0xa4,
+	0x60, 0x44, 0x59, 0x36, 0xa2, 0x09, 0xd5, 0x11, 0x0f, 0x02, 0x61, 0xc7, 0x40, 0xad, 0x7d, 0x35,
+	0x8c, 0x54, 0x18, 0x1d, 0x3d, 0x16, 0xa1, 0xd9, 0x3a, 0x08, 0x30, 0x27, 0xec, 0x1c, 0x10, 0xb2,
+	0x95, 0xc7, 0x42, 0x8f, 0x04, 0xd0, 0x3b, 0xb0, 0x32, 0xf9, 0xd2, 0xe9, 0x18, 0x76, 0x1f, 0x8b,
+	0xe7, 0xc7, 0x3c, 0xab, 0xb6, 0x59, 0x43, 0xa8, 0x0d, 0xab, 0x01, 0xdb, 0x97, 0xa7, 0x54, 0xd8,
+	0x94, 0xcc, 0x31, 0x8a, 0xbf, 0x45, 0xf6, 0x3d, 0xeb, 0xcc, 0xf0, 0x71, 0x7d, 0xa1, 0xa1, 0x6c,
+	0x2f, 0xe8, 0x31, 0x83, 0xee, 0x00, 0x8b, 0xec, 0x9f, 0x1e, 0x8d, 0xac, 0x41, 0xbd, 0xca, 0x06,
+	0x23, 0x9a, 0x46, 0xa0, 0x13, 0x47, 0x00, 0x58, 0x1d, 0x17, 0x38, 0xda, 0xb7, 0x0a, 0xac, 0x05,
+	0xe4, 0x13, 0x1b, 0xc7, 0xa1, 0xa0, 0x59, 0xd7, 0x06, 0x88, 0x91, 0x4f, 0xe6, 0x83, 0x20, 0x2a,
+	0x48, 0x5d, 0xa0, 0x62, 0xf6, 0x60, 0x3d, 0xd3, 0x8e, 0x82, 0xc7, 0xc2, 0x19, 0xac, 0x05, 0xf7,
+	0x93, 0x94, 0x5b, 0x17, 0xd9, 0x64, 0xe7, 0x72, 0x23, 0x73, 0xdd, 0x82, 0x6e, 0xf8, 0xb0, 0x4a,
+	0xb7, 0x68, 0xca, 0x89, 0xbc, 0x62, 0xa0, 0xc1, 0xe2, 0x33, 0xd1, 0xb9, 0xc0, 0x7c, 0x89, 0x77,
+	0x0e, 0x27, 0x3e, 0x85, 0x6b, 0x19, 0xab, 0x16, 0x74, 0xe1, 0x3b, 0x05, 0xd6, 0x79, 0xde, 0xbc,
+	0x8e, 0x1b, 0x93, 0x0c, 0x37, 0xa4, 0x18, 0xe5, 0x27, 0xfc, 0xec, 0x2b, 0xf6, 0x63, 0xa8, 0x67,
+	0x9b, 0x54, 0xd0, 0xc7, 0x1f, 0x14, 0xb8, 0xc6, 0x4f, 0x94, 0x58, 0xdb, 0xd4, 0x37, 0x4f, 0x37,
+	0xe3, 0x90, 0x7d, 0xfd, 0x0b, 0xca, 0xec, 0x50, 0xfe, 0xaa, 0xc0, 0x5a, 0x96, 0x65, 0x05, 0xcf,
+	0xbb, 0xfb, 0x50, 0x8b, 0x83, 0x10, 0x3e, 0xa4, 0xb2, 0x8a, 0x82, 0x28, 0x96, 0xb8, 0x51, 0x94,
+	0x0b, 0xde, 0x28, 0xb4, 0x1f, 0x15, 0xb8, 0xce, 0x7d, 0xf9, 0xd8, 0xb3, 0xb0, 0x3d, 0xfc, 0x8f,
+	0x61, 0xfd, 0x9b, 0x02, 0x37, 0xf2, 0xed, 0xfb, 0x3f, 0x22, 0xfe, 0x15, 0xd4, 0x78, 0x9e, 0x90,
+	0x1e, 0x31, 0xd1, 0x1d, 0x9a, 0x72, 0x63, 0xe1, 0x38, 0x48, 0x1d, 0x8c, 0xe1, 0x38, 0xbd, 0x57,
+	0x08, 0xf6, 0x44, 0x29, 0x2c, 0x33, 0xf3, 0x73, 0x58, 0xfb, 0x49, 0x81, 0x46, 0x7a, 0xdf, 0x0a,
+	0xc6, 0x5c, 0xa8, 0xa1, 0x90, 0xd8, 0x12, 0xe5, 0x62, 0x5b, 0x42, 0xfb, 0x43, 0x81, 0x9b, 0x33,
+	0x8c, 0x2c, 0x18, 0xf5, 0xf7, 0xa0, 0x36, 0x88, 0xd5, 0xf0, 0xa8, 0xaf, 0x24, 0xd0, 0x66, 0x2b,
+	0x88, 0x72, 0xff, 0x56, 0xd8, 0x5f, 0x80, 0xd6, 0x19, 0x61, 0xc3, 0x7b, 0x43, 0xe8, 0x6b, 0xcf,
+	0xe1, 0xd6, 0x4c, 0xfd, 0x05, 0x2b, 0xf1, 0x08, 0xd4, 0x7e, 0x2a, 0x22, 0x7b, 0xf8, 0x0c, 0x8f,
+	0x66, 0x3c, 0x24, 0x46, 0x54, 0x86, 0x19, 0x3b, 0xa7, 0x07, 0xc4, 0x39, 0x32, 0xfe, 0x33, 0xb8,
+	0x9e, 0xbb, 0x5a, 0x31, 0x07, 0xda, 0x3f, 0x03, 0x5c, 0x7e, 0xc2, 0x24, 0xfa, 0xd8, 0x3b, 0xb3,
+	0x06, 0x18, 0x3d, 0x80, 0x9a, 0xd0, 0xfc, 0x42, 0x6b, 0xa1, 0x02, 0xb9, 0xbb, 0xa6, 0xae, 0x67,
+	0xf2, 0x89, 0x8b, 0xde, 0x87, 0x6a, 0xd4, 0x4f, 0x42, 0xab, 0xd1, 0xf2, 0x42, 0x9b, 0x4b, 0xbd,
+	0x96, 0xc1, 0x0d, 0x66, 0x46, 0x4d, 0x9e, 0x78, 0xa6, 0xd8, 0x57, 0x8a, 0x67, 0xca, 0xdd, 0xa0,
+	0x16, 0xcc, 0x07, 0x5d, 0x10, 0xb4, 0x1c, 0x0a, 0x44, 0x8d, 0x1e, 0x15, 0x25, 0x59, 0xc4, 0xa5,
+	0x4e, 0x0a, 0xdd, 0x80, 0xd8, 0x49, 0xb9, 0x11, 0x12, 0x3b, 0x99, 0x6c, 0x1d, 0xec, 0xb0, 0x6e,
+	0xa3, 0xf0, 0xfc, 0x45, 0x6f, 0x09, 0x78, 0xc8, 0xdd, 0x01, 0x55, 0xcd, 0x1b, 0x8a, 0x14, 0x09,
+	0x6f, 0x43, 0x49, 0x91, 0xfc, 0x30, 0x95, 0x14, 0x25, 0x9f, 0x93, 0x9f, 0xc3, 0x4a, 0xc6, 0x85,
+	0x16, 0x6d, 0xca, 0x50, 0x27, 0xaf, 0x44, 0xea, 0xd6, 0xd4, 0xf1, 0x40, 0x6f, 0xc6, 0x0d, 0x33,
+	0xd6, 0x9b, 0x7d, 0xed, 0x8d, 0xf5, 0xe6, 0x5d, 0x4f, 0xf7, 0x61, 0x39, 0x75, 0xe9, 0x43, 0x37,
+	0xc4, 0x87, 0x52, 0x4a, 0xe7, 0xc6, 0x94, 0x51, 0xe2, 0xa2, 0xe7, 0xb0, 0x9a, 0x75, 0xcb, 0x42,
+	0x5b, 0x89, 0x3a, 0x96, 0xd2, 0xdb, 0x98, 0x2e, 0x40, 0x5c, 0xd4, 0x8f, 0x5e, 0xf0, 0x42, 0xe2,
+	0xa1, 0x8d, 0x44, 0x38, 0xe4, 0xfb, 0x81, 0xba, 0x39, 0x6d, 0x98, 0xb8, 0x08, 0x43, 0x3d, 0xef,
+	0xf8, 0x46, 0xb7, 0x12, 0x73, 0xb3, 0x2e, 0x20, 0xea, 0xed, 0xd9, 0x42, 0xc4, 0x45, 0x3e, 0x6c,
+	0x4c, 0x3d, 0x34, 0xd0, 0x76, 0xbe, 0x9d, 0x72, 0x09, 0x56, 0xef, 0x9c, 0x53, 0x92, 0xb8, 0xe8,
+	0x6b, 0xd8, 0x9a, 0x51, 0x73, 0xd1, 0xdd, 0x08, 0xf6, 0x99, 0xc5, 0x5f, 0xbd, 0x77, 0x6e, 0x59,
+	0xe2, 0xa2, 0x23, 0x58, 0xcf, 0x29, 0x93, 0x48, 0x13, 0x6a, 0x41, 0x4e, 0xd5, 0x56, 0x6f, 0xcd,
+	0x94, 0x21, 0xee, 0xc3, 0xe5, 0x2f, 0x96, 0x9a, 0xfc, 0xef, 0x98, 0x0f, 0x82, 0x9f, 0xa3, 0x79,
+	0xf6, 0x5f, 0xcb, 0xbb, 0xff, 0x04, 0x00, 0x00, 0xff, 0xff, 0x50, 0x31, 0x47, 0xbd, 0xad, 0x19,
+	0x00, 0x00,
 }
