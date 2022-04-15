@@ -564,11 +564,10 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 }
 
 type WorkMoment struct {
-
 }
 
-func (d *DataBases) CreateOneWorkMoment(workMoment WorkMoment) error {
-
+func (d *DataBases) CreateOneWorkMoment(workMoment *WorkMoment) error {
+	return nil
 }
 
 func generateTagID(tagName, userID string) string {
