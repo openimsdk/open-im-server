@@ -46,11 +46,14 @@ func init() {
 		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
 		uri = config.Config.Mongo.DBUri
 	} else {
+		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s/?maxPoolSize=%d", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress[0],
+				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
+		}
 		uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
 			config.Config.Mongo.DBAddress[0], config.Config.Mongo.DBDatabase,
 			config.Config.Mongo.DBMaxPoolSize)
 	}
-
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		fmt.Println(" mongo.Connect  failed, try ", utils.GetSelfFuncName(), err.Error(), uri)
