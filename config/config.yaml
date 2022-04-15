@@ -25,8 +25,8 @@ mongo:
   dbTimeout: 10
   dbDatabase: openIM  #mongo db 默认即可
   dbSource: admin
-  dbUserName: "openIM" #mongo用户名，建议先不设置
-  dbPassword: "123456" #mongo密码，建议先不设置
+  dbUserName: #mongo用户名，建议先不设置
+  dbPassword: #mongo密码，建议先不设置
   dbMaxPoolSize: 20
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
 
@@ -167,7 +167,7 @@ longconnsvr:
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10
 
-## 推送只能开启一个 enable=true代表开启
+## 推送只能开启一个 enable代表开启
 push:
   tpns: #腾讯推送，暂未测试 暂不要使用
     ios:
