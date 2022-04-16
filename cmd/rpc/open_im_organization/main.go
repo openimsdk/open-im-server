@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	rpcPort := flag.Int("port", 10100, "get RpcOrganizationPort from cmd,default 10100 as port")
+	rpcPort := flag.Int("port", 11200, "get RpcOrganizationPort from cmd,default 11200 as port")
 	flag.Parse()
 	fmt.Println("start organization rpc server, port: ", *rpcPort)
 	rpcServer := group.NewGroupServer(*rpcPort)
