@@ -149,7 +149,7 @@ message DepartmentMember {
 
 
 message  UserInDepartment {
-  OrganizationUser departmentUser = 1;
+  OrganizationUser organizationUser = 1;
   repeated DepartmentMember departmentMemberList = 2;
 }
 

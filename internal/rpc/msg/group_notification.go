@@ -22,7 +22,7 @@ import (
 //} creator->group
 
 func setOpUserInfo(opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupMemberFullInfo) error {
-	if token_verify.IsMangerUserID(opUserID) {
+	if token_verify.IsManagerUserID(opUserID) {
 		u, err := imdb.GetUserByUserID(opUserID)
 		if err != nil {
 			return utils.Wrap(err, "GetUserByUserID failed")

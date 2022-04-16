@@ -84,14 +84,14 @@ func UpdateDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
-func GetDepartment(c *gin.Context) {
+func GetSubDepartment(c *gin.Context) {
 	params := api.GetDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.GetDepartmentReq{}
+	req := &rpc.GetSubDepartmentReq{}
 	utils.CopyStructFields(req, &params)
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
 	req.OpUserID = opUserID
@@ -105,7 +105,7 @@ func GetDepartment(c *gin.Context) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := rpc.NewOrganizationClient(etcdConn)
-	RpcResp, err := client.GetDepartment(context.Background(), req)
+	RpcResp, err := client.GetSubDepartment(context.Background(), req)
 	if err != nil {
 		errMsg := "rpc GetDepartment failed " + err.Error() + req.String()
 		log.NewError(req.OperationID, errMsg)
@@ -395,6 +395,40 @@ func GetDepartmentMember(c *gin.Context) {
 
 	apiResp := api.GetDepartmentMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, UserInDepartmentList: RpcResp.UserInDepartmentList}
 	apiResp.Data = jsonData.JsonDataList(RpcResp.UserInDepartmentList)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api return ", apiResp)
+	c.JSON(http.StatusOK, apiResp)
+}
+
+func DeleteUserInDepartment(c *gin.Context) {
+	params := api.DeleteUserInDepartmentReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.DeleteUserInDepartmentReq{}
+	utils.CopyStructFields(req, &params)
+
+	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
+	req.OpUserID = opUserID
+	if err != nil {
+		errMsg := "ParseTokenGetUserID failed " + err.Error() + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewOrganizationClient(etcdConn)
+	RpcResp, err := client.DeleteUserInDepartment(context.Background(), req)
+	if err != nil {
+		errMsg := "rpc DeleteUserInDepartment failed " + err.Error() + req.String()
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
+	apiResp := api.GetDepartmentMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api return ", apiResp)
 	c.JSON(http.StatusOK, apiResp)
 }

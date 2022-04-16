@@ -278,8 +278,8 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 
 func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
 	log.NewInfo(req.OperationID, "DeleteUsers args ", req.String())
-	if !token_verify.IsMangerUserID(req.OpUserID) {
-		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
+	if !token_verify.IsManagerUserID(req.OpUserID) {
+		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
 		return &pbUser.DeleteUsersResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, FailedUserIDList: req.DeleteUserIDList}, nil
 	}
 	var common pbUser.CommonResp
@@ -299,8 +299,8 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 
 func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq) (*pbUser.GetAllUserIDResp, error) {
 	log.NewInfo(req.OperationID, "GetAllUserID args ", req.String())
-	if !token_verify.IsMangerUserID(req.OpUserID) {
-		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
+	if !token_verify.IsManagerUserID(req.OpUserID) {
+		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
 		return &pbUser.GetAllUserIDResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	uidList, err := imdb.SelectAllUserID()
@@ -315,8 +315,8 @@ func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq
 
 func (s *userServer) AccountCheck(_ context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
 	log.NewInfo(req.OperationID, "AccountCheck args ", req.String())
-	if !token_verify.IsMangerUserID(req.OpUserID) {
-		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
+	if !token_verify.IsManagerUserID(req.OpUserID) {
+		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
 		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	uidList, err := imdb.SelectSomeUserID(req.CheckUserIDList)

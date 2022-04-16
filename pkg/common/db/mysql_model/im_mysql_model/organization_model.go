@@ -2,7 +2,6 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
-	"errors"
 	"time"
 )
 
@@ -72,6 +71,16 @@ func CreateOrganizationUser(organizationUser *db.OrganizationUser) error {
 	return dbConn.Table("organization_users").Create(organizationUser).Error
 }
 
+func GetOrganizationUser(userID string) (error, *db.OrganizationUser) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err, nil
+	}
+	organizationUser := db.OrganizationUser{}
+	err = dbConn.Table("organization_users").Where("user_id=?", userID).Take(&organizationUser).Error
+	return err, &organizationUser
+}
+
 func UpdateOrganizationUser(organizationUser *db.OrganizationUser, args map[string]interface{}) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
@@ -101,23 +110,32 @@ func GetUserInDepartment(userID string) (error, []db.DepartmentMember) {
 		return err, nil
 	}
 	var departmentMemberList []db.DepartmentMember
-	err = dbConn.Table("department_members").Where("user_id=?", userID).Find(&departmentMemberList).Error
+	err = dbConn.Table("department_members").Where("user_id=?", userID).Take(&departmentMemberList).Error
 	return err, departmentMemberList
 }
 
-func UpdateUserInDepartment(userInDepartmentList []db.DepartmentMember) error {
-	if len(userInDepartmentList) == 0 {
-		return errors.New("args failed")
-	}
-	if err := DeleteUserInAllDepartment(userInDepartmentList[0].UserID); err != nil {
+func UpdateUserInDepartment(departmentMember *db.DepartmentMember, args map[string]interface{}) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
 		return err
 	}
-	for _, v := range userInDepartmentList {
-		if err := CreateDepartmentMember(&v); err != nil {
-			return err
-		}
+	if err = dbConn.Table("department_members").Where("department_id=? ADN user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
+		Updates(departmentMember).Error; err != nil {
+		return err
+	}
+	if args != nil {
+		return dbConn.Table("department_members").Where("department_id=? ADN user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
+			Updates(args).Error
 	}
 	return nil
+}
+
+func DeleteUserInDepartment(departmentID, userID string) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	return dbConn.Table("department_members").Where("department_id=? ADN user_id=?", departmentID, userID).Delete(db.DepartmentMember{}).Error
 }
 
 func DeleteUserInAllDepartment(userID string) error {
@@ -140,13 +158,21 @@ func DeleteOrganizationUser(OrganizationUserID string) error {
 }
 
 func GetDepartmentMemberUserIDList(departmentID string) (error, []string) {
+	//dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	//if err != nil {
+	//	return err
+	//}
+	//return dbConn.Table("department_members").Where("user_id=?", userID).Delete(db.DepartmentMember{}).Error
+
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err, nil
 	}
 	var departmentMemberList []db.DepartmentMember
-	err = dbConn.Table("department_members").Where("department_id=?", departmentID).Find(&departmentMemberList).Error
-
+	err = dbConn.Table("department_members").Where("department_id=?", departmentID).Take(&departmentMemberList).Error
+	if err != nil {
+		return err, nil
+	}
 	var userIDList []string = make([]string, 0)
 	for _, v := range departmentMemberList {
 		userIDList = append(userIDList, v.UserID)

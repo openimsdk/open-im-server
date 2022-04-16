@@ -107,7 +107,7 @@ func GroupMemberOpenIMCopyDB(dst *db.GroupMember, src *open_im_sdk.GroupMemberFu
 
 func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.GroupMember) error {
 	utils.CopyStructFields(dst, src)
-	if token_verify.IsMangerUserID(src.UserID) {
+	if token_verify.IsManagerUserID(src.UserID) {
 		u, err := imdb.GetUserByUserID(src.UserID)
 		if err != nil {
 			return utils.Wrap(err, "")

@@ -99,3 +99,12 @@ type GetDepartmentMemberResp struct {
 	UserInDepartmentList []*open_im_sdk.UserInDepartment `json:"-"`
 	Data                 []map[string]interface{}        `json:"data"`
 }
+
+type DeleteUserInDepartmentReq struct {
+	DepartmentID string `json:"departmentID" binding:"required"`
+	UserID       string `json:"userID" binding:"required"`
+	OperationID  string `json:"operationID" binding:"required"`
+}
+type DeleteUserInDepartmentResp struct {
+	CommResp
+}

@@ -111,7 +111,7 @@ func IsAppManagerAccess(token string, OpUserID string) bool {
 	return false
 }
 
-func IsMangerUserID(OpUserID string) bool {
+func IsManagerUserID(OpUserID string) bool {
 	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
 		return true
 	} else {

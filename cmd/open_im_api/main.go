@@ -152,7 +152,7 @@ func main() {
 	{
 		organizationGroup.POST("/create_department", organization.CreateDepartment)
 		organizationGroup.POST("/update_department", organization.UpdateDepartment)
-		organizationGroup.POST("/get_department", organization.GetDepartment)
+		organizationGroup.POST("/get_department", organization.GetSubDepartment)
 		organizationGroup.POST("/delete_department", organization.DeleteDepartment)
 		organizationGroup.POST("/create_organization_user", organization.CreateOrganizationUser)
 		organizationGroup.POST("/update_organization_user", organization.UpdateOrganizationUser)
@@ -161,6 +161,7 @@ func main() {
 		organizationGroup.POST("/update_user_In_department", organization.UpdateUserInDepartment)
 		organizationGroup.POST("/delete_organization_user", organization.DeleteOrganizationUser)
 		organizationGroup.POST("/get_department_member", organization.GetDepartmentMember)
+		organizationGroup.POST("/delete_user_in_department", organization.DeleteUserInDepartment)
 	}
 
 	go apiThird.MinioInit()
