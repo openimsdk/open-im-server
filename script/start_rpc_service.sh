@@ -19,6 +19,7 @@ service_filename=(
   open_im_statistics
   ${msg_name}
   open_im_office
+  open_im_organization
 )
 
 #service config port name
