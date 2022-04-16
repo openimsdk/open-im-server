@@ -27,7 +27,7 @@ type organizationServer struct {
 	etcdAddr        []string
 }
 
-func NewGroupServer(port int) *organizationServer {
+func NewServer(port int) *organizationServer {
 	log.NewPrivateLog(constant.LogFileName)
 	return &organizationServer{
 		rpcPort:         port,
