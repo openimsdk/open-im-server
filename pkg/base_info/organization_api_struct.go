@@ -13,7 +13,7 @@ type CreateDepartmentResp struct {
 }
 
 type UpdateDepartmentReq struct {
-	open_im_sdk.Department
+	*open_im_sdk.Department
 	DepartmentID string `json:"departmentID" binding:"required"`
 	OperationID  string `json:"operationID" binding:"required"`
 }

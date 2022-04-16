@@ -25,7 +25,6 @@ func CreateDepartment(c *gin.Context) {
 	}
 	req := &rpc.CreateDepartmentReq{DepartmentInfo: &open_im_sdk.Department{}}
 	utils.CopyStructFields(req, &params)
-	utils.CopyStructFields(req.DepartmentInfo, params.Department)
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
 	req.OpUserID = opUserID
 	if err != nil {
