@@ -145,6 +145,7 @@ rpcregistername: #rpc注册服务名，默认即可
   OpenImMessageCMSName: MessageCMS
   openImAdminCMSName: AdminCMS
   openImOfficeName: Office
+  openImOrganizationName: Organization
 
 log:
   storageLocation: ../logs/

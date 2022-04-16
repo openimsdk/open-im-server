@@ -31,7 +31,7 @@ func NewGroupServer(port int) *organizationServer {
 	log.NewPrivateLog(constant.LogFileName)
 	return &organizationServer{
 		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImGroupName,
+		rpcRegisterName: config.Config.RpcRegisterName.OpenImOrganizationName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
