@@ -37,6 +37,7 @@ service_port_name=(
   openImStatisticsPort
   openImOfflineMessagePort
   openImOfficePort
+  openImOrganizationPort
 )
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do
