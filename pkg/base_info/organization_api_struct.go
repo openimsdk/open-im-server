@@ -3,7 +3,7 @@ package base_info
 import open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 
 type CreateDepartmentReq struct {
-	open_im_sdk.Department
+	*open_im_sdk.Department
 	OperationID string `json:"operationID" binding:"required"`
 }
 type CreateDepartmentResp struct {
