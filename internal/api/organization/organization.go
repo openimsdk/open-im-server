@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	rpc "Open_IM/pkg/proto/organization"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,7 @@ func CreateDepartment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.CreateDepartmentReq{}
+	req := &rpc.CreateDepartmentReq{DepartmentInfo: &open_im_sdk.Department{}}
 	utils.CopyStructFields(req, &params)
 	utils.CopyStructFields(req.DepartmentInfo, params.Department)
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
