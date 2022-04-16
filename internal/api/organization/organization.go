@@ -33,7 +33,7 @@ func CreateDepartment(c *gin.Context) {
 		return
 	}
 
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.CreateDepartment(context.Background(), req)
