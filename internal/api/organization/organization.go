@@ -27,7 +27,7 @@ func CreateDepartment(c *gin.Context) {
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
 	req.OpUserID = opUserID
 	if err != nil {
-		errMsg := "ParseTokenGetUserID failed " + err.Error() + c.Request.Header.Get("token")
+		errMsg := "ParseTokenGetUserID failed " + err.Error() + " " + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
