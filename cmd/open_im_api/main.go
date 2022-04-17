@@ -154,9 +154,11 @@ func main() {
 		organizationGroup.POST("/update_department", organization.UpdateDepartment)
 		organizationGroup.POST("/get_sub_department", organization.GetSubDepartment)
 		organizationGroup.POST("/delete_department", organization.DeleteDepartment)
+
 		organizationGroup.POST("/create_organization_user", organization.CreateOrganizationUser)
 		organizationGroup.POST("/update_organization_user", organization.UpdateOrganizationUser)
 		organizationGroup.POST("/create_department_member", organization.CreateDepartmentMember)
+
 		organizationGroup.POST("/get_user_in_department", organization.GetUserInDepartment)
 		organizationGroup.POST("/update_user_In_department", organization.UpdateUserInDepartment)
 		organizationGroup.POST("/delete_organization_user", organization.DeleteOrganizationUser)

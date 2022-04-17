@@ -163,8 +163,9 @@ func CreateOrganizationUser(c *gin.Context) {
 		return
 	}
 
-	req := &rpc.CreateOrganizationUserReq{}
+	req := &rpc.CreateOrganizationUserReq{OrganizationUser: &open_im_sdk.OrganizationUser{}}
 	utils.CopyStructFields(req, &params)
+	utils.CopyStructFields(req.OrganizationUser, &params)
 
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
 	req.OpUserID = opUserID
