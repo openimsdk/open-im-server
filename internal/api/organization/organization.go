@@ -192,7 +192,7 @@ func CreateOrganizationUser(c *gin.Context) {
 }
 
 func UpdateOrganizationUser(c *gin.Context) {
-	params := api.UpdateOrganizationUserReq{OrganizationUser: &open_im_sdk.OrganizationUser{}}
+	params := api.UpdateOrganizationUserReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})

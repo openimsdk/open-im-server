@@ -48,16 +48,16 @@ type CreateOrganizationUserResp struct {
 }
 
 type UpdateOrganizationUserReq struct {
-	OperationID      string `json:"operationID" binding:"required"`
-	OrganizationUser *open_im_sdk.OrganizationUser
+	OperationID string `json:"operationID" binding:"required"`
+	*open_im_sdk.OrganizationUser
 }
 type UpdateOrganizationUserResp struct {
 	CommResp
 }
 
 type CreateDepartmentMemberReq struct {
-	OperationID      string `json:"operationID" binding:"required"`
-	UserInDepartment *open_im_sdk.UserInDepartment
+	OperationID string `json:"operationID" binding:"required"`
+	*open_im_sdk.UserInDepartment
 }
 
 type CreateDepartmentMemberResp struct {
@@ -65,7 +65,7 @@ type CreateDepartmentMemberResp struct {
 }
 
 type GetUserInDepartmentReq struct {
-	UserID      string
+	UserID      string `json:"userID" binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
 }
 type GetUserInDepartmentResp struct {
@@ -83,7 +83,7 @@ type UpdateUserInDepartmentResp struct {
 }
 
 type DeleteOrganizationUserReq struct {
-	UserID      string
+	UserID      string `json:"userID" binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
 }
 type DeleteOrganizationUserResp struct {
@@ -91,7 +91,7 @@ type DeleteOrganizationUserResp struct {
 }
 
 type GetDepartmentMemberReq struct {
-	DepartmentID string
+	DepartmentID string `json:"departmentID" binding:"required"`
 	OperationID  string `json:"operationID" binding:"required"`
 }
 type GetDepartmentMemberResp struct {
