@@ -68,6 +68,7 @@ func CreateOrganizationUser(organizationUser *db.OrganizationUser) error {
 		return err
 	}
 	organizationUser.CreateTime = time.Now()
+
 	return dbConn.Table("organization_users").Create(organizationUser).Error
 }
 
