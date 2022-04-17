@@ -194,6 +194,10 @@ func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rp
 	}
 	organizationUser := db.OrganizationUser{}
 	utils.CopyStructFields(&organizationUser, req.OrganizationUser)
+	if req.OrganizationUser.Birth != 0 {
+		organizationUser.Birth = utils.UnixSecondToTime(int64(req.OrganizationUser.Birth))
+	}
+
 	log.Debug(req.OperationID, "src ", *req.OrganizationUser, "dst ", organizationUser)
 	err := imdb.UpdateOrganizationUser(&organizationUser, nil)
 	if err != nil {
