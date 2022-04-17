@@ -40,8 +40,8 @@ type DeleteDepartmentResp struct {
 }
 
 type CreateOrganizationUserReq struct {
-	OperationID      string `json:"operationID" binding:"required"`
-	OrganizationUser *open_im_sdk.OrganizationUser
+	OperationID string `json:"operationID" binding:"required"`
+	*open_im_sdk.OrganizationUser
 }
 type CreateOrganizationUserResp struct {
 	CommResp
