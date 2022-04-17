@@ -105,7 +105,7 @@ func GetSubDepartment(c *gin.Context) {
 		return
 	}
 
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.GetSubDepartment(context.Background(), req)
@@ -139,7 +139,7 @@ func DeleteDepartment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.DeleteDepartment(context.Background(), req)
@@ -175,7 +175,7 @@ func CreateOrganizationUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.CreateOrganizationUser(context.Background(), req)
@@ -199,9 +199,9 @@ func UpdateOrganizationUser(c *gin.Context) {
 		return
 	}
 
-	req := &rpc.UpdateOrganizationUserReq{}
+	req := &rpc.UpdateOrganizationUserReq{OrganizationUser: &open_im_sdk.OrganizationUser{}}
 	utils.CopyStructFields(req, &params)
-
+	utils.CopyStructFields(req.OrganizationUser, &params)
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
 	req.OpUserID = opUserID
 	if err != nil {
@@ -210,7 +210,7 @@ func UpdateOrganizationUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.UpdateOrganizationUser(context.Background(), req)
@@ -245,7 +245,7 @@ func CreateDepartmentMember(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.CreateDepartmentMember(context.Background(), req)
@@ -280,7 +280,7 @@ func GetUserInDepartment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.GetUserInDepartment(context.Background(), req)
@@ -316,7 +316,7 @@ func UpdateUserInDepartment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.UpdateUserInDepartment(context.Background(), req)
@@ -351,7 +351,7 @@ func DeleteOrganizationUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.DeleteOrganizationUser(context.Background(), req)
@@ -386,7 +386,7 @@ func GetDepartmentMember(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.GetDepartmentMember(context.Background(), req)
@@ -421,7 +421,7 @@ func DeleteUserInDepartment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.DeleteUserInDepartment(context.Background(), req)
