@@ -156,7 +156,7 @@ func DeleteDepartment(c *gin.Context) {
 }
 
 func CreateOrganizationUser(c *gin.Context) {
-	params := api.CreateOrganizationUserReq{OrganizationUser: &open_im_sdk.OrganizationUser{}}
+	params := api.CreateOrganizationUserReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
