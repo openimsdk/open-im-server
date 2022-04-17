@@ -75,8 +75,8 @@ type GetUserInDepartmentResp struct {
 }
 
 type UpdateUserInDepartmentReq struct {
-	OperationID      string `json:"operationID" binding:"required"`
-	UserInDepartment *open_im_sdk.UserInDepartment
+	OperationID string `json:"operationID" binding:"required"`
+	*open_im_sdk.DepartmentMember
 }
 type UpdateUserInDepartmentResp struct {
 	CommResp

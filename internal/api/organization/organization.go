@@ -299,14 +299,14 @@ func GetUserInDepartment(c *gin.Context) {
 }
 
 func UpdateUserInDepartment(c *gin.Context) {
-	params := api.UpdateUserInDepartmentReq{}
+	params := api.UpdateUserInDepartmentReq{DepartmentMember: &open_im_sdk.DepartmentMember{}}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 
-	req := &rpc.UpdateUserInDepartmentReq{}
+	req := &rpc.UpdateUserInDepartmentReq{DepartmentMember: &open_im_sdk.DepartmentMember{}}
 	utils.CopyStructFields(req, &params)
 
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
