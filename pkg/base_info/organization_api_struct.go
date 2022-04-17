@@ -23,7 +23,7 @@ type UpdateDepartmentResp struct {
 
 type GetSubDepartmentReq struct {
 	OperationID  string `json:"operationID" binding:"required"`
-	DepartmentID string
+	DepartmentID string `json:"departmentID" binding:"required"`
 }
 type GetSubDepartmentResp struct {
 	CommResp
