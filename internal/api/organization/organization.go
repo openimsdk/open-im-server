@@ -88,7 +88,7 @@ func UpdateDepartment(c *gin.Context) {
 }
 
 func GetSubDepartment(c *gin.Context) {
-	params := api.GetDepartmentReq{}
+	params := api.GetSubDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -116,7 +116,7 @@ func GetSubDepartment(c *gin.Context) {
 		return
 	}
 
-	apiResp := api.GetDepartmentResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, DepartmentList: RpcResp.DepartmentList}
+	apiResp := api.GetSubDepartmentResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, DepartmentList: RpcResp.DepartmentList}
 	apiResp.Data = jsonData.JsonDataList(RpcResp.DepartmentList)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api return ", apiResp)
 	c.JSON(http.StatusOK, apiResp)

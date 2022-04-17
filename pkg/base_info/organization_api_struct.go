@@ -21,11 +21,11 @@ type UpdateDepartmentResp struct {
 	CommResp
 }
 
-type GetDepartmentReq struct {
+type GetSubDepartmentReq struct {
 	OperationID  string `json:"operationID" binding:"required"`
 	DepartmentID string
 }
-type GetDepartmentResp struct {
+type GetSubDepartmentResp struct {
 	CommResp
 	DepartmentList []*open_im_sdk.Department `json:"-"`
 	Data           []map[string]interface{}  `json:"data"`
