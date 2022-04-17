@@ -59,8 +59,9 @@ func UpdateDepartment(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.UpdateDepartmentReq{}
+	req := &rpc.UpdateDepartmentReq{DepartmentInfo: &open_im_sdk.Department{}}
 	utils.CopyStructFields(req, &params)
+	utils.CopyStructFields(req.DepartmentInfo, &params)
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
 	req.OpUserID = opUserID
 	if err != nil {
@@ -70,7 +71,7 @@ func UpdateDepartment(c *gin.Context) {
 		return
 	}
 
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api args ", req.String(), "params", params)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := rpc.NewOrganizationClient(etcdConn)
 	RpcResp, err := client.UpdateDepartment(context.Background(), req)
