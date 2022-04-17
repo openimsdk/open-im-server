@@ -33,7 +33,7 @@ type GetSubDepartmentResp struct {
 
 type DeleteDepartmentReq struct {
 	OperationID  string `json:"operationID" binding:"required"`
-	DepartmentID string
+	DepartmentID string `json:"departmentID" binding:"required"`
 }
 type DeleteDepartmentResp struct {
 	CommResp
