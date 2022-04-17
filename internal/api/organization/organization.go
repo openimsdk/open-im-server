@@ -156,7 +156,7 @@ func DeleteDepartment(c *gin.Context) {
 }
 
 func CreateOrganizationUser(c *gin.Context) {
-	params := api.CreateOrganizationUserReq{}
+	params := api.CreateOrganizationUserReq{OrganizationUser: &open_im_sdk.OrganizationUser{}}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -192,7 +192,7 @@ func CreateOrganizationUser(c *gin.Context) {
 }
 
 func UpdateOrganizationUser(c *gin.Context) {
-	params := api.UpdateOrganizationUserReq{}
+	params := api.UpdateOrganizationUserReq{OrganizationUser: &open_im_sdk.OrganizationUser{}}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -227,7 +227,7 @@ func UpdateOrganizationUser(c *gin.Context) {
 }
 
 func CreateDepartmentMember(c *gin.Context) {
-	params := api.CreateDepartmentMemberReq{}
+	params := api.CreateDepartmentMemberReq{UserInDepartment: &open_im_sdk.UserInDepartment{}}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
