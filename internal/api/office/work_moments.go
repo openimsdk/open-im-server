@@ -167,6 +167,44 @@ func CommentOneWorkMoment(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+func GetWorkMomentByID(c *gin.Context) {
+	var (
+		req    apiStruct.GetWorkMomentByIDReq
+		resp   apiStruct.GetWorkMomentByIDResp
+		reqPb  pbOffice.GetWorkMomentByIDReq
+		respPb *pbOffice.GetWorkMomentByIDResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
+	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	reqPb.OperationID = req.OperationID
+	reqPb.OpUserID = userID
+	reqPb.WorkMomentID = req.WorkMomentID
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	client := pbOffice.NewOfficeServiceClient(etcdConn)
+	respPb, err := client.GetWorkMomentByID(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserWorkMoments rpc failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserWorkMoments rpc server failed" + err.Error()})
+		return
+	}
+	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	resp.Data.WorkMoment = respPb.WorkMoment
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
 func GetUserWorkMoments(c *gin.Context) {
 	var (
 		req    apiStruct.GetUserWorkMomentsReq

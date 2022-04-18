@@ -26,6 +26,8 @@ const cChat = "msg"
 const cGroup = "group"
 const cTag = "tag"
 const cSendLog = "send_log"
+const cWorkMoment = "work_moment"
+const cCommentMsg = "comment_msg"
 const singleGocMsgNum = 5000
 
 type MsgInfo struct {
@@ -571,39 +573,68 @@ type WorkMoment struct {
 	Comments             []*Comment  `bson:"comments"`
 	WhoCanSeeUserIDList  []string    `bson:"who_can_see_user_id_list"`
 	WhoCantSeeUserIDList []string    `bson:"who_cant_see_user_id_list"`
-	IsPrivate            bool
-	IsPublic             bool
-	CreateTime           int32
+	IsPrivate            bool        `bson:"is_private"`
+	CreateTime           int32       `bson:"create_time"`
 }
 
 type LikeUser struct {
-	UserID   string
-	UserName string
+	UserID   string `bson:"user_id"`
+	UserName string `bson:"user_name"`
 }
 
 type Comment struct {
-	UserID        string
-	UserName      string
-	ReplyUserID   string
-	ReplyUserName string
-	ContentID     string
-	Content       string
-	CreateTime    int32
+	UserID        string `bson:"user_id" json:"user_id"`
+	UserName      string `bson:"user_id" json:"user_name"`
+	ReplyUserID   string `bson:"reply_user_id" json:"reply_user_id"`
+	ReplyUserName string `bson:"reply_user_name" json:"reply_user_name"`
+	ContentID     string `bson:"content_id" json:"content_id"`
+	Content       string `bson:"content" json:"content"`
+	CreateTime    int32  `bson:"create_time" json:"create_time"`
 }
 
 func (d *DataBases) CreateOneWorkMoment(workMoment *WorkMoment) error {
-	return nil
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	workMomentID := generateWorkMomentID(workMoment.UserID)
+	workMoment.WorkMomentID = workMomentID
+	workMoment.CreateTime = int32(time.Now().Unix())
+	_, err := c.InsertOne(ctx, workMoment)
+	return err
 }
 
 func (d *DataBases) DeleteOneWorkMoment(workMomentID string) error {
-	return nil
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	_, err := c.DeleteOne(ctx, bson.M{"work_moment_id": workMomentID})
+	return err
 }
 
 func (d *DataBases) GetWorkMomentByID(workMomentID string) (*WorkMoment, error) {
-	return nil, nil
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	workMoment := &WorkMoment{}
+	err := c.FindOne(ctx, bson.M{"work_moment_id": workMomentID}).Decode(workMoment)
+	return workMoment, err
 }
 
 func (d *DataBases) LikeOneWorkMoment(likeUserID, workMomentID string) error {
+	workMoment, err := d.GetWorkMomentByID(workMomentID)
+	if err != nil {
+		return err
+	}
+	for i, user := range workMoment.LikeUsers {
+		if likeUserID == user.UserID {
+			workMoment.LikeUsers = append(workMoment.LikeUsers[0:i], workMoment.LikeUsers[i+1:]...)
+			return nil
+		}
+	}
+	workMoment.LikeUsers = append(workMoment.LikeUsers, &LikeUser{UserID: likeUserID})
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	_, err = c.UpdateOne(ctx, bson.M{"work_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUsers}})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -611,30 +642,124 @@ func (d *DataBases) SetUserWorkMomentsLevel(userID string, level int32) error {
 	return nil
 }
 
+func (d *DataBases) CreateUserWorkMomentsCommentsMsg(msg CommentMsg) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cCommentMsg)
+	_, err := c.InsertOne(ctx, msg)
+	return err
+}
+
 func (d *DataBases) ClearUserWorkMomentsCommentsMsg(userID string) error {
-	return nil
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cCommentMsg)
+	_, err := c.DeleteOne(ctx, bson.M{"user_id": userID})
+	return err
 }
 
 type CommentMsg struct {
-	WorkMomentID   string `bson:"workMoment"`
-	CommentContent string `bson:"content"`
+	WorkMomentID      string `bson:"work_moment" json:"work_moment"`
+	WorkMomentContent string `bson:"work_moment_content" json:"work_moment_content"`
 	Comment
 }
 
 func (d *DataBases) GetUserWorkMomentsCommentsMsg(userID string, showNumber, pageNumber int32) ([]CommentMsg, error) {
-	return nil, nil
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cCommentMsg)
+	var commentMsgList []CommentMsg
+	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
+	result, err := c.Find(ctx, bson.M{"user_id": userID}, findOpts)
+	if err != nil {
+		return commentMsgList, err
+	}
+	err = result.All(ctx, &commentMsgList)
+	return commentMsgList, err
 }
 
-func (d *DataBases) CommentOneWorkMoment(comment Comment, workMomentID string) error {
-	return nil
+func (d *DataBases) CommentOneWorkMoment(comment Comment, workMomentID string) (WorkMoment, error) {
+	comment.ContentID = generateWorkMomentCommentID(workMomentID)
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	var workMoment WorkMoment
+	err := c.FindOneAndUpdate(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$push": bson.M{"comments": comment}}).Decode(&workMoment)
+	return workMoment, err
 }
 
 func (d *DataBases) GetUserWorkMoments(userID string, showNumber, pageNumber int32) ([]WorkMoment, error) {
-	return nil, nil
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	var workMomentList []WorkMoment
+	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
+	result, err := c.Find(ctx, bson.M{"user_id": userID}, findOpts)
+	if err != nil {
+		return workMomentList, nil
+	}
+	err = result.All(ctx, &workMomentList)
+	return workMomentList, err
 }
 
-func (d *DataBases) GetUserFriendWorkMoments(friendIDList []string, showNumber, pageNumber int32) ([]WorkMoment, error) {
-	return nil, nil
+// recursion
+func (d *DataBases) GetUserFriendWorkMomentsRecursion(friendIDList []string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	var workMomentList []WorkMoment
+	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
+	result, err := c.Find(ctx, bson.M{"user_id": friendIDList, "is_private": false, "who_can_see_user_id_list": bson.M{"$elemMatch": bson.M{"$eq": userID}}, "who_cant_see_user_id_list": ""}, findOpts)
+	if err != nil {
+		return workMomentList, nil
+	}
+	err = result.All(ctx, &workMomentList)
+	//if len(workMomentList) == 0 {
+	//	return workMomentList, nil
+	//}
+	//for i, workMoment := range workMomentList {
+	//	if workMoment.IsPrivate {
+	//		workMomentList = append(workMomentList[0:i], workMomentList[i+1:]...)
+	//		continue
+	//	}
+	//
+	//	var isContain bool
+	//	for _, WhoCanSeeUserID := range workMoment.WhoCanSeeUserIDList {
+	//		if WhoCanSeeUserID == userID {
+	//			isContain = true
+	//			break
+	//		}
+	//	}
+	//	if !isContain {
+	//		workMomentList = append(workMomentList[0:i], workMomentList[i+1:]...)
+	//		continue
+	//	}
+	//
+	//	for _, whoCantSeeUserID := range workMoment.WhoCantSeeUserIDList {
+	//		if whoCantSeeUserID == userID {
+	//			workMomentList = append(workMomentList[0:i], workMomentList[i+1:]...)
+	//			break
+	//		}
+	//	}
+	//}
+	//
+	//if len(workMomentList) < int(pageNumber) {
+	//	workMomentListWorkMomentList, err := d.GetUserFriendWorkMomentsRecursion(friendIDList, showNumber, pageNumber, userID)
+	//	workMomentList = append(workMomentList, workMomentListWorkMomentList...)
+	//	if err != nil {
+	//		return workMomentList, err
+	//	}
+	//}
+	return workMomentList, err
+}
+
+func (d *DataBases) GetUserFriendWorkMoments(friendIDList []string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	var workMomentList []WorkMoment
+	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
+	result, err := c.Find(ctx, bson.M{"user_id": friendIDList, "is_private": false, "$or": bson.M{"who_can_see_user_id_list": bson.M{"$elemMatch": bson.M{"$eq": userID}},
+		"who_cant_see_user_id_list": bson.M{"$nin": userID}},
+	}, findOpts)
+	if err != nil {
+		return workMomentList, nil
+	}
+	err = result.All(ctx, &workMomentList)
+	return workMomentList, err
 }
 
 func generateTagID(tagName, userID string) string {
@@ -643,6 +768,10 @@ func generateTagID(tagName, userID string) string {
 
 func generateWorkMomentID(userID string) string {
 	return utils.Md5(userID + strconv.Itoa(rand.Int()) + time.Now().String())
+}
+
+func generateWorkMomentCommentID(workMomentID string) string {
+	return utils.Md5(workMomentID + strconv.Itoa(rand.Int()) + time.Now().String())
 }
 
 func getCurrentTimestampByMill() int64 {
@@ -666,9 +795,7 @@ func getMsgIndex(seq uint32) int {
 }
 
 func isContainInt32(target uint32, List []uint32) bool {
-
 	for _, element := range List {
-
 		if target == element {
 			return true
 		}

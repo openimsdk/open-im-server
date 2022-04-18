@@ -132,7 +132,6 @@ message WorkMoment {
   repeated string whoCanSeeUserIDList = 6;
   repeated string whoCantSeeUserIDList = 7;
   bool isPrivate = 8;
-  bool isPublic = 9;
   int32 CreateTime = 10;
 }
 
@@ -176,6 +175,17 @@ message CommentOneWorkMomentReq {
 
 message CommentOneWorkMomentResp {
   CommonResp commonResp = 1;
+}
+
+message GetWorkMomentByIDReq {
+  string workMomentID = 1;
+  string opUserID = 2;
+  string operationID = 3;
+}
+
+message GetWorkMomentByIDResp {
+  CommonResp commonResp = 1;
+  WorkMoment workMoment = 2;
 }
 
 message GetUserWorkMomentsReq {
@@ -252,6 +262,7 @@ service OfficeService {
   rpc DeleteOneWorkMoment(DeleteOneWorkMomentReq) returns(DeleteOneWorkMomentResp);
   rpc LikeOneWorkMoment(LikeOneWorkMomentReq) returns(LikeOneWorkMomentResp);
   rpc CommentOneWorkMoment(CommentOneWorkMomentReq) returns(CommentOneWorkMomentResp);
+  rpc GetWorkMomentByID(GetWorkMomentByIDReq) returns(GetWorkMomentByIDResp);
   /// user self
   rpc GetUserWorkMoments(GetUserWorkMomentsReq) returns(GetUserWorkMomentsResp);
   /// users friend

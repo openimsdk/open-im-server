@@ -91,6 +91,9 @@ const (
 
 	OrganizationChangedNotification = 1801
 
+	WorkMomentNotificationStart      = 1900
+	WorkMomentNewCommentNotification = 1901
+
 	NotificationEnd = 2000
 
 	//status

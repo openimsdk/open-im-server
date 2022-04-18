@@ -206,10 +206,23 @@ func (s *userServer) GetConversations(ctx context.Context, req *pbUser.GetConver
 
 func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConversationReq) (*pbUser.SetConversationResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbUser.SetConversationResp{}
 	if req.NotificationType == 0 {
 		req.NotificationType = constant.ConversationOptChangeNotification
 	}
-	resp := &pbUser.SetConversationResp{}
+	if req.Conversation.ConversationType == constant.GroupChatType {
+		groupInfo, err := imdb.GetGroupInfoByGroupID(req.Conversation.GroupID)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", req.Conversation.GroupID, err.Error())
+			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+			return resp, nil
+		}
+		if groupInfo.Status == constant.GroupStatusDismissed {
+			errMsg := "group status is dismissed"
+			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}
+			return resp, nil
+		}
+	}
 	var conversation db.Conversation
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", *req.Conversation, err.Error())
