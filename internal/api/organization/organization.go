@@ -307,8 +307,8 @@ func UpdateUserInDepartment(c *gin.Context) {
 	}
 
 	req := &rpc.UpdateUserInDepartmentReq{DepartmentMember: &open_im_sdk.DepartmentMember{}}
+	utils.CopyStructFields(req.DepartmentMember, &params)
 	utils.CopyStructFields(req, &params)
-
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
 	req.OpUserID = opUserID
 	if err != nil {
