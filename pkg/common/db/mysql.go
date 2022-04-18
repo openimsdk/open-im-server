@@ -106,20 +106,20 @@ func initMysqlDB() {
 		fmt.Println("CreateTable Conversation")
 		db.CreateTable(&Conversation{})
 	}
-	/*
-		if db.HasTable(&Department{}) {
-			fmt.Println("CreateTable Department")
-			db.CreateTable(&Department{})
-		}
-		if db.HasTable(&OrganizationUser{}) {
-			fmt.Println("CreateTable OrganizationUser")
-			db.CreateTable(&OrganizationUser{})
-		}
-		if db.HasTable(&DepartmentMember{}) {
-			fmt.Println("CreateTable DepartmentMember")
-			db.CreateTable(&DepartmentMember{})
-		}
-	*/
+
+	if !db.HasTable(&Department{}) {
+		fmt.Println("CreateTable Department")
+		db.CreateTable(&Department{})
+	}
+	if !db.HasTable(&OrganizationUser{}) {
+		fmt.Println("CreateTable OrganizationUser")
+		db.CreateTable(&OrganizationUser{})
+	}
+	if !db.HasTable(&DepartmentMember{}) {
+		fmt.Println("CreateTable DepartmentMember")
+		db.CreateTable(&DepartmentMember{})
+	}
+
 	return
 }
 

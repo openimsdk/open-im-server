@@ -81,6 +81,7 @@ const (
 	GroupMemberCancelMutedNotification   = 1513
 	GroupMutedNotification               = 1514
 	GroupCancelMutedNotification         = 1515
+	GroupMemberInfoSetNotification       = 1516
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601
@@ -88,8 +89,10 @@ const (
 
 	ConversationPrivateChatNotification = 1701
 
-	WorkMomentNotificationStart      = 1800
-	WorkMomentNewCommentNotification = 1801
+	OrganizationChangedNotification = 1801
+
+	WorkMomentNotificationStart      = 1900
+	WorkMomentNewCommentNotification = 1901
 
 	NotificationEnd = 2000
 

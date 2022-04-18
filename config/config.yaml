@@ -122,6 +122,7 @@ rpcport: #rpc服务端口 默认即可
   openImMessageCmsPort: [ 10900 ]
   openImAdminCmsPort: [ 11000 ]
   openImOfficePort: [ 11100 ]
+  openImOrganizationPort: [ 11200 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -144,6 +145,7 @@ rpcregistername: #rpc注册服务名，默认即可
   OpenImMessageCMSName: MessageCMS
   openImAdminCMSName: AdminCMS
   openImOfficeName: Office
+  openImOrganizationName: Organization
 
 log:
   storageLocation: ../logs/
@@ -430,6 +432,20 @@ notification:
       ext: "groupMemberCancelMuted ext"
     defaultTips:
       tips: "group Member Cancel Muted"
+
+  groupMemberInfoSet:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "groupMemberInfoSet title"
+      desc: "groupMemberInfoSet desc"
+      ext: "groupMemberInfoSet ext"
+    defaultTips:
+      tips: "group member info set"
+
+
   #############################friend#################################
 
   friendApplicationAdded:

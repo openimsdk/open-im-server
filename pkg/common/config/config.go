@@ -117,6 +117,7 @@ type config struct {
 		OpenImMessageCMSName         string `yaml:"openImMessageCMSName"`
 		OpenImAdminCMSName           string `yaml:"openImAdminCMSName"`
 		OpenImOfficeName             string `yaml:"openImOfficeName"`
+		OpenImOrganizationName       string `yaml:"openImOrganizationName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
@@ -303,6 +304,11 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"groupMemberCancelMuted"`
+		GroupMemberInfoSet struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberInfoSet"`
 
 		////////////////////////user///////////////////////
 		UserInfoUpdated struct {

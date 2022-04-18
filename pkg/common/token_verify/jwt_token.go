@@ -111,7 +111,7 @@ func IsAppManagerAccess(token string, OpUserID string) bool {
 	return false
 }
 
-func IsMangerUserID(OpUserID string) bool {
+func IsManagerUserID(OpUserID string) bool {
 	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
 		return true
 	} else {
@@ -138,21 +138,29 @@ func GetUserIDFromToken(token string, operationID string) (bool, string) {
 	return true, claims.UID
 }
 
+func ParseTokenGetUserID(token string, operationID string) (error, string) {
+	claims, err := ParseToken(token, operationID)
+	if err != nil {
+		return utils.Wrap(err, ""), ""
+	}
+	return nil, claims.UID
+}
+
 func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 	claims, err = GetClaimFromToken(tokensString)
 	if err != nil {
 		log.NewError(operationID, "token validate err", err.Error(), tokensString)
-		return nil, err
+		return nil, utils.Wrap(err, "")
 	}
 
 	m, err := commonDB.DB.GetTokenMapByUidPid(claims.UID, claims.Platform)
 	if err != nil {
 		log.NewError(operationID, "get token from redis err", err.Error(), tokensString)
-		return nil, &constant.ErrTokenInvalid
+		return nil, utils.Wrap(&constant.ErrTokenInvalid, "get token from redis err")
 	}
 	if m == nil {
 		log.NewError(operationID, "get token from redis err", "m is nil", tokensString)
-		return nil, &constant.ErrTokenInvalid
+		return nil, utils.Wrap(&constant.ErrTokenInvalid, "get token from redis err")
 	}
 	if v, ok := m[tokensString]; ok {
 		switch v {
@@ -160,18 +168,18 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 			log.NewDebug(operationID, "this is normal return", claims)
 			return claims, nil
 		case constant.InValidToken:
-			return nil, &constant.ErrTokenInvalid
+			return nil, utils.Wrap(&constant.ErrTokenInvalid, "")
 		case constant.KickedToken:
 			log.Error(operationID, "this token has been kicked by other same terminal ", constant.ErrTokenKicked)
-			return nil, &constant.ErrTokenKicked
+			return nil, utils.Wrap(&constant.ErrTokenKicked, "this token has been kicked by other same terminal ")
 		case constant.ExpiredToken:
-			return nil, &constant.ErrTokenExpired
+			return nil, utils.Wrap(&constant.ErrTokenExpired, "")
 		default:
-			return nil, &constant.ErrTokenUnknown
+			return nil, utils.Wrap(&constant.ErrTokenUnknown, "")
 		}
 	}
 	log.NewError(operationID, "redis token map not find", constant.ErrTokenUnknown)
-	return nil, &constant.ErrTokenUnknown
+	return nil, utils.Wrap(&constant.ErrTokenUnknown, "redis token map not find")
 }
 
 //func MakeTheTokenInvalid(currentClaims *Claims, platformClass string) (bool, error) {

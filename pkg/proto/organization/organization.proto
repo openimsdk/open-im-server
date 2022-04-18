@@ -28,13 +28,13 @@ message UpdateDepartmentResp{
 }
 
 
-message GetDepartmentReq{
+message GetSubDepartmentReq{
   string departmentID = 1;
   string operationID = 2;
   string opUserID = 3;
 }
 
-message GetDepartmentResp{
+message GetSubDepartmentResp{
   int32   errCode = 1;
   string  errMsg = 2;
   repeated server_api_params.Department departmentList = 3;
@@ -81,7 +81,7 @@ message UpdateOrganizationUserResp{
 
 
 message CreateDepartmentMemberReq{
-  server_api_params.UserInDepartment userInDepartment = 1;
+  server_api_params.DepartmentMember departmentMember = 1;
   string operationID = 2;
   string opUserID = 3;
 }
@@ -104,7 +104,7 @@ message GetUserInDepartmentResp{
 
 
 message UpdateUserInDepartmentReq{
-  server_api_params.UserInDepartment userInDepartment = 1;
+  server_api_params.DepartmentMember departmentMember = 1;
   string operationID = 2;
   string opUserID = 3;
 }
@@ -114,12 +114,23 @@ message UpdateUserInDepartmentResp{
 }
 
 
-message DeleteOrganizationReq{
+message DeleteUserInDepartmentReq{
+  string userID = 1;
+  string operationID = 2;
+  string opUserID = 3;
+  string departmentID = 4;
+}
+message DeleteUserInDepartmentResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+}
+
+message DeleteOrganizationUserReq{
   string userID = 1;
   string operationID = 2;
   string opUserID = 3;
 }
-message DeleteOrganizationResp{
+message DeleteOrganizationUserResp{
   int32   errCode = 1;
   string  errMsg = 2;
 }
@@ -134,21 +145,25 @@ message GetDepartmentMemberReq{
 message GetDepartmentMemberResp{
   int32   errCode = 1;
   string  errMsg = 2;
-  repeated  server_api_params.UserInDepartment userInDepartmentList = 3;
+  repeated  server_api_params.UserDepartmentMember userDepartmentMemberList = 3;
 }
 
 
 service organization{
-  rpc createDepartment(CreateDepartmentReq) returns(CreateDepartmentResp);
+  rpc CreateDepartment(CreateDepartmentReq) returns(CreateDepartmentResp);
   rpc UpdateDepartment(UpdateDepartmentReq) returns(UpdateDepartmentResp);
-  rpc GetDepartment(GetDepartmentReq) returns(GetDepartmentResp);
+  rpc GetSubDepartment(GetSubDepartmentReq) returns(GetSubDepartmentResp);
   rpc DeleteDepartment(DeleteDepartmentReq) returns(DeleteDepartmentResp);
+
   rpc CreateOrganizationUser(CreateOrganizationUserReq) returns(CreateOrganizationUserResp);
   rpc UpdateOrganizationUser(UpdateOrganizationUserReq) returns(UpdateOrganizationUserResp);
+  rpc DeleteOrganizationUser(DeleteOrganizationUserReq) returns(DeleteOrganizationUserResp);
+
+
   rpc CreateDepartmentMember(CreateDepartmentMemberReq) returns(CreateDepartmentMemberResp);
   rpc GetUserInDepartment(GetUserInDepartmentReq) returns(GetUserInDepartmentResp);
+  rpc DeleteUserInDepartment(DeleteUserInDepartmentReq) returns(DeleteUserInDepartmentResp);
   rpc UpdateUserInDepartment(UpdateUserInDepartmentReq) returns(UpdateUserInDepartmentResp);
-  rpc DeleteOrganization(DeleteOrganizationReq) returns(DeleteOrganizationResp);
   rpc GetDepartmentMember(GetDepartmentMemberReq) returns(GetDepartmentMemberResp);
 }
 

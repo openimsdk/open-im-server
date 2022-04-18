@@ -227,9 +227,9 @@ type Department struct {
 	DepartmentID   string    `gorm:"column:department_id;primary_key;size:64" json:"departmentID"`
 	FaceURL        string    `gorm:"column:face_url;size:255" json:"faceURL"`
 	Name           string    `gorm:"column:name;size:256" json:"name" binding:"required"`
-	ParentID       string    `gorm:"column:parent_id;size:64" json:"parentID" binding:"required"`
-	Order          int32     `gorm:"column:order" json:"order" `
-	DepartmentType int32     `gorm:"column:department_type" json:"departmentType"`
+	ParentID       string    `gorm:"column:parent_id;size:64" json:"parentID" binding:"required"` // "0" or Real parent id
+	Order          int32     `gorm:"column:order" json:"order" `                                  // 1, 2, ...
+	DepartmentType int32     `gorm:"column:department_type" json:"departmentType"`                //1, 2...
 	CreateTime     time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex             string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }
@@ -243,7 +243,7 @@ type OrganizationUser struct {
 	Nickname    string    `gorm:"column:nickname;size:256"`
 	EnglishName string    `gorm:"column:english_name;size:256"`
 	FaceURL     string    `gorm:"column:face_url;size:256"`
-	Gender      int32     `gorm:"column:gender"`
+	Gender      int32     `gorm:"column:gender"` //1 ,2
 	Mobile      string    `gorm:"column:mobile;size:32"`
 	Telephone   string    `gorm:"column:telephone;size:32"`
 	Birth       time.Time `gorm:"column:birth"`
@@ -257,13 +257,14 @@ func (OrganizationUser) TableName() string {
 }
 
 type DepartmentMember struct {
-	UserID       string `gorm:"column:user_id;primary_key;size:64"`
-	DepartmentID string `gorm:"column:department_id;primary_key;size:64"`
-	Order        int32  `gorm:"column:order" json:"order"`
-	Position     string `gorm:"column:position;size:256" json:"position"`
-	Leader       int32  `gorm:"column:leader" json:"leader"`
-	Status       int32  `gorm:"column:status" json:"status"`
-	Ex           string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+	UserID       string    `gorm:"column:user_id;primary_key;size:64"`
+	DepartmentID string    `gorm:"column:department_id;primary_key;size:64"`
+	Order        int32     `gorm:"column:order" json:"order"` //1,2
+	Position     string    `gorm:"column:position;size:256" json:"position"`
+	Leader       int32     `gorm:"column:leader" json:"leader"` //-1, 1
+	Status       int32     `gorm:"column:status" json:"status"` //-1, 1
+	CreateTime   time.Time `gorm:"column:create_time"`
+	Ex           string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }
 
 func (DepartmentMember) TableName() string {

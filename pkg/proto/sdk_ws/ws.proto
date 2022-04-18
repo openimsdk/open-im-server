@@ -138,18 +138,23 @@ message OrganizationUser  {
 
 message DepartmentMember {
       string userID = 1;
-      string DepartmentID = 2;
-      int32 Order = 3;
-      string Position = 4;
-      int32 Leader = 5;
-      int32 Status = 6;
-      string Ex     = 7;
+      string departmentID = 2;
+      int32 order = 3;
+      string position = 4;
+      int32 leader = 5;
+      int32 status = 6;
+      string ex     = 7;
 }
 
 
+message  UserDepartmentMember {
+  OrganizationUser organizationUser = 1;
+  DepartmentMember departmentMember = 2;
+}
+
 
 message  UserInDepartment {
-  OrganizationUser departmentUser = 1;
+  OrganizationUser organizationUser = 1;
   repeated DepartmentMember departmentMemberList = 2;
 }
 
@@ -346,6 +351,12 @@ message GroupCancelMutedTips{
   int64 operationTime = 3;
 }
 
+message GroupMemberInfoSetTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo changedUser = 4;
+}
 
 //////////////////////friend/////////////////////
 //message FriendInfo{
