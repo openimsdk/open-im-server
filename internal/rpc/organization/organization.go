@@ -71,9 +71,9 @@ func (s *organizationServer) Run() {
 func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.CreateDepartmentReq) (*rpc.CreateDepartmentResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.CreateDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.CreateDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
 	department := db.Department{}
@@ -103,9 +103,9 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 func (s *organizationServer) UpdateDepartment(ctx context.Context, req *rpc.UpdateDepartmentReq) (*rpc.UpdateDepartmentResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.UpdateDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.UpdateDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
 	department := db.Department{}
@@ -146,9 +146,9 @@ func (s *organizationServer) GetSubDepartment(ctx context.Context, req *rpc.GetS
 func (s *organizationServer) DeleteDepartment(ctx context.Context, req *rpc.DeleteDepartmentReq) (*rpc.DeleteDepartmentResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.DeleteDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.DeleteDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 	err := imdb.DeleteDepartment(req.DepartmentID)
 	if err != nil {
@@ -165,9 +165,9 @@ func (s *organizationServer) DeleteDepartment(ctx context.Context, req *rpc.Dele
 func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rpc.CreateOrganizationUserReq) (*rpc.CreateOrganizationUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 	organizationUser := db.OrganizationUser{}
 	utils.CopyStructFields(&organizationUser, req.OrganizationUser)
@@ -188,7 +188,7 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rpc.UpdateOrganizationUserReq) (*rpc.UpdateOrganizationUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
 		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
@@ -215,14 +215,14 @@ func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rp
 func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rpc.CreateDepartmentMemberReq) (*rpc.CreateDepartmentMemberResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
 		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
 	err, _ := imdb.GetOrganizationUser(req.DepartmentMember.UserID)
 	if err != nil {
-		errMsg := req.OperationID + "" + req.DepartmentMember.UserID + " is not exist"
+		errMsg := req.OperationID + " " + req.DepartmentMember.UserID + " is not exist"
 		log.Error(req.OperationID, errMsg)
 		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
@@ -283,9 +283,9 @@ func (s *organizationServer) GetUserInDepartment(ctx context.Context, req *rpc.G
 func (s *organizationServer) UpdateUserInDepartment(ctx context.Context, req *rpc.UpdateUserInDepartmentReq) (*rpc.UpdateUserInDepartmentResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.UpdateUserInDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.UpdateUserInDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 	departmentMember := &db.DepartmentMember{}
 	utils.CopyStructFields(departmentMember, req.DepartmentMember)
@@ -304,9 +304,9 @@ func (s *organizationServer) UpdateUserInDepartment(ctx context.Context, req *rp
 func (s *organizationServer) DeleteUserInDepartment(ctx context.Context, req *rpc.DeleteUserInDepartmentReq) (*rpc.DeleteUserInDepartmentResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.DeleteUserInDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.DeleteUserInDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
 	err := imdb.DeleteUserInDepartment(req.DepartmentID, req.UserID)
@@ -324,9 +324,9 @@ func (s *organizationServer) DeleteUserInDepartment(ctx context.Context, req *rp
 func (s *organizationServer) DeleteOrganizationUser(ctx context.Context, req *rpc.DeleteOrganizationUserReq) (*rpc.DeleteOrganizationUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.DeleteOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.DeleteOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 	err := imdb.DeleteOrganizationUser(req.UserID)
 	if err != nil {
@@ -344,9 +344,9 @@ func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.G
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	err, departmentMemberList := imdb.GetDepartmentMemberList(req.DepartmentID)
 	if err != nil {
-		errMsg := req.OperationID + " " + "GetDepartmentMemberList failed " + err.Error()
-		log.Error(req.OperationID, errMsg, req.DepartmentID)
-		return &rpc.GetDepartmentMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
+		log.Error(req.OperationID, errMsg)
+		return &rpc.GetDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
 	log.Debug(req.OperationID, "GetDepartmentMemberList ", departmentMemberList)
