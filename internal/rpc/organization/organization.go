@@ -335,23 +335,30 @@ func (s *organizationServer) DeleteOrganizationUser(ctx context.Context, req *rp
 
 func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.GetDepartmentMemberReq) (*rpc.GetDepartmentMemberResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	err, departmentMemberUserIDList := imdb.GetDepartmentMemberUserIDList(req.DepartmentID)
+	err, departmentMemberList := imdb.GetDepartmentMemberList(req.DepartmentID)
 	if err != nil {
-		errMsg := req.OperationID + " " + "GetDepartmentMemberUserIDList failed " + err.Error()
+		errMsg := req.OperationID + " " + "GetDepartmentMemberList failed " + err.Error()
 		log.Error(req.OperationID, errMsg, req.DepartmentID)
 		return &rpc.GetDepartmentMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
 	}
 
-	log.Debug(req.OperationID, "GetDepartmentMemberUserIDList ", departmentMemberUserIDList)
+	log.Debug(req.OperationID, "GetDepartmentMemberList ", departmentMemberList)
 	resp := rpc.GetDepartmentMemberResp{}
-	for _, v := range departmentMemberUserIDList {
-		r, err := s.GetUserInDepartmentByUserID(v, req.OperationID)
+	for _, v := range departmentMemberList {
+		err, organizationUser := imdb.GetOrganizationUser(v.UserID)
 		if err != nil {
-			log.Error(req.OperationID, "GetUserInDepartmentByUserID failed ", err.Error())
+			log.Error(req.OperationID, "GetOrganizationUser failed ", err.Error())
 			continue
 		}
-		log.Debug(req.OperationID, "GetUserInDepartmentByUserID success ", *r, "userID ", v)
-		resp.UserInDepartmentList = append(resp.UserInDepartmentList, r)
+		respOrganizationUser := &open_im_sdk.OrganizationUser{}
+		respDepartmentMember := &open_im_sdk.DepartmentMember{}
+
+		utils.CopyStructFields(respOrganizationUser, organizationUser)
+		utils.CopyStructFields(respDepartmentMember, &v)
+		userDepartmentMember := open_im_sdk.UserDepartmentMember{OrganizationUser: respOrganizationUser, DepartmentMember: respDepartmentMember}
+
+		log.Debug(req.OperationID, "GetUserInDepartmentByUserID success ", userDepartmentMember)
+		resp.UserDepartmentMemberList = append(resp.UserDepartmentMemberList, &userDepartmentMember)
 	}
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", resp)

@@ -398,8 +398,8 @@ func GetDepartmentMember(c *gin.Context) {
 		return
 	}
 
-	apiResp := api.GetDepartmentMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, UserInDepartmentList: RpcResp.UserInDepartmentList}
-	apiResp.Data = jsonData.JsonDataList(RpcResp.UserInDepartmentList)
+	apiResp := api.GetDepartmentMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, UserInDepartmentList: RpcResp.UserDepartmentMemberList}
+	apiResp.Data = jsonData.JsonDataList(RpcResp.UserDepartmentMemberList)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api return ", apiResp)
 	c.JSON(http.StatusOK, apiResp)
 }
