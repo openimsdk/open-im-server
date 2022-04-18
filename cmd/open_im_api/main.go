@@ -38,9 +38,10 @@ func main() {
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
-		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)    //1
-		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)        //1
-		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo) //1
+		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)              //1
+		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)                  //1
+		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
+		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
@@ -86,6 +87,7 @@ func main() {
 		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
 
 		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
+
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
