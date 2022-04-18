@@ -271,7 +271,8 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 			//	e := err.(*constant.ErrInfo)
 			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error())
 			w.Header().Set("Sec-Websocket-Version", "13")
-			http.Error(w, err.Error(), 1222212)
+			w.Header().Set("ws_err_msg", err.Error())
+			http.Error(w, err.Error(), status)
 			return false
 		} else {
 			log.Info(operationID, "Connection Authentication Success", "", "token", query["token"][0], "userID", query["sendID"][0])
@@ -280,6 +281,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 	} else {
 		log.Error(operationID, "Args err", "query", query)
 		w.Header().Set("Sec-Websocket-Version", "13")
+		w.Header().Set("ws_err_msg", "args err")
 		http.Error(w, http.StatusText(status), status)
 		return false
 	}
