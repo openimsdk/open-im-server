@@ -236,7 +236,7 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 	return resp, nil
 }
 
-func (s *organizationServer) GetUserInDepartmentByUserID(userID string) (*open_im_sdk.UserInDepartment, error) {
+func (s *organizationServer) GetUserInDepartmentByUserID(userID string, operationID string) (*open_im_sdk.UserInDepartment, error) {
 	err, organizationUser := imdb.GetOrganizationUser(userID)
 	if err != nil {
 		return nil, utils.Wrap(err, "GetOrganizationUser failed")
@@ -245,11 +245,13 @@ func (s *organizationServer) GetUserInDepartmentByUserID(userID string) (*open_i
 	if err != nil {
 		return nil, utils.Wrap(err, "GetUserInDepartment failed")
 	}
+	log.Debug(operationID, "GetUserInDepartment  ", departmentMemberList)
 	resp := &open_im_sdk.UserInDepartment{OrganizationUser: &open_im_sdk.OrganizationUser{}}
 	utils.CopyStructFields(resp.OrganizationUser, organizationUser)
 	for _, v := range departmentMemberList {
 		v1 := open_im_sdk.DepartmentMember{}
 		utils.CopyStructFields(&v1, v)
+		log.Debug(operationID, "DepartmentMember src  ", v, "dst ", v1)
 		resp.DepartmentMemberList = append(resp.DepartmentMemberList, &v1)
 	}
 	return resp, nil
@@ -257,7 +259,7 @@ func (s *organizationServer) GetUserInDepartmentByUserID(userID string) (*open_i
 
 func (s *organizationServer) GetUserInDepartment(ctx context.Context, req *rpc.GetUserInDepartmentReq) (*rpc.GetUserInDepartmentResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	r, err := s.GetUserInDepartmentByUserID(req.UserID)
+	r, err := s.GetUserInDepartmentByUserID(req.UserID, req.OperationID)
 	if err != nil {
 		errMsg := req.OperationID + " " + "GetUserInDepartmentByUserID failed " + err.Error()
 		log.Error(req.OperationID, errMsg, req.UserID)
@@ -342,7 +344,7 @@ func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.G
 
 	resp := rpc.GetDepartmentMemberResp{}
 	for _, v := range departmentMemberUserIDList {
-		r, err := s.GetUserInDepartmentByUserID(v)
+		r, err := s.GetUserInDepartmentByUserID(v, req.OperationID)
 		if err != nil {
 			log.Error(req.OperationID, "GetUserInDepartmentByUserID failed ", err.Error())
 			continue
