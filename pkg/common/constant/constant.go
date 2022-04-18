@@ -89,6 +89,8 @@ const (
 
 	ConversationPrivateChatNotification = 1701
 
+	OrganizationChangedNotification = 1801
+
 	NotificationEnd = 2000
 
 	//status

@@ -57,7 +57,7 @@ type UpdateOrganizationUserResp struct {
 
 type CreateDepartmentMemberReq struct {
 	OperationID string `json:"operationID" binding:"required"`
-	*open_im_sdk.UserInDepartment
+	*open_im_sdk.DepartmentMember
 }
 
 type CreateDepartmentMemberResp struct {
