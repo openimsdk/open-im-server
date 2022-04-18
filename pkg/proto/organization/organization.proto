@@ -145,7 +145,7 @@ message GetDepartmentMemberReq{
 message GetDepartmentMemberResp{
   int32   errCode = 1;
   string  errMsg = 2;
-  repeated  server_api_params.UserInDepartment userInDepartmentList = 3;
+  repeated  server_api_params.UserDepartmentMember userDepartmentMemberList = 3;
 }
 
 

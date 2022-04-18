@@ -147,6 +147,11 @@ message DepartmentMember {
 }
 
 
+message  UserDepartmentMember {
+  OrganizationUser organizationUser = 1;
+  DepartmentMember departmentMember = 2;
+}
+
 
 message  UserInDepartment {
   OrganizationUser organizationUser = 1;

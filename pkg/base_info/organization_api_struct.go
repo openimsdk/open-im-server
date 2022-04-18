@@ -96,8 +96,8 @@ type GetDepartmentMemberReq struct {
 }
 type GetDepartmentMemberResp struct {
 	CommResp
-	UserInDepartmentList []*open_im_sdk.UserInDepartment `json:"-"`
-	Data                 []map[string]interface{}        `json:"data"`
+	UserInDepartmentList []*open_im_sdk.UserDepartmentMember `json:"-"`
+	Data                 []map[string]interface{}            `json:"data"`
 }
 
 type DeleteUserInDepartmentReq struct {

@@ -159,12 +159,6 @@ func DeleteOrganizationUser(OrganizationUserID string) error {
 }
 
 func GetDepartmentMemberUserIDList(departmentID string) (error, []string) {
-	//dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	//if err != nil {
-	//	return err
-	//}
-	//return dbConn.Table("department_members").Where("user_id=?", userID).Delete(db.DepartmentMember{}).Error
-
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err, nil
@@ -179,4 +173,17 @@ func GetDepartmentMemberUserIDList(departmentID string) (error, []string) {
 		userIDList = append(userIDList, v.UserID)
 	}
 	return err, userIDList
+}
+
+func GetDepartmentMemberList(departmentID string) (error, []db.DepartmentMember) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err, nil
+	}
+	var departmentMemberList []db.DepartmentMember
+	err = dbConn.Table("department_members").Where("department_id=?", departmentID).Find(&departmentMemberList).Error
+	if err != nil {
+		return err, nil
+	}
+	return err, departmentMemberList
 }
