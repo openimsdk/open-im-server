@@ -88,6 +88,9 @@ const (
 
 	ConversationPrivateChatNotification = 1701
 
+	WorkMomentNotificationStart      = 1800
+	WorkMomentNewCommentNotification = 1801
+
 	NotificationEnd = 2000
 
 	//status

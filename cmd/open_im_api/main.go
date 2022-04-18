@@ -140,6 +140,7 @@ func main() {
 		officeGroup.POST("/delete_one_work_moment", office.DeleteOneWorkMoment)
 		officeGroup.POST("/like_one_work_moment", office.LikeOneWorkMoment)
 		officeGroup.POST("/comment_one_work_moment", office.CommentOneWorkMoment)
+		officeGroup.POST("/get_work_moment_by_id", office.GetWorkMomentByID)
 		officeGroup.POST("/get_user_work_moments", office.GetUserWorkMoments)
 		officeGroup.POST("/get_user_friend_work_moments", office.GetUserFriendWorkMoments)
 		officeGroup.POST("/get_user_work_moments_comments_msg", office.GetUserWorkMomentsCommentsMsg)

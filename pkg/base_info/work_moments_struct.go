@@ -41,6 +41,17 @@ type WorkMomentsUserCommonReq struct {
 	UserID      string `json:"UserID" binding:"required"`
 }
 
+type GetWorkMomentByIDReq struct {
+	office.GetWorkMomentByIDReq
+}
+
+type GetWorkMomentByIDResp struct {
+	CommResp
+	Data struct {
+		WorkMoment *office.WorkMoment `json:"workMoment"`
+	} `json:"data"`
+}
+
 type GetUserWorkMomentsReq struct {
 	WorkMomentsUserCommonReq
 }
