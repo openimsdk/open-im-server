@@ -84,6 +84,8 @@ func main() {
 		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
 		groupRouterGroup.POST("/mute_group", group.MuteGroup)
 		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
+
+		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")

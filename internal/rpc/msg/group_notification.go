@@ -168,6 +168,9 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		tips.DefaultTips = toNickname + "" + cn.GroupMemberMuted.DefaultTips.Tips
 	case constant.GroupMemberCancelMutedNotification:
 		tips.DefaultTips = toNickname + "" + cn.GroupMemberCancelMuted.DefaultTips.Tips
+	case constant.GroupMemberInfoSetNotification:
+		tips.DefaultTips = toNickname + "" + cn.GroupMemberInfoSet.DefaultTips.Tips
+
 	default:
 		log.Error(operationID, "contentType failed ", contentType)
 		return
@@ -280,6 +283,24 @@ func GroupMemberMutedNotification(operationID, opUserID, groupID, groupMemberUse
 		return
 	}
 	groupNotification(constant.GroupMemberMutedNotification, &tips, opUserID, groupID, "", operationID)
+}
+
+func GroupMemberInfoSetNotification(operationID, opUserID, groupID, groupMemberUserID string) {
+	tips := open_im_sdk.GroupMemberInfoSetTips{Group: &open_im_sdk.GroupInfo{},
+		OpUser: &open_im_sdk.GroupMemberFullInfo{}, ChangedUser: &open_im_sdk.GroupMemberFullInfo{}}
+	if err := setGroupInfo(groupID, tips.Group); err != nil {
+		log.Error(operationID, "setGroupInfo failed ", err.Error(), groupID)
+		return
+	}
+	if err := setOpUserInfo(opUserID, groupID, tips.OpUser); err != nil {
+		log.Error(operationID, "setOpUserInfo failed ", err.Error(), opUserID, groupID)
+		return
+	}
+	if err := setGroupMemberInfo(groupID, groupMemberUserID, tips.ChangedUser); err != nil {
+		log.Error(operationID, "setGroupMemberInfo failed ", err.Error(), groupID, groupMemberUserID)
+		return
+	}
+	groupNotification(constant.GroupMemberInfoSetNotification, &tips, opUserID, groupID, "", operationID)
 }
 
 func GroupMemberCancelMutedNotification(operationID, opUserID, groupID, groupMemberUserID string) {

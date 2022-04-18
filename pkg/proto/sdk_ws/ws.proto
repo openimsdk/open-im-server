@@ -346,6 +346,12 @@ message GroupCancelMutedTips{
   int64 operationTime = 3;
 }
 
+message GroupMemberInfoSetTips{
+  GroupInfo group = 1;
+  GroupMemberFullInfo opUser = 2;
+  int64 operationTime = 3;
+  GroupMemberFullInfo changedUser = 4;
+}
 
 //////////////////////friend/////////////////////
 //message FriendInfo{
