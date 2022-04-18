@@ -436,11 +436,11 @@ notification:
   groupMemberInfoSet:
     conversation:
       reliabilityLevel: 2
-      unreadCount: true
+      unreadCount: false
     offlinePush:
       switch: false
-      title: "groupMemberInfoSet title "
-      desc: "groupMemberInfoSet desc "
+      title: "groupMemberInfoSet title"
+      desc: "groupMemberInfoSet desc"
       ext: "groupMemberInfoSet ext"
     defaultTips:
       tips: "group member info set"
