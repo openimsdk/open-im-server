@@ -51,7 +51,8 @@ var (
 
 	ErrAccess   = ErrInfo{ErrCode: 801, ErrMsg: AccessMsg.Error()}
 	ErrDB       = ErrInfo{ErrCode: 802, ErrMsg: DBMsg.Error()}
-	ErrArgs     = ErrInfo{ErrCode: 8003, ErrMsg: ArgsMsg.Error()}
+	ErrArgs     = ErrInfo{ErrCode: 803, ErrMsg: ArgsMsg.Error()}
+	ErrStatus   = ErrInfo{ErrCode: 804, ErrMsg: StatusMsg.Error()}
 	ErrCallback = ErrInfo{ErrCode: 809, ErrMsg: CallBackMsg.Error()}
 )
 
@@ -64,6 +65,7 @@ var (
 	TokenUnknownMsg     = errors.New("couldn't handle this token")
 	TokenUserKickedMsg  = errors.New("user has been kicked")
 	AccessMsg           = errors.New("no permission")
+	StatusMsg           = errors.New("status is abnormal")
 	DBMsg               = errors.New("db failed")
 	ArgsMsg             = errors.New("args failed")
 	CallBackMsg         = errors.New("callback failed")
