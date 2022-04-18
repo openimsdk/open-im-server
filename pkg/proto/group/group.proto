@@ -380,6 +380,19 @@ message CancelMuteGroupResp{
 
 
 
+message SetGroupMemberNicknameReq{
+  string groupID = 1;
+  string nickname = 2;
+  string opUserID = 3;
+  string operationID = 4;
+  string userID = 5;
+}
+message SetGroupMemberNicknameResp{
+  CommonResp CommonResp = 1;
+}
+
+
+
 
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -413,6 +426,9 @@ service group{
   rpc CancelMuteGroupMember(CancelMuteGroupMemberReq) returns(CancelMuteGroupMemberResp);
   rpc MuteGroup(MuteGroupReq) returns(MuteGroupResp);
   rpc CancelMuteGroup(CancelMuteGroupReq) returns(CancelMuteGroupResp);
+
+  rpc SetGroupMemberNickname(SetGroupMemberNicknameReq) returns (SetGroupMemberNicknameResp);
+
 }
 
 

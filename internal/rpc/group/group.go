@@ -1073,3 +1073,36 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
 	return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
 }
+
+func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.SetGroupMemberNicknameReq) (*pbGroup.SetGroupMemberNicknameResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
+	if req.OpUserID != req.UserID && !token_verify.IsManagerUserID(req.OpUserID) {
+		errMsg := req.OperationID + " verify failed " + req.OpUserID + req.GroupID
+		log.Error(req.OperationID, errMsg)
+		return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+	}
+
+	groupMemberInfo := db.GroupMember{}
+	groupMemberInfo.UserID = req.UserID
+	groupMemberInfo.GroupID = req.GroupID
+	if req.Nickname == "" {
+		userNickname, err := imdb.GetUserNameByUserID(groupMemberInfo.UserID)
+		if err != nil {
+			errMsg := req.OperationID + " GetUserNameByUserID failed " + err.Error()
+			log.Error(req.OperationID, errMsg)
+			return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		}
+		groupMemberInfo.Nickname = userNickname
+	} else {
+		groupMemberInfo.Nickname = req.Nickname
+	}
+	err := imdb.UpdateGroupMemberInfo(groupMemberInfo)
+	if err != nil {
+		errMsg := req.OperationID + " UpdateGroupMemberInfo failed " + err.Error()
+		log.Error(req.OperationID, errMsg)
+		return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
+	return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+}

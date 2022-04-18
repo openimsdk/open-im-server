@@ -220,3 +220,14 @@ type CancelMuteGroupReq struct {
 type CancelMuteGroupResp struct {
 	CommResp
 }
+
+type SetGroupMemberNicknameReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	GroupID     string `json:"groupID" binding:"required"`
+	UserID      string `json:"userID" binding:"required"`
+	Nickname    string `json:"nickname"`
+}
+
+type SetGroupMemberNicknameResp struct {
+	CommResp
+}
