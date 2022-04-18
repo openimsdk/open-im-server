@@ -342,6 +342,7 @@ func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.G
 		return &rpc.GetDepartmentMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
 	}
 
+	log.Debug(req.OperationID, "GetDepartmentMemberUserIDList ", departmentMemberUserIDList)
 	resp := rpc.GetDepartmentMemberResp{}
 	for _, v := range departmentMemberUserIDList {
 		r, err := s.GetUserInDepartmentByUserID(v, req.OperationID)
@@ -349,7 +350,7 @@ func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.G
 			log.Error(req.OperationID, "GetUserInDepartmentByUserID failed ", err.Error())
 			continue
 		}
-		log.Debug(req.OperationID, "GetUserInDepartmentByUserID success ", *r)
+		log.Debug(req.OperationID, "GetUserInDepartmentByUserID success ", *r, "userID ", v)
 		resp.UserInDepartmentList = append(resp.UserInDepartmentList, r)
 	}
 
