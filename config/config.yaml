@@ -439,8 +439,8 @@ notification:
       unreadCount: true
     offlinePush:
       switch: false
-      title: "groupMemberInfoSet title"
-      desc: "groupMemberInfoSet desc"
+      title: "groupMemberInfoSet title "
+      desc: "groupMemberInfoSet desc "
       ext: "groupMemberInfoSet ext"
     defaultTips:
       tips: "group member info set"
