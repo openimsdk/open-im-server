@@ -262,19 +262,23 @@ func (ws *WServer) getUserUid(conn *UserConn) (uid, platform string) {
 func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
+	operationID := ""
+	if len(query["operationID"]) != 0 {
+		operationID = query["operationID"][0]
+	}
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
 		if ok, err, msg := token_verify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0]); !ok {
-			e := err.(*constant.ErrInfo)
-			log.ErrorByKv("Token verify failed", "", "query", query, msg)
+			//	e := err.(*constant.ErrInfo)
+			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error())
 			w.Header().Set("Sec-Websocket-Version", "13")
-			http.Error(w, e.ErrMsg, int(e.ErrCode))
+			http.Error(w, err.Error(), 2001)
 			return false
 		} else {
-			log.InfoByKv("Connection Authentication Success", "", "token", query["token"][0], "userID", query["sendID"][0])
+			log.Info(operationID, "Connection Authentication Success", "", "token", query["token"][0], "userID", query["sendID"][0])
 			return true
 		}
 	} else {
-		log.ErrorByKv("Args err", "", "query", query)
+		log.Error(operationID, "Args err", "query", query)
 		w.Header().Set("Sec-Websocket-Version", "13")
 		http.Error(w, http.StatusText(status), status)
 		return false
