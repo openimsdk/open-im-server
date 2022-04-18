@@ -227,7 +227,7 @@ func UpdateOrganizationUser(c *gin.Context) {
 }
 
 func CreateDepartmentMember(c *gin.Context) {
-	params := api.CreateDepartmentMemberReq{UserInDepartment: &open_im_sdk.UserInDepartment{}}
+	params := api.CreateDepartmentMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})

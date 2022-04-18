@@ -219,9 +219,10 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 		log.Error(req.OperationID, errMsg)
 		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
+
 	departmentMember := db.DepartmentMember{}
-	utils.CopyStructFields(&departmentMember, req.UserInDepartment)
-	log.Debug(req.OperationID, "src ", *req.UserInDepartment, "dst ", departmentMember)
+	utils.CopyStructFields(&departmentMember, req.DepartmentMember)
+	log.Debug(req.OperationID, "src ", *req.DepartmentMember, "dst ", departmentMember)
 	err := imdb.CreateDepartmentMember(&departmentMember)
 	if err != nil {
 		errMsg := req.OperationID + " " + "CreateDepartmentMember failed " + err.Error()
@@ -229,6 +230,7 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
 	}
 	log.Debug(req.OperationID, "UpdateOrganizationUser ", departmentMember)
+
 	resp := &rpc.CreateDepartmentMemberResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
 	return resp, nil

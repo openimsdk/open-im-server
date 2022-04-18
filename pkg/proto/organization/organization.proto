@@ -81,7 +81,7 @@ message UpdateOrganizationUserResp{
 
 
 message CreateDepartmentMemberReq{
-  server_api_params.UserInDepartment userInDepartment = 1;
+  server_api_params.DepartmentMember departmentMember = 1;
   string operationID = 2;
   string opUserID = 3;
 }

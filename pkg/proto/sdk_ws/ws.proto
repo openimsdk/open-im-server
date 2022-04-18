@@ -138,12 +138,12 @@ message OrganizationUser  {
 
 message DepartmentMember {
       string userID = 1;
-      string DepartmentID = 2;
-      int32 Order = 3;
-      string Position = 4;
-      int32 Leader = 5;
-      int32 Status = 6;
-      string Ex     = 7;
+      string departmentID = 2;
+      int32 order = 3;
+      string position = 4;
+      int32 leader = 5;
+      int32 status = 6;
+      string ex     = 7;
 }
 
 
