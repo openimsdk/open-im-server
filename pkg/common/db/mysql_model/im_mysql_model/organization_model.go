@@ -111,7 +111,7 @@ func GetUserInDepartment(userID string) (error, []db.DepartmentMember) {
 		return err, nil
 	}
 	var departmentMemberList []db.DepartmentMember
-	err = dbConn.Table("department_members").Where("user_id=?", userID).Take(&departmentMemberList).Error
+	err = dbConn.Table("department_members").Where("user_id=?", userID).Find(&departmentMemberList).Error
 	return err, departmentMemberList
 }
 
