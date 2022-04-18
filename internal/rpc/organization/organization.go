@@ -220,10 +220,17 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
 
+	err, _ := imdb.GetOrganizationUser(req.DepartmentMember.UserID)
+	if err != nil {
+		errMsg := req.OperationID + "" + req.DepartmentMember.UserID + " is not exist"
+		log.Error(req.OperationID, errMsg)
+		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+	}
+
 	departmentMember := db.DepartmentMember{}
 	utils.CopyStructFields(&departmentMember, req.DepartmentMember)
 	log.Debug(req.OperationID, "src ", *req.DepartmentMember, "dst ", departmentMember)
-	err := imdb.CreateDepartmentMember(&departmentMember)
+	err = imdb.CreateDepartmentMember(&departmentMember)
 	if err != nil {
 		errMsg := req.OperationID + " " + "CreateDepartmentMember failed " + err.Error()
 		log.Error(req.OperationID, errMsg, departmentMember)

@@ -433,7 +433,7 @@ func DeleteUserInDepartment(c *gin.Context) {
 		return
 	}
 
-	apiResp := api.GetDepartmentMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	apiResp := api.DeleteUserInDepartmentResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api return ", apiResp)
 	c.JSON(http.StatusOK, apiResp)
 }
