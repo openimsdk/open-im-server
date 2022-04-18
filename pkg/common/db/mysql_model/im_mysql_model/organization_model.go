@@ -120,12 +120,12 @@ func UpdateUserInDepartment(departmentMember *db.DepartmentMember, args map[stri
 	if err != nil {
 		return err
 	}
-	if err = dbConn.Table("department_members").Where("department_id=? ADN user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
+	if err = dbConn.Table("department_members").Where("department_id=? AND user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
 		Updates(departmentMember).Error; err != nil {
 		return err
 	}
 	if args != nil {
-		return dbConn.Table("department_members").Where("department_id=? ADN user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
+		return dbConn.Table("department_members").Where("department_id=? AND user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
 			Updates(args).Error
 	}
 	return nil
@@ -136,7 +136,7 @@ func DeleteUserInDepartment(departmentID, userID string) error {
 	if err != nil {
 		return err
 	}
-	return dbConn.Table("department_members").Where("department_id=? ADN user_id=?", departmentID, userID).Delete(db.DepartmentMember{}).Error
+	return dbConn.Table("department_members").Where("department_id=? AND user_id=?", departmentID, userID).Delete(db.DepartmentMember{}).Error
 }
 
 func DeleteUserInAllDepartment(userID string) error {
