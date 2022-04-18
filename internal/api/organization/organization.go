@@ -234,9 +234,9 @@ func CreateDepartmentMember(c *gin.Context) {
 		return
 	}
 
-	req := &rpc.CreateDepartmentMemberReq{UserInDepartment: &open_im_sdk.UserInDepartment{}}
+	req := &rpc.CreateDepartmentMemberReq{DepartmentMember: &open_im_sdk.DepartmentMember{}}
 	utils.CopyStructFields(req, &params)
-	utils.CopyStructFields(req.UserInDepartment, &params)
+	utils.CopyStructFields(req.DepartmentMember, &params)
 
 	err, opUserID := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
 	req.OpUserID = opUserID
