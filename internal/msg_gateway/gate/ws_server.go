@@ -271,7 +271,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 			//	e := err.(*constant.ErrInfo)
 			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error())
 			w.Header().Set("Sec-Websocket-Version", "13")
-			http.Error(w, err.Error(), status)
+			http.Error(w, err.Error(), 1222212)
 			return false
 		} else {
 			log.Info(operationID, "Connection Authentication Success", "", "token", query["token"][0], "userID", query["sendID"][0])
