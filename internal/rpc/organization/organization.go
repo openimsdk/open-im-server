@@ -190,7 +190,7 @@ func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rp
 	if !token_verify.IsManagerUserID(req.OpUserID) {
 		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 	organizationUser := db.OrganizationUser{}
 	utils.CopyStructFields(&organizationUser, req.OrganizationUser)
@@ -217,14 +217,14 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 	if !token_verify.IsManagerUserID(req.OpUserID) {
 		errMsg := req.OperationID + "" + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
 	err, _ := imdb.GetOrganizationUser(req.DepartmentMember.UserID)
 	if err != nil {
 		errMsg := req.OperationID + "" + req.DepartmentMember.UserID + " is not exist"
 		log.Error(req.OperationID, errMsg)
-		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
 	departmentMember := db.DepartmentMember{}
