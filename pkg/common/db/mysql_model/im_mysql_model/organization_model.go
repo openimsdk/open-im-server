@@ -186,7 +186,12 @@ func GetDepartmentMemberList(departmentID string) (error, []db.DepartmentMember)
 		return err, nil
 	}
 	var departmentMemberList []db.DepartmentMember
-	err = dbConn.Table("department_members").Where("department_id=?", departmentID).Find(&departmentMemberList).Error
+	if departmentID == "-1" {
+		err = dbConn.Table("department_members").Find(&departmentMemberList).Error
+	} else {
+		err = dbConn.Table("department_members").Where("department_id=?", departmentID).Find(&departmentMemberList).Error
+	}
+
 	if err != nil {
 		return err, nil
 	}
