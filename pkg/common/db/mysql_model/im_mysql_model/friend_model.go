@@ -49,12 +49,12 @@ func GetFriendListByUserID(OwnerUserID string) ([]db.Friend, error) {
 	return friends, nil
 }
 
-func GetFriendIDListByUserID(OwnerUserID string) ([]string, error) {
+func GetFriendIDListByUserID(OwnerUserID string) ([]*string, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
-	var friendIDList []string
+	var friendIDList []*string
 	err = dbConn.Table("friends").Select("friend_user_id").Where("owner_user_id=?", OwnerUserID).Find(&friendIDList).Error
 	if err != nil {
 		return nil, err
