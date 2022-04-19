@@ -270,7 +270,7 @@ func (s *officeServer) GetUserTagByID(_ context.Context, req *pbOffice.GetUserTa
 func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.CreateOneWorkMomentReq) (resp *pbOffice.CreateOneWorkMomentResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.CreateOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
-	workMoment := db.WorkMoment{}
+	workMoment := db.WorkMoment{Comments: []*db.Comment{}, LikeUsers: []*db.LikeUser{}}
 	if err := utils.CopyStructFields(&workMoment, req.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
@@ -453,8 +453,8 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 
 func (s *officeServer) GetUserWorkMomentsCommentsMsg(_ context.Context, req *pbOffice.GetUserWorkMomentsCommentsMsgReq) (resp *pbOffice.GetUserWorkMomentsCommentsMsgResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbOffice.GetUserWorkMomentsCommentsMsgResp{CommonResp: &pbOffice.CommonResp{}, CommentsMsgs: []*pbOffice.CommentsMsg{}}
-	//resp.CommentsMsgs = make([]*pbOffice.CommentsMsg, 0)
+	resp = &pbOffice.GetUserWorkMomentsCommentsMsgResp{CommonResp: &pbOffice.CommonResp{}}
+	resp.CommentsMsgs = make([]*pbOffice.CommentsMsg, 0)
 	workMomentsCommentMsgs, err := db.DB.GetUserWorkMomentsCommentsMsg(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserWorkMomentsCommentsMsg", err.Error())
