@@ -452,11 +452,11 @@ notification:
       unreadCount: false
     offlinePush:
       switch: false
-      title: "groupMemberInfoSet title"
-      desc: "groupMemberInfoSet desc"
-      ext: "groupMemberInfoSet ext"
+      title: "organizationChanged title"
+      desc: "organizationChanged desc"
+      ext: "organizationChanged ext"
     defaultTips:
-      tips: "group member info set"
+      tips: "organization changed"
 
 
 
