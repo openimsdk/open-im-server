@@ -660,6 +660,7 @@ func (d *DataBases) ClearUserWorkMomentsCommentsMsg(userID string) error {
 type CommentMsg struct {
 	WorkMomentID      string `bson:"work_moment" json:"work_moment"`
 	WorkMomentContent string `bson:"work_moment_content" json:"work_moment_content"`
+	UserID            string `bson:"user_id" json:"user_id"`
 	Comment
 }
 

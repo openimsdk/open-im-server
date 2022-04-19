@@ -376,6 +376,7 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 	}
 	commentMsg := db.CommentMsg{
 		Comment:           comment,
+		UserID:            workMoment.UserID,
 		WorkMomentID:      workMoment.WorkMomentID,
 		WorkMomentContent: workMoment.Content,
 	}
@@ -473,7 +474,7 @@ func (s *officeServer) GetUserWorkMomentsCommentsMsg(_ context.Context, req *pbO
 		resp.CommentsMsgs = append(resp.CommentsMsgs, &pbOffice.CommentsMsg{
 			Comment:      &comment,
 			WorkMomentID: commentMsg.WorkMomentID,
-			Content:      commentMsg.Content,
+			Content:      commentMsg.WorkMomentContent,
 		})
 	}
 	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}

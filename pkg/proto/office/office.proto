@@ -214,7 +214,8 @@ message GetUserFriendWorkMomentsResp {
 message CommentsMsg {
   Comment comment = 1;
   string workMomentID = 2;
-  string content = 3;
+  string userID = 3;
+  string content = 4;
 }
 
 message GetUserWorkMomentsCommentsMsgReq {
