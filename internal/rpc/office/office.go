@@ -410,8 +410,8 @@ func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWor
 
 func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUserWorkMomentsReq) (resp *pbOffice.GetUserWorkMomentsResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbOffice.GetUserWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}}
-	resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
+	resp = &pbOffice.GetUserWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
+	//resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
 	workMoments, err := db.DB.GetUserWorkMoments(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err)
@@ -428,8 +428,8 @@ func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUs
 
 func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice.GetUserFriendWorkMomentsReq) (resp *pbOffice.GetUserFriendWorkMomentsResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbOffice.GetUserFriendWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}}
-	resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
+	resp = &pbOffice.GetUserFriendWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
+	//resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
 	friendIDList, err := imdb.GetFriendIDListByUserID(req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetFriendIDListByUserID", err.Error())
@@ -453,8 +453,8 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 
 func (s *officeServer) GetUserWorkMomentsCommentsMsg(_ context.Context, req *pbOffice.GetUserWorkMomentsCommentsMsgReq) (resp *pbOffice.GetUserWorkMomentsCommentsMsgResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbOffice.GetUserWorkMomentsCommentsMsgResp{CommonResp: &pbOffice.CommonResp{}}
-	resp.CommentsMsgs = make([]*pbOffice.CommentsMsg, 0)
+	resp = &pbOffice.GetUserWorkMomentsCommentsMsgResp{CommonResp: &pbOffice.CommonResp{}, CommentsMsgs: []*pbOffice.CommentsMsg{}}
+	//resp.CommentsMsgs = make([]*pbOffice.CommentsMsg, 0)
 	workMomentsCommentMsgs, err := db.DB.GetUserWorkMomentsCommentsMsg(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserWorkMomentsCommentsMsg", err.Error())

@@ -632,6 +632,7 @@ func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string)
 	if !isAlreadyLike {
 		workMoment.LikeUsers = append(workMoment.LikeUsers, &LikeUser{UserID: likeUserID, UserName: userName})
 	}
+	log.Info("", utils.GetSelfFuncName(), workMoment)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	_, err = c.UpdateOne(ctx, bson.M{"work_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUsers}})
