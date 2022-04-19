@@ -668,7 +668,7 @@ func (d *DataBases) GetUserWorkMomentsCommentsMsg(userID string, showNumber, pag
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cCommentMsg)
 	var commentMsgList []CommentMsg
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
-	result, err := c.Find(ctx, bson.M{"user_id": userID}, findOpts)
+	result, err := c.Find(ctx, bson.M{"comment.user_id": userID}, findOpts)
 	if err != nil {
 		return commentMsgList, err
 	}

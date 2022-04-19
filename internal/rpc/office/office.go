@@ -464,6 +464,7 @@ func (s *officeServer) GetUserWorkMomentsCommentsMsg(_ context.Context, req *pbO
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMomentsCommentMsgs: ", workMomentsCommentMsgs)
 	for _, commentMsg := range workMomentsCommentMsgs {
 		comment := pbOffice.Comment{}
 		if err := utils.CopyStructFields(&comment, commentMsg); err != nil {
