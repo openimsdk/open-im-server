@@ -617,25 +617,25 @@ func (d *DataBases) GetWorkMomentByID(workMomentID string) (*WorkMoment, error) 
 	return workMoment, err
 }
 
-func (d *DataBases) LikeOneWorkMoment(likeUserID, workMomentID string) error {
+func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string) error {
 	workMoment, err := d.GetWorkMomentByID(workMomentID)
 	if err != nil {
 		return err
 	}
+	var isAlreadyLike bool
 	for i, user := range workMoment.LikeUsers {
 		if likeUserID == user.UserID {
+			isAlreadyLike = true
 			workMoment.LikeUsers = append(workMoment.LikeUsers[0:i], workMoment.LikeUsers[i+1:]...)
-			return nil
 		}
 	}
-	workMoment.LikeUsers = append(workMoment.LikeUsers, &LikeUser{UserID: likeUserID})
+	if !isAlreadyLike {
+		workMoment.LikeUsers = append(workMoment.LikeUsers, &LikeUser{UserID: likeUserID, UserName: userName})
+	}
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	_, err = c.UpdateOne(ctx, bson.M{"work_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUsers}})
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (d *DataBases) SetUserWorkMomentsLevel(userID string, level int32) error {

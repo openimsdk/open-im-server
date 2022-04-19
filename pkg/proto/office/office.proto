@@ -137,8 +137,7 @@ message WorkMoment {
 
 message CreateOneWorkMomentReq {
   WorkMoment workMoment = 1;
-  string userID = 2;
-  string operationID = 3;
+  string operationID = 2;
 }
 
 message CreateOneWorkMomentResp {
