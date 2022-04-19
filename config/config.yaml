@@ -446,6 +446,20 @@ notification:
       tips: "group member info set"
 
 
+  organizationChanged:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "groupMemberInfoSet title"
+      desc: "groupMemberInfoSet desc"
+      ext: "groupMemberInfoSet ext"
+    defaultTips:
+      tips: "group member info set"
+
+
+
   #############################friend#################################
 
   friendApplicationAdded:
