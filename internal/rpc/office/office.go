@@ -475,6 +475,7 @@ func (s *officeServer) GetUserWorkMomentsCommentsMsg(_ context.Context, req *pbO
 			Comment:      &comment,
 			WorkMomentID: commentMsg.WorkMomentID,
 			Content:      commentMsg.WorkMomentContent,
+			UserID:       req.UserID,
 		})
 	}
 	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
