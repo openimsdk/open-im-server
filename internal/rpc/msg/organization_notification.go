@@ -28,7 +28,7 @@ func OrganizationNotificationToAll(opUserID string, operationID string) {
 	utils2.UserDBCopyOpenIM(tips.OpUser, user)
 
 	for _, v := range userIDList {
-		log.Debug(operationID, opUserID, v, constant.OrganizationChangedNotification, &tips, operationID)
+		log.Debug(operationID, "OrganizationNotification", opUserID, v, constant.OrganizationChangedNotification, &tips, operationID)
 		OrganizationNotification(opUserID, v, constant.OrganizationChangedNotification, &tips, operationID)
 	}
 }
