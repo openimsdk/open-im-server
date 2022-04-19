@@ -584,7 +584,7 @@ type LikeUser struct {
 
 type Comment struct {
 	UserID        string `bson:"user_id" json:"user_id"`
-	UserName      string `bson:"user_id" json:"user_name"`
+	UserName      string `bson:"user_name" json:"user_name"`
 	ReplyUserID   string `bson:"reply_user_id" json:"reply_user_id"`
 	ReplyUserName string `bson:"reply_user_name" json:"reply_user_name"`
 	ContentID     string `bson:"content_id" json:"content_id"`
@@ -635,7 +635,7 @@ func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string)
 	log.Info("", utils.GetSelfFuncName(), workMoment)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
-	_, err = c.UpdateOne(ctx, bson.M{"work_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUsers}})
+	_, err = c.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUsers}})
 	return err
 }
 
