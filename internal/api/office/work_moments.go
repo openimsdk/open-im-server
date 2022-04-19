@@ -37,7 +37,7 @@ func CreateOneWorkMoment(c *gin.Context) {
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	reqPb.UserID = userID
+	reqPb.WorkMoment.UserID = userID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.CreateOneWorkMoment(context.Background(), &reqPb)
@@ -46,8 +46,9 @@ func CreateOneWorkMoment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "CreateOneWorkMoment rpc server failed" + err.Error()})
 		return
 	}
-	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	resp.CommResp = apiStruct.CommResp{
+		ErrCode: respPb.CommonResp.ErrCode,
+		ErrMsg:  respPb.CommonResp.ErrMsg,
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, resp)

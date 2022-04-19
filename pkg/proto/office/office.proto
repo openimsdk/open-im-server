@@ -137,8 +137,7 @@ message WorkMoment {
 
 message CreateOneWorkMomentReq {
   WorkMoment workMoment = 1;
-  string userID = 2;
-  string operationID = 3;
+  string operationID = 2;
 }
 
 message CreateOneWorkMomentResp {
@@ -215,7 +214,8 @@ message GetUserFriendWorkMomentsResp {
 message CommentsMsg {
   Comment comment = 1;
   string workMomentID = 2;
-  string content = 3;
+  string userID = 3;
+  string content = 4;
 }
 
 message GetUserWorkMomentsCommentsMsgReq {

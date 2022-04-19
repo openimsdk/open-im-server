@@ -38,7 +38,6 @@ type WorkMomentsUserCommonReq struct {
 	PageNumber  int32  `json:"pageNumber" binding:"required"`
 	ShowNumber  int32  `json:"showNumber" binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
-	UserID      string `json:"UserID" binding:"required"`
 }
 
 type GetWorkMomentByIDReq struct {

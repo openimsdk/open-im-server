@@ -584,7 +584,7 @@ type LikeUser struct {
 
 type Comment struct {
 	UserID        string `bson:"user_id" json:"user_id"`
-	UserName      string `bson:"user_id" json:"user_name"`
+	UserName      string `bson:"user_name" json:"user_name"`
 	ReplyUserID   string `bson:"reply_user_id" json:"reply_user_id"`
 	ReplyUserName string `bson:"reply_user_name" json:"reply_user_name"`
 	ContentID     string `bson:"content_id" json:"content_id"`
@@ -617,25 +617,26 @@ func (d *DataBases) GetWorkMomentByID(workMomentID string) (*WorkMoment, error) 
 	return workMoment, err
 }
 
-func (d *DataBases) LikeOneWorkMoment(likeUserID, workMomentID string) error {
+func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string) error {
 	workMoment, err := d.GetWorkMomentByID(workMomentID)
 	if err != nil {
 		return err
 	}
+	var isAlreadyLike bool
 	for i, user := range workMoment.LikeUsers {
 		if likeUserID == user.UserID {
+			isAlreadyLike = true
 			workMoment.LikeUsers = append(workMoment.LikeUsers[0:i], workMoment.LikeUsers[i+1:]...)
-			return nil
 		}
 	}
-	workMoment.LikeUsers = append(workMoment.LikeUsers, &LikeUser{UserID: likeUserID})
+	if !isAlreadyLike {
+		workMoment.LikeUsers = append(workMoment.LikeUsers, &LikeUser{UserID: likeUserID, UserName: userName})
+	}
+	log.Info("", utils.GetSelfFuncName(), workMoment)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
-	_, err = c.UpdateOne(ctx, bson.M{"work_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUsers}})
-	if err != nil {
-		return err
-	}
-	return nil
+	_, err = c.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUsers}})
+	return err
 }
 
 func (d *DataBases) SetUserWorkMomentsLevel(userID string, level int32) error {
@@ -659,6 +660,7 @@ func (d *DataBases) ClearUserWorkMomentsCommentsMsg(userID string) error {
 type CommentMsg struct {
 	WorkMomentID      string `bson:"work_moment" json:"work_moment"`
 	WorkMomentContent string `bson:"work_moment_content" json:"work_moment_content"`
+	UserID            string `bson:"user_id" json:"user_id"`
 	Comment
 }
 
@@ -747,7 +749,7 @@ func (d *DataBases) GetUserFriendWorkMomentsRecursion(friendIDList []string, sho
 	return workMomentList, err
 }
 
-func (d *DataBases) GetUserFriendWorkMoments(friendIDList []string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
+func (d *DataBases) GetUserFriendWorkMoments(friendIDList []*string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
