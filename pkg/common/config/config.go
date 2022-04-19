@@ -309,6 +309,11 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"groupMemberInfoSet"`
+		OrganizationChanged struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"organizationChanged"`
 
 		////////////////////////user///////////////////////
 		UserInfoUpdated struct {

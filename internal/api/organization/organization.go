@@ -122,6 +122,10 @@ func GetSubDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+func GetAllDepartment(c *gin.Context) {
+
+}
+
 func DeleteDepartment(c *gin.Context) {
 	params := api.DeleteDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {

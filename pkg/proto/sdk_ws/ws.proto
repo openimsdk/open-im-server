@@ -358,6 +358,13 @@ message GroupMemberInfoSetTips{
   GroupMemberFullInfo changedUser = 4;
 }
 
+
+message OrganizationChangedTips{
+  UserInfo opUser = 2;
+  int64 operationTime = 3;
+}
+
+
 //////////////////////friend/////////////////////
 //message FriendInfo{
 //  UserInfo OwnerUser = 1;

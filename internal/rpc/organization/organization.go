@@ -1,6 +1,7 @@
 package organization
 
 import (
+	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
@@ -97,6 +98,7 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 	resp := &rpc.CreateDepartmentResp{DepartmentInfo: &open_im_sdk.Department{}}
 	utils.CopyStructFields(resp.DepartmentInfo, createdDepartment)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
@@ -120,6 +122,7 @@ func (s *organizationServer) UpdateDepartment(ctx context.Context, req *rpc.Upda
 
 	resp := &rpc.UpdateDepartmentResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
@@ -159,6 +162,7 @@ func (s *organizationServer) DeleteDepartment(ctx context.Context, req *rpc.Dele
 	log.Debug(req.OperationID, "DeleteDepartment ", req.DepartmentID)
 	resp := &rpc.DeleteDepartmentResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
@@ -182,6 +186,7 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 	log.Debug(req.OperationID, "CreateOrganizationUser ", organizationUser)
 	resp := &rpc.CreateOrganizationUserResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
@@ -209,6 +214,7 @@ func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rp
 	log.Debug(req.OperationID, "UpdateOrganizationUser ", organizationUser)
 	resp := &rpc.UpdateOrganizationUserResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
@@ -240,6 +246,7 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 
 	resp := &rpc.CreateDepartmentMemberResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
@@ -298,6 +305,7 @@ func (s *organizationServer) UpdateUserInDepartment(ctx context.Context, req *rp
 	}
 	resp := &rpc.UpdateUserInDepartmentResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
@@ -318,6 +326,7 @@ func (s *organizationServer) DeleteUserInDepartment(ctx context.Context, req *rp
 	log.Debug(req.OperationID, "DeleteUserInDepartment success ", req.DepartmentID, req.UserID)
 	resp := &rpc.DeleteUserInDepartmentResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
@@ -337,6 +346,7 @@ func (s *organizationServer) DeleteOrganizationUser(ctx context.Context, req *rp
 	log.Debug(req.OperationID, "DeleteOrganizationUser success ", req.UserID)
 	resp := &rpc.DeleteOrganizationUserResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
+	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 

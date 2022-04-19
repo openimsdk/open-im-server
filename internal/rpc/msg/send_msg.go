@@ -562,6 +562,7 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.GroupMemberCancelMuted.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.GroupMemberCancelMuted.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.GroupMemberCancelMuted.Conversation.UnreadCount
+
 	}
 	switch reliabilityLevel {
 	case constant.UnreliableNotification:

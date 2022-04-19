@@ -44,7 +44,12 @@ func GetSubDepartmentList(departmentID string) (error, []db.Department) {
 		return err, nil
 	}
 	var departmentList []db.Department
-	err = dbConn.Table("departments").Where("parent_id=?", departmentID).Find(&departmentList).Error
+	if departmentID == "-1" {
+		err = dbConn.Table("departments").Find(&departmentList).Error
+	} else {
+		err = dbConn.Table("departments").Where("parent_id=?", departmentID).Find(&departmentList).Error
+	}
+
 	return err, departmentList
 }
 
@@ -186,4 +191,14 @@ func GetDepartmentMemberList(departmentID string) (error, []db.DepartmentMember)
 		return err, nil
 	}
 	return err, departmentMemberList
+}
+
+func GetAllOrganizationUserID() (error, []string) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err, nil
+	}
+	var OrganizationUser db.OrganizationUser
+	var result []string
+	return dbConn.Model(&OrganizationUser).Pluck("user_id", &result).Error, result
 }
