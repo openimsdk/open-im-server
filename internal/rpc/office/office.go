@@ -379,6 +379,9 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 		WorkMomentID:      workMoment.WorkMomentID,
 		WorkMomentContent: workMoment.Content,
 	}
+	if err = db.DB.CreateUserWorkMomentsCommentsMsg(commentMsg); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+	}
 	msg.CommentOneWorkMomentNotification(req.OperationID, workMoment.UserID, commentMsg, *commentUser)
 	if req.ReplyUserID != "" {
 		msg.CommentOneWorkMomentNotification(req.OperationID, req.ReplyUserID, commentMsg, *commentUser)
