@@ -201,7 +201,10 @@ func GetWorkMomentByID(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.WorkMoment = respPb.WorkMoment
+	//resp.Data.WorkMoment = respPb.WorkMoment
+	if err := utils.CopyStructFields(&resp.Data.WorkMoment, respPb.WorkMoment); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -242,7 +245,9 @@ func GetUserWorkMoments(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.WorkMoments = respPb.WorkMoments
+	if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
@@ -285,52 +290,11 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.WorkMoments = respPb.WorkMoments
-	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
-	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
-	c.JSON(http.StatusOK, resp)
-}
-
-func GetUserWorkMomentsCommentsMsg(c *gin.Context) {
-	var (
-		req    apiStruct.GetUserWorkMomentsCommentsMsgReq
-		resp   apiStruct.GetUserWorkMomentsCommentsMsgResp
-		reqPb  pbOffice.GetUserWorkMomentsCommentsMsgReq
-		respPb *pbOffice.GetUserWorkMomentsCommentsMsgResp
-	)
-	if err := c.BindJSON(&req); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
-		return
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
-		return
-	}
-	reqPb.OperationID = req.OperationID
-	reqPb.Pagination = &pbCommon.RequestPagination{
-		PageNumber: req.PageNumber,
-		ShowNumber: req.ShowNumber,
-	}
-	reqPb.UserID = userID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
-	client := pbOffice.NewOfficeServiceClient(etcdConn)
-	respPb, err := client.GetUserWorkMomentsCommentsMsg(context.Background(), &reqPb)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserWorkMomentsCommentsMsg rpc failed", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserWorkMomentsCommentsMsg rpc server failed" + err.Error()})
-		return
-	}
-	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
+	if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
-	resp.Data.CommentMsgs = respPb.CommentsMsgs
+	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -364,42 +328,6 @@ func SetUserWorkMomentsLevel(c *gin.Context) {
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetUserWorkMomentsLevel rpc failed", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "SetUserWorkMomentsLevel rpc server failed" + err.Error()})
-		return
-	}
-	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
-	c.JSON(http.StatusOK, resp)
-}
-
-func ClearUserWorkMomentsCommentsMsg(c *gin.Context) {
-	var (
-		req    apiStruct.ClearUserWorkMomentsCommentsMsgReq
-		resp   apiStruct.ClearUserWorkMomentsCommentsMsgResp
-		reqPb  pbOffice.ClearUserWorkMomentsCommentsMsgReq
-		respPb *pbOffice.ClearUserWorkMomentsCommentsMsgResp
-	)
-	if err := c.BindJSON(&req); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
-		return
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
-		return
-	}
-	reqPb.UserID = userID
-	reqPb.OperationID = req.OperationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
-	client := pbOffice.NewOfficeServiceClient(etcdConn)
-	respPb, err := client.ClearUserWorkMomentsCommentsMsg(context.Background(), &reqPb)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ClearUserWorkMomentsCommentsMsg rpc failed", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "ClearUserWorkMomentsCommentsMsg rpc server failed" + err.Error()})
 		return
 	}
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
