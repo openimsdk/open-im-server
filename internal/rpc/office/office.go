@@ -270,18 +270,71 @@ func (s *officeServer) GetUserTagByID(_ context.Context, req *pbOffice.GetUserTa
 func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.CreateOneWorkMomentReq) (resp *pbOffice.CreateOneWorkMomentResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.CreateOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
-	workMoment := db.WorkMoment{Comments: []*db.Comment{}, LikeUsers: []*db.LikeUser{}}
+	workMoment := db.WorkMoment{
+		Comments:     []*db.Comment{},
+		LikeUserList: []*db.LikeUser{},
+	}
+	createUser, err := imdb.GetUserByUserID(req.WorkMoment.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserByUserID", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	workMoment.UserName = createUser.Nickname
+	workMoment.FaceURL = createUser.FaceURL
 	if err := utils.CopyStructFields(&workMoment, req.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupIDList, req.WorkMoment.PermissionUserIDList)
+	for _, userID := range req.WorkMoment.AtUserIDList {
+		userName, err := imdb.GetUserNameByUserID(userID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", userID, err.Error())
+			continue
+		}
+		workMoment.AtUserList = append(workMoment.AtUserList, &db.AtUser{
+			UserID:   userID,
+			UserName: userName,
+		})
+	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
 	err = db.DB.CreateOneWorkMoment(&workMoment)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CreateOneWorkMoment", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
+
+	// send notification to at users
+	for _, atUser := range req.WorkMoment.AtUserIDList {
+		workMomentNotificationMsg := &pbOffice.WorkMomentNotificationMsg{
+			NotificationMsgType: constant.WorkMomentAtUserNotification,
+			WorkMomentID:        workMoment.WorkMomentID,
+			WorkMomentContent:   workMoment.Content,
+			UserID:              workMoment.UserID,
+			FaceURL:             createUser.FaceURL,
+			UserName:            createUser.Nickname,
+		}
+		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser, workMomentNotificationMsg)
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
+}
+
+// count and distinct permission users
+func (s *officeServer) getPermissionUserIDList(operationID string, groupIDList, userIDList []string) []string {
+	var permissionUserIDList []string
+	for _, groupID := range groupIDList {
+		GroupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", groupID, err.Error())
+			continue
+		}
+		permissionUserIDList = append(permissionUserIDList, GroupMemberIDList...)
+	}
+	permissionUserIDList = append(permissionUserIDList, userIDList...)
+	permissionUserIDList = utils.RemoveRepeatedStringInList(permissionUserIDList)
+	return permissionUserIDList
 }
 
 func (s *officeServer) DeleteOneWorkMoment(_ context.Context, req *pbOffice.DeleteOneWorkMomentReq) (resp *pbOffice.DeleteOneWorkMomentResp, err error) {
@@ -295,7 +348,7 @@ func (s *officeServer) DeleteOneWorkMoment(_ context.Context, req *pbOffice.Dele
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment", workMoment)
 	if workMoment.UserID != req.UserID {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "workMoment.UserID != req.WorkMomentID ", workMoment, req.WorkMomentID)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "workMoment.UserID != req.WorkMomentID, delete failed", workMoment, req.WorkMomentID)
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}
 		return resp, nil
 	}
@@ -311,15 +364,17 @@ func (s *officeServer) DeleteOneWorkMoment(_ context.Context, req *pbOffice.Dele
 
 func isUserCanSeeWorkMoment(userID string, workMoment db.WorkMoment) bool {
 	if userID != workMoment.UserID {
-		if utils.IsContain(userID, workMoment.WhoCantSeeUserIDList) {
-			return false
-		}
-		if utils.IsContain(userID, workMoment.WhoCanSeeUserIDList) {
+		switch workMoment.Permission {
+		case constant.WorkMomentPublic:
 			return true
-		}
-		if workMoment.IsPrivate {
+		case constant.WorkMomentPrivate:
 			return false
+		case constant.WorkMomentPermissionCanSee:
+			return utils.IsContain(userID, workMoment.PermissionUserIDList)
+		case constant.WorkMomentPermissionCantSee:
+			return !utils.IsContain(userID, workMoment.PermissionUserIDList)
 		}
+		return false
 	}
 	return true
 }
@@ -333,11 +388,20 @@ func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOn
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	if err = db.DB.LikeOneWorkMoment(req.UserID, userName, req.WorkMomentID); err != nil {
+	workMoment, err := db.DB.LikeOneWorkMoment(req.UserID, userName, req.WorkMomentID)
+	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "LikeOneWorkMoment failed ", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
+	workMomentNotificationMsg := &pbOffice.WorkMomentNotificationMsg{
+		NotificationMsgType: constant.WorkMomentLikeNotification,
+		WorkMomentID:        workMoment.WorkMomentID,
+		WorkMomentContent:   workMoment.Content,
+		UserID:              workMoment.UserID,
+	}
+	// send notification
+	msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
@@ -360,7 +424,7 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 			return resp, nil
 		}
 	}
-	comment := db.Comment{
+	comment := &db.Comment{
 		UserID:        req.UserID,
 		UserName:      commentUser.Nickname,
 		ReplyUserID:   req.ReplyUserID,
@@ -374,18 +438,25 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	commentMsg := db.CommentMsg{
-		Comment:           comment,
-		UserID:            workMoment.UserID,
-		WorkMomentID:      workMoment.WorkMomentID,
-		WorkMomentContent: workMoment.Content,
+	workMomentNotificationMsg := &pbOffice.WorkMomentNotificationMsg{
+		NotificationMsgType: constant.WorkMomentCommentNotification,
+		WorkMomentID:        workMoment.WorkMomentID,
+		WorkMomentContent:   workMoment.Content,
+		UserID:              workMoment.UserID,
+		Comment: &pbOffice.Comment{
+			UserID:        comment.UserID,
+			UserName:      comment.UserName,
+			FaceURL:       commentUser.FaceURL,
+			ReplyUserID:   comment.ReplyUserID,
+			ReplyUserName: comment.ReplyUserName,
+			ContentID:     comment.ContentID,
+			Content:       comment.Content,
+			CreateTime:    comment.CreateTime,
+		},
 	}
-	if err = db.DB.CreateUserWorkMomentsCommentsMsg(commentMsg); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-	}
-	msg.CommentOneWorkMomentNotification(req.OperationID, workMoment.UserID, commentMsg, *commentUser)
+	msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
 	if req.ReplyUserID != "" {
-		msg.CommentOneWorkMomentNotification(req.OperationID, req.ReplyUserID, commentMsg, *commentUser)
+		msg.WorkMomentSendNotification(req.OperationID, req.UserID, req.ReplyUserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -405,6 +476,9 @@ func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWor
 	}
 	canSee := isUserCanSeeWorkMoment(req.OpUserID, *workMoment)
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), canSee, req.OpUserID, *workMoment)
+	if !canSee {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "workMoments not access to user", canSee, workMoment, req.OpUserID)
+	}
 	if err := utils.CopyStructFields(resp.WorkMoment, workMoment); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields", err.Error())
 	}
@@ -455,34 +529,6 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 	return resp, nil
 }
 
-func (s *officeServer) GetUserWorkMomentsCommentsMsg(_ context.Context, req *pbOffice.GetUserWorkMomentsCommentsMsgReq) (resp *pbOffice.GetUserWorkMomentsCommentsMsgResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbOffice.GetUserWorkMomentsCommentsMsgResp{CommonResp: &pbOffice.CommonResp{}}
-	resp.CommentsMsgs = make([]*pbOffice.CommentsMsg, 0)
-	workMomentsCommentMsgs, err := db.DB.GetUserWorkMomentsCommentsMsg(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserWorkMomentsCommentsMsg", err.Error())
-		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMomentsCommentMsgs: ", workMomentsCommentMsgs)
-	for _, commentMsg := range workMomentsCommentMsgs {
-		comment := pbOffice.Comment{}
-		if err := utils.CopyStructFields(&comment, commentMsg); err != nil {
-			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		}
-		resp.CommentsMsgs = append(resp.CommentsMsgs, &pbOffice.CommentsMsg{
-			Comment:      &comment,
-			WorkMomentID: commentMsg.WorkMomentID,
-			Content:      commentMsg.WorkMomentContent,
-			UserID:       req.UserID,
-		})
-	}
-	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
-}
-
 func (s *officeServer) SetUserWorkMomentsLevel(_ context.Context, req *pbOffice.SetUserWorkMomentsLevelReq) (resp *pbOffice.SetUserWorkMomentsLevelResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SetUserWorkMomentsLevelResp{CommonResp: &pbOffice.CommonResp{}}
@@ -495,14 +541,9 @@ func (s *officeServer) SetUserWorkMomentsLevel(_ context.Context, req *pbOffice.
 	return resp, nil
 }
 
-func (s *officeServer) ClearUserWorkMomentsCommentsMsg(_ context.Context, req *pbOffice.ClearUserWorkMomentsCommentsMsgReq) (resp *pbOffice.ClearUserWorkMomentsCommentsMsgResp, err error) {
+func (s *officeServer) ChangeWorkMomentPermission(_ context.Context, req *pbOffice.ChangeWorkMomentPermissionReq) (resp *pbOffice.ChangeWorkMomentPermissionResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbOffice.ClearUserWorkMomentsCommentsMsgResp{CommonResp: &pbOffice.CommonResp{}}
-	if err := db.DB.ClearUserWorkMomentsCommentsMsg(req.UserID); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ClearUserWorkMomentsCommentsMsg", err.Error())
-		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
+	resp = &pbOffice.ChangeWorkMomentPermissionResp{CommonResp: &pbOffice.CommonResp{}}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }

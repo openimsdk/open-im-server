@@ -568,13 +568,20 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 type WorkMoment struct {
 	WorkMomentID         string      `bson:"work_moment_id"`
 	UserID               string      `bson:"user_id"`
+	UserName             string      `bson:"user_name"`
+	FaceURL              string      `bson:"face_url"`
 	Content              string      `bson:"content"`
-	LikeUsers            []*LikeUser `bson:"like_users"`
+	LikeUserList         []*LikeUser `bson:"like_user_list"`
+	AtUserList           []*AtUser   `bson:"at_user_list"`
 	Comments             []*Comment  `bson:"comments"`
-	WhoCanSeeUserIDList  []string    `bson:"who_can_see_user_id_list"`
-	WhoCantSeeUserIDList []string    `bson:"who_cant_see_user_id_list"`
-	IsPrivate            bool        `bson:"is_private"`
+	PermissionUserIDList []string    `bson:"permission_user_id_list"`
+	Permission           int32       `bson:"is_private"`
 	CreateTime           int32       `bson:"create_time"`
+}
+
+type AtUser struct {
+	UserID   string `bson:"user_id"`
+	UserName string `bson:"user_name"`
 }
 
 type LikeUser struct {
@@ -617,67 +624,33 @@ func (d *DataBases) GetWorkMomentByID(workMomentID string) (*WorkMoment, error) 
 	return workMoment, err
 }
 
-func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string) error {
+func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string) (*WorkMoment, error) {
 	workMoment, err := d.GetWorkMomentByID(workMomentID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var isAlreadyLike bool
-	for i, user := range workMoment.LikeUsers {
+	for i, user := range workMoment.LikeUserList {
 		if likeUserID == user.UserID {
 			isAlreadyLike = true
-			workMoment.LikeUsers = append(workMoment.LikeUsers[0:i], workMoment.LikeUsers[i+1:]...)
+			workMoment.LikeUserList = append(workMoment.LikeUserList[0:i], workMoment.LikeUserList[i+1:]...)
 		}
 	}
 	if !isAlreadyLike {
-		workMoment.LikeUsers = append(workMoment.LikeUsers, &LikeUser{UserID: likeUserID, UserName: userName})
+		workMoment.LikeUserList = append(workMoment.LikeUserList, &LikeUser{UserID: likeUserID, UserName: userName})
 	}
-	log.Info("", utils.GetSelfFuncName(), workMoment)
+	log.NewDebug("", utils.GetSelfFuncName(), workMoment)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
-	_, err = c.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUsers}})
-	return err
+	_, err = c.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUserList}})
+	return workMoment, err
 }
 
 func (d *DataBases) SetUserWorkMomentsLevel(userID string, level int32) error {
 	return nil
 }
 
-func (d *DataBases) CreateUserWorkMomentsCommentsMsg(msg CommentMsg) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cCommentMsg)
-	_, err := c.InsertOne(ctx, msg)
-	return err
-}
-
-func (d *DataBases) ClearUserWorkMomentsCommentsMsg(userID string) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cCommentMsg)
-	_, err := c.DeleteOne(ctx, bson.M{"user_id": userID})
-	return err
-}
-
-type CommentMsg struct {
-	WorkMomentID      string `bson:"work_moment" json:"work_moment"`
-	WorkMomentContent string `bson:"work_moment_content" json:"work_moment_content"`
-	UserID            string `bson:"user_id" json:"user_id"`
-	Comment
-}
-
-func (d *DataBases) GetUserWorkMomentsCommentsMsg(userID string, showNumber, pageNumber int32) ([]CommentMsg, error) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cCommentMsg)
-	var commentMsgList []CommentMsg
-	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
-	result, err := c.Find(ctx, bson.M{"user_id": userID}, findOpts)
-	if err != nil {
-		return commentMsgList, err
-	}
-	err = result.All(ctx, &commentMsgList)
-	return commentMsgList, err
-}
-
-func (d *DataBases) CommentOneWorkMoment(comment Comment, workMomentID string) (WorkMoment, error) {
+func (d *DataBases) CommentOneWorkMoment(comment *Comment, workMomentID string) (WorkMoment, error) {
 	comment.ContentID = generateWorkMomentCommentID(workMomentID)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
