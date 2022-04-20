@@ -54,7 +54,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
 		conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
 		if err != nil {
-			log.ErrorByKv("upgrade http conn err", "", "err", err)
+			log.ErrorByKv("upgrade http conn err", "", "err", err, query)
 			return
 		} else {
 			//Connection mapping relationship,
@@ -196,6 +196,7 @@ func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, tok
 func (ws *WServer) delUserConn(conn *UserConn) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
+	operationID := utils.OperationIDGenerator()
 	var platform, uid string
 	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
 		for k, v := range oldStringMap {
@@ -212,9 +213,9 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 			for _, v := range ws.wsUserToConn {
 				count = count + len(v)
 			}
-			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
+			log.NewWarn(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 		} else {
-			log.WarnByKv("WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
+			log.NewWarn(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
 		}
 		userCount = uint64(len(ws.wsUserToConn))
 		delete(ws.wsConnToUser, conn)
@@ -222,8 +223,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	}
 	err := conn.Close()
 	if err != nil {
-		log.ErrorByKv("close err", "", "uid", uid, "platform", platform)
-
+		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
 
 }
@@ -267,7 +267,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 		operationID = query["operationID"][0]
 	}
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
-		if ok, err, msg := token_verify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0]); !ok {
+		if ok, err, msg := token_verify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0], operationID); !ok {
 			//	e := err.(*constant.ErrInfo)
 			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error())
 			w.Header().Set("Sec-Websocket-Version", "13")
@@ -281,7 +281,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
 	} else {
 		log.Error(operationID, "Args err", "query", query)
 		w.Header().Set("Sec-Websocket-Version", "13")
-		w.Header().Set("ws_err_msg", "args err")
+		w.Header().Set("ws_err_msg", "args err, need token, sendID, platformID")
 		http.Error(w, http.StatusText(status), status)
 		return false
 	}

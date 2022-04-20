@@ -20,38 +20,41 @@ import (
 )
 
 func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq) (*pbAuth.UserRegisterResp, error) {
-	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	var user db.User
 	utils.CopyStructFields(&user, req.UserInfo)
 	if req.UserInfo.Birth != 0 {
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
+	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
 	err := imdb.UserRegister(user)
 	if err != nil {
-		log.NewError(req.OperationID, "UserRegister failed ", err.Error(), user)
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		errMsg := req.OperationID + " imdb.UserRegister failed " + err.Error() + user.UserID
+		log.NewError(req.OperationID, errMsg, user)
+		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
 
-	log.NewInfo(req.OperationID, "rpc UserRegister return")
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}})
 	return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}}, nil
 }
 
 func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
-	log.NewInfo(req.OperationID, "UserToken args ", req.String())
-
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	_, err := imdb.GetUserByUserID(req.FromUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.FromUserID)
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		errMsg := req.OperationID + " imdb.GetUserByUserID failed " + err.Error() + req.FromUserID
+		log.NewError(req.OperationID, errMsg)
+		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
 
 	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, req.Platform)
 	if err != nil {
-		log.NewError(req.OperationID, "CreateToken failed ", err.Error(), req.FromUserID, req.Platform)
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		errMsg := req.OperationID + " token_verify.CreateToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
+		log.NewError(req.OperationID, errMsg)
+		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
 
-	log.NewInfo(req.OperationID, "rpc UserToken return ", tokens, expTime)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime})
 	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }
 
@@ -73,15 +76,16 @@ func NewRpcAuthServer(port int) *rpcAuth {
 }
 
 func (rpc *rpcAuth) Run() {
-	log.NewInfo("0", "rpc auth start...")
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, "rpc auth start...")
 
 	address := utils.ServerIP + ":" + strconv.Itoa(rpc.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.NewError("0", "listen network failed ", err.Error(), address)
+		log.NewError(operationID, "listen network failed ", err.Error(), address)
 		return
 	}
-	log.NewInfo("0", "listen network success, ", address, listener)
+	log.NewInfo(operationID, "listen network success, ", address, listener)
 	//grpc server
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
@@ -90,15 +94,15 @@ func (rpc *rpcAuth) Run() {
 	pbAuth.RegisterAuthServer(srv, rpc)
 	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
-		log.NewError("0", "RegisterEtcd failed ", err.Error(),
+		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
 			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
 		return
 	}
-	log.NewInfo("0", "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
+	log.NewInfo(operationID, "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
-		log.NewError("0", "Serve failed ", err.Error())
+		log.NewError(operationID, "Serve failed ", err.Error())
 		return
 	}
-	log.NewInfo("0", "rpc auth ok")
+	log.NewInfo(operationID, "rpc auth ok")
 }
