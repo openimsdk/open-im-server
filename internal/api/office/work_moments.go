@@ -201,7 +201,10 @@ func GetWorkMomentByID(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.WorkMoment = respPb.WorkMoment
+	//resp.Data.WorkMoment = respPb.WorkMoment
+	if err := utils.CopyStructFields(&resp.Data.WorkMoment, respPb.WorkMoment); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -242,7 +245,9 @@ func GetUserWorkMoments(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.WorkMoments = respPb.WorkMoments
+	if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
@@ -285,7 +290,9 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.WorkMoments = respPb.WorkMoments
+	if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
