@@ -148,8 +148,6 @@ func main() {
 		officeGroup.POST("/get_work_moment_by_id", office.GetWorkMomentByID)
 		officeGroup.POST("/get_user_work_moments", office.GetUserWorkMoments)
 		officeGroup.POST("/get_user_friend_work_moments", office.GetUserFriendWorkMoments)
-		officeGroup.POST("/get_user_work_moments_comments_msg", office.GetUserWorkMomentsCommentsMsg)
-		officeGroup.POST("/clear_user_work_moments_comments_msg", office.ClearUserWorkMomentsCommentsMsg)
 		officeGroup.POST("/set_user_work_moments_level", office.SetUserWorkMomentsLevel)
 	}
 
