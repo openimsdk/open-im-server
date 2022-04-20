@@ -140,6 +140,16 @@ func (s *organizationServer) GetSubDepartment(ctx context.Context, req *rpc.GetS
 		v1 := open_im_sdk.Department{}
 		utils.CopyStructFields(&v1, v)
 		log.Debug(req.OperationID, "src ", v, "dst ", v1)
+		err, v1.MemberNum = imdb.GetDepartmentMemberNum(v1.DepartmentID)
+		if err != nil {
+			log.Error(req.OperationID, "GetDepartmentMemberNum failed ", err.Error(), v1.DepartmentID)
+			continue
+		}
+		err, v1.SubDepartmentNum = imdb.GetSubDepartmentNum(v1.DepartmentID)
+		if err != nil {
+			log.Error(req.OperationID, "GetSubDepartmentNum failed ", err.Error(), v1.DepartmentID)
+			continue
+		}
 		resp.DepartmentList = append(resp.DepartmentList, &v1)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
