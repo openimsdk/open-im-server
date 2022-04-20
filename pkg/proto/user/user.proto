@@ -79,7 +79,9 @@ message Conversation{
   bool IsPinned = 9;
   string AttachedInfo = 10;
   bool IsPrivateChat = 11;
-  string Ex = 12;
+  int32 GroupAtType = 12;
+  bool IsNotInGroup = 13;
+  string Ex = 14;
 }
 
 message SetConversationReq{
@@ -144,9 +146,9 @@ message BatchSetConversationsReq{
 }
 
 message BatchSetConversationsResp{
-   CommonResp  commonResp = 1;
-   repeated string Success = 2;
-   repeated string Failed = 3;
+  CommonResp  commonResp = 1;
+  repeated string Success = 2;
+  repeated string Failed = 3;
 }
 
 message ResignUserReq{
@@ -177,9 +179,9 @@ message GetUserByIdResp{
 }
 
 message GetUsersByNameReq {
- string UserName = 1;
- server_api_params.RequestPagination Pagination =2;
- string OperationID = 3;
+  string UserName = 1;
+  server_api_params.RequestPagination Pagination = 2;
+  string OperationID = 3;
 }
 
 message GetUsersByNameResp {
@@ -223,7 +225,7 @@ message AddUserReq{
 }
 
 message AddUserResp{
- CommonResp  CommonResp = 1;
+  CommonResp  CommonResp = 1;
 }
 
 
@@ -235,7 +237,7 @@ message BlockUserReq{
 }
 
 message BlockUserResp{
-   CommonResp  CommonResp = 1;
+  CommonResp  CommonResp = 1;
 }
 
 message UnBlockUserReq{
@@ -245,19 +247,19 @@ message UnBlockUserReq{
 }
 
 message UnBlockUserResp{
-   CommonResp  CommonResp = 1;
+  CommonResp  CommonResp = 1;
 }
 
 message GetBlockUsersReq{
-  server_api_params.RequestPagination Pagination =1;
+  server_api_params.RequestPagination Pagination = 1;
   string OperationID = 2;
   int32 BlockUserNum = 3;
 }
 
 message BlockUser {
-    User User = 1;
-    string BeginDisableTime = 2;
-    string EndDisableTime = 3;
+  User User = 1;
+  string BeginDisableTime = 2;
+  string EndDisableTime = 3;
 }
 
 message GetBlockUsersResp{
@@ -268,22 +270,22 @@ message GetBlockUsersResp{
 }
 
 message GetBlockUserByIdReq {
-    string User_id = 1;
-    string OperationID = 2;
+  string User_id = 1;
+  string OperationID = 2;
 }
 
 message GetBlockUserByIdResp {
-    BlockUser BlockUser = 2;
+  BlockUser BlockUser = 2;
 }
 
 message DeleteUserReq {
-    string User_id = 1;
-    string OperationID = 2;
-    string OpUserId = 3;
+  string User_id = 1;
+  string OperationID = 2;
+  string OpUserId = 3;
 }
 
 message DeleteUserResp {
-    CommonResp  CommonResp = 1;
+  CommonResp  CommonResp = 1;
 }
 
 
