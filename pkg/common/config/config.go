@@ -176,6 +176,7 @@ type config struct {
 		AppManagerUid []string `yaml:"appManagerUid"`
 		Secrets       []string `yaml:"secrets"`
 	}
+
 	Kafka struct {
 		Ws2mschat struct {
 			Addr  []string `yaml:"addr"`
@@ -191,9 +192,11 @@ type config struct {
 			MsgToPush  string `yaml:"msgToPush"`
 		}
 	}
-	Secret           string `yaml:"secret"`
-	MultiLoginPolicy int    `yaml:"multiloginpolicy"`
-	TokenPolicy      struct {
+	Secret               string `yaml:"secret"`
+	MultiLoginPolicy     int    `yaml:"multiloginpolicy"`
+	ChatPersistenceMysql bool   `yaml:"chatPersistenceMysql"`
+
+	TokenPolicy struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
 	}
