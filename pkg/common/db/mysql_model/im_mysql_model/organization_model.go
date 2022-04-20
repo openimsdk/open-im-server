@@ -2,6 +2,7 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"time"
 )
 
@@ -206,4 +207,32 @@ func GetAllOrganizationUserID() (error, []string) {
 	var OrganizationUser db.OrganizationUser
 	var result []string
 	return dbConn.Model(&OrganizationUser).Pluck("user_id", &result).Error, result
+}
+
+func GetDepartmentMemberNum(departmentID string) (error, uint32) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return utils.Wrap(err, "DefaultGormDB failed"), 0
+	}
+	var number uint32
+	err = dbConn.Table("department_members").Where("department_id=?", departmentID).Count(&number).Error
+	if err != nil {
+		return utils.Wrap(err, ""), 0
+	}
+	return nil, number
+
+}
+
+func GetSubDepartmentNum(departmentID string) (error, uint32) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return utils.Wrap(err, "DefaultGormDB failed"), 0
+	}
+	var number uint32
+	err = dbConn.Table("departments").Where("parent_id=?", departmentID).Count(&number).Error
+	if err != nil {
+		return utils.Wrap(err, ""), 0
+	}
+	return nil, number
+
 }
