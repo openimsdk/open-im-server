@@ -134,12 +134,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	if len(config.Config.Manager.AppManagerUid) == 0 {
-		log.NewError(req.OperationID, "Manager == 0")
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "Manager == 0"})
-		return
-	}
-	req.OpUserID = config.Config.Manager.AppManagerUid[0]
+
 	log.NewInfo(params.OperationID, "GetUsersOnlineStatus args ", req.String())
 	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
 	var respResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
