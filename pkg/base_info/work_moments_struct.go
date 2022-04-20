@@ -44,10 +44,38 @@ type GetWorkMomentByIDReq struct {
 	office.GetWorkMomentByIDReq
 }
 
+type WorkMoment struct {
+	WorkMomentID          string      `json:"workMomentID"`
+	UserID                string      `json:"userID"`
+	Content               string      `json:"content"`
+	LikeUsers             []*LikeUser `json:"likeUsers"`
+	Comments              []*Comment  `json:"comments"`
+	Permission            int32       `json:"permission"`
+	PermissionUserIDList  []string    `json:"permissionUserIDList"`
+	PermissionGroupIDList []string    `json:"permissionGroupIDList"`
+	AtUserIDList          []string    `json:"atUserIDList"`
+	CreateTime            int32       `json:"createTime,omitempty"`
+}
+
+type LikeUser struct {
+	UserID   string `json:"userID"`
+	UserName string `json:"userName"`
+}
+
+type Comment struct {
+	UserID        string `json:"userID"`
+	UserName      string `json:"userName"`
+	ReplyUserID   string `json:"replyUserID"`
+	ReplyUserName string `json:"replyUserName"`
+	ContentID     string `json:"contentID"`
+	Content       string `json:"content"`
+	CreateTime    int32  `json:"createTime"`
+}
+
 type GetWorkMomentByIDResp struct {
 	CommResp
 	Data struct {
-		WorkMoment *office.WorkMoment `json:"workMoment"`
+		WorkMoment *WorkMoment `json:"workMoment"`
 	} `json:"data"`
 }
 
@@ -58,9 +86,9 @@ type GetUserWorkMomentsReq struct {
 type GetUserWorkMomentsResp struct {
 	CommResp
 	Data struct {
-		WorkMoments []*office.WorkMoment `json:"workMoments"`
-		CurrentPage int32                `json:"currentPage"`
-		ShowNumber  int32                `json:"showNumber"`
+		WorkMoments []*WorkMoment `json:"workMoments"`
+		CurrentPage int32         `json:"currentPage"`
+		ShowNumber  int32         `json:"showNumber"`
 	} `json:"data"`
 }
 
@@ -71,22 +99,9 @@ type GetUserFriendWorkMomentsReq struct {
 type GetUserFriendWorkMomentsResp struct {
 	CommResp
 	Data struct {
-		WorkMoments []*office.WorkMoment `json:"workMoments"`
-		CurrentPage int32                `json:"currentPage"`
-		ShowNumber  int32                `json:"showNumber"`
-	} `json:"data"`
-}
-
-type GetUserWorkMomentsCommentsMsgReq struct {
-	WorkMomentsUserCommonReq
-}
-
-type GetUserWorkMomentsCommentsMsgResp struct {
-	CommResp
-	Data struct {
-		CommentMsgs []*office.CommentsMsg `json:"comments"`
-		CurrentPage int32                 `json:"currentPage"`
-		ShowNumber  int32                 `json:"showNumber"`
+		WorkMoments []*WorkMoment `json:"workMoments"`
+		CurrentPage int32         `json:"currentPage"`
+		ShowNumber  int32         `json:"showNumber"`
 	} `json:"data"`
 }
 
@@ -95,13 +110,5 @@ type SetUserWorkMomentsLevelReq struct {
 }
 
 type SetUserWorkMomentsLevelResp struct {
-	CommResp
-}
-
-type ClearUserWorkMomentsCommentsMsgReq struct {
-	office.ClearUserWorkMomentsCommentsMsgReq
-}
-
-type ClearUserWorkMomentsCommentsMsgResp struct {
 	CommResp
 }

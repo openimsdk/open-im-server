@@ -91,8 +91,8 @@ const (
 
 	OrganizationChangedNotification = 1801
 
-	WorkMomentNotificationStart      = 1900
-	WorkMomentNewCommentNotification = 1901
+	WorkMomentNotificationBegin = 1900
+	WorkMomentNotification      = 1901
 
 	NotificationEnd = 2000
 
@@ -183,6 +183,17 @@ const (
 	OtherType = 1
 	VideoType = 2
 	ImageType = 3
+
+	// workMoment permission
+	WorkMomentPublic            = 0
+	WorkMomentPrivate           = 1
+	WorkMomentPermissionCanSee  = 2
+	WorkMomentPermissionCantSee = 3
+
+	// workMoment sdk notification type
+	WorkMomentCommentNotification = 0
+	WorkMomentLikeNotification    = 1
+	WorkMomentAtUserNotification  = 2
 )
 
 var ContentType2PushContent = map[int64]string{
