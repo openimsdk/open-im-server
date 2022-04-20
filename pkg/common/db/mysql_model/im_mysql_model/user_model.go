@@ -321,7 +321,8 @@ func SetConversation(conversation db.Conversation) error {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
 		//force update
 		return dbConn.Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
-			Update(map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt, "is_pinned": conversation.IsPinned, "is_private_chat": conversation.IsPrivateChat}).Error
+			Update(map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt, "is_pinned": conversation.IsPinned, "is_private_chat": conversation.IsPrivateChat,
+				"group_at_type": conversation.GroupAtType, "is_not_in_group": conversation.IsNotInGroup}).Error
 	}
 }
 
