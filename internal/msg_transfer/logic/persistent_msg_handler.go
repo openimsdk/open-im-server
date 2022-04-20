@@ -56,10 +56,14 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey strin
 			}
 		}
 		if tag {
-			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
-			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
-				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
-				return
+			if config.Config.ChatPersistenceMysql == true {
+				log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
+				if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
+					log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
+					return
+				}
+			} else {
+				log.Debug(msgFromMQ.OperationID, "don't insert to db", string(msg))
 			}
 		}
 

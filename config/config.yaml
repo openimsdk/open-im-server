@@ -204,6 +204,9 @@ secret: tuoyun
 # 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
 multiloginpolicy: 1
 
+#chat log insert to db
+chatPersistenceMysql: true
+
 #token config
 tokenpolicy:
   accessSecret: "open_im_server" #token生成相关，默认即可
