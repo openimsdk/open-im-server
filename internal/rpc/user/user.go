@@ -218,7 +218,7 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 			return resp, nil
 		}
-		if groupInfo.Status == constant.GroupStatusDismissed {
+		if groupInfo.Status == constant.GroupStatusDismissed && !req.Conversation.IsNotInGroup {
 			errMsg := "group status is dismissed"
 			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}
 			return resp, nil

@@ -381,10 +381,7 @@ func GetConversation(OwnerUserID, conversationID string) (db.Conversation, error
 	if err != nil {
 		return conversation, err
 	}
-	err = dbConn.Model(&db.Conversation{
-		OwnerUserID:    OwnerUserID,
-		ConversationID: conversationID,
-	}).Find(&conversation).Error
+	err = dbConn.Table("conversations").Where("owner_user_id=? and conversation_id=?", OwnerUserID, conversationID).Take(&conversation).Error
 	return conversation, err
 }
 
@@ -395,5 +392,14 @@ func GetConversations(OwnerUserID string, conversationIDs []string) ([]db.Conver
 		return conversations, err
 	}
 	err = dbConn.Model(&db.Conversation{}).Where("conversation_id IN (?) and  owner_user_id=?", conversationIDs, OwnerUserID).Find(&conversations).Error
+	return conversations, err
+}
+func GetConversationsByConversationIDMultipleOwner(OwnerUserIDList []string, conversationID string) ([]db.Conversation, error) {
+	var conversations []db.Conversation
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return conversations, err
+	}
+	err = dbConn.Model(&db.Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", OwnerUserIDList, conversationID).Find(&conversations).Error
 	return conversations, err
 }
