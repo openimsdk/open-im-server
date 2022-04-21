@@ -381,10 +381,7 @@ func GetConversation(OwnerUserID, conversationID string) (db.Conversation, error
 	if err != nil {
 		return conversation, err
 	}
-	err = dbConn.Model(&db.Conversation{
-		OwnerUserID:    OwnerUserID,
-		ConversationID: conversationID,
-	}).Take(&conversation).Error
+	err = dbConn.Table("conversations").Where("owner_user_id=? and conversation_id=?", OwnerUserID, conversationID).Take(&conversation).Error
 	return conversation, err
 }
 
