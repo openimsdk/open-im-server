@@ -285,16 +285,19 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	if err := utils.CopyStructFields(&workMoment, req.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupIDList, req.WorkMoment.PermissionUserIDList)
-	for _, userID := range req.WorkMoment.AtUserIDList {
-		userName, err := imdb.GetUserNameByUserID(userID)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", userID, err.Error())
-			continue
+	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
+	for _, user := range req.WorkMoment.AtUserList {
+		if user.UserName == "" {
+			userName, err := imdb.GetUserNameByUserID(user.UserID)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", user.UserID, err.Error())
+				continue
+			}
+			user.UserName = userName
 		}
 		workMoment.AtUserList = append(workMoment.AtUserList, &db.AtUser{
-			UserID:   userID,
-			UserName: userName,
+			UserID:   user.UserID,
+			UserName: user.UserName,
 		})
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
@@ -306,7 +309,7 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	}
 
 	// send notification to at users
-	for _, atUser := range req.WorkMoment.AtUserIDList {
+	for _, atUser := range req.WorkMoment.AtUserList {
 		workMomentNotificationMsg := &pbOffice.WorkMomentNotificationMsg{
 			NotificationMsgType: constant.WorkMomentAtUserNotification,
 			WorkMomentID:        workMoment.WorkMomentID,
@@ -315,22 +318,26 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 			FaceURL:             createUser.FaceURL,
 			UserName:            createUser.Nickname,
 		}
-		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser, workMomentNotificationMsg)
+		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser.UserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
 // count and distinct permission users
-func (s *officeServer) getPermissionUserIDList(operationID string, groupIDList, userIDList []string) []string {
+func (s *officeServer) getPermissionUserIDList(operationID string, groupList []*pbOffice.PermissionGroup, userList []*pbOffice.WorkMomentUser) []string {
 	var permissionUserIDList []string
-	for _, groupID := range groupIDList {
-		GroupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
+	for _, group := range groupList {
+		GroupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(group.GroupID)
 		if err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", groupID, err.Error())
+			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", group, err.Error())
 			continue
 		}
 		permissionUserIDList = append(permissionUserIDList, GroupMemberIDList...)
+	}
+	var userIDList []string
+	for _, user := range userList {
+		userIDList = append(userIDList, user.UserID)
 	}
 	permissionUserIDList = append(permissionUserIDList, userIDList...)
 	permissionUserIDList = utils.RemoveRepeatedStringInList(permissionUserIDList)

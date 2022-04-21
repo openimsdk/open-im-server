@@ -45,16 +45,16 @@ type GetWorkMomentByIDReq struct {
 }
 
 type WorkMoment struct {
-	WorkMomentID          string      `json:"workMomentID"`
-	UserID                string      `json:"userID"`
-	Content               string      `json:"content"`
-	LikeUsers             []*LikeUser `json:"likeUsers"`
-	Comments              []*Comment  `json:"comments"`
-	Permission            int32       `json:"permission"`
-	PermissionUserIDList  []string    `json:"permissionUserIDList"`
-	PermissionGroupIDList []string    `json:"permissionGroupIDList"`
-	AtUserIDList          []string    `json:"atUserIDList"`
-	CreateTime            int32       `json:"createTime,omitempty"`
+	WorkMomentID string      `json:"workMomentID"`
+	UserID       string      `json:"userID"`
+	Content      string      `json:"content"`
+	LikeUsers    []*LikeUser `json:"likeUsers"`
+	Comments     []*Comment  `json:"comments"`
+	//Permission            int32       `json:"permission"`
+	//PermissionUserIDList  []string    `json:"permissionUserIDList"`
+	//PermissionGroupIDList []string    `json:"permissionGroupIDList"`
+	AtUserIDList []string `json:"atUserIDList"`
+	CreateTime   int32    `json:"createTime,omitempty"`
 }
 
 type LikeUser struct {
