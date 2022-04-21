@@ -206,15 +206,6 @@ func GetWorkMomentByID(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp.Data.WorkMoment, respPb.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	if err := utils.CopyStructFields(&resp.Data.WorkMoment.AtUserIDList, respPb.WorkMoment.AtUserList); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed")
-	}
-	if err := utils.CopyStructFields(&resp.Data.WorkMoment.LikeUserList, respPb.WorkMoment.LikeUserList); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed")
-	}
-	if err := utils.CopyStructFields(&resp.Data.WorkMoment.Comments, respPb.WorkMoment.Comments); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed")
-	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, resp)
 }

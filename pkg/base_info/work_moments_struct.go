@@ -53,8 +53,8 @@ type WorkMoment struct {
 	//Permission            int32       `json:"permission"`
 	//PermissionUserIDList  []string    `json:"permissionUserIDList"`
 	//PermissionGroupIDList []string    `json:"permissionGroupIDList"`
-	AtUserIDList []*WorkMomentUser `json:"atUsers"`
-	CreateTime   int32             `json:"createTime,omitempty"`
+	AtUserList []*WorkMomentUser `json:"atUsers"`
+	CreateTime int32             `json:"createTime,omitempty"`
 }
 
 type WorkMomentUser struct {
