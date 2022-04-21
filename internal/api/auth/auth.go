@@ -23,8 +23,9 @@ func UserRegister(c *gin.Context) {
 	}
 
 	if params.Secret != config.Config.Secret {
-		log.NewError(params.OperationID, "params.Secret != config.Config.Secret", params.Secret, config.Config.Secret)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "not authorized"})
+		errMsg := " params.Secret != config.Config.Secret "
+		log.NewError(params.OperationID, errMsg, params.Secret, config.Config.Secret)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": errMsg})
 		return
 	}
 	req := &rpc.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
@@ -36,7 +37,7 @@ func UserRegister(c *gin.Context) {
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserRegister(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "call rpc err ", err)
+		log.NewError(req.OperationID, "call rpc err ", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "internal service err"})
 		return
 	}
@@ -86,6 +87,6 @@ func UserToken(c *gin.Context) {
 	}
 	resp := api.UserTokenResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg},
 		UserToken: api.UserTokenInfo{UserID: req.FromUserID, Token: reply.Token, ExpiredTime: reply.ExpiredTime}}
-	log.NewInfo(req.OperationID, "UserRegister return ", resp)
+	log.NewInfo(req.OperationID, "UserToken return ", resp)
 	c.JSON(http.StatusOK, resp)
 }

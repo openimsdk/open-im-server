@@ -43,6 +43,8 @@ type Conversation struct {
 	DraftTextTime    int64  `json:"draftTextTime"`
 	IsPinned         bool   `json:"isPinned" binding:"omitempty"`
 	IsPrivateChat    bool   `json:"isPrivateChat"`
+	GroupAtType      int32  `json:"groupAtType"`
+	IsNotInGroup     bool   `json:"isNotInGroup"`
 	AttachedInfo     string `json:"attachedInfo"`
 	Ex               string `json:"ex"`
 }

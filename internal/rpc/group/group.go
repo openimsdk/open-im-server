@@ -13,6 +13,7 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
 	"net"
@@ -576,6 +577,22 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	}
 
 	chat.MemberQuitNotification(req)
+	//modify quitter conversation info
+	var reqPb pbUser.SetConversationReq
+	reqPb.OperationID = req.OperationID
+	reqPb.Conversation.OwnerUserID = req.OpUserID
+	reqPb.Conversation.ConversationID = utils.GetConversationIDBySessionType(req.OpUserID, constant.GroupChatType)
+	reqPb.Conversation.ConversationType = constant.GroupChatType
+	reqPb.Conversation.GroupID = req.GroupID
+	reqPb.Conversation.IsNotInGroup = true
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := pbUser.NewUserClient(etcdConn)
+	respPb, err := client.SetConversation(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error())
+	} else {
+		log.NewDebug(req.OpUserID, utils.GetSelfFuncName(), respPb.String())
+	}
 	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}})
 	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
 }
@@ -988,13 +1005,35 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	chat.GroupDismissedNotification(req)
-
+	memberList, err := imdb.GetGroupMemberListByGroupID(req.GroupID)
+	if err != nil {
+		log.NewError(req.OperationID, "GetGroupMemberListByGroupID failed,", err.Error(), req.GroupID)
+	}
+	//modify quitter conversation info
+	var reqPb pbUser.SetConversationReq
+	for _, v := range memberList {
+		reqPb.OperationID = req.OperationID
+		reqPb.Conversation.OwnerUserID = v.UserID
+		reqPb.Conversation.ConversationID = utils.GetConversationIDBySessionType(v.UserID, constant.GroupChatType)
+		reqPb.Conversation.ConversationType = constant.GroupChatType
+		reqPb.Conversation.GroupID = req.GroupID
+		reqPb.Conversation.IsNotInGroup = true
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+		client := pbUser.NewUserClient(etcdConn)
+		respPb, err := client.SetConversation(context.Background(), &reqPb)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error(), v.UserID)
+		} else {
+			log.NewDebug(req.OpUserID, utils.GetSelfFuncName(), respPb.String(), v.UserID)
+		}
+	}
 	err = imdb.DeleteGroupMemberByGroupID(req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, "DeleteGroupMemberByGroupID failed ", req.GroupID)
 		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
 	return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
 }

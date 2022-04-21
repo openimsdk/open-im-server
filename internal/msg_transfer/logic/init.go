@@ -2,8 +2,8 @@ package logic
 
 import (
 	"Open_IM/pkg/common/config"
-
 	"Open_IM/pkg/common/kafka"
+	"fmt"
 )
 
 var (
@@ -20,6 +20,10 @@ func Init() {
 }
 func Run() {
 	//register mysqlConsumerHandler to
-	go persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&persistentCH)
+	if config.Config.ChatPersistenceMysql {
+		go persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&persistentCH)
+	} else {
+		fmt.Println("not start mysql consumer")
+	}
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
 }

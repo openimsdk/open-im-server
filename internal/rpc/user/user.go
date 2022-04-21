@@ -75,7 +75,7 @@ func (s *userServer) Run() {
 func syncPeerUserConversation(conversation *pbUser.Conversation, operationID string) error {
 	peerUserConversation := db.Conversation{
 		OwnerUserID:      conversation.UserID,
-		ConversationID:   "single_" + conversation.OwnerUserID,
+		ConversationID:   utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType),
 		ConversationType: constant.SingleChatType,
 		UserID:           conversation.OwnerUserID,
 		GroupID:          "",
@@ -129,6 +129,7 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 		if err := utils.CopyStructFields(&conversation, v); err != nil {
 			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), v.String(), "CopyStructFields failed", err.Error())
 		}
+		//redis op
 		if err := db.DB.SetSingleConversationRecvMsgOpt(req.OwnerUserID, v.ConversationID, v.RecvMsgOpt); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error())
 			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
