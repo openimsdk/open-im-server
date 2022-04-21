@@ -580,7 +580,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	var c pbUser.Conversation
 	reqPb.OperationID = req.OperationID
 	c.OwnerUserID = req.OpUserID
-	c.ConversationID = utils.GetConversationIDBySessionType(req.OpUserID, constant.GroupChatType)
+	c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
 	c.ConversationType = constant.GroupChatType
 	c.GroupID = req.GroupID
 	c.IsNotInGroup = true
@@ -1015,7 +1015,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	for _, v := range memberList {
 		reqPb.OperationID = req.OperationID
 		c.OwnerUserID = v.UserID
-		c.ConversationID = utils.GetConversationIDBySessionType(v.UserID, constant.GroupChatType)
+		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
 		c.ConversationType = constant.GroupChatType
 		c.GroupID = req.GroupID
 		c.IsNotInGroup = true
