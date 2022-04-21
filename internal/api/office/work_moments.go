@@ -202,6 +202,7 @@ func GetWorkMomentByID(c *gin.Context) {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
 	//resp.Data.WorkMoment = respPb.WorkMoment
+	resp.Data.WorkMoment = &apiStruct.WorkMoment{}
 	if err := utils.CopyStructFields(&resp.Data.WorkMoment, respPb.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}

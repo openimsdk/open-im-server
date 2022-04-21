@@ -129,18 +129,28 @@ message Comment {
   int32  createTime = 8;
 }
 
+message PermissionGroup {
+  string groupName = 1;
+  string groupID = 2;
+}
+
+message WorkMomentUser {
+   string userID = 1;
+   string userName = 2;
+}
+
 message WorkMoment {
   string workMomentID = 1;
   string userID = 2;
   string userName = 3;
   string faceURL = 4;
   string content = 5;
-  repeated LikeUser likeUsers = 6;
+  repeated WorkMomentUser likeUserList = 6;
   repeated Comment comments = 7;
   int32 permission = 8;
-  repeated string permissionUserIDList = 9;
-  repeated string permissionGroupIDList = 10;
-  repeated string atUserIDList = 11;
+  repeated WorkMomentUser permissionUserList = 9;
+  repeated PermissionGroup permissionGroupList = 10;
+  repeated WorkMomentUser atUserList = 11;
   int32 createTime = 12;
 }
 

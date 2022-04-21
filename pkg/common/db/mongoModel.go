@@ -642,7 +642,7 @@ func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string)
 	log.NewDebug("", utils.GetSelfFuncName(), workMoment)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
-	_, err = c.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_users": workMoment.LikeUserList}})
+	_, err = c.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_user_list": workMoment.LikeUserList}})
 	return workMoment, err
 }
 
@@ -683,42 +683,6 @@ func (d *DataBases) GetUserFriendWorkMomentsRecursion(friendIDList []string, sho
 		return workMomentList, nil
 	}
 	err = result.All(ctx, &workMomentList)
-	//if len(workMomentList) == 0 {
-	//	return workMomentList, nil
-	//}
-	//for i, workMoment := range workMomentList {
-	//	if workMoment.IsPrivate {
-	//		workMomentList = append(workMomentList[0:i], workMomentList[i+1:]...)
-	//		continue
-	//	}
-	//
-	//	var isContain bool
-	//	for _, WhoCanSeeUserID := range workMoment.WhoCanSeeUserIDList {
-	//		if WhoCanSeeUserID == userID {
-	//			isContain = true
-	//			break
-	//		}
-	//	}
-	//	if !isContain {
-	//		workMomentList = append(workMomentList[0:i], workMomentList[i+1:]...)
-	//		continue
-	//	}
-	//
-	//	for _, whoCantSeeUserID := range workMoment.WhoCantSeeUserIDList {
-	//		if whoCantSeeUserID == userID {
-	//			workMomentList = append(workMomentList[0:i], workMomentList[i+1:]...)
-	//			break
-	//		}
-	//	}
-	//}
-	//
-	//if len(workMomentList) < int(pageNumber) {
-	//	workMomentListWorkMomentList, err := d.GetUserFriendWorkMomentsRecursion(friendIDList, showNumber, pageNumber, userID)
-	//	workMomentList = append(workMomentList, workMomentListWorkMomentList...)
-	//	if err != nil {
-	//		return workMomentList, err
-	//	}
-	//}
 	return workMomentList, err
 }
 
