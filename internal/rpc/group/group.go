@@ -557,7 +557,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 }
 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) (*pbGroup.QuitGroupResp, error) {
-	log.NewError(req.OperationID, "QuitGroup args ", req.String())
+	log.NewInfo(req.OperationID, "QuitGroup args ", req.String())
 	_, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.OpUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupMemberInfoByGroupIDAndUserID failed ", err.Error(), req.GroupID, req.OpUserID)
@@ -575,16 +575,16 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		log.NewError(req.OperationID, "DelGroupMember failed ", req.GroupID, req.OpUserID)
 		//	return &pbGroup.CommonResp{ErrorCode: constant.ErrQuitGroup.ErrCode, ErrorMsg: constant.ErrQuitGroup.ErrMsg}, nil
 	}
-
-	chat.MemberQuitNotification(req)
 	//modify quitter conversation info
 	var reqPb pbUser.SetConversationReq
+	var c pbUser.Conversation
 	reqPb.OperationID = req.OperationID
-	reqPb.Conversation.OwnerUserID = req.OpUserID
-	reqPb.Conversation.ConversationID = utils.GetConversationIDBySessionType(req.OpUserID, constant.GroupChatType)
-	reqPb.Conversation.ConversationType = constant.GroupChatType
-	reqPb.Conversation.GroupID = req.GroupID
-	reqPb.Conversation.IsNotInGroup = true
+	c.OwnerUserID = req.OpUserID
+	c.ConversationID = utils.GetConversationIDBySessionType(req.OpUserID, constant.GroupChatType)
+	c.ConversationType = constant.GroupChatType
+	c.GroupID = req.GroupID
+	c.IsNotInGroup = true
+	reqPb.Conversation = &c
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.SetConversation(context.Background(), &reqPb)
@@ -593,6 +593,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	} else {
 		log.NewDebug(req.OpUserID, utils.GetSelfFuncName(), respPb.String())
 	}
+	chat.MemberQuitNotification(req)
 	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}})
 	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
 }
@@ -1004,20 +1005,21 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		log.NewError(req.OperationID, "OperateGroupStatus failed ", req.GroupID, constant.GroupStatusDismissed)
 		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-	chat.GroupDismissedNotification(req)
 	memberList, err := imdb.GetGroupMemberListByGroupID(req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupMemberListByGroupID failed,", err.Error(), req.GroupID)
 	}
 	//modify quitter conversation info
 	var reqPb pbUser.SetConversationReq
+	var c pbUser.Conversation
 	for _, v := range memberList {
 		reqPb.OperationID = req.OperationID
-		reqPb.Conversation.OwnerUserID = v.UserID
-		reqPb.Conversation.ConversationID = utils.GetConversationIDBySessionType(v.UserID, constant.GroupChatType)
-		reqPb.Conversation.ConversationType = constant.GroupChatType
-		reqPb.Conversation.GroupID = req.GroupID
-		reqPb.Conversation.IsNotInGroup = true
+		c.OwnerUserID = v.UserID
+		c.ConversationID = utils.GetConversationIDBySessionType(v.UserID, constant.GroupChatType)
+		c.ConversationType = constant.GroupChatType
+		c.GroupID = req.GroupID
+		c.IsNotInGroup = true
+		reqPb.Conversation = &c
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 		client := pbUser.NewUserClient(etcdConn)
 		respPb, err := client.SetConversation(context.Background(), &reqPb)
@@ -1027,6 +1029,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			log.NewDebug(req.OpUserID, utils.GetSelfFuncName(), respPb.String(), v.UserID)
 		}
 	}
+	chat.GroupDismissedNotification(req)
 	err = imdb.DeleteGroupMemberByGroupID(req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, "DeleteGroupMemberByGroupID failed ", req.GroupID)
