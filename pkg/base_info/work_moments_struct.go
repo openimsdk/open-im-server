@@ -50,6 +50,8 @@ type WorkMoment struct {
 	Content      string            `json:"content"`
 	LikeUserList []*WorkMomentUser `json:"likeUsers"`
 	Comments     []*Comment        `json:"comments"`
+	FaceURL      string            `json:"face_url"`
+	UserName     string            `json:"user_name"`
 	//Permission            int32       `json:"permission"`
 	//PermissionUserIDList  []string    `json:"permissionUserIDList"`
 	//PermissionGroupIDList []string    `json:"permissionGroupIDList"`

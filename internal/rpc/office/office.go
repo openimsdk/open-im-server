@@ -280,11 +280,11 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	workMoment.UserName = createUser.Nickname
-	workMoment.FaceURL = createUser.FaceURL
 	if err := utils.CopyStructFields(&workMoment, req.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	workMoment.UserName = createUser.Nickname
+	workMoment.FaceURL = createUser.FaceURL
 	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
 	err = db.DB.CreateOneWorkMoment(&workMoment)
