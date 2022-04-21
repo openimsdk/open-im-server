@@ -11,7 +11,7 @@ import (
 )
 
 func WorkMomentSendNotification(operationID, sendID, recvID string, notificationMsg *pbOffice.WorkMomentNotificationMsg) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), recvID)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), sendID, recvID, notificationMsg)
 	WorkMomentNotification(operationID, sendID, recvID, notificationMsg)
 }
 
@@ -29,7 +29,7 @@ func WorkMomentNotification(operationID, sendID, recvID string, m proto.Message)
 		RecvID:      recvID,
 		MsgFrom:     constant.UserMsgType,
 		ContentType: constant.WorkMomentNotification,
-		SessionType: constant.UserMsgType,
+		SessionType: constant.SingleChatType,
 		OperationID: operationID,
 	}
 	n.Content, err = proto.Marshal(m)

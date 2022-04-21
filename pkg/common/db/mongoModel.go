@@ -575,7 +575,7 @@ type WorkMoment struct {
 	AtUserList           []*AtUser   `bson:"at_user_list"`
 	Comments             []*Comment  `bson:"comments"`
 	PermissionUserIDList []string    `bson:"permission_user_id_list"`
-	Permission           int32       `bson:"is_private"`
+	Permission           int32       `bson:"permission"`
 	CreateTime           int32       `bson:"create_time"`
 }
 
