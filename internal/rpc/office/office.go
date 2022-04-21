@@ -286,20 +286,6 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
 	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
-	for _, user := range req.WorkMoment.AtUserList {
-		if user.UserName == "" {
-			userName, err := imdb.GetUserNameByUserID(user.UserID)
-			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", user.UserID, err.Error())
-				continue
-			}
-			user.UserName = userName
-		}
-		workMoment.AtUserList = append(workMoment.AtUserList, &db.AtUser{
-			UserID:   user.UserID,
-			UserName: user.UserName,
-		})
-	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
 	err = db.DB.CreateOneWorkMoment(&workMoment)
 	if err != nil {
