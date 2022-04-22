@@ -181,6 +181,13 @@ const (
 	VideoType = 2
 	ImageType = 3
 )
+const (
+	AtAllString = "AtAllTag"
+	AtNormal    = 0
+	AtMe        = 1
+	AtAll       = 2
+	AtAllAtMe   = 3
+)
 
 var ContentType2PushContent = map[int64]string{
 	Picture:  "[图片]",

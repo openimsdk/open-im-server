@@ -246,6 +246,21 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			}
 		case constant.MemberQuitNotification:
 			addUidList = append(addUidList, pb.MsgData.SendID)
+		case constant.AtText:
+			//tagMe := utils.IsContain(c.loginUserID, s.AtElem.AtUserList)
+			//tagAll := utils.IsContain(constant.AtAllString, pb.MsgData.AtUserIDList)
+			//if tagAll {
+			//	if tagMe {
+			//		lc.GroupAtType = constant.AtAllAtMe
+			//		return
+			//	}
+			//	lc.GroupAtType = constant.AtAll
+			//	return
+			//}
+			//if tagMe {
+			//	lc.GroupAtType = constant.AtMe
+			//}
+
 		default:
 		}
 		groupID := pb.MsgData.GroupID
