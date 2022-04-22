@@ -594,6 +594,21 @@ func Notification(n *NotificationMsg) {
 		reliabilityLevel = config.Config.Notification.OrganizationChanged.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.OrganizationChanged.Conversation.UnreadCount
 
+	case constant.WorkMomentNotification:
+		pushSwitch = config.Config.Notification.WorkMomentsNotification.OfflinePush.PushSwitch
+		title = config.Config.Notification.WorkMomentsNotification.OfflinePush.Title
+		desc = config.Config.Notification.WorkMomentsNotification.OfflinePush.Desc
+		ex = config.Config.Notification.WorkMomentsNotification.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.WorkMomentsNotification.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.WorkMomentsNotification.Conversation.UnreadCount
+
+	case constant.ConversationPrivateChatNotification:
+		pushSwitch = config.Config.Notification.ConversationSetPrivate.OfflinePush.PushSwitch
+		title = config.Config.Notification.ConversationSetPrivate.OfflinePush.Title
+		desc = config.Config.Notification.ConversationSetPrivate.OfflinePush.Desc
+		ex = config.Config.Notification.ConversationSetPrivate.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.ConversationSetPrivate.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.ConversationSetPrivate.Conversation.UnreadCount
 	}
 	switch reliabilityLevel {
 	case constant.UnreliableNotification:
