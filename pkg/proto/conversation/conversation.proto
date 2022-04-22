@@ -1,0 +1,302 @@
+syntax = "proto3";
+option go_package = "./conversation;conversation";
+package conversation;
+
+message CommonResp{
+  int32  errCode = 1;
+  string errMsg = 2;
+}
+
+message DeleteUsersReq{
+  repeated string  DeleteUserIDList = 2;
+  string OpUserID = 3;
+  string OperationID = 4;
+}
+
+message DeleteUsersResp{
+  CommonResp  CommonResp = 1;
+  repeated string FailedUserIDList = 2;
+}
+
+
+message GetAllUserIDReq{
+  string opUserID = 1;
+  string operationID = 2;
+}
+message GetAllUserIDResp{
+  CommonResp  CommonResp = 1;
+  repeated string UserIDList = 2;
+}
+
+
+message AccountCheckReq{
+  repeated string CheckUserIDList = 1;
+  string OpUserID = 2;
+  string OperationID = 3;
+
+}
+message AccountCheckResp{
+  CommonResp  commonResp = 1;
+  message SingleUserStatus {
+    string userID = 1;
+    string accountStatus = 2;
+  }
+  repeated SingleUserStatus ResultList = 2;
+}
+
+
+message GetUserInfoReq{
+  repeated string userIDList = 1;
+  string OpUserID = 2;
+  string OperationID = 3;
+}
+message GetUserInfoResp{
+  CommonResp  commonResp = 1;
+  repeated server_api_params.UserInfo UserInfoList = 3;
+}
+
+
+
+message UpdateUserInfoReq{
+  server_api_params.UserInfo UserInfo = 1;
+  string OpUserID = 2;
+  string  operationID = 3;
+}
+message UpdateUserInfoResp{
+  CommonResp  commonResp = 1;
+}
+
+message Conversation{
+  string OwnerUserID = 1;
+  string ConversationID = 2;
+  int32 RecvMsgOpt = 3;
+  int32 ConversationType = 4;
+  string UserID = 5;
+  string GroupID = 6;
+  int32 UnreadCount = 7;
+  int64 DraftTextTime = 8;
+  bool IsPinned = 9;
+  string AttachedInfo = 10;
+  bool IsPrivateChat = 11;
+  int32 GroupAtType = 12;
+  bool IsNotInGroup = 13;
+  string Ex = 14;
+}
+
+message ModifyConversationFiledReq{
+  Conversation Conversation = 1;
+  int32 notificationType = 2;
+  string OperationID = 3;
+}
+
+message SetConversationResp{
+  CommonResp  commonResp = 1;
+}
+
+message SetRecvMsgOptReq {
+  string OwnerUserID = 1;
+  string ConversationID = 2;
+  int32 RecvMsgOpt = 3;
+  int32 notificationType = 4;
+  string OperationID = 5;
+}
+
+message SetRecvMsgOptResp {
+  CommonResp  commonResp = 1;
+}
+
+message GetConversationReq{
+  string ConversationID = 1;
+  string OwnerUserID = 2;
+  string OperationID = 3;
+}
+
+message GetConversationResp{
+  CommonResp  commonResp = 1;
+  Conversation Conversation = 2;
+}
+
+message GetConversationsReq{
+  string OwnerUserID = 1;
+  repeated string ConversationIDs = 2;
+  string OperationID = 3;
+}
+
+message GetConversationsResp{
+  CommonResp  commonResp = 1;
+  repeated Conversation Conversations = 2;
+}
+
+message GetAllConversationsReq{
+  string OwnerUserID = 1;
+  string OperationID = 2;
+}
+
+message GetAllConversationsResp{
+  CommonResp  commonResp = 1;
+  repeated Conversation Conversations = 2;
+}
+
+message BatchSetConversationsReq{
+  repeated Conversation Conversations = 1;
+  string OwnerUserID = 2;
+  int32 notificationType = 3;
+  string OperationID = 4;
+}
+
+message BatchSetConversationsResp{
+  CommonResp  commonResp = 1;
+  repeated string Success = 2;
+  repeated string Failed = 3;
+}
+
+message ResignUserReq{
+  string UserId = 1;
+  string OperationID = 2;
+}
+
+message ResignUserResp{
+  CommonResp  commonResp = 1;
+}
+
+message GetUserByIdReq{
+  string UserId = 1;
+  string OperationID = 2;
+}
+
+message User{
+  string ProfilePhoto = 1;
+  string Nickname = 2;
+  string UserId = 3;
+  string CreateTime = 4;
+  bool IsBlock = 5;
+}
+
+message GetUserByIdResp{
+  CommonResp CommonResp = 1;
+  User user = 2;
+}
+
+message GetUsersByNameReq {
+  string UserName = 1;
+  server_api_params.RequestPagination Pagination = 2;
+  string OperationID = 3;
+}
+
+message GetUsersByNameResp {
+  repeated User users = 1;
+  server_api_params.ResponsePagination Pagination = 2;
+  int32 UserNums = 3;
+}
+
+message AlterUserReq{
+  string UserId = 1;
+  string OperationID = 2;
+  int64 PhoneNumber = 3;
+  string Nickname = 4;
+  string Email = 5;
+  string OpUserId = 6;
+}
+
+message AlterUserResp{
+  CommonResp  CommonResp = 1;
+}
+
+message GetUsersReq {
+  string OperationID = 1;
+  server_api_params.RequestPagination Pagination = 2;
+  string UserName = 3;
+}
+
+message GetUsersResp{
+  CommonResp  CommonResp = 1;
+  repeated User user = 2;
+  server_api_params.ResponsePagination Pagination = 3;
+  int32 UserNums = 4;
+}
+
+message AddUserReq{
+  string OperationID = 1;
+  string PhoneNumber = 2;
+  string UserId = 3;
+  string name = 4;
+  string OpUserId = 5;
+}
+
+message AddUserResp{
+  CommonResp  CommonResp = 1;
+}
+
+
+message BlockUserReq{
+  string UserId = 1;
+  string EndDisableTime = 2;
+  string OperationID = 3;
+  string OpUserId = 4;
+}
+
+message BlockUserResp{
+  CommonResp  CommonResp = 1;
+}
+
+message UnBlockUserReq{
+  string UserId = 1;
+  string OperationID = 2;
+  string OpUserId = 3;
+}
+
+message UnBlockUserResp{
+  CommonResp  CommonResp = 1;
+}
+
+message GetBlockUsersReq{
+  server_api_params.RequestPagination Pagination = 1;
+  string OperationID = 2;
+  int32 BlockUserNum = 3;
+}
+
+message BlockUser {
+  User User = 1;
+  string BeginDisableTime = 2;
+  string EndDisableTime = 3;
+}
+
+message GetBlockUsersResp{
+  CommonResp  CommonResp = 1;
+  repeated BlockUser BlockUsers = 2;
+  server_api_params.ResponsePagination Pagination = 3;
+  int32 UserNums = 4;
+}
+
+message GetBlockUserByIdReq {
+  string User_id = 1;
+  string OperationID = 2;
+}
+
+message GetBlockUserByIdResp {
+  BlockUser BlockUser = 2;
+}
+
+message DeleteUserReq {
+  string User_id = 1;
+  string OperationID = 2;
+  string OpUserId = 3;
+}
+
+message DeleteUserResp {
+  CommonResp  CommonResp = 1;
+}
+
+
+
+service user {
+  rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
+  rpc GetConversation(GetConversationReq)returns(GetConversationResp);
+  rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
+  rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
+  rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
+  rpc SetConversation(SetConversationReq)returns(SetConversationResp);
+  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
+
+
+}
