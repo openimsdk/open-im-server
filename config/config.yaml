@@ -92,8 +92,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim
     location: us-east-1
-    endpoint: http://127.0.0.1:9000
-    endpointInner: http://127.0.0.1:9000 #minio内网地址
+    endpoint: http://127.0.0.1:9000 #minio外网ip 这个ip是给客户端访问的
+    endpointInner: http://127.0.0.1:9000 #minio内网地址 如果im server 可以通过内网访问到 minio就可以填写
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID: user12345
     secretAccessKey: key12345
