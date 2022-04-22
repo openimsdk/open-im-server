@@ -600,7 +600,7 @@ notification:
 
   conversationSetPrivate:
     conversation:
-      reliabilityLevel: 2
+      reliabilityLevel: 3
       unreadCount: true
     offlinePush:
       switch: true
@@ -611,6 +611,19 @@ notification:
       openTips: "burn after reading was opened"
       closeTips: "burn after reading was closed"
 
+  ###################workMoments################
+  workMomentsNotification:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: true
+      offlinePush:
+        switch: true
+        title: "burn after reading"
+        desc: "burn after reading"
+        ext: "burn after reading"
+      defaultTips:
+        openTips: "burn after reading was opened"
+        closeTips: "burn after reading was closed"
 
 
 #---------------demo configuration---------------------#
