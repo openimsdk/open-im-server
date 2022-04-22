@@ -42,6 +42,7 @@ func main() {
 		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)                  //1
 		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
 		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
+		userRouterGroup.POST("/get_users_info_from_cache", user.GetUsersInfoFromCache)
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
