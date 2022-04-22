@@ -8,6 +8,7 @@ import (
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
 	"Open_IM/internal/api/office"
+	"Open_IM/internal/api/organization"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/config"
@@ -37,9 +38,10 @@ func main() {
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
-		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)    //1
-		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)        //1
-		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo) //1
+		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)              //1
+		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)                  //1
+		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
+		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
@@ -83,6 +85,9 @@ func main() {
 		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
 		groupRouterGroup.POST("/mute_group", group.MuteGroup)
 		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
+
+		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
+
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
@@ -135,7 +140,38 @@ func main() {
 		officeGroup.POST("/set_tag", office.SetTag)
 		officeGroup.POST("/send_msg_to_tag", office.SendMsg2Tag)
 		officeGroup.POST("/get_send_tag_log", office.GetTagSendLogs)
+
+		officeGroup.POST("/create_one_work_moment", office.CreateOneWorkMoment)
+		officeGroup.POST("/delete_one_work_moment", office.DeleteOneWorkMoment)
+		officeGroup.POST("/like_one_work_moment", office.LikeOneWorkMoment)
+		officeGroup.POST("/comment_one_work_moment", office.CommentOneWorkMoment)
+		officeGroup.POST("/get_work_moment_by_id", office.GetWorkMomentByID)
+		officeGroup.POST("/get_user_work_moments", office.GetUserWorkMoments)
+		officeGroup.POST("/get_user_friend_work_moments", office.GetUserFriendWorkMoments)
+		officeGroup.POST("/set_user_work_moments_level", office.SetUserWorkMomentsLevel)
 	}
+
+	organizationGroup := r.Group("/organization")
+	{
+		organizationGroup.POST("/create_department", organization.CreateDepartment)
+		organizationGroup.POST("/update_department", organization.UpdateDepartment)
+		organizationGroup.POST("/get_sub_department", organization.GetSubDepartment)
+		organizationGroup.POST("/delete_department", organization.DeleteDepartment)
+		organizationGroup.POST("/get_all_department", organization.GetAllDepartment)
+
+		organizationGroup.POST("/create_organization_user", organization.CreateOrganizationUser)
+		organizationGroup.POST("/update_organization_user", organization.UpdateOrganizationUser)
+		organizationGroup.POST("/delete_organization_user", organization.DeleteOrganizationUser)
+
+		organizationGroup.POST("/create_department_member", organization.CreateDepartmentMember)
+		organizationGroup.POST("/get_user_in_department", organization.GetUserInDepartment)
+		organizationGroup.POST("/update_user_in_department", organization.UpdateUserInDepartment)
+
+		organizationGroup.POST("/get_department_member", organization.GetDepartmentMember)
+		organizationGroup.POST("/delete_user_in_department", organization.DeleteUserInDepartment)
+
+	}
+
 	go apiThird.MinioInit()
 	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()

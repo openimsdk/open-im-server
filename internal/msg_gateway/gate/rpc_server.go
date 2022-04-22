@@ -101,7 +101,7 @@ func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgRe
 }
 func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUsersOnlineStatusReq) (*pbRelay.GetUsersOnlineStatusResp, error) {
 	log.NewInfo(req.OperationID, "rpc GetUsersOnlineStatus arrived server", req.String())
-	if !token_verify.IsMangerUserID(req.OpUserID) {
+	if !token_verify.IsManagerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "no permission GetUsersOnlineStatus ", req.OpUserID)
 		return &pbRelay.GetUsersOnlineStatusResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}

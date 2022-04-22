@@ -92,7 +92,9 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim
     location: us-east-1
-    endpoint: http://121.37.25.71:9000
+    endpoint: http://127.0.0.1:9000 #minio外网ip 这个ip是给客户端访问的
+    endpointInner: http://127.0.0.1:9000 #minio内网地址 如果im server 可以通过内网访问到 minio就可以填写
+    endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID: user12345
     secretAccessKey: key12345
   ali: # ali oss
@@ -120,6 +122,7 @@ rpcport: #rpc服务端口 默认即可
   openImMessageCmsPort: [ 10900 ]
   openImAdminCmsPort: [ 11000 ]
   openImOfficePort: [ 11100 ]
+  openImOrganizationPort: [ 11200 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -142,6 +145,7 @@ rpcregistername: #rpc注册服务名，默认即可
   OpenImMessageCMSName: MessageCMS
   openImAdminCMSName: AdminCMS
   openImOfficeName: Office
+  openImOrganizationName: Organization
 
 log:
   storageLocation: ../logs/
@@ -165,7 +169,7 @@ longconnsvr:
   websocketMaxMsgLen: 4096
   websocketTimeOut: 10
 
-## 推送只能开启一个
+## 推送只能开启一个 enable代表开启
 push:
   tpns: #腾讯推送，暂未测试 暂不要使用
     ios:
@@ -199,6 +203,9 @@ secret: tuoyun
 # 多端互踢策略
 # 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
 multiloginpolicy: 1
+
+#chat log insert to db
+chatPersistenceMysql: true
 
 #token config
 tokenpolicy:
@@ -428,6 +435,34 @@ notification:
       ext: "groupMemberCancelMuted ext"
     defaultTips:
       tips: "group Member Cancel Muted"
+
+  groupMemberInfoSet:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "groupMemberInfoSet title"
+      desc: "groupMemberInfoSet desc"
+      ext: "groupMemberInfoSet ext"
+    defaultTips:
+      tips: "group member info set"
+
+
+  organizationChanged:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: false
+      title: "organizationChanged title"
+      desc: "organizationChanged desc"
+      ext: "organizationChanged ext"
+    defaultTips:
+      tips: "organization changed"
+
+
+
   #############################friend#################################
 
   friendApplicationAdded:
@@ -565,7 +600,7 @@ notification:
 
   conversationSetPrivate:
     conversation:
-      reliabilityLevel: 2
+      reliabilityLevel: 3
       unreadCount: true
     offlinePush:
       switch: true
@@ -576,6 +611,19 @@ notification:
       openTips: "burn after reading was opened"
       closeTips: "burn after reading was closed"
 
+  ###################workMoments################
+  workMomentsNotification:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: true
+      offlinePush:
+        switch: true
+        title: "burn after reading"
+        desc: "burn after reading"
+        ext: "burn after reading"
+      defaultTips:
+        openTips: "burn after reading was opened"
+        closeTips: "burn after reading was closed"
 
 
 #---------------demo configuration---------------------#

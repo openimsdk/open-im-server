@@ -81,12 +81,18 @@ const (
 	GroupMemberCancelMutedNotification   = 1513
 	GroupMutedNotification               = 1514
 	GroupCancelMutedNotification         = 1515
+	GroupMemberInfoSetNotification       = 1516
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601
 	SignalingNotificationEnd   = 1699
 
 	ConversationPrivateChatNotification = 1701
+
+	OrganizationChangedNotification = 1801
+
+	WorkMomentNotificationBegin = 1900
+	WorkMomentNotification      = 1901
 
 	NotificationEnd = 2000
 
@@ -177,6 +183,24 @@ const (
 	OtherType = 1
 	VideoType = 2
 	ImageType = 3
+
+	// workMoment permission
+	WorkMomentPublic            = 0
+	WorkMomentPrivate           = 1
+	WorkMomentPermissionCanSee  = 2
+	WorkMomentPermissionCantSee = 3
+
+	// workMoment sdk notification type
+	WorkMomentCommentNotification = 0
+	WorkMomentLikeNotification    = 1
+	WorkMomentAtUserNotification  = 2
+)
+const (
+	AtAllString = "AtAllTag"
+	AtNormal    = 0
+	AtMe        = 1
+	AtAll       = 2
+	AtAllAtMe   = 3
 )
 
 var ContentType2PushContent = map[int64]string{

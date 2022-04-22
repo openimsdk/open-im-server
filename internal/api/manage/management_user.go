@@ -118,6 +118,7 @@ func AccountCheck(c *gin.Context) {
 	log.NewInfo(req.OperationID, "AccountCheck api return", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
 func GetUsersOnlineStatus(c *gin.Context) {
 	params := api.GetUsersOnlineStatusReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -133,6 +134,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
+
 	log.NewInfo(params.OperationID, "GetUsersOnlineStatus args ", req.String())
 	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
 	var respResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
@@ -176,5 +178,4 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	}
 	log.NewInfo(req.OperationID, "GetUsersOnlineStatus api return", resp)
 	c.JSON(http.StatusOK, resp)
-
 }

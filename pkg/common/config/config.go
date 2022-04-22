@@ -56,11 +56,13 @@ type config struct {
 			OssRoleArn         string `yaml:"OssRoleArn"`
 		}
 		Minio struct {
-			Bucket          string `yaml:"bucket"`
-			Location        string `yaml:"location"`
-			Endpoint        string `yaml:"endpoint"`
-			AccessKeyID     string `yaml:"accessKeyID"`
-			SecretAccessKey string `yaml:"secretAccessKey"`
+			Bucket              string `yaml:"bucket"`
+			Location            string `yaml:"location"`
+			Endpoint            string `yaml:"endpoint"`
+			AccessKeyID         string `yaml:"accessKeyID"`
+			SecretAccessKey     string `yaml:"secretAccessKey"`
+			EndpointInner       string `yaml:"endpointInner"`
+			EndpointInnerEnable bool   `yaml:"endpointInnerEnable"`
 		} `yaml:"minio"`
 	}
 
@@ -115,6 +117,7 @@ type config struct {
 		OpenImMessageCMSName         string `yaml:"openImMessageCMSName"`
 		OpenImAdminCMSName           string `yaml:"openImAdminCMSName"`
 		OpenImOfficeName             string `yaml:"openImOfficeName"`
+		OpenImOrganizationName       string `yaml:"openImOrganizationName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
@@ -173,6 +176,7 @@ type config struct {
 		AppManagerUid []string `yaml:"appManagerUid"`
 		Secrets       []string `yaml:"secrets"`
 	}
+
 	Kafka struct {
 		Ws2mschat struct {
 			Addr  []string `yaml:"addr"`
@@ -188,9 +192,11 @@ type config struct {
 			MsgToPush  string `yaml:"msgToPush"`
 		}
 	}
-	Secret           string `yaml:"secret"`
-	MultiLoginPolicy int    `yaml:"multiloginpolicy"`
-	TokenPolicy      struct {
+	Secret               string `yaml:"secret"`
+	MultiLoginPolicy     int    `yaml:"multiloginpolicy"`
+	ChatPersistenceMysql bool   `yaml:"chatPersistenceMysql"`
+
+	TokenPolicy struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
 	}
@@ -301,6 +307,16 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"groupMemberCancelMuted"`
+		GroupMemberInfoSet struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberInfoSet"`
+		OrganizationChanged struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"organizationChanged"`
 
 		////////////////////////user///////////////////////
 		UserInfoUpdated struct {
@@ -366,6 +382,11 @@ type config struct {
 				CloseTips string `yaml:"closeTips"`
 			} `yaml:"defaultTips"`
 		} `yaml:"conversationSetPrivate"`
+		WorkMomentsNotification struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"workMomentsNotification"`
 	}
 	Demo struct {
 		Port         []int `yaml:"openImDemoPort"`

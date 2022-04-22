@@ -75,7 +75,7 @@ func (s *userServer) Run() {
 func syncPeerUserConversation(conversation *pbUser.Conversation, operationID string) error {
 	peerUserConversation := db.Conversation{
 		OwnerUserID:      conversation.UserID,
-		ConversationID:   "single_" + conversation.OwnerUserID,
+		ConversationID:   utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType),
 		ConversationType: constant.SingleChatType,
 		UserID:           conversation.OwnerUserID,
 		GroupID:          "",
@@ -129,6 +129,7 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 		if err := utils.CopyStructFields(&conversation, v); err != nil {
 			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), v.String(), "CopyStructFields failed", err.Error())
 		}
+		//redis op
 		if err := db.DB.SetSingleConversationRecvMsgOpt(req.OwnerUserID, v.ConversationID, v.RecvMsgOpt); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error())
 			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -206,10 +207,23 @@ func (s *userServer) GetConversations(ctx context.Context, req *pbUser.GetConver
 
 func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConversationReq) (*pbUser.SetConversationResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbUser.SetConversationResp{}
 	if req.NotificationType == 0 {
 		req.NotificationType = constant.ConversationOptChangeNotification
 	}
-	resp := &pbUser.SetConversationResp{}
+	if req.Conversation.ConversationType == constant.GroupChatType {
+		groupInfo, err := imdb.GetGroupInfoByGroupID(req.Conversation.GroupID)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", req.Conversation.GroupID, err.Error())
+			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+			return resp, nil
+		}
+		if groupInfo.Status == constant.GroupStatusDismissed && !req.Conversation.IsNotInGroup {
+			errMsg := "group status is dismissed"
+			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}
+			return resp, nil
+		}
+	}
 	var conversation db.Conversation
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", *req.Conversation, err.Error())
@@ -278,8 +292,8 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 
 func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
 	log.NewInfo(req.OperationID, "DeleteUsers args ", req.String())
-	if !token_verify.IsMangerUserID(req.OpUserID) {
-		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
+	if !token_verify.IsManagerUserID(req.OpUserID) {
+		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
 		return &pbUser.DeleteUsersResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, FailedUserIDList: req.DeleteUserIDList}, nil
 	}
 	var common pbUser.CommonResp
@@ -299,8 +313,8 @@ func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) 
 
 func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq) (*pbUser.GetAllUserIDResp, error) {
 	log.NewInfo(req.OperationID, "GetAllUserID args ", req.String())
-	if !token_verify.IsMangerUserID(req.OpUserID) {
-		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
+	if !token_verify.IsManagerUserID(req.OpUserID) {
+		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
 		return &pbUser.GetAllUserIDResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	uidList, err := imdb.SelectAllUserID()
@@ -315,8 +329,8 @@ func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq
 
 func (s *userServer) AccountCheck(_ context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
 	log.NewInfo(req.OperationID, "AccountCheck args ", req.String())
-	if !token_verify.IsMangerUserID(req.OpUserID) {
-		log.NewError(req.OperationID, "IsMangerUserID false ", req.OpUserID)
+	if !token_verify.IsManagerUserID(req.OpUserID) {
+		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
 		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	uidList, err := imdb.SelectSomeUserID(req.CheckUserIDList)

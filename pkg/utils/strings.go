@@ -43,6 +43,14 @@ func IsContain(target string, List []string) bool {
 	}
 	return false
 }
+func IsContainInt32(target int32, List []int32) bool {
+	for _, element := range List {
+		if target == element {
+			return true
+		}
+	}
+	return false
+}
 
 func InterfaceArrayToStringArray(data []interface{}) (i []string) {
 	for _, param := range data {
@@ -77,6 +85,8 @@ func GetConversationIDBySessionType(sourceID string, sessionType int) string {
 		return "single_" + sourceID
 	case constant.GroupChatType:
 		return "group_" + sourceID
+	case constant.NotificationChatType:
+		return "notification_" + sourceID
 	}
 	return ""
 }

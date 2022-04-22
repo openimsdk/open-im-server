@@ -1,7 +1,6 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-option go_package = "./user;user";
-package user;
+option go_package = "./conversation;conversation";
+package conversation;
 
 message CommonResp{
   int32  errCode = 1;
@@ -84,7 +83,7 @@ message Conversation{
   string Ex = 14;
 }
 
-message SetConversationReq{
+message ModifyConversationFiledReq{
   Conversation Conversation = 1;
   int32 notificationType = 2;
   string OperationID = 3;
@@ -291,11 +290,6 @@ message DeleteUserResp {
 
 
 service user {
-  rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
-  rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
-  rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
-  rpc GetAllUserID(GetAllUserIDReq)returns(GetAllUserIDResp);
-
   rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
   rpc GetConversation(GetConversationReq)returns(GetConversationResp);
   rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
@@ -304,15 +298,5 @@ service user {
   rpc SetConversation(SetConversationReq)returns(SetConversationResp);
   rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
 
-  rpc GetUserById(GetUserByIdReq) returns (GetUserByIdResp);
-  rpc GetUsersByName(GetUsersByNameReq) returns (GetUsersByNameResp);
-  rpc ResignUser(ResignUserReq) returns (ResignUserResp);
-  rpc AlterUser(AlterUserReq) returns (AlterUserResp);
-  rpc GetUsers(GetUsersReq) returns (GetUsersResp);
-  rpc AddUser(AddUserReq) returns (AddUserResp);
-  rpc BlockUser(BlockUserReq) returns (BlockUserResp);
-  rpc UnBlockUser(UnBlockUserReq) returns (UnBlockUserResp);
-  rpc GetBlockUsers(GetBlockUsersReq) returns (GetBlockUsersResp);
-  rpc GetBlockUserById(GetBlockUserByIdReq) returns (GetBlockUserByIdResp);
-  rpc DeleteUser(DeleteUserReq) returns (DeleteUserResp);
+
 }

@@ -106,6 +106,162 @@ message GetUserTagByIDResp {
   Tag tag = 2;
 }
 
+/// WorkMoment
+
+message LikeUser {
+  string userID = 1;
+  string userName = 2;
+}
+
+message NotificationUser {
+  string userID = 1;
+  string userName = 2;
+}
+
+message Comment {
+  string userID = 1;
+  string userName = 2;
+  string faceURL = 3;
+  string replyUserID = 4;
+  string replyUserName = 5;
+  string contentID = 6;
+  string content = 7;
+  int32  createTime = 8;
+}
+
+message PermissionGroup {
+  string groupName = 1;
+  string groupID = 2;
+}
+
+message WorkMomentUser {
+   string userID = 1;
+   string userName = 2;
+}
+
+message WorkMoment {
+  string workMomentID = 1;
+  string userID = 2;
+  string userName = 3;
+  string faceURL = 4;
+  string content = 5;
+  repeated WorkMomentUser likeUserList = 6;
+  repeated Comment comments = 7;
+  int32 permission = 8;
+  repeated WorkMomentUser permissionUserList = 9;
+  repeated PermissionGroup permissionGroupList = 10;
+  repeated WorkMomentUser atUserList = 11;
+  int32 createTime = 12;
+}
+
+message CreateOneWorkMomentReq {
+  WorkMoment workMoment = 1;
+  string operationID = 2;
+}
+
+message CreateOneWorkMomentResp {
+  CommonResp commonResp = 1;
+}
+
+message DeleteOneWorkMomentReq {
+  string workMomentID = 1;
+  string userID = 2;
+  string operationID = 3;
+}
+
+message DeleteOneWorkMomentResp {
+  CommonResp commonResp = 1;
+}
+
+message LikeOneWorkMomentReq {
+  string userID = 1;
+  string WorkMomentID = 2;
+  string operationID = 3;
+}
+
+message LikeOneWorkMomentResp {
+  CommonResp commonResp = 1;
+}
+
+message CommentOneWorkMomentReq {
+  string userID = 1;
+  string workMomentID = 2;
+  string replyUserID = 3;
+  string content = 4;
+  string operationID = 5;
+}
+
+message CommentOneWorkMomentResp {
+  CommonResp commonResp = 1;
+}
+
+message GetWorkMomentByIDReq {
+  string workMomentID = 1;
+  string opUserID = 2;
+  string operationID = 3;
+}
+
+message GetWorkMomentByIDResp {
+  CommonResp commonResp = 1;
+  WorkMoment workMoment = 2;
+}
+
+message ChangeWorkMomentPermissionReq {
+  string workMomentID = 1;
+  string opUserID = 2;
+  int32 permission = 3;
+  repeated string permissionUserIDList = 4;
+  string operationID = 5;
+}
+
+message ChangeWorkMomentPermissionResp {
+  CommonResp commonResp = 1;
+}
+
+message GetUserWorkMomentsReq {
+  string userID = 1;
+  server_api_params.RequestPagination Pagination = 2;
+  string operationID = 3;
+}
+
+message GetUserWorkMomentsResp {
+  CommonResp commonResp = 1;
+  repeated WorkMoment workMoments = 2;
+  server_api_params.ResponsePagination Pagination = 3;
+}
+
+message GetUserFriendWorkMomentsReq {
+  string userID = 1;
+  server_api_params.RequestPagination Pagination = 2;
+  string operationID = 3;
+}
+
+message GetUserFriendWorkMomentsResp {
+  CommonResp commonResp = 1;
+  repeated WorkMoment workMoments = 2;
+  server_api_params.ResponsePagination Pagination = 3;
+}
+
+message WorkMomentNotificationMsg {
+  int32 notificationMsgType = 1;
+  Comment comment = 2;
+  string workMomentID = 3;
+  string userID = 4;
+  string userName = 5;
+  string faceURL = 6;
+  string workMomentContent = 7;
+}
+
+message SetUserWorkMomentsLevelReq {
+  string userID = 1;
+  int32 level = 2;
+  string operationID = 3;
+}
+
+message SetUserWorkMomentsLevelResp {
+  CommonResp commonResp = 1;
+}
+
 service OfficeService {
   rpc GetUserTags(GetUserTagsReq) returns(GetUserTagsResp);
   rpc CreateTag(CreateTagReq) returns(CreateTagResp);
@@ -114,5 +270,17 @@ service OfficeService {
   rpc SendMsg2Tag(SendMsg2TagReq) returns(SendMsg2TagResp);
   rpc GetTagSendLogs(GetTagSendLogsReq) returns(GetTagSendLogsResp);
   rpc GetUserTagByID(GetUserTagByIDReq) returns(GetUserTagByIDResp);
+
+  rpc CreateOneWorkMoment(CreateOneWorkMomentReq) returns(CreateOneWorkMomentResp);
+  rpc DeleteOneWorkMoment(DeleteOneWorkMomentReq) returns(DeleteOneWorkMomentResp);
+  rpc LikeOneWorkMoment(LikeOneWorkMomentReq) returns(LikeOneWorkMomentResp);
+  rpc CommentOneWorkMoment(CommentOneWorkMomentReq) returns(CommentOneWorkMomentResp);
+  rpc GetWorkMomentByID(GetWorkMomentByIDReq) returns(GetWorkMomentByIDResp);
+  rpc ChangeWorkMomentPermission(ChangeWorkMomentPermissionReq) returns(ChangeWorkMomentPermissionResp);
+  /// user self
+  rpc GetUserWorkMoments(GetUserWorkMomentsReq) returns(GetUserWorkMomentsResp);
+  /// users friend
+  rpc GetUserFriendWorkMoments(GetUserFriendWorkMomentsReq) returns(GetUserFriendWorkMomentsResp);
+  rpc SetUserWorkMomentsLevel(SetUserWorkMomentsLevelReq) returns(SetUserWorkMomentsLevelResp);
 }
 

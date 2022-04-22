@@ -266,3 +266,283 @@ func (s *officeServer) GetUserTagByID(_ context.Context, req *pbOffice.GetUserTa
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
+
+func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.CreateOneWorkMomentReq) (resp *pbOffice.CreateOneWorkMomentResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.CreateOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
+	workMoment := db.WorkMoment{
+		Comments:     []*db.Comment{},
+		LikeUserList: []*db.LikeUser{},
+	}
+	createUser, err := imdb.GetUserByUserID(req.WorkMoment.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserByUserID", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	if err := utils.CopyStructFields(&workMoment, req.WorkMoment); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	workMoment.UserName = createUser.Nickname
+	workMoment.FaceURL = createUser.FaceURL
+	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
+	err = db.DB.CreateOneWorkMoment(&workMoment)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CreateOneWorkMoment", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+
+	// send notification to at users
+	for _, atUser := range req.WorkMoment.AtUserList {
+		workMomentNotificationMsg := &pbOffice.WorkMomentNotificationMsg{
+			NotificationMsgType: constant.WorkMomentAtUserNotification,
+			WorkMomentID:        workMoment.WorkMomentID,
+			WorkMomentContent:   workMoment.Content,
+			UserID:              workMoment.UserID,
+			FaceURL:             createUser.FaceURL,
+			UserName:            createUser.Nickname,
+		}
+		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser.UserID, workMomentNotificationMsg)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+// count and distinct permission users
+func (s *officeServer) getPermissionUserIDList(operationID string, groupList []*pbOffice.PermissionGroup, userList []*pbOffice.WorkMomentUser) []string {
+	var permissionUserIDList []string
+	for _, group := range groupList {
+		GroupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(group.GroupID)
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", group, err.Error())
+			continue
+		}
+		permissionUserIDList = append(permissionUserIDList, GroupMemberIDList...)
+	}
+	var userIDList []string
+	for _, user := range userList {
+		userIDList = append(userIDList, user.UserID)
+	}
+	permissionUserIDList = append(permissionUserIDList, userIDList...)
+	permissionUserIDList = utils.RemoveRepeatedStringInList(permissionUserIDList)
+	return permissionUserIDList
+}
+
+func (s *officeServer) DeleteOneWorkMoment(_ context.Context, req *pbOffice.DeleteOneWorkMomentReq) (resp *pbOffice.DeleteOneWorkMomentResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.DeleteOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
+	workMoment, err := db.DB.GetWorkMomentByID(req.WorkMomentID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetWorkMomentByID failed", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment", workMoment)
+	if workMoment.UserID != req.UserID {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "workMoment.UserID != req.WorkMomentID, delete failed", workMoment, req.WorkMomentID)
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}
+		return resp, nil
+	}
+	err = db.DB.DeleteOneWorkMoment(req.WorkMomentID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DeleteOneWorkMoment", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func isUserCanSeeWorkMoment(userID string, workMoment db.WorkMoment) bool {
+	if userID != workMoment.UserID {
+		switch workMoment.Permission {
+		case constant.WorkMomentPublic:
+			return true
+		case constant.WorkMomentPrivate:
+			return false
+		case constant.WorkMomentPermissionCanSee:
+			return utils.IsContain(userID, workMoment.PermissionUserIDList)
+		case constant.WorkMomentPermissionCantSee:
+			return !utils.IsContain(userID, workMoment.PermissionUserIDList)
+		}
+		return false
+	}
+	return true
+}
+
+func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOneWorkMomentReq) (resp *pbOffice.LikeOneWorkMomentResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.LikeOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
+	userName, err := imdb.GetUserNameByUserID(req.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	workMoment, like, err := db.DB.LikeOneWorkMoment(req.UserID, userName, req.WorkMomentID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "LikeOneWorkMoment failed ", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	workMomentNotificationMsg := &pbOffice.WorkMomentNotificationMsg{
+		NotificationMsgType: constant.WorkMomentLikeNotification,
+		WorkMomentID:        workMoment.WorkMomentID,
+		WorkMomentContent:   workMoment.Content,
+		UserID:              workMoment.UserID,
+		FaceURL:             workMoment.FaceURL,
+		UserName:            workMoment.UserName,
+	}
+	// send notification
+	if like {
+		msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.CommentOneWorkMomentReq) (resp *pbOffice.CommentOneWorkMomentResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.CommentOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
+	commentUser, err := imdb.GetUserByUserID(req.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID commentUserName failed", req.UserID, err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	var replyUserName string
+	if req.ReplyUserID != "" {
+		replyUserName, err = imdb.GetUserNameByUserID(req.ReplyUserID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID get replyUserName failed", req.ReplyUserID, err.Error())
+			resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+			return resp, nil
+		}
+	}
+	comment := &db.Comment{
+		UserID:        req.UserID,
+		UserName:      commentUser.Nickname,
+		ReplyUserID:   req.ReplyUserID,
+		ReplyUserName: replyUserName,
+		Content:       req.Content,
+		CreateTime:    int32(time.Now().Unix()),
+	}
+	workMoment, err := db.DB.CommentOneWorkMoment(comment, req.WorkMomentID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CommentOneWorkMoment failed", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	workMomentNotificationMsg := &pbOffice.WorkMomentNotificationMsg{
+		NotificationMsgType: constant.WorkMomentCommentNotification,
+		WorkMomentID:        workMoment.WorkMomentID,
+		WorkMomentContent:   workMoment.Content,
+		UserID:              workMoment.UserID,
+		FaceURL:             workMoment.FaceURL,
+		UserName:            workMoment.UserName,
+		Comment: &pbOffice.Comment{
+			UserID:        comment.UserID,
+			UserName:      comment.UserName,
+			FaceURL:       commentUser.FaceURL,
+			ReplyUserID:   comment.ReplyUserID,
+			ReplyUserName: comment.ReplyUserName,
+			ContentID:     comment.ContentID,
+			Content:       comment.Content,
+			CreateTime:    comment.CreateTime,
+		},
+	}
+	msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
+	if req.ReplyUserID != "" {
+		msg.WorkMomentSendNotification(req.OperationID, req.UserID, req.ReplyUserID, workMomentNotificationMsg)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWorkMomentByIDReq) (resp *pbOffice.GetWorkMomentByIDResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.GetWorkMomentByIDResp{
+		WorkMoment: &pbOffice.WorkMoment{},
+		CommonResp: &pbOffice.CommonResp{},
+	}
+	workMoment, err := db.DB.GetWorkMomentByID(req.WorkMomentID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetWorkMomentByID failed", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	canSee := isUserCanSeeWorkMoment(req.OpUserID, *workMoment)
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), canSee, req.OpUserID, *workMoment)
+	if !canSee {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "workMoments not access to user", canSee, workMoment, req.OpUserID)
+	}
+	if err := utils.CopyStructFields(resp.WorkMoment, workMoment); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields", err.Error())
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUserWorkMomentsReq) (resp *pbOffice.GetUserWorkMomentsResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.GetUserWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
+	//resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
+	workMoments, err := db.DB.GetUserWorkMoments(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err)
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	if err := utils.CopyStructFields(&resp.WorkMoments, workMoments); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice.GetUserFriendWorkMomentsReq) (resp *pbOffice.GetUserFriendWorkMomentsResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.GetUserFriendWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
+	//resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
+	friendIDList, err := imdb.GetFriendIDListByUserID(req.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetFriendIDListByUserID", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "friendIDList: ", friendIDList)
+	workMoments, err := db.DB.GetUserFriendWorkMoments(friendIDList, req.Pagination.ShowNumber, req.Pagination.PageNumber, req.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserFriendWorkMoments", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	if err := utils.CopyStructFields(&resp.WorkMoments, workMoments); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *officeServer) SetUserWorkMomentsLevel(_ context.Context, req *pbOffice.SetUserWorkMomentsLevelReq) (resp *pbOffice.SetUserWorkMomentsLevelResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.SetUserWorkMomentsLevelResp{CommonResp: &pbOffice.CommonResp{}}
+	if err := db.DB.SetUserWorkMomentsLevel(req.UserID, req.Level); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetUserWorkMomentsLevel failed", err.Error())
+		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+		return resp, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *officeServer) ChangeWorkMomentPermission(_ context.Context, req *pbOffice.ChangeWorkMomentPermissionReq) (resp *pbOffice.ChangeWorkMomentPermissionResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.ChangeWorkMomentPermissionResp{CommonResp: &pbOffice.CommonResp{}}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}

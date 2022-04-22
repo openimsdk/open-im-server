@@ -7,6 +7,8 @@ import (
 	"Open_IM/pkg/utils"
 	"bytes"
 	"crypto/sha256"
+	"errors"
+
 	//"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
@@ -18,10 +20,12 @@ import (
 
 var (
 	GetuiClient *Getui
+
+	TokenExpireError = errors.New("token expire")
 )
 
 const (
-	PushURL = "/push/single/cid"
+	PushURL = "/push/single/alias"
 	AuthURL = "/auth"
 )
 
@@ -51,31 +55,50 @@ type AuthResp struct {
 type PushReq struct {
 	RequestID string `json:"request_id"`
 	Audience  struct {
-		Cid []string `json:"cid"`
+		Alias []string `json:"alias"`
 	} `json:"audience"`
 	PushMessage struct {
 		Notification Notification `json:"notification,omitempty"`
 		Transmission string       `json:"transmission,omitempty"`
 	} `json:"push_message"`
+	PushChannel struct {
+		Ios     Ios     `json:"ios"`
+		Android Android `json:"android"`
+	} `json:"push_channel"`
+}
+
+type Ios struct {
+	Aps struct {
+		Sound string `json:"sound"`
+		Alert Alert  `json:"alert"`
+	} `json:"aps"`
+}
+
+type Alert struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}
+
+type Android struct {
+	Ups struct {
+		Notification Notification `json:"notification"`
+	} `json:"ups"`
 }
 
 type Notification struct {
 	Title     string `json:"title"`
 	Body      string `json:"body"`
 	ClickType string `json:"click_type"`
-	//Intent    string `json:"intent,omitempty"`
-	//Url       string `json:"url,omitempty"`
 }
 
 type PushResp struct {
-	GetuiCommonResp
 }
 
 func newGetuiClient() *Getui {
 	return &Getui{}
 }
 
-func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operationID string) (resp string, err error) {
+func (g *Getui) Push(userIDList []string, alert, detailContent, operationID string) (resp string, err error) {
 	token, err := db.DB.GetGetuiToken()
 	log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
 	if err != nil {
@@ -91,22 +114,37 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, platform, operat
 	pushReq := PushReq{
 		RequestID: utils.OperationIDGenerator(),
 		Audience: struct {
-			Cid []string `json:"cid"`
-		}{Cid: []string{userIDList[0]}},
+			Alias []string `json:"alias"`
+		}{Alias: []string{userIDList[0]}},
 	}
 	pushReq.PushMessage.Notification = Notification{
 		Title:     alert,
 		Body:      alert,
 		ClickType: "startapp",
 	}
+	pushReq.PushChannel.Ios.Aps.Sound = "default"
+	pushReq.PushChannel.Ios.Aps.Alert = Alert{
+		Title: alert,
+		Body:  alert,
+	}
+	pushReq.PushChannel.Android.Ups.Notification = Notification{
+		Title:     alert,
+		Body:      alert,
+		ClickType: "startapp",
+	}
 	pushResp := PushResp{}
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
+	switch err {
+	case TokenExpireError:
+		token, err = g.getTokenAndSave2Redis(operationID)
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "getTokenAndSave2Redis failed, ", err.Error())
+		} else {
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "getTokenAndSave2Redis: ", token)
+		}
+	}
 	if err != nil {
 		return "", utils.Wrap(err, "push failed")
-	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "resp: ", pushResp)
-	if pushResp.Code == 10001 {
-		_, _ = g.getTokenAndSave2Redis(operationID)
 	}
 	respBytes, err := json.Marshal(pushResp)
 	return string(respBytes), utils.Wrap(err, "")
@@ -163,6 +201,9 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 	commonResp.Data = returnStruct
 	if err := json.Unmarshal(result, &commonResp); err != nil {
 		return err
+	}
+	if commonResp.Code == 10001 {
+		return TokenExpireError
 	}
 	return nil
 }

@@ -246,6 +246,21 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			}
 		case constant.MemberQuitNotification:
 			addUidList = append(addUidList, pb.MsgData.SendID)
+		case constant.AtText:
+			//tagMe := utils.IsContain(c.loginUserID, s.AtElem.AtUserList)
+			//tagAll := utils.IsContain(constant.AtAllString, pb.MsgData.AtUserIDList)
+			//if tagAll {
+			//	if tagMe {
+			//		lc.GroupAtType = constant.AtAllAtMe
+			//		return
+			//	}
+			//	lc.GroupAtType = constant.AtAll
+			//	return
+			//}
+			//if tagMe {
+			//	lc.GroupAtType = constant.AtMe
+			//}
+
 		default:
 		}
 		groupID := pb.MsgData.GroupID
@@ -562,6 +577,38 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.GroupMemberCancelMuted.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.GroupMemberCancelMuted.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.GroupMemberCancelMuted.Conversation.UnreadCount
+
+	case constant.GroupMemberInfoSetNotification:
+		pushSwitch = config.Config.Notification.GroupMemberInfoSet.OfflinePush.PushSwitch
+		title = config.Config.Notification.GroupMemberInfoSet.OfflinePush.Title
+		desc = config.Config.Notification.GroupMemberInfoSet.OfflinePush.Desc
+		ex = config.Config.Notification.GroupMemberInfoSet.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.GroupMemberInfoSet.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.GroupMemberInfoSet.Conversation.UnreadCount
+
+	case constant.OrganizationChangedNotification:
+		pushSwitch = config.Config.Notification.OrganizationChanged.OfflinePush.PushSwitch
+		title = config.Config.Notification.OrganizationChanged.OfflinePush.Title
+		desc = config.Config.Notification.OrganizationChanged.OfflinePush.Desc
+		ex = config.Config.Notification.OrganizationChanged.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.OrganizationChanged.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.OrganizationChanged.Conversation.UnreadCount
+
+	case constant.WorkMomentNotification:
+		pushSwitch = config.Config.Notification.WorkMomentsNotification.OfflinePush.PushSwitch
+		title = config.Config.Notification.WorkMomentsNotification.OfflinePush.Title
+		desc = config.Config.Notification.WorkMomentsNotification.OfflinePush.Desc
+		ex = config.Config.Notification.WorkMomentsNotification.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.WorkMomentsNotification.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.WorkMomentsNotification.Conversation.UnreadCount
+
+	case constant.ConversationPrivateChatNotification:
+		pushSwitch = config.Config.Notification.ConversationSetPrivate.OfflinePush.PushSwitch
+		title = config.Config.Notification.ConversationSetPrivate.OfflinePush.Title
+		desc = config.Config.Notification.ConversationSetPrivate.OfflinePush.Desc
+		ex = config.Config.Notification.ConversationSetPrivate.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.ConversationSetPrivate.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.ConversationSetPrivate.Conversation.UnreadCount
 	}
 	switch reliabilityLevel {
 	case constant.UnreliableNotification:
