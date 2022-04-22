@@ -624,10 +624,10 @@ func (d *DataBases) GetWorkMomentByID(workMomentID string) (*WorkMoment, error) 
 	return workMoment, err
 }
 
-func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string) (*WorkMoment, error) {
+func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string) (*WorkMoment, bool, error) {
 	workMoment, err := d.GetWorkMomentByID(workMomentID)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	var isAlreadyLike bool
 	for i, user := range workMoment.LikeUserList {
@@ -643,7 +643,7 @@ func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	_, err = c.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_user_list": workMoment.LikeUserList}})
-	return workMoment, err
+	return workMoment, !isAlreadyLike, err
 }
 
 func (d *DataBases) SetUserWorkMomentsLevel(userID string, level int32) error {
@@ -672,30 +672,17 @@ func (d *DataBases) GetUserWorkMoments(userID string, showNumber, pageNumber int
 	return workMomentList, err
 }
 
-// recursion
-func (d *DataBases) GetUserFriendWorkMomentsRecursion(friendIDList []string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
-	var workMomentList []WorkMoment
-	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
-	result, err := c.Find(ctx, bson.M{"user_id": friendIDList, "is_private": false, "who_can_see_user_id_list": bson.M{"$elemMatch": bson.M{"$eq": userID}}, "who_cant_see_user_id_list": ""}, findOpts)
-	if err != nil {
-		return workMomentList, nil
-	}
-	err = result.All(ctx, &workMomentList)
-	return workMomentList, err
-}
-
 func (d *DataBases) GetUserFriendWorkMoments(friendIDList []*string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
-	result, err := c.Find(ctx, bson.M{"user_id": friendIDList, "is_private": false, "$or": bson.M{"who_can_see_user_id_list": bson.M{"$elemMatch": bson.M{"$eq": userID}},
-		"who_cant_see_user_id_list": bson.M{"$nin": userID}},
-	}, findOpts)
+	result, err := c.Find(ctx,
+		bson.M{"user_id": friendIDList, "$or": bson.M{"who_can_see_user_id_list": bson.M{"$elemMatch": bson.M{"$eq": userID}},
+			"who_cant_see_user_id_list": bson.M{"$nin": userID}},
+		}, findOpts)
 	if err != nil {
-		return workMomentList, nil
+		return workMomentList, err
 	}
 	err = result.All(ctx, &workMomentList)
 	return workMomentList, err

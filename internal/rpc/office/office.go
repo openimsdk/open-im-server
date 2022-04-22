@@ -381,7 +381,7 @@ func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOn
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	workMoment, err := db.DB.LikeOneWorkMoment(req.UserID, userName, req.WorkMomentID)
+	workMoment, like, err := db.DB.LikeOneWorkMoment(req.UserID, userName, req.WorkMomentID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "LikeOneWorkMoment failed ", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -392,9 +392,13 @@ func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOn
 		WorkMomentID:        workMoment.WorkMomentID,
 		WorkMomentContent:   workMoment.Content,
 		UserID:              workMoment.UserID,
+		FaceURL:             workMoment.FaceURL,
+		UserName:            workMoment.UserName,
 	}
 	// send notification
-	msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
+	if like {
+		msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
@@ -436,6 +440,8 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 		WorkMomentID:        workMoment.WorkMomentID,
 		WorkMomentContent:   workMoment.Content,
 		UserID:              workMoment.UserID,
+		FaceURL:             workMoment.FaceURL,
+		UserName:            workMoment.UserName,
 		Comment: &pbOffice.Comment{
 			UserID:        comment.UserID,
 			UserName:      comment.UserName,

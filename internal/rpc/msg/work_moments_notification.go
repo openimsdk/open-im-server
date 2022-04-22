@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	pbOffice "Open_IM/pkg/proto/office"
+	sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
@@ -11,17 +12,21 @@ import (
 
 func WorkMomentSendNotification(operationID, sendID, recvID string, notificationMsg *pbOffice.WorkMomentNotificationMsg) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), sendID, recvID, notificationMsg)
+	//if sendID == recvID {
+	//	return
+	//}
 	WorkMomentNotification(operationID, sendID, recvID, notificationMsg)
 }
 
 func WorkMomentNotification(operationID, sendID, recvID string, m proto.Message) {
-	//var tips open_im_sdk.TipsComm
+	var tips sdk.TipsComm
+	var err error
 	marshaler := jsonpb.Marshaler{
 		OrigName:     true,
 		EnumsAsInts:  false,
 		EmitDefaults: false,
 	}
-	JsonDetail, _ := marshaler.MarshalToString(m)
+	tips.JsonDetail, _ = marshaler.MarshalToString(m)
 	n := &NotificationMsg{
 		SendID:      sendID,
 		RecvID:      recvID,
@@ -30,7 +35,11 @@ func WorkMomentNotification(operationID, sendID, recvID string, m proto.Message)
 		SessionType: constant.SingleChatType,
 		OperationID: operationID,
 	}
-	n.Content = []byte(JsonDetail)
-	log.NewInfo(operationID, utils.GetSelfFuncName(), JsonDetail)
+	n.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "proto.Marshal failed")
+		return
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), string(n.Content))
 	Notification(n)
 }
