@@ -210,12 +210,11 @@ message MsgData {
   uint32 seq = 14;
   int64 sendTime = 15;
   int64 createTime = 16;
-  repeated string atUserIDList = 17;
-  int32 status = 18;
-  map<string, bool> options = 19;
-  OfflinePushInfo offlinePushInfo = 20;
+  int32 status = 17;
+  map<string, bool> options = 18;
+  OfflinePushInfo offlinePushInfo = 19;
 }
-
+//    repeated string atUserIDList = 20;
 message OfflinePushInfo{
   string title = 1;
   string desc = 2;
