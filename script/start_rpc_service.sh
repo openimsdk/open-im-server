@@ -36,7 +36,7 @@ service_port_name=(
   openImAdminCmsPort
   openImMessageCmsPort
   openImStatisticsPort
-  openImOfflineMessagePort
+  openImMessagePort
   openImOfficePort
   openImOrganizationPort
   openImConversationPort
