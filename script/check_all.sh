@@ -21,6 +21,7 @@ service_port_name=(
   openImStatisticsPort
   openImOfficePort
   openImOrganizationPort
+  openImConversationPort
 )
 switch=$(cat $config_path | grep demoswitch |awk -F '[:]' '{print $NF}')
 for i in ${service_port_name[*]}; do

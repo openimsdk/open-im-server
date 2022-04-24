@@ -32,7 +32,7 @@ message ModifyConversationFieldReq{
 message ModifyConversationFieldResp{
   CommonResp  commonResp = 1;
 }
-service user {
+service conversation {
   rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
 
 }
