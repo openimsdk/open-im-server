@@ -80,6 +80,7 @@ type GetWorkMomentByIDResp struct {
 
 type GetUserWorkMomentsReq struct {
 	WorkMomentsUserCommonReq
+	UserID string `json:"userID"`
 }
 
 type GetUserWorkMomentsResp struct {

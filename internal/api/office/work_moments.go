@@ -223,7 +223,7 @@ func GetUserWorkMoments(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, opUserID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -234,7 +234,8 @@ func GetUserWorkMoments(c *gin.Context) {
 		PageNumber: req.PageNumber,
 		ShowNumber: req.ShowNumber,
 	}
-	reqPb.UserID = userID
+	reqPb.OpUserID = opUserID
+	reqPb.UserID = req.UserID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.GetUserWorkMoments(context.Background(), &reqPb)
