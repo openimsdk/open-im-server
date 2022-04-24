@@ -113,8 +113,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
 rpcport: #rpc服务端口 默认即可
   openImUserPort: [ 10100 ]
   openImFriendPort: [ 10200 ]
-  openImOfflineMessagePort: [ 10300 ]
-  openImOnlineRelayPort: [ 10400 ]
+  openImMessagePort: [ 10300 ]
+  openImMessageGatewayPort: [ 10400 ]
   openImGroupPort: [ 10500 ]
   openImAuthPort: [ 10600 ]
   openImPushPort: [ 10700 ]
