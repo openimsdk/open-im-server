@@ -129,6 +129,7 @@ func main() {
 		conversationGroup.POST("/set_conversation", conversation.SetConversation)
 		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
 		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
+		conversationGroup.POST("/modify_conversation_field", conversation.ModifyConversationField)
 	}
 	// office
 	officeGroup := r.Group("/office")

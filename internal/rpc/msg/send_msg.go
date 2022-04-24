@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	rpc "Open_IM/pkg/proto/friend"
 	pbGroup "Open_IM/pkg/proto/group"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
@@ -227,6 +228,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.Error(pb.Token, pb.OperationID, "rpc send_msg getGroupInfo failed, err = %s", reply.ErrMsg)
 			return returnMsg(&replay, pb, reply.ErrCode, reply.ErrMsg, "", 0)
 		}
+		memberUserIDList := func(all []*sdk_ws.GroupMemberFullInfo) (result []string) {
+			for _, v := range all {
+				result = append(result, v.UserID)
+			}
+			return result
+		}(reply.MemberList)
 		var addUidList []string
 		switch pb.MsgData.ContentType {
 		case constant.MemberKickedNotification:
@@ -247,31 +254,66 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		case constant.MemberQuitNotification:
 			addUidList = append(addUidList, pb.MsgData.SendID)
 		case constant.AtText:
-			//tagMe := utils.IsContain(c.loginUserID, s.AtElem.AtUserList)
-			//tagAll := utils.IsContain(constant.AtAllString, pb.MsgData.AtUserIDList)
-			//if tagAll {
-			//	if tagMe {
-			//		lc.GroupAtType = constant.AtAllAtMe
-			//		return
-			//	}
-			//	lc.GroupAtType = constant.AtAll
-			//	return
-			//}
-			//if tagMe {
-			//	lc.GroupAtType = constant.AtMe
-			//}
-
+			go func() {
+				var conversationReq pbConversation.ModifyConversationFieldReq
+				var tag bool
+				var atUserID []string
+				conversation := pbConversation.Conversation{
+					OwnerUserID:      pb.MsgData.SendID,
+					ConversationID:   utils.GetConversationIDBySessionType(pb.MsgData.GroupID, constant.GroupChatType),
+					ConversationType: constant.GroupChatType,
+					GroupID:          pb.MsgData.GroupID,
+				}
+				conversationReq.Conversation = &conversation
+				conversationReq.OperationID = pb.OperationID
+				conversationReq.FieldType = constant.FieldGroupAtType
+				tagAll := utils.IsContain(constant.AtAllString, pb.MsgData.AtUserIDList)
+				if tagAll {
+					atUserID = utils.DifferenceString([]string{constant.AtAllString}, pb.MsgData.AtUserIDList)
+					if len(atUserID) == 0 { //just @everyone
+						conversationReq.UserIDList = memberUserIDList
+						conversation.GroupAtType = constant.AtAll
+					} else { //@Everyone and @other people
+						conversationReq.UserIDList = atUserID
+						conversation.GroupAtType = constant.AtAllAtMe
+						tag = true
+					}
+				} else {
+					conversationReq.UserIDList = pb.MsgData.AtUserIDList
+					conversation.GroupAtType = constant.AtMe
+				}
+				etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+				client := pbConversation.NewConversationClient(etcdConn)
+				conversationReply, err := client.ModifyConversationField(context.Background(), &conversationReq)
+				if err != nil {
+					log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), err.Error())
+				} else if conversationReply.CommonResp.ErrCode != 0 {
+					log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), conversationReply.String())
+				}
+				if tag {
+					conversationReq.UserIDList = utils.DifferenceString(atUserID, memberUserIDList)
+					conversation.GroupAtType = constant.AtAll
+					etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+					client := pbConversation.NewConversationClient(etcdConn)
+					conversationReply, err := client.ModifyConversationField(context.Background(), &conversationReq)
+					if err != nil {
+						log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), err.Error())
+					} else if conversationReply.CommonResp.ErrCode != 0 {
+						log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), conversationReply.String())
+					}
+				}
+			}()
 		default:
 		}
 		groupID := pb.MsgData.GroupID
-		for _, v := range reply.MemberList {
-			pb.MsgData.RecvID = v.UserID
-			isSend := modifyMessageByUserMessageReceiveOpt(v.UserID, groupID, constant.GroupChatType, pb)
+		for _, v := range memberUserIDList {
+			pb.MsgData.RecvID = v
+			isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, pb)
 			if isSend {
 				msgToMQ.MsgData = pb.MsgData
-				err := rpc.sendMsgToKafka(&msgToMQ, v.UserID)
+				err := rpc.sendMsgToKafka(&msgToMQ, v)
 				if err != nil {
-					log.NewError(msgToMQ.OperationID, "kafka send msg err:UserId", v.UserID, msgToMQ.String())
+					log.NewError(msgToMQ.OperationID, "kafka send msg err:UserId", v, msgToMQ.String())
 					return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 				}
 			}
