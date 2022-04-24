@@ -49,7 +49,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	}
 	haveUserID, _ := imdb.GetExistConversationUserIDList(req.Conversation.ConversationID)
 	switch req.FieldType {
-	case constant.RecvMsgOpt:
+	case constant.FieldRecvMsgOpt:
 		for _, v := range req.UserIDList {
 			if err = db.DB.SetSingleConversationRecvMsgOpt(v, req.Conversation.ConversationID, req.Conversation.RecvMsgOpt); err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error())
@@ -58,17 +58,17 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 			}
 		}
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt})
-	case constant.GroupAtType:
+	case constant.FieldGroupAtType:
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"group_at_type": conversation.GroupAtType})
-	case constant.IsNotInGroup:
+	case constant.FieldIsNotInGroup:
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"is_not_in_group": conversation.IsNotInGroup})
-	case constant.IsPinned:
+	case constant.FieldIsPinned:
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"is_pinned": conversation.IsPinned})
-	case constant.IsPrivateChat:
+	case constant.FieldIsPrivateChat:
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"is_private_chat": conversation.IsPrivateChat})
-	case constant.Ex:
+	case constant.FieldEx:
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"ex": conversation.Ex})
-	case constant.AttachedInfo:
+	case constant.FieldAttachedInfo:
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"attached_info": conversation.AttachedInfo})
 	}
 	if err != nil {
@@ -86,7 +86,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 		}
 	}
 	// notification
-	if req.Conversation.ConversationType == constant.SingleChatType && req.FieldType == constant.IsPrivateChat {
+	if req.Conversation.ConversationType == constant.SingleChatType && req.FieldType == constant.FieldIsPrivateChat {
 		//sync peer user conversation if conversation is singleChatType
 		if err := syncPeerUserConversation(req.Conversation, req.OperationID); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())

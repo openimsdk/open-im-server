@@ -215,13 +215,13 @@ var ContentType2PushContent = map[int64]string{
 }
 
 const (
-	RecvMsgOpt    = 1
-	IsPinned      = 2
-	AttachedInfo  = 3
-	IsPrivateChat = 4
-	GroupAtType   = 5
-	IsNotInGroup  = 6
-	Ex            = 7
+	FieldRecvMsgOpt    = 1
+	FieldIsPinned      = 2
+	FieldAttachedInfo  = 3
+	FieldIsPrivateChat = 4
+	FieldGroupAtType   = 5
+	FieldIsNotInGroup  = 6
+	FieldEx            = 7
 )
 
 const (
