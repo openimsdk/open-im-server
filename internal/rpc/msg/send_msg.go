@@ -265,7 +265,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			}
 			conversationReq.Conversation = &conversation
 			conversationReq.OperationID = pb.OperationID
-			conversationReq.FieldType = constant.GroupAtType
+			conversationReq.FieldType = constant.FieldGroupAtType
 			tagAll := utils.IsContain(constant.AtAllString, pb.MsgData.AtUserIDList)
 			if tagAll {
 				atUserID = utils.DifferenceString([]string{constant.AtAllString}, pb.MsgData.AtUserIDList)
