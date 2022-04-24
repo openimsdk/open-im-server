@@ -16,7 +16,7 @@ import (
 
 	//"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
-	"gopkg.in/mgo.v2/bson"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"strconv"
 	"time"
@@ -659,7 +659,7 @@ func (d *DataBases) CommentOneWorkMoment(comment *Comment, workMomentID string) 
 	return workMoment, err
 }
 
-func (d *DataBases) GetUserWorkMoments(userID string, showNumber, pageNumber int32) ([]WorkMoment, error) {
+func (d *DataBases) GetUserSelfWorkMoments(userID string, showNumber, pageNumber int32) ([]WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
@@ -672,15 +672,39 @@ func (d *DataBases) GetUserWorkMoments(userID string, showNumber, pageNumber int
 	return workMomentList, err
 }
 
+func (d *DataBases) GetUserWorkMoments(opUserID, userID string, showNumber, pageNumber int32) ([]WorkMoment, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	var workMomentList []WorkMoment
+	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
+	result, err := c.Find(ctx, bson.D{ // 等价条件: select * from
+		{"user_id", userID},
+		{"$or", bson.A{
+			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {opUserID, bson.D{{"$nin", "permission_user_id_list"}}}},
+			bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {opUserID, bson.D{{"$in", "permission_user_id_list"}}}},
+			bson.D{{"permission", constant.WorkMomentPublic}},
+		}},
+	}, findOpts)
+	if err != nil {
+		return workMomentList, nil
+	}
+	err = result.All(ctx, &workMomentList)
+	return workMomentList, err
+}
+
 func (d *DataBases) GetUserFriendWorkMoments(friendIDList []*string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
-	result, err := c.Find(ctx,
-		bson.M{"user_id": friendIDList, "$or": bson.M{"who_can_see_user_id_list": bson.M{"$elemMatch": bson.M{"$eq": userID}},
-			"who_cant_see_user_id_list": bson.M{"$nin": userID}},
-		}, findOpts)
+	result, err := c.Find(ctx, bson.D{ // 等价条件: select * from t where user_id in friend_id_list and () or () or （）;
+		{"user_id", bson.D{{"$in", friendIDList}}},
+		{"$or", bson.A{
+			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {userID, bson.D{{"$nin", "permission_user_id_list"}}}},
+			bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {userID, bson.D{{"$in", "permission_user_id_list"}}}},
+			bson.D{{"permission", constant.WorkMomentPublic}},
+		}},
+	}, findOpts)
 	if err != nil {
 		return workMomentList, err
 	}

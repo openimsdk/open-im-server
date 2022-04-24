@@ -303,6 +303,7 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 			UserID:              workMoment.UserID,
 			FaceURL:             createUser.FaceURL,
 			UserName:            createUser.Nickname,
+			CreateTime:          workMoment.CreateTime,
 		}
 		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser.UserID, workMomentNotificationMsg)
 	}
@@ -375,13 +376,13 @@ func isUserCanSeeWorkMoment(userID string, workMoment db.WorkMoment) bool {
 func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOneWorkMomentReq) (resp *pbOffice.LikeOneWorkMomentResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.LikeOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
-	userName, err := imdb.GetUserNameByUserID(req.UserID)
+	user, err := imdb.GetUserByUserID(req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	workMoment, like, err := db.DB.LikeOneWorkMoment(req.UserID, userName, req.WorkMomentID)
+	workMoment, like, err := db.DB.LikeOneWorkMoment(req.UserID, user.Nickname, req.WorkMomentID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "LikeOneWorkMoment failed ", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -391,9 +392,10 @@ func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOn
 		NotificationMsgType: constant.WorkMomentLikeNotification,
 		WorkMomentID:        workMoment.WorkMomentID,
 		WorkMomentContent:   workMoment.Content,
-		UserID:              workMoment.UserID,
-		FaceURL:             workMoment.FaceURL,
-		UserName:            workMoment.UserName,
+		UserID:              user.UserID,
+		FaceURL:             user.FaceURL,
+		UserName:            user.Nickname,
+		CreateTime:          int32(time.Now().Unix()),
 	}
 	// send notification
 	if like {
@@ -442,16 +444,11 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 		UserID:              workMoment.UserID,
 		FaceURL:             workMoment.FaceURL,
 		UserName:            workMoment.UserName,
-		Comment: &pbOffice.Comment{
-			UserID:        comment.UserID,
-			UserName:      comment.UserName,
-			FaceURL:       commentUser.FaceURL,
-			ReplyUserID:   comment.ReplyUserID,
-			ReplyUserName: comment.ReplyUserName,
-			ContentID:     comment.ContentID,
-			Content:       comment.Content,
-			CreateTime:    comment.CreateTime,
-		},
+		ReplyUserID:         comment.ReplyUserID,
+		ReplyUserName:       comment.ReplyUserName,
+		ContentID:           comment.ContentID,
+		Content:             comment.Content,
+		CreateTime:          comment.CreateTime,
 	}
 	msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
 	if req.ReplyUserID != "" {
@@ -488,10 +485,14 @@ func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWor
 func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUserWorkMomentsReq) (resp *pbOffice.GetUserWorkMomentsResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.GetUserWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
-	//resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
-	workMoments, err := db.DB.GetUserWorkMoments(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	var workMoments []db.WorkMoment
+	if req.UserID == req.OpUserID {
+		workMoments, err = db.DB.GetUserSelfWorkMoments(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	} else {
+		workMoments, err = db.DB.GetUserWorkMoments(req.OpUserID, req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	}
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserWorkMoments failed", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
