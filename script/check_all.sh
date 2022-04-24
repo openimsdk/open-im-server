@@ -8,8 +8,8 @@ service_port_name=(
   openImApiPort
   openImUserPort
   openImFriendPort
-  openImOfflineMessagePort
-  openImOnlineRelayPort
+  openImMessagePort
+  openImMessageGatewayPort
   openImGroupPort
   openImAuthPort
   openImPushPort
