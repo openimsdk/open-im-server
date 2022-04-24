@@ -123,7 +123,7 @@ rpcport: #rpc服务端口 默认即可
   openImAdminCmsPort: [ 11000 ]
   openImOfficePort: [ 11100 ]
   openImOrganizationPort: [ 11200 ]
-  openImConversatinPort: [ 11300 ]
+  openImConversationPort: [ 11300 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
