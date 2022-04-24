@@ -20,6 +20,7 @@ service_filename=(
   ${msg_name}
   open_im_office
   open_im_organization
+  open_im_conversation
 )
 
 #service config port name
@@ -38,6 +39,7 @@ service_port_name=(
   openImOfflineMessagePort
   openImOfficePort
   openImOrganizationPort
+  openImConversationPort
 )
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do
