@@ -11,8 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogo/protobuf/sortkeys"
-	"go.etcd.io/etcd/clientv3"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"math/rand"
 
@@ -682,7 +680,7 @@ func (d *DataBases) GetUserWorkMoments(opUserID, userID string, showNumber, page
 	result, err := c.Find(ctx, bson.D{ // 等价条件: select * from
 		{"user_id", userID},
 		{"$or", bson.A{
-			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {opUserID, bson.D{{"$in", "permission_user_id_list"}}}},
+			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {opUserID, bson.D{{"$nin", "permission_user_id_list"}}}},
 			bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {opUserID, bson.D{{"$in", "permission_user_id_list"}}}},
 			bson.D{{"permission", constant.WorkMomentPublic}},
 		}},
@@ -702,7 +700,7 @@ func (d *DataBases) GetUserFriendWorkMoments(friendIDList []*string, showNumber,
 	result, err := c.Find(ctx, bson.D{ // 等价条件: select * from t where user_id in friend_id_list and () or () or （）;
 		{"user_id", bson.D{{"$in", friendIDList}}},
 		{"$or", bson.A{
-			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {userID, bson.D{{"$in", "permission_user_id_list"}}}},
+			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {userID, bson.D{{"$nin", "permission_user_id_list"}}}},
 			bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {userID, bson.D{{"$in", "permission_user_id_list"}}}},
 			bson.D{{"permission", constant.WorkMomentPublic}},
 		}},
