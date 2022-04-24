@@ -697,13 +697,17 @@ func (d *DataBases) GetUserFriendWorkMoments(friendIDList []*string, showNumber,
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
-	result, err := c.Find(ctx, bson.D{ // 等价条件: select * from t where user_id in friend_id_list and () or () or （）;
-		{"user_id", bson.D{{"$in", friendIDList}}},
+	result, err := c.Find(ctx, bson.D{
 		{"$or", bson.A{
-			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {"permission_user_id_list", bson.D{{"$nin", bson.A{userID}}}}},
-			bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {"permission_user_id_list", bson.D{{"$in", bson.A{userID}}}}},
-			bson.D{{"permission", constant.WorkMomentPublic}},
-		}},
+			bson.D{{"user_id", userID}}, //self
+			bson.D{{"user_id", bson.D{{"$in", friendIDList}}},
+				{"$or", bson.A{
+					bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {"permission_user_id_list", bson.D{{"$nin", bson.A{userID}}}}},
+					bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {"permission_user_id_list", bson.D{{"$in", bson.A{userID}}}}},
+					bson.D{{"permission", constant.WorkMomentPublic}},
+				}}},
+		},
+		},
 	}, findOpts)
 	if err != nil {
 		return workMomentList, err
