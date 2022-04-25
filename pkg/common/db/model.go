@@ -73,7 +73,7 @@ func init() {
 
 	cCommentMsgModels := []mongo.IndexModel{
 		{
-			Keys: bson.M{"create_time": -1, "user_id": -1},
+			Keys: bson.A{bson.D{{"create_time", -1}, {"user_id", -1}}},
 		},
 	}
 	result, err := dataBase.Collection(cCommentMsg).Indexes().CreateMany(context.Background(), cCommentMsgModels, opts)
