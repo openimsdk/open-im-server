@@ -42,7 +42,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	if r.Password != params.Password {
-		log.NewError(params.OperationID, "password err", params.Password, account, r.Password, r.Account)
+		log.NewError(params.OperationID, "password  err", params.Password, account, r.Password, r.Account)
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.PasswordErr, "errMsg": "password err"})
 		return
 	}
