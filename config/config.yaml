@@ -111,19 +111,19 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
 
 
 rpcport: #rpc服务端口 默认即可
-  openImUserPort: [ 10100 ]
-  openImFriendPort: [ 10200 ]
-  openImMessagePort: [ 10300 ]
-  openImMessageGatewayPort: [ 10400 ]
-  openImGroupPort: [ 10500 ]
-  openImAuthPort: [ 10600 ]
-  openImPushPort: [ 10700 ]
-  openImStatisticsPort: [ 10800 ]
-  openImMessageCmsPort: [ 10900 ]
-  openImAdminCmsPort: [ 11000 ]
-  openImOfficePort: [ 11100 ]
-  openImOrganizationPort: [ 11200 ]
-  openImConversationPort: [ 11400 ]
+  openImUserPort: [ 10110 ]
+  openImFriendPort: [ 10120 ]
+  openImMessagePort: [ 10130 ]
+  openImMessageGatewayPort: [ 10140 ]
+  openImGroupPort: [ 10150 ]
+  openImAuthPort: [ 10160 ]
+  openImPushPort: [ 10170 ]
+  openImStatisticsPort: [ 10180 ]
+  openImMessageCmsPort: [ 10190 ]
+  openImAdminCmsPort: [ 10200 ]
+  openImOfficePort: [ 10210 ]
+  openImOrganizationPort: [ 10220 ]
+  openImConversationPort: [ 10230 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
