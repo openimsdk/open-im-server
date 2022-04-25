@@ -515,7 +515,7 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 		return resp, nil
 	}
 	for _, friendID := range friendIDList {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), *friendID)
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), friendID)
 	}
 	workMoments, err := db.DB.GetUserFriendWorkMoments(friendIDList, req.Pagination.ShowNumber, req.Pagination.PageNumber, req.UserID)
 	if err != nil {

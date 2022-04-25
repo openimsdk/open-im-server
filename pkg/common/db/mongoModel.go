@@ -692,7 +692,7 @@ func (d *DataBases) GetUserWorkMoments(opUserID, userID string, showNumber, page
 	return workMomentList, err
 }
 
-func (d *DataBases) GetUserFriendWorkMoments(friendIDList []*string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
+func (d *DataBases) GetUserFriendWorkMoments(friendIDList []string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
