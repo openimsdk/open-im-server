@@ -285,6 +285,7 @@ func GetUserWorkMoments(c *gin.Context) {
 				UserName: atUser.UserName,
 			}
 		}
+		resp.Data.WorkMoments = append(resp.Data.WorkMoments, &workMoment)
 	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
@@ -331,6 +332,7 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	//if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
 	//	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	//}
+	resp.Data.WorkMoments = []*apiStruct.WorkMoment{}
 	for _, v := range respPb.WorkMoments {
 		workMoment := apiStruct.WorkMoment{
 			WorkMomentID: v.WorkMomentID,
@@ -366,6 +368,7 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 				UserName: atUser.UserName,
 			}
 		}
+		resp.Data.WorkMoments = append(resp.Data.WorkMoments, &workMoment)
 	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
