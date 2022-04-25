@@ -93,13 +93,13 @@ func GetMultipleUserConversationByConversationID(ownerUserIDList []string, conve
 	err = dbConn.Model(&db.Conversation{}).Where("owner_user_id IN ? and  conversation_id=?", ownerUserIDList, conversationID).Find(&conversations).Error
 	return conversations, err
 }
-func GetExistConversationUserIDList(conversationID string) ([]string, error) {
+func GetExistConversationUserIDList(ownerUserIDList []string, conversationID string) ([]string, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var resultArr []string
-	err = dbConn.Table("conversations").Where(" conversation_id=?", conversationID).Pluck("owner_user_id", &resultArr).Error
+	err = dbConn.Table("conversations").Where(" owner_user_id IN (?) and conversation_id=?", ownerUserIDList, conversationID).Pluck("owner_user_id", &resultArr).Error
 	if err != nil {
 		return nil, err
 	}
@@ -140,6 +140,6 @@ func UpdateColumnsConversations(ownerUserIDList []string, conversationID string,
 		return err
 	}
 	dbConn.LogMode(false)
-	return dbConn.Model(&db.Conversation{}).Where("owner_user_id IN ? and  conversation_id=?", ownerUserIDList, conversationID).Updates(args).Error
+	return dbConn.Debug().Model(&db.Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", ownerUserIDList, conversationID).Updates(args).Error
 
 }
