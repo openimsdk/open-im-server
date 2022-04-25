@@ -18,8 +18,8 @@ service_port_name=(
   openImPushPort
   openImStatisticsPort
   openImMessageCmsPort
-  openImOfficePort
   openImAdminCmsPort
+  openImOfficePort
   openImOrganizationPort
   openImConversationPort
 )
