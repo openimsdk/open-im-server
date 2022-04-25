@@ -46,7 +46,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.PasswordErr, "errMsg": "password err"})
 		return
 	}
-	url := fmt.Sprintf("http://%s:%d/auth/user_token", utils.ServerIP, config.Config.Api.GinPort)
+	url := fmt.Sprintf("http://%s:%s/auth/user_token", utils.ServerIP, config.Config.Api.GinPort[0])
 	openIMGetUserToken := api.UserTokenReq{}
 	openIMGetUserToken.OperationID = params.OperationID
 	openIMGetUserToken.Platform = params.Platform
