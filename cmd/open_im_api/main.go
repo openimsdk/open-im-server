@@ -174,7 +174,7 @@ func main() {
 	}
 
 	go apiThird.MinioInit()
-	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
+	ginPort := flag.Int("port", 10002, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
 	fmt.Println("start api server, port: ", *ginPort)
 	err := r.Run(":" + strconv.Itoa(*ginPort))

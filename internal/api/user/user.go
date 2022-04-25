@@ -205,22 +205,22 @@ func GetSelfUserInfo(c *gin.Context) {
 		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), updateUserInfoReq.String())
 		etcdConnCache := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
 		cacheClient := cache.NewCacheClient(etcdConnCache)
-		cacheResp, err := cacheClient.UpdateUserInfo(context.Background(), updateUserInfoReq)
-		if err != nil {
-			log.NewError(req.OperationID, "UpdateUserInfo cache failed ", err.Error(), req.String())
-			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed: " + err.Error()})
-			return
-		}
-		if cacheResp.CommonResp.ErrCode != 0 {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), cacheResp.CommonResp.String())
-			resp := api.UpdateUserInfoResp{CommResp: api.CommResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}
-			c.JSON(http.StatusOK, resp)
-			return
-		}
-		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfo: RpcResp.UserInfoList[0]}
-		resp.Data = jsonData.JsonDataOne(resp.UserInfo)
-		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
-		c.JSON(http.StatusOK, resp)
+		:= cacheClient.UpdateUserInfo(context.Background(), updateUserInfoReq)
+		//if err != nil {
+		//	log.NewError(req.OperationID, "UpdateUserInfo cache failed ", err.Error(), req.String())
+		//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed: " + err.Error()})
+		//	return
+		//}
+		//if cacheResp.CommonResp.ErrCode != 0 {
+		//	log.NewError(req.OperationID, utils.GetSelfFuncName(), cacheResp.CommonResp.String())
+		//	resp := api.UpdateUserInfoResp{CommResp: api.CommResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}
+		//	c.JSON(http.StatusOK, resp)
+		//	return
+		//}
+		//resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfo: RpcResp.UserInfoList[0]}
+		//resp.Data = jsonData.JsonDataOne(resp.UserInfo)
+		//log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
+		//c.JSON(http.StatusOK, resp)
 	} else {
 		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
