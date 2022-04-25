@@ -243,11 +243,48 @@ func GetUserWorkMoments(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserWorkMoments rpc server failed" + err.Error()})
 		return
 	}
+	resp.Data.WorkMoments = []*apiStruct.WorkMoment{}
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	//if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
+	//	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	//}
+	for _, v := range respPb.WorkMoments {
+		workMoment := apiStruct.WorkMoment{
+			WorkMomentID: v.WorkMomentID,
+			UserID:       v.UserID,
+			Content:      v.Content,
+			FaceURL:      v.FaceURL,
+			UserName:     v.UserName,
+			CreateTime:   v.CreateTime,
+			Comments:     make([]*apiStruct.Comment, len(v.Comments)),
+			LikeUserList: make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
+			AtUserList:   make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
+		}
+		for i, comment := range v.Comments {
+			workMoment.Comments[i] = &apiStruct.Comment{
+				UserID:        comment.UserID,
+				UserName:      comment.UserName,
+				ReplyUserID:   comment.ReplyUserID,
+				ReplyUserName: comment.ReplyUserID,
+				ContentID:     comment.ContentID,
+				Content:       comment.Content,
+				CreateTime:    comment.CreateTime,
+			}
+		}
+		for i, likeUser := range v.LikeUserList {
+			workMoment.LikeUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   likeUser.UserID,
+				UserName: likeUser.UserName,
+			}
+		}
+		for i, atUser := range v.AtUserList {
+			workMoment.AtUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   atUser.UserID,
+				UserName: atUser.UserName,
+			}
+		}
 	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
@@ -291,8 +328,44 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	//if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
+	//	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	//}
+	for _, v := range respPb.WorkMoments {
+		workMoment := apiStruct.WorkMoment{
+			WorkMomentID: v.WorkMomentID,
+			UserID:       v.UserID,
+			Content:      v.Content,
+			FaceURL:      v.FaceURL,
+			UserName:     v.UserName,
+			CreateTime:   v.CreateTime,
+			Comments:     make([]*apiStruct.Comment, len(v.Comments)),
+			LikeUserList: make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
+			AtUserList:   make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
+		}
+		for i, comment := range v.Comments {
+			workMoment.Comments[i] = &apiStruct.Comment{
+				UserID:        comment.UserID,
+				UserName:      comment.UserName,
+				ReplyUserID:   comment.ReplyUserID,
+				ReplyUserName: comment.ReplyUserID,
+				ContentID:     comment.ContentID,
+				Content:       comment.Content,
+				CreateTime:    comment.CreateTime,
+			}
+		}
+		for i, likeUser := range v.LikeUserList {
+			workMoment.LikeUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   likeUser.UserID,
+				UserName: likeUser.UserName,
+			}
+		}
+		for i, atUser := range v.AtUserList {
+			workMoment.AtUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   atUser.UserID,
+				UserName: atUser.UserName,
+			}
+		}
 	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
