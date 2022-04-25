@@ -4,8 +4,11 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 service_port_name=(
-  openImCmsApiPort
+  openImWsPort
   openImApiPort
+  openImSdkWsPort
+  openImDemoPort
+  openImCmsApiPort
   openImUserPort
   openImFriendPort
   openImMessagePort
@@ -13,13 +16,10 @@ service_port_name=(
   openImGroupPort
   openImAuthPort
   openImPushPort
-  openImWsPort
-  openImSdkWsPort
-  openImDemoPort
-  openImAdminCmsPort
-  openImMessageCmsPort
   openImStatisticsPort
+  openImMessageCmsPort
   openImOfficePort
+  openImAdminCmsPort
   openImOrganizationPort
   openImConversationPort
 )
