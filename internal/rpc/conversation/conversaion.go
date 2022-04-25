@@ -47,7 +47,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", *req.Conversation, err.Error())
 	}
-	haveUserID, _ := imdb.GetExistConversationUserIDList(req.Conversation.ConversationID)
+	haveUserID, _ := imdb.GetExistConversationUserIDList(req.UserIDList, req.Conversation.ConversationID)
 	switch req.FieldType {
 	case constant.FieldRecvMsgOpt:
 		for _, v := range req.UserIDList {
