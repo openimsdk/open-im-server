@@ -15,7 +15,7 @@ import (
 func NewGinRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	baseRouter := gin.Default()
-	router := baseRouter.Group("/api")
+	router := baseRouter.Group("/cms")
 	router.Use(middleware.CorsHandler())
 	adminRouterGroup := router.Group("/admin")
 	{
