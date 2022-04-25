@@ -508,14 +508,15 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.GetUserFriendWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
 	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
-	//resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
 	friendIDList, err := imdb.GetFriendIDListByUserID(req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetFriendIDListByUserID", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "friendIDList: ", friendIDList)
+	for _, friendID := range friendIDList {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), *friendID)
+	}
 	workMoments, err := db.DB.GetUserFriendWorkMoments(friendIDList, req.Pagination.ShowNumber, req.Pagination.PageNumber, req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserFriendWorkMoments", err.Error())

@@ -1,0 +1,44 @@
+syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./cache;cache";
+package cache;
+
+message CommonResp{
+  int32  errCode = 1;
+  string errMsg = 2;
+}
+
+message GetUserInfoReq{
+  repeated string userIDList = 1;
+  string operationID = 3;
+}
+
+message GetUserInfoResp{
+  CommonResp  commonResp = 1;
+  repeated server_api_params.UserInfo UserInfoList = 2;
+}
+
+
+message UpdateUserInfoReq{
+  repeated server_api_params.UserInfo UserInfoList = 1;
+  string operationID = 2;
+}
+
+message UpdateUserInfoResp{
+  CommonResp commonResp = 1;
+}
+
+message UpdateAllUserToCacheReq{
+  string operationID = 1;
+}
+
+message UpdateAllUserToCacheResp{
+  CommonResp commonResp = 1;
+}
+
+
+service cache{
+  rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
+  rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
+  rpc UpdateAllUserToCache(UpdateAllUserToCacheReq) returns(UpdateAllUserToCacheResp);
+}

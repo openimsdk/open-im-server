@@ -148,6 +148,7 @@ rpcregistername: #rpc注册服务名，默认即可
   openImOfficeName: Office
   openImOrganizationName: Organization
   openImConversationName: Conversation
+  openImCacheName: Cache
 
 log:
   storageLocation: ../logs/
