@@ -140,6 +140,6 @@ func UpdateColumnsConversations(ownerUserIDList []string, conversationID string,
 		return err
 	}
 	dbConn.LogMode(false)
-	return dbConn.Debug().Model(&db.Conversation{}).Where("owner_user_id IN ? and  conversation_id=?", ownerUserIDList, conversationID).Updates(args).Error
+	return dbConn.Debug().Model(&db.Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", ownerUserIDList, conversationID).Updates(args).Error
 
 }
