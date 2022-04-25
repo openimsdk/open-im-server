@@ -205,7 +205,7 @@ func GetSelfUserInfo(c *gin.Context) {
 		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), updateUserInfoReq.String())
 		etcdConnCache := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
 		cacheClient := cache.NewCacheClient(etcdConnCache)
-		:= cacheClient.UpdateUserInfo(context.Background(), updateUserInfoReq)
+		cacheClient.UpdateUserInfo(context.Background(), updateUserInfoReq)
 		//if err != nil {
 		//	log.NewError(req.OperationID, "UpdateUserInfo cache failed ", err.Error(), req.String())
 		//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed: " + err.Error()})
