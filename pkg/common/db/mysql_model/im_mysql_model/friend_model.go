@@ -55,7 +55,7 @@ func GetFriendIDListByUserID(OwnerUserID string) ([]string, error) {
 		return nil, err
 	}
 	var friendIDList []string
-	err = dbConn.Table("friends").Select("friend_user_id").Where("owner_user_id=?", OwnerUserID).Find(&friendIDList).Error
+	err = dbConn.Table("friends").Where("owner_user_id=?", OwnerUserID).Pluck("friend_user_id", &friendIDList).Error
 	if err != nil {
 		return nil, err
 	}
