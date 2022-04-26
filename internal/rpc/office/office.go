@@ -305,7 +305,7 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 			UserName:            createUser.Nickname,
 			CreateTime:          workMoment.CreateTime,
 		}
-		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser.UserID, workMomentNotificationMsg)
+		msg.WorkMomentSendNotification(req.OperationID, atUser.UserID, atUser.UserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil

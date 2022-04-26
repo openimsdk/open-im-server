@@ -96,10 +96,16 @@ func (s *cacheServer) UpdateUserInfo(_ context.Context, req *pbCache.UpdateUserI
 }
 
 func (s *cacheServer) GetBlackList(_ context.Context, req *pbCache.GetBlackListReq) (resp *pbCache.GetBlackListResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	return nil, nil
 }
 
 func (s *cacheServer) UpdateBlackList(_ context.Context, req *pbCache.UpdateBlackListReq) (resp *pbCache.UpdateBlackListResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	return nil, nil
 }
 
