@@ -21,6 +21,7 @@ service_filename=(
   open_im_office
   open_im_organization
   open_im_conversation
+  open_im_cache
 )
 
 #service config port name
@@ -40,6 +41,7 @@ service_port_name=(
   openImOfficePort
   openImOrganizationPort
   openImConversationPort
+  openImCachePort
 )
 
 for ((i = 0; i < ${#service_filename[*]}; i++)); do
