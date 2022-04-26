@@ -71,24 +71,14 @@ func init() {
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	dataBase := mongoClient.Database(config.Config.Mongo.DBDatabase)
 
-	cCommentMsgModels := []mongo.IndexModel{
-		{
-			Keys: bson.A{bson.D{{"create_time", -1}, {"user_id", -1}}},
-		},
-	}
-	result, err := dataBase.Collection(cCommentMsg).Indexes().CreateMany(context.Background(), cCommentMsgModels, opts)
-	if err != nil {
-		fmt.Println("mongodb create cCommentMsgModels failed", result, err.Error())
-	}
-
 	cSendLogModels := []mongo.IndexModel{
 		{
-			Keys: bson.M{"user_id": -1, "send_time": -1},
+			Keys: bson.M{"user_id": -1},
 		},
 	}
-	result, err = dataBase.Collection(cSendLog).Indexes().CreateMany(context.Background(), cSendLogModels, opts)
+	result, err := dataBase.Collection(cSendLog).Indexes().CreateMany(context.Background(), cSendLogModels, opts)
 	if err != nil {
-		fmt.Println("mongodb create cSendLogModels failed", result, err.Error())
+		//fmt.Println("mongodb create cSendLogModels failed", result, err.Error())
 	}
 
 	cChatModels := []mongo.IndexModel{
@@ -106,12 +96,12 @@ func init() {
 			Keys: bson.M{"work_moment_id": -1},
 		},
 		{
-			Keys: bson.M{"user_id": -1, "create_time": -1},
+			Keys: bson.M{"user_id": -1},
 		},
 	}
 	result, err = dataBase.Collection(cWorkMoment).Indexes().CreateMany(context.Background(), cWorkMomentModels, opts)
 	if err != nil {
-		fmt.Println("mongodb create cWorkMomentModels failed", result, err.Error())
+		//fmt.Println("mongodb create cWorkMomentModels failed", result, err.Error())
 	}
 
 	cTagModels := []mongo.IndexModel{
@@ -119,12 +109,12 @@ func init() {
 			Keys: bson.M{"tag_id": -1},
 		},
 		{
-			Keys: bson.M{"user_id": -1, "tag_id": -1},
+			Keys: bson.M{"user_id": -1},
 		},
 	}
 	result, err = dataBase.Collection(cTag).Indexes().CreateMany(context.Background(), cTagModels, opts)
 	if err != nil {
-		fmt.Println("mongodb create cTagModels failed", result, err.Error())
+		//fmt.Println("mongodb create cTagModels failed", result, err.Error())
 	}
 	DB.mongoClient = mongoClient
 

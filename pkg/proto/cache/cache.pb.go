@@ -36,7 +36,7 @@ func (m *CommonResp) Reset()         { *m = CommonResp{} }
 func (m *CommonResp) String() string { return proto.CompactTextString(m) }
 func (*CommonResp) ProtoMessage()    {}
 func (*CommonResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_613af94c3da056d4, []int{0}
+	return fileDescriptor_cache_c95b22de9c135769, []int{0}
 }
 func (m *CommonResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CommonResp.Unmarshal(m, b)
@@ -82,7 +82,7 @@ func (m *GetUserInfoReq) Reset()         { *m = GetUserInfoReq{} }
 func (m *GetUserInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserInfoReq) ProtoMessage()    {}
 func (*GetUserInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_613af94c3da056d4, []int{1}
+	return fileDescriptor_cache_c95b22de9c135769, []int{1}
 }
 func (m *GetUserInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInfoReq.Unmarshal(m, b)
@@ -118,7 +118,7 @@ func (m *GetUserInfoReq) GetOperationID() string {
 
 type GetUserInfoResp struct {
 	CommonResp           *CommonResp        `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
-	UserInfoList         []*sdk_ws.UserInfo `protobuf:"bytes,2,rep,name=UserInfoList" json:"UserInfoList,omitempty"`
+	UserInfoList         []*sdk_ws.UserInfo `protobuf:"bytes,2,rep,name=userInfoList" json:"userInfoList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
 	XXX_unrecognized     []byte             `json:"-"`
 	XXX_sizecache        int32              `json:"-"`
@@ -128,7 +128,7 @@ func (m *GetUserInfoResp) Reset()         { *m = GetUserInfoResp{} }
 func (m *GetUserInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserInfoResp) ProtoMessage()    {}
 func (*GetUserInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_613af94c3da056d4, []int{2}
+	return fileDescriptor_cache_c95b22de9c135769, []int{2}
 }
 func (m *GetUserInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInfoResp.Unmarshal(m, b)
@@ -163,7 +163,7 @@ func (m *GetUserInfoResp) GetUserInfoList() []*sdk_ws.UserInfo {
 }
 
 type UpdateUserInfoReq struct {
-	UserInfoList         []*sdk_ws.UserInfo `protobuf:"bytes,1,rep,name=UserInfoList" json:"UserInfoList,omitempty"`
+	UserInfoList         []*sdk_ws.UserInfo `protobuf:"bytes,1,rep,name=userInfoList" json:"userInfoList,omitempty"`
 	OperationID          string             `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
 	XXX_unrecognized     []byte             `json:"-"`
@@ -174,7 +174,7 @@ func (m *UpdateUserInfoReq) Reset()         { *m = UpdateUserInfoReq{} }
 func (m *UpdateUserInfoReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInfoReq) ProtoMessage()    {}
 func (*UpdateUserInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_613af94c3da056d4, []int{3}
+	return fileDescriptor_cache_c95b22de9c135769, []int{3}
 }
 func (m *UpdateUserInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInfoReq.Unmarshal(m, b)
@@ -219,7 +219,7 @@ func (m *UpdateUserInfoResp) Reset()         { *m = UpdateUserInfoResp{} }
 func (m *UpdateUserInfoResp) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInfoResp) ProtoMessage()    {}
 func (*UpdateUserInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_613af94c3da056d4, []int{4}
+	return fileDescriptor_cache_c95b22de9c135769, []int{4}
 }
 func (m *UpdateUserInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInfoResp.Unmarshal(m, b)
@@ -246,76 +246,344 @@ func (m *UpdateUserInfoResp) GetCommonResp() *CommonResp {
 	return nil
 }
 
-type UpdateAllUserToCacheReq struct {
-	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+type GetFriendInfoReq struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *UpdateAllUserToCacheReq) Reset()         { *m = UpdateAllUserToCacheReq{} }
-func (m *UpdateAllUserToCacheReq) String() string { return proto.CompactTextString(m) }
-func (*UpdateAllUserToCacheReq) ProtoMessage()    {}
-func (*UpdateAllUserToCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_613af94c3da056d4, []int{5}
+func (m *GetFriendInfoReq) Reset()         { *m = GetFriendInfoReq{} }
+func (m *GetFriendInfoReq) String() string { return proto.CompactTextString(m) }
+func (*GetFriendInfoReq) ProtoMessage()    {}
+func (*GetFriendInfoReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_c95b22de9c135769, []int{5}
 }
-func (m *UpdateAllUserToCacheReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_UpdateAllUserToCacheReq.Unmarshal(m, b)
+func (m *GetFriendInfoReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFriendInfoReq.Unmarshal(m, b)
 }
-func (m *UpdateAllUserToCacheReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_UpdateAllUserToCacheReq.Marshal(b, m, deterministic)
+func (m *GetFriendInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFriendInfoReq.Marshal(b, m, deterministic)
 }
-func (dst *UpdateAllUserToCacheReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateAllUserToCacheReq.Merge(dst, src)
+func (dst *GetFriendInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFriendInfoReq.Merge(dst, src)
 }
-func (m *UpdateAllUserToCacheReq) XXX_Size() int {
-	return xxx_messageInfo_UpdateAllUserToCacheReq.Size(m)
+func (m *GetFriendInfoReq) XXX_Size() int {
+	return xxx_messageInfo_GetFriendInfoReq.Size(m)
 }
-func (m *UpdateAllUserToCacheReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateAllUserToCacheReq.DiscardUnknown(m)
+func (m *GetFriendInfoReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFriendInfoReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_UpdateAllUserToCacheReq proto.InternalMessageInfo
+var xxx_messageInfo_GetFriendInfoReq proto.InternalMessageInfo
 
-func (m *UpdateAllUserToCacheReq) GetOperationID() string {
+func (m *GetFriendInfoReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *GetFriendInfoReq) GetOperationID() string {
 	if m != nil {
 		return m.OperationID
 	}
 	return ""
 }
 
-type UpdateAllUserToCacheResp struct {
+type GetFriendInfoResp struct {
+	FriendInfoList       []*sdk_ws.FriendInfo `protobuf:"bytes,1,rep,name=friendInfoList" json:"friendInfoList,omitempty"`
+	CommonResp           *CommonResp          `protobuf:"bytes,2,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
+}
+
+func (m *GetFriendInfoResp) Reset()         { *m = GetFriendInfoResp{} }
+func (m *GetFriendInfoResp) String() string { return proto.CompactTextString(m) }
+func (*GetFriendInfoResp) ProtoMessage()    {}
+func (*GetFriendInfoResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_c95b22de9c135769, []int{6}
+}
+func (m *GetFriendInfoResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFriendInfoResp.Unmarshal(m, b)
+}
+func (m *GetFriendInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFriendInfoResp.Marshal(b, m, deterministic)
+}
+func (dst *GetFriendInfoResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFriendInfoResp.Merge(dst, src)
+}
+func (m *GetFriendInfoResp) XXX_Size() int {
+	return xxx_messageInfo_GetFriendInfoResp.Size(m)
+}
+func (m *GetFriendInfoResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFriendInfoResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetFriendInfoResp proto.InternalMessageInfo
+
+func (m *GetFriendInfoResp) GetFriendInfoList() []*sdk_ws.FriendInfo {
+	if m != nil {
+		return m.FriendInfoList
+	}
+	return nil
+}
+
+func (m *GetFriendInfoResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type UpdateBlackListReq struct {
+	BlackList            []*sdk_ws.BlackInfo `protobuf:"bytes,1,rep,name=blackList" json:"blackList,omitempty"`
+	OperationID          string              `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
+}
+
+func (m *UpdateBlackListReq) Reset()         { *m = UpdateBlackListReq{} }
+func (m *UpdateBlackListReq) String() string { return proto.CompactTextString(m) }
+func (*UpdateBlackListReq) ProtoMessage()    {}
+func (*UpdateBlackListReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_c95b22de9c135769, []int{7}
+}
+func (m *UpdateBlackListReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateBlackListReq.Unmarshal(m, b)
+}
+func (m *UpdateBlackListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateBlackListReq.Marshal(b, m, deterministic)
+}
+func (dst *UpdateBlackListReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateBlackListReq.Merge(dst, src)
+}
+func (m *UpdateBlackListReq) XXX_Size() int {
+	return xxx_messageInfo_UpdateBlackListReq.Size(m)
+}
+func (m *UpdateBlackListReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateBlackListReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateBlackListReq proto.InternalMessageInfo
+
+func (m *UpdateBlackListReq) GetBlackList() []*sdk_ws.BlackInfo {
+	if m != nil {
+		return m.BlackList
+	}
+	return nil
+}
+
+func (m *UpdateBlackListReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type UpdateBlackListResp struct {
 	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
 }
 
-func (m *UpdateAllUserToCacheResp) Reset()         { *m = UpdateAllUserToCacheResp{} }
-func (m *UpdateAllUserToCacheResp) String() string { return proto.CompactTextString(m) }
-func (*UpdateAllUserToCacheResp) ProtoMessage()    {}
-func (*UpdateAllUserToCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_613af94c3da056d4, []int{6}
+func (m *UpdateBlackListResp) Reset()         { *m = UpdateBlackListResp{} }
+func (m *UpdateBlackListResp) String() string { return proto.CompactTextString(m) }
+func (*UpdateBlackListResp) ProtoMessage()    {}
+func (*UpdateBlackListResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_c95b22de9c135769, []int{8}
 }
-func (m *UpdateAllUserToCacheResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_UpdateAllUserToCacheResp.Unmarshal(m, b)
+func (m *UpdateBlackListResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateBlackListResp.Unmarshal(m, b)
 }
-func (m *UpdateAllUserToCacheResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_UpdateAllUserToCacheResp.Marshal(b, m, deterministic)
+func (m *UpdateBlackListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateBlackListResp.Marshal(b, m, deterministic)
 }
-func (dst *UpdateAllUserToCacheResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateAllUserToCacheResp.Merge(dst, src)
+func (dst *UpdateBlackListResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateBlackListResp.Merge(dst, src)
 }
-func (m *UpdateAllUserToCacheResp) XXX_Size() int {
-	return xxx_messageInfo_UpdateAllUserToCacheResp.Size(m)
+func (m *UpdateBlackListResp) XXX_Size() int {
+	return xxx_messageInfo_UpdateBlackListResp.Size(m)
 }
-func (m *UpdateAllUserToCacheResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateAllUserToCacheResp.DiscardUnknown(m)
+func (m *UpdateBlackListResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateBlackListResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_UpdateAllUserToCacheResp proto.InternalMessageInfo
+var xxx_messageInfo_UpdateBlackListResp proto.InternalMessageInfo
 
-func (m *UpdateAllUserToCacheResp) GetCommonResp() *CommonResp {
+func (m *UpdateBlackListResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type GetBlackListReq struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetBlackListReq) Reset()         { *m = GetBlackListReq{} }
+func (m *GetBlackListReq) String() string { return proto.CompactTextString(m) }
+func (*GetBlackListReq) ProtoMessage()    {}
+func (*GetBlackListReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_c95b22de9c135769, []int{9}
+}
+func (m *GetBlackListReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetBlackListReq.Unmarshal(m, b)
+}
+func (m *GetBlackListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetBlackListReq.Marshal(b, m, deterministic)
+}
+func (dst *GetBlackListReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetBlackListReq.Merge(dst, src)
+}
+func (m *GetBlackListReq) XXX_Size() int {
+	return xxx_messageInfo_GetBlackListReq.Size(m)
+}
+func (m *GetBlackListReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetBlackListReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetBlackListReq proto.InternalMessageInfo
+
+func (m *GetBlackListReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *GetBlackListReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetBlackListResp struct {
+	BlackList            []*sdk_ws.BlackInfo `protobuf:"bytes,1,rep,name=blackList" json:"blackList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
+}
+
+func (m *GetBlackListResp) Reset()         { *m = GetBlackListResp{} }
+func (m *GetBlackListResp) String() string { return proto.CompactTextString(m) }
+func (*GetBlackListResp) ProtoMessage()    {}
+func (*GetBlackListResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_c95b22de9c135769, []int{10}
+}
+func (m *GetBlackListResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetBlackListResp.Unmarshal(m, b)
+}
+func (m *GetBlackListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetBlackListResp.Marshal(b, m, deterministic)
+}
+func (dst *GetBlackListResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetBlackListResp.Merge(dst, src)
+}
+func (m *GetBlackListResp) XXX_Size() int {
+	return xxx_messageInfo_GetBlackListResp.Size(m)
+}
+func (m *GetBlackListResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetBlackListResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetBlackListResp proto.InternalMessageInfo
+
+func (m *GetBlackListResp) GetBlackList() []*sdk_ws.BlackInfo {
+	if m != nil {
+		return m.BlackList
+	}
+	return nil
+}
+
+type UpdateFriendInfoReq struct {
+	FriendInfoList       []*sdk_ws.FriendInfo `protobuf:"bytes,1,rep,name=friendInfoList" json:"friendInfoList,omitempty"`
+	OperationID          string               `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
+	XXX_unrecognized     []byte               `json:"-"`
+	XXX_sizecache        int32                `json:"-"`
+}
+
+func (m *UpdateFriendInfoReq) Reset()         { *m = UpdateFriendInfoReq{} }
+func (m *UpdateFriendInfoReq) String() string { return proto.CompactTextString(m) }
+func (*UpdateFriendInfoReq) ProtoMessage()    {}
+func (*UpdateFriendInfoReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_c95b22de9c135769, []int{11}
+}
+func (m *UpdateFriendInfoReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateFriendInfoReq.Unmarshal(m, b)
+}
+func (m *UpdateFriendInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateFriendInfoReq.Marshal(b, m, deterministic)
+}
+func (dst *UpdateFriendInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateFriendInfoReq.Merge(dst, src)
+}
+func (m *UpdateFriendInfoReq) XXX_Size() int {
+	return xxx_messageInfo_UpdateFriendInfoReq.Size(m)
+}
+func (m *UpdateFriendInfoReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateFriendInfoReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateFriendInfoReq proto.InternalMessageInfo
+
+func (m *UpdateFriendInfoReq) GetFriendInfoList() []*sdk_ws.FriendInfo {
+	if m != nil {
+		return m.FriendInfoList
+	}
+	return nil
+}
+
+func (m *UpdateFriendInfoReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type UpdateFriendInfoResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *UpdateFriendInfoResp) Reset()         { *m = UpdateFriendInfoResp{} }
+func (m *UpdateFriendInfoResp) String() string { return proto.CompactTextString(m) }
+func (*UpdateFriendInfoResp) ProtoMessage()    {}
+func (*UpdateFriendInfoResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_c95b22de9c135769, []int{12}
+}
+func (m *UpdateFriendInfoResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateFriendInfoResp.Unmarshal(m, b)
+}
+func (m *UpdateFriendInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateFriendInfoResp.Marshal(b, m, deterministic)
+}
+func (dst *UpdateFriendInfoResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateFriendInfoResp.Merge(dst, src)
+}
+func (m *UpdateFriendInfoResp) XXX_Size() int {
+	return xxx_messageInfo_UpdateFriendInfoResp.Size(m)
+}
+func (m *UpdateFriendInfoResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateFriendInfoResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateFriendInfoResp proto.InternalMessageInfo
+
+func (m *UpdateFriendInfoResp) GetCommonResp() *CommonResp {
 	if m != nil {
 		return m.CommonResp
 	}
@@ -328,8 +596,14 @@ func init() {
 	proto.RegisterType((*GetUserInfoResp)(nil), "cache.GetUserInfoResp")
 	proto.RegisterType((*UpdateUserInfoReq)(nil), "cache.UpdateUserInfoReq")
 	proto.RegisterType((*UpdateUserInfoResp)(nil), "cache.UpdateUserInfoResp")
-	proto.RegisterType((*UpdateAllUserToCacheReq)(nil), "cache.UpdateAllUserToCacheReq")
-	proto.RegisterType((*UpdateAllUserToCacheResp)(nil), "cache.UpdateAllUserToCacheResp")
+	proto.RegisterType((*GetFriendInfoReq)(nil), "cache.GetFriendInfoReq")
+	proto.RegisterType((*GetFriendInfoResp)(nil), "cache.GetFriendInfoResp")
+	proto.RegisterType((*UpdateBlackListReq)(nil), "cache.UpdateBlackListReq")
+	proto.RegisterType((*UpdateBlackListResp)(nil), "cache.UpdateBlackListResp")
+	proto.RegisterType((*GetBlackListReq)(nil), "cache.GetBlackListReq")
+	proto.RegisterType((*GetBlackListResp)(nil), "cache.GetBlackListResp")
+	proto.RegisterType((*UpdateFriendInfoReq)(nil), "cache.UpdateFriendInfoReq")
+	proto.RegisterType((*UpdateFriendInfoResp)(nil), "cache.UpdateFriendInfoResp")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -345,7 +619,10 @@ const _ = grpc.SupportPackageIsVersion4
 type CacheClient interface {
 	GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoResp, error)
 	UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq, opts ...grpc.CallOption) (*UpdateUserInfoResp, error)
-	UpdateAllUserToCache(ctx context.Context, in *UpdateAllUserToCacheReq, opts ...grpc.CallOption) (*UpdateAllUserToCacheResp, error)
+	GetFriendInfo(ctx context.Context, in *GetFriendInfoReq, opts ...grpc.CallOption) (*GetFriendInfoResp, error)
+	UpdateFriendInfo(ctx context.Context, in *UpdateFriendInfoReq, opts ...grpc.CallOption) (*UpdateFriendInfoResp, error)
+	UpdateBlackList(ctx context.Context, in *UpdateBlackListReq, opts ...grpc.CallOption) (*UpdateBlackListResp, error)
+	GetBlackList(ctx context.Context, in *GetBlackListReq, opts ...grpc.CallOption) (*GetBlackListResp, error)
 }
 
 type cacheClient struct {
@@ -374,9 +651,36 @@ func (c *cacheClient) UpdateUserInfo(ctx context.Context, in *UpdateUserInfoReq,
 	return out, nil
 }
 
-func (c *cacheClient) UpdateAllUserToCache(ctx context.Context, in *UpdateAllUserToCacheReq, opts ...grpc.CallOption) (*UpdateAllUserToCacheResp, error) {
-	out := new(UpdateAllUserToCacheResp)
-	err := grpc.Invoke(ctx, "/cache.cache/UpdateAllUserToCache", in, out, c.cc, opts...)
+func (c *cacheClient) GetFriendInfo(ctx context.Context, in *GetFriendInfoReq, opts ...grpc.CallOption) (*GetFriendInfoResp, error) {
+	out := new(GetFriendInfoResp)
+	err := grpc.Invoke(ctx, "/cache.cache/GetFriendInfo", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheClient) UpdateFriendInfo(ctx context.Context, in *UpdateFriendInfoReq, opts ...grpc.CallOption) (*UpdateFriendInfoResp, error) {
+	out := new(UpdateFriendInfoResp)
+	err := grpc.Invoke(ctx, "/cache.cache/UpdateFriendInfo", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheClient) UpdateBlackList(ctx context.Context, in *UpdateBlackListReq, opts ...grpc.CallOption) (*UpdateBlackListResp, error) {
+	out := new(UpdateBlackListResp)
+	err := grpc.Invoke(ctx, "/cache.cache/UpdateBlackList", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheClient) GetBlackList(ctx context.Context, in *GetBlackListReq, opts ...grpc.CallOption) (*GetBlackListResp, error) {
+	out := new(GetBlackListResp)
+	err := grpc.Invoke(ctx, "/cache.cache/GetBlackList", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -388,7 +692,10 @@ func (c *cacheClient) UpdateAllUserToCache(ctx context.Context, in *UpdateAllUse
 type CacheServer interface {
 	GetUserInfo(context.Context, *GetUserInfoReq) (*GetUserInfoResp, error)
 	UpdateUserInfo(context.Context, *UpdateUserInfoReq) (*UpdateUserInfoResp, error)
-	UpdateAllUserToCache(context.Context, *UpdateAllUserToCacheReq) (*UpdateAllUserToCacheResp, error)
+	GetFriendInfo(context.Context, *GetFriendInfoReq) (*GetFriendInfoResp, error)
+	UpdateFriendInfo(context.Context, *UpdateFriendInfoReq) (*UpdateFriendInfoResp, error)
+	UpdateBlackList(context.Context, *UpdateBlackListReq) (*UpdateBlackListResp, error)
+	GetBlackList(context.Context, *GetBlackListReq) (*GetBlackListResp, error)
 }
 
 func RegisterCacheServer(s *grpc.Server, srv CacheServer) {
@@ -431,20 +738,74 @@ func _Cache_UpdateUserInfo_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Cache_UpdateAllUserToCache_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateAllUserToCacheReq)
+func _Cache_GetFriendInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendInfoReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CacheServer).UpdateAllUserToCache(ctx, in)
+		return srv.(CacheServer).GetFriendInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/cache.cache/UpdateAllUserToCache",
+		FullMethod: "/cache.cache/GetFriendInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CacheServer).UpdateAllUserToCache(ctx, req.(*UpdateAllUserToCacheReq))
+		return srv.(CacheServer).GetFriendInfo(ctx, req.(*GetFriendInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cache_UpdateFriendInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateFriendInfoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServer).UpdateFriendInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cache.cache/UpdateFriendInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServer).UpdateFriendInfo(ctx, req.(*UpdateFriendInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cache_UpdateBlackList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateBlackListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServer).UpdateBlackList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cache.cache/UpdateBlackList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServer).UpdateBlackList(ctx, req.(*UpdateBlackListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cache_GetBlackList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBlackListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServer).GetBlackList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cache.cache/GetBlackList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServer).GetBlackList(ctx, req.(*GetBlackListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -462,40 +823,61 @@ var _Cache_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Cache_UpdateUserInfo_Handler,
 		},
 		{
-			MethodName: "UpdateAllUserToCache",
-			Handler:    _Cache_UpdateAllUserToCache_Handler,
+			MethodName: "GetFriendInfo",
+			Handler:    _Cache_GetFriendInfo_Handler,
+		},
+		{
+			MethodName: "UpdateFriendInfo",
+			Handler:    _Cache_UpdateFriendInfo_Handler,
+		},
+		{
+			MethodName: "UpdateBlackList",
+			Handler:    _Cache_UpdateBlackList_Handler,
+		},
+		{
+			MethodName: "GetBlackList",
+			Handler:    _Cache_GetBlackList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "cache/cache.proto",
 }
 
-func init() { proto.RegisterFile("cache/cache.proto", fileDescriptor_cache_613af94c3da056d4) }
+func init() { proto.RegisterFile("cache/cache.proto", fileDescriptor_cache_c95b22de9c135769) }
 
-var fileDescriptor_cache_613af94c3da056d4 = []byte{
-	// 383 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x53, 0x5d, 0x4f, 0xe2, 0x40,
-	0x14, 0xcd, 0x40, 0x60, 0xc3, 0xed, 0x2e, 0x84, 0xc9, 0x2e, 0x5b, 0x6b, 0x82, 0xb5, 0x4f, 0x7d,
-	0x6a, 0x23, 0x3e, 0x62, 0x34, 0x0a, 0x86, 0x90, 0x48, 0x4c, 0x26, 0x12, 0x13, 0x5f, 0x9a, 0x0a,
-	0x23, 0x12, 0xa0, 0x33, 0xce, 0x54, 0xf8, 0x05, 0xfe, 0x54, 0xff, 0x87, 0xe9, 0x14, 0xb0, 0x1f,
-	0x68, 0x22, 0x2f, 0x93, 0xdc, 0x8f, 0x73, 0xe6, 0x9c, 0x3b, 0x73, 0xa1, 0x3e, 0xf2, 0x47, 0xcf,
-	0xd4, 0x55, 0xa7, 0xc3, 0x05, 0x0b, 0x19, 0x2e, 0xa9, 0xc0, 0x38, 0xbe, 0xe5, 0x34, 0xf0, 0xfa,
-	0x03, 0x97, 0xcf, 0x26, 0xae, 0xaa, 0xb8, 0x72, 0x3c, 0xf3, 0x56, 0xd2, 0x5d, 0xc9, 0xb8, 0xd3,
-	0x3a, 0x07, 0xe8, 0xb0, 0xc5, 0x82, 0x05, 0x84, 0x4a, 0x8e, 0x75, 0xf8, 0x45, 0x85, 0xe8, 0xb0,
-	0x31, 0xd5, 0x91, 0x89, 0xec, 0x12, 0xd9, 0x84, 0xb8, 0x01, 0x65, 0x2a, 0xc4, 0x40, 0x4e, 0xf4,
-	0x82, 0x89, 0xec, 0x0a, 0x59, 0x47, 0x16, 0x81, 0x6a, 0x8f, 0x86, 0x43, 0x49, 0x45, 0x3f, 0x78,
-	0x62, 0x84, 0xbe, 0xe0, 0x26, 0xc0, 0x6b, 0x14, 0x76, 0x6f, 0xa6, 0x32, 0xd4, 0x91, 0x59, 0xb4,
-	0x2b, 0x24, 0x91, 0xc1, 0x26, 0x68, 0x8c, 0x53, 0xe1, 0x87, 0x53, 0x16, 0xf4, 0xbb, 0x7a, 0x51,
-	0xd1, 0x25, 0x53, 0xd6, 0x1b, 0x82, 0x5a, 0x8a, 0x54, 0x72, 0x7c, 0x02, 0x30, 0xda, 0xea, 0x54,
-	0xe2, 0xb4, 0x56, 0xdd, 0x89, 0x3d, 0x7f, 0x1a, 0x20, 0x89, 0x26, 0x7c, 0x01, 0xbf, 0x37, 0x14,
-	0x4a, 0x4a, 0xc1, 0x2c, 0xda, 0x5a, 0xeb, 0xd0, 0x91, 0x54, 0x2c, 0xa9, 0xf0, 0x7c, 0x3e, 0xf5,
-	0xb8, 0x2f, 0xfc, 0x85, 0x74, 0xb6, 0x37, 0xa5, 0x00, 0xd6, 0x12, 0xea, 0x43, 0x3e, 0xf6, 0x43,
-	0x9a, 0xb4, 0x97, 0x65, 0x45, 0x3f, 0x64, 0xcd, 0xfa, 0x2f, 0xe4, 0xfd, 0xf7, 0x00, 0x67, 0xef,
-	0xdd, 0x6b, 0x02, 0x56, 0x1b, 0xfe, 0xc7, 0x44, 0x97, 0xf3, 0x79, 0xc4, 0x75, 0xc7, 0x3a, 0x51,
-	0x7b, 0x64, 0x23, 0xa3, 0x02, 0xe5, 0x55, 0x0c, 0x40, 0xdf, 0x0d, 0xde, 0x4b, 0x4b, 0xeb, 0x1d,
-	0x41, 0xfc, 0x2b, 0xf1, 0x19, 0x68, 0x89, 0xd7, 0xc5, 0xff, 0xd6, 0xb8, 0xf4, 0x37, 0x32, 0x1a,
-	0xbb, 0xd2, 0x92, 0xe3, 0x6b, 0xa8, 0xa6, 0x87, 0x83, 0xf5, 0x75, 0x67, 0xee, 0xad, 0x8c, 0x83,
-	0x2f, 0x2a, 0x92, 0xe3, 0x7b, 0xf8, 0xbb, 0xcb, 0x1d, 0x6e, 0xa6, 0x20, 0xb9, 0xb9, 0x19, 0x47,
-	0xdf, 0xd6, 0x25, 0xbf, 0xaa, 0x3d, 0xfc, 0x71, 0xe2, 0x5d, 0x6c, 0xab, 0xf3, 0xb1, 0xac, 0x16,
-	0xed, 0xf4, 0x23, 0x00, 0x00, 0xff, 0xff, 0x14, 0x24, 0x83, 0x9c, 0xa7, 0x03, 0x00, 0x00,
+var fileDescriptor_cache_c95b22de9c135769 = []byte{
+	// 527 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x55, 0x4d, 0x6f, 0xd3, 0x40,
+	0x10, 0x95, 0x13, 0x35, 0x28, 0x13, 0xda, 0x34, 0x03, 0xa4, 0xc6, 0x05, 0x64, 0x7c, 0xca, 0xc9,
+	0x16, 0xe1, 0x06, 0x08, 0xa4, 0xb4, 0x90, 0x46, 0x6d, 0x41, 0x5a, 0xa9, 0x17, 0x2e, 0x91, 0x9b,
+	0x6c, 0x4b, 0x14, 0xe2, 0x5d, 0x76, 0xdd, 0xf6, 0xc6, 0x8d, 0x23, 0xff, 0x83, 0x9f, 0x89, 0xb2,
+	0xb6, 0x93, 0xdd, 0x8d, 0x23, 0x42, 0xe0, 0x62, 0x69, 0xf6, 0xe3, 0xcd, 0x7b, 0x6f, 0xc6, 0xb3,
+	0xd0, 0x1a, 0xc5, 0xa3, 0x2f, 0x34, 0x52, 0xdf, 0x90, 0x0b, 0x96, 0x32, 0xdc, 0x51, 0x81, 0xf7,
+	0xfc, 0x13, 0xa7, 0xc9, 0x70, 0x70, 0x1e, 0xf1, 0xe9, 0x75, 0xa4, 0x76, 0x22, 0x39, 0x9e, 0x0e,
+	0xef, 0x64, 0x74, 0x27, 0xb3, 0x93, 0xc1, 0x5b, 0x80, 0x23, 0x36, 0x9b, 0xb1, 0x84, 0x50, 0xc9,
+	0xd1, 0x85, 0x7b, 0x54, 0x88, 0x23, 0x36, 0xa6, 0xae, 0xe3, 0x3b, 0x9d, 0x1d, 0x52, 0x84, 0xd8,
+	0x86, 0x1a, 0x15, 0xe2, 0x5c, 0x5e, 0xbb, 0x15, 0xdf, 0xe9, 0xd4, 0x49, 0x1e, 0x05, 0x04, 0xf6,
+	0xfa, 0x34, 0xbd, 0x90, 0x54, 0x0c, 0x92, 0x2b, 0x46, 0xe8, 0x37, 0x7c, 0x06, 0x70, 0x33, 0x0f,
+	0x8f, 0xcf, 0x26, 0x32, 0x75, 0x1d, 0xbf, 0xda, 0xa9, 0x13, 0x6d, 0x05, 0x7d, 0x68, 0x30, 0x4e,
+	0x45, 0x9c, 0x4e, 0x58, 0x32, 0x38, 0x76, 0xab, 0x0a, 0x4e, 0x5f, 0x0a, 0x7e, 0x38, 0xd0, 0x34,
+	0x40, 0x25, 0xc7, 0x17, 0x00, 0xa3, 0x05, 0x4f, 0x45, 0xae, 0xd1, 0x6d, 0x85, 0x99, 0xe6, 0xa5,
+	0x00, 0xa2, 0x1d, 0xc2, 0x77, 0x70, 0xff, 0x26, 0x87, 0x50, 0x54, 0x2a, 0x7e, 0xb5, 0xd3, 0xe8,
+	0x1e, 0x86, 0x92, 0x8a, 0x5b, 0x2a, 0x86, 0x31, 0x9f, 0x0c, 0x79, 0x2c, 0xe2, 0x99, 0x0c, 0x17,
+	0x99, 0x8c, 0x0b, 0xc1, 0x2d, 0xb4, 0x2e, 0xf8, 0x38, 0x4e, 0xa9, 0x2e, 0xcf, 0x46, 0x75, 0xfe,
+	0x12, 0xd5, 0xd6, 0x5f, 0x59, 0xd5, 0xdf, 0x07, 0xb4, 0xf3, 0x6e, 0xe5, 0x40, 0x70, 0x06, 0xfb,
+	0x7d, 0x9a, 0x7e, 0x10, 0x13, 0x9a, 0x8c, 0x0b, 0xfe, 0x6d, 0xa8, 0x65, 0xc5, 0x50, 0x10, 0x75,
+	0x92, 0x47, 0x1b, 0xd0, 0xfa, 0xe9, 0x40, 0xcb, 0x82, 0x93, 0x1c, 0xdf, 0xc3, 0xde, 0xd5, 0x62,
+	0x45, 0x73, 0xe4, 0x69, 0x89, 0x23, 0xda, 0x55, 0xeb, 0x92, 0xa5, 0xae, 0xb2, 0x89, 0x3a, 0x51,
+	0xd8, 0xd4, 0xfb, 0x1a, 0x8f, 0xa6, 0x73, 0x94, 0xb9, 0xbe, 0x57, 0x50, 0xbf, 0x2c, 0xe2, 0x9c,
+	0xca, 0x93, 0x12, 0x2a, 0xea, 0x8e, 0x62, 0xb2, 0x3c, 0xbe, 0x81, 0x07, 0x27, 0xf0, 0x60, 0x25,
+	0xe7, 0x76, 0xb5, 0x39, 0x55, 0x3d, 0x6e, 0x50, 0xdf, 0xbe, 0x34, 0x1f, 0x55, 0xa1, 0x4d, 0x4e,
+	0xff, 0x60, 0x44, 0xf0, 0xbd, 0x90, 0x69, 0xf6, 0xce, 0x7f, 0xaa, 0xf5, 0x9f, 0xf5, 0x0c, 0xe0,
+	0xe1, 0x6a, 0xfe, 0xad, 0x7c, 0xee, 0xfe, 0xaa, 0x42, 0x36, 0x0d, 0xf1, 0x0d, 0x34, 0xb4, 0xa9,
+	0x82, 0x8f, 0xf2, 0x7b, 0xe6, 0xf8, 0xf2, 0xda, 0x65, 0xcb, 0x59, 0x9f, 0x9b, 0x3f, 0x25, 0xba,
+	0xf9, 0xc9, 0x95, 0x19, 0xe1, 0x3d, 0x5e, 0xb3, 0x23, 0x39, 0xf6, 0x60, 0xd7, 0xf8, 0x87, 0xf0,
+	0x60, 0x99, 0xcf, 0x30, 0xdb, 0x73, 0xcb, 0x37, 0x24, 0xc7, 0x53, 0xd8, 0xb7, 0xdd, 0x41, 0xcf,
+	0x48, 0x69, 0x22, 0x1d, 0xae, 0xdd, 0x93, 0x1c, 0x4f, 0xa0, 0x69, 0x75, 0x34, 0x9a, 0xf4, 0xf5,
+	0x16, 0xf5, 0xbc, 0x75, 0x5b, 0xd9, 0xbc, 0xd5, 0x9b, 0x10, 0x35, 0x27, 0x0d, 0x8c, 0x83, 0xd2,
+	0x75, 0xc9, 0x7b, 0xcd, 0xcf, 0xbb, 0x61, 0xf6, 0x8c, 0xbd, 0x56, 0xdf, 0xcb, 0x9a, 0x7a, 0xa3,
+	0x5e, 0xfe, 0x0e, 0x00, 0x00, 0xff, 0xff, 0xb4, 0x17, 0x6d, 0x42, 0xe2, 0x06, 0x00, 0x00,
 }

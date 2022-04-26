@@ -23,11 +23,11 @@ type cacheServer struct {
 	etcdAddr        []string
 }
 
-func NewOfficeServer(port int) *cacheServer {
+func NewCacheServer(port int) *cacheServer {
 	log.NewPrivateLog(constant.LogFileName)
 	return &cacheServer{
 		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfficeName,
+		rpcRegisterName: config.Config.RpcRegisterName.OpenImCacheName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
@@ -95,9 +95,24 @@ func (s *cacheServer) UpdateUserInfo(_ context.Context, req *pbCache.UpdateUserI
 	return resp, nil
 }
 
-func (s *cacheServer) UpdateAllUserToCache(_ context.Context, req *pbCache.UpdateAllUserToCacheReq) (resp *pbCache.UpdateAllUserToCacheResp, err error) {
+func (s *cacheServer) GetBlackList(_ context.Context, req *pbCache.GetBlackListReq) (resp *pbCache.GetBlackListResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.UpdateAllUserToCacheResp{CommonResp: &pbCache.CommonResp{}}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
+
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	return nil, nil
+}
+
+func (s *cacheServer) UpdateBlackList(_ context.Context, req *pbCache.UpdateBlackListReq) (resp *pbCache.UpdateBlackListResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	return nil, nil
+}
+
+func (s *cacheServer) GetFriendInfo(_ context.Context, req *pbCache.GetFriendInfoReq) (resp *pbCache.GetFriendInfoResp, err error) {
+	return nil, nil
+}
+
+func (s *cacheServer) UpdateFriendInfo(_ context.Context, req *pbCache.UpdateFriendInfoReq) (resp *pbCache.UpdateFriendInfoResp, err error) {
+	return nil, nil
 }

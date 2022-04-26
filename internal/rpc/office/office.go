@@ -305,7 +305,7 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 			UserName:            createUser.Nickname,
 			CreateTime:          workMoment.CreateTime,
 		}
-		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser.UserID, workMomentNotificationMsg)
+		msg.WorkMomentSendNotification(req.OperationID, atUser.UserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -398,8 +398,8 @@ func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOn
 		CreateTime:          int32(time.Now().Unix()),
 	}
 	// send notification
-	if like {
-		msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
+	if like && workMoment.UserID != req.UserID {
+		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -441,18 +441,20 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 		NotificationMsgType: constant.WorkMomentCommentNotification,
 		WorkMomentID:        workMoment.WorkMomentID,
 		WorkMomentContent:   workMoment.Content,
-		UserID:              workMoment.UserID,
-		FaceURL:             workMoment.FaceURL,
-		UserName:            workMoment.UserName,
+		UserID:              commentUser.UserID,
+		FaceURL:             commentUser.FaceURL,
+		UserName:            commentUser.Nickname,
 		ReplyUserID:         comment.ReplyUserID,
 		ReplyUserName:       comment.ReplyUserName,
 		ContentID:           comment.ContentID,
 		Content:             comment.Content,
 		CreateTime:          comment.CreateTime,
 	}
-	msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
-	if req.ReplyUserID != "" {
-		msg.WorkMomentSendNotification(req.OperationID, req.UserID, req.ReplyUserID, workMomentNotificationMsg)
+	if req.UserID != workMoment.UserID {
+		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
+	}
+	if req.ReplyUserID != "" && req.ReplyUserID != workMoment.UserID && req.ReplyUserID != req.UserID {
+		msg.WorkMomentSendNotification(req.OperationID, req.ReplyUserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
