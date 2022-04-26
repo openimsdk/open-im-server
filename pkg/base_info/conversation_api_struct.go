@@ -43,6 +43,8 @@ type Conversation struct {
 	DraftTextTime    int64  `json:"draftTextTime"`
 	IsPinned         bool   `json:"isPinned" binding:"omitempty"`
 	IsPrivateChat    bool   `json:"isPrivateChat"`
+	GroupAtType      int32  `json:"groupAtType"`
+	IsNotInGroup     bool   `json:"isNotInGroup"`
 	AttachedInfo     string `json:"attachedInfo"`
 	Ex               string `json:"ex"`
 }
@@ -54,6 +56,15 @@ type SetConversationReq struct {
 }
 
 type SetConversationResp struct {
+	CommResp
+}
+type ModifyConversationFieldReq struct {
+	Conversation
+	FieldType   int32    `json:"fieldType" binding:"required"`
+	UserIDList  []string `json:"userIDList" binding:"required"`
+	OperationID string   `json:"operationID" binding:"required"`
+}
+type ModifyConversationFieldResp struct {
 	CommResp
 }
 

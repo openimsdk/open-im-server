@@ -93,6 +93,6 @@ func UserToken(c *gin.Context) {
 	}
 	resp := api.UserTokenResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg},
 		UserToken: api.UserTokenInfo{UserID: req.FromUserID, Token: reply.Token, ExpiredTime: reply.ExpiredTime}}
-	log.NewInfo(req.OperationID, "UserRegister return ", resp)
+	log.NewInfo(req.OperationID, "UserToken return ", resp)
 	c.JSON(http.StatusOK, resp)
 }

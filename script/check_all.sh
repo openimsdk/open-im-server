@@ -4,23 +4,24 @@ source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
 service_port_name=(
-  openImCmsApiPort
+  openImWsPort
   openImApiPort
+  openImSdkWsPort
+  openImDemoPort
+  openImCmsApiPort
   openImUserPort
   openImFriendPort
-  openImOfflineMessagePort
-  openImOnlineRelayPort
+  openImMessagePort
+  openImMessageGatewayPort
   openImGroupPort
   openImAuthPort
   openImPushPort
-  openImWsPort
-  openImSdkWsPort
-  openImDemoPort
-  openImAdminCmsPort
-  openImMessageCmsPort
   openImStatisticsPort
+  openImMessageCmsPort
+  openImAdminCmsPort
   openImOfficePort
   openImOrganizationPort
+  openImConversationPort
 )
 switch=$(cat $config_path | grep demoswitch |awk -F '[:]' '{print $NF}')
 for i in ${service_port_name[*]}; do

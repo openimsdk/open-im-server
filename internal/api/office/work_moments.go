@@ -201,7 +201,7 @@ func GetWorkMomentByID(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	//resp.Data.WorkMoment = respPb.WorkMoment
+	resp.Data.WorkMoment = &apiStruct.WorkMoment{LikeUserList: []*apiStruct.WorkMomentUser{}, Comments: []*apiStruct.Comment{}, AtUserList: []*apiStruct.WorkMomentUser{}}
 	if err := utils.CopyStructFields(&resp.Data.WorkMoment, respPb.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
@@ -222,7 +222,7 @@ func GetUserWorkMoments(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, opUserID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
@@ -233,7 +233,8 @@ func GetUserWorkMoments(c *gin.Context) {
 		PageNumber: req.PageNumber,
 		ShowNumber: req.ShowNumber,
 	}
-	reqPb.UserID = userID
+	reqPb.OpUserID = opUserID
+	reqPb.UserID = req.UserID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.GetUserWorkMoments(context.Background(), &reqPb)
@@ -242,11 +243,49 @@ func GetUserWorkMoments(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserWorkMoments rpc server failed" + err.Error()})
 		return
 	}
+	resp.Data.WorkMoments = []*apiStruct.WorkMoment{}
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	//if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
+	//	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	//}
+	for _, v := range respPb.WorkMoments {
+		workMoment := apiStruct.WorkMoment{
+			WorkMomentID: v.WorkMomentID,
+			UserID:       v.UserID,
+			Content:      v.Content,
+			FaceURL:      v.FaceURL,
+			UserName:     v.UserName,
+			CreateTime:   v.CreateTime,
+			Comments:     make([]*apiStruct.Comment, len(v.Comments)),
+			LikeUserList: make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
+			AtUserList:   make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
+		}
+		for i, comment := range v.Comments {
+			workMoment.Comments[i] = &apiStruct.Comment{
+				UserID:        comment.UserID,
+				UserName:      comment.UserName,
+				ReplyUserID:   comment.ReplyUserID,
+				ReplyUserName: comment.ReplyUserID,
+				ContentID:     comment.ContentID,
+				Content:       comment.Content,
+				CreateTime:    comment.CreateTime,
+			}
+		}
+		for i, likeUser := range v.LikeUserList {
+			workMoment.LikeUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   likeUser.UserID,
+				UserName: likeUser.UserName,
+			}
+		}
+		for i, atUser := range v.AtUserList {
+			workMoment.AtUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   atUser.UserID,
+				UserName: atUser.UserName,
+			}
+		}
+		resp.Data.WorkMoments = append(resp.Data.WorkMoments, &workMoment)
 	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
@@ -290,8 +329,46 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	//if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
+	//	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	//}
+	resp.Data.WorkMoments = []*apiStruct.WorkMoment{}
+	for _, v := range respPb.WorkMoments {
+		workMoment := apiStruct.WorkMoment{
+			WorkMomentID: v.WorkMomentID,
+			UserID:       v.UserID,
+			Content:      v.Content,
+			FaceURL:      v.FaceURL,
+			UserName:     v.UserName,
+			CreateTime:   v.CreateTime,
+			Comments:     make([]*apiStruct.Comment, len(v.Comments)),
+			LikeUserList: make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
+			AtUserList:   make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
+		}
+		for i, comment := range v.Comments {
+			workMoment.Comments[i] = &apiStruct.Comment{
+				UserID:        comment.UserID,
+				UserName:      comment.UserName,
+				ReplyUserID:   comment.ReplyUserID,
+				ReplyUserName: comment.ReplyUserID,
+				ContentID:     comment.ContentID,
+				Content:       comment.Content,
+				CreateTime:    comment.CreateTime,
+			}
+		}
+		for i, likeUser := range v.LikeUserList {
+			workMoment.LikeUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   likeUser.UserID,
+				UserName: likeUser.UserName,
+			}
+		}
+		for i, atUser := range v.AtUserList {
+			workMoment.AtUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   atUser.UserID,
+				UserName: atUser.UserName,
+			}
+		}
+		resp.Data.WorkMoments = append(resp.Data.WorkMoments, &workMoment)
 	}
 	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
 	resp.Data.CurrentPage = respPb.Pagination.CurrentPage

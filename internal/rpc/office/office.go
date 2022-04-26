@@ -280,23 +280,12 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	workMoment.UserName = createUser.Nickname
-	workMoment.FaceURL = createUser.FaceURL
 	if err := utils.CopyStructFields(&workMoment, req.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupIDList, req.WorkMoment.PermissionUserIDList)
-	for _, userID := range req.WorkMoment.AtUserIDList {
-		userName, err := imdb.GetUserNameByUserID(userID)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", userID, err.Error())
-			continue
-		}
-		workMoment.AtUserList = append(workMoment.AtUserList, &db.AtUser{
-			UserID:   userID,
-			UserName: userName,
-		})
-	}
+	workMoment.UserName = createUser.Nickname
+	workMoment.FaceURL = createUser.FaceURL
+	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
 	err = db.DB.CreateOneWorkMoment(&workMoment)
 	if err != nil {
@@ -306,7 +295,7 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	}
 
 	// send notification to at users
-	for _, atUser := range req.WorkMoment.AtUserIDList {
+	for _, atUser := range req.WorkMoment.AtUserList {
 		workMomentNotificationMsg := &pbOffice.WorkMomentNotificationMsg{
 			NotificationMsgType: constant.WorkMomentAtUserNotification,
 			WorkMomentID:        workMoment.WorkMomentID,
@@ -314,23 +303,28 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 			UserID:              workMoment.UserID,
 			FaceURL:             createUser.FaceURL,
 			UserName:            createUser.Nickname,
+			CreateTime:          workMoment.CreateTime,
 		}
-		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser, workMomentNotificationMsg)
+		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, atUser.UserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
 // count and distinct permission users
-func (s *officeServer) getPermissionUserIDList(operationID string, groupIDList, userIDList []string) []string {
+func (s *officeServer) getPermissionUserIDList(operationID string, groupList []*pbOffice.PermissionGroup, userList []*pbOffice.WorkMomentUser) []string {
 	var permissionUserIDList []string
-	for _, groupID := range groupIDList {
-		GroupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
+	for _, group := range groupList {
+		GroupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(group.GroupID)
 		if err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", groupID, err.Error())
+			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", group, err.Error())
 			continue
 		}
 		permissionUserIDList = append(permissionUserIDList, GroupMemberIDList...)
+	}
+	var userIDList []string
+	for _, user := range userList {
+		userIDList = append(userIDList, user.UserID)
 	}
 	permissionUserIDList = append(permissionUserIDList, userIDList...)
 	permissionUserIDList = utils.RemoveRepeatedStringInList(permissionUserIDList)
@@ -382,13 +376,13 @@ func isUserCanSeeWorkMoment(userID string, workMoment db.WorkMoment) bool {
 func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOneWorkMomentReq) (resp *pbOffice.LikeOneWorkMomentResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.LikeOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
-	userName, err := imdb.GetUserNameByUserID(req.UserID)
+	user, err := imdb.GetUserByUserID(req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	workMoment, err := db.DB.LikeOneWorkMoment(req.UserID, userName, req.WorkMomentID)
+	workMoment, like, err := db.DB.LikeOneWorkMoment(req.UserID, user.Nickname, req.WorkMomentID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "LikeOneWorkMoment failed ", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -398,10 +392,15 @@ func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOn
 		NotificationMsgType: constant.WorkMomentLikeNotification,
 		WorkMomentID:        workMoment.WorkMomentID,
 		WorkMomentContent:   workMoment.Content,
-		UserID:              workMoment.UserID,
+		UserID:              user.UserID,
+		FaceURL:             user.FaceURL,
+		UserName:            user.Nickname,
+		CreateTime:          int32(time.Now().Unix()),
 	}
 	// send notification
-	msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
+	if like {
+		msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
@@ -443,16 +442,13 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 		WorkMomentID:        workMoment.WorkMomentID,
 		WorkMomentContent:   workMoment.Content,
 		UserID:              workMoment.UserID,
-		Comment: &pbOffice.Comment{
-			UserID:        comment.UserID,
-			UserName:      comment.UserName,
-			FaceURL:       commentUser.FaceURL,
-			ReplyUserID:   comment.ReplyUserID,
-			ReplyUserName: comment.ReplyUserName,
-			ContentID:     comment.ContentID,
-			Content:       comment.Content,
-			CreateTime:    comment.CreateTime,
-		},
+		FaceURL:             workMoment.FaceURL,
+		UserName:            workMoment.UserName,
+		ReplyUserID:         comment.ReplyUserID,
+		ReplyUserName:       comment.ReplyUserName,
+		ContentID:           comment.ContentID,
+		Content:             comment.Content,
+		CreateTime:          comment.CreateTime,
 	}
 	msg.WorkMomentSendNotification(req.OperationID, req.UserID, workMoment.UserID, workMomentNotificationMsg)
 	if req.ReplyUserID != "" {
@@ -489,17 +485,21 @@ func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWor
 func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUserWorkMomentsReq) (resp *pbOffice.GetUserWorkMomentsResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.GetUserWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
-	//resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
-	workMoments, err := db.DB.GetUserWorkMoments(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
+	var workMoments []db.WorkMoment
+	if req.UserID == req.OpUserID {
+		workMoments, err = db.DB.GetUserSelfWorkMoments(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	} else {
+		workMoments, err = db.DB.GetUserWorkMoments(req.OpUserID, req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	}
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserWorkMoments failed", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
 	if err := utils.CopyStructFields(&resp.WorkMoments, workMoments); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
@@ -507,14 +507,16 @@ func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUs
 func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice.GetUserFriendWorkMomentsReq) (resp *pbOffice.GetUserFriendWorkMomentsResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.GetUserFriendWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
-	//resp.WorkMoments = make([]*pbOffice.WorkMoment, 0)
+	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
 	friendIDList, err := imdb.GetFriendIDListByUserID(req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetFriendIDListByUserID", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "friendIDList: ", friendIDList)
+	for _, friendID := range friendIDList {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), friendID)
+	}
 	workMoments, err := db.DB.GetUserFriendWorkMoments(friendIDList, req.Pagination.ShowNumber, req.Pagination.PageNumber, req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserFriendWorkMoments", err.Error())
@@ -524,7 +526,6 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 	if err := utils.CopyStructFields(&resp.WorkMoments, workMoments); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }

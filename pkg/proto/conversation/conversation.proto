@@ -1,0 +1,38 @@
+syntax = "proto3";
+option go_package = "./conversation;conversation";
+package conversation;
+
+message CommonResp{
+  int32  errCode = 1;
+  string errMsg = 2;
+}
+message Conversation{
+  string ownerUserID = 1;
+  string conversationID = 2;
+  int32 recvMsgOpt = 3;
+  int32 conversationType = 4;
+  string userID = 5;
+  string groupID = 6;
+  int32 unreadCount = 7;
+  int64 draftTextTime = 8;
+  bool isPinned = 9;
+  string attachedInfo = 10;
+  bool isPrivateChat = 11;
+  int32 groupAtType = 12;
+  bool isNotInGroup = 13;
+  string ex = 14;
+}
+message ModifyConversationFieldReq{
+  Conversation conversation = 1;
+  int32 fieldType = 2;
+  repeated string userIDList = 3;
+  string operationID = 4;
+}
+
+message ModifyConversationFieldResp{
+  CommonResp  commonResp = 1;
+}
+service conversation {
+  rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
+
+}

@@ -118,6 +118,8 @@ type config struct {
 		OpenImAdminCMSName           string `yaml:"openImAdminCMSName"`
 		OpenImOfficeName             string `yaml:"openImOfficeName"`
 		OpenImOrganizationName       string `yaml:"openImOrganizationName"`
+		OpenImConversationName       string `yaml:"openImConversationName"`
+		OpenImCacheName              string `yaml:"openImCacheName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
@@ -382,6 +384,11 @@ type config struct {
 				CloseTips string `yaml:"closeTips"`
 			} `yaml:"defaultTips"`
 		} `yaml:"conversationSetPrivate"`
+		WorkMomentsNotification struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"workMomentsNotification"`
 	}
 	Demo struct {
 		Port         []int `yaml:"openImDemoPort"`

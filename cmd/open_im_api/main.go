@@ -130,6 +130,7 @@ func main() {
 		conversationGroup.POST("/set_conversation", conversation.SetConversation)
 		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
 		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
+		conversationGroup.POST("/modify_conversation_field", conversation.ModifyConversationField)
 	}
 	// office
 	officeGroup := r.Group("/office")
@@ -174,7 +175,7 @@ func main() {
 	}
 
 	go apiThird.MinioInit()
-	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
+	ginPort := flag.Int("port", 10002, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
 	fmt.Println("start api server, port: ", *ginPort)
 	err := r.Run(":" + strconv.Itoa(*ginPort))

@@ -195,6 +195,13 @@ const (
 	WorkMomentLikeNotification    = 1
 	WorkMomentAtUserNotification  = 2
 )
+const (
+	AtAllString = "AtAllTag"
+	AtNormal    = 0
+	AtMe        = 1
+	AtAll       = 2
+	AtAllAtMe   = 3
+)
 
 var ContentType2PushContent = map[int64]string{
 	Picture:  "[图片]",
@@ -206,6 +213,16 @@ var ContentType2PushContent = map[int64]string{
 	GroupMsg: "你收到一条群聊消息",
 	Common:   "你收到一条新消息",
 }
+
+const (
+	FieldRecvMsgOpt    = 1
+	FieldIsPinned      = 2
+	FieldAttachedInfo  = 3
+	FieldIsPrivateChat = 4
+	FieldGroupAtType   = 5
+	FieldIsNotInGroup  = 6
+	FieldEx            = 7
+)
 
 const (
 	AppOrdinaryUsers = 1
