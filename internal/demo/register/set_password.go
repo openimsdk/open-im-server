@@ -53,7 +53,7 @@ func SetPassword(c *gin.Context) {
 			return
 		}
 	}
-	url := fmt.Sprintf("http://%s:10000/auth/user_register", utils.ServerIP)
+	url := fmt.Sprintf("http://%s:%d/auth/user_register", utils.ServerIP, config.Config.Api.GinPort[0])
 	openIMRegisterReq := api.UserRegisterReq{}
 	openIMRegisterReq.OperationID = params.OperationID
 	openIMRegisterReq.Platform = params.Platform
