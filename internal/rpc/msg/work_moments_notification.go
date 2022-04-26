@@ -10,12 +10,9 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-func WorkMomentSendNotification(operationID, sendID, recvID string, notificationMsg *pbOffice.WorkMomentNotificationMsg) {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), sendID, recvID, notificationMsg)
-	if sendID == recvID {
-		return
-	}
-	WorkMomentNotification(operationID, sendID, recvID, notificationMsg)
+func WorkMomentSendNotification(operationID, recvID string, notificationMsg *pbOffice.WorkMomentNotificationMsg) {
+	log.NewInfo(operationID, utils.GetSelfFuncName(), recvID, notificationMsg)
+	WorkMomentNotification(operationID, recvID, recvID, notificationMsg)
 }
 
 func WorkMomentNotification(operationID, sendID, recvID string, m proto.Message) {
