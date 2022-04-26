@@ -34,7 +34,7 @@ func main() {
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
 
-	log.Info("load config: ", config.Config)
+	log.Info("load  config: ", config.Config)
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
