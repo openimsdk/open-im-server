@@ -10,7 +10,7 @@ func main() {
 	rpcPort := flag.Int("port", 10600, "RpcToken default listen port 10800")
 	flag.Parse()
 	fmt.Println("start auth rpc server, port: ", *rpcPort)
-	rpcServer := rpcCache.NewOfficeServer(*rpcPort)
+	rpcServer := rpcCache.NewCacheServer(*rpcPort)
 	rpcServer.Run()
 
 }
