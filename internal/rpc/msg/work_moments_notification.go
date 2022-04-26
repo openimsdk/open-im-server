@@ -12,9 +12,9 @@ import (
 
 func WorkMomentSendNotification(operationID, sendID, recvID string, notificationMsg *pbOffice.WorkMomentNotificationMsg) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), sendID, recvID, notificationMsg)
-	//if sendID == recvID {
-	//	return
-	//}
+	if sendID == recvID {
+		return
+	}
 	WorkMomentNotification(operationID, sendID, recvID, notificationMsg)
 }
 
