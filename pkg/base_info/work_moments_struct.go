@@ -50,13 +50,10 @@ type WorkMoment struct {
 	Content      string            `json:"content"`
 	LikeUserList []*WorkMomentUser `json:"likeUsers"`
 	Comments     []*Comment        `json:"comments"`
-	FaceURL      string            `json:"faceUrl"`
+	FaceURL      string            `json:"faceURL"`
 	UserName     string            `json:"userName"`
-	//Permission            int32       `json:"permission"`
-	//PermissionUserIDList  []string    `json:"permissionUserIDList"`
-	//PermissionGroupIDList []string    `json:"permissionGroupIDList"`
-	AtUserList []*WorkMomentUser `json:"atUsers"`
-	CreateTime int32             `json:"createTime"`
+	AtUserList   []*WorkMomentUser `json:"atUsers"`
+	CreateTime   int32             `json:"createTime"`
 }
 
 type WorkMomentUser struct {
@@ -83,6 +80,7 @@ type GetWorkMomentByIDResp struct {
 
 type GetUserWorkMomentsReq struct {
 	WorkMomentsUserCommonReq
+	UserID string `json:"userID"`
 }
 
 type GetUserWorkMomentsResp struct {

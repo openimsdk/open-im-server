@@ -215,6 +215,16 @@ var ContentType2PushContent = map[int64]string{
 }
 
 const (
+	FieldRecvMsgOpt    = 1
+	FieldIsPinned      = 2
+	FieldAttachedInfo  = 3
+	FieldIsPrivateChat = 4
+	FieldGroupAtType   = 5
+	FieldIsNotInGroup  = 6
+	FieldEx            = 7
+)
+
+const (
 	AppOrdinaryUsers = 1
 	AppAdmin         = 2
 

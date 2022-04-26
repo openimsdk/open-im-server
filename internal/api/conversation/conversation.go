@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -34,6 +35,37 @@ func SetConversation(c *gin.Context) {
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.SetConversation(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetAllConversationMsgOpt rpc failed, " + err.Error()})
+		return
+	}
+	resp.ErrMsg = respPb.CommonResp.ErrMsg
+	resp.ErrCode = respPb.CommonResp.ErrCode
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+func ModifyConversationField(c *gin.Context) {
+	var (
+		req   api.ModifyConversationFieldReq
+		resp  api.ModifyConversationFieldResp
+		reqPb pbConversation.ModifyConversationFieldReq
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
+		return
+	}
+	reqPb.Conversation = &pbConversation.Conversation{}
+	err := utils.CopyStructFields(&reqPb, req)
+	err = utils.CopyStructFields(reqPb.Conversation, req.Conversation)
+	if err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+	client := pbConversation.NewConversationClient(etcdConn)
+	respPb, err := client.ModifyConversationField(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "GetAllConversationMsgOpt rpc failed, " + err.Error()})

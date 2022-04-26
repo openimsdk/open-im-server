@@ -206,7 +206,7 @@ func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 func VerifyToken(token, uid string) (bool, error) {
 	claims, err := ParseToken(token, "")
 	if err != nil {
-		return false, err
+		return false, utils.Wrap(err, "ParseToken failed")
 	}
 	if claims.UID != uid {
 		return false, &constant.ErrTokenUnknown
@@ -215,8 +215,8 @@ func VerifyToken(token, uid string) (bool, error) {
 	log.NewDebug("", claims.UID, claims.Platform)
 	return true, nil
 }
-func WsVerifyToken(token, uid string, platformID string) (bool, error, string) {
-	claims, err := ParseToken(token, "")
+func WsVerifyToken(token, uid string, platformID string, operationID string) (bool, error, string) {
+	claims, err := ParseToken(token, operationID)
 	if err != nil {
 		return false, utils.Wrap(err, "parse token err"), "parse token err"
 	}
@@ -226,6 +226,6 @@ func WsVerifyToken(token, uid string, platformID string) (bool, error, string) {
 	if claims.Platform != constant.PlatformIDToName(utils.StringToInt32(platformID)) {
 		return false, utils.Wrap(&constant.ErrTokenUnknown, "platform is not same to token platform"), "platform is not same to token platform"
 	}
-	log.NewDebug("", claims.UID, claims.Platform)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), " check ok ", claims.UID, uid, claims.Platform)
 	return true, nil, ""
 }

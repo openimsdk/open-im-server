@@ -3,6 +3,8 @@ package db
 import (
 	"Open_IM/pkg/common/constant"
 	log2 "Open_IM/pkg/common/log"
+	pbCommon "Open_IM/pkg/proto/sdk_ws"
+	"encoding/json"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -15,6 +17,7 @@ const (
 	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
 	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
 	GetuiToken                    = "GETUI"
+	UserInfoCache                 = "USER_INFO_CACHE:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -154,4 +157,24 @@ func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
 func (d *DataBases) GetGetuiToken() (string, error) {
 	result, err := redis.String(d.Exec("GET", GetuiToken))
 	return result, err
+}
+
+func (d *DataBases) SetUserInfo(userInfo *pbCommon.UserInfo) error {
+	b, _ := json.Marshal(&userInfo)
+	m := map[string]interface{}{}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	_, err := d.Exec("hmset", UserInfoCache+userInfo.UserID, redis.Args{}.Add().AddFlat(m)...)
+	return err
+}
+
+func (d *DataBases) GetUserInfo(userID string) (*pbCommon.UserInfo, error) {
+	result, err := redis.String(d.Exec("HGETALL", UserInfoCache+userID))
+	if err != nil {
+		return nil, err
+	}
+	userInfo := &pbCommon.UserInfo{}
+	err = json.Unmarshal([]byte(result), userInfo)
+	return userInfo, err
 }
