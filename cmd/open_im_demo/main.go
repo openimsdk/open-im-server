@@ -23,7 +23,7 @@ func main() {
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
 
-	authRouterGroup := r.Group("/auth")
+	authRouterGroup := r.Group("/demo")
 	{
 		authRouterGroup.POST("/code", register.SendVerificationCode)
 		authRouterGroup.POST("/verify", register.Verify)
