@@ -398,7 +398,7 @@ func (s *officeServer) LikeOneWorkMoment(_ context.Context, req *pbOffice.LikeOn
 		CreateTime:          int32(time.Now().Unix()),
 	}
 	// send notification
-	if like {
+	if like && workMoment.UserID != req.UserID {
 		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
@@ -450,7 +450,9 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 		Content:             comment.Content,
 		CreateTime:          comment.CreateTime,
 	}
-	msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
+	if req.UserID != workMoment.UserID {
+		msg.WorkMomentSendNotification(req.OperationID, workMoment.UserID, workMomentNotificationMsg)
+	}
 	if req.ReplyUserID != "" {
 		msg.WorkMomentSendNotification(req.OperationID, req.ReplyUserID, workMomentNotificationMsg)
 	}
