@@ -3,6 +3,8 @@
 source ./style_info.cfg
 source ./path_info.cfg
 source ./function.sh
+ulimit -n 200000
+
 list1=$(cat $config_path | grep openImApiPort | awk -F '[:]' '{print $NF}')
 list2=$(cat $config_path | grep openImWsPort | awk -F '[:]' '{print $NF}')
 list3=$(cat $config_path | grep openImSdkWsPort | awk -F '[:]' '{print $NF}')
