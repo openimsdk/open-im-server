@@ -113,8 +113,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
 rpcport: #rpc服务端口 默认即可
   openImUserPort: [ 10110 ]
   openImFriendPort: [ 10120 ]
-  openImOfflineMessagePort: [ 10130 ]
-  openImOnlineRelayPort: [ 10140 ]
+  openImMessagePort: [ 10130 ]
+  openImMessageGatewayPort: [ 10140 ]
   openImGroupPort: [ 10150 ]
   openImAuthPort: [ 10160 ]
   openImPushPort: [ 10170 ]
@@ -123,6 +123,8 @@ rpcport: #rpc服务端口 默认即可
   openImAdminCmsPort: [ 10200 ]
   openImOfficePort: [ 10210 ]
   openImOrganizationPort: [ 10220 ]
+  openImConversationPort: [ 10230 ]
+  openImCachePort: [10240]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -146,6 +148,8 @@ rpcregistername: #rpc注册服务名，默认即可
   openImAdminCMSName: AdminCMS
   openImOfficeName: Office
   openImOrganizationName: Organization
+  openImConversationName: Conversation
+  openImCacheName: Cache
 
 log:
   storageLocation: ../logs/

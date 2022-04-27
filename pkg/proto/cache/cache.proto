@@ -1,0 +1,78 @@
+syntax = "proto3";
+import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "./cache;cache";
+package cache;
+
+message CommonResp{
+  int32  errCode = 1;
+  string errMsg = 2;
+}
+
+message GetUserInfoReq{
+  repeated string userIDList = 1;
+  string operationID = 3;
+}
+
+message GetUserInfoResp{
+  CommonResp  commonResp = 1;
+  repeated server_api_params.UserInfo userInfoList = 2;
+}
+
+
+message UpdateUserInfoReq{
+  repeated server_api_params.UserInfo userInfoList = 1;
+  string operationID = 2;
+}
+
+message UpdateUserInfoResp{
+  CommonResp commonResp = 1;
+}
+
+message GetFriendInfoReq {
+  string userID = 1;
+  string operationID = 2;
+}
+
+message GetFriendInfoResp {
+  repeated server_api_params.FriendInfo friendInfoList = 1;
+  CommonResp commonResp = 2;
+}
+
+message UpdateBlackListReq {
+  repeated server_api_params.BlackInfo blackList = 1;
+  string operationID = 2;
+}
+
+message UpdateBlackListResp {
+  CommonResp commonResp = 1;
+}
+
+message GetBlackListReq {
+  string userID = 1;
+  string operationID = 2;
+}
+
+message GetBlackListResp {
+  repeated server_api_params.BlackInfo blackList = 1;
+}
+
+
+message UpdateFriendInfoReq{
+  repeated server_api_params.FriendInfo friendInfoList = 1;
+  string operationID = 2;
+}
+
+message UpdateFriendInfoResp{
+  CommonResp commonResp = 1;
+}
+
+service cache{
+  rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
+  rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
+  rpc GetFriendInfo(GetFriendInfoReq) returns(GetFriendInfoResp);
+  rpc UpdateFriendInfo(UpdateFriendInfoReq) returns(UpdateFriendInfoResp);
+  rpc UpdateBlackList(UpdateBlackListReq) returns(UpdateBlackListResp);
+  rpc GetBlackList(GetBlackListReq) returns(GetBlackListResp);
+}
+
+

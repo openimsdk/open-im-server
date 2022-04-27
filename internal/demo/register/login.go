@@ -42,11 +42,11 @@ func Login(c *gin.Context) {
 		return
 	}
 	if r.Password != params.Password {
-		log.NewError(params.OperationID, "password err", params.Password, account, r.Password, r.Account)
+		log.NewError(params.OperationID, "password  err", params.Password, account, r.Password, r.Account)
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.PasswordErr, "errMsg": "password err"})
 		return
 	}
-	url := fmt.Sprintf("http://%s:10000/auth/user_token", utils.ServerIP)
+	url := fmt.Sprintf("http://%s:%d/auth/user_token", utils.ServerIP, config.Config.Api.GinPort[0])
 	openIMGetUserToken := api.UserTokenReq{}
 	openIMGetUserToken.OperationID = params.OperationID
 	openIMGetUserToken.Platform = params.Platform

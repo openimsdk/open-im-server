@@ -34,7 +34,7 @@ func main() {
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
 
-	log.Info("load config: ", config.Config)
+	log.Info("load  config: ", config.Config)
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
@@ -42,6 +42,7 @@ func main() {
 		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)                  //1
 		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
 		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
+		userRouterGroup.POST("/get_users_info_from_cache", user.GetUsersInfoFromCache)
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
@@ -129,6 +130,7 @@ func main() {
 		conversationGroup.POST("/set_conversation", conversation.SetConversation)
 		conversationGroup.POST("/batch_set_conversation", conversation.BatchSetConversations)
 		conversationGroup.POST("/set_recv_msg_opt", conversation.SetRecvMsgOpt)
+		conversationGroup.POST("/modify_conversation_field", conversation.ModifyConversationField)
 	}
 	// office
 	officeGroup := r.Group("/office")
@@ -173,7 +175,7 @@ func main() {
 	}
 
 	go apiThird.MinioInit()
-	ginPort := flag.Int("port", 10000, "get ginServerPort from cmd,default 10000 as port")
+	ginPort := flag.Int("port", 10002, "get ginServerPort from cmd,default 10000 as port")
 	flag.Parse()
 	fmt.Println("start api server, port: ", *ginPort)
 	err := r.Run(":" + strconv.Itoa(*ginPort))
