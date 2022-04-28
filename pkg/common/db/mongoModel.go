@@ -692,7 +692,7 @@ func (d *DataBases) GetUserWorkMoments(opUserID, userID string, showNumber, page
 	return workMomentList, err
 }
 
-func (d *DataBases) GetUserFriendWorkMoments(friendIDList []string, showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
+func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
@@ -700,7 +700,7 @@ func (d *DataBases) GetUserFriendWorkMoments(friendIDList []string, showNumber, 
 	result, err := c.Find(ctx, bson.D{
 		{"$or", bson.A{
 			bson.D{{"user_id", userID}}, //self
-			bson.D{{"user_id", bson.D{{"$in", friendIDList}}},
+			bson.D{
 				{"$or", bson.A{
 					bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {"permission_user_id_list", bson.D{{"$nin", bson.A{userID}}}}},
 					bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {"permission_user_id_list", bson.D{{"$in", bson.A{userID}}}}},

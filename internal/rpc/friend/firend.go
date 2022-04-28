@@ -262,10 +262,10 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
 	client := pbCache.NewCacheClient(etcdConn)
 	addFriendToCacheReq.UserID = req.CommID.ToUserID
-	addFriendToCacheReq.UserID = req.CommID.FromUserID
+	addFriendToCacheReq.FriendID = req.CommID.FromUserID
 	respPb, err := client.AddFriendToCache(context.Background(), addFriendToCacheReq)
 	addFriendToCacheReq.UserID = req.CommID.FromUserID
-	addFriendToCacheReq.UserID = req.CommID.ToUserID
+	addFriendToCacheReq.FriendID = req.CommID.ToUserID
 	respPb, err = client.AddFriendToCache(context.Background(), addFriendToCacheReq)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "AddFriendToCache failed", err.Error())
