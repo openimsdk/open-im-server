@@ -165,13 +165,8 @@ func (d *DataBases) SearchContentType() {
 
 }
 
-func (d *DataBases) SetUserInfoToCache(userInfo *pbCommon.UserInfo) error {
-	b, _ := json.Marshal(&userInfo)
-	m := map[string]interface{}{}
-	if err := json.Unmarshal(b, &m); err != nil {
-		return err
-	}
-	_, err := d.Exec("hmset", userInfoCache+userInfo.UserID, redis.Args{}.Add().AddFlat(m)...)
+func (d *DataBases) SetUserInfoToCache(userID string, m map[string]interface{}) error {
+	_, err := d.Exec("hmset", userInfoCache+userID, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
 

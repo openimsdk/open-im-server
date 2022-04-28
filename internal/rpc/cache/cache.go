@@ -78,7 +78,7 @@ func SyncDB2Cache() error {
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	err = updateAllUserToCache(userList)
+	//err = updateAllUserToCache(userList)
 	err = updateAllFriendToCache(userList)
 	err = updateAllBlackListToCache(userList)
 	return err
@@ -98,7 +98,11 @@ func updateAllUserToCache(userList []db.User) error {
 			CreateTime:     uint32(userInfo.CreateTime.Unix()),
 			AppMangerLevel: userInfo.AppMangerLevel,
 		}
-		if err := db.DB.SetUserInfoToCache(userInfoPb); err != nil {
+		m, err := utils.Pb2Map(userInfoPb)
+		if err != nil {
+			log.NewError("", utils.GetSelfFuncName(), err.Error())
+		}
+		if err := db.DB.SetUserInfoToCache(userInfo.UserID, m); err != nil {
 			log.NewError("0", utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
 		}
 	}
@@ -161,7 +165,11 @@ func (s *cacheServer) UpdateUserInfoToCache(_ context.Context, req *pbCache.Upda
 		CommonResp: &pbCache.CommonResp{},
 	}
 	for _, userInfo := range req.UserInfoList {
-		if err := db.DB.SetUserInfoToCache(userInfo); err != nil {
+		m, err := utils.Pb2Map(userInfo)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), *userInfo)
+		}
+		if err := db.DB.SetUserInfoToCache(userInfo.UserID, m); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
 		}
 	}
@@ -177,11 +185,11 @@ func (s *cacheServer) GetFriendIDListFromCache(_ context.Context, req *pbCache.G
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetFriendIDListFromCache", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
-		return
+		return resp, nil
 	}
 	resp.UserIDList = friendIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return nil, nil
+	return resp, nil
 }
 
 func (s *cacheServer) AddFriendToCache(_ context.Context, req *pbCache.AddFriendToCacheReq) (resp *pbCache.AddFriendToCacheResp, err error) {
@@ -207,7 +215,7 @@ func (s *cacheServer) ReduceFriendFromCache(_ context.Context, req *pbCache.Redu
 		return resp, nil
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return nil, nil
+	return resp, nil
 }
 
 func (s *cacheServer) GetBlackIDListFromCache(_ context.Context, req *pbCache.GetBlackIDListFromCacheReq) (resp *pbCache.GetBlackIDListFromCacheResp, err error) {
@@ -222,7 +230,7 @@ func (s *cacheServer) GetBlackIDListFromCache(_ context.Context, req *pbCache.Ge
 	}
 	resp.UserIDList = blackUserIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return nil, nil
+	return resp, nil
 }
 
 func (s *cacheServer) AddBlackUserToCache(_ context.Context, req *pbCache.AddBlackUserToCacheReq) (resp *pbCache.AddBlackUserToCacheResp, err error) {
@@ -248,5 +256,5 @@ func (s *cacheServer) ReduceBlackUserFromCache(_ context.Context, req *pbCache.R
 		return resp, nil
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return nil, nil
+	return resp, nil
 }
