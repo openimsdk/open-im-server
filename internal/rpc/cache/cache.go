@@ -187,6 +187,7 @@ func (s *cacheServer) GetFriendIDListFromCache(_ context.Context, req *pbCache.G
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), friendIDList)
 	resp.UserIDList = friendIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -228,6 +229,7 @@ func (s *cacheServer) GetBlackIDListFromCache(_ context.Context, req *pbCache.Ge
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), blackUserIDList)
 	resp.UserIDList = blackUserIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
