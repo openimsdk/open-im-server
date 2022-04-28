@@ -60,6 +60,16 @@ func DeleteUser(userID string) (i int64) {
 	return i
 }
 
+func GetAllUser() ([]db.User, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	var userList []db.User
+	err = dbConn.Table("users").Find(&userList).Error
+	return userList, err
+}
+
 func GetUserByUserID(userID string) (*db.User, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {

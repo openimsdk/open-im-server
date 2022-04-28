@@ -32,3 +32,21 @@ type GetSelfUserInfoResp struct {
 	UserInfo *open_im_sdk.UserInfo  `json:"-"`
 	Data     map[string]interface{} `json:"data"`
 }
+
+type GetFriendIDListFromCacheReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type GetFriendIDListFromCacheResp struct {
+	CommResp
+	UserIDList []string `json:"userIDList" binding:"required"`
+}
+
+type GetBlackIDListFromCacheReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type GetBlackIDListFromCacheResp struct {
+	CommResp
+	UserIDList []string `json:"userIDList" binding:"required"`
+}

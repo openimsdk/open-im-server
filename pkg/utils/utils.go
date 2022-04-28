@@ -1,6 +1,10 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/json"
+	"github.com/gogo/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"math/rand"
@@ -130,4 +134,19 @@ func RemoveRepeatedStringInList(slc []string) []string {
 		}
 	}
 	return result
+}
+
+func Pb2Map(pb proto.Message) (map[string]interface{}, error) {
+	_buffer := bytes.Buffer{}
+	jsonbMarshaller := &jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  true,
+		EmitDefaults: true,
+	}
+	_ = jsonbMarshaller.Marshal(&_buffer, pb)
+	jsonCnt := _buffer.Bytes()
+	var out map[string]interface{}
+	err := json.Unmarshal(jsonCnt, &out)
+
+	return out, err
 }

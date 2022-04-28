@@ -56,3 +56,16 @@ func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
 	}
 	return blackListUsersInfo, nil
 }
+
+func GetBlackIDListByUserID(ownerUserID string) ([]string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	var blackIDList []string
+	err = dbConn.Table("blacks").Where("owner_user_id=?", ownerUserID).Pluck("block_user_id", &blackIDList).Error
+	if err != nil {
+		return nil, err
+	}
+	return blackIDList, nil
+}

@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	cacheRpc "Open_IM/pkg/proto/cache"
 	pbRelay "Open_IM/pkg/proto/relay"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	rpc "Open_IM/pkg/proto/user"
@@ -17,6 +18,44 @@ import (
 	"net/http"
 	"strings"
 )
+
+func GetUsersInfoFromCache(c *gin.Context) {
+	params := api.GetUsersInfoReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.GetUserInfoReq{}
+	utils.CopyStructFields(req, &params)
+	var ok bool
+	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	log.NewInfo(params.OperationID, "GetUserInfo args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	client := rpc.NewUserClient(etcdConn)
+	RpcResp, err := client.GetUserInfo(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "GetUserInfo failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+	var publicUserInfoList []*open_im_sdk.PublicUserInfo
+	for _, v := range RpcResp.UserInfoList {
+		publicUserInfoList = append(publicUserInfoList,
+			&open_im_sdk.PublicUserInfo{UserID: v.UserID, Nickname: v.Nickname, FaceURL: v.FaceURL, Gender: v.Gender, Ex: v.Ex})
+	}
+
+	resp := api.GetUsersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: publicUserInfoList}
+	resp.Data = jsonData.JsonDataList(resp.UserInfoList)
+	log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
 
 //func GetUsersInfoFromCache(c *gin.Context) {
 //	params := api.GetUsersInfoReq{}
@@ -35,13 +74,13 @@ import (
 //		return
 //	}
 //	log.NewInfo(params.OperationID, "GetUserInfo args ", getUserInfoReq.String())
-//	reqCacheGetUserInfo := &cacheRpc.GetUserInfoReq{}
+//	reqCacheGetUserInfo := &cacheRpc.GetUserInfoFromCacheReq{}
 //	utils.CopyStructFields(reqCacheGetUserInfo, &params)
 //	var userInfoList []*open_im_sdk.UserInfo
 //	var publicUserInfoList []*open_im_sdk.PublicUserInfo
 //	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
 //	cacheClient := cacheRpc.NewCacheClient(etcdConn)
-//	cacheResp, err := cacheClient.GetUserInfo(context.Background(), reqCacheGetUserInfo)
+//	cacheResp, err := cacheClient.GetUserInfoFromCache(context.Background(), reqCacheGetUserInfo)
 //	if err != nil {
 //		log.NewError(getUserInfoReq.OperationID, utils.GetSelfFuncName(), "GetUserInfo failed", err.Error())
 //		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed: " + err.Error()})
@@ -101,11 +140,11 @@ import (
 //		return
 //	}
 //	userInfoList = append(userInfoList, rpcResp.UserInfoList...)
-//	cacheUpdateUserInfoReq := &cacheRpc.UpdateUserInfoReq{
+//	cacheUpdateUserInfoReq := &cacheRpc.UpdateUserInfoToCacheReq{
 //		UserInfoList: rpcResp.UserInfoList,
 //		OperationID:  getUserInfoReq.OperationID,
 //	}
-//	_, err = cacheClient.UpdateUserInfo(context.Background(), cacheUpdateUserInfoReq)
+//	_, err = cacheClient.UpdateUserInfoToCache(context.Background(), cacheUpdateUserInfoReq)
 //	if err != nil {
 //		log.NewError(getUserInfoReq.OperationID, "GetUserInfo failed ", err.Error())
 //		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed:" + err.Error()})
@@ -122,50 +161,70 @@ import (
 //	c.JSON(http.StatusOK, resp)
 //}
 
-func GetUsersInfoFromCache(c *gin.Context) {
-	params := api.GetUsersInfoReq{}
-	if err := c.BindJSON(&params); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
+func GetFriendIDListFromCache(c *gin.Context) {
+	var (
+		req    api.GetFriendIDListFromCacheReq
+		resp   api.GetFriendIDListFromCacheResp
+		reqPb  cacheRpc.GetFriendIDListFromCacheReq
+		respPb *cacheRpc.GetFriendIDListFromCacheResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.GetUserInfoReq{}
-	utils.CopyStructFields(req, &params)
+	reqPb.OperationID = req.OperationID
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, reqPb.UserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
 		return
 	}
-	log.NewInfo(params.OperationID, "GetUserInfo args ", req.String())
-
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
-	client := rpc.NewUserClient(etcdConn)
-	RpcResp, err := client.GetUserInfo(context.Background(), req)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	client := cacheRpc.NewCacheClient(etcdConn)
+	respPb, err := client.GetFriendIDListFromCache(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(req.OperationID, "GetUserInfo failed ", err.Error(), req.String())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetFriendIDListFromCache", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed:" + err.Error()})
 		return
 	}
-	var publicUserInfoList []*open_im_sdk.PublicUserInfo
-	for _, v := range RpcResp.UserInfoList {
-		publicUserInfoList = append(publicUserInfoList,
-			&open_im_sdk.PublicUserInfo{UserID: v.UserID, Nickname: v.Nickname, FaceURL: v.FaceURL, Gender: v.Gender, Ex: v.Ex})
-	}
-
-	resp := api.GetUsersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, UserInfoList: publicUserInfoList}
-	resp.Data = jsonData.JsonDataList(resp.UserInfoList)
-	log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
+	resp.UserIDList = respPb.UserIDList
+	resp.CommResp = api.CommResp{ErrMsg: respPb.CommonResp.ErrMsg, ErrCode: respPb.CommonResp.ErrCode}
 	c.JSON(http.StatusOK, resp)
 }
 
-func GetUserFriendFromCache(c *gin.Context) {
-
-}
-
-func GetBlackListFromCache(c *gin.Context) {
-
+func GetBlackIDListFromCache(c *gin.Context) {
+	var (
+		req    api.GetBlackIDListFromCacheReq
+		resp   api.GetBlackIDListFromCacheResp
+		reqPb  cacheRpc.GetBlackIDListFromCacheReq
+		respPb *cacheRpc.GetBlackIDListFromCacheResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
+		return
+	}
+	reqPb.OperationID = req.OperationID
+	var ok bool
+	ok, reqPb.UserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	client := cacheRpc.NewCacheClient(etcdConn)
+	respPb, err := client.GetBlackIDListFromCache(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetFriendIDListFromCache", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed:" + err.Error()})
+		return
+	}
+	resp.UserIDList = respPb.UserIDList
+	resp.CommResp = api.CommResp{ErrMsg: respPb.CommonResp.ErrMsg, ErrCode: respPb.CommonResp.ErrCode}
+	c.JSON(http.StatusOK, resp)
 }
 
 func GetUsersInfo(c *gin.Context) {

@@ -37,7 +37,7 @@ type AtContent struct {
 func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingleMsgToUser
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
-	log.Debug("Get msg from msg_transfer And push msg", pushMsg.OperationID, "PushData", pushMsg.String())
+	log.Debug(pushMsg.OperationID, "Get msg from msg_transfer And push msg", pushMsg.String())
 	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
 	//Online push message
 	log.Debug("test", pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
@@ -45,14 +45,14 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		msgClient := pbRelay.NewOnlineMessageRelayServiceClient(v)
 		reply, err := msgClient.OnlinePushMsg(context.Background(), &pbRelay.OnlinePushMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserID: pushMsg.PushToUserID})
 		if err != nil {
-			log.InfoByKv("push data to client rpc err", pushMsg.OperationID, "err", err)
+			log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
 			continue
 		}
 		if reply != nil && reply.Resp != nil {
 			wsResult = append(wsResult, reply.Resp...)
 		}
 	}
-	log.InfoByKv("push_result", pushMsg.OperationID, "result", wsResult, "sendData", pushMsg.MsgData)
+	log.NewInfo(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData)
 	count++
 	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
 		for _, v := range wsResult {
