@@ -87,8 +87,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     appID: 1302656840
     region: ap-chengdu
     bucket: echat-1302656840
-    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
-    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
+    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC1
+    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe1
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim
     location: us-east-1
