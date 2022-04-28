@@ -134,7 +134,7 @@ func updateAllBlackListToCache(userList []db.User) error {
 			log.NewError("", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList); err != nil {
+		if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		}
 	}
