@@ -6,7 +6,6 @@ import (
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"encoding/json"
 	"github.com/garyburd/redigo/redis"
-	"strings"
 )
 
 const (
@@ -193,8 +192,12 @@ func (d *DataBases) ReduceFriendToCache(userID string, friendIDList ...interface
 }
 
 func (d *DataBases) GetFriendIDListFromCache(userID string) ([]string, error) {
-	result, err := redis.String(d.Exec("SMEMBERS", friendRelationCache+userID))
-	return strings.Split(result, " "), err
+	result, err := redis.Values(d.Exec("SMEMBERS", friendRelationCache+userID))
+	var userIDList []string
+	for _, v := range result {
+		userIDList = append(userIDList, v.(string))
+	}
+	return userIDList, err
 }
 
 func (d *DataBases) AddBlackUserToCache(userID string, blackList ...interface{}) error {
@@ -208,6 +211,10 @@ func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...interfa
 }
 
 func (d *DataBases) GetBlackListFromCache(userID string) ([]string, error) {
-	result, err := redis.String(d.Exec("SMEMBERS", blackListCache+userID))
-	return strings.Split(result, " "), err
+	result, err := redis.Values(d.Exec("SMEMBERS", blackListCache+userID))
+	var userIDList []string
+	for _, v := range result {
+		userIDList = append(userIDList, v.(string))
+	}
+	return userIDList, err
 }
