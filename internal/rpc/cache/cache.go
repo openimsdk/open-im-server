@@ -195,7 +195,7 @@ func (s *cacheServer) GetFriendIDListFromCache(_ context.Context, req *pbCache.G
 func (s *cacheServer) AddFriendToCache(_ context.Context, req *pbCache.AddFriendToCacheReq) (resp *pbCache.AddFriendToCacheResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbCache.AddFriendToCacheResp{CommonResp: &pbCache.CommonResp{}}
-	if err := db.DB.AddFriendToCache(req.UserID, []string{req.FriendID}); err != nil {
+	if err := db.DB.AddFriendToCache(req.UserID, req.FriendID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddFriendToCache failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
@@ -236,7 +236,7 @@ func (s *cacheServer) GetBlackIDListFromCache(_ context.Context, req *pbCache.Ge
 func (s *cacheServer) AddBlackUserToCache(_ context.Context, req *pbCache.AddBlackUserToCacheReq) (resp *pbCache.AddBlackUserToCacheResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbCache.AddBlackUserToCacheResp{CommonResp: &pbCache.CommonResp{}}
-	if err := db.DB.AddBlackUserToCache(req.UserID, []string{req.BlackUserID}); err != nil {
+	if err := db.DB.AddBlackUserToCache(req.UserID, req.BlackUserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
@@ -249,7 +249,7 @@ func (s *cacheServer) AddBlackUserToCache(_ context.Context, req *pbCache.AddBla
 func (s *cacheServer) ReduceBlackUserFromCache(_ context.Context, req *pbCache.ReduceBlackUserFromCacheReq) (resp *pbCache.ReduceBlackUserFromCacheResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbCache.ReduceBlackUserFromCacheResp{CommonResp: &pbCache.CommonResp{}}
-	if err := db.DB.ReduceBlackUserFromCache(req.UserID, []string{req.BlackUserID}); err != nil {
+	if err := db.DB.ReduceBlackUserFromCache(req.UserID, req.BlackUserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
