@@ -6,9 +6,9 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	cacheRpc "Open_IM/pkg/proto/cache"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbConversation "Open_IM/pkg/proto/conversation"
-	rpc "Open_IM/pkg/proto/friend"
 	pbGroup "Open_IM/pkg/proto/group"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -48,36 +48,38 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 		return true, 0, ""
 	}
 	log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
-	req := &rpc.IsInBlackListReq{CommID: &rpc.CommID{}}
-	req.CommID.OperationID = data.OperationID
-	req.CommID.OpUserID = data.MsgData.RecvID
-	req.CommID.FromUserID = data.MsgData.RecvID
-	req.CommID.ToUserID = data.MsgData.SendID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	client := rpc.NewFriendClient(etcdConn)
-	reply, err := client.IsInBlackList(context.Background(), req)
+	reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := cacheRpc.NewCacheClient(etcdConn)
+	cacheResp, err := cacheClient.GetBlackIDListFromCache(context.Background(), reqGetBlackIDListFromCache)
 	if err != nil {
-		log.NewDebug(data.OperationID, "IsInBlackListReq rpc failed, ", req.String(), err.Error())
-	} else if reply.Response == true {
-		log.NewDebug(data.OperationID, "IsInBlackListReq  ", req.String())
-		return false, 600, "in black list"
+		log.NewError(data.OperationID, "GetBlackIDListFromCache rpc call failed ", err.Error())
+	} else {
+		if cacheResp.CommonResp.ErrCode != 0 {
+			log.NewError(data.OperationID, "GetBlackIDListFromCache rpc logic call failed ", cacheResp.String())
+		} else {
+			if utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
+				return false, 600, "in black list"
+			}
+		}
 	}
 	log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 	if config.Config.MessageVerify.FriendVerify {
-		friendReq := &rpc.IsFriendReq{CommID: &rpc.CommID{}}
-		friendReq.CommID.OperationID = data.OperationID
-		friendReq.CommID.OpUserID = data.MsgData.RecvID
-		friendReq.CommID.FromUserID = data.MsgData.RecvID
-		friendReq.CommID.ToUserID = data.MsgData.SendID
-		friendReply, err := client.IsFriend(context.Background(), friendReq)
+		reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		cacheClient := cacheRpc.NewCacheClient(etcdConn)
+		cacheResp, err := cacheClient.GetFriendIDListFromCache(context.Background(), reqGetFriendIDListFromCache)
 		if err != nil {
-			log.NewDebug(data.OperationID, "IsFriendReq rpc failed, ", req.String(), err.Error())
-			return true, 0, ""
-		} else if friendReply.Response == false {
-			log.NewDebug(data.OperationID, "not friend  ", req.String())
-			return friendReply.Response, 601, "not friend"
+			log.NewError(data.OperationID, "GetFriendIDListFromCache rpc call failed ", err.Error())
+		} else {
+			if cacheResp.CommonResp.ErrCode != 0 {
+				log.NewError(data.OperationID, "GetFriendIDListFromCache rpc logic call failed ", cacheResp.String())
+			} else {
+				if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
+					return false, 601, "not friend"
+				}
+			}
 		}
-		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify, friendReply.Response)
 		return true, 0, ""
 	} else {
 		return true, 0, ""

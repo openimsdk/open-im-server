@@ -222,7 +222,7 @@ func (s *cacheServer) GetBlackIDListFromCache(_ context.Context, req *pbCache.Ge
 	}
 	resp.UserIDList = blackUserIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return nil, nil
+	return resp, nil
 }
 
 func (s *cacheServer) AddBlackUserToCache(_ context.Context, req *pbCache.AddBlackUserToCacheReq) (resp *pbCache.AddBlackUserToCacheResp, err error) {
