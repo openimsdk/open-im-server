@@ -19,3 +19,5 @@ func main() {
 	fmt.Println("start cms api server, port: ", ginPort)
 	router.Run(":" + strconv.Itoa(*ginPort))
 }
+
+//
