@@ -14,6 +14,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"strings"
+	"time"
 )
 
 type fcb func(msg []byte, msgKey string)
@@ -38,7 +39,7 @@ func (mc *HistoryConsumerHandler) Init() {
 }
 
 func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
-	time := utils.GetCurrentTimestampByNano()
+	now := time.Now()
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
 	if err != nil {
@@ -62,13 +63,13 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				return
 			}
 			mc.singleMsgCount++
-			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", utils.GetCurrentTimestampByNano()-time)
+			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", time.Since(now))
 		}
 		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
 		} else {
 			go sendMessageToPush(&msgFromMQ, msgKey)
 		}
-		log.NewDebug(operationID, "saveUserChat cost time ", utils.GetCurrentTimestampByNano()-time)
+		log.NewDebug(operationID, "saveUserChat cost time ", time.Since(now))
 	case constant.GroupChatType:
 		log.NewDebug(msgFromMQ.OperationID, "msg_transfer msg type = GroupChatType", isHistory, isPersist)
 		if isHistory {
@@ -89,13 +90,13 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				return
 			}
 			mc.singleMsgCount++
-			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", utils.GetCurrentTimestampByNano()-time)
+			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", time.Since(now))
 		}
 		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
 		} else {
 			go sendMessageToPush(&msgFromMQ, msgKey)
 		}
-		log.NewDebug(operationID, "saveUserChat cost time ", utils.GetCurrentTimestampByNano()-time)
+		log.NewDebug(operationID, "saveUserChat cost time ", time.Since(now))
 	default:
 		log.NewError(msgFromMQ.OperationID, "SessionType error", msgFromMQ.String())
 		return
