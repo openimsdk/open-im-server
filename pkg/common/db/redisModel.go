@@ -9,15 +9,17 @@ import (
 )
 
 const (
-	AccountTempCode               = "ACCOUNT_TEMP_CODE"
+	accountTempCode               = "ACCOUNT_TEMP_CODE"
 	resetPwdTempCode              = "RESET_PWD_TEMP_CODE"
 	userIncrSeq                   = "REDIS_USER_INCR_SEQ:" // user incr seq
 	appleDeviceToken              = "DEVICE_TOKEN"
 	userMinSeq                    = "REDIS_USER_MIN_SEQ:"
 	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
 	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
-	GetuiToken                    = "GETUI"
-	UserInfoCache                 = "USER_INFO_CACHE:"
+	getuiToken                    = "GETUI"
+	userInfoCache                 = "USER_INFO_CACHE:"
+	friendRelationCache           = "FRIEND_RELATION_CACHE:"
+	blackListCache                = "BLACK_LIST_CACHE:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -40,16 +42,16 @@ func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (inte
 	return con.Do(cmd, params...)
 }
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
-	key := AccountTempCode + account
+	key := accountTempCode + account
 	return redis.Bool(d.Exec("EXISTS", key))
 }
 func (d *DataBases) SetAccountCode(account string, code, ttl int) (err error) {
-	key := AccountTempCode + account
+	key := accountTempCode + account
 	_, err = d.Exec("SET", key, code, "ex", ttl)
 	return err
 }
 func (d *DataBases) GetAccountCode(account string) (string, error) {
-	key := AccountTempCode + account
+	key := accountTempCode + account
 	return redis.String(d.Exec("GET", key))
 }
 
@@ -150,31 +152,66 @@ func (d *DataBases) GetMultiConversationMsgOpt(userID string, conversationIDs []
 }
 
 func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
-	_, err := d.Exec("SET", GetuiToken, token, "ex", expireTime)
+	_, err := d.Exec("SET", getuiToken, token, "ex", expireTime)
 	return err
 }
 
 func (d *DataBases) GetGetuiToken() (string, error) {
-	result, err := redis.String(d.Exec("GET", GetuiToken))
+	result, err := redis.String(d.Exec("GET", getuiToken))
 	return result, err
 }
 
-func (d *DataBases) SetUserInfo(userInfo *pbCommon.UserInfo) error {
+func (d *DataBases) SearchContentType() {
+
+}
+
+func (d *DataBases) SetUserInfoToCache(userInfo *pbCommon.UserInfo) error {
 	b, _ := json.Marshal(&userInfo)
 	m := map[string]interface{}{}
 	if err := json.Unmarshal(b, &m); err != nil {
 		return err
 	}
-	_, err := d.Exec("hmset", UserInfoCache+userInfo.UserID, redis.Args{}.Add().AddFlat(m)...)
+	_, err := d.Exec("hmset", userInfoCache+userInfo.UserID, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
 
-func (d *DataBases) GetUserInfo(userID string) (*pbCommon.UserInfo, error) {
-	result, err := redis.String(d.Exec("HGETALL", UserInfoCache+userID))
+func (d *DataBases) GetUserInfoFromCache(userID string) (*pbCommon.UserInfo, error) {
+	result, err := redis.String(d.Exec("hgetall", userInfoCache+userID))
+	log2.NewInfo("", result)
 	if err != nil {
 		return nil, err
 	}
 	userInfo := &pbCommon.UserInfo{}
 	err = json.Unmarshal([]byte(result), userInfo)
 	return userInfo, err
+}
+
+func (d *DataBases) AddFriendToCache(userID string, friendIDList ...interface{}) error {
+	_, err := redis.String(d.Exec("SADD", friendRelationCache+userID, friendIDList...))
+	return err
+}
+
+func (d *DataBases) ReduceFriendToCache(userID string, friendIDList ...interface{}) error {
+	_, err := redis.String(d.Exec("SREM", friendRelationCache+userID, friendIDList...))
+	return err
+}
+
+func (d *DataBases) GetFriendIDListFromCache(userID string) ([]string, error) {
+	result, err := redis.Strings(d.Exec("SMEMBERS", friendRelationCache+userID))
+	return result, err
+}
+
+func (d *DataBases) AddBlackUserToCache(userID string, blackList ...interface{}) error {
+	_, err := redis.String(d.Exec("SADD", blackListCache+userID, blackList...))
+	return err
+}
+
+func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...interface{}) error {
+	_, err := redis.String(d.Exec("SREM", blackListCache+userID, blackList...))
+	return err
+}
+
+func (d *DataBases) GetBlackListFromCache(userID string) ([]string, error) {
+	result, err := redis.Strings(d.Exec("SMEMBERS", blackListCache+userID))
+	return result, err
 }

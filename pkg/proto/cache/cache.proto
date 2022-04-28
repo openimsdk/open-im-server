@@ -8,71 +8,100 @@ message CommonResp{
   string errMsg = 2;
 }
 
-message GetUserInfoReq{
+message GetUserInfoFromCacheReq{
   repeated string userIDList = 1;
-  string operationID = 3;
+  string operationID = 2;
 }
 
-message GetUserInfoResp{
+message GetUserInfoFromCacheResp{
   CommonResp  commonResp = 1;
   repeated server_api_params.UserInfo userInfoList = 2;
 }
 
 
-message UpdateUserInfoReq{
+message UpdateUserInfoToCacheReq{
   repeated server_api_params.UserInfo userInfoList = 1;
   string operationID = 2;
 }
 
-message UpdateUserInfoResp{
+message UpdateUserInfoToCacheResp{
   CommonResp commonResp = 1;
 }
 
-message GetFriendInfoReq {
+message GetFriendIDListFromCacheReq {
   string userID = 1;
   string operationID = 2;
 }
 
-message GetFriendInfoResp {
-  repeated server_api_params.FriendInfo friendInfoList = 1;
+message GetFriendIDListFromCacheResp {
+  repeated string userIDList = 1;
   CommonResp commonResp = 2;
 }
 
-message UpdateBlackListReq {
-  repeated server_api_params.BlackInfo blackList = 1;
-  string operationID = 2;
+message AddFriendToCacheReq {
+   string userID = 1;
+   string friendID = 2;
+   string operationID = 3;
 }
 
-message UpdateBlackListResp {
+message AddFriendToCacheResp {
   CommonResp commonResp = 1;
 }
 
-message GetBlackListReq {
+message ReduceFriendFromCacheReq {
+   string userID = 1;
+   string friendID = 2;
+   string operationID = 3;
+}
+
+message ReduceFriendFromCacheResp {
+  CommonResp commonResp = 1;
+}
+
+message GetBlackIDListFromCacheReq {
   string userID = 1;
   string operationID = 2;
 }
 
-message GetBlackListResp {
-  repeated server_api_params.BlackInfo blackList = 1;
+message GetBlackIDListFromCacheResp {
+  repeated string userIDList = 1;
+  CommonResp commonResp = 2;
 }
 
-
-message UpdateFriendInfoReq{
-  repeated server_api_params.FriendInfo friendInfoList = 1;
-  string operationID = 2;
+message AddBlackUserToCacheReq {
+  string userID = 1;
+  string blackUserID = 2;
+  string operationID = 3;
 }
 
-message UpdateFriendInfoResp{
+message AddBlackUserToCacheResp {
+  CommonResp commonResp = 1;
+}
+
+message ReduceBlackUserFromCacheReq {
+  string userID = 1;
+  string blackUserID = 2;
+  string operationID = 3;
+}
+
+message ReduceBlackUserFromCacheResp {
   CommonResp commonResp = 1;
 }
 
 service cache{
-  rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
-  rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
-  rpc GetFriendInfo(GetFriendInfoReq) returns(GetFriendInfoResp);
-  rpc UpdateFriendInfo(UpdateFriendInfoReq) returns(UpdateFriendInfoResp);
-  rpc UpdateBlackList(UpdateBlackListReq) returns(UpdateBlackListResp);
-  rpc GetBlackList(GetBlackListReq) returns(GetBlackListResp);
+  // userInfo
+  rpc GetUserInfoFromCache(GetUserInfoFromCacheReq) returns(GetUserInfoFromCacheResp);
+  rpc UpdateUserInfoToCache(UpdateUserInfoToCacheReq) returns(UpdateUserInfoToCacheResp);
+
+  // friendInfo
+  rpc GetFriendIDListFromCache(GetFriendIDListFromCacheReq) returns(GetFriendIDListFromCacheResp);
+  rpc AddFriendToCache(AddFriendToCacheReq) returns(AddFriendToCacheResp);
+  rpc ReduceFriendFromCache(ReduceFriendFromCacheReq) returns(ReduceFriendFromCacheResp);
+
+  // blackList
+  rpc GetBlackIDListFromCache(GetBlackIDListFromCacheReq) returns(GetBlackIDListFromCacheResp);
+  rpc AddBlackUserToCache(AddBlackUserToCacheReq) returns(AddBlackUserToCacheResp);
+  rpc ReduceBlackUserFromCache(ReduceBlackUserFromCacheReq) returns(ReduceBlackUserFromCacheResp);
 }
 
 
