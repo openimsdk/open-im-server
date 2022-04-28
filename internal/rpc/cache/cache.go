@@ -118,7 +118,7 @@ func updateAllFriendToCache(userList []db.User) error {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		if err := db.DB.AddFriendToCache(user.UserID, friendIDList); err != nil {
+		if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		}
 	}
@@ -134,7 +134,7 @@ func updateAllBlackListToCache(userList []db.User) error {
 			log.NewError("", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList); err != nil {
+		if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		}
 	}
@@ -187,6 +187,7 @@ func (s *cacheServer) GetFriendIDListFromCache(_ context.Context, req *pbCache.G
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), friendIDList)
 	resp.UserIDList = friendIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -228,6 +229,7 @@ func (s *cacheServer) GetBlackIDListFromCache(_ context.Context, req *pbCache.Ge
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), blackUserIDList)
 	resp.UserIDList = blackUserIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil

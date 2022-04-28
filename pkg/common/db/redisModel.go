@@ -6,7 +6,6 @@ import (
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"encoding/json"
 	"github.com/garyburd/redigo/redis"
-	"strings"
 )
 
 const (
@@ -182,32 +181,48 @@ func (d *DataBases) GetUserInfoFromCache(userID string) (*pbCommon.UserInfo, err
 	return userInfo, err
 }
 
-func (d *DataBases) AddFriendToCache(userID string, friendIDList ...interface{}) error {
-	_, err := d.Exec("SADD", friendRelationCache+userID, friendIDList...)
+func (d *DataBases) AddFriendToCache(userID string, friendIDList ...string) error {
+	var IDList []interface{}
+	for _, id := range friendIDList {
+		IDList = append(IDList, id)
+	}
+	_, err := d.Exec("SADD", friendRelationCache+userID, IDList...)
 	return err
 }
 
-func (d *DataBases) ReduceFriendToCache(userID string, friendIDList ...interface{}) error {
-	_, err := d.Exec("SREM", friendRelationCache+userID, friendIDList...)
+func (d *DataBases) ReduceFriendToCache(userID string, friendIDList ...string) error {
+	var IDList []interface{}
+	for _, id := range friendIDList {
+		IDList = append(IDList, id)
+	}
+	_, err := d.Exec("SREM", friendRelationCache+userID, IDList...)
 	return err
 }
 
 func (d *DataBases) GetFriendIDListFromCache(userID string) ([]string, error) {
-	result, err := redis.String(d.Exec("SMEMBERS", friendRelationCache+userID))
-	return strings.Split(result, " "), err
+	result, err := redis.Strings(d.Exec("SMEMBERS", friendRelationCache+userID))
+	return result, err
 }
 
-func (d *DataBases) AddBlackUserToCache(userID string, blackList ...interface{}) error {
-	_, err := d.Exec("SADD", blackListCache+userID, blackList...)
+func (d *DataBases) AddBlackUserToCache(userID string, blackList ...string) error {
+	var IDList []interface{}
+	for _, id := range blackList {
+		IDList = append(IDList, id)
+	}
+	_, err := d.Exec("SADD", blackListCache+userID, IDList...)
 	return err
 }
 
-func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...interface{}) error {
-	_, err := d.Exec("SREM", blackListCache+userID, blackList...)
+func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...string) error {
+	var IDList []interface{}
+	for _, id := range blackList {
+		IDList = append(IDList, id)
+	}
+	_, err := d.Exec("SREM", blackListCache+userID, IDList...)
 	return err
 }
 
 func (d *DataBases) GetBlackListFromCache(userID string) ([]string, error) {
-	result, err := redis.String(d.Exec("SMEMBERS", blackListCache+userID))
-	return strings.Split(result, " "), err
+	result, err := redis.Strings(d.Exec("SMEMBERS", blackListCache+userID))
+	return result, err
 }
