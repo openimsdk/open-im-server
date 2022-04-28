@@ -84,6 +84,18 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	log.NewInfo(req.CommID.OperationID, "AddBlacklist rpc ok ", req.CommID.FromUserID, req.CommID.ToUserID)
+	reqAddBlackUserToCache := &pbCache.AddBlackUserToCacheReq{UserID: req.CommID.FromUserID, BlackUserID: req.CommID.ToUserID, OperationID: req.CommID.OperationID}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := pbCache.NewCacheClient(etcdConn)
+	cacheResp, err := cacheClient.AddBlackUserToCache(context.Background(), reqAddBlackUserToCache)
+	if err != nil {
+		log.NewError(req.CommID.OperationID, "AddBlackUserToCache rpc call failed ", err.Error())
+		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: 500, ErrMsg: "AddBlackUserToCache rpc call failed"}}, nil
+	}
+	if cacheResp.CommonResp.ErrCode != 0 {
+		log.NewError(req.CommID.OperationID, "AddBlackUserToCache rpc logic call failed ", cacheResp.String())
+		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}, nil
+	}
 	chat.BlackAddedNotification(req)
 	return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{}}, nil
 }
@@ -362,6 +374,18 @@ func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.Remove
 
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc RemoveBlacklist ok ")
+	reqReduceBlackUserFromCache := &pbCache.ReduceBlackUserFromCacheReq{UserID: req.CommID.FromUserID, BlackUserID: req.CommID.ToUserID, OperationID: req.CommID.OperationID}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := pbCache.NewCacheClient(etcdConn)
+	cacheResp, err := cacheClient.ReduceBlackUserFromCache(context.Background(), reqReduceBlackUserFromCache)
+	if err != nil {
+		log.NewError(req.CommID.OperationID, "ReduceBlackUserFromCache rpc call failed ", err.Error())
+		return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: 500, ErrMsg: "ReduceBlackUserFromCache rpc call failed"}}, nil
+	}
+	if cacheResp.CommonResp.ErrCode != 0 {
+		log.NewError(req.CommID.OperationID, "ReduceBlackUserFromCache rpc logic call failed ", cacheResp.String())
+		return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}, nil
+	}
 	chat.BlackDeletedNotification(req)
 	return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{}}, nil
 }
