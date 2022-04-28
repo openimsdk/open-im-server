@@ -118,7 +118,7 @@ func updateAllFriendToCache(userList []db.User) error {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		if err := db.DB.AddFriendToCache(user.UserID, friendIDList); err != nil {
+		if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		}
 	}

@@ -181,13 +181,13 @@ func (d *DataBases) GetUserInfoFromCache(userID string) (*pbCommon.UserInfo, err
 	return userInfo, err
 }
 
-func (d *DataBases) AddFriendToCache(userID string, friendIDList ...interface{}) error {
-	_, err := d.Exec("SADD", friendRelationCache+userID, friendIDList...)
+func (d *DataBases) AddFriendToCache(userID string, friendIDList ...string) error {
+	_, err := d.Exec("SADD", friendRelationCache+userID, redis.Args{}.Add().AddFlat(friendIDList))
 	return err
 }
 
 func (d *DataBases) ReduceFriendToCache(userID string, friendIDList ...interface{}) error {
-	_, err := d.Exec("SREM", friendRelationCache+userID, friendIDList...)
+	_, err := d.Exec("SREM", friendRelationCache+userID, redis.Args{}.Add().AddFlat(friendIDList))
 	return err
 }
 
@@ -197,12 +197,12 @@ func (d *DataBases) GetFriendIDListFromCache(userID string) ([]string, error) {
 }
 
 func (d *DataBases) AddBlackUserToCache(userID string, blackList ...interface{}) error {
-	_, err := d.Exec("SADD", blackListCache+userID, blackList...)
+	_, err := d.Exec("SADD", blackListCache+userID, redis.Args{}.Add().AddFlat(blackList))
 	return err
 }
 
 func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...interface{}) error {
-	_, err := d.Exec("SREM", blackListCache+userID, blackList...)
+	_, err := d.Exec("SREM", blackListCache+userID, redis.Args{}.Add().AddFlat(blackList))
 	return err
 }
 
