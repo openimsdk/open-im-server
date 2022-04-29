@@ -4,15 +4,15 @@ import (
 	"Open_IM/pkg/common/log"
 	"context"
 	"fmt"
-	"strings"
-	"sync"
-	"time"
-
-	"go.etcd.io/etcd/api/v3/mvccpb"
-	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.etcd.io/etcd/clientv3"
+	"go.etcd.io/etcd/mvcc/mvccpb"
+	//"google.golang.org/genproto/googleapis/ads/googleads/v1/services"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
 	"google.golang.org/grpc/resolver"
+	"strings"
+	"sync"
+	"time"
 )
 
 type Resolver struct {
