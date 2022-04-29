@@ -113,7 +113,7 @@ func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts re
 	if err == nil {
 		var addrList []resolver.Address
 		for i := range resp.Kvs {
-			//log.Debug("", "init addr: ", string(resp.Kvs[i].Value))
+			log.Debug("", "etcd init addr: ", string(resp.Kvs[i].Value))
 			addrList = append(addrList, resolver.Address{Addr: string(resp.Kvs[i].Value)})
 		}
 		r.cc.UpdateState(resolver.State{Addresses: addrList})
