@@ -49,7 +49,7 @@ func NewResolver(schema, etcdAddr, serviceName string) (*Resolver, error) {
 	//conn, err := grpc.DialContext(ctx, GetPrefix(schema, serviceName),
 	//	grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
 	//	grpc.WithInsecure())
-	log.Debug("", "etcd key ", GetPrefix(schema, serviceName), "value ", *r.grpcClientConn)
+	log.Debug("", "etcd key ", GetPrefix(schema, serviceName))
 
 	conn, err := grpc.Dial(
 		GetPrefix(schema, serviceName),
