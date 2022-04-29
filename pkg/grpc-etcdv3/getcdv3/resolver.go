@@ -44,19 +44,19 @@ func NewResolver(schema, etcdAddr, serviceName string) (*Resolver, error) {
 	r.schema = schema
 	r.etcdAddr = etcdAddr
 	resolver.Register(&r)
-
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
-	conn, err := grpc.DialContext(ctx, GetPrefix(schema, serviceName),
-		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
-		grpc.WithInsecure())
+	//
+	//ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	//conn, err := grpc.DialContext(ctx, GetPrefix(schema, serviceName),
+	//	grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
+	//	grpc.WithInsecure())
 	log.Debug("", "etcd key ", GetPrefix(schema, serviceName), "value ", *r.grpcClientConn)
 
-	//conn, err := grpc.Dial(
-	//	GetPrefix(schema, serviceName),
-	//	grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
-	//	grpc.WithInsecure(),
-	//	grpc.WithTimeout(time.Duration(5)*time.Second),
-	//)
+	conn, err := grpc.Dial(
+		GetPrefix(schema, serviceName),
+		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
+		grpc.WithInsecure(),
+		grpc.WithTimeout(time.Duration(5)*time.Second),
+	)
 	if err == nil {
 		r.grpcClientConn = conn
 	}
