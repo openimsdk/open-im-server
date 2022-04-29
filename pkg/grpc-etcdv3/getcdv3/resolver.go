@@ -44,12 +44,16 @@ func NewResolver(schema, etcdAddr, serviceName string) (*Resolver, error) {
 	r.etcdAddr = etcdAddr
 	resolver.Register(&r)
 
-	conn, err := grpc.Dial(
-		GetPrefix(schema, serviceName),
+	ctx, _ := context.WithTimeout(context.TODO(), time.Second*5)
+	conn, err := grpc.DialContext(ctx, GetPrefix(schema, serviceName),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
-		grpc.WithInsecure(),
-		grpc.WithTimeout(time.Duration(5)*time.Second),
-	)
+		grpc.WithInsecure())
+	//conn, err := grpc.Dial(
+	//	GetPrefix(schema, serviceName),
+	//	grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
+	//	grpc.WithInsecure(),
+	//	grpc.WithTimeout(time.Duration(5)*time.Second),
+	//)
 	if err == nil {
 		r.grpcClientConn = conn
 	}
