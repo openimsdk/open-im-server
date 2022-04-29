@@ -20,6 +20,7 @@ const (
 	userInfoCache                 = "USER_INFO_CACHE:"
 	friendRelationCache           = "FRIEND_RELATION_CACHE:"
 	blackListCache                = "BLACK_LIST_CACHE:"
+	groupCache                    = "GROUP_CACHE:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -224,5 +225,28 @@ func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...string)
 
 func (d *DataBases) GetBlackListFromCache(userID string) ([]string, error) {
 	result, err := redis.Strings(d.Exec("SMEMBERS", blackListCache+userID))
+	return result, err
+}
+
+func (d *DataBases) AddGroupMemberToCache(groupID string, userIDList ...string) error {
+	var IDList []interface{}
+	for _, id := range userIDList {
+		IDList = append(IDList, id)
+	}
+	_, err := d.Exec("SADD", blackListCache+groupID, IDList...)
+	return err
+}
+
+func (d *DataBases) ReduceGroupMemberFromCache(groupID string, userIDList ...string) error {
+	var IDList []interface{}
+	for _, id := range userIDList {
+		IDList = append(IDList, id)
+	}
+	_, err := d.Exec("SREM", blackListCache+groupID, IDList...)
+	return err
+}
+
+func (d *DataBases) GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
+	result, err := redis.Strings(d.Exec("SMEMBERS", groupCache+groupID))
 	return result, err
 }

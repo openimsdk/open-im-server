@@ -81,8 +81,11 @@ func SyncDB2Cache() error {
 	//err = updateAllUserToCache(userList)
 	err = updateAllFriendToCache(userList)
 	err = updateAllBlackListToCache(userList)
+	err = updateAllGroupMemberListToCache()
 	return err
 }
+
+func DelRelationCache() {}
 
 func updateAllUserToCache(userList []db.User) error {
 	for _, userInfo := range userList {
@@ -104,6 +107,28 @@ func updateAllUserToCache(userList []db.User) error {
 		}
 		if err := db.DB.SetUserInfoToCache(userInfo.UserID, m); err != nil {
 			log.NewError("0", utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
+		}
+	}
+	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
+	return nil
+}
+
+func updateAllGroupMemberListToCache() error {
+	log.NewInfo("0", utils.GetSelfFuncName())
+	groupIDList, err := imdb.GetAllGroupIDList()
+	if err != nil {
+		log.NewError("0", utils.GetSelfFuncName(), "getAllGroupIDList failed", err.Error())
+		panic(err.Error())
+	}
+	for _, groupID := range groupIDList {
+		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
+		if err != nil {
+			log.NewError("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
+			continue
+		}
+		log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
+		if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
+			log.NewError("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
@@ -253,6 +278,49 @@ func (s *cacheServer) ReduceBlackUserFromCache(_ context.Context, req *pbCache.R
 	resp = &pbCache.ReduceBlackUserFromCacheResp{CommonResp: &pbCache.CommonResp{}}
 	if err := db.DB.ReduceBlackUserFromCache(req.UserID, req.BlackUserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		return resp, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *cacheServer) GetGroupMemberIDListFromCache(_ context.Context, req *pbCache.GetGroupMemberIDListFromCacheReq) (resp *pbCache.GetGroupMemberIDListFromCacheResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbCache.GetGroupMemberIDListFromCacheResp{
+		CommonResp: &pbCache.CommonResp{},
+	}
+	userIDList, err := db.DB.GetGroupMemberIDListFromCache(req.GroupID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListFromCache failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		return resp, nil
+	}
+	resp.UserIDList = userIDList
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *cacheServer) AddGroupMemberToCache(_ context.Context, req *pbCache.AddGroupMemberToCacheReq) (resp *pbCache.AddGroupMemberToCacheResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbCache.AddGroupMemberToCacheResp{CommonResp: &pbCache.CommonResp{}}
+	if err := db.DB.AddGroupMemberToCache(req.GroupID, req.UserIDList...); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddGroupMemberToCache failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		return resp, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *cacheServer) ReduceGroupMemberFromCache(_ context.Context, req *pbCache.ReduceGroupMemberFromCacheReq) (resp *pbCache.ReduceGroupMemberFromCacheResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbCache.ReduceGroupMemberFromCacheResp{}
+	if err := db.DB.ReduceGroupMemberFromCache(req.GroupID, req.UserIDList...); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ReduceGroupMemberFromCache failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil

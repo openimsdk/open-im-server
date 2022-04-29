@@ -165,7 +165,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error())
 			continue
 		}
-		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), userIDList)
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), userIDList)
 		groupUserIDList = append(groupUserIDList, userIDList...)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
@@ -315,12 +315,13 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 func (s *officeServer) getPermissionUserIDList(operationID string, groupList []*pbOffice.PermissionGroup, userList []*pbOffice.WorkMomentUser) []string {
 	var permissionUserIDList []string
 	for _, group := range groupList {
-		GroupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(group.GroupID)
+		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(group.GroupID)
 		if err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", group, err.Error())
 			continue
 		}
-		permissionUserIDList = append(permissionUserIDList, GroupMemberIDList...)
+		log.NewDebug(operationID, utils.GetSelfFuncName(), "groupMemberIDList: ", groupMemberIDList)
+		permissionUserIDList = append(permissionUserIDList, groupMemberIDList...)
 	}
 	var userIDList []string
 	for _, user := range userList {

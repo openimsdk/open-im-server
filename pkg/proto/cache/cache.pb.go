@@ -36,7 +36,7 @@ func (m *CommonResp) Reset()         { *m = CommonResp{} }
 func (m *CommonResp) String() string { return proto.CompactTextString(m) }
 func (*CommonResp) ProtoMessage()    {}
 func (*CommonResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{0}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{0}
 }
 func (m *CommonResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CommonResp.Unmarshal(m, b)
@@ -82,7 +82,7 @@ func (m *GetUserInfoFromCacheReq) Reset()         { *m = GetUserInfoFromCacheReq
 func (m *GetUserInfoFromCacheReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserInfoFromCacheReq) ProtoMessage()    {}
 func (*GetUserInfoFromCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{1}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{1}
 }
 func (m *GetUserInfoFromCacheReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInfoFromCacheReq.Unmarshal(m, b)
@@ -128,7 +128,7 @@ func (m *GetUserInfoFromCacheResp) Reset()         { *m = GetUserInfoFromCacheRe
 func (m *GetUserInfoFromCacheResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserInfoFromCacheResp) ProtoMessage()    {}
 func (*GetUserInfoFromCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{2}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{2}
 }
 func (m *GetUserInfoFromCacheResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInfoFromCacheResp.Unmarshal(m, b)
@@ -174,7 +174,7 @@ func (m *UpdateUserInfoToCacheReq) Reset()         { *m = UpdateUserInfoToCacheR
 func (m *UpdateUserInfoToCacheReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInfoToCacheReq) ProtoMessage()    {}
 func (*UpdateUserInfoToCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{3}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{3}
 }
 func (m *UpdateUserInfoToCacheReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInfoToCacheReq.Unmarshal(m, b)
@@ -219,7 +219,7 @@ func (m *UpdateUserInfoToCacheResp) Reset()         { *m = UpdateUserInfoToCache
 func (m *UpdateUserInfoToCacheResp) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInfoToCacheResp) ProtoMessage()    {}
 func (*UpdateUserInfoToCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{4}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{4}
 }
 func (m *UpdateUserInfoToCacheResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInfoToCacheResp.Unmarshal(m, b)
@@ -258,7 +258,7 @@ func (m *GetFriendIDListFromCacheReq) Reset()         { *m = GetFriendIDListFrom
 func (m *GetFriendIDListFromCacheReq) String() string { return proto.CompactTextString(m) }
 func (*GetFriendIDListFromCacheReq) ProtoMessage()    {}
 func (*GetFriendIDListFromCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{5}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{5}
 }
 func (m *GetFriendIDListFromCacheReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendIDListFromCacheReq.Unmarshal(m, b)
@@ -304,7 +304,7 @@ func (m *GetFriendIDListFromCacheResp) Reset()         { *m = GetFriendIDListFro
 func (m *GetFriendIDListFromCacheResp) String() string { return proto.CompactTextString(m) }
 func (*GetFriendIDListFromCacheResp) ProtoMessage()    {}
 func (*GetFriendIDListFromCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{6}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{6}
 }
 func (m *GetFriendIDListFromCacheResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendIDListFromCacheResp.Unmarshal(m, b)
@@ -351,7 +351,7 @@ func (m *AddFriendToCacheReq) Reset()         { *m = AddFriendToCacheReq{} }
 func (m *AddFriendToCacheReq) String() string { return proto.CompactTextString(m) }
 func (*AddFriendToCacheReq) ProtoMessage()    {}
 func (*AddFriendToCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{7}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{7}
 }
 func (m *AddFriendToCacheReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddFriendToCacheReq.Unmarshal(m, b)
@@ -403,7 +403,7 @@ func (m *AddFriendToCacheResp) Reset()         { *m = AddFriendToCacheResp{} }
 func (m *AddFriendToCacheResp) String() string { return proto.CompactTextString(m) }
 func (*AddFriendToCacheResp) ProtoMessage()    {}
 func (*AddFriendToCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{8}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{8}
 }
 func (m *AddFriendToCacheResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddFriendToCacheResp.Unmarshal(m, b)
@@ -443,7 +443,7 @@ func (m *ReduceFriendFromCacheReq) Reset()         { *m = ReduceFriendFromCacheR
 func (m *ReduceFriendFromCacheReq) String() string { return proto.CompactTextString(m) }
 func (*ReduceFriendFromCacheReq) ProtoMessage()    {}
 func (*ReduceFriendFromCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{9}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{9}
 }
 func (m *ReduceFriendFromCacheReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReduceFriendFromCacheReq.Unmarshal(m, b)
@@ -495,7 +495,7 @@ func (m *ReduceFriendFromCacheResp) Reset()         { *m = ReduceFriendFromCache
 func (m *ReduceFriendFromCacheResp) String() string { return proto.CompactTextString(m) }
 func (*ReduceFriendFromCacheResp) ProtoMessage()    {}
 func (*ReduceFriendFromCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{10}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{10}
 }
 func (m *ReduceFriendFromCacheResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReduceFriendFromCacheResp.Unmarshal(m, b)
@@ -534,7 +534,7 @@ func (m *GetBlackIDListFromCacheReq) Reset()         { *m = GetBlackIDListFromCa
 func (m *GetBlackIDListFromCacheReq) String() string { return proto.CompactTextString(m) }
 func (*GetBlackIDListFromCacheReq) ProtoMessage()    {}
 func (*GetBlackIDListFromCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{11}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{11}
 }
 func (m *GetBlackIDListFromCacheReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetBlackIDListFromCacheReq.Unmarshal(m, b)
@@ -580,7 +580,7 @@ func (m *GetBlackIDListFromCacheResp) Reset()         { *m = GetBlackIDListFromC
 func (m *GetBlackIDListFromCacheResp) String() string { return proto.CompactTextString(m) }
 func (*GetBlackIDListFromCacheResp) ProtoMessage()    {}
 func (*GetBlackIDListFromCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{12}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{12}
 }
 func (m *GetBlackIDListFromCacheResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetBlackIDListFromCacheResp.Unmarshal(m, b)
@@ -627,7 +627,7 @@ func (m *AddBlackUserToCacheReq) Reset()         { *m = AddBlackUserToCacheReq{}
 func (m *AddBlackUserToCacheReq) String() string { return proto.CompactTextString(m) }
 func (*AddBlackUserToCacheReq) ProtoMessage()    {}
 func (*AddBlackUserToCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{13}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{13}
 }
 func (m *AddBlackUserToCacheReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddBlackUserToCacheReq.Unmarshal(m, b)
@@ -679,7 +679,7 @@ func (m *AddBlackUserToCacheResp) Reset()         { *m = AddBlackUserToCacheResp
 func (m *AddBlackUserToCacheResp) String() string { return proto.CompactTextString(m) }
 func (*AddBlackUserToCacheResp) ProtoMessage()    {}
 func (*AddBlackUserToCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{14}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{14}
 }
 func (m *AddBlackUserToCacheResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddBlackUserToCacheResp.Unmarshal(m, b)
@@ -719,7 +719,7 @@ func (m *ReduceBlackUserFromCacheReq) Reset()         { *m = ReduceBlackUserFrom
 func (m *ReduceBlackUserFromCacheReq) String() string { return proto.CompactTextString(m) }
 func (*ReduceBlackUserFromCacheReq) ProtoMessage()    {}
 func (*ReduceBlackUserFromCacheReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{15}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{15}
 }
 func (m *ReduceBlackUserFromCacheReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReduceBlackUserFromCacheReq.Unmarshal(m, b)
@@ -771,7 +771,7 @@ func (m *ReduceBlackUserFromCacheResp) Reset()         { *m = ReduceBlackUserFro
 func (m *ReduceBlackUserFromCacheResp) String() string { return proto.CompactTextString(m) }
 func (*ReduceBlackUserFromCacheResp) ProtoMessage()    {}
 func (*ReduceBlackUserFromCacheResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_cache_d0822f7e413e82c3, []int{16}
+	return fileDescriptor_cache_cf8751e0f76be356, []int{16}
 }
 func (m *ReduceBlackUserFromCacheResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReduceBlackUserFromCacheResp.Unmarshal(m, b)
@@ -798,6 +798,282 @@ func (m *ReduceBlackUserFromCacheResp) GetCommonResp() *CommonResp {
 	return nil
 }
 
+type GetGroupMemberIDListFromCacheReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	GroupID              string   `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetGroupMemberIDListFromCacheReq) Reset()         { *m = GetGroupMemberIDListFromCacheReq{} }
+func (m *GetGroupMemberIDListFromCacheReq) String() string { return proto.CompactTextString(m) }
+func (*GetGroupMemberIDListFromCacheReq) ProtoMessage()    {}
+func (*GetGroupMemberIDListFromCacheReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_cf8751e0f76be356, []int{17}
+}
+func (m *GetGroupMemberIDListFromCacheReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupMemberIDListFromCacheReq.Unmarshal(m, b)
+}
+func (m *GetGroupMemberIDListFromCacheReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupMemberIDListFromCacheReq.Marshal(b, m, deterministic)
+}
+func (dst *GetGroupMemberIDListFromCacheReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupMemberIDListFromCacheReq.Merge(dst, src)
+}
+func (m *GetGroupMemberIDListFromCacheReq) XXX_Size() int {
+	return xxx_messageInfo_GetGroupMemberIDListFromCacheReq.Size(m)
+}
+func (m *GetGroupMemberIDListFromCacheReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupMemberIDListFromCacheReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupMemberIDListFromCacheReq proto.InternalMessageInfo
+
+func (m *GetGroupMemberIDListFromCacheReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GetGroupMemberIDListFromCacheReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+type GetGroupMemberIDListFromCacheResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	UserIDList           []string    `protobuf:"bytes,2,rep,name=userIDList" json:"userIDList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *GetGroupMemberIDListFromCacheResp) Reset()         { *m = GetGroupMemberIDListFromCacheResp{} }
+func (m *GetGroupMemberIDListFromCacheResp) String() string { return proto.CompactTextString(m) }
+func (*GetGroupMemberIDListFromCacheResp) ProtoMessage()    {}
+func (*GetGroupMemberIDListFromCacheResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_cf8751e0f76be356, []int{18}
+}
+func (m *GetGroupMemberIDListFromCacheResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetGroupMemberIDListFromCacheResp.Unmarshal(m, b)
+}
+func (m *GetGroupMemberIDListFromCacheResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetGroupMemberIDListFromCacheResp.Marshal(b, m, deterministic)
+}
+func (dst *GetGroupMemberIDListFromCacheResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetGroupMemberIDListFromCacheResp.Merge(dst, src)
+}
+func (m *GetGroupMemberIDListFromCacheResp) XXX_Size() int {
+	return xxx_messageInfo_GetGroupMemberIDListFromCacheResp.Size(m)
+}
+func (m *GetGroupMemberIDListFromCacheResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetGroupMemberIDListFromCacheResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetGroupMemberIDListFromCacheResp proto.InternalMessageInfo
+
+func (m *GetGroupMemberIDListFromCacheResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+func (m *GetGroupMemberIDListFromCacheResp) GetUserIDList() []string {
+	if m != nil {
+		return m.UserIDList
+	}
+	return nil
+}
+
+type AddGroupMemberToCacheReq struct {
+	UserIDList           []string `protobuf:"bytes,1,rep,name=userIDList" json:"userIDList,omitempty"`
+	GroupID              string   `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddGroupMemberToCacheReq) Reset()         { *m = AddGroupMemberToCacheReq{} }
+func (m *AddGroupMemberToCacheReq) String() string { return proto.CompactTextString(m) }
+func (*AddGroupMemberToCacheReq) ProtoMessage()    {}
+func (*AddGroupMemberToCacheReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_cf8751e0f76be356, []int{19}
+}
+func (m *AddGroupMemberToCacheReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddGroupMemberToCacheReq.Unmarshal(m, b)
+}
+func (m *AddGroupMemberToCacheReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddGroupMemberToCacheReq.Marshal(b, m, deterministic)
+}
+func (dst *AddGroupMemberToCacheReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddGroupMemberToCacheReq.Merge(dst, src)
+}
+func (m *AddGroupMemberToCacheReq) XXX_Size() int {
+	return xxx_messageInfo_AddGroupMemberToCacheReq.Size(m)
+}
+func (m *AddGroupMemberToCacheReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddGroupMemberToCacheReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddGroupMemberToCacheReq proto.InternalMessageInfo
+
+func (m *AddGroupMemberToCacheReq) GetUserIDList() []string {
+	if m != nil {
+		return m.UserIDList
+	}
+	return nil
+}
+
+func (m *AddGroupMemberToCacheReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *AddGroupMemberToCacheReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type AddGroupMemberToCacheResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *AddGroupMemberToCacheResp) Reset()         { *m = AddGroupMemberToCacheResp{} }
+func (m *AddGroupMemberToCacheResp) String() string { return proto.CompactTextString(m) }
+func (*AddGroupMemberToCacheResp) ProtoMessage()    {}
+func (*AddGroupMemberToCacheResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_cf8751e0f76be356, []int{20}
+}
+func (m *AddGroupMemberToCacheResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddGroupMemberToCacheResp.Unmarshal(m, b)
+}
+func (m *AddGroupMemberToCacheResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddGroupMemberToCacheResp.Marshal(b, m, deterministic)
+}
+func (dst *AddGroupMemberToCacheResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddGroupMemberToCacheResp.Merge(dst, src)
+}
+func (m *AddGroupMemberToCacheResp) XXX_Size() int {
+	return xxx_messageInfo_AddGroupMemberToCacheResp.Size(m)
+}
+func (m *AddGroupMemberToCacheResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddGroupMemberToCacheResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddGroupMemberToCacheResp proto.InternalMessageInfo
+
+func (m *AddGroupMemberToCacheResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type ReduceGroupMemberFromCacheReq struct {
+	UserIDList           []string `protobuf:"bytes,1,rep,name=userIDList" json:"userIDList,omitempty"`
+	GroupID              string   `protobuf:"bytes,2,opt,name=groupID" json:"groupID,omitempty"`
+	OperationID          string   `protobuf:"bytes,3,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ReduceGroupMemberFromCacheReq) Reset()         { *m = ReduceGroupMemberFromCacheReq{} }
+func (m *ReduceGroupMemberFromCacheReq) String() string { return proto.CompactTextString(m) }
+func (*ReduceGroupMemberFromCacheReq) ProtoMessage()    {}
+func (*ReduceGroupMemberFromCacheReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_cf8751e0f76be356, []int{21}
+}
+func (m *ReduceGroupMemberFromCacheReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ReduceGroupMemberFromCacheReq.Unmarshal(m, b)
+}
+func (m *ReduceGroupMemberFromCacheReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ReduceGroupMemberFromCacheReq.Marshal(b, m, deterministic)
+}
+func (dst *ReduceGroupMemberFromCacheReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReduceGroupMemberFromCacheReq.Merge(dst, src)
+}
+func (m *ReduceGroupMemberFromCacheReq) XXX_Size() int {
+	return xxx_messageInfo_ReduceGroupMemberFromCacheReq.Size(m)
+}
+func (m *ReduceGroupMemberFromCacheReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReduceGroupMemberFromCacheReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReduceGroupMemberFromCacheReq proto.InternalMessageInfo
+
+func (m *ReduceGroupMemberFromCacheReq) GetUserIDList() []string {
+	if m != nil {
+		return m.UserIDList
+	}
+	return nil
+}
+
+func (m *ReduceGroupMemberFromCacheReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *ReduceGroupMemberFromCacheReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type ReduceGroupMemberFromCacheResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *ReduceGroupMemberFromCacheResp) Reset()         { *m = ReduceGroupMemberFromCacheResp{} }
+func (m *ReduceGroupMemberFromCacheResp) String() string { return proto.CompactTextString(m) }
+func (*ReduceGroupMemberFromCacheResp) ProtoMessage()    {}
+func (*ReduceGroupMemberFromCacheResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_cache_cf8751e0f76be356, []int{22}
+}
+func (m *ReduceGroupMemberFromCacheResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ReduceGroupMemberFromCacheResp.Unmarshal(m, b)
+}
+func (m *ReduceGroupMemberFromCacheResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ReduceGroupMemberFromCacheResp.Marshal(b, m, deterministic)
+}
+func (dst *ReduceGroupMemberFromCacheResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReduceGroupMemberFromCacheResp.Merge(dst, src)
+}
+func (m *ReduceGroupMemberFromCacheResp) XXX_Size() int {
+	return xxx_messageInfo_ReduceGroupMemberFromCacheResp.Size(m)
+}
+func (m *ReduceGroupMemberFromCacheResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReduceGroupMemberFromCacheResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReduceGroupMemberFromCacheResp proto.InternalMessageInfo
+
+func (m *ReduceGroupMemberFromCacheResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*CommonResp)(nil), "cache.CommonResp")
 	proto.RegisterType((*GetUserInfoFromCacheReq)(nil), "cache.GetUserInfoFromCacheReq")
@@ -816,6 +1092,12 @@ func init() {
 	proto.RegisterType((*AddBlackUserToCacheResp)(nil), "cache.AddBlackUserToCacheResp")
 	proto.RegisterType((*ReduceBlackUserFromCacheReq)(nil), "cache.ReduceBlackUserFromCacheReq")
 	proto.RegisterType((*ReduceBlackUserFromCacheResp)(nil), "cache.ReduceBlackUserFromCacheResp")
+	proto.RegisterType((*GetGroupMemberIDListFromCacheReq)(nil), "cache.GetGroupMemberIDListFromCacheReq")
+	proto.RegisterType((*GetGroupMemberIDListFromCacheResp)(nil), "cache.GetGroupMemberIDListFromCacheResp")
+	proto.RegisterType((*AddGroupMemberToCacheReq)(nil), "cache.AddGroupMemberToCacheReq")
+	proto.RegisterType((*AddGroupMemberToCacheResp)(nil), "cache.AddGroupMemberToCacheResp")
+	proto.RegisterType((*ReduceGroupMemberFromCacheReq)(nil), "cache.ReduceGroupMemberFromCacheReq")
+	proto.RegisterType((*ReduceGroupMemberFromCacheResp)(nil), "cache.ReduceGroupMemberFromCacheResp")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -840,6 +1122,10 @@ type CacheClient interface {
 	GetBlackIDListFromCache(ctx context.Context, in *GetBlackIDListFromCacheReq, opts ...grpc.CallOption) (*GetBlackIDListFromCacheResp, error)
 	AddBlackUserToCache(ctx context.Context, in *AddBlackUserToCacheReq, opts ...grpc.CallOption) (*AddBlackUserToCacheResp, error)
 	ReduceBlackUserFromCache(ctx context.Context, in *ReduceBlackUserFromCacheReq, opts ...grpc.CallOption) (*ReduceBlackUserFromCacheResp, error)
+	// group
+	GetGroupMemberIDListFromCache(ctx context.Context, in *GetGroupMemberIDListFromCacheReq, opts ...grpc.CallOption) (*GetGroupMemberIDListFromCacheResp, error)
+	AddGroupMemberToCache(ctx context.Context, in *AddGroupMemberToCacheReq, opts ...grpc.CallOption) (*AddGroupMemberToCacheResp, error)
+	ReduceGroupMemberFromCache(ctx context.Context, in *ReduceGroupMemberFromCacheReq, opts ...grpc.CallOption) (*ReduceGroupMemberFromCacheResp, error)
 }
 
 type cacheClient struct {
@@ -922,6 +1208,33 @@ func (c *cacheClient) ReduceBlackUserFromCache(ctx context.Context, in *ReduceBl
 	return out, nil
 }
 
+func (c *cacheClient) GetGroupMemberIDListFromCache(ctx context.Context, in *GetGroupMemberIDListFromCacheReq, opts ...grpc.CallOption) (*GetGroupMemberIDListFromCacheResp, error) {
+	out := new(GetGroupMemberIDListFromCacheResp)
+	err := grpc.Invoke(ctx, "/cache.cache/GetGroupMemberIDListFromCache", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheClient) AddGroupMemberToCache(ctx context.Context, in *AddGroupMemberToCacheReq, opts ...grpc.CallOption) (*AddGroupMemberToCacheResp, error) {
+	out := new(AddGroupMemberToCacheResp)
+	err := grpc.Invoke(ctx, "/cache.cache/AddGroupMemberToCache", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheClient) ReduceGroupMemberFromCache(ctx context.Context, in *ReduceGroupMemberFromCacheReq, opts ...grpc.CallOption) (*ReduceGroupMemberFromCacheResp, error) {
+	out := new(ReduceGroupMemberFromCacheResp)
+	err := grpc.Invoke(ctx, "/cache.cache/ReduceGroupMemberFromCache", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Cache service
 
 type CacheServer interface {
@@ -936,6 +1249,10 @@ type CacheServer interface {
 	GetBlackIDListFromCache(context.Context, *GetBlackIDListFromCacheReq) (*GetBlackIDListFromCacheResp, error)
 	AddBlackUserToCache(context.Context, *AddBlackUserToCacheReq) (*AddBlackUserToCacheResp, error)
 	ReduceBlackUserFromCache(context.Context, *ReduceBlackUserFromCacheReq) (*ReduceBlackUserFromCacheResp, error)
+	// group
+	GetGroupMemberIDListFromCache(context.Context, *GetGroupMemberIDListFromCacheReq) (*GetGroupMemberIDListFromCacheResp, error)
+	AddGroupMemberToCache(context.Context, *AddGroupMemberToCacheReq) (*AddGroupMemberToCacheResp, error)
+	ReduceGroupMemberFromCache(context.Context, *ReduceGroupMemberFromCacheReq) (*ReduceGroupMemberFromCacheResp, error)
 }
 
 func RegisterCacheServer(s *grpc.Server, srv CacheServer) {
@@ -1086,6 +1403,60 @@ func _Cache_ReduceBlackUserFromCache_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Cache_GetGroupMemberIDListFromCache_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetGroupMemberIDListFromCacheReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServer).GetGroupMemberIDListFromCache(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cache.cache/GetGroupMemberIDListFromCache",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServer).GetGroupMemberIDListFromCache(ctx, req.(*GetGroupMemberIDListFromCacheReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cache_AddGroupMemberToCache_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddGroupMemberToCacheReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServer).AddGroupMemberToCache(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cache.cache/AddGroupMemberToCache",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServer).AddGroupMemberToCache(ctx, req.(*AddGroupMemberToCacheReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Cache_ReduceGroupMemberFromCache_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReduceGroupMemberFromCacheReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServer).ReduceGroupMemberFromCache(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cache.cache/ReduceGroupMemberFromCache",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServer).ReduceGroupMemberFromCache(ctx, req.(*ReduceGroupMemberFromCacheReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Cache_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "cache.cache",
 	HandlerType: (*CacheServer)(nil),
@@ -1122,52 +1493,72 @@ var _Cache_serviceDesc = grpc.ServiceDesc{
 			MethodName: "ReduceBlackUserFromCache",
 			Handler:    _Cache_ReduceBlackUserFromCache_Handler,
 		},
+		{
+			MethodName: "GetGroupMemberIDListFromCache",
+			Handler:    _Cache_GetGroupMemberIDListFromCache_Handler,
+		},
+		{
+			MethodName: "AddGroupMemberToCache",
+			Handler:    _Cache_AddGroupMemberToCache_Handler,
+		},
+		{
+			MethodName: "ReduceGroupMemberFromCache",
+			Handler:    _Cache_ReduceGroupMemberFromCache_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "cache/cache.proto",
 }
 
-func init() { proto.RegisterFile("cache/cache.proto", fileDescriptor_cache_d0822f7e413e82c3) }
+func init() { proto.RegisterFile("cache/cache.proto", fileDescriptor_cache_cf8751e0f76be356) }
 
-var fileDescriptor_cache_d0822f7e413e82c3 = []byte{
-	// 619 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xdf, 0x6e, 0xd3, 0x3e,
-	0x14, 0x56, 0x5a, 0xb5, 0xbf, 0x5f, 0x4f, 0x41, 0x30, 0x33, 0xba, 0xcc, 0x1d, 0x25, 0x0b, 0x37,
-	0xbd, 0x6a, 0x45, 0xb9, 0x44, 0x02, 0x6d, 0x9d, 0x56, 0x55, 0x6c, 0x43, 0x44, 0x1b, 0x93, 0xc6,
-	0x45, 0xc9, 0x12, 0x6f, 0x54, 0xa5, 0xb5, 0x67, 0xa7, 0x4c, 0x5c, 0xf0, 0x0a, 0xbc, 0x26, 0xaf,
-	0x81, 0x6a, 0xa7, 0xe9, 0x9f, 0xd9, 0x6d, 0xc8, 0xe0, 0x26, 0x92, 0xed, 0x93, 0xef, 0x9c, 0xef,
-	0x7c, 0xe7, 0x1c, 0x1b, 0x36, 0x02, 0x3f, 0xf8, 0x42, 0x9a, 0xf2, 0xdb, 0x60, 0x9c, 0x46, 0x14,
-	0x15, 0xe4, 0x02, 0xef, 0xbe, 0x67, 0x64, 0xd4, 0xeb, 0x1e, 0x37, 0xd9, 0xe0, 0xba, 0x29, 0x4f,
-	0x9a, 0x22, 0x1c, 0xf4, 0x6e, 0x45, 0xf3, 0x56, 0x28, 0x4b, 0xf7, 0x0d, 0x40, 0x9b, 0x0e, 0x87,
-	0x74, 0xe4, 0x11, 0xc1, 0x90, 0x0d, 0xff, 0x11, 0xce, 0xdb, 0x34, 0x24, 0xb6, 0xe5, 0x58, 0xf5,
-	0x82, 0x37, 0x5d, 0xa2, 0x0a, 0x14, 0x09, 0xe7, 0xc7, 0xe2, 0xda, 0xce, 0x39, 0x56, 0xbd, 0xe4,
-	0xc5, 0x2b, 0xf7, 0x13, 0x6c, 0x75, 0x48, 0x74, 0x26, 0x08, 0xef, 0x8e, 0xae, 0xe8, 0x21, 0xa7,
-	0xc3, 0xf6, 0xc4, 0xb5, 0x47, 0x6e, 0x50, 0x0d, 0x60, 0x3c, 0xd9, 0x3f, 0x38, 0xea, 0x8b, 0xc8,
-	0xb6, 0x9c, 0x7c, 0xbd, 0xe4, 0xcd, 0xed, 0x20, 0x07, 0xca, 0x94, 0x11, 0xee, 0x47, 0x7d, 0x3a,
-	0xea, 0x1e, 0xc4, 0xb8, 0xf3, 0x5b, 0xee, 0x4f, 0x0b, 0x6c, 0x3d, 0xba, 0x60, 0xe8, 0x25, 0x40,
-	0x90, 0x44, 0x2e, 0xc3, 0x2d, 0xb7, 0x36, 0x1a, 0x2a, 0x0b, 0x33, 0x4a, 0xde, 0x9c, 0x11, 0x7a,
-	0x0b, 0x0f, 0xc6, 0x31, 0x96, 0x8c, 0x29, 0xe7, 0xe4, 0xeb, 0xe5, 0x56, 0xb5, 0x21, 0x08, 0xff,
-	0x46, 0x78, 0xcf, 0x67, 0xfd, 0x1e, 0xf3, 0xb9, 0x3f, 0x14, 0x8d, 0xa9, 0x4b, 0x6f, 0xe1, 0x07,
-	0xf7, 0x07, 0xd8, 0x67, 0x2c, 0xf4, 0x23, 0x32, 0x3d, 0x3f, 0xa5, 0x09, 0xdd, 0x65, 0x70, 0xeb,
-	0x0f, 0xc1, 0x53, 0xe4, 0xe3, 0x04, 0xb6, 0x0d, 0xee, 0x33, 0xe5, 0xc3, 0x3d, 0x87, 0x6a, 0x87,
-	0x44, 0x87, 0xbc, 0x4f, 0x46, 0xa1, 0x12, 0x65, 0x41, 0xc0, 0x0a, 0x14, 0x95, 0x5c, 0x12, 0xad,
-	0xe4, 0xc5, 0xab, 0x14, 0x81, 0xde, 0xc0, 0x8e, 0x19, 0x58, 0xb0, 0xb5, 0xa5, 0xb1, 0xc8, 0x25,
-	0x97, 0x86, 0xcb, 0x00, 0x9e, 0xec, 0x85, 0xa1, 0x72, 0x39, 0xa7, 0x8a, 0x89, 0x03, 0x86, 0xff,
-	0xaf, 0xe2, 0xf0, 0x62, 0x02, 0xc9, 0x7a, 0x99, 0x5f, 0xfe, 0x2e, 0xbf, 0x2e, 0x6c, 0xde, 0x75,
-	0x96, 0x4d, 0x03, 0x06, 0xb6, 0x47, 0xc2, 0x71, 0x40, 0x14, 0x5a, 0x2a, 0x01, 0xee, 0x17, 0xfc,
-	0x09, 0x6c, 0x1b, 0x3c, 0x66, 0x63, 0xf0, 0x11, 0x70, 0x87, 0x44, 0xfb, 0x5f, 0xfd, 0x60, 0xf0,
-	0x57, 0x8b, 0x88, 0xc9, 0xea, 0xd4, 0xe3, 0xfe, 0x9b, 0x1a, 0x8a, 0xa0, 0xb2, 0x17, 0x86, 0xd2,
-	0xe3, 0xa4, 0xc3, 0x52, 0x94, 0x91, 0x03, 0xe5, 0xcb, 0xa9, 0xf9, 0x8c, 0xc5, 0xdc, 0x56, 0x0a,
-	0x3d, 0x8e, 0x60, 0x4b, 0xeb, 0x35, 0x9b, 0x1a, 0xdf, 0xa1, 0xaa, 0xd4, 0x4d, 0x00, 0xd3, 0xca,
-	0x71, 0x6f, 0x22, 0x1f, 0x60, 0xc7, 0xec, 0x3a, 0x13, 0x9b, 0xd6, 0xaf, 0x02, 0xa8, 0xbb, 0x0c,
-	0x9d, 0xc3, 0xa6, 0xee, 0x2a, 0x40, 0xb5, 0x18, 0xc0, 0x70, 0x0b, 0xe1, 0xe7, 0x2b, 0xcf, 0x05,
-	0x43, 0x17, 0xf0, 0x54, 0x3b, 0x54, 0xd1, 0xf4, 0x4f, 0xd3, 0xc4, 0xc7, 0xce, 0x6a, 0x03, 0xc1,
-	0x50, 0x20, 0xef, 0x2f, 0xed, 0x1c, 0x44, 0xee, 0x2c, 0x30, 0xd3, 0x04, 0xc6, 0x2f, 0xd6, 0xda,
-	0x08, 0x86, 0xde, 0xc1, 0xe3, 0xe5, 0x61, 0x84, 0x70, 0xfc, 0xa3, 0x66, 0x24, 0xe2, 0xaa, 0xf1,
-	0x4c, 0x65, 0x43, 0x3b, 0x1c, 0x92, 0x6c, 0x98, 0x86, 0x55, 0x92, 0x0d, 0xf3, 0x6c, 0xf9, 0x2c,
-	0xdf, 0x0a, 0xba, 0x86, 0x46, 0xbb, 0x33, 0xa2, 0x86, 0x41, 0x82, 0xdd, 0x75, 0x26, 0x82, 0xa1,
-	0x53, 0x79, 0x09, 0x2c, 0xb7, 0x12, 0x7a, 0x36, 0x63, 0xac, 0x69, 0x6e, 0x5c, 0x5b, 0x75, 0xac,
-	0x54, 0x34, 0xd5, 0x75, 0xa2, 0xe2, 0x8a, 0x9e, 0x4b, 0x54, 0x5c, 0xd5, 0x1c, 0xfb, 0x8f, 0x2e,
-	0x1e, 0x36, 0xd4, 0x1b, 0xee, 0xb5, 0xfc, 0x5e, 0x16, 0xe5, 0x03, 0xed, 0xd5, 0xef, 0x00, 0x00,
-	0x00, 0xff, 0xff, 0x08, 0x5c, 0x1d, 0xa2, 0xdf, 0x09, 0x00, 0x00,
+var fileDescriptor_cache_cf8751e0f76be356 = []byte{
+	// 751 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x57, 0x6f, 0x4f, 0x13, 0x4f,
+	0x10, 0xce, 0x95, 0xc0, 0x0f, 0xa6, 0x3f, 0xa3, 0xac, 0x08, 0xc7, 0x16, 0xea, 0x71, 0x6a, 0xec,
+	0xab, 0x36, 0xe2, 0x4b, 0x13, 0x0d, 0x7f, 0x42, 0xd3, 0x08, 0x18, 0x4f, 0x90, 0x04, 0x13, 0xeb,
+	0xd1, 0x5b, 0xb0, 0xa9, 0xed, 0x2d, 0xbb, 0x57, 0x88, 0x31, 0x7e, 0x05, 0x3f, 0x84, 0x9f, 0xd4,
+	0x74, 0xf7, 0xfe, 0x73, 0x7b, 0x3d, 0x0e, 0x7d, 0x73, 0xc9, 0xee, 0xce, 0x3d, 0x33, 0xcf, 0x3e,
+	0x73, 0x33, 0x73, 0xb0, 0xd8, 0xb3, 0x7b, 0x5f, 0x49, 0x4b, 0x3c, 0x9b, 0x94, 0xb9, 0x9e, 0x8b,
+	0x66, 0xc5, 0x02, 0x6f, 0xbc, 0xa3, 0x64, 0xd4, 0xed, 0x1c, 0xb4, 0xe8, 0xe0, 0xa2, 0x25, 0x4e,
+	0x5a, 0xdc, 0x19, 0x74, 0xaf, 0x79, 0xeb, 0x9a, 0x4b, 0x4b, 0xf3, 0x35, 0xc0, 0x8e, 0x3b, 0x1c,
+	0xba, 0x23, 0x8b, 0x70, 0x8a, 0x74, 0xf8, 0x8f, 0x30, 0xb6, 0xe3, 0x3a, 0x44, 0xd7, 0x0c, 0xad,
+	0x31, 0x6b, 0x05, 0x4b, 0xb4, 0x0c, 0x73, 0x84, 0xb1, 0x03, 0x7e, 0xa1, 0x57, 0x0c, 0xad, 0xb1,
+	0x60, 0xf9, 0x2b, 0xf3, 0x13, 0xac, 0xb4, 0x89, 0x77, 0xcc, 0x09, 0xeb, 0x8c, 0xce, 0xdd, 0x3d,
+	0xe6, 0x0e, 0x77, 0x26, 0xae, 0x2d, 0x72, 0x89, 0xea, 0x00, 0xe3, 0xc9, 0xfe, 0xee, 0x7e, 0x9f,
+	0x7b, 0xba, 0x66, 0xcc, 0x34, 0x16, 0xac, 0xd8, 0x0e, 0x32, 0xa0, 0xea, 0x52, 0xc2, 0x6c, 0xaf,
+	0xef, 0x8e, 0x3a, 0xbb, 0x3e, 0x6e, 0x7c, 0xcb, 0xfc, 0xa5, 0x81, 0x9e, 0x8d, 0xce, 0x29, 0x7a,
+	0x01, 0xd0, 0x0b, 0x23, 0x17, 0xe1, 0x56, 0x37, 0x17, 0x9b, 0xf2, 0x16, 0x22, 0x4a, 0x56, 0xcc,
+	0x08, 0xbd, 0x81, 0xff, 0xc7, 0x3e, 0x96, 0x88, 0xa9, 0x62, 0xcc, 0x34, 0xaa, 0x9b, 0xb5, 0x26,
+	0x27, 0xec, 0x8a, 0xb0, 0xae, 0x4d, 0xfb, 0x5d, 0x6a, 0x33, 0x7b, 0xc8, 0x9b, 0x81, 0x4b, 0x2b,
+	0xf1, 0x82, 0xf9, 0x13, 0xf4, 0x63, 0xea, 0xd8, 0x1e, 0x09, 0xce, 0x8f, 0xdc, 0x90, 0x6e, 0x1a,
+	0x5c, 0xbb, 0x25, 0x78, 0x81, 0xfb, 0x38, 0x84, 0x55, 0x85, 0xfb, 0x52, 0xf7, 0x61, 0x9e, 0x40,
+	0xad, 0x4d, 0xbc, 0x3d, 0xd6, 0x27, 0x23, 0x47, 0x8a, 0x92, 0x10, 0x70, 0x19, 0xe6, 0xa4, 0x5c,
+	0x02, 0x6d, 0xc1, 0xf2, 0x57, 0x05, 0x02, 0xbd, 0x84, 0x35, 0x35, 0x30, 0xa7, 0x53, 0x53, 0x23,
+	0xc9, 0xa5, 0x52, 0x84, 0xcb, 0x00, 0x1e, 0x6e, 0x39, 0x8e, 0x74, 0x19, 0x53, 0x45, 0xc5, 0x01,
+	0xc3, 0xfc, 0xb9, 0x1f, 0x9e, 0x4f, 0x20, 0x5c, 0xa7, 0xf9, 0xcd, 0xdc, 0xe4, 0xd7, 0x81, 0xa5,
+	0x9b, 0xce, 0xca, 0x69, 0x40, 0x41, 0xb7, 0x88, 0x33, 0xee, 0x11, 0x89, 0x56, 0x48, 0x80, 0xbb,
+	0x05, 0x7f, 0x08, 0xab, 0x0a, 0x8f, 0xe5, 0x18, 0x7c, 0x04, 0xdc, 0x26, 0xde, 0xf6, 0x37, 0xbb,
+	0x37, 0xf8, 0xab, 0x49, 0x44, 0x45, 0x76, 0x66, 0xe3, 0xfe, 0x9b, 0x1c, 0xf2, 0x60, 0x79, 0xcb,
+	0x71, 0x84, 0xc7, 0xc9, 0x17, 0x56, 0x20, 0x8d, 0x0c, 0xa8, 0x9e, 0x05, 0xe6, 0x11, 0x8b, 0xd8,
+	0x56, 0x01, 0x3d, 0xf6, 0x61, 0x25, 0xd3, 0x6b, 0x39, 0x35, 0xbe, 0x43, 0x4d, 0xaa, 0x1b, 0x02,
+	0x16, 0x95, 0xe3, 0xce, 0x44, 0xde, 0xc3, 0x9a, 0xda, 0x75, 0x39, 0x36, 0x9f, 0xc1, 0x68, 0x13,
+	0xaf, 0xcd, 0xdc, 0x31, 0x3d, 0x20, 0xc3, 0xb3, 0x40, 0xdc, 0x04, 0xa5, 0x54, 0x60, 0xda, 0x8d,
+	0xc0, 0x26, 0x6d, 0xed, 0x62, 0x02, 0x11, 0x12, 0x0b, 0x96, 0xe6, 0x15, 0x6c, 0x4c, 0xc1, 0x2f,
+	0xd7, 0x69, 0x92, 0xc9, 0x59, 0x49, 0x27, 0xa7, 0x79, 0x05, 0xfa, 0x96, 0xe3, 0xc4, 0xfc, 0xc6,
+	0x72, 0x6d, 0x5a, 0x62, 0x2b, 0xd9, 0x14, 0xfb, 0xf6, 0x15, 0x7e, 0xcb, 0xe9, 0xf3, 0x03, 0xd6,
+	0xa5, 0xe4, 0x31, 0xc8, 0x5b, 0x0d, 0x01, 0x77, 0x21, 0xf3, 0x01, 0xea, 0x79, 0xce, 0x4b, 0x31,
+	0xda, 0xfc, 0x3d, 0x0f, 0x72, 0x7a, 0x42, 0x27, 0xb0, 0x94, 0x35, 0x7c, 0xa0, 0xba, 0x0f, 0xa0,
+	0x98, 0x7b, 0xf0, 0xe3, 0xdc, 0x73, 0x4e, 0xd1, 0x29, 0x3c, 0xca, 0x6c, 0xe3, 0x28, 0x78, 0x53,
+	0x35, 0x63, 0x60, 0x23, 0xdf, 0x80, 0x53, 0xd4, 0x13, 0x13, 0x53, 0x66, 0xe7, 0x45, 0x66, 0x14,
+	0x98, 0xaa, 0xe7, 0xe3, 0x27, 0x53, 0x6d, 0x38, 0x45, 0x6f, 0xe1, 0x41, 0xba, 0xfd, 0x21, 0xec,
+	0xbf, 0x98, 0xd1, 0x84, 0x71, 0x4d, 0x79, 0x26, 0x6f, 0x23, 0xb3, 0x1d, 0x85, 0xb7, 0xa1, 0x6a,
+	0x8f, 0xe1, 0x6d, 0xa8, 0xbb, 0xd9, 0x17, 0x31, 0x9d, 0x66, 0xb5, 0x10, 0xb4, 0x11, 0x11, 0x55,
+	0xb4, 0x2e, 0x6c, 0x4e, 0x33, 0xe1, 0x14, 0x1d, 0x89, 0xb1, 0x23, 0x5d, 0xbc, 0xd1, 0x7a, 0xc4,
+	0x38, 0xa3, 0x9d, 0xe0, 0x7a, 0xde, 0xb1, 0x54, 0x51, 0x55, 0x49, 0x43, 0x15, 0x73, 0xaa, 0x7c,
+	0xa8, 0x62, 0x6e, 0x39, 0x66, 0xb0, 0x9e, 0x5b, 0xfb, 0xd0, 0xf3, 0x88, 0x7f, 0x6e, 0x05, 0xc6,
+	0x8d, 0x62, 0x86, 0x52, 0xec, 0xcc, 0xfa, 0x13, 0x8a, 0xad, 0xaa, 0x8a, 0xa1, 0xd8, 0xea, 0xf2,
+	0xd5, 0x07, 0xac, 0x2e, 0x07, 0xe8, 0x69, 0xe2, 0x4a, 0x14, 0xe5, 0x0a, 0x3f, 0x2b, 0x60, 0xc5,
+	0xe9, 0xf6, 0xfd, 0xd3, 0x7b, 0x4d, 0xf9, 0xc3, 0xf5, 0x4a, 0x3c, 0xcf, 0xe6, 0xc4, 0xdf, 0xd4,
+	0xcb, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xdf, 0x94, 0x59, 0x33, 0x8c, 0x0d, 0x00, 0x00,
 }

@@ -161,6 +161,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	resp.GroupInfo.OwnerUserID = req.OwnerUserID
 
 	log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
+
 	chat.GroupCreatedNotification(req.OperationID, req.OpUserID, groupId, okUserIDList)
 	return resp, nil
 }
@@ -690,6 +691,22 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	} else {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String())
 	}
+	//reduceGroupMemberFromCacheReq := &pbCache.ReduceGroupMemberFromCacheReq{
+	//	UserIDList:           []string{req.OpUserID},
+	//	GroupID:              req.GroupID,
+	//	OperationID:          req.OperationID,
+	//}
+	//etcdConn = getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	//cacheClient := pbCache.NewCacheClient(etcdConn)
+	//respCachePb, err := cacheClient.ReduceGroupMemberFromCache(context.Background(), reduceGroupMemberFromCacheReq)
+	//if err != nil {
+	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddFriendToCache failed", err.Error(), reduceGroupMemberFromCacheReq.String())
+	//	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: constant.ErrServer.ErrMsg}}, nil
+	//}
+	//if respPb.CommonResp.ErrCode != 0 {
+	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddFriendToCache failed", reduceGroupMemberFromCacheReq.String())
+	//	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode:respCachePb.CommonResp.ErrCode, ErrMsg: respCachePb.CommonResp.ErrMsg}}, nil
+	//}
 	chat.MemberQuitNotification(req)
 	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}})
 	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil

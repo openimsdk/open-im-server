@@ -72,14 +72,10 @@ func GetGroupMemberIDListByGroupID(groupID string) ([]string, error) {
 		return nil, err
 	}
 	dbConn.LogMode(false)
-	var groupMembers []db.GroupMember
-	err = dbConn.Table("group_members").Select("user_id").Where("group_id=?", groupID).Find(&groupMembers).Error
+	var groupMemberIDList []string
+	err = dbConn.Table("group_members").Where("group_id=?", groupID).Pluck("user_id", &groupMemberIDList).Error
 	if err != nil {
 		return nil, err
-	}
-	var groupMemberIDList []string
-	for _, v := range groupMembers {
-		groupMemberIDList = append(groupMemberIDList, v.UserID)
 	}
 	return groupMemberIDList, nil
 }

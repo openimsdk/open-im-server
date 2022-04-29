@@ -730,3 +730,7 @@ func SetGroupMemberNickname(c *gin.Context) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
+func GetGroupMemberIDListFromCache(c *gin.Context) {
+
+}

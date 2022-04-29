@@ -88,6 +88,36 @@ message ReduceBlackUserFromCacheResp {
   CommonResp commonResp = 1;
 }
 
+message GetGroupMemberIDListFromCacheReq {
+  string operationID = 1;
+  string groupID = 2;
+}
+
+message GetGroupMemberIDListFromCacheResp {
+  CommonResp commonResp = 1;
+  repeated string userIDList = 2;
+}
+
+message AddGroupMemberToCacheReq {
+  repeated string userIDList = 1;
+  string groupID = 2;
+  string operationID = 3;
+}
+
+message AddGroupMemberToCacheResp {
+  CommonResp commonResp = 1;
+}
+
+message ReduceGroupMemberFromCacheReq {
+  repeated string userIDList = 1;
+  string groupID = 2;
+  string operationID = 3;
+}
+
+message ReduceGroupMemberFromCacheResp {
+  CommonResp commonResp = 1;
+}
+
 service cache{
   // userInfo
   rpc GetUserInfoFromCache(GetUserInfoFromCacheReq) returns(GetUserInfoFromCacheResp);
@@ -102,6 +132,11 @@ service cache{
   rpc GetBlackIDListFromCache(GetBlackIDListFromCacheReq) returns(GetBlackIDListFromCacheResp);
   rpc AddBlackUserToCache(AddBlackUserToCacheReq) returns(AddBlackUserToCacheResp);
   rpc ReduceBlackUserFromCache(ReduceBlackUserFromCacheReq) returns(ReduceBlackUserFromCacheResp);
+
+  // group
+  rpc GetGroupMemberIDListFromCache(GetGroupMemberIDListFromCacheReq) returns(GetGroupMemberIDListFromCacheResp);
+  rpc AddGroupMemberToCache(AddGroupMemberToCacheReq) returns(AddGroupMemberToCacheResp);
+  rpc ReduceGroupMemberFromCache(ReduceGroupMemberFromCacheReq) returns(ReduceGroupMemberFromCacheResp);
 }
 
 

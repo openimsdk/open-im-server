@@ -223,3 +223,13 @@ func UpdateGroupInfoDefaultZero(groupID string, args map[string]interface{}) err
 	}
 	return dbConn.Table("groups").Where("group_id = ? ", groupID).Update(args).Error
 }
+
+func GetAllGroupIDList() ([]string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	var groupIDList []string
+	err = dbConn.Model(&db.Group{}).Pluck("group_id", &groupIDList).Error
+	return groupIDList, err
+}
