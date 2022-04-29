@@ -1,16 +1,14 @@
 package getcdv3
 
 import (
+	"Open_IM/pkg/common/log"
 	"context"
 	"fmt"
+	"go.etcd.io/etcd/clientv3"
 	"net"
 	"strconv"
 	"strings"
 	"time"
-
-	clientv3 "go.etcd.io/etcd/client/v3"
-
-	"Open_IM/pkg/common/log"
 )
 
 type RegEtcd struct {
