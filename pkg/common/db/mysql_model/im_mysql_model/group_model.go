@@ -230,6 +230,6 @@ func GetAllGroupIDList() ([]string, error) {
 		return nil, err
 	}
 	var groupIDList []string
-	err = dbConn.Model(&db.Group{}).Pluck("group_id", &groupIDList).Error
+	err = dbConn.Model("groups").Pluck("group_id", &groupIDList).Error
 	return groupIDList, err
 }
