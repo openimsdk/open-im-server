@@ -179,7 +179,7 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 
 		if flag == 1 {
 			r.cc.UpdateState(resolver.State{Addresses: addrList})
-			//log.Debug("update: ", addrList)
+			log.Debug("update: ", addrList)
 		}
 	}
 }
@@ -187,7 +187,7 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 func GetConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
 	gEtcdCli, err := clientv3.New(clientv3.Config{Endpoints: strings.Split(etcdaddr, ",")})
 	if err != nil {
-		//log.Error("clientv3.New failed", err.Error())
+		log.Error("clientv3.New failed", err.Error())
 		return nil
 	}
 
