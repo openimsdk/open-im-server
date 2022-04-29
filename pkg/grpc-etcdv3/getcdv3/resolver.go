@@ -45,7 +45,7 @@ func NewResolver(schema, etcdAddr, serviceName string) (*Resolver, error) {
 	r.etcdAddr = etcdAddr
 	resolver.Register(&r)
 
-	ctx, _ := context.WithTimeout(context.TODO(), time.Second*5)
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
 	conn, err := grpc.DialContext(ctx, GetPrefix(schema, serviceName),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
 		grpc.WithInsecure())
