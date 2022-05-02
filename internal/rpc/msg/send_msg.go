@@ -264,12 +264,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		//split  parallel send
 		var wg sync.WaitGroup
 		var sendTag bool
-		var split = 10
+		var split = 50
 		remain := len(memberUserIDList) % split
 		for i := 0; i < len(memberUserIDList)/split; i++ {
 			wg.Add(1)
 			go func(list []string) {
-				log.Debug(pb.OperationID, "split userID ", list)
+				//	log.Debug(pb.OperationID, "split userID ", list)
 				groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
 				*groupPB.MsgData = *pb.MsgData
 				*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
@@ -279,7 +279,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &groupPB)
 					if isSend {
 						msgToMQGroup.MsgData = groupPB.MsgData
-						log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
+						//	log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
 						err := rpc.sendMsgToKafka(&msgToMQGroup, v)
 						if err != nil {
 							log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
@@ -296,7 +296,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		if remain > 0 {
 			wg.Add(1)
 			go func(list []string) {
-				log.Debug(pb.OperationID, "split userID ", list)
+				//	log.Debug(pb.OperationID, "split userID ", list)
 				groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
 				*groupPB.MsgData = *pb.MsgData
 				*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
@@ -306,7 +306,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &groupPB)
 					if isSend {
 						msgToMQGroup.MsgData = groupPB.MsgData
-						log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
+						//	log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
 						err := rpc.sendMsgToKafka(&msgToMQGroup, v)
 						if err != nil {
 							log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
