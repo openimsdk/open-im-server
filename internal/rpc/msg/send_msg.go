@@ -279,8 +279,8 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					groupPB.MsgData.RecvID = v
 					isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &groupPB)
 					if isSend {
-						log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, groupPB.String())
 						msgToMQGroup.MsgData = groupPB.MsgData
+						log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
 						err := rpc.sendMsgToKafka(&msgToMQGroup, v)
 						if err != nil {
 							log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
