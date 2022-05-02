@@ -237,6 +237,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			}
 			return result
 		}(reply.MemberList)
+		log.Debug(pb.OperationID, "GetGroupAllMember userID list", memberUserIDList)
 		var addUidList []string
 		switch pb.MsgData.ContentType {
 		case constant.MemberKickedNotification:
@@ -277,6 +278,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					groupPB.MsgData.RecvID = v
 					isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &groupPB)
 					if isSend {
+						log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID)
 						msgToMQGroup.MsgData = groupPB.MsgData
 						err := rpc.sendMsgToKafka(&msgToMQGroup, v)
 						if err != nil {
@@ -284,6 +286,8 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 						} else {
 							sendTag = true
 						}
+					} else {
+						log.Debug(groupPB.OperationID, "not sendMsgToKafka, ", v)
 					}
 				}
 				wg.Done()
@@ -301,6 +305,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					groupPB.MsgData.RecvID = v
 					isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &groupPB)
 					if isSend {
+						log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID)
 						msgToMQGroup.MsgData = groupPB.MsgData
 						err := rpc.sendMsgToKafka(&msgToMQGroup, v)
 						if err != nil {
@@ -308,6 +313,8 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 						} else {
 							sendTag = true
 						}
+					} else {
+						log.Debug(groupPB.OperationID, "not sendMsgToKafka, ", v)
 					}
 				}
 				wg.Done()
