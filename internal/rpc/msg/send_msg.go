@@ -269,6 +269,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		for i := 0; i < len(memberUserIDList)/split; i++ {
 			wg.Add(1)
 			go func(list []string) {
+				log.Debug(pb.OperationID, "split userID ", list)
 				groupPB := pbChat.SendMsgReq{MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
 				groupPB = *pb
 				*groupPB.MsgData = *pb.MsgData
@@ -296,6 +297,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		if remain > 0 {
 			wg.Add(1)
 			go func(list []string) {
+				log.Debug(pb.OperationID, "split userID ", list)
 				groupPB := pbChat.SendMsgReq{MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
 				groupPB = *pb
 				*groupPB.MsgData = *pb.MsgData
