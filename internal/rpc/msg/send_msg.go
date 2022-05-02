@@ -270,8 +270,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			wg.Add(1)
 			go func(list []string) {
 				log.Debug(pb.OperationID, "split userID ", list)
-				groupPB := pbChat.SendMsgReq{MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
-				groupPB = *pb
+				groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
 				*groupPB.MsgData = *pb.MsgData
 				*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
 				msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
@@ -298,8 +297,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			wg.Add(1)
 			go func(list []string) {
 				log.Debug(pb.OperationID, "split userID ", list)
-				groupPB := pbChat.SendMsgReq{MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
-				groupPB = *pb
+				groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
 				*groupPB.MsgData = *pb.MsgData
 				*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
 				msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
@@ -307,8 +305,8 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					groupPB.MsgData.RecvID = v
 					isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &groupPB)
 					if isSend {
-						log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID)
 						msgToMQGroup.MsgData = groupPB.MsgData
+						log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
 						err := rpc.sendMsgToKafka(&msgToMQGroup, v)
 						if err != nil {
 							log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
