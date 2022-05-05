@@ -56,7 +56,7 @@ func (r *RPCServer) run() {
 	}
 }
 func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgReq) (*pbRelay.OnlinePushMsgResp, error) {
-	log.InfoByKv("PushMsgToUser is arriving", in.OperationID, "args", in.String())
+	log.NewInfo(in.OperationID, "PushMsgToUser is arriving", in.String())
 	var resp []*pbRelay.SingleMsgToUser
 	msgBytes, _ := proto.Marshal(in.MsgData)
 	mReply := Resp{
@@ -93,7 +93,7 @@ func (r *RPCServer) OnlinePushMsg(_ context.Context, in *pbRelay.OnlinePushMsgRe
 		}
 	}
 	if !tag {
-		log.NewError(in.OperationID, "push err ,no matched ws conn not in map", in.String())
+		log.NewDebug(in.OperationID, "push err ,no matched ws conn not in map", in.String())
 	}
 	return &pbRelay.OnlinePushMsgResp{
 		Resp: resp,
@@ -130,12 +130,12 @@ func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUser
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.OnlinePushMsgReq, RecvPlatForm, RecvID string) (ResultCode int64) {
 	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
 	if err != nil {
-		log.ErrorByKv("PushMsgToUser is failed By Ws", "", "Addr", conn.RemoteAddr().String(),
+		log.NewError(in.OperationID, "PushMsgToUser is failed By Ws", "Addr", conn.RemoteAddr().String(),
 			"error", err, "senderPlatform", constant.PlatformIDToName(in.MsgData.SenderPlatformID), "recvPlatform", RecvPlatForm, "args", in.String(), "recvID", RecvID)
 		ResultCode = -2
 		return ResultCode
 	} else {
-		log.InfoByKv("PushMsgToUser is success By Ws", in.OperationID, "args", in.String(), "recvPlatForm", RecvPlatForm, "recvID", RecvID)
+		log.NewDebug(in.OperationID, "PushMsgToUser is success By Ws", "args", in.String(), "recvPlatForm", RecvPlatForm, "recvID", RecvID)
 		ResultCode = 0
 		return ResultCode
 	}
