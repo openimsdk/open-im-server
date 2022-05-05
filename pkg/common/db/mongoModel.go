@@ -716,6 +716,18 @@ func (d *DataBases) DeleteOneWorkMoment(workMomentID string) error {
 	return err
 }
 
+func (d *DataBases) DeleteComment(workMomentID, contentID, opUserID string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
+	_, err := c.UpdateOne(ctx, bson.D{{"work_moment_id", workMomentID},
+		{"$or", bson.A{
+			bson.D{{"user_id", opUserID}},
+			bson.D{{"comments", bson.M{"$elemMatch": bson.M{"user_id": opUserID}}}},
+		},
+		}}, bson.M{"$pull": bson.M{"comments": bson.M{"content_id": contentID}}})
+	return err
+}
+
 func (d *DataBases) GetWorkMomentByID(workMomentID string) (*WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
