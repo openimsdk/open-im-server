@@ -311,6 +311,20 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	return resp, nil
 }
 
+func (s *officeServer) DeleteComment(_ context.Context, req *pbOffice.DeleteCommentReq) (resp *pbOffice.DeleteCommentResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.DeleteCommentResp{CommonResp: &pbOffice.CommonResp{}}
+	err = db.DB.DeleteComment(req.WorkMomentID, req.ContentID, req.OpUserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetWorkMomentByID failed", err.Error())
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
 // count and distinct permission users
 func (s *officeServer) getPermissionUserIDList(operationID string, groupList []*pbOffice.PermissionGroup, userList []*pbOffice.WorkMomentUser) []string {
 	var permissionUserIDList []string

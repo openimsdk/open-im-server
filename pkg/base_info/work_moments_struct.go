@@ -34,6 +34,14 @@ type CommentOneWorkMomentResp struct {
 	CommResp
 }
 
+type DeleteCommentReq struct {
+	office.DeleteCommentReq
+}
+
+type DeleteCommentResp struct {
+	CommResp
+}
+
 type WorkMomentsUserCommonReq struct {
 	PageNumber  int32  `json:"pageNumber" binding:"required"`
 	ShowNumber  int32  `json:"showNumber" binding:"required"`
@@ -54,6 +62,7 @@ type WorkMoment struct {
 	UserName     string            `json:"userName"`
 	AtUserList   []*WorkMomentUser `json:"atUsers"`
 	CreateTime   int32             `json:"createTime"`
+	Permission   int32             `json:"permission"`
 }
 
 type WorkMomentUser struct {

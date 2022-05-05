@@ -168,6 +168,44 @@ func CommentOneWorkMoment(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+func DeleteComment(c *gin.Context) {
+	var (
+		req    apiStruct.DeleteCommentReq
+		resp   apiStruct.DeleteCommentResp
+		reqPb  pbOffice.DeleteCommentReq
+		respPb *pbOffice.DeleteCommentResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "bind json failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
+	if err := utils.CopyStructFields(&reqPb, req); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), err.Error())
+	}
+	var ok bool
+	ok, reqPb.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		return
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	client := pbOffice.NewOfficeServiceClient(etcdConn)
+	respPb, err := client.DeleteComment(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DeleteComment rpc failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "DeleteComment rpc server failed" + err.Error()})
+		return
+	}
+	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
 func GetWorkMomentByID(c *gin.Context) {
 	var (
 		req    apiStruct.GetWorkMomentByIDReq
@@ -261,6 +299,7 @@ func GetUserWorkMoments(c *gin.Context) {
 			Comments:     make([]*apiStruct.Comment, len(v.Comments)),
 			LikeUserList: make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
 			AtUserList:   make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
+			Permission:   v.Permission,
 		}
 		for i, comment := range v.Comments {
 			workMoment.Comments[i] = &apiStruct.Comment{
@@ -344,6 +383,7 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 			Comments:     make([]*apiStruct.Comment, len(v.Comments)),
 			LikeUserList: make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
 			AtUserList:   make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
+			Permission:   v.Permission,
 		}
 		for i, comment := range v.Comments {
 			workMoment.Comments[i] = &apiStruct.Comment{
