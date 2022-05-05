@@ -8,6 +8,7 @@ type CreateOneWorkMomentReq struct {
 
 type CreateOneWorkMomentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
 
 type DeleteOneWorkMomentReq struct {
@@ -16,6 +17,7 @@ type DeleteOneWorkMomentReq struct {
 
 type DeleteOneWorkMomentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
 
 type LikeOneWorkMomentReq struct {
@@ -24,6 +26,7 @@ type LikeOneWorkMomentReq struct {
 
 type LikeOneWorkMomentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
 
 type CommentOneWorkMomentReq struct {
@@ -32,6 +35,7 @@ type CommentOneWorkMomentReq struct {
 
 type CommentOneWorkMomentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
 
 type DeleteCommentReq struct {
@@ -40,6 +44,7 @@ type DeleteCommentReq struct {
 
 type DeleteCommentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
 
 type WorkMomentsUserCommonReq struct {
@@ -120,4 +125,5 @@ type SetUserWorkMomentsLevelReq struct {
 
 type SetUserWorkMomentsLevelResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
