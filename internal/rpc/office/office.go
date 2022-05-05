@@ -485,7 +485,6 @@ func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWor
 	workMoment, err := db.DB.GetWorkMomentByID(req.WorkMomentID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetWorkMomentByID failed", err.Error())
-		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
 	canSee := isUserCanSeeWorkMoment(req.OpUserID, *workMoment)
