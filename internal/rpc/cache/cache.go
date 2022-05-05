@@ -11,10 +11,11 @@ import (
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"google.golang.org/grpc"
 )
 
 type cacheServer struct {
@@ -127,8 +128,10 @@ func updateAllGroupMemberListToCache() error {
 			continue
 		}
 		log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
-		if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
-			log.NewError("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
+		if len(groupMemberIDList) > 0 {
+			if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
+				log.NewError("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
+			}
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
@@ -143,8 +146,11 @@ func updateAllFriendToCache(userList []db.User) error {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
-			log.NewError("0", utils.GetSelfFuncName(), err.Error())
+		log.NewDebug("", utils.GetSelfFuncName(), "friendIDList", user.UserID, friendIDList)
+		if len(friendIDList) > 0 {
+			if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
+				log.NewError("0", utils.GetSelfFuncName(), err.Error(), friendIDList, user.UserID)
+			}
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
@@ -159,8 +165,11 @@ func updateAllBlackListToCache(userList []db.User) error {
 			log.NewError("", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
-			log.NewError("0", utils.GetSelfFuncName(), err.Error())
+		log.NewDebug("", utils.GetSelfFuncName(), "updateAllBlackListToCache", user.UserID, blackIDList)
+		if len(blackIDList) > 0 {
+			if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
+				log.NewError("0", utils.GetSelfFuncName(), err.Error())
+			}
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
