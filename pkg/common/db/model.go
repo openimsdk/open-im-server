@@ -3,6 +3,8 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/x/bsonx"
+
 	//"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"fmt"
@@ -70,38 +72,33 @@ func init() {
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	dataBase := mongoClient.Database(config.Config.Mongo.DBDatabase)
 
-	//cSendLogModels := []mongo.IndexModel{
-	//	{
-	//		Keys: bsonx.Doc{
-	//			{
-	//				Key: "send_id",
-	//			},
-	//		},
-	//		Options: options.Index().SetUnique(true),
-	//	},
-	//	{
-	//		Keys: bsonx.Doc{
-	//			{
-	//				Key:   "send_time",
-	//				Value: bsonx.Int32(-1),
-	//			},
-	//		},
-	//	},
-	//}
-	//result, err := dataBase.Collection(cSendLog).Indexes().CreateMany(context.Background(), cSendLogModels, opts)
-	//if err != nil {
-	//	fmt.Println("mongodb create cSendLogModels failed", result, err.Error())
-	//}
-
-	result, err := dataBase.Collection(cSendLog).Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "send_id"},
-			{Key: "send_time", Value: -1},
+	cSendLogModels := []mongo.IndexModel{
+		{
+			Keys: bsonx.Doc{
+				{
+					Key: "send_id",
+				},
+				{
+					Key:   "send_time",
+					Value: bsonx.Int32(-1),
+				},
+			},
 		},
-	}, opts)
-	if err != nil {
-		fmt.Println("mongodb create cSendLog index failed", result, err.Error())
 	}
+	result, err := dataBase.Collection(cSendLog).Indexes().CreateMany(context.Background(), cSendLogModels, opts)
+	if err != nil {
+		fmt.Println("mongodb create cSendLogModels failed", result, err.Error())
+	}
+
+	//result, err := dataBase.Collection(cSendLog).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+	//	Keys: bson.D{
+	//		{Key: "send_id"},
+	//		{Key: "send_time", Value: -1},
+	//	},
+	//}, opts)
+	//if err != nil {
+	//	fmt.Println("mongodb create cSendLog index failed", result, err.Error())
+	//}
 
 	cChatModels := []mongo.IndexModel{
 		{
