@@ -148,7 +148,7 @@ func init() {
 	//if err != nil {
 	//	fmt.Println("mongodb create cWorkMomentModels failed", result, err.Error())
 	//}
-	result, err = dataBase.Collection(cWorkMoment).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+	_, err = dataBase.Collection(cWorkMoment).Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "create_time", Value: -1},
 			{Key: "work_moment_id"},
