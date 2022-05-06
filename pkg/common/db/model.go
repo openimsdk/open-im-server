@@ -92,7 +92,7 @@ func init() {
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
 		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
 	}
-
+	fmt.Println("create index success")
 	DB.mongoClient = mongoClient
 
 	// redis pool init
