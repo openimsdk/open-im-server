@@ -206,7 +206,7 @@ func init() {
 	//if err != nil {
 	//	fmt.Println("mongodb create cTagModel2 failed", result, err.Error())
 	//}
-	result, err = dataBase.Collection(cTag).Indexes().CreateOne(context.Background(), mongo.IndexModel{
+	_, err = dataBase.Collection(cTag).Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "user_id"},
 			{Key: "create_time", Value: -1},
