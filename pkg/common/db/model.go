@@ -3,8 +3,6 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/x/bsonx"
-
 	//"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"fmt"
@@ -74,15 +72,7 @@ func init() {
 
 	cSendLogModels := []mongo.IndexModel{
 		{
-			Keys: bsonx.Doc{
-				{
-					Key: "send_id",
-				},
-				{
-					Key:   "send_time",
-					Value: bsonx.Int32(-1),
-				},
-			},
+			Keys: bson.M{"send_id": -1, "send_time": -1},
 		},
 	}
 	result, err := dataBase.Collection(cSendLog).Indexes().CreateMany(context.Background(), cSendLogModels, opts)
