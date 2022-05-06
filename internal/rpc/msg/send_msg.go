@@ -272,7 +272,9 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 				//	log.Debug(pb.OperationID, "split userID ", list)
 				groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
 				*groupPB.MsgData = *pb.MsgData
-				*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
+				if pb.MsgData.OfflinePushInfo != nil {
+					*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
+				}
 				msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
 				for _, v := range list {
 					groupPB.MsgData.RecvID = v
@@ -300,6 +302,9 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 				groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
 				*groupPB.MsgData = *pb.MsgData
 				*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
+				if pb.MsgData.OfflinePushInfo != nil {
+					*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
+				}
 				msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
 				for _, v := range list {
 					groupPB.MsgData.RecvID = v
