@@ -2,7 +2,6 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/x/bsonx"
 	"strings"
 
@@ -70,84 +69,28 @@ func init() {
 	}
 	fmt.Println("0", utils.GetSelfFuncName(), "mongo driver client init success: ", uri)
 	// mongodb create index
-	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
-	dataBase := mongoClient.Database(config.Config.Mongo.DBDatabase)
-	//cSendLogModels := []mongo.IndexModel{
-	//	{
-	//		//Keys: bson.M{"send_id": -1, "send_time": -1},
-	//		Keys: bson.D{
-	//			{Key: "send_id"},
-	//			{Key: "send_time", Value: -1},
-	//		},
-	//	},
-	//}
-	//result, err := dataBase.Collection(cSendLog).Indexes().CreateMany(context.Background(), cSendLogModels, opts)
-	//if err != nil {
-	//	fmt.Println("mongodb create cSendLogModels failed", result, err.Error())
-	//}
-	if err := createUniqueIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
-		fmt.Println("send_id", "-send_time", "create failed", err.Error())
+	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
+		fmt.Println("send_id", "-send_time", "index create failed", err.Error())
 	}
-	var result string
-	cChatModels := []mongo.IndexModel{
-		{
-			Keys:    bson.M{"uid": -1},
-			Options: options.Index().SetUnique(true),
-		},
+	if err := createMongoIndex(mongoClient, cChat, true, "uid"); err != nil {
+		fmt.Println("uid", " index create failed", err.Error())
 	}
-	_, err = dataBase.Collection(cChat).Indexes().CreateMany(context.Background(), cChatModels, opts)
-	if err != nil {
-		fmt.Println("mongodb create cChatModels failed", result, err.Error())
+	if err := createMongoIndex(mongoClient, cWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
+		fmt.Println("-create_time", "work_moment_id", "index create failed", err.Error())
+	}
+	if err := createMongoIndex(mongoClient, cWorkMoment, true, "work_moment_id"); err != nil {
+		fmt.Println("work_moment_id", "index create failed", err.Error())
 	}
 
-	_, err = dataBase.Collection(cWorkMoment).Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "create_time", Value: -1},
-			{Key: "work_moment_id"},
-		},
-	}, opts)
-	if err != nil {
-		fmt.Println("mongodb create cWorkMoment index failed", result, err.Error())
+	if err := createMongoIndex(mongoClient, cWorkMoment, false, "user_id", "-create_time"); err != nil {
+		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
 	}
 
-	_, err = dataBase.Collection(cWorkMoment).Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "work_moment_id"},
-		},
-		Options: options.Index().SetUnique(true),
-	}, opts)
-	if err != nil {
-		fmt.Println("mongodb create cWorkMoment index failed", err.Error())
+	if err := createMongoIndex(mongoClient, cTag, false, "user_id", "-create_time"); err != nil {
+		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
 	}
-
-	_, err = dataBase.Collection(cWorkMoment).Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "user_id"},
-			{Key: "create_time", Value: -1},
-		},
-	}, opts)
-	if err != nil {
-		fmt.Println("mongodb create cWorkMoment index failed", err.Error())
-	}
-
-	_, err = dataBase.Collection(cTag).Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "user_id"},
-			{Key: "create_time", Value: -1},
-		},
-	}, opts)
-	if err != nil {
-		fmt.Println("mongodb create cSendLog index failed", err.Error())
-	}
-
-	_, err = dataBase.Collection(cTag).Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "tag_id"},
-		},
-		Options: options.Index().SetUnique(true),
-	})
-	if err != nil {
-		fmt.Println("mongodb create cSendLog index failed", result, err.Error())
+	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
+		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
 	}
 
 	DB.mongoClient = mongoClient
@@ -171,7 +114,7 @@ func init() {
 	}
 }
 
-func createUniqueIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {
+func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {
 	db := client.Database(config.Config.Mongo.DBDatabase).Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 
