@@ -290,16 +290,17 @@ func GetUserWorkMoments(c *gin.Context) {
 	//}
 	for _, v := range respPb.WorkMoments {
 		workMoment := apiStruct.WorkMoment{
-			WorkMomentID: v.WorkMomentID,
-			UserID:       v.UserID,
-			Content:      v.Content,
-			FaceURL:      v.FaceURL,
-			UserName:     v.UserName,
-			CreateTime:   v.CreateTime,
-			Comments:     make([]*apiStruct.Comment, len(v.Comments)),
-			LikeUserList: make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
-			AtUserList:   make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
-			Permission:   v.Permission,
+			WorkMomentID:       v.WorkMomentID,
+			UserID:             v.UserID,
+			Content:            v.Content,
+			FaceURL:            v.FaceURL,
+			UserName:           v.UserName,
+			CreateTime:         v.CreateTime,
+			Comments:           make([]*apiStruct.Comment, len(v.Comments)),
+			LikeUserList:       make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
+			AtUserList:         make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
+			PermissionUserList: make([]*apiStruct.WorkMomentUser, len(v.PermissionUserList)),
+			Permission:         v.Permission,
 		}
 		for i, comment := range v.Comments {
 			workMoment.Comments[i] = &apiStruct.Comment{
@@ -322,6 +323,12 @@ func GetUserWorkMoments(c *gin.Context) {
 			workMoment.AtUserList[i] = &apiStruct.WorkMomentUser{
 				UserID:   atUser.UserID,
 				UserName: atUser.UserName,
+			}
+		}
+		for i, permissionUser := range v.PermissionUserList {
+			workMoment.PermissionUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   permissionUser.UserID,
+				UserName: permissionUser.UserName,
 			}
 		}
 		resp.Data.WorkMoments = append(resp.Data.WorkMoments, &workMoment)
@@ -374,16 +381,17 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	resp.Data.WorkMoments = []*apiStruct.WorkMoment{}
 	for _, v := range respPb.WorkMoments {
 		workMoment := apiStruct.WorkMoment{
-			WorkMomentID: v.WorkMomentID,
-			UserID:       v.UserID,
-			Content:      v.Content,
-			FaceURL:      v.FaceURL,
-			UserName:     v.UserName,
-			CreateTime:   v.CreateTime,
-			Comments:     make([]*apiStruct.Comment, len(v.Comments)),
-			LikeUserList: make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
-			AtUserList:   make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
-			Permission:   v.Permission,
+			WorkMomentID:       v.WorkMomentID,
+			UserID:             v.UserID,
+			Content:            v.Content,
+			FaceURL:            v.FaceURL,
+			UserName:           v.UserName,
+			CreateTime:         v.CreateTime,
+			Comments:           make([]*apiStruct.Comment, len(v.Comments)),
+			LikeUserList:       make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
+			AtUserList:         make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
+			PermissionUserList: make([]*apiStruct.WorkMomentUser, len(v.PermissionUserList)),
+			Permission:         v.Permission,
 		}
 		for i, comment := range v.Comments {
 			workMoment.Comments[i] = &apiStruct.Comment{
@@ -406,6 +414,12 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 			workMoment.AtUserList[i] = &apiStruct.WorkMomentUser{
 				UserID:   atUser.UserID,
 				UserName: atUser.UserName,
+			}
+		}
+		for i, permissionUser := range v.PermissionUserList {
+			workMoment.PermissionUserList[i] = &apiStruct.WorkMomentUser{
+				UserID:   permissionUser.UserID,
+				UserName: permissionUser.UserName,
 			}
 		}
 		resp.Data.WorkMoments = append(resp.Data.WorkMoments, &workMoment)

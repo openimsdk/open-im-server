@@ -666,25 +666,21 @@ func (d *DataBases) GetTagSendLogs(userID string, showNumber, pageNumber int32) 
 }
 
 type WorkMoment struct {
-	WorkMomentID         string      `bson:"work_moment_id"`
-	UserID               string      `bson:"user_id"`
-	UserName             string      `bson:"user_name"`
-	FaceURL              string      `bson:"face_url"`
-	Content              string      `bson:"content"`
-	LikeUserList         []*LikeUser `bson:"like_user_list"`
-	AtUserList           []*AtUser   `bson:"at_user_list"`
-	Comments             []*Comment  `bson:"comments"`
-	PermissionUserIDList []string    `bson:"permission_user_id_list"`
-	Permission           int32       `bson:"permission"`
-	CreateTime           int32       `bson:"create_time"`
+	WorkMomentID         string            `bson:"work_moment_id"`
+	UserID               string            `bson:"user_id"`
+	UserName             string            `bson:"user_name"`
+	FaceURL              string            `bson:"face_url"`
+	Content              string            `bson:"content"`
+	LikeUserList         []*WorkMomentUser `bson:"like_user_list"`
+	AtUserList           []*WorkMomentUser `bson:"at_user_list"`
+	PermissionUserList   []*WorkMomentUser `bson:"permission_user_list"`
+	Comments             []*Comment        `bson:"comments"`
+	PermissionUserIDList []string          `bson:"permission_user_id_list"`
+	Permission           int32             `bson:"permission"`
+	CreateTime           int32             `bson:"create_time"`
 }
 
-type AtUser struct {
-	UserID   string `bson:"user_id"`
-	UserName string `bson:"user_name"`
-}
-
-type LikeUser struct {
+type WorkMomentUser struct {
 	UserID   string `bson:"user_id"`
 	UserName string `bson:"user_name"`
 }
@@ -749,7 +745,7 @@ func (d *DataBases) LikeOneWorkMoment(likeUserID, userName, workMomentID string)
 		}
 	}
 	if !isAlreadyLike {
-		workMoment.LikeUserList = append(workMoment.LikeUserList, &LikeUser{UserID: likeUserID, UserName: userName})
+		workMoment.LikeUserList = append(workMoment.LikeUserList, &WorkMomentUser{UserID: likeUserID, UserName: userName})
 	}
 	log.NewDebug("", utils.GetSelfFuncName(), workMoment)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)

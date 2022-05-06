@@ -3,6 +3,7 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 
 	//"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
@@ -73,12 +74,25 @@ func init() {
 
 	cSendLogModels := []mongo.IndexModel{
 		{
-			Keys: bson.M{"user_id": -1},
+			Keys: bsonx.Doc{
+				{
+					Key: "send_id",
+				},
+			},
+			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bsonx.Doc{
+				{
+					Key:   "send_time",
+					Value: bsonx.Int32(-1),
+				},
+			},
 		},
 	}
 	result, err := dataBase.Collection(cSendLog).Indexes().CreateMany(context.Background(), cSendLogModels, opts)
 	if err != nil {
-		//fmt.Println("mongodb create cSendLogModels failed", result, err.Error())
+		fmt.Println("mongodb create cSendLogModels failed", result, err.Error())
 	}
 
 	cChatModels := []mongo.IndexModel{
@@ -93,28 +107,68 @@ func init() {
 
 	cWorkMomentModels := []mongo.IndexModel{
 		{
-			Keys: bson.M{"work_moment_id": -1},
+			Keys: bsonx.Doc{
+				{
+					Key:   "create_time",
+					Value: bsonx.Int32(-1),
+				},
+			},
 		},
 		{
-			Keys: bson.M{"user_id": -1},
+			Keys: bsonx.Doc{
+				{
+					Key: "work_moment_id",
+				},
+			},
+			Options: options.Index().SetUnique(true),
+		},
+	}
+	cWorkMomentModel2 := []mongo.IndexModel{
+		{
+			Keys: bsonx.Doc{
+				{
+					Key: "work_moment_id",
+				},
+			},
+			Options: options.Index().SetUnique(true),
 		},
 	}
 	result, err = dataBase.Collection(cWorkMoment).Indexes().CreateMany(context.Background(), cWorkMomentModels, opts)
 	if err != nil {
-		//fmt.Println("mongodb create cWorkMomentModels failed", result, err.Error())
+		fmt.Println("mongodb create cWorkMomentModels failed", result, err.Error())
+	}
+	result, err = dataBase.Collection(cWorkMoment).Indexes().CreateMany(context.Background(), cWorkMomentModel2, opts)
+	if err != nil {
+		fmt.Println("mongodb create cWorkMomentModels failed", result, err.Error())
 	}
 
-	cTagModels := []mongo.IndexModel{
+	cTagModel1 := []mongo.IndexModel{
 		{
-			Keys: bson.M{"tag_id": -1},
-		},
-		{
-			Keys: bson.M{"user_id": -1},
+			Keys: bsonx.Doc{
+				{
+					Key: "tag_id",
+				},
+			},
+			Options: options.Index().SetUnique(true),
 		},
 	}
-	result, err = dataBase.Collection(cTag).Indexes().CreateMany(context.Background(), cTagModels, opts)
+	cTagModel2 := []mongo.IndexModel{
+		{
+			Keys: bsonx.Doc{
+				{
+					Key: "user_id",
+				},
+			},
+			Options: options.Index().SetUnique(true),
+		},
+	}
+	result, err = dataBase.Collection(cTag).Indexes().CreateMany(context.Background(), cTagModel1, opts)
 	if err != nil {
-		//fmt.Println("mongodb create cTagModels failed", result, err.Error())
+		fmt.Println("mongodb create cTagModel1 failed", result, err.Error())
+	}
+	result, err = dataBase.Collection(cTag).Indexes().CreateMany(context.Background(), cTagModel2, opts)
+	if err != nil {
+		fmt.Println("mongodb create cTagModel2 failed", result, err.Error())
 	}
 	DB.mongoClient = mongoClient
 

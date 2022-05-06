@@ -271,8 +271,9 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.CreateOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
 	workMoment := db.WorkMoment{
-		Comments:     []*db.Comment{},
-		LikeUserList: []*db.LikeUser{},
+		Comments:           []*db.Comment{},
+		LikeUserList:       []*db.WorkMomentUser{},
+		PermissionUserList: []*db.WorkMomentUser{},
 	}
 	createUser, err := imdb.GetUserByUserID(req.WorkMoment.UserID)
 	if err != nil {
@@ -286,6 +287,17 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	workMoment.UserName = createUser.Nickname
 	workMoment.FaceURL = createUser.FaceURL
 	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
+	for _, userID := range workMoment.PermissionUserIDList {
+		userName, err := imdb.GetUserNameByUserID(userID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+			continue
+		}
+		workMoment.PermissionUserList = append(workMoment.PermissionUserList, &db.WorkMomentUser{
+			UserID:   userID,
+			UserName: userName,
+		})
+	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
 	err = db.DB.CreateOneWorkMoment(&workMoment)
 	if err != nil {
