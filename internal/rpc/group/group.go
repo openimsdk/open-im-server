@@ -170,11 +170,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	cacheClient := pbCache.NewCacheClient(etcdConn)
 	cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
 	if err != nil {
-		log.NewError(req.OperationID, "AddBlackUserToCache rpc call failed ", err.Error())
+		log.NewError(req.OperationID, "AddGroupMemberToCache rpc call failed ", err.Error())
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
 	if cacheResp.CommonResp.ErrCode != 0 {
-		log.NewError(req.OperationID, "AddBlackUserToCache rpc logic call failed ", cacheResp.String())
+		log.NewError(req.OperationID, "AddGroupMemberToCache rpc logic call failed ", cacheResp.String())
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
 
@@ -334,11 +334,11 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	cacheClient := pbCache.NewCacheClient(etcdConn)
 	cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
 	if err != nil {
-		log.NewError(req.OperationID, "AddBlackUserToCache rpc call failed ", err.Error())
+		log.NewError(req.OperationID, "AddGroupMemberToCache rpc call failed ", err.Error())
 		return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
 	if cacheResp.CommonResp.ErrCode != 0 {
-		log.NewError(req.OperationID, "AddBlackUserToCache rpc logic call failed ", cacheResp.String())
+		log.NewError(req.OperationID, "AddGroupMemberToCache rpc logic call failed ", cacheResp.String())
 		return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
 

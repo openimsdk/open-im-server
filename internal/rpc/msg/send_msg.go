@@ -10,7 +10,6 @@ import (
 	pbCache "Open_IM/pkg/proto/cache"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbConversation "Open_IM/pkg/proto/conversation"
-	pbGroup "Open_IM/pkg/proto/group"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
@@ -217,21 +216,6 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendGroupMsg result", canSend, "end rpc and return")
 			return returnMsg(&replay, pb, 201, "callbackBeforeSendGroupMsg result stop rpc and return", "", 0)
 		}
-		//etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
-		//client := pbGroup.NewGroupClient(etcdConn)
-		//req := &pbGroup.GetGroupAllMemberReq{
-		//	GroupID:     pb.MsgData.GroupID,
-		//	OperationID: pb.OperationID,
-		//}
-		//reply, err := client.GetGroupAllMember(context.Background(), req)
-		//if err != nil {
-		//	log.Error(pb.Token, pb.OperationID, "rpc send_msg getGroupInfo failed, err = %s", err.Error())
-		//	return returnMsg(&replay, pb, 201, err.Error(), "", 0)
-		//}
-		//if reply.ErrCode != 0 {
-		//	log.Error(pb.Token, pb.OperationID, "rpc send_msg getGroupInfo failed, err = %s", reply.ErrMsg)
-		//	return returnMsg(&replay, pb, reply.ErrCode, reply.ErrMsg, "", 0)
-		//}
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pb.OperationID, GroupID: pb.MsgData.GroupID}
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
 		client := pbCache.NewCacheClient(etcdConn)
