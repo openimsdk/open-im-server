@@ -654,6 +654,18 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 		} else {
 			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String())
 		}
+		addGroupMemberToCacheReq := &pbCache.AddGroupMemberToCacheReq{OperationID: req.OperationID, GroupID: req.GroupID, UserIDList: []string{req.FromUserID}}
+		etcdCacheConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		cacheClient := pbCache.NewCacheClient(etcdCacheConn)
+		cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
+		if err != nil {
+			log.NewError(req.OperationID, "AddGroupMemberToCache rpc call failed ", err.Error())
+			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		}
+		if cacheResp.CommonResp.ErrCode != 0 {
+			log.NewError(req.OperationID, "AddGroupMemberToCache rpc logic call failed ", cacheResp.String())
+			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		}
 		chat.GroupApplicationAcceptedNotification(req)
 		chat.MemberEnterNotification(req)
 	} else if req.HandleResult == constant.GroupResponseRefuse {
@@ -1169,11 +1181,11 @@ func (s *groupServer) AddGroupMembersCMS(_ context.Context, req *pbGroup.AddGrou
 	cacheClient := pbCache.NewCacheClient(etcdConn)
 	cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
 	if err != nil {
-		log.NewError(req.OperationId, "AddBlackUserToCache rpc call failed ", err.Error())
+		log.NewError(req.OperationId, "AddGroupMemberToCache rpc call failed ", err.Error())
 		return resp, http.WrapError(constant.ErrDB)
 	}
 	if cacheResp.CommonResp.ErrCode != 0 {
-		log.NewError(req.OperationId, "AddBlackUserToCache rpc logic call failed ", cacheResp.String())
+		log.NewError(req.OperationId, "AddGroupMemberToCache rpc logic call failed ", cacheResp.String())
 		return resp, http.WrapError(constant.ErrDB)
 	}
 
