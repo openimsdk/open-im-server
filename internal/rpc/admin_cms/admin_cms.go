@@ -35,22 +35,35 @@ func NewAdminCMSServer(port int) *adminCMSServer {
 
 func (s *adminCMSServer) Run() {
 	log.NewInfo("0", "AdminCMS rpc start ")
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
+	}
+	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+
 	//listener network
-	listener, err := net.Listen("tcp", registerAddress)
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.NewError("0", "Listen failed ", err.Error(), registerAddress)
+		log.NewError("0", "Listen failed ", err.Error(), address)
 		return
 	}
-	log.NewInfo("0", "listen network success, ", registerAddress, listener)
+	log.NewInfo("0", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbAdminCMS.RegisterAdminCMSServer(srv, s)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		return

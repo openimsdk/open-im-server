@@ -138,7 +138,14 @@ func NewRpcConversationServer(port int) *rpcConversation {
 func (rpc *rpcConversation) Run() {
 	log.NewInfo("0", "rpc conversation start...")
 
-	address := utils.ServerIP + ":" + strconv.Itoa(rpc.rpcPort)
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
+	}
+	address := listenIP + ":" + strconv.Itoa(rpc.rpcPort)
+
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.NewError("0", "listen network failed ", err.Error(), address)
@@ -151,13 +158,20 @@ func (rpc *rpcConversation) Run() {
 
 	//service registers with etcd
 	pbConversation.RegisterConversationServer(srv, rpc)
-	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error(),
-			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
+			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
 		return
 	}
-	log.NewInfo("0", "RegisterConversationServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
+	log.NewInfo("0", "RegisterConversationServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError("0", "Serve failed ", err.Error())

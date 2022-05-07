@@ -59,6 +59,11 @@ kafka:
 #如果是单机模式，用0.0.0.0或者不填，默认即可
 serverip: 0.0.0.0
 
+rpcRegisterIP: 127.0.0.1
+listenIP: 0.0.0.0
+
+
+
 # endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
 endpoints:
   api: openim_api

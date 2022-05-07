@@ -24,7 +24,11 @@ type callBackConfig struct {
 }
 
 type config struct {
-	ServerIP      string `yaml:"serverip"`
+	ServerIP string `yaml:"serverip"`
+
+	RpcRegisterIP string `yaml:"rpcRegisterIP"`
+	ListenIP      string `yaml:"listenIP"`
+
 	ServerVersion string `yaml:"serverversion"`
 	Api           struct {
 		GinPort []int `yaml:"openImApiPort"`
