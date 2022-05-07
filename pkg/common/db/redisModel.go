@@ -233,7 +233,7 @@ func (d *DataBases) AddGroupMemberToCache(groupID string, userIDList ...string) 
 	for _, id := range userIDList {
 		IDList = append(IDList, id)
 	}
-	_, err := d.Exec("SADD", blackListCache+groupID, IDList...)
+	_, err := d.Exec("SADD", groupCache+groupID, IDList...)
 	return err
 }
 
@@ -242,7 +242,7 @@ func (d *DataBases) ReduceGroupMemberFromCache(groupID string, userIDList ...str
 	for _, id := range userIDList {
 		IDList = append(IDList, id)
 	}
-	_, err := d.Exec("SREM", blackListCache+groupID, IDList...)
+	_, err := d.Exec("SREM", groupCache+groupID, IDList...)
 	return err
 }
 
