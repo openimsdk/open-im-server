@@ -14,9 +14,7 @@ import (
 	"encoding/gob"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
-	"google.golang.org/grpc"
 	"runtime"
-	"strconv"
 	"strings"
 )
 
@@ -205,21 +203,15 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
 	if isPass {
 		signalResp := pbRtc.SignalResp{}
-		//isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
-		connGrpc, err := grpc.Dial(config.Config.Rtc.Address+":"+strconv.Itoa(config.Config.Rtc.Port), grpc.WithInsecure())
-		if err != nil {
-			log.NewError(m.OperationID, utils.GetSelfFuncName(), "grpc.Dial failed", err.Error())
-			ws.sendSignalMsgResp(conn, 204, "create grpc failed"+err.Error(), m, nil)
-			return
-		}
-		rtcClient := pbRtc.NewRtcServiceClient(connGrpc)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRealTimeCommName)
+		rtcClient := pbRtc.NewRtcServiceClient(etcdConn)
 		req := &pbRtc.SignalMessageAssembleReq{
 			SignalReq:   pData.(*pbRtc.SignalReq),
 			OperationID: m.OperationID,
 		}
 		respPb, err := rtcClient.SignalMessageAssemble(context.Background(), req)
 		if err != nil {
-			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error(), config.Config.Rtc.Address+":"+strconv.Itoa(config.Config.Rtc.Port))
+			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error(), config.Config.RpcRegisterName.OpenImRealTimeCommName)
 			ws.sendSignalMsgResp(conn, 204, "grpc SignalMessageAssemble failed: "+err.Error(), m, &signalResp)
 			return
 		}

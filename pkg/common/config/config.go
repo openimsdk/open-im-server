@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
@@ -106,7 +105,7 @@ type config struct {
 		RpcGetTokenPort       []int `yaml:"rpcGetTokenPort"`
 	}
 	RpcRegisterName struct {
-		OpenImStatisticsName         string `yaml:"OpenImStatisticsName"`
+		OpenImStatisticsName         string `yaml:"openImStatisticsName"`
 		OpenImUserName               string `yaml:"openImUserName"`
 		OpenImFriendName             string `yaml:"openImFriendName"`
 		OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`
@@ -120,6 +119,7 @@ type config struct {
 		OpenImOrganizationName       string `yaml:"openImOrganizationName"`
 		OpenImConversationName       string `yaml:"openImConversationName"`
 		OpenImCacheName              string `yaml:"openImCacheName"`
+		OpenImRealTimeCommName       string `yaml:"openImRealTimeCommName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
@@ -429,21 +429,11 @@ type PDefaultTips struct {
 }
 
 func init() {
-	//path, _ := os.Getwd()
-	//bytes, err := ioutil.ReadFile(path + "/config/config.yaml")
-	// if we cd Open-IM-Server/src/utils and run go test
-	// it will panic cannot find config/config.yaml
-
 	cfgName := os.Getenv("CONFIG_NAME")
 	if len(cfgName) == 0 {
 		cfgName = Root + "/config/config.yaml"
 	}
 
-	viper.SetConfigFile(cfgName)
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(err.Error())
-	}
 	bytes, err := ioutil.ReadFile(cfgName)
 	if err != nil {
 		panic(err.Error())
