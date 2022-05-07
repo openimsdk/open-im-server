@@ -28,12 +28,18 @@ func CreateOneWorkMoment(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	var userID string
+	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
@@ -67,12 +73,18 @@ func DeleteOneWorkMoment(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	var userID string
+	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
@@ -105,12 +117,18 @@ func LikeOneWorkMoment(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	var userID string
+	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
@@ -143,12 +161,18 @@ func CommentOneWorkMoment(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	var userID string
+	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
@@ -184,13 +208,17 @@ func DeleteComment(c *gin.Context) {
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), err.Error())
 	}
+
 	var ok bool
-	ok, reqPb.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.DeleteComment(context.Background(), &reqPb)
@@ -219,12 +247,18 @@ func GetWorkMomentByID(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	var userID string
+	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	reqPb.OperationID = req.OperationID
 	reqPb.OpUserID = userID
 	reqPb.WorkMomentID = req.WorkMomentID
@@ -261,12 +295,18 @@ func GetUserWorkMoments(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, opUserID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	var opUserID string
+	ok, opUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	reqPb.OperationID = req.OperationID
 	reqPb.Pagination = &pbCommon.RequestPagination{
 		PageNumber: req.PageNumber,
@@ -353,12 +393,18 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	var userID string
+	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	reqPb.OperationID = req.OperationID
 	reqPb.Pagination = &pbCommon.RequestPagination{
 		PageNumber: req.PageNumber,
@@ -444,12 +490,18 @@ func SetUserWorkMomentsLevel(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	ok, userID := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	var userID string
+	ok, userID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
