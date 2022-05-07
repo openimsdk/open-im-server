@@ -106,7 +106,7 @@ type config struct {
 		RpcGetTokenPort       []int `yaml:"rpcGetTokenPort"`
 	}
 	RpcRegisterName struct {
-		OpenImStatisticsName         string `yaml:"OpenImStatisticsName"`
+		OpenImStatisticsName         string `yaml:"openImStatisticsName"`
 		OpenImUserName               string `yaml:"openImUserName"`
 		OpenImFriendName             string `yaml:"openImFriendName"`
 		OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`

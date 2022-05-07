@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbCache "Open_IM/pkg/proto/cache"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
@@ -136,12 +137,12 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 
 		okUserIDList = append(okUserIDList, user.UserID)
-		err = db.DB.AddGroupMember(groupId, user.UserID)
-		if err != nil {
-			log.NewError(req.OperationID, "add mongo group member failed, db.DB.AddGroupMember failed ", err.Error())
-		}
+		// mongoDB method
+		//err = db.DB.AddGroupMember(groupId, user.UserID)
+		//if err != nil {
+		//	log.NewError(req.OperationID, "add mongo group member failed, db.DB.AddGroupMember failed ", err.Error())
+		//}
 	}
-
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
 	group, err := imdb.GetGroupInfoByGroupID(groupId)
 	if err != nil {
@@ -160,8 +161,24 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 	resp.GroupInfo.OwnerUserID = req.OwnerUserID
 
-	log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
+	addGroupMemberToCacheReq := &pbCache.AddGroupMemberToCacheReq{
+		UserIDList:  okUserIDList,
+		GroupID:     req.GroupInfo.GroupID,
+		OperationID: req.OperationID,
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := pbCache.NewCacheClient(etcdConn)
+	cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
+	if err != nil {
+		log.NewError(req.OperationID, "AddBlackUserToCache rpc call failed ", err.Error())
+		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	}
+	if cacheResp.CommonResp.ErrCode != 0 {
+		log.NewError(req.OperationID, "AddBlackUserToCache rpc logic call failed ", cacheResp.String())
+		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	}
 
+	log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
 	chat.GroupCreatedNotification(req.OperationID, req.OpUserID, groupId, okUserIDList)
 	return resp, nil
 }
@@ -307,6 +324,24 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v)
 		}
 	}
+
+	addGroupMemberToCacheReq := &pbCache.AddGroupMemberToCacheReq{
+		UserIDList:  okUserIDList,
+		GroupID:     req.GroupID,
+		OperationID: req.OperationID,
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := pbCache.NewCacheClient(etcdConn)
+	cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
+	if err != nil {
+		log.NewError(req.OperationID, "AddBlackUserToCache rpc call failed ", err.Error())
+		return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	}
+	if cacheResp.CommonResp.ErrCode != 0 {
+		log.NewError(req.OperationID, "AddBlackUserToCache rpc logic call failed ", cacheResp.String())
+		return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	}
+
 	chat.MemberInvitedNotification(req.OperationID, req.GroupID, req.OpUserID, req.Reason, okUserIDList)
 	resp.ErrCode = 0
 	log.NewInfo(req.OperationID, "InviteUserToGroup rpc return ", resp.String())
@@ -450,6 +485,24 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v)
 		}
 	}
+
+	reduceGroupMemberFromCacheReq := &pbCache.ReduceGroupMemberFromCacheReq{
+		UserIDList:  okUserIDList,
+		GroupID:     req.GroupID,
+		OperationID: req.OperationID,
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := pbCache.NewCacheClient(etcdConn)
+	cacheResp, err := cacheClient.ReduceGroupMemberFromCache(context.Background(), reduceGroupMemberFromCacheReq)
+	if err != nil {
+		log.NewError(req.OperationID, "ReduceGroupMemberFromCache rpc call failed ", err.Error())
+		return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	}
+	if cacheResp.CommonResp.ErrCode != 0 {
+		log.NewError(req.OperationID, "ReduceGroupMemberFromCache rpc logic call failed ", cacheResp.String())
+		return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	}
+
 	chat.MemberKickedNotification(req, okUserIDList)
 	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp.String())
 	return &resp, nil
@@ -691,22 +744,24 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	} else {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String())
 	}
-	//reduceGroupMemberFromCacheReq := &pbCache.ReduceGroupMemberFromCacheReq{
-	//	UserIDList:           []string{req.OpUserID},
-	//	GroupID:              req.GroupID,
-	//	OperationID:          req.OperationID,
-	//}
-	//etcdConn = getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
-	//cacheClient := pbCache.NewCacheClient(etcdConn)
-	//respCachePb, err := cacheClient.ReduceGroupMemberFromCache(context.Background(), reduceGroupMemberFromCacheReq)
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddFriendToCache failed", err.Error(), reduceGroupMemberFromCacheReq.String())
-	//	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: constant.ErrServer.ErrMsg}}, nil
-	//}
-	//if respPb.CommonResp.ErrCode != 0 {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddFriendToCache failed", reduceGroupMemberFromCacheReq.String())
-	//	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode:respCachePb.CommonResp.ErrCode, ErrMsg: respCachePb.CommonResp.ErrMsg}}, nil
-	//}
+
+	reduceGroupMemberFromCacheReq := &pbCache.ReduceGroupMemberFromCacheReq{
+		UserIDList:  []string{req.OpUserID},
+		GroupID:     req.GroupID,
+		OperationID: req.OperationID,
+	}
+	etcdConnCache := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := pbCache.NewCacheClient(etcdConnCache)
+	cacheResp, err := cacheClient.ReduceGroupMemberFromCache(context.Background(), reduceGroupMemberFromCacheReq)
+	if err != nil {
+		log.NewError(req.OperationID, "ReduceGroupMemberFromCache rpc call failed ", err.Error())
+		return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+	if cacheResp.CommonResp.ErrCode != 0 {
+		log.NewError(req.OperationID, "ReduceGroupMemberFromCache rpc logic call failed ", cacheResp.String())
+		return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+
 	chat.MemberQuitNotification(req)
 	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}})
 	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
@@ -1047,9 +1102,26 @@ func (s *groupServer) RemoveGroupMembersCMS(_ context.Context, req *pbGroup.Remo
 			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v)
 		}
 	}
+
+	reduceGroupMemberFromCacheReq := &pbCache.ReduceGroupMemberFromCacheReq{
+		UserIDList:  resp.Success,
+		GroupID:     req.GroupId,
+		OperationID: req.OperationID,
+	}
+	etcdConnCache := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := pbCache.NewCacheClient(etcdConnCache)
+	cacheResp, err := cacheClient.ReduceGroupMemberFromCache(context.Background(), reduceGroupMemberFromCacheReq)
+	if err != nil {
+		log.NewError(req.OperationID, "ReduceGroupMemberFromCache rpc call failed ", err.Error())
+		return resp, http.WrapError(constant.ErrDB)
+	}
+	if cacheResp.CommonResp.ErrCode != 0 {
+		log.NewError(req.OperationID, "ReduceGroupMemberFromCache rpc logic call failed ", cacheResp.String())
+		return resp, http.WrapError(constant.ErrDB)
+	}
+
 	chat.MemberKickedNotification(reqKick, resp.Success)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "success: ", resp.Success)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "failed: ", resp.Failed)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	return resp, nil
 }
 
@@ -1086,6 +1158,24 @@ func (s *groupServer) AddGroupMembersCMS(_ context.Context, req *pbGroup.AddGrou
 			resp.Success = append(resp.Success, userId)
 		}
 	}
+
+	addGroupMemberToCacheReq := &pbCache.AddGroupMemberToCacheReq{
+		UserIDList:  resp.Success,
+		GroupID:     req.GroupId,
+		OperationID: req.OperationId,
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	cacheClient := pbCache.NewCacheClient(etcdConn)
+	cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
+	if err != nil {
+		log.NewError(req.OperationId, "AddBlackUserToCache rpc call failed ", err.Error())
+		return resp, http.WrapError(constant.ErrDB)
+	}
+	if cacheResp.CommonResp.ErrCode != 0 {
+		log.NewError(req.OperationId, "AddBlackUserToCache rpc logic call failed ", cacheResp.String())
+		return resp, http.WrapError(constant.ErrDB)
+	}
+
 	chat.MemberInvitedNotification(req.OperationId, req.GroupId, req.OpUserId, "admin add you to group", resp.Success)
 	return resp, nil
 }

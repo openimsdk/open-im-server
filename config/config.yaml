@@ -143,8 +143,8 @@ rpcregistername: #rpc注册服务名，默认即可
   openImOnlineMessageRelayName: OnlineMessageRelay
   openImGroupName: Group
   openImAuthName: Auth
-  OpenImStatisticsName: Statistics
-  OpenImMessageCMSName: MessageCMS
+  openImStatisticsName: Statistics
+  openImMessageCMSName: MessageCMS
   openImAdminCMSName: AdminCMS
   openImOfficeName: Office
   openImOrganizationName: Organization
