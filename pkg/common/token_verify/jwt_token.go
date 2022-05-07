@@ -129,13 +129,13 @@ func CheckAccess(OpUserID string, OwnerUserID string) bool {
 	return false
 }
 
-func GetUserIDFromToken(token string, operationID string) (bool, string) {
+func GetUserIDFromToken(token string, operationID string) (bool, string, string) {
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
 		log.Error(operationID, "ParseToken failed, ", err.Error(), token)
-		return false, ""
+		return false, "", err.Error()
 	}
-	return true, claims.UID
+	return true, claims.UID, ""
 }
 
 func ParseTokenGetUserID(token string, operationID string) (error, string) {

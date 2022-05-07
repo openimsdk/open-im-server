@@ -38,13 +38,13 @@ func UserRegister(c *gin.Context) {
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserRegister(context.Background(), req)
 	if err != nil {
-		errMsg := req.OperationID + " " + "client.UserRegister failed " + err.Error() + req.String()
+		errMsg := req.OperationID + " " + "UserRegister failed " + err.Error() + req.String()
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	if reply.CommonResp.ErrCode != 0 {
-		errMsg := req.OperationID + " " + " client.UserRegister failed " + reply.CommonResp.ErrMsg + req.String()
+		errMsg := req.OperationID + " " + " UserRegister failed " + reply.CommonResp.ErrMsg + req.String()
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return

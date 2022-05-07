@@ -29,11 +29,14 @@ func KickGroupMember(c *gin.Context) {
 
 	req := &rpc.KickGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -71,14 +74,17 @@ func GetGroupMembersInfo(c *gin.Context) {
 	}
 	req := &rpc.GetGroupMembersInfoReq{}
 	utils.CopyStructFields(req, params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		//c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
-		api.SetErrCodeMsg(c, http.StatusInternalServerError)
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -106,13 +112,17 @@ func GetGroupMemberList(c *gin.Context) {
 	}
 	req := &rpc.GetGroupMemberListReq{}
 	utils.CopyStructFields(req, params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "GetGroupMemberList args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -141,13 +151,17 @@ func GetGroupAllMemberList(c *gin.Context) {
 	}
 	req := &rpc.GetGroupAllMemberReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "GetGroupAllMember args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -174,13 +188,17 @@ func GetJoinedGroupList(c *gin.Context) {
 	}
 	req := &rpc.GetJoinedGroupListReq{}
 	utils.CopyStructFields(req, params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "GetJoinedGroupList args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -207,13 +225,17 @@ func InviteUserToGroup(c *gin.Context) {
 	}
 	req := &rpc.InviteUserToGroupReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "InviteUserToGroup args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -252,13 +274,17 @@ func CreateGroup(c *gin.Context) {
 	for _, v := range params.MemberList {
 		req.InitMemberList = append(req.InitMemberList, &rpc.GroupAddMemberInfo{UserID: v.UserID, RoleLevel: v.RoleLevel})
 	}
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	req.OwnerUserID = params.OwnerUserID
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "CreateGroup args ", req.String())
@@ -355,13 +381,17 @@ func GetGroupsInfo(c *gin.Context) {
 	}
 	req := &rpc.GetGroupsInfoReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := rpc.NewGroupClient(etcdConn)
@@ -388,13 +418,17 @@ func ApplicationGroupResponse(c *gin.Context) {
 	}
 	req := &rpc.GroupApplicationResponseReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "ApplicationGroupResponse args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -420,13 +454,17 @@ func JoinGroup(c *gin.Context) {
 	}
 	req := &rpc.JoinGroupReq{}
 	utils.CopyStructFields(req, params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "JoinGroup args ", req.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := rpc.NewGroupClient(etcdConn)
@@ -451,13 +489,17 @@ func QuitGroup(c *gin.Context) {
 	}
 	req := &rpc.QuitGroupReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "QuitGroup args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -483,13 +525,17 @@ func SetGroupInfo(c *gin.Context) {
 	req := &rpc.SetGroupInfoReq{GroupInfo: &open_im_sdk.GroupInfo{}}
 	utils.CopyStructFields(req.GroupInfo, &params)
 	req.OperationID = params.OperationID
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "SetGroupInfo args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -514,13 +560,17 @@ func TransferGroupOwner(c *gin.Context) {
 	}
 	req := &rpc.TransferGroupOwnerReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, "TransferGroupOwner args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -546,13 +596,17 @@ func DismissGroup(c *gin.Context) {
 	}
 	req := &rpc.DismissGroupReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -578,13 +632,17 @@ func MuteGroupMember(c *gin.Context) {
 	}
 	req := &rpc.MuteGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -610,13 +668,17 @@ func CancelMuteGroupMember(c *gin.Context) {
 	}
 	req := &rpc.CancelMuteGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -642,13 +704,17 @@ func MuteGroup(c *gin.Context) {
 	}
 	req := &rpc.MuteGroupReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -674,13 +740,17 @@ func CancelMuteGroup(c *gin.Context) {
 	}
 	req := &rpc.CancelMuteGroupReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -708,13 +778,17 @@ func SetGroupMemberNickname(c *gin.Context) {
 	}
 	req := &rpc.SetGroupMemberNicknameReq{}
 	utils.CopyStructFields(req, &params)
+
 	var ok bool
-	ok, req.OpUserID = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError(req.OperationID, "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)

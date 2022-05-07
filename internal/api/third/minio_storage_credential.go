@@ -33,12 +33,17 @@ func MinioUploadFile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	ok, _ := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError("", utils.GetSelfFuncName(), "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
 	switch req.FileType {
 	// videoType upload snapShot
@@ -101,12 +106,17 @@ func MinioStorageCredential(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	ok, _ := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+
+	var ok bool
+	var errInfo string
+	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		log.NewError("", utils.GetSelfFuncName(), "GetUserIDFromToken false ", c.Request.Header.Get("token"))
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserIDFromToken failed"})
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	var stsOpts cr.STSAssumeRoleOptions
 	stsOpts.AccessKey = config.Config.Credential.Minio.AccessKeyID
 	stsOpts.SecretKey = config.Config.Credential.Minio.SecretAccessKey
