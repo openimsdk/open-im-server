@@ -161,9 +161,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 	resp.GroupInfo.OwnerUserID = req.OwnerUserID
 
+	okUserIDList = append(okUserIDList, req.OwnerUserID)
 	addGroupMemberToCacheReq := &pbCache.AddGroupMemberToCacheReq{
 		UserIDList:  okUserIDList,
-		GroupID:     req.GroupInfo.GroupID,
+		GroupID:     groupId,
 		OperationID: req.OperationID,
 	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
