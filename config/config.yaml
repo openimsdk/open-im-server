@@ -4,7 +4,7 @@
 serverversion: 2.0.0
 #---------------Infrastructure configuration---------------------#
 etcd:
-  etcdSchema: openIM  #默认即可
+  etcdSchema: openim  #默认即可
   etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
 
 mysql:
@@ -150,7 +150,7 @@ rpcregistername: #rpc注册服务名，默认即可
   openImOrganizationName: Organization
   openImConversationName: Conversation
   openImCacheName: Cache
-
+  openImRealTimeCommName: RealTimeComm
 log:
   storageLocation: ../logs/
   rotationTime: 24
