@@ -341,7 +341,7 @@ func (s *cacheServer) AddGroupMemberToCache(_ context.Context, req *pbCache.AddG
 
 func (s *cacheServer) ReduceGroupMemberFromCache(_ context.Context, req *pbCache.ReduceGroupMemberFromCacheReq) (resp *pbCache.ReduceGroupMemberFromCacheResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.ReduceGroupMemberFromCacheResp{}
+	resp = &pbCache.ReduceGroupMemberFromCacheResp{CommonResp: &pbCache.CommonResp{}}
 	if err := db.DB.ReduceGroupMemberFromCache(req.GroupID, req.UserIDList...); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ReduceGroupMemberFromCache failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
