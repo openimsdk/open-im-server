@@ -51,7 +51,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey strin
 				tag = true
 			}
 		case constant.GroupChatType:
-			if msgKey == msgFromMQ.MsgData.SendID || utils.IsContain(msgFromMQ.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+			if msgKey == msgFromMQ.MsgData.SendID {
 				tag = true
 			}
 		}
