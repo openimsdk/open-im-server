@@ -6,7 +6,7 @@ import (
 )
 
 type Statistics struct {
-	Count      *uint64
+	AllCount   *uint64
 	ModuleName string
 	PrintArgs  string
 	SleepTime  int
@@ -17,16 +17,16 @@ func (s *Statistics) output() {
 	defer t.Stop()
 	var sum uint64
 	for {
-		sum = *s.Count
+		sum = *s.AllCount
 		select {
 		case <-t.C:
 		}
-		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, *s.Count-sum, "total:", *s.Count)
+		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, *s.AllCount-sum, "total:", *s.AllCount)
 	}
 }
 
-func NewStatistics(count *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
-	p := &Statistics{Count: count, ModuleName: moduleName, SleepTime: sleepTime, PrintArgs: printArgs}
+func NewStatistics(allCount *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
+	p := &Statistics{AllCount: allCount, ModuleName: moduleName, SleepTime: sleepTime, PrintArgs: printArgs}
 	go p.output()
 	return p
 }

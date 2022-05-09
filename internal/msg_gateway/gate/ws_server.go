@@ -62,6 +62,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 			//Initialize a lock for each user
 			newConn := &UserConn{conn, new(sync.Mutex)}
+			userCount++
 			ws.addUserConn(query["sendID"][0], int32(utils.StringToInt64(query["platformID"][0])), newConn, query["token"][0])
 			go ws.readMsg(newConn)
 		}
@@ -77,6 +78,7 @@ func (ws *WServer) readMsg(conn *UserConn) {
 		if err != nil {
 			uid, platform := ws.getUserUid(conn)
 			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", uid, "platform", platform, "error", err.Error())
+			userCount--
 			ws.delUserConn(conn)
 			return
 		} else {
@@ -189,7 +191,6 @@ func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, tok
 		count = count + len(v)
 	}
 	log.Debug(operationID, "WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
-	userCount = uint64(len(ws.wsUserToConn))
 
 }
 
@@ -213,11 +214,10 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 			for _, v := range ws.wsUserToConn {
 				count = count + len(v)
 			}
-			log.NewWarn(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
+			log.Debug(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 		} else {
-			log.NewWarn(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
+			log.Debug(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
 		}
-		userCount = uint64(len(ws.wsUserToConn))
 		delete(ws.wsConnToUser, conn)
 
 	}
