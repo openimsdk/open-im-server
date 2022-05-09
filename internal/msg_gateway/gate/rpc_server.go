@@ -11,9 +11,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"fmt"
 	"github.com/golang/protobuf/proto"
 	"net"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/websocket"
@@ -34,24 +34,37 @@ func (r *RPCServer) onInit(rpcPort int) {
 	r.etcdAddr = config.Config.Etcd.EtcdAddr
 }
 func (r *RPCServer) run() {
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + utils.IntToString(r.rpcPort)
-	listener, err := net.Listen("tcp", registerAddress)
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
+	}
+	address := listenIP + ":" + strconv.Itoa(r.rpcPort)
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.ErrorByArgs(fmt.Sprintf("fail to listening consumer, err:%v\n", err))
+		log.Error("", "fail to listening consumer failed ", err.Error(), address)
 		return
 	}
 	defer listener.Close()
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	pbRelay.RegisterOnlineMessageRelayServiceServer(srv, r)
-	err = getcdv3.RegisterEtcd4Unique(r.etcdSchema, strings.Join(r.etcdAddr, ","), ip, r.rpcPort, r.rpcRegisterName, 10)
+
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+	err = getcdv3.RegisterEtcd4Unique(r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName, 10)
 	if err != nil {
-		log.ErrorByKv("register push message rpc to etcd err", "", "err", err.Error())
+		log.Error("", "register push message rpc to etcd err", "", "err", err.Error(), r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName)
 	}
 	err = srv.Serve(listener)
 	if err != nil {
-		log.ErrorByKv("push message rpc listening err", "", "err", err.Error())
+		log.Error("", "push message rpc listening err", "", "err", err.Error())
 		return
 	}
 }

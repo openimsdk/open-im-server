@@ -79,7 +79,13 @@ func (rpc *rpcAuth) Run() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, "rpc auth start...")
 
-	address := utils.ServerIP + ":" + strconv.Itoa(rpc.rpcPort)
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
+	}
+	address := listenIP + ":" + strconv.Itoa(rpc.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.NewError(operationID, "listen network failed ", err.Error(), address)
@@ -92,13 +98,21 @@ func (rpc *rpcAuth) Run() {
 
 	//service registers with etcd
 	pbAuth.RegisterAuthServer(srv, rpc)
-	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+
+	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
-			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
+			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
 		return
 	}
-	log.NewInfo(operationID, "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), utils.ServerIP, rpc.rpcPort, rpc.rpcRegisterName)
+	log.NewInfo(operationID, "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError(operationID, "Serve failed ", err.Error())

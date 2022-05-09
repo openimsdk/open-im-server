@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"Open_IM/pkg/common/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,10 +15,13 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := cms_api.NewGinRouter()
 	router.Use(utils.CorsHandler())
-	ginPort := flag.Int("port", 10006, "get ginServerPort from cmd,default 8000 as port")
+	ginPort := flag.Int("port", 10006, "get ginServerPort from cmd,default 10006 as port")
 	flag.Parse()
-	fmt.Println("start cms api server, port: ", ginPort)
-	router.Run(":" + strconv.Itoa(*ginPort))
+	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
+	if config.Config.Api.ListenIP != "" {
+		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
+	}
+	address = config.Config.CmsApi.ListenIP + ":" + strconv.Itoa(*ginPort)
+	fmt.Println("start cms api server, address: ", address)
+	router.Run(address)
 }
-
-//

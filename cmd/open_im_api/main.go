@@ -178,10 +178,15 @@ func main() {
 	}
 
 	go apiThird.MinioInit()
-	ginPort := flag.Int("port", 10002, "get ginServerPort from cmd,default 10000 as port")
+	ginPort := flag.Int("port", 10002, "get ginServerPort from cmd,default 10002 as port")
 	flag.Parse()
-	fmt.Println("start api server, port: ", *ginPort)
-	err := r.Run(":" + strconv.Itoa(*ginPort))
+	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
+	if config.Config.Api.ListenIP != "" {
+		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
+	}
+	address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
+	fmt.Println("start api server, address: ", address)
+	err := r.Run(address)
 	if err != nil {
 		log.Error("", "run failed ", *ginPort, err.Error())
 	}

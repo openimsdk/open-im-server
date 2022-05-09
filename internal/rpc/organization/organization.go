@@ -40,27 +40,39 @@ func NewServer(port int) *organizationServer {
 
 func (s *organizationServer) Run() {
 	log.NewInfo("", "organization rpc start ")
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
+	}
+	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
 	//listener network
-	listener, err := net.Listen("tcp", registerAddress)
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.NewError("", "Listen failed ", err.Error(), registerAddress)
+		log.NewError("", "Listen failed ", err.Error(), address)
 		return
 	}
-	log.NewInfo("", "listen network success, ", registerAddress, listener)
+	log.NewInfo("", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	rpc.RegisterOrganizationServer(srv, s)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("", "RegisterEtcd failed ", err.Error())
 		return
 	}
-	log.NewInfo("", "organization rpc RegisterEtcd success", ip, s.rpcPort, s.rpcRegisterName, 10)
+	log.NewInfo("", "organization rpc RegisterEtcd success", rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError("", "Serve failed ", err.Error())

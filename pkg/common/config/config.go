@@ -24,16 +24,23 @@ type callBackConfig struct {
 }
 
 type config struct {
-	ServerIP      string `yaml:"serverip"`
+	ServerIP string `yaml:"serverip"`
+
+	RpcRegisterIP string `yaml:"rpcRegisterIP"`
+	ListenIP      string `yaml:"listenIP"`
+
 	ServerVersion string `yaml:"serverversion"`
 	Api           struct {
-		GinPort []int `yaml:"openImApiPort"`
+		GinPort  []int  `yaml:"openImApiPort"`
+		ListenIP string `yaml:"listenIP"`
 	}
 	CmsApi struct {
-		GinPort []int `yaml:"openImCmsApiPort"`
+		GinPort  []int  `yaml:"openImCmsApiPort"`
+		ListenIP string `yaml:"listenIP"`
 	}
 	Sdk struct {
-		WsPort []int `yaml:"openImSdkWsPort"`
+		WsPort  []int    `yaml:"openImSdkWsPort"`
+		DataDir []string `yaml:"dataDir"`
 	}
 	Credential struct {
 		Tencent struct {
@@ -391,7 +398,8 @@ type config struct {
 		} `yaml:"workMomentsNotification"`
 	}
 	Demo struct {
-		Port         []int `yaml:"openImDemoPort"`
+		Port         []int  `yaml:"openImDemoPort"`
+		ListenIP     string `yaml:"listenIP"`
 		AliSMSVerify struct {
 			AccessKeyID                  string `yaml:"accessKeyId"`
 			AccessKeySecret              string `yaml:"accessKeySecret"`

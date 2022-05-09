@@ -1,26 +1,28 @@
 package utils
 
 import (
-	"Open_IM/pkg/common/config"
+	"errors"
+	"fmt"
 	"net"
 )
 
 var ServerIP = ""
 
-func init() {
-	//fixme In the configuration file, ip takes precedence, if not, get the valid network card ip of the machine
-	if config.Config.ServerIP != "" {
-		ServerIP = config.Config.ServerIP
-		return
-	}
-
-	// see https://gist.github.com/jniltinho/9787946#gistcomment-3019898
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+func GetLocalIP() (string, error) {
+	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		panic(err.Error())
+
+		return "", err
+	}
+	for _, address := range addrs {
+
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				fmt.Println(ipnet.IP.String())
+				return ipnet.IP.String(), nil
+			}
+		}
 	}
 
-	defer conn.Close()
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
-	ServerIP = localAddr.IP.String()
+	return "", errors.New("no ip")
 }
