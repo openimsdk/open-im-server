@@ -83,7 +83,7 @@ func SyncDB2Cache() error {
 	err = updateAllFriendToCache(userList)
 	err = updateAllBlackListToCache(userList)
 	err = updateAllGroupMemberListToCache()
-	return err
+	return utils.Wrap(err, "")
 }
 
 func DelRelationCache() {}
@@ -127,7 +127,7 @@ func updateAllGroupMemberListToCache() error {
 			log.NewError("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
 			continue
 		}
-		log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
+		//log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
 		if len(groupMemberIDList) > 0 {
 			if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
 				log.NewError("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
@@ -146,7 +146,7 @@ func updateAllFriendToCache(userList []db.User) error {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		log.NewDebug("", utils.GetSelfFuncName(), "friendIDList", user.UserID, friendIDList)
+		//log.NewDebug("", utils.GetSelfFuncName(), "friendIDList", user.UserID, friendIDList)
 		if len(friendIDList) > 0 {
 			if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
 				log.NewError("0", utils.GetSelfFuncName(), err.Error(), friendIDList, user.UserID)
@@ -165,7 +165,7 @@ func updateAllBlackListToCache(userList []db.User) error {
 			log.NewError("", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		log.NewDebug("", utils.GetSelfFuncName(), "updateAllBlackListToCache", user.UserID, blackIDList)
+		//log.NewDebug("", utils.GetSelfFuncName(), "updateAllBlackListToCache", user.UserID, blackIDList)
 		if len(blackIDList) > 0 {
 			if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
 				log.NewError("0", utils.GetSelfFuncName(), err.Error())

@@ -287,6 +287,18 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	workMoment.UserName = createUser.Nickname
 	workMoment.FaceURL = createUser.FaceURL
 	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
+	workMoment.PermissionUserList = []*db.WorkMomentUser{}
+	for _, userID := range workMoment.PermissionUserIDList {
+		userName, err := imdb.GetUserNameByUserID(userID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+			continue
+		}
+		workMoment.PermissionUserList = append(workMoment.PermissionUserList, &db.WorkMomentUser{
+			UserID:   userID,
+			UserName: userName,
+		})
+	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
 	err = db.DB.CreateOneWorkMoment(&workMoment)
 	if err != nil {
