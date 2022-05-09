@@ -59,5 +59,3 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
-
-replace google.golang.org/grpc => google.golang.org/grpc v1.29.0
