@@ -10,6 +10,7 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
@@ -119,6 +120,7 @@ func ParseToken(c *gin.Context) {
 	}
 
 	resp := api.ParseTokenResp{CommResp: api.CommResp{ErrCode: 0, ErrMsg: ""}, ExpireTime: api.ExpireTime{ExpireTimeSeconds: uint32(expireTime)}}
+	resp.Data = structs.Map(&resp.ExpireTime)
 	log.NewInfo(params.OperationID, "ParseToken return ", resp)
 	c.JSON(http.StatusOK, resp)
 }

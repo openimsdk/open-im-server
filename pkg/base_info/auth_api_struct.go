@@ -53,5 +53,6 @@ type ExpireTime struct {
 
 type ParseTokenResp struct {
 	CommResp
-	ExpireTime ExpireTime `json:"expireTime"`
+	Data       map[string]interface{} `json:"data"`
+	ExpireTime ExpireTime             `json:"-"`
 }
