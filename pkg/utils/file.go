@@ -40,29 +40,29 @@ func GetNewFileNameAndContentType(fileName string, fileType int) (string, string
 }
 
 func GetUploadAppNewName(appType int, version string) (string, string, error) {
-	var newFileName, newYamlName = version + "_app_", version + "_yaml_"
+	var newFileName, newYamlName = "_" + version + "_app_", version + "_yaml"
 	switch appType {
 	case constant.IOSPlatformID:
-		newFileName += constant.IOSPlatformStr
-		newYamlName += constant.IOSPlatformStr
+		newFileName = constant.IOSPlatformStr + newFileName
+		newYamlName = constant.IOSPlatformStr + newYamlName
 	case constant.AndroidPlatformID:
-		newFileName += constant.AndroidPlatformStr
-		newYamlName += constant.AndroidPlatformStr
+		newFileName = constant.AndroidPlatformStr + newFileName
+		newYamlName = constant.AndroidPlatformStr + newYamlName
 	case constant.WindowsPlatformID:
-		newFileName += constant.WindowsPlatformStr
-		newYamlName += constant.WindowsPlatformStr
+		newFileName = constant.WindowsPlatformStr + newFileName
+		newYamlName = constant.WindowsPlatformStr + newYamlName
 	case constant.OSXPlatformID:
-		newFileName += constant.OSXPlatformStr
-		newYamlName += constant.OSXPlatformStr
+		newFileName = constant.OSXPlatformStr + newFileName
+		newYamlName = constant.OSXPlatformStr + newYamlName
 	case constant.WebPlatformID:
-		newFileName += constant.WebPlatformStr
-		newYamlName += constant.WebPlatformStr
+		newFileName = constant.WebPlatformStr + newFileName
+		newYamlName = constant.WebPlatformStr + newYamlName
 	case constant.MiniWebPlatformID:
-		newFileName += constant.MiniWebPlatformStr
-		newYamlName += constant.MiniWebPlatformStr
+		newFileName = constant.MiniWebPlatformStr + newFileName
+		newYamlName = constant.MiniWebPlatformStr + newYamlName
 	case constant.LinuxPlatformID:
-		newFileName += constant.LinuxPlatformStr
-		newYamlName += constant.LinuxPlatformStr
+		newFileName = constant.LinuxPlatformStr + newFileName
+		newYamlName = constant.LinuxPlatformStr + newYamlName
 	default:
 		return "", "", errors.New("invalid app type")
 	}
