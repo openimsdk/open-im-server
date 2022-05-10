@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"net/http"
+	"path"
 	"strings"
 
 	"Open_IM/internal/api/third"
@@ -64,22 +65,31 @@ func UploadUpdateApp(c *gin.Context) {
 		return
 	}
 	fileObj, err := req.File.Open()
-	yamlObj, err := req.Yaml.Open()
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open file error" + err.Error()})
+		return
+	}
+	yamlObj, err := req.Yaml.Open()
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open Yaml error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open Yaml error" + err.Error()})
 		return
 	}
 	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size)
 	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size)
 
 	// v2.0.9_app_linux v2.0.9_yaml_linux
-	_, newType := utils.GetNewFileNameAndContentType("", constant.OtherType)
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size, minio.PutObjectOptions{ContentType: newType})
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{ContentType: newType})
+	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "open file error")
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "invalid file path" + err.Error()})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject file error")
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject file error" + err.Error()})
+		return
+	}
+	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(newYamlName)})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject yaml error")
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject yaml error" + err.Error()})
 		return
 	}
 	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate, newFileName, newYamlName); err != nil {
