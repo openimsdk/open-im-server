@@ -44,5 +44,5 @@ type ParseTokenReq struct {
 
 type ParseTokenResp struct {
 	CommResp
-	ExpireTime int64 `json:"token" binding:"required"`
+	ExpireTime int64 `json:"expireTime" binding:"required"`
 }
