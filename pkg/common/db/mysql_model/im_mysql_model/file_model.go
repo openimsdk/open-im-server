@@ -11,14 +11,13 @@ func UpdateAppVersion(appType int, version string, forceUpdate bool, fileName, y
 		return err
 	}
 	app := db.AppVersion{
-		Version:     version,
-		Type:        appType,
-		UpdateTime:  int(time.Now().Unix()),
-		ForceUpdate: forceUpdate,
-		FileName:    fileName,
-		YamlName:    yamlName,
+		Version:    version,
+		Type:       appType,
+		UpdateTime: int(time.Now().Unix()),
+		FileName:   fileName,
+		YamlName:   yamlName,
 	}
-	result := dbConn.Model(db.AppVersion{}).Where("type = ?", appType).Updates(&app)
+	result := dbConn.Model(db.AppVersion{}).Where("type = ?", appType).Updates(&app).Update(map[string]interface{}{"force_update": forceUpdate})
 	if result.Error != nil {
 		return result.Error
 	}
