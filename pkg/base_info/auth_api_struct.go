@@ -42,7 +42,16 @@ type ParseTokenReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
 
+//type ParseTokenResp struct {
+//	CommResp
+//	ExpireTime int64 `json:"expireTime" binding:"required"`
+//}
+
+type ExpireTime struct {
+	ExpireTimeSeconds int64 `json:"expireTimeSeconds" `
+}
+
 type ParseTokenResp struct {
 	CommResp
-	ExpireTime int64 `json:"expireTime" binding:"required"`
+	ExpireTime ExpireTime `json:"expireTime"`
 }
