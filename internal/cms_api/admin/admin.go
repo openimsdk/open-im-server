@@ -105,7 +105,6 @@ func UploadUpdateApp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
 		return
 	}
-	fmt.Println(apiThird.MinioClient.EndpointURL())
 
 	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size)
 	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, yaml.Size)
@@ -113,6 +112,7 @@ func UploadUpdateApp(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
 		Secure: false,
 	})
+	fmt.Println(apiThird.MinioClient.EndpointURL())
 
 	_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
 	if err != nil {
