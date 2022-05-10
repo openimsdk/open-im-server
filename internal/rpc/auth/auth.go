@@ -88,8 +88,7 @@ func (rpc *rpcAuth) Run() {
 	address := listenIP + ":" + strconv.Itoa(rpc.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.NewError(operationID, "listen network failed ", err.Error(), address)
-		return
+		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
 	}
 	log.NewInfo(operationID, "listen network success, ", address, listener)
 	//grpc server

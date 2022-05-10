@@ -51,7 +51,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey strin
 				tag = true
 			}
 		case constant.GroupChatType:
-			if msgKey == msgFromMQ.MsgData.SendID || utils.IsContain(msgFromMQ.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+			if msgKey == msgFromMQ.MsgData.SendID {
 				tag = true
 			}
 		}
@@ -70,7 +70,7 @@ func (PersistentConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { 
 func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.InfoByKv("kafka get info to mysql", "", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
+		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
 		pc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 		sess.MarkMessage(msg, "")
 	}

@@ -97,6 +97,7 @@ func main() {
 	{
 		authRouterGroup.POST("/user_register", apiAuth.UserRegister) //1
 		authRouterGroup.POST("/user_token", apiAuth.UserToken)       //1
+		authRouterGroup.POST("/parse_token", apiAuth.ParseToken)     //1
 	}
 	//Third service
 	thirdGroup := r.Group("/third")

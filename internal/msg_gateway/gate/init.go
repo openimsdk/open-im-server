@@ -2,6 +2,7 @@ package gate
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 
 	"Open_IM/pkg/statistics"
 	"fmt"
@@ -10,12 +11,14 @@ import (
 )
 
 var (
-	rwLock       *sync.RWMutex
-	validate     *validator.Validate
-	ws           WServer
-	rpcSvr       RPCServer
-	sendMsgCount uint64
-	userCount    uint64
+	rwLock              *sync.RWMutex
+	validate            *validator.Validate
+	ws                  WServer
+	rpcSvr              RPCServer
+	sendMsgAllCount     uint64
+	sendMsgFailedCount  uint64
+	sendMsgSuccessCount uint64
+	userCount           uint64
 )
 
 func Init(rpcPort, wsPort int) {
@@ -23,8 +26,8 @@ func Init(rpcPort, wsPort int) {
 
 	rwLock = new(sync.RWMutex)
 	validate = validator.New()
-	statistics.NewStatistics(&sendMsgCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second recv to msg_gateway sendMsgCount", sendMsgCount), 300)
-	statistics.NewStatistics(&userCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second add user conn", userCount), 300)
+	statistics.NewStatistics(&sendMsgAllCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second recv to msg_gateway sendMsgCount", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+	statistics.NewStatistics(&userCount, config.Config.ModuleName.LongConnSvrName, fmt.Sprintf("%d second add user conn", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	ws.onInit(wsPort)
 	rpcSvr.onInit(rpcPort)
 }

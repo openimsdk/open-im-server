@@ -80,7 +80,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 		nReply.ErrMsg = err.Error()
 		ws.getSeqResp(conn, m, nReply)
 	} else {
-		log.InfoByKv("rpc call success to getSeqReq", rpcReq.OperationID, "replyData", rpcReply.String())
+		log.NewInfo(rpcReq.OperationID, "rpc call success to getSeqReq", rpcReply.String())
 		ws.getSeqResp(conn, m, rpcReply)
 	}
 }
@@ -146,7 +146,7 @@ func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullM
 
 }
 func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
-	sendMsgCount++
+	sendMsgAllCount++
 	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)

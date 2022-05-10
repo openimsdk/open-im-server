@@ -51,7 +51,7 @@ require (
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71 // indirect
-	google.golang.org/grpc v1.42.0
+	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
@@ -59,5 +59,3 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
-
-replace google.golang.org/grpc => google.golang.org/grpc v1.29.0

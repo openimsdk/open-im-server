@@ -45,8 +45,7 @@ func (rpc *rpcChat) Run() {
 	address := listenIP + ":" + strconv.Itoa(rpc.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Error("", "listen network failed ", err.Error(), address)
-		return
+		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
 	}
 	log.Info("", "listen network success, address ", address)
 

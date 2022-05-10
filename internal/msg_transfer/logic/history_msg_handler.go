@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/statistics"
 	"Open_IM/pkg/utils"
 	"context"
+	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"strings"
@@ -20,15 +21,16 @@ import (
 type fcb func(msg []byte, msgKey string)
 
 type HistoryConsumerHandler struct {
-	msgHandle            map[string]fcb
-	historyConsumerGroup *kfk.MConsumerGroup
-	singleMsgCount       uint64
-	groupMsgCount        uint64
+	msgHandle             map[string]fcb
+	historyConsumerGroup  *kfk.MConsumerGroup
+	singleMsgFailedCount  uint64
+	singleMsgSuccessCount uint64
+	groupMsgCount         uint64
 }
 
 func (mc *HistoryConsumerHandler) Init() {
-	statistics.NewStatistics(&mc.singleMsgCount, config.Config.ModuleName.MsgTransferName, "singleMsgCount insert to mongo ", 300)
-	statistics.NewStatistics(&mc.groupMsgCount, config.Config.ModuleName.MsgTransferName, "groupMsgCount insert to mongo ", 300)
+	statistics.NewStatistics(&mc.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
+	statistics.NewStatistics(&mc.groupMsgCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second groupMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 
 	mc.msgHandle = make(map[string]fcb)
 	mc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = mc.handleChatWs2Mongo
@@ -59,10 +61,11 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 		if isHistory {
 			err := saveUserChat(msgKey, &msgFromMQ)
 			if err != nil {
+				mc.singleMsgFailedCount++
 				log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
 				return
 			}
-			mc.singleMsgCount++
+			mc.singleMsgSuccessCount++
 			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", time.Since(now))
 		}
 		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
@@ -89,7 +92,6 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
 				return
 			}
-			mc.singleMsgCount++
 			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", time.Since(now))
 		}
 		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
@@ -109,7 +111,7 @@ func (HistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { ret
 func (mc *HistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.InfoByKv("kafka get info to mongo", "", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
+		log.NewDebug("", "kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
 		mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 		sess.MarkMessage(msg, "")
 	}
