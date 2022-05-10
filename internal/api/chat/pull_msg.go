@@ -55,10 +55,10 @@ func PullMsgBySeqList(c *gin.Context) {
 	msgClient := pbChat.NewChatClient(grpcConn)
 	reply, err := msgClient.PullMessageBySeqList(context.Background(), &pbData)
 	if err != nil {
-		log.ErrorByKv("PullMessageBySeqList error", pbData.OperationID, "err", err.Error())
+		log.Error(pbData.OperationID, "PullMessageBySeqList error", err.Error())
 		return
 	}
-	log.InfoByKv("rpc call success to PullMessageBySeqList", pbData.OperationID, "ReplyArgs", reply.String(), len(reply.List))
+	log.NewInfo(pbData.OperationID, "rpc call success to PullMessageBySeqList", reply.String(), len(reply.List))
 	c.JSON(http.StatusOK, gin.H{
 		"errCode":       reply.ErrCode,
 		"errMsg":        reply.ErrMsg,

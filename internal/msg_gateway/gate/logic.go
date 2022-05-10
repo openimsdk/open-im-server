@@ -80,7 +80,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 		nReply.ErrMsg = err.Error()
 		ws.getSeqResp(conn, m, nReply)
 	} else {
-		log.InfoByKv("rpc call success to getSeqReq", rpcReq.OperationID, "replyData", rpcReply.String())
+		log.NewInfo(rpcReq.OperationID, "rpc call success to getSeqReq", rpcReply.String())
 		ws.getSeqResp(conn, m, rpcReply)
 	}
 }

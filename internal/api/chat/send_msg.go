@@ -63,13 +63,12 @@ func SendMsg(c *gin.Context) {
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		log.ErrorByKv("json unmarshal err", "", "err", err.Error(), "data", c.PostForm("data"))
+		log.Error("0", "BindJSON failed ", err.Error())
 		return
 	}
 
 	token := c.Request.Header.Get("token")
-
-	log.InfoByKv("api call success to sendMsgReq", params.OperationID, "Parameters", params)
-
+	log.NewInfo(params.OperationID, "api call success to sendMsgReq", params)
 	pbData := newUserSendMsgReq(token, &params)
 	log.Info("", "", "api SendMsg call start..., [data: %s]", pbData.String())
 

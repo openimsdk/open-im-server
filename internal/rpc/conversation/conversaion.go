@@ -148,8 +148,7 @@ func (rpc *rpcConversation) Run() {
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.NewError("0", "listen network failed ", err.Error(), address)
-		return
+		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
 	}
 	log.NewInfo("0", "listen network success, ", address, listener)
 	//grpc server

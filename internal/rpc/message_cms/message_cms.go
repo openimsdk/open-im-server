@@ -54,8 +54,7 @@ func (s *messageCMSServer) Run() {
 	//listener network
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.NewError("0", "Listen failed ", err.Error(), address)
-		return
+		panic("listening err:" + err.Error() + s.rpcRegisterName)
 	}
 	log.NewInfo("0", "listen network success, ", address, listener)
 	defer listener.Close()
