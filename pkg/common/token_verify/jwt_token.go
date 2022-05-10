@@ -135,6 +135,7 @@ func GetUserIDFromToken(token string, operationID string) (bool, string, string)
 		log.Error(operationID, "ParseToken failed, ", err.Error(), token)
 		return false, "", err.Error()
 	}
+	log.Debug(operationID, "token claims.ExpiresAt.Second() ", claims.ExpiresAt.Second())
 	return true, claims.UID, ""
 }
 
