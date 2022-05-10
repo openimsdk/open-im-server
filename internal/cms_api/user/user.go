@@ -29,6 +29,7 @@ func GetUserById(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
@@ -43,15 +44,17 @@ func GetUserById(c *gin.Context) {
 		return
 	}
 	utils.CopyStructFields(&resp, respPb.User)
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
 func GetUsersByName(c *gin.Context) {
 	var (
-		req cms_api_struct.GetUsersByNameRequest
-		resp cms_api_struct.GetUsersByNameResponse
+		req   cms_api_struct.GetUsersByNameRequest
+		resp  cms_api_struct.GetUsersByNameResponse
 		reqPb pb.GetUsersByNameReq
 	)
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	if err := c.ShouldBindQuery(&req); err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "ShouldBindQuery failed", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
@@ -74,6 +77,7 @@ func GetUsersByName(c *gin.Context) {
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	resp.UserNums = respPb.UserNums
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -89,6 +93,7 @@ func GetUsers(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.Pagination, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
@@ -101,6 +106,7 @@ func GetUsers(c *gin.Context) {
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	resp.UserNums = respPb.UserNums
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 
 }
@@ -116,14 +122,15 @@ func ResignUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb, &req)
-	fmt.Println(reqPb.UserId)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
 	_, err := client.ResignUser(context.Background(), &reqPb)
 	if err != nil {
 		openIMHttp.RespHttp200(c, err, resp)
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -138,6 +145,7 @@ func AlterUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
@@ -159,6 +167,7 @@ func AddUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
@@ -182,6 +191,7 @@ func BlockUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
@@ -205,6 +215,7 @@ func UnblockUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
@@ -213,6 +224,7 @@ func UnblockUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, err, resp)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -229,6 +241,7 @@ func GetBlockUsers(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.Pagination, &req)
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "blockUsers", reqPb.Pagination, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
@@ -255,6 +268,7 @@ func GetBlockUsers(c *gin.Context) {
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	resp.UserNums = respPb.UserNums
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -269,6 +283,7 @@ func GetBlockUserById(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.UserId = req.UserId
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)
@@ -281,6 +296,7 @@ func GetBlockUserById(c *gin.Context) {
 	resp.EndDisableTime = respPb.BlockUser.EndDisableTime
 	resp.BeginDisableTime = respPb.BlockUser.BeginDisableTime
 	utils.CopyStructFields(&resp, respPb.BlockUser.User)
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -294,6 +310,7 @@ func DeleteUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.UserId = req.UserId
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pb.NewUserClient(etcdConn)

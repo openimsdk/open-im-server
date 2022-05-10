@@ -110,6 +110,7 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 		chatLog.RecvID = req.GroupId
 		chatLog.SendID = req.UserId
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "chat_log: ", chatLog)
 	nums, err := imdb.GetChatLogCount(chatLog)
 	resp.ChatLogsNum = int32(nums)
 	if err != nil {

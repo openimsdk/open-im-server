@@ -63,6 +63,7 @@ type config struct {
 		}
 		Minio struct {
 			Bucket              string `yaml:"bucket"`
+			AppBucket           string `yaml:"appBucket"`
 			Location            string `yaml:"location"`
 			Endpoint            string `yaml:"endpoint"`
 			AccessKeyID         string `yaml:"accessKeyID"`

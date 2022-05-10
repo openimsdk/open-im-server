@@ -119,7 +119,10 @@ func initMysqlDB() {
 		fmt.Println("CreateTable DepartmentMember")
 		db.CreateTable(&DepartmentMember{})
 	}
-
+	if !db.HasTable(&AppVersion{}) {
+		fmt.Println("CreateTable DepartmentMember")
+		db.CreateTable(&AppVersion{})
+	}
 	return
 }
 
