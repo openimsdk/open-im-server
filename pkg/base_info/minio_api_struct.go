@@ -32,7 +32,7 @@ type UploadUpdateAppReq struct {
 	Version     string                `form:"version"  binding:"required"`
 	File        *multipart.FileHeader `form:"file" binding:"required"`
 	Yaml        *multipart.FileHeader `form:"yaml" binding:"required"`
-	ForceUpdate bool                  `form:"forceUpdate"  binding:"required"`
+	ForceUpdate bool                  `form:"forceUpdate"`
 }
 
 type UploadUpdateAppResp struct {

@@ -31,10 +31,10 @@ func UpdateAppVersion(appType int, version string, forceUpdate bool, fileName, y
 
 func GetNewestVersion(appType int) (*db.AppVersion, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	app := db.AppVersion{}
 	if err != nil {
-		return nil, err
+		return &app, err
 	}
 	dbConn.LogMode(true)
-	app := db.AppVersion{}
 	return &app, dbConn.Model(db.AppVersion{}).First(&app, appType).Error
 }
