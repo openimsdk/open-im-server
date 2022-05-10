@@ -68,7 +68,7 @@ func GetUploadAppNewName(appType int, version, fileName, yamlName string) (strin
 	}
 	suffixFile := path.Ext(fileName)
 	suffixYaml := path.Ext(yamlName)
-	newFileName = fmt.Sprintf("%s.%s", newFileName, suffixFile)
-	newYamlName = fmt.Sprintf("%s.%s", newYamlName, suffixYaml)
+	newFileName = fmt.Sprintf("%s%s", newFileName, suffixFile)
+	newYamlName = fmt.Sprintf("%s%s", newYamlName, suffixYaml)
 	return newFileName, newYamlName, nil
 }
