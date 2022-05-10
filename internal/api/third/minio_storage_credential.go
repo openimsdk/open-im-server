@@ -161,7 +161,13 @@ func UploadUpdateApp(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, req.File.Filename, req.Yaml.Filename)
+	var yamlName string
+	if req.Yaml == nil {
+		yamlName = ""
+	} else {
+		yamlName = req.Yaml.Filename
+	}
+	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, req.File.Filename, yamlName)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
@@ -179,18 +185,19 @@ func UploadUpdateApp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject file error" + err.Error()})
 		return
 	}
-
-	yamlObj, err := req.Yaml.Open()
-	if err == nil {
-		_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(newYamlName)})
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject yaml error")
-			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject yaml error" + err.Error()})
-			return
+	if newYamlName != "" {
+		yamlObj, err := req.Yaml.Open()
+		if err == nil {
+			_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(newYamlName)})
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject yaml error")
+				c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject yaml error" + err.Error()})
+				return
+			}
+		} else {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+			newYamlName = ""
 		}
-	} else {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		newYamlName = ""
 	}
 	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate, newFileName, newYamlName); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateAppVersion error", err.Error())
