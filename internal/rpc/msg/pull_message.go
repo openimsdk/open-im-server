@@ -42,7 +42,7 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 	//msgList, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList, in.OperationID)
 	msgList, err := commonDB.DB.GetMsgBySeqListMongo2(in.UserID, in.SeqList, in.OperationID)
 	if err != nil {
-		log.ErrorByKv("PullMessageBySeqList data error", in.OperationID, in.String())
+		log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err.Error())
 		resp.ErrCode = 201
 		resp.ErrMsg = err.Error()
 		return resp, nil

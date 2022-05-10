@@ -13,6 +13,7 @@ type Statistics struct {
 }
 
 func (s *Statistics) output() {
+	var intervalCount uint64
 	t := time.NewTicker(time.Duration(s.SleepTime) * time.Second)
 	defer t.Stop()
 	var sum uint64
@@ -21,7 +22,12 @@ func (s *Statistics) output() {
 		select {
 		case <-t.C:
 		}
-		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, *s.AllCount-sum, "total:", *s.AllCount)
+		if *s.AllCount-sum <= 0 {
+			intervalCount = 0
+		} else {
+			intervalCount = *s.AllCount - sum
+		}
+		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, intervalCount, "total:", *s.AllCount)
 	}
 }
 

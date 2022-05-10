@@ -34,7 +34,7 @@ func (ms *PushConsumerHandler) handleMs2PsChat(msg []byte) {
 	log.NewDebug("", "msg come from kafka  And push!!!", "msg", string(msg))
 	msgFromMQ := pbChat.PushMsgDataToMQ{}
 	if err := proto.Unmarshal(msg, &msgFromMQ); err != nil {
-		log.ErrorByKv("push Unmarshal msg err", "", "msg", string(msg), "err", err.Error())
+		log.Error("", "push Unmarshal msg err", "msg", string(msg), "err", err.Error())
 		return
 	}
 	//Call push module to send message to the user

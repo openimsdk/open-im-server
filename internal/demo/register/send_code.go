@@ -21,7 +21,7 @@ type paramsVerificationCode struct {
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNumber"`
 	OperationID string `json:"operationID" binding:"required"`
-	UsedFor     int `json:"usedFor"`
+	UsedFor     int    `json:"usedFor"`
 }
 
 func SendVerificationCode(c *gin.Context) {
@@ -62,7 +62,7 @@ func SendVerificationCode(c *gin.Context) {
 	}
 	rand.Seed(time.Now().UnixNano())
 	code := 100000 + rand.Intn(900000)
-	log.NewInfo(params.OperationID, params.UsedFor,"begin store redis", accountKey, code)
+	log.NewInfo(params.OperationID, params.UsedFor, "begin store redis", accountKey, code)
 	err := db.DB.SetAccountCode(accountKey, code, config.Config.Demo.CodeTTL)
 	if err != nil {
 		log.NewError(params.OperationID, "set redis error", accountKey, "err", err.Error())
@@ -77,7 +77,7 @@ func SendVerificationCode(c *gin.Context) {
 		m.SetHeader(`Subject`, config.Config.Demo.Mail.Title)
 		m.SetBody(`text/html`, fmt.Sprintf("%d", code))
 		if err := gomail.NewDialer(config.Config.Demo.Mail.SmtpAddr, config.Config.Demo.Mail.SmtpPort, config.Config.Demo.Mail.SenderMail, config.Config.Demo.Mail.SenderAuthorizationCode).DialAndSend(m); err != nil {
-			log.ErrorByKv("send mail error", account, "err", err.Error())
+			log.Error(params.OperationID, "send mail error", account, err.Error())
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.MailSendCodeErr, "errMsg": ""})
 			return
 		}
