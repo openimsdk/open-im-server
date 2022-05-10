@@ -2,7 +2,6 @@ package cms_api_struct
 
 import (
 	apiStruct "Open_IM/pkg/base_info"
-	"mime/multipart"
 )
 
 type AdminLoginRequest struct {
@@ -15,12 +14,12 @@ type AdminLoginResponse struct {
 }
 
 type UploadUpdateAppReq struct {
-	OperationID string               `form:"operationID" binding:"required"`
-	Type        int                  `form:"type" binding:"required"`
-	Version     string               `form:"version"  binding:"required"`
-	File        multipart.FileHeader `form:"file" binding:"required"`
-	Yaml        multipart.FileHeader `form:"yaml" binding:"required"`
-	ForceUpdate bool                 `form:"forceUpdate"  binding:"required"`
+	OperationID string `form:"operationID" binding:"required"`
+	Type        int    `form:"type" binding:"required"`
+	Version     string `form:"version"  binding:"required"`
+	//File        multipart.FileHeader `form:"file" binding:"required"`
+	//Yaml        multipart.FileHeader `form:"yaml" binding:"required"`
+	ForceUpdate bool `form:"forceUpdate"  binding:"required"`
 }
 
 type UploadUpdateAppResp struct {

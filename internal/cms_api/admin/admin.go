@@ -63,17 +63,37 @@ func UploadUpdateApp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
 		return
 	}
-	fileObj, err := req.File.Open()
-	yamlObj, err := req.Yaml.Open()
+
+	file, err := c.FormFile("file")
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "missing file arg", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
 		return
 	}
-	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", newFileName, newYamlName, fileObj, yamlObj, req.File.Size, req.Yaml.Size)
+	fileObj, err := file.Open()
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open file error:" + err.Error()})
+		return
+	}
+
+	yaml, err := c.FormFile("yaml")
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "missing yaml arg", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing yaml arg: " + err.Error()})
+		return
+	}
+	yamlObj, err := yaml.Open()
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "open yaml failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open file error:" + err.Error()})
+		return
+	}
+
+	//fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", newFileName, newYamlName, fileObj, yamlObj, file.Size, yaml.Size)
 	// v2.0.9_app_linux v2.0.9_yaml_linux
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size, minio.PutObjectOptions{})
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{})
+	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size, minio.PutObjectOptions{})
+	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, yaml.Size, minio.PutObjectOptions{})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "open file error")
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "invalid file path" + err.Error()})
