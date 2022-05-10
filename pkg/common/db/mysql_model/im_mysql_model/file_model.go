@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func UpdateAppVersion(appType int, version string, forceUpdate bool) error {
+func UpdateAppVersion(appType int, version string, forceUpdate bool, fileName, yamlName string) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
@@ -15,6 +15,8 @@ func UpdateAppVersion(appType int, version string, forceUpdate bool) error {
 		Type:        appType,
 		UpdateTime:  int(time.Now().Unix()),
 		ForceUpdate: forceUpdate,
+		FileName:    fileName,
+		YamlName:    yamlName,
 	}
 	result := dbConn.Model(db.AppVersion{}).Where("app_type = ?", appType).Updates(&app)
 	if result.Error != nil {

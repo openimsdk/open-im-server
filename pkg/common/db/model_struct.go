@@ -278,6 +278,8 @@ type AppVersion struct {
 	Type        int    `gorm:"column:type;primary_key"`
 	UpdateTime  int    `gorm:"column:update_time"`
 	ForceUpdate bool   `gorm:"column:force_update"`
+	FileName    string `gorm:"column:file_name"`
+	YamlName    string `gorm:"column:yaml_name"`
 }
 
 func (AppVersion) TableName() string {

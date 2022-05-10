@@ -39,8 +39,8 @@ func GetNewFileNameAndContentType(fileName string, fileType int) (string, string
 	return newName, contentType
 }
 
-func GetUploadAppNewName(appType int, version string) (string, string, error) {
-	var newFileName, newYamlName = "_" + version + "_app_", version + "_yaml"
+func GetUploadAppNewName(appType int, version, fileName, yamlName string) (string, string, error) {
+	var newFileName, newYamlName = "_" + version + "_app", "_" + version + "_yaml"
 	switch appType {
 	case constant.IOSPlatformID:
 		newFileName = constant.IOSPlatformStr + newFileName
@@ -66,5 +66,9 @@ func GetUploadAppNewName(appType int, version string) (string, string, error) {
 	default:
 		return "", "", errors.New("invalid app type")
 	}
+	suffixFile := path.Ext(fileName)
+	suffixYaml := path.Ext(yamlName)
+	newFileName = fmt.Sprintf("%s.%s", newFileName, suffixFile)
+	newYamlName = fmt.Sprintf("%s.%s", newYamlName, suffixYaml)
 	return newFileName, newYamlName, nil
 }

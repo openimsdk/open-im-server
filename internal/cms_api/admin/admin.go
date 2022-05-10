@@ -57,7 +57,7 @@ func UploadUpdateApp(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version)
+	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, req.File.Filename, req.Yaml.Filename)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
@@ -82,7 +82,7 @@ func UploadUpdateApp(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "invalid file path" + err.Error()})
 		return
 	}
-	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate); err != nil {
+	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate, newFileName, newYamlName); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateAppVersion error", err.Error())
 		resp.ErrCode = http.StatusInternalServerError
 		resp.ErrMsg = err.Error()
@@ -107,12 +107,12 @@ func GetDownloadURL(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	fileName, yamlName, err := utils.GetUploadAppNewName(req.Type, req.Version)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
-		return
-	}
+	//fileName, yamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, req.)
+	//if err != nil {
+	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
+	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
+	//	return
+	//}
 	app, err := imdb.GetNewestVersion(req.Type)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "getNewestVersion failed", err.Error())
@@ -124,8 +124,8 @@ func GetDownloadURL(c *gin.Context) {
 		if app.ForceUpdate == true {
 			resp.Data.ForceUpdate = true
 		}
-		resp.Data.YamlURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + yamlName
-		resp.Data.FileURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + fileName
+		resp.Data.YamlURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + app.YamlName
+		resp.Data.FileURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + app.FileName
 		c.JSON(http.StatusOK, resp)
 	} else {
 		resp.Data.HasNewVersion = false
