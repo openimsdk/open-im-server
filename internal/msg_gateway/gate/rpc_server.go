@@ -43,8 +43,7 @@ func (r *RPCServer) run() {
 	address := listenIP + ":" + strconv.Itoa(r.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Error("", "fail to listening consumer failed ", err.Error(), address)
-		return
+		panic("listening err:" + err.Error() + r.rpcRegisterName)
 	}
 	defer listener.Close()
 	srv := grpc.NewServer()

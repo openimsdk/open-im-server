@@ -35,10 +35,6 @@ func GetSeq(c *gin.Context) {
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
-
-	if grpcConn == nil {
-		log.ErrorByKv("get grpcConn err", pbData.OperationID, "args", params)
-	}
 	msgClient := pbMsg.NewChatClient(grpcConn)
 	reply, err := msgClient.GetMaxAndMinSeq(context.Background(), &pbData)
 	if err != nil {

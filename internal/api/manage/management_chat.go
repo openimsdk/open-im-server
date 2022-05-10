@@ -166,7 +166,7 @@ func ManagementSendMsg(c *gin.Context) {
 		}
 
 	}
-	log.InfoByKv("Ws call success to ManagementSendMsgReq", params.OperationID, "Parameters", params)
+	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
 
 	pbData := newUserSendMsgReq(&params)
 	log.Info("", "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())

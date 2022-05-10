@@ -37,8 +37,7 @@ func (r *RPCServer) run() {
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Error("", "push module rpc listening port err", err.Error(), address)
-		return
+		panic("listening err:" + err.Error() + r.rpcRegisterName)
 	}
 	defer listener.Close()
 	srv := grpc.NewServer()

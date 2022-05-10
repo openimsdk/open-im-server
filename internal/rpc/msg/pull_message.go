@@ -11,7 +11,7 @@ import (
 )
 
 func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeqReq) (*pbMsg.GetMaxAndMinSeqResp, error) {
-	log.InfoByKv("rpc getMaxAndMinSeq is arriving", in.OperationID, in.String())
+	log.NewInfo(in.OperationID, "rpc getMaxAndMinSeq is arriving", in.String())
 	//seq, err := model.GetBiggestSeqFromReceive(in.UserID)
 	maxSeq, err1 := commonDB.DB.GetUserMaxSeq(in.UserID)
 	minSeq, err2 := commonDB.DB.GetUserMinSeq(in.UserID)

@@ -35,14 +35,14 @@ func Verify(c *gin.Context) {
 	}
 
 	if params.VerificationCode == config.Config.Demo.SuperCode {
-		log.InfoByKv("Super Code Verified successfully", account)
+		log.NewInfo(params.OperationID, "Super Code Verified successfully", account)
 		data := make(map[string]interface{})
 		data["account"] = account
 		data["verificationCode"] = params.VerificationCode
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "Verified successfully!", "data": data})
 		return
 	}
-	log.NewInfo("0", " params.VerificationCode != config.Config.Demo.SuperCode", params.VerificationCode, config.Config.Demo)
+	log.NewInfo(params.OperationID, " params.VerificationCode != config.Config.Demo.SuperCode", params.VerificationCode, config.Config.Demo)
 	log.NewInfo(params.OperationID, "begin get form redis", account)
 	if params.UsedFor == 0 {
 		params.UsedFor = constant.VerificationCodeForRegister
