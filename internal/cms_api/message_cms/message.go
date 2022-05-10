@@ -78,6 +78,7 @@ func GetChatLogs(c *gin.Context) {
 		ShowNumber: int32(req.ShowNumber),
 	}
 	utils.CopyStructFields(&reqPb, &req)
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName)
 	client := pbMessage.NewMessageCMSClient(etcdConn)
 	respPb, err := client.GetChatLogs(context.Background(), &reqPb)
@@ -105,5 +106,6 @@ func GetChatLogs(c *gin.Context) {
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	resp.ChatLogsNum = int(respPb.ChatLogsNum)
+	log.NewInfo("", utils.GetSelfFuncName(), "resp", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }

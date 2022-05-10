@@ -146,10 +146,10 @@ func (s *officeServer) DeleteTag(_ context.Context, req *pbOffice.DeleteTagReq) 
 func (s *officeServer) SetTag(_ context.Context, req *pbOffice.SetTagReq) (resp *pbOffice.SetTagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SetTagResp{CommonResp: &pbOffice.CommonResp{}}
-	IncreaseUserIDList := utils.RemoveRepeatedStringInList(req.IncreaseUserIDList)
+	increaseUserIDList := utils.RemoveRepeatedStringInList(req.IncreaseUserIDList)
 	reduceUserIDList := utils.RemoveRepeatedStringInList(req.ReduceUserIDList)
-	if err := db.DB.SetTag(req.UserID, req.TagID, req.NewName, IncreaseUserIDList, reduceUserIDList); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetTag failed", err.Error())
+	if err := db.DB.SetTag(req.UserID, req.TagID, req.NewName, increaseUserIDList, reduceUserIDList); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetTag failed", increaseUserIDList, reduceUserIDList, err.Error())
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
@@ -174,13 +174,13 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	for _, groupID := range req.GroupList {
 		userIDList, err := im_mysql_model.GetGroupMemberIDListByGroupID(groupID)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error())
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error(), groupID)
 			continue
 		}
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), userIDList)
 		groupUserIDList = append(groupUserIDList, userIDList...)
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
 	var userIDList []string
 	userIDList = append(userIDList, tagUserIDList...)
 	userIDList = append(userIDList, groupUserIDList...)
@@ -191,13 +191,13 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 			userIDList = append(userIDList[:i], userIDList[i+1:]...)
 		}
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
-	us, err := imdb.GetUserByUserID(req.SendID)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
+	user, err := imdb.GetUserByUserID(req.SendID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.SendID)
 	}
 	for _, userID := range userIDList {
-		msg.TagSendMessage(req.OperationID, us, userID, req.Content, req.SenderPlatformID)
+		msg.TagSendMessage(req.OperationID, user, userID, req.Content, req.SenderPlatformID)
 	}
 	var tagSendLogs db.TagSendLog
 	for _, userID := range userIDList {
@@ -216,7 +216,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	tagSendLogs.SenderPlatformID = req.SenderPlatformID
 	tagSendLogs.SendTime = time.Now().Unix()
 	if err := db.DB.SaveTagSendLog(&tagSendLogs); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", tagSendLogs, err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil

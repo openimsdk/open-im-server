@@ -25,10 +25,10 @@ func DelMsg(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
 	if err := utils.CopyStructFields(&reqPb, &req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields", err.Error())
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 	msgClient := pbChat.NewChatClient(grpcConn)
 	respPb, err := msgClient.DelMsgList(context.Background(), &reqPb)
@@ -39,5 +39,6 @@ func DelMsg(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }

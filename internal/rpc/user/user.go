@@ -16,7 +16,6 @@ import (
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -170,6 +169,7 @@ func (s *userServer) GetAllConversations(ctx context.Context, req *pbUser.GetAll
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.GetAllConversationsResp{Conversations: []*pbUser.Conversation{}}
 	conversations, err := imdb.GetUserAllConversations(req.OwnerUserID)
+	log.NewDebug(req.OperationID, "conversations: ", conversations)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversations error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -187,6 +187,7 @@ func (s *userServer) GetConversation(ctx context.Context, req *pbUser.GetConvers
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.GetConversationResp{Conversation: &pbUser.Conversation{}}
 	conversation, err := imdb.GetConversation(req.OwnerUserID, req.ConversationID)
+	log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversation error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -204,6 +205,7 @@ func (s *userServer) GetConversations(ctx context.Context, req *pbUser.GetConver
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.GetConversationsResp{Conversations: []*pbUser.Conversation{}}
 	conversations, err := imdb.GetConversations(req.OwnerUserID, req.ConversationIDs)
+	log.NewDebug("", utils.GetSelfFuncName(), "conversations", conversations)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversations error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -231,6 +233,7 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 			return resp, nil
 		}
 		if groupInfo.Status == constant.GroupStatusDismissed && !req.Conversation.IsNotInGroup {
+			log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "group status is dismissed", groupInfo)
 			errMsg := "group status is dismissed"
 			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}
 			return resp, nil
@@ -443,6 +446,7 @@ func (s *userServer) GetUsersByName(ctx context.Context, req *pbUser.GetUsersByN
 		CurrentPage: req.Pagination.PageNumber,
 		ShowNumber:  req.Pagination.ShowNumber,
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	return resp, nil
 }
 
@@ -466,6 +470,7 @@ func (s *userServer) GetUserById(ctx context.Context, req *pbUser.GetUserByIdReq
 		CreateTime:   user.CreateTime.String(),
 		IsBlock:      isBlock,
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
@@ -474,6 +479,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	resp := &pbUser.GetUsersResp{User: []*pbUser.User{}}
 	users, err := imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	for _, v := range users {
@@ -487,16 +493,19 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 				IsBlock:      isBlock,
 			}
 			resp.User = append(resp.User, user)
+		} else {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "UserIsBlock failed", err.Error())
 		}
 	}
 	user := db.User{}
 	nums, err := imdb.GetUsersCount(user)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsersCount failed", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsersCount failed", err.Error(), user)
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	resp.UserNums = nums
 	resp.Pagination = &sdkws.ResponsePagination{ShowNumber: req.Pagination.ShowNumber, CurrentPage: req.Pagination.PageNumber}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
@@ -506,7 +515,7 @@ func (s *userServer) ResignUser(ctx context.Context, req *pbUser.ResignUserReq) 
 }
 
 func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*pbUser.AlterUserResp, error) {
-	log.NewInfo(req.OperationID, "AlterUser args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AlterUserResp{}
 	user := db.User{
 		PhoneNumber: strconv.FormatInt(req.PhoneNumber, 10),
@@ -519,11 +528,12 @@ func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	chat.UserInfoUpdatedNotification(req.OperationID, req.UserId, req.OpUserId)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
-	log.NewInfo(req.OperationID, "AddUser args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AddUserResp{}
 	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name)
 	if err != nil {
@@ -534,8 +544,7 @@ func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUs
 }
 
 func (s *userServer) BlockUser(ctx context.Context, req *pbUser.BlockUserReq) (*pbUser.BlockUserResp, error) {
-	log.NewInfo(req.OperationID, "BlockUser args ", req.String())
-	fmt.Println("BlockUser args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.BlockUserResp{}
 	err := imdb.BlockUser(req.UserId, req.EndDisableTime)
 	if err != nil {
@@ -546,7 +555,7 @@ func (s *userServer) BlockUser(ctx context.Context, req *pbUser.BlockUserReq) (*
 }
 
 func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq) (*pbUser.UnBlockUserResp, error) {
-	log.NewInfo(req.OperationID, "UnBlockUser args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.UnBlockUserResp{}
 	err := imdb.UnBlockUser(req.UserId)
 	if err != nil {
@@ -557,7 +566,7 @@ func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq
 }
 
 func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUsersReq) (*pbUser.GetBlockUsersResp, error) {
-	log.NewInfo(req.OperationID, "GetBlockUsers args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.GetBlockUsersResp{}
 	blockUsers, err := imdb.GetBlockUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
@@ -585,11 +594,12 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	resp.UserNums = nums
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	return resp, nil
 }
 
 func (s *userServer) GetBlockUserById(_ context.Context, req *pbUser.GetBlockUserByIdReq) (*pbUser.GetBlockUserByIdResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetBlockUserById args ", req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.GetBlockUserByIdResp{}
 	user, err := imdb.GetBlockUserById(req.UserId)
 	if err != nil {
@@ -606,6 +616,7 @@ func (s *userServer) GetBlockUserById(_ context.Context, req *pbUser.GetBlockUse
 		BeginDisableTime: (user.BeginDisableTime).String(),
 		EndDisableTime:   (user.EndDisableTime).String(),
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
 	return resp, nil
 }
 

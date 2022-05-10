@@ -95,5 +95,6 @@ func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLogi
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "failed")
 		return resp, openIMHttp.WrapError(constant.ErrTokenMalformed)
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }

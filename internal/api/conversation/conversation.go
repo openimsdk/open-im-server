@@ -25,13 +25,13 @@ func SetConversation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	reqPb.Conversation = &pbUser.Conversation{}
 	err := utils.CopyStructFields(&reqPb, req)
 	err = utils.CopyStructFields(reqPb.Conversation, req.Conversation)
 	if err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.SetConversation(context.Background(), &reqPb)
@@ -56,13 +56,13 @@ func ModifyConversationField(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	reqPb.Conversation = &pbConversation.Conversation{}
 	err := utils.CopyStructFields(&reqPb, req)
 	err = utils.CopyStructFields(reqPb.Conversation, req.Conversation)
 	if err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
 	client := pbConversation.NewConversationClient(etcdConn)
 	respPb, err := client.ModifyConversationField(context.Background(), &reqPb)
@@ -88,10 +88,10 @@ func BatchSetConversations(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.BatchSetConversations(context.Background(), &reqPb)
@@ -120,10 +120,10 @@ func GetAllConversations(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.GetAllConversations(context.Background(), &reqPb)
@@ -152,10 +152,10 @@ func GetConversation(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.GetConversation(context.Background(), &reqPb)
@@ -184,10 +184,10 @@ func GetConversations(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.GetConversations(context.Background(), &reqPb)
@@ -216,10 +216,10 @@ func SetRecvMsgOpt(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "bind json failed " + err.Error()})
 		return
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	if err := utils.CopyStructFields(&reqPb, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := pbUser.NewUserClient(etcdConn)
 	respPb, err := client.SetRecvMsgOpt(context.Background(), &reqPb)

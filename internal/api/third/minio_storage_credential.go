@@ -33,7 +33,7 @@ func MinioUploadFile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
 	var ok bool
 	var errInfo string
 	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
@@ -61,7 +61,7 @@ func MinioUploadFile(c *gin.Context) {
 		}
 		snapShotNewName, snapShotNewType := utils.GetNewFileNameAndContentType(snapShotFile.Filename, constant.ImageType)
 		log.Debug(req.OperationID, utils.GetSelfFuncName(), snapShotNewName, snapShotNewType)
-		_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, snapShotNewName, snapShotFileObj, snapShotFile.Size, minio.PutObjectOptions{ContentType: snapShotNewType})
+		_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, snapShotNewName, snapShotFileObj, snapShotFile.Size, minio.PutObjectOptions{ContentType: snapShotNewType})
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject snapShotFile error", err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -72,6 +72,7 @@ func MinioUploadFile(c *gin.Context) {
 	}
 	file, err := c.FormFile("file")
 	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "FormFile failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
 		return
 	}
@@ -83,10 +84,10 @@ func MinioUploadFile(c *gin.Context) {
 	}
 	newName, newType := utils.GetNewFileNameAndContentType(file.Filename, req.FileType)
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), newName, newType)
-	_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, newName, fileObj, file.Size, minio.PutObjectOptions{ContentType: newType})
+	_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, newName, fileObj, file.Size, minio.PutObjectOptions{ContentType: newType})
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "open file error")
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "invalid file path" + err.Error()})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "upload file error")
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "upload file error" + err.Error()})
 		return
 	}
 	resp.NewName = newName
@@ -106,7 +107,7 @@ func MinioStorageCredential(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	var ok bool
 	var errInfo string
 	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
