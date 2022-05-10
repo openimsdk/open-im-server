@@ -268,4 +268,4 @@ const BigVersion = "v3"
 
 const LogFileName = "OpenIM.log"
 
-const StatisticsTimeInterval = 300
+const StatisticsTimeInterval = 10
