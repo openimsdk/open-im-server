@@ -137,7 +137,6 @@ func GetUserIDFromToken(token string, operationID string) (bool, string, string)
 	}
 	log.Debug(operationID, "token claims.ExpiresAt.Second() ", claims.ExpiresAt.Unix())
 	return true, claims.UID, ""
-	claims.UID
 }
 
 func GetUserIDFromTokenExpireTime(token string, operationID string) (bool, string, string, int64) {
