@@ -53,7 +53,7 @@ func UploadUpdateApp(c *gin.Context) {
 		resp apiStruct.UploadUpdateAppResp
 	)
 	if err := c.Bind(&req); err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
@@ -64,22 +64,49 @@ func UploadUpdateApp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
 		return
 	}
-	fileObj, err := req.File.Open()
+	//fileObj, err := req.File.Open()
+	//if err != nil {
+	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
+	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open file error" + err.Error()})
+	//	return
+	//}
+	//yamlObj, err := req.Yaml.Open()
+	//if err != nil {
+	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open Yaml error", err.Error())
+	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open Yaml error" + err.Error()})
+	//	return
+	//}
+
+	// v2.0.9_app_linux v2.0.9_yaml_linux
+	file, err := c.FormFile("file")
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "FormFile failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
+		return
+	}
+	fileObj, err := file.Open()
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open file error" + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
 		return
 	}
-	yamlObj, err := req.Yaml.Open()
+
+	yaml, err := c.FormFile("yaml")
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open Yaml error", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open Yaml error" + err.Error()})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "FormFile failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
 		return
 	}
+	yamlObj, err := yaml.Open()
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
+		return
+	}
+
 	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size)
 	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size)
 
-	// v2.0.9_app_linux v2.0.9_yaml_linux
 	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject file error")
