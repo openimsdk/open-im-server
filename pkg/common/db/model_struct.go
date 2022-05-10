@@ -274,12 +274,12 @@ func (DepartmentMember) TableName() string {
 }
 
 type AppVersion struct {
-	Version     string `gorm:"column:version;size:64"`
-	Type        int    `gorm:"column:type;primary_key"`
-	UpdateTime  int    `gorm:"column:update_time"`
-	ForceUpdate bool   `gorm:"column:force_update"`
-	FileName    string `gorm:"column:file_name"`
-	YamlName    string `gorm:"column:yaml_name"`
+	Version     string `gorm:"column:version;size:64" json:"version"`
+	Type        int    `gorm:"column:type;primary_key" json:"type"`
+	UpdateTime  int    `gorm:"column:update_time" json:"update_time"`
+	ForceUpdate bool   `gorm:"column:force_update" json:"force_update"`
+	FileName    string `gorm:"column:file_name" json:"file_name"`
+	YamlName    string `gorm:"column:yaml_name" json:"yaml_name"`
 }
 
 func (AppVersion) TableName() string {
