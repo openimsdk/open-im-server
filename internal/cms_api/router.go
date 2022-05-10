@@ -22,6 +22,7 @@ func NewGinRouter() *gin.Engine {
 		adminRouterGroup.POST("/login", admin.AdminLogin)
 		adminRouterGroup.POST("/upload_update_app", admin.UploadUpdateApp)
 		adminRouterGroup.POST("/get_download_url", admin.GetDownloadURL)
+		adminRouterGroup.POST("/test", admin.UploadUpdateApp)
 	}
 	r2 := router.Group("")
 	r2.Use(middleware.JWTAuth())
