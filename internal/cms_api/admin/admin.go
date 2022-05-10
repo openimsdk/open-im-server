@@ -1,14 +1,12 @@
 package admin
 
 import (
-	apiStruct2 "Open_IM/pkg/base_info"
 	apiStruct "Open_IM/pkg/cms_api_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	openIMHttp "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAdmin "Open_IM/pkg/proto/admin_cms"
 	"Open_IM/pkg/utils"
@@ -20,7 +18,6 @@ import (
 	"path"
 	"strings"
 
-	"Open_IM/internal/api/third"
 	"github.com/gin-gonic/gin"
 	url2 "net/url"
 )
