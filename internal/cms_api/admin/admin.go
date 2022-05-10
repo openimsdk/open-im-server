@@ -184,13 +184,13 @@ func MinioUploadFile(c *gin.Context) {
 		req  apiStruct2.MinioUploadFileReq
 		resp apiStruct2.MinioUploadFileResp
 	)
-	defer func() {
-		if r := recover(); r != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), r)
-			c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file or snapShot args"})
-			return
-		}
-	}()
+	//defer func() {
+	//	if r := recover(); r != nil {
+	//		log.NewError(req.OperationID, utils.GetSelfFuncName(), r)
+	//		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file or snapShot args"})
+	//		return
+	//	}
+	//}()
 	if err := c.Bind(&req); err != nil {
 		log.NewError("0", utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
