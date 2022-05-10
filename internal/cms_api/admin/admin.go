@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"net/http"
-	"path"
 	"strings"
 
 	"Open_IM/internal/api/third"
@@ -73,7 +72,7 @@ func UploadUpdateApp(c *gin.Context) {
 	//}
 
 	// v2.0.9_app_linux v2.0.9_yaml_linux
-	file, err := c.FormFile("file")
+	file, err := c.FormFile("app")
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "FormFile failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
@@ -108,13 +107,13 @@ func UploadUpdateApp(c *gin.Context) {
 	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size)
 	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, yaml.Size)
 
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, newFileName, fileObj, file.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
+	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size, minio.PutObjectOptions{})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject file error")
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject file error" + err.Error()})
 		return
 	}
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, newYamlName, yamlObj, yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(newYamlName)})
+	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, yaml.Size, minio.PutObjectOptions{})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject yaml error")
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject yaml error" + err.Error()})
