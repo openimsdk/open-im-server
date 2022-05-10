@@ -118,7 +118,7 @@ func ParseToken(c *gin.Context) {
 		return
 	}
 
-	resp := api.ParseTokenResp{CommResp: api.CommResp{ErrCode: 0, ErrMsg: ""}, ExpireTime: api.ExpireTime{ExpireTimeSeconds: expireTime}}
+	resp := api.ParseTokenResp{CommResp: api.CommResp{ErrCode: 0, ErrMsg: ""}, ExpireTime: api.ExpireTime{ExpireTimeSeconds: uint32(expireTime)}}
 	log.NewInfo(params.OperationID, "ParseToken return ", resp)
 	c.JSON(http.StatusOK, resp)
 }

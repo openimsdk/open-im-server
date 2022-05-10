@@ -48,7 +48,7 @@ type ParseTokenReq struct {
 //}
 
 type ExpireTime struct {
-	ExpireTimeSeconds int64 `json:"expireTimeSeconds" `
+	ExpireTimeSeconds uint32 `json:"expireTimeSeconds" `
 }
 
 type ParseTokenResp struct {
