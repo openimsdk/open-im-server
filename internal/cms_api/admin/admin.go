@@ -112,7 +112,7 @@ func UploadUpdateApp(c *gin.Context) {
 		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
 		Secure: false,
 	})
-	fmt.Println(apiThird.MinioClient.EndpointURL())
+	fmt.Println(minioClient.EndpointURL())
 
 	_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
 	if err != nil {
