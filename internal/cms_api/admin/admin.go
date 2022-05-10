@@ -13,12 +13,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"net/http"
 	"path"
 	"strings"
 
 	"Open_IM/internal/api/third"
 	"github.com/gin-gonic/gin"
+	url2 "net/url"
 )
 
 // register
@@ -105,10 +107,32 @@ func UploadUpdateApp(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, "app.apk", fileObj, file.Size)
-	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, "test.yaml", yamlObj, yaml.Size)
+	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size)
+	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, yaml.Size)
 
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
+	var initUrl string
+	if config.Config.Credential.Minio.EndpointInnerEnable {
+		initUrl = config.Config.Credential.Minio.EndpointInner
+	} else {
+		initUrl = config.Config.Credential.Minio.Endpoint
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "use initUrl: ", initUrl)
+	minioUrl, err := url2.Parse(initUrl)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "Parse ok ", config.Config.Credential.Minio)
+	MinioClient, err := minio.New(minioUrl.Host, &minio.Options{
+		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "init minio client failed", err.Error())
+		return
+	}
+
+	_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject file error")
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject file error" + err.Error()})
