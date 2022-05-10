@@ -219,16 +219,11 @@ func GetDownloadURL(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	//fileName, yamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, req.)
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
-	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
-	//	return
-	//}
 	app, err := imdb.GetNewestVersion(req.Type)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "getNewestVersion failed", err.Error())
 	}
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "app: ", app)
 	if app != nil {
 		if app.Version != req.Version && app.Version != "" {
 			resp.Data.HasNewVersion = true
@@ -238,9 +233,11 @@ func GetDownloadURL(c *gin.Context) {
 			resp.Data.YamlURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + app.YamlName
 			resp.Data.FileURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + app.FileName
 			c.JSON(http.StatusOK, resp)
+			return
 		} else {
 			resp.Data.HasNewVersion = false
 			c.JSON(http.StatusOK, resp)
+			return
 		}
 	}
 	c.JSON(http.StatusBadRequest, gin.H{"errCode": 0, "errMsg": "not found app version"})
