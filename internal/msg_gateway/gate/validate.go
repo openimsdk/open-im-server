@@ -62,11 +62,11 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 	case constant.WSSendMsg:
 		data := open_im_sdk.MsgData{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+			log.Error("", "Decode Data struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
-			log.ErrorByKv("data args validate  err", "", "err", err.Error(), "reqIdentifier", r)
+			log.Error("", "data args validate  err", err.Error(), r)
 			return false, 204, err.Error(), nil
 
 		}
@@ -74,11 +74,11 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 	case constant.WSSendSignalMsg:
 		data := pbRtc.SignalReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+			log.Error("", "Decode Data struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
-			log.ErrorByKv("data args validate  err", "", "err", err.Error(), "reqIdentifier", r)
+			log.Error("", "data args validate  err", err.Error(), r)
 			return false, 204, err.Error(), nil
 
 		}
@@ -86,11 +86,11 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 	case constant.WSPullMsgBySeqList:
 		data := open_im_sdk.PullMessageBySeqListReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
+			log.Error("", "Decode Data struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
-			log.ErrorByKv("data args validate  err", "", "err", err.Error(), "reqIdentifier", r)
+			log.Error("", "data args validate  err", err.Error(), r)
 			return false, 204, err.Error(), nil
 
 		}

@@ -45,7 +45,7 @@ func (ws *WServer) run() {
 	http.HandleFunc("/", ws.wsHandler)         //Get request from client to handle by wsHandler
 	err := http.ListenAndServe(ws.wsAddr, nil) //Start listening
 	if err != nil {
-		log.ErrorByKv("Ws listening err", "", "err", err.Error())
+		panic("Ws listening err:" + err.Error())
 	}
 }
 
@@ -54,7 +54,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
 		conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
 		if err != nil {
-			log.ErrorByKv("upgrade http conn err", "", "err", err, query)
+			log.Error("", "upgrade http conn err", err, query)
 			return
 		} else {
 			//Connection mapping relationship,
@@ -77,7 +77,7 @@ func (ws *WServer) readMsg(conn *UserConn) {
 		}
 		if err != nil {
 			uid, platform := ws.getUserUid(conn)
-			log.ErrorByKv("WS ReadMsg error", "", "userIP", conn.RemoteAddr().String(), "userUid", uid, "platform", platform, "error", err.Error())
+			log.Error("", "WS ReadMsg error", "userIP", conn.RemoteAddr().String(), "userUid", uid, "platform", platform, "error", err.Error())
 			userCount--
 			ws.delUserConn(conn)
 			return

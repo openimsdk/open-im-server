@@ -592,7 +592,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	}
 
 	resp := pbGroup.GetGroupsInfoResp{GroupInfoList: groupsInfoList}
-	log.NewInfo(req.OperationID, "GetGroupsInfo rpc return ", resp)
+	log.NewInfo(req.OperationID, "GetGroupsInfo rpc return ", resp.String())
 	return &resp, nil
 }
 
@@ -990,7 +990,8 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 	for _, v := range groups {
 		groupMember, err := imdb.GetGroupMaster(v.GroupID)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMaster failed", err.Error(), v)
+			continue
 		}
 		resp.CMSGroups = append(resp.CMSGroups, &pbGroup.CMSGroup{
 			GroupInfo: &open_im_sdk.GroupInfo{
@@ -1006,7 +1007,7 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 			GroupMasterName: groupMember.Nickname,
 		})
 	}
-
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetGroups ", resp.String())
 	return resp, nil
 }
 
@@ -1086,6 +1087,7 @@ func (s *groupServer) GetGroupMembersCMS(_ context.Context, req *pbGroup.GetGrou
 		CurrentPage: req.Pagination.PageNumber,
 		ShowNumber:  req.Pagination.ShowNumber,
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp.String())
 	return resp, nil
 }
 

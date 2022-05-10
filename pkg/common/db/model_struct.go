@@ -272,3 +272,14 @@ type DepartmentMember struct {
 func (DepartmentMember) TableName() string {
 	return "department_members"
 }
+
+type AppVersion struct {
+	Version     string `gorm:"column:version;size:64"`
+	Type        int    `gorm:"column:type;primary_key"`
+	UpdateTime  int    `gorm:"column:update_time"`
+	ForceUpdate bool   `gorm:"column:force_update"`
+}
+
+func (AppVersion) TableName() string {
+	return "app_version"
+}

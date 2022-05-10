@@ -28,6 +28,7 @@ func GetGroupById(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupId = req.GroupId
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pbGroup.NewGroupClient(etcdConn)
@@ -44,6 +45,7 @@ func GetGroupById(c *gin.Context) {
 	resp.GroupMasterName = respPb.CMSGroup.GroupMasterName
 	resp.GroupMasterId = respPb.CMSGroup.GroupMasterId
 	resp.IsBanChat = constant.GroupIsBanChat(respPb.CMSGroup.GroupInfo.Status)
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -58,6 +60,7 @@ func GetGroups(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.Pagination = &commonPb.RequestPagination{}
 	utils.CopyStructFields(&reqPb.Pagination, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -83,6 +86,7 @@ func GetGroups(c *gin.Context) {
 	resp.GroupNums = int(respPb.GroupNum)
 	resp.CurrentPage = int(respPb.Pagination.PageNumber)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -97,6 +101,7 @@ func GetGroupByName(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupName = req.GroupName
 	reqPb.Pagination = &commonPb.RequestPagination{}
 	utils.CopyStructFields(&reqPb.Pagination, req)
@@ -123,6 +128,7 @@ func GetGroupByName(c *gin.Context) {
 	resp.CurrentPage = int(respPb.Pagination.PageNumber)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.GroupNums = int(respPb.GroupNums)
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -137,6 +143,7 @@ func CreateGroup(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupInfo = &commonPb.GroupInfo{}
 	reqPb.GroupInfo.GroupName = req.GroupName
 	reqPb.GroupInfo.CreatorUserID = req.GroupMasterId
@@ -169,6 +176,7 @@ func BanGroupChat(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupId = req.GroupId
 	reqPb.Status = constant.GroupBanChat
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -193,6 +201,7 @@ func BanPrivateChat(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupId = req.GroupId
 	reqPb.Status = constant.GroupBanPrivateChat
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -216,6 +225,7 @@ func OpenGroupChat(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupId = req.GroupId
 	reqPb.Status = constant.GroupOk
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -239,6 +249,7 @@ func OpenPrivateChat(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupId = req.GroupId
 	reqPb.Status = constant.GroupOk
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -263,6 +274,7 @@ func GetGroupMembers(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.Pagination = &commonPb.RequestPagination{
 		PageNumber: int32(req.PageNumber),
 		ShowNumber: int32(req.ShowNumber),
@@ -290,6 +302,7 @@ func GetGroupMembers(c *gin.Context) {
 			JoinTime:       utils.UnixSecondToTime(int64(groupMembers.JoinTime)).String(),
 		})
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -304,6 +317,7 @@ func AddGroupMembers(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.UserIds = req.Members
 	reqPb.GroupId = req.GroupId
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -316,6 +330,7 @@ func AddGroupMembers(c *gin.Context) {
 	}
 	resp.Success = respPb.Success
 	resp.Failed = respPb.Failed
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -330,6 +345,7 @@ func RemoveGroupMembers(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.UserIds = req.Members
 	reqPb.GroupId = req.GroupId
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
@@ -342,6 +358,7 @@ func RemoveGroupMembers(c *gin.Context) {
 	}
 	resp.Success = respPb.Success
 	resp.Failed = respPb.Failed
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -356,6 +373,7 @@ func DeleteGroup(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupId = req.GroupId
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := pbGroup.NewGroupClient(etcdConn)
@@ -379,6 +397,7 @@ func SetGroupMaster(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupId = req.GroupId
 	reqPb.UserId = req.UserId
 	reqPb.RoleLevel = constant.GroupOwner
@@ -404,6 +423,7 @@ func SetGroupOrdinaryUsers(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	reqPb.GroupId = req.GroupId
 	reqPb.UserId = req.UserId
 	reqPb.RoleLevel = constant.GroupOrdinaryUsers
@@ -424,6 +444,7 @@ func AlterGroupInfo(c *gin.Context) {
 		_     cms_api_struct.SetGroupMasterResponse
 		reqPb pbGroup.SetGroupInfoReq
 	)
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)

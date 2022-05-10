@@ -27,6 +27,7 @@ func GetMessagesStatistics(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
 	client := pb.NewUserClient(etcdConn)
@@ -57,6 +58,7 @@ func GetMessagesStatistics(c *gin.Context) {
 			MessageNum: int(v.Num),
 		})
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -72,6 +74,7 @@ func GetUserStatistics(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
 	client := pb.NewUserClient(etcdConn)
@@ -112,6 +115,7 @@ func GetUserStatistics(c *gin.Context) {
 			TotalUserNum: int(v.Num),
 		})
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -127,6 +131,7 @@ func GetGroupStatistics(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
 	client := pb.NewUserClient(etcdConn)
@@ -160,6 +165,7 @@ func GetGroupStatistics(c *gin.Context) {
 			})
 
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -175,6 +181,7 @@ func GetActiveUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
 	client := pb.NewUserClient(etcdConn)
@@ -185,6 +192,7 @@ func GetActiveUser(c *gin.Context) {
 		return
 	}
 	utils.CopyStructFields(&resp.ActiveUserList, respPb.Users)
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -200,6 +208,7 @@ func GetActiveGroup(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, req)
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
 	client := pb.NewUserClient(etcdConn)
@@ -220,5 +229,6 @@ func GetActiveGroup(c *gin.Context) {
 			MessageNum: int(group.MessageNum),
 		})
 	}
+	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }

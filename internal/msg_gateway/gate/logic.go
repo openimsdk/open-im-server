@@ -69,9 +69,6 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	rpcReq.UserID = m.SendID
 	rpcReq.OperationID = m.OperationID
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
-	if grpcConn == nil {
-		log.ErrorByKv("get grpcConn err", rpcReq.OperationID, "args", m)
-	}
 	msgClient := pbChat.NewChatClient(grpcConn)
 	rpcReply, err := msgClient.GetMaxAndMinSeq(context.Background(), &rpcReq)
 	if err != nil {
