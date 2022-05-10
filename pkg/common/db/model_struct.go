@@ -280,6 +280,7 @@ type AppVersion struct {
 	ForceUpdate bool   `gorm:"column:force_update" json:"force_update"`
 	FileName    string `gorm:"column:file_name" json:"file_name"`
 	YamlName    string `gorm:"column:yaml_name" json:"yaml_name"`
+	TestField   string `gorm:"column:test_field" json:"test_field"`
 }
 
 func (AppVersion) TableName() string {
