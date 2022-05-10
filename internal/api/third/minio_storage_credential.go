@@ -10,7 +10,6 @@ import (
 	_ "Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/utils"
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
 	_ "github.com/minio/minio-go/v7"
