@@ -58,12 +58,7 @@ func UploadUpdateApp(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, req.File.Filename, req.Yaml.Filename)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
-		return
-	}
+
 	//fileObj, err := req.File.Open()
 	//if err != nil {
 	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
@@ -101,6 +96,12 @@ func UploadUpdateApp(c *gin.Context) {
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
+		return
+	}
+	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, file.Filename, yaml.Filename)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
 		return
 	}
 
