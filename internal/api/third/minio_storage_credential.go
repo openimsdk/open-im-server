@@ -176,41 +176,12 @@ func UploadUpdateApp(c *gin.Context) {
 		return
 	}
 
-	// v2.0.9_app_linux v2.0.9_yaml_linux
-
-	//file, err := c.FormFile("file")
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "FormFile failed", err.Error())
-	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
-	//	return
-	//}
-	//fileObj, err := file.Open()
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
-	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
-	//	return
-	//}
-	//
-	//yaml, err := c.FormFile("yaml")
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "FormFile failed", err.Error())
-	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
-	//	return
-	//}
-	//yamlObj, err := yaml.Open()
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
-	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
-	//	return
-	//}
 	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, req.File.Filename, req.Yaml.Filename)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
 		return
 	}
-	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size)
-	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size)
 
 	_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
 	if err != nil {

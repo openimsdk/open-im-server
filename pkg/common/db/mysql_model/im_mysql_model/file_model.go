@@ -18,7 +18,7 @@ func UpdateAppVersion(appType int, version string, forceUpdate bool, fileName, y
 		FileName:    fileName,
 		YamlName:    yamlName,
 	}
-	result := dbConn.Model(db.AppVersion{}).Where("app_type = ?", appType).Updates(&app)
+	result := dbConn.Model(db.AppVersion{}).Where("type = ?", appType).Updates(&app)
 	if result.Error != nil {
 		return result.Error
 	}
