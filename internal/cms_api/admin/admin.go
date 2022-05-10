@@ -69,7 +69,7 @@ func UploadUpdateApp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "name: ", newFileName, newYamlName)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "name: ", newFileName, newYamlName, fileObj, yamlObj, req.File.Size, req.Yaml.Size)
 	// v2.0.9_app_linux v2.0.9_yaml_linux
 	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size, minio.PutObjectOptions{})
 	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{})

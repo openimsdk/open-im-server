@@ -75,6 +75,7 @@ func MinioInit() {
 	}
 	// 自动化桶public的代码
 	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
 	if err != nil {
 		log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
 		return

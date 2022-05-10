@@ -274,8 +274,8 @@ func (DepartmentMember) TableName() string {
 }
 
 type AppVersion struct {
-	Version     string `gorm:"column:user_id;size:64"`
-	Type        int    `gorm:"column:user_id;primary_key"`
+	Version     string `gorm:"column:version;size:64"`
+	Type        int    `gorm:"column:type;primary_key"`
 	UpdateTime  int    `gorm:"column:update_time"`
 	ForceUpdate bool   `gorm:"column:force_update"`
 }
