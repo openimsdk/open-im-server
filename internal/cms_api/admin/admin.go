@@ -11,7 +11,6 @@ import (
 	pbAdmin "Open_IM/pkg/proto/admin_cms"
 	"Open_IM/pkg/utils"
 	"context"
-	"fmt"
 	"github.com/minio/minio-go/v7"
 	"net/http"
 	"strings"
