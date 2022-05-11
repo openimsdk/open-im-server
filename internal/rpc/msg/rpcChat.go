@@ -19,7 +19,8 @@ type rpcChat struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
-	producer        *kafka.Producer
+	onlineProducer  *kafka.Producer
+	offlineProducer *kafka.Producer
 }
 
 func NewRpcChatServer(port int) *rpcChat {
@@ -30,7 +31,8 @@ func NewRpcChatServer(port int) *rpcChat {
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
-	rc.producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
+	rc.onlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
+	rc.offlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschatOffline.Addr, config.Config.Kafka.Ws2mschatOffline.Topic)
 	return &rc
 }
 

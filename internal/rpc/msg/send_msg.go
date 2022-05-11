@@ -10,9 +10,11 @@ import (
 	pbCache "Open_IM/pkg/proto/cache"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbConversation "Open_IM/pkg/proto/conversation"
+	pbRelay "Open_IM/pkg/proto/relay"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
 	"math/rand"
@@ -188,14 +190,14 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		if isSend {
 			msgToMQSingle.MsgData = pb.MsgData
 			log.NewInfo(msgToMQSingle.OperationID, msgToMQSingle)
-			err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.RecvID)
+			err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.RecvID, constant.OnlineStatus)
 			if err1 != nil {
 				log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
 		if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
-			err2 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.SendID)
+			err2 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.SendID, constant.OnlineStatus)
 			if err2 != nil {
 				log.NewError(msgToMQSingle.OperationID, "kafka send msg err:SendID", msgToMQSingle.MsgData.SendID, msgToMQSingle.String())
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
@@ -252,72 +254,33 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 
 		default:
 		}
+		onUserIDList, offUserIDList := getOnlineAndOfflineUserIDList(memberUserIDList, pb.OperationID)
+		log.Debug(pb.OperationID, onUserIDList, offUserIDList)
 		groupID := pb.MsgData.GroupID
 		//split  parallel send
 		var wg sync.WaitGroup
 		var sendTag bool
 		var split = 50
-		remain := len(memberUserIDList) % split
-		for i := 0; i < len(memberUserIDList)/split; i++ {
+		remain := len(onUserIDList) % split
+		for i := 0; i < len(onUserIDList)/split; i++ {
 			wg.Add(1)
-			go func(list []string) {
-				//	log.Debug(pb.OperationID, "split userID ", list)
-				groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
-				*groupPB.MsgData = *pb.MsgData
-				if pb.MsgData.OfflinePushInfo != nil {
-					*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
-				}
-				msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
-				for _, v := range list {
-					groupPB.MsgData.RecvID = v
-					isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &groupPB)
-					if isSend {
-						msgToMQGroup.MsgData = groupPB.MsgData
-						//	log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
-						err := rpc.sendMsgToKafka(&msgToMQGroup, v)
-						if err != nil {
-							log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
-						} else {
-							sendTag = true
-						}
-					} else {
-						log.Debug(groupPB.OperationID, "not sendMsgToKafka, ", v)
-					}
-				}
-				wg.Done()
-			}(memberUserIDList[i*split : (i+1)*split])
+			go rpc.sendMsgToGroup(onUserIDList[i*split:(i+1)*split], pb, constant.OnlineStatus, &sendTag, &wg)
 		}
 		if remain > 0 {
 			wg.Add(1)
-			go func(list []string) {
-				//	log.Debug(pb.OperationID, "split userID ", list)
-				groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
-				*groupPB.MsgData = *pb.MsgData
-				if pb.MsgData.OfflinePushInfo != nil {
-					*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
-				}
-				msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
-				for _, v := range list {
-					groupPB.MsgData.RecvID = v
-					isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, &groupPB)
-					if isSend {
-						msgToMQGroup.MsgData = groupPB.MsgData
-						//	log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
-						err := rpc.sendMsgToKafka(&msgToMQGroup, v)
-						if err != nil {
-							log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
-						} else {
-							sendTag = true
-						}
-					} else {
-						log.Debug(groupPB.OperationID, "not sendMsgToKafka, ", v)
-					}
-				}
-				wg.Done()
-			}(memberUserIDList[split*(len(memberUserIDList)/split):])
+			go rpc.sendMsgToGroup(onUserIDList[split*(len(onUserIDList)/split):], pb, constant.OnlineStatus, &sendTag, &wg)
 		}
 		wg.Wait()
-
+		remain = len(offUserIDList) % split
+		for i := 0; i < len(offUserIDList)/split; i++ {
+			wg.Add(1)
+			go rpc.sendMsgToGroup(offUserIDList[i*split:(i+1)*split], pb, constant.OfflineStatus, &sendTag, &wg)
+		}
+		if remain > 0 {
+			wg.Add(1)
+			go rpc.sendMsgToGroup(offUserIDList[split*(len(offUserIDList)/split):], pb, constant.OfflineStatus, &sendTag, &wg)
+		}
+		wg.Wait()
 		log.Info(msgToMQSingle.OperationID, "addUidList", addUidList)
 		for _, v := range addUidList {
 			pb.MsgData.RecvID = v
@@ -325,7 +288,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.Info(msgToMQSingle.OperationID, "isSend", isSend)
 			if isSend {
 				msgToMQSingle.MsgData = pb.MsgData
-				err := rpc.sendMsgToKafka(&msgToMQSingle, v)
+				err := rpc.sendMsgToKafka(&msgToMQSingle, v, constant.OnlineStatus)
 				if err != nil {
 					log.NewError(msgToMQSingle.OperationID, "kafka send msg err:UserId", v, msgToMQSingle.String())
 				} else {
@@ -397,14 +360,14 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	case constant.NotificationChatType:
 		msgToMQSingle.MsgData = pb.MsgData
 		log.NewInfo(msgToMQSingle.OperationID, msgToMQSingle)
-		err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.RecvID)
+		err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.RecvID, constant.OnlineStatus)
 		if err1 != nil {
 			log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 		}
 
 		if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
-			err2 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.SendID)
+			err2 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.SendID, constant.OnlineStatus)
 			if err2 != nil {
 				log.NewError(msgToMQSingle.OperationID, "kafka send msg err:SendID", msgToMQSingle.MsgData.SendID, msgToMQSingle.String())
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
@@ -416,12 +379,22 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	}
 }
 
-func (rpc *rpcChat) sendMsgToKafka(m *pbChat.MsgDataToMQ, key string) error {
-	pid, offset, err := rpc.producer.SendMessage(m, key)
-	if err != nil {
-		log.Error(m.OperationID, "kafka send failed", "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key)
+func (rpc *rpcChat) sendMsgToKafka(m *pbChat.MsgDataToMQ, key string, status string) error {
+	switch status {
+	case constant.OnlineStatus:
+		pid, offset, err := rpc.onlineProducer.SendMessage(m, key)
+		if err != nil {
+			log.Error(m.OperationID, "kafka send failed", "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key, status)
+		}
+		return err
+	case constant.OfflineStatus:
+		pid, offset, err := rpc.offlineProducer.SendMessage(m, key)
+		if err != nil {
+			log.Error(m.OperationID, "kafka send failed", "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key, status)
+		}
+		return err
 	}
-	return err
+	return errors.New("status error")
 }
 func GetMsgID(sendID string) string {
 	t := time.Now().Format("2006-01-02 15:04:05")
@@ -735,4 +708,69 @@ func Notification(n *NotificationMsg) {
 	} else if reply.ErrCode != 0 {
 		log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String(), reply.ErrCode, reply.ErrMsg)
 	}
+}
+func getOnlineAndOfflineUserIDList(memberList []string, operationID string) (onllUserIDList []string, offlUserIDList []string) {
+	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
+	req := &pbRelay.GetUsersOnlineStatusReq{}
+	req.UserIDList = memberList
+	req.OperationID = operationID
+	req.OpUserID = config.Config.Manager.AppManagerUid[0]
+	flag := false
+	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+	for _, v := range grpcCons {
+		client := pbRelay.NewOnlineMessageRelayServiceClient(v)
+		reply, err := client.GetUsersOnlineStatus(context.Background(), req)
+		if err != nil {
+			log.NewError(operationID, "GetUsersOnlineStatus rpc  err", req.String(), err.Error())
+			continue
+		} else {
+			if reply.ErrCode == 0 {
+				wsResult = append(wsResult, reply.SuccessResult...)
+			}
+		}
+	}
+	log.NewInfo(operationID, "call GetUsersOnlineStatus rpc server is success", wsResult)
+	//Online data merge of each node
+	for _, v1 := range memberList {
+		flag = false
+
+		for _, v2 := range wsResult {
+			if v2.UserID == v1 {
+				flag = true
+				onllUserIDList = append(onllUserIDList, v1)
+			}
+
+		}
+		if !flag {
+			offlUserIDList = append(offlUserIDList, v1)
+		}
+	}
+	return onllUserIDList, offlUserIDList
+}
+
+func (rpc *rpcChat) sendMsgToGroup(list []string, pb *pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
+	//	log.Debug(pb.OperationID, "split userID ", list)
+	groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
+	*groupPB.MsgData = *pb.MsgData
+	if pb.MsgData.OfflinePushInfo != nil {
+		*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
+	}
+	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
+	for _, v := range list {
+		groupPB.MsgData.RecvID = v
+		isSend := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, &groupPB)
+		if isSend {
+			msgToMQGroup.MsgData = groupPB.MsgData
+			//	log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
+			err := rpc.sendMsgToKafka(&msgToMQGroup, v, status)
+			if err != nil {
+				log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
+			} else {
+				*sendTag = true
+			}
+		} else {
+			log.Debug(groupPB.OperationID, "not sendMsgToKafka, ", v)
+		}
+	}
+	wg.Done()
 }
