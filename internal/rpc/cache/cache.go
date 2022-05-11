@@ -143,6 +143,10 @@ func updateAllFriendToCache(userList []db.User) error {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
+		if len(friendIDList) == 0 {
+			log.NewWarn("0", utils.GetSelfFuncName(), "friendIDList is empty")
+			continue
+		}
 		if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
 			log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		}
@@ -157,6 +161,10 @@ func updateAllBlackListToCache(userList []db.User) error {
 		blackIDList, err := imdb.GetBlackIDListByUserID(user.UserID)
 		if err != nil {
 			log.NewError("", utils.GetSelfFuncName(), err.Error())
+			continue
+		}
+		if len(blackIDList) == 0 {
+			log.NewWarn("0", utils.GetSelfFuncName(), "blackIDList is empty")
 			continue
 		}
 		if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
