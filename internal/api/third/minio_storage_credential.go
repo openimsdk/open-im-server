@@ -173,7 +173,7 @@ func UploadUpdateApp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open file error" + err.Error()})
 		return
 	}
-	_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, req.File.Filename, fileObj, req.File.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
+	_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, req.File.Filename, fileObj, req.File.Size, minio.PutObjectOptions{ContentType: path.Ext(req.File.Filename)})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject file error")
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject file error" + err.Error()})
@@ -182,7 +182,7 @@ func UploadUpdateApp(c *gin.Context) {
 	if yamlName != "" {
 		yamlObj, err := req.Yaml.Open()
 		if err == nil {
-			_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, yamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(newYamlName)})
+			_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, yamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(yamlName)})
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject yaml error")
 				c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject yaml error" + err.Error()})
