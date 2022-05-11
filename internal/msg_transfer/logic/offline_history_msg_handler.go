@@ -19,6 +19,7 @@ type OfflineHistoryConsumerHandler struct {
 }
 
 func (mc *OfflineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
+	log.Debug("ts", config.Config.Kafka.ConsumerGroupID.MsgToMongoOffline, config.Config.Kafka.Ws2mschatOffline.Topic)
 	mc.msgHandle = make(map[string]fcb)
 	mc.cmdCh = cmdCh
 	mc.msgHandle[config.Config.Kafka.Ws2mschatOffline.Topic] = mc.handleChatWs2Mongo
