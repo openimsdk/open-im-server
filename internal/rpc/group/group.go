@@ -64,8 +64,8 @@ func (s *groupServer) Run() {
 	//Service registers with etcd
 	pbGroup.RegisterGroupServer(srv, s)
 
-	rpcRegisterIP := ""
-	if config.Config.RpcRegisterIP == "" {
+	rpcRegisterIP := config.Config.RpcRegisterIP
+	if rpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
 			log.Error("", "GetLocalIP failed ", err.Error())
@@ -76,6 +76,7 @@ func (s *groupServer) Run() {
 		log.NewError("", "RegisterEtcd failed ", err.Error())
 		return
 	}
+	log.Info("", "RegisterEtcd ", s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError("", "Serve failed ", err.Error())

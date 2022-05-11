@@ -85,7 +85,7 @@ type config struct {
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
 	}
 	Mongo struct {
-		DBUri               string   `yaml:"dbUri"` // 当dbUri值不为空则直接使用该值
+		DBUri               string   `yaml:"dbUri"`
 		DBAddress           []string `yaml:"dbAddress"`
 		DBDirect            bool     `yaml:"dbDirect"`
 		DBTimeout           int      `yaml:"dbTimeout"`
