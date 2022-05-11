@@ -103,18 +103,23 @@ func (mc *OfflineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 	//	log.NewDebug("", "kafka get info to delay mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "offline")
 	//	//mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 	//}
+	cmd := Cmd2Value{}
+repeat:
 	select {
-	case cmd := <-mc.cmdCh:
-		if cmd.Cmd == OnlineTopicVacancy {
-			for msg := range claim.Messages() {
-				if GetOnlineTopicStatus() == OnlineTopicVacancy {
-					log.NewDebug("", "kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
-					mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
-					sess.MarkMessage(msg, "")
-				}
+	case cmd = <-mc.cmdCh:
+	case <-time.After(time.Millisecond * time.Duration(1)):
+		goto repeat
+	}
+	if cmd.Cmd == OnlineTopicVacancy {
+		for msg := range claim.Messages() {
+			if GetOnlineTopicStatus() == OnlineTopicVacancy {
+				log.NewDebug("", "kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
+				mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+				sess.MarkMessage(msg, "")
+			} else {
+				goto repeat
 			}
 		}
-
 	}
 	return nil
 }
