@@ -199,7 +199,7 @@ func UploadUpdateApp(c *gin.Context) {
 			newYamlName = ""
 		}
 	}
-	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate, newFileName, newYamlName); err != nil {
+	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate, newFileName, newYamlName, req.UpdateLog); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateAppVersion error", err.Error())
 		resp.ErrCode = http.StatusInternalServerError
 		resp.ErrMsg = err.Error()
@@ -239,6 +239,8 @@ func GetDownloadURL(c *gin.Context) {
 				resp.Data.YamlURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + app.YamlName
 			}
 			resp.Data.FileURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + app.FileName
+			resp.Data.Version = app.Version
+			resp.Data.UpdateLog = app.UpdateLog
 			c.JSON(http.StatusOK, resp)
 			return
 		} else {
