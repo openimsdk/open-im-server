@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/statistics"
 	"fmt"
 	"sync"
@@ -27,8 +28,10 @@ var (
 
 func Init() {
 	cmdCh = make(chan Cmd2Value, 10000)
+	w = new(sync.Mutex)
 	persistentCH.Init()
 	historyCH.Init(cmdCh)
+	log.Debug("come msg transfer ts", config.Config.Kafka.ConsumerGroupID.MsgToMongoOffline, config.Config.Kafka.Ws2mschatOffline.Topic)
 	offlineHistoryCH.Init(cmdCh)
 	statistics.NewStatistics(&singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	statistics.NewStatistics(&groupMsgCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second groupMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)

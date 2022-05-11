@@ -49,7 +49,7 @@ kafka:
     topic: "ms2ps_chat"
   consumergroupid:
     msgToMongo: mongo
-    MsgToMongoOffline: mongo_offline
+    msgToMongoOffline: mongo_offline
     msgToMySql: mysql
     msgToPush: push
 
