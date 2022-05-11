@@ -98,10 +98,9 @@ func (OfflineHistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error 
 func (OfflineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (mc *OfflineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
-
-	log.NewDebug("", "new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
+	log.NewDebug("", "offline new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
 	for msg := range claim.Messages() {
-		log.NewDebug("", "kafka get info to delay mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", "offline")
+		log.NewDebug("", "kafka get info to delay mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "offline")
 		//mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 	}
 	//select {

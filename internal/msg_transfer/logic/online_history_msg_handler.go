@@ -133,6 +133,7 @@ func (OnlineHistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error  
 func (OnlineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
+	log.NewDebug("", "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
 	och.TriggerCmd(OnlineTopicBusy)
 	SetOnlineTopicStatus(OnlineTopicBusy)
 	for msg := range claim.Messages() {
