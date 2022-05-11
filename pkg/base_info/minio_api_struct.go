@@ -1,5 +1,7 @@
 package base_info
 
+import "mime/multipart"
+
 type MinioStorageCredentialReq struct {
 	OperationID string `json:"operationID"`
 }
@@ -22,4 +24,36 @@ type MinioUploadFileResp struct {
 	NewName         string `json:"newName"`
 	SnapshotURL     string `json:"snapshotURL,omitempty"`
 	SnapshotNewName string `json:"snapshotName,omitempty"`
+}
+
+type UploadUpdateAppReq struct {
+	OperationID string                `form:"operationID" binding:"required"`
+	Type        int                   `form:"type" binding:"required"`
+	Version     string                `form:"version"  binding:"required"`
+	File        *multipart.FileHeader `form:"file" binding:"required"`
+	Yaml        *multipart.FileHeader `form:"yaml"`
+	ForceUpdate bool                  `form:"forceUpdate"`
+	UpdateLog   string                `form:"updateLog" binding:"required"`
+}
+
+type UploadUpdateAppResp struct {
+	CommResp
+}
+
+type GetDownloadURLReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	Type        int    `json:"type" binding:"required"`
+	Version     string `json:"version" binding:"required"`
+}
+
+type GetDownloadURLResp struct {
+	CommResp
+	Data struct {
+		HasNewVersion bool   `json:"hasNewVersion"`
+		ForceUpdate   bool   `json:"forceUpdate"`
+		FileURL       string `json:"fileURL"`
+		YamlURL       string `json:"yamlURL"`
+		Version       string `json:"version"`
+		UpdateLog     string `json:"update_log"`
+	} `json:"data"`
 }

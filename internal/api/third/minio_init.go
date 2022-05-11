@@ -7,7 +7,6 @@ import (
 	"context"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/minio/minio-go/v7/pkg/policy"
 	url2 "net/url"
 )
 
@@ -30,11 +29,16 @@ func MinioInit() {
 		log.NewError(operationID, utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
 		return
 	}
+	opts := &minio.Options{
+		Creds: credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+	}
+	if minioUrl.Scheme == "http" {
+		opts.Secure = false
+	} else if minioUrl.Scheme == "https" {
+		opts.Secure = true
+	}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "Parse ok ", config.Config.Credential.Minio)
-	MinioClient, err = minio.New(minioUrl.Host, &minio.Options{
-		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
-		Secure: false,
-	})
+	MinioClient, err = minio.New(minioUrl.Host, opts)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "new ok ", config.Config.Credential.Minio)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "init minio client failed", err.Error())
@@ -74,11 +78,11 @@ func MinioInit() {
 		}
 	}
 	// 自动化桶public的代码
-	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
-	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
-	if err != nil {
-		log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
-		return
-	}
+	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
+	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
+	//if err != nil {
+	//	log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+	//	return
+	//}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio create and set policy success")
 }

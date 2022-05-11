@@ -3,7 +3,7 @@ module Open_IM
 go 1.15
 
 require (
-	github.com/Shopify/sarama v1.19.0
+	github.com/Shopify/sarama v1.32.0
 	github.com/Shopify/toxiproxy v2.1.4+incompatible // indirect
 	github.com/alibabacloud-go/darabonba-openapi v0.1.11
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.8
@@ -15,7 +15,6 @@ require (
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/fatih/structs v1.1.0
-	github.com/frankban/quicktest v1.14.0 // indirect
 	github.com/garyburd/redigo v1.6.2
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
@@ -47,7 +46,6 @@ require (
 	go.etcd.io/etcd/api/v3 v3.5.4
 	go.etcd.io/etcd/client/v3 v3.5.4
 	go.mongodb.org/mongo-driver v1.8.3
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71 // indirect
