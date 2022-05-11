@@ -102,7 +102,7 @@ func (mc *OfflineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 	log.NewDebug("", "new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to delay mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", "offline")
-		mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+		//mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 	}
 	//select {
 	//case cmd := <-mc.cmdCh:
