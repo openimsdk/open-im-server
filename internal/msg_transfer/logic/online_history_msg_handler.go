@@ -141,6 +141,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 		och.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 		sess.MarkMessage(msg, "")
 		if claim.HighWaterMarkOffset()-msg.Offset <= 1 {
+			log.Debug("", "online msg consume end", claim.HighWaterMarkOffset(), msg.Offset)
 			och.TriggerCmd(OnlineTopicVacancy)
 			SetOnlineTopicStatus(OnlineTopicVacancy)
 		}
