@@ -10,8 +10,8 @@ import (
 	"sync"
 )
 
-const OnlineTopicBusy = "Busy"
-const OnlineTopicVacancy = "Vacancy"
+const OnlineTopicBusy = 1
+const OnlineTopicVacancy = 0
 
 var (
 	persistentCH          PersistentConsumerHandler
@@ -19,7 +19,7 @@ var (
 	offlineHistoryCH      OfflineHistoryConsumerHandler
 	producer              *kafka.Producer
 	cmdCh                 chan Cmd2Value
-	onlineTopicStatus     string
+	onlineTopicStatus     int
 	w                     *sync.Mutex
 	singleMsgSuccessCount uint64
 	groupMsgCount         uint64
@@ -31,6 +31,7 @@ func Init() {
 	w = new(sync.Mutex)
 	persistentCH.Init()
 	historyCH.Init(cmdCh)
+	onlineTopicStatus = OnlineTopicVacancy
 	log.Debug("come msg transfer ts", config.Config.Kafka.ConsumerGroupID.MsgToMongoOffline, config.Config.Kafka.Ws2mschatOffline.Topic)
 	offlineHistoryCH.Init(cmdCh)
 	statistics.NewStatistics(&singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
@@ -47,12 +48,12 @@ func Run() {
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
 	go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
 }
-func SetOnlineTopicStatus(status string) {
+func SetOnlineTopicStatus(status int) {
 	w.Lock()
 	defer w.Unlock()
 	onlineTopicStatus = status
 }
-func GetOnlineTopicStatus() string {
+func GetOnlineTopicStatus() int {
 	w.Lock()
 	defer w.Unlock()
 	return onlineTopicStatus
