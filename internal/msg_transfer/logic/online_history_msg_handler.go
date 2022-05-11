@@ -137,7 +137,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 	for msg := range claim.Messages() {
 		SetOnlineTopicStatus(OnlineTopicBusy)
 		//och.TriggerCmd(OnlineTopicBusy)
-		log.NewDebug("", "kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "online", msg.Offset, claim.HighWaterMarkOffset())
+		log.NewDebug("", "online kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "online", msg.Offset, claim.HighWaterMarkOffset())
 		och.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 		sess.MarkMessage(msg, "")
 		if claim.HighWaterMarkOffset()-msg.Offset <= 1 {

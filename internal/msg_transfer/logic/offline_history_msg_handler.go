@@ -105,7 +105,7 @@ func (mc *OfflineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 	//}
 	for msg := range claim.Messages() {
 		if GetOnlineTopicStatus() == OnlineTopicVacancy {
-			log.NewDebug("", "kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
+			log.NewDebug("", "offline kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
 			mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 			sess.MarkMessage(msg, "")
 		} else {
