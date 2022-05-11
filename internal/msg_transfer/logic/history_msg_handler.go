@@ -136,10 +136,10 @@ func sendMessageToPush(message *pbMsg.MsgDataToMQ, pushToUserID string) {
 		log.Error(rpcPushMsg.OperationID, "rpc send failed", rpcPushMsg.OperationID, "push data", rpcPushMsg.String(), "err", err.Error())
 		pid, offset, err := producer.SendMessage(&mqPushMsg)
 		if err != nil {
-			log.Error("kafka send failed", mqPushMsg.OperationID, "send data", mqPushMsg.String(), "pid", pid, "offset", offset, "err", err.Error())
+			log.Error(message.OperationID, "kafka send failed", mqPushMsg.OperationID, "send data", mqPushMsg.String(), "pid", pid, "offset", offset, "err", err.Error())
 		}
 	} else {
-		log.Info("rpc send success", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
+		log.Info(message.OperationID, "rpc send success", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
 
 	}
 }
