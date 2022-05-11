@@ -63,7 +63,16 @@ services:
     environment:
       TZ: Asia/Shanghai
     restart: always
-
+  kafka-manager:
+    image: index.docker.io/sheepkiller/kafka-manager:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9000:9000
+    environment:
+      TZ: Asia/Shanghai
+      ZK_HOSTS: 127.0.0.1:2181
+    restart: always
 
   kafka:
     image: wurstmeister/kafka
