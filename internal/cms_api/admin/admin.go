@@ -11,13 +11,52 @@ import (
 	pbAdmin "Open_IM/pkg/proto/admin_cms"
 	"Open_IM/pkg/utils"
 	"context"
+	"fmt"
 	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"net/http"
+	"path"
 	"strings"
 
-	"Open_IM/internal/api/third"
 	"github.com/gin-gonic/gin"
+	url2 "net/url"
 )
+
+var (
+	minioClient *minio.Client
+)
+
+func init() {
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio config: ", config.Config.Credential.Minio)
+	var initUrl string
+	if config.Config.Credential.Minio.EndpointInnerEnable {
+		initUrl = config.Config.Credential.Minio.EndpointInner
+	} else {
+		initUrl = config.Config.Credential.Minio.Endpoint
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "use initUrl: ", initUrl)
+	minioUrl, err := url2.Parse(initUrl)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
+		return
+	}
+	opts := &minio.Options{
+		Creds: credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+	}
+	if minioUrl.Scheme == "http" {
+		opts.Secure = false
+	} else if minioUrl.Scheme == "https" {
+		opts.Secure = true
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "Parse ok ", config.Config.Credential.Minio)
+	minioClient, err = minio.New(minioUrl.Host, opts)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "new ok ", config.Config.Credential.Minio)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "init minio client failed", err.Error())
+		return
+	}
+}
 
 // register
 func AdminLogin(c *gin.Context) {
@@ -51,34 +90,74 @@ func UploadUpdateApp(c *gin.Context) {
 		resp apiStruct.UploadUpdateAppResp
 	)
 	if err := c.Bind(&req); err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version)
+
+	//fileObj, err := req.File.Open()
+	//if err != nil {
+	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
+	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open file error" + err.Error()})
+	//	return
+	//}
+	//yamlObj, err := req.Yaml.Open()
+	//if err != nil {
+	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open Yaml error", err.Error())
+	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open Yaml error" + err.Error()})
+	//	return
+	//}
+
+	// v2.0.9_app_linux v2.0.9_yaml_linux
+	file, err := c.FormFile("file")
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "FormFile failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
 		return
 	}
-	fileObj, err := req.File.Open()
-	yamlObj, err := req.Yaml.Open()
+	fileObj, err := file.Open()
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "name: ", newFileName, newYamlName)
-	// v2.0.9_app_linux v2.0.9_yaml_linux
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size, minio.PutObjectOptions{})
-	_, err = apiThird.MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{})
+
+	yaml, err := c.FormFile("yaml")
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "open file error")
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "invalid file path" + err.Error()})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "FormFile failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "missing file arg: " + err.Error()})
 		return
 	}
-	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate); err != nil {
+	yamlObj, err := yaml.Open()
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file path" + err.Error()})
+		return
+	}
+	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, file.Filename, yaml.Filename)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
+		return
+	}
+
+	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size)
+	fmt.Println(req.OperationID, utils.GetSelfFuncName(), "name: ", config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, yaml.Size)
+
+	_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, file.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject file error")
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject file error" + err.Error()})
+		return
+	}
+	_, err = minioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(newYamlName)})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject yaml error")
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject yaml error" + err.Error()})
+		return
+	}
+	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate, newFileName, newYamlName); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateAppVersion error", err.Error())
 		resp.ErrCode = http.StatusInternalServerError
 		resp.ErrMsg = err.Error()
@@ -103,28 +182,25 @@ func GetDownloadURL(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	fileName, yamlName, err := utils.GetUploadAppNewName(req.Type, req.Version)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
-		return
-	}
 	app, err := imdb.GetNewestVersion(req.Type)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "getNewestVersion failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "getNewestVersion failed" + err.Error()})
-		return
 	}
-	if app.Version != req.Version {
-		resp.Data.HasNewVersion = true
-		if app.ForceUpdate == true {
-			resp.Data.ForceUpdate = true
+	if app != nil {
+		if app.Version != req.Version && app.Version != "" {
+			resp.Data.HasNewVersion = true
+			if app.ForceUpdate == true {
+				resp.Data.ForceUpdate = true
+			}
+			resp.Data.YamlURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + app.YamlName
+			resp.Data.FileURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + app.FileName
+			c.JSON(http.StatusOK, resp)
+			return
+		} else {
+			resp.Data.HasNewVersion = false
+			c.JSON(http.StatusOK, resp)
+			return
 		}
-		resp.Data.YamlURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + yamlName
-		resp.Data.FileURL = config.Config.Credential.Minio.Endpoint + "/" + config.Config.Credential.Minio.AppBucket + "/" + fileName
-		c.JSON(http.StatusOK, resp)
-	} else {
-		resp.Data.HasNewVersion = false
-		c.JSON(http.StatusOK, resp)
 	}
+	c.JSON(http.StatusBadRequest, gin.H{"errCode": 0, "errMsg": "not found app version"})
 }

@@ -106,6 +106,8 @@ func main() {
 		thirdGroup.POST("/ali_oss_credential", apiThird.AliOSSCredential)
 		thirdGroup.POST("/minio_storage_credential", apiThird.MinioStorageCredential)
 		thirdGroup.POST("/minio_upload", apiThird.MinioUploadFile)
+		thirdGroup.POST("/upload_update_app", apiThird.UploadUpdateApp)
+		thirdGroup.POST("/get_download_url", apiThird.GetDownloadURL)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
