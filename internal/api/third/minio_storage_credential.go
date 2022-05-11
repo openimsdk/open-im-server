@@ -167,28 +167,22 @@ func UploadUpdateApp(c *gin.Context) {
 	} else {
 		yamlName = req.Yaml.Filename
 	}
-	newFileName, newYamlName, err := utils.GetUploadAppNewName(req.Type, req.Version, req.File.Filename, yamlName)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUploadAppNewName failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "invalid file type" + err.Error()})
-		return
-	}
 	fileObj, err := req.File.Open()
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "Open file error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "Open file error" + err.Error()})
 		return
 	}
-	_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newFileName, fileObj, req.File.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
+	_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, req.File.Filename, fileObj, req.File.Size, minio.PutObjectOptions{ContentType: path.Ext(newFileName)})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject file error")
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject file error" + err.Error()})
 		return
 	}
-	if newYamlName != "" {
+	if yamlName != "" {
 		yamlObj, err := req.Yaml.Open()
 		if err == nil {
-			_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, newYamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(newYamlName)})
+			_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.AppBucket, yamlName, yamlObj, req.Yaml.Size, minio.PutObjectOptions{ContentType: path.Ext(newYamlName)})
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "PutObject yaml error")
 				c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "PutObject yaml error" + err.Error()})
@@ -196,10 +190,9 @@ func UploadUpdateApp(c *gin.Context) {
 			}
 		} else {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-			newYamlName = ""
 		}
 	}
-	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate, newFileName, newYamlName, req.UpdateLog); err != nil {
+	if err := imdb.UpdateAppVersion(req.Type, req.Version, req.ForceUpdate, req.File.Filename, yamlName, req.UpdateLog); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateAppVersion error", err.Error())
 		resp.ErrCode = http.StatusInternalServerError
 		resp.ErrMsg = err.Error()
