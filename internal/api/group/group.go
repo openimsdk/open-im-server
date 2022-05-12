@@ -287,6 +287,7 @@ func CreateGroup(c *gin.Context) {
 
 	req.OwnerUserID = params.OwnerUserID
 	req.OperationID = params.OperationID
+
 	log.NewInfo(req.OperationID, "CreateGroup args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)

@@ -97,8 +97,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeCreateGroup failed")
 		}
 	}
-	//Time stamp + MD5 to generate group chat id
-	groupId := utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
+
+	groupId := req.GroupInfo.GroupID
+	if groupId == "" {
+		groupId = utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
+	}
 	//to group
 	groupInfo := db.Group{}
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
@@ -109,15 +112,19 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupInfo)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 	}
-
-	us, err := imdb.GetUserByUserID(req.OwnerUserID)
+	groupMember := db.GroupMember{}
+	us := &db.User{}
+	if req.OwnerUserID == "" {
+		goto initMemberList
+	}
+	us, err = imdb.GetUserByUserID(req.OwnerUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OwnerUserID)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 	}
 
 	//to group member
-	groupMember := db.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
+	groupMember = db.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
 	utils.CopyStructFields(&groupMember, us)
 	err = imdb.InsertIntoGroupMember(groupMember)
 	if err != nil {
@@ -125,10 +132,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 	}
 
-	err = db.DB.AddGroupMember(groupId, req.OwnerUserID)
-	if err != nil {
-		log.NewError(req.OperationID, "AddGroupMember failed ", err.Error(), groupId, req.OwnerUserID)
-	}
+initMemberList:
 	var okUserIDList []string
 	//to group member
 	for _, user := range req.InitMemberList {
@@ -148,20 +152,14 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
 			continue
 		}
-
 		okUserIDList = append(okUserIDList, user.UserID)
-		// mongoDB method
-		//err = db.DB.AddGroupMember(groupId, user.UserID)
-		//if err != nil {
-		//	log.NewError(req.OperationID, "add mongo group member failed, db.DB.AddGroupMember failed ", err.Error())
-		//}
 	}
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
 	group, err := imdb.GetGroupInfoByGroupID(groupId)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupId)
 		resp.ErrCode = constant.ErrDB.ErrCode
-		resp.ErrMsg = constant.ErrDB.ErrMsg
+		resp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	utils.CopyStructFields(resp.GroupInfo, group)
@@ -169,32 +167,39 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupMemberNumByGroupID failed ", err.Error(), groupId)
 		resp.ErrCode = constant.ErrDB.ErrCode
-		resp.ErrMsg = constant.ErrDB.ErrMsg
+		resp.ErrMsg = err.Error()
 		return resp, nil
 	}
-	resp.GroupInfo.OwnerUserID = req.OwnerUserID
-
-	okUserIDList = append(okUserIDList, req.OwnerUserID)
-	addGroupMemberToCacheReq := &pbCache.AddGroupMemberToCacheReq{
-		UserIDList:  okUserIDList,
-		GroupID:     groupId,
-		OperationID: req.OperationID,
-	}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
-	cacheClient := pbCache.NewCacheClient(etcdConn)
-	cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
-	if err != nil {
-		log.NewError(req.OperationID, "AddGroupMemberToCache rpc call failed ", err.Error())
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
-	}
-	if cacheResp.CommonResp.ErrCode != 0 {
-		log.NewError(req.OperationID, "AddGroupMemberToCache rpc logic call failed ", cacheResp.String())
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	if req.OwnerUserID != "" {
+		resp.GroupInfo.OwnerUserID = req.OwnerUserID
+		okUserIDList = append(okUserIDList, req.OwnerUserID)
 	}
 
-	log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
-	chat.GroupCreatedNotification(req.OperationID, req.OpUserID, groupId, okUserIDList)
-	return resp, nil
+	if len(okUserIDList) != 0 {
+		addGroupMemberToCacheReq := &pbCache.AddGroupMemberToCacheReq{
+			UserIDList:  okUserIDList,
+			GroupID:     groupId,
+			OperationID: req.OperationID,
+		}
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		cacheClient := pbCache.NewCacheClient(etcdConn)
+		cacheResp, err := cacheClient.AddGroupMemberToCache(context.Background(), addGroupMemberToCacheReq)
+		if err != nil {
+			log.NewError(req.OperationID, "AddGroupMemberToCache rpc call failed ", err.Error())
+			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		}
+		if cacheResp.CommonResp.ErrCode != 0 {
+			log.NewError(req.OperationID, "AddGroupMemberToCache rpc logic call failed ", cacheResp.String())
+			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		}
+
+		log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
+		chat.GroupCreatedNotification(req.OperationID, req.OpUserID, groupId, okUserIDList)
+		return resp, nil
+	} else {
+		log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
+		return resp, nil
+	}
 }
 
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {

@@ -192,14 +192,19 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
+		Ws2mschatOffline struct {
+			Addr  []string `yaml:"addr"`
+			Topic string   `yaml:"topic"`
+		}
 		Ms2pschat struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
 		ConsumerGroupID struct {
-			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
-			MsgToPush  string `yaml:"msgToPush"`
+			MsgToMongo        string `yaml:"msgToMongo"`
+			MsgToMongoOffline string `yaml:"msgToMongoOffline"`
+			MsgToMySql        string `yaml:"msgToMySql"`
+			MsgToPush         string `yaml:"msgToPush"`
 		}
 	}
 	Secret               string `yaml:"secret"`

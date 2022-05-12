@@ -8,10 +8,9 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbMsg "Open_IM/pkg/proto/chat"
 	pbPush "Open_IM/pkg/proto/push"
-	"Open_IM/pkg/statistics"
 	"Open_IM/pkg/utils"
 	"context"
-	"fmt"
+	"errors"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"strings"
@@ -19,28 +18,52 @@ import (
 )
 
 type fcb func(msg []byte, msgKey string)
-
-type HistoryConsumerHandler struct {
-	msgHandle             map[string]fcb
-	historyConsumerGroup  *kfk.MConsumerGroup
-	singleMsgFailedCount  uint64
-	singleMsgSuccessCount uint64
-	groupMsgCount         uint64
+type Cmd2Value struct {
+	Cmd   int
+	Value interface{}
+}
+type OnlineHistoryConsumerHandler struct {
+	msgHandle            map[string]fcb
+	historyConsumerGroup *kfk.MConsumerGroup
+	cmdCh                chan Cmd2Value
 }
 
-func (mc *HistoryConsumerHandler) Init() {
-	statistics.NewStatistics(&mc.singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-	statistics.NewStatistics(&mc.groupMsgCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second groupMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-
-	mc.msgHandle = make(map[string]fcb)
-	mc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = mc.handleChatWs2Mongo
-	mc.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
+func (och *OnlineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
+	och.msgHandle = make(map[string]fcb)
+	och.cmdCh = cmdCh
+	och.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = och.handleChatWs2Mongo
+	och.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo)
 
 }
-
-func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
+func (och *OnlineHistoryConsumerHandler) TriggerCmd(status int) {
+	operationID := utils.OperationIDGenerator()
+	for {
+		err := sendCmd(och.cmdCh, Cmd2Value{Cmd: status, Value: ""}, 1)
+		if err != nil {
+			log.Error(operationID, "TriggerCmd failed ", err.Error(), status)
+			continue
+		}
+		log.Debug(operationID, "TriggerCmd success", status)
+		return
+	}
+}
+func sendCmd(ch chan Cmd2Value, value Cmd2Value, timeout int64) error {
+	var flag = 0
+	select {
+	case ch <- value:
+		flag = 1
+	case <-time.After(time.Second * time.Duration(timeout)):
+		flag = 2
+	}
+	if flag == 1 {
+		return nil
+	} else {
+		return errors.New("send cmd timeout")
+	}
+}
+func (och *OnlineHistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
 	now := time.Now()
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
@@ -61,11 +84,11 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 		if isHistory {
 			err := saveUserChat(msgKey, &msgFromMQ)
 			if err != nil {
-				mc.singleMsgFailedCount++
+				singleMsgFailedCount++
 				log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
 				return
 			}
-			mc.singleMsgSuccessCount++
+			singleMsgSuccessCount++
 			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", time.Since(now))
 		}
 		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
@@ -81,7 +104,7 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				log.NewError(operationID, "group data insert to mongo err", msgFromMQ.String(), msgFromMQ.MsgData.RecvID, err.Error())
 				return
 			}
-			mc.groupMsgCount++
+			groupMsgCount++
 		}
 		go sendMessageToPush(&msgFromMQ, msgFromMQ.MsgData.RecvID)
 	case constant.NotificationChatType:
@@ -106,14 +129,22 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 	log.NewDebug(msgFromMQ.OperationID, "msg_transfer handle topic data to database success...", msgFromMQ.String())
 }
 
-func (HistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (HistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (mc *HistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
-	claim sarama.ConsumerGroupClaim) error {
+func (OnlineHistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (OnlineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
+	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
+	log.NewDebug("", "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
 	for msg := range claim.Messages() {
-		log.NewDebug("", "kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
-		mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+		SetOnlineTopicStatus(OnlineTopicBusy)
+		//och.TriggerCmd(OnlineTopicBusy)
+		log.NewDebug("", "online kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "online", msg.Offset, claim.HighWaterMarkOffset())
+		och.msgHandle[msg.Topic](msg.Value, string(msg.Key))
 		sess.MarkMessage(msg, "")
+		if claim.HighWaterMarkOffset()-msg.Offset <= 1 {
+			log.Debug("", "online msg consume end", claim.HighWaterMarkOffset(), msg.Offset)
+			SetOnlineTopicStatus(OnlineTopicVacancy)
+			och.TriggerCmd(OnlineTopicVacancy)
+		}
 	}
 	return nil
 }
