@@ -232,6 +232,7 @@ type Department struct {
 	ParentID       string    `gorm:"column:parent_id;size:64" json:"parentID" binding:"required"` // "0" or Real parent id
 	Order          int32     `gorm:"column:order" json:"order" `                                  // 1, 2, ...
 	DepartmentType int32     `gorm:"column:department_type" json:"departmentType"`                //1, 2...
+	RelatedGroupID string    `gorm:"column:related_group_id;size:64" json:"relatedGroupID"`
 	CreateTime     time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex             string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }

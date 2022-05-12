@@ -84,6 +84,8 @@ func SetPassword(c *gin.Context) {
 		return
 	}
 	log.Info(params.OperationID, "end setPassword", account, params.Password)
+	// demo onboarding
+	onboardingProcess(params.OperationID, account, params.Name)
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": openIMRegisterResp.UserToken})
 	return
 }
