@@ -10,6 +10,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/auth"
+	groupRpc "Open_IM/pkg/proto/group"
 	rpc "Open_IM/pkg/proto/organization"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -110,6 +111,34 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 	utils.CopyStructFields(resp.DepartmentInfo, createdDepartment)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
 	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := groupRpc.NewGroupClient(etcdConn)
+	createGroupReq := &groupRpc.CreateGroupReq{
+		InitMemberList: nil,
+		GroupInfo: &open_im_sdk.GroupInfo{
+			GroupName:     req.DepartmentInfo.Name,
+			FaceURL:       req.DepartmentInfo.FaceURL,
+			CreateTime:    uint32(time.Now().Unix()),
+			CreatorUserID: req.OpUserID,
+			GroupType:     constant.DepartmentGroup,
+		},
+		OperationID: req.OperationID,
+		OpUserID:    req.OpUserID,
+	}
+	createGroupResp, err := client.CreateGroup(context.Background(), createGroupReq)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CreateGroup rpc failed", createGroupReq, err.Error())
+		resp.ErrCode = constant.ErrDB.ErrCode
+		resp.ErrMsg = constant.ErrDB.ErrMsg + " createGroup failed " + err.Error()
+		return resp, nil
+	}
+	if createGroupResp.ErrCode != 0 {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), resp)
+		resp.ErrCode = constant.ErrDB.ErrCode
+		resp.ErrMsg = constant.ErrDB.ErrMsg + " createGroup failed " + createGroupResp.ErrMsg
+		return resp, nil
+	}
 	return resp, nil
 }
 
@@ -307,6 +336,19 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 	return resp, nil
 }
 
+func (s *organizationServer) GetDepartmentParentIDListReq(_ context.Context, req *rpc.GetDepartmentParentIDListReq) (resp *rpc.GetDepartmentParentIDListResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req.String())
+	resp = &rpc.GetDepartmentParentIDListResp{}
+	resp.ParentIDList, err = imdb.GetDepartmentParentIDList(req.DepartmentID)
+	if err != nil {
+		resp.ErrMsg = constant.ErrDB.ErrMsg + ": " + err.Error()
+		resp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp.String())
+	return resp, nil
+}
+
 func (s *organizationServer) GetUserInDepartmentByUserID(userID string, operationID string) (*open_im_sdk.UserInDepartment, error) {
 	err, organizationUser := imdb.GetOrganizationUser(userID)
 	if err != nil {
@@ -437,4 +479,19 @@ func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.G
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", resp)
 	return &resp, nil
+}
+
+func (s *organizationServer) GetDepartmentRelatedGroupIDList(ctx context.Context, req rpc.GetDepartmentRelatedGroupIDListReq) (resp *rpc.GetDepartmentRelatedGroupIDListResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &rpc.GetDepartmentRelatedGroupIDListResp{}
+	groupIDList, err := imdb.GetDepartmentRelatedGroupIDList(req.DepartmentIDList)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		resp.ErrMsg = constant.ErrDB.ErrMsg + " GetDepartMentRelatedGroupIDList failed " + err.Error()
+		resp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
+	}
+	resp.GroupIDList = groupIDList
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
 }

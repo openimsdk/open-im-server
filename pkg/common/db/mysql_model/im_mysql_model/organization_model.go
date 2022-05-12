@@ -3,6 +3,7 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -234,5 +235,48 @@ func GetSubDepartmentNum(departmentID string) (error, uint32) {
 		return utils.Wrap(err, ""), 0
 	}
 	return nil, number
+}
 
+func GetDepartmentRelatedGroupIDList(departmentIDList []string) ([]string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, utils.Wrap(err, "DefaultGormDB failed")
+	}
+	var groupIDList []string
+	err = dbConn.Table("departments").Where("department_id IN (?) ", departmentIDList).Pluck("related_group_id", &groupIDList).Error
+	return groupIDList, err
+}
+
+func getDepartmentParent(departmentID string, dbConn *gorm.DB) (*db.Department, error) {
+	var department db.Department
+	var parentID string
+	dbConn.LogMode(true)
+	// select * from departments where department_id = (select parent_id from departments where department_id= zx234fd);
+	err := dbConn.Table("departments").Where("department_id=?", dbConn.Table("departments").Where("department_id=?", departmentID).Pluck("parent_id", parentID)).Error
+	return &department, err
+}
+
+func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList []string) (*db.Department, error) {
+	department, err := getDepartmentParent(departmentID, dbConn)
+	if err != nil {
+		return nil, err
+	}
+	if department.ParentID != "" {
+		parentIDList = append(parentIDList, department.ParentID)
+		_, err = GetDepartmentParent(departmentID, dbConn, parentIDList)
+		if err != nil {
+			return nil, nil
+		}
+	}
+	return nil, nil
+}
+
+func GetDepartmentParentIDList(departmentID string) ([]string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return nil, err
+	}
+	var parentIDList []string
+	_, err = GetDepartmentParent(departmentID, dbConn, parentIDList)
+	return parentIDList, err
 }

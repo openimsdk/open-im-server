@@ -397,6 +397,11 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"workMomentsNotification"`
+		JoinDepartmentNotification struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"joinDepartmentNotification"`
 	}
 	Demo struct {
 		Port         []int  `yaml:"openImDemoPort"`
@@ -416,6 +421,7 @@ type config struct {
 			SmtpAddr                string `yaml:"smtpAddr"`
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
+		TestDepartMentID string `yaml:"testDepartMentID"`
 	}
 	Rtc struct {
 		Port    int    `yaml:"port"`
