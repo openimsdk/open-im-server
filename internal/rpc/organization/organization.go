@@ -336,7 +336,7 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 	return resp, nil
 }
 
-func (s *organizationServer) GetDepartmentParentIDListReq(_ context.Context, req *rpc.GetDepartmentParentIDListReq) (resp *rpc.GetDepartmentParentIDListResp, err error) {
+func (s *organizationServer) GetDepartmentParentIDList(_ context.Context, req *rpc.GetDepartmentParentIDListReq) (resp *rpc.GetDepartmentParentIDListResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req.String())
 	resp = &rpc.GetDepartmentParentIDListResp{}
 	resp.ParentIDList, err = imdb.GetDepartmentParentIDList(req.DepartmentID)
