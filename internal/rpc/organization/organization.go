@@ -481,7 +481,7 @@ func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.G
 	return &resp, nil
 }
 
-func (s *organizationServer) GetDepartmentRelatedGroupIDList(ctx context.Context, req rpc.GetDepartmentRelatedGroupIDListReq) (resp *rpc.GetDepartmentRelatedGroupIDListResp, err error) {
+func (s *organizationServer) GetDepartmentRelatedGroupIDList(ctx context.Context, req *rpc.GetDepartmentRelatedGroupIDListReq) (resp *rpc.GetDepartmentRelatedGroupIDListResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &rpc.GetDepartmentRelatedGroupIDListResp{}
 	groupIDList, err := imdb.GetDepartmentRelatedGroupIDList(req.DepartmentIDList)
