@@ -256,7 +256,6 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		}
 		onUserIDList, offUserIDList := getOnlineAndOfflineUserIDList(memberUserIDList, pb.OperationID)
 		log.Debug(pb.OperationID, onUserIDList, offUserIDList)
-		groupID := pb.MsgData.GroupID
 		//split  parallel send
 		var wg sync.WaitGroup
 		var sendTag bool
@@ -281,21 +280,8 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			go rpc.sendMsgToGroup(offUserIDList[split*(len(offUserIDList)/split):], *pb, constant.OfflineStatus, &sendTag, &wg)
 		}
 		wg.Wait()
-		log.Info(msgToMQSingle.OperationID, "addUidList", addUidList)
-		for _, v := range addUidList {
-			pb.MsgData.RecvID = v
-			isSend := modifyMessageByUserMessageReceiveOpt(v, groupID, constant.GroupChatType, pb)
-			log.Info(msgToMQSingle.OperationID, "isSend", isSend)
-			if isSend {
-				msgToMQSingle.MsgData = pb.MsgData
-				err := rpc.sendMsgToKafka(&msgToMQSingle, v, constant.OnlineStatus)
-				if err != nil {
-					log.NewError(msgToMQSingle.OperationID, "kafka send msg err:UserId", v, msgToMQSingle.String())
-				} else {
-					sendTag = true
-				}
-			}
-		}
+		wg.Add(1)
+		rpc.sendMsgToGroup(addUidList, *pb, constant.OnlineStatus, &sendTag, &wg)
 		// callback
 		if err := callbackAfterSendGroupMsg(pb); err != nil {
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendGroupMsg failed", err.Error())
