@@ -139,7 +139,7 @@ func ManagementSendMsg(c *gin.Context) {
 		log.Error(c.PostForm("operationID"), "data args validate  err", err.Error())
 		return
 	}
-	log.NewInfo("", data, params)
+	log.NewInfo(params.OperationID, data, params)
 	token := c.Request.Header.Get("token")
 	claims, err := token_verify.ParseToken(token, params.OperationID)
 	if err != nil {
@@ -170,12 +170,12 @@ func ManagementSendMsg(c *gin.Context) {
 	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
 
 	pbData := newUserSendMsgReq(&params)
-	log.Info("", "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())
+	log.Info(params.OperationID, "api ManagementSendMsg call start..., [data: %s]", pbData.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 	client := pbChat.NewChatClient(etcdConn)
 
-	log.Info("", "", "api ManagementSendMsg call, api call rpc...")
+	log.Info(params.OperationID, "api ManagementSendMsg call, api call rpc...")
 
 	RpcResp, err := client.SendMsg(context.Background(), pbData)
 	if err != nil {
