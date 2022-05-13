@@ -39,15 +39,13 @@ func (och *OnlineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
 }
 func (och *OnlineHistoryConsumerHandler) TriggerCmd(status int) {
 	operationID := utils.OperationIDGenerator()
-	for {
-		err := sendCmd(och.cmdCh, Cmd2Value{Cmd: status, Value: ""}, 1)
-		if err != nil {
-			log.Error(operationID, "TriggerCmd failed ", err.Error(), status)
-			continue
-		}
-		log.Debug(operationID, "TriggerCmd success", status)
+	err := sendCmd(och.cmdCh, Cmd2Value{Cmd: status, Value: ""}, 1)
+	if err != nil {
+		log.Error(operationID, "TriggerCmd failed ", err.Error(), status)
 		return
 	}
+	log.Debug(operationID, "TriggerCmd success", status)
+
 }
 func sendCmd(ch chan Cmd2Value, value Cmd2Value, timeout int64) error {
 	var flag = 0
