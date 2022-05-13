@@ -405,12 +405,26 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		chat.UserInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID, v.FriendUser.UserID)
 	}
 
-	//etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
-	//client := pbFriend.NewFriendClient(etcdConn)
-
 	chat.UserInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID, req.OpUserID)
 	log.Info(req.OperationID, "UserInfoUpdatedNotification ", req.UserInfo.UserID, req.OpUserID)
+	if req.UserInfo.FaceURL != "" {
+		go s.SyncJoinedGroupMemberFaceURL(req.UserInfo.UserID, req.UserInfo.FaceURL, req.OperationID, req.OpUserID)
+	}
+
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
+}
+
+func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string, operationID string, opUserID string) {
+	joinedGroupIDList, err := imdb.GetJoinedGroupIDListByUserID(userID)
+	if err != nil {
+		log.NewWarn(operationID, "GetJoinedGroupIDListByUserID failed ", userID, err.Error())
+		return
+	}
+	for _, v := range joinedGroupIDList {
+		groupMemberInfo := db.GroupMember{UserID: userID, GroupID: v, FaceURL: faceURL}
+		imdb.UpdateGroupMemberInfo(groupMemberInfo)
+		chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
+	}
 }
 
 func (s *userServer) GetUsersByName(ctx context.Context, req *pbUser.GetUsersByNameReq) (*pbUser.GetUsersByNameResp, error) {

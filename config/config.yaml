@@ -642,6 +642,19 @@ notification:
         openTips: "burn after reading was opened"
         closeTips: "burn after reading was closed"
 
+  ###################organization################
+  joinDepartmentNotification:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: true
+      offlinePush:
+        switch: false
+        title: "welcome user join department"
+        desc: "welcome user join department"
+        ext: "welcome user join department"
+      defaultTips:
+        tips: "welcome user join department"
+
 
 #---------------demo configuration---------------------#
 #The following configuration items are applied to openIM Demo configuration
@@ -665,6 +678,7 @@ demo:
     senderAuthorizationCode: "gxyausfoevlzbfag"
     smtpAddr: "smtp.qq.com"
     smtpPort: 25   #需开放此端口 出口方向
+  testDepartMentID: 001
 
 rtc:
   port: 11300
