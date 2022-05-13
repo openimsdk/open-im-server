@@ -9,14 +9,17 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbCache "Open_IM/pkg/proto/cache"
 	pbOffice "Open_IM/pkg/proto/office"
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"golang.org/x/net/html/atom"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -172,13 +175,27 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	}
 	var groupUserIDList []string
 	for _, groupID := range req.GroupList {
-		userIDList, err := im_mysql_model.GetGroupMemberIDListByGroupID(groupID)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error(), groupID)
-			continue
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		cacheClient := pbCache.NewCacheClient(etcdConn)
+		req := pbCache.GetGroupMemberIDListFromCacheReq{
+			OperationID: req.OperationID,
+			GroupID:     groupID,
 		}
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), userIDList)
-		groupUserIDList = append(groupUserIDList, userIDList...)
+		getGroupMemberIDListFromCacheResp, err := cacheClient.GetGroupMemberIDListFromCache(context.Background(), &req)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error(), req.String())
+			resp.CommonResp.ErrCode = constant.ErrServer.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		if getGroupMemberIDListFromCacheResp.CommonResp.ErrCode != 0 {
+			log.NewError(req.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", getGroupMemberIDListFromCacheResp.CommonResp.ErrCode)
+			resp.CommonResp.ErrCode = getGroupMemberIDListFromCacheResp.CommonResp.ErrCode
+			resp.CommonResp.ErrMsg = getGroupMemberIDListFromCacheResp.CommonResp.ErrMsg
+			return resp, nil
+		}
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), getGroupMemberIDListFromCacheResp.UserIDList)
+		groupUserIDList = append(groupUserIDList, getGroupMemberIDListFromCacheResp.UserIDList...)
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
 	var userIDList []string
@@ -195,22 +212,37 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	user, err := imdb.GetUserByUserID(req.SendID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.SendID)
+		resp.CommonResp.ErrMsg = err.Error()
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
 	}
+	var wg sync.WaitGroup
+	wg.Add(len(userIDList))
 	for _, userID := range userIDList {
-		msg.TagSendMessage(req.OperationID, user, userID, req.Content, req.SenderPlatformID)
+		go func(userID string) {
+			defer wg.Done()
+			msg.TagSendMessage(req.OperationID, user, userID, req.Content, req.SenderPlatformID)
+		}(userID)
 	}
+	wg.Wait()
 	var tagSendLogs db.TagSendLog
+
+	wg.Add(len(userIDList))
 	for _, userID := range userIDList {
-		userName, err := im_mysql_model.GetUserNameByUserID(userID)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
-			continue
-		}
-		tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
-			UserID:   userID,
-			UserName: userName,
-		})
+		go func(userID string) {
+			defer wg.Done()
+			userName, err := im_mysql_model.GetUserNameByUserID(userID)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+				return
+			}
+			tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
+				UserID:   userID,
+				UserName: userName,
+			})
+		}(userID)
 	}
+	wg.Wait()
 	tagSendLogs.SendID = req.SendID
 	tagSendLogs.Content = req.Content
 	tagSendLogs.SenderPlatformID = req.SenderPlatformID
