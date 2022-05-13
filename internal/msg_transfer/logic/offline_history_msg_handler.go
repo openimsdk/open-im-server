@@ -60,7 +60,7 @@ func (mc *OfflineHistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey s
 		} else {
 			go sendMessageToPush(&msgFromMQ, msgKey)
 		}
-		log.NewDebug(operationID, "saveUserChat cost time ", time.Since(now))
+		log.NewDebug(operationID, "saveSingleMsg cost time ", time.Since(now))
 	case constant.GroupChatType:
 		log.NewDebug(msgFromMQ.OperationID, "msg_transfer msg type = GroupChatType", isHistory, isPersist)
 		if isHistory {
@@ -72,6 +72,8 @@ func (mc *OfflineHistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey s
 			groupMsgCount++
 		}
 		go sendMessageToPush(&msgFromMQ, msgFromMQ.MsgData.RecvID)
+		log.NewDebug(operationID, "saveGroupMsg cost time ", time.Since(now))
+
 	case constant.NotificationChatType:
 		log.NewDebug(msgFromMQ.OperationID, "msg_transfer msg type = NotificationChatType", isHistory, isPersist)
 		if isHistory {
