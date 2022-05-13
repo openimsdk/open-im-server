@@ -264,21 +264,21 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		remain := len(onUserIDList) % split
 		for i := 0; i < len(onUserIDList)/split; i++ {
 			wg.Add(1)
-			go rpc.sendMsgToGroup(onUserIDList[i*split:(i+1)*split], pb, constant.OnlineStatus, &sendTag, &wg)
+			go rpc.sendMsgToGroup(onUserIDList[i*split:(i+1)*split], *pb, constant.OnlineStatus, &sendTag, &wg)
 		}
 		if remain > 0 {
 			wg.Add(1)
-			go rpc.sendMsgToGroup(onUserIDList[split*(len(onUserIDList)/split):], pb, constant.OnlineStatus, &sendTag, &wg)
+			go rpc.sendMsgToGroup(onUserIDList[split*(len(onUserIDList)/split):], *pb, constant.OnlineStatus, &sendTag, &wg)
 		}
 		wg.Wait()
 		remain = len(offUserIDList) % split
 		for i := 0; i < len(offUserIDList)/split; i++ {
 			wg.Add(1)
-			go rpc.sendMsgToGroup(offUserIDList[i*split:(i+1)*split], pb, constant.OfflineStatus, &sendTag, &wg)
+			go rpc.sendMsgToGroup(offUserIDList[i*split:(i+1)*split], *pb, constant.OfflineStatus, &sendTag, &wg)
 		}
 		if remain > 0 {
 			wg.Add(1)
-			go rpc.sendMsgToGroup(offUserIDList[split*(len(offUserIDList)/split):], pb, constant.OfflineStatus, &sendTag, &wg)
+			go rpc.sendMsgToGroup(offUserIDList[split*(len(offUserIDList)/split):], *pb, constant.OfflineStatus, &sendTag, &wg)
 		}
 		wg.Wait()
 		log.Info(msgToMQSingle.OperationID, "addUidList", addUidList)
@@ -748,17 +748,26 @@ func getOnlineAndOfflineUserIDList(memberList []string, operationID string) (onl
 	return onllUserIDList, offlUserIDList
 }
 
-func (rpc *rpcChat) sendMsgToGroup(list []string, pb *pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
+func (rpc *rpcChat) sendMsgToGroup(list []string, pb pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
 	//	log.Debug(pb.OperationID, "split userID ", list)
-	groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &sdk_ws.MsgData{OfflinePushInfo: &sdk_ws.OfflinePushInfo{}}}
-	*groupPB.MsgData = *pb.MsgData
+	offlinePushInfo := sdk_ws.OfflinePushInfo{}
 	if pb.MsgData.OfflinePushInfo != nil {
-		*groupPB.MsgData.OfflinePushInfo = *pb.MsgData.OfflinePushInfo
+		offlinePushInfo = *pb.MsgData.OfflinePushInfo
 	}
-	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
+	msgData := sdk_ws.MsgData{}
+	msgData = *pb.MsgData
+	msgData.OfflinePushInfo = &offlinePushInfo
+
+	groupPB := pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
+	msgToMQGroup := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
 	for _, v := range list {
+		options := make(map[string]bool, 10)
+		for key, value := range pb.MsgData.Options {
+			options[key] = value
+		}
 		groupPB.MsgData.RecvID = v
-		isSend := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, &groupPB)
+		groupPB.MsgData.Options = options
+		isSend := modifyMessageByUserMessageReceiveOpt(v, msgData.GroupID, constant.GroupChatType, &groupPB)
 		if isSend {
 			msgToMQGroup.MsgData = groupPB.MsgData
 			//	log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
