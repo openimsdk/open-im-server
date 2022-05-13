@@ -40,11 +40,12 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 		fallthrough
 	case constant.Voice:
 		fallthrough
+	case constant.Video:
+		fallthrough
 	case constant.File:
 		newContent = utils.StructToJsonString(params.Content)
 	case constant.Revoke:
 		newContent = params.Content["revokeMsgClientID"].(string)
-
 	default:
 	}
 	var options map[string]bool
@@ -94,7 +95,7 @@ func ManagementSendMsg(c *gin.Context) {
 	params := ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-		log.ErrorByKv("json unmarshal err", c.PostForm("operationID"), "err", err.Error(), "content", c.PostForm("content"))
+		log.Error(c.PostForm("operationID"), "json unmarshal err", err.Error(), c.PostForm("content"))
 		return
 	}
 	switch params.ContentType {
@@ -126,16 +127,16 @@ func ManagementSendMsg(c *gin.Context) {
 	//case constant.Quote:
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 404, "errMsg": "contentType err"})
-		log.ErrorByKv("contentType err", c.PostForm("operationID"), "content", c.PostForm("content"))
+		log.Error(c.PostForm("operationID"), "contentType err", c.PostForm("content"))
 		return
 	}
 	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": err.Error()})
-		log.ErrorByKv("content to Data struct  err", "", "err", err.Error())
+		log.Error(c.PostForm("operationID"), "content to Data struct  err", err.Error())
 		return
 	} else if err := validate.Struct(data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 403, "errMsg": err.Error()})
-		log.ErrorByKv("data args validate  err", "", "err", err.Error())
+		log.Error(c.PostForm("operationID"), "data args validate  err", err.Error())
 		return
 	}
 	log.NewInfo("", data, params)
@@ -166,7 +167,7 @@ func ManagementSendMsg(c *gin.Context) {
 		}
 
 	}
-	log.InfoByKv("Ws call success to ManagementSendMsgReq", params.OperationID, "Parameters", params)
+	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
 
 	pbData := newUserSendMsgReq(&params)
 	log.Info("", "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())

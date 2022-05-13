@@ -232,6 +232,7 @@ type Department struct {
 	ParentID       string    `gorm:"column:parent_id;size:64" json:"parentID" binding:"required"` // "0" or Real parent id
 	Order          int32     `gorm:"column:order" json:"order" `                                  // 1, 2, ...
 	DepartmentType int32     `gorm:"column:department_type" json:"departmentType"`                //1, 2...
+	RelatedGroupID string    `gorm:"column:related_group_id;size:64" json:"relatedGroupID"`
 	CreateTime     time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex             string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }
@@ -271,4 +272,18 @@ type DepartmentMember struct {
 
 func (DepartmentMember) TableName() string {
 	return "department_members"
+}
+
+type AppVersion struct {
+	Version     string `gorm:"column:version;size:64" json:"version"`
+	Type        int    `gorm:"column:type;primary_key" json:"type"`
+	UpdateTime  int    `gorm:"column:update_time" json:"update_time"`
+	ForceUpdate bool   `gorm:"column:force_update" json:"force_update"`
+	FileName    string `gorm:"column:file_name" json:"file_name"`
+	YamlName    string `gorm:"column:yaml_name" json:"yaml_name"`
+	UpdateLog   string `gorm:"column:update_log" json:"update_log"`
+}
+
+func (AppVersion) TableName() string {
+	return "app_version"
 }

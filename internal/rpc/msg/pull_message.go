@@ -11,7 +11,7 @@ import (
 )
 
 func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeqReq) (*pbMsg.GetMaxAndMinSeqResp, error) {
-	log.InfoByKv("rpc getMaxAndMinSeq is arriving", in.OperationID, in.String())
+	log.NewInfo(in.OperationID, "rpc getMaxAndMinSeq is arriving", in.String())
 	//seq, err := model.GetBiggestSeqFromReceive(in.UserID)
 	maxSeq, err1 := commonDB.DB.GetUserMaxSeq(in.UserID)
 	minSeq, err2 := commonDB.DB.GetUserMinSeq(in.UserID)
@@ -42,7 +42,7 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 	//msgList, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList, in.OperationID)
 	msgList, err := commonDB.DB.GetMsgBySeqListMongo2(in.UserID, in.SeqList, in.OperationID)
 	if err != nil {
-		log.ErrorByKv("PullMessageBySeqList data error", in.OperationID, in.String())
+		log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err.Error())
 		resp.ErrCode = 201
 		resp.ErrMsg = err.Error()
 		return resp, nil

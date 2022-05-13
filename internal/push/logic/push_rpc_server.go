@@ -9,6 +9,7 @@ import (
 	"context"
 	"google.golang.org/grpc"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -26,24 +27,37 @@ func (r *RPCServer) Init(rpcPort int) {
 	r.etcdAddr = config.Config.Etcd.EtcdAddr
 }
 func (r *RPCServer) run() {
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + utils.IntToString(r.rpcPort)
-	listener, err := net.Listen("tcp", registerAddress)
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
+	}
+	address := listenIP + ":" + strconv.Itoa(r.rpcPort)
+
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.ErrorByKv("push module rpc listening port err", "", "err", err.Error())
-		return
+		panic("listening err:" + err.Error() + r.rpcRegisterName)
 	}
 	defer listener.Close()
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	pbPush.RegisterPushMsgServiceServer(srv, r)
-	err = getcdv3.RegisterEtcd(r.etcdSchema, strings.Join(r.etcdAddr, ","), ip, r.rpcPort, r.rpcRegisterName, 10)
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+
+	err = getcdv3.RegisterEtcd(r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName, 10)
 	if err != nil {
-		log.ErrorByKv("register push module  rpc to etcd err", "", "err", err.Error())
+		log.Error("", "register push module  rpc to etcd err", err.Error(), r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName)
 	}
 	err = srv.Serve(listener)
 	if err != nil {
-		log.ErrorByKv("push module rpc start err", "", "err", err.Error())
+		log.Error("", "push module rpc start err", err.Error())
 		return
 	}
 }

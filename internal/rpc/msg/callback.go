@@ -31,6 +31,7 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) (canSend bool, err erro
 	if !config.Config.Callback.CallbackBeforeSendSingleMsg.Enable {
 		return true, nil
 	}
+
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
 	commonCallbackReq.CallbackCommand = constant.CallbackBeforeSendSingleMsgCommand

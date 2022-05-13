@@ -7,12 +7,11 @@ import (
 	"context"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/minio/minio-go/v7/pkg/policy"
 	url2 "net/url"
 )
 
 var (
-	minioClient *minio.Client
+	MinioClient *minio.Client
 )
 
 func MinioInit() {
@@ -30,11 +29,16 @@ func MinioInit() {
 		log.NewError(operationID, utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
 		return
 	}
+	opts := &minio.Options{
+		Creds: credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+	}
+	if minioUrl.Scheme == "http" {
+		opts.Secure = false
+	} else if minioUrl.Scheme == "https" {
+		opts.Secure = true
+	}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "Parse ok ", config.Config.Credential.Minio)
-	minioClient, err = minio.New(minioUrl.Host, &minio.Options{
-		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
-		Secure: false,
-	})
+	MinioClient, err = minio.New(minioUrl.Host, opts)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "new ok ", config.Config.Credential.Minio)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "init minio client failed", err.Error())
@@ -44,10 +48,25 @@ func MinioInit() {
 		Region:        config.Config.Credential.Minio.Location,
 		ObjectLocking: false,
 	}
-	err = minioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.Bucket, opt)
+	err = MinioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.Bucket, opt)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "MakeBucket failed ", err.Error())
-		exists, err := minioClient.BucketExists(context.Background(), config.Config.Credential.Minio.Bucket)
+		exists, err := MinioClient.BucketExists(context.Background(), config.Config.Credential.Minio.Bucket)
+		if err == nil && exists {
+			log.NewWarn(operationID, utils.GetSelfFuncName(), "We already own ", config.Config.Credential.Minio.Bucket)
+		} else {
+			if err != nil {
+				log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
+			}
+			log.NewError(operationID, utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
+			return
+		}
+	}
+	// make app bucket
+	err = MinioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.AppBucket, opt)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "MakeBucket failed ", err.Error())
+		exists, err := MinioClient.BucketExists(context.Background(), config.Config.Credential.Minio.Bucket)
 		if err == nil && exists {
 			log.NewWarn(operationID, utils.GetSelfFuncName(), "We already own ", config.Config.Credential.Minio.Bucket)
 		} else {
@@ -59,10 +78,11 @@ func MinioInit() {
 		}
 	}
 	// 自动化桶public的代码
-	err = minioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
-	if err != nil {
-		log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
-		return
-	}
+	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
+	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
+	//if err != nil {
+	//	log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+	//	return
+	//}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio create and set policy success")
 }

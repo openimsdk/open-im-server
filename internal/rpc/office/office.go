@@ -9,6 +9,7 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbCache "Open_IM/pkg/proto/cache"
 	pbOffice "Open_IM/pkg/proto/office"
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -17,6 +18,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -39,22 +41,34 @@ func NewOfficeServer(port int) *officeServer {
 
 func (s *officeServer) Run() {
 	log.NewInfo("0", "officeServer rpc start ")
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
-	//listener network
-	listener, err := net.Listen("tcp", registerAddress)
-	if err != nil {
-		log.NewError("0", "Listen failed ", err.Error(), registerAddress)
-		return
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
 	}
-	log.NewInfo("0", "listen network success, ", registerAddress, listener)
+	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+	//listener network
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		panic("listening err:" + err.Error() + s.rpcRegisterName)
+	}
+	log.NewInfo("0", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbOffice.RegisterOfficeServiceServer(srv, s)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		return
@@ -134,10 +148,10 @@ func (s *officeServer) DeleteTag(_ context.Context, req *pbOffice.DeleteTagReq) 
 func (s *officeServer) SetTag(_ context.Context, req *pbOffice.SetTagReq) (resp *pbOffice.SetTagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.SetTagResp{CommonResp: &pbOffice.CommonResp{}}
-	IncreaseUserIDList := utils.RemoveRepeatedStringInList(req.IncreaseUserIDList)
+	increaseUserIDList := utils.RemoveRepeatedStringInList(req.IncreaseUserIDList)
 	reduceUserIDList := utils.RemoveRepeatedStringInList(req.ReduceUserIDList)
-	if err := db.DB.SetTag(req.UserID, req.TagID, req.NewName, IncreaseUserIDList, reduceUserIDList); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetTag failed", err.Error())
+	if err := db.DB.SetTag(req.UserID, req.TagID, req.NewName, increaseUserIDList, reduceUserIDList); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetTag failed", increaseUserIDList, reduceUserIDList, err.Error())
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
@@ -160,15 +174,29 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	}
 	var groupUserIDList []string
 	for _, groupID := range req.GroupList {
-		userIDList, err := im_mysql_model.GetGroupMemberIDListByGroupID(groupID)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID failed", err.Error())
-			continue
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		cacheClient := pbCache.NewCacheClient(etcdConn)
+		req := pbCache.GetGroupMemberIDListFromCacheReq{
+			OperationID: req.OperationID,
+			GroupID:     groupID,
 		}
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), userIDList)
-		groupUserIDList = append(groupUserIDList, userIDList...)
+		getGroupMemberIDListFromCacheResp, err := cacheClient.GetGroupMemberIDListFromCache(context.Background(), &req)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error(), req.String())
+			resp.CommonResp.ErrCode = constant.ErrServer.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		if getGroupMemberIDListFromCacheResp.CommonResp.ErrCode != 0 {
+			log.NewError(req.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", getGroupMemberIDListFromCacheResp.CommonResp.ErrCode)
+			resp.CommonResp.ErrCode = getGroupMemberIDListFromCacheResp.CommonResp.ErrCode
+			resp.CommonResp.ErrMsg = getGroupMemberIDListFromCacheResp.CommonResp.ErrMsg
+			return resp, nil
+		}
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), getGroupMemberIDListFromCacheResp.UserIDList)
+		groupUserIDList = append(groupUserIDList, getGroupMemberIDListFromCacheResp.UserIDList...)
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), groupUserIDList, req.GroupList)
 	var userIDList []string
 	userIDList = append(userIDList, tagUserIDList...)
 	userIDList = append(userIDList, groupUserIDList...)
@@ -179,32 +207,47 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 			userIDList = append(userIDList[:i], userIDList[i+1:]...)
 		}
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
-	us, err := imdb.GetUserByUserID(req.SendID)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
+	user, err := imdb.GetUserByUserID(req.SendID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.SendID)
+		resp.CommonResp.ErrMsg = err.Error()
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
 	}
+	var wg sync.WaitGroup
+	wg.Add(len(userIDList))
 	for _, userID := range userIDList {
-		msg.TagSendMessage(req.OperationID, us, userID, req.Content, req.SenderPlatformID)
+		go func(userID string) {
+			defer wg.Done()
+			msg.TagSendMessage(req.OperationID, user, userID, req.Content, req.SenderPlatformID)
+		}(userID)
 	}
+	wg.Wait()
 	var tagSendLogs db.TagSendLog
+
+	wg.Add(len(userIDList))
 	for _, userID := range userIDList {
-		userName, err := im_mysql_model.GetUserNameByUserID(userID)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
-			continue
-		}
-		tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
-			UserID:   userID,
-			UserName: userName,
-		})
+		go func(userID string) {
+			defer wg.Done()
+			userName, err := im_mysql_model.GetUserNameByUserID(userID)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+				return
+			}
+			tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
+				UserID:   userID,
+				UserName: userName,
+			})
+		}(userID)
 	}
+	wg.Wait()
 	tagSendLogs.SendID = req.SendID
 	tagSendLogs.Content = req.Content
 	tagSendLogs.SenderPlatformID = req.SenderPlatformID
 	tagSendLogs.SendTime = time.Now().Unix()
 	if err := db.DB.SaveTagSendLog(&tagSendLogs); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SaveTagSendLog failed", tagSendLogs, err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil
@@ -271,8 +314,9 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.CreateOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
 	workMoment := db.WorkMoment{
-		Comments:     []*db.Comment{},
-		LikeUserList: []*db.LikeUser{},
+		Comments:           []*db.Comment{},
+		LikeUserList:       []*db.WorkMomentUser{},
+		PermissionUserList: []*db.WorkMomentUser{},
 	}
 	createUser, err := imdb.GetUserByUserID(req.WorkMoment.UserID)
 	if err != nil {
@@ -286,6 +330,18 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	workMoment.UserName = createUser.Nickname
 	workMoment.FaceURL = createUser.FaceURL
 	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
+	workMoment.PermissionUserList = []*db.WorkMomentUser{}
+	for _, userID := range workMoment.PermissionUserIDList {
+		userName, err := imdb.GetUserNameByUserID(userID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+			continue
+		}
+		workMoment.PermissionUserList = append(workMoment.PermissionUserList, &db.WorkMomentUser{
+			UserID:   userID,
+			UserName: userName,
+		})
+	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "workMoment to create", workMoment)
 	err = db.DB.CreateOneWorkMoment(&workMoment)
 	if err != nil {
@@ -306,6 +362,20 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 			CreateTime:          workMoment.CreateTime,
 		}
 		msg.WorkMomentSendNotification(req.OperationID, atUser.UserID, workMomentNotificationMsg)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *officeServer) DeleteComment(_ context.Context, req *pbOffice.DeleteCommentReq) (resp *pbOffice.DeleteCommentResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbOffice.DeleteCommentResp{CommonResp: &pbOffice.CommonResp{}}
+	err = db.DB.DeleteComment(req.WorkMomentID, req.ContentID, req.OpUserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetWorkMomentByID failed", err.Error())
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -471,7 +541,6 @@ func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWor
 	workMoment, err := db.DB.GetWorkMomentByID(req.WorkMomentID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetWorkMomentByID failed", err.Error())
-		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
 	canSee := isUserCanSeeWorkMoment(req.OpUserID, *workMoment)

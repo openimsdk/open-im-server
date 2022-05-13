@@ -129,13 +129,23 @@ func CheckAccess(OpUserID string, OwnerUserID string) bool {
 	return false
 }
 
-func GetUserIDFromToken(token string, operationID string) (bool, string) {
+func GetUserIDFromToken(token string, operationID string) (bool, string, string) {
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
 		log.Error(operationID, "ParseToken failed, ", err.Error(), token)
-		return false, ""
+		return false, "", err.Error()
 	}
-	return true, claims.UID
+	log.Debug(operationID, "token claims.ExpiresAt.Second() ", claims.ExpiresAt.Unix())
+	return true, claims.UID, ""
+}
+
+func GetUserIDFromTokenExpireTime(token string, operationID string) (bool, string, string, int64) {
+	claims, err := ParseToken(token, operationID)
+	if err != nil {
+		log.Error(operationID, "ParseToken failed, ", err.Error(), token)
+		return false, "", err.Error(), 0
+	}
+	return true, claims.UID, "", claims.ExpiresAt.Unix()
 }
 
 func ParseTokenGetUserID(token string, operationID string) (error, string) {

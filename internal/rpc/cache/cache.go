@@ -11,10 +11,11 @@ import (
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"google.golang.org/grpc"
 )
 
 type cacheServer struct {
@@ -36,15 +37,19 @@ func NewCacheServer(port int) *cacheServer {
 
 func (s *cacheServer) Run() {
 	log.NewInfo("0", "cacheServer rpc start ")
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
-	//listener network
-	listener, err := net.Listen("tcp", registerAddress)
-	if err != nil {
-		log.NewError("0", "Listen failed ", err.Error(), registerAddress)
-		return
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
 	}
-	log.NewInfo("0", "listen network success, ", registerAddress, listener)
+	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+	//listener network
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		panic("listening err:" + err.Error() + s.rpcRegisterName)
+	}
+	log.NewInfo("0", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
 
@@ -58,7 +63,16 @@ func (s *cacheServer) Run() {
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	pbCache.RegisterCacheServer(srv, s)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
+
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		return
@@ -75,6 +89,7 @@ func SyncDB2Cache() error {
 	var err error
 	log.NewInfo("0", utils.GetSelfFuncName())
 	userList, err := imdb.GetAllUser()
+	log.NewDebug("", utils.GetSelfFuncName(), "userList", userList)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
@@ -82,7 +97,7 @@ func SyncDB2Cache() error {
 	err = updateAllFriendToCache(userList)
 	err = updateAllBlackListToCache(userList)
 	err = updateAllGroupMemberListToCache()
-	return err
+	return utils.Wrap(err, "")
 }
 
 func DelRelationCache() {}
@@ -103,10 +118,10 @@ func updateAllUserToCache(userList []db.User) error {
 		}
 		m, err := utils.Pb2Map(userInfoPb)
 		if err != nil {
-			log.NewError("", utils.GetSelfFuncName(), err.Error())
+			log.NewWarn("", utils.GetSelfFuncName(), err.Error())
 		}
 		if err := db.DB.SetUserInfoToCache(userInfo.UserID, m); err != nil {
-			log.NewError("0", utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
+			log.NewWarn("0", utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
@@ -117,18 +132,20 @@ func updateAllGroupMemberListToCache() error {
 	log.NewInfo("0", utils.GetSelfFuncName())
 	groupIDList, err := imdb.GetAllGroupIDList()
 	if err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), "getAllGroupIDList failed", err.Error())
+		log.NewWarn("0", utils.GetSelfFuncName(), "getAllGroupIDList failed", err.Error())
 		panic(err.Error())
 	}
 	for _, groupID := range groupIDList {
 		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
 		if err != nil {
-			log.NewError("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
+			log.NewWarn("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
 			continue
 		}
-		log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
-		if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
-			log.NewError("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
+		//log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
+		if len(groupMemberIDList) > 0 {
+			if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
+				log.NewWarn("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
+			}
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
@@ -140,11 +157,13 @@ func updateAllFriendToCache(userList []db.User) error {
 	for _, user := range userList {
 		friendIDList, err := imdb.GetFriendIDListByUserID(user.UserID)
 		if err != nil {
-			log.NewError("0", utils.GetSelfFuncName(), err.Error())
+			log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
-			log.NewError("0", utils.GetSelfFuncName(), err.Error())
+		if len(friendIDList) > 0 {
+			if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
+				log.NewWarn("0", utils.GetSelfFuncName(), err.Error(), friendIDList, user.UserID)
+			}
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
@@ -156,11 +175,13 @@ func updateAllBlackListToCache(userList []db.User) error {
 	for _, user := range userList {
 		blackIDList, err := imdb.GetBlackIDListByUserID(user.UserID)
 		if err != nil {
-			log.NewError("", utils.GetSelfFuncName(), err.Error())
+			log.NewWarn("", utils.GetSelfFuncName(), err.Error())
 			continue
 		}
-		if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
-			log.NewError("0", utils.GetSelfFuncName(), err.Error())
+		if len(blackIDList) > 0 {
+			if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
+				log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
+			}
 		}
 	}
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
@@ -318,7 +339,7 @@ func (s *cacheServer) AddGroupMemberToCache(_ context.Context, req *pbCache.AddG
 
 func (s *cacheServer) ReduceGroupMemberFromCache(_ context.Context, req *pbCache.ReduceGroupMemberFromCacheReq) (resp *pbCache.ReduceGroupMemberFromCacheResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.ReduceGroupMemberFromCacheResp{}
+	resp = &pbCache.ReduceGroupMemberFromCacheResp{CommonResp: &pbCache.CommonResp{}}
 	if err := db.DB.ReduceGroupMemberFromCache(req.GroupID, req.UserIDList...); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ReduceGroupMemberFromCache failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode

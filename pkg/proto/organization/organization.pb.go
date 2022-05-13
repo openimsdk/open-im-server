@@ -37,7 +37,7 @@ func (m *CreateDepartmentReq) Reset()         { *m = CreateDepartmentReq{} }
 func (m *CreateDepartmentReq) String() string { return proto.CompactTextString(m) }
 func (*CreateDepartmentReq) ProtoMessage()    {}
 func (*CreateDepartmentReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{0}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{0}
 }
 func (m *CreateDepartmentReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateDepartmentReq.Unmarshal(m, b)
@@ -91,7 +91,7 @@ func (m *CreateDepartmentResp) Reset()         { *m = CreateDepartmentResp{} }
 func (m *CreateDepartmentResp) String() string { return proto.CompactTextString(m) }
 func (*CreateDepartmentResp) ProtoMessage()    {}
 func (*CreateDepartmentResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{1}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{1}
 }
 func (m *CreateDepartmentResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateDepartmentResp.Unmarshal(m, b)
@@ -145,7 +145,7 @@ func (m *UpdateDepartmentReq) Reset()         { *m = UpdateDepartmentReq{} }
 func (m *UpdateDepartmentReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateDepartmentReq) ProtoMessage()    {}
 func (*UpdateDepartmentReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{2}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{2}
 }
 func (m *UpdateDepartmentReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateDepartmentReq.Unmarshal(m, b)
@@ -198,7 +198,7 @@ func (m *UpdateDepartmentResp) Reset()         { *m = UpdateDepartmentResp{} }
 func (m *UpdateDepartmentResp) String() string { return proto.CompactTextString(m) }
 func (*UpdateDepartmentResp) ProtoMessage()    {}
 func (*UpdateDepartmentResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{3}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{3}
 }
 func (m *UpdateDepartmentResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateDepartmentResp.Unmarshal(m, b)
@@ -245,7 +245,7 @@ func (m *GetSubDepartmentReq) Reset()         { *m = GetSubDepartmentReq{} }
 func (m *GetSubDepartmentReq) String() string { return proto.CompactTextString(m) }
 func (*GetSubDepartmentReq) ProtoMessage()    {}
 func (*GetSubDepartmentReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{4}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{4}
 }
 func (m *GetSubDepartmentReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSubDepartmentReq.Unmarshal(m, b)
@@ -299,7 +299,7 @@ func (m *GetSubDepartmentResp) Reset()         { *m = GetSubDepartmentResp{} }
 func (m *GetSubDepartmentResp) String() string { return proto.CompactTextString(m) }
 func (*GetSubDepartmentResp) ProtoMessage()    {}
 func (*GetSubDepartmentResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{5}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{5}
 }
 func (m *GetSubDepartmentResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSubDepartmentResp.Unmarshal(m, b)
@@ -353,7 +353,7 @@ func (m *DeleteDepartmentReq) Reset()         { *m = DeleteDepartmentReq{} }
 func (m *DeleteDepartmentReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteDepartmentReq) ProtoMessage()    {}
 func (*DeleteDepartmentReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{6}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{6}
 }
 func (m *DeleteDepartmentReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteDepartmentReq.Unmarshal(m, b)
@@ -406,7 +406,7 @@ func (m *DeleteDepartmentResp) Reset()         { *m = DeleteDepartmentResp{} }
 func (m *DeleteDepartmentResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteDepartmentResp) ProtoMessage()    {}
 func (*DeleteDepartmentResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{7}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{7}
 }
 func (m *DeleteDepartmentResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteDepartmentResp.Unmarshal(m, b)
@@ -440,6 +440,106 @@ func (m *DeleteDepartmentResp) GetErrMsg() string {
 	return ""
 }
 
+type GetDepartmentParentIDListReq struct {
+	DepartmentID         string   `protobuf:"bytes,1,opt,name=departmentID" json:"departmentID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetDepartmentParentIDListReq) Reset()         { *m = GetDepartmentParentIDListReq{} }
+func (m *GetDepartmentParentIDListReq) String() string { return proto.CompactTextString(m) }
+func (*GetDepartmentParentIDListReq) ProtoMessage()    {}
+func (*GetDepartmentParentIDListReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_organization_6d9a9b5829486353, []int{8}
+}
+func (m *GetDepartmentParentIDListReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetDepartmentParentIDListReq.Unmarshal(m, b)
+}
+func (m *GetDepartmentParentIDListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetDepartmentParentIDListReq.Marshal(b, m, deterministic)
+}
+func (dst *GetDepartmentParentIDListReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetDepartmentParentIDListReq.Merge(dst, src)
+}
+func (m *GetDepartmentParentIDListReq) XXX_Size() int {
+	return xxx_messageInfo_GetDepartmentParentIDListReq.Size(m)
+}
+func (m *GetDepartmentParentIDListReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetDepartmentParentIDListReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetDepartmentParentIDListReq proto.InternalMessageInfo
+
+func (m *GetDepartmentParentIDListReq) GetDepartmentID() string {
+	if m != nil {
+		return m.DepartmentID
+	}
+	return ""
+}
+
+func (m *GetDepartmentParentIDListReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetDepartmentParentIDListResp struct {
+	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	ParentIDList         []string `protobuf:"bytes,3,rep,name=parentIDList" json:"parentIDList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetDepartmentParentIDListResp) Reset()         { *m = GetDepartmentParentIDListResp{} }
+func (m *GetDepartmentParentIDListResp) String() string { return proto.CompactTextString(m) }
+func (*GetDepartmentParentIDListResp) ProtoMessage()    {}
+func (*GetDepartmentParentIDListResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_organization_6d9a9b5829486353, []int{9}
+}
+func (m *GetDepartmentParentIDListResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetDepartmentParentIDListResp.Unmarshal(m, b)
+}
+func (m *GetDepartmentParentIDListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetDepartmentParentIDListResp.Marshal(b, m, deterministic)
+}
+func (dst *GetDepartmentParentIDListResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetDepartmentParentIDListResp.Merge(dst, src)
+}
+func (m *GetDepartmentParentIDListResp) XXX_Size() int {
+	return xxx_messageInfo_GetDepartmentParentIDListResp.Size(m)
+}
+func (m *GetDepartmentParentIDListResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetDepartmentParentIDListResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetDepartmentParentIDListResp proto.InternalMessageInfo
+
+func (m *GetDepartmentParentIDListResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *GetDepartmentParentIDListResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *GetDepartmentParentIDListResp) GetParentIDList() []string {
+	if m != nil {
+		return m.ParentIDList
+	}
+	return nil
+}
+
 type CreateOrganizationUserReq struct {
 	OrganizationUser     *sdk_ws.OrganizationUser `protobuf:"bytes,1,opt,name=organizationUser" json:"organizationUser,omitempty"`
 	OperationID          string                   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
@@ -453,7 +553,7 @@ func (m *CreateOrganizationUserReq) Reset()         { *m = CreateOrganizationUse
 func (m *CreateOrganizationUserReq) String() string { return proto.CompactTextString(m) }
 func (*CreateOrganizationUserReq) ProtoMessage()    {}
 func (*CreateOrganizationUserReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{8}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{10}
 }
 func (m *CreateOrganizationUserReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateOrganizationUserReq.Unmarshal(m, b)
@@ -506,7 +606,7 @@ func (m *CreateOrganizationUserResp) Reset()         { *m = CreateOrganizationUs
 func (m *CreateOrganizationUserResp) String() string { return proto.CompactTextString(m) }
 func (*CreateOrganizationUserResp) ProtoMessage()    {}
 func (*CreateOrganizationUserResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{9}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{11}
 }
 func (m *CreateOrganizationUserResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateOrganizationUserResp.Unmarshal(m, b)
@@ -553,7 +653,7 @@ func (m *UpdateOrganizationUserReq) Reset()         { *m = UpdateOrganizationUse
 func (m *UpdateOrganizationUserReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateOrganizationUserReq) ProtoMessage()    {}
 func (*UpdateOrganizationUserReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{10}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{12}
 }
 func (m *UpdateOrganizationUserReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateOrganizationUserReq.Unmarshal(m, b)
@@ -606,7 +706,7 @@ func (m *UpdateOrganizationUserResp) Reset()         { *m = UpdateOrganizationUs
 func (m *UpdateOrganizationUserResp) String() string { return proto.CompactTextString(m) }
 func (*UpdateOrganizationUserResp) ProtoMessage()    {}
 func (*UpdateOrganizationUserResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{11}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{13}
 }
 func (m *UpdateOrganizationUserResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateOrganizationUserResp.Unmarshal(m, b)
@@ -653,7 +753,7 @@ func (m *CreateDepartmentMemberReq) Reset()         { *m = CreateDepartmentMembe
 func (m *CreateDepartmentMemberReq) String() string { return proto.CompactTextString(m) }
 func (*CreateDepartmentMemberReq) ProtoMessage()    {}
 func (*CreateDepartmentMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{12}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{14}
 }
 func (m *CreateDepartmentMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateDepartmentMemberReq.Unmarshal(m, b)
@@ -706,7 +806,7 @@ func (m *CreateDepartmentMemberResp) Reset()         { *m = CreateDepartmentMemb
 func (m *CreateDepartmentMemberResp) String() string { return proto.CompactTextString(m) }
 func (*CreateDepartmentMemberResp) ProtoMessage()    {}
 func (*CreateDepartmentMemberResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{13}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{15}
 }
 func (m *CreateDepartmentMemberResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateDepartmentMemberResp.Unmarshal(m, b)
@@ -753,7 +853,7 @@ func (m *GetUserInDepartmentReq) Reset()         { *m = GetUserInDepartmentReq{}
 func (m *GetUserInDepartmentReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserInDepartmentReq) ProtoMessage()    {}
 func (*GetUserInDepartmentReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{14}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{16}
 }
 func (m *GetUserInDepartmentReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInDepartmentReq.Unmarshal(m, b)
@@ -807,7 +907,7 @@ func (m *GetUserInDepartmentResp) Reset()         { *m = GetUserInDepartmentResp
 func (m *GetUserInDepartmentResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserInDepartmentResp) ProtoMessage()    {}
 func (*GetUserInDepartmentResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{15}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{17}
 }
 func (m *GetUserInDepartmentResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserInDepartmentResp.Unmarshal(m, b)
@@ -861,7 +961,7 @@ func (m *UpdateUserInDepartmentReq) Reset()         { *m = UpdateUserInDepartmen
 func (m *UpdateUserInDepartmentReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInDepartmentReq) ProtoMessage()    {}
 func (*UpdateUserInDepartmentReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{16}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{18}
 }
 func (m *UpdateUserInDepartmentReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInDepartmentReq.Unmarshal(m, b)
@@ -914,7 +1014,7 @@ func (m *UpdateUserInDepartmentResp) Reset()         { *m = UpdateUserInDepartme
 func (m *UpdateUserInDepartmentResp) String() string { return proto.CompactTextString(m) }
 func (*UpdateUserInDepartmentResp) ProtoMessage()    {}
 func (*UpdateUserInDepartmentResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{17}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{19}
 }
 func (m *UpdateUserInDepartmentResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateUserInDepartmentResp.Unmarshal(m, b)
@@ -962,7 +1062,7 @@ func (m *DeleteUserInDepartmentReq) Reset()         { *m = DeleteUserInDepartmen
 func (m *DeleteUserInDepartmentReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteUserInDepartmentReq) ProtoMessage()    {}
 func (*DeleteUserInDepartmentReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{18}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{20}
 }
 func (m *DeleteUserInDepartmentReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteUserInDepartmentReq.Unmarshal(m, b)
@@ -1022,7 +1122,7 @@ func (m *DeleteUserInDepartmentResp) Reset()         { *m = DeleteUserInDepartme
 func (m *DeleteUserInDepartmentResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteUserInDepartmentResp) ProtoMessage()    {}
 func (*DeleteUserInDepartmentResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{19}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{21}
 }
 func (m *DeleteUserInDepartmentResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteUserInDepartmentResp.Unmarshal(m, b)
@@ -1069,7 +1169,7 @@ func (m *DeleteOrganizationUserReq) Reset()         { *m = DeleteOrganizationUse
 func (m *DeleteOrganizationUserReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteOrganizationUserReq) ProtoMessage()    {}
 func (*DeleteOrganizationUserReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{20}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{22}
 }
 func (m *DeleteOrganizationUserReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteOrganizationUserReq.Unmarshal(m, b)
@@ -1122,7 +1222,7 @@ func (m *DeleteOrganizationUserResp) Reset()         { *m = DeleteOrganizationUs
 func (m *DeleteOrganizationUserResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteOrganizationUserResp) ProtoMessage()    {}
 func (*DeleteOrganizationUserResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{21}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{23}
 }
 func (m *DeleteOrganizationUserResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteOrganizationUserResp.Unmarshal(m, b)
@@ -1169,7 +1269,7 @@ func (m *GetDepartmentMemberReq) Reset()         { *m = GetDepartmentMemberReq{}
 func (m *GetDepartmentMemberReq) String() string { return proto.CompactTextString(m) }
 func (*GetDepartmentMemberReq) ProtoMessage()    {}
 func (*GetDepartmentMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{22}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{24}
 }
 func (m *GetDepartmentMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetDepartmentMemberReq.Unmarshal(m, b)
@@ -1223,7 +1323,7 @@ func (m *GetDepartmentMemberResp) Reset()         { *m = GetDepartmentMemberResp
 func (m *GetDepartmentMemberResp) String() string { return proto.CompactTextString(m) }
 func (*GetDepartmentMemberResp) ProtoMessage()    {}
 func (*GetDepartmentMemberResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_organization_f9b83a1db54ed9cf, []int{23}
+	return fileDescriptor_organization_6d9a9b5829486353, []int{25}
 }
 func (m *GetDepartmentMemberResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetDepartmentMemberResp.Unmarshal(m, b)
@@ -1264,6 +1364,106 @@ func (m *GetDepartmentMemberResp) GetUserDepartmentMemberList() []*sdk_ws.UserDe
 	return nil
 }
 
+type GetDepartmentRelatedGroupIDListReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	DepartmentIDList     []string `protobuf:"bytes,2,rep,name=departmentIDList" json:"departmentIDList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetDepartmentRelatedGroupIDListReq) Reset()         { *m = GetDepartmentRelatedGroupIDListReq{} }
+func (m *GetDepartmentRelatedGroupIDListReq) String() string { return proto.CompactTextString(m) }
+func (*GetDepartmentRelatedGroupIDListReq) ProtoMessage()    {}
+func (*GetDepartmentRelatedGroupIDListReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_organization_6d9a9b5829486353, []int{26}
+}
+func (m *GetDepartmentRelatedGroupIDListReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetDepartmentRelatedGroupIDListReq.Unmarshal(m, b)
+}
+func (m *GetDepartmentRelatedGroupIDListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetDepartmentRelatedGroupIDListReq.Marshal(b, m, deterministic)
+}
+func (dst *GetDepartmentRelatedGroupIDListReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetDepartmentRelatedGroupIDListReq.Merge(dst, src)
+}
+func (m *GetDepartmentRelatedGroupIDListReq) XXX_Size() int {
+	return xxx_messageInfo_GetDepartmentRelatedGroupIDListReq.Size(m)
+}
+func (m *GetDepartmentRelatedGroupIDListReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetDepartmentRelatedGroupIDListReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetDepartmentRelatedGroupIDListReq proto.InternalMessageInfo
+
+func (m *GetDepartmentRelatedGroupIDListReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GetDepartmentRelatedGroupIDListReq) GetDepartmentIDList() []string {
+	if m != nil {
+		return m.DepartmentIDList
+	}
+	return nil
+}
+
+type GetDepartmentRelatedGroupIDListResp struct {
+	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	GroupIDList          []string `protobuf:"bytes,3,rep,name=groupIDList" json:"groupIDList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetDepartmentRelatedGroupIDListResp) Reset()         { *m = GetDepartmentRelatedGroupIDListResp{} }
+func (m *GetDepartmentRelatedGroupIDListResp) String() string { return proto.CompactTextString(m) }
+func (*GetDepartmentRelatedGroupIDListResp) ProtoMessage()    {}
+func (*GetDepartmentRelatedGroupIDListResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_organization_6d9a9b5829486353, []int{27}
+}
+func (m *GetDepartmentRelatedGroupIDListResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetDepartmentRelatedGroupIDListResp.Unmarshal(m, b)
+}
+func (m *GetDepartmentRelatedGroupIDListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetDepartmentRelatedGroupIDListResp.Marshal(b, m, deterministic)
+}
+func (dst *GetDepartmentRelatedGroupIDListResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetDepartmentRelatedGroupIDListResp.Merge(dst, src)
+}
+func (m *GetDepartmentRelatedGroupIDListResp) XXX_Size() int {
+	return xxx_messageInfo_GetDepartmentRelatedGroupIDListResp.Size(m)
+}
+func (m *GetDepartmentRelatedGroupIDListResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetDepartmentRelatedGroupIDListResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetDepartmentRelatedGroupIDListResp proto.InternalMessageInfo
+
+func (m *GetDepartmentRelatedGroupIDListResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *GetDepartmentRelatedGroupIDListResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *GetDepartmentRelatedGroupIDListResp) GetGroupIDList() []string {
+	if m != nil {
+		return m.GroupIDList
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*CreateDepartmentReq)(nil), "organization.CreateDepartmentReq")
 	proto.RegisterType((*CreateDepartmentResp)(nil), "organization.CreateDepartmentResp")
@@ -1273,6 +1473,8 @@ func init() {
 	proto.RegisterType((*GetSubDepartmentResp)(nil), "organization.GetSubDepartmentResp")
 	proto.RegisterType((*DeleteDepartmentReq)(nil), "organization.DeleteDepartmentReq")
 	proto.RegisterType((*DeleteDepartmentResp)(nil), "organization.DeleteDepartmentResp")
+	proto.RegisterType((*GetDepartmentParentIDListReq)(nil), "organization.GetDepartmentParentIDListReq")
+	proto.RegisterType((*GetDepartmentParentIDListResp)(nil), "organization.GetDepartmentParentIDListResp")
 	proto.RegisterType((*CreateOrganizationUserReq)(nil), "organization.CreateOrganizationUserReq")
 	proto.RegisterType((*CreateOrganizationUserResp)(nil), "organization.CreateOrganizationUserResp")
 	proto.RegisterType((*UpdateOrganizationUserReq)(nil), "organization.UpdateOrganizationUserReq")
@@ -1289,6 +1491,8 @@ func init() {
 	proto.RegisterType((*DeleteOrganizationUserResp)(nil), "organization.DeleteOrganizationUserResp")
 	proto.RegisterType((*GetDepartmentMemberReq)(nil), "organization.GetDepartmentMemberReq")
 	proto.RegisterType((*GetDepartmentMemberResp)(nil), "organization.GetDepartmentMemberResp")
+	proto.RegisterType((*GetDepartmentRelatedGroupIDListReq)(nil), "organization.GetDepartmentRelatedGroupIDListReq")
+	proto.RegisterType((*GetDepartmentRelatedGroupIDListResp)(nil), "organization.GetDepartmentRelatedGroupIDListResp")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1306,6 +1510,7 @@ type OrganizationClient interface {
 	UpdateDepartment(ctx context.Context, in *UpdateDepartmentReq, opts ...grpc.CallOption) (*UpdateDepartmentResp, error)
 	GetSubDepartment(ctx context.Context, in *GetSubDepartmentReq, opts ...grpc.CallOption) (*GetSubDepartmentResp, error)
 	DeleteDepartment(ctx context.Context, in *DeleteDepartmentReq, opts ...grpc.CallOption) (*DeleteDepartmentResp, error)
+	GetDepartmentParentIDList(ctx context.Context, in *GetDepartmentParentIDListReq, opts ...grpc.CallOption) (*GetDepartmentParentIDListResp, error)
 	CreateOrganizationUser(ctx context.Context, in *CreateOrganizationUserReq, opts ...grpc.CallOption) (*CreateOrganizationUserResp, error)
 	UpdateOrganizationUser(ctx context.Context, in *UpdateOrganizationUserReq, opts ...grpc.CallOption) (*UpdateOrganizationUserResp, error)
 	DeleteOrganizationUser(ctx context.Context, in *DeleteOrganizationUserReq, opts ...grpc.CallOption) (*DeleteOrganizationUserResp, error)
@@ -1314,6 +1519,7 @@ type OrganizationClient interface {
 	DeleteUserInDepartment(ctx context.Context, in *DeleteUserInDepartmentReq, opts ...grpc.CallOption) (*DeleteUserInDepartmentResp, error)
 	UpdateUserInDepartment(ctx context.Context, in *UpdateUserInDepartmentReq, opts ...grpc.CallOption) (*UpdateUserInDepartmentResp, error)
 	GetDepartmentMember(ctx context.Context, in *GetDepartmentMemberReq, opts ...grpc.CallOption) (*GetDepartmentMemberResp, error)
+	GetDepartmentRelatedGroupIDList(ctx context.Context, in *GetDepartmentRelatedGroupIDListReq, opts ...grpc.CallOption) (*GetDepartmentRelatedGroupIDListResp, error)
 }
 
 type organizationClient struct {
@@ -1354,6 +1560,15 @@ func (c *organizationClient) GetSubDepartment(ctx context.Context, in *GetSubDep
 func (c *organizationClient) DeleteDepartment(ctx context.Context, in *DeleteDepartmentReq, opts ...grpc.CallOption) (*DeleteDepartmentResp, error) {
 	out := new(DeleteDepartmentResp)
 	err := grpc.Invoke(ctx, "/organization.organization/DeleteDepartment", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *organizationClient) GetDepartmentParentIDList(ctx context.Context, in *GetDepartmentParentIDListReq, opts ...grpc.CallOption) (*GetDepartmentParentIDListResp, error) {
+	out := new(GetDepartmentParentIDListResp)
+	err := grpc.Invoke(ctx, "/organization.organization/GetDepartmentParentIDList", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1432,6 +1647,15 @@ func (c *organizationClient) GetDepartmentMember(ctx context.Context, in *GetDep
 	return out, nil
 }
 
+func (c *organizationClient) GetDepartmentRelatedGroupIDList(ctx context.Context, in *GetDepartmentRelatedGroupIDListReq, opts ...grpc.CallOption) (*GetDepartmentRelatedGroupIDListResp, error) {
+	out := new(GetDepartmentRelatedGroupIDListResp)
+	err := grpc.Invoke(ctx, "/organization.organization/GetDepartmentRelatedGroupIDList", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Organization service
 
 type OrganizationServer interface {
@@ -1439,6 +1663,7 @@ type OrganizationServer interface {
 	UpdateDepartment(context.Context, *UpdateDepartmentReq) (*UpdateDepartmentResp, error)
 	GetSubDepartment(context.Context, *GetSubDepartmentReq) (*GetSubDepartmentResp, error)
 	DeleteDepartment(context.Context, *DeleteDepartmentReq) (*DeleteDepartmentResp, error)
+	GetDepartmentParentIDList(context.Context, *GetDepartmentParentIDListReq) (*GetDepartmentParentIDListResp, error)
 	CreateOrganizationUser(context.Context, *CreateOrganizationUserReq) (*CreateOrganizationUserResp, error)
 	UpdateOrganizationUser(context.Context, *UpdateOrganizationUserReq) (*UpdateOrganizationUserResp, error)
 	DeleteOrganizationUser(context.Context, *DeleteOrganizationUserReq) (*DeleteOrganizationUserResp, error)
@@ -1447,6 +1672,7 @@ type OrganizationServer interface {
 	DeleteUserInDepartment(context.Context, *DeleteUserInDepartmentReq) (*DeleteUserInDepartmentResp, error)
 	UpdateUserInDepartment(context.Context, *UpdateUserInDepartmentReq) (*UpdateUserInDepartmentResp, error)
 	GetDepartmentMember(context.Context, *GetDepartmentMemberReq) (*GetDepartmentMemberResp, error)
+	GetDepartmentRelatedGroupIDList(context.Context, *GetDepartmentRelatedGroupIDListReq) (*GetDepartmentRelatedGroupIDListResp, error)
 }
 
 func RegisterOrganizationServer(s *grpc.Server, srv OrganizationServer) {
@@ -1521,6 +1747,24 @@ func _Organization_DeleteDepartment_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(OrganizationServer).DeleteDepartment(ctx, req.(*DeleteDepartmentReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Organization_GetDepartmentParentIDList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDepartmentParentIDListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationServer).GetDepartmentParentIDList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/organization.organization/GetDepartmentParentIDList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationServer).GetDepartmentParentIDList(ctx, req.(*GetDepartmentParentIDListReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1669,6 +1913,24 @@ func _Organization_GetDepartmentMember_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Organization_GetDepartmentRelatedGroupIDList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDepartmentRelatedGroupIDListReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrganizationServer).GetDepartmentRelatedGroupIDList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/organization.organization/GetDepartmentRelatedGroupIDList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrganizationServer).GetDepartmentRelatedGroupIDList(ctx, req.(*GetDepartmentRelatedGroupIDListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Organization_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "organization.organization",
 	HandlerType: (*OrganizationServer)(nil),
@@ -1688,6 +1950,10 @@ var _Organization_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDepartment",
 			Handler:    _Organization_DeleteDepartment_Handler,
+		},
+		{
+			MethodName: "GetDepartmentParentIDList",
+			Handler:    _Organization_GetDepartmentParentIDList_Handler,
 		},
 		{
 			MethodName: "CreateOrganizationUser",
@@ -1721,60 +1987,72 @@ var _Organization_serviceDesc = grpc.ServiceDesc{
 			MethodName: "GetDepartmentMember",
 			Handler:    _Organization_GetDepartmentMember_Handler,
 		},
+		{
+			MethodName: "GetDepartmentRelatedGroupIDList",
+			Handler:    _Organization_GetDepartmentRelatedGroupIDList_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "organization/organization.proto",
 }
 
 func init() {
-	proto.RegisterFile("organization/organization.proto", fileDescriptor_organization_f9b83a1db54ed9cf)
+	proto.RegisterFile("organization/organization.proto", fileDescriptor_organization_6d9a9b5829486353)
 }
 
-var fileDescriptor_organization_f9b83a1db54ed9cf = []byte{
-	// 715 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x58, 0xdf, 0x6e, 0x12, 0x4f,
-	0x14, 0xce, 0xfe, 0xf8, 0x59, 0xe5, 0xb4, 0x31, 0x64, 0x4a, 0x70, 0xbb, 0xa6, 0x91, 0xa2, 0x4d,
-	0xb9, 0x82, 0xa4, 0x5e, 0x7a, 0x67, 0x31, 0x2d, 0x89, 0x48, 0x82, 0xe9, 0x05, 0xde, 0x90, 0x45,
-	0x46, 0x42, 0x90, 0xdd, 0xe9, 0xcc, 0x22, 0x49, 0x5f, 0xc2, 0x2b, 0x6f, 0x8c, 0x4f, 0xe0, 0x95,
-	0x8f, 0xe2, 0x23, 0x99, 0xdd, 0xa5, 0x38, 0x7b, 0xe6, 0x2c, 0xc5, 0x05, 0x4c, 0xbd, 0x9c, 0x61,
-	0xe6, 0x7c, 0xe7, 0x7c, 0xe7, 0xcf, 0x7c, 0x2c, 0x3c, 0xf1, 0xe5, 0xd0, 0xf5, 0x46, 0xd7, 0x6e,
-	0x30, 0xf2, 0xbd, 0xba, 0xbe, 0xa8, 0x09, 0xe9, 0x07, 0x3e, 0xdb, 0xd3, 0xf7, 0x9c, 0xa3, 0xb6,
-	0xe0, 0x5e, 0xaf, 0xd9, 0xaa, 0x8b, 0xf1, 0xb0, 0x1e, 0x1d, 0xa8, 0xab, 0xc1, 0xb8, 0x37, 0x53,
-	0xf5, 0x99, 0x8a, 0x2f, 0x54, 0xbe, 0x5a, 0xb0, 0x7f, 0x26, 0xb9, 0x1b, 0xf0, 0x06, 0x17, 0xae,
-	0x0c, 0x26, 0xdc, 0x0b, 0x3a, 0xfc, 0x8a, 0xbd, 0x82, 0x87, 0x83, 0xc5, 0x46, 0xd3, 0xfb, 0xe0,
-	0xdb, 0x56, 0xd9, 0xaa, 0xee, 0x9e, 0x1e, 0xd6, 0x14, 0x97, 0x9f, 0xb8, 0xec, 0xb9, 0x62, 0xd4,
-	0x13, 0xae, 0x74, 0x27, 0xaa, 0xa6, 0xdd, 0x44, 0x97, 0x58, 0x19, 0x76, 0x7d, 0xc1, 0x65, 0xe4,
-	0x4e, 0xb3, 0x61, 0xff, 0x57, 0xb6, 0xaa, 0xf9, 0x8e, 0xbe, 0xc5, 0x1c, 0x78, 0xe0, 0x8b, 0x4b,
-	0xc5, 0x65, 0xb3, 0x61, 0xe7, 0xa2, 0x9f, 0x17, 0xeb, 0xca, 0x67, 0x0b, 0x8a, 0xa6, 0x73, 0x4a,
-	0x30, 0x1b, 0xee, 0x73, 0x29, 0xcf, 0xfc, 0x01, 0x8f, 0xdc, 0xba, 0xd7, 0xb9, 0x59, 0xb2, 0x12,
-	0xec, 0x70, 0x29, 0x5b, 0x6a, 0x38, 0xc7, 0x9a, 0xaf, 0x88, 0x78, 0x72, 0x19, 0xe2, 0x89, 0xe8,
-	0xba, 0x14, 0x83, 0xbb, 0x49, 0xd7, 0x05, 0x14, 0x4d, 0xdf, 0xb2, 0xb0, 0x55, 0x99, 0xc1, 0xfe,
-	0x39, 0x0f, 0xde, 0x4e, 0xfb, 0xc9, 0x28, 0x2b, 0xb0, 0xa7, 0x39, 0xdc, 0x88, 0xac, 0xe5, 0x3b,
-	0x89, 0xbd, 0x0d, 0x64, 0xdc, 0x44, 0x5e, 0x3f, 0xe3, 0xaf, 0x47, 0x2a, 0xb0, 0x73, 0xe5, 0xdc,
-	0x1f, 0xa5, 0x24, 0xbc, 0x14, 0x52, 0xd1, 0xe0, 0x1f, 0x39, 0x4e, 0xf8, 0xf6, 0xa9, 0xb8, 0x80,
-	0xa2, 0x09, 0x9c, 0x29, 0x9b, 0xdf, 0x2d, 0x38, 0x88, 0xdb, 0xa8, 0xad, 0x4d, 0x87, 0x10, 0x26,
-	0x8c, 0xa4, 0x0d, 0x05, 0x1f, 0x6d, 0xcf, 0x8b, 0xf7, 0x29, 0xc1, 0x94, 0x61, 0xc1, 0xb8, 0xbc,
-	0x66, 0xd8, 0x6f, 0xc0, 0x49, 0xf3, 0x35, 0x73, 0xf0, 0x71, 0x57, 0xfc, 0x1b, 0xc1, 0xa7, 0xf9,
-	0xba, 0x66, 0xe6, 0x7f, 0x17, 0x51, 0x8b, 0x4f, 0xfa, 0x8b, 0xe0, 0x07, 0x68, 0x7b, 0x49, 0xf0,
-	0x86, 0x05, 0xe3, 0xf2, 0xa6, 0x32, 0x6f, 0xfa, 0x9a, 0x29, 0x78, 0x0f, 0x4a, 0xe7, 0x3c, 0x88,
-	0x8c, 0x7b, 0xc9, 0xe6, 0x2d, 0xc1, 0xce, 0x34, 0xf6, 0x21, 0x6e, 0xdb, 0xf9, 0x6a, 0x4d, 0xff,
-	0xbf, 0x59, 0xf0, 0x88, 0x04, 0xcc, 0x34, 0xbe, 0xda, 0x50, 0x98, 0x22, 0x4b, 0xf3, 0x27, 0x8b,
-	0x4a, 0x8e, 0x01, 0x6a, 0x5c, 0xd6, 0x1a, 0x81, 0xa2, 0xe4, 0xee, 0xd5, 0x42, 0x9a, 0xaf, 0x99,
-	0x6a, 0xe1, 0x8b, 0x05, 0x07, 0xf1, 0x34, 0xfd, 0x6b, 0xf5, 0x60, 0x3c, 0x11, 0xff, 0x9b, 0x4f,
-	0x44, 0x18, 0x67, 0x9a, 0x5b, 0x99, 0xe2, 0xbc, 0xba, 0x09, 0x93, 0x1a, 0x76, 0xdb, 0x29, 0xfb,
-	0x45, 0x08, 0x1b, 0x9a, 0x59, 0xd7, 0x51, 0xdb, 0x52, 0xf3, 0x6a, 0xfb, 0x6f, 0xee, 0x8f, 0xb8,
-	0x85, 0x37, 0x33, 0x80, 0xd8, 0x7b, 0xb0, 0x43, 0x86, 0xb1, 0x35, 0x4d, 0x8b, 0x9c, 0xa4, 0xb4,
-	0xb2, 0xe1, 0x40, 0xaa, 0xa1, 0xd3, 0x9f, 0x79, 0x48, 0x88, 0x7e, 0xd6, 0x85, 0x02, 0x1e, 0xa3,
-	0xec, 0xa8, 0x96, 0xf8, 0xaf, 0x40, 0x08, 0x7e, 0xa7, 0x72, 0xdb, 0x11, 0x25, 0x42, 0xd3, 0x58,
-	0x60, 0x62, 0xd3, 0x84, 0x38, 0xc6, 0xa6, 0x49, 0x8d, 0xda, 0x85, 0x02, 0xd6, 0x7d, 0xd8, 0x34,
-	0xa1, 0x48, 0xb1, 0x69, 0x52, 0x3a, 0x76, 0xa1, 0x80, 0x85, 0x14, 0x36, 0x4d, 0x28, 0x3c, 0x6c,
-	0x9a, 0xd4, 0x62, 0x63, 0x28, 0xd1, 0x62, 0x85, 0x9d, 0x50, 0x74, 0x12, 0x4d, 0xe9, 0x54, 0x57,
-	0x3b, 0x18, 0x83, 0xd1, 0xe2, 0x00, 0x83, 0xa5, 0xca, 0x1d, 0x0c, 0xb6, 0x44, 0x6b, 0x8c, 0xa1,
-	0x44, 0x77, 0x35, 0x06, 0x4b, 0x1d, 0x37, 0x18, 0x6c, 0xc9, 0x90, 0x58, 0xd0, 0x88, 0x2b, 0x9c,
-	0xa6, 0x91, 0x98, 0x0d, 0x34, 0x8d, 0x64, 0x1f, 0xf7, 0xa3, 0xff, 0x36, 0x78, 0xde, 0xb2, 0x67,
-	0x46, 0x25, 0x11, 0x2f, 0x85, 0x73, 0xbc, 0xc2, 0x29, 0x9d, 0x3d, 0x03, 0x86, 0x64, 0x8f, 0x42,
-	0xaa, 0xae, 0x76, 0x50, 0xaf, 0x8b, 0xdb, 0xc0, 0x52, 0x5f, 0x7f, 0xba, 0x2e, 0x48, 0xb0, 0x98,
-	0x3d, 0x23, 0x4f, 0x26, 0x7b, 0x54, 0x92, 0x8e, 0x57, 0x38, 0xa5, 0xc4, 0xcb, 0xc3, 0x77, 0x8f,
-	0x6b, 0x89, 0x8f, 0x1b, 0x2f, 0xf4, 0x45, 0x7f, 0x27, 0xfa, 0x72, 0xf1, 0xfc, 0x57, 0x00, 0x00,
-	0x00, 0xff, 0xff, 0x63, 0xc0, 0xb1, 0xa3, 0x0d, 0x11, 0x00, 0x00,
+var fileDescriptor_organization_6d9a9b5829486353 = []byte{
+	// 846 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xd4, 0x58, 0xcf, 0x6e, 0xd3, 0x4c,
+	0x10, 0x97, 0x9b, 0xef, 0x2b, 0x74, 0x52, 0xa1, 0x68, 0x5b, 0x85, 0xd4, 0x50, 0x35, 0x75, 0x5b,
+	0x35, 0x2a, 0x52, 0x02, 0xe5, 0xc8, 0x8d, 0x06, 0xa5, 0x91, 0x28, 0x41, 0x41, 0x3d, 0x94, 0x4b,
+	0xe4, 0xe0, 0x25, 0x8a, 0xd2, 0xda, 0xdb, 0xb5, 0x43, 0x45, 0x1f, 0x80, 0x2b, 0x27, 0x2e, 0x88,
+	0x27, 0xe0, 0xc4, 0x9b, 0xf0, 0x4a, 0xc8, 0x6b, 0x37, 0x59, 0xef, 0x8e, 0x93, 0xd4, 0x4d, 0x51,
+	0x39, 0x7a, 0xb2, 0xfb, 0x9b, 0x7f, 0x3b, 0x33, 0xbf, 0x09, 0x6c, 0x78, 0xbc, 0x67, 0xbb, 0xfd,
+	0x4b, 0x3b, 0xe8, 0x7b, 0x6e, 0x4d, 0xfe, 0xa8, 0x32, 0xee, 0x05, 0x1e, 0x59, 0x96, 0x65, 0xe6,
+	0x66, 0x8b, 0x51, 0xb7, 0xd3, 0x3c, 0xaa, 0xb1, 0x41, 0xaf, 0x26, 0x0e, 0xd4, 0x7c, 0x67, 0xd0,
+	0xb9, 0xf0, 0x6b, 0x17, 0x7e, 0x74, 0xc1, 0xfa, 0x6e, 0xc0, 0xca, 0x01, 0xa7, 0x76, 0x40, 0xeb,
+	0x94, 0xd9, 0x3c, 0x38, 0xa3, 0x6e, 0xd0, 0xa6, 0xe7, 0xe4, 0x15, 0x3c, 0x70, 0x46, 0x82, 0xa6,
+	0xfb, 0xd1, 0x2b, 0x19, 0x65, 0xa3, 0x92, 0xdf, 0x5f, 0xaf, 0xfa, 0x94, 0x7f, 0xa2, 0xbc, 0x63,
+	0xb3, 0x7e, 0x87, 0xd9, 0xdc, 0x3e, 0xf3, 0xab, 0xd2, 0x4d, 0xe5, 0x12, 0x29, 0x43, 0xde, 0x63,
+	0x94, 0x0b, 0x73, 0x9a, 0xf5, 0xd2, 0x42, 0xd9, 0xa8, 0x2c, 0xb5, 0x65, 0x11, 0x31, 0xe1, 0xbe,
+	0xc7, 0x8e, 0x7d, 0xca, 0x9b, 0xf5, 0x52, 0x4e, 0xfc, 0x3c, 0xfa, 0xb6, 0xbe, 0x1a, 0xb0, 0xaa,
+	0x1b, 0xe7, 0x33, 0x52, 0x82, 0x7b, 0x94, 0xf3, 0x03, 0xcf, 0xa1, 0xc2, 0xac, 0xff, 0xdb, 0x57,
+	0x9f, 0xa4, 0x08, 0x8b, 0x94, 0xf3, 0x23, 0xbf, 0x17, 0xeb, 0x8a, 0xbf, 0x10, 0x7f, 0x72, 0x19,
+	0xfc, 0x11, 0xe1, 0x3a, 0x66, 0xce, 0xdd, 0x0c, 0xd7, 0x21, 0xac, 0xea, 0xb6, 0x65, 0x89, 0x96,
+	0x75, 0x01, 0x2b, 0x0d, 0x1a, 0xbc, 0x1b, 0x76, 0x93, 0x5e, 0x5a, 0xb0, 0x2c, 0x19, 0x5c, 0x17,
+	0x68, 0x4b, 0xed, 0x84, 0x6c, 0x0e, 0x19, 0xd7, 0x35, 0xdf, 0x3c, 0xe3, 0xaf, 0xfb, 0x7e, 0x50,
+	0xca, 0x95, 0x73, 0xd7, 0x4a, 0x49, 0x78, 0x29, 0x0c, 0x45, 0x9d, 0x9e, 0x52, 0x35, 0xe1, 0xb7,
+	0x1f, 0x8a, 0x43, 0x58, 0xd5, 0x15, 0x67, 0xca, 0xa6, 0x03, 0x8f, 0x1b, 0x34, 0x18, 0xc3, 0xbc,
+	0xb5, 0xb9, 0x30, 0x30, 0xf4, 0x6f, 0x6e, 0xbe, 0x58, 0x43, 0x58, 0x9f, 0xa0, 0x25, 0x53, 0x0a,
+	0x2d, 0x58, 0x66, 0x12, 0x8a, 0x48, 0xe0, 0x52, 0x3b, 0x21, 0xb3, 0x7e, 0x1a, 0xb0, 0x16, 0xf5,
+	0x88, 0x96, 0xd4, 0xfa, 0xc2, 0x18, 0x86, 0xae, 0xb5, 0xa0, 0xe0, 0x29, 0xe2, 0xb8, 0x32, 0xb7,
+	0x90, 0x67, 0xa0, 0x21, 0x68, 0x97, 0x6f, 0x98, 0xd3, 0x37, 0x60, 0xa6, 0xd9, 0x9a, 0x29, 0xb3,
+	0xa1, 0xf3, 0x51, 0xc9, 0xff, 0x1b, 0xce, 0xa7, 0xd9, 0x9a, 0xd9, 0x79, 0x75, 0x3a, 0x1c, 0xd1,
+	0xb3, 0xee, 0xc8, 0x79, 0x47, 0x11, 0x4f, 0x70, 0x5e, 0x43, 0xd0, 0x2e, 0xcf, 0x2b, 0xf3, 0xba,
+	0xad, 0x99, 0x9c, 0x77, 0xa1, 0xd8, 0xa0, 0x81, 0x00, 0x77, 0x93, 0x9d, 0xa9, 0x08, 0x8b, 0xc3,
+	0xc8, 0x86, 0xa8, 0x8e, 0xe3, 0xaf, 0x1b, 0xda, 0xff, 0xc3, 0x80, 0x87, 0xa8, 0xc2, 0x4c, 0x85,
+	0xdd, 0x82, 0xc2, 0x50, 0x41, 0x8a, 0xe7, 0x31, 0x96, 0x1c, 0x4d, 0xa9, 0x76, 0x59, 0x2a, 0x04,
+	0x2c, 0x24, 0x77, 0xef, 0x2d, 0xa4, 0xd9, 0x9a, 0xe9, 0x2d, 0x7c, 0x33, 0x60, 0x2d, 0x1a, 0x15,
+	0x7f, 0xed, 0x3d, 0x68, 0x33, 0xe3, 0x3f, 0x7d, 0x66, 0x84, 0x7e, 0xa6, 0x99, 0x95, 0xc9, 0xcf,
+	0xf3, 0x2b, 0x37, 0xb1, 0x66, 0x77, 0x3b, 0xcf, 0x7e, 0xe4, 0xc2, 0x9c, 0x7a, 0xd6, 0xa5, 0x28,
+	0x5b, 0xac, 0x5f, 0xdd, 0x3e, 0xa1, 0xf8, 0x15, 0x95, 0xf0, 0x7c, 0x1a, 0x10, 0xf9, 0x00, 0xa5,
+	0x30, 0xc2, 0x2a, 0x9a, 0x44, 0xb4, 0x76, 0x53, 0x4a, 0x59, 0x33, 0x20, 0x15, 0xc8, 0xe2, 0x60,
+	0x25, 0x2c, 0x6e, 0xd3, 0x53, 0x3b, 0xa0, 0x4e, 0x83, 0x7b, 0x43, 0x36, 0xe6, 0x2f, 0x4a, 0x58,
+	0x0c, 0x3d, 0x2c, 0x7b, 0x72, 0x03, 0x88, 0xc9, 0xc4, 0x82, 0x20, 0x13, 0x9a, 0xdc, 0xfa, 0x0c,
+	0x5b, 0x53, 0x75, 0x66, 0x8a, 0x58, 0x19, 0xf2, 0xbd, 0x31, 0x48, 0x4c, 0x66, 0x64, 0xd1, 0xfe,
+	0xef, 0x3c, 0x24, 0x16, 0x38, 0x72, 0x02, 0x05, 0x75, 0x6a, 0x90, 0xcd, 0x6a, 0x62, 0xef, 0x43,
+	0x96, 0x37, 0xd3, 0x9a, 0x76, 0xc4, 0x67, 0x21, 0xb4, 0xba, 0x2c, 0xa8, 0xd0, 0xc8, 0xa2, 0xa3,
+	0x42, 0xa3, 0xfb, 0xc6, 0x09, 0x14, 0x54, 0x0e, 0xaf, 0x42, 0x23, 0xdb, 0x85, 0x0a, 0x8d, 0xae,
+	0x01, 0x27, 0x50, 0x50, 0x49, 0xb1, 0x0a, 0x8d, 0xb0, 0x75, 0x15, 0x1a, 0xe5, 0xd5, 0x01, 0xac,
+	0xa5, 0xf2, 0x57, 0xb2, 0xa7, 0xd9, 0x96, 0x4a, 0xa7, 0xcd, 0x27, 0x33, 0x9f, 0xf5, 0x19, 0x19,
+	0x40, 0x11, 0x67, 0x84, 0x64, 0x17, 0x4b, 0x22, 0xd2, 0xf9, 0xcc, 0xca, 0x6c, 0x07, 0x23, 0x65,
+	0x38, 0x03, 0x53, 0x95, 0xa5, 0x72, 0x4a, 0x55, 0xd9, 0x04, 0x42, 0x37, 0x80, 0x22, 0xde, 0x3a,
+	0x55, 0x65, 0xa9, 0x3d, 0x5d, 0x55, 0x36, 0xa1, 0x13, 0x8f, 0xc2, 0xa8, 0xb6, 0x11, 0x3c, 0x8c,
+	0x48, 0x03, 0xc6, 0xc3, 0x88, 0x36, 0xcb, 0xae, 0xd8, 0x8e, 0xd5, 0xa1, 0x46, 0xb6, 0xb5, 0xbc,
+	0x23, 0xe3, 0xd8, 0xdc, 0x99, 0xe1, 0x94, 0x1c, 0x3d, 0x4d, 0x0d, 0x1a, 0x3d, 0x4c, 0x53, 0x65,
+	0xb6, 0x83, 0xf2, 0xbb, 0x98, 0xa6, 0x2c, 0x95, 0x62, 0xe1, 0xef, 0x02, 0x55, 0x16, 0x45, 0x4f,
+	0xcb, 0xd3, 0xf6, 0x84, 0xaa, 0x19, 0x27, 0x69, 0x67, 0x86, 0x53, 0x3e, 0x23, 0x5f, 0x0c, 0xd8,
+	0x98, 0xd2, 0xc4, 0xc9, 0xd3, 0x09, 0x50, 0xe8, 0x9c, 0x31, 0x9f, 0x5d, 0xf3, 0x86, 0xcf, 0x5e,
+	0xae, 0xbf, 0x7f, 0x54, 0x4d, 0xfc, 0x4f, 0xf7, 0x42, 0xfe, 0xe8, 0x2e, 0x8a, 0x3f, 0xe1, 0x9e,
+	0xff, 0x09, 0x00, 0x00, 0xff, 0xff, 0x3f, 0xfc, 0xb9, 0x33, 0xd8, 0x13, 0x00, 0x00,
 }

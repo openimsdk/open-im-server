@@ -14,9 +14,7 @@ import (
 	"encoding/gob"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
-	"google.golang.org/grpc"
 	"runtime"
-	"strconv"
 	"strings"
 )
 
@@ -62,7 +60,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 		ws.pullMsgBySeqListReq(conn, &m)
 	default:
 	}
-	log.NewInfo("", "goroutine num is ", runtime.NumGoroutine())
+	log.NewInfo(m.OperationID, "goroutine num is ", runtime.NumGoroutine())
 }
 func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to getNewSeq", m.MsgIncr, m.SendID, m.ReqIdentifier, m.Data)
@@ -71,9 +69,6 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	rpcReq.UserID = m.SendID
 	rpcReq.OperationID = m.OperationID
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
-	if grpcConn == nil {
-		log.ErrorByKv("get grpcConn err", rpcReq.OperationID, "args", m)
-	}
 	msgClient := pbChat.NewChatClient(grpcConn)
 	rpcReply, err := msgClient.GetMaxAndMinSeq(context.Background(), &rpcReq)
 	if err != nil {
@@ -82,7 +77,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 		nReply.ErrMsg = err.Error()
 		ws.getSeqResp(conn, m, nReply)
 	} else {
-		log.InfoByKv("rpc call success to getSeqReq", rpcReq.OperationID, "replyData", rpcReply.String())
+		log.NewInfo(rpcReq.OperationID, "rpc call success to getSeqReq", rpcReply.String())
 		ws.getSeqResp(conn, m, rpcReply)
 	}
 }
@@ -148,7 +143,7 @@ func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullM
 
 }
 func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
-	sendMsgCount++
+	sendMsgAllCount++
 	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
@@ -205,21 +200,15 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
 	if isPass {
 		signalResp := pbRtc.SignalResp{}
-		//isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
-		connGrpc, err := grpc.Dial(config.Config.Rtc.Address+":"+strconv.Itoa(config.Config.Rtc.Port), grpc.WithInsecure())
-		if err != nil {
-			log.NewError(m.OperationID, utils.GetSelfFuncName(), "grpc.Dial failed", err.Error())
-			ws.sendSignalMsgResp(conn, 204, "create grpc failed"+err.Error(), m, nil)
-			return
-		}
-		rtcClient := pbRtc.NewRtcServiceClient(connGrpc)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRealTimeCommName)
+		rtcClient := pbRtc.NewRtcServiceClient(etcdConn)
 		req := &pbRtc.SignalMessageAssembleReq{
 			SignalReq:   pData.(*pbRtc.SignalReq),
 			OperationID: m.OperationID,
 		}
 		respPb, err := rtcClient.SignalMessageAssemble(context.Background(), req)
 		if err != nil {
-			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error(), config.Config.Rtc.Address+":"+strconv.Itoa(config.Config.Rtc.Port))
+			log.NewError(m.OperationID, utils.GetSelfFuncName(), "SignalMessageAssemble", err.Error(), config.Config.RpcRegisterName.OpenImRealTimeCommName)
 			ws.sendSignalMsgResp(conn, 204, "grpc SignalMessageAssemble failed: "+err.Error(), m, &signalResp)
 			return
 		}

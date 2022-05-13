@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	errors "Open_IM/pkg/common/http"
 	"context"
+	"strconv"
 
 	"Open_IM/pkg/common/log"
 
@@ -17,7 +18,6 @@ import (
 	"Open_IM/pkg/utils"
 
 	"net"
-	"strconv"
 	"strings"
 
 	"google.golang.org/grpc"
@@ -42,22 +42,35 @@ func NewMessageCMSServer(port int) *messageCMSServer {
 
 func (s *messageCMSServer) Run() {
 	log.NewInfo("0", "messageCMS rpc start ")
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
-	//listener network
-	listener, err := net.Listen("tcp", registerAddress)
-	if err != nil {
-		log.NewError("0", "Listen failed ", err.Error(), registerAddress)
-		return
+
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
 	}
-	log.NewInfo("0", "listen network success, ", registerAddress, listener)
+	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+
+	//listener network
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		panic("listening err:" + err.Error() + s.rpcRegisterName)
+	}
+	log.NewInfo("0", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbMessageCMS.RegisterMessageCMSServer(srv, s)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		return
@@ -96,6 +109,7 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 		chatLog.RecvID = req.GroupId
 		chatLog.SendID = req.UserId
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "chat_log: ", chatLog)
 	nums, err := imdb.GetChatLogCount(chatLog)
 	resp.ChatLogsNum = int32(nums)
 	if err != nil {

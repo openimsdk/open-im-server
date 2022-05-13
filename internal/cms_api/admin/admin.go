@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"Open_IM/pkg/cms_api_struct"
+	apiStruct "Open_IM/pkg/cms_api_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	openIMHttp "Open_IM/pkg/common/http"
@@ -10,16 +10,55 @@ import (
 	pbAdmin "Open_IM/pkg/proto/admin_cms"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	url2 "net/url"
 )
+
+var (
+	minioClient *minio.Client
+)
+
+func init() {
+	operationID := utils.OperationIDGenerator()
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio config: ", config.Config.Credential.Minio)
+	var initUrl string
+	if config.Config.Credential.Minio.EndpointInnerEnable {
+		initUrl = config.Config.Credential.Minio.EndpointInner
+	} else {
+		initUrl = config.Config.Credential.Minio.Endpoint
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "use initUrl: ", initUrl)
+	minioUrl, err := url2.Parse(initUrl)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "parse failed, please check config/config.yaml", err.Error())
+		return
+	}
+	opts := &minio.Options{
+		Creds: credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+	}
+	if minioUrl.Scheme == "http" {
+		opts.Secure = false
+	} else if minioUrl.Scheme == "https" {
+		opts.Secure = true
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "Parse ok ", config.Config.Credential.Minio)
+	minioClient, err = minio.New(minioUrl.Host, opts)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "new ok ", config.Config.Credential.Minio)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "init minio client failed", err.Error())
+		return
+	}
+}
 
 // register
 func AdminLogin(c *gin.Context) {
 	var (
-		req cms_api_struct.AdminLoginRequest
-		resp cms_api_struct.AdminLoginResponse
+		req   apiStruct.AdminLoginRequest
+		resp  apiStruct.AdminLoginResponse
 		reqPb pbAdmin.AdminLoginReq
 	)
 	if err := c.BindJSON(&req); err != nil {

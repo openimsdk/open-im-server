@@ -8,6 +8,7 @@ type CreateOneWorkMomentReq struct {
 
 type CreateOneWorkMomentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
 
 type DeleteOneWorkMomentReq struct {
@@ -16,6 +17,7 @@ type DeleteOneWorkMomentReq struct {
 
 type DeleteOneWorkMomentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
 
 type LikeOneWorkMomentReq struct {
@@ -24,6 +26,7 @@ type LikeOneWorkMomentReq struct {
 
 type LikeOneWorkMomentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }
 
 type CommentOneWorkMomentReq struct {
@@ -32,6 +35,16 @@ type CommentOneWorkMomentReq struct {
 
 type CommentOneWorkMomentResp struct {
 	CommResp
+	Data struct{} `json:"data"`
+}
+
+type DeleteCommentReq struct {
+	office.DeleteCommentReq
+}
+
+type DeleteCommentResp struct {
+	CommResp
+	Data struct{} `json:"data"`
 }
 
 type WorkMomentsUserCommonReq struct {
@@ -45,15 +58,17 @@ type GetWorkMomentByIDReq struct {
 }
 
 type WorkMoment struct {
-	WorkMomentID string            `json:"workMomentID"`
-	UserID       string            `json:"userID"`
-	Content      string            `json:"content"`
-	LikeUserList []*WorkMomentUser `json:"likeUsers"`
-	Comments     []*Comment        `json:"comments"`
-	FaceURL      string            `json:"faceURL"`
-	UserName     string            `json:"userName"`
-	AtUserList   []*WorkMomentUser `json:"atUsers"`
-	CreateTime   int32             `json:"createTime"`
+	WorkMomentID       string            `json:"workMomentID"`
+	UserID             string            `json:"userID"`
+	Content            string            `json:"content"`
+	LikeUserList       []*WorkMomentUser `json:"likeUsers"`
+	Comments           []*Comment        `json:"comments"`
+	FaceURL            string            `json:"faceURL"`
+	UserName           string            `json:"userName"`
+	AtUserList         []*WorkMomentUser `json:"atUsers"`
+	PermissionUserList []*WorkMomentUser `json:"permissionUsers"`
+	CreateTime         int32             `json:"createTime"`
+	Permission         int32             `json:"permission"`
 }
 
 type WorkMomentUser struct {
@@ -111,4 +126,5 @@ type SetUserWorkMomentsLevelReq struct {
 
 type SetUserWorkMomentsLevelResp struct {
 	CommResp
+	Data struct{} `json:"data"`
 }

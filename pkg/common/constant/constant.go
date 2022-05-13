@@ -151,6 +151,10 @@ const (
 	GroupStatusDismissed = 2
 	GroupStatusMuted     = 3
 
+	//GroupType
+	NormalGroup     = 0
+	DepartmentGroup = 1
+
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
 
@@ -267,3 +271,5 @@ func GroupIsBanPrivateChat(status int32) bool {
 const BigVersion = "v3"
 
 const LogFileName = "OpenIM.log"
+
+const StatisticsTimeInterval = 300

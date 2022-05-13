@@ -12,12 +12,13 @@ import (
 func (rpc *rpcChat) DelMsgList(_ context.Context, req *commonPb.DelMsgListReq) (*commonPb.DelMsgListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &commonPb.DelMsgListResp{}
-	if err := db.DB.DelMsgLogic(req.UserID, req.SeqList, req.OperationID); err != nil {
+	if err := db.DB.DelMsgBySeqList(req.UserID, req.SeqList, req.OperationID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelMsg failed", err.Error())
 		resp.ErrMsg = constant.ErrDB.ErrMsg
 		resp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }

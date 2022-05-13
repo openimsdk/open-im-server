@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"context"
+	"strconv"
 	"sync"
 	"time"
 
@@ -21,7 +22,6 @@ import (
 	//"context"
 	errors "Open_IM/pkg/common/http"
 	"net"
-	"strconv"
 	"strings"
 
 	"google.golang.org/grpc"
@@ -46,22 +46,35 @@ func NewStatisticsServer(port int) *statisticsServer {
 
 func (s *statisticsServer) Run() {
 	log.NewInfo("0", "Statistics rpc start ")
-	ip := utils.ServerIP
-	registerAddress := ip + ":" + strconv.Itoa(s.rpcPort)
-	//listener network
-	listener, err := net.Listen("tcp", registerAddress)
-	if err != nil {
-		log.NewError("0", "Listen failed ", err.Error(), registerAddress)
-		return
+
+	listenIP := ""
+	if config.Config.ListenIP == "" {
+		listenIP = "0.0.0.0"
+	} else {
+		listenIP = config.Config.ListenIP
 	}
-	log.NewInfo("0", "listen network success, ", registerAddress, listener)
+	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
+
+	//listener network
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		panic("listening err:" + err.Error() + s.rpcRegisterName)
+	}
+	log.NewInfo("0", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbStatistics.RegisterUserServer(srv, s)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), ip, s.rpcPort, s.rpcRegisterName, 10)
+	rpcRegisterIP := ""
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+		}
+	}
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		return
@@ -75,13 +88,14 @@ func (s *statisticsServer) Run() {
 }
 
 func (s *statisticsServer) GetActiveGroup(_ context.Context, req *pbStatistics.GetActiveGroupReq) (*pbStatistics.GetActiveGroupResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req", req.String())
 	resp := &pbStatistics.GetActiveGroupResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
 		return resp, errors.WrapError(constant.ErrArgs)
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "time: ", fromTime, toTime)
 	activeGroups, err := imdb.GetActiveGroups(fromTime, toTime, 12)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveGroups failed", err.Error())
@@ -95,6 +109,7 @@ func (s *statisticsServer) GetActiveGroup(_ context.Context, req *pbStatistics.G
 				MessageNum: int32(activeGroup.MessageNum),
 			})
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp.String())
 	return resp, nil
 }
 
@@ -106,6 +121,7 @@ func (s *statisticsServer) GetActiveUser(_ context.Context, req *pbStatistics.Ge
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "time: ", fromTime, toTime)
 	activeUsers, err := imdb.GetActiveUsers(fromTime, toTime, 12)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveUsers failed", err.Error())
@@ -120,6 +136,7 @@ func (s *statisticsServer) GetActiveUser(_ context.Context, req *pbStatistics.Ge
 			},
 		)
 	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp.String())
 	return resp, nil
 }
 
@@ -219,7 +236,7 @@ func (s *statisticsServer) GetGroupStatistics(_ context.Context, req *pbStatisti
 	}
 	increaseGroupNum, err := imdb.GetIncreaseGroupNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseGroupNum failed", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseGroupNum failed", err.Error(), fromTime, toTime)
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	totalGroupNum, err := imdb.GetTotalGroupNum()
@@ -230,7 +247,7 @@ func (s *statisticsServer) GetGroupStatistics(_ context.Context, req *pbStatisti
 	resp.IncreaseGroupNum = increaseGroupNum
 	resp.TotalGroupNum = totalGroupNum
 	times := GetRangeDate(fromTime, toTime)
-	log.NewInfo(req.OperationID, "times:", times)
+	log.NewDebug(req.OperationID, "times:", times)
 	wg := &sync.WaitGroup{}
 	resp.IncreaseGroupNumList = make([]*pbStatistics.DateNumList, len(times), len(times))
 	resp.TotalGroupNumList = make([]*pbStatistics.DateNumList, len(times), len(times))
@@ -257,6 +274,7 @@ func (s *statisticsServer) GetGroupStatistics(_ context.Context, req *pbStatisti
 		}(wg, i, v)
 	}
 	wg.Wait()
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	return resp, nil
 }
 
@@ -264,6 +282,7 @@ func (s *statisticsServer) GetMessageStatistics(_ context.Context, req *pbStatis
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp := &pbStatistics.GetMessageStatisticsResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "times: ", fromTime, toTime)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
 		return resp, errors.WrapError(constant.ErrArgs)
@@ -278,6 +297,7 @@ func (s *statisticsServer) GetMessageStatistics(_ context.Context, req *pbStatis
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMessageNum failed", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), privateMessageNum, groupMessageNum)
 	resp.PrivateMessageNum = privateMessageNum
 	resp.GroupMessageNum = groupMessageNum
 	times := GetRangeDate(fromTime, toTime)
@@ -312,7 +332,7 @@ func (s *statisticsServer) GetMessageStatistics(_ context.Context, req *pbStatis
 }
 
 func (s *statisticsServer) GetUserStatistics(_ context.Context, req *pbStatistics.GetUserStatisticsReq) (*pbStatistics.GetUserStatisticsResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbStatistics.GetUserStatisticsResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
@@ -374,5 +394,6 @@ func (s *statisticsServer) GetUserStatistics(_ context.Context, req *pbStatistic
 		}(wg, i, v)
 	}
 	wg.Wait()
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	return resp, nil
 }

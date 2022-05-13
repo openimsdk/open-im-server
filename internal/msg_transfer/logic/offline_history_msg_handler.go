@@ -5,40 +5,30 @@ import (
 	"Open_IM/pkg/common/constant"
 	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbMsg "Open_IM/pkg/proto/chat"
-	pbPush "Open_IM/pkg/proto/push"
-	"Open_IM/pkg/statistics"
 	"Open_IM/pkg/utils"
-	"context"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
-	"strings"
 	"time"
 )
 
-type fcb func(msg []byte, msgKey string)
-
-type HistoryConsumerHandler struct {
+type OfflineHistoryConsumerHandler struct {
 	msgHandle            map[string]fcb
+	cmdCh                chan Cmd2Value
 	historyConsumerGroup *kfk.MConsumerGroup
-	singleMsgCount       uint64
-	groupMsgCount        uint64
 }
 
-func (mc *HistoryConsumerHandler) Init() {
-	statistics.NewStatistics(&mc.singleMsgCount, config.Config.ModuleName.MsgTransferName, "singleMsgCount insert to mongo ", 300)
-	statistics.NewStatistics(&mc.groupMsgCount, config.Config.ModuleName.MsgTransferName, "groupMsgCount insert to mongo ", 300)
-
+func (mc *OfflineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
 	mc.msgHandle = make(map[string]fcb)
-	mc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = mc.handleChatWs2Mongo
+	mc.cmdCh = cmdCh
+	mc.msgHandle[config.Config.Kafka.Ws2mschatOffline.Topic] = mc.handleChatWs2Mongo
 	mc.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
-		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
-		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo)
+		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschatOffline.Topic},
+		config.Config.Kafka.Ws2mschatOffline.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongoOffline)
 
 }
 
-func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
+func (mc *OfflineHistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) {
 	now := time.Now()
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
@@ -59,17 +49,18 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 		if isHistory {
 			err := saveUserChat(msgKey, &msgFromMQ)
 			if err != nil {
+				singleMsgFailedCount++
 				log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
 				return
 			}
-			mc.singleMsgCount++
+			singleMsgSuccessCount++
 			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", time.Since(now))
 		}
 		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
 		} else {
 			go sendMessageToPush(&msgFromMQ, msgKey)
 		}
-		log.NewDebug(operationID, "saveUserChat cost time ", time.Since(now))
+		log.NewDebug(operationID, "saveSingleMsg cost time ", time.Since(now))
 	case constant.GroupChatType:
 		log.NewDebug(msgFromMQ.OperationID, "msg_transfer msg type = GroupChatType", isHistory, isPersist)
 		if isHistory {
@@ -78,9 +69,11 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				log.NewError(operationID, "group data insert to mongo err", msgFromMQ.String(), msgFromMQ.MsgData.RecvID, err.Error())
 				return
 			}
-			mc.groupMsgCount++
+			groupMsgCount++
 		}
 		go sendMessageToPush(&msgFromMQ, msgFromMQ.MsgData.RecvID)
+		log.NewDebug(operationID, "saveGroupMsg cost time ", time.Since(now))
+
 	case constant.NotificationChatType:
 		log.NewDebug(msgFromMQ.OperationID, "msg_transfer msg type = NotificationChatType", isHistory, isPersist)
 		if isHistory {
@@ -89,7 +82,6 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 				log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
 				return
 			}
-			mc.singleMsgCount++
 			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", time.Since(now))
 		}
 		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
@@ -104,40 +96,31 @@ func (mc *HistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey string) 
 	log.NewDebug(msgFromMQ.OperationID, "msg_transfer handle topic data to database success...", msgFromMQ.String())
 }
 
-func (HistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (HistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (mc *HistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
-	claim sarama.ConsumerGroupClaim) error {
+func (OfflineHistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (OfflineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (mc *OfflineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
+	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
+	//log.NewDebug("", "offline new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
+	//for msg := range claim.Messages() {
+	//	log.NewDebug("", "kafka get info to delay mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "offline")
+	//	//mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+	//}
 	for msg := range claim.Messages() {
-		log.InfoByKv("kafka get info to mongo", "", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
-		mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
-		sess.MarkMessage(msg, "")
-	}
-	return nil
-}
-func sendMessageToPush(message *pbMsg.MsgDataToMQ, pushToUserID string) {
-	log.Info(message.OperationID, "msg_transfer send message to push", "message", message.String())
-	rpcPushMsg := pbPush.PushMsgReq{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
-	mqPushMsg := pbMsg.PushMsgDataToMQ{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName)
-	if grpcConn == nil {
-		log.Error(rpcPushMsg.OperationID, "rpc dial failed", "push data", rpcPushMsg.String())
-		pid, offset, err := producer.SendMessage(&mqPushMsg)
-		if err != nil {
-			log.Error(mqPushMsg.OperationID, "kafka send failed", "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
+		if GetOnlineTopicStatus() == OnlineTopicVacancy {
+			log.NewDebug("", "vacancy offline kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
+			mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+			sess.MarkMessage(msg, "")
+		} else {
+			select {
+			case <-mc.cmdCh:
+				log.NewDebug("", "cmd offline kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
+			case <-time.After(time.Millisecond * time.Duration(100)):
+				log.NewDebug("", "timeout offline kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
+			}
+			mc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+			sess.MarkMessage(msg, "")
 		}
-		return
 	}
-	msgClient := pbPush.NewPushMsgServiceClient(grpcConn)
-	_, err := msgClient.PushMsg(context.Background(), &rpcPushMsg)
-	if err != nil {
-		log.Error(rpcPushMsg.OperationID, "rpc send failed", rpcPushMsg.OperationID, "push data", rpcPushMsg.String(), "err", err.Error())
-		pid, offset, err := producer.SendMessage(&mqPushMsg)
-		if err != nil {
-			log.Error("kafka send failed", mqPushMsg.OperationID, "send data", mqPushMsg.String(), "pid", pid, "offset", offset, "err", err.Error())
-		}
-	} else {
-		log.Info("rpc send success", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
 
-	}
+	return nil
 }

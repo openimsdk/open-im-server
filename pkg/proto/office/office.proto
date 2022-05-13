@@ -195,6 +195,17 @@ message CommentOneWorkMomentResp {
   CommonResp commonResp = 1;
 }
 
+message DeleteCommentReq {
+  string workMomentID = 1;
+  string contentID = 2;
+  string opUserID = 3;
+  string operationID = 4;
+}
+
+message DeleteCommentResp {
+  CommonResp commonResp = 1;
+}
+
 message GetWorkMomentByIDReq {
   string workMomentID = 1;
   string opUserID = 2;
@@ -280,6 +291,7 @@ service OfficeService {
   rpc DeleteOneWorkMoment(DeleteOneWorkMomentReq) returns(DeleteOneWorkMomentResp);
   rpc LikeOneWorkMoment(LikeOneWorkMomentReq) returns(LikeOneWorkMomentResp);
   rpc CommentOneWorkMoment(CommentOneWorkMomentReq) returns(CommentOneWorkMomentResp);
+  rpc DeleteComment(DeleteCommentReq) returns(DeleteCommentResp);
   rpc GetWorkMomentByID(GetWorkMomentByIDReq) returns(GetWorkMomentByIDResp);
   rpc ChangeWorkMomentPermission(ChangeWorkMomentPermissionReq) returns(ChangeWorkMomentPermissionResp);
   /// user self
