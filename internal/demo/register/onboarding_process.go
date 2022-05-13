@@ -75,11 +75,15 @@ func joinTestDepartment(operationID, userID, departmentID string) error {
 	}()
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := organizationRpc.NewOrganizationClient(etcdConn)
-	req := &organizationRpc.CreateDepartmentMemberReq{DepartmentMember: &commonPb.DepartmentMember{
-		UserID:       userID,
-		DepartmentID: departmentID,
-		Position:     randomPosition(),
-	}}
+	req := &organizationRpc.CreateDepartmentMemberReq{
+		DepartmentMember: &commonPb.DepartmentMember{
+			UserID:       userID,
+			DepartmentID: departmentID,
+			Position:     randomPosition(),
+		},
+		OperationID: operationID,
+		OpUserID:    config.Config.Manager.AppManagerUid[0],
+	}
 	resp, err := client.CreateDepartmentMember(context.Background(), req)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
