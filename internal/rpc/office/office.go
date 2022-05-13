@@ -14,7 +14,6 @@ import (
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"golang.org/x/net/html/atom"
 	"google.golang.org/grpc"
 	"net"
 	"strconv"
