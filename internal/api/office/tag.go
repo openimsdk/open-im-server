@@ -262,8 +262,8 @@ func GetTagSendLogs(c *gin.Context) {
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.GetTagSendLogs(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserTags failed", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "CreateTag rpc server failed" + err.Error()})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTagSendLogs failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetTagSendLogs rpc server failed" + err.Error()})
 		return
 	}
 	if err := utils.CopyStructFields(&resp.CommResp, respPb.CommonResp); err != nil {

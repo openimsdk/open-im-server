@@ -56,7 +56,13 @@ func (s *officeServer) Run() {
 	log.NewInfo("0", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
-	srv := grpc.NewServer()
+	recvSize := 1024 * 1024 * 30
+	sendSize := 1024 * 1024 * 30
+	var options = []grpc.ServerOption{
+		grpc.MaxRecvMsgSize(recvSize),
+		grpc.MaxSendMsgSize(sendSize),
+	}
+	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbOffice.RegisterOfficeServiceServer(srv, s)
@@ -548,8 +554,17 @@ func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWor
 	if !canSee {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "workMoments not access to user", canSee, workMoment, req.OpUserID)
 	}
+
 	if err := utils.CopyStructFields(resp.WorkMoment, workMoment); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields", err.Error())
+	}
+	user, err := imdb.GetUserByUserID(workMoment.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserByUserID failed", err.Error())
+	}
+	if user != nil {
+		resp.WorkMoment.FaceURL = user.FaceURL
+		resp.WorkMoment.UserName = user.Nickname
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -573,6 +588,16 @@ func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUs
 	if err := utils.CopyStructFields(&resp.WorkMoments, workMoments); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	for _, v := range resp.WorkMoments {
+		user, err := imdb.GetUserByUserID(v.UserID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		}
+		if user != nil {
+			v.UserName = user.Nickname
+			v.FaceURL = user.FaceURL
+		}
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
@@ -589,6 +614,16 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 	}
 	if err := utils.CopyStructFields(&resp.WorkMoments, workMoments); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	for _, v := range resp.WorkMoments {
+		user, err := imdb.GetUserByUserID(v.UserID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		}
+		if user != nil {
+			v.UserName = user.Nickname
+			v.FaceURL = user.FaceURL
+		}
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil

@@ -23,6 +23,13 @@
 #  ../cmd/open_im_demo/
 #)
 #
-dockerfile_list=pwd
+dockerfile_list=$(ls ../dockerfiles/)
+echo ${dockerfile_list}
+for dockerfile in $dockerfile_list
+do
+	echo "start to build images" $dockerfile
+	docker build -t $image . -f ${dockerfile}
+	echo "build ${dockerfile} ok"
+done
+echo ${#dockerfile_list[*]}
 
-docker build -t  $image . -f deploy.Dockerfile
