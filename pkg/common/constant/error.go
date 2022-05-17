@@ -49,11 +49,12 @@ var (
 	ErrTokenUnknown     = ErrInfo{705, TokenUnknownMsg.Error()}
 	ErrTokenKicked      = ErrInfo{706, TokenUserKickedMsg.Error()}
 
-	ErrAccess   = ErrInfo{ErrCode: 801, ErrMsg: AccessMsg.Error()}
-	ErrDB       = ErrInfo{ErrCode: 802, ErrMsg: DBMsg.Error()}
-	ErrArgs     = ErrInfo{ErrCode: 803, ErrMsg: ArgsMsg.Error()}
-	ErrStatus   = ErrInfo{ErrCode: 804, ErrMsg: StatusMsg.Error()}
-	ErrCallback = ErrInfo{ErrCode: 809, ErrMsg: CallBackMsg.Error()}
+	ErrAccess    = ErrInfo{ErrCode: 801, ErrMsg: AccessMsg.Error()}
+	ErrDB        = ErrInfo{ErrCode: 802, ErrMsg: DBMsg.Error()}
+	ErrArgs      = ErrInfo{ErrCode: 803, ErrMsg: ArgsMsg.Error()}
+	ErrStatus    = ErrInfo{ErrCode: 804, ErrMsg: StatusMsg.Error()}
+	ErrCallback  = ErrInfo{ErrCode: 809, ErrMsg: CallBackMsg.Error()}
+	ErrSendLimit = ErrInfo{ErrCode: 810, ErrMsg: "send msg limit, to many users"}
 )
 
 var (

@@ -20,6 +20,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 )
 
 type officeServer struct {
@@ -212,6 +213,12 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 		if userID == req.SendID || userID == "" {
 			userIDList = append(userIDList[:i], userIDList[i+1:]...)
 		}
+	}
+	if unsafe.Sizeof(userIDList) > 1024*1024 {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "size", unsafe.Sizeof(userIDList))
+		resp.CommonResp.ErrMsg = constant.ErrSendLimit.ErrMsg
+		resp.CommonResp.ErrCode = constant.ErrSendLimit.ErrCode
+		return
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
 	user, err := imdb.GetUserByUserID(req.SendID)
