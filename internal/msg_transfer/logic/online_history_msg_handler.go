@@ -86,7 +86,9 @@ func (och *OnlineHistoryConsumerHandler) handleChatWs2Mongo(msg []byte, msgKey s
 				log.NewError(operationID, "single data insert to mongo err", err.Error(), msgFromMQ.String())
 				return
 			}
+			singleMsgSuccessCountMutex.Lock()
 			singleMsgSuccessCount++
+			singleMsgSuccessCountMutex.Unlock()
 			log.NewDebug(msgFromMQ.OperationID, "sendMessageToPush cost time ", time.Since(now))
 		}
 		if !isSenderSync && msgKey == msgFromMQ.MsgData.SendID {
