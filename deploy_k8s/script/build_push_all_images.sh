@@ -23,6 +23,7 @@
 #  ../cmd/open_im_demo/
 #)
 #
+$version = v2.0.10
 cd ../../script/; ./build_all_service.sh
 cd ../deploy_k8s/dockerfiles
 dockerfile_list=$(ls ../dockerfiles/)
@@ -33,6 +34,7 @@ for dockerfile in $dockerfile_list
 do
 	echo "start to build images" $dockerfile
 	image=`echo $dockerfile |awk -F '.' '{print $1}'`
+	image="openim"+image+$version
 	docker build -t $image . -f ../dockerfiles/${dockerfile}
 	echo "build ${dockerfile} success"
 	docker push $image
