@@ -144,6 +144,7 @@ const (
 	IsSenderSync               = "senderSync"
 	IsNotPrivate               = "notPrivate"
 	IsSenderConversationUpdate = "senderConversationUpdate"
+	IsSenderNotificationPush   = "senderNotificationPush"
 
 	//GroupStatus
 	GroupOk              = 0
