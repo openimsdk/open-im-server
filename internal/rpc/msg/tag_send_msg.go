@@ -27,6 +27,7 @@ func TagSendMessage(operationID string, user *db.User, recvID, content string, s
 	msgData.SenderNickname = user.Nickname
 	msgData.Options = map[string]bool{}
 	msgData.Options[constant.IsSenderConversationUpdate] = false
+	msgData.Options[constant.IsSenderNotificationPush] = false
 	msgData.CreateTime = utils.GetCurrentTimestampByMill()
 	msgData.ClientMsgID = utils.GetMsgID(user.UserID)
 	msgData.SenderPlatformID = senderPlatformID
