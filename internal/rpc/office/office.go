@@ -240,6 +240,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	var tagSendLogs db.TagSendLog
 
 	wg.Add(len(userIDList))
+	var lock sync.Mutex
 	for _, userID := range userIDList {
 		go func(userID string) {
 			defer wg.Done()
@@ -248,10 +249,12 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
 				return
 			}
+			lock.Lock()
 			tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
 				UserID:   userID,
 				UserName: userName,
 			})
+			lock.Unlock()
 		}(userID)
 	}
 	wg.Wait()
