@@ -258,7 +258,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 			user:             user,
 			userID:           userID,
 			content:          req.Content,
-			senderPlatformID: 0,
+			senderPlatformID: req.SenderPlatformID,
 		}
 		select {
 		case s.ch <- t:
@@ -281,7 +281,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 			defer wg.Done()
 			userName, err := im_mysql_model.GetUserNameByUserID(userID)
 			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error(), userID)
 				return
 			}
 			lock.Lock()
