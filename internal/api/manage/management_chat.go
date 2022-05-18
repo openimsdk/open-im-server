@@ -48,9 +48,8 @@ func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
 		newContent = params.Content["revokeMsgClientID"].(string)
 	default:
 	}
-	var options map[string]bool
+	options := make(map[string]bool, 5)
 	if params.IsOnlineOnly {
-		options = make(map[string]bool, 5)
 		utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 		utils.SetSwitchFromOptions(options, constant.IsHistory, false)
 		utils.SetSwitchFromOptions(options, constant.IsPersistent, false)
