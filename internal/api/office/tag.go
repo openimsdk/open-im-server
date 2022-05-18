@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 	"net/http"
 	"strings"
 )
@@ -260,7 +261,8 @@ func GetTagSendLogs(c *gin.Context) {
 	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
-	respPb, err := client.GetTagSendLogs(context.Background(), &reqPb)
+	maxSizeOption := grpc.MaxCallRecvMsgSize(1024 * 1024 * 20)
+	respPb, err := client.GetTagSendLogs(context.Background(), &reqPb, maxSizeOption)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTagSendLogs failed", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetTagSendLogs rpc server failed" + err.Error()})
