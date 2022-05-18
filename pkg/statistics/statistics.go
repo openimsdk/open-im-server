@@ -17,6 +17,7 @@ func (s *Statistics) output() {
 	t := time.NewTicker(time.Duration(s.SleepTime) * time.Second)
 	defer t.Stop()
 	var sum uint64
+	var timeIntervalNum uint64
 	for {
 		sum = *s.AllCount
 		select {
@@ -27,7 +28,8 @@ func (s *Statistics) output() {
 		} else {
 			intervalCount = *s.AllCount - sum
 		}
-		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, intervalCount, "total:", *s.AllCount)
+		timeIntervalNum++
+		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, intervalCount, "total:", *s.AllCount, "intervalNum", timeIntervalNum)
 	}
 }
 
