@@ -9,7 +9,7 @@ type Statistics struct {
 	AllCount   *uint64
 	ModuleName string
 	PrintArgs  string
-	SleepTime  int
+	SleepTime  uint64
 }
 
 func (s *Statistics) output() {
@@ -29,12 +29,12 @@ func (s *Statistics) output() {
 			intervalCount = *s.AllCount - sum
 		}
 		timeIntervalNum++
-		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, intervalCount, "total:", *s.AllCount, "intervalNum", timeIntervalNum)
+		log.NewWarn("", " system stat ", s.ModuleName, s.PrintArgs, intervalCount, "total:", *s.AllCount, "intervalNum", timeIntervalNum, "avg", (*s.AllCount)/(timeIntervalNum)/s.SleepTime)
 	}
 }
 
 func NewStatistics(allCount *uint64, moduleName, printArgs string, sleepTime int) *Statistics {
-	p := &Statistics{AllCount: allCount, ModuleName: moduleName, SleepTime: sleepTime, PrintArgs: printArgs}
+	p := &Statistics{AllCount: allCount, ModuleName: moduleName, SleepTime: uint64(sleepTime), PrintArgs: printArgs}
 	go p.output()
 	return p
 }
