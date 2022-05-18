@@ -116,6 +116,9 @@ func JsonStringToMap(str string) (tempMap map[string]int32) {
 	return tempMap
 }
 func GetSwitchFromOptions(Options map[string]bool, key string) (result bool) {
+	if Options == nil {
+		return true
+	}
 	if flag, ok := Options[key]; !ok || flag {
 		return true
 	}
