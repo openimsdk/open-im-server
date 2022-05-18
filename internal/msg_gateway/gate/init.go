@@ -19,6 +19,8 @@ var (
 	sendMsgFailedCount  uint64
 	sendMsgSuccessCount uint64
 	userCount           uint64
+
+	sendMsgAllCountLock sync.RWMutex
 )
 
 func Init(rpcPort, wsPort int) {
