@@ -5,7 +5,7 @@ ENV WORKDIR /bin
 ENV CONFIG_NAME $WORKDIR/config/config.yaml
 
 # 将可执行文件复制到目标目录
-ADD ../cmd/bin/open_im_api $WORKDIR/main
+ADD ../../cmd/bin/open_im_api $WORKDIR/main
 
 # 创建用于挂载的几个目录，添加可执行权限
 RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/db && \

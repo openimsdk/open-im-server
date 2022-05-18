@@ -23,13 +23,19 @@
 #  ../cmd/open_im_demo/
 #)
 #
+cd ../../script/; ./build_all_service.sh
+cd ../deploy_k8s/dockerfiles
 dockerfile_list=$(ls ../dockerfiles/)
-echo ${dockerfile_list}
+
+echo "start to build images"
+
 for dockerfile in $dockerfile_list
 do
 	echo "start to build images" $dockerfile
-	docker build -t $image . -f ${dockerfile}
-	echo "build ${dockerfile} ok"
+	image=`echo $dockerfile |awk -F '.' '{print $1}'`
+	docker build -t $image . -f ../dockerfiles/${dockerfile}
+	echo "build ${dockerfile} success"
+	docker push $image
+	echo "push ${image} success "
 done
-echo ${#dockerfile_list[*]}
 
