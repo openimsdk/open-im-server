@@ -102,10 +102,12 @@ type tagSendStruct struct {
 
 func (s *officeServer) sendTagMsgRoutine() {
 	log.NewInfo("", utils.GetSelfFuncName(), "start")
-	select {
-	case v := <-s.ch:
-		msg.TagSendMessage(v.operationID, v.user, v.userID, v.content, v.senderPlatformID)
-		time.Sleep(time.Millisecond * 500)
+	for {
+		select {
+		case v := <-s.ch:
+			msg.TagSendMessage(v.operationID, v.user, v.userID, v.content, v.senderPlatformID)
+			time.Sleep(time.Millisecond * 500)
+		}
 	}
 }
 
