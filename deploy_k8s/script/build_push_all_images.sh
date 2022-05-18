@@ -23,7 +23,7 @@
 #  ../cmd/open_im_demo/
 #)
 #
-$version = v2.0.10
+version=v2.0.10
 cd ../../script/; ./build_all_service.sh
 cd ../deploy_k8s/dockerfiles
 dockerfile_list=$(ls ../dockerfiles/)
