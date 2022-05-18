@@ -26,7 +26,7 @@
 cd ../../script/; ./build_all_service.sh
 cd ../deploy_k8s/dockerfiles
 dockerfile_list=$(ls ../dockerfiles/)
-
+mv ../../bin/* ./
 echo "start to build images"
 
 for dockerfile in $dockerfile_list
