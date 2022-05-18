@@ -24,6 +24,8 @@ var (
 	singleMsgSuccessCount uint64
 	groupMsgCount         uint64
 	singleMsgFailedCount  uint64
+
+	singleMsgSuccessCountMutex sync.Mutex
 )
 
 func Init() {
