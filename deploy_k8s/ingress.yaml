@@ -1,0 +1,77 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  # 配置注解 支持websocket
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  name: sdk-server.openim.xxx.com
+spec:
+  rules:
+    - host: sdk-server.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: sdk-server
+                port:
+                  number: 30000
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  name: msg-gateway.openim.xxx.com
+spec:
+  rules:
+    - host: msg-gateway.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: msg-gateway
+                port:
+                  number: 17778
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api.openim.xxx.com
+spec:
+  rules:
+    - host: api.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: api
+                port:
+                  number: 10000
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo.openim.xxx.com
+spec:
+  rules:
+    - host: demo.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: demo
+                port:
+                  number: 42233
+            path: /
+            pathType: Prefix

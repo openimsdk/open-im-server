@@ -1,0 +1,92 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: admin-cms
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: admin-cms
+      workload.auth.cattle.io/workloadselector: statefulSet-openim-admin-cms
+  serviceName: admin-cms
+  template:
+    metadata:
+      labels:
+        app: admin-cms
+        workload.auth.cattle.io/workloadselector: statefulSet-openim-admin-cms
+    spec:
+      containers:
+        - image: "IMAGE_TAG"
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+          ports:
+            - name: p11000
+              protocol: TCP
+              containerPort: 11000
+          imagePullPolicy: Always
+          name: admin-cms
+          stdin: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: true
+          volumeMounts:
+            - mountPath: /Open-IM-Server/config.tmp.yaml
+              name: vol2
+              readOnly: true
+              subPath: config.yaml
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 256
+            name: config.yaml
+            optional: false
+          name: vol2
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-cms
+spec:
+  ports:
+    - name: p11000
+      port: 11000
+      protocol: TCP
+      targetPort: 11000
+  selector:
+    app: admin-cms
+  type: ClusterIP
