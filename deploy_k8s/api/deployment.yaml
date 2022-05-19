@@ -1,6 +1,6 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: api-deployment
 spec:
@@ -22,7 +22,7 @@ spec:
             - name: cfg
               mountPath: /Open-IM-Server/config/config.yaml
               subPath: config.yaml
-  updateStrategy: #更新策略
+  strategy: #更新策略
     rollingUpdate:
       partition: 1
     type: RollingUpdate # 滚动更新
