@@ -22,6 +22,10 @@ spec:
             - name: config
               mountPath: /Open-IM-Server/config/config.yaml
               subPath: config.yaml
+          volumes:
+            - name: config
+              configMap:
+                name: myconfigmap
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 ---
