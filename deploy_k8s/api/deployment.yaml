@@ -14,18 +14,18 @@ spec:
         app: api # 标签
     spec:
       containers:
-        - name: api
-          image: openim/api:2.0.10
-          ports:
-            - containerPort: 10002
-          volumeMounts:
-            - name: config
-              mountPath: /Open-IM-Server/config/config.yaml
-              subPath: config.yaml
-        volumes:
+      - name: api
+        image: openim/api:2.0.10
+        ports:
+        - containerPort: 10002
+        volumeMounts:
           - name: config
-            configMap:
-              name: myconfigmap
+            mountPath: /Open-IM-Server/config/config.yaml
+            subPath: config.yaml
+      volumes:
+        - name: config
+          configMap:
+            name: myconfigmap
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 ---
