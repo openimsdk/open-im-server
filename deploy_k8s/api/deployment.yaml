@@ -35,7 +35,6 @@ spec:
   externalTrafficPolicy: Cluster
   ports:
     - name: apiPort
-      nodePort: NODE_PORT_API
       port: 10002
       protocol: TCP
       targetPort: 10002
