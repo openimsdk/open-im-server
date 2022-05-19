@@ -182,7 +182,8 @@ func main() {
 	}
 
 	go apiThird.MinioInit()
-	ginPort := flag.Int("port", 10002, "get ginServerPort from cmd,default 10002 as port")
+	defaultPorts := config.Config.Api.GinPort
+	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10002 as port")
 	flag.Parse()
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
 	if config.Config.Api.ListenIP != "" {

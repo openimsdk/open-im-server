@@ -104,13 +104,20 @@ type config struct {
 		DBPassWord    string `yaml:"dbPassWord"`
 	}
 	RpcPort struct {
-		OpenImUserPort        []int `yaml:"openImUserPort"`
-		openImFriendPort      []int `yaml:"openImFriendPort"`
-		RpcMessagePort        []int `yaml:"rpcMessagePort"`
-		RpcPushMessagePort    []int `yaml:"rpcPushMessagePort"`
-		OpenImGroupPort       []int `yaml:"openImGroupPort"`
-		RpcModifyUserInfoPort []int `yaml:"rpcModifyUserInfoPort"`
-		RpcGetTokenPort       []int `yaml:"rpcGetTokenPort"`
+		OpenImUserPort           []int `yaml:"openImUserPort"`
+		OpenImFriendPort         []int `yaml:"openImFriendPort"`
+		OpenImMessagePort        []int `yaml:"openImMessagePort"`
+		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
+		OpenImGroupPort          []int `yaml:"openImGroupPort"`
+		OpenImAuthPort           []int `yaml:"openImAuthPort"`
+		OpenImPushPort           []int `yaml:"openImPushPort"`
+		OpenImStatisticsPort     []int `yaml:"openImStatisticsPort"`
+		OpenImMessageCmsPort     []int `yaml:"openImMessageCmsPort"`
+		OpenImAdminCmsPort       []int `yaml:"openImAdminCmsPort"`
+		OpenImOfficePort         []int `yaml:"openImOfficePort"`
+		OpenImOrganizationPort   []int `yaml:"openImOrganizationPort"`
+		OpenImConversationPort   []int `yaml:"openImConversationPort"`
+		OpenImCachePort          []int `yaml:"openImCachePort"`
 	}
 	RpcRegisterName struct {
 		OpenImStatisticsName         string `yaml:"openImStatisticsName"`
