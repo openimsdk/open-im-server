@@ -23,8 +23,6 @@ spec:
               mountPath: /Open-IM-Server/config/config.yaml
               subPath: config.yaml
   strategy: #更新策略
-    rollingUpdate:
-      partition: 1
     type: RollingUpdate # 滚动更新
 ---
 apiVersion: v1
