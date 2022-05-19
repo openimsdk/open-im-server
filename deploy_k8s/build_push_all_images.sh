@@ -2,26 +2,26 @@
 service=(
   #api service file
   api
-#  cms_api
-#
-#  #rpc service file
-#  user
-#  friend
-#  group
-#  auth
-#  admin_cms
-#  message_cms
-#  statistics
-#  office
-#  organization
-#  conversation
-#  cache
-#  gateway
-#  transfer
-#  msg
-#  push
-#  sdk_server
-#  open_im_demo
+  cms_api
+
+  #rpc service file
+  user
+  friend
+  group
+  auth
+  admin_cms
+  message_cms
+  statistics
+  office
+  organization
+  conversation
+  cache
+  gateway
+  transfer
+  msg
+  push
+  sdk_server
+  open_im_demo
 )
 #
 version=v2.0.10
