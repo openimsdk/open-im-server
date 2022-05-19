@@ -222,7 +222,9 @@ secret: tuoyun
 multiloginpolicy: 1
 
 #chat log insert to db
-chatPersistenceMysql: true
+chatpersistencemysql: true
+#可靠性存储
+reliablestorage: true
 
 #token config
 tokenpolicy:

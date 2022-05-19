@@ -209,7 +209,8 @@ type config struct {
 	}
 	Secret               string `yaml:"secret"`
 	MultiLoginPolicy     int    `yaml:"multiloginpolicy"`
-	ChatPersistenceMysql bool   `yaml:"chatPersistenceMysql"`
+	ChatPersistenceMysql bool   `yaml:"chatpersistencemysql"`
+	ReliableStorage      bool   `yaml:"reliablestorage"`
 
 	TokenPolicy struct {
 		AccessSecret string `yaml:"accessSecret"`

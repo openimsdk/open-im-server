@@ -12,6 +12,7 @@ import (
 
 const OnlineTopicBusy = 1
 const OnlineTopicVacancy = 0
+const Msg = 2
 
 var (
 	persistentCH          PersistentConsumerHandler
