@@ -25,7 +25,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: myconfigmap
+            name: config
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 ---
