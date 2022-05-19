@@ -19,7 +19,7 @@ spec:
           ports:
             - containerPort: 10002
           volumeMounts:
-            - name: cfg
+            - name: config
               mountPath: /Open-IM-Server/config/config.yaml
               subPath: config.yaml
   strategy: #更新策略
@@ -32,7 +32,6 @@ metadata:
 spec:
   externalTrafficPolicy: Cluster
   ports:
-    - name: apiPort
       port: 10002
       protocol: TCP
       targetPort: 10002
