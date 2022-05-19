@@ -15,12 +15,12 @@ service=(
   organization
   conversation
   cache
-  gateway
+  msg_gateway
   transfer
   msg
   push
   sdk_server
-  open_im_demo
+  demo
 )
 #
 version=v2.0.10
