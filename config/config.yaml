@@ -224,7 +224,7 @@ multiloginpolicy: 1
 #chat log insert to db
 chatpersistencemysql: true
 #可靠性存储
-reliablestorage: true
+reliablestorage: false
 
 #token config
 tokenpolicy:
