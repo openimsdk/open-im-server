@@ -28,14 +28,15 @@ func (mc *OfflineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
 	go mc.MessagesDistributionHandle()
 	mc.cmdCh = cmdCh
 	mc.msgCh = make(chan Cmd2Value, 1000)
+	for i := 0; i < ChannelNum; i++ {
+		mc.chArrays[i] = make(chan Cmd2Value, 1000)
+		go mc.Run(i)
+	}
 	if config.Config.ReliableStorage {
 		mc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = mc.handleChatWs2Mongo
 	} else {
 		mc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = mc.handleChatWs2MongoLowReliability
-		for i := 0; i < ChannelNum; i++ {
-			mc.chArrays[i] = make(chan Cmd2Value, 1000)
-			go mc.Run(i)
-		}
+
 	}
 	mc.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschatOffline.Topic},

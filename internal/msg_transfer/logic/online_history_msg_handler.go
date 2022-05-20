@@ -48,14 +48,15 @@ func (och *OnlineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
 	go och.MessagesDistributionHandle()
 	och.cmdCh = cmdCh
 	och.msgCh = make(chan Cmd2Value, 1000)
+	for i := 0; i < ChannelNum; i++ {
+		och.chArrays[i] = make(chan Cmd2Value, 1000)
+		go och.Run(i)
+	}
 	if config.Config.ReliableStorage {
 		och.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = och.handleChatWs2Mongo
 	} else {
 		och.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = och.handleChatWs2MongoLowReliability
-		for i := 0; i < ChannelNum; i++ {
-			och.chArrays[i] = make(chan Cmd2Value, 1000)
-			go och.Run(i)
-		}
+
 	}
 	och.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
