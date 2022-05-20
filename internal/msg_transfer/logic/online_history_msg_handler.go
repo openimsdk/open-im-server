@@ -407,7 +407,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 				och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
 					triggerID: triggerID, cmsgList: ccMsg}}
 				sess.MarkMessage(msg, "")
-				cMsg = cMsg[0:0]
+				cMsg = make([]*sarama.ConsumerMessage, 0, 500)
 				log.Debug(triggerID, "timer trigger msg consumer end", len(cMsg))
 			}
 		default:
@@ -422,7 +422,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 				och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
 					triggerID: triggerID, cmsgList: ccMsg}}
 				sess.MarkMessage(msg, "")
-				cMsg = cMsg[0:0]
+				cMsg = make([]*sarama.ConsumerMessage, 0, 500)
 				log.Debug(triggerID, "length trigger msg consumer end", len(cMsg))
 			}
 
