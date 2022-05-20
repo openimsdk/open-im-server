@@ -10,7 +10,6 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"
-	"time"
 )
 
 func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) error {
@@ -66,7 +65,9 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 			log.Debug(operationID, "msgListToMongoNext ", seqUidNext, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain)
 		}
 	}
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	//	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+
+	ctx := context.Background()
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 
 	if seqUid != "" {
