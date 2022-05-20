@@ -96,8 +96,8 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 				msgChannelValue := cmd.Value.(MsgChannelValue)
 				msgList := msgChannelValue.msgList
 				triggerID := msgChannelValue.triggerID
-				storageMsgList := make([]*pbMsg.MsgDataToMQ, 80)
-				pushMsgList := make([]*pbMsg.MsgDataToMQ, 80)
+				storageMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
+				pushMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
 				log.Debug(triggerID, "msg arrived channel", "channel id", channelID, msgList, msgChannelValue.userID, len(msgList))
 				for _, v := range msgList {
 					log.Debug(triggerID, "msg come to storage center", v.String())

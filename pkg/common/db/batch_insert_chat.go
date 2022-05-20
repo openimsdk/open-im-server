@@ -35,7 +35,7 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 	msgListToMongoNext := make([]MsgInfo, 0)
 	seqUid := ""
 	seqUidNext := ""
-	log.Debug(operationID, "remain ", remain, "insertCounter ", insertCounter, "currentMaxSeq ", currentMaxSeq, userID)
+	log.Debug(operationID, "remain ", remain, "insertCounter ", insertCounter, "currentMaxSeq ", currentMaxSeq, userID, len(msgList))
 	for _, m := range msgList {
 		currentMaxSeq++
 		sMsg := MsgInfo{}
