@@ -378,18 +378,21 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 	cMsg := make([]*sarama.ConsumerMessage, 500)
 	t := time.NewTicker(time.Duration(500) * time.Millisecond)
 	for msg := range claim.Messages() {
+		operationID := utils.OperationIDGenerator()
 		//och.TriggerCmd(OnlineTopicBusy)
 		cMsg = append(cMsg, msg)
 		select {
 		case <-t.C:
 			if len(cMsg) >= 0 {
 				och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: cMsg}
+				log.Debug(operationID, "timer send to msgDistributionCh", och.msgDistributionCh, "len: ", len(cMsg))
 				sess.MarkMessage(msg, "")
 				cMsg = cMsg[0:0]
 			}
 		default:
 			if len(cMsg) >= 500 {
 				och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: cMsg}
+				log.Debug(operationID, "500 send to msgDistributionCh", och.msgDistributionCh, "len: ", len(cMsg))
 				sess.MarkMessage(msg, "")
 				cMsg = cMsg[0:0]
 			}
