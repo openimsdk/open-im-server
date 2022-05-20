@@ -231,7 +231,7 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 						oldM = append(oldM, &msgFromMQ)
 						UserAggregationMsgs[string(consumerMessages[i].Key)] = oldM
 					} else {
-						m := make([]*pbMsg.MsgDataToMQ, 0, 100)
+						m := make([]*pbMsg.MsgDataToMQ, 50, 100)
 						m = append(m, &msgFromMQ)
 						UserAggregationMsgs[string(consumerMessages[i].Key)] = m
 					}
@@ -385,7 +385,7 @@ func (OnlineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error
 func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
 	log.NewDebug("", "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
-	cMsg := make([]*sarama.ConsumerMessage, 0, 500)
+	cMsg := make([]*sarama.ConsumerMessage, 200, 500)
 	t := time.NewTicker(time.Duration(500) * time.Millisecond)
 	var triggerID string
 	for msg := range claim.Messages() {
