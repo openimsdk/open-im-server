@@ -13,6 +13,9 @@ import (
 const OnlineTopicBusy = 1
 const OnlineTopicVacancy = 0
 const Msg = 2
+const ConsumerMsgs = 3
+const UserMessages = 4
+const ChannelNum = 10
 
 var (
 	persistentCH          PersistentConsumerHandler
