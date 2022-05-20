@@ -205,19 +205,23 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 
 func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 	for {
+		operationID := utils.OperationIDGenerator()
 		select {
+
 		case cmd := <-och.msgDistributionCh:
 			switch cmd.Cmd {
 			case ConsumerMsgs:
 				consumerMessages := cmd.Value.([]*sarama.ConsumerMessage)
 				//Aggregation map[userid]message list
 				for i := 0; i < len(consumerMessages); i++ {
+
 					msgFromMQ := pbMsg.MsgDataToMQ{}
 					err := proto.Unmarshal(consumerMessages[i].Value, &msgFromMQ)
 					if err != nil {
-						log.Error("msg_transfer Unmarshal msg err", "", "msg", string(consumerMessages[i].Value), "err", err.Error())
+						log.Error(operationID, "msg_transfer Unmarshal msg err", "", "msg", string(consumerMessages[i].Value), "err", err.Error())
 						return
 					}
+					log.Debug(operationID, "MessagesDistributionHandle ", msgFromMQ.String())
 					if oldM, ok := och.UserAggregationMsgs[string(consumerMessages[i].Key)]; ok {
 						oldM = append(oldM, &msgFromMQ)
 						och.UserAggregationMsgs[string(consumerMessages[i].Key)] = oldM
@@ -230,6 +234,7 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 				for userID, v := range och.UserAggregationMsgs {
 					if len(v) >= 0 {
 						channelID := getHashCode(userID) % ChannelNum
+						log.Debug(operationID, "UserAggregationMsgs ", len(v), channelID, userID)
 						go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
 							och.chArrays[cID] <- Cmd2Value{Cmd: UserMessages, Value: MsgChannelValue{userID: userID, msgList: messages}}
 						}(channelID, userID, v)
