@@ -213,6 +213,7 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 			case ConsumerMsgs:
 				consumerMessages := cmd.Value.([]*sarama.ConsumerMessage)
 				//Aggregation map[userid]message list
+				log.Debug(operationID, "consumerMessages len ", len(consumerMessages))
 				for i := 0; i < len(consumerMessages); i++ {
 
 					msgFromMQ := pbMsg.MsgDataToMQ{}
