@@ -14,6 +14,7 @@ import (
 )
 
 func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) error {
+	newTime := getCurrentTimestampByMill()
 	if len(msgList) > GetSingleGocMsgNum() {
 		return errors.New("too large")
 	}
@@ -51,28 +52,27 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 	}
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
-	newTime := getCurrentTimestampByMill()
 
 	if seqUid != "" {
 		filter := bson.M{"uid": seqUid}
-		log.NewDebug(operationID, "filter ", seqUid)
+		log.NewDebug(operationID, "filter ", seqUid, "list ", msgListToMongo)
 		err := c.FindOneAndUpdate(ctx, filter, bson.M{"$push": bson.M{"msg": bson.M{"$each": msgListToMongo}}}).Err()
 		if err != nil {
 			log.Error(operationID, "FindOneAndUpdate failed ", err.Error(), filter)
 			return utils.Wrap(err, "")
 		}
 	}
-
 	if seqUidNext != "" {
 		filter := bson.M{"uid": seqUidNext}
 		sChat := UserChat{}
 		sChat.UID = seqUidNext
 		sChat.Msg = msgListToMongoNext
+		log.NewDebug(operationID, "filter ", seqUidNext, "list ", msgListToMongoNext)
 		if _, err = c.InsertOne(ctx, &sChat); err != nil {
 			log.NewError(operationID, "InsertOne failed", filter, err.Error(), sChat)
 			return utils.Wrap(err, "")
 		}
 	}
-	log.NewDebug(operationID, "find mgo uid cost time", getCurrentTimestampByMill()-newTime)
+	log.NewWarn(operationID, "batch mgo  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
 	return utils.Wrap(d.SetUserMaxSeq(userID, uint32(currentMaxSeq)), "")
 }
