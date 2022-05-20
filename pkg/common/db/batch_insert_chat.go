@@ -45,9 +45,11 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 			msgListToMongo = append(msgListToMongo, sMsg)
 			insertCounter++
 			seqUid = getSeqUid(userID, uint32(currentMaxSeq))
+			log.Debug(operationID, "msgListToMongo ", seqUid, m.MsgData.Seq, m.MsgData.ClientMsgID)
 		} else {
 			msgListToMongoNext = append(msgListToMongoNext, sMsg)
 			seqUidNext = getSeqUid(userID, uint32(currentMaxSeq))
+			log.Debug(operationID, "msgListToMongoNext ", seqUidNext, m.MsgData.Seq, m.MsgData.ClientMsgID)
 		}
 	}
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
