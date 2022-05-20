@@ -209,8 +209,8 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 //}
 
 func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
-	UserAggregationMsgs := make(map[string][]*pbMsg.MsgDataToMQ, ChannelNum)
 	for {
+		UserAggregationMsgs := make(map[string][]*pbMsg.MsgDataToMQ, ChannelNum)
 		select {
 		case cmd := <-och.msgDistributionCh:
 			switch cmd.Cmd {
@@ -250,6 +250,7 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 				}
 			}
 		}
+
 	}
 
 }
@@ -403,7 +404,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 
 				}
 				triggerID = utils.OperationIDGenerator()
-				log.Debug(triggerID, "timer trigger msg consumer start", len(cMsg))
+				log.Debug(triggerID, "timer trigger msg consumer start", len(ccMsg))
 				och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
 					triggerID: triggerID, cmsgList: ccMsg}}
 				sess.MarkMessage(msg, "")
@@ -418,7 +419,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 
 				}
 				triggerID = utils.OperationIDGenerator()
-				log.Debug(triggerID, "length trigger msg consumer start", len(cMsg))
+				log.Debug(triggerID, "length trigger msg consumer start", len(ccMsg))
 				och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
 					triggerID: triggerID, cmsgList: ccMsg}}
 				sess.MarkMessage(msg, "")
