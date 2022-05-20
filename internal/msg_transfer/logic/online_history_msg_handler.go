@@ -238,6 +238,8 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 						go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
 							och.chArrays[cID] <- Cmd2Value{Cmd: UserMessages, Value: MsgChannelValue{userID: userID, msgList: messages}}
 						}(channelID, userID, v)
+					} else {
+						log.NewWarn(operationID, "UserAggregationMsgs ", len(v), userID)
 					}
 				}
 			}
