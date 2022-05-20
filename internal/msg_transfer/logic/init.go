@@ -15,7 +15,7 @@ const OnlineTopicVacancy = 0
 const Msg = 2
 const ConsumerMsgs = 3
 const UserMessages = 4
-const ChannelNum = 10
+const ChannelNum = 11
 
 var (
 	persistentCH          PersistentConsumerHandler
