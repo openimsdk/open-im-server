@@ -242,9 +242,9 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 						hashCode := getHashCode(userID)
 						channelID := hashCode % ChannelNum
 						log.Debug(triggerID, "generate channelID", hashCode, channelID, userID)
-						go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
-							och.chArrays[cID] <- Cmd2Value{Cmd: UserMessages, Value: MsgChannelValue{userID: userID, msgList: messages, triggerID: triggerID}}
-						}(channelID, userID, v)
+						//go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
+						och.chArrays[channelID] <- Cmd2Value{Cmd: UserMessages, Value: MsgChannelValue{userID: userID, msgList: v, triggerID: triggerID}}
+						//}(channelID, userID, v)
 					}
 				}
 			}
