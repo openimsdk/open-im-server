@@ -119,7 +119,7 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 				//	log.NewError(msgFromMQ.OperationID, "SessionType error", msgFromMQ.String())
 				//	return
 				//}
-
+				log.Debug(triggerID, "msg storage length", len(storageMsgList), "push length", len(pushMsgList))
 				err := saveUserChatList(msgChannelValue.userID, storageMsgList, triggerID)
 				if err != nil {
 					singleMsgFailedCount += uint64(len(storageMsgList))
@@ -227,7 +227,7 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 						log.Error(triggerID, "msg_transfer Unmarshal msg err", "msg", string(consumerMessages[i].Value), "err", err.Error())
 						return
 					}
-					log.Debug(triggerID, "single msg come to distribution center", msgFromMQ.String())
+					log.Debug(triggerID, "single msg come to distribution center", msgFromMQ.String(), string(consumerMessages[i].Key))
 					if oldM, ok := UserAggregationMsgs[string(consumerMessages[i].Key)]; ok {
 						oldM = append(oldM, &msgFromMQ)
 						UserAggregationMsgs[string(consumerMessages[i].Key)] = oldM
