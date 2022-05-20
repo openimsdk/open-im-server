@@ -18,16 +18,17 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 	if len(msgList) > GetSingleGocMsgNum() {
 		return errors.New("too large")
 	}
+	isInit := false
 	currentMaxSeq, err := d.GetUserMaxSeq(userID)
 	if err == nil {
 
 	} else if err == redis.ErrNil {
+		isInit = true
 		currentMaxSeq = 0
 	} else {
 		return utils.Wrap(err, "")
 	}
 
-	//4999
 	remain := uint64(GetSingleGocMsgNum()) - (currentMaxSeq % uint64(GetSingleGocMsgNum()))
 	insertCounter := uint64(0)
 	msgListToMongo := make([]MsgInfo, 0)
@@ -43,6 +44,13 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 		if sMsg.Msg, err = proto.Marshal(m.MsgData); err != nil {
 			return utils.Wrap(err, "")
 		}
+		if isInit {
+			msgListToMongoNext = append(msgListToMongoNext, sMsg)
+			seqUidNext = getSeqUid(userID, uint32(currentMaxSeq))
+			log.Debug(operationID, "msgListToMongoNext ", seqUidNext, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain)
+			continue
+		}
+
 		if insertCounter < remain {
 			msgListToMongo = append(msgListToMongo, sMsg)
 			insertCounter++
