@@ -55,7 +55,6 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 			log.Debug(operationID, "msgListToMongoNext ", seqUidNext, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain)
 			continue
 		}
-
 		if insertCounter < remain {
 			msgListToMongo = append(msgListToMongo, sMsg)
 			insertCounter++
