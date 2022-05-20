@@ -33,6 +33,7 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 	msgListToMongoNext := make([]MsgInfo, 0)
 	seqUid := ""
 	seqUidNext := ""
+	log.Debug(operationID, "remain ", remain, "insertCounter ", insertCounter, "currentMaxSeq ", currentMaxSeq)
 	for _, m := range msgList {
 		currentMaxSeq++
 		sMsg := MsgInfo{}
@@ -45,11 +46,11 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 			msgListToMongo = append(msgListToMongo, sMsg)
 			insertCounter++
 			seqUid = getSeqUid(userID, uint32(currentMaxSeq))
-			log.Debug(operationID, "msgListToMongo ", seqUid, m.MsgData.Seq, m.MsgData.ClientMsgID)
+			log.Debug(operationID, "msgListToMongo ", seqUid, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain)
 		} else {
 			msgListToMongoNext = append(msgListToMongoNext, sMsg)
 			seqUidNext = getSeqUid(userID, uint32(currentMaxSeq))
-			log.Debug(operationID, "msgListToMongoNext ", seqUidNext, m.MsgData.Seq, m.MsgData.ClientMsgID)
+			log.Debug(operationID, "msgListToMongoNext ", seqUidNext, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain)
 		}
 	}
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
