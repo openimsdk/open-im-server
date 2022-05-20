@@ -31,6 +31,10 @@ const cWorkMoment = "work_moment"
 const cCommentMsg = "comment_msg"
 const singleGocMsgNum = 5000
 
+func GetSingleGocMsgNum() int {
+	return singleGocMsgNum
+}
+
 type MsgInfo struct {
 	SendTime int64
 	Msg      []byte
@@ -351,7 +355,7 @@ func (d *DataBases) SaveUserChatMongo2(uid string, sendTime int64, m *pbMsg.MsgD
 		return utils.Wrap(err, "")
 	}
 	err = c.FindOneAndUpdate(ctx, filter, bson.M{"$push": bson.M{"msg": sMsg}}).Err()
-	log.NewDebug(operationID, "get mgoSession cost time", getCurrentTimestampByMill()-newTime)
+	log.NewWarn(operationID, "get mgoSession cost time", getCurrentTimestampByMill()-newTime)
 	if err != nil {
 		sChat := UserChat{}
 		sChat.UID = seqUid
@@ -367,6 +371,47 @@ func (d *DataBases) SaveUserChatMongo2(uid string, sendTime int64, m *pbMsg.MsgD
 	log.NewDebug(operationID, "find mgo uid cost time", getCurrentTimestampByMill()-newTime)
 	return nil
 }
+
+//
+//func (d *DataBases) SaveUserChatListMongo2(uid string, sendTime int64, msgList []*pbMsg.MsgDataToDB) error {
+//	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+//	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+//	newTime := getCurrentTimestampByMill()
+//	operationID := ""
+//	seqUid := ""
+//	msgListToMongo := make([]MsgInfo, 0)
+//
+//	for _, m := range msgList {
+//		seqUid = getSeqUid(uid, m.MsgData.Seq)
+//		var err error
+//		sMsg := MsgInfo{}
+//		sMsg.SendTime = sendTime
+//		if sMsg.Msg, err = proto.Marshal(m.MsgData); err != nil {
+//			return utils.Wrap(err, "")
+//		}
+//		msgListToMongo = append(msgListToMongo, sMsg)
+//	}
+//
+//	filter := bson.M{"uid": seqUid}
+//	log.NewDebug(operationID, "filter ", seqUid)
+//	err := c.FindOneAndUpdate(ctx, filter, bson.M{"$push": bson.M{"msg": bson.M{"$each": msgListToMongo}}}).Err()
+//	log.NewWarn(operationID, "get mgoSession cost time", getCurrentTimestampByMill()-newTime)
+//	if err != nil {
+//		sChat := UserChat{}
+//		sChat.UID = seqUid
+//		sChat.Msg = msgListToMongo
+//
+//		if _, err = c.InsertOne(ctx, &sChat); err != nil {
+//			log.NewError(operationID, "InsertOne failed", filter, err.Error(), sChat)
+//			return utils.Wrap(err, "")
+//		}
+//	} else {
+//		log.NewDebug(operationID, "FindOneAndUpdate ok", filter)
+//	}
+//
+//	log.NewDebug(operationID, "find mgo uid cost time", getCurrentTimestampByMill()-newTime)
+//	return nil
+//}
 
 func (d *DataBases) SaveUserChat(uid string, sendTime int64, m *pbMsg.MsgDataToDB) error {
 	var seqUid string
