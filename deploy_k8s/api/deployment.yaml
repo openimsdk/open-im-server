@@ -36,9 +36,10 @@ metadata:
 spec:
   externalTrafficPolicy: Cluster
   ports:
-      port: 10002
-      protocol: TCP
-      targetPort: 10002
+    - name: apiPort
+        port: 10002
+        protocol: TCP
+        targetPort: 10002
   selector:
     app: api
   type: NodePort
