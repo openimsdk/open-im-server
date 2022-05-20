@@ -239,7 +239,9 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 				log.Debug(triggerID, "generate map list users len", len(UserAggregationMsgs))
 				for userID, v := range UserAggregationMsgs {
 					if len(v) >= 0 {
-						channelID := getHashCode(userID) % ChannelNum
+						hashCode := getHashCode(userID)
+						channelID := hashCode % ChannelNum
+						log.Debug(triggerID, "generate channelID", hashCode, channelID, userID)
 						go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
 							och.chArrays[cID] <- Cmd2Value{Cmd: UserMessages, Value: MsgChannelValue{userID: userID, msgList: messages, triggerID: triggerID}}
 						}(channelID, userID, v)
