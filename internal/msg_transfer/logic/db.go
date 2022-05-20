@@ -22,7 +22,7 @@ func saveUserChat(uid string, msg *pbMsg.MsgDataToMQ) error {
 	//	return db.DB.SaveUserChatMongo2(uid, pbSaveData.MsgData.SendTime, &pbSaveData)
 }
 
-func saveUserChatList(uid string, msgList []*pbMsg.MsgDataToMQ, operationID string) error {
-	log.Info(operationID, utils.GetSelfFuncName(), "args ", uid, len(msgList))
-	return db.DB.BatchInsertChat(uid, msgList, operationID)
+func saveUserChatList(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) error {
+	log.Info(operationID, utils.GetSelfFuncName(), "args ", userID, len(msgList))
+	return db.DB.BatchInsertChat(userID, msgList, operationID)
 }

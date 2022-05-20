@@ -74,5 +74,5 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 		}
 	}
 	log.NewDebug(operationID, "find mgo uid cost time", getCurrentTimestampByMill()-newTime)
-	return nil
+	return utils.Wrap(d.SetUserMaxSeq(userID, uint32(currentMaxSeq)), "")
 }
