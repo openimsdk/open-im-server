@@ -69,9 +69,9 @@ func (d *DataBases) GetUserMaxSeq(uid string) (uint64, error) {
 }
 
 //set the largest Seq
-func (d *DataBases) SetUserMaxSeq(uid string, maxSeq uint32) error {
+func (d *DataBases) SetUserMaxSeq(uid string, maxSeq uint64) error {
 	key := userIncrSeq + uid
-	_, err := redis.Uint64(d.Exec("SET", key, maxSeq))
+	_, err := d.Exec("SET", key, maxSeq)
 	return err
 }
 

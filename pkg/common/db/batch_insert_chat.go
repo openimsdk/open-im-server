@@ -27,13 +27,14 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 		return utils.Wrap(err, "")
 	}
 
-	remain := currentMaxSeq % uint64(GetSingleGocMsgNum())
+	//4999
+	remain := uint64(GetSingleGocMsgNum()) - (currentMaxSeq % uint64(GetSingleGocMsgNum()))
 	insertCounter := uint64(0)
 	msgListToMongo := make([]MsgInfo, 0)
 	msgListToMongoNext := make([]MsgInfo, 0)
 	seqUid := ""
 	seqUidNext := ""
-	log.Debug(operationID, "remain ", remain, "insertCounter ", insertCounter, "currentMaxSeq ", currentMaxSeq)
+	log.Debug(operationID, "remain ", remain, "insertCounter ", insertCounter, "currentMaxSeq ", currentMaxSeq, userID)
 	for _, m := range msgList {
 		currentMaxSeq++
 		sMsg := MsgInfo{}
@@ -77,5 +78,5 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 		}
 	}
 	log.NewWarn(operationID, "batch mgo  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
-	return utils.Wrap(d.SetUserMaxSeq(userID, uint32(currentMaxSeq)), "")
+	return utils.Wrap(d.SetUserMaxSeq(userID, uint64(currentMaxSeq)), "")
 }
