@@ -376,7 +376,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
 	log.NewDebug("", "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
 	cMsg := make([]*sarama.ConsumerMessage, 500)
-	t := time.NewTicker(time.Duration(500) * time.Millisecond)
+	t := time.NewTicker(time.Duration(10) * time.Millisecond)
 	for msg := range claim.Messages() {
 		operationID := utils.OperationIDGenerator()
 		//och.TriggerCmd(OnlineTopicBusy)
