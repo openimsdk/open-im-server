@@ -34,9 +34,9 @@ kind: Service
 metadata:
   name: api
 spec:
-  externalTrafficPolicy: Cluster
   ports:
-    - protocol: TCP
+    - name: api
+      protocol: TCP
       port: 10002
       targetPort: 10002
   selector:
