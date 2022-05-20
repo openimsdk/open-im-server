@@ -28,11 +28,20 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 		return utils.Wrap(err, "")
 	}
 	var remain uint64
+	//if currentMaxSeq < uint64(GetSingleGocMsgNum()) {
+	//	remain = uint64(GetSingleGocMsgNum()-1) - (currentMaxSeq % uint64(GetSingleGocMsgNum()))
+	//} else {
+	//	remain = uint64(GetSingleGocMsgNum()) - ((currentMaxSeq - (uint64(GetSingleGocMsgNum()) - 1)) % uint64(GetSingleGocMsgNum()))
+	//}
+
+	blk0 := uint64(GetSingleGocMsgNum() - 1)
 	if currentMaxSeq < uint64(GetSingleGocMsgNum()) {
-		remain = uint64(GetSingleGocMsgNum()-1) - (currentMaxSeq % uint64(GetSingleGocMsgNum()))
+		remain = blk0 - currentMaxSeq
 	} else {
-		remain = uint64(GetSingleGocMsgNum()) - ((currentMaxSeq - (uint64(GetSingleGocMsgNum()) - 1)) % uint64(GetSingleGocMsgNum()))
+		excludeBlk0 := currentMaxSeq - blk0
+		remain = (uint64(GetSingleGocMsgNum()) - (excludeBlk0 % uint64(GetSingleGocMsgNum()))) % uint64(GetSingleGocMsgNum())
 	}
+
 	insertCounter := uint64(0)
 	msgListToMongo := make([]MsgInfo, 0)
 	msgListToMongoNext := make([]MsgInfo, 0)
