@@ -147,6 +147,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 	sendMsgAllCount++
 	sendMsgAllCountLock.Unlock()
 	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
+
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
 	if isPass {

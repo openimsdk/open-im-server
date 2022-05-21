@@ -48,6 +48,8 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 	seqUid := ""
 	seqUidNext := ""
 	log.Debug(operationID, "remain ", remain, "insertCounter ", insertCounter, "currentMaxSeq ", currentMaxSeq, userID, len(msgList))
+	//4998 remain ==1
+	//4999
 	for _, m := range msgList {
 		log.Debug(operationID, "msg node ", m.String(), m.MsgData.ClientMsgID)
 		currentMaxSeq++

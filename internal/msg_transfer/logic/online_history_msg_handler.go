@@ -105,6 +105,7 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 					isSenderSync := utils.GetSwitchFromOptions(v.MsgData.Options, constant.IsSenderSync)
 					if isHistory {
 						storageMsgList = append(storageMsgList, v)
+						log.NewWarn(triggerID, "storageMsgList to mongodb  client msgID: ", v.MsgData.ClientMsgID)
 					}
 					if !(!isSenderSync && msgChannelValue.userID == v.MsgData.SendID) {
 						pushMsgList = append(pushMsgList, v)
