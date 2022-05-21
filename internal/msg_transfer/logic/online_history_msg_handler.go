@@ -105,7 +105,7 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 					isSenderSync := utils.GetSwitchFromOptions(v.MsgData.Options, constant.IsSenderSync)
 					if isHistory {
 						storageMsgList = append(storageMsgList, v)
-						log.NewWarn(triggerID, "storageMsgList to mongodb  client msgID: ", v.MsgData.ClientMsgID)
+						//	log.NewWarn(triggerID, "storageMsgList to mongodb  client msgID: ", v.MsgData.ClientMsgID)
 					}
 					if !(!isSenderSync && msgChannelValue.userID == v.MsgData.SendID) {
 						pushMsgList = append(pushMsgList, v)
@@ -389,9 +389,16 @@ func (OnlineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error
 
 func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
-	if sess == nil {
-		time.Sleep(100 * time.Millisecond)
+	for {
+		if sess == nil {
+			log.Error("sess == nil")
+			time.Sleep(100 * time.Millisecond)
+		} else {
+			log.NewWarn("sess == ", sess)
+			break
+		}
 	}
+
 	log.NewDebug("", "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
 	cMsg := make([]*sarama.ConsumerMessage, 0, 1000)
 	t := time.NewTicker(time.Duration(100) * time.Millisecond)
