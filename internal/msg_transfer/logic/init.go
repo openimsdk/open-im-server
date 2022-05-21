@@ -15,7 +15,7 @@ const OnlineTopicVacancy = 0
 const Msg = 2
 const ConsumerMsgs = 3
 const UserMessages = 4
-const ChannelNum = 11
+const ChannelNum = 100
 
 var (
 	persistentCH          PersistentConsumerHandler
@@ -52,7 +52,7 @@ func Run() {
 		fmt.Println("not start mysql consumer")
 	}
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
-	go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
+	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
 }
 func SetOnlineTopicStatus(status int) {
 	w.Lock()
