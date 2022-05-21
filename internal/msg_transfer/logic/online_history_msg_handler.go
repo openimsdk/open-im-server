@@ -129,9 +129,15 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 					singleMsgSuccessCountMutex.Lock()
 					singleMsgSuccessCount += uint64(len(storageMsgList))
 					singleMsgSuccessCountMutex.Unlock()
-					for _, v := range pushMsgList {
-						sendMessageToPush(v, msgChannelValue.userID)
-					}
+					//go func(push,storage []*pbMsg.MsgDataToMQ) {
+					//	for _, v := range storage {
+					//		sendMessageToPush(v, msgChannelValue.userID)
+					//	}
+					//	for _, x := range utils.DifferenceString() {
+					//		sendMessageToPush(v, msgChannelValue.userID)
+					//	}
+					//
+					//}(pushMsgList,storageMsgList)
 
 				}
 			}
