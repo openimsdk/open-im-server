@@ -397,9 +397,15 @@ func (OnlineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error
 
 func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
-	if sess == nil {
-		time.Sleep(100 * time.Millisecond)
+	for {
+		if sess == nil {
+			log.NewWarn("", " sess == nil, waiting ")
+			time.Sleep(100 * time.Millisecond)
+		} else {
+			break
+		}
 	}
+
 	log.NewDebug("", "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
 	cMsg := make([]*sarama.ConsumerMessage, 0, 1000)
 	t := time.NewTicker(time.Duration(100) * time.Millisecond)
