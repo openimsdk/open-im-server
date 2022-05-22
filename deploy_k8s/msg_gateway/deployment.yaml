@@ -2,22 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-deployment
+  name: msg-gateway-deployment
 spec:
   selector:
     matchLabels:
-      app: api # 选择这个指定标签执行
+      app: msg-gateway # 选择这个指定标签执行
   replicas: 2 # 运行pod数量
   template:
     metadata:
       labels:
-        app: api # 标签
+        app: msg-gateway # 标签
     spec:
       containers:
-      - name: api
-        image: openim/api:v2.0.10
+      - name: msg-gateway
+        image: openim/msg_gateway:v2.0.10
         ports:
-        - containerPort: 10002
+        - containerPort: 10140
+        - containerPort: 10001
         volumeMounts:
           - name: config
             mountPath: /Open-IM-Server/config
@@ -32,12 +33,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: api
+  name: msg-gateway
 spec:
   ports:
-    - name: api-port
+    - name: msg-gateway-port
       protocol: TCP
-      port: 10002
-      targetPort: 10002
+      port: 10001
+      targetPort: 10001
   selector:
-    app: api
+    app: demo    
+
+    
