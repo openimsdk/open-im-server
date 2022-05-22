@@ -415,11 +415,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 		//och.TriggerCmd(OnlineTopicBusy)
 		select {
 		case msg := <-claim.Messages():
-			if msg == nil {
-				log.NewDebug("", "claim.Messages ", msg)
-				continue
-			}
-
+			log.NewDebug("", "claim.Messages ", msg, *msg)
 			cMsg = append(cMsg, msg)
 			if len(cMsg) >= 1000 {
 				ccMsg := make([]*sarama.ConsumerMessage, 0, 1000)
