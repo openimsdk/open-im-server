@@ -142,7 +142,8 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 }
 func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
-	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
+	newTime := db.GetCurrentTimestampByMill()
+	log.NewWarn(pb.OperationID, "rpc sendMsg come here", pb.String(), pb.MsgData.ClientMsgID)
 	flag, errCode, errMsg := userRelationshipVerification(pb)
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
@@ -360,6 +361,8 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
+
+		log.NewWarn(pb.OperationID, "send msg cost time ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 	default:
 		return returnMsg(&replay, pb, 203, "unkonwn sessionType", "", 0)

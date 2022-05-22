@@ -884,6 +884,9 @@ func generateWorkMomentCommentID(workMomentID string) string {
 func getCurrentTimestampByMill() int64 {
 	return time.Now().UnixNano() / 1e6
 }
+func GetCurrentTimestampByMill() int64 {
+	return time.Now().UnixNano() / 1e6
+}
 
 func getSeqUid(uid string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
