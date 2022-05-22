@@ -397,6 +397,7 @@ func (OnlineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error
 
 func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
+
 	for {
 		if sess == nil {
 			log.NewWarn("", " sess == nil, waiting ")
@@ -414,6 +415,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 		//och.TriggerCmd(OnlineTopicBusy)
 		select {
 		case msg := <-claim.Messages():
+			log.NewDebug("", "claim.Messages ", msg, *msg)
 			cMsg = append(cMsg, msg)
 			if len(cMsg) >= 1000 {
 				ccMsg := make([]*sarama.ConsumerMessage, 0, 1000)
