@@ -272,7 +272,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		//split  parallel send
 		var wg sync.WaitGroup
 		var sendTag bool
-		var split = 50
+		var split = 20
 		for k, v := range m {
 			remain := len(v) % split
 			for i := 0; i < len(v)/split; i++ {
