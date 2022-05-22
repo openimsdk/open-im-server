@@ -419,7 +419,6 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 				ccMsg := make([]*sarama.ConsumerMessage, 0, 1000)
 				for _, v := range cMsg {
 					ccMsg = append(ccMsg, v)
-
 				}
 				triggerID = utils.OperationIDGenerator()
 				log.Debug(triggerID, "length trigger msg consumer start", len(ccMsg))
