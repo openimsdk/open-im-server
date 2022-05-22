@@ -2,7 +2,6 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  # 配置注解 支持websocket
   annotations:
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
@@ -17,7 +16,7 @@ spec:
               service:
                 name: sdk-server
                 port:
-                  number: 30000
+                  number: 10003
             path: /
             pathType: Prefix
 ---
@@ -38,7 +37,7 @@ spec:
               service:
                 name: msg-gateway
                 port:
-                  number: 17778
+                  number: 10001
             path: /
             pathType: Prefix
 ---
@@ -55,7 +54,7 @@ spec:
               service:
                 name: api
                 port:
-                  number: 10000
+                  number: 10002
             path: /
             pathType: Prefix
 ---
@@ -73,5 +72,39 @@ spec:
                 name: demo
                 port:
                   number: 42233
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo.openim.xxx.com
+spec:
+  rules:
+    - host: demo.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: demo
+                port:
+                  number: 10004
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cms-api.openim.xxx.com
+spec:
+  rules:
+    - host: cms-api.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: cms-api
+                port:
+                  number: 10006
             path: /
             pathType: Prefix
