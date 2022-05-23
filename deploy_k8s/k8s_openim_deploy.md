@@ -23,6 +23,8 @@ nodeSelector:
 域名修改等操作
 
 ### 5. 执行./kubectl_start.sh脚本
+chmod +x ./kubectl_start.sh
+./kubectl_start.sh
 kubectl 启动所有deployment，services，ingress
 
 ### 6. 查看k8s deployment service ingress状态
