@@ -11,11 +11,11 @@ import (
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
-
-	"google.golang.org/grpc"
+	"sync"
 )
 
 type cacheServer struct {
@@ -103,27 +103,33 @@ func SyncDB2Cache() error {
 func DelRelationCache() {}
 
 func updateAllUserToCache(userList []db.User) error {
+	wg := &sync.WaitGroup{}
+	wg.Add(len(userList))
 	for _, userInfo := range userList {
-		userInfoPb := &commonPb.UserInfo{
-			UserID:         userInfo.UserID,
-			Nickname:       userInfo.Nickname,
-			FaceURL:        userInfo.FaceURL,
-			Gender:         userInfo.Gender,
-			PhoneNumber:    userInfo.PhoneNumber,
-			Birth:          uint32(userInfo.Birth.Unix()),
-			Email:          userInfo.Email,
-			Ex:             userInfo.Ex,
-			CreateTime:     uint32(userInfo.CreateTime.Unix()),
-			AppMangerLevel: userInfo.AppMangerLevel,
-		}
-		m, err := utils.Pb2Map(userInfoPb)
-		if err != nil {
-			log.NewWarn("", utils.GetSelfFuncName(), err.Error())
-		}
-		if err := db.DB.SetUserInfoToCache(userInfo.UserID, m); err != nil {
-			log.NewWarn("0", utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
-		}
+		go func() {
+			defer wg.Done()
+			userInfoPb := &commonPb.UserInfo{
+				UserID:         userInfo.UserID,
+				Nickname:       userInfo.Nickname,
+				FaceURL:        userInfo.FaceURL,
+				Gender:         userInfo.Gender,
+				PhoneNumber:    userInfo.PhoneNumber,
+				Birth:          uint32(userInfo.Birth.Unix()),
+				Email:          userInfo.Email,
+				Ex:             userInfo.Ex,
+				CreateTime:     uint32(userInfo.CreateTime.Unix()),
+				AppMangerLevel: userInfo.AppMangerLevel,
+			}
+			m, err := utils.Pb2Map(userInfoPb)
+			if err != nil {
+				log.NewWarn("", utils.GetSelfFuncName(), err.Error())
+			}
+			if err := db.DB.SetUserInfoToCache(userInfo.UserID, m); err != nil {
+				log.NewWarn("0", utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
+			}
+		}()
 	}
+	wg.Wait()
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }
@@ -135,55 +141,73 @@ func updateAllGroupMemberListToCache() error {
 		log.NewWarn("0", utils.GetSelfFuncName(), "getAllGroupIDList failed", err.Error())
 		panic(err.Error())
 	}
+	wg := &sync.WaitGroup{}
+	wg.Add(len(groupIDList))
 	for _, groupID := range groupIDList {
-		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
-		if err != nil {
-			log.NewWarn("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
-			continue
-		}
-		//log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
-		if len(groupMemberIDList) > 0 {
-			if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
-				log.NewWarn("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
+		go func() {
+			defer wg.Done()
+			groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
+			if err != nil {
+				log.NewWarn("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
+				return
 			}
-		}
+			//log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
+			if len(groupMemberIDList) > 0 {
+				if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
+					log.NewWarn("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
+				}
+			}
+		}()
 	}
+	wg.Wait()
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }
 
 func updateAllFriendToCache(userList []db.User) error {
 	log.NewInfo("0", utils.GetSelfFuncName())
+	wg := sync.WaitGroup{}
+	wg.Add(len(userList))
 	for _, user := range userList {
-		friendIDList, err := imdb.GetFriendIDListByUserID(user.UserID)
-		if err != nil {
-			log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
-			continue
-		}
-		if len(friendIDList) > 0 {
-			if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
-				log.NewWarn("0", utils.GetSelfFuncName(), err.Error(), friendIDList, user.UserID)
+		go func() {
+			defer wg.Done()
+			friendIDList, err := imdb.GetFriendIDListByUserID(user.UserID)
+			if err != nil {
+				log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
+				return
 			}
-		}
+			if len(friendIDList) > 0 {
+				if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
+					log.NewWarn("0", utils.GetSelfFuncName(), err.Error(), friendIDList, user.UserID)
+				}
+			}
+		}()
 	}
+	wg.Wait()
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }
 
 func updateAllBlackListToCache(userList []db.User) error {
 	log.NewInfo("0", utils.GetSelfFuncName())
+	wg := &sync.WaitGroup{}
+	wg.Add(len(userList))
 	for _, user := range userList {
-		blackIDList, err := imdb.GetBlackIDListByUserID(user.UserID)
-		if err != nil {
-			log.NewWarn("", utils.GetSelfFuncName(), err.Error())
-			continue
-		}
-		if len(blackIDList) > 0 {
-			if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
-				log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
+		go func() {
+			defer wg.Done()
+			blackIDList, err := imdb.GetBlackIDListByUserID(user.UserID)
+			if err != nil {
+				log.NewWarn("", utils.GetSelfFuncName(), err.Error())
+				return
 			}
-		}
+			if len(blackIDList) > 0 {
+				if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
+					log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
+				}
+			}
+		}()
 	}
+	wg.Wait()
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }
