@@ -57,6 +57,9 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
 		for _, v := range wsResult {
 			if v.ResultCode == 0 {
+				if utils.IsContainInt32(v.RecvPlatFormID, pushTerminal) {
+					break
+				}
 				continue
 			}
 			if utils.IsContainInt32(v.RecvPlatFormID, pushTerminal) {
