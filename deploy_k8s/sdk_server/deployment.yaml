@@ -22,10 +22,18 @@ spec:
           - name: config
             mountPath: /Open-IM-Server/config
             readOnly: true
+          - name: localDB
+            mountPath: /db/sdk
+        command: ["/Open-IM-Server/main"]
+        args: ["-openIM_api_port", "10002", "-openIM_ws_port", "10001", "-sdk_ws_port", "10003", "-openIM_log_level", "6"]
       volumes:
         - name: config
           configMap:
             name: config
+        - name: localDB
+          hostPath:
+            path: /db/sdk
+            type: Directory
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 ---
