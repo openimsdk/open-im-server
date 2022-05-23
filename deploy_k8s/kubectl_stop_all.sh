@@ -15,7 +15,7 @@ service=(
   conversation
   cache
   msg-gateway
-  transfer
+  msg-transfer
   msg
   push
   sdk-server

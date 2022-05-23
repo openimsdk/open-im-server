@@ -2,20 +2,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: transfer-deployment
+  name: msg-transfer-deployment
 spec:
   selector:
     matchLabels:
-      app: transfer # 选择这个指定标签执行
+      app: msg-transfer # 选择这个指定标签执行
   replicas: 2 # 运行pod数量
   template:
     metadata:
       labels:
-        app: transfer # 标签
+        app: msg-transfer # 标签
     spec:
       containers:
-      - name: transfer
-        image: openim/transfer:v2.0.10
+      - name: msg-transfer
+        image: openim/msg_transfer:v2.0.10
         volumeMounts:
           - name: config
             mountPath: /Open-IM-Server/config

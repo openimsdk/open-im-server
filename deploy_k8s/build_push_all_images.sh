@@ -1,29 +1,9 @@
 #/bin/sh
-service=(
-  #api service file
-  api
-  cms_api
-  #rpc service file
-  user
-  friend
-  group
-  auth
-  admin_cms
-  message_cms
-  statistics
-  office
-  organization
-  conversation
-  cache
-  msg_gateway
-  transfer
-  msg
-  push
-  sdk_server
-  demo
-)
-#
+source ./path_info.cfg
+
+# images version
 version=v2.0.10
+
 cd ../script/; ./build_all_service.sh
 cd ../deploy_k8s/
 
