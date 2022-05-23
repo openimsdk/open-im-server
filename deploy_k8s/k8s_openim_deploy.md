@@ -19,6 +19,8 @@ nodeSelector:
 ### 4. 修改ingress.yaml配置文件
 
 ### 5. 执行./kubectl_start.sh脚本
+chmod +x ./kubectl_start.sh
+./kubectl_start.sh
 kubectl 启动所有deployment，services，ingress
 
 ### 6. 查看k8s deployment service ingress状态
