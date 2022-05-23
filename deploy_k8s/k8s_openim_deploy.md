@@ -19,6 +19,8 @@ nodeSelector:
 修改每种服务数量，建议至少每种2个rpc。
 如果修改了config/config.yaml某些配置比如端口，同时需要修改对应deployment端口
 
+jssdk 需要在sdk_server/deployment.yaml修改启动端口等
+
 ### 4. 修改ingress.yaml配置文件
 域名修改等操作
 
