@@ -16,6 +16,8 @@ nodeSelector:
 创建资源清单时添加上nodeSelector属性对应即可
 修改每种服务数量，建议至少每种2个rpc。
 
+jssdk 需要在sdk_server/deployment.yaml修改启动端口等
+
 ### 4. 修改ingress.yaml配置文件
 
 ### 5. 执行./kubectl_start.sh脚本
