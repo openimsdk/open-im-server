@@ -22,7 +22,7 @@ spec:
           - name: config
             mountPath: /Open-IM-Server/config
             readOnly: true
-          - name: localDB
+          - name: local-db
             mountPath: /db/sdk
         command: ["/Open-IM-Server/main"]
         args: ["-openIM_api_port", "10002", "-openIM_ws_port", "10001", "-sdk_ws_port", "10003", "-openIM_log_level", "6"]
@@ -30,7 +30,7 @@ spec:
         - name: config
           configMap:
             name: config
-        - name: localDB
+        - name: local-db
           hostPath:
             path: /db/sdk
             type: Directory
