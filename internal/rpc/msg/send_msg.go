@@ -397,7 +397,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		}
 		return returnMsg(&replay, pb, 0, "", msgToMQ.MsgData.ServerMsgID, msgToMQ.MsgData.SendTime)
 	default:
-		return returnMsg(&replay, pb, 203, "unkonwn sessionType", "", 0)
+		return returnMsg(&replay, pb, 203, "unknown sessionType", "", 0)
 	}
 }
 
