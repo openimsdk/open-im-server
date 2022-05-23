@@ -8,6 +8,7 @@ package kafka
 
 import (
 	"context"
+	"fmt"
 	"github.com/Shopify/sarama"
 )
 
@@ -28,6 +29,7 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addr []stri
 	config.Version = consumerConfig.KafkaVersion
 	config.Consumer.Offsets.Initial = consumerConfig.OffsetsInitial
 	config.Consumer.Return.Errors = consumerConfig.IsReturnErr
+	fmt.Println("init address is ", addr, "topics is ", topics)
 	client, err := sarama.NewClient(addr, config)
 	if err != nil {
 		panic(err.Error())
