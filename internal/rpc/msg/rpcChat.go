@@ -3,6 +3,7 @@ package msg
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -21,6 +22,14 @@ type rpcChat struct {
 	etcdAddr        []string
 	onlineProducer  *kafka.Producer
 	offlineProducer *kafka.Producer
+	delMsgCh        chan deleteMsg
+}
+
+type deleteMsg struct {
+	UserID      string
+	OpUserID    string
+	SeqList     []uint32
+	OperationID string
 }
 
 func NewRpcChatServer(port int) *rpcChat {
@@ -33,6 +42,7 @@ func NewRpcChatServer(port int) *rpcChat {
 	}
 	rc.onlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
 	rc.offlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschatOffline.Addr, config.Config.Kafka.Ws2mschatOffline.Topic)
+	rc.delMsgCh = make(chan deleteMsg, 1000)
 	return &rc
 }
 
@@ -74,4 +84,16 @@ func (rpc *rpcChat) Run() {
 		return
 	}
 	log.Info("", "rpc rpcChat init success")
+}
+
+func (rpc *rpcChat) runCh() {
+	log.NewInfo("", "start del msg chan ")
+	for {
+		select {
+		case msg := <-rpc.delMsgCh:
+			if err := db.DB.DelMsgBySeqList(msg.UserID, msg.SeqList, msg.OperationID); err != nil {
+				log.NewError(msg.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList qrgs: ", msg.UserID, msg.SeqList, msg.OperationID, err.Error())
+			}
+		}
+	}
 }

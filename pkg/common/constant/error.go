@@ -54,7 +54,7 @@ var (
 	ErrArgs      = ErrInfo{ErrCode: 803, ErrMsg: ArgsMsg.Error()}
 	ErrStatus    = ErrInfo{ErrCode: 804, ErrMsg: StatusMsg.Error()}
 	ErrCallback  = ErrInfo{ErrCode: 809, ErrMsg: CallBackMsg.Error()}
-	ErrSendLimit = ErrInfo{ErrCode: 810, ErrMsg: "send msg limit, to many users"}
+	ErrSendLimit = ErrInfo{ErrCode: 810, ErrMsg: "send msg limit, to many request, try again later"}
 )
 
 var (
