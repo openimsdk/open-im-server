@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 service=(
   #api service file
   api

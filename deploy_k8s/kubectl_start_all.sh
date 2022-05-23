@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 source ./path_info.cfg
 
 for i in ${service[*]}

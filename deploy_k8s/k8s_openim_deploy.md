@@ -6,6 +6,7 @@
 kubectl create namespace openim
 kubectl -n openim create configmap config --from-file=config/config.yaml
 openim 为im项目的namespace, 可选
+kubectl -n openim get configmap
 
 ### 3(可选). 修改每个deployment.yml
 kubectl get nodes
@@ -15,8 +16,10 @@ nodeSelector:
   node: kube-Node
 创建资源清单时添加上nodeSelector属性对应即可
 修改每种服务数量，建议至少每种2个rpc。
+如果修改了config/config.yaml某些配置比如端口，同时需要修改对应deployment端口
 
 ### 4. 修改ingress.yaml配置文件
+域名修改等操作
 
 ### 5. 执行./kubectl_start.sh脚本
 kubectl 启动所有deployment，services，ingress
@@ -25,3 +28,4 @@ kubectl 启动所有deployment，services，ingress
 kubectl -n openim get services
 kubectl -n openim get deployment
 kubectl -n openim get ingress
+kubectl -n openim get pods
