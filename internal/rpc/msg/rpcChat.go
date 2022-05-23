@@ -77,7 +77,7 @@ func (rpc *rpcChat) Run() {
 		log.Error("", "register rpcChat to etcd failed ", err.Error())
 		return
 	}
-
+	go rpc.runCh()
 	err = srv.Serve(listener)
 	if err != nil {
 		log.Error("", "rpc rpcChat failed ", err.Error())
