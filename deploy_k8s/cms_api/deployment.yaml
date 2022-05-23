@@ -40,4 +40,4 @@ spec:
       port: 10006
       targetPort: 10006
   selector:
-    app: cms_api    
+    app: cms-api

@@ -6,6 +6,7 @@
 kubectl create namespace openim
 kubectl -n openim create configmap config --from-file=config/config.yaml
 openim 为im项目的namespace, 可选
+查看configmap
 kubectl -n openim get configmap
 
 ### 3(可选). 修改每个deployment.yml

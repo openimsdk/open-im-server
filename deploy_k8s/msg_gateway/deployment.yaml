@@ -41,6 +41,6 @@ spec:
       port: 10001
       targetPort: 10001
   selector:
-    app: demo    
+    app: msg-gateway
 
     

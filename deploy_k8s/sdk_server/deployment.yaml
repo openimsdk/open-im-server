@@ -40,6 +40,6 @@ spec:
       port: 10003
       targetPort: 10003
   selector:
-    app: demo    
+    app: sdk-server
 
     
