@@ -33,7 +33,6 @@ spec:
         - name: local-db
           hostPath:
             path: /db/sdk
-            type: Directory
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 ---
