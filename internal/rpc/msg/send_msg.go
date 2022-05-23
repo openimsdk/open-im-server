@@ -790,7 +790,7 @@ func valueCopy(pb *pbChat.SendMsgReq) *pbChat.SendMsgReq {
 		options[key] = value
 	}
 	msgData.Options = options
-	return &pbChat.SendMsgReq{Token: "", OperationID: pb.OperationID, MsgData: &msgData}
+	return &pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
 }
 
 func (rpc *rpcChat) sendMsgToGroup(list []string, pb pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
