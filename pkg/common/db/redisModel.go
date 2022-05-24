@@ -266,14 +266,17 @@ func (d *DataBases) GetGroupMemberIDListFromCache(groupID string) ([]string, err
 }
 func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
 	for _, v := range seqList {
+		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
-		result, err := redis.String(d.Exec("HGETALL", key))
+
+		result, err := redis.Bytes(d.Exec("HGETALL", key))
 		if err != nil {
 			errResult = err
 			failedSeqList = append(failedSeqList, v)
+			log2.NewWarn(operationID, "redis get message error:", err.Error(), v)
 		} else {
 			msg := pbCommon.MsgData{}
-			err = json.Unmarshal([]byte(result), &msg)
+			err = json.Unmarshal(result, &msg)
 			if err != nil {
 				errResult = err
 				failedSeqList = append(failedSeqList, v)
