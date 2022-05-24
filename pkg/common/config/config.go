@@ -218,6 +218,7 @@ type config struct {
 	MultiLoginPolicy     int    `yaml:"multiloginpolicy"`
 	ChatPersistenceMysql bool   `yaml:"chatpersistencemysql"`
 	ReliableStorage      bool   `yaml:"reliablestorage"`
+	MsgCacheTimeout      int    `yaml:"msgCacheTimeout"`
 
 	TokenPolicy struct {
 		AccessSecret string `yaml:"accessSecret"`
