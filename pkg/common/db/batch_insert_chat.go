@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/chat"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
@@ -104,8 +103,4 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 	}
 	log.NewWarn(operationID, "batch mgo  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
 	return utils.Wrap(d.SetUserMaxSeq(userID, uint64(currentMaxSeq)), "")
-}
-
-func setMessageToCache(msgList []*server_api_params.MsgData, uid string) (err error) {
-	return err
 }

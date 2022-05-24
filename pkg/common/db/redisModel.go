@@ -3,9 +3,14 @@ package db
 import (
 	"Open_IM/pkg/common/constant"
 	log2 "Open_IM/pkg/common/log"
+	pbChat "Open_IM/pkg/proto/chat"
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/utils"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/garyburd/redigo/redis"
+	"strconv"
 )
 
 const (
@@ -21,6 +26,7 @@ const (
 	friendRelationCache           = "FRIEND_RELATION_CACHE:"
 	blackListCache                = "BLACK_LIST_CACHE:"
 	groupCache                    = "GROUP_CACHE:"
+	messageCache                  = "MESSAGE_CACHE:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -256,4 +262,25 @@ func (d *DataBases) ReduceGroupMemberFromCache(groupID string, userIDList ...str
 func (d *DataBases) GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 	result, err := redis.Strings(d.Exec("SMEMBERS", groupCache+groupID))
 	return result, err
+}
+
+func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string) (err error) {
+	var failedList []pbChat.MsgDataToMQ
+	for _, msg := range msgList {
+		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
+		m, err := utils.Pb2Map(msg.MsgData)
+		if err != nil {
+			log2.NewWarn("", utils.GetSelfFuncName(), "Pb2Map failed", *msg.MsgData, uid, err.Error())
+			continue
+		}
+		_, err = d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
+		if err != nil {
+			log2.NewWarn("", utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid)
+			failedList = append(failedList, *msg)
+		}
+	}
+	if len(failedList) != 0 {
+		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %s", failedList))
+	}
+	return err
 }
