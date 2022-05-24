@@ -269,14 +269,18 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
 
-		result, err := redis.Bytes(d.Exec("HGETALL", key))
+		result, err := redis.Values(d.Exec("HGETALL", key))
 		if err != nil {
 			errResult = err
 			failedSeqList = append(failedSeqList, v)
 			log2.NewWarn(operationID, "redis get message error:", err.Error(), v)
 		} else {
+			var a []byte
+			for _, v := range result {
+				a = append(a, v.(byte))
+			}
 			msg := pbCommon.MsgData{}
-			err = json.Unmarshal(result, &msg)
+			err = json.Unmarshal(a, &msg)
 			if err != nil {
 				errResult = err
 				failedSeqList = append(failedSeqList, v)
