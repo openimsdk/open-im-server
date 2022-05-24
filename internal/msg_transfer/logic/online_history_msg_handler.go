@@ -479,6 +479,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 				cMsg = make([]*sarama.ConsumerMessage, 0, 1000)
 				log.Debug(triggerID, "timer trigger msg consumer end", len(cMsg))
 			}
+		default:
 
 		}
 		//log.NewDebug("", "online kafka get info to mongo", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "online", msg.Offset, claim.HighWaterMarkOffset())
