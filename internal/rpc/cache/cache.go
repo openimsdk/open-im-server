@@ -153,73 +153,56 @@ func updateAllGroupMemberListToCache() error {
 		log.NewWarn("0", utils.GetSelfFuncName(), "getAllGroupIDList failed", err.Error())
 		panic(err.Error())
 	}
-	wg := &sync.WaitGroup{}
-	wg.Add(len(groupIDList))
+
 	for _, groupID := range groupIDList {
-		go func() {
-			defer wg.Done()
-			groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
-			if err != nil {
-				log.NewWarn("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
-				return
+		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
+		if err != nil {
+			log.NewWarn("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
+			continue
+		}
+		if len(groupMemberIDList) > 0 {
+			if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
+				log.NewWarn("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
 			}
-			//log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
-			if len(groupMemberIDList) > 0 {
-				if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
-					log.NewWarn("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
-				}
-			}
-		}()
+		}
 	}
-	wg.Wait()
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }
 
 func updateAllFriendToCache(userList []db.User) error {
 	log.NewInfo("0", utils.GetSelfFuncName())
-	wg := sync.WaitGroup{}
-	wg.Add(len(userList))
 	for _, user := range userList {
-		go func() {
-			defer wg.Done()
-			friendIDList, err := imdb.GetFriendIDListByUserID(user.UserID)
-			if err != nil {
-				log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
-				return
+		friendIDList, err := imdb.GetFriendIDListByUserID(user.UserID)
+		if err != nil {
+			log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
+			continue
+		}
+		if len(friendIDList) > 0 {
+			if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
+				log.NewWarn("0", utils.GetSelfFuncName(), err.Error(), friendIDList, user.UserID)
 			}
-			if len(friendIDList) > 0 {
-				if err := db.DB.AddFriendToCache(user.UserID, friendIDList...); err != nil {
-					log.NewWarn("0", utils.GetSelfFuncName(), err.Error(), friendIDList, user.UserID)
-				}
-			}
-		}()
+		}
 	}
-	wg.Wait()
+
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }
 
 func updateAllBlackListToCache(userList []db.User) error {
 	log.NewInfo("0", utils.GetSelfFuncName())
-	wg := &sync.WaitGroup{}
-	wg.Add(len(userList))
 	for _, user := range userList {
-		go func() {
-			defer wg.Done()
-			blackIDList, err := imdb.GetBlackIDListByUserID(user.UserID)
-			if err != nil {
-				log.NewWarn("", utils.GetSelfFuncName(), err.Error())
-				return
+		blackIDList, err := imdb.GetBlackIDListByUserID(user.UserID)
+		if err != nil {
+			log.NewWarn("", utils.GetSelfFuncName(), err.Error())
+			continue
+		}
+		if len(blackIDList) > 0 {
+			if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
+				log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
 			}
-			if len(blackIDList) > 0 {
-				if err := db.DB.AddBlackUserToCache(user.UserID, blackIDList...); err != nil {
-					log.NewWarn("0", utils.GetSelfFuncName(), err.Error())
-				}
-			}
-		}()
+		}
 	}
-	wg.Wait()
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }
