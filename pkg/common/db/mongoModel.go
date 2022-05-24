@@ -893,6 +893,10 @@ func getSeqUid(uid string, seq uint32) string {
 	return indexGen(uid, seqSuffix)
 }
 
+func GetSeqUid(uid string, seq uint32) string {
+	return getSeqUid(uid, seq)
+}
+
 func getMsgIndex(seq uint32) int {
 	seqSuffix := seq / singleGocMsgNum
 	var index uint32
