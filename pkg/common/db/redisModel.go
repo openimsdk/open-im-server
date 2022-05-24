@@ -273,9 +273,10 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string)
 			log2.NewWarn("", utils.GetSelfFuncName(), "Pb2Map failed", *msg.MsgData, uid, err.Error())
 			continue
 		}
+		log2.NewDebug("", "m", m)
 		_, err = d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
 		if err != nil {
-			log2.NewWarn("", utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid)
+			log2.NewWarn("", utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, m)
 			failedList = append(failedList, *msg)
 		}
 	}
