@@ -275,6 +275,7 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 			msg := pbCommon.MsgData{}
 			err = json.Unmarshal([]byte(result), &msg)
 			if err != nil {
+				errResult = err
 				failedSeqList = append(failedSeqList, v)
 				log2.NewWarn(operationID, "Unmarshal err", result, err.Error())
 			} else {
