@@ -15,6 +15,7 @@ const OnlineTopicVacancy = 0
 const Msg = 2
 const ConsumerMsgs = 3
 const UserMessages = 4
+const MongoMessages = 5
 const ChannelNum = 100
 
 var (
