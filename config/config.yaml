@@ -228,7 +228,7 @@ chatpersistencemysql: true
 #可靠性存储
 reliablestorage: false
 #消息缓存时间
-msgCacheTimeout: 60 * 60
+msgCacheTimeout: 1800
 
 #token config
 tokenpolicy:
