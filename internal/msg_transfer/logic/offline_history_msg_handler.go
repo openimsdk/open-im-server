@@ -76,7 +76,7 @@ func (och *OfflineHistoryConsumerHandler) Run(channelID int) {
 				//	return
 				//}
 
-				err := saveUserChatList(msgChannelValue.userID, storageMsgList, triggerID)
+				err, _ := saveUserChatList(msgChannelValue.userID, storageMsgList, triggerID)
 				if err != nil {
 					singleMsgFailedCount += uint64(len(storageMsgList))
 					log.NewError(triggerID, "single data insert to mongo err", err.Error(), storageMsgList)
