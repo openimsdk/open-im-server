@@ -24,5 +24,6 @@ func saveUserChat(uid string, msg *pbMsg.MsgDataToMQ) error {
 
 func saveUserChatList(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) error {
 	log.Info(operationID, utils.GetSelfFuncName(), "args ", userID, len(msgList))
-	return db.DB.BatchInsertChat(userID, msgList, operationID)
+	//return db.DB.BatchInsertChat(userID, msgList, operationID)
+	return db.DB.BatchInsertChatBoth(userID, msgList, operationID)
 }
