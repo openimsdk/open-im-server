@@ -269,9 +269,7 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
 		result, err := redis.String(d.Exec("HGETALL", key))
 		if err != nil {
-			if err != redis.ErrNil {
-				errResult = err
-			}
+			errResult = err
 			failedSeqList = append(failedSeqList, v)
 		} else {
 			msg := pbCommon.MsgData{}
@@ -280,6 +278,7 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 				failedSeqList = append(failedSeqList, v)
 				log2.NewWarn(operationID, "Unmarshal err", result, err.Error())
 			} else {
+				log2.NewDebug(operationID, "redis get msg is ", msg.String())
 				seqMsg = append(seqMsg, &msg)
 			}
 
@@ -288,24 +287,24 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 	return seqMsg, failedSeqList, errResult
 }
 
-func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string) (err error) {
+func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	var failedList []pbChat.MsgDataToMQ
 	for _, msg := range msgList {
 		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
 		m, err := utils.Pb2Map(msg.MsgData)
 		if err != nil {
-			log2.NewWarn("", utils.GetSelfFuncName(), "Pb2Map failed", *msg.MsgData, uid, err.Error())
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "Pb2Map failed", msg.MsgData.String(), uid, err.Error())
 			continue
 		}
-		log2.NewDebug("", "m", m)
+		log2.NewDebug(operationID, "convert map is ", m)
 		_, err = d.Exec("hmset", key, redis.Args{}.Add("TIMEOUT", config.Config.MsgCacheTimeout).AddFlat(m)...)
 		if err != nil {
-			log2.NewWarn("", utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, m)
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, m)
 			failedList = append(failedList, *msg)
 		}
 	}
 	if len(failedList) != 0 {
 		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %s", failedList))
 	}
-	return err
+	return nil
 }
