@@ -6,7 +6,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-  name: sdk-server.openim.xxx.com
+  name: sdk-server-ingress
 spec:
   rules:
     - host: sdk-server.openim.xxx.com
@@ -27,7 +27,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-  name: msg-gateway.openim.xxx.com
+  name: msg-gateway-ingress
 spec:
   rules:
     - host: msg-gateway.openim.xxx.com
@@ -44,7 +44,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: api.openim.xxx.com
+  name: api-ingress
 spec:
   rules:
     - host: api.openim.xxx.com
@@ -61,24 +61,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: demo.openim.xxx.com
-spec:
-  rules:
-    - host: demo.openim.xxx.com
-      http:
-        paths:
-          - backend:
-              service:
-                name: demo
-                port:
-                  number: 42233
-            path: /
-            pathType: Prefix
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: demo.openim.xxx.com
+  name: demo-ingress
 spec:
   rules:
     - host: demo.openim.xxx.com
@@ -95,7 +78,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cms-api.openim.xxx.com
+  name: cms-api-ingress
 spec:
   rules:
     - host: cms-api.openim.xxx.com

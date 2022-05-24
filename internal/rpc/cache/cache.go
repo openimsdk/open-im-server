@@ -94,9 +94,21 @@ func SyncDB2Cache() error {
 		return utils.Wrap(err, "")
 	}
 	//err = updateAllUserToCache(userList)
-	err = updateAllFriendToCache(userList)
-	err = updateAllBlackListToCache(userList)
-	err = updateAllGroupMemberListToCache()
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		err = updateAllFriendToCache(userList)
+	}()
+	go func() {
+		defer wg.Done()
+		err = updateAllBlackListToCache(userList)
+	}()
+	go func() {
+		defer wg.Done()
+		err = updateAllGroupMemberListToCache()
+	}()
+	wg.Wait()
 	return utils.Wrap(err, "")
 }
 
