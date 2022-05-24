@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
+	"github.com/golang/protobuf/jsonpb"
 	"strconv"
 )
 
@@ -269,18 +270,14 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
 
-		result, err := redis.Values(d.Exec("HGETALL", key))
+		result, err := redis.String(d.Exec("GET", key))
 		if err != nil {
 			errResult = err
 			failedSeqList = append(failedSeqList, v)
 			log2.NewWarn(operationID, "redis get message error:", err.Error(), v)
 		} else {
-			var a []byte
-			for _, v := range result {
-				a = append(a, v.(byte))
-			}
 			msg := pbCommon.MsgData{}
-			err = json.Unmarshal(a, &msg)
+			err = jsonpb.UnmarshalString(result, &msg)
 			if err != nil {
 				errResult = err
 				failedSeqList = append(failedSeqList, v)
@@ -299,15 +296,15 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 	var failedList []pbChat.MsgDataToMQ
 	for _, msg := range msgList {
 		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
-		m, err := utils.Pb2Map(msg.MsgData)
+		s, err := utils.Pb2String(msg.MsgData)
 		if err != nil {
-			log2.NewWarn(operationID, utils.GetSelfFuncName(), "Pb2Map failed", msg.MsgData.String(), uid, err.Error())
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "Pb2String failed", msg.MsgData.String(), uid, err.Error())
 			continue
 		}
-		log2.NewDebug(operationID, "convert map is ", m)
-		_, err = d.Exec("hmset", key, redis.Args{}.Add("TIMEOUT", config.Config.MsgCacheTimeout).AddFlat(m)...)
+		log2.NewDebug(operationID, "convert string is ", s)
+		_, err = d.Exec("SET", key, s, "ex", config.Config.MsgCacheTimeout)
 		if err != nil {
-			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, m)
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, s)
 			failedList = append(failedList, *msg)
 		}
 	}
