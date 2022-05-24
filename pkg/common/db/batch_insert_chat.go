@@ -10,8 +10,6 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"
-	"runtime"
-	"time"
 )
 
 func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string, currentMaxSeq uint64) error {
@@ -120,23 +118,22 @@ func (d *DataBases) BatchInsertChat2Cache(userID string, msgList []*pbMsg.MsgDat
 	return utils.Wrap(d.SetUserMaxSeq(userID, uint64(currentMaxSeq)), ""), lastMaxSeq
 }
 
-func (d *DataBases) BatchInsertChatBoth(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) error {
-	err, lastMaxSeq := d.BatchInsertChat2Cache(userID, msgList, operationID)
-	if err != nil {
-		log.Error(operationID, "BatchInsertChat2Cache failed ", err.Error(), userID, len(msgList))
-		return err
-	}
-	for {
-		if runtime.NumGoroutine() > 50000 {
-			log.NewWarn(operationID, "too many NumGoroutine ", runtime.NumGoroutine())
-			time.Sleep(10 * time.Millisecond)
-		} else {
-			break
-		}
-	}
-	go d.BatchInsertChat2DB(userID, msgList, operationID, lastMaxSeq)
-	return nil
-}
+//func (d *DataBases) BatchInsertChatBoth(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) (error, uint64) {
+//	err, lastMaxSeq := d.BatchInsertChat2Cache(userID, msgList, operationID)
+//	if err != nil {
+//		log.Error(operationID, "BatchInsertChat2Cache failed ", err.Error(), userID, len(msgList))
+//		return err, 0
+//	}
+//	for {
+//		if runtime.NumGoroutine() > 50000 {
+//			log.NewWarn(operationID, "too many NumGoroutine ", runtime.NumGoroutine())
+//			time.Sleep(10 * time.Millisecond)
+//		} else {
+//			break
+//		}
+//	}
+//	return nil, lastMaxSeq
+//}
 
 func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) error {
 	newTime := getCurrentTimestampByMill()
