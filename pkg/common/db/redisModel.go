@@ -263,6 +263,29 @@ func (d *DataBases) GetGroupMemberIDListFromCache(groupID string) ([]string, err
 	result, err := redis.Strings(d.Exec("SMEMBERS", groupCache+groupID))
 	return result, err
 }
+func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
+	for _, v := range seqList {
+		key := messageCache + userID + "_" + strconv.Itoa(int(v))
+		result, err := redis.String(d.Exec("HGETALL", key))
+		if err != nil {
+			if err != redis.ErrNil {
+				errResult = err
+			}
+			failedSeqList = append(failedSeqList, v)
+		} else {
+			msg := pbCommon.MsgData{}
+			err = json.Unmarshal([]byte(result), &msg)
+			if err != nil {
+				failedSeqList = append(failedSeqList, v)
+				log2.NewWarn(operationID, "Unmarshal err", result, err.Error())
+			} else {
+				seqMsg = append(seqMsg, &msg)
+			}
+
+		}
+	}
+	return seqMsg, failedSeqList, errResult
+}
 
 func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string) (err error) {
 	var failedList []pbChat.MsgDataToMQ
