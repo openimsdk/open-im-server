@@ -130,7 +130,7 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 				//	return
 				//}
 				log.Debug(triggerID, "msg storage length", len(storageMsgList), "push length", len(notStoragepushMsgList))
-				err, _ := saveUserChatList(msgChannelValue.userID, storageMsgList, triggerID)
+				err, lastSeq := saveUserChatList(msgChannelValue.userID, storageMsgList, triggerID)
 				if err != nil {
 					singleMsgFailedCount += uint64(len(storageMsgList))
 					log.NewError(triggerID, "single data insert to redis err", err.Error(), storageMsgList)
@@ -138,7 +138,7 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 					singleMsgSuccessCountMutex.Lock()
 					singleMsgSuccessCount += uint64(len(storageMsgList))
 					singleMsgSuccessCountMutex.Unlock()
-					//och.SendMessageToMongoCH(msgChannelValue.userID, triggerID, storageMsgList, lastSeq)
+					och.SendMessageToMongoCH(msgChannelValue.userID, triggerID, storageMsgList, lastSeq)
 					go func(push, storage []*pbMsg.MsgDataToMQ) {
 						for _, v := range storage {
 							sendMessageToPush(v, msgChannelValue.userID)
@@ -155,6 +155,7 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 	}
 }
 func (och *OnlineHistoryConsumerHandler) SendMessageToMongoCH(userID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq uint64) {
+	return
 	hashCode := getHashCode(userID)
 	channelID := hashCode % ChannelNum
 	log.Debug(triggerID, "generate channelID", hashCode, channelID, userID)
