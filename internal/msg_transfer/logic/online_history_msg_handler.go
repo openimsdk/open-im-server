@@ -164,7 +164,7 @@ func (och *OnlineHistoryConsumerHandler) SendMessageToMongoCH(userID string, tri
 func (och *OnlineHistoryConsumerHandler) MongoMessageRun(channelID int) {
 	for {
 		select {
-		case cmd := <-och.chArrays[channelID]:
+		case cmd := <-och.chMongoArrays[channelID]:
 			switch cmd.Cmd {
 			case MongoMessages:
 				msgChannelValue := cmd.Value.(MsgChannelValue)
