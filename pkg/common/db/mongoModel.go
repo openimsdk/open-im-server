@@ -110,7 +110,7 @@ func (d *DataBases) DelMsgBySeqList(userID string, seqList []uint32, operationID
 			defer wg.Done()
 			unexistSeqList, err := d.DelMsgBySeqListInOneDoc(suffixUserID, subSeqList, operationID)
 			if err != nil {
-				log.Error(operationID, "DelMsgBySeqListInOneDoc failed ", e.Error(), suffixUserID, subSeqList)
+				log.Error(operationID, "DelMsgBySeqListInOneDoc failed ", err.Error(), suffixUserID, subSeqList)
 				return
 			}
 			lock.Lock()
