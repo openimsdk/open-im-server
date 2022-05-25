@@ -91,10 +91,11 @@ func (rpc *rpcChat) runCh() {
 	for {
 		select {
 		case msg := <-rpc.delMsgCh:
-			if err := db.DB.DelMsgBySeqList(msg.UserID, msg.SeqList, msg.OperationID); err != nil {
-				log.NewError(msg.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList qrgs: ", msg.UserID, msg.SeqList, msg.OperationID, err.Error())
+			if unexistSeqList, err := db.DB.DelMsgBySeqList(msg.UserID, msg.SeqList, msg.OperationID); err != nil {
+				log.NewError(msg.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList args: ", msg.UserID, msg.SeqList, msg.OperationID, err.Error())
+				DeleteMessageNotification(msg.OpUserID, msg.UserID, unexistSeqList, msg.OperationID)
 			}
-			db.DataBases.DelMsgFromCache(msg.SeqList, msg.UserID, msg.OperationID)
+			db.DB.DelMsgFromCache(msg.UserID, msg.SeqList, msg.OperationID)
 		}
 	}
 }
