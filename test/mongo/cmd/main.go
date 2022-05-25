@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	mongo2 "Open_IM/test/mongo"
