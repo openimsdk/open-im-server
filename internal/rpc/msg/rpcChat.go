@@ -91,6 +91,7 @@ func (rpc *rpcChat) runCh() {
 	for {
 		select {
 		case msg := <-rpc.delMsgCh:
+			log.NewInfo(msg.OperationID, utils.GetSelfFuncName(), "delmsgch recv new: ", msg)
 			db.DB.DelMsgFromCache(msg.UserID, msg.SeqList, msg.OperationID)
 			unexistSeqList, err := db.DB.DelMsgBySeqList(msg.UserID, msg.SeqList, msg.OperationID)
 			if err != nil {
