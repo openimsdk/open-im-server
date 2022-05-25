@@ -445,7 +445,12 @@ message ConversationSetPrivateTips{
  bool isPrivate = 3;
 }
 
-
+////////////////////message///////////////////////
+message DeleteMessageTips{
+  string opUserID = 1;
+  string userID =2;
+  repeated string seqList = 3;
+}
 ///cms
 message RequestPagination {
   int32 pageNumber = 1;
