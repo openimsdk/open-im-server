@@ -330,7 +330,7 @@ func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID st
 			log2.NewWarn(operationID, utils.GetSelfFuncName(), "string2Pb failed", msg, err.Error())
 			continue
 		}
-		msg.Status = 4
+		msg.Status = constant.MsgDeleted
 		s, err := utils.Pb2String(&msg)
 		if err != nil {
 			log2.NewWarn(operationID, utils.GetSelfFuncName(), "Pb2String failed", msg, err.Error())
