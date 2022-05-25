@@ -313,3 +313,31 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 	}
 	return nil
 }
+
+func (d *DataBases) DelMsgFromCache(seqList []uint32, uid, operationID string) {
+	for _, seq := range seqList {
+		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
+		result, err := redis.String(d.Exec("GET", key))
+		if err != nil {
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key)
+			continue
+		}
+		log2.Debug(operationID, utils.GetSelfFuncName(), "del result", result)
+		var msg pbCommon.MsgData
+		err = utils.String2Pb(result, &msg)
+		if err != nil {
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "string2Pb failed", msg, err.Error())
+			continue
+		}
+		msg.Status = 4
+		s, err := utils.Pb2String(&msg)
+		if err != nil {
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "Pb2String failed", msg, err.Error())
+			continue
+		}
+		_, err = d.Exec("SET", key, s, "ex", config.Config.MsgCacheTimeout)
+		if err != nil {
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, msg, s)
+		}
+	}
+}

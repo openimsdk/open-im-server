@@ -143,7 +143,10 @@ func Pb2String(pb proto.Message) (string, error) {
 		EmitDefaults: false,
 	}
 	return marshaler.MarshalToString(pb)
+}
 
+func String2Pb(s string, pb proto.Message) error {
+	return proto.Unmarshal([]byte(s), pb)
 }
 
 func Map2Pb(m map[string]interface{}) (pb proto.Message, err error) {
