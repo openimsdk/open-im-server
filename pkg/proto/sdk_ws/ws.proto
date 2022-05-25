@@ -449,7 +449,7 @@ message ConversationSetPrivateTips{
 message DeleteMessageTips{
   string opUserID = 1;
   string userID =2;
-  repeated string seqList = 3;
+  repeated uint32 seqList = 3;
 }
 ///cms
 message RequestPagination {
