@@ -46,8 +46,8 @@ const (
 	GroupMsg       = 201
 
 	//SysRelated
-	NotificationBegin = 1000
-
+	NotificationBegin                     = 1000
+	DeleteMessageNotification             = 1100
 	FriendApplicationApprovedNotification = 1201 //add_friend_response
 	FriendApplicationRejectedNotification = 1202 //add_friend_response
 	FriendApplicationNotification         = 1203 //add_friend
