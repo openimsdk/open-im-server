@@ -39,7 +39,6 @@ type OnlineHistoryConsumerHandler struct {
 	msgHandle            map[string]fcb
 	historyConsumerGroup *kfk.MConsumerGroup
 	cmdCh                chan Cmd2Value
-	msgCh                chan Cmd2Value
 	chArrays             [ChannelNum]chan Cmd2Value
 	chMongoArrays        [ChannelNum]chan Cmd2Value
 	msgDistributionCh    chan Cmd2Value
@@ -50,13 +49,12 @@ func (och *OnlineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
 	och.msgDistributionCh = make(chan Cmd2Value) //no buffer channel
 	go och.MessagesDistributionHandle()
 	och.cmdCh = cmdCh
-	och.msgCh = make(chan Cmd2Value, 1000)
 	for i := 0; i < ChannelNum; i++ {
-		och.chArrays[i] = make(chan Cmd2Value, 1000)
+		och.chArrays[i] = make(chan Cmd2Value, 100)
 		go och.Run(i)
 	}
 	for i := 0; i < ChannelNum; i++ {
-		och.chMongoArrays[i] = make(chan Cmd2Value, 10000)
+		och.chMongoArrays[i] = make(chan Cmd2Value, 1000)
 		go och.MongoMessageRun(i)
 	}
 	if config.Config.ReliableStorage {
