@@ -55,7 +55,7 @@ func (och *OnlineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
 		go och.Run(i)
 	}
 	for i := 0; i < ChannelNum; i++ {
-		och.chMongoArrays[i] = make(chan Cmd2Value, 100)
+		och.chMongoArrays[i] = make(chan Cmd2Value, 1000)
 		go och.MongoMessageRun(i)
 	}
 	if config.Config.ReliableStorage {
