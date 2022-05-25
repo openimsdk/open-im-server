@@ -94,7 +94,7 @@ func (rpc *rpcChat) runCh() {
 			if err := db.DB.DelMsgBySeqList(msg.UserID, msg.SeqList, msg.OperationID); err != nil {
 				log.NewError(msg.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList qrgs: ", msg.UserID, msg.SeqList, msg.OperationID, err.Error())
 			}
-			db.DataBases.DelMsgFromCache(msg.SeqList, msg.UserID, msg.OperationID)
+			//db.DataBases.DelMsgFromCache(msg.SeqList, msg.UserID, msg.OperationID)
 		}
 	}
 }
