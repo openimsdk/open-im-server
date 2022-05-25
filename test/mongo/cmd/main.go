@@ -26,6 +26,6 @@ func init() {
 func main() {
 	userID := flag.String("userID", "", "userID")
 	flag.Parse()
-	fmt.Println("userID:", userID)
+	fmt.Println("userID:", *userID)
 	mongo2.GetUserAllChat(*userID)
 }
