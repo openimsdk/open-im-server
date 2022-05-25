@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/db"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"context"
 	"fmt"
@@ -16,10 +15,20 @@ var (
 	Client *mongo.Client
 )
 
+type MsgInfo struct {
+	SendTime int64
+	Msg      []byte
+}
+
+type UserChat struct {
+	UID string
+	Msg []MsgInfo
+}
+
 func GetUserAllChat(uid string) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	collection := Client.Database(config.Config.Mongo.DBDatabase).Collection("msg")
-	var userChatList []db.UserChat
+	var userChatList []UserChat
 	uid = uid + ":"
 	filter := bson.M{"uid": bson.M{"$regex": uid}}
 	//filter := bson.M{"uid": "17726378428:0"}
