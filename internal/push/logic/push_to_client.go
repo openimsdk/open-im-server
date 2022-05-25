@@ -19,6 +19,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
+	"google.golang.org/grpc"
 	"strings"
 )
 
@@ -34,11 +35,16 @@ type AtContent struct {
 	IsAtSelf   bool     `json:"isAtSelf"`
 }
 
+var grpcCons []*grpc.ClientConn
+
 func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingleMsgToUser
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
 	log.Debug(pushMsg.OperationID, "Get msg from msg_transfer And push msg", pushMsg.String())
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+	if len(grpcCons) == 0 {
+		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
+		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+	}
 	//Online push message
 	log.Debug("test", pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
 	for _, v := range grpcCons {
