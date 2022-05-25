@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
+	"time"
 )
 
 var (
@@ -17,14 +18,15 @@ var (
 )
 
 func GetUserAllChat(uid string) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	collection := Client.Database(config.Config.Mongo.DBDatabase).Collection("msg")
 	var userChatList []db.UserChat
 	result, err := collection.Find(context.Background(), bson.M{"uid": primitive.Regex{Pattern: uid}})
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("find error", err.Error())
 		return
 	}
-	if err := result.All(context.Background(), &userChatList); err != nil {
+	if err := result.All(ctx, &userChatList); err != nil {
 		fmt.Println(err.Error())
 	}
 	for _, userChat := range userChatList {
