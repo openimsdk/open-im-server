@@ -9,17 +9,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	client *mongo.Client
-)
-
 func init() {
 	clientOptions := options.Client().ApplyURI("mongodb://127.0.0.1:37017/openIM/?maxPoolSize=100")
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	var err error
+	mongo2.Client, err = mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		panic(err)
 	}
-	err = client.Ping(context.TODO(), nil)
+	err = mongo2.Client.Ping(context.TODO(), nil)
 	if err != nil {
 		panic(err)
 	}
