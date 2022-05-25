@@ -4,15 +4,21 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/db"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/test/mongo/cmd"
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
 )
 
+var (
+	Client *mongo.Client
+)
+
 func GetUserAllChat(uid string) {
-	collection := client.Database(config.Config.Mongo.DBDatabase).Collection("msg")
+	collection := Client.Database(config.Config.Mongo.DBDatabase).Collection("msg")
 	var userChatList []db.UserChat
 	result, err := collection.Find(context.Background(), bson.M{"uid": primitive.Regex{Pattern: uid}})
 	if err != nil {
