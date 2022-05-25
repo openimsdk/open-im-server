@@ -20,6 +20,7 @@ func GetUserAllChat(uid string) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	collection := Client.Database(config.Config.Mongo.DBDatabase).Collection("msg")
 	var userChatList []db.UserChat
+	uid = uid + ":"
 	filter := bson.M{"uid": bson.M{"$regex": uid}}
 	//filter := bson.M{"uid": "17726378428:0"}
 	result, err := collection.Find(context.Background(), filter)
