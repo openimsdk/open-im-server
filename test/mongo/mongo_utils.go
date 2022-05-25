@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/db"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
-	"Open_IM/test/mongo/cmd"
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/proto"
