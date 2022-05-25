@@ -99,7 +99,7 @@ func (rpc *rpcChat) runCh() {
 				continue
 			}
 			if len(unexistSeqList) > 0 {
-				DeleteMessageNotification(msg.OpUserID, msg.UserID, msg.SeqList, msg.OperationID)
+				DeleteMessageNotification(msg.OpUserID, msg.UserID, unexistSeqList, msg.OperationID)
 			}
 		}
 	}
