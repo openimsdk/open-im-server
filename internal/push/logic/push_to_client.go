@@ -7,8 +7,6 @@
 package logic
 
 import (
-	pusher "Open_IM/internal/push"
-	"Open_IM/internal/push/getui"
 	jpush "Open_IM/internal/push/jpush"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -101,14 +99,6 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 					default:
 						content = constant.ContentType2PushContent[constant.Common]
 					}
-				}
-				var offlinePusher pusher.OfflinePusher
-				if config.Config.Push.Getui.Enable {
-					log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), config.Config.Push.Getui)
-					offlinePusher = getui.GetuiClient
-				}
-				if config.Config.Push.Jpns.Enable {
-					offlinePusher = jpush.JPushClient
 				}
 				if offlinePusher == nil {
 					offlinePusher = jpush.JPushClient
