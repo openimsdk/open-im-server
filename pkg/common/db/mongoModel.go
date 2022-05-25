@@ -116,7 +116,6 @@ func (d *DataBases) DelMsgBySeqList(userID string, seqList []uint32, operationID
 			lock.Lock()
 			totalUnexistSeqList = append(totalUnexistSeqList, unexistSeqList...)
 			lock.Unlock()
-			wg.Done()
 		}(k, v, operationID)
 	}
 	return totalUnexistSeqList, err
