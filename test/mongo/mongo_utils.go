@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
 	"time"
