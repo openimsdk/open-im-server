@@ -21,7 +21,7 @@ func GetUserAllChat(uid string) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	collection := Client.Database(config.Config.Mongo.DBDatabase).Collection("msg")
 	var userChatList []db.UserChat
-	result, err := collection.Find(context.Background(), bson.M{"uid": primitive.Regex{Pattern: uid}})
+	result, err := collection.Find(context.Background(), bson.M{"uid": bson.M{"$regex": uid}})
 	if err != nil {
 		fmt.Println("find error", err.Error())
 		return
