@@ -336,7 +336,7 @@ func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID st
 			log2.NewWarn(operationID, utils.GetSelfFuncName(), "Pb2String failed", msg, err.Error())
 			continue
 		}
-		_, err = d.Exec("SET", key, s, "ex", config.Config.MsgCacheTimeout)
+		_, err = d.Exec("SET", key, s)
 		if err != nil {
 			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, msg, s)
 		}
