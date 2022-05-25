@@ -427,8 +427,8 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 					rwLock.Unlock()
 					split := 1000
 					triggerID = utils.OperationIDGenerator()
+					log.NewWarn(triggerID, "timer trigger msg consumer start", len(ccMsg))
 					for i := 0; i < len(ccMsg)/split; i++ {
-						log.NewWarn(triggerID, "timer trigger msg consumer start", len(ccMsg))
 						//log.Debug()
 						och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
 							triggerID: triggerID, cmsgList: ccMsg[i*split : (i+1)*split]}}
