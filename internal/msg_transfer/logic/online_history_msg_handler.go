@@ -154,7 +154,6 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 	}
 }
 func (och *OnlineHistoryConsumerHandler) SendMessageToMongoCH(userID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq uint64) {
-	return
 	hashCode := getHashCode(userID)
 	channelID := hashCode % ChannelNum
 	log.Debug(triggerID, "generate channelID", hashCode, channelID, userID)
