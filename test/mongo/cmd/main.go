@@ -1,6 +1,7 @@
-package mongo
+package cmd
 
 import (
+	mongo2 "Open_IM/test/mongo"
 	"context"
 	"flag"
 	"fmt"
@@ -12,7 +13,7 @@ var (
 	client *mongo.Client
 )
 
-func initDB() {
+func init() {
 	clientOptions := options.Client().ApplyURI("mongodb://127.0.0.1:37017/openIM/?maxPoolSize=100")
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -29,5 +30,5 @@ func main() {
 	userID := flag.String("userID", "", "userID")
 	flag.Parse()
 	fmt.Println("userID:", userID)
-	GetUserAllChat(*userID)
+	mongo2.GetUserAllChat(*userID)
 }
