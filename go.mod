@@ -4,25 +4,21 @@ go 1.15
 
 require (
 	github.com/Shopify/sarama v1.32.0
-	github.com/Shopify/toxiproxy v2.1.4+incompatible // indirect
 	github.com/alibabacloud-go/darabonba-openapi v0.1.11
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.8
 	github.com/alibabacloud-go/sts-20150401 v1.1.0
 	github.com/alibabacloud-go/tea v1.1.17
 	github.com/antonfisher/nested-logrus-formatter v1.3.0
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/eapache/go-resiliency v1.2.0 // indirect
-	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
-	github.com/eapache/queue v1.1.0 // indirect
 	github.com/fatih/structs v1.1.0
 	github.com/garyburd/redigo v1.6.2
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/golang/protobuf v1.5.2
-	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/jinzhu/copier v0.3.4
 	github.com/jinzhu/gorm v1.9.16
@@ -36,9 +32,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/olivere/elastic/v7 v7.0.23
-	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0

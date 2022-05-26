@@ -10,7 +10,12 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+func (d *DataBases) BatchDeleteChat2DB(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) {
+
+}
 
 func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string, currentMaxSeq uint64) error {
 	newTime := getCurrentTimestampByMill()
@@ -68,8 +73,20 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 		log.NewDebug(operationID, "filter ", seqUid, "list ", msgListToMongo)
 		err := c.FindOneAndUpdate(ctx, filter, bson.M{"$push": bson.M{"msg": bson.M{"$each": msgListToMongo}}}).Err()
 		if err != nil {
-			log.Error(operationID, "FindOneAndUpdate failed ", err.Error(), filter)
-			return utils.Wrap(err, "")
+			if err == mongo.ErrNoDocuments {
+				filter := bson.M{"uid": seqUid}
+				sChat := UserChat{}
+				sChat.UID = seqUid
+				sChat.Msg = msgListToMongo
+				log.NewDebug(operationID, "filter ", seqUid, "list ", msgListToMongo)
+				if _, err = c.InsertOne(ctx, &sChat); err != nil {
+					log.NewError(operationID, "InsertOne failed", filter, err.Error(), sChat)
+					return utils.Wrap(err, "")
+				}
+			} else {
+				log.Error(operationID, "FindOneAndUpdate failed ", err.Error(), filter)
+				return utils.Wrap(err, "")
+			}
 		}
 	}
 	if seqUidNext != "" {
@@ -231,3 +248,9 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 //func (d *DataBases)setMessageToCache(msgList []*pbMsg.MsgDataToMQ, uid string) (err error) {
 //
 //}
+
+func (d *DataBases) GetFromCacheAndInsertDB(msgUserIDPrefix string) {
+	//get value from redis
+
+	//batch insert to db
+}
