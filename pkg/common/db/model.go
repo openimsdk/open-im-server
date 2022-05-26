@@ -20,9 +20,7 @@ import (
 	//"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	//	"go.mongodb.org/mongo-driver/mongo/options"
-
-
-//go_redis "github.com/go-redis/redis/v8"
+	//go_redis "github.com/go-redis/redis/v8"
 )
 
 var DB DataBases
@@ -32,8 +30,6 @@ type DataBases struct {
 	mgoSession  *mgo.Session
 	redisPool   *redis.Pool
 	mongoClient *mongo.Client
-
-	rdb *
 }
 
 func key(dbAddress, dbName string) string {
