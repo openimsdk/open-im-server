@@ -28,7 +28,7 @@ import (
 
 var validate *validator.Validate
 
-func newUserSendMsgReq(params *ManagementSendMsgReq) *pbChat.SendMsgReq {
+func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 	var newContent string
 	var err error
 	switch params.ContentType {
@@ -91,7 +91,7 @@ func init() {
 
 func ManagementSendMsg(c *gin.Context) {
 	var data interface{}
-	params := ManagementSendMsgReq{}
+	params := api.ManagementSendMsgReq{}
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		log.Error(c.PostForm("operationID"), "json unmarshal err", err.Error(), c.PostForm("content"))
@@ -186,34 +186,113 @@ func ManagementSendMsg(c *gin.Context) {
 	resp := api.ManagementSendMsgResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, ResultList: server_api_params.UserSendMsgResp{ServerMsgID: RpcResp.ServerMsgID, ClientMsgID: RpcResp.ClientMsgID, SendTime: RpcResp.SendTime}}
 	log.Info(params.OperationID, "ManagementSendMsg return", resp)
 	c.JSON(http.StatusOK, resp)
-
 }
 
-//
-//type MergeElem struct {
-//	Title        string       `json:"title"`
-//	AbstractList []string     `json:"abstractList"`
-//	MultiMessage []*MsgStruct `json:"multiMessage"`
-//}
-//
-//type QuoteElem struct {
-//	Text         string     `json:"text"`
-//	QuoteMessage *MsgStruct `json:"quoteMessage"`
-//}
-type ManagementSendMsgReq struct {
-	OperationID      string                       `json:"operationID" binding:"required"`
-	SendID           string                       `json:"sendID" binding:"required"`
-	RecvID           string                       `json:"recvID" `
-	GroupID          string                       `json:"groupID" `
-	SenderNickname   string                       `json:"senderNickname" `
-	SenderFaceURL    string                       `json:"senderFaceURL" `
-	SenderPlatformID int32                        `json:"senderPlatformID"`
-	ForceList        []string                     `json:"forceList" `
-	Content          map[string]interface{}       `json:"content" binding:"required"`
-	ContentType      int32                        `json:"contentType" binding:"required"`
-	SessionType      int32                        `json:"sessionType" binding:"required"`
-	IsOnlineOnly     bool                         `json:"isOnlineOnly"`
-	OfflinePushInfo  *open_im_sdk.OfflinePushInfo `json:"offlinePushInfo"`
+func ManagementBatchSendMsg(c *gin.Context) {
+	var data interface{}
+	params := api.ManagementBatchSendMsgReq{}
+	resp := api.ManagementBatchSendMsgResp{}
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		log.Error(c.PostForm("operationID"), "json unmarshal err", err.Error(), c.PostForm("content"))
+		return
+	}
+	switch params.ContentType {
+	case constant.Text:
+		data = TextElem{}
+	case constant.Picture:
+		data = PictureElem{}
+	case constant.Voice:
+		data = SoundElem{}
+	case constant.Video:
+		data = VideoElem{}
+	case constant.File:
+		data = FileElem{}
+	//case constant.AtText:
+	//	data = AtElem{}
+	//case constant.Merger:
+	//	data =
+	//case constant.Card:
+	//case constant.Location:
+	case constant.Custom:
+		data = CustomElem{}
+	case constant.Revoke:
+		data = RevokeElem{}
+	case constant.OANotification:
+		data = OANotificationElem{}
+		params.SessionType = constant.NotificationChatType
+	//case constant.HasReadReceipt:
+	//case constant.Typing:
+	//case constant.Quote:
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 404, "errMsg": "contentType err"})
+		log.Error(c.PostForm("operationID"), "contentType err", c.PostForm("content"))
+		return
+	}
+	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": err.Error()})
+		log.Error(c.PostForm("operationID"), "content to Data struct  err", err.Error())
+		return
+	} else if err := validate.Struct(data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 403, "errMsg": err.Error()})
+		log.Error(c.PostForm("operationID"), "data args validate  err", err.Error())
+		return
+	}
+	log.NewInfo("", data, params)
+	token := c.Request.Header.Get("token")
+	claims, err := token_verify.ParseToken(token, params.OperationID)
+	if err != nil {
+		log.NewError(params.OperationID, "parse token failed", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
+		return
+	}
+	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not authorized", "sendTime": 0, "MsgID": ""})
+		return
+
+	}
+	switch params.SessionType {
+	case constant.SingleChatType:
+		if len(params.RecvID) == 0 {
+			log.NewError(params.OperationID, "recvID is a null string")
+			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "recvID is a null string", "sendTime": 0, "MsgID": ""})
+			return
+		}
+	case constant.GroupChatType:
+		if len(params.GroupID) == 0 {
+			log.NewError(params.OperationID, "groupID is a null string")
+			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "groupID is a null string", "sendTime": 0, "MsgID": ""})
+			return
+		}
+
+	}
+	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
+	for _, recvID := range params.RecvIDList {
+		pbData := newUserSendMsgReq(&params.ManagementSendMsgReq)
+		pbData.MsgData.RecvID = recvID
+		log.Info("", "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+		client := pbChat.NewChatClient(etcdConn)
+		rpcResp, err := client.SendMsg(context.Background(), pbData)
+		if err != nil {
+			log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
+			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
+			continue
+		}
+		if rpcResp.ErrCode != 0 {
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), "rpc failed", pbData)
+			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
+			continue
+		}
+		resp.Data.ResultList = append(resp.Data.ResultList, server_api_params.UserSendMsgResp{
+			ServerMsgID: rpcResp.ServerMsgID,
+			ClientMsgID: rpcResp.ClientMsgID,
+			SendTime:    rpcResp.SendTime,
+		})
+	}
+
+	log.NewInfo(params.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
+	c.JSON(http.StatusOK, resp)
 }
 
 type PictureBaseInfo struct {

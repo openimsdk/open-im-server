@@ -106,6 +106,14 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 						content = constant.ContentType2PushContent[constant.Common]
 					}
 				}
+				callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList[0], pushMsg.MsgData.OfflinePushInfo, v.RecvPlatFormID)
+				if callbackResp.ErrCode != 0 {
+					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
+				}
+				if callbackResp.ActionCode != constant.ActionAllow {
+					break
+				}
+
 				if offlinePusher == nil {
 					offlinePusher = jpush.JPushClient
 				}

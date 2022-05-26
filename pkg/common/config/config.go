@@ -234,11 +234,14 @@ type config struct {
 
 	Callback struct {
 		CallbackUrl                 string         `yaml:"callbackUrl"`
-		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackbeforeSendSingleMsg"`
+		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackBeforeSendSingleMsg"`
 		CallbackAfterSendSingleMsg  callBackConfig `yaml:"callbackAfterSendSingleMsg"`
 		CallbackBeforeSendGroupMsg  callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
 		CallbackAfterSendGroupMsg   callBackConfig `yaml:"callbackAfterSendGroupMsg"`
 		CallbackWordFilter          callBackConfig `yaml:"callbackWordFilter"`
+		CallbackUserOnline          callBackConfig `yaml:"callbackUserOnline"`
+		CallbackUserOffline         callBackConfig `yaml:"callbackUserOffline"`
+		CallbackOfflinePush         callBackConfig `yaml:"callbackOfflinePush"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////

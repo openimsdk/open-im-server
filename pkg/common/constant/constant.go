@@ -177,6 +177,9 @@ const (
 	CallbackBeforeSendGroupMsgCommand  = "callbackBeforeSendGroupMsgCommand"
 	CallbackAfterSendGroupMsgCommand   = "callbackAfterSendGroupMsgCommand"
 	CallbackWordFilterCommand          = "callbackWordFilterCommand"
+	CallbackUserOnlineCommand          = "callbackUserOnlineCommand"
+	CallbackUserOfflineCommand         = "callbackUserOfflineCommand"
+	CallbackOfflinePushCommand         = "callbackOfflinePushCommand"
 	//callback actionCode
 	ActionAllow     = 0
 	ActionForbidden = 1

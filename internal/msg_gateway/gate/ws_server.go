@@ -59,7 +59,6 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			//Connection mapping relationship,
 			//userID+" "+platformID->conn
-
 			//Initialize a lock for each user
 			newConn := &UserConn{conn, new(sync.Mutex)}
 			userCount++
@@ -167,6 +166,10 @@ func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, tok
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	operationID := utils.OperationIDGenerator()
+	callbackResp := callbackUserOnline(operationID, uid, platformID, token)
+	if callbackResp.ErrCode != 0 {
+		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
+	}
 	ws.MultiTerminalLoginChecker(uid, platformID, conn, token, operationID)
 	if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
 		oldConnMap[constant.PlatformIDToName(platformID)] = conn
@@ -191,7 +194,6 @@ func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, tok
 		count = count + len(v)
 	}
 	log.Debug(operationID, "WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
-
 }
 
 func (ws *WServer) delUserConn(conn *UserConn) {
@@ -225,7 +227,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if err != nil {
 		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
-
+	callbaclResp := callbackUserOffline(operationID, uid, platform)
 }
 
 func (ws *WServer) getUserConn(uid string, platform string) *UserConn {

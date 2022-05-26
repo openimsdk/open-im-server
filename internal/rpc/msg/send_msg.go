@@ -148,47 +148,29 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
-	//if !utils.VerifyToken(pb.Token, pb.SendID) {
-	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
 	rpc.encapsulateMsgData(pb.MsgData)
 	log.Info("", "this is a test MsgData ", pb.MsgData)
 	msgToMQSingle := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: pb.MsgData}
-	//options := utils.JsonStringToMap(pbData.Options)
-	isHistory := utils.GetSwitchFromOptions(pb.MsgData.Options, constant.IsHistory)
-	mReq := MsgCallBackReq{
-		SendID:      pb.MsgData.SendID,
-		RecvID:      pb.MsgData.RecvID,
-		Content:     string(pb.MsgData.Content),
-		SendTime:    pb.MsgData.SendTime,
-		MsgFrom:     pb.MsgData.MsgFrom,
-		ContentType: pb.MsgData.ContentType,
-		SessionType: pb.MsgData.SessionType,
-		PlatformID:  pb.MsgData.SenderPlatformID,
-		MsgID:       pb.MsgData.ClientMsgID,
-	}
-	if !isHistory {
-		mReq.IsOnlineOnly = true
-	}
 
 	// callback
-	canSend, err := callbackWordFilter(pb)
-	if err != nil {
-		log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter failed", err.Error(), pb.MsgData)
+	callbackResp := callbackWordFilter(pb)
+	if callbackResp.ErrCode != 0 {
+		log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter resp: ", callbackResp)
 	}
-	if !canSend {
-		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter result", canSend, "end rpc and return", pb.MsgData)
-		return returnMsg(&replay, pb, 201, "callbackWordFilter result stop rpc and return", "", 0)
+	if callbackResp.ActionCode != constant.ActionAllow {
+		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter result", "end rpc and return", pb.MsgData)
+		return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 	}
 	switch pb.MsgData.SessionType {
 	case constant.SingleChatType:
 		// callback
-		canSend, err := callbackBeforeSendSingleMsg(pb)
-		if err != nil {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg failed", err.Error())
+		callbackResp := callbackBeforeSendSingleMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
 		}
-		if !canSend {
-			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", canSend, "end rpc and return")
-			return returnMsg(&replay, pb, 201, "callbackBeforeSendSingleMsg result stop rpc and return", "", 0)
+		if callbackResp.ActionCode != constant.ActionAllow {
+			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
+			return returnMsg(&replay, pb, int32(callbackResp.ActionCode), callbackResp.ErrMsg, "", 0)
 		}
 		isSend := modifyMessageByUserMessageReceiveOpt(pb.MsgData.RecvID, pb.MsgData.SendID, constant.SingleChatType, pb)
 		if isSend {
@@ -208,19 +190,20 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			}
 		}
 		// callback
-		if err := callbackAfterSendSingleMsg(pb); err != nil {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSingleMsg failed", err.Error())
+		callbackResp = callbackAfterSendSingleMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSingleMsg resp: ", callbackResp)
 		}
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 	case constant.GroupChatType:
 		// callback
-		canSend, err := callbackBeforeSendGroupMsg(pb)
-		if err != nil {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendGroupMsg failed", err.Error())
+		callbackResp := callbackBeforeSendGroupMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendGroupMsg resp:", callbackResp)
 		}
-		if !canSend {
-			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendGroupMsg result", canSend, "end rpc and return")
-			return returnMsg(&replay, pb, 201, "callbackBeforeSendGroupMsg result stop rpc and return", "", 0)
+		if callbackResp.ActionCode != constant.ActionAllow {
+			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
+			return returnMsg(&replay, pb, int32(callbackResp.ActionCode), callbackResp.ErrMsg, "", 0)
 		}
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pb.OperationID, GroupID: pb.MsgData.GroupID}
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
@@ -295,8 +278,9 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		log.Debug(pb.OperationID, "send msg cost time2 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 		newTime = db.GetCurrentTimestampByMill()
 		// callback
-		if err := callbackAfterSendGroupMsg(pb); err != nil {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendGroupMsg failed", err.Error())
+		callbackResp = callbackAfterSendGroupMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendGroupMsg resp: ", callbackResp)
 		}
 		if !sendTag {
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
@@ -354,7 +338,6 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			}
 			log.Debug(pb.OperationID, "send msg cost time3 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 			return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
-
 		}
 	case constant.NotificationChatType:
 		msgToMQSingle.MsgData = pb.MsgData
