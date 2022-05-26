@@ -17,15 +17,14 @@ nodeSelector:
   node: kube-Node
 创建资源清单时添加上nodeSelector属性对应即可
 修改每种服务数量，建议至少每种2个rpc。
-如果修改了config/config.yaml某些配置比如端口，同时需要修改对应deployment端口
+如果修改了config/config.yaml某些配置比如端口，同时需要修改对应deployment端口和ingress端口
 
-jssdk 需要在sdk_server/deployment.yaml修改启动端口等
 
 ### 4. 修改ingress.yaml配置文件
-域名修改等操作
+需要安装ingress controller 这里使用的是ingress-nginx 其他ingress需要修改配置文件
+进行域名修改等操作
 
 ### 5. 执行./kubectl_start.sh脚本
-需要安装ingress controller
 chmod +x ./kubectl_start.sh ./kubectl_stop.sh
 ./kubectl_start.sh
 kubectl -n openim apply -f ingress.yaml
