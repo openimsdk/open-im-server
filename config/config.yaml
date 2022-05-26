@@ -694,6 +694,7 @@ demo:
     smtpAddr: "smtp.qq.com"
     smtpPort: 25   #需开放此端口 出口方向
   testDepartMentID: 001
+  imAPIURL: http://127.0.0.1:10002
 
 rtc:
   port: 11300
