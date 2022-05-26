@@ -412,6 +412,7 @@ type config struct {
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
 		TestDepartMentID string `yaml:"testDepartMentID"`
+		ImAPIURL         string `yaml:"imAPIURL"`
 	}
 	Rtc struct {
 		Port    int    `yaml:"port"`

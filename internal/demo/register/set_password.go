@@ -10,7 +10,6 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -53,7 +52,7 @@ func SetPassword(c *gin.Context) {
 			return
 		}
 	}
-	url := fmt.Sprintf("http://%s:%d/auth/user_register", utils.ServerIP, config.Config.Api.GinPort[0])
+	url := config.Config.Demo.ImAPIURL + "/auth/user_register"
 	openIMRegisterReq := api.UserRegisterReq{}
 	openIMRegisterReq.OperationID = params.OperationID
 	openIMRegisterReq.Platform = params.Platform
