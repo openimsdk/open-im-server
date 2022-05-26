@@ -18,7 +18,7 @@ spec:
                 name: sdk-server
                 port:
                   number: 10003
-            path: /
+            path: /sdk-server
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -97,5 +97,5 @@ spec:
                 name: cms-api
                 port:
                   number: 10006
-            path: /
+            path: /cms-api
             pathType: Prefix
