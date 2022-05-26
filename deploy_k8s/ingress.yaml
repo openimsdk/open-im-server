@@ -18,7 +18,7 @@ spec:
                 name: sdk-server
                 port:
                   number: 10003
-            path: /sdk-server
+            path: /sdk-server/(.*)
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -40,7 +40,7 @@ spec:
                 name: msg-gateway
                 port:
                   number: 10001
-            path: /msg-gateway
+            path: /msg-gateway/(.*)
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -59,7 +59,7 @@ spec:
                 name: api
                 port:
                   number: 10002
-            path: /api
+            path: /api/(.*)
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -78,7 +78,7 @@ spec:
                 name: demo
                 port:
                   number: 10004
-            path: /demo
+            path: /demo/(.*)
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -97,5 +97,5 @@ spec:
                 name: cms-api
                 port:
                   number: 10006
-            path: /cms-api
+            path: /cms-api/(.*)
             pathType: Prefix
