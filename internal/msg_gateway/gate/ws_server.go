@@ -227,7 +227,10 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if err != nil {
 		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
-	callbaclResp := callbackUserOffline(operationID, uid, platform)
+	callbackResp := callbackUserOffline(operationID, uid, platform)
+	if callbackResp.ErrCode != 0 {
+		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+	}
 }
 
 func (ws *WServer) getUserConn(uid string, platform string) *UserConn {
