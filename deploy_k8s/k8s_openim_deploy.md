@@ -25,8 +25,10 @@ jssdk 需要在sdk_server/deployment.yaml修改启动端口等
 域名修改等操作
 
 ### 5. 执行./kubectl_start.sh脚本
+需要安装ingress controller
 chmod +x ./kubectl_start.sh ./kubectl_stop.sh
 ./kubectl_start.sh
+kubectl -n openim apply -f ingress.yaml
 kubectl 启动所有deployment，services，ingress
 
 ### 6. 查看k8s deployment service ingress状态

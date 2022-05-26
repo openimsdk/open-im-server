@@ -9,7 +9,7 @@ metadata:
   name: sdk-server-ingress
 spec:
   rules:
-    - host: k8s.open-im-test.rentsoft.cn
+    - host: sdk-server.openim.xxx.com
       http:
         paths:
           - backend:
@@ -17,7 +17,7 @@ spec:
                 name: sdk-server
                 port:
                   number: 10003
-            path: /sdk-server
+            path: /
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -30,7 +30,7 @@ metadata:
   name: msg-gateway-ingress
 spec:
   rules:
-    - host: k8s.open-im-test.rentsoft.cn
+    - host: msg-gateway.openim.xxx.com
       http:
         paths:
           - backend:
@@ -38,7 +38,7 @@ spec:
                 name: msg-gateway
                 port:
                   number: 10001
-            path: /msg-gateway
+            path: /
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -47,7 +47,7 @@ metadata:
   name: api-ingress
 spec:
   rules:
-    - host: k8s.open-im-test.rentsoft.cn
+    - host: api.openim.xxx.com
       http:
         paths:
           - backend:
@@ -55,7 +55,7 @@ spec:
                 name: api
                 port:
                   number: 10002
-            path: /api
+            path: /
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -64,7 +64,7 @@ metadata:
   name: demo-ingress
 spec:
   rules:
-    - host: k8s.open-im-test.rentsoft.cn
+    - host: demo.openim.xxx.com
       http:
         paths:
           - backend:
@@ -72,7 +72,7 @@ spec:
                 name: demo
                 port:
                   number: 10004
-            path: /demo
+            path: /
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -81,7 +81,7 @@ metadata:
   name: cms-api-ingress
 spec:
   rules:
-    - host: k8s.open-im-test.rentsoft.cn
+    - host: cms-api.openim.xxx.com
       http:
         paths:
           - backend:
@@ -89,5 +89,5 @@ spec:
                 name: cms-api
                 port:
                   number: 10006
-            path: /cms-api
+            path: /
             pathType: Prefix
