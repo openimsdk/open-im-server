@@ -506,8 +506,6 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				groupOwnerUserID = v.UserID
 			}
 		}
-
-		var okUserIDList []string
 		//remove
 		for _, v := range req.KickedUserIDList {
 			//owner can‘t kicked
