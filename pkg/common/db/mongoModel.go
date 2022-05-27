@@ -29,6 +29,7 @@ const cTag = "tag"
 const cSendLog = "send_log"
 const cWorkMoment = "work_moment"
 const cCommentMsg = "comment_msg"
+const cSuperGroup = "super_group"
 const singleGocMsgNum = 5000
 
 func GetSingleGocMsgNum() int {
@@ -878,8 +879,51 @@ func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userI
 	return workMomentList, err
 }
 
-func (d *DataBases) CreateSuperGroup() {
+type SuperGroup struct {
+	GroupID        string   `bson:"group_id"`
+	MemberNumCount int      `bson:"member_num_count"`
+	MemberIDList   []string `bson:"member_id_list"`
+}
 
+func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, memberNumCount int) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	superGroup := SuperGroup{
+		GroupID:        groupID,
+		MemberNumCount: memberNumCount,
+		MemberIDList:   initMemberIDList,
+	}
+	_, err := c.InsertOne(ctx, superGroup)
+	return err
+}
+
+func (d *DataBases) GetSuperGroup(groupID string) (SuperGroup, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	superGroup := SuperGroup{}
+	err := c.FindOne(ctx, bson.M{"group_id": groupID}).Decode(&superGroup)
+	return superGroup, err
+}
+
+func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	_, err := c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": userIDList}})
+	return err
+}
+
+func (d *DataBases) RemoverUserFromSuperGroup(groupID string, userIDList []string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	_, err := c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
+	return err
+}
+
+func (d *DataBases) DeleteSuperGroup(groupID string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	_, err := c.DeleteOne(ctx, bson.M{"group_id": groupID})
+	return err
 }
 
 func generateTagID(tagName, userID string) string {
