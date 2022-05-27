@@ -126,7 +126,6 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 	}
 	if req.GroupInfo.GroupType != constant.SuperGroup {
-		var okUserIDList []string
 		//to group member
 		for _, user := range req.InitMemberList {
 			us, err := imdb.GetUserByUserID(user.UserID)
@@ -174,7 +173,6 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			log.NewError(req.OperationID, "GetGroupMemberNumByGroupID failed ", err.Error(), groupId)
 			resp.ErrCode = constant.ErrDB.ErrCode
 			resp.ErrMsg = err.Error() + ": CreateSuperGroup failed"
-			return resp, nil
 		}
 	}
 
