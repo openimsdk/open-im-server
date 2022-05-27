@@ -275,10 +275,10 @@ callback:
     callbackTimeOut: 2
     callbackFailedContinue: true
   callbackUserOnline:
-    enable: true
+    enable: false
     callbackTimeOut: 2
   callbackUserOffline:
-    enable: true
+    enable: false
     callbackTimeOut: 2
   callbackOfflinePush:
     enable: true
