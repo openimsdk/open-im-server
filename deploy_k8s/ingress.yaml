@@ -7,10 +7,13 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # 使用重写后的路径进行路由
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
   name: sdk-server-ingress
 spec:
   rules:
-    - host: sdk-server.openim.xxx.com
+    - host: k8s.open-im-test.rentsoft.cn
       http:
         paths:
           - backend:
@@ -18,7 +21,7 @@ spec:
                 name: sdk-server
                 port:
                   number: 10003
-            path: /
+            path: /sdk-server/(.*)
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -29,10 +32,13 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+     # 使用重写后的路径进行路由
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
   name: msg-gateway-ingress
 spec:
   rules:
-    - host: msg-gateway.openim.xxx.com
+    - host: k8s.open-im-test.rentsoft.cn
       http:
         paths:
           - backend:
@@ -40,7 +46,7 @@ spec:
                 name: msg-gateway
                 port:
                   number: 10001
-            path: /
+            path: /msg-gateway/(.*)
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -48,10 +54,13 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
+     # 使用重写后的路径进行路由
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
   name: api-ingress
 spec:
   rules:
-    - host: api.openim.xxx.com
+    - host: k8s.open-im-test.rentsoft.cn
       http:
         paths:
           - backend:
@@ -59,7 +68,7 @@ spec:
                 name: api
                 port:
                   number: 10002
-            path: /
+            path: /api/(.*)
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -67,10 +76,13 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
+     # 使用重写后的路径进行路由
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
   name: demo-ingress
 spec:
   rules:
-    - host: demo.openim.xxx.com
+    - host: k8s.open-im-test.rentsoft.cn
       http:
         paths:
           - backend:
@@ -78,7 +90,7 @@ spec:
                 name: demo
                 port:
                   number: 10004
-            path: /
+            path: /demo/(.*)
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
@@ -86,10 +98,13 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
+     # 使用重写后的路径进行路由
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
   name: cms-api-ingress
 spec:
   rules:
-    - host: cms-api.openim.xxx.com
+    - host: k8s.open-im-test.rentsoft.cn
       http:
         paths:
           - backend:
@@ -97,5 +112,5 @@ spec:
                 name: cms-api
                 port:
                   number: 10006
-            path: /
+            path: /cms-api/(.*)
             pathType: Prefix
