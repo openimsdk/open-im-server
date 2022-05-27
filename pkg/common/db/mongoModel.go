@@ -878,6 +878,10 @@ func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userI
 	return workMomentList, err
 }
 
+func (d *DataBases) CreateSuperGroup() {
+
+}
+
 func generateTagID(tagName, userID string) string {
 	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()) + time.Now().String())
 }

@@ -154,7 +154,8 @@ const (
 
 	//GroupType
 	NormalGroup     = 0
-	DepartmentGroup = 1
+	SuperGroup      = 1
+	DepartmentGroup = 2
 
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4

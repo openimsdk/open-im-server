@@ -91,12 +91,6 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.OwnerUserID)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
-	canCreate, err := callbackBeforeCreateGroup(req)
-	if err != nil || !canCreate {
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeCreateGroup failed")
-		}
-	}
 
 	groupId := req.GroupInfo.GroupID
 	if groupId == "" {
@@ -107,72 +101,82 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
 	groupInfo.CreatorUserID = req.OpUserID
 	groupInfo.GroupID = groupId
-	err = imdb.InsertIntoGroup(groupInfo)
+	err := imdb.InsertIntoGroup(groupInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupInfo)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 	}
-	groupMember := db.GroupMember{}
-	us := &db.User{}
-	if req.OwnerUserID == "" {
-		goto initMemberList
-	}
-	us, err = imdb.GetUserByUserID(req.OwnerUserID)
-	if err != nil {
-		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OwnerUserID)
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
-	}
-
-	//to group member
-	groupMember = db.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
-	utils.CopyStructFields(&groupMember, us)
-	err = imdb.InsertIntoGroupMember(groupMember)
-	if err != nil {
-		log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
-	}
-
-initMemberList:
 	var okUserIDList []string
-	//to group member
-	for _, user := range req.InitMemberList {
-		us, err := imdb.GetUserByUserID(user.UserID)
+
+	if req.GroupInfo.GroupType == constant.NormalGroup {
+		groupMember := db.GroupMember{}
+		us := &db.User{}
+		if req.OwnerUserID == "" {
+			goto initMemberList
+		}
+		us, err = imdb.GetUserByUserID(req.OwnerUserID)
 		if err != nil {
-			log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), user.UserID)
-			continue
+			log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OwnerUserID)
+			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 		}
-		if user.RoleLevel == constant.GroupOwner {
-			log.NewError(req.OperationID, "only one owner, failed ", user)
-			continue
-		}
-		groupMember.RoleLevel = user.RoleLevel
+
+		//to group member
+		groupMember = db.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
 		utils.CopyStructFields(&groupMember, us)
 		err = imdb.InsertIntoGroupMember(groupMember)
 		if err != nil {
 			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
-			continue
+			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 		}
-		okUserIDList = append(okUserIDList, user.UserID)
-	}
-	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
-	group, err := imdb.GetGroupInfoByGroupID(groupId)
-	if err != nil {
-		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupId)
-		resp.ErrCode = constant.ErrDB.ErrCode
-		resp.ErrMsg = err.Error()
-		return resp, nil
-	}
-	utils.CopyStructFields(resp.GroupInfo, group)
-	resp.GroupInfo.MemberCount, err = imdb.GetGroupMemberNumByGroupID(groupId)
-	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMemberNumByGroupID failed ", err.Error(), groupId)
-		resp.ErrCode = constant.ErrDB.ErrCode
-		resp.ErrMsg = err.Error()
-		return resp, nil
-	}
-	if req.OwnerUserID != "" {
-		resp.GroupInfo.OwnerUserID = req.OwnerUserID
-		okUserIDList = append(okUserIDList, req.OwnerUserID)
+
+	initMemberList:
+		var okUserIDList []string
+		//to group member
+		for _, user := range req.InitMemberList {
+			us, err := imdb.GetUserByUserID(user.UserID)
+			if err != nil {
+				log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), user.UserID)
+				continue
+			}
+			if user.RoleLevel == constant.GroupOwner {
+				log.NewError(req.OperationID, "only one owner, failed ", user)
+				continue
+			}
+			groupMember.RoleLevel = user.RoleLevel
+			utils.CopyStructFields(&groupMember, us)
+			err = imdb.InsertIntoGroupMember(groupMember)
+			if err != nil {
+				log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
+				continue
+			}
+			okUserIDList = append(okUserIDList, user.UserID)
+		}
+		resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
+		group, err := imdb.GetGroupInfoByGroupID(groupId)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupId)
+			resp.ErrCode = constant.ErrDB.ErrCode
+			resp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		utils.CopyStructFields(resp.GroupInfo, group)
+		resp.GroupInfo.MemberCount, err = imdb.GetGroupMemberNumByGroupID(groupId)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupMemberNumByGroupID failed ", err.Error(), groupId)
+			resp.ErrCode = constant.ErrDB.ErrCode
+			resp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		if req.OwnerUserID != "" {
+			resp.GroupInfo.OwnerUserID = req.OwnerUserID
+			okUserIDList = append(okUserIDList, req.OwnerUserID)
+		}
+	} else if req.GroupInfo.GroupType == constant.SuperGroup {
+		for _, v := range req.InitMemberList {
+			okUserIDList = append(okUserIDList, v.UserID)
+		}
+		//memberCount := len(okUserIDList)
+
 	}
 
 	if len(okUserIDList) != 0 {
