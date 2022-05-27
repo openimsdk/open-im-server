@@ -13,7 +13,7 @@ import (
 
 func callbackOfflinePush(operationID, userID string, info *commonPb.OfflinePushInfo, platformID int32) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
-	if !config.Config.Callback.CallbackUserOnline.Enable {
+	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return callbackResp
 	}
 	callbackOfflinePushReq := cbApi.CallbackOfflinePushReq{
@@ -30,7 +30,13 @@ func callbackOfflinePush(operationID, userID string, info *commonPb.OfflinePushI
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackOfflinePushReq, callbackOfflinePushResp, config.Config.Callback.CallbackOfflinePush.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
+		if !config.Config.Callback.CallbackOfflinePush.CallbackFailedContinue {
+			callbackResp.ActionCode = constant.ActionForbidden
+			return callbackResp
+		} else {
+			callbackResp.ActionCode = constant.ActionAllow
+			return callbackResp
+		}
 	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), callbackOfflinePushResp)
 	return callbackResp
 }

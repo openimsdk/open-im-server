@@ -107,11 +107,11 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 					}
 				}
 				callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList[0], pushMsg.MsgData.OfflinePushInfo, v.RecvPlatFormID)
+				log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 				if callbackResp.ErrCode != 0 {
 					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
 				}
 				if callbackResp.ActionCode != constant.ActionAllow {
-					log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline push was stop")
 					break
 				}
 
