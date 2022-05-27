@@ -122,6 +122,7 @@ func main() {
 	{
 		managementGroup.POST("/delete_user", manage.DeleteUser) //1
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
+		managementGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
 		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)             //1
 		managementGroup.POST("/account_check", manage.AccountCheck)                   //1
 		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
