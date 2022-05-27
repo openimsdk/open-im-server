@@ -8,5 +8,5 @@ type CallbackOfflinePushReq struct {
 }
 
 type CallbackOfflinePushResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }

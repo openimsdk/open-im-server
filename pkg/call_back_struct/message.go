@@ -1,22 +1,21 @@
 package call_back_struct
 
-
 type CallbackBeforeSendSingleMsgReq struct {
 	CommonCallbackReq
-	RecvID  string `json:"recvID"`
+	RecvID string `json:"recvID"`
 }
 
 type CallbackBeforeSendSingleMsgResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackAfterSendSingleMsgReq struct {
 	CommonCallbackReq
-	RecvID  string `json:"recvID"`
+	RecvID string `json:"recvID"`
 }
 
 type CallbackAfterSendSingleMsgResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackBeforeSendGroupMsgReq struct {
@@ -25,7 +24,7 @@ type CallbackBeforeSendGroupMsgReq struct {
 }
 
 type CallbackBeforeSendGroupMsgResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackAfterSendGroupMsgReq struct {
@@ -34,7 +33,7 @@ type CallbackAfterSendGroupMsgReq struct {
 }
 
 type CallbackAfterSendGroupMsgResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackWordFilterReq struct {
@@ -42,6 +41,6 @@ type CallbackWordFilterReq struct {
 }
 
 type CallbackWordFilterResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 	Content string `json:"content"`
 }
