@@ -98,7 +98,7 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
-		if !config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue {
+		if !config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue {
 			callbackResp.ActionCode = constant.ActionForbidden
 			return callbackResp
 		} else {
@@ -147,7 +147,7 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackWordFilter.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
-		if !config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue {
+		if !config.Config.Callback.CallbackWordFilter.CallbackFailedContinue {
 			callbackResp.ActionCode = constant.ActionForbidden
 			return callbackResp
 		} else {
