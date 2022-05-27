@@ -192,6 +192,7 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	var data interface{}
 	params := api.ManagementBatchSendMsgReq{}
 	resp := api.ManagementBatchSendMsgResp{}
+	resp.Data.FailedIDList = make([]string, 0)
 	if err := c.BindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		log.Error(c.PostForm("operationID"), "json unmarshal err", err.Error(), c.PostForm("content"))
