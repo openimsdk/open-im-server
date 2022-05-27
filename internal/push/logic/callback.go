@@ -5,14 +5,16 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
-	"Open_IM/pkg/common/log"
 	commonPb "Open_IM/pkg/proto/sdk_ws"
-	"Open_IM/pkg/utils"
+	"fmt"
 	http2 "net/http"
 )
 
 func callbackOfflinePush(operationID, userID string, info *commonPb.OfflinePushInfo, platformID int32) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
+	fmt.Println(config.Config.Callback.CallbackOfflinePush)
+	fmt.Println(config.Config.Callback.CallbackUserOnline)
+
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return callbackResp
 	}
