@@ -155,7 +155,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	// callback
 	callbackResp := callbackWordFilter(pb)
 	if callbackResp.ErrCode != 0 {
-		log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter resp: ", callbackResp)
+		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter resp: ", callbackResp)
 	}
 	log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackResp: ", callbackResp)
 	if callbackResp.ActionCode != constant.ActionAllow {

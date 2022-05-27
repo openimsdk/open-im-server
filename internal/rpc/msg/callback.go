@@ -155,7 +155,7 @@ func callbackWordFilter(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
 			return callbackResp
 		}
 	}
-	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow {
+	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow && resp.Content != "" {
 		msg.MsgData.Content = []byte(resp.Content)
 	}
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), string(msg.MsgData.Content))
