@@ -41,7 +41,7 @@ type AccountCheckResp struct {
 
 type ManagementSendMsgReq struct {
 	OperationID      string                       `json:"operationID" binding:"required"`
-	SendID           string                       `json:"sendID"`
+	SendID           string                       `json:"sendID" binding:"required"`
 	RecvID           string                       `json:"recvID" `
 	GroupID          string                       `json:"groupID" `
 	SenderNickname   string                       `json:"senderNickname" `
