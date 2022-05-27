@@ -908,7 +908,7 @@ func (d *DataBases) GetSuperGroup(groupID string) (SuperGroup, error) {
 func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
-	_, err := c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": userIDList}})
+	_, err := c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDList}}})
 	return err
 }
 
