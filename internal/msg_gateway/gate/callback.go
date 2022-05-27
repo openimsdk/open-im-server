@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
 	http2 "net/http"
+	"time"
 )
 
 func callbackUserOnline(operationID, userID string, platformID int32, token string) cbApi.CommonCallbackResp {
@@ -21,7 +22,9 @@ func callbackUserOnline(operationID, userID string, platformID int32, token stri
 			UserID:          userID,
 			PlatformID:      platformID,
 			Platform:        constant.PlatformIDToName(platformID),
-		}}
+		},
+		Seq: time.Now().Nanosecond() / 1e6,
+	}
 	callbackUserOnlineResp := &cbApi.CallbackUserOnlineResp{CommonCallbackResp: callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackUserOnlineReq, callbackUserOnlineResp, config.Config.Callback.CallbackUserOnline.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
@@ -35,13 +38,16 @@ func callbackUserOffline(operationID, userID string, platform string) cbApi.Comm
 	if !config.Config.Callback.CallbackUserOffline.Enable {
 		return callbackResp
 	}
-	callbackOfflineReq := cbApi.CallbackUserOfflineReq{UserStatusCallbackReq: cbApi.UserStatusCallbackReq{
-		CallbackCommand: constant.CallbackUserOfflineCommand,
-		OperationID:     operationID,
-		UserID:          userID,
-		PlatformID:      constant.PlatformNameToID(platform),
-		Platform:        platform,
-	}}
+	callbackOfflineReq := cbApi.CallbackUserOfflineReq{
+		UserStatusCallbackReq: cbApi.UserStatusCallbackReq{
+			CallbackCommand: constant.CallbackUserOfflineCommand,
+			OperationID:     operationID,
+			UserID:          userID,
+			PlatformID:      constant.PlatformNameToID(platform),
+			Platform:        platform,
+		},
+		Seq: time.Now().Nanosecond() / 1e6,
+	}
 	callbackUserOfflineResp := &cbApi.CallbackUserOfflineResp{CommonCallbackResp: callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackOfflineReq, callbackUserOfflineResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
