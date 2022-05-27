@@ -251,21 +251,6 @@ func ManagementBatchSendMsg(c *gin.Context) {
 		return
 
 	}
-	switch params.SessionType {
-	case constant.SingleChatType:
-		if len(params.RecvID) == 0 {
-			log.NewError(params.OperationID, "recvID is a null string")
-			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "recvID is a null string", "sendTime": 0, "MsgID": ""})
-			return
-		}
-	case constant.GroupChatType:
-		if len(params.GroupID) == 0 {
-			log.NewError(params.OperationID, "groupID is a null string")
-			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "groupID is a null string", "sendTime": 0, "MsgID": ""})
-			return
-		}
-
-	}
 	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
 	for _, recvID := range params.RecvIDList {
 		pbData := newUserSendMsgReq(&params.ManagementSendMsgReq)
