@@ -281,7 +281,7 @@ callback:
     enable: false
     callbackTimeOut: 2
   callbackOfflinePush:
-    enable: true
+    enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续离线推送
 
