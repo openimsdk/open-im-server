@@ -14,14 +14,13 @@ const OnlineTopicBusy = 1
 const OnlineTopicVacancy = 0
 const Msg = 2
 const ConsumerMsgs = 3
-const UserMessages = 4
+const AggregationMessages = 4
 const MongoMessages = 5
 const ChannelNum = 100
 
 var (
 	persistentCH          PersistentConsumerHandler
 	historyCH             OnlineHistoryConsumerHandler
-	offlineHistoryCH      OfflineHistoryConsumerHandler
 	producer              *kafka.Producer
 	cmdCh                 chan Cmd2Value
 	onlineTopicStatus     int

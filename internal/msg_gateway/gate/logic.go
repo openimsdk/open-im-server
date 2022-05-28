@@ -64,28 +64,37 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 }
 func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to getNewSeq", m.MsgIncr, m.SendID, m.ReqIdentifier, m.Data)
-	rpcReq := pbChat.GetMaxAndMinSeqReq{}
-	nReply := new(pbChat.GetMaxAndMinSeqResp)
-	rpcReq.UserID = m.SendID
-	rpcReq.OperationID = m.OperationID
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
-	msgClient := pbChat.NewChatClient(grpcConn)
-	rpcReply, err := msgClient.GetMaxAndMinSeq(context.Background(), &rpcReq)
-	if err != nil {
-		log.Error(rpcReq.OperationID, "rpc call failed to getSeqReq", err, rpcReq.String())
-		nReply.ErrCode = 500
-		nReply.ErrMsg = err.Error()
-		ws.getSeqResp(conn, m, nReply)
+	nReply := new(sdk_ws.GetMaxAndMinSeqResp)
+	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSGetNewestSeq)
+	if isPass {
+		rpcReq := sdk_ws.GetMaxAndMinSeqReq{}
+		rpcReq.GroupIDList = data.(sdk_ws.GetMaxAndMinSeqReq).GroupIDList
+		rpcReq.UserID = m.SendID
+		rpcReq.OperationID = m.OperationID
+		log.Debug(m.OperationID, "Ws call success to getMaxAndMinSeq", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.GetMaxAndMinSeqReq).GroupIDList)
+		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+		msgClient := pbChat.NewChatClient(grpcConn)
+		rpcReply, err := msgClient.GetMaxAndMinSeq(context.Background(), &rpcReq)
+		if err != nil {
+			log.Error(rpcReq.OperationID, "rpc call failed to getSeqReq", err.Error(), rpcReq.String())
+			nReply.ErrCode = 500
+			nReply.ErrMsg = err.Error()
+			ws.getSeqResp(conn, m, nReply)
+		} else {
+			log.NewInfo(rpcReq.OperationID, "rpc call success to getSeqReq", rpcReply.String())
+			ws.getSeqResp(conn, m, rpcReply)
+		}
 	} else {
-		log.NewInfo(rpcReq.OperationID, "rpc call success to getSeqReq", rpcReply.String())
-		ws.getSeqResp(conn, m, rpcReply)
+		nReply.ErrCode = errCode
+		nReply.ErrMsg = errMsg
+		ws.getSeqResp(conn, m, nReply)
+
 	}
+
 }
-func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeqResp) {
-	var mReplyData sdk_ws.GetMaxAndMinSeqResp
-	mReplyData.MaxSeq = pb.GetMaxSeq()
-	mReplyData.MinSeq = pb.GetMinSeq()
-	b, _ := proto.Marshal(&mReplyData)
+func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdk_ws.GetMaxAndMinSeqResp) {
+	log.Debug(m.OperationID, "getSeqResp come  here ", pb.String())
+	b, _ := proto.Marshal(pb)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
 		MsgIncr:       m.MsgIncr,
@@ -146,6 +155,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 	sendMsgAllCountLock.Lock()
 	sendMsgAllCount++
 	sendMsgAllCountLock.Unlock()
+	//stat.GaugeVecApiMethod.WithLabelValues("ws_send_message_count").Inc()
 	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
 
 	nReply := new(pbChat.SendMsgResp)

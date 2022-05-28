@@ -6,18 +6,25 @@ import (
 
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	pbMsg "Open_IM/pkg/proto/chat"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 )
 
-func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeqReq) (*pbMsg.GetMaxAndMinSeqResp, error) {
+func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAndMinSeqReq) (*open_im_sdk.GetMaxAndMinSeqResp, error) {
 	log.NewInfo(in.OperationID, "rpc getMaxAndMinSeq is arriving", in.String())
+	resp := new(open_im_sdk.GetMaxAndMinSeqResp)
+	m := make(map[string]*open_im_sdk.MaxAndMinSeq)
 	//seq, err := model.GetBiggestSeqFromReceive(in.UserID)
 	maxSeq, err1 := commonDB.DB.GetUserMaxSeq(in.UserID)
 	minSeq, err2 := commonDB.DB.GetUserMinSeq(in.UserID)
-	resp := new(pbMsg.GetMaxAndMinSeqResp)
 	if err1 == nil {
 		resp.MaxSeq = uint32(maxSeq)
+		for _, v := range in.GroupIDList {
+			x := new(open_im_sdk.MaxAndMinSeq)
+			maxSeq, _ := commonDB.DB.GetUserMaxSeq(v)
+			x.MaxSeq = uint32(maxSeq)
+			m[v] = x
+		}
+		resp.GroupMaxAndMinSeq = m
 	} else if err1 == redis.ErrNil {
 		resp.MaxSeq = 0
 	} else {
@@ -39,6 +46,7 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeq
 func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.PullMessageBySeqListReq) (*open_im_sdk.PullMessageBySeqListResp, error) {
 	log.NewInfo(in.OperationID, "rpc PullMessageBySeqList is arriving", in.String())
 	resp := new(open_im_sdk.PullMessageBySeqListResp)
+	m := make(map[string]*open_im_sdk.MsgDataList)
 	//msgList, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList, in.OperationID)
 	redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(in.UserID, in.SeqList, in.OperationID)
 	if err != nil {
@@ -60,6 +68,32 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 	} else {
 		resp.List = redisMsgList
 	}
+	for k, v := range in.GroupSeqList {
+		x := new(open_im_sdk.MsgDataList)
+		redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(k, v.SeqList, in.OperationID)
+		if err != nil {
+			if err != redis.ErrNil {
+				log.Error(in.OperationID, "get message from redis exception", err.Error(), failedSeqList)
+			} else {
+				log.Debug(in.OperationID, "get message from redis is nil", failedSeqList)
+			}
+			msgList, err1 := commonDB.DB.GetMsgBySeqListMongo2(k, failedSeqList, in.OperationID)
+			if err1 != nil {
+				log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err.Error())
+				resp.ErrCode = 201
+				resp.ErrMsg = err.Error()
+				return resp, nil
+			} else {
+				redisMsgList = append(redisMsgList, msgList...)
+				x.MsgDataList = redisMsgList
+				m[k] = x
+			}
+		} else {
+			x.MsgDataList = redisMsgList
+			m[k] = x
+		}
+	}
+	resp.GroupMsgDataList = m
 	//respSingleMsgFormat = singleMsgHandleByUser(SingleMsgFormat, in.UserID)
 	//respGroupMsgFormat = groupMsgHandleByUser(GroupMsgFormat)
 	return resp, nil
