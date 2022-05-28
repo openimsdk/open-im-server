@@ -198,6 +198,7 @@ message PullMessageBySeqListResp {
 message GetMaxAndMinSeqReq {
     repeated string groupIDList = 1;
     string userID = 2;
+    string  operationID =3;
 }
 message MaxAndMinSeq{
   uint32 maxSeq = 1;
@@ -206,7 +207,9 @@ message MaxAndMinSeq{
 message GetMaxAndMinSeqResp {
   uint32 maxSeq = 1;
   uint32 minSeq = 2;
-  map<string, MaxAndMinSeq> groupMaxAndMinSeq = 3;
+  int32 errCode = 3;
+  string errMsg = 4;
+  map<string, MaxAndMinSeq> groupMaxAndMinSeq = 5;
 }
 
 message UserSendMsgResp {
