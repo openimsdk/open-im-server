@@ -15,11 +15,12 @@ import (
 	sdkws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc"
 )
 
 type friendServer struct {
@@ -69,7 +70,7 @@ func (s *friendServer) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-
+	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)

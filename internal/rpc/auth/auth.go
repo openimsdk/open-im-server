@@ -104,7 +104,7 @@ func (rpc *rpcAuth) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-
+	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
