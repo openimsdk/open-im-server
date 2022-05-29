@@ -1,5 +1,5 @@
 # Open-IM-Server 
-![avatar](扫码进群https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Wechat.jpg)
+![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Wechat.jpg)
 
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-logo.png)
 
