@@ -1,6 +1,5 @@
 # Open-IM-Server 
-
-(https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Wechat.jpg)
+![avatar]([https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-server.png](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Wechat.jpg)
 ![avatar](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/open-im-logo.png)
 
 [![LICENSE](https://img.shields.io/badge/license-Apache--2.0-green)](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/LICENSE) [![Language](https://img.shields.io/badge/Language-Go-blue.svg)](https://golang.org/)
