@@ -985,6 +985,7 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 	opts := &options.UpdateOptions{
 		Upsert: &upsert,
 	}
+	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
 	_, err = c.UpdateMany(sCtx, bson.M{"user_id": bson.M{"$in": initMemberIDList}}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 	if err != nil {
 		session.AbortTransaction(ctx)
