@@ -107,7 +107,7 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdk_ws.GetMaxAndMinSeq
 }
 
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr, m.Data)
+	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr)
 	nReply := new(sdk_ws.PullMessageBySeqListResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
 	if isPass {
@@ -115,6 +115,7 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 		rpcReq.SeqList = data.(sdk_ws.PullMessageBySeqListReq).SeqList
 		rpcReq.UserID = m.SendID
 		rpcReq.OperationID = m.OperationID
+		rpcReq.GroupSeqList = data.(sdk_ws.PullMessageBySeqListReq).GroupSeqList
 		log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList, data.(sdk_ws.PullMessageBySeqListReq).GroupSeqList)
 		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		msgClient := pbChat.NewChatClient(grpcConn)
