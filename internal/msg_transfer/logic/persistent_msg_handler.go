@@ -55,6 +55,8 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 			if msgKey == msgFromMQ.MsgData.SendID {
 				tag = true
 			}
+		case constant.SuperGroupChatType:
+			tag = true
 		}
 		if tag {
 			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
