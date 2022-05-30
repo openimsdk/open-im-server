@@ -33,18 +33,19 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/server-snippets: |
-      location / {
-       proxy_set_header Upgrade $http_upgrade;
-       proxy_http_version 1.1;
-       proxy_set_header X-Forwarded-Host $http_host;
-       proxy_set_header X-Forwarded-Proto $scheme;
-       proxy_set_header X-Forwarded-For $remote_addr;
-       proxy_set_header Host $host;
-       proxy_set_header Connection "upgrade";
-       proxy_cache_bypass $http_upgrade;
-       }
-
+#    nginx.ingress.kubernetes.io/server-snippets: |
+#      location / {
+#       proxy_set_header Upgrade $http_upgrade;
+#       proxy_http_version 1.1;
+#       proxy_set_header X-Forwarded-Host $http_host;
+#       proxy_set_header X-Forwarded-Proto $scheme;
+#       proxy_set_header X-Forwarded-For $remote_addr;
+#       proxy_set_header Host $host;
+#       proxy_set_header Connection "upgrade";
+#       proxy_cache_bypass $http_upgrade;
+#       }
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
 
 spec:
   rules:
