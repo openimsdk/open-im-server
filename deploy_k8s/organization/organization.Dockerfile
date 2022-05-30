@@ -4,8 +4,11 @@ FROM ubuntu
 ENV WORKDIR /Open-IM-Server
 ENV CONFIG_NAME $WORKDIR/config/config.yaml
 
+RUN mkdir $WORKDIR/cmd
+
 # 将可执行文件复制到目标目录
 ADD ./open_im_organization $WORKDIR/cmd/main
+
 
 # 创建用于挂载的几个目录，添加可执行权限
 RUN mkdir $WORKDIR/logs $WORKDIR/config $WORKDIR/script && \

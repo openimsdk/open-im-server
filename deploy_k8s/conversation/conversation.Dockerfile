@@ -4,6 +4,7 @@ FROM ubuntu
 ENV WORKDIR /Open-IM-Server
 ENV CONFIG_NAME $WORKDIR/config/config.yaml
 
+RUN mkdir $WORKDIR/cmd
 # 将可执行文件复制到目标目录
 ADD ./open_im_conversation $WORKDIR/cmd/main
 
