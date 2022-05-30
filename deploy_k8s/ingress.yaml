@@ -10,7 +10,7 @@ metadata:
   name: sdk-server-ingress
 spec:
   rules:
-    - host: sdk-server.open-im-test.rentsoft.cn
+    - host: sdk-server.openim.xxx.com
       http:
         paths:
           - backend:
@@ -32,7 +32,7 @@ metadata:
   name: msg-gateway-ingress
 spec:
   rules:
-    - host: msg-gateway.open-im-test.rentsoft.cn
+    - host: msg-gateway.openim.xxx.com
       http:
         paths:
           - backend:
@@ -51,7 +51,7 @@ metadata:
   name: api-ingress
 spec:
   rules:
-    - host: api.open-im-test.rentsoft.cn
+    - host: api.openim.xxx.com
       http:
         paths:
           - backend:
@@ -70,7 +70,7 @@ metadata:
   name: demo-ingress
 spec:
   rules:
-    - host: demo.open-im-test.rentsoft.cn
+    - host: demo.openim.xxx.com
       http:
         paths:
           - backend:
@@ -89,7 +89,7 @@ metadata:
   name: cms-api-ingress
 spec:
   rules:
-    - host: cms-api.open-im-test.rentsoft.cn
+    - host: cms-api.openim.xxx.com
       http:
         paths:
           - backend:
