@@ -1106,7 +1106,7 @@ func (d *DataBases) RemoveGroupFromUser(ctx, sCtx context.Context, groupID strin
 		})
 	}
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
-	_, err := c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
+	_, err := c.UpdateOne(sCtx, bson.M{"user_id": bson.M{"$in": userID}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
 	if err != nil {
 		return utils.Wrap(err, "UpdateOne transaction failed")
 	}
