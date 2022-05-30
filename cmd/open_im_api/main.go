@@ -92,8 +92,8 @@ func main() {
 	}
 	superGroupRouterGroup := r.Group("/super_group")
 	{
-		superGroupRouterGroup.POST("/get_joined_super_group_list", group.GetJoinedSuperGroupList)
-		superGroupRouterGroup.POST("/get_super_groups_info", group.GetSuperGroupsInfo)
+		superGroupRouterGroup.POST("/get_joined_group_list", group.GetJoinedSuperGroupList)
+		superGroupRouterGroup.POST("/get_groups_info", group.GetSuperGroupsInfo)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")

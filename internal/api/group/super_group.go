@@ -23,7 +23,14 @@ func GetJoinedSuperGroupList(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	reqPb := rpc.GetJoinedSuperGroupListReq{OperationID: req.OperationID}
+	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	reqPb := rpc.GetJoinedSuperGroupListReq{OperationID: req.OperationID, OpUserID: opUserID, UserID: req.FromUserID}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := rpc.NewGroupClient(etcdConn)
 	rpcResp, err := client.GetJoinedSuperGroupList(context.Background(), &reqPb)
