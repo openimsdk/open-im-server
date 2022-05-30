@@ -22,7 +22,7 @@ service=(
   demo
 )
 
-mkdir -p /db/sdk #path for jssdk sqlite
+#mkdir -p /db/sdk #path for jssdk sqlite
 
 for i in ${service[*]}
 do
