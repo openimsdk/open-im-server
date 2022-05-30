@@ -7,3 +7,11 @@ type GetJoinedSuperGroupReq struct {
 type GetJoinedSuperGroupResp struct {
 	GetJoinedGroupListResp
 }
+
+type GetSuperGroupsInfoReq struct {
+	GetGroupInfoReq
+}
+
+type GetSuperGroupsInfoResp struct {
+	GetGroupInfoResp
+}
