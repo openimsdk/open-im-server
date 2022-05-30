@@ -31,6 +31,12 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 		if err := utils.CopyStructFields(groupInfo, groupInfoDB); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		}
+		group, err := db.DB.GetSuperGroup(groupID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroup failed", groupID, err.Error())
+			continue
+		}
+		groupInfo.MemberCount = uint32(len(group.MemberIDList))
 		resp.GroupList = append(resp.GroupList, groupInfo)
 	}
 	log.NewError(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
