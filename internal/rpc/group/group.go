@@ -410,21 +410,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 			//log.Debug(req.OperationID, "cp value: ", node)
 			resp.MemberList = append(resp.MemberList, &node)
 		}
-	} else {
-		groupInfo, err := db.DB.GetSuperGroup(req.GroupID)
-		if err != nil {
-			resp.ErrCode = constant.ErrDB.ErrCode
-			resp.ErrMsg = constant.ErrDB.ErrMsg
-			log.NewError(req.OperationID, "GetSuperGroup failed,", err.Error(), req.GroupID)
-			return &resp, nil
-		}
-		for _, userID := range groupInfo.MemberIDList {
-			var node open_im_sdk.GroupMemberFullInfo
-			node.UserID = userID
-			resp.MemberList = append(resp.MemberList, &node)
-		}
 	}
-
 	log.NewInfo(req.OperationID, "GetGroupAllMember rpc return ", resp.String())
 	return &resp, nil
 }

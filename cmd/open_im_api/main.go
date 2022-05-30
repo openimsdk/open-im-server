@@ -70,7 +70,7 @@ func main() {
 	{
 		groupRouterGroup.POST("/create_group", group.CreateGroup)                                   //1
 		groupRouterGroup.POST("/set_group_info", group.SetGroupInfo)                                //1
-		groupRouterGroup.POST("join_group", group.JoinGroup)                                        //1
+		groupRouterGroup.POST("/join_group", group.JoinGroup)                                       //1
 		groupRouterGroup.POST("/quit_group", group.QuitGroup)                                       //1
 		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)        //1
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                          //1
@@ -82,15 +82,17 @@ func main() {
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
-		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)        //1
-		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)                      //
+		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
+		groupRouterGroup.POST("/dismiss_group", group.DismissGroup) //
 		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)
 		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
 		groupRouterGroup.POST("/mute_group", group.MuteGroup)
 		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
-
 		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
-
+	}
+	superGroupRouterGroup := r.Group("/super_group")
+	{
+		superGroupRouterGroup.POST("/get_joined_super_group_list", group.GetJoinedSuperGroupList)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
