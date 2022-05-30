@@ -401,6 +401,16 @@ message GetJoinedSuperGroupListResp {
   repeated server_api_params.GroupInfo GroupList = 3;
 }
 
+message GetSuperGroupsInfoReq {
+  repeated string GroupIDList = 1;
+  string OperationID = 2;
+  string OpUserID = 3; //No verification permission
+}
+
+message GetSuperGroupsInfoResp {
+  CommonResp commonResp = 1;
+  repeated server_api_params.GroupInfo GroupInfoList = 3;
+}
 
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -438,6 +448,7 @@ service group{
   rpc SetGroupMemberNickname(SetGroupMemberNicknameReq) returns (SetGroupMemberNicknameResp);
 
   rpc GetJoinedSuperGroupList(GetJoinedSuperGroupListReq) returns (GetJoinedSuperGroupListResp);
+  rpc GetSuperGroupsInfo(GetSuperGroupsInfoReq) returns (GetSuperGroupsInfoResp);
 }
 
 
