@@ -1,7 +1,7 @@
 #### openIM k8s部署文档
 ### 1. 修改配置文件
 在Open-IM-SERVER目录下修改config/config.yaml配置文件, 将MySQL, Kafka, MongoDB等配置修改。
-使用demo需要修改demo/imAPIURL地址
+使用demo需要修改demo/imAPIURL地址 让demo能请求到im的api
 
 ### 2. 项目根目录创建im configMap到k8s openim namespace
 kubectl create namespace openim
