@@ -94,7 +94,10 @@ const (
 	WorkMomentNotificationBegin = 1900
 	WorkMomentNotification      = 1901
 
-	NotificationEnd = 2000
+	SuperGroupUpdateNotificationBegin = 2000
+	SuperGroupUpdateNotification      = 2001
+
+	NotificationEnd = 3000
 
 	//status
 	MsgNormal  = 1

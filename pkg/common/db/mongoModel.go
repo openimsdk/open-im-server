@@ -895,11 +895,36 @@ type UserToSuperGroup struct {
 func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, memberNumCount int) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	session, err := d.mongoClient.StartSession()
+	if err != nil {
+		return utils.Wrap(err, "start session failed")
+	}
+	defer session.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, session)
+	if err != nil {
+		return utils.Wrap(err, "start transaction failed")
+	}
 	superGroup := SuperGroup{
 		GroupID:      groupID,
 		MemberIDList: initMemberIDList,
 	}
-	_, err := c.InsertOne(ctx, superGroup)
+	_, err = c.InsertOne(sCtx, superGroup)
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	var users []UserToSuperGroup
+	for _, v := range initMemberIDList {
+		users = append(users, UserToSuperGroup{
+			UserID: v,
+		})
+	}
+	_, err = c.UpdateOne(sCtx, users, bson.M{"$addToSet": bson.M{"group_id_list": groupID}})
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	session.CommitTransaction(ctx)
 	return err
 }
 
@@ -954,6 +979,10 @@ func (d *DataBases) RemoverUserFromSuperGroup(groupID string, userIDList []strin
 	defer session.EndSession(ctx)
 	sCtx := mongo.NewSessionContext(ctx, session)
 	_, err = c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
 	err = d.RemoveGroupFromUser(ctx, sCtx, groupID, userIDList)
 	if err != nil {
 		session.AbortTransaction(ctx)
