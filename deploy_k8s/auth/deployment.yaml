@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: auth
-        image: openim/auth:v2.0.10
+        image: openim/auth:v2.0.10k
         ports:
         - containerPort: 10160
         volumeMounts:

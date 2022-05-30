@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: msg-gateway
-        image: openim/msg_gateway:v2.0.10
+        image: openim/msg_gateway:v2.0.10k
         ports:
         - name: rpc-port
           containerPort: 10140

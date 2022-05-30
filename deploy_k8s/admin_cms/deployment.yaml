@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: admin-cms
-          image: openim/admin_cms:v2.0.10
+          image: openim/admin_cms:v2.0.10k
           ports:
             - containerPort: 10200
           volumeMounts:

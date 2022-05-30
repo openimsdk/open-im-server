@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: user
-        image: openim/user:v2.0.10
+        image: openim/user:v2.0.10k
         volumeMounts:
           - name: config
             mountPath: /Open-IM-Server/config

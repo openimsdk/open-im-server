@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: statistics
-        image: openim/statistics:v2.0.10
+        image: openim/statistics:v2.0.10k
         ports:
         - containerPort: 10180
         volumeMounts:

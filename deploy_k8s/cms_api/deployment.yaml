@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: cms-api
-        image: openim/cms_api:v2.0.10
+        image: openim/cms_api:v2.0.10k
         ports:
         - containerPort: 10006
         volumeMounts:

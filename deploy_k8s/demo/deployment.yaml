@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: demo
-        image: openim/demo:v2.0.10
+        image: openim/demo:v2.0.10k
         ports:
         - containerPort: 10004
         volumeMounts:

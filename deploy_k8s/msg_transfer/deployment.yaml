@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: msg-transfer
-        image: openim/msg_transfer:v2.0.10
+        image: openim/msg_transfer:v2.0.10k
         volumeMounts:
           - name: config
             mountPath: /Open-IM-Server/config
