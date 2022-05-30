@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogo/protobuf/sortkeys"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"math/rand"
 	"sync"
@@ -30,6 +31,7 @@ const cSendLog = "send_log"
 const cWorkMoment = "work_moment"
 const cCommentMsg = "comment_msg"
 const cSuperGroup = "super_group"
+const cUserToSuperGroup = "user_to_super_group"
 const singleGocMsgNum = 5000
 
 func GetSingleGocMsgNum() int {
@@ -880,18 +882,22 @@ func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userI
 }
 
 type SuperGroup struct {
-	GroupID        string   `bson:"group_id"`
-	MemberNumCount int      `bson:"member_num_count"`
-	MemberIDList   []string `bson:"member_id_list"`
+	GroupID string `bson:"group_id"`
+	//MemberNumCount int      `bson:"member_num_count"`
+	MemberIDList []string `bson:"member_id_list"`
+}
+
+type UserToSuperGroup struct {
+	UserID      string   `bson:"user_id"`
+	GroupIDList []string `bson:"group_id_list"`
 }
 
 func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, memberNumCount int) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
 	superGroup := SuperGroup{
-		GroupID:        groupID,
-		MemberNumCount: memberNumCount,
-		MemberIDList:   initMemberIDList,
+		GroupID:      groupID,
+		MemberIDList: initMemberIDList,
 	}
 	_, err := c.InsertOne(ctx, superGroup)
 	return err
@@ -908,21 +914,98 @@ func (d *DataBases) GetSuperGroup(groupID string) (SuperGroup, error) {
 func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
-	_, err := c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDList}}})
+	session, err := d.mongoClient.StartSession()
+	if err != nil {
+		return utils.Wrap(err, "start session failed")
+	}
+	defer session.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, session)
+	if err != nil {
+		return utils.Wrap(err, "start transaction failed")
+	}
+	_, err = c.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDList}}})
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+	var users []UserToSuperGroup
+	for _, v := range userIDList {
+		users = append(users, UserToSuperGroup{
+			UserID: v,
+		})
+	}
+	_, err = c.UpdateMany(sCtx, users, bson.M{"$addToSet": bson.M{"group_id_list": groupID}})
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	session.CommitTransaction(ctx)
 	return err
 }
 
 func (d *DataBases) RemoverUserFromSuperGroup(groupID string, userIDList []string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
-	_, err := c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
+	session, err := d.mongoClient.StartSession()
+	if err != nil {
+		return utils.Wrap(err, "start session failed")
+	}
+	defer session.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, session)
+	_, err = c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
+	err = d.RemoveGroupFromUser(ctx, sCtx, groupID, userIDList)
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	session.CommitTransaction(ctx)
 	return err
+}
+
+func (d *DataBases) GetSuperGroupByUserID(userID string) (UserToSuperGroup, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+	var user UserToSuperGroup
+	return user, c.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
 }
 
 func (d *DataBases) DeleteSuperGroup(groupID string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
-	_, err := c.DeleteOne(ctx, bson.M{"group_id": groupID})
+	session, err := d.mongoClient.StartSession()
+	if err != nil {
+		return utils.Wrap(err, "start session failed")
+	}
+	defer session.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, session)
+	superGroup := &SuperGroup{}
+	result := c.FindOneAndDelete(sCtx, bson.M{"group_id": groupID})
+	err = result.Decode(superGroup)
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	if err = d.RemoveGroupFromUser(ctx, sCtx, groupID, superGroup.MemberIDList); err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	session.CommitTransaction(ctx)
+	return nil
+}
+
+func (d *DataBases) RemoveGroupFromUser(ctx, sCtx context.Context, groupID string, userID []string) error {
+	var users []UserToSuperGroup
+	for _, v := range userID {
+		users = append(users, UserToSuperGroup{
+			UserID: v,
+		})
+	}
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+	_, err := c.UpdateOne(sCtx, bson.M{"user_id": groupID}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
+	if err != nil {
+		return utils.Wrap(err, "UpdateOne transaction failed")
+	}
 	return err
 }
 
