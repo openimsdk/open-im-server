@@ -44,8 +44,8 @@ metadata:
        proxy_cache_bypass $http_upgrade;
        }
      # 使用重写后的路径进行路由
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
+#    nginx.ingress.kubernetes.io/use-regex: "true"
+#    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
   name: msg-gateway-ingress
 spec:
   rules:
