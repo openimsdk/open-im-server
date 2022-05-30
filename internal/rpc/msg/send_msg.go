@@ -50,46 +50,49 @@ type MsgCallBackResp struct {
 }
 
 func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string) {
-	if data.MsgData.SessionType == constant.GroupChatType {
-		return true, 0, ""
-	}
-	log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
-	reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
-	cacheClient := cacheRpc.NewCacheClient(etcdConn)
-	cacheResp, err := cacheClient.GetBlackIDListFromCache(context.Background(), reqGetBlackIDListFromCache)
-	if err != nil {
-		log.NewError(data.OperationID, "GetBlackIDListFromCache rpc call failed ", err.Error())
-	} else {
-		if cacheResp.CommonResp.ErrCode != 0 {
-			log.NewError(data.OperationID, "GetBlackIDListFromCache rpc logic call failed ", cacheResp.String())
-		} else {
-			if utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
-				return false, 600, "in black list"
-			}
-		}
-	}
-	log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
-	if config.Config.MessageVerify.FriendVerify {
-		reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
+	if data.MsgData.SessionType == constant.SingleChatType {
+		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
+		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
 		cacheClient := cacheRpc.NewCacheClient(etcdConn)
-		cacheResp, err := cacheClient.GetFriendIDListFromCache(context.Background(), reqGetFriendIDListFromCache)
+		cacheResp, err := cacheClient.GetBlackIDListFromCache(context.Background(), reqGetBlackIDListFromCache)
 		if err != nil {
-			log.NewError(data.OperationID, "GetFriendIDListFromCache rpc call failed ", err.Error())
+			log.NewError(data.OperationID, "GetBlackIDListFromCache rpc call failed ", err.Error())
 		} else {
 			if cacheResp.CommonResp.ErrCode != 0 {
-				log.NewError(data.OperationID, "GetFriendIDListFromCache rpc logic call failed ", cacheResp.String())
+				log.NewError(data.OperationID, "GetBlackIDListFromCache rpc logic call failed ", cacheResp.String())
 			} else {
-				if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
-					return false, 601, "not friend"
+				if utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
+					return false, 600, "in black list"
 				}
 			}
 		}
-		return true, 0, ""
+		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
+		if config.Config.MessageVerify.FriendVerify {
+			reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
+			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+			cacheClient := cacheRpc.NewCacheClient(etcdConn)
+			cacheResp, err := cacheClient.GetFriendIDListFromCache(context.Background(), reqGetFriendIDListFromCache)
+			if err != nil {
+				log.NewError(data.OperationID, "GetFriendIDListFromCache rpc call failed ", err.Error())
+			} else {
+				if cacheResp.CommonResp.ErrCode != 0 {
+					log.NewError(data.OperationID, "GetFriendIDListFromCache rpc logic call failed ", cacheResp.String())
+				} else {
+					if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
+						return false, 601, "not friend"
+					}
+				}
+			}
+			return true, 0, ""
+		} else {
+			return true, 0, ""
+		}
+
 	} else {
 		return true, 0, ""
 	}
+
 }
 func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)
@@ -368,6 +371,34 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 
 		log.Debug(pb.OperationID, "send msg cost time ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
+	case constant.SuperGroupChatType:
+		// callback
+		callbackResp := callbackBeforeSendSingleMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSuperGroupMsg resp: ", callbackResp)
+		}
+		if callbackResp.ActionCode != constant.ActionAllow {
+			if callbackResp.ErrCode == 0 {
+				callbackResp.ErrCode = 201
+			}
+			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSuperGroupMsg result", "end rpc and return", callbackResp)
+			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
+		}
+		msgToMQSingle.MsgData = pb.MsgData
+		log.NewInfo(msgToMQSingle.OperationID, msgToMQSingle)
+		err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.GroupID, constant.OnlineStatus)
+		if err1 != nil {
+			log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
+			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+		}
+
+		// callback
+		callbackResp = callbackAfterSendSingleMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSuperGroupMsg resp: ", callbackResp)
+		}
+		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
+
 	default:
 		return returnMsg(&replay, pb, 203, "unknown sessionType", "", 0)
 	}

@@ -1032,6 +1032,10 @@ func getSeqUid(uid string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return indexGen(uid, seqSuffix)
 }
+func getSeqSuperGroupID(groupID string, seq uint32) string {
+	seqSuffix := seq / singleGocMsgNum
+	return superGroupIndexGen(groupID, seqSuffix)
+}
 
 func GetSeqUid(uid string, seq uint32) string {
 	return getSeqUid(uid, seq)
@@ -1068,4 +1072,7 @@ func isNotContainInt32(target uint32, List []uint32) bool {
 
 func indexGen(uid string, seqSuffix uint32) string {
 	return uid + ":" + strconv.FormatInt(int64(seqSuffix), 10)
+}
+func superGroupIndexGen(groupID string, seqSuffix uint32) string {
+	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }
