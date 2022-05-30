@@ -1,10 +1,10 @@
 package base_info
 
-type GetJoinedSuperGroupReq struct {
+type GetJoinedSuperGroupListReq struct {
 	GetJoinedGroupListReq
 }
 
-type GetJoinedSuperGroupResp struct {
+type GetJoinedSuperGroupListResp struct {
 	GetJoinedGroupListResp
 }
 

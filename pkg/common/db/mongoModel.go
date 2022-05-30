@@ -985,10 +985,13 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 	opts := &options.UpdateOptions{
 		Upsert: &upsert,
 	}
-	_, err = c.UpdateMany(sCtx, bson.M{"user_id": bson.M{"$in": initMemberIDList}}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
-	if err != nil {
-		session.AbortTransaction(ctx)
-		return utils.Wrap(err, "transaction failed")
+	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+	for _, userID := range initMemberIDList {
+		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
+		if err != nil {
+			session.AbortTransaction(ctx)
+			return utils.Wrap(err, "transaction failed")
+		}
 	}
 	session.CommitTransaction(ctx)
 	return err
@@ -1026,10 +1029,16 @@ func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) err
 			UserID: v,
 		})
 	}
-	_, err = c.UpdateMany(sCtx, users, bson.M{"$addToSet": bson.M{"group_id_list": groupID}})
-	if err != nil {
-		session.AbortTransaction(ctx)
-		return utils.Wrap(err, "transaction failed")
+	upsert := true
+	opts := &options.UpdateOptions{
+		Upsert: &upsert,
+	}
+	for _, userID := range userIDList {
+		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
+		if err != nil {
+			session.AbortTransaction(ctx)
+			return utils.Wrap(err, "transaction failed")
+		}
 	}
 	session.CommitTransaction(ctx)
 	return err
@@ -1097,7 +1106,7 @@ func (d *DataBases) RemoveGroupFromUser(ctx, sCtx context.Context, groupID strin
 		})
 	}
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
-	_, err := c.UpdateOne(sCtx, bson.M{"user_id": groupID}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
+	_, err := c.UpdateOne(sCtx, bson.M{"user_id": bson.M{"$in": userID}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
 	if err != nil {
 		return utils.Wrap(err, "UpdateOne transaction failed")
 	}
