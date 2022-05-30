@@ -981,7 +981,11 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 			UserID: v,
 		})
 	}
-	_, err = c.UpdateOne(sCtx, users, bson.M{"$addToSet": bson.M{"group_id_list": groupID}})
+	upsert := true
+	opts := &options.UpdateOptions{
+		Upsert: &upsert,
+	}
+	_, err = c.UpdateMany(sCtx, bson.M{"user_id": bson.M{"$in": initMemberIDList}}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 	if err != nil {
 		session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
