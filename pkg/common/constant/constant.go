@@ -88,7 +88,7 @@ const (
 	SignalingNotificationEnd   = 1649
 
 	SuperGroupNotificationBegin  = 1650
-	SuperGroupUpdateNotification = 1621
+	SuperGroupUpdateNotification = 1651
 	SuperGroupNotificationEnd    = 1699
 
 	ConversationPrivateChatNotification = 1701
