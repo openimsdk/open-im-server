@@ -33,8 +33,8 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
      # 使用重写后的路径进行路由
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
+#    nginx.ingress.kubernetes.io/use-regex: "true"
+#    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
   name: msg-gateway-ingress
 spec:
   rules:
@@ -46,7 +46,8 @@ spec:
                 name: msg-gateway
                 port:
                   number: 10001
-            path: /msg-gateway/(.*)
+#            path: /msg-gateway/(.*)
+            path: /
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1

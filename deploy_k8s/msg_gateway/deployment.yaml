@@ -1,4 +1,4 @@
----
+  ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,8 +17,10 @@ spec:
       - name: msg-gateway
         image: openim/msg_gateway:v2.0.10
         ports:
-        - containerPort: 10140
-        - containerPort: 10001
+        - name: rpc-port
+          containerPort: 10140
+        - name: ws-port
+          containerPort: 10001
         volumeMounts:
           - name: config
             mountPath: /Open-IM-Server/config
@@ -39,7 +41,7 @@ spec:
     - name: msg-gateway-port
       protocol: TCP
       port: 10001
-      targetPort: 10001
+      targetPort: ws-port
   selector:
     app: msg-gateway
 
