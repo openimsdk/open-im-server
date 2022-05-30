@@ -46,7 +46,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 
 func (s *groupServer) GetSuperGroupsInfo(_ context.Context, req *pbGroup.GetSuperGroupsInfoReq) (resp *pbGroup.GetSuperGroupsInfoResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbGroup.GetSuperGroupsInfoResp{}
+	resp = &pbGroup.GetSuperGroupsInfoResp{CommonResp: &pbGroup.CommonResp{}}
 	groupsInfoList := make([]*commonPb.GroupInfo, 0)
 	for _, groupID := range req.GroupIDList {
 		groupInfoFromMysql, err := imdb.GetGroupInfoByGroupID(groupID)

@@ -987,7 +987,7 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 	}
 	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
 	for _, userID := range initMemberIDList {
-		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}, "user_id": userID}, opts)
+		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 		if err != nil {
 			session.AbortTransaction(ctx)
 			return utils.Wrap(err, "transaction failed")
@@ -1034,7 +1034,7 @@ func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) err
 		Upsert: &upsert,
 	}
 	for _, userID := range userIDList {
-		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}, "user_id": userID}, opts)
+		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 		if err != nil {
 			session.AbortTransaction(ctx)
 			return utils.Wrap(err, "transaction failed")
