@@ -27,6 +27,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  name: msg-gateway-ingress
   annotations:
     kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
@@ -43,9 +44,8 @@ metadata:
        proxy_set_header Connection "upgrade";
        proxy_cache_bypass $http_upgrade;
        }
-#    nginx.ingress.kubernetes.io/use-regex: "true"
-#    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
-  name: msg-gateway-ingress
+
+
 spec:
   rules:
     - host: k8s.open-im-test.rentsoft.cn
