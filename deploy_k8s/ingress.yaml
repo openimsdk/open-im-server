@@ -54,9 +54,11 @@ spec:
         paths:
           - backend:
               service:
-                serviceName: msg-gateway
-                servicePort: 10001
-            path: /msg-gateway/(.*)
+                name: msg-gateway
+                  port:
+                    number: 10001
+#            path: /msg-gateway/(.*)
+            path: /
             pathType: Prefix
 ---
 apiVersion: networking.k8s.io/v1
