@@ -249,10 +249,11 @@ func GetDepartmentRelatedGroupIDList(departmentIDList []string) ([]string, error
 
 func getDepartmentParent(departmentID string, dbConn *gorm.DB) (*db.Department, error) {
 	var department db.Department
-	var parentID string
+	//var parentID string
 	dbConn.LogMode(true)
 	// select * from departments where department_id = (select parent_id from departments where department_id= zx234fd);
-	err := dbConn.Table("departments").Where("department_id=?", dbConn.Table("departments").Where("department_id=?", departmentID).Pluck("parent_id", parentID)).Find(&department).Error
+	//dbConn.Table("departments").Where("department_id=?", departmentID).Pluck("parent_id", parentID).Error
+	err := dbConn.Table("departments").Where("department_id=?").Find(&department).Error
 	return &department, err
 }
 

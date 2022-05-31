@@ -154,7 +154,6 @@ func (s *organizationServer) UpdateDepartment(ctx context.Context, req *rpc.Upda
 
 	department := db.Department{}
 	utils.CopyStructFields(&department, req.DepartmentInfo)
-
 	log.Debug(req.OperationID, "dst ", department, "src ", req.DepartmentInfo)
 	if err := imdb.UpdateDepartment(&department, nil); err != nil {
 		errMsg := req.OperationID + " " + "UpdateDepartment failed " + err.Error()
@@ -343,6 +342,7 @@ func (s *organizationServer) GetDepartmentParentIDList(_ context.Context, req *r
 	resp = &rpc.GetDepartmentParentIDListResp{}
 	resp.ParentIDList, err = imdb.GetDepartmentParentIDList(req.DepartmentID)
 	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetDepartmentParentIDList failed", err.Error())
 		resp.ErrMsg = constant.ErrDB.ErrMsg + ": " + err.Error()
 		resp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
