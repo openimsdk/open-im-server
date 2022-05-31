@@ -7,10 +7,9 @@ import (
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
+	"github.com/mitchellh/mapstructure"
 	"strconv"
 	"time"
 )
@@ -51,11 +50,7 @@ func (d *DataBases) NewGetMessageListBySeq(userID string, seqList []uint32, oper
 }
 func Map2Pb(m map[string]string) (*pbCommon.MsgData, error) {
 	var data pbCommon.MsgData
-	b, err := json.Marshal(m)
-	if err != nil {
-		return nil, err
-	}
-	err = proto.Unmarshal(b, &data)
+	err := mapstructure.Decode(m, &data)
 	if err != nil {
 		return nil, err
 	}
