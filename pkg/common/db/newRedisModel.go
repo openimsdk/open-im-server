@@ -31,7 +31,11 @@ func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid stri
 		}
 		log2.NewDebug(operationID, "convert map is ", s)
 		fmt.Println("ts", s)
-		err = d.rdb.HMSet(context.Background(), key, s).Err()
+		m := make(map[string]interface{})
+		for k, v := range s {
+			m[k] = v
+		}
+		err = d.rdb.HMSet(context.Background(), key, m).Err()
 		if err != nil {
 			return err
 			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, s, err.Error())
