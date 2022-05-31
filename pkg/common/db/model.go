@@ -8,8 +8,8 @@ import (
 	//"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"fmt"
+	go_redis "github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
 	//	"context"
 	//	"fmt"
 	"github.com/garyburd/redigo/redis"
@@ -30,6 +30,7 @@ type DataBases struct {
 	mgoSession  *mgo.Session
 	redisPool   *redis.Pool
 	mongoClient *mongo.Client
+	rdb         *go_redis.ClusterClient
 }
 
 func key(dbAddress, dbName string) string {
@@ -112,6 +113,18 @@ func init() {
 				redis.DialPassword(config.Config.Redis.DBPassWord),
 			)
 		},
+	}
+
+	DB.rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
+		Addrs:    []string{config.Config.Redis.DBAddress},
+		PoolSize: 100,
+		Password: config.Config.Redis.DBPassWord,
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	_, err = DB.rdb.Ping(ctx).Result()
+	if err != nil {
+		panic(err.Error())
 	}
 }
 
