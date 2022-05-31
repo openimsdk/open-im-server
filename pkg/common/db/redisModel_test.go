@@ -2,6 +2,7 @@ package db
 
 import (
 	pbChat "Open_IM/pkg/proto/chat"
+	"Open_IM/pkg/proto/sdk_ws"
 	"context"
 	"flag"
 	"fmt"
@@ -46,9 +47,11 @@ func Test_HGetAll(t *testing.T) {
 }
 func Test_NewSetMessageToCache(t *testing.T) {
 	var msg pbChat.MsgDataToMQ
+	var data server_api_params.MsgData
 	uid := "test_uid"
-	msg.MsgData.Seq = 11
-	msg.MsgData.ClientMsgID = "23jwhjsdf"
+	data.Seq = 11
+	data.ClientMsgID = "23jwhjsdf"
+	msg.MsgData = &data
 	messageList := []*pbChat.MsgDataToMQ{&msg}
 	err := DB.NewSetMessageToCache(messageList, uid, "test")
 	assert.Nil(t, err)
