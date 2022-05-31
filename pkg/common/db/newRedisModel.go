@@ -30,6 +30,7 @@ func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid stri
 			continue
 		}
 		log2.NewDebug(operationID, "convert map is ", s)
+		fmt.Println("ts", s)
 		val, err := d.rdb.HSet(ctx, key, s).Result()
 		if err != nil {
 			return err
