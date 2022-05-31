@@ -53,7 +53,7 @@ func Test_NewSetMessageToCache(t *testing.T) {
 	data.ClientMsgID = "23jwhjsdf"
 	msg.MsgData = &data
 	messageList := []*pbChat.MsgDataToMQ{&msg}
-	err := DB.NewSetMessageToCache(messageList, uid, "test")
+	err := DB.NewSetMessageToCache(messageList, uid, "cacheTest")
 	assert.Nil(t, err)
 
 }
