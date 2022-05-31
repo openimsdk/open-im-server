@@ -31,10 +31,10 @@ func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid stri
 		}
 		log2.NewDebug(operationID, "convert map is ", s)
 		fmt.Println("ts", s)
-		val, err := d.rdb.HMSet(ctx, key, s).Result()
+		err = d.rdb.HMSet(ctx, key, s).Err()
 		if err != nil {
 			return err
-			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, s, val, err.Error())
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, s, err.Error())
 			failedList = append(failedList, *msg)
 		}
 		d.rdb.Expire(ctx, key, time.Second*time.Duration(config.Config.MsgCacheTimeout))
