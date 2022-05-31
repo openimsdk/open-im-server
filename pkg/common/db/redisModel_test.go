@@ -58,3 +58,16 @@ func Test_NewSetMessageToCache(t *testing.T) {
 	assert.Nil(t, err)
 
 }
+func Test_NewGetMessageListBySeq(t *testing.T) {
+	var msg pbChat.MsgDataToMQ
+	var data server_api_params.MsgData
+	uid := "test_uid"
+	data.Seq = 11
+	data.ClientMsgID = "23jwhjsdf"
+	msg.MsgData = &data
+
+	seqMsg, failedSeqList, err := DB.NewGetMessageListBySeq(uid, []uint32{11}, "cacheTest")
+	assert.Nil(t, err)
+	fmt.Println(seqMsg, failedSeqList)
+
+}
