@@ -256,19 +256,19 @@ func getDepartmentParent(departmentID string, dbConn *gorm.DB) (*db.Department, 
 	return &department, err
 }
 
-func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList []string) (*db.Department, error) {
+func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList *[]string) error {
 	department, err := getDepartmentParent(departmentID, dbConn)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if department.ParentID != "" {
-		parentIDList = append(parentIDList, department.ParentID)
-		_, err = GetDepartmentParent(departmentID, dbConn, parentIDList)
+		*parentIDList = append(*parentIDList, department.ParentID)
+		err = GetDepartmentParent(departmentID, dbConn, parentIDList)
 		if err != nil {
-			return nil, nil
+			return err
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 func GetDepartmentParentIDList(departmentID string) ([]string, error) {
@@ -277,6 +277,6 @@ func GetDepartmentParentIDList(departmentID string) ([]string, error) {
 		return nil, err
 	}
 	var parentIDList []string
-	_, err = GetDepartmentParent(departmentID, dbConn, parentIDList)
+	err = GetDepartmentParent(departmentID, dbConn, &parentIDList)
 	return parentIDList, err
 }
