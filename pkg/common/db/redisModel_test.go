@@ -55,7 +55,6 @@ func Test_NewSetMessageToCache(t *testing.T) {
 	msg.MsgData = &data
 	messageList := []*pbChat.MsgDataToMQ{&msg}
 	err := DB.NewSetMessageToCache(messageList, uid, "cacheTest")
-	//err := DB.rdb.HMSet(context.Background(), "12", map[string]interface{}{"1": 2}).Err()
 	assert.Nil(t, err)
 
 }
