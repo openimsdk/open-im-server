@@ -165,7 +165,7 @@ func Pb2Map(pb proto.Message) (map[string]interface{}, error) {
 	jsonbMarshaller := &jsonpb.Marshaler{
 		OrigName:     true,
 		EnumsAsInts:  true,
-		EmitDefaults: true,
+		EmitDefaults: false,
 	}
 	_ = jsonbMarshaller.Marshal(&_buffer, pb)
 	jsonCnt := _buffer.Bytes()
