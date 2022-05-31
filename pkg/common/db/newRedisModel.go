@@ -38,7 +38,7 @@ func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid stri
 		d.rdb.Expire(ctx, key, time.Second*time.Duration(config.Config.MsgCacheTimeout))
 	}
 	if len(failedList) != 0 {
-		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %s", failedList))
+		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q", failedList))
 	}
 	return nil
 }

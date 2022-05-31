@@ -309,7 +309,7 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 		}
 	}
 	if len(failedList) != 0 {
-		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %s", failedList))
+		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q", failedList))
 	}
 	return nil
 }
