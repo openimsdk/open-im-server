@@ -22,7 +22,6 @@ import (
 func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	ctx := context.Background()
 	var failedList []pbChat.MsgDataToMQ
-	var err error
 	for _, msg := range msgList {
 		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
 		s, err := utils.Pb2Map(msg.MsgData)
@@ -33,13 +32,14 @@ func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid stri
 		log2.NewDebug(operationID, "convert map is ", s)
 		val, err := d.rdb.HMSet(ctx, key, s).Result()
 		if err != nil {
+			return err
 			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, s, val, err.Error())
 			failedList = append(failedList, *msg)
 		}
 		d.rdb.Expire(ctx, key, time.Second*time.Duration(config.Config.MsgCacheTimeout))
 	}
 	if len(failedList) != 0 {
-		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, operationID) + err.Error())
+		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, operationID))
 	}
 	return nil
 }
