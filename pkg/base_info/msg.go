@@ -10,3 +10,12 @@ type DelMsgReq struct {
 type DelMsgResp struct {
 	CommResp
 }
+
+type CleanUpMsgReq struct {
+	UserID      string `json:"userID"  binding:"required"`
+	OperationID string `json:"operationID"  binding:"required"`
+}
+
+type CleanUpMsgResp struct {
+	CommResp
+}

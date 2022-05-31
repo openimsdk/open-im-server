@@ -277,7 +277,7 @@ func GroupIsBanPrivateChat(status int32) bool {
 	return true
 }
 
-const BigVersion = "v3"
+const BigVersion = "v2"
 
 const LogFileName = "OpenIM.log"
 

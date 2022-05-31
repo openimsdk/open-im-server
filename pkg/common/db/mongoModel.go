@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/gogo/protobuf/sortkeys"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -1136,6 +1137,17 @@ func getSeqUid(uid string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return indexGen(uid, seqSuffix)
 }
+
+func getSeqUserIDList(userID string, maxSeq uint32) []string {
+	seqMaxSuffix := maxSeq / singleGocMsgNum
+	var seqUserIDList []string
+	for i := 0; i <= int(seqMaxSuffix); i++ {
+		seqUserID := indexGen(userID, uint32(i))
+		seqUserIDList = append(seqUserIDList, seqUserID)
+	}
+	return seqUserIDList
+}
+
 func getSeqSuperGroupID(groupID string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return superGroupIndexGen(groupID, seqSuffix)
@@ -1179,4 +1191,24 @@ func indexGen(uid string, seqSuffix uint32) string {
 }
 func superGroupIndexGen(groupID string, seqSuffix uint32) string {
 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
+}
+
+func (d *DataBases) CleanUpUserMsgFromMongo(userID string) error {
+	ctx := context.Background()
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	maxSeq, err := d.GetUserMaxSeq(userID)
+	if err == redis.Nil {
+		return nil
+	}
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+
+	seqUsers := getSeqUserIDList(userID, uint32(maxSeq))
+	//bson.M{"id":bson.M{"$in":list}}
+	_, err = c.DeleteMany(ctx, bson.M{"uid": bson.M{"$in": seqUsers}})
+	if err == mongo.ErrNoDocuments {
+		return nil
+	}
+	return utils.Wrap(err, "")
 }

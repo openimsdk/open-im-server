@@ -69,14 +69,25 @@ message SendMsgResp {
   string serverMsgID = 4;
   string clientMsgID = 5;
   int64  sendTime = 6;
-
 }
 
 
+message ClearMsgReq{
+      string userID = 1;
+      string opUserID = 2;
+      string operationID = 3;
+}
+
+
+message ClearMsgResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+}
 
 service Chat {
   rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
   rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
   rpc DelMsgList(server_api_params.DelMsgListReq) returns(server_api_params.DelMsgListResp);
+  rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
 }
