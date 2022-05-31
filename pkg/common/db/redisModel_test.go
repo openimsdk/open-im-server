@@ -1,8 +1,6 @@
 package db
 
 import (
-	pbChat "Open_IM/pkg/proto/chat"
-	"Open_IM/pkg/proto/sdk_ws"
 	"context"
 	"flag"
 	"fmt"
@@ -45,15 +43,17 @@ func Test_HGetAll(t *testing.T) {
 	assert.Nil(t, err)
 	fmt.Println(ttl)
 }
+
 func Test_NewSetMessageToCache(t *testing.T) {
-	var msg pbChat.MsgDataToMQ
-	var data server_api_params.MsgData
-	uid := "test_uid"
-	data.Seq = 11
-	data.ClientMsgID = "23jwhjsdf"
-	msg.MsgData = &data
-	messageList := []*pbChat.MsgDataToMQ{&msg}
-	err := DB.NewSetMessageToCache(messageList, uid, "cacheTest")
+	//var msg pbChat.MsgDataToMQ
+	//var data server_api_params.MsgData
+	//uid := "test_uid"
+	//data.Seq = 11
+	//data.ClientMsgID = "23jwhjsdf"
+	//msg.MsgData = &data
+	//messageList := []*pbChat.MsgDataToMQ{&msg}
+	//err := DB.NewSetMessageToCache(messageList, uid, "cacheTest")
+	err := DB.rdb.HMSet(context.Background(), "12", map[string]interface{}{"1": 2}).Err()
 	assert.Nil(t, err)
 
 }
