@@ -85,10 +85,11 @@ func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid stri
 	return nil
 }
 
-func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string) error {
+func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID string) error {
 	ctx := context.Background()
 	key := messageCache + userID + "_" + "*"
 	vals, err := d.rdb.Keys(ctx, key).Result()
+	log2.Debug(operationID, "vals: ", vals)
 	if err == redis.ErrNil {
 		return nil
 	}

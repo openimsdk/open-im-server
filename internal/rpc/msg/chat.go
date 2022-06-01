@@ -18,7 +18,7 @@ func (rpc *rpcChat) ClearMsg(_ context.Context, req *pbChat.ClearMsgReq) (*pbCha
 		return &pbChat.ClearMsgResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
 	}
 	log.Debug(req.OperationID, "CleanUpOneUserAllMsgFromRedis args", req.UserID)
-	err := db.DB.CleanUpOneUserAllMsgFromRedis(req.UserID)
+	err := db.DB.CleanUpOneUserAllMsgFromRedis(req.UserID, req.OperationID)
 	if err != nil {
 		errMsg := "CleanUpOneUserAllMsgFromRedis failed " + err.Error() + req.OperationID + req.UserID
 		log.Error(req.OperationID, errMsg)

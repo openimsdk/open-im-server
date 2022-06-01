@@ -1193,7 +1193,7 @@ func superGroupIndexGen(groupID string, seqSuffix uint32) string {
 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }
 
-func (d *DataBases) CleanUpUserMsgFromMongo(userID string) error {
+func (d *DataBases) CleanUpUserMsgFromMongo(userID string, operationID string) error {
 	ctx := context.Background()
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 	maxSeq, err := d.GetUserMaxSeq(userID)
@@ -1205,7 +1205,7 @@ func (d *DataBases) CleanUpUserMsgFromMongo(userID string) error {
 	}
 
 	seqUsers := getSeqUserIDList(userID, uint32(maxSeq))
-	//bson.M{"id":bson.M{"$in":list}}
+	log.Error(operationID, "getSeqUserIDList", seqUsers)
 	_, err = c.DeleteMany(ctx, bson.M{"uid": bson.M{"$in": seqUsers}})
 	if err == mongo.ErrNoDocuments {
 		return nil
