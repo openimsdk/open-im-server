@@ -48,7 +48,12 @@ func GetUserAllChat(uid string) {
 				fmt.Println(err.Error(), msg)
 				continue
 			}
-			fmt.Println("seq: ", msgData.Seq, "status: ", msgData.Status, "sendID: ", msgData.SendID, "recvID: ", msgData.RecvID, "sendTime: ", msgData.SendTime)
+			fmt.Println("seq: ", msgData.Seq, "status: ", msgData.Status,
+				"sendID: ", msgData.SendID, "recvID: ", msgData.RecvID,
+				"sendTime: ", msgData.SendTime,
+				"clientMsgID: ", msgData.ClientMsgID,
+				"serverMsgID: ", msgData.ServerMsgID,
+				"content: ", string(msgData.Content))
 		}
 	}
 }
