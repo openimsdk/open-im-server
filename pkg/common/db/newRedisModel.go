@@ -9,6 +9,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/garyburd/redigo/redis"
 	"github.com/mitchellh/mapstructure"
 	"strconv"
 	"time"
@@ -88,6 +89,9 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string) error {
 	ctx := context.Background()
 	key := messageCache + userID + "_" + "*"
 	vals, err := d.rdb.Keys(ctx, key).Result()
+	if err == redis.ErrNil {
+		return nil
+	}
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
