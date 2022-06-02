@@ -45,6 +45,7 @@ func (j *JPush) Push(accounts []string, alert, detailContent, operationID string
 	if opts.Signal.ClientMsgID != "" {
 		extras.ClientMsgID = opts.Signal.ClientMsgID
 	}
+	no.IOSEnableMutableContent()
 	no.SetExtras(extras)
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)

@@ -18,10 +18,11 @@ type Android struct {
 	Extras Extras `json:"extras"`
 }
 type Ios struct {
-	Alert  string `json:"alert,omitempty"`
-	Sound  string `json:"sound,omitempty"`
-	Badge  string `json:"badge,omitempty"`
-	Extras Extras `json:"extras"`
+	Alert          string `json:"alert,omitempty"`
+	Sound          string `json:"sound,omitempty"`
+	Badge          string `json:"badge,omitempty"`
+	Extras         Extras `json:"extras"`
+	MutableContent bool   `json:"mutable-content"`
 }
 
 type Extras struct {
@@ -44,4 +45,8 @@ func (n *Notification) SetExtras(extras Extras) {
 
 func (n *Notification) SetAndroidIntent() {
 	n.Android.Intent.URL = config.Config.Push.Jpns.PushIntent
+}
+
+func (n *Notification) IOSEnableMutableContent() {
+	n.IOS.MutableContent = true
 }
