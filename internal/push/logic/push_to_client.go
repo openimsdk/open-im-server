@@ -143,15 +143,16 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 }
 
 func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err error) {
-	if pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd && pushMsg.MsgData.ContentType > constant.SignalingNotification {
+	if pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd && pushMsg.MsgData.ContentType > constant.SignalingNotificationBegin {
 		req := &pbRtc.SignalReq{}
 		if err := proto.Unmarshal(pushMsg.MsgData.Content, req); err != nil {
 			return opts, err
 		}
-		log.NewInfo("", utils.GetSelfFuncName(), "SignalReq: ", req.String())
+		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
 		switch req.Payload.(type) {
 		case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
 			opts.Signal.ClientMsgID = pushMsg.MsgData.ClientMsgID
+			log.NewDebug(pushMsg.OperationID, opts)
 		}
 
 	}
