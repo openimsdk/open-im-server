@@ -806,6 +806,26 @@ func SetGroupMemberNickname(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func GetGroupMemberIDListFromCache(c *gin.Context) {
-
+func SetGroupMemberInfo(c *gin.Context) {
+	//var (
+	//	req api.SetGroupMemberInfoReq
+	//	resp api.SetGroupMemberInfoResp
+	//)
+	//if err := c.BindJSON(&req); err != nil {
+	//	log.NewError("0", "BindJSON failed ", err.Error())
+	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+	//	return
+	//}
+	//
+	//var ok bool
+	//var errInfo string
+	//ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	//if !ok {
+	//	errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+	//	log.NewError(req.OperationID, errMsg)
+	//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+	//	return
+	//}
+	//
+	//log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 }

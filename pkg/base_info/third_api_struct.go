@@ -57,3 +57,25 @@ type GetDownloadURLResp struct {
 		UpdateLog     string `json:"update_log"`
 	} `json:"data"`
 }
+
+type GetRTCInvitationInfoReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	ClientMsgID string `json:"clientMsgID"`
+}
+
+type GetRTCInvitationInfoResp struct {
+	CommResp
+	Data struct {
+		OpUserID   string `json:"opUserID"`
+		Invitation struct {
+			InviterUserID     string   `json:"InviterUserID"`
+			InviteeUserIDList []string `json:"InviteeUserIDList"`
+			GroupID           string   `json:"groupID"`
+			RoomID            string   `json:"roomID"`
+			Timeout           int32    `json:"timeout"`
+			MediaType         string   `json:"mediaType"`
+			SessionType       int32    `json:"sessionType"`
+		} `json:"invitation"`
+		OfflinePushInfo struct{} `json:"offlinePushInfo"`
+	}
+}

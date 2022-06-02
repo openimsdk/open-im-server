@@ -7,16 +7,17 @@
 package logic
 
 import (
-	jpush "Open_IM/internal/push/jpush"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
+	pbRtc "Open_IM/pkg/proto/rtc"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
+	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc"
 	"strings"
 )
@@ -34,6 +35,14 @@ type AtContent struct {
 }
 
 var grpcCons []*grpc.ClientConn
+
+type PushOpts struct {
+	Signal Signal
+}
+
+type Signal struct {
+	ClientMsgID string
+}
 
 func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingleMsgToUser
@@ -117,9 +126,13 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				}
 
 				if offlinePusher == nil {
-					offlinePusher = jpush.JPushClient
+					break
 				}
-				pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, pushMsg.OperationID)
+				opts, err := GetOfflinePushOpts(pushMsg)
+				if err != nil {
+					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
+				}
+				pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, pushMsg.OperationID, opts)
 				if err != nil {
 					log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
 				} else {
@@ -131,6 +144,21 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		}
 
 	}
+}
+
+func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts PushOpts, err error) {
+	if pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd && pushMsg.MsgData.ContentType > constant.SignalingNotification {
+		req := &pbRtc.SignalMessageAssembleReq{}
+		if err := proto.Unmarshal(pushMsg.MsgData.Content, req); err != nil {
+			return opts, err
+		}
+		switch req.SignalReq.Payload.(type) {
+		case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
+			opts.Signal.ClientMsgID = pushMsg.MsgData.ClientMsgID
+		}
+
+	}
+	return opts, nil
 }
 
 //func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {

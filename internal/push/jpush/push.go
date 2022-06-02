@@ -3,6 +3,7 @@ package push
 import (
 	"Open_IM/internal/push/jpush/common"
 	"Open_IM/internal/push/jpush/requestBody"
+	"Open_IM/internal/push/logic"
 	"Open_IM/pkg/common/config"
 	"bytes"
 	"encoding/json"
@@ -32,13 +33,19 @@ func (j *JPush) SetAlias(cid, alias string) (resp string, err error) {
 	return resp, nil
 }
 
-func (j *JPush) Push(accounts []string, alert, detailContent, operationID string) (string, error) {
+func (j *JPush) Push(accounts []string, alert, detailContent, operationID string, opts logic.PushOpts) (string, error) {
 	var pf requestBody.Platform
 	pf.SetAll()
 	var au requestBody.Audience
 	au.SetAlias(accounts)
 	var no requestBody.Notification
 	no.SetAlert(alert)
+
+	var extras requestBody.Extras
+	if opts.Signal.ClientMsgID != "" {
+		extras.ClientMsgID = opts.Signal.ClientMsgID
+	}
+	no.SetExtras(extras)
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)
 	var o requestBody.Options

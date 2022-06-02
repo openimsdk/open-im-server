@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+import "Open_IM/pkg/proto/sdk_ws/wrappers.proto";
 option go_package = "./group;group";
 package group;
 
@@ -391,8 +392,19 @@ message SetGroupMemberNicknameResp{
   CommonResp CommonResp = 1;
 }
 
+message SetGroupMemberInfoReq{
+  string groupID = 1;
+  string userID = 2;
+  string operationID = 3;
+  google.protobuf.StringValue nickname = 4;
+  google.protobuf.StringValue faceURL = 5;
+  google.protobuf.Int32Value roleLevel = 6;
+  google.protobuf.StringValue ex = 7;
+}
 
-
+message SetGroupMemberInfoResp{
+  CommonResp CommonResp = 1;
+}
 
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
@@ -428,7 +440,7 @@ service group{
   rpc CancelMuteGroup(CancelMuteGroupReq) returns(CancelMuteGroupResp);
 
   rpc SetGroupMemberNickname(SetGroupMemberNicknameReq) returns (SetGroupMemberNicknameResp);
-
+  rpc SetGroupMemberInfo(SetGroupMemberInfoReq) returns (SetGroupMemberInfoResp);
 }
 
 

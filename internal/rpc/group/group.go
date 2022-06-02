@@ -1405,3 +1405,8 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
 	return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
 }
+
+func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (resp *pbGroup.SetGroupMemberInfoResp, err error) {
+	resp = &pbGroup.SetGroupMemberInfoResp{}
+	return resp, nil
+}

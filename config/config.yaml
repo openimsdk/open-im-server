@@ -1,4 +1,5 @@
 # The class cannot be named by Pascal or camel case.
+# The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
 serverversion: 2.0.0
@@ -697,5 +698,4 @@ demo:
   imAPIURL: http://127.0.0.1:10002
 
 rtc:
-  port: 11300
-  address: 127.0.0.1
+  signalTimeout: 300

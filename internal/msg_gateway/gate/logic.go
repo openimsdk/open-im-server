@@ -3,6 +3,7 @@ package gate
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
@@ -237,7 +238,13 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 				ws.sendSignalMsgResp(conn, 200, err.Error(), m, &signalResp)
 			} else {
 				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
-				ws.sendSignalMsgResp(conn, 0, "", m, &signalResp)
+				// save invitation info for offline push
+				if err := db.DB.CacheSignalInfo(pbData.MsgData); err != nil {
+					log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), m, &signalResp)
+					ws.sendSignalMsgResp(conn, 200, err.Error(), m, &signalResp)
+				} else {
+					ws.sendSignalMsgResp(conn, 0, "", m, &signalResp)
+				}
 			}
 		} else {
 			log.NewError(m.OperationID, utils.GetSelfFuncName(), respPb.IsPass, respPb.CommonResp.ErrCode, respPb.CommonResp.ErrMsg)

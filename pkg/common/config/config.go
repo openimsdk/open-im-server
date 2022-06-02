@@ -442,8 +442,7 @@ type config struct {
 		ImAPIURL         string `yaml:"imAPIURL"`
 	}
 	Rtc struct {
-		Port    int    `yaml:"port"`
-		Address string `yaml:"address"`
+		SignalTimeout string `yaml:"signalTimeout"`
 	} `yaml:"rtc"`
 }
 type PConversation struct {
