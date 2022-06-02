@@ -47,7 +47,7 @@ func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbA
 		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
 
-	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, req.Platform)
+	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, int(req.Platform))
 	if err != nil {
 		errMsg := req.OperationID + " token_verify.CreateToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
 		log.NewError(req.OperationID, errMsg)

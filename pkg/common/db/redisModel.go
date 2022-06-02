@@ -111,7 +111,7 @@ func (d *DataBases) DelAppleDeviceToken(accountAddress string) (err error) {
 }
 
 //Store userid and platform class to redis
-func (d *DataBases) AddTokenFlag(userID string, platformID int32, token string, flag int) error {
+func (d *DataBases) AddTokenFlag(userID string, platformID int, token string, flag int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	log2.NewDebug("", "add token key is ", key)
 	_, err1 := d.Exec("HSet", key, token, flag)
@@ -123,12 +123,12 @@ func (d *DataBases) GetTokenMapByUidPid(userID, platformID string) (map[string]i
 	log2.NewDebug("", "get token key is ", key)
 	return redis.IntMap(d.Exec("HGETALL", key))
 }
-func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int32, m map[string]int) error {
+func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int, m map[string]int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	_, err := d.Exec("hmset", key, redis.Args{}.Add().AddFlat(m)...)
 	return err
 }
-func (d *DataBases) DeleteTokenByUidPid(userID string, platformID int32, fields []string) error {
+func (d *DataBases) DeleteTokenByUidPid(userID string, platformID int, fields []string) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
 	_, err := d.Exec("HDEL", key, redis.Args{}.Add().AddFlat(fields)...)
 	return err

@@ -37,7 +37,7 @@ func BuildClaims(uid, platform string, ttl int64) Claims {
 		}}
 }
 
-func CreateToken(userID string, platformID int32) (string, int64, error) {
+func CreateToken(userID string, platformID int) (string, int64, error) {
 	claims := BuildClaims(userID, constant.PlatformIDToName(platformID), config.Config.TokenPolicy.AccessExpire)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(config.Config.TokenPolicy.AccessSecret))
@@ -233,7 +233,7 @@ func WsVerifyToken(token, uid string, platformID string, operationID string) (bo
 	if claims.UID != uid {
 		return false, utils.Wrap(&constant.ErrTokenUnknown, "uid is not same to token uid"), "uid is not same to token uid"
 	}
-	if claims.Platform != constant.PlatformIDToName(utils.StringToInt32(platformID)) {
+	if claims.Platform != constant.PlatformIDToName(utils.StringToInt(platformID)) {
 		return false, utils.Wrap(&constant.ErrTokenUnknown, "platform is not same to token platform"), "platform is not same to token platform"
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), " check ok ", claims.UID, uid, claims.Platform)
