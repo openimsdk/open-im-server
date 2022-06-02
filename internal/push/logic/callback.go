@@ -20,7 +20,7 @@ func callbackOfflinePush(operationID, userID string, info *commonPb.OfflinePushI
 			OperationID:     operationID,
 			UserID:          userID,
 			PlatformID:      platformID,
-			Platform:        constant.PlatformIDToName(platformID),
+			Platform:        constant.PlatformIDToName(int(platformID)),
 		},
 		OfflinePushInfo: info,
 	}
