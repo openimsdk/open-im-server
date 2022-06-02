@@ -14,6 +14,7 @@ repeated SingleMsgToUserPlatform resp = 1;
 message SingelMsgToUserResultList{
   string userID =1;
   repeated SingleMsgToUserPlatform resp = 2;
+  bool onlinePush = 3;
 
 }
 message OnlineBatchPushOneMsgReq{

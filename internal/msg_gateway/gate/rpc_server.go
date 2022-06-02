@@ -159,11 +159,16 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 	}
 	for _, v := range req.PushToUserIDList {
 		var resp []*pbRelay.SingleMsgToUserPlatform
+		tempT := &pbRelay.SingelMsgToUserResultList{
+			UserID: v,
+		}
 		userConnMap := ws.getUserAllCons(v)
 		for platform, userConn := range userConnMap {
 			if userConn != nil {
 				resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
-				if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) { //仅仅记录推送成功的平台端
+				if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
+					tempT.OnlinePush = true
+					log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
 					temp := &pbRelay.SingleMsgToUserPlatform{
 						ResultCode:     resultCode,
 						RecvID:         v,
@@ -174,31 +179,7 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 
 			}
 		}
-		//for _, x := range r.platformList {
-		//	if conn := ws.getUserConn(v, x); conn != nil {
-		//		resultCode := sendMsgBatchToUser(conn, replyBytes.Bytes(), req, x, v)
-		//		temp := &pbRelay.SingleMsgToUserPlatform{
-		//			ResultCode:     resultCode,
-		//			RecvID:         v,
-		//			RecvPlatFormID: constant.PlatformNameToID(x),
-		//		}
-		//		resp = append(resp, temp)
-		//	} else {
-		//		if utils.IsContain(x,r.pushTerminal) {
-		//			temp := &pbRelay.SingleMsgToUserPlatform{
-		//				ResultCode:     -1,
-		//				RecvID:         v,
-		//				RecvPlatFormID: constant.PlatformNameToID(x),
-		//			}
-		//			resp = append(resp, temp)
-		//		}
-		//
-		//	}
-		//}
-		tempT := &pbRelay.SingelMsgToUserResultList{
-			UserID: v,
-			Resp:   resp,
-		}
+		tempT.Resp = resp
 		singleUserResult = append(singleUserResult, tempT)
 
 	}
