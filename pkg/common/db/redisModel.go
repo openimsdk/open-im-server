@@ -356,14 +356,15 @@ func (d *DataBases) CacheSignalInfo(msg *pbCommon.MsgData) error {
 func (d *DataBases) GetSignalInfoFromCache(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
 	key := SignalCache + clientMsgID
 	result, err := redis.Bytes(d.Exec("GET", key))
-	log2.NewDebug("", utils.GetSelfFuncName(), clientMsgID, result)
+	log2.NewDebug("", utils.GetSelfFuncName(), clientMsgID, result, string(result))
 	if err != nil {
-		invitationInfo := &pbRtc.SignalInviteReq{}
-		return invitationInfo, err
+		return nil, err
 	}
-	req := &pbRtc.SignalMessageAssembleReq{}
-	err = proto.Unmarshal(result, req)
-	req2 := req.SignalReq.Payload.(*pbRtc.SignalReq_Invite)
+	req := &pbRtc.SignalReq{}
+	if err = proto.Unmarshal(result, req); err != nil {
+		return nil, err
+	}
+	req2 := req.Payload.(*pbRtc.SignalReq_Invite)
 	invitationInfo = req2.Invite
 	return invitationInfo, err
 }

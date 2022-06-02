@@ -125,6 +125,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				if err != nil {
 					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
 				}
+				log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), "opts:", opts)
 				pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, pushMsg.OperationID, opts)
 				if err != nil {
 					log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
@@ -141,11 +142,11 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 
 func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err error) {
 	if pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd && pushMsg.MsgData.ContentType > constant.SignalingNotification {
-		req := &pbRtc.SignalMessageAssembleReq{}
+		req := &pbRtc.SignalReq{}
 		if err := proto.Unmarshal(pushMsg.MsgData.Content, req); err != nil {
 			return opts, err
 		}
-		switch req.SignalReq.Payload.(type) {
+		switch req.Payload.(type) {
 		case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
 			opts.Signal.ClientMsgID = pushMsg.MsgData.ClientMsgID
 		}
