@@ -104,6 +104,8 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 						} else {
 							content = constant.ContentType2PushContent[constant.GroupMsg]
 						}
+					case constant.SignalingNotification:
+						content = constant.ContentType2PushContent[constant.SignalMsg]
 					default:
 						content = constant.ContentType2PushContent[constant.Common]
 					}

@@ -34,12 +34,12 @@ func (j *JPush) SetAlias(cid, alias string) (resp string, err error) {
 }
 
 func (j *JPush) Push(accounts []string, alert, detailContent, operationID string, opts push.PushOpts) (string, error) {
+
 	var pf requestBody.Platform
 	pf.SetAll()
 	var au requestBody.Audience
 	au.SetAlias(accounts)
 	var no requestBody.Notification
-	no.SetAlert(alert)
 
 	var extras requestBody.Extras
 	if opts.Signal.ClientMsgID != "" {
@@ -47,6 +47,7 @@ func (j *JPush) Push(accounts []string, alert, detailContent, operationID string
 	}
 	no.IOSEnableMutableContent()
 	no.SetExtras(extras)
+	no.SetAlert(alert)
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)
 	var o requestBody.Options
