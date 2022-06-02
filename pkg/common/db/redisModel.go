@@ -14,7 +14,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	osconfig "google.golang.org/genproto/googleapis/cloud/osconfig/v1alpha"
+	//osconfig "google.golang.org/genproto/googleapis/cloud/osconfig/v1alpha"
 	"strconv"
 )
 
