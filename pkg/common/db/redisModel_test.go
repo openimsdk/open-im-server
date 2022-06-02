@@ -1,6 +1,7 @@
 package db
 
 import (
+	"Open_IM/pkg/common/constant"
 	pbChat "Open_IM/pkg/proto/chat"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"context"
@@ -48,10 +49,25 @@ func Test_HGetAll(t *testing.T) {
 
 func Test_NewSetMessageToCache(t *testing.T) {
 	var msg pbChat.MsgDataToMQ
+	m := make(map[string]bool)
+	var offlinePush server_api_params.OfflinePushInfo
+	offlinePush.Title = "3"
+	offlinePush.Ex = "34"
+	offlinePush.IOSPushSound = "+1"
+	offlinePush.IOSBadgeCount = true
+	m[constant.IsPersistent] = true
+	m[constant.IsHistory] = true
 	var data server_api_params.MsgData
 	uid := "test_uid"
 	data.Seq = 11
 	data.ClientMsgID = "23jwhjsdf"
+	data.SendID = "111"
+	data.RecvID = "222"
+	data.Content = []byte{1, 2, 3, 4, 5, 6, 7}
+	data.Seq = 1212
+	data.Options = m
+	data.OfflinePushInfo = &offlinePush
+	data.AtUserIDList = []string{"1212", "23232"}
 	msg.MsgData = &data
 	messageList := []*pbChat.MsgDataToMQ{&msg}
 	err := DB.NewSetMessageToCache(messageList, uid, "cacheTest")
