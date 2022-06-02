@@ -1,7 +1,13 @@
 package push
 
-import "Open_IM/internal/push/logic"
-
 type OfflinePusher interface {
-	Push(userIDList []string, alert, detailContent, operationID string, opts logic.PushOpts) (resp string, err error)
+	Push(userIDList []string, alert, detailContent, operationID string, opts PushOpts) (resp string, err error)
+}
+
+type PushOpts struct {
+	Signal Signal
+}
+
+type Signal struct {
+	ClientMsgID string
 }

@@ -7,6 +7,7 @@
 package logic
 
 import (
+	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
@@ -35,14 +36,6 @@ type AtContent struct {
 }
 
 var grpcCons []*grpc.ClientConn
-
-type PushOpts struct {
-	Signal Signal
-}
-
-type Signal struct {
-	ClientMsgID string
-}
 
 func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingleMsgToUser
@@ -146,7 +139,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	}
 }
 
-func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts PushOpts, err error) {
+func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err error) {
 	if pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd && pushMsg.MsgData.ContentType > constant.SignalingNotification {
 		req := &pbRtc.SignalMessageAssembleReq{}
 		if err := proto.Unmarshal(pushMsg.MsgData.Content, req); err != nil {
