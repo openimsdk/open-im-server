@@ -45,5 +45,5 @@ func GetRTCInvitationInfo(c *gin.Context) {
 	resp.Data.Invitation.InviteeUserIDList = invitationInfo.Invitation.InviteeUserIDList
 	resp.Data.Invitation.MediaType = invitationInfo.Invitation.MediaType
 	resp.Data.Invitation.Timeout = invitationInfo.Invitation.Timeout
-	c.JSON(http.StatusInternalServerError, resp)
+	c.JSON(http.StatusOK, resp)
 }
