@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAuth "Open_IM/pkg/proto/auth"
+	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"context"
 	"net"
@@ -59,17 +60,36 @@ func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbA
 }
 
 func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
-	//log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	//err := token_verify.DeleteToken(req.FromUserID, int(req.Platform))
-	//if err != nil {
-	//	errMsg := req.OperationID + " imdb.DeleteToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
-	//	log.NewError(req.OperationID, errMsg)
-	//	return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	//}
-	//
-	//return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
-	return nil, nil
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
+	if !token_verify.IsManagerUserID(req.OpUserID) {
+		errMsg := req.OperationID + " IsManagerUserID false " + req.OpUserID
+		log.NewError(req.OperationID, errMsg)
+		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
+	}
+	if err := token_verify.DeleteToken(req.FromUserID, int(req.Platform)); err != nil {
+		errMsg := req.OperationID + " DeleteToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
+		log.NewError(req.OperationID, errMsg)
+		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+	}
+	if err := rpc.forceKickOff(req.FromUserID, req.Platform, req.OperationID); err != nil {
+		errMsg := req.OperationID + " forceKickOff failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
+		log.NewError(req.OperationID, errMsg)
+		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}})
+	return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{}}, nil
+}
 
+func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID string) error {
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+	client := pbRelay.NewOnlineMessageRelayServiceClient(etcdConn)
+
+	kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}}
+	_, err := client.KickUserOffline(context.Background(), kickReq)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	return nil
 }
 
 type rpcAuth struct {
