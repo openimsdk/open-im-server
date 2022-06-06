@@ -157,8 +157,13 @@ func (d *DataBases) GetAvailableSignalInvitationInfo(userID string) (invitationI
 	keyList := SignalListCache + userID
 	result := d.rdb.RPop(context.Background(), keyList)
 	if err = result.Err(); err != nil {
-		return nil, err
+		return nil, utils.Wrap(err, "GetAvailableSignalInvitationInfo failed")
 	}
-	invitationInfo, err = d.GetSignalInfoFromCacheByClientMsgID(result.String())
-	return invitationInfo, err
+	key, err := result.Result()
+	if err != nil {
+		return nil, utils.Wrap(err, "GetAvailableSignalInvitationInfo failed")
+	}
+	log2.NewDebug("", utils.GetSelfFuncName(), result, result.String())
+	invitationInfo, err = d.GetSignalInfoFromCacheByClientMsgID(key)
+	return invitationInfo, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
 }
