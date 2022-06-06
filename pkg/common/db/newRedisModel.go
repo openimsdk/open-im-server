@@ -140,6 +140,7 @@ func (d *DataBases) NewCacheSignalInfo(msg *pbCommon.MsgData) error {
 
 func (d *DataBases) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
 	key := SignalCache + clientMsgID
+	invitationInfo = &pbRtc.SignalInviteReq{}
 	bytes, err := d.rdb.Get(context.Background(), key).Bytes()
 	if err != nil {
 		return nil, err
@@ -148,8 +149,12 @@ func (d *DataBases) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (inv
 	if err = proto.Unmarshal(bytes, req); err != nil {
 		return nil, err
 	}
-	req2 := req.Payload.(*pbRtc.SignalReq_Invite)
-	invitationInfo = req2.Invite
+	switch req2 := req.Payload.(type) {
+	case *pbRtc.SignalReq_Invite:
+		invitationInfo.Invitation = req2.Invite.Invitation
+	case *pbRtc.SignalReq_InviteInGroup:
+		invitationInfo.Invitation = req2.InviteInGroup.Invitation
+	}
 	return invitationInfo, err
 }
 
