@@ -671,7 +671,6 @@ notification:
       defaultTips:
         tips: "welcome user join department"
 
-
 #---------------demo configuration---------------------#
 #The following configuration items are applied to openIM Demo configuration
 #是否启动demo，如果自身没有账号体系，设置为true
@@ -698,4 +697,4 @@ demo:
   imAPIURL: http://127.0.0.1:10002
 
 rtc:
-  signalTimeout: 300
+  signalTimeout: 3000
