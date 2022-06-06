@@ -11,7 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
-	goRedis "github.com/go-redis/redis/v8"
+	//goRedis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
 	"strconv"
