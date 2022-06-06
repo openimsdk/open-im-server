@@ -83,8 +83,9 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				var content string
 				if pushMsg.MsgData.OfflinePushInfo != nil {
 					content = pushMsg.MsgData.OfflinePushInfo.Title
-
+					log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "xxxx OfflinePushInfo", content)
 				} else {
+					log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "xxxx2222 OfflinePushInfo", content)
 					switch pushMsg.MsgData.ContentType {
 					case constant.Text:
 						content = constant.ContentType2PushContent[constant.Text]
