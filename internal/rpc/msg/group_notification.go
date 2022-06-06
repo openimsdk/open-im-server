@@ -225,12 +225,20 @@ func GroupCreatedNotification(operationID, opUserID, groupID string, initMemberL
 }
 
 //群信息改变后掉用
-func GroupInfoSetNotification(operationID, opUserID, groupID string) {
+//groupName := ""
+//	notification := ""
+//	introduction := ""
+//	faceURL := ""
+func GroupInfoSetNotification(operationID, opUserID, groupID string, groupName, notification, introduction, faceURL string) {
 	GroupInfoChangedTips := open_im_sdk.GroupInfoSetTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
 	if err := setGroupInfo(groupID, GroupInfoChangedTips.Group); err != nil {
 		log.Error(operationID, "setGroupInfo failed ", err.Error(), groupID)
 		return
 	}
+	GroupInfoChangedTips.Group.GroupName = groupName
+	GroupInfoChangedTips.Group.Notification = notification
+	GroupInfoChangedTips.Group.Introduction = introduction
+	GroupInfoChangedTips.Group.FaceURL = faceURL
 	if err := setOpUserInfo(opUserID, groupID, GroupInfoChangedTips.OpUser); err != nil {
 		log.Error(operationID, "setOpUserInfo failed ", err.Error(), opUserID, groupID)
 		return

@@ -887,17 +887,25 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 
 	////bitwise operators: 0001:groupName; 0010:Notification  0100:Introduction; 1000:FaceUrl; 10000:owner
 	var changedType int32
+	groupName := ""
+	notification := ""
+	introduction := ""
+	faceURL := ""
 	if group.GroupName != req.GroupInfo.GroupName && req.GroupInfo.GroupName != "" {
 		changedType = 1
+		groupName = req.GroupInfo.GroupName
 	}
 	if group.Notification != req.GroupInfo.Notification && req.GroupInfo.Notification != "" {
 		changedType = changedType | (1 << 1)
+		notification = req.GroupInfo.Notification
 	}
 	if group.Introduction != req.GroupInfo.Introduction && req.GroupInfo.Introduction != "" {
 		changedType = changedType | (1 << 2)
+		introduction = req.GroupInfo.Introduction
 	}
 	if group.FaceURL != req.GroupInfo.FaceURL && req.GroupInfo.FaceURL != "" {
 		changedType = changedType | (1 << 3)
+		faceURL = req.GroupInfo.FaceURL
 	}
 	//only administrators can set group information
 	var groupInfo db.Group
@@ -909,7 +917,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	}
 	log.NewInfo(req.OperationID, "SetGroupInfo rpc return ", pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}})
 	if changedType != 0 {
-		chat.GroupInfoSetNotification(req.OperationID, req.OpUserID, req.GroupInfo.GroupID)
+		chat.GroupInfoSetNotification(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, groupName, notification, introduction, faceURL)
 	}
 	return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
 }
