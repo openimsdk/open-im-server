@@ -68,10 +68,18 @@ message GetUsersOnlineStatusResp{
 
   }
 }
+message KickUserOfflineReq{
+  string operationID = 1;
+  repeated string kickUserIDList = 3;
+}
+message KickUserOfflineResp{
+
+}
 service OnlineMessageRelayService {
   rpc OnlinePushMsg(OnlinePushMsgReq) returns(OnlinePushMsgResp);
   rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq)returns(GetUsersOnlineStatusResp);
   rpc OnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
+  rpc KickUserOffline(KickUserOfflineReq) returns(KickUserOfflineResp);
 //  rpc SendMsgByWS(SendMsgByWSReq)  returns(MsgToUserResp);
 }
 

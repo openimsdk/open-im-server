@@ -29,6 +29,10 @@ type RPCServer struct {
 	pushTerminal    []int
 }
 
+func (r *RPCServer) KickUserOffline(c context.Context, req *pbRelay.KickUserOfflineReq) (*pbRelay.KickUserOfflineResp, error) {
+	panic("implement me")
+}
+
 func (r *RPCServer) onInit(rpcPort int) {
 	r.rpcPort = rpcPort
 	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImOnlineMessageRelayName
