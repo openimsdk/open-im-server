@@ -10,12 +10,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/garyburd/redigo/redis"
+
 	//goRedis "github.com/go-redis/redis/v8"
-	"github.com/golang/protobuf/proto"
-	"github.com/mitchellh/mapstructure"
 	"strconv"
 	"time"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/mitchellh/mapstructure"
 )
 
 //func  (d *  DataBases)pubMessage(channel, msg string) {
@@ -177,5 +180,18 @@ func (d *DataBases) GetAvailableSignalInvitationInfo(userID string) (invitationI
 	}
 	log2.NewDebug("", utils.GetSelfFuncName(), result, result.String())
 	invitationInfo, err = d.GetSignalInfoFromCacheByClientMsgID(key)
-	return invitationInfo, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
+	if err != nil {
+		return nil, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
+	}
+	err = d.delUserSingalList(userID)
+	if err != nil {
+		return nil, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
+	}
+	return invitationInfo, nil
+}
+
+func (d *DataBases) delUserSingalList(userID string) error {
+	keyList := SignalListCache + userID
+	err := d.rdb.Del(context.Background(), keyList).Err()
+	return err
 }
