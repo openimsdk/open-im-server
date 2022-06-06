@@ -16,7 +16,7 @@ spec:
       containers:
       - name: msg
         image: openim/msg:v2.0.10k
-        imagePullPolicy: Always
+        # imagePullPolicy: Always
         ports:
         - containerPort: 10130
         volumeMounts:

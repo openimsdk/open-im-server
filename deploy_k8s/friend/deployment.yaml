@@ -16,7 +16,7 @@ spec:
       containers:
       - name: friend
         image: openim/friend:v2.0.10k
-        imagePullPolicy: Always
+        # imagePullPolicy: Always
         ports:
         - containerPort: 10120
         volumeMounts:
