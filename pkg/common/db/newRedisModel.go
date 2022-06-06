@@ -132,6 +132,8 @@ func (d *DataBases) NewCacheSignalInfo(msg *pbCommon.MsgData) error {
 			return err
 		}
 		return err
+	default:
+		log2.NewDebug("", utils.GetSelfFuncName(), "req type not invite", string(msg.Content))
 	}
 	return nil
 }
