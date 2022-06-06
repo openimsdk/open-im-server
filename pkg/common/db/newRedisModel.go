@@ -106,29 +106,34 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID str
 }
 
 func (d *DataBases) NewCacheSignalInfo(msg *pbCommon.MsgData) error {
-	keyList := SignalListCache + msg.RecvID
-	timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
-	if err != nil {
+	req := &pbRtc.SignalReq{}
+	if err := proto.Unmarshal(msg.Content, req); err != nil {
 		return err
 	}
-	err = d.rdb.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
-	if err != nil {
+	//log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
+	switch req.Payload.(type) {
+	case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
+		keyList := SignalListCache + msg.RecvID
+		timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
+		if err != nil {
+			return err
+		}
+		err = d.rdb.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
+		if err != nil {
+			return err
+		}
+		err = d.rdb.Expire(context.Background(), keyList, time.Duration(timeout)*time.Second).Err()
+		if err != nil {
+			return err
+		}
+		key := SignalCache + msg.ClientMsgID
+		err = d.rdb.Set(context.Background(), key, msg.Content, time.Duration(timeout)*time.Second).Err()
+		if err != nil {
+			return err
+		}
 		return err
 	}
-	err = d.rdb.Expire(context.Background(), keyList, time.Duration(timeout)*time.Second).Err()
-	if err != nil {
-		return err
-	}
-	key := SignalCache + msg.ClientMsgID
-	err = d.rdb.Set(context.Background(), key, msg.Content, time.Duration(timeout)*time.Second).Err()
-	if err != nil {
-		return err
-	}
-	err = d.rdb.Expire(context.Background(), key, time.Duration(timeout)*time.Second).Err()
-	if err != nil {
-		return err
-	}
-	return err
+	return nil
 }
 
 func (d *DataBases) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
