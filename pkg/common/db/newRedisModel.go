@@ -111,13 +111,22 @@ func (d *DataBases) NewCacheSignalInfo(msg *pbCommon.MsgData) error {
 		return err
 	}
 	//log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
-	switch req.Payload.(type) {
-	case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
-		keyList := SignalListCache + msg.RecvID
+	var inviteeUserIDList []string
+	switch invitationInfo := req.Payload.(type) {
+	case *pbRtc.SignalReq_Invite:
+		inviteeUserIDList = invitationInfo.Invite.Invitation.InviteeUserIDList
+	case *pbRtc.SignalReq_InviteInGroup:
+		inviteeUserIDList = invitationInfo.InviteInGroup.Invitation.InviteeUserIDList
+	default:
+		log2.NewDebug("", utils.GetSelfFuncName(), "req type not invite", string(msg.Content))
+		return nil
+	}
+	for _, userID := range inviteeUserIDList {
 		timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
 		if err != nil {
 			return err
 		}
+		keyList := SignalListCache + userID
 		err = d.rdb.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
 		if err != nil {
 			return err
@@ -132,8 +141,6 @@ func (d *DataBases) NewCacheSignalInfo(msg *pbCommon.MsgData) error {
 			return err
 		}
 		return err
-	default:
-		log2.NewDebug("", utils.GetSelfFuncName(), "req type not invite", string(msg.Content))
 	}
 	return nil
 }
