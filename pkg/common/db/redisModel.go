@@ -32,7 +32,8 @@ const (
 	blackListCache                = "BLACK_LIST_CACHE:"
 	groupCache                    = "GROUP_CACHE:"
 	messageCache                  = "MESSAGE_CACHE:"
-	SignalCache                   = "Signal_CACHE:"
+	SignalCache                   = "SIGNAL_CACHE:"
+	SignalListCache               = "SIGNAL_ZSET_CACHE:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {

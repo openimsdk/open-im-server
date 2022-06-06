@@ -119,7 +119,6 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 					log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
 					break
 				}
-
 				if offlinePusher == nil {
 					break
 				}

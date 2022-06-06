@@ -239,7 +239,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 			} else {
 				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
 				// save invitation info for offline push
-				if err := db.DB.CacheSignalInfo(pbData.MsgData); err != nil {
+				if err := db.DB.NewCacheSignalInfo(pbData.MsgData); err != nil {
 					log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), m, &signalResp)
 					ws.sendSignalMsgResp(conn, 200, err.Error(), m, &signalResp)
 				} else {

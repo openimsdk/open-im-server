@@ -60,7 +60,7 @@ type GetDownloadURLResp struct {
 
 type GetRTCInvitationInfoReq struct {
 	OperationID string `json:"operationID" binding:"required"`
-	ClientMsgID string `json:"clientMsgID"`
+	ClientMsgID string `json:"clientMsgID" binding:"required"`
 }
 
 type GetRTCInvitationInfoResp struct {
@@ -78,4 +78,12 @@ type GetRTCInvitationInfoResp struct {
 		} `json:"invitation"`
 		OfflinePushInfo struct{} `json:"offlinePushInfo"`
 	} `json:"data"`
+}
+
+type GetRTCInvitationInfoStartAppReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type GetRTCInvitationInfoStartAppResp struct {
+	GetRTCInvitationInfoResp
 }

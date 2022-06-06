@@ -31,7 +31,7 @@ func GetRTCInvitationInfo(c *gin.Context) {
 		return
 	}
 	var err error
-	invitationInfo, err := db.DB.GetSignalInfoFromCache(req.ClientMsgID)
+	invitationInfo, err := db.DB.GetSignalInfoFromCacheByClientMsgID(req.ClientMsgID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSignalInfoFromCache", err.Error(), req)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
@@ -46,4 +46,43 @@ func GetRTCInvitationInfo(c *gin.Context) {
 	resp.Data.Invitation.MediaType = invitationInfo.Invitation.MediaType
 	resp.Data.Invitation.Timeout = invitationInfo.Invitation.Timeout
 	c.JSON(http.StatusOK, resp)
+}
+
+func GetRTCInvitationInfoStartApp(c *gin.Context) {
+	var (
+		req  api.GetRTCInvitationInfoStartAppReq
+		resp api.GetRTCInvitationInfoStartAppResp
+	)
+	if err := c.Bind(&req); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
+	var ok bool
+	var errInfo string
+	ok, userID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
+	invitationInfo, err := db.DB.GetAvailableSignalInvitationInfo(userID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSignalInfoFromCache", err.Error(), req)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+	resp.Data.OpUserID = invitationInfo.OpUserID
+	resp.Data.Invitation.RoomID = invitationInfo.Invitation.RoomID
+	resp.Data.Invitation.SessionType = invitationInfo.Invitation.SessionType
+	resp.Data.Invitation.GroupID = invitationInfo.Invitation.GroupID
+	resp.Data.Invitation.InviterUserID = invitationInfo.Invitation.InviterUserID
+	resp.Data.Invitation.InviteeUserIDList = invitationInfo.Invitation.InviteeUserIDList
+	resp.Data.Invitation.MediaType = invitationInfo.Invitation.MediaType
+	resp.Data.Invitation.Timeout = invitationInfo.Invitation.Timeout
+	c.JSON(http.StatusOK, resp)
+
 }

@@ -8,6 +8,7 @@ import (
 	//"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"fmt"
+	go_redis "github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	//	"context"
@@ -30,6 +31,7 @@ type DataBases struct {
 	mgoSession  *mgo.Session
 	redisPool   *redis.Pool
 	mongoClient *mongo.Client
+	rdb         *go_redis.Client
 }
 
 func key(dbAddress, dbName string) string {
@@ -113,6 +115,12 @@ func init() {
 			)
 		},
 	}
+	DB.rdb = go_redis.NewClient(&go_redis.Options{
+		Addr:     config.Config.Redis.DBAddress,
+		Password: config.Config.Redis.DBPassWord, // no password set
+		DB:       0,                              // use default DB
+		PoolSize: 100,                            // 连接池大小
+	})
 }
 
 func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {

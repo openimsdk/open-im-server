@@ -108,6 +108,7 @@ func main() {
 		thirdGroup.POST("/upload_update_app", apiThird.UploadUpdateApp)
 		thirdGroup.POST("/get_download_url", apiThird.GetDownloadURL)
 		thirdGroup.POST("/get_rtc_invitation_info", apiThird.GetRTCInvitationInfo)
+		thirdGroup.POST("/get_rtc_invitation_start_app", apiThird.GetRTCInvitationInfoStartApp)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
