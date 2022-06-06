@@ -124,3 +124,29 @@ func ParseToken(c *gin.Context) {
 	log.NewInfo(params.OperationID, "ParseToken return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
+func ForceLogout(c *gin.Context) {
+	params := api.ForceLogoutReq{}
+	if err := c.BindJSON(&params); err != nil {
+		errMsg := " BindJSON failed " + err.Error()
+		log.NewError("0", errMsg)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
+		return
+	}
+
+	var ok bool
+	var errInfo string
+	var expireTime int64
+	ok, _, errInfo, expireTime = token_verify.GetUserIDFromTokenExpireTime(c.Request.Header.Get("token"), params.OperationID)
+	if !ok {
+		errMsg := params.OperationID + " " + "GetUserIDFromTokenExpireTime failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(params.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
+	resp := api.ParseTokenResp{CommResp: api.CommResp{ErrCode: 0, ErrMsg: ""}, ExpireTime: api.ExpireTime{ExpireTimeSeconds: uint32(expireTime)}}
+	resp.Data = structs.Map(&resp.ExpireTime)
+	log.NewInfo(params.OperationID, "ParseToken return ", resp)
+	c.JSON(http.StatusOK, resp)
+}

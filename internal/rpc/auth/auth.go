@@ -58,6 +58,20 @@ func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbA
 	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }
 
+func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
+	//log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
+	//err := token_verify.DeleteToken(req.FromUserID, int(req.Platform))
+	//if err != nil {
+	//	errMsg := req.OperationID + " imdb.DeleteToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
+	//	log.NewError(req.OperationID, errMsg)
+	//	return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+	//}
+	//
+	//return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
+	return nil, nil
+
+}
+
 type rpcAuth struct {
 	rpcPort         int
 	rpcRegisterName string
