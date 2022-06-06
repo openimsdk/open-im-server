@@ -72,7 +72,7 @@ func GetRTCInvitationInfoStartApp(c *gin.Context) {
 	invitationInfo, err := db.DB.GetAvailableSignalInvitationInfo(userID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSignalInfoFromCache", err.Error(), req)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": err.Error(), "data": struct{}{}})
 		return
 	}
 	resp.Data.OpUserID = invitationInfo.OpUserID
