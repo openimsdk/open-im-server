@@ -68,8 +68,8 @@ type GetRTCInvitationInfoResp struct {
 	Data struct {
 		OpUserID   string `json:"opUserID"`
 		Invitation struct {
-			InviterUserID     string   `json:"InviterUserID"`
-			InviteeUserIDList []string `json:"InviteeUserIDList"`
+			InviterUserID     string   `json:"inviterUserID"`
+			InviteeUserIDList []string `json:"inviteeUserIDList"`
 			GroupID           string   `json:"groupID"`
 			RoomID            string   `json:"roomID"`
 			Timeout           int32    `json:"timeout"`
