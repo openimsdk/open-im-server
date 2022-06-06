@@ -77,5 +77,5 @@ type GetRTCInvitationInfoResp struct {
 			SessionType       int32    `json:"sessionType"`
 		} `json:"invitation"`
 		OfflinePushInfo struct{} `json:"offlinePushInfo"`
-	}
+	} `json:"data"`
 }
