@@ -146,7 +146,7 @@ func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err err
 	if pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd && pushMsg.MsgData.ContentType > constant.SignalingNotificationBegin {
 		req := &pbRtc.SignalReq{}
 		if err := proto.Unmarshal(pushMsg.MsgData.Content, req); err != nil {
-			return opts, err
+			return opts, utils.Wrap(err, "")
 		}
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
 		switch req.Payload.(type) {
