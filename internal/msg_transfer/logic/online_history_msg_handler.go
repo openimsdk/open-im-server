@@ -109,6 +109,7 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 					log.Debug(triggerID, "msg come to storage center", v.String())
 					if v.MsgData == nil {
 						log.NewWarn(triggerID, "msg come to storage center nil", v.String())
+						panic(v.String())
 						continue
 					}
 					isHistory := utils.GetSwitchFromOptions(v.MsgData.Options, constant.IsHistory)
