@@ -83,13 +83,9 @@ func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (
 func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID string) error {
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
 	client := pbRelay.NewOnlineMessageRelayServiceClient(etcdConn)
-
 	kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
 	_, err := client.KickUserOffline(context.Background(), kickReq)
-	if err != nil {
-		return utils.Wrap(err, "")
-	}
-	return nil
+	return utils.Wrap(err, "")
 }
 
 type rpcAuth struct {

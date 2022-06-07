@@ -134,19 +134,30 @@ func ForceLogout(c *gin.Context) {
 		return
 	}
 
+	req := &rpc.ForceLogoutReq{}
+	utils.CopyStructFields(req, &params)
+
 	var ok bool
 	var errInfo string
-	var expireTime int64
-	ok, _, errInfo, expireTime = token_verify.GetUserIDFromTokenExpireTime(c.Request.Header.Get("token"), params.OperationID)
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		errMsg := params.OperationID + " " + "GetUserIDFromTokenExpireTime failed " + errInfo + " token:" + c.Request.Header.Get("token")
-		log.NewError(params.OperationID, errMsg)
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
-	resp := api.ParseTokenResp{CommResp: api.CommResp{ErrCode: 0, ErrMsg: ""}, ExpireTime: api.ExpireTime{ExpireTimeSeconds: uint32(expireTime)}}
-	resp.Data = structs.Map(&resp.ExpireTime)
-	log.NewInfo(params.OperationID, "ParseToken return ", resp)
-	c.JSON(http.StatusOK, resp)
+	log.NewInfo(req.OperationID, "ForceLogout args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+	client := rpc.NewAuthClient(etcdConn)
+	reply, err := client.ForceLogout(context.Background(), req)
+	if err != nil {
+		errMsg := req.OperationID + " UserToken failed " + err.Error() + req.String()
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
+	log.NewInfo(params.OperationID, utils.GetSelfFuncName(), " return ", reply)
+	c.JSON(http.StatusOK, reply)
 }

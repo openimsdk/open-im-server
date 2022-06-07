@@ -40,7 +40,7 @@ type UserTokenResp struct {
 
 type ForceLogoutReq struct {
 	Platform    int32  `json:"platform" binding:"required,min=1,max=8"`
-	UserID      string `json:"userID" binding:"required,min=1,max=64"`
+	FromUserID  string `json:"fromUserID" binding:"required,min=1,max=64"`
 	OperationID string `json:"operationID" binding:"required"`
 }
 
