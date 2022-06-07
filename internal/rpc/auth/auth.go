@@ -11,6 +11,7 @@ import (
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
 	"net"
 	"strconv"
 	"strings"
@@ -81,11 +82,16 @@ func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (
 }
 
 func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID string) error {
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
-	client := pbRelay.NewOnlineMessageRelayServiceClient(etcdConn)
-	kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
-	_, err := client.KickUserOffline(context.Background(), kickReq)
-	return utils.Wrap(err, "")
+
+	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+	for _, v := range grpcCons {
+		client := pbRelay.NewOnlineMessageRelayServiceClient(v)
+		kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
+		_, err := client.KickUserOffline(context.Background(), kickReq)
+		return utils.Wrap(err, "")
+	}
+
+	return errors.New("no rpc node ")
 }
 
 type rpcAuth struct {
