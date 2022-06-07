@@ -228,7 +228,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache logic failed", "", 0)
 		}
 		memberUserIDList := cacheResp.UserIDList
-		log.Debug(pb.OperationID, "GetGroupAllMember userID list", cacheResp.UserIDList)
+		log.Debug(pb.OperationID, "GetGroupAllMember userID list", cacheResp.UserIDList, "len: ", len(cacheResp.UserIDList))
 		var addUidList []string
 		switch pb.MsgData.ContentType {
 		case constant.MemberKickedNotification:
