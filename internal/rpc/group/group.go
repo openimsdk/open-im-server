@@ -12,6 +12,7 @@ import (
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
@@ -933,6 +934,42 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	log.NewInfo(req.OperationID, "SetGroupInfo rpc return ", pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}})
 	if changedType != 0 {
 		chat.GroupInfoSetNotification(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, groupName, notification, introduction, faceURL)
+	}
+	if req.GroupInfo.Notification != "" {
+		//get group member user id
+		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: req.OperationID, GroupID: req.GroupInfo.GroupID}
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		client := pbCache.NewCacheClient(etcdConn)
+		cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+			return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
+		}
+		if cacheResp.CommonResp.ErrCode != 0 {
+			log.NewError(req.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
+			return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
+		}
+		var conversationReq pbConversation.ModifyConversationFieldReq
+
+		conversation := pbConversation.Conversation{
+			OwnerUserID:      req.OpUserID,
+			ConversationID:   utils.GetConversationIDBySessionType(req.GroupInfo.GroupID, constant.GroupChatType),
+			ConversationType: constant.GroupChatType,
+			GroupID:          req.GroupInfo.GroupID,
+		}
+		conversationReq.Conversation = &conversation
+		conversationReq.OperationID = req.OperationID
+		conversationReq.FieldType = constant.FieldGroupAtType
+		conversation.GroupAtType = constant.GroupNotification
+		conversationReq.UserIDList = cacheResp.UserIDList
+		nEtcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+		nClient := pbConversation.NewConversationClient(nEtcdConn)
+		conversationReply, err := nClient.ModifyConversationField(context.Background(), &conversationReq)
+		if err != nil {
+			log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), err.Error())
+		} else if conversationReply.CommonResp.ErrCode != 0 {
+			log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), conversationReply.String())
+		}
 	}
 	return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
 }
