@@ -87,6 +87,7 @@ func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID st
 	for _, v := range grpcCons {
 		client := pbRelay.NewOnlineMessageRelayServiceClient(v)
 		kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
+		log.NewInfo(operationID, "KickUserOffline ", client, kickReq.String())
 		_, err := client.KickUserOffline(context.Background(), kickReq)
 		return utils.Wrap(err, "")
 	}
