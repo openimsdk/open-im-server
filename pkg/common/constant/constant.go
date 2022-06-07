@@ -209,12 +209,12 @@ const (
 	WorkMomentAtUserNotification  = 2
 )
 const (
-	AtAllString = "AtAllTag"
-	AtNormal    = 0
-	AtMe        = 1
-	AtAll       = 2
-	AtAllAtMe   = 3
-	GroupAnnouncement
+	AtAllString       = "AtAllTag"
+	AtNormal          = 0
+	AtMe              = 1
+	AtAll             = 2
+	AtAllAtMe         = 3
+	GroupNotification = 4
 )
 
 var ContentType2PushContent = map[int64]string{
