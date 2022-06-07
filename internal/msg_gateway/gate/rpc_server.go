@@ -196,7 +196,7 @@ func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOffl
 			ws.sendKickMsg(conn, &UserConn{})
 		}
 	}
-	return nil, nil
+	return &pbRelay.KickUserOfflineResp{}, nil
 
 }
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.OnlinePushMsgReq, RecvPlatForm int, RecvID string) (ResultCode int64) {
