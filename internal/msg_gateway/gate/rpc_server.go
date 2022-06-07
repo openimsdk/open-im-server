@@ -189,6 +189,7 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 	}, nil
 }
 func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOfflineReq) (*pbRelay.KickUserOfflineResp, error) {
+	log.NewInfo(req.OperationID, "KickUserOffline is arriving", req.String())
 	for _, v := range req.KickUserIDList {
 		oldConnMap := ws.getUserAllCons(v)
 		if conn, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
