@@ -44,6 +44,7 @@ const (
 	Quote          = 114
 	Common         = 200
 	GroupMsg       = 201
+	SignalMsg      = 202
 
 	//SysRelated
 	NotificationBegin                     = 1000
@@ -218,14 +219,15 @@ const (
 )
 
 var ContentType2PushContent = map[int64]string{
-	Picture:  "[图片]",
-	Voice:    "[语音]",
-	Video:    "[视频]",
-	File:     "[文件]",
-	Text:     "你收到了一条文本消息",
-	AtText:   "[有人@你]",
-	GroupMsg: "你收到一条群聊消息",
-	Common:   "你收到一条新消息",
+	Picture:   "[图片]",
+	Voice:     "[语音]",
+	Video:     "[视频]",
+	File:      "[文件]",
+	Text:      "你收到了一条文本消息",
+	AtText:    "[有人@你]",
+	GroupMsg:  "你收到一条群聊消息",
+	Common:    "你收到一条新消息",
+	SignalMsg: "音視頻通話邀請",
 }
 
 const (

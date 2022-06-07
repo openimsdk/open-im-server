@@ -231,7 +231,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache logic failed", "", 0)
 		}
 		memberUserIDList := cacheResp.UserIDList
-		log.Debug(pb.OperationID, "GetGroupAllMember userID list", cacheResp.UserIDList)
+		log.Debug(pb.OperationID, "GetGroupAllMember userID list", cacheResp.UserIDList, "len: ", len(cacheResp.UserIDList))
 		var addUidList []string
 		switch pb.MsgData.ContentType {
 		case constant.MemberKickedNotification:
@@ -861,6 +861,10 @@ func (rpc *rpcChat) sendMsgToGroupOptimization(list []string, groupPB *pbChat.Se
 		groupPB.MsgData.RecvID = v
 		isSend := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
 		if isSend {
+			if v == "" || groupPB.MsgData.SendID == "" {
+				log.Error(msgToMQGroup.OperationID, "sendMsgToGroupOptimization userID nil ", msgToMQGroup.String())
+				continue
+			}
 			err := rpc.sendMsgToKafka(&msgToMQGroup, v, status)
 			if err != nil {
 				log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())

@@ -419,6 +419,11 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"joinDepartmentNotification"`
+		Signal struct {
+			OfflinePush struct {
+				Title string `yaml:"title"`
+			} `yaml:"offlinePush"`
+		} `yaml:"signal"`
 	}
 	Demo struct {
 		Port         []int  `yaml:"openImDemoPort"`
@@ -442,8 +447,7 @@ type config struct {
 		ImAPIURL         string `yaml:"imAPIURL"`
 	}
 	Rtc struct {
-		Port    int    `yaml:"port"`
-		Address string `yaml:"address"`
+		SignalTimeout string `yaml:"signalTimeout"`
 	} `yaml:"rtc"`
 }
 type PConversation struct {

@@ -7,16 +7,18 @@
 package logic
 
 import (
-	jpush "Open_IM/internal/push/jpush"
+	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
+	pbRtc "Open_IM/pkg/proto/rtc"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
+	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc"
 	"strings"
 )
@@ -99,11 +101,15 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				} else {
 					content = constant.ContentType2PushContent[constant.GroupMsg]
 				}
+			case constant.SignalingNotification:
+				content = constant.ContentType2PushContent[constant.SignalMsg]
 			default:
 				content = constant.ContentType2PushContent[constant.Common]
+
 			}
 		}
-		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList[0], pushMsg.MsgData.OfflinePushInfo, constant.AndroidPlatformID)
+
+		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList[0], pushMsg.MsgData)
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
@@ -113,9 +119,14 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 			return
 		}
 		if offlinePusher == nil {
-			offlinePusher = jpush.JPushClient
+			return
 		}
-		pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, pushMsg.OperationID)
+		opts, err := GetOfflinePushOpts(pushMsg)
+		if err != nil {
+			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
+		}
+		log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), UIDList, content, jsonCustomContent, "opts:", opts)
+		pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, pushMsg.OperationID, opts)
 		if err != nil {
 			log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
 		} else {
@@ -223,6 +234,23 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	//	}
 	//
 	//}
+}
+
+func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err error) {
+	if pushMsg.MsgData.ContentType < constant.SignalingNotificationEnd && pushMsg.MsgData.ContentType > constant.SignalingNotificationBegin {
+		req := &pbRtc.SignalReq{}
+		if err := proto.Unmarshal(pushMsg.MsgData.Content, req); err != nil {
+			return opts, utils.Wrap(err, "")
+		}
+		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
+		switch req.Payload.(type) {
+		case *pbRtc.SignalReq_Invite, *pbRtc.SignalReq_InviteInGroup:
+			opts.Signal.ClientMsgID = pushMsg.MsgData.ClientMsgID
+			log.NewDebug(pushMsg.OperationID, opts)
+		}
+
+	}
+	return opts, nil
 }
 
 //func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {

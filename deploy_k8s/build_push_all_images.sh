@@ -2,8 +2,8 @@
 source ./path_info.cfg
 
 # images version
-version=v2.0.10
-
+version=v2.0.10k
+git pull
 cd ../script/; ./build_all_service.sh
 cd ../deploy_k8s/
 

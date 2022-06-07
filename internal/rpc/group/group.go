@@ -12,6 +12,7 @@ import (
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
@@ -71,6 +72,7 @@ func (s *groupServer) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
+	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("", "RegisterEtcd failed ", err.Error())
@@ -934,6 +936,42 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if changedType != 0 {
 		chat.GroupInfoSetNotification(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, groupName, notification, introduction, faceURL)
 	}
+	if req.GroupInfo.Notification != "" {
+		//get group member user id
+		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: req.OperationID, GroupID: req.GroupInfo.GroupID}
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		client := pbCache.NewCacheClient(etcdConn)
+		cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+		if err != nil {
+			log.NewError(req.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+			return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
+		}
+		if cacheResp.CommonResp.ErrCode != 0 {
+			log.NewError(req.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
+			return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
+		}
+		var conversationReq pbConversation.ModifyConversationFieldReq
+
+		conversation := pbConversation.Conversation{
+			OwnerUserID:      req.OpUserID,
+			ConversationID:   utils.GetConversationIDBySessionType(req.GroupInfo.GroupID, constant.GroupChatType),
+			ConversationType: constant.GroupChatType,
+			GroupID:          req.GroupInfo.GroupID,
+		}
+		conversationReq.Conversation = &conversation
+		conversationReq.OperationID = req.OperationID
+		conversationReq.FieldType = constant.FieldGroupAtType
+		conversation.GroupAtType = constant.GroupNotification
+		conversationReq.UserIDList = cacheResp.UserIDList
+		nEtcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+		nClient := pbConversation.NewConversationClient(nEtcdConn)
+		conversationReply, err := nClient.ModifyConversationField(context.Background(), &conversationReq)
+		if err != nil {
+			log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), err.Error())
+		} else if conversationReply.CommonResp.ErrCode != 0 {
+			log.NewError(conversationReq.OperationID, "ModifyConversationField rpc failed, ", conversationReq.String(), conversationReply.String())
+		}
+	}
 	return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}}, nil
 }
 
@@ -1581,4 +1619,36 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
 	return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+}
+
+func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (resp *pbGroup.SetGroupMemberInfoResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbGroup.SetGroupMemberInfoResp{CommonResp: &pbGroup.CommonResp{}}
+	groupMember := db.GroupMember{
+		GroupID: req.GroupID,
+		UserID:  req.UserID,
+	}
+	m := make(map[string]interface{})
+	if req.RoleLevel != nil {
+		m["role_level"] = req.RoleLevel.Value
+	}
+	if req.FaceURL != nil {
+		m["user_group_face_url"] = req.FaceURL.Value
+	}
+	if req.Nickname != nil {
+		m["nickname"] = req.Nickname.Value
+	}
+	if req.Ex != nil {
+		m["ex"] = req.Ex.Value
+	}
+	err = imdb.UpdateGroupMemberInfoByMap(groupMember, m)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetGroupMemberInfo failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg + ":" + err.Error()
+		return resp, nil
+	}
+	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
 }

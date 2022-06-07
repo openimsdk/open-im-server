@@ -9,17 +9,18 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	"Open_IM/pkg/proto/auth"
+	pbAuth "Open_IM/pkg/proto/auth"
 	groupRpc "Open_IM/pkg/proto/group"
 	rpc "Open_IM/pkg/proto/organization"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	"google.golang.org/grpc"
 )
 
 type organizationServer struct {
@@ -67,6 +68,7 @@ func (s *organizationServer) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
+	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("", "RegisterEtcd failed ", err.Error())
@@ -152,7 +154,6 @@ func (s *organizationServer) UpdateDepartment(ctx context.Context, req *rpc.Upda
 
 	department := db.Department{}
 	utils.CopyStructFields(&department, req.DepartmentInfo)
-
 	log.Debug(req.OperationID, "dst ", department, "src ", req.DepartmentInfo)
 	if err := imdb.UpdateDepartment(&department, nil); err != nil {
 		errMsg := req.OperationID + " " + "UpdateDepartment failed " + err.Error()
@@ -341,6 +342,7 @@ func (s *organizationServer) GetDepartmentParentIDList(_ context.Context, req *r
 	resp = &rpc.GetDepartmentParentIDListResp{}
 	resp.ParentIDList, err = imdb.GetDepartmentParentIDList(req.DepartmentID)
 	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetDepartmentParentIDList failed", err.Error())
 		resp.ErrMsg = constant.ErrDB.ErrMsg + ": " + err.Error()
 		resp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil

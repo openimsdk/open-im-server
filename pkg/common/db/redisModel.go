@@ -5,13 +5,18 @@ import (
 	"Open_IM/pkg/common/constant"
 	log2 "Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/chat"
+	pbRtc "Open_IM/pkg/proto/rtc"
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
+
+	//osconfig "google.golang.org/genproto/googleapis/cloud/osconfig/v1alpha"
 	"strconv"
 )
 
@@ -29,6 +34,8 @@ const (
 	blackListCache                = "BLACK_LIST_CACHE:"
 	groupCache                    = "GROUP_CACHE:"
 	messageCache                  = "MESSAGE_CACHE:"
+	SignalCache                   = "SIGNAL_CACHE:"
+	SignalListCache               = "SIGNAL_LIST_CACHE:"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
@@ -341,4 +348,26 @@ func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID st
 			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, msg, s)
 		}
 	}
+}
+
+func (d *DataBases) CacheSignalInfo(msg *pbCommon.MsgData) error {
+	key := SignalCache + msg.ClientMsgID
+	_, err := d.Exec("SET", key, msg.Content, "ex", config.Config.Rtc.SignalTimeout)
+	return err
+}
+
+func (d *DataBases) GetSignalInfoFromCache(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
+	key := SignalCache + clientMsgID
+	result, err := redis.Bytes(d.Exec("GET", key))
+	log2.NewDebug("", utils.GetSelfFuncName(), clientMsgID, result, string(result))
+	if err != nil {
+		return nil, err
+	}
+	req := &pbRtc.SignalReq{}
+	if err = proto.Unmarshal(result, req); err != nil {
+		return nil, err
+	}
+	req2 := req.Payload.(*pbRtc.SignalReq_Invite)
+	invitationInfo = req2.Invite
+	return invitationInfo, err
 }

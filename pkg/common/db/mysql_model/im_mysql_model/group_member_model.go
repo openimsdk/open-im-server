@@ -142,6 +142,18 @@ func UpdateGroupMemberInfo(groupMemberInfo db.GroupMember) error {
 	return nil
 }
 
+func UpdateGroupMemberInfoByMap(groupMemberInfo db.GroupMember, m map[string]interface{}) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	err = dbConn.Table("group_members").Where("group_id=? and user_id=?", groupMemberInfo.GroupID, groupMemberInfo.UserID).Updates(m).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func GetOwnerManagerByGroupID(groupID string) ([]db.GroupMember, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {

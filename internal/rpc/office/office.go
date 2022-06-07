@@ -14,13 +14,14 @@ import (
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 	"unsafe"
+
+	"google.golang.org/grpc"
 )
 
 type officeServer struct {
@@ -77,7 +78,7 @@ func (s *officeServer) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-
+	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
