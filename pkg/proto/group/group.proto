@@ -395,11 +395,12 @@ message SetGroupMemberNicknameResp{
 message SetGroupMemberInfoReq{
   string groupID = 1;
   string userID = 2;
-  string operationID = 3;
-  google.protobuf.StringValue nickname = 4;
-  google.protobuf.StringValue faceURL = 5;
-  google.protobuf.Int32Value roleLevel = 6;
-  google.protobuf.StringValue ex = 7;
+  string opUserID = 3;
+  string operationID = 4;
+  google.protobuf.StringValue nickname = 5;
+  google.protobuf.StringValue faceURL = 6;
+  google.protobuf.Int32Value roleLevel = 7;
+  google.protobuf.StringValue ex = 8;
 }
 
 message SetGroupMemberInfoResp{

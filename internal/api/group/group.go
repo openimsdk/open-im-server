@@ -10,6 +10,7 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/golang/protobuf/ptypes/wrappers"
 
 	"github.com/gin-gonic/gin"
 
@@ -807,25 +808,55 @@ func SetGroupMemberNickname(c *gin.Context) {
 }
 
 func SetGroupMemberInfo(c *gin.Context) {
-	//var (
-	//	req api.SetGroupMemberInfoReq
-	//	resp api.SetGroupMemberInfoResp
-	//)
-	//if err := c.BindJSON(&req); err != nil {
-	//	log.NewError("0", "BindJSON failed ", err.Error())
-	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-	//	return
-	//}
-	//
-	//var ok bool
-	//var errInfo string
-	//ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-	//if !ok {
-	//	errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
-	//	log.NewError(req.OperationID, errMsg)
-	//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
-	//	return
-	//}
-	//
-	//log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
+	var (
+		req  api.SetGroupMemberInfoReq
+		resp api.SetGroupMemberInfoResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
+	var opUserID string
+	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
+	reqPb := &rpc.SetGroupMemberInfoReq{
+		GroupID:     req.GroupID,
+		UserID:      req.UserID,
+		OperationID: req.OperationID,
+		OpUserID:    opUserID,
+	}
+	if req.Nickname != nil {
+		reqPb.Nickname = &wrappers.StringValue{Value: *req.Nickname}
+	}
+	if req.FaceURL != nil {
+		reqPb.FaceURL = &wrappers.StringValue{Value: *req.FaceURL}
+	}
+	if req.Ex != nil {
+		reqPb.Ex = &wrappers.StringValue{Value: *req.Ex}
+	}
+	if req.RoleLevel != nil {
+		reqPb.RoleLevel = &wrappers.Int32Value{Value: *req.RoleLevel}
+	}
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	client := rpc.NewGroupClient(etcdConn)
+	respPb, err := client.SetGroupMemberInfo(context.Background(), reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp.ErrMsg = respPb.CommonResp.ErrMsg
+	resp.ErrCode = respPb.CommonResp.ErrCode
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", resp)
+	c.JSON(http.StatusInternalServerError, resp)
 }

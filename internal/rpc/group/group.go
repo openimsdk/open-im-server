@@ -1407,6 +1407,33 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 }
 
 func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (resp *pbGroup.SetGroupMemberInfoResp, err error) {
-	resp = &pbGroup.SetGroupMemberInfoResp{}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbGroup.SetGroupMemberInfoResp{CommonResp: &pbGroup.CommonResp{}}
+	groupMember := db.GroupMember{
+		GroupID: req.GroupID,
+		UserID:  req.UserID,
+	}
+	m := make(map[string]interface{})
+	if req.RoleLevel != nil {
+		m["role_level"] = req.RoleLevel.Value
+	}
+	if req.FaceURL != nil {
+		m["user_group_face_url"] = req.FaceURL.Value
+	}
+	if req.Nickname != nil {
+		m["nickname"] = req.Nickname.Value
+	}
+	if req.Ex != nil {
+		m["ex"] = req.Ex.Value
+	}
+
+	err = imdb.UpdateGroupMemberInfoByMap(groupMember, m)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetGroupMemberInfo failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg + ":" + err.Error()
+	}
+	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }

@@ -234,13 +234,13 @@ type SetGroupMemberNicknameResp struct {
 }
 
 type SetGroupMemberInfoReq struct {
-	OperationID string `json:"operationID" binding:"required"`
-	GroupID     string `json:"groupID" binding:"required"`
-	UserID      string `json:"userID" binding:"required"`
-	Nickname    string `json:"nickname"`
-	FaceURL     string `json:"user_group_face_url"`
-	RoleLevel   string `json:"role_level"`
-	Ex          string `json:"ex"`
+	OperationID string  `json:"operationID" binding:"required"`
+	GroupID     string  `json:"groupID" binding:"required"`
+	UserID      string  `json:"userID" binding:"required"`
+	Nickname    *string `json:"nickname"`
+	FaceURL     *string `json:"userGroupFaceUrl"`
+	RoleLevel   *int32  `json:"roleLevel" validate:"gte=1,lte=3"`
+	Ex          *string `json:"ex"`
 }
 
 type SetGroupMemberInfoResp struct {
