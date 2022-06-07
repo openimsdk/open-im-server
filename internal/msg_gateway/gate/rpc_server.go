@@ -189,7 +189,14 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 	}, nil
 }
 func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOfflineReq) (*pbRelay.KickUserOfflineResp, error) {
-	panic("implement me")
+	for _, v := range req.KickUserIDList {
+		oldConnMap := ws.getUserAllCons(v)
+		if conn, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
+			ws.sendKickMsg(conn, &UserConn{})
+		}
+	}
+	return nil, nil
+
 }
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.OnlinePushMsgReq, RecvPlatForm int, RecvID string) (ResultCode int64) {
 	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
