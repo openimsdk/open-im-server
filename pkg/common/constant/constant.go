@@ -214,6 +214,7 @@ const (
 	AtMe        = 1
 	AtAll       = 2
 	AtAllAtMe   = 3
+	GroupAnnouncement
 )
 
 var ContentType2PushContent = map[int64]string{
