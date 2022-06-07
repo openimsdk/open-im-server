@@ -108,7 +108,7 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 				for _, v := range msgList {
 					log.Debug(triggerID, "msg come to storage center", v.String())
 					if v.MsgData == nil {
-						log.NewWarn(triggerID, "msg come to storage center nil", v.String(), v.OperationID)
+						log.NewWarn(triggerID, "msg come to storage center nil", v.String(), v.OperationID, msgChannelValue.userID)
 						continue
 					}
 					isHistory := utils.GetSwitchFromOptions(v.MsgData.Options, constant.IsHistory)
@@ -238,7 +238,10 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 					if len(v) >= 0 {
 						hashCode := getHashCode(userID)
 						channelID := hashCode % ChannelNum
-						log.Debug(triggerID, "generate channelID", hashCode, channelID, userID)
+						log.Debug(triggerID, "generate channelID", hashCode, channelID, userID, len(v))
+						for _, y := range v {
+							log.Debug(triggerID, "single user slice is ", y.String())
+						}
 						//go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
 						och.chArrays[channelID] <- Cmd2Value{Cmd: UserMessages, Value: MsgChannelValue{userID: userID, msgList: v, triggerID: triggerID}}
 						//}(channelID, userID, v)
