@@ -157,7 +157,7 @@ func ForceLogout(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-
-	log.NewInfo(params.OperationID, utils.GetSelfFuncName(), " return ", reply)
-	c.JSON(http.StatusOK, reply)
+	resp := api.ForceLogoutResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
+	log.NewInfo(params.OperationID, utils.GetSelfFuncName(), " return ", resp)
+	c.JSON(http.StatusOK, resp)
 }
