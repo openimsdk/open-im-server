@@ -9,7 +9,7 @@ import (
 	http2 "net/http"
 )
 
-func callbackOfflinePush(operationID, userID string, info *commonPb.OfflinePushInfo, platformID int32) cbApi.CommonCallbackResp {
+func callbackOfflinePush(operationID, userID string, msg *commonPb.MsgData) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return callbackResp
@@ -19,10 +19,16 @@ func callbackOfflinePush(operationID, userID string, info *commonPb.OfflinePushI
 			CallbackCommand: constant.CallbackOfflinePushCommand,
 			OperationID:     operationID,
 			UserID:          userID,
-			PlatformID:      platformID,
-			Platform:        constant.PlatformIDToName(int(platformID)),
+			PlatformID:      msg.SenderPlatformID,
+			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 		},
-		OfflinePushInfo: info,
+		OfflinePushInfo: msg.OfflinePushInfo,
+		SendID:          msg.SendID,
+		GroupID:         msg.GroupID,
+		ContentType:     msg.ContentType,
+		SessionType:     msg.SessionType,
+		AtUserIDList:    msg.AtUserIDList,
+		Content:         string(msg.Content),
 	}
 	callbackOfflinePushResp := &cbApi.CallbackOfflinePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackOfflinePushReq, callbackOfflinePushResp, config.Config.Callback.CallbackOfflinePush.CallbackTimeOut); err != nil {

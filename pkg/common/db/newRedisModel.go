@@ -4,15 +4,21 @@ import (
 	"Open_IM/pkg/common/config"
 	log2 "Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/chat"
+	pbRtc "Open_IM/pkg/proto/rtc"
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/garyburd/redigo/redis"
-	"github.com/mitchellh/mapstructure"
+
+	//goRedis "github.com/go-redis/redis/v8"
 	"strconv"
 	"time"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/mitchellh/mapstructure"
 )
 
 //func  (d *  DataBases)pubMessage(channel, msg string) {
@@ -100,4 +106,92 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID str
 		return utils.Wrap(err, "")
 	}
 	return nil
+}
+
+func (d *DataBases) NewCacheSignalInfo(msg *pbCommon.MsgData) error {
+	req := &pbRtc.SignalReq{}
+	if err := proto.Unmarshal(msg.Content, req); err != nil {
+		return err
+	}
+	//log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
+	var inviteeUserIDList []string
+	switch invitationInfo := req.Payload.(type) {
+	case *pbRtc.SignalReq_Invite:
+		inviteeUserIDList = invitationInfo.Invite.Invitation.InviteeUserIDList
+	case *pbRtc.SignalReq_InviteInGroup:
+		inviteeUserIDList = invitationInfo.InviteInGroup.Invitation.InviteeUserIDList
+	default:
+		log2.NewDebug("", utils.GetSelfFuncName(), "req type not invite", string(msg.Content))
+		return nil
+	}
+	for _, userID := range inviteeUserIDList {
+		timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
+		if err != nil {
+			return err
+		}
+		keyList := SignalListCache + userID
+		err = d.rdb.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
+		if err != nil {
+			return err
+		}
+		err = d.rdb.Expire(context.Background(), keyList, time.Duration(timeout)*time.Second).Err()
+		if err != nil {
+			return err
+		}
+		key := SignalCache + msg.ClientMsgID
+		err = d.rdb.Set(context.Background(), key, msg.Content, time.Duration(timeout)*time.Second).Err()
+		if err != nil {
+			return err
+		}
+		return err
+	}
+	return nil
+}
+
+func (d *DataBases) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
+	key := SignalCache + clientMsgID
+	invitationInfo = &pbRtc.SignalInviteReq{}
+	bytes, err := d.rdb.Get(context.Background(), key).Bytes()
+	if err != nil {
+		return nil, err
+	}
+	req := &pbRtc.SignalReq{}
+	if err = proto.Unmarshal(bytes, req); err != nil {
+		return nil, err
+	}
+	switch req2 := req.Payload.(type) {
+	case *pbRtc.SignalReq_Invite:
+		invitationInfo.Invitation = req2.Invite.Invitation
+	case *pbRtc.SignalReq_InviteInGroup:
+		invitationInfo.Invitation = req2.InviteInGroup.Invitation
+	}
+	return invitationInfo, err
+}
+
+func (d *DataBases) GetAvailableSignalInvitationInfo(userID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
+	keyList := SignalListCache + userID
+	result := d.rdb.RPop(context.Background(), keyList)
+	if err = result.Err(); err != nil {
+		return nil, utils.Wrap(err, "GetAvailableSignalInvitationInfo failed")
+	}
+	key, err := result.Result()
+	if err != nil {
+		return nil, utils.Wrap(err, "GetAvailableSignalInvitationInfo failed")
+	}
+	log2.NewDebug("", utils.GetSelfFuncName(), result, result.String())
+	invitationInfo, err = d.GetSignalInfoFromCacheByClientMsgID(key)
+	if err != nil {
+		return nil, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
+	}
+	err = d.delUserSingalList(userID)
+	if err != nil {
+		return nil, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
+	}
+	return invitationInfo, nil
+}
+
+func (d *DataBases) delUserSingalList(userID string) error {
+	keyList := SignalListCache + userID
+	err := d.rdb.Del(context.Background(), keyList).Err()
+	return err
 }

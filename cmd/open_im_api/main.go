@@ -89,7 +89,7 @@ func main() {
 		groupRouterGroup.POST("/mute_group", group.MuteGroup)
 		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
 		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
-
+		groupRouterGroup.POST("/set_group_member_info", group.SetGroupMemberInfo)
 	}
 	superGroupRouterGroup := r.Group("/super_group")
 	{
@@ -113,6 +113,8 @@ func main() {
 		thirdGroup.POST("/minio_upload", apiThird.MinioUploadFile)
 		thirdGroup.POST("/upload_update_app", apiThird.UploadUpdateApp)
 		thirdGroup.POST("/get_download_url", apiThird.GetDownloadURL)
+		thirdGroup.POST("/get_rtc_invitation_info", apiThird.GetRTCInvitationInfo)
+		thirdGroup.POST("/get_rtc_invitation_start_app", apiThird.GetRTCInvitationInfoStartApp)
 	}
 	//Message
 	chatGroup := r.Group("/msg")

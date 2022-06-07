@@ -71,6 +71,7 @@ func (s *groupServer) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
+	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("", "RegisterEtcd failed ", err.Error())
@@ -1581,4 +1582,36 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
 	return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+}
+
+func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (resp *pbGroup.SetGroupMemberInfoResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &pbGroup.SetGroupMemberInfoResp{CommonResp: &pbGroup.CommonResp{}}
+	groupMember := db.GroupMember{
+		GroupID: req.GroupID,
+		UserID:  req.UserID,
+	}
+	m := make(map[string]interface{})
+	if req.RoleLevel != nil {
+		m["role_level"] = req.RoleLevel.Value
+	}
+	if req.FaceURL != nil {
+		m["user_group_face_url"] = req.FaceURL.Value
+	}
+	if req.Nickname != nil {
+		m["nickname"] = req.Nickname.Value
+	}
+	if req.Ex != nil {
+		m["ex"] = req.Ex.Value
+	}
+	err = imdb.UpdateGroupMemberInfoByMap(groupMember, m)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetGroupMemberInfo failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg + ":" + err.Error()
+		return resp, nil
+	}
+	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
 }

@@ -161,6 +161,7 @@ func onboardingProcessNotification(operationID, userID, groupID string) {
 	}()
 	var tips commonPb.TipsComm
 	tips.DefaultTips = config.Config.Notification.JoinDepartmentNotification.DefaultTips.Tips
+	tips.JsonDetail = ""
 	content, err := proto.Marshal(&tips)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), "proto marshal failed")

@@ -249,26 +249,27 @@ func GetDepartmentRelatedGroupIDList(departmentIDList []string) ([]string, error
 
 func getDepartmentParent(departmentID string, dbConn *gorm.DB) (*db.Department, error) {
 	var department db.Department
-	var parentID string
+	//var parentID string
 	dbConn.LogMode(true)
 	// select * from departments where department_id = (select parent_id from departments where department_id= zx234fd);
-	err := dbConn.Table("departments").Where("department_id=?", dbConn.Table("departments").Where("department_id=?", departmentID).Pluck("parent_id", parentID)).Find(&department).Error
+	//dbConn.Table("departments").Where("department_id=?", departmentID).Pluck("parent_id", parentID).Error
+	err := dbConn.Table("departments").Where("department_id=?").Find(&department).Error
 	return &department, err
 }
 
-func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList []string) (*db.Department, error) {
+func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList *[]string) error {
 	department, err := getDepartmentParent(departmentID, dbConn)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if department.ParentID != "" {
-		parentIDList = append(parentIDList, department.ParentID)
-		_, err = GetDepartmentParent(departmentID, dbConn, parentIDList)
+		*parentIDList = append(*parentIDList, department.ParentID)
+		err = GetDepartmentParent(departmentID, dbConn, parentIDList)
 		if err != nil {
-			return nil, nil
+			return err
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 func GetDepartmentParentIDList(departmentID string) ([]string, error) {
@@ -277,6 +278,6 @@ func GetDepartmentParentIDList(departmentID string) ([]string, error) {
 		return nil, err
 	}
 	var parentIDList []string
-	_, err = GetDepartmentParent(departmentID, dbConn, parentIDList)
+	err = GetDepartmentParent(departmentID, dbConn, &parentIDList)
 	return parentIDList, err
 }
