@@ -1426,7 +1426,6 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	if req.Ex != nil {
 		m["ex"] = req.Ex.Value
 	}
-
 	err = imdb.UpdateGroupMemberInfoByMap(groupMember, m)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetGroupMemberInfo failed", err.Error())
