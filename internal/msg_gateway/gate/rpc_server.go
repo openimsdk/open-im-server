@@ -29,10 +29,6 @@ type RPCServer struct {
 	pushTerminal    []int
 }
 
-func (r *RPCServer) KickUserOffline(c context.Context, req *pbRelay.KickUserOfflineReq) (*pbRelay.KickUserOfflineResp, error) {
-	panic("implement me")
-}
-
 func (r *RPCServer) onInit(rpcPort int) {
 	r.rpcPort = rpcPort
 	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImOnlineMessageRelayName
@@ -191,6 +187,9 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 	return &pbRelay.OnlineBatchPushOneMsgResp{
 		SinglePushResult: singleUserResult,
 	}, nil
+}
+func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOfflineReq) (*pbRelay.KickUserOfflineResp, error) {
+	panic("implement me")
 }
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.OnlinePushMsgReq, RecvPlatForm int, RecvID string) (ResultCode int64) {
 	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
