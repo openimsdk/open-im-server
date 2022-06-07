@@ -223,7 +223,7 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 						log.Error(triggerID, "msg_transfer Unmarshal msg err", "msg", string(consumerMessages[i].Value), "err", err.Error())
 						return
 					}
-					log.Debug(triggerID, "single msg come to distribution center", msgFromMQ.String(), string(consumerMessages[i].Key))
+					log.Debug(triggerID, "single msg come to distribution center", string(consumerMessages[i].Key))
 					if oldM, ok := UserAggregationMsgs[string(consumerMessages[i].Key)]; ok {
 						oldM = append(oldM, &msgFromMQ)
 						UserAggregationMsgs[string(consumerMessages[i].Key)] = oldM
@@ -233,7 +233,7 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 						UserAggregationMsgs[string(consumerMessages[i].Key)] = m
 					}
 				}
-				log.Debug(triggerID, "generate map list users len", len(UserAggregationMsgs))
+				log.Debug(triggerID, "generate map list users len", len(UserAggregationMsgs), UserAggregationMsgs)
 				for userID, v := range UserAggregationMsgs {
 					if len(v) >= 0 {
 						hashCode := getHashCode(userID)
