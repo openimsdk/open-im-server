@@ -37,6 +37,25 @@ func BuildClaims(uid, platform string, ttl int64) Claims {
 		}}
 }
 
+func DeleteToken(userID string, platformID int) error {
+	m, err := commonDB.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
+	if err != nil && err != redis.ErrNil {
+		return utils.Wrap(err, "")
+	}
+	var deleteTokenKey []string
+	for k, v := range m {
+		_, err = GetClaimFromToken(k)
+		if err != nil || v != constant.NormalToken {
+			deleteTokenKey = append(deleteTokenKey, k)
+		}
+	}
+	if len(deleteTokenKey) != 0 {
+		err = commonDB.DB.DeleteTokenByUidPid(userID, platformID, deleteTokenKey)
+		return utils.Wrap(err, "")
+	}
+	return nil
+}
+
 func CreateToken(userID string, platformID int) (string, int64, error) {
 	claims := BuildClaims(userID, constant.PlatformIDToName(platformID), config.Config.TokenPolicy.AccessExpire)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

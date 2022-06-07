@@ -89,6 +89,7 @@ func main() {
 		groupRouterGroup.POST("/mute_group", group.MuteGroup)
 		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
 		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
+
 	}
 	superGroupRouterGroup := r.Group("/super_group")
 	{
@@ -101,6 +102,7 @@ func main() {
 		authRouterGroup.POST("/user_register", apiAuth.UserRegister) //1
 		authRouterGroup.POST("/user_token", apiAuth.UserToken)       //1
 		authRouterGroup.POST("/parse_token", apiAuth.ParseToken)     //1
+		authRouterGroup.POST("/force_logout", apiAuth.ForceLogout)   //1
 	}
 	//Third service
 	thirdGroup := r.Group("/third")
@@ -130,7 +132,6 @@ func main() {
 		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)             //1
 		managementGroup.POST("/account_check", manage.AccountCheck)                   //1
 		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
-
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
