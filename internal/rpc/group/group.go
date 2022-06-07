@@ -200,9 +200,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		if req.GroupInfo.GroupType != constant.SuperGroup {
 			chat.GroupCreatedNotification(req.OperationID, req.OpUserID, groupId, okUserIDList)
 		} else {
-			for _, userID := range okUserIDList {
-				chat.SuperGroupNotification(req.OperationID, req.OpUserID, userID)
-			}
+			chat.SuperGroupNotification(req.OperationID, req.OpUserID, groupId)
 
 		}
 		return resp, nil
@@ -385,9 +383,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if groupInfo.GroupType != constant.SuperGroup {
 		chat.MemberInvitedNotification(req.OperationID, req.GroupID, req.OpUserID, req.Reason, okUserIDList)
 	} else {
-		for _, userID := range okUserIDList {
-			chat.SuperGroupNotification(req.OperationID, req.OpUserID, userID)
-		}
+		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.GroupID)
 	}
 
 	log.NewInfo(req.OperationID, "InviteUserToGroup rpc return ")
@@ -589,9 +585,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 	if groupInfo.GroupType != constant.SuperGroup {
 		chat.MemberKickedNotification(req, okUserIDList)
 	} else {
-		for _, userID := range okUserIDList {
-			chat.SuperGroupNotification(req.OperationID, req.OpUserID, userID)
-		}
+		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.GroupID)
 	}
 	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp.String())
 	return &resp, nil

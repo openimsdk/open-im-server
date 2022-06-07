@@ -9,7 +9,8 @@ import (
 	//"github.com/golang/protobuf/proto"
 )
 
-func SuperGroupNotification(operationID, sendID, recvID string) {
+func SuperGroupNotification(operationID, sendID, groupID string) {
+
 	//var tips sdk.TipsComm
 	//var err error
 	//marshaler := jsonpb.Marshaler{
@@ -20,10 +21,10 @@ func SuperGroupNotification(operationID, sendID, recvID string) {
 	//tips.JsonDetail, _ = marshaler.MarshalToString(m)
 	n := &NotificationMsg{
 		SendID:      sendID,
-		RecvID:      recvID,
-		MsgFrom:     constant.UserMsgType,
+		RecvID:      groupID,
+		MsgFrom:     constant.SysMsgType,
 		ContentType: constant.SuperGroupUpdateNotification,
-		SessionType: constant.SingleChatType,
+		SessionType: constant.SuperGroupChatType,
 		OperationID: operationID,
 	}
 	//n.Content, err = proto.Marshal(&tips)
