@@ -339,6 +339,16 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"groupMemberInfoSet"`
+		GroupMemberSetToAdmin struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberSetToAdmin"`
+		GroupMemberSetToOrdinary struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberSetToOrdinaryUser"`
 		OrganizationChanged struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`

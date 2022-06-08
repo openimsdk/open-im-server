@@ -51,6 +51,9 @@ type MsgCallBackResp struct {
 
 func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string) {
 	if data.MsgData.SessionType == constant.SingleChatType {
+		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+			return true, 0, ""
+		}
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)

@@ -170,7 +170,10 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		tips.DefaultTips = toNickname + "" + cn.GroupMemberCancelMuted.DefaultTips.Tips
 	case constant.GroupMemberInfoSetNotification:
 		tips.DefaultTips = toNickname + "" + cn.GroupMemberInfoSet.DefaultTips.Tips
-
+	case constant.GroupMemberSetToAdminNotification:
+		tips.DefaultTips = toNickname + "" + cn.GroupMemberSetToAdmin.DefaultTips.Tips
+	case constant.GroupMemberSetToOrdinaryUserNotification:
+		tips.DefaultTips = toNickname + "" + cn.GroupMemberSetToOrdinary.DefaultTips.Tips
 	default:
 		log.Error(operationID, "contentType failed ", contentType)
 		return
@@ -309,6 +312,28 @@ func GroupMemberInfoSetNotification(operationID, opUserID, groupID, groupMemberU
 		return
 	}
 	groupNotification(constant.GroupMemberInfoSetNotification, &tips, opUserID, groupID, "", operationID)
+}
+
+func GroupMemberRoleLevelChangeNotification(operationID, opUserID, groupID, groupMemberUserID string, notificationType int32) {
+	if notificationType != constant.GroupMemberSetToAdminNotification || notificationType != constant.GroupOrdinaryUsers {
+		log.NewError(operationID, utils.GetSelfFuncName(), "invalid notificationType: ", notificationType)
+		return
+	}
+	tips := open_im_sdk.GroupMemberInfoSetTips{Group: &open_im_sdk.GroupInfo{},
+		OpUser: &open_im_sdk.GroupMemberFullInfo{}, ChangedUser: &open_im_sdk.GroupMemberFullInfo{}}
+	if err := setGroupInfo(groupID, tips.Group); err != nil {
+		log.Error(operationID, "setGroupInfo failed ", err.Error(), groupID)
+		return
+	}
+	if err := setOpUserInfo(opUserID, groupID, tips.OpUser); err != nil {
+		log.Error(operationID, "setOpUserInfo failed ", err.Error(), opUserID, groupID)
+		return
+	}
+	if err := setGroupMemberInfo(groupID, groupMemberUserID, tips.ChangedUser); err != nil {
+		log.Error(operationID, "setGroupMemberInfo failed ", err.Error(), groupID, groupMemberUserID)
+		return
+	}
+	groupNotification(notificationType, &tips, opUserID, groupID, "", operationID)
 }
 
 func GroupMemberCancelMutedNotification(operationID, opUserID, groupID, groupMemberUserID string) {

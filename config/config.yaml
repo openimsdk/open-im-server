@@ -481,6 +481,30 @@ notification:
     defaultTips:
       tips: "group member info set"
 
+  groupMemberSetToOrdinaryUser:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: false
+      offlinePush:
+        switch: false
+        title: "groupMemberSetToOrdinaryUser title"
+        desc: "groupMemberSetToOrdinaryUser desc"
+        ext: "groupMemberSetToOrdinaryUser ext"
+      defaultTips:
+        tips: "was set to ordinaryUser"
+
+  groupMemberSetToAdmin:
+    conversation:
+      reliabilityLevel: 3
+      unreadCount: false
+      offlinePush:
+        switch: false
+        title: "groupMemberSetToAdmin title"
+        desc: "groupMemberSetToAdmin desc"
+        ext: "groupMemberSetToAdmin ext"
+      defaultTips:
+        tips: "was set to admin"
+  #############################organization#################################
 
   organizationChanged:
     conversation:

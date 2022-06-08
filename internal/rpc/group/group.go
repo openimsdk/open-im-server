@@ -1648,7 +1648,16 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg + ":" + err.Error()
 		return resp, nil
 	}
-	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
+	if req.RoleLevel != nil {
+		switch req.RoleLevel.Value {
+		case constant.GroupOrdinaryUsers:
+			chat.GroupMemberRoleLevelChangeNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID, constant.GroupMemberSetToOrdinaryUserNotification)
+		case constant.GroupAdmin, constant.GroupOwner:
+			chat.GroupMemberRoleLevelChangeNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID, constant.GroupMemberSetToAdminNotification)
+		}
+	} else {
+		chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }

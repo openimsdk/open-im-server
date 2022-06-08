@@ -266,7 +266,7 @@ func ManagementBatchSendMsg(c *gin.Context) {
 			continue
 		}
 		if rpcResp.ErrCode != 0 {
-			log.NewError(params.OperationID, utils.GetSelfFuncName(), "rpc failed", pbData)
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), "rpc failed", pbData, rpcResp)
 			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
 			continue
 		}

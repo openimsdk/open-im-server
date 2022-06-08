@@ -67,22 +67,24 @@ const (
 
 	GroupNotificationBegin = 1500
 
-	GroupCreatedNotification             = 1501
-	GroupInfoSetNotification             = 1502
-	JoinGroupApplicationNotification     = 1503
-	MemberQuitNotification               = 1504
-	GroupApplicationAcceptedNotification = 1505
-	GroupApplicationRejectedNotification = 1506
-	GroupOwnerTransferredNotification    = 1507
-	MemberKickedNotification             = 1508
-	MemberInvitedNotification            = 1509
-	MemberEnterNotification              = 1510
-	GroupDismissedNotification           = 1511
-	GroupMemberMutedNotification         = 1512
-	GroupMemberCancelMutedNotification   = 1513
-	GroupMutedNotification               = 1514
-	GroupCancelMutedNotification         = 1515
-	GroupMemberInfoSetNotification       = 1516
+	GroupCreatedNotification                 = 1501
+	GroupInfoSetNotification                 = 1502
+	JoinGroupApplicationNotification         = 1503
+	MemberQuitNotification                   = 1504
+	GroupApplicationAcceptedNotification     = 1505
+	GroupApplicationRejectedNotification     = 1506
+	GroupOwnerTransferredNotification        = 1507
+	MemberKickedNotification                 = 1508
+	MemberInvitedNotification                = 1509
+	MemberEnterNotification                  = 1510
+	GroupDismissedNotification               = 1511
+	GroupMemberMutedNotification             = 1512
+	GroupMemberCancelMutedNotification       = 1513
+	GroupMutedNotification                   = 1514
+	GroupCancelMutedNotification             = 1515
+	GroupMemberInfoSetNotification           = 1516
+	GroupMemberSetToAdminNotification        = 1517
+	GroupMemberSetToOrdinaryUserNotification = 1518
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601
