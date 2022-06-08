@@ -246,7 +246,7 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 	utils.CopyStructFields(&organizationUser, req.OrganizationUser)
 	organizationUser.Birth = utils.UnixSecondToTime(int64(req.OrganizationUser.Birth))
 	log.Debug(req.OperationID, "src ", *req.OrganizationUser, "dst ", organizationUser)
-	err = imdb.CreateOrganizationUser(&organizationUser)
+	err := imdb.CreateOrganizationUser(&organizationUser)
 	if err != nil {
 		errMsg := req.OperationID + " " + "CreateOrganizationUser failed " + err.Error()
 		log.Error(req.OperationID, errMsg, organizationUser)
