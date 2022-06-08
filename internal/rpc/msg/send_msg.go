@@ -514,7 +514,7 @@ func Notification(n *NotificationMsg) {
 	msg.ClientMsgID = utils.GetMsgID(n.SendID)
 	msg.Options = make(map[string]bool, 7)
 	switch n.SessionType {
-	case constant.GroupChatType:
+	case constant.GroupChatType, constant.SuperGroupChatType:
 		msg.RecvID = ""
 		msg.GroupID = n.RecvID
 	}
@@ -735,6 +735,8 @@ func Notification(n *NotificationMsg) {
 		unReadCount = config.Config.Notification.ConversationSetPrivate.Conversation.UnreadCount
 	case constant.DeleteMessageNotification:
 		reliabilityLevel = constant.ReliableNotificationNoMsg
+	case constant.SuperGroupUpdateNotification:
+		reliabilityLevel = constant.UnreliableNotification
 	}
 	switch reliabilityLevel {
 	case constant.UnreliableNotification:
