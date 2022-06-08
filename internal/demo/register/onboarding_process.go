@@ -50,7 +50,7 @@ func createOrganizationUser(operationID, userID, userName string) error {
 			CreateTime:  uint32(time.Now().Unix()),
 		},
 		OperationID: operationID,
-		OpUserID:    userID,
+		OpUserID:    config.Config.Manager.AppManagerUid[0],
 		IsRegister:  false,
 	}
 	if strings.Contains("@", userID) {
