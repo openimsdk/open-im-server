@@ -33,12 +33,10 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	return &p
 }
 
-func (p *Producer) SendMessage(m proto.Message, key ...string) (int32, int64, error) {
+func (p *Producer) SendMessage(m proto.Message, key string) (int32, int64, error) {
 	kMsg := &sarama.ProducerMessage{}
 	kMsg.Topic = p.topic
-	if len(key) == 1 {
-		kMsg.Key = sarama.StringEncoder(key[0])
-	}
+	kMsg.Key = sarama.StringEncoder(key)
 	bMsg, err := proto.Marshal(m)
 	if err != nil {
 		log2.Error("", "", "proto marshal err = %s", err.Error())
