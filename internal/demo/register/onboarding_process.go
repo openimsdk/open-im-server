@@ -34,7 +34,7 @@ func onboardingProcess(operationID, userID, userName string) {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), groupIDList)
-	//joinGroups(operationID, userID, userName, groupIDList)
+	joinGroups(operationID, userID, userName, groupIDList)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
 }
 
@@ -120,19 +120,19 @@ func GetDepartmentGroupIDList(operationID, departmentID string) ([]string, error
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), resp)
 		return nil, errors.New(resp.ErrMsg)
 	}
-	return resp.ParentIDList, nil
-	//resp.ParentIDList = append(resp.ParentIDList, departmentID)
-	//getDepartmentRelatedGroupIDListReq := organizationRpc.GetDepartmentRelatedGroupIDListReq{OperationID: operationID, DepartmentIDList: resp.ParentIDList}
-	//getDepartmentParentIDListResp, err := client.GetDepartmentRelatedGroupIDList(context.Background(), &getDepartmentRelatedGroupIDListReq)
-	//if err != nil {
-	//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), getDepartmentRelatedGroupIDListReq.String())
-	//	return nil, err
-	//}
-	//if getDepartmentParentIDListResp.ErrCode != 0 {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), getDepartmentParentIDListResp)
-	//	return nil, errors.New(getDepartmentParentIDListResp.ErrMsg)
-	//}
-	//return getDepartmentParentIDListResp.GroupIDList, nil
+
+	resp.ParentIDList = append(resp.ParentIDList, departmentID)
+	getDepartmentRelatedGroupIDListReq := organizationRpc.GetDepartmentRelatedGroupIDListReq{OperationID: operationID, DepartmentIDList: resp.ParentIDList}
+	getDepartmentParentIDListResp, err := client.GetDepartmentRelatedGroupIDList(context.Background(), &getDepartmentRelatedGroupIDListReq)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), getDepartmentRelatedGroupIDListReq.String())
+		return nil, err
+	}
+	if getDepartmentParentIDListResp.ErrCode != 0 {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), getDepartmentParentIDListResp)
+		return nil, errors.New(getDepartmentParentIDListResp.ErrMsg)
+	}
+	return getDepartmentParentIDListResp.GroupIDList, nil
 }
 
 func joinGroups(operationID, userID, userName string, groupIDList []string) {
