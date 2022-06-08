@@ -29,10 +29,11 @@ func onboardingProcess(operationID, userID, userName string) {
 		log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
 	}
 
-	//groupIDList, err := GetDepartmentGroupIDList(operationID, departmentID)
-	//if err != nil {
-	//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
-	//}
+	groupIDList, err := GetDepartmentGroupIDList(operationID, departmentID)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), groupIDList)
 	//joinGroups(operationID, userID, userName, groupIDList)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
 }

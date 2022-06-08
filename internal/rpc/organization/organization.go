@@ -340,13 +340,14 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 func (s *organizationServer) GetDepartmentParentIDList(_ context.Context, req *rpc.GetDepartmentParentIDListReq) (resp *rpc.GetDepartmentParentIDListResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req.String())
 	resp = &rpc.GetDepartmentParentIDListResp{}
-	resp.ParentIDList, err = imdb.GetDepartmentParentIDList(req.DepartmentID)
+	parentIDList, err := imdb.GetDepartmentParentIDList(req.DepartmentID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetDepartmentParentIDList failed", err.Error())
 		resp.ErrMsg = constant.ErrDB.ErrMsg + ": " + err.Error()
 		resp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
+	resp.ParentIDList = parentIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp.String())
 	return resp, nil
 }
