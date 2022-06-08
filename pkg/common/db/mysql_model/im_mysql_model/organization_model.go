@@ -249,10 +249,14 @@ func GetDepartmentRelatedGroupIDList(departmentIDList []string) ([]string, error
 
 func getDepartmentParent(departmentID string, dbConn *gorm.DB) (*db.Department, error) {
 	var department db.Department
+	var parentDepartment db.Department
 	//var parentID string
 	dbConn.LogMode(true)
-	dbConn.Model(&department).Where("department_id=?", departmentID).Select("parent_id").First(&department)
-	err := dbConn.Model(&department).Where("department_id = ?", department.ParentID).Find(&department).Error
+	err := dbConn.Model(&department).Where("department_id=?", departmentID).Select("parent_id").First(&department).Error
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	err = dbConn.Model(&parentDepartment).Where("department_id = ?", department.ParentID).Find(&parentDepartment).Error
 	return &department, err
 }
 
@@ -261,7 +265,7 @@ func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList *[]s
 	if err != nil {
 		return err
 	}
-	if department.ParentID != "" {
+	if department.DepartmentID != "" {
 		*parentIDList = append(*parentIDList, department.ParentID)
 		err = GetDepartmentParent(departmentID, dbConn, parentIDList)
 		if err != nil {
