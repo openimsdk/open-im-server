@@ -315,7 +315,7 @@ func GroupMemberInfoSetNotification(operationID, opUserID, groupID, groupMemberU
 }
 
 func GroupMemberRoleLevelChangeNotification(operationID, opUserID, groupID, groupMemberUserID string, notificationType int32) {
-	if notificationType != constant.GroupMemberSetToAdminNotification || notificationType != constant.GroupOrdinaryUsers {
+	if notificationType != constant.GroupMemberSetToAdminNotification || notificationType != constant.GroupMemberSetToOrdinaryUserNotification {
 		log.NewError(operationID, utils.GetSelfFuncName(), "invalid notificationType: ", notificationType)
 		return
 	}
