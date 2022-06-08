@@ -24,14 +24,16 @@ func onboardingProcess(operationID, userID, userName string) {
 		log.NewError(operationID, utils.GetSelfFuncName(), "createOrganizationUser failed", err.Error())
 	}
 	departmentID := config.Config.Demo.TestDepartMentID
+
 	if err := joinTestDepartment(operationID, userID, departmentID); err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
 	}
-	groupIDList, err := GetDepartmentGroupIDList(operationID, departmentID)
-	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
-	}
-	joinGroups(operationID, userID, userName, groupIDList)
+
+	//groupIDList, err := GetDepartmentGroupIDList(operationID, departmentID)
+	//if err != nil {
+	//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
+	//}
+	//joinGroups(operationID, userID, userName, groupIDList)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
 }
 
@@ -39,6 +41,7 @@ func createOrganizationUser(operationID, userID, userName string) error {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID)
 	}()
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "start createOrganizationUser")
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := organizationRpc.NewOrganizationClient(etcdConn)
 	req := &organizationRpc.CreateOrganizationUserReq{
@@ -98,6 +101,9 @@ func joinTestDepartment(operationID, userID, departmentID string) error {
 }
 
 func GetDepartmentGroupIDList(operationID, departmentID string) ([]string, error) {
+	defer func() {
+		log.NewInfo(operationID, utils.GetSelfFuncName(), departmentID)
+	}()
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
 	client := organizationRpc.NewOrganizationClient(etcdConn)
 	req := organizationRpc.GetDepartmentParentIDListReq{
