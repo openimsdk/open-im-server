@@ -40,7 +40,7 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 		groupInfo.MemberCount = uint32(len(group.MemberIDList))
 		resp.GroupList = append(resp.GroupList, groupInfo)
 	}
-	log.NewError(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 

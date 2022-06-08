@@ -964,9 +964,6 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 	}
 	defer session.EndSession(ctx)
 	sCtx := mongo.NewSessionContext(ctx, session)
-	if err != nil {
-		return utils.Wrap(err, "start transaction failed")
-	}
 	superGroup := SuperGroup{
 		GroupID:      groupID,
 		MemberIDList: initMemberIDList,
@@ -987,12 +984,10 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 		Upsert: &upsert,
 	}
 	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
-	for _, userID := range initMemberIDList {
-		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
-		if err != nil {
-			session.AbortTransaction(ctx)
-			return utils.Wrap(err, "transaction failed")
-		}
+	_, err = c.UpdateMany(sCtx, bson.M{"user_id": bson.M{"$in": initMemberIDList}}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
 	}
 	session.CommitTransaction(ctx)
 	return err
@@ -1099,15 +1094,15 @@ func (d *DataBases) DeleteSuperGroup(groupID string) error {
 	return nil
 }
 
-func (d *DataBases) RemoveGroupFromUser(ctx, sCtx context.Context, groupID string, userID []string) error {
+func (d *DataBases) RemoveGroupFromUser(ctx, sCtx context.Context, groupID string, userIDList []string) error {
 	var users []UserToSuperGroup
-	for _, v := range userID {
+	for _, v := range userIDList {
 		users = append(users, UserToSuperGroup{
 			UserID: v,
 		})
 	}
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
-	_, err := c.UpdateOne(sCtx, bson.M{"user_id": bson.M{"$in": userID}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
+	_, err := c.UpdateOne(sCtx, bson.M{"user_id": bson.M{"$in": userIDList}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
 	if err != nil {
 		return utils.Wrap(err, "UpdateOne transaction failed")
 	}
