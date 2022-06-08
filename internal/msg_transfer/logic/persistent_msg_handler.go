@@ -72,7 +72,9 @@ func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSessi
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
-		pc.msgHandle[msg.Topic](msg, string(msg.Key), sess)
+		if len(msg.Value) != 0 {
+			pc.msgHandle[msg.Topic](msg, string(msg.Key), sess)
+		}
 		sess.MarkMessage(msg, "")
 	}
 	return nil

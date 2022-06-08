@@ -466,7 +466,9 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 		//och.chArrays[channelID] <- Cmd2Value{Cmd: UserMessages, Value: MsgChannelValue{userID: userID, msgList: []*pbMsg.MsgDataToMQ{&msgFromMQ}, triggerID: msgFromMQ.OperationID}}
 		//sess.MarkMessage(msg, "")
 		rwLock.Lock()
-		cMsg = append(cMsg, msg)
+		if len(msg.Value) != 0 {
+			cMsg = append(cMsg, msg)
+		}
 		rwLock.Unlock()
 		sess.MarkMessage(msg, "")
 		//och.TriggerCmd(OnlineTopicBusy)
