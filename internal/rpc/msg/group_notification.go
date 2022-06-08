@@ -314,8 +314,8 @@ func GroupMemberInfoSetNotification(operationID, opUserID, groupID, groupMemberU
 	groupNotification(constant.GroupMemberInfoSetNotification, &tips, opUserID, groupID, "", operationID)
 }
 
-func GroupMemberRoleLevelChangeNotification(operationID, opUserID, groupID, groupMemberUserID string, notificationType int32) {
-	if notificationType != constant.GroupMemberSetToAdminNotification || notificationType != constant.GroupMemberSetToOrdinaryUserNotification {
+func GroupMemberRoleLevelChangeNotification(operationID, opUserID, groupID, groupMemberUserID string, notificationType int) {
+	if notificationType != constant.GroupMemberSetToAdminNotification && notificationType != constant.GroupMemberSetToOrdinaryUserNotification {
 		log.NewError(operationID, utils.GetSelfFuncName(), "invalid notificationType: ", notificationType)
 		return
 	}
