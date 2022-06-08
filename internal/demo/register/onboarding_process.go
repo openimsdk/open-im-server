@@ -51,6 +51,7 @@ func createOrganizationUser(operationID, userID, userName string) error {
 		},
 		OperationID: operationID,
 		OpUserID:    userID,
+		IsRegister:  false,
 	}
 	if strings.Contains("@", userID) {
 		req.OrganizationUser.Email = userID

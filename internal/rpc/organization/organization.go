@@ -221,21 +221,21 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 	authReq := &pbAuth.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
 	utils.CopyStructFields(authReq.UserInfo, req.OrganizationUser)
 	authReq.OperationID = req.OperationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
-	client := pbAuth.NewAuthClient(etcdConn)
-
-	reply, err := client.UserRegister(context.Background(), authReq)
-	if err != nil {
-		errMsg := "UserRegister failed " + err.Error()
-		log.NewError(req.OperationID, errMsg)
-		return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+	if req.IsRegister {
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+		client := pbAuth.NewAuthClient(etcdConn)
+		reply, err := client.UserRegister(context.Background(), authReq)
+		if err != nil {
+			errMsg := "UserRegister failed " + err.Error()
+			log.NewError(req.OperationID, errMsg)
+			return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+		}
+		if reply.CommonResp.ErrCode != 0 {
+			errMsg := "UserRegister failed " + reply.CommonResp.ErrMsg
+			log.NewError(req.OperationID, errMsg)
+			return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+		}
 	}
-	if reply.CommonResp.ErrCode != 0 {
-		errMsg := "UserRegister failed " + reply.CommonResp.ErrMsg
-		log.NewError(req.OperationID, errMsg)
-		return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
-	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
 		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
