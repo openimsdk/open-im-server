@@ -277,7 +277,7 @@ func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList *[]s
 		return err
 	}
 	if department.DepartmentID != "" {
-		*parentIDList = append(*parentIDList, department.ParentID)
+		*parentIDList = append(*parentIDList, department.DepartmentID)
 		err = GetDepartmentParent(department.DepartmentID, dbConn, parentIDList)
 		if err != nil {
 			return err
