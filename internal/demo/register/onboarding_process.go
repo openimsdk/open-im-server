@@ -13,7 +13,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"strings"
 	"time"
@@ -167,18 +166,18 @@ func onboardingProcessNotification(operationID, userID, groupID string) {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID, groupID)
 	}()
-	var tips commonPb.TipsComm
-	tips.DefaultTips = config.Config.Notification.JoinDepartmentNotification.DefaultTips.Tips
-	tips.JsonDetail = ""
-	content, err := proto.Marshal(&tips)
-	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), "proto marshal failed")
-		return
-	}
+	//var tips commonPb.TipsComm
+	//tips.DefaultTips = config.Config.Notification.JoinDepartmentNotification.DefaultTips.Tips
+	//tips.JsonDetail = ""
+	//content, err := proto.Marshal(&tips)
+	//if err != nil {
+	//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), "proto marshal failed")
+	//	return
+	//}
 	notification := &msg.NotificationMsg{
 		SendID:      userID,
 		RecvID:      groupID,
-		Content:     content,
+		Content:     []byte("大家来欢迎我加入部门"),
 		MsgFrom:     constant.UserMsgType,
 		ContentType: constant.Text,
 		SessionType: constant.GroupChatType,
