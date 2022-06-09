@@ -214,11 +214,13 @@ type config struct {
 			MsgToPush         string `yaml:"msgToPush"`
 		}
 	}
-	Secret               string `yaml:"secret"`
-	MultiLoginPolicy     int    `yaml:"multiloginpolicy"`
-	ChatPersistenceMysql bool   `yaml:"chatpersistencemysql"`
-	ReliableStorage      bool   `yaml:"reliablestorage"`
-	MsgCacheTimeout      int    `yaml:"msgCacheTimeout"`
+	Secret                            string `yaml:"secret"`
+	MultiLoginPolicy                  int    `yaml:"multiloginpolicy"`
+	ChatPersistenceMysql              bool   `yaml:"chatpersistencemysql"`
+	ReliableStorage                   bool   `yaml:"reliablestorage"`
+	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
+	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
+	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
 
 	TokenPolicy struct {
 		AccessSecret string `yaml:"accessSecret"`
