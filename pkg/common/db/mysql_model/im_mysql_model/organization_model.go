@@ -16,14 +16,14 @@ func CreateDepartment(department *db.Department) error {
 	return dbConn.Table("departments").Create(department).Error
 }
 
-func GetDepartment(departmentID string) (error, *db.Department) {
+func GetDepartment(departmentID string) (*db.Department, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
 	var department db.Department
 	err = dbConn.Table("departments").Where("department_id=?", departmentID).Find(&department).Error
-	return err, &department
+	return &department, err
 }
 
 func UpdateDepartment(department *db.Department, args map[string]interface{}) error {
@@ -237,6 +237,15 @@ func GetSubDepartmentNum(departmentID string) (error, uint32) {
 	return nil, number
 }
 
+func SetDepartmentRelatedGroupID(groupID, departmentID string) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return utils.Wrap(err, "DefaultGormDB failed")
+	}
+	department := &db.Department{RelatedGroupID: groupID}
+	return dbConn.Model(&department).Where("department_id=?", departmentID).Update(department).Error
+}
+
 func GetDepartmentRelatedGroupIDList(departmentIDList []string) ([]string, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
@@ -257,7 +266,7 @@ func getDepartmentParent(departmentID string, dbConn *gorm.DB) (*db.Department, 
 		return nil, utils.Wrap(err, "")
 	}
 	err = dbConn.Model(&parentDepartment).Where("department_id = ?", department.ParentID).Find(&parentDepartment).Error
-	return &department, err
+	return &parentDepartment, utils.Wrap(err, "")
 }
 
 func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList *[]string) error {

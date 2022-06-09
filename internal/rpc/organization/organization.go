@@ -102,7 +102,7 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 		log.Error(req.OperationID, errMsg)
 		return &rpc.CreateDepartmentResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
 	}
-	err, createdDepartment := imdb.GetDepartment(department.DepartmentID)
+	createdDepartment, err := imdb.GetDepartment(department.DepartmentID)
 	if err != nil {
 		errMsg := req.OperationID + " " + "GetDepartment failed " + err.Error() + department.DepartmentID
 		log.Error(req.OperationID, errMsg)
@@ -140,6 +140,9 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 		resp.ErrCode = constant.ErrDB.ErrCode
 		resp.ErrMsg = constant.ErrDB.ErrMsg + " createGroup failed " + createGroupResp.ErrMsg
 		return resp, nil
+	}
+	if err := imdb.SetDepartmentRelatedGroupID(createGroupResp.GroupInfo.GroupID, department.DepartmentID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetDepartmentRelatedGroupID failed", err.Error())
 	}
 	return resp, nil
 }

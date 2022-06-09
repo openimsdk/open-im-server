@@ -181,7 +181,7 @@ func onboardingProcessNotification(operationID, userID, groupID string) {
 		Content:     content,
 		MsgFrom:     constant.UserMsgType,
 		ContentType: constant.Text,
-		SessionType: constant.SingleChatType,
+		SessionType: constant.GroupChatType,
 		OperationID: operationID,
 	}
 	// notification user join group
