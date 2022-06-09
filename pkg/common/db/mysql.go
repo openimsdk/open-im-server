@@ -53,7 +53,9 @@ func initMysqlDB() {
 	}
 
 	fmt.Println("open db ok ", dsn)
-	db.AutoMigrate(&Friend{},
+	db.AutoMigrate(
+		&Register{},
+		&Friend{},
 		&FriendRequest{},
 		&Group{},
 		&GroupMember{},
