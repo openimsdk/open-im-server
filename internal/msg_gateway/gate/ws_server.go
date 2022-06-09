@@ -61,7 +61,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 			//Connection mapping relationship,
 			//userID+" "+platformID->conn
 			//Initialize a lock for each user
-			newConn := &UserConn{conn, new(sync.Mutex)}
+			newConn := &UserConn{conn, new(sync.Mutex), 0}
 			userCount++
 			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0])
 			go ws.readMsg(newConn)

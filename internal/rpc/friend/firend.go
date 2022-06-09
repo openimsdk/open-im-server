@@ -63,7 +63,7 @@ func (s *friendServer) Run() {
 	defer srv.GracefulStop()
 	//User friend related services register to etcd
 	pbFriend.RegisterFriendServer(srv, s)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {

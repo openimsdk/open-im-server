@@ -7,7 +7,6 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
-	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"bytes"
 	"context"
@@ -142,10 +141,6 @@ func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUser
 	}
 	log.NewInfo(req.OperationID, "GetUsersOnlineStatus rpc return ", resp.String())
 	return &resp, nil
-}
-
-func (r *RPCServer) GetBatchMsgForPush(operationID string, msgData *sdk_ws.MsgData, pushToUserIDList []string, platformID string) map[string][]*sdk_ws.MsgData {
-	return nil
 }
 
 func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.OnlineBatchPushOneMsgReq) (*pbRelay.OnlineBatchPushOneMsgResp, error) {
