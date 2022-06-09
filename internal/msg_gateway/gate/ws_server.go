@@ -19,7 +19,8 @@ import (
 
 type UserConn struct {
 	*websocket.Conn
-	w *sync.Mutex
+	w            *sync.Mutex
+	PushedMaxSeq uint32
 }
 type WServer struct {
 	wsAddr       string
