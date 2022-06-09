@@ -46,12 +46,18 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.PasswordErr, "errMsg": "password err"})
 		return
 	}
+	var userID string
+	if r.UserID != "" {
+		userID = r.UserID
+	} else {
+		userID = r.Account
+	}
 	url := fmt.Sprintf("http://%s:%d/auth/user_token", utils.ServerIP, config.Config.Api.GinPort[0])
 	openIMGetUserToken := api.UserTokenReq{}
 	openIMGetUserToken.OperationID = params.OperationID
 	openIMGetUserToken.Platform = params.Platform
 	openIMGetUserToken.Secret = config.Config.Secret
-	openIMGetUserToken.UserID = account
+	openIMGetUserToken.UserID = userID
 	openIMGetUserTokenResp := api.UserTokenResp{}
 	bMsg, err := http2.Post(url, openIMGetUserToken, 2)
 	if err != nil {

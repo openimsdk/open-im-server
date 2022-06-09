@@ -6,6 +6,7 @@ type Register struct {
 	Account  string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
 	Password string `gorm:"column:password;type:varchar(255)" json:"password"`
 	Ex       string `gorm:"column:ex;size:1024" json:"ex"`
+	UserID   string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
 }
 
 //
