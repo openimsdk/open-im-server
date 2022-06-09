@@ -157,12 +157,12 @@ func joinGroups(operationID, userID, userName string, groupIDList []string) {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), resp)
 			continue
 		}
-		onboardingProcessNotification(operationID, userID, groupID)
+		onboardingProcessNotification(operationID, userID, groupID, userName)
 	}
 }
 
 // welcome user join department notification
-func onboardingProcessNotification(operationID, userID, groupID string) {
+func onboardingProcessNotification(operationID, userID, groupID, userName string) {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID, groupID)
 	}()
@@ -174,10 +174,11 @@ func onboardingProcessNotification(operationID, userID, groupID string) {
 	//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), "proto marshal failed")
 	//	return
 	//}
+	welcomeString := fmt.Sprintf("欢迎%s加入部门", userName)
 	notification := &msg.NotificationMsg{
 		SendID:      userID,
 		RecvID:      groupID,
-		Content:     []byte("大家来欢迎我加入部门"),
+		Content:     []byte(welcomeString),
 		MsgFrom:     constant.UserMsgType,
 		ContentType: constant.Text,
 		SessionType: constant.GroupChatType,
