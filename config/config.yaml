@@ -230,7 +230,10 @@ chatpersistencemysql: true
 reliablestorage: false
 #消息缓存时间
 msgCacheTimeout: 1800
-
+#群聊已读开启
+groupMessageHasReadReceiptEnable: false
+#单聊已读开启
+singleMessageHasReadReceiptEnable: false
 #token config
 tokenpolicy:
   accessSecret: "open_im_server" #token生成相关，默认即可
