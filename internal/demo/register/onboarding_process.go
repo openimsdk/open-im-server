@@ -13,7 +13,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"strings"
 	"time"
@@ -158,27 +157,28 @@ func joinGroups(operationID, userID, userName string, groupIDList []string) {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), resp)
 			continue
 		}
-		onboardingProcessNotification(operationID, userID, groupID)
+		onboardingProcessNotification(operationID, userID, groupID, userName)
 	}
 }
 
 // welcome user join department notification
-func onboardingProcessNotification(operationID, userID, groupID string) {
+func onboardingProcessNotification(operationID, userID, groupID, userName string) {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID, groupID)
 	}()
-	var tips commonPb.TipsComm
-	tips.DefaultTips = config.Config.Notification.JoinDepartmentNotification.DefaultTips.Tips
-	tips.JsonDetail = ""
-	content, err := proto.Marshal(&tips)
-	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), "proto marshal failed")
-		return
-	}
+	//var tips commonPb.TipsComm
+	//tips.DefaultTips = config.Config.Notification.JoinDepartmentNotification.DefaultTips.Tips
+	//tips.JsonDetail = ""
+	//content, err := proto.Marshal(&tips)
+	//if err != nil {
+	//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), "proto marshal failed")
+	//	return
+	//}
+	welcomeString := fmt.Sprintf("欢迎%s加入部门", userName)
 	notification := &msg.NotificationMsg{
 		SendID:      userID,
 		RecvID:      groupID,
-		Content:     content,
+		Content:     []byte(welcomeString),
 		MsgFrom:     constant.UserMsgType,
 		ContentType: constant.Text,
 		SessionType: constant.GroupChatType,
