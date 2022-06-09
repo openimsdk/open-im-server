@@ -236,6 +236,7 @@ groupMessageHasReadReceiptEnable: false
 singleMessageHasReadReceiptEnable: false
 
 
+
 #token config
 tokenpolicy:
   accessSecret: "open_im_server" #token生成相关，默认即可
