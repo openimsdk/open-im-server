@@ -49,6 +49,24 @@ type MsgCallBackResp struct {
 	}
 }
 
+func isMessageHasReadEnabled(pb *pbChat.SendMsgReq) (bool, int32, string) {
+	switch pb.MsgData.ContentType {
+	case constant.HasReadReceipt:
+		if config.Config.SingleMessageHasReadReceiptEnable {
+			return true, 0, ""
+		} else {
+			return false, constant.ErrMessageHasReadDisable.ErrCode, constant.ErrMessageHasReadDisable.ErrMsg
+		}
+	case constant.GroupHasReadReceipt:
+		if config.Config.GroupMessageHasReadReceiptEnable {
+			return true, 0, ""
+		} else {
+			return false, constant.ErrMessageHasReadDisable.ErrCode, constant.ErrMessageHasReadDisable.ErrMsg
+		}
+	}
+	return true, 0, ""
+}
+
 func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string) {
 	if data.MsgData.SessionType == constant.GroupChatType {
 		return true, 0, ""
@@ -144,7 +162,11 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	replay := pbChat.SendMsgResp{}
 	newTime := db.GetCurrentTimestampByMill()
 	log.NewWarn(pb.OperationID, "rpc sendMsg come here", pb.String(), pb.MsgData.ClientMsgID)
-	flag, errCode, errMsg := userRelationshipVerification(pb)
+	flag, errCode, errMsg := isMessageHasReadEnabled(pb)
+	if !flag {
+		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
+	}
+	flag, errCode, errMsg = userRelationshipVerification(pb)
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
