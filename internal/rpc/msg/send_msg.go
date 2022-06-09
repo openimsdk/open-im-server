@@ -166,6 +166,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
+	log.Debug(pb.OperationID, "flag ", flag, config.Config.SingleMessageHasReadReceiptEnable, config.Config.GroupMessageHasReadReceiptEnable)
 	flag, errCode, errMsg = userRelationshipVerification(pb)
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
