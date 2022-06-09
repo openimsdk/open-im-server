@@ -265,7 +265,9 @@ func getDepartmentParent(departmentID string, dbConn *gorm.DB) (*db.Department, 
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	err = dbConn.Model(&parentDepartment).Where("department_id = ?", department.ParentID).Find(&parentDepartment).Error
+	if department.ParentID != "" {
+		err = dbConn.Model(&parentDepartment).Where("department_id = ?", department.ParentID).Find(&parentDepartment).Error
+	}
 	return &parentDepartment, utils.Wrap(err, "")
 }
 
