@@ -15,11 +15,12 @@ func GetRegister(account string) (*db.Register, error) {
 		account).Take(&r).Error
 }
 
-func SetPassword(account, password, ex string) error {
+func SetPassword(account, password, ex, userID string) error {
 	r := db.Register{
 		Account:  account,
 		Password: password,
 		Ex:       ex,
+		UserID:   userID,
 	}
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {

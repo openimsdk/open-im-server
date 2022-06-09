@@ -15,8 +15,8 @@ type resetPasswordRequest struct {
 	VerificationCode string `json:"verificationCode" binding:"required"`
 	Email            string `json:"email"`
 	PhoneNumber      string `json:"phoneNumber"`
-	NewPassword string `json:"newPassword" binding:"required"`
-	OperationID string `json:"operationID"`
+	NewPassword      string `json:"newPassword" binding:"required"`
+	OperationID      string `json:"operationID"`
 }
 
 func ResetPassword(c *gin.Context) {
@@ -44,12 +44,14 @@ func ResetPassword(c *gin.Context) {
 	}
 	user, err := im_mysql_model.GetRegister(account)
 	if err != nil || user.Account == "" {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "get register error", err.Error())
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "get register error", err.Error())
+		}
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.NotRegistered, "errMsg": "user not register!"})
 		return
 	}
 	if err := im_mysql_model.ResetPassword(account, req.NewPassword); err != nil {
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.ResetPasswordFailed, "errMsg": "reset password failed: "+err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": constant.ResetPasswordFailed, "errMsg": "reset password failed: " + err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "reset password success"})

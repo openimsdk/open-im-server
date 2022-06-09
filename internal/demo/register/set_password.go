@@ -52,11 +52,12 @@ func SetPassword(c *gin.Context) {
 			return
 		}
 	}
+	userID := utils.Md5(account)
 	url := config.Config.Demo.ImAPIURL + "/auth/user_register"
 	openIMRegisterReq := api.UserRegisterReq{}
 	openIMRegisterReq.OperationID = params.OperationID
 	openIMRegisterReq.Platform = params.Platform
-	openIMRegisterReq.UserID = account
+	openIMRegisterReq.UserID = userID
 	openIMRegisterReq.Nickname = params.Name
 	openIMRegisterReq.Secret = config.Config.Secret
 	openIMRegisterResp := api.UserRegisterResp{}
@@ -76,7 +77,7 @@ func SetPassword(c *gin.Context) {
 		return
 	}
 	log.Info(params.OperationID, "begin store mysql", account, params.Password)
-	err = im_mysql_model.SetPassword(account, params.Password, params.Ex)
+	err = im_mysql_model.SetPassword(account, params.Password, params.Ex, userID)
 	if err != nil {
 		log.NewError(params.OperationID, "set phone number password error", account, "err", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": err.Error()})
@@ -84,7 +85,7 @@ func SetPassword(c *gin.Context) {
 	}
 	log.Info(params.OperationID, "end setPassword", account, params.Password)
 	// demo onboarding
-	onboardingProcess(params.OperationID, account, params.Name)
+	onboardingProcess(params.OperationID, userID, params.Name)
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": openIMRegisterResp.UserToken})
 	return
 }
