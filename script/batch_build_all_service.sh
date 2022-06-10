@@ -51,7 +51,7 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
  else
         echo "Exit status - $stat"
  fi
-
+done
 
 
 
