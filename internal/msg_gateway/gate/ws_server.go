@@ -90,13 +90,14 @@ func (ws *WServer) readMsg(conn *UserConn) {
 }
 
 func (ws *WServer) SetWriteTimeout(conn *UserConn, timeout int) {
+	conn.w.Lock()
+	defer conn.w.Unlock()
 	conn.SetWriteDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
 }
 
 func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	conn.w.Lock()
 	defer conn.w.Unlock()
-	ws.SetWriteTimeout(conn, 5)
 	return conn.WriteMessage(a, msg)
 }
 
@@ -164,6 +165,7 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "Encode Msg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
 		return
 	}
+	ws.SetWriteTimeout(oldConn, 5)
 	err = ws.writeMsg(oldConn, websocket.BinaryMessage, b.Bytes())
 	if err != nil {
 		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "WS WriteMsg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
