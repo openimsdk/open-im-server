@@ -36,7 +36,7 @@ done
 
 echo "wait all build finish....."
 
-success_num = 0
+success_num=0
 for ((i = 0; i < ${#service_source_root[*]}; i++)); do
   echo "wait pid: " ${build_pid_array[i]} ${service_names[$i]}
   wait ${build_pid_array[i]}
