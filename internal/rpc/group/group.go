@@ -18,12 +18,12 @@ import (
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"google.golang.org/grpc"
+	"math/big"
 	"net"
 	"strconv"
 	"strings"
 	"time"
-
-	"google.golang.org/grpc"
 )
 
 type groupServer struct {
@@ -96,7 +96,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 
 	groupId := req.GroupInfo.GroupID
 	if groupId == "" {
-		groupId = utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
+		groupId = utils.Md5(req.OperationID + strconv.FormatInt(time.Now().UnixNano(), 10))
+		bi := big.NewInt(0)
+		bi.SetString(groupId[0:8], 16)
+		groupId = bi.String()
 	}
 	//to group
 	groupInfo := db.Group{}
