@@ -1,6 +1,7 @@
 package register
 
 import (
+	"Open_IM/internal/api/manage"
 	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -11,6 +12,7 @@ import (
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/proto"
@@ -36,6 +38,7 @@ func onboardingProcess(operationID, userID, userName string) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), groupIDList)
 	//joinGroups(operationID, userID, userName, groupIDList)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
+	oaNotification(operationID, userID)
 }
 
 func createOrganizationUser(operationID, userID, userName string) error {
@@ -179,8 +182,40 @@ func onboardingProcessNotification(operationID, userID, groupID string) {
 		SessionType: constant.SingleChatType,
 		OperationID: operationID,
 	}
+
 	// notification user join group
 	msg.Notification(notification)
+
+}
+
+func oaNotification(operationID, userID string) {
+	elem := manage.OANotificationElem{
+		NotificationName:    "入职通知",
+		NotificationFaceURL: "",
+		NotificationType:    1,
+		Text:                "欢迎你入职公司",
+		Url:                 "",
+		MixType:             0,
+		PictureElem:         manage.PictureElem{},
+		SoundElem:           manage.SoundElem{},
+		VideoElem:           manage.VideoElem{},
+		FileElem:            manage.FileElem{},
+		Ex:                  "",
+	}
+	bytes, err := json.Marshal(elem)
+	if err != nil {
+		return
+	}
+	sysNotification := &msg.NotificationMsg{
+		SendID:      config.Config.Manager.AppManagerUid[0],
+		RecvID:      userID,
+		Content:     bytes,
+		MsgFrom:     constant.SysMsgType,
+		ContentType: constant.OANotification,
+		SessionType: constant.NotificationChatType,
+		OperationID: operationID,
+	}
+	msg.Notification(sysNotification)
 }
 
 func randomEnglishName() string {
@@ -188,7 +223,6 @@ func randomEnglishName() string {
 		"feudal", "adverse", "exploit", "occupy", "solve", "amazing", "fantasy", "orchid", "spiky", "approve", "flap"}
 	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len(l) - 1)
-	fmt.Println(index)
 	return l[index]
 }
 
@@ -196,6 +230,5 @@ func randomPosition() string {
 	l := []string{"Golang工程师", "前端工程师", "后端工程师", "产品经理", "测试开发工程师", "运维开发工程师"}
 	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len(l) - 1)
-	fmt.Println(index)
 	return l[index]
 }
