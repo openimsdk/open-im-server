@@ -16,9 +16,9 @@ import (
 
 type ParamsSetPassword struct {
 	Email            string `json:"email"`
-	Nickname         string `json:"name"`
+	Nickname         string `json:"name" binding:"required"`
 	PhoneNumber      string `json:"phoneNumber"`
-	Password         string `json:"password"`
+	Password         string `json:"password" binding:"required"`
 	VerificationCode string `json:"verificationCode"`
 	Platform         int32  `json:"platform" binding:"required,min=1,max=7"`
 	Ex               string `json:"ex"`
