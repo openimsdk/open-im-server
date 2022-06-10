@@ -21,12 +21,14 @@ echo "==========================================================">>../logs/openI
 echo "==========================================================">>../logs/openIM.log 2>&1 &
 
 build_pid_array=()
-
+idx=0
 for i in ${need_to_start_server_shell[*]}; do
   chmod +x $i
   ./$i &
   build_pid=$!
-  build_pid_array[i]=$build_pid
+  echo "build_pid " $build_pid
+  build_pid_array[idx]=$build_pid
+  let idx=idx+1
 done
 
 echo "wait all start finish....."
