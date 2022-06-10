@@ -189,6 +189,7 @@ func onboardingProcessNotification(operationID, userID, groupID string) {
 }
 
 func oaNotification(operationID, userID string) {
+	var err error
 	elem := manage.OANotificationElem{
 		NotificationName:    "入职通知",
 		NotificationFaceURL: "",
@@ -202,20 +203,22 @@ func oaNotification(operationID, userID string) {
 		FileElem:            manage.FileElem{},
 		Ex:                  "",
 	}
-	bytes, err := json.Marshal(elem)
-	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), "elem: ", elem, err.Error())
-		return
-	}
 	sysNotification := &msg.NotificationMsg{
 		SendID:      config.Config.Manager.AppManagerUid[0],
 		RecvID:      userID,
-		Content:     bytes,
 		MsgFrom:     constant.SysMsgType,
 		ContentType: constant.OANotification,
 		SessionType: constant.NotificationChatType,
 		OperationID: operationID,
 	}
+	var tips commonPb.TipsComm
+	tips.JsonDetail = utils.StructToJsonString(elem)
+	sysNotification.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "elem: ", elem, err.Error())
+		return
+	}
+
 	msg.Notification(sysNotification)
 }
 
