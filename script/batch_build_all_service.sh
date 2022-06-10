@@ -30,7 +30,7 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
   cd $service_path
   make install &
   build_pid=$!
-  build_pid_array[i]=build_pid
+  build_pid_array[i]=$build_pid
   if [ $? -ne 0 ]; then
         echo -e "${RED_PREFIX}${service_names[$i]} build failed ${COLOR_SUFFIX}\n"
         exit -1
