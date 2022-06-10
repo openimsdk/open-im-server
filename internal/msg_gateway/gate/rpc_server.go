@@ -206,6 +206,7 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 			platformList = append(platformList, k)
 		}
 		needPushMapList := r.GetSingleUserMsgForPushPlatforms(req.OperationID, req.MsgData, v, platformList)
+		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms ", req.MsgData.Seq, v, platformList, len(needPushMapList))
 		for platform, list := range needPushMapList {
 			if list != nil {
 				for _, v := range list {
@@ -218,7 +219,7 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 				resultCode := sendMsgBatchToUser(userConnMap[platform], replyBytes.Bytes(), req, platform, v)
 				if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
 					tempT.OnlinePush = true
-					log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
+					log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recv PlatForm", constant.PlatformIDToName(platform), "recvID", v)
 					temp := &pbRelay.SingleMsgToUserPlatform{
 						ResultCode:     resultCode,
 						RecvID:         v,
