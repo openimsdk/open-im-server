@@ -45,7 +45,7 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
  if [ $stat == 0 ]
  then
       echo -e "${GREEN_PREFIX}${service_names[$i]} successfully be built ${COLOR_SUFFIX}\n"
-      success_num=$success_num+1
+      let success_num=$success_num+1
 
  else
       echo -e "${RED_PREFIX}${service_names[$i]} build failed ${COLOR_SUFFIX}\n"
@@ -53,9 +53,7 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
  fi
 done
 
-echo "success_num" $success_num
-echo "service_source_root" ${#service_source_root[*]}
-
+echo "success_num" $success_num  "service num:" ${#service_source_root[*]}
 if [ $success_num == ${#service_source_root[*]} ]
 then
   echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}
