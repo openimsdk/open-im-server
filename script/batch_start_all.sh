@@ -31,15 +31,7 @@ done
 
 echo "wait all start finish....."
 
-for i in ${need_to_start_server_shell[*]}; do
-  chmod +x $i
-  ./$i &
-    if [ $? -ne 0 ]; then
-        exit -1
-  fi
-done
-
-
+exit 0
 
 success_num=0
 for ((i = 0; i < ${#need_to_start_server_shell[*]}; i++)); do
@@ -49,11 +41,11 @@ for ((i = 0; i < ${#need_to_start_server_shell[*]}; i++)); do
   echo ${build_pid_array[i]}  " " $stat
  if [ $stat == 0 ]
  then
-      echo -e "${GREEN_PREFIX}${need_to_start_server_shell[$i]} successfully be built ${COLOR_SUFFIX}\n"
+     # echo -e "${GREEN_PREFIX}${need_to_start_server_shell[$i]} successfully be built ${COLOR_SUFFIX}\n"
       let success_num=$success_num+1
 
  else
-      echo -e "${RED_PREFIX}${need_to_start_server_shell[$i]} build failed ${COLOR_SUFFIX}\n"
+      #echo -e "${RED_PREFIX}${need_to_start_server_shell[$i]} build failed ${COLOR_SUFFIX}\n"
       exit -1
  fi
 done
