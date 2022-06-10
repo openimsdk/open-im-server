@@ -205,15 +205,18 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 		for k, _ := range userConnMap {
 			platformList = append(platformList, k)
 		}
+		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms begin", req.MsgData.Seq, v, platformList)
 		needPushMapList := r.GetSingleUserMsgForPushPlatforms(req.OperationID, req.MsgData, v, platformList)
 		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms ", req.MsgData.Seq, v, platformList, len(needPushMapList))
 		for platform, list := range needPushMapList {
 			if list != nil {
+				log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms ", "userID: ", v, "platform: ", platform, "push msg num:", len(list))
 				for _, v := range list {
 					req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
 				}
 				replyBytes, err := r.encodeWsData(req.MsgData, req.OperationID)
 				if err != nil {
+					log.Error(req.OperationID, "encodeWsData failed ", req.MsgData.String())
 					continue
 				}
 				resultCode := sendMsgBatchToUser(userConnMap[platform], replyBytes.Bytes(), req, platform, v)
@@ -227,7 +230,6 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 					}
 					resp = append(resp, temp)
 				}
-
 			} else {
 				if utils.IsContainInt(platform, r.pushTerminal) {
 					tempT.OnlinePush = true
@@ -293,11 +295,11 @@ func sendMsgBatchToUser(conn *UserConn, bMsg []byte, in *pbRelay.OnlineBatchPush
 	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
 	if err != nil {
 		log.NewError(in.OperationID, "PushMsgToUser is failed By Ws", "Addr", conn.RemoteAddr().String(),
-			"error", err, "senderPlatform", constant.PlatformIDToName(int(in.MsgData.SenderPlatformID)), "recvPlatform", RecvPlatForm, "args", in.String(), "recvID", RecvID)
+			"error", err, "senderPlatform", constant.PlatformIDToName(int(in.MsgData.SenderPlatformID)), "recv Platform", RecvPlatForm, "args", in.String(), "recvID", RecvID)
 		ResultCode = -2
 		return ResultCode
 	} else {
-		log.NewDebug(in.OperationID, "PushMsgToUser is success By Ws", "args", in.String(), "recvPlatForm", RecvPlatForm, "recvID", RecvID)
+		log.NewDebug(in.OperationID, "PushMsgToUser is success By Ws", "args", in.String(), "recv PlatForm", RecvPlatForm, "recvID", RecvID)
 		ResultCode = 0
 		return ResultCode
 	}
