@@ -28,18 +28,13 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
   cd $begin_path
   service_path=${service_source_root[$i]}
   cd $service_path
-  make install &
+  make install > /dev/null &
   build_pid=$!
   build_pid_array[i]=$build_pid
-  if [ $? -ne 0 ]; then
-        echo -e "${RED_PREFIX}${service_names[$i]} build failed ${COLOR_SUFFIX}\n"
-        exit -1
-        else
-         echo -e "${GREEN_PREFIX}${service_names[$i]} successfully be built ${COLOR_SUFFIX}\n"
-  fi
 done
 
-echo "wait all build finish"
+
+echo "wait all build finish....."
 
 success_num = 0
 for ((i = 0; i < ${#service_source_root[*]}; i++)); do
