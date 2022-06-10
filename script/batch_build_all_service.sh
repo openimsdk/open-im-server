@@ -41,6 +41,7 @@ done
 
 echo "wait all build finish"
 
+success_num = 0
 for ((i = 0; i < ${#service_source_root[*]}; i++)); do
 
   echo "wait pid: " ${build_pid_array[i]}
@@ -49,12 +50,19 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
   echo ${build_pid_array[i]}  " " $stat
  if [ $stat == 0 ]
  then
-        echo "Exit status - $stat"
+        echo -e "${RED_PREFIX}${service_names[$i]} build failed ${COLOR_SUFFIX}\n"
+        exit -1
+
  else
-        echo "Exit status - $stat"
+        echo -e "${GREEN_PREFIX}${service_names[$i]} successfully be built ${COLOR_SUFFIX}\n"
+        success_num++
  fi
 done
 
+echo "success_num" $success_num
+echo "service_source_root" ${#service_source_root[*]}
 
-
-#echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}
+if [ $success_num == ${#service_source_root[*]} ]
+then
+  echo -e ${YELLOW_PREFIX}"all services build success"${COLOR_SUFFIX}
+fi
