@@ -209,6 +209,7 @@ func oaNotification(operationID, userID string) {
 	}
 	bytes, err := json.Marshal(elem)
 	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "elem: ", elem, err.Error())
 		return
 	}
 	sysNotification := &msg.NotificationMsg{
