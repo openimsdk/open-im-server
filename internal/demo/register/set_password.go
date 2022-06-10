@@ -52,7 +52,7 @@ func SetPassword(c *gin.Context) {
 			return
 		}
 	}
-	userID := utils.Md5(account)
+	userID := utils.Base64Encode(account)
 	url := config.Config.Demo.ImAPIURL + "/auth/user_register"
 	openIMRegisterReq := api.UserRegisterReq{}
 	openIMRegisterReq.OperationID = params.OperationID
