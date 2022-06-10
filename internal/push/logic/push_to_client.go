@@ -10,6 +10,7 @@ import (
 	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbPush "Open_IM/pkg/proto/push"
@@ -125,6 +126,11 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				opts, err := GetOfflinePushOpts(pushMsg)
 				if err != nil {
 					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
+				}
+				// save invitation info for offline push
+				if err := db.DB.HandleSignalInfo(pushMsg.MsgData); err != nil {
+					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
+					continue
 				}
 				log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), UIDList, content, jsonCustomContent, "opts:", opts)
 				pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, pushMsg.OperationID, opts)

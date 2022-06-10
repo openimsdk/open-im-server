@@ -108,42 +108,47 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID str
 	return nil
 }
 
-func (d *DataBases) NewCacheSignalInfo(msg *pbCommon.MsgData) error {
+func (d *DataBases) HandleSignalInfo(msg *pbCommon.MsgData) error {
 	req := &pbRtc.SignalReq{}
 	if err := proto.Unmarshal(msg.Content, req); err != nil {
 		return err
 	}
 	//log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
 	var inviteeUserIDList []string
-	switch invitationInfo := req.Payload.(type) {
+	var isInviteSignal bool
+	switch signalInfo := req.Payload.(type) {
 	case *pbRtc.SignalReq_Invite:
-		inviteeUserIDList = invitationInfo.Invite.Invitation.InviteeUserIDList
+		inviteeUserIDList = signalInfo.Invite.Invitation.InviteeUserIDList
+		isInviteSignal = true
 	case *pbRtc.SignalReq_InviteInGroup:
-		inviteeUserIDList = invitationInfo.InviteInGroup.Invitation.InviteeUserIDList
+		inviteeUserIDList = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
+		isInviteSignal = true
 	default:
-		log2.NewDebug("", utils.GetSelfFuncName(), "req type not invite", string(msg.Content))
+		log2.NewDebug("", utils.GetSelfFuncName(), "req invalid type", string(msg.Content))
 		return nil
 	}
-	for _, userID := range inviteeUserIDList {
-		timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
-		if err != nil {
+	if isInviteSignal {
+		for _, userID := range inviteeUserIDList {
+			timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
+			if err != nil {
+				return err
+			}
+			keyList := SignalListCache + userID
+			err = d.rdb.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
+			if err != nil {
+				return err
+			}
+			err = d.rdb.Expire(context.Background(), keyList, time.Duration(timeout)*time.Second).Err()
+			if err != nil {
+				return err
+			}
+			key := SignalCache + msg.ClientMsgID
+			err = d.rdb.Set(context.Background(), key, msg.Content, time.Duration(timeout)*time.Second).Err()
+			if err != nil {
+				return err
+			}
 			return err
 		}
-		keyList := SignalListCache + userID
-		err = d.rdb.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
-		if err != nil {
-			return err
-		}
-		err = d.rdb.Expire(context.Background(), keyList, time.Duration(timeout)*time.Second).Err()
-		if err != nil {
-			return err
-		}
-		key := SignalCache + msg.ClientMsgID
-		err = d.rdb.Set(context.Background(), key, msg.Content, time.Duration(timeout)*time.Second).Err()
-		if err != nil {
-			return err
-		}
-		return err
 	}
 	return nil
 }
@@ -183,14 +188,14 @@ func (d *DataBases) GetAvailableSignalInvitationInfo(userID string) (invitationI
 	if err != nil {
 		return nil, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
 	}
-	err = d.delUserSingalList(userID)
+	err = d.DelUserSignalList(userID)
 	if err != nil {
 		return nil, utils.Wrap(err, "GetSignalInfoFromCacheByClientMsgID")
 	}
 	return invitationInfo, nil
 }
 
-func (d *DataBases) delUserSingalList(userID string) error {
+func (d *DataBases) DelUserSignalList(userID string) error {
 	keyList := SignalListCache + userID
 	err := d.rdb.Del(context.Background(), keyList).Err()
 	return err
