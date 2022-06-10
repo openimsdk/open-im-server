@@ -21,9 +21,7 @@ func GetRTCInvitationInfo(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	var ok bool
-	var errInfo string
-	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -37,6 +35,10 @@ func GetRTCInvitationInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
+	if err := db.DB.DelUserSignalList(userID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelUserSignalList result:", err.Error())
+	}
+
 	resp.Data.OpUserID = invitationInfo.OpUserID
 	resp.Data.Invitation.RoomID = invitationInfo.Invitation.RoomID
 	resp.Data.Invitation.SessionType = invitationInfo.Invitation.SessionType

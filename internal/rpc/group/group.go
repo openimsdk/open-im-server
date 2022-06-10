@@ -1426,12 +1426,12 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	if req.Ex != nil {
 		m["ex"] = req.Ex.Value
 	}
-
 	err = imdb.UpdateGroupMemberInfoByMap(groupMember, m)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetGroupMemberInfo failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg + ":" + err.Error()
+		return resp, nil
 	}
 	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
