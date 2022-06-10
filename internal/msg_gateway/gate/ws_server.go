@@ -88,12 +88,18 @@ func (ws *WServer) readMsg(conn *UserConn) {
 	}
 
 }
+
+func (ws *WServer) SetWriteTimeout(conn *UserConn, timeout int) {
+	conn.SetWriteDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+}
+
 func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	conn.w.Lock()
 	defer conn.w.Unlock()
+	ws.SetWriteTimeout(conn, 5)
 	return conn.WriteMessage(a, msg)
-
 }
+
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
 	case constant.AllLoginButSameTermKick:
@@ -101,6 +107,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 			if oldConn, ok := oldConnMap[constant.PlatformIDToName(platformID)]; ok {
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
 				ws.sendKickMsg(oldConn, newConn)
+				log.NewDebug(operationID, uid, platformID, "kick old conn")
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != redis.ErrNil {
 					log.NewError(operationID, "get token from redis err", err.Error())
