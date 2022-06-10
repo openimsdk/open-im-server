@@ -43,19 +43,18 @@ echo "wait all build finish"
 
 success_num = 0
 for ((i = 0; i < ${#service_source_root[*]}; i++)); do
-
-  echo "wait pid: " ${build_pid_array[i]}
+  echo "wait pid: " ${build_pid_array[i]} ${service_names[$i]}
   wait ${build_pid_array[i]}
   stat=$?
   echo ${build_pid_array[i]}  " " $stat
  if [ $stat == 0 ]
  then
-        echo -e "${RED_PREFIX}${service_names[$i]} build failed ${COLOR_SUFFIX}\n"
-        exit -1
+      echo -e "${GREEN_PREFIX}${service_names[$i]} successfully be built ${COLOR_SUFFIX}\n"
+      success_num++
 
  else
-        echo -e "${GREEN_PREFIX}${service_names[$i]} successfully be built ${COLOR_SUFFIX}\n"
-        success_num++
+      echo -e "${RED_PREFIX}${service_names[$i]} build failed ${COLOR_SUFFIX}\n"
+      exit -1
  fi
 done
 
