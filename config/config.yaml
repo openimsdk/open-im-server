@@ -727,4 +727,4 @@ demo:
   imAPIURL: http://127.0.0.1:10002
 
 rtc:
-  signalTimeout: 3000
+  signalTimeout: 300

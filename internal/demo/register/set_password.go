@@ -16,12 +16,13 @@ import (
 
 type ParamsSetPassword struct {
 	Email            string `json:"email"`
-	Name             string `json:"name"`
+	Nickname         string `json:"nickname" binding:"required"`
 	PhoneNumber      string `json:"phoneNumber"`
-	Password         string `json:"password"`
+	Password         string `json:"password" binding:"required"`
 	VerificationCode string `json:"verificationCode"`
 	Platform         int32  `json:"platform" binding:"required,min=1,max=7"`
 	Ex               string `json:"ex"`
+	FaceURL          string `json:"faceURL"`
 	OperationID      string `json:"operationID" binding:"required"`
 }
 
@@ -38,8 +39,8 @@ func SetPassword(c *gin.Context) {
 	} else {
 		account = params.PhoneNumber
 	}
-	if params.Name == "" {
-		params.Name = account
+	if params.Nickname == "" {
+		params.Nickname = account
 	}
 	if params.VerificationCode != config.Config.Demo.SuperCode {
 		accountKey := account + "_" + constant.VerificationCodeForRegisterSuffix
@@ -58,8 +59,9 @@ func SetPassword(c *gin.Context) {
 	openIMRegisterReq.OperationID = params.OperationID
 	openIMRegisterReq.Platform = params.Platform
 	openIMRegisterReq.UserID = userID
-	openIMRegisterReq.Nickname = params.Name
+	openIMRegisterReq.Nickname = params.Nickname
 	openIMRegisterReq.Secret = config.Config.Secret
+	openIMRegisterReq.FaceURL = params.FaceURL
 	openIMRegisterResp := api.UserRegisterResp{}
 	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
 	if err != nil {
@@ -85,7 +87,7 @@ func SetPassword(c *gin.Context) {
 	}
 	log.Info(params.OperationID, "end setPassword", account, params.Password)
 	// demo onboarding
-	onboardingProcess(params.OperationID, userID, params.Name)
+	onboardingProcess(params.OperationID, userID, params.Nickname)
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": openIMRegisterResp.UserToken})
 	return
 }
