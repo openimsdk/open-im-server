@@ -42,9 +42,11 @@ done
 echo "wait all build finish"
 
 for ((i = 0; i < ${#service_source_root[*]}; i++)); do
-  wait build_pid_array[i]
+
+  echo "wait pid: " ${build_pid_array[i]}
+  wait ${build_pid_array[i]}
   stat=$?
-  echo build_pid_array[i]  " " $stat
+  echo ${build_pid_array[i]}  " " $stat
  if [ $stat == 0 ]
  then
         echo "Exit status - $stat"
