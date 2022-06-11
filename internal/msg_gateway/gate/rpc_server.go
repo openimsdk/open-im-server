@@ -207,10 +207,10 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 		}
 		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms begin", req.MsgData.Seq, v, platformList)
 		needPushMapList := r.GetSingleUserMsgForPushPlatforms(req.OperationID, req.MsgData, v, platformList)
-		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms ", req.MsgData.Seq, v, platformList, len(needPushMapList))
+		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms end", req.MsgData.Seq, v, platformList, len(needPushMapList))
 		for platform, list := range needPushMapList {
 			if list != nil {
-				log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms ", "userID: ", v, "platform: ", platform, "push msg num:", len(list))
+				log.Debug(req.OperationID, "needPushMapList ", "userID: ", v, "platform: ", platform, "push msg num:", len(list))
 				for _, v := range list {
 					req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
 				}
