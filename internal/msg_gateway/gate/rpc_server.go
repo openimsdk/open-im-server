@@ -212,13 +212,17 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 			if list != nil {
 				log.Debug(req.OperationID, "needPushMapList ", "userID: ", v, "platform: ", platform, "push msg num:", len(list))
 				for _, v := range list {
+					log.Debug(req.OperationID, "req.MsgData.MsgDataList begin", "len: ", len(req.MsgData.MsgDataList))
 					req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
+					log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
 				}
+
 				replyBytes, err := r.encodeWsData(req.MsgData, req.OperationID)
 				if err != nil {
 					log.Error(req.OperationID, "encodeWsData failed ", req.MsgData.String())
 					continue
 				}
+				log.Debug(req.OperationID, "encodeWsData", "len: ", replyBytes.Len())
 				resultCode := sendMsgBatchToUser(userConnMap[platform], replyBytes.Bytes(), req, platform, v)
 				if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
 					tempT.OnlinePush = true
