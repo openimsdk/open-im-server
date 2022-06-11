@@ -211,11 +211,13 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 		for platform, list := range needPushMapList {
 			if list != nil {
 				log.Debug(req.OperationID, "needPushMapList ", "userID: ", v, "platform: ", platform, "push msg num:", len(list))
-				for _, v := range list {
-					log.Debug(req.OperationID, "req.MsgData.MsgDataList begin", "len: ", len(req.MsgData.MsgDataList))
-					req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
-					log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
-				}
+				//for _, v := range list {
+				//	log.Debug(req.OperationID, "req.MsgData.MsgDataList begin", "len: ", len(req.MsgData.MsgDataList))
+				//	req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
+				//	log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
+				//}
+				req.MsgData.MsgDataList = list
+
 				log.Debug(req.OperationID, "r.encodeWsData  no string")
 				log.Debug(req.OperationID, "r.encodeWsData  ", req.MsgData.String())
 				replyBytes, err := r.encodeWsData(req.MsgData, req.OperationID)
