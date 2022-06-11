@@ -12,7 +12,6 @@ import (
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/proto"
