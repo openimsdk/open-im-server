@@ -111,7 +111,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 				log.NewWarn(operationID, uid, platformID, "kick old conn end")
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != redis.ErrNil {
-					log.NewError(operationID, "get token from redis err", err.Error())
+					log.NewError(operationID, "get token from redis err", err.Error(), uid)
 					return
 				}
 				if m == nil {
