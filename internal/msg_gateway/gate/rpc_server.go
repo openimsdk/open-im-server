@@ -254,7 +254,13 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 	}, nil
 }
 func (r *RPCServer) encodeWsData(wsData *sdk_ws.MsgData, operationID string) (bytes.Buffer, error) {
-	msgBytes, _ := proto.Marshal(wsData)
+	log.Debug(operationID, "encodeWsData begin", wsData.String())
+	msgBytes, err := proto.Marshal(wsData)
+	if err != nil {
+		log.NewError(operationID, "Marshal", err.Error())
+		return bytes.Buffer{}, utils.Wrap(err, "")
+	}
+	log.Debug(operationID, "encodeWsData begin", wsData.String())
 	mReply := Resp{
 		ReqIdentifier: constant.WSPushMsg,
 		OperationID:   operationID,
@@ -262,10 +268,10 @@ func (r *RPCServer) encodeWsData(wsData *sdk_ws.MsgData, operationID string) (by
 	}
 	var replyBytes bytes.Buffer
 	enc := gob.NewEncoder(&replyBytes)
-	err := enc.Encode(mReply)
+	err = enc.Encode(mReply)
 	if err != nil {
 		log.NewError(operationID, "data encode err", err.Error())
-		return bytes.Buffer{}, err
+		return bytes.Buffer{}, utils.Wrap(err, "")
 	}
 	return replyBytes, nil
 }
