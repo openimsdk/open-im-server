@@ -101,6 +101,13 @@ func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	return conn.WriteMessage(a, msg)
 }
 
+func (ws *WServer) SetWriteTimeoutWriteMsg(conn *UserConn, a int, msg []byte, timeout int) error {
+	conn.w.Lock()
+	defer conn.w.Unlock()
+	conn.SetWriteDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+	return conn.WriteMessage(a, msg)
+}
+
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
 	case constant.AllLoginButSameTermKick:
