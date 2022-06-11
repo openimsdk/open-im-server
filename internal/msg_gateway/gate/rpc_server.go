@@ -216,7 +216,8 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 					req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
 					log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
 				}
-
+				log.Debug(req.OperationID, "r.encodeWsData  no string")
+				log.Debug(req.OperationID, "r.encodeWsData  ", req.MsgData.String())
 				replyBytes, err := r.encodeWsData(req.MsgData, req.OperationID)
 				if err != nil {
 					log.Error(req.OperationID, "encodeWsData failed ", req.MsgData.String())
