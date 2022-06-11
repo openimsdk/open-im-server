@@ -36,14 +36,16 @@ func (r *RPCServer) GenPullSeqList(currentSeq uint32, operationID string, userID
 
 func (r *RPCServer) GetSingleUserMsgForPushPlatforms(operationID string, msgData *sdk_ws.MsgData, pushToUserID string, platformIDList []int) map[int][]*sdk_ws.MsgData {
 	user2PushMsg := make(map[int][]*sdk_ws.MsgData, 0)
-	//for _, v := range platformIDList {
-	//	user2PushMsg[v] = r.GetSingleUserMsgForPush(operationID, msgData, pushToUserID, v)
-	//	log.Info(operationID, "GetSingleUserMsgForPush", msgData.Seq, pushToUserID, v, "len:", len(user2PushMsg[v]))
-	//}
+	for _, v := range platformIDList {
+		user2PushMsg[v] = r.GetSingleUserMsgForPush(operationID, msgData, pushToUserID, v)
+		log.Info(operationID, "GetSingleUserMsgForPush", msgData.Seq, pushToUserID, v, "len:", len(user2PushMsg[v]))
+	}
 	return user2PushMsg
 }
 
 func (r *RPCServer) GetSingleUserMsgForPush(operationID string, msgData *sdk_ws.MsgData, pushToUserID string, platformID int) []*sdk_ws.MsgData {
+	return []*sdk_ws.MsgData{msgData}
+
 	userConn := ws.getUserConn(pushToUserID, platformID)
 	if userConn == nil {
 		log.Debug(operationID, "userConn == nil")
