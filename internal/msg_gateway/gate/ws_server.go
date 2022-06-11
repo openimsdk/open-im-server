@@ -98,7 +98,7 @@ func (ws *WServer) SetWriteTimeout(conn *UserConn, timeout int) {
 func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	conn.w.Lock()
 	defer conn.w.Unlock()
-	conn.SetWriteDeadline(time.Now().Add(time.Duration(30) * time.Second))
+	conn.SetWriteDeadline(time.Now().Add(time.Duration(10) * time.Second))
 	return conn.WriteMessage(a, msg)
 }
 
