@@ -106,9 +106,9 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int32, newCo
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[constant.PlatformIDToName(platformID)]; ok {
-				log.NewDebug(operationID, uid, platformID, "kick old conn")
+				log.NewWarn(operationID, uid, platformID, "kick old conn begin")
 				ws.sendKickMsg(oldConn, newConn)
-				log.NewDebug(operationID, uid, platformID, "kick old conn")
+				log.NewWarn(operationID, uid, platformID, "kick old conn end")
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != redis.ErrNil {
 					log.NewError(operationID, "get token from redis err", err.Error())
@@ -168,7 +168,7 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 	ws.SetWriteTimeout(oldConn, 5)
 	err = ws.writeMsg(oldConn, websocket.BinaryMessage, b.Bytes())
 	if err != nil {
-		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "WS WriteMsg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
+		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "sendKickMsg WS WriteMsg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
 	}
 }
 func (ws *WServer) addUserConn(uid string, platformID int32, conn *UserConn, token string) {
