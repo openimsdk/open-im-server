@@ -44,6 +44,7 @@ func (r *RPCServer) GetSingleUserMsgForPushPlatforms(operationID string, msgData
 }
 
 func (r *RPCServer) GetSingleUserMsgForPush(operationID string, msgData *sdk_ws.MsgData, pushToUserID string, platformID int) []*sdk_ws.MsgData {
+	msgData.MsgDataList = nil
 	return []*sdk_ws.MsgData{msgData}
 
 	userConn := ws.getUserConn(pushToUserID, platformID)
