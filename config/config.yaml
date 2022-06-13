@@ -229,7 +229,7 @@ chatpersistencemysql: true
 #可靠性存储
 reliablestorage: false
 #消息缓存时间
-msgCacheTimeout: 1800
+msgCacheTimeout: 3600
 #群聊已读开启
 groupMessageHasReadReceiptEnable: false
 #单聊已读开启
