@@ -52,7 +52,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		msgClient := pbRelay.NewOnlineMessageRelayServiceClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: []string{pushMsg.PushToUserID}})
 		if err != nil {
-			log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
+			log.NewError("SuperGroupOnlineBatchPushOneMsg push data to client rpc err", pushMsg.OperationID, "err", err)
 			continue
 		}
 		if reply != nil && reply.SinglePushResult != nil {
