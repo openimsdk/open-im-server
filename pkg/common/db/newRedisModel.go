@@ -169,8 +169,10 @@ func (d *DataBases) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (inv
 	switch req2 := req.Payload.(type) {
 	case *pbRtc.SignalReq_Invite:
 		invitationInfo.Invitation = req2.Invite.Invitation
+		invitationInfo.OpUserID = req2.Invite.OpUserID
 	case *pbRtc.SignalReq_InviteInGroup:
 		invitationInfo.Invitation = req2.InviteInGroup.Invitation
+		invitationInfo.OpUserID = req2.InviteInGroup.OpUserID
 	}
 	return invitationInfo, err
 }
