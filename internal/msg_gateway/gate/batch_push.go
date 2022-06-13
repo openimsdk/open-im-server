@@ -44,17 +44,23 @@ func (r *RPCServer) GetSingleUserMsgForPushPlatforms(operationID string, msgData
 }
 
 func (r *RPCServer) GetSingleUserMsgForPush(operationID string, msgData *sdk_ws.MsgData, pushToUserID string, platformID int) []*sdk_ws.MsgData {
+	msgData.MsgDataList = nil
+	return []*sdk_ws.MsgData{msgData}
+
 	userConn := ws.getUserConn(pushToUserID, platformID)
 	if userConn == nil {
+		log.Debug(operationID, "userConn == nil")
 		return []*sdk_ws.MsgData{msgData}
 	}
 
 	if msgData.Seq <= userConn.PushedMaxSeq {
+		log.Debug(operationID, "msgData.Seq <= userConn.PushedMaxSeq", msgData.Seq, userConn.PushedMaxSeq)
 		return nil
 	}
 
 	msgList := r.GetSingleUserMsg(operationID, msgData.Seq, pushToUserID)
 	if msgList == nil {
+		log.Debug(operationID, "GetSingleUserMsg msgList == nil", msgData.Seq, userConn.PushedMaxSeq)
 		userConn.PushedMaxSeq = msgData.Seq
 		return []*sdk_ws.MsgData{msgData}
 	}
@@ -65,6 +71,7 @@ func (r *RPCServer) GetSingleUserMsgForPush(operationID string, msgData *sdk_ws.
 			userConn.PushedMaxSeq = v.Seq
 		}
 	}
+	log.Debug(operationID, "GetSingleUserMsg msgList len ", len(msgList), userConn.PushedMaxSeq)
 	return msgList
 }
 

@@ -205,20 +205,28 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 		for k, _ := range userConnMap {
 			platformList = append(platformList, k)
 		}
-		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms begin", req.MsgData.Seq, v, platformList)
+		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms begin", req.MsgData.Seq, v, platformList, req.MsgData.String())
 		needPushMapList := r.GetSingleUserMsgForPushPlatforms(req.OperationID, req.MsgData, v, platformList)
-		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms ", req.MsgData.Seq, v, platformList, len(needPushMapList))
+		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms end", req.MsgData.Seq, v, platformList, len(needPushMapList))
 		for platform, list := range needPushMapList {
 			if list != nil {
-				log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms ", "userID: ", v, "platform: ", platform, "push msg num:", len(list))
+				log.Debug(req.OperationID, "needPushMapList ", "userID: ", v, "platform: ", platform, "push msg num:", len(list))
 				for _, v := range list {
+					log.Debug(req.OperationID, "req.MsgData.MsgDataList begin", "len: ", len(req.MsgData.MsgDataList), v.String())
 					req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
+					log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
 				}
+
+				log.Debug(req.OperationID, "r.encodeWsData  no string")
+				log.Debug(req.OperationID, "r.encodeWsData  data0 list ", req.MsgData.MsgDataList[0].String())
+
+				log.Debug(req.OperationID, "r.encodeWsData  ", req.MsgData.String())
 				replyBytes, err := r.encodeWsData(req.MsgData, req.OperationID)
 				if err != nil {
 					log.Error(req.OperationID, "encodeWsData failed ", req.MsgData.String())
 					continue
 				}
+				log.Debug(req.OperationID, "encodeWsData", "len: ", replyBytes.Len())
 				resultCode := sendMsgBatchToUser(userConnMap[platform], replyBytes.Bytes(), req, platform, v)
 				if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
 					tempT.OnlinePush = true
@@ -250,7 +258,13 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 	}, nil
 }
 func (r *RPCServer) encodeWsData(wsData *sdk_ws.MsgData, operationID string) (bytes.Buffer, error) {
-	msgBytes, _ := proto.Marshal(wsData)
+	log.Debug(operationID, "encodeWsData begin", wsData.String())
+	msgBytes, err := proto.Marshal(wsData)
+	if err != nil {
+		log.NewError(operationID, "Marshal", err.Error())
+		return bytes.Buffer{}, utils.Wrap(err, "")
+	}
+	log.Debug(operationID, "encodeWsData begin", wsData.String())
 	mReply := Resp{
 		ReqIdentifier: constant.WSPushMsg,
 		OperationID:   operationID,
@@ -258,10 +272,10 @@ func (r *RPCServer) encodeWsData(wsData *sdk_ws.MsgData, operationID string) (by
 	}
 	var replyBytes bytes.Buffer
 	enc := gob.NewEncoder(&replyBytes)
-	err := enc.Encode(mReply)
+	err = enc.Encode(mReply)
 	if err != nil {
 		log.NewError(operationID, "data encode err", err.Error())
-		return bytes.Buffer{}, err
+		return bytes.Buffer{}, utils.Wrap(err, "")
 	}
 	return replyBytes, nil
 }

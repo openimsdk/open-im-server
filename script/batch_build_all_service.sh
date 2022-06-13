@@ -41,7 +41,7 @@ for ((i = 0; i < ${#service_source_root[*]}; i++)); do
   echo "wait pid: " ${build_pid_array[i]} ${service_names[$i]}
   wait ${build_pid_array[i]}
   stat=$?
-  echo ${build_pid_array[i]}  " " $stat
+  echo ${service_names[$i]} "pid: " ${build_pid_array[i]}  "stat: " $stat
  if [ $stat == 0 ]
  then
       echo -e "${GREEN_PREFIX}${service_names[$i]} successfully be built ${COLOR_SUFFIX}\n"
