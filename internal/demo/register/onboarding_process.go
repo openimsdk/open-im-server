@@ -5,6 +5,7 @@ import (
 	"Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	groupRpc "Open_IM/pkg/proto/group"
@@ -29,7 +30,12 @@ func onboardingProcess(operationID, userID, userName string) {
 	if err := joinTestDepartment(operationID, userID, departmentID); err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
 	}
-
+	departmentID, err := imdb.GetRandomDepartmentID()
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "random departmentID", departmentID)
+	if err != nil {
+		log.NewError(utils.GetSelfFuncName(), "GetRandomDepartmentID failed", err.Error())
+		return
+	}
 	groupIDList, err := GetDepartmentGroupIDList(operationID, departmentID)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())

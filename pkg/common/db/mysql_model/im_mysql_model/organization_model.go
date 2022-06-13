@@ -295,3 +295,13 @@ func GetDepartmentParentIDList(departmentID string) ([]string, error) {
 	err = GetDepartmentParent(departmentID, dbConn, &parentIDList)
 	return parentIDList, err
 }
+
+func GetRandomDepartmentID() (string, error) {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return "", err
+	}
+	department := &db.Department{}
+	err = dbConn.Model(department).Where("related_group_id != ? AND parent_id != ?", "", "").Take(department).Error
+	return department.DepartmentID, err
+}
