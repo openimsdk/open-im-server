@@ -123,6 +123,8 @@ func (d *DataBases) HandleSignalInfo(msg *pbCommon.MsgData) error {
 	case *pbRtc.SignalReq_InviteInGroup:
 		inviteeUserIDList = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
 		isInviteSignal = true
+	case *pbRtc.SignalReq_HungUp, *pbRtc.SignalReq_Cancel, *pbRtc.SignalReq_Reject, *pbRtc.SignalReq_Accept:
+		return errors.New("signalInfo do not need offlinePush")
 	default:
 		log2.NewDebug("", utils.GetSelfFuncName(), "req invalid type", string(msg.Content))
 		return nil
@@ -175,7 +177,7 @@ func (d *DataBases) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (inv
 
 func (d *DataBases) GetAvailableSignalInvitationInfo(userID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
 	keyList := SignalListCache + userID
-	result := d.rdb.RPop(context.Background(), keyList)
+	result := d.rdb.LPop(context.Background(), keyList)
 	if err = result.Err(); err != nil {
 		return nil, utils.Wrap(err, "GetAvailableSignalInvitationInfo failed")
 	}
