@@ -31,6 +31,7 @@ func onboardingProcess(operationID, userID, userName string) {
 		log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
 	}
 	departmentID, err := imdb.GetRandomDepartmentID()
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "random departmentID", departmentID)
 	if err != nil {
 		log.NewError(utils.GetSelfFuncName(), "GetRandomDepartmentID failed", err.Error())
 		return
