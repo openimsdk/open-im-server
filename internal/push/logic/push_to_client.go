@@ -123,14 +123,14 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				if offlinePusher == nil {
 					break
 				}
-				opts, err := GetOfflinePushOpts(pushMsg)
-				if err != nil {
-					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
-				}
 				// save invitation info for offline push
 				if err := db.DB.HandleSignalInfo(pushMsg.MsgData); err != nil {
 					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
 					continue
+				}
+				opts, err := GetOfflinePushOpts(pushMsg)
+				if err != nil {
+					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
 				}
 				log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), UIDList, content, jsonCustomContent, "opts:", opts)
 				pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, pushMsg.OperationID, opts)
