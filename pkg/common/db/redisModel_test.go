@@ -82,7 +82,7 @@ func Test_NewGetMessageListBySeq(t *testing.T) {
 	data.ClientMsgID = "23jwhjsdf"
 	msg.MsgData = &data
 
-	seqMsg, failedSeqList, err := DB.NewGetMessageListBySeq(uid, []uint32{11}, "cacheTest")
+	seqMsg, failedSeqList, err := DB.NewGetMessageListBySeq(uid, []uint32{1212}, "cacheTest")
 	assert.Nil(t, err)
 	fmt.Println(seqMsg, failedSeqList)
 
