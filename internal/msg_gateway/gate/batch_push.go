@@ -36,43 +36,43 @@ func (r *RPCServer) GenPullSeqList(currentSeq uint32, operationID string, userID
 
 func (r *RPCServer) GetSingleUserMsgForPushPlatforms(operationID string, msgData *sdk_ws.MsgData, pushToUserID string, platformIDList []int) map[int]*sdk_ws.MsgDataList {
 	user2PushMsg := make(map[int]*sdk_ws.MsgDataList, 0)
-	//for _, v := range platformIDList {
-	//user2PushMsg[v] = r.GetSingleUserMsgForPush(operationID, msgData, pushToUserID, v)
-	//log.Info(operationID, "GetSingleUserMsgForPush", msgData.Seq, pushToUserID, v, "len:", len(user2PushMsg[v]))
-	//}
+	for _, v := range platformIDList {
+		user2PushMsg[v] = r.GetSingleUserMsgForPush(operationID, msgData, pushToUserID, v)
+		//log.Info(operationID, "GetSingleUserMsgForPush", msgData.Seq, pushToUserID, v, "len:", len(user2PushMsg[v]))
+	}
 	return user2PushMsg
 }
 
-func (r *RPCServer) GetSingleUserMsgForPush(operationID string, msgData *sdk_ws.MsgData, pushToUserID string, platformID int) []*sdk_ws.MsgData {
+func (r *RPCServer) GetSingleUserMsgForPush(operationID string, msgData *sdk_ws.MsgData, pushToUserID string, platformID int) *sdk_ws.MsgDataList {
 	msgData.MsgDataList = nil
-	return []*sdk_ws.MsgData{msgData}
+	return &sdk_ws.MsgDataList{}
 
-	userConn := ws.getUserConn(pushToUserID, platformID)
-	if userConn == nil {
-		log.Debug(operationID, "userConn == nil")
-		return []*sdk_ws.MsgData{msgData}
-	}
-
-	if msgData.Seq <= userConn.PushedMaxSeq {
-		log.Debug(operationID, "msgData.Seq <= userConn.PushedMaxSeq", msgData.Seq, userConn.PushedMaxSeq)
-		return nil
-	}
-
-	msgList := r.GetSingleUserMsg(operationID, msgData.Seq, pushToUserID)
-	if msgList == nil {
-		log.Debug(operationID, "GetSingleUserMsg msgList == nil", msgData.Seq, userConn.PushedMaxSeq)
-		userConn.PushedMaxSeq = msgData.Seq
-		return []*sdk_ws.MsgData{msgData}
-	}
-	msgList = append(msgList, msgData)
-
-	for _, v := range msgList {
-		if v.Seq > userConn.PushedMaxSeq {
-			userConn.PushedMaxSeq = v.Seq
-		}
-	}
-	log.Debug(operationID, "GetSingleUserMsg msgList len ", len(msgList), userConn.PushedMaxSeq)
-	return msgList
+	//userConn := ws.getUserConn(pushToUserID, platformID)
+	//if userConn == nil {
+	//	log.Debug(operationID, "userConn == nil")
+	//	return []*sdk_ws.MsgData{msgData}
+	//}
+	//
+	//if msgData.Seq <= userConn.PushedMaxSeq {
+	//	log.Debug(operationID, "msgData.Seq <= userConn.PushedMaxSeq", msgData.Seq, userConn.PushedMaxSeq)
+	//	return nil
+	//}
+	//
+	//msgList := r.GetSingleUserMsg(operationID, msgData.Seq, pushToUserID)
+	//if msgList == nil {
+	//	log.Debug(operationID, "GetSingleUserMsg msgList == nil", msgData.Seq, userConn.PushedMaxSeq)
+	//	userConn.PushedMaxSeq = msgData.Seq
+	//	return []*sdk_ws.MsgData{msgData}
+	//}
+	//msgList = append(msgList, msgData)
+	//
+	//for _, v := range msgList {
+	//	if v.Seq > userConn.PushedMaxSeq {
+	//		userConn.PushedMaxSeq = v.Seq
+	//	}
+	//}
+	//log.Debug(operationID, "GetSingleUserMsg msgList len ", len(msgList), userConn.PushedMaxSeq)
+	//return msgList
 }
 
 func (r *RPCServer) GetSingleUserMsg(operationID string, currentMsgSeq uint32, userID string) []*sdk_ws.MsgData {
@@ -102,10 +102,10 @@ func (r *RPCServer) GetSingleUserMsg(operationID string, currentMsgSeq uint32, u
 	return reply.List
 }
 
-func (r *RPCServer) GetBatchUserMsgForPush(operationID string, msgData *sdk_ws.MsgData, pushToUserIDList []string, platformID int) map[string][]*sdk_ws.MsgData {
-	user2PushMsg := make(map[string][]*sdk_ws.MsgData, 0)
-	for _, v := range pushToUserIDList {
-		user2PushMsg[v] = r.GetSingleUserMsgForPush(operationID, msgData, v, platformID)
-	}
-	return user2PushMsg
-}
+//func (r *RPCServer) GetBatchUserMsgForPush(operationID string, msgData *sdk_ws.MsgData, pushToUserIDList []string, platformID int) map[string][]*sdk_ws.MsgData {
+//	user2PushMsg := make(map[string][]*sdk_ws.MsgData, 0)
+//	for _, v := range pushToUserIDList {
+//		user2PushMsg[v] = r.GetSingleUserMsgForPush(operationID, msgData, v, platformID)
+//	}
+//	return user2PushMsg
+//}
