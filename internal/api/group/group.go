@@ -858,5 +858,5 @@ func SetGroupMemberInfo(c *gin.Context) {
 	resp.ErrMsg = respPb.CommonResp.ErrMsg
 	resp.ErrCode = respPb.CommonResp.ErrCode
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", resp)
-	c.JSON(http.StatusInternalServerError, resp)
+	c.JSON(http.StatusOK, resp)
 }
