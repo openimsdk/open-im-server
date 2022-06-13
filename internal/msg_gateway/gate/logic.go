@@ -198,7 +198,7 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 }
 
 func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
+	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, string(m.Data))
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
 	if isPass {
@@ -226,7 +226,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 				MsgData:     &msgData,
 			}
 			log.NewInfo(m.OperationID, utils.GetSelfFuncName(), "pbData: ", pbData)
-			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
+			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, "session Type", msgData.SessionType)
 			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 			client := pbChat.NewChatClient(etcdConn)
 			reply, err := client.SendMsg(context.Background(), &pbData)
