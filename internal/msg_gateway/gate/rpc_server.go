@@ -210,15 +210,21 @@ func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.Online
 		log.Debug(req.OperationID, "GetSingleUserMsgForPushPlatforms end", req.MsgData.Seq, v, platformList, len(needPushMapList))
 		for platform, list := range needPushMapList {
 			if list != nil {
-				log.Debug(req.OperationID, "needPushMapList ", "userID: ", v, "platform: ", platform, "push msg num:", len(list))
-				for _, v := range list {
-					log.Debug(req.OperationID, "req.MsgData.MsgDataList begin", "len: ", len(req.MsgData.MsgDataList), v.String())
-					req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
-					log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
+				log.Debug(req.OperationID, "needPushMapList ", "userID: ", v, "platform: ", platform, "push msg num:")
+				//for _, v := range list {
+				//	log.Debug(req.OperationID, "req.MsgData.MsgDataList begin", "len: ", len(req.MsgData.MsgDataList), v.String())
+				//	req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
+				//	log.Debug(req.OperationID, "req.MsgData.MsgDataList end", "len: ", len(req.MsgData.MsgDataList))
+				//}
+				msgBytes, err := proto.Marshal(list)
+				if err != nil {
+					log.Error(req.OperationID, "proto marshal err", err.Error())
+					continue
 				}
-
+				req.MsgData.MsgDataList = msgBytes
+				//req.MsgData.MsgDataList = append(req.MsgData.MsgDataList, v)
 				log.Debug(req.OperationID, "r.encodeWsData  no string")
-				log.Debug(req.OperationID, "r.encodeWsData  data0 list ", req.MsgData.MsgDataList[0].String())
+				//log.Debug(req.OperationID, "r.encodeWsData  data0 list ", req.MsgData.MsgDataList[0].String())
 
 				log.Debug(req.OperationID, "r.encodeWsData  ", req.MsgData.String())
 				replyBytes, err := r.encodeWsData(req.MsgData, req.OperationID)

@@ -238,7 +238,7 @@ message MsgData {
   map<string, bool> options = 18;
   OfflinePushInfo offlinePushInfo = 19;
   repeated string atUserIDList = 20;
-  repeated MsgData msgDataList = 21;
+  bytes msgDataList = 21;
 
 }
 message OfflinePushInfo{
