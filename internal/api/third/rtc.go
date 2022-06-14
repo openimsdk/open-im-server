@@ -47,6 +47,7 @@ func GetRTCInvitationInfo(c *gin.Context) {
 	resp.Data.Invitation.InviteeUserIDList = invitationInfo.Invitation.InviteeUserIDList
 	resp.Data.Invitation.MediaType = invitationInfo.Invitation.MediaType
 	resp.Data.Invitation.Timeout = invitationInfo.Invitation.Timeout
+	resp.Data.Invitation.InitiateTime = invitationInfo.Invitation.InitiateTime
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -85,6 +86,7 @@ func GetRTCInvitationInfoStartApp(c *gin.Context) {
 	resp.Data.Invitation.InviteeUserIDList = invitationInfo.Invitation.InviteeUserIDList
 	resp.Data.Invitation.MediaType = invitationInfo.Invitation.MediaType
 	resp.Data.Invitation.Timeout = invitationInfo.Invitation.Timeout
+	resp.Data.Invitation.InitiateTime = invitationInfo.Invitation.InitiateTime
 	c.JSON(http.StatusOK, resp)
 
 }
