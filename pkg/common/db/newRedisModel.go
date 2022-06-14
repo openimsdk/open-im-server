@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/mitchellh/mapstructure"
 )
 
 //func  (d *  DataBases)pubMessage(channel, msg string) {
@@ -55,15 +54,6 @@ func (d *DataBases) NewGetMessageListBySeq(userID string, seqList []uint32, oper
 	}
 	return seqMsg, failedSeqList, errResult
 }
-func Map2Pb(m map[string]string) (*pbCommon.MsgData, error) {
-	var data pbCommon.MsgData
-	err := mapstructure.Decode(m, &data)
-	if err != nil {
-		return nil, err
-	}
-	return &data, nil
-}
-
 func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	ctx := context.Background()
 	var failedList []pbChat.MsgDataToMQ
