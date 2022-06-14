@@ -62,6 +62,10 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	log.NewInfo(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData)
 	successCount++
 	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
+		// save invitation info for offline push
+		if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
+			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
+		}
 		for _, v := range wsResult {
 			if v.ResultCode == 0 {
 				if utils.IsContainInt32(v.RecvPlatFormID, pushTerminal) {
@@ -123,11 +127,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				if offlinePusher == nil {
 					break
 				}
-				// save invitation info for offline push
-				if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
-					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
-					continue
-				}
+
 				opts, err := GetOfflinePushOpts(pushMsg)
 				if err != nil {
 					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
