@@ -76,6 +76,7 @@ type GetRTCInvitationInfoResp struct {
 			MediaType         string   `json:"mediaType"`
 			SessionType       int32    `json:"sessionType"`
 			InitiateTime      int32    `json:"initiateTime"`
+			PlatformID        int32    `json:"platformID"`
 		} `json:"invitation"`
 		OfflinePushInfo struct{} `json:"offlinePushInfo"`
 	} `json:"data"`

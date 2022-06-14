@@ -48,6 +48,7 @@ func GetRTCInvitationInfo(c *gin.Context) {
 	resp.Data.Invitation.MediaType = invitationInfo.Invitation.MediaType
 	resp.Data.Invitation.Timeout = invitationInfo.Invitation.Timeout
 	resp.Data.Invitation.InitiateTime = invitationInfo.Invitation.InitiateTime
+	resp.Data.Invitation.PlatformID = invitationInfo.Invitation.PlatformID
 	c.JSON(http.StatusOK, resp)
 }
 
