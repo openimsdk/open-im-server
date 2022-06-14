@@ -280,12 +280,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		default:
 		}
 		m := make(map[string][]string, 2)
-		if len(memberUserIDList) > GroupMemberNum {
-			getOnlineAndOfflineUserIDList(memberUserIDList, m, pb.OperationID)
-			log.Debug(pb.OperationID, m[constant.OnlineStatus], m[constant.OfflineStatus])
-		} else {
-			m[constant.OnlineStatus] = memberUserIDList
-		}
+		//if len(memberUserIDList) > GroupMemberNum {
+		//	getOnlineAndOfflineUserIDList(memberUserIDList, m, pb.OperationID)
+		//	log.Debug(pb.OperationID, m[constant.OnlineStatus], m[constant.OfflineStatus])
+		//} else {
+		m[constant.OnlineStatus] = memberUserIDList
+		//}
 
 		log.Debug(pb.OperationID, "send msg cost time1 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 		newTime = db.GetCurrentTimestampByMill()
