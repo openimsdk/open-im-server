@@ -124,7 +124,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 					break
 				}
 				// save invitation info for offline push
-				if err := db.DB.HandleSignalInfo(pushMsg.MsgData); err != nil {
+				if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
 					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
 					continue
 				}

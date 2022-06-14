@@ -108,7 +108,7 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID str
 	return nil
 }
 
-func (d *DataBases) HandleSignalInfo(msg *pbCommon.MsgData) error {
+func (d *DataBases) HandleSignalInfo(operationID string, msg *pbCommon.MsgData) error {
 	req := &pbRtc.SignalReq{}
 	if err := proto.Unmarshal(msg.Content, req); err != nil {
 		return err
@@ -126,11 +126,13 @@ func (d *DataBases) HandleSignalInfo(msg *pbCommon.MsgData) error {
 	case *pbRtc.SignalReq_HungUp, *pbRtc.SignalReq_Cancel, *pbRtc.SignalReq_Reject, *pbRtc.SignalReq_Accept:
 		return errors.New("signalInfo do not need offlinePush")
 	default:
-		log2.NewDebug("", utils.GetSelfFuncName(), "req invalid type", string(msg.Content))
+		log2.NewDebug(operationID, utils.GetSelfFuncName(), "req invalid type", string(msg.Content))
 		return nil
 	}
 	if isInviteSignal {
+		log2.NewInfo(operationID, utils.GetSelfFuncName(), "invite userID list:", inviteeUserIDList)
 		for _, userID := range inviteeUserIDList {
+			log2.NewInfo(operationID, utils.GetSelfFuncName(), "invite userID:", userID)
 			timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
 			if err != nil {
 				return err
