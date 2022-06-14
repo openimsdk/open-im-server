@@ -198,7 +198,7 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 }
 
 func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, string(m.Data))
+	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, string(m.Data), m.Token)
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
 	if isPass {
@@ -236,7 +236,7 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 				nReply.ErrMsg = err.Error()
 				ws.sendSignalMsgResp(conn, 200, err.Error(), m, &signalResp)
 			} else {
-				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
+				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String(), signalResp.String(), m)
 				ws.sendSignalMsgResp(conn, 0, "", m, &signalResp)
 			}
 		} else {
