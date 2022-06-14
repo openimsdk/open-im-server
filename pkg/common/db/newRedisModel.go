@@ -151,7 +151,6 @@ func (d *DataBases) HandleSignalInfo(operationID string, msg *pbCommon.MsgData) 
 			if err != nil {
 				return err
 			}
-			return err
 		}
 	}
 	return nil
