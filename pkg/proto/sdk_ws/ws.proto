@@ -492,11 +492,11 @@ message InvitationInfo  {
     string customData = 3;
     string  groupID = 4;
     string roomID = 5;
-    int32 initiateTime = 6;
-    int32 timeout = 7;
-    string mediaType = 8;
-     int32 platformID = 9;
-    int32   sessionType = 10;
+    int32 timeout = 6;
+    string mediaType = 7;
+    int32 platformID = 8;
+    int32 sessionType = 9;
+    int32 initiateTime = 10;
 }
 
 message ParticipantMetaData{
