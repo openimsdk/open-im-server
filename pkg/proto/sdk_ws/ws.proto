@@ -54,6 +54,7 @@ message UserInfo{
   string ex = 8;
   uint32 createTime = 9;
   int32 appMangerLevel = 10;
+  int32  globalRecvMsgOpt = 11;
 }
 
 message FriendInfo{
