@@ -25,6 +25,92 @@ import (
 //func  (d *  DataBases)pubMessage(channel, msg string) {
 //	d.rdb.Publish(context.Background(),channel,msg)
 //}
+func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
+	key := accountTempCode + account
+	n, err := d.rdb.Exists(context.Background(), key).Result()
+	if n > 0 {
+		return true, err
+	} else {
+		return false, err
+	}
+}
+func (d *DataBases) SetAccountCode(account string, code, ttl int) (err error) {
+	key := accountTempCode + account
+	return d.rdb.Set(context.Background(), key, code, time.Duration(ttl)*time.Second).Err()
+}
+func (d *DataBases) GetAccountCode(account string) (string, error) {
+	key := accountTempCode + account
+	return d.rdb.Get(context.Background(), key).Result()
+}
+
+//Perform seq auto-increment operation of user messages
+func (d *DataBases) IncrUserSeq(uid string) (uint64, error) {
+	key := userIncrSeq + uid
+	seq, err := d.rdb.Incr(context.Background(), key).Result()
+	return uint64(seq), err
+}
+
+//Get the largest Seq
+func (d *DataBases) GetUserMaxSeq(uid string) (uint64, error) {
+	key := userIncrSeq + uid
+	seq, err := d.rdb.Get(context.Background(), key).Result()
+	return uint64(utils.StringToInt(seq)), err
+}
+
+//set the largest Seq
+func (d *DataBases) SetUserMaxSeq(uid string, maxSeq uint64) error {
+	key := userIncrSeq + uid
+	return d.rdb.Set(context.Background(), key, maxSeq, 0).Err()
+}
+
+//Set the user's minimum seq
+func (d *DataBases) SetUserMinSeq(uid string, minSeq uint32) (err error) {
+	key := userMinSeq + uid
+	return d.rdb.Set(context.Background(), key, minSeq, 0).Err()
+}
+
+//Get the smallest Seq
+func (d *DataBases) GetUserMinSeq(uid string) (uint64, error) {
+	key := userMinSeq + uid
+	seq, err := d.rdb.Get(context.Background(), key).Result()
+	return uint64(utils.StringToInt(seq)), err
+}
+
+//Store userid and platform class to redis
+func (d *DataBases) AddTokenFlag(userID string, platformID int, token string, flag int) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+	log2.NewDebug("", "add token key is ", key)
+	return d.rdb.HSet(context.Background(), key, token, flag).Err()
+}
+
+func (d *DataBases) GetTokenMapByUidPid(userID, platformID string) (map[string]int, error) {
+	key := uidPidToken + userID + ":" + platformID
+	log2.NewDebug("", "get token key is ", key)
+	m, err := d.rdb.HGetAll(context.Background(), key).Result()
+	mm := make(map[string]int)
+	for k, v := range m {
+		mm[k] = utils.StringToInt(v)
+	}
+	return mm, err
+}
+func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int, m map[string]int) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+	return d.rdb.HMSet(context.Background(), key, m).Err()
+}
+func (d *DataBases) DeleteTokenByUidPid(userID string, platformID int, fields []string) error {
+	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
+	return d.rdb.HDel(context.Background(), key, fields...).Err()
+}
+func (d *DataBases) SetSingleConversationRecvMsgOpt(userID, conversationID string, opt int32) error {
+	key := conversationReceiveMessageOpt + userID
+	return d.rdb.HSet(context.Background(), key, conversationID, opt).Err()
+}
+
+func (d *DataBases) GetSingleConversationRecvMsgOpt(userID, conversationID string) (int, error) {
+	key := conversationReceiveMessageOpt + userID
+	result, err := d.rdb.HGet(context.Background(), key, conversationID).Result()
+	return utils.StringToInt(result), err
+}
 func (d *DataBases) SetUserGlobalMsgRecvOpt(userID string, opt int32) error {
 	key := conversationReceiveMessageOpt + userID
 	return d.rdb.HSet(context.Background(), key, GlobalMsgRecvOpt, opt).Err()
@@ -41,7 +127,7 @@ func (d *DataBases) GetUserGlobalMsgRecvOpt(userID string) (int, error) {
 	}
 	return utils.StringToInt(result), err
 }
-func (d *DataBases) NewGetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
+func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
@@ -67,7 +153,7 @@ func (d *DataBases) NewGetMessageListBySeq(userID string, seqList []uint32, oper
 	}
 	return seqMsg, failedSeqList, errResult
 }
-func (d *DataBases) NewSetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
+func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	ctx := context.Background()
 	var failedList []pbChat.MsgDataToMQ
 	for _, msg := range msgList {

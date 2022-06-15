@@ -25,11 +25,11 @@ func Test_GetTokenMapByUidPid(t *testing.T) {
 	fmt.Println(m)
 }
 
-func TestDataBases_GetMultiConversationMsgOpt(t *testing.T) {
-	m, err := DB.GetMultiConversationMsgOpt("fg", []string{"user", "age", "color"})
-	assert.Nil(t, err)
-	fmt.Println(m)
-}
+//func TestDataBases_GetMultiConversationMsgOpt(t *testing.T) {
+//	m, err := DB.GetMultiConversationMsgOpt("fg", []string{"user", "age", "color"})
+//	assert.Nil(t, err)
+//	fmt.Println(m)
+//}
 func Test_GetKeyTTL(t *testing.T) {
 	ctx := context.Background()
 	key := flag.String("key", "key", "key value")
@@ -70,7 +70,7 @@ func Test_NewSetMessageToCache(t *testing.T) {
 	data.AtUserIDList = []string{"1212", "23232"}
 	msg.MsgData = &data
 	messageList := []*pbChat.MsgDataToMQ{&msg}
-	err := DB.NewSetMessageToCache(messageList, uid, "cacheTest")
+	err := DB.SetMessageToCache(messageList, uid, "cacheTest")
 	assert.Nil(t, err)
 
 }
@@ -82,7 +82,7 @@ func Test_NewGetMessageListBySeq(t *testing.T) {
 	data.ClientMsgID = "23jwhjsdf"
 	msg.MsgData = &data
 
-	seqMsg, failedSeqList, err := DB.NewGetMessageListBySeq(uid, []uint32{1212}, "cacheTest")
+	seqMsg, failedSeqList, err := DB.GetMessageListBySeq(uid, []uint32{1212}, "cacheTest")
 	assert.Nil(t, err)
 	fmt.Println(seqMsg, failedSeqList)
 
@@ -99,4 +99,22 @@ func Test_GetUserGlobalMsgRecvOpt(t *testing.T) {
 	opt, err := DB.GetUserGlobalMsgRecvOpt(uid)
 	assert.Nil(t, err)
 	fmt.Println("get opt", opt)
+}
+func Test_JudgeAccountEXISTS(t *testing.T) {
+	uid := "test_uid"
+	b, err := DB.JudgeAccountEXISTS(uid)
+	assert.Nil(t, err)
+	fmt.Println(b)
+}
+func Test_SetAccountCode(t *testing.T) {
+	uid := "test_uid"
+	code := 666666
+	err := DB.SetAccountCode(uid, code, 100)
+	assert.Nil(t, err)
+}
+func Test_GetAccountCode(t *testing.T) {
+	uid := "test_uid"
+	code, err := DB.GetAccountCode(uid)
+	assert.Nil(t, err)
+	fmt.Println(code)
 }
