@@ -25,7 +25,7 @@ import (
 //}
 func (d *DataBases) SetUserGlobalMsgRecvOpt(userID string, opt int32) error {
 	key := conversationReceiveMessageOpt + userID
-	return d.rdb.HSet(context.Background(), key, map[string]interface{}{GlobalMsgRecvOpt: opt}).Err()
+	return d.rdb.HSet(context.Background(), key, GlobalMsgRecvOpt, opt).Err()
 }
 func (d *DataBases) GetUserGlobalMsgRecvOpt(userID string) (int, error) {
 	key := conversationReceiveMessageOpt + userID
