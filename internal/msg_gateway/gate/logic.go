@@ -107,7 +107,7 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdk_ws.GetMaxAndMinSeq
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr, string(m.Data))
 	nReply := new(sdk_ws.PullMessageBySeqListResp)
-	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
+	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList, m.OperationID)
 	if isPass {
 		rpcReq := sdk_ws.PullMessageBySeqListReq{}
 		rpcReq.SeqList = data.(sdk_ws.PullMessageBySeqListReq).SeqList
