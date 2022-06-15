@@ -11,7 +11,6 @@ require (
 	github.com/antonfisher/nested-logrus-formatter v1.3.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/fatih/structs v1.1.0
-	github.com/garyburd/redigo v1.6.2
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-redis/redis/v8 v8.11.5
@@ -33,6 +32,7 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/olivere/elastic/v7 v7.0.23
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.11.1
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0

@@ -1,9 +1,5 @@
 package db
 
-import (
-	log2 "Open_IM/pkg/common/log"
-)
-
 const (
 	accountTempCode               = "ACCOUNT_TEMP_CODE"
 	resetPwdTempCode              = "RESET_PWD_TEMP_CODE"
@@ -23,25 +19,25 @@ const (
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
 )
 
-func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
-	con := d.redisPool.Get()
-	if err := con.Err(); err != nil {
-		log2.Error("", "", "redis cmd = %v, err = %v", cmd, err)
-		return nil, err
-	}
-	defer con.Close()
-
-	params := make([]interface{}, 0)
-	params = append(params, key)
-
-	if len(args) > 0 {
-		for _, v := range args {
-			params = append(params, v)
-		}
-	}
-
-	return con.Do(cmd, params...)
-}
+//func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
+//	con := d.redisPool.Get()
+//	if err := con.Err(); err != nil {
+//		log2.Error("", "", "redis cmd = %v, err = %v", cmd, err)
+//		return nil, err
+//	}
+//	defer con.Close()
+//
+//	params := make([]interface{}, 0)
+//	params = append(params, key)
+//
+//	if len(args) > 0 {
+//		for _, v := range args {
+//			params = append(params, v)
+//		}
+//	}
+//
+//	return con.Do(cmd, params...)
+//}
 
 //func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
 //	key := accountTempCode + account
