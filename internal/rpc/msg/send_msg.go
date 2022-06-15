@@ -113,7 +113,6 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 	} else {
 		return true, 0, ""
 	}
-
 }
 func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 	msg.ServerMsgID = GetMsgID(msg.SendID)

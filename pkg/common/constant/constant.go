@@ -230,7 +230,7 @@ var ContentType2PushContent = map[int64]string{
 	AtText:    "[有人@你]",
 	GroupMsg:  "你收到一条群聊消息",
 	Common:    "你收到一条新消息",
-	SignalMsg: "音視頻通話邀請",
+	SignalMsg: "音视频通话邀请",
 }
 
 const (

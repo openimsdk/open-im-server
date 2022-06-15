@@ -10,6 +10,7 @@ import (
 	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
@@ -62,10 +63,14 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	log.NewInfo(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData)
 	successCount++
 	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
+		// save invitation info for offline push
 		for _, v := range wsResult {
 			if v.OnlinePush {
 				return
 			}
+		}
+		if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
+			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
 		}
 		//Use offline push messaging
 		var UIDList []string
@@ -246,9 +251,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		} else {
 			log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
 		}
-
 	}
-
 }
 
 func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err error) {
@@ -267,3 +270,45 @@ func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err err
 	}
 	return opts, nil
 }
+
+//func SendMsgByWS(m *pbChat.WSToMsgSvrChatMsg) {
+//	m.MsgID = rpcChat.GetMsgID(m.SendID)
+//	m.ClientMsgID = m.MsgID
+//	switch m.SessionType {
+//	case constant.SingleChatType:
+//		sendMsgToKafka(m, m.SendID, "msgKey--sendID")
+//		sendMsgToKafka(m, m.RecvID, "msgKey--recvID")
+//	case constant.GroupChatType:
+//		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+//		client := pbGroup.NewGroupClient(etcdConn)
+//		req := &pbGroup.Req{
+//			GroupID:     m.RecvID,
+//			Token:       config.Config.Secret,
+//			OperationID: m.OperationID,
+//		}
+//		reply, err := client.(context.Background(), req)
+//		if err != nil {
+//			log.Error(m.Token, m.OperationID, "rpc  getGroupInfo failed, err = %s", err.Error())
+//			return
+//		}
+//		if reply.ErrorCode != 0 {
+//			log.Error(m.Token, m.OperationID, "rpc  getGroupInfo failed, err = %s", reply.ErrorMsg)
+//			return
+//		}
+//		groupID := m.RecvID
+//		for i, v := range reply.MemberList {
+//			m.RecvID = v.UserId + " " + groupID
+//			sendMsgToKafka(m, utils.IntToString(i), "msgKey--recvID+\" \"+groupID")
+//		}
+//	default:
+//
+//	}
+//}
+//
+//func sendMsgToKafka(m *pbChat.WSToMsgSvrChatMsg, key string, flag string) {
+//	pid, offset, err := producer.SendMessage(m, key)
+//	if err != nil {
+//		log.ErrorByKv("kafka send failed", m.OperationID, "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), flag, key)
+//	}
+//
+//}

@@ -75,6 +75,9 @@ type GetRTCInvitationInfoResp struct {
 			Timeout           int32    `json:"timeout"`
 			MediaType         string   `json:"mediaType"`
 			SessionType       int32    `json:"sessionType"`
+			InitiateTime      int32    `json:"initiateTime"`
+			PlatformID        int32    `json:"platformID"`
+			CustomData        string   `json:"customData"`
 		} `json:"invitation"`
 		OfflinePushInfo struct{} `json:"offlinePushInfo"`
 	} `json:"data"`

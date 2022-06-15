@@ -235,8 +235,6 @@ groupMessageHasReadReceiptEnable: false
 #单聊已读开启
 singleMessageHasReadReceiptEnable: false
 
-
-
 #token config
 tokenpolicy:
   accessSecret: "open_im_server" #token生成相关，默认即可
@@ -487,30 +485,6 @@ notification:
     defaultTips:
       tips: "group member info set"
 
-  groupMemberSetToOrdinaryUser:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: false
-      offlinePush:
-        switch: false
-        title: "groupMemberSetToOrdinaryUser title"
-        desc: "groupMemberSetToOrdinaryUser desc"
-        ext: "groupMemberSetToOrdinaryUser ext"
-      defaultTips:
-        tips: "was set to ordinaryUser"
-
-  groupMemberSetToAdmin:
-    conversation:
-      reliabilityLevel: 3
-      unreadCount: false
-      offlinePush:
-        switch: false
-        title: "groupMemberSetToAdmin title"
-        desc: "groupMemberSetToAdmin desc"
-        ext: "groupMemberSetToAdmin ext"
-      defaultTips:
-        tips: "was set to admin"
-  #############################organization#################################
 
   organizationChanged:
     conversation:
@@ -727,4 +701,4 @@ demo:
   imAPIURL: http://127.0.0.1:10002
 
 rtc:
-  signalTimeout: 300
+  signalTimeout: 60
