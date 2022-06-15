@@ -25,12 +25,11 @@ func onboardingProcess(operationID, userID, userName string) {
 	if err := createOrganizationUser(operationID, userID, userName); err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "createOrganizationUser failed", err.Error())
 	}
-	departmentID := config.Config.Demo.TestDepartMentID
+	departmentID, err := imdb.GetRandomDepartmentID()
 
 	if err := joinTestDepartment(operationID, userID, departmentID); err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
 	}
-	departmentID, err := imdb.GetRandomDepartmentID()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "random departmentID", departmentID)
 	if err != nil {
 		log.NewError(utils.GetSelfFuncName(), "GetRandomDepartmentID failed", err.Error())
