@@ -36,7 +36,6 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 		ws.sendErrMsg(conn, 201, err.Error(), m.ReqIdentifier, m.MsgIncr, m.OperationID)
 		return
 	}
-
 	log.NewInfo(m.OperationID, "Basic Info Authentication Success", m.SendID, m.MsgIncr, m.ReqIdentifier)
 
 	switch m.ReqIdentifier {
@@ -57,10 +56,12 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	}
 	log.NewInfo(m.OperationID, "goroutine num is ", runtime.NumGoroutine())
 }
+
 func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to getNewSeq", m.MsgIncr, m.SendID, m.ReqIdentifier)
 	nReply := new(sdk_ws.GetMaxAndMinSeqResp)
-	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSGetNewestSeq)
+	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSGetNewestSeq, m.OperationID)
+	log.Info(m.OperationID, "argsValidate ", isPass, errCode, errMsg)
 	if isPass {
 		rpcReq := sdk_ws.GetMaxAndMinSeqReq{}
 		rpcReq.GroupIDList = data.(sdk_ws.GetMaxAndMinSeqReq).GroupIDList
@@ -71,9 +72,9 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 		msgClient := pbChat.NewChatClient(grpcConn)
 		rpcReply, err := msgClient.GetMaxAndMinSeq(context.Background(), &rpcReq)
 		if err != nil {
-			log.Error(rpcReq.OperationID, "rpc call failed to getSeqReq", err.Error(), rpcReq.String())
 			nReply.ErrCode = 500
 			nReply.ErrMsg = err.Error()
+			log.Error(rpcReq.OperationID, "rpc call failed to GetMaxAndMinSeq ", nReply.String())
 			ws.getSeqResp(conn, m, nReply)
 		} else {
 			log.NewInfo(rpcReq.OperationID, "rpc call success to getSeqReq", rpcReply.String())
@@ -82,6 +83,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	} else {
 		nReply.ErrCode = errCode
 		nReply.ErrMsg = errMsg
+		log.Error(m.OperationID, "argsValidate failed send resp: ", nReply.String())
 		ws.getSeqResp(conn, m, nReply)
 	}
 }
