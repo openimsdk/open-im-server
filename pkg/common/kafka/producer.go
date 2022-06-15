@@ -2,6 +2,7 @@ package kafka
 
 import (
 	log2 "Open_IM/pkg/common/log"
+	"errors"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )
@@ -32,18 +33,22 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	return &p
 }
 
-func (p *Producer) SendMessage(m proto.Message, key ...string) (int32, int64, error) {
+func (p *Producer) SendMessage(m proto.Message, key string, operationID string) (int32, int64, error) {
+	log2.Info(operationID, "SendMessage", "key ", key, m.String(), p.producer)
 	kMsg := &sarama.ProducerMessage{}
 	kMsg.Topic = p.topic
-	if len(key) == 1 {
-		kMsg.Key = sarama.StringEncoder(key[0])
-	}
+	kMsg.Key = sarama.StringEncoder(key)
 	bMsg, err := proto.Marshal(m)
 	if err != nil {
-		log2.Error("", "", "proto marshal err = %s", err.Error())
+		log2.Error(operationID, "", "proto marshal err = %s", err.Error())
 		return -1, -1, err
 	}
+	if len(bMsg) == 0 {
+		return 0, 0, errors.New("msg content is nil")
+	}
 	kMsg.Value = sarama.ByteEncoder(bMsg)
-
-	return p.producer.SendMessage(kMsg)
+	log2.Info(operationID, "ByteEncoder SendMessage begin", "key ", kMsg, p.producer)
+	a, b, c := p.producer.SendMessage(kMsg)
+	log2.Info(operationID, "ByteEncoder SendMessage end", "key ", kMsg, p.producer)
+	return a, b, c
 }

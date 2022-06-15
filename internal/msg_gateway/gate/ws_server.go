@@ -89,11 +89,25 @@ func (ws *WServer) readMsg(conn *UserConn) {
 	}
 
 }
+
+func (ws *WServer) SetWriteTimeout(conn *UserConn, timeout int) {
+	conn.w.Lock()
+	defer conn.w.Unlock()
+	conn.SetWriteDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+}
+
 func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	conn.w.Lock()
 	defer conn.w.Unlock()
+	conn.SetWriteDeadline(time.Now().Add(time.Duration(60) * time.Second))
 	return conn.WriteMessage(a, msg)
+}
 
+func (ws *WServer) SetWriteTimeoutWriteMsg(conn *UserConn, a int, msg []byte, timeout int) error {
+	conn.w.Lock()
+	defer conn.w.Unlock()
+	conn.SetWriteDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+	return conn.WriteMessage(a, msg)
 }
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
@@ -104,7 +118,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 				ws.sendKickMsg(oldConn, newConn)
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != redis.ErrNil {
-					log.NewError(operationID, "get token from redis err", err.Error())
+					log.NewError(operationID, "get token from redis err", err.Error(), uid)
 					return
 				}
 				if m == nil {
@@ -160,7 +174,7 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 	}
 	err = ws.writeMsg(oldConn, websocket.BinaryMessage, b.Bytes())
 	if err != nil {
-		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "WS WriteMsg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
+		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "sendKickMsg WS WriteMsg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
 	}
 }
 func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string) {

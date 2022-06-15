@@ -91,9 +91,9 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 		ws.getSeqResp(conn, m, nReply)
 
 	}
-
 }
-func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdk_ws.GetMaxAndMinSeqResp) {
+
+func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeqResp) {
 	log.Debug(m.OperationID, "getSeqResp come  here ", pb.String())
 	b, _ := proto.Marshal(pb)
 	mReply := Resp{
@@ -108,7 +108,7 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdk_ws.GetMaxAndMinSeq
 }
 
 func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
-	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr)
+	log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq start", m.SendID, m.ReqIdentifier, m.MsgIncr, string(m.Data))
 	nReply := new(sdk_ws.PullMessageBySeqListResp)
 	isPass, errCode, errMsg, data := ws.argsValidate(m, constant.WSPullMsgBySeqList)
 	if isPass {
@@ -117,7 +117,7 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 		rpcReq.UserID = m.SendID
 		rpcReq.OperationID = m.OperationID
 		rpcReq.GroupSeqList = data.(sdk_ws.PullMessageBySeqListReq).GroupSeqList
-		log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList, data.(sdk_ws.PullMessageBySeqListReq).GroupSeqList)
+		log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList)
 		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
 		msgClient := pbChat.NewChatClient(grpcConn)
 		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
@@ -157,7 +157,6 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 	sendMsgAllCountLock.Lock()
 	sendMsgAllCount++
 	sendMsgAllCountLock.Unlock()
-	//stat.GaugeVecApiMethod.WithLabelValues("ws_send_message_count").Inc()
 	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
 
 	nReply := new(pbChat.SendMsgResp)
@@ -248,14 +247,8 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 				nReply.ErrMsg = err.Error()
 				ws.sendSignalMsgResp(conn, 200, err.Error(), m, &signalResp)
 			} else {
-				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String())
-				// save invitation info for offline push
-				if err := db.DB.NewCacheSignalInfo(pbData.MsgData); err != nil {
-					log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), m, &signalResp)
-					ws.sendSignalMsgResp(conn, 200, err.Error(), m, &signalResp)
-				} else {
-					ws.sendSignalMsgResp(conn, 0, "", m, &signalResp)
-				}
+				log.NewInfo(pbData.OperationID, "rpc call success to sendMsgReq", reply.String(), signalResp.String(), m)
+				ws.sendSignalMsgResp(conn, 0, "", m, &signalResp)
 			}
 		} else {
 			log.NewError(m.OperationID, utils.GetSelfFuncName(), respPb.IsPass, respPb.CommonResp.ErrCode, respPb.CommonResp.ErrMsg)

@@ -21,9 +21,7 @@ func GetRTCInvitationInfo(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	var ok bool
-	var errInfo string
-	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	ok, userID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
@@ -37,6 +35,10 @@ func GetRTCInvitationInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
+	if err := db.DB.DelUserSignalList(userID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelUserSignalList result:", err.Error())
+	}
+
 	resp.Data.OpUserID = invitationInfo.OpUserID
 	resp.Data.Invitation.RoomID = invitationInfo.Invitation.RoomID
 	resp.Data.Invitation.SessionType = invitationInfo.Invitation.SessionType
@@ -45,6 +47,9 @@ func GetRTCInvitationInfo(c *gin.Context) {
 	resp.Data.Invitation.InviteeUserIDList = invitationInfo.Invitation.InviteeUserIDList
 	resp.Data.Invitation.MediaType = invitationInfo.Invitation.MediaType
 	resp.Data.Invitation.Timeout = invitationInfo.Invitation.Timeout
+	resp.Data.Invitation.InitiateTime = invitationInfo.Invitation.InitiateTime
+	resp.Data.Invitation.PlatformID = invitationInfo.Invitation.PlatformID
+	resp.Data.Invitation.CustomData = invitationInfo.Invitation.CustomData
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -83,6 +88,9 @@ func GetRTCInvitationInfoStartApp(c *gin.Context) {
 	resp.Data.Invitation.InviteeUserIDList = invitationInfo.Invitation.InviteeUserIDList
 	resp.Data.Invitation.MediaType = invitationInfo.Invitation.MediaType
 	resp.Data.Invitation.Timeout = invitationInfo.Invitation.Timeout
+	resp.Data.Invitation.InitiateTime = invitationInfo.Invitation.InitiateTime
+	resp.Data.Invitation.PlatformID = invitationInfo.Invitation.PlatformID
+	resp.Data.Invitation.CustomData = invitationInfo.Invitation.CustomData
 	c.JSON(http.StatusOK, resp)
 
 }
