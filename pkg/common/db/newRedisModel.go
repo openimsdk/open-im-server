@@ -128,33 +128,37 @@ func (d *DataBases) GetUserGlobalMsgRecvOpt(userID string) (int, error) {
 	return utils.StringToInt(result), err
 }
 func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
+	var keys []string
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
-
-		result, err := d.rdb.Get(context.Background(), key).Result()
-		if err != nil {
-			errResult = err
-			failedSeqList = append(failedSeqList, v)
-			log2.NewWarn(operationID, "redis get message error:", err.Error(), v)
-		} else {
+		keys = append(keys, key)
+	}
+	result, err := d.rdb.MGet(context.Background(), keys...).Result()
+	if err != nil {
+		errResult = err
+		failedSeqList = seqList
+		log2.NewWarn(operationID, "redis get message error:", err.Error(), seqList)
+	} else {
+		for _, v := range result {
 			msg := pbCommon.MsgData{}
-			err = jsonpb.UnmarshalString(result, &msg)
+			err = jsonpb.UnmarshalString(v.(string), &msg)
 			if err != nil {
 				errResult = err
-				failedSeqList = append(failedSeqList, v)
+				failedSeqList = seqList
 				log2.NewWarn(operationID, "Unmarshal err", result, err.Error())
+				break
 			} else {
 				log2.NewDebug(operationID, "redis get msg is ", msg.String())
 				seqMsg = append(seqMsg, &msg)
 			}
-
 		}
 	}
 	return seqMsg, failedSeqList, errResult
 }
 func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	ctx := context.Background()
+	pipe := d.rdb.Pipeline()
 	var failedList []pbChat.MsgDataToMQ
 	for _, msg := range msgList {
 		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
@@ -164,7 +168,7 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 			continue
 		}
 		log2.NewDebug(operationID, "convert string is ", s)
-		err = d.rdb.Set(ctx, key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err()
+		err = pipe.Set(ctx, key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err()
 		//err = d.rdb.HMSet(context.Background(), "12", map[string]interface{}{"1": 2, "343": false}).Err()
 		if err != nil {
 			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, *msg, uid, s, err.Error())
@@ -174,7 +178,8 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 	if len(failedList) != 0 {
 		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, operationID))
 	}
-	return nil
+	_, err := pipe.Exec(ctx)
+	return err
 }
 
 func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID string) error {
