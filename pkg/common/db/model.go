@@ -7,9 +7,7 @@ import (
 	"fmt"
 	go_redis "github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	//	"context"
-	//	"fmt"
-	"github.com/garyburd/redigo/redis"
+
 	"gopkg.in/mgo.v2"
 	"time"
 
@@ -22,9 +20,9 @@ import (
 var DB DataBases
 
 type DataBases struct {
-	MysqlDB     mysqlDB
-	mgoSession  *mgo.Session
-	redisPool   *redis.Pool
+	MysqlDB    mysqlDB
+	mgoSession *mgo.Session
+	//redisPool   *redis.Pool
 	mongoClient *mongo.Client
 	rdb         *go_redis.Client
 }
@@ -101,22 +99,22 @@ func init() {
 	//
 
 	// redis pool init
-	DB.redisPool = &redis.Pool{
-		MaxIdle:     config.Config.Redis.DBMaxIdle,
-		MaxActive:   config.Config.Redis.DBMaxActive,
-		IdleTimeout: time.Duration(config.Config.Redis.DBIdleTimeout) * time.Second,
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial(
-				"tcp",
-				config.Config.Redis.DBAddress,
-				redis.DialReadTimeout(time.Duration(1000)*time.Millisecond),
-				redis.DialWriteTimeout(time.Duration(1000)*time.Millisecond),
-				redis.DialConnectTimeout(time.Duration(1000)*time.Millisecond),
-				redis.DialDatabase(0),
-				redis.DialPassword(config.Config.Redis.DBPassWord),
-			)
-		},
-	}
+	//DB.redisPool = &redis.Pool{
+	//	MaxIdle:     config.Config.Redis.DBMaxIdle,
+	//	MaxActive:   config.Config.Redis.DBMaxActive,
+	//	IdleTimeout: time.Duration(config.Config.Redis.DBIdleTimeout) * time.Second,
+	//	Dial: func() (redis.Conn, error) {
+	//		return redis.Dial(
+	//			"tcp",
+	//			config.Config.Redis.DBAddress,
+	//			redis.DialReadTimeout(time.Duration(1000)*time.Millisecond),
+	//			redis.DialWriteTimeout(time.Duration(1000)*time.Millisecond),
+	//			redis.DialConnectTimeout(time.Duration(1000)*time.Millisecond),
+	//			redis.DialDatabase(0),
+	//			redis.DialPassword(config.Config.Redis.DBPassWord),
+	//		)
+	//	},
+	//}
 	DB.rdb = go_redis.NewClient(&go_redis.Options{
 		Addr:     config.Config.Redis.DBAddress,
 		Password: config.Config.Redis.DBPassWord, // no password set
