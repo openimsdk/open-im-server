@@ -51,21 +51,27 @@ func (ws *WServer) run() {
 }
 
 func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
-	if ws.headerCheck(w, r) {
-		query := r.URL.Query()
+	query := r.URL.Query()
+	operationID := ""
+	if len(query["operationID"]) != 0 {
+		operationID = query["operationID"][0]
+	} else {
+		operationID = utils.OperationIDGenerator()
+	}
+	log.Debug(operationID, utils.GetSelfFuncName(), " args: ", query)
+	if ws.headerCheck(w, r, operationID) {
 		conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
 		if err != nil {
-			log.Error("", "upgrade http conn err", err, query)
+			log.Error(operationID, "upgrade http conn err", err.Error(), query)
 			return
 		} else {
-			//Connection mapping relationship,
-			//userID+" "+platformID->conn
-			//Initialize a lock for each user
 			newConn := &UserConn{conn, new(sync.Mutex), 0}
 			userCount++
-			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0])
+			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
 			go ws.readMsg(newConn)
 		}
+	} else {
+		log.Error(operationID, "headerCheck failed ")
 	}
 }
 
@@ -76,18 +82,13 @@ func (ws *WServer) readMsg(conn *UserConn) {
 			log.NewInfo("", "this is a  pingMessage")
 		}
 		if err != nil {
-			uid, platform := ws.getUserUid(conn)
-			log.Error("", "WS ReadMsg error", "userIP", conn.RemoteAddr().String(), "userUid", uid, "platform", platform, "error", err.Error())
+			log.Error("", "WS ReadMsg error ", " userIP", conn.RemoteAddr().String(), "userUid", "platform", "error", err.Error())
 			userCount--
 			ws.delUserConn(conn)
 			return
-		} else {
-			//log.ErrorByKv("test", "", "msgType", msgType, "userIP", conn.RemoteAddr().String(), "userUid", ws.getUserUid(conn))
 		}
 		ws.msgParse(conn, msg)
-		//ws.writeMsg(conn, 1, chat)
 	}
-
 }
 
 func (ws *WServer) SetWriteTimeout(conn *UserConn, timeout int) {
@@ -115,25 +116,27 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[platformID]; ok {
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
-				ws.sendKickMsg(oldConn, newConn)
+				//	ws.sendKickMsg(oldConn, newConn)
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != go_redis.Nil {
-					log.NewError(operationID, "get token from redis err", err.Error(), uid)
+					log.NewError(operationID, "get token from redis err", err.Error(), uid, constant.PlatformIDToName(platformID))
 					return
 				}
 				if m == nil {
-					log.NewError(operationID, "get token from redis err", "m is nil")
+					log.NewError(operationID, "get token from redis err", "m is nil", uid, constant.PlatformIDToName(platformID))
 					return
 				}
+				log.NewDebug(operationID, "get token map is ", m, uid, constant.PlatformIDToName(platformID))
+
 				for k, _ := range m {
 					if k != token {
 						m[k] = constant.KickedToken
 					}
 				}
-				log.NewDebug(operationID, "get map is ", m)
+				log.NewDebug(operationID, "set token map is ", m, uid, constant.PlatformIDToName(platformID))
 				err = db.DB.SetTokenMapByUidPid(uid, platformID, m)
 				if err != nil {
-					log.NewError(operationID, "SetTokenMapByUidPid err", err.Error())
+					log.NewError(operationID, "SetTokenMapByUidPid err", err.Error(), uid, platformID, m)
 					return
 				}
 				err = oldConn.Close()
@@ -146,7 +149,6 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 				if err != nil {
 					log.NewError(operationID, "conn close err", err.Error(), uid, platformID)
 				}
-
 			} else {
 				log.NewWarn(operationID, "abnormal uid-conn  ", uid, platformID, oldConnMap[platformID])
 			}
@@ -177,10 +179,11 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "sendKickMsg WS WriteMsg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
 	}
 }
-func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string) {
+
+func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string, operationID string) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
-	operationID := utils.OperationIDGenerator()
+	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token)
 	callbackResp := callbackUserOnline(operationID, uid, platformID, token)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
@@ -268,43 +271,39 @@ func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
 	return nil
 }
 
-func (ws *WServer) getUserUid(conn *UserConn) (uid string, platform int) {
-	rwLock.RLock()
-	defer rwLock.RUnlock()
-
-	if stringMap, ok := ws.wsConnToUser[conn]; ok {
-		for k, v := range stringMap {
-			platform = k
-			uid = v
-		}
-		return uid, platform
-	}
-	return "", 0
-}
-func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request) bool {
+//func (ws *WServer) getUserUid(conn *UserConn) (uid string, platform int) {
+//	rwLock.RLock()
+//	defer rwLock.RUnlock()
+//
+//	if stringMap, ok := ws.wsConnToUser[conn]; ok {
+//		for k, v := range stringMap {
+//			platform = k
+//			uid = v
+//		}
+//		return uid, platform
+//	}
+//	return "", 0
+//}
+func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) bool {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
-	operationID := ""
-	if len(query["operationID"]) != 0 {
-		operationID = query["operationID"][0]
-	}
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
 		if ok, err, msg := token_verify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0], operationID); !ok {
-			//	e := err.(*constant.ErrInfo)
 			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error())
 			w.Header().Set("Sec-Websocket-Version", "13")
 			w.Header().Set("ws_err_msg", err.Error())
 			http.Error(w, err.Error(), status)
 			return false
 		} else {
-			log.Info(operationID, "Connection Authentication Success", "", "token", query["token"][0], "userID", query["sendID"][0])
+			log.Info(operationID, "Connection Authentication Success", "", "token ", query["token"][0], "userID ", query["sendID"][0], "platformID ", query["platformID"][0])
 			return true
 		}
 	} else {
-		log.Error(operationID, "Args err", "query", query)
+		log.Error(operationID, "Args err ", "query ", query)
 		w.Header().Set("Sec-Websocket-Version", "13")
-		w.Header().Set("ws_err_msg", "args err, need token, sendID, platformID")
-		http.Error(w, http.StatusText(status), status)
+		errMsg := "args err, need token, sendID, platformID"
+		w.Header().Set("ws_err_msg", errMsg)
+		http.Error(w, errMsg, status)
 		return false
 	}
 }

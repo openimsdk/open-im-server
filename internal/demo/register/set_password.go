@@ -11,7 +11,10 @@ import (
 	"Open_IM/pkg/utils"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"math/big"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 type ParamsSetPassword struct {
@@ -53,7 +56,13 @@ func SetPassword(c *gin.Context) {
 			return
 		}
 	}
-	userID := utils.Base64Encode(account)
+	//userID := utils.Base64Encode(account)
+
+	userID := utils.Md5(params.OperationID + strconv.FormatInt(time.Now().UnixNano(), 10))
+	bi := big.NewInt(0)
+	bi.SetString(userID[0:8], 16)
+	userID = bi.String()
+
 	url := config.Config.Demo.ImAPIURL + "/auth/user_register"
 	openIMRegisterReq := api.UserRegisterReq{}
 	openIMRegisterReq.OperationID = params.OperationID

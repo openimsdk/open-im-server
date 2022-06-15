@@ -16,8 +16,9 @@ type Producer struct {
 
 func NewKafkaProducer(addr []string, topic string) *Producer {
 	p := Producer{}
-	p.config = sarama.NewConfig()                             //Instantiate a sarama Config
-	p.config.Producer.Return.Successes = true                 //Whether to enable the successes channel to be notified after the message is sent successfully
+	p.config = sarama.NewConfig()             //Instantiate a sarama Config
+	p.config.Producer.Return.Successes = true //Whether to enable the successes channel to be notified after the message is sent successfully
+	p.config.Producer.Return.Errors = true
 	p.config.Producer.RequiredAcks = sarama.WaitForAll        //Set producer Message Reply level 0 1 all
 	p.config.Producer.Partitioner = sarama.NewHashPartitioner //Set the hash-key automatic hash partition. When sending a message, you must specify the key value of the message. If there is no key, the partition will be selected randomly
 
@@ -48,6 +49,10 @@ func (p *Producer) SendMessage(m proto.Message, key string, operationID string) 
 	}
 	kMsg.Value = sarama.ByteEncoder(bMsg)
 	log2.Info(operationID, "ByteEncoder SendMessage begin", "key ", kMsg, p.producer)
+	if kMsg.Key.Length() == 0 || kMsg.Value.Length() == 0 {
+		log2.Error(operationID, "kMsg.Key.Length() == 0 || kMsg.Value.Length() == 0 ", kMsg)
+		return -1, -1, errors.New("key or value == 0")
+	}
 	a, b, c := p.producer.SendMessage(kMsg)
 	log2.Info(operationID, "ByteEncoder SendMessage end", "key ", kMsg, p.producer)
 	return a, b, c

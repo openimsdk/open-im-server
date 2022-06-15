@@ -176,7 +176,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
 	rpc.encapsulateMsgData(pb.MsgData)
-	log.Info("", "this is a test MsgData ", pb.MsgData)
+	log.Info(pb.OperationID, "this is a test MsgData ", pb.MsgData)
 	msgToMQSingle := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: pb.MsgData}
 
 	// callback
