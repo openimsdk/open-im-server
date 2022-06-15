@@ -7,7 +7,6 @@ import (
 	pbChat "Open_IM/pkg/proto/chat"
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -25,7 +24,7 @@ const (
 	userMinSeq                    = "REDIS_USER_MIN_SEQ:"
 	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
 	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
-	getuiToken                    = "GETUI"
+	getuiToken                    = "GETUI_TOKEN"
 	userInfoCache                 = "USER_INFO_CACHE:"
 	friendRelationCache           = "FRIEND_RELATION_CACHE:"
 	blackListCache                = "BLACK_LIST_CACHE:"
@@ -172,104 +171,105 @@ func (d *DataBases) GetMultiConversationMsgOpt(userID string, conversationIDs []
 
 }
 
-func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
-	_, err := d.Exec("SET", getuiToken, token, "ex", expireTime)
-	return err
-}
-
-func (d *DataBases) GetGetuiToken() (string, error) {
-	result, err := redis.String(d.Exec("GET", getuiToken))
-	return result, err
-}
+//func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
+//	_, err := d.Exec("SET", getuiToken, token, "ex", expireTime)
+//	return err
+//}
+//
+//func (d *DataBases) GetGetuiToken() (string, error) {
+//	result, err := redis.String(d.Exec("GET", getuiToken))
+//	return result, err
+//}
 
 func (d *DataBases) SearchContentType() {
 
 }
 
-func (d *DataBases) SetUserInfoToCache(userID string, m map[string]interface{}) error {
-	_, err := d.Exec("hmset", userInfoCache+userID, redis.Args{}.Add().AddFlat(m)...)
-	return err
-}
+//func (d *DataBases) SetUserInfoToCache(userID string, m map[string]interface{}) error {
+//	_, err := d.Exec("hmset", userInfoCache+userID, redis.Args{}.Add().AddFlat(m)...)
+//	return err
+//}
+//
+//func (d *DataBases) GetUserInfoFromCache(userID string) (*pbCommon.UserInfo, error) {
+//	result, err := redis.String(d.Exec("hgetall", userInfoCache+userID))
+//	log2.NewInfo("", result)
+//	if err != nil {
+//		return nil, err
+//	}
+//	userInfo := &pbCommon.UserInfo{}
+//	err = json.Unmarshal([]byte(result), userInfo)
+//	return userInfo, err
+//}
 
-func (d *DataBases) GetUserInfoFromCache(userID string) (*pbCommon.UserInfo, error) {
-	result, err := redis.String(d.Exec("hgetall", userInfoCache+userID))
-	log2.NewInfo("", result)
-	if err != nil {
-		return nil, err
-	}
-	userInfo := &pbCommon.UserInfo{}
-	err = json.Unmarshal([]byte(result), userInfo)
-	return userInfo, err
-}
+//func (d *DataBases) AddFriendToCache(userID string, friendIDList ...string) error {
+//	var IDList []interface{}
+//	for _, id := range friendIDList {
+//		IDList = append(IDList, id)
+//	}
+//	_, err := d.Exec("SADD", friendRelationCache+userID, IDList...)
+//	return err
+//}
 
-func (d *DataBases) AddFriendToCache(userID string, friendIDList ...string) error {
-	var IDList []interface{}
-	for _, id := range friendIDList {
-		IDList = append(IDList, id)
-	}
-	_, err := d.Exec("SADD", friendRelationCache+userID, IDList...)
-	return err
-}
+//func (d *DataBases) ReduceFriendToCache(userID string, friendIDList ...string) error {
+//	var IDList []interface{}
+//	for _, id := range friendIDList {
+//		IDList = append(IDList, id)
+//	}
+//	_, err := d.Exec("SREM", friendRelationCache+userID, IDList...)
+//	return err
+//}
 
-func (d *DataBases) ReduceFriendToCache(userID string, friendIDList ...string) error {
-	var IDList []interface{}
-	for _, id := range friendIDList {
-		IDList = append(IDList, id)
-	}
-	_, err := d.Exec("SREM", friendRelationCache+userID, IDList...)
-	return err
-}
+//func (d *DataBases) GetFriendIDListFromCache(userID string) ([]string, error) {
+//	result, err := redis.Strings(d.Exec("SMEMBERS", friendRelationCache+userID))
+//	return result, err
+//}
+//
+//func (d *DataBases) AddBlackUserToCache(userID string, blackList ...string) error {
+//	var IDList []interface{}
+//	for _, id := range blackList {
+//		IDList = append(IDList, id)
+//	}
+//	_, err := d.Exec("SADD", blackListCache+userID, IDList...)
+//	return err
+//}
 
-func (d *DataBases) GetFriendIDListFromCache(userID string) ([]string, error) {
-	result, err := redis.Strings(d.Exec("SMEMBERS", friendRelationCache+userID))
-	return result, err
-}
+//func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...string) error {
+//	var IDList []interface{}
+//	for _, id := range blackList {
+//		IDList = append(IDList, id)
+//	}
+//	_, err := d.Exec("SREM", blackListCache+userID, IDList...)
+//	return err
+//}
 
-func (d *DataBases) AddBlackUserToCache(userID string, blackList ...string) error {
-	var IDList []interface{}
-	for _, id := range blackList {
-		IDList = append(IDList, id)
-	}
-	_, err := d.Exec("SADD", blackListCache+userID, IDList...)
-	return err
-}
+//func (d *DataBases) GetBlackListFromCache(userID string) ([]string, error) {
+//	result, err := redis.Strings(d.Exec("SMEMBERS", blackListCache+userID))
+//	return result, err
+//}
 
-func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...string) error {
-	var IDList []interface{}
-	for _, id := range blackList {
-		IDList = append(IDList, id)
-	}
-	_, err := d.Exec("SREM", blackListCache+userID, IDList...)
-	return err
-}
+//func (d *DataBases) AddGroupMemberToCache(groupID string, userIDList ...string) error {
+//	var IDList []interface{}
+//	for _, id := range userIDList {
+//		IDList = append(IDList, id)
+//	}
+//	_, err := d.Exec("SADD", groupCache+groupID, IDList...)
+//	return err
+//}
 
-func (d *DataBases) GetBlackListFromCache(userID string) ([]string, error) {
-	result, err := redis.Strings(d.Exec("SMEMBERS", blackListCache+userID))
-	return result, err
-}
+//func (d *DataBases) ReduceGroupMemberFromCache(groupID string, userIDList ...string) error {
+//	var IDList []interface{}
+//	for _, id := range userIDList {
+//		IDList = append(IDList, id)
+//	}
+//	_, err := d.Exec("SREM", groupCache+groupID, IDList...)
+//	return err
+//}
 
-func (d *DataBases) AddGroupMemberToCache(groupID string, userIDList ...string) error {
-	var IDList []interface{}
-	for _, id := range userIDList {
-		IDList = append(IDList, id)
-	}
-	_, err := d.Exec("SADD", groupCache+groupID, IDList...)
-	return err
-}
+//func (d *DataBases) GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
+//	result, err := redis.Strings(d.Exec("SMEMBERS", groupCache+groupID))
+//	return result, err
+//}
 
-func (d *DataBases) ReduceGroupMemberFromCache(groupID string, userIDList ...string) error {
-	var IDList []interface{}
-	for _, id := range userIDList {
-		IDList = append(IDList, id)
-	}
-	_, err := d.Exec("SREM", groupCache+groupID, IDList...)
-	return err
-}
-
-func (d *DataBases) GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
-	result, err := redis.Strings(d.Exec("SMEMBERS", groupCache+groupID))
-	return result, err
-}
 func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
