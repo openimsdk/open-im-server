@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
-	"github.com/garyburd/redigo/redis"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -112,7 +112,7 @@ func (d *DataBases) BatchInsertChat2Cache(userID string, msgList []*pbMsg.MsgDat
 	currentMaxSeq, err := d.GetUserMaxSeq(userID)
 	if err == nil {
 
-	} else if err == redis.ErrNil {
+	} else if err == go_redis.Nil {
 		currentMaxSeq = 0
 	} else {
 		return utils.Wrap(err, ""), 0
@@ -161,7 +161,7 @@ func (d *DataBases) BatchInsertChat(userID string, msgList []*pbMsg.MsgDataToMQ,
 	currentMaxSeq, err := d.GetUserMaxSeq(userID)
 	if err == nil {
 
-	} else if err == redis.ErrNil {
+	} else if err == go_redis.Nil {
 		isInit = true
 		currentMaxSeq = 0
 	} else {

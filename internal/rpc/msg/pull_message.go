@@ -2,7 +2,7 @@ package msg
 
 import (
 	"context"
-	"github.com/garyburd/redigo/redis"
+	go_redis "github.com/go-redis/redis/v8"
 
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
@@ -15,7 +15,7 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAnd
 	m := make(map[string]*open_im_sdk.MaxAndMinSeq)
 	//seq, err := model.GetBiggestSeqFromReceive(in.UserID)
 	maxSeq, err1 := commonDB.DB.GetUserMaxSeq(in.UserID)
-	minSeq, err2 := commonDB.DB.GetUserMinSeq(in.UserID)
+	//minSeq, err2 := commonDB.DB.GetUserMinSeq(in.UserID)
 	if err1 == nil {
 		resp.MaxSeq = uint32(maxSeq)
 		for _, v := range in.GroupIDList {
@@ -25,22 +25,22 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAnd
 			m[v] = x
 		}
 		resp.GroupMaxAndMinSeq = m
-	} else if err1 == redis.ErrNil {
+	} else if err1 == go_redis.Nil {
 		resp.MaxSeq = 0
 	} else {
 		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err1.Error())
 		resp.ErrCode = 200
 		resp.ErrMsg = "redis get err"
 	}
-	if err2 == nil {
-		resp.MinSeq = uint32(minSeq)
-	} else if err2 == redis.ErrNil {
-		resp.MinSeq = 0
-	} else {
-		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err2.Error())
-		resp.ErrCode = 201
-		resp.ErrMsg = "redis get err"
-	}
+	//if err2 == nil {
+	//	resp.MinSeq = uint32(minSeq)
+	//} else if err2 == redis.ErrNil {
+	//	resp.MinSeq = 0
+	//} else {
+	//	log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err2.Error())
+	//	resp.ErrCode = 201
+	//	resp.ErrMsg = "redis get err"
+	//}
 	return resp, nil
 }
 func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.PullMessageBySeqListReq) (*open_im_sdk.PullMessageBySeqListResp, error) {
@@ -50,7 +50,7 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 	//msgList, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList, in.OperationID)
 	redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(in.UserID, in.SeqList, in.OperationID)
 	if err != nil {
-		if err != redis.ErrNil {
+		if err != go_redis.Nil {
 			log.Error(in.OperationID, "get message from redis exception", err.Error(), failedSeqList)
 		} else {
 			log.Debug(in.OperationID, "get message from redis is nil", failedSeqList)
@@ -72,7 +72,7 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 		x := new(open_im_sdk.MsgDataList)
 		redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(k, v.SeqList, in.OperationID)
 		if err != nil {
-			if err != redis.ErrNil {
+			if err != go_redis.Nil {
 				log.Error(in.OperationID, "get message from redis exception", err.Error(), failedSeqList)
 			} else {
 				log.Debug(in.OperationID, "get message from redis is nil", failedSeqList)

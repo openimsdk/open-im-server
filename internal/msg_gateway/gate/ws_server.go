@@ -9,7 +9,7 @@ import (
 	"Open_IM/pkg/utils"
 	"bytes"
 	"encoding/gob"
-	"github.com/garyburd/redigo/redis"
+	go_redis "github.com/go-redis/redis/v8"
 	"net/http"
 	"sync"
 	"time"
@@ -117,7 +117,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
 				ws.sendKickMsg(oldConn, newConn)
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
-				if err != nil && err != redis.ErrNil {
+				if err != nil && err != go_redis.Nil {
 					log.NewError(operationID, "get token from redis err", err.Error(), uid)
 					return
 				}

@@ -6,7 +6,7 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
-	"github.com/garyburd/redigo/redis"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
@@ -39,7 +39,7 @@ func BuildClaims(uid, platform string, ttl int64) Claims {
 
 func DeleteToken(userID string, platformID int) error {
 	m, err := commonDB.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
-	if err != nil && err != redis.ErrNil {
+	if err != nil && err != go_redis.Nil {
 		return utils.Wrap(err, "")
 	}
 	var deleteTokenKey []string
@@ -65,7 +65,7 @@ func CreateToken(userID string, platformID int) (string, int64, error) {
 	}
 	//remove Invalid token
 	m, err := commonDB.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
-	if err != nil && err != redis.ErrNil {
+	if err != nil && err != go_redis.Nil {
 		return "", 0, err
 	}
 	var deleteTokenKey []string

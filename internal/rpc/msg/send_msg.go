@@ -15,7 +15,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
-	"github.com/garyburd/redigo/redis"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"strconv"
@@ -464,7 +464,7 @@ func returnMsg(replay *pbChat.SendMsgResp, pb *pbChat.SendMsgReq, errCode int32,
 func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *pbChat.SendMsgReq) bool {
 	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
 	opt, err := db.DB.GetSingleConversationRecvMsgOpt(userID, conversationID)
-	if err != nil && err != redis.ErrNil {
+	if err != nil && err != go_redis.Nil {
 		log.NewError(pb.OperationID, "GetSingleConversationMsgOpt from redis err", conversationID, pb.String(), err.Error())
 		return true
 	}
@@ -487,7 +487,7 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 func modifyMessageByUserMessageReceiveOptoptimization(userID, sourceID string, sessionType int, operationID string, options *map[string]bool) bool {
 	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
 	opt, err := db.DB.GetSingleConversationRecvMsgOpt(userID, conversationID)
-	if err != nil && err != redis.ErrNil {
+	if err != nil && err != go_redis.Nil {
 		log.NewError(operationID, "GetSingleConversationMsgOpt from redis err", userID, conversationID, err.Error())
 		return true
 	}
