@@ -152,7 +152,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 	sendMsgAllCount++
 	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
 	nReply := new(pbChat.SendMsgResp)
-	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg)
+	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg, m.OperationID)
 	if isPass {
 		data := pData.(sdk_ws.MsgData)
 		pbData := pbChat.SendMsgReq{
@@ -203,7 +203,7 @@ func (ws *WServer) sendMsgResp(conn *UserConn, m *Req, pb *pbChat.SendMsgResp) {
 func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, string(m.Data), m.Token)
 	nReply := new(pbChat.SendMsgResp)
-	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg)
+	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg, m.OperationID)
 	if isPass {
 		signalResp := pbRtc.SignalResp{}
 		//isPass2, errCode2, errMsg2, signalResp, msgData := ws.signalMessageAssemble(pData.(*sdk_ws.SignalReq), m.OperationID)
