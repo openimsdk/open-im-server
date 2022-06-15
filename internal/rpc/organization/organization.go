@@ -124,7 +124,7 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 			FaceURL:       req.DepartmentInfo.FaceURL,
 			CreateTime:    uint32(time.Now().Unix()),
 			CreatorUserID: req.OpUserID,
-			GroupType:     constant.DepartmentGroup,
+			GroupType:     constant.NormalGroup,
 			OwnerUserID:   req.OpUserID,
 		},
 		OperationID: req.OperationID,
