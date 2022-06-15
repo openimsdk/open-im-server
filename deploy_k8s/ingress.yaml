@@ -77,7 +77,7 @@ spec:
               service:
                 name: demo
                 port:
-                  number: 10004
+                  number: 10004 
             path: /
             pathType: Prefix
 ---
