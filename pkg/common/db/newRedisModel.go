@@ -128,30 +128,27 @@ func (d *DataBases) GetUserGlobalMsgRecvOpt(userID string) (int, error) {
 	return utils.StringToInt(result), err
 }
 func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
-	var keys []string
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
-		keys = append(keys, key)
-	}
-	result, err := d.rdb.MGet(context.Background(), keys...).Result()
-	if err != nil {
-		errResult = err
-		failedSeqList = seqList
-		log2.NewWarn(operationID, "redis get message error:", err.Error(), seqList)
-	} else {
-		for _, v := range result {
+
+		result, err := d.rdb.Get(context.Background(), key).Result()
+		if err != nil {
+			errResult = err
+			failedSeqList = append(failedSeqList, v)
+			log2.NewWarn(operationID, "redis get message error:", err.Error(), v)
+		} else {
 			msg := pbCommon.MsgData{}
-			err = jsonpb.UnmarshalString(v.(string), &msg)
+			err = jsonpb.UnmarshalString(result, &msg)
 			if err != nil {
 				errResult = err
-				failedSeqList = seqList
+				failedSeqList = append(failedSeqList, v)
 				log2.NewWarn(operationID, "Unmarshal err", result, err.Error())
-				break
 			} else {
 				log2.NewDebug(operationID, "redis get msg is ", msg.String())
 				seqMsg = append(seqMsg, &msg)
 			}
+
 		}
 	}
 	return seqMsg, failedSeqList, errResult
