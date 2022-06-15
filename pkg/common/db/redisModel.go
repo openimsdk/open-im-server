@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	log2 "Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/chat"
-	pbRtc "Open_IM/pkg/proto/rtc"
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"encoding/json"
@@ -14,8 +13,6 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
-
 	//osconfig "google.golang.org/genproto/googleapis/cloud/osconfig/v1alpha"
 	"strconv"
 )
@@ -322,53 +319,53 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 	return nil
 }
 
-func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID string) {
-	for _, seq := range seqList {
-		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
-		result, err := redis.String(d.Exec("GET", key))
-		if err != nil {
-			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key)
-			continue
-		}
-		log2.Debug(operationID, utils.GetSelfFuncName(), "del result", result)
-		var msg pbCommon.MsgData
-		err = utils.String2Pb(result, &msg)
-		log2.NewDebug(operationID, utils.GetSelfFuncName(), "msg", msg)
-		if err != nil {
-			log2.NewWarn(operationID, utils.GetSelfFuncName(), "string2Pb failed", msg, err.Error())
-			continue
-		}
-		msg.Status = constant.MsgDeleted
-		s, err := utils.Pb2String(&msg)
-		if err != nil {
-			log2.NewWarn(operationID, utils.GetSelfFuncName(), "Pb2String failed", msg, err.Error())
-			continue
-		}
-		_, err = d.Exec("SET", key, s)
-		if err != nil {
-			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, msg, s)
-		}
-	}
-}
+//func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID string) {
+//	for _, seq := range seqList {
+//		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
+//		result, err := redis.String(d.Exec("GET", key))
+//		if err != nil {
+//			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key)
+//			continue
+//		}
+//		log2.Debug(operationID, utils.GetSelfFuncName(), "del result", result)
+//		var msg pbCommon.MsgData
+//		err = utils.String2Pb(result, &msg)
+//		log2.NewDebug(operationID, utils.GetSelfFuncName(), "msg", msg)
+//		if err != nil {
+//			log2.NewWarn(operationID, utils.GetSelfFuncName(), "string2Pb failed", msg, err.Error())
+//			continue
+//		}
+//		msg.Status = constant.MsgDeleted
+//		s, err := utils.Pb2String(&msg)
+//		if err != nil {
+//			log2.NewWarn(operationID, utils.GetSelfFuncName(), "Pb2String failed", msg, err.Error())
+//			continue
+//		}
+//		_, err = d.Exec("SET", key, s)
+//		if err != nil {
+//			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, msg, s)
+//		}
+//	}
+//}
 
-func (d *DataBases) CacheSignalInfo(msg *pbCommon.MsgData) error {
-	key := SignalCache + msg.ClientMsgID
-	_, err := d.Exec("SET", key, msg.Content, "ex", config.Config.Rtc.SignalTimeout)
-	return err
-}
-
-func (d *DataBases) GetSignalInfoFromCache(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
-	key := SignalCache + clientMsgID
-	result, err := redis.Bytes(d.Exec("GET", key))
-	log2.NewDebug("", utils.GetSelfFuncName(), clientMsgID, result, string(result))
-	if err != nil {
-		return nil, err
-	}
-	req := &pbRtc.SignalReq{}
-	if err = proto.Unmarshal(result, req); err != nil {
-		return nil, err
-	}
-	req2 := req.Payload.(*pbRtc.SignalReq_Invite)
-	invitationInfo = req2.Invite
-	return invitationInfo, err
-}
+//func (d *DataBases) CacheSignalInfo(msg *pbCommon.MsgData) error {
+//	key := SignalCache + msg.ClientMsgID
+//	_, err := d.Exec("SET", key, msg.Content, "ex", config.Config.Rtc.SignalTimeout)
+//	return err
+//}
+//
+//func (d *DataBases) GetSignalInfoFromCache(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
+//	key := SignalCache + clientMsgID
+//	result, err := redis.Bytes(d.Exec("GET", key))
+//	log2.NewDebug("", utils.GetSelfFuncName(), clientMsgID, result, string(result))
+//	if err != nil {
+//		return nil, err
+//	}
+//	req := &pbRtc.SignalReq{}
+//	if err = proto.Unmarshal(result, req); err != nil {
+//		return nil, err
+//	}
+//	req2 := req.Payload.(*pbRtc.SignalReq_Invite)
+//	invitationInfo = req2.Invite
+//	return invitationInfo, err
+//}

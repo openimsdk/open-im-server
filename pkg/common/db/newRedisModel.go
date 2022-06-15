@@ -2,6 +2,7 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	log2 "Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/chat"
 	pbRtc "Open_IM/pkg/proto/rtc"
@@ -202,4 +203,25 @@ func (d *DataBases) DelUserSignalList(userID string) error {
 	keyList := SignalListCache + userID
 	err := d.rdb.Del(context.Background(), keyList).Err()
 	return err
+}
+
+func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID string) {
+	for _, seq := range seqList {
+		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
+		result := d.rdb.Get(context.Background(), key).String()
+		var msg pbCommon.MsgData
+		if err := utils.String2Pb(result, &msg); err != nil {
+			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, err.Error())
+			continue
+		}
+		msg.Status = constant.MsgDeleted
+		s, err := utils.Pb2String(&msg)
+		if err != nil {
+			log2.Error(operationID, utils.GetSelfFuncName(), "Pb2String failed", msg, err.Error())
+			continue
+		}
+		if err := d.rdb.Set(context.Background(), key, s, time.Duration(config.Config.MsgCacheTimeout)*time.Second).Err(); err != nil {
+			log2.Error(operationID, utils.GetSelfFuncName(), "Set failed", err.Error())
+		}
+	}
 }
