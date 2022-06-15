@@ -89,7 +89,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 }
 
 func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdk_ws.GetMaxAndMinSeqResp) {
-	log.Debug(m.OperationID, "getSeqResp come  here ", pb.String())
+
 	b, _ := proto.Marshal(pb)
 	mReply := Resp{
 		ReqIdentifier: m.ReqIdentifier,
@@ -99,6 +99,8 @@ func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdk_ws.GetMaxAndMinSeq
 		OperationID:   m.OperationID,
 		Data:          b,
 	}
+	log.Debug(m.OperationID, "getSeqResp come  here req: ", pb.String(), "send resp: ",
+		mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg)
 	ws.sendMsg(conn, mReply)
 }
 
