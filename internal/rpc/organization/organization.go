@@ -119,11 +119,13 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 	createGroupReq := &groupRpc.CreateGroupReq{
 		InitMemberList: nil,
 		GroupInfo: &open_im_sdk.GroupInfo{
+			Introduction:  req.DepartmentInfo.Name,
 			GroupName:     req.DepartmentInfo.Name,
 			FaceURL:       req.DepartmentInfo.FaceURL,
 			CreateTime:    uint32(time.Now().Unix()),
 			CreatorUserID: req.OpUserID,
 			GroupType:     constant.DepartmentGroup,
+			OwnerUserID:   req.OpUserID,
 		},
 		OperationID: req.OperationID,
 		OpUserID:    req.OpUserID,
