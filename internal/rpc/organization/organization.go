@@ -129,6 +129,7 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 		},
 		OperationID: req.OperationID,
 		OpUserID:    req.OpUserID,
+		OwnerUserID: req.OpUserID,
 	}
 	createGroupResp, err := client.CreateGroup(context.Background(), createGroupReq)
 	if err != nil {
