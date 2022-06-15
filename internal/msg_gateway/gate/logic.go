@@ -3,7 +3,6 @@ package gate
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
@@ -93,7 +92,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 	}
 }
 
-func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *pbChat.GetMaxAndMinSeqResp) {
+func (ws *WServer) getSeqResp(conn *UserConn, m *Req, pb *sdk_ws.GetMaxAndMinSeqResp) {
 	log.Debug(m.OperationID, "getSeqResp come  here ", pb.String())
 	b, _ := proto.Marshal(pb)
 	mReply := Resp{

@@ -431,7 +431,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 func (rpc *rpcChat) sendMsgToKafka(m *pbChat.MsgDataToMQ, key string, status string) error {
 	switch status {
 	case constant.OnlineStatus:
-		pid, offset, err := rpc.onlineProducer.SendMessage(m, key)
+		pid, offset, err := rpc.onlineProducer.SendMessage(m, key, m.OperationID)
 		if err != nil {
 			log.Error(m.OperationID, "kafka send failed", "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key, status)
 		} else {
@@ -439,7 +439,7 @@ func (rpc *rpcChat) sendMsgToKafka(m *pbChat.MsgDataToMQ, key string, status str
 		}
 		return err
 	case constant.OfflineStatus:
-		pid, offset, err := rpc.onlineProducer.SendMessage(m, key)
+		pid, offset, err := rpc.onlineProducer.SendMessage(m, key, m.OperationID)
 		if err != nil {
 			log.Error(m.OperationID, "kafka send failed", "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key, status)
 		}
