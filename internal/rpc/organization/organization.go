@@ -117,12 +117,7 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 	client := groupRpc.NewGroupClient(etcdConn)
 	createGroupReq := &groupRpc.CreateGroupReq{
-		InitMemberList: []*groupRpc.GroupAddMemberInfo{
-			{
-				UserID:    req.OpUserID,
-				RoleLevel: constant.GroupOwner,
-			},
-		},
+		InitMemberList: []*groupRpc.GroupAddMemberInfo{},
 		GroupInfo: &open_im_sdk.GroupInfo{
 			Introduction:  req.DepartmentInfo.Name,
 			GroupName:     req.DepartmentInfo.Name,
