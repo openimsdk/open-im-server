@@ -87,3 +87,16 @@ func Test_NewGetMessageListBySeq(t *testing.T) {
 	fmt.Println(seqMsg, failedSeqList)
 
 }
+func Test_SetUserGlobalMsgRecvOpt(t *testing.T) {
+	var opt int32
+	uid := "test_uid"
+	opt = 1
+	err := DB.SetUserGlobalMsgRecvOpt(uid, opt)
+	assert.Nil(t, err)
+}
+func Test_GetUserGlobalMsgRecvOpt(t *testing.T) {
+	uid := "test_uid"
+	opt, err := DB.GetUserGlobalMsgRecvOpt(uid)
+	assert.Nil(t, err)
+	fmt.Println("get opt", opt)
+}

@@ -10,15 +10,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/jsonpb"
-
-	"github.com/garyburd/redigo/redis"
-
-	//goRedis "github.com/go-redis/redis/v8"
+	"github.com/golang/protobuf/proto"
 	"strconv"
 	"time"
-
-	"github.com/golang/protobuf/proto"
 )
 
 //func  (d *  DataBases)pubMessage(channel, msg string) {
@@ -27,7 +23,22 @@ import (
 //func  (d *  DataBases)pubMessage(channel, msg string) {
 //	d.rdb.Publish(context.Background(),channel,msg)
 //}
-
+func (d *DataBases) SetUserGlobalMsgRecvOpt(userID string, opt int32) error {
+	key := conversationReceiveMessageOpt + userID
+	return d.rdb.HSet(context.Background(), key, GlobalMsgRecvOpt, opt).Err()
+}
+func (d *DataBases) GetUserGlobalMsgRecvOpt(userID string) (int, error) {
+	key := conversationReceiveMessageOpt + userID
+	result, err := d.rdb.HGet(context.Background(), key, GlobalMsgRecvOpt).Result()
+	if err != nil {
+		if err == go_redis.Nil {
+			return 0, nil
+		} else {
+			return 0, err
+		}
+	}
+	return utils.StringToInt(result), err
+}
 func (d *DataBases) NewGetMessageListBySeq(userID string, seqList []uint32, operationID string) (seqMsg []*pbCommon.MsgData, failedSeqList []uint32, errResult error) {
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
@@ -83,7 +94,7 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID str
 	key := messageCache + userID + "_" + "*"
 	vals, err := d.rdb.Keys(ctx, key).Result()
 	log2.Debug(operationID, "vals: ", vals)
-	if err == redis.ErrNil {
+	if err == go_redis.Nil {
 		return nil
 	}
 	if err != nil {

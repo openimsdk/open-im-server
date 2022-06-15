@@ -36,6 +36,7 @@ const (
 	messageCache                  = "MESSAGE_CACHE:"
 	SignalCache                   = "SIGNAL_CACHE:"
 	SignalListCache               = "SIGNAL_LIST_CACHE:"
+	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
 )
 
 func (d *DataBases) Exec(cmd string, key interface{}, args ...interface{}) (interface{}, error) {
