@@ -16,7 +16,7 @@ spec:
       containers:
       - name: api
         image: openim/api:v2.0.10k
-        # imagePullPolicy: Always
+        imagePullPolicy: Always
         ports:
         - containerPort: 10002
         volumeMounts:
@@ -42,3 +42,4 @@ spec:
       targetPort: 10002
   selector:
     app: api
+  type: NodePort  

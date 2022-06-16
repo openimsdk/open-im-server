@@ -42,3 +42,4 @@ spec:
       targetPort: 10004
   selector:
     app: demo    
+  type: NodePort   

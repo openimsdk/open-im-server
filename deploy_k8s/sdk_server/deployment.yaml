@@ -49,5 +49,6 @@ spec:
       targetPort: 10003
   selector:
     app: sdk-server
+  type: NodePort   
 
     

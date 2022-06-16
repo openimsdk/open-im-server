@@ -42,3 +42,4 @@ spec:
       targetPort: 10006
   selector:
     app: cms-api
+  type: NodePort  
