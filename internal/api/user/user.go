@@ -197,6 +197,8 @@ func GetUsersInfo(c *gin.Context) {
 
 func UpdateUserInfo(c *gin.Context) {
 	params := api.UpdateSelfUserInfoReq{}
+	var t int32
+	params.GlobalRecvMsgOpt = &t
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
