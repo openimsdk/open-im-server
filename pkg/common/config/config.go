@@ -102,6 +102,7 @@ type config struct {
 		DBMaxActive   int    `yaml:"dbMaxActive"`
 		DBIdleTimeout int    `yaml:"dbIdleTimeout"`
 		DBPassWord    string `yaml:"dbPassWord"`
+		EnableCluster bool   `yaml:"enableCluster"`
 	}
 	RpcPort struct {
 		OpenImUserPort           []int `yaml:"openImUserPort"`
