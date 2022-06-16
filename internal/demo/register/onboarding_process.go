@@ -50,7 +50,12 @@ func createOrganizationUser(operationID, userID, userName string) error {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID)
 	}()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "start createOrganizationUser")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
+	if etcdConn == nil {
+		errMsg := operationID + "getcdv3.GetConn == nil"
+		log.NewError(operationID, errMsg)
+		return errors.New(errMsg)
+	}
 	client := organizationRpc.NewOrganizationClient(etcdConn)
 	req := &organizationRpc.CreateOrganizationUserReq{
 		OrganizationUser: &commonPb.OrganizationUser{
@@ -85,7 +90,12 @@ func joinTestDepartment(operationID, userID, departmentID string) error {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID)
 	}()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
+	if etcdConn == nil {
+		errMsg := operationID + "getcdv3.GetConn == nil"
+		log.NewError(operationID, errMsg)
+		return errors.New(errMsg)
+	}
 	client := organizationRpc.NewOrganizationClient(etcdConn)
 	req := &organizationRpc.CreateDepartmentMemberReq{
 		DepartmentMember: &commonPb.DepartmentMember{
@@ -112,7 +122,12 @@ func GetDepartmentGroupIDList(operationID, departmentID string) ([]string, error
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), departmentID)
 	}()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
+	if etcdConn == nil {
+		errMsg := operationID + "getcdv3.GetConn == nil"
+		log.NewError(operationID, errMsg)
+		return nil, errors.New(errMsg)
+	}
 	client := organizationRpc.NewOrganizationClient(etcdConn)
 	req := organizationRpc.GetDepartmentParentIDListReq{
 		DepartmentID: departmentID,
@@ -146,7 +161,12 @@ func joinGroups(operationID, userID, userName string, groupIDList []string) {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID, groupIDList)
 	}()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, operationID)
+	if etcdConn == nil {
+		errMsg := operationID + "getcdv3.GetConn == nil"
+		log.NewError(operationID, errMsg)
+		return
+	}
 	client := groupRpc.NewGroupClient(etcdConn)
 	for _, groupID := range groupIDList {
 		req := &groupRpc.InviteUserToGroupReq{
