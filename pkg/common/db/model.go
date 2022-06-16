@@ -125,7 +125,6 @@ func init() {
 		DB.rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
 			Addrs:    []string{config.Config.Redis.DBAddress},
 			PoolSize: 50,
-			Password: config.Config.Redis.DBPassWord,
 		})
 		_, err = DB.rdb.Ping(ctx).Result()
 		if err != nil {
