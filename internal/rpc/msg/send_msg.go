@@ -72,6 +72,9 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
 			return true, 0, ""
 		}
+		if data.MsgData.ContentType <= constant.FriendApplicationNotification && data.MsgData.ContentType >= constant.FriendApplicationApprovedNotification {
+			return true, 0, ""
+		}
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
