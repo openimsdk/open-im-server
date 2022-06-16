@@ -89,7 +89,13 @@ func (r *RPCServer) GetSingleUserMsg(operationID string, currentMsgSeq uint32, u
 	rpcReq.SeqList = seqList
 	rpcReq.UserID = userID
 	rpcReq.OperationID = operationID
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, rpcReq.OperationID)
+	if grpcConn == nil {
+		errMsg := "getcdv3.GetConn == nil"
+		log.NewError(rpcReq.OperationID, errMsg)
+		return nil
+	}
+
 	msgClient := pbChat.NewChatClient(grpcConn)
 	reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
 	if err != nil {

@@ -31,7 +31,13 @@ func GetJoinedSuperGroupList(c *gin.Context) {
 		return
 	}
 	reqPb := rpc.GetJoinedSuperGroupListReq{OperationID: req.OperationID, OpUserID: opUserID, UserID: req.FromUserID}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	rpcResp, err := client.GetJoinedSuperGroupList(context.Background(), &reqPb)
 	if err != nil {
@@ -61,7 +67,13 @@ func GetSuperGroupsInfo(c *gin.Context) {
 		return
 	}
 	reqPb := rpc.GetSuperGroupsInfoReq{OperationID: req.OperationID, OpUserID: opUserID, GroupIDList: req.GroupIDList}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	rpcResp, err := client.GetSuperGroupsInfo(context.Background(), &reqPb)
 	if err != nil {
