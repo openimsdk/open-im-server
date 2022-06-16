@@ -385,7 +385,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	m := make(map[string]interface{}, 1)
 	if req.GlobalRecvMsgOpt != nil {
-		m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt
+		m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt.Value
 		err := db.DB.SetUserGlobalMsgRecvOpt(user.UserID, req.GlobalRecvMsgOpt.Value)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetUserGlobalMsgRecvOpt failed ", err.Error(), user)
