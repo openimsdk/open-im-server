@@ -22,6 +22,14 @@ message PushMsgDataToMQ{
   server_api_params.MsgData msgData = 2;
   string pushToUserID = 3;
 }
+message MsgDataToMongoByMQ{
+ uint64 lastSeq =1;
+ string aggregationID = 2;
+ repeated MsgDataToMQ messageList = 3;
+ string triggerID = 4;
+
+
+}
 
 //message PullMessageReq {
 //  string UserID = 1;
