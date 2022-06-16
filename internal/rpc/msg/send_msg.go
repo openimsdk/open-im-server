@@ -462,13 +462,29 @@ func returnMsg(replay *pbChat.SendMsgResp, pb *pbChat.SendMsgReq, errCode int32,
 }
 
 func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *pbChat.SendMsgReq) bool {
-	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
-	opt, err := db.DB.GetSingleConversationRecvMsgOpt(userID, conversationID)
-	if err != nil && err != go_redis.Nil {
-		log.NewError(pb.OperationID, "GetSingleConversationMsgOpt from redis err", conversationID, pb.String(), err.Error())
-		return true
+	opt, err := db.DB.GetUserGlobalMsgRecvOpt(userID)
+	if err != nil {
+		log.NewError(pb.OperationID, "GetUserGlobalMsgRecvOpt from redis err", userID, pb.String(), err.Error())
+
 	}
 	switch opt {
+	case constant.ReceiveMessage:
+	case constant.NotReceiveMessage:
+		return false
+	case constant.ReceiveNotNotifyMessage:
+		if pb.MsgData.Options == nil {
+			pb.MsgData.Options = make(map[string]bool, 10)
+		}
+		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
+		return true
+	}
+	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
+	singleOpt, sErr := db.DB.GetSingleConversationRecvMsgOpt(userID, conversationID)
+	if sErr != nil && sErr != go_redis.Nil {
+		log.NewError(pb.OperationID, "GetSingleConversationMsgOpt from redis err", conversationID, pb.String(), sErr.Error())
+		return true
+	}
+	switch singleOpt {
 	case constant.ReceiveMessage:
 		return true
 	case constant.NotReceiveMessage:
