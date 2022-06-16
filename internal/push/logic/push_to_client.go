@@ -71,6 +71,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		}
 		if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
 			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
+			return
 		}
 		//Use offline push messaging
 		var UIDList []string
@@ -138,9 +139,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		} else {
 			log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
 		}
-
 	}
-
 }
 
 func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
