@@ -231,9 +231,9 @@ reliablestorage: false
 #消息缓存时间
 msgCacheTimeout: 1800
 #群聊已读开启
-groupMessageHasReadReceiptEnable: false
+groupMessageHasReadReceiptEnable: true
 #单聊已读开启
-singleMessageHasReadReceiptEnable: false
+singleMessageHasReadReceiptEnable: true
 
 #token config
 tokenpolicy:
