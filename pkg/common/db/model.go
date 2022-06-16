@@ -28,7 +28,7 @@ type DataBases struct {
 	mgoSession *mgo.Session
 	//redisPool   *redis.Pool
 	mongoClient *mongo.Client
-	rdb         *go_redis.ClusterClient
+	rdb         *go_redis.Client
 }
 
 func key(dbAddress, dbName string) string {
@@ -112,17 +112,17 @@ func init() {
 	//		)
 	//	},
 	//}
-	//DB.rdb = go_redis.NewClient(&go_redis.Options{
-	//	Addr:     config.Config.Redis.DBAddress,
-	//	Password: config.Config.Redis.DBPassWord, // no password set
-	//	DB:       0,                              // use default DB
-	//	PoolSize: 100,                            // 连接池大小
-	//})
-	DB.rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
-		Addrs:    []string{config.Config.Redis.DBAddress},
-		PoolSize: 50,
-		//Password: config.Config.Redis.DBPassWord,
+	DB.rdb = go_redis.NewClient(&go_redis.Options{
+		Addr:     config.Config.Redis.DBAddress,
+		Password: config.Config.Redis.DBPassWord, // no password set
+		DB:       0,                              // use default DB
+		PoolSize: 100,                            // 连接池大小
 	})
+	//DB.rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
+	//	Addrs:    []string{config.Config.Redis.DBAddress},
+	//	PoolSize: 50,
+	//Password: config.Config.Redis.DBPassWord,
+	//})
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	_, err = DB.rdb.Ping(ctx).Result()
