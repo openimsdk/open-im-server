@@ -317,8 +317,4 @@ service user {
   rpc GetBlockUsers(GetBlockUsersReq) returns (GetBlockUsersResp);
   rpc GetBlockUserById(GetBlockUserByIdReq) returns (GetBlockUserByIdResp);
   rpc DeleteUser(DeleteUserReq) returns (DeleteUserResp);
-
-
-  rpc GetUserInfoFromCache(GetUserInfoReq) returns(GetUserInfoResp);
-
 }
