@@ -69,9 +69,15 @@ func SendMsg(c *gin.Context) {
 	token := c.Request.Header.Get("token")
 	log.NewInfo(params.OperationID, "api call success to sendMsgReq", params)
 	pbData := newUserSendMsgReq(token, &params)
-	log.Info("", "", "api SendMsg call start..., [data: %s]", pbData.String())
+	log.Info(params.OperationID, "", "api SendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, params.OperationID)
+	if etcdConn == nil {
+		errMsg := params.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(params.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbChat.NewChatClient(etcdConn)
 
 	log.Info("", "", "api SendMsg call, api call rpc...")
@@ -82,7 +88,7 @@ func SendMsg(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": "SendMsg rpc failed, " + err.Error()})
 		return
 	}
-	log.Info("", "", "api SendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
+	log.Info(params.OperationID, "", "api SendMsg call end..., [data: %s] [reply: %s]", pbData.String(), reply.String())
 
 	c.JSON(http.StatusOK, gin.H{
 		"errCode": reply.ErrCode,

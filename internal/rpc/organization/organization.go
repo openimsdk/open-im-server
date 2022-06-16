@@ -114,7 +114,14 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
 	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		resp.ErrCode = constant.ErrInternal.ErrCode
+		resp.ErrMsg = errMsg
+		return resp, nil
+	}
 	client := groupRpc.NewGroupClient(etcdConn)
 	createGroupReq := &groupRpc.CreateGroupReq{
 		InitMemberList: []*groupRpc.GroupAddMemberInfo{},
@@ -228,7 +235,12 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 	utils.CopyStructFields(authReq.UserInfo, req.OrganizationUser)
 	authReq.OperationID = req.OperationID
 	if req.IsRegister {
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+		if etcdConn == nil {
+			errMsg := req.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(req.OperationID, errMsg)
+			return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
+		}
 		client := pbAuth.NewAuthClient(etcdConn)
 		reply, err := client.UserRegister(context.Background(), authReq)
 		if err != nil {
@@ -269,7 +281,12 @@ func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rp
 	authReq := &pbAuth.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
 	utils.CopyStructFields(authReq.UserInfo, req.OrganizationUser)
 	authReq.OperationID = req.OperationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
+	}
 	client := pbAuth.NewAuthClient(etcdConn)
 
 	reply, err := client.UserRegister(context.Background(), authReq)
