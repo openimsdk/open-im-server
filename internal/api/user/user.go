@@ -15,6 +15,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"net/http"
 	"strings"
 )
@@ -197,8 +198,6 @@ func GetUsersInfo(c *gin.Context) {
 
 func UpdateUserInfo(c *gin.Context) {
 	params := api.UpdateSelfUserInfoReq{}
-	var t int32
-	params.GlobalRecvMsgOpt = &t
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -218,7 +217,7 @@ func UpdateUserInfo(c *gin.Context) {
 	}
 	log.NewInfo(params.OperationID, "UpdateUserInfo args ", req.String())
 	if params.GlobalRecvMsgOpt != nil {
-		req.GlobalRecvMsgOpt.Value = *params.GlobalRecvMsgOpt
+		req.GlobalRecvMsgOpt = &wrappers.Int32Value{Value: *params.GlobalRecvMsgOpt}
 	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
 	if etcdConn == nil {
