@@ -74,7 +74,13 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 		}
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+		if etcdConn == nil {
+			errMsg := data.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(data.OperationID, errMsg)
+			return true, 0, ""
+		}
+
 		cacheClient := cacheRpc.NewCacheClient(etcdConn)
 		cacheResp, err := cacheClient.GetBlackIDListFromCache(context.Background(), reqGetBlackIDListFromCache)
 		if err != nil {
@@ -91,7 +97,12 @@ func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string)
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 		if config.Config.MessageVerify.FriendVerify {
 			reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+			if etcdConn == nil {
+				errMsg := data.OperationID + "getcdv3.GetConn == nil"
+				log.NewError(data.OperationID, errMsg)
+				return true, 0, ""
+			}
 			cacheClient := cacheRpc.NewCacheClient(etcdConn)
 			cacheResp, err := cacheClient.GetFriendIDListFromCache(context.Background(), reqGetFriendIDListFromCache)
 			if err != nil {
@@ -243,7 +254,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 		}
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pb.OperationID, GroupID: pb.MsgData.GroupID}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, msgToMQSingle.OperationID)
+		if etcdConn == nil {
+			errMsg := msgToMQSingle.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(msgToMQSingle.OperationID, errMsg)
+			return returnMsg(&replay, pb, 201, errMsg, "", 0)
+		}
 		client := pbCache.NewCacheClient(etcdConn)
 		cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
 		if err != nil {
@@ -351,7 +367,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 						conversationReq.UserIDList = pb.MsgData.AtUserIDList
 						conversation.GroupAtType = constant.AtMe
 					}
-					etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+					etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
+					if etcdConn == nil {
+						errMsg := pb.OperationID + "getcdv3.GetConn == nil"
+						log.NewError(pb.OperationID, errMsg)
+						return
+					}
 					client := pbConversation.NewConversationClient(etcdConn)
 					conversationReply, err := client.ModifyConversationField(context.Background(), &conversationReq)
 					if err != nil {
@@ -362,7 +383,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					if tag {
 						conversationReq.UserIDList = utils.DifferenceString(atUserID, memberUserIDList)
 						conversation.GroupAtType = constant.AtAll
-						etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+						etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
+						if etcdConn == nil {
+							errMsg := pb.OperationID + "getcdv3.GetConn == nil"
+							log.NewError(pb.OperationID, errMsg)
+							return
+						}
 						client := pbConversation.NewConversationClient(etcdConn)
 						conversationReply, err := client.ModifyConversationField(context.Background(), &conversationReq)
 						if err != nil {
@@ -794,7 +820,13 @@ func Notification(n *NotificationMsg) {
 	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		return
+	}
+
 	client := pbChat.NewChatClient(etcdConn)
 	reply, err := client.SendMsg(context.Background(), &req)
 	if err != nil {
