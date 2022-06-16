@@ -36,7 +36,13 @@ func UserRegister(c *gin.Context) {
 	//copier.Copy(req.UserInfo, &params)
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + " getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserRegister(context.Background(), req)
 	if err != nil {
@@ -84,7 +90,13 @@ func UserToken(c *gin.Context) {
 	}
 	req := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID}
 	log.NewInfo(req.OperationID, "UserToken args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + " getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserToken(context.Background(), req)
 	if err != nil {
@@ -148,7 +160,13 @@ func ForceLogout(c *gin.Context) {
 	}
 
 	log.NewInfo(req.OperationID, "ForceLogout args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + " getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.ForceLogout(context.Background(), req)
 	if err != nil {

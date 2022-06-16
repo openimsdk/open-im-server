@@ -2,6 +2,7 @@ package getcdv3
 
 import (
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
 	"go.etcd.io/etcd/api/v3/mvccpb"
@@ -32,12 +33,13 @@ var (
 	rwNameResolverMutex sync.RWMutex
 )
 
-func NewResolver(schema, etcdAddr, serviceName string) (*Resolver, error) {
+func NewResolver(schema, etcdAddr, serviceName string, operationID string) (*Resolver, error) {
 	etcdCli, err := clientv3.New(clientv3.Config{
 		Endpoints: strings.Split(etcdAddr, ","),
 	})
 	if err != nil {
-		return nil, err
+		log.Error(operationID, "etcd client v3 failed")
+		return nil, utils.Wrap(err, "")
 	}
 
 	var r Resolver
@@ -51,18 +53,11 @@ func NewResolver(schema, etcdAddr, serviceName string) (*Resolver, error) {
 	conn, err := grpc.DialContext(ctx, GetPrefix(schema, serviceName),
 		grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
 		grpc.WithInsecure())
-	log.Debug("", "etcd key ", GetPrefix(schema, serviceName))
-
-	//conn, err := grpc.Dial(
-	//	GetPrefix(schema, serviceName),
-	//	grpc.WithDefaultServiceConfig(fmt.Sprintf(`{"LoadBalancingPolicy": "%s"}`, roundrobin.Name)),
-	//	grpc.WithInsecure(),
-	//	grpc.WithTimeout(time.Duration(5)*time.Second),
-	//)
+	log.Debug(operationID, "etcd key ", GetPrefix(schema, serviceName))
 	if err == nil {
 		r.grpcClientConn = conn
 	}
-	return &r, err
+	return &r, utils.Wrap(err, "")
 }
 
 func (r1 *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
@@ -71,12 +66,12 @@ func (r1 *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
 func (r1 *Resolver) Close() {
 }
 
-func GetConn(schema, etcdaddr, serviceName string) *grpc.ClientConn {
+func GetConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
 	rwNameResolverMutex.RLock()
 	r, ok := nameResolver[schema+serviceName]
 	rwNameResolverMutex.RUnlock()
 	if ok {
-		log.Debug("", "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
+		log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
 		return r.grpcClientConn
 	}
 
@@ -84,18 +79,18 @@ func GetConn(schema, etcdaddr, serviceName string) *grpc.ClientConn {
 	r, ok = nameResolver[schema+serviceName]
 	if ok {
 		rwNameResolverMutex.Unlock()
-		log.Debug("", "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
+		log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
 		return r.grpcClientConn
 	}
 
-	r, err := NewResolver(schema, etcdaddr, serviceName)
+	r, err := NewResolver(schema, etcdaddr, serviceName, operationID)
 	if err != nil {
-		log.Error("", "etcd failed ", schema, etcdaddr, serviceName)
+		log.Error(operationID, "etcd failed ", schema, etcdaddr, serviceName, err.Error())
 		rwNameResolverMutex.Unlock()
 		return nil
 	}
 
-	log.Debug("", "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
+	log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
 	nameResolver[schema+serviceName] = r
 	rwNameResolverMutex.Unlock()
 	return r.grpcClientConn
@@ -220,7 +215,7 @@ func GetConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
 
 	allConn := make([]*grpc.ClientConn, 0)
 	for _, v := range allService {
-		r := GetConn(schema, etcdaddr, v)
+		r := GetConn(schema, etcdaddr, v, "0")
 		allConn = append(allConn, r)
 	}
 
@@ -233,7 +228,7 @@ var (
 )
 
 func GetconnFactory(schema, etcdaddr, servicename string) (*grpc.ClientConn, error) {
-	c := GetConn(schema, etcdaddr, servicename)
+	c := GetConn(schema, etcdaddr, servicename, "0")
 	if c != nil {
 		return c, nil
 	} else {
