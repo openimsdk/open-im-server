@@ -45,5 +45,6 @@ spec:
       targetPort: ws-port
   selector:
     app: msg-gateway
+  type: NodePort   
 
     

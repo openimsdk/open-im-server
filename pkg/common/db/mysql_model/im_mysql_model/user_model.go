@@ -96,16 +96,24 @@ func GetUserNameByUserID(userID string) (string, error) {
 	return user.Nickname, nil
 }
 
-func UpdateUserInfo(user db.User, m ...map[string]interface{}) error {
+func UpdateUserInfo(user db.User) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return err
 	}
 	dbConn.LogMode(false)
 	err = dbConn.Table("users").Where("user_id=?", user.UserID).Update(&user).Error
-	if len(m) > 0 {
-		err = dbConn.Table("users").Where("user_id=?", user.UserID).Updates(m[0]).Error
+
+	return err
+}
+
+func UpdateUserInfoByMap(user db.User, m map[string]interface{}) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
 	}
+	dbConn.LogMode(false)
+	err = dbConn.Table("users").Where("user_id=?", user.UserID).Updates(m).Error
 	return err
 }
 

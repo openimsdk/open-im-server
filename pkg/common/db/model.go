@@ -120,8 +120,8 @@ func init() {
 	})
 	//DB.rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
 	//	Addrs:    []string{config.Config.Redis.DBAddress},
-	//	PoolSize: 100,
-	//	Password: config.Config.Redis.DBPassWord,
+	//	PoolSize: 50,
+	//Password: config.Config.Redis.DBPassWord,
 	//})
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
