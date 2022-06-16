@@ -233,6 +233,44 @@ func UpdateUserInfo(c *gin.Context) {
 	log.NewInfo(req.OperationID, "UpdateUserInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
+func SetGlobalRecvMessageOpt(c *gin.Context) {
+	params := api.SetGlobalRecvMessageOptReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.SetGlobalRecvMessageOptReq{}
+	utils.CopyStructFields(req, &params)
+	req.OperationID = params.OperationID
+	var ok bool
+	var errInfo string
+	ok, req.UserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	log.NewInfo(params.OperationID, "SetGlobalRecvMessageOpt args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	client := rpc.NewUserClient(etcdConn)
+	RpcResp, err := client.SetGlobalRecvMessageOpt(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "SetGlobalRecvMessageOpt failed ", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
+		return
+	}
+	resp := api.UpdateUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+	log.NewInfo(req.OperationID, "SetGlobalRecvMessageOpt api return ", resp)
+	c.JSON(http.StatusOK, resp)
+}
 
 func GetSelfUserInfo(c *gin.Context) {
 	params := api.GetSelfUserInfoReq{}
