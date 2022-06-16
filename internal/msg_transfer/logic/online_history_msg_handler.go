@@ -155,11 +155,17 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 	}
 }
 func (och *OnlineHistoryConsumerHandler) SendMessageToMongoCH(aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq uint64) {
-	hashCode := getHashCode(aggregationID)
-	channelID := hashCode % ChannelNum
-	log.Debug(triggerID, "generate channelID", hashCode, channelID, aggregationID)
-	//go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
-	och.chMongoArrays[channelID] <- Cmd2Value{Cmd: MongoMessages, Value: MsgChannelValue{aggregationID: aggregationID, msgList: messages, triggerID: triggerID, lastSeq: lastSeq}}
+	pid, offset, err := producerToMongo.SendMessage(&pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: aggregationID, MessageList: messages, TriggerID: triggerID}, aggregationID, triggerID)
+	if err != nil {
+		log.Error(triggerID, "kafka send failed", "send data", len(messages), "pid", pid, "offset", offset, "err", err.Error(), "key", aggregationID)
+	} else {
+		//	log.NewWarn(m.OperationID, "sendMsgToKafka   client msgID ", m.MsgData.ClientMsgID)
+	}
+	//hashCode := getHashCode(aggregationID)
+	//channelID := hashCode % ChannelNum
+	//log.Debug(triggerID, "generate channelID", hashCode, channelID, aggregationID)
+	////go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
+	//och.chMongoArrays[channelID] <- Cmd2Value{Cmd: MongoMessages, Value: MsgChannelValue{aggregationID: aggregationID, msgList: messages, triggerID: triggerID, lastSeq: lastSeq}}
 }
 func (och *OnlineHistoryConsumerHandler) MongoMessageRun(channelID int) {
 	for {

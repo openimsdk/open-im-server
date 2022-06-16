@@ -22,6 +22,7 @@ var (
 	persistentCH          PersistentConsumerHandler
 	historyCH             OnlineHistoryConsumerHandler
 	producer              *kafka.Producer
+	producerToMongo       *kafka.Producer
 	cmdCh                 chan Cmd2Value
 	onlineTopicStatus     int
 	w                     *sync.Mutex
@@ -43,6 +44,7 @@ func Init() {
 	statistics.NewStatistics(&singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	statistics.NewStatistics(&groupMsgCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second groupMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ms2pschat.Addr, config.Config.Kafka.Ms2pschat.Topic)
+	producerToMongo = kafka.NewKafkaProducer(config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.MsgToMongo.Topic)
 }
 func Run() {
 	//register mysqlConsumerHandler to
