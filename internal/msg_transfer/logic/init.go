@@ -53,7 +53,7 @@ func Run() {
 		fmt.Println("not start mysql consumer")
 	}
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
-	go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
+	//go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
 	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
 }
 func SetOnlineTopicStatus(status int) {
