@@ -87,7 +87,7 @@ func MinioUploadFile(c *gin.Context) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), config.Config.Credential.Minio.Bucket, newName, fileObj, file.Size, newType, MinioClient.EndpointURL())
 	_, err = MinioClient.PutObject(context.Background(), config.Config.Credential.Minio.Bucket, newName, fileObj, file.Size, minio.PutObjectOptions{ContentType: newType})
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "upload file error")
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "upload file error", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "upload file error" + err.Error()})
 		return
 	}
