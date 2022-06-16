@@ -191,7 +191,9 @@ func UpdateUserInfo(c *gin.Context) {
 		return
 	}
 	log.NewInfo(params.OperationID, "UpdateUserInfo args ", req.String())
-
+	if params.GlobalRecvMsgOpt != nil {
+		req.GlobalRecvMsgOpt.Value = *params.GlobalRecvMsgOpt
+	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
 	client := rpc.NewUserClient(etcdConn)
 	RpcResp, err := client.UpdateUserInfo(context.Background(), req)
