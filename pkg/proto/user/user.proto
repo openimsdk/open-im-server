@@ -69,7 +69,7 @@ message UpdateUserInfoResp{
 message SetGlobalRecvMessageOptReq{
   string userID = 1;
   string  operationID = 2;
-  int32 opt = 3;
+  int32 globalRecvMsgOpt = 3;
 }
 message SetGlobalRecvMessageOptResp{
   CommonResp  commonResp = 1;
