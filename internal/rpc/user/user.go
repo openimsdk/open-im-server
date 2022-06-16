@@ -383,7 +383,16 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if req.UserInfo.Birth != 0 {
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
-	err := imdb.UpdateUserInfo(user)
+	m := make(map[string]interface{}, 1)
+	if req.GlobalRecvMsgOpt != nil {
+		m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt
+		err := db.DB.SetUserGlobalMsgRecvOpt(user.UserID, req.GlobalRecvMsgOpt.Value)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetUserGlobalMsgRecvOpt failed ", err.Error(), user)
+			return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		}
+	}
+	err := imdb.UpdateUserInfo(user, m)
 	if err != nil {
 		log.NewError(req.OperationID, "UpdateUserInfo failed ", err.Error(), user)
 		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
