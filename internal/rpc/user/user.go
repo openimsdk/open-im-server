@@ -391,12 +391,19 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetUserGlobalMsgRecvOpt failed ", err.Error(), user)
 			return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
+		err = imdb.UpdateUserInfoByMap(user, m)
+		if err != nil {
+			log.NewError(req.OperationID, "UpdateUserInfo failed ", err.Error(), user)
+			return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		}
+	} else {
+		err := imdb.UpdateUserInfo(user)
+		if err != nil {
+			log.NewError(req.OperationID, "UpdateUserInfo failed ", err.Error(), user)
+			return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		}
 	}
-	err := imdb.UpdateUserInfo(user, m)
-	if err != nil {
-		log.NewError(req.OperationID, "UpdateUserInfo failed ", err.Error(), user)
-		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
-	}
+
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := pbFriend.NewFriendClient(etcdConn)
 	newReq := &pbFriend.GetFriendListReq{
