@@ -1,6 +1,5 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-import "Open_IM/pkg/proto/sdk_ws/wrappers.proto";
 option go_package = "./user;user";
 package user;
 
@@ -63,7 +62,6 @@ message UpdateUserInfoReq{
   server_api_params.UserInfo UserInfo = 1;
   string OpUserID = 2;
   string  operationID = 3;
-  google.protobuf.Int32Value globalRecvMsgOpt = 4;
 }
 message UpdateUserInfoResp{
   CommonResp  commonResp = 1;
