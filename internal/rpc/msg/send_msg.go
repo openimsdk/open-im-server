@@ -160,29 +160,29 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
-
 	}
 }
 func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
 	newTime := db.GetCurrentTimestampByMill()
-	log.NewWarn(pb.OperationID, "rpc sendMsg come here", pb.String(), pb.MsgData.ClientMsgID)
+	log.Info(pb.OperationID, "rpc sendMsg come here ", pb.String())
 	flag, errCode, errMsg := isMessageHasReadEnabled(pb)
+	log.Info(pb.OperationID, "isMessageHasReadEnabled ", flag)
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
 	flag, errCode, errMsg = userRelationshipVerification(pb)
+	log.Info(pb.OperationID, "userRelationshipVerification ", flag)
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
 	rpc.encapsulateMsgData(pb.MsgData)
-	log.Info("", "this is a test MsgData ", pb.MsgData)
 	msgToMQSingle := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: pb.MsgData}
-
 	// callback
 	callbackResp := callbackWordFilter(pb)
+	log.Info(pb.OperationID, "callbackWordFilter ", callbackResp)
 	if callbackResp.ErrCode != 0 {
-		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter resp: ", callbackResp)
+		log.Error(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter resp: ", callbackResp)
 	}
 	log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackResp: ", callbackResp)
 	if callbackResp.ActionCode != constant.ActionAllow {
@@ -212,7 +212,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.NewInfo(msgToMQSingle.OperationID, msgToMQSingle)
 			err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.RecvID, constant.OnlineStatus)
 			if err1 != nil {
-				log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
+				log.NewError(msgToMQSingle.OperationID, "kafka send msg err :RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String(), err1.Error())
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
