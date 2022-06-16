@@ -15,7 +15,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/protobuf/ptypes/wrappers"
 	"net/http"
 	"strings"
 )
@@ -216,9 +215,6 @@ func UpdateUserInfo(c *gin.Context) {
 		return
 	}
 	log.NewInfo(params.OperationID, "UpdateUserInfo args ", req.String())
-	if params.GlobalRecvMsgOpt != nil {
-		req.GlobalRecvMsgOpt = &wrappers.Int32Value{Value: *params.GlobalRecvMsgOpt}
-	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetConn == nil"
