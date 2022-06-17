@@ -63,9 +63,11 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	successCount++
 	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
 		// save invitation info for offline push
-		if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
-			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
-			return
+		if pushMsg.MsgData.ContentType == constant.SignalingNotification {
+			if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
+				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
+				return
+			}
 		}
 		for _, v := range wsResult {
 			if v.ResultCode == 0 {
