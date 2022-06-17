@@ -49,12 +49,6 @@ func ConversationSetPrivateNotification(operationID, sendID, recvID string, isPr
 	}
 	var tips open_im_sdk.TipsComm
 	var tipsMsg string
-	//var senderName string
-	//senderName, err := im_mysql_model.GetUserNameByUserID(sendID)
-	//if err != nil {
-	//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
-	//	senderName = sendID
-	//}
 	if isPrivateChat == true {
 		tipsMsg = config.Config.Notification.ConversationSetPrivate.DefaultTips.OpenTips
 	} else {

@@ -10,6 +10,7 @@ import (
 	pb "Open_IM/pkg/proto/statistics"
 	"Open_IM/pkg/utils"
 	"context"
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -27,9 +28,16 @@ func GetMessagesStatistics(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
+	reqPb.OperationID = utils.OperationIDGenerator()
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	if etcdConn == nil {
+		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(reqPb.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetMessageStatistics(context.Background(), &reqPb)
 	if err != nil {
@@ -58,7 +66,7 @@ func GetMessagesStatistics(c *gin.Context) {
 			MessageNum: int(v.Num),
 		})
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -74,13 +82,20 @@ func GetUserStatistics(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
+	reqPb.OperationID = utils.OperationIDGenerator()
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	if etcdConn == nil {
+		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(reqPb.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetUserStatistics(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), "GetUserStatistics failed", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetUserStatistics failed", err.Error())
 		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
@@ -115,7 +130,7 @@ func GetUserStatistics(c *gin.Context) {
 			TotalUserNum: int(v.Num),
 		})
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -131,9 +146,16 @@ func GetGroupStatistics(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
+	reqPb.OperationID = utils.OperationIDGenerator()
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	if etcdConn == nil {
+		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(reqPb.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetGroupStatistics(context.Background(), &reqPb)
 	if err != nil {
@@ -165,7 +187,7 @@ func GetGroupStatistics(c *gin.Context) {
 			})
 
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -181,9 +203,16 @@ func GetActiveUser(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
+	reqPb.OperationID = utils.OperationIDGenerator()
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, req)
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	if etcdConn == nil {
+		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(reqPb.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetActiveUser(context.Background(), &reqPb)
 	if err != nil {
@@ -192,7 +221,7 @@ func GetActiveUser(c *gin.Context) {
 		return
 	}
 	utils.CopyStructFields(&resp.ActiveUserList, respPb.Users)
-	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
 
@@ -208,13 +237,20 @@ func GetActiveGroup(c *gin.Context) {
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "req: ", req)
+	reqPb.OperationID = utils.OperationIDGenerator()
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, req)
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	if etcdConn == nil {
+		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(reqPb.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pb.NewUserClient(etcdConn)
 	respPb, err := client.GetActiveGroup(context.Background(), &reqPb)
 	if err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), "GetActiveGroup failed ", err.Error())
+		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetActiveGroup failed ", err.Error())
 		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
@@ -229,6 +265,6 @@ func GetActiveGroup(c *gin.Context) {
 			MessageNum: int(group.MessageNum),
 		})
 	}
-	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }

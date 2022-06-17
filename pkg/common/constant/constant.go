@@ -68,26 +68,32 @@ const (
 
 	GroupNotificationBegin = 1500
 
-	GroupCreatedNotification             = 1501
-	GroupInfoSetNotification             = 1502
-	JoinGroupApplicationNotification     = 1503
-	MemberQuitNotification               = 1504
-	GroupApplicationAcceptedNotification = 1505
-	GroupApplicationRejectedNotification = 1506
-	GroupOwnerTransferredNotification    = 1507
-	MemberKickedNotification             = 1508
-	MemberInvitedNotification            = 1509
-	MemberEnterNotification              = 1510
-	GroupDismissedNotification           = 1511
-	GroupMemberMutedNotification         = 1512
-	GroupMemberCancelMutedNotification   = 1513
-	GroupMutedNotification               = 1514
-	GroupCancelMutedNotification         = 1515
-	GroupMemberInfoSetNotification       = 1516
+	GroupCreatedNotification                 = 1501
+	GroupInfoSetNotification                 = 1502
+	JoinGroupApplicationNotification         = 1503
+	MemberQuitNotification                   = 1504
+	GroupApplicationAcceptedNotification     = 1505
+	GroupApplicationRejectedNotification     = 1506
+	GroupOwnerTransferredNotification        = 1507
+	MemberKickedNotification                 = 1508
+	MemberInvitedNotification                = 1509
+	MemberEnterNotification                  = 1510
+	GroupDismissedNotification               = 1511
+	GroupMemberMutedNotification             = 1512
+	GroupMemberCancelMutedNotification       = 1513
+	GroupMutedNotification                   = 1514
+	GroupCancelMutedNotification             = 1515
+	GroupMemberInfoSetNotification           = 1516
+	GroupMemberSetToAdminNotification        = 1517
+	GroupMemberSetToOrdinaryUserNotification = 1518
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601
-	SignalingNotificationEnd   = 1699
+	SignalingNotificationEnd   = 1649
+
+	SuperGroupNotificationBegin  = 1650
+	SuperGroupUpdateNotification = 1651
+	SuperGroupNotificationEnd    = 1699
 
 	ConversationPrivateChatNotification = 1701
 
@@ -96,7 +102,7 @@ const (
 	WorkMomentNotificationBegin = 1900
 	WorkMomentNotification      = 1901
 
-	NotificationEnd = 2000
+	NotificationEnd = 3000
 
 	//status
 	MsgNormal  = 1
@@ -107,9 +113,9 @@ const (
 	SysMsgType  = 200
 
 	//SessionType
-	SingleChatType = 1
-	GroupChatType  = 2
-
+	SingleChatType       = 1
+	GroupChatType        = 2
+	SuperGroupChatType   = 3
 	NotificationChatType = 4
 	//token
 	NormalToken  = 0
@@ -156,7 +162,8 @@ const (
 
 	//GroupType
 	NormalGroup     = 0
-	DepartmentGroup = 1
+	SuperGroup      = 1
+	DepartmentGroup = 2
 
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
@@ -206,11 +213,12 @@ const (
 	WorkMomentAtUserNotification  = 2
 )
 const (
-	AtAllString = "AtAllTag"
-	AtNormal    = 0
-	AtMe        = 1
-	AtAll       = 2
-	AtAllAtMe   = 3
+	AtAllString       = "AtAllTag"
+	AtNormal          = 0
+	AtMe              = 1
+	AtAll             = 2
+	AtAllAtMe         = 3
+	GroupNotification = 4
 )
 
 var ContentType2PushContent = map[int64]string{
@@ -275,7 +283,7 @@ func GroupIsBanPrivateChat(status int32) bool {
 	return true
 }
 
-const BigVersion = "v3"
+const BigVersion = "v2"
 
 const LogFileName = "OpenIM.log"
 

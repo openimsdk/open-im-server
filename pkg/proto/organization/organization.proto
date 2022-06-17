@@ -67,6 +67,7 @@ message CreateOrganizationUserReq{
   server_api_params.OrganizationUser organizationUser = 1;
   string operationID = 2;
   string opUserID = 3;
+  bool IsRegister = 4;
 }
 
 

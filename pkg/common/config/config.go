@@ -85,23 +85,24 @@ type config struct {
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
 	}
 	Mongo struct {
-		DBUri               string   `yaml:"dbUri"`
-		DBAddress           []string `yaml:"dbAddress"`
-		DBDirect            bool     `yaml:"dbDirect"`
-		DBTimeout           int      `yaml:"dbTimeout"`
-		DBDatabase          string   `yaml:"dbDatabase"`
-		DBSource            string   `yaml:"dbSource"`
-		DBUserName          string   `yaml:"dbUserName"`
-		DBPassword          string   `yaml:"dbPassword"`
-		DBMaxPoolSize       int      `yaml:"dbMaxPoolSize"`
-		DBRetainChatRecords int      `yaml:"dbRetainChatRecords"`
+		DBUri               string `yaml:"dbUri"`
+		DBAddress           string `yaml:"dbAddress"`
+		DBDirect            bool   `yaml:"dbDirect"`
+		DBTimeout           int    `yaml:"dbTimeout"`
+		DBDatabase          string `yaml:"dbDatabase"`
+		DBSource            string `yaml:"dbSource"`
+		DBUserName          string `yaml:"dbUserName"`
+		DBPassword          string `yaml:"dbPassword"`
+		DBMaxPoolSize       int    `yaml:"dbMaxPoolSize"`
+		DBRetainChatRecords int    `yaml:"dbRetainChatRecords"`
 	}
 	Redis struct {
-		DBAddress     string `yaml:"dbAddress"`
-		DBMaxIdle     int    `yaml:"dbMaxIdle"`
-		DBMaxActive   int    `yaml:"dbMaxActive"`
-		DBIdleTimeout int    `yaml:"dbIdleTimeout"`
-		DBPassWord    string `yaml:"dbPassWord"`
+		DBAddress     []string `yaml:"dbAddress"`
+		DBMaxIdle     int      `yaml:"dbMaxIdle"`
+		DBMaxActive   int      `yaml:"dbMaxActive"`
+		DBIdleTimeout int      `yaml:"dbIdleTimeout"`
+		DBPassWord    string   `yaml:"dbPassWord"`
+		EnableCluster bool     `yaml:"enableCluster"`
 	}
 	RpcPort struct {
 		OpenImUserPort           []int `yaml:"openImUserPort"`
@@ -190,8 +191,9 @@ type config struct {
 		}
 	}
 	Manager struct {
-		AppManagerUid []string `yaml:"appManagerUid"`
-		Secrets       []string `yaml:"secrets"`
+		AppManagerUid          []string `yaml:"appManagerUid"`
+		Secrets                []string `yaml:"secrets"`
+		AppSysNotificationName string   `yaml:"appSysNotificationName"`
 	}
 
 	Kafka struct {
@@ -203,15 +205,19 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
+		MsgToMongo struct {
+			Addr  []string `yaml:"addr"`
+			Topic string   `yaml:"topic"`
+		}
 		Ms2pschat struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
 		ConsumerGroupID struct {
-			MsgToMongo        string `yaml:"msgToMongo"`
-			MsgToMongoOffline string `yaml:"msgToMongoOffline"`
-			MsgToMySql        string `yaml:"msgToMySql"`
-			MsgToPush         string `yaml:"msgToPush"`
+			MsgToRedis string `yaml:"msgToTransfer"`
+			MsgToMongo string `yaml:"msgToMongo"`
+			MsgToMySql string `yaml:"msgToMySql"`
+			MsgToPush  string `yaml:"msgToPush"`
 		}
 	}
 	Secret                            string `yaml:"secret"`
@@ -221,7 +227,8 @@ type config struct {
 	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
 	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
 	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
-	TokenPolicy                       struct {
+
+	TokenPolicy struct {
 		AccessSecret string `yaml:"accessSecret"`
 		AccessExpire int64  `yaml:"accessExpire"`
 	}
@@ -340,6 +347,16 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"groupMemberInfoSet"`
+		GroupMemberSetToAdmin struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberSetToAdmin"`
+		GroupMemberSetToOrdinary struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberSetToOrdinaryUser"`
 		OrganizationChanged struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`

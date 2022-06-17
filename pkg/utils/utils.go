@@ -149,7 +149,7 @@ func String2Pb(s string, pb proto.Message) error {
 	return proto.Unmarshal([]byte(s), pb)
 }
 
-func Map2Pb(m map[string]interface{}) (pb proto.Message, err error) {
+func Map2Pb(m map[string]string) (pb proto.Message, err error) {
 	b, err := json.Marshal(m)
 	if err != nil {
 		return nil, err
@@ -165,7 +165,7 @@ func Pb2Map(pb proto.Message) (map[string]interface{}, error) {
 	jsonbMarshaller := &jsonpb.Marshaler{
 		OrigName:     true,
 		EnumsAsInts:  true,
-		EmitDefaults: true,
+		EmitDefaults: false,
 	}
 	_ = jsonbMarshaller.Marshal(&_buffer, pb)
 	jsonCnt := _buffer.Bytes()

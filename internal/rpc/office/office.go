@@ -205,7 +205,15 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	}
 	var groupUserIDList []string
 	for _, groupID := range req.GroupList {
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
+		if etcdConn == nil {
+			errMsg := req.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(req.OperationID, errMsg)
+			resp.CommonResp.ErrCode = constant.ErrInternal.ErrCode
+			resp.CommonResp.ErrMsg = errMsg
+			return resp, nil
+		}
+
 		cacheClient := pbCache.NewCacheClient(etcdConn)
 		req := pbCache.GetGroupMemberIDListFromCacheReq{
 			OperationID: req.OperationID,

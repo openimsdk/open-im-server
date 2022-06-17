@@ -6,7 +6,7 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
-	"github.com/garyburd/redigo/redis"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
@@ -37,7 +37,26 @@ func BuildClaims(uid, platform string, ttl int64) Claims {
 		}}
 }
 
-func CreateToken(userID string, platformID int32) (string, int64, error) {
+func DeleteToken(userID string, platformID int) error {
+	m, err := commonDB.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
+	if err != nil && err != go_redis.Nil {
+		return utils.Wrap(err, "")
+	}
+	var deleteTokenKey []string
+	for k, v := range m {
+		_, err = GetClaimFromToken(k)
+		if err != nil || v != constant.NormalToken {
+			deleteTokenKey = append(deleteTokenKey, k)
+		}
+	}
+	if len(deleteTokenKey) != 0 {
+		err = commonDB.DB.DeleteTokenByUidPid(userID, platformID, deleteTokenKey)
+		return utils.Wrap(err, "")
+	}
+	return nil
+}
+
+func CreateToken(userID string, platformID int) (string, int64, error) {
 	claims := BuildClaims(userID, constant.PlatformIDToName(platformID), config.Config.TokenPolicy.AccessExpire)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(config.Config.TokenPolicy.AccessSecret))
@@ -46,7 +65,7 @@ func CreateToken(userID string, platformID int32) (string, int64, error) {
 	}
 	//remove Invalid token
 	m, err := commonDB.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
-	if err != nil && err != redis.ErrNil {
+	if err != nil && err != go_redis.Nil {
 		return "", 0, err
 	}
 	var deleteTokenKey []string
@@ -226,15 +245,19 @@ func VerifyToken(token, uid string) (bool, error) {
 	return true, nil
 }
 func WsVerifyToken(token, uid string, platformID string, operationID string) (bool, error, string) {
+	argMsg := "token: " + token + " operationID: " + operationID + " userID: " + uid + " platformID: " + platformID
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
-		return false, utils.Wrap(err, "parse token err"), "parse token err"
+		errMsg := "parse token err " + argMsg
+		return false, utils.Wrap(err, errMsg), errMsg
 	}
 	if claims.UID != uid {
-		return false, utils.Wrap(&constant.ErrTokenUnknown, "uid is not same to token uid"), "uid is not same to token uid"
+		errMsg := " uid is not same to token uid " + " claims.UID " + claims.UID + argMsg
+		return false, utils.Wrap(&constant.ErrTokenUnknown, errMsg), errMsg
 	}
-	if claims.Platform != constant.PlatformIDToName(utils.StringToInt32(platformID)) {
-		return false, utils.Wrap(&constant.ErrTokenUnknown, "platform is not same to token platform"), "platform is not same to token platform"
+	if claims.Platform != constant.PlatformIDToName(utils.StringToInt(platformID)) {
+		errMsg := " platform is not same to token platform " + argMsg + "claims platformID " + claims.Platform
+		return false, utils.Wrap(&constant.ErrTokenUnknown, errMsg), errMsg
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), " check ok ", claims.UID, uid, claims.Platform)
 	return true, nil, ""

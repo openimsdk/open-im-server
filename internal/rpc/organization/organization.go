@@ -102,7 +102,7 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 		log.Error(req.OperationID, errMsg)
 		return &rpc.CreateDepartmentResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
 	}
-	err, createdDepartment := imdb.GetDepartment(department.DepartmentID)
+	createdDepartment, err := imdb.GetDepartment(department.DepartmentID)
 	if err != nil {
 		errMsg := req.OperationID + " " + "GetDepartment failed " + err.Error() + department.DepartmentID
 		log.Error(req.OperationID, errMsg)
@@ -114,19 +114,29 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
 	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		resp.ErrCode = constant.ErrInternal.ErrCode
+		resp.ErrMsg = errMsg
+		return resp, nil
+	}
 	client := groupRpc.NewGroupClient(etcdConn)
 	createGroupReq := &groupRpc.CreateGroupReq{
-		InitMemberList: nil,
+		InitMemberList: []*groupRpc.GroupAddMemberInfo{},
 		GroupInfo: &open_im_sdk.GroupInfo{
+			Introduction:  req.DepartmentInfo.Name,
 			GroupName:     req.DepartmentInfo.Name,
 			FaceURL:       req.DepartmentInfo.FaceURL,
 			CreateTime:    uint32(time.Now().Unix()),
 			CreatorUserID: req.OpUserID,
-			GroupType:     constant.DepartmentGroup,
+			GroupType:     constant.NormalGroup,
+			OwnerUserID:   req.OpUserID,
 		},
 		OperationID: req.OperationID,
 		OpUserID:    req.OpUserID,
+		OwnerUserID: req.OpUserID,
 	}
 	createGroupResp, err := client.CreateGroup(context.Background(), createGroupReq)
 	if err != nil {
@@ -140,6 +150,9 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 		resp.ErrCode = constant.ErrDB.ErrCode
 		resp.ErrMsg = constant.ErrDB.ErrMsg + " createGroup failed " + createGroupResp.ErrMsg
 		return resp, nil
+	}
+	if err := imdb.SetDepartmentRelatedGroupID(createGroupResp.GroupInfo.GroupID, department.DepartmentID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetDepartmentRelatedGroupID failed", err.Error())
 	}
 	return resp, nil
 }
@@ -221,21 +234,26 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 	authReq := &pbAuth.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
 	utils.CopyStructFields(authReq.UserInfo, req.OrganizationUser)
 	authReq.OperationID = req.OperationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
-	client := pbAuth.NewAuthClient(etcdConn)
-
-	reply, err := client.UserRegister(context.Background(), authReq)
-	if err != nil {
-		errMsg := "UserRegister failed " + err.Error()
-		log.NewError(req.OperationID, errMsg)
-		return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+	if req.IsRegister {
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+		if etcdConn == nil {
+			errMsg := req.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(req.OperationID, errMsg)
+			return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
+		}
+		client := pbAuth.NewAuthClient(etcdConn)
+		reply, err := client.UserRegister(context.Background(), authReq)
+		if err != nil {
+			errMsg := "UserRegister failed " + err.Error()
+			log.NewError(req.OperationID, errMsg)
+			return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+		}
+		if reply.CommonResp.ErrCode != 0 {
+			errMsg := "UserRegister failed " + reply.CommonResp.ErrMsg
+			log.NewError(req.OperationID, errMsg)
+			return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+		}
 	}
-	if reply.CommonResp.ErrCode != 0 {
-		errMsg := "UserRegister failed " + reply.CommonResp.ErrMsg
-		log.NewError(req.OperationID, errMsg)
-		return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
-	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
 		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
@@ -246,7 +264,7 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 	utils.CopyStructFields(&organizationUser, req.OrganizationUser)
 	organizationUser.Birth = utils.UnixSecondToTime(int64(req.OrganizationUser.Birth))
 	log.Debug(req.OperationID, "src ", *req.OrganizationUser, "dst ", organizationUser)
-	err = imdb.CreateOrganizationUser(&organizationUser)
+	err := imdb.CreateOrganizationUser(&organizationUser)
 	if err != nil {
 		errMsg := req.OperationID + " " + "CreateOrganizationUser failed " + err.Error()
 		log.Error(req.OperationID, errMsg, organizationUser)
@@ -263,7 +281,12 @@ func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rp
 	authReq := &pbAuth.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
 	utils.CopyStructFields(authReq.UserInfo, req.OrganizationUser)
 	authReq.OperationID = req.OperationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
+	}
 	client := pbAuth.NewAuthClient(etcdConn)
 
 	reply, err := client.UserRegister(context.Background(), authReq)
@@ -340,13 +363,14 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 func (s *organizationServer) GetDepartmentParentIDList(_ context.Context, req *rpc.GetDepartmentParentIDListReq) (resp *rpc.GetDepartmentParentIDListResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req.String())
 	resp = &rpc.GetDepartmentParentIDListResp{}
-	resp.ParentIDList, err = imdb.GetDepartmentParentIDList(req.DepartmentID)
+	parentIDList, err := imdb.GetDepartmentParentIDList(req.DepartmentID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetDepartmentParentIDList failed", err.Error())
 		resp.ErrMsg = constant.ErrDB.ErrMsg + ": " + err.Error()
 		resp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
+	resp.ParentIDList = parentIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp.String())
 	return resp, nil
 }

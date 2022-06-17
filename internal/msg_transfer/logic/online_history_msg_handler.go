@@ -9,10 +9,8 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbMsg "Open_IM/pkg/proto/chat"
 	pbPush "Open_IM/pkg/proto/push"
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"errors"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"hash/crc32"
@@ -22,10 +20,10 @@ import (
 )
 
 type MsgChannelValue struct {
-	userID    string
-	triggerID string
-	msgList   []*pbMsg.MsgDataToMQ
-	lastSeq   uint64
+	aggregationID string //maybe userID or super groupID
+	triggerID     string
+	msgList       []*pbMsg.MsgDataToMQ
+	lastSeq       uint64
 }
 type TriggerChannelValue struct {
 	triggerID string
@@ -36,27 +34,20 @@ type Cmd2Value struct {
 	Cmd   int
 	Value interface{}
 }
-type OnlineHistoryConsumerHandler struct {
+type OnlineHistoryRedisConsumerHandler struct {
 	msgHandle            map[string]fcb
 	historyConsumerGroup *kfk.MConsumerGroup
-	cmdCh                chan Cmd2Value
 	chArrays             [ChannelNum]chan Cmd2Value
-	chMongoArrays        [ChannelNum]chan Cmd2Value
 	msgDistributionCh    chan Cmd2Value
 }
 
-func (och *OnlineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
+func (och *OnlineHistoryRedisConsumerHandler) Init(cmdCh chan Cmd2Value) {
 	och.msgHandle = make(map[string]fcb)
 	och.msgDistributionCh = make(chan Cmd2Value) //no buffer channel
 	go och.MessagesDistributionHandle()
-	och.cmdCh = cmdCh
 	for i := 0; i < ChannelNum; i++ {
 		och.chArrays[i] = make(chan Cmd2Value, 50)
 		go och.Run(i)
-	}
-	for i := 0; i < ChannelNum; i++ {
-		och.chMongoArrays[i] = make(chan Cmd2Value, 10000)
-		go och.MongoMessageRun(i)
 	}
 	if config.Config.ReliableStorage {
 		och.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = och.handleChatWs2Mongo
@@ -66,60 +57,33 @@ func (och *OnlineHistoryConsumerHandler) Init(cmdCh chan Cmd2Value) {
 	}
 	och.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
-		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMongo)
+		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToRedis)
 
 }
-func (och *OnlineHistoryConsumerHandler) TriggerCmd(status int) {
-	operationID := utils.OperationIDGenerator()
-	err := sendCmd(och.cmdCh, Cmd2Value{Cmd: status, Value: ""}, 1)
-	if err != nil {
-		log.Error(operationID, "TriggerCmd failed ", err.Error(), status)
-		return
-	}
-	log.Debug(operationID, "TriggerCmd success", status)
-
-}
-func sendCmd(ch chan Cmd2Value, value Cmd2Value, timeout int64) error {
-	var flag = 0
-	select {
-	case ch <- value:
-		flag = 1
-	case <-time.After(time.Second * time.Duration(timeout)):
-		flag = 2
-	}
-	if flag == 1 {
-		return nil
-	} else {
-		return errors.New("send cmd timeout")
-	}
-}
-func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
+func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 	for {
 		select {
 		case cmd := <-och.chArrays[channelID]:
 			switch cmd.Cmd {
-			case UserMessages:
+			case AggregationMessages:
 				msgChannelValue := cmd.Value.(MsgChannelValue)
 				msgList := msgChannelValue.msgList
 				triggerID := msgChannelValue.triggerID
 				storageMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
-				notStoragepushMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
-				log.Debug(triggerID, "msg arrived channel", "channel id", channelID, msgList, msgChannelValue.userID, len(msgList))
+				notStoragePushMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
+				log.Debug(triggerID, "msg arrived channel", "channel id", channelID, msgList, msgChannelValue.aggregationID, len(msgList))
 				for _, v := range msgList {
 					log.Debug(triggerID, "msg come to storage center", v.String())
-					if v.MsgData == nil {
-						log.NewWarn(triggerID, "msg come to storage center nil", v.String(), v.OperationID, msgChannelValue.userID)
-						continue
-					}
 					isHistory := utils.GetSwitchFromOptions(v.MsgData.Options, constant.IsHistory)
 					isSenderSync := utils.GetSwitchFromOptions(v.MsgData.Options, constant.IsSenderSync)
 					if isHistory {
 						storageMsgList = append(storageMsgList, v)
 						//log.NewWarn(triggerID, "storageMsgList to mongodb  client msgID: ", v.MsgData.ClientMsgID)
 					} else {
-						if !(!isSenderSync && msgChannelValue.userID == v.MsgData.SendID) {
-							notStoragepushMsgList = append(notStoragepushMsgList, v)
+						if !(!isSenderSync && msgChannelValue.aggregationID == v.MsgData.SendID) {
+							notStoragePushMsgList = append(notStoragePushMsgList, v)
 						}
+
 					}
 
 				}
@@ -132,8 +96,8 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 				//	log.NewError(msgFromMQ.OperationID, "SessionType error", msgFromMQ.String())
 				//	return
 				//}
-				log.Debug(triggerID, "msg storage length", len(storageMsgList), "push length", len(notStoragepushMsgList))
-				err, lastSeq := saveUserChatList(msgChannelValue.userID, storageMsgList, triggerID)
+				log.Debug(triggerID, "msg storage length", len(storageMsgList), "push length", len(notStoragePushMsgList))
+				err, lastSeq := saveUserChatList(msgChannelValue.aggregationID, storageMsgList, triggerID)
 				if err != nil {
 					singleMsgFailedCount += uint64(len(storageMsgList))
 					log.NewError(triggerID, "single data insert to redis err", err.Error(), storageMsgList)
@@ -141,72 +105,79 @@ func (och *OnlineHistoryConsumerHandler) Run(channelID int) {
 					singleMsgSuccessCountMutex.Lock()
 					singleMsgSuccessCount += uint64(len(storageMsgList))
 					singleMsgSuccessCountMutex.Unlock()
-					och.SendMessageToMongoCH(msgChannelValue.userID, triggerID, storageMsgList, lastSeq)
+					och.SendMessageToMongoCH(msgChannelValue.aggregationID, triggerID, storageMsgList, lastSeq)
 					go func(push, storage []*pbMsg.MsgDataToMQ) {
 						for _, v := range storage {
-							sendMessageToPush(v, msgChannelValue.userID)
+							sendMessageToPush(v, msgChannelValue.aggregationID)
 						}
 						for _, x := range push {
-							sendMessageToPush(x, msgChannelValue.userID)
+							sendMessageToPush(x, msgChannelValue.aggregationID)
 						}
 
-					}(notStoragepushMsgList, storageMsgList)
+					}(notStoragePushMsgList, storageMsgList)
 
 				}
 			}
 		}
 	}
 }
-func (och *OnlineHistoryConsumerHandler) SendMessageToMongoCH(userID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq uint64) {
-	hashCode := getHashCode(userID)
-	channelID := hashCode % ChannelNum
-	log.Debug(triggerID, "generate channelID", hashCode, channelID, userID)
-	//go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
-	och.chMongoArrays[channelID] <- Cmd2Value{Cmd: MongoMessages, Value: MsgChannelValue{userID: userID, msgList: messages, triggerID: triggerID, lastSeq: lastSeq}}
-}
-func (och *OnlineHistoryConsumerHandler) MongoMessageRun(channelID int) {
-	for {
-		select {
-		case cmd := <-och.chMongoArrays[channelID]:
-			switch cmd.Cmd {
-			case MongoMessages:
-				msgChannelValue := cmd.Value.(MsgChannelValue)
-				msgList := msgChannelValue.msgList
-				triggerID := msgChannelValue.triggerID
-				userID := msgChannelValue.userID
-				lastSeq := msgChannelValue.lastSeq
-				err := db.DB.BatchInsertChat2DB(userID, msgList, triggerID, lastSeq)
-				if err != nil {
-					log.NewError(triggerID, "single data insert to mongo err", err.Error(), msgList)
-				}
-				for _, v := range msgList {
-					if v.MsgData.ContentType == constant.DeleteMessageNotification {
-						tips := server_api_params.TipsComm{}
-						DeleteMessageTips := server_api_params.DeleteMessageTips{}
-						err := proto.Unmarshal(v.MsgData.Content, &tips)
-						if err != nil {
-							log.NewError(triggerID, "tips unmarshal err:", err.Error(), v.String())
-							continue
-						}
-						err = proto.Unmarshal(tips.Detail, &DeleteMessageTips)
-						if err != nil {
-							log.NewError(triggerID, "deleteMessageTips unmarshal err:", err.Error(), v.String())
-							continue
-						}
-						if unexistSeqList, err := db.DB.DelMsgBySeqList(DeleteMessageTips.UserID, DeleteMessageTips.SeqList, v.OperationID); err != nil {
-							log.NewError(v.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList args: ", DeleteMessageTips.UserID, DeleteMessageTips.SeqList, v.OperationID, err.Error(), unexistSeqList)
-						}
-
-					}
-				}
-			}
-		}
+func (och *OnlineHistoryRedisConsumerHandler) SendMessageToMongoCH(aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq uint64) {
+	pid, offset, err := producerToMongo.SendMessage(&pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: aggregationID, MessageList: messages, TriggerID: triggerID}, aggregationID, triggerID)
+	if err != nil {
+		log.Error(triggerID, "kafka send failed", "send data", len(messages), "pid", pid, "offset", offset, "err", err.Error(), "key", aggregationID)
+	} else {
+		//	log.NewWarn(m.OperationID, "sendMsgToKafka   client msgID ", m.MsgData.ClientMsgID)
 	}
+	//hashCode := getHashCode(aggregationID)
+	//channelID := hashCode % ChannelNum
+	//log.Debug(triggerID, "generate channelID", hashCode, channelID, aggregationID)
+	////go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
+	//och.chMongoArrays[channelID] <- Cmd2Value{Cmd: MongoMessages, Value: MsgChannelValue{aggregationID: aggregationID, msgList: messages, triggerID: triggerID, lastSeq: lastSeq}}
 }
 
-func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
+//func (och *OnlineHistoryRedisConsumerHandler) MongoMessageRun(channelID int) {
+//	for {
+//		select {
+//		case cmd := <-och.chMongoArrays[channelID]:
+//			switch cmd.Cmd {
+//			case MongoMessages:
+//				msgChannelValue := cmd.Value.(MsgChannelValue)
+//				msgList := msgChannelValue.msgList
+//				triggerID := msgChannelValue.triggerID
+//				aggregationID := msgChannelValue.aggregationID
+//				lastSeq := msgChannelValue.lastSeq
+//				err := db.DB.BatchInsertChat2DB(aggregationID, msgList, triggerID, lastSeq)
+//				if err != nil {
+//					log.NewError(triggerID, "single data insert to mongo err", err.Error(), msgList)
+//				}
+//				for _, v := range msgList {
+//					if v.MsgData.ContentType == constant.DeleteMessageNotification {
+//						tips := server_api_params.TipsComm{}
+//						DeleteMessageTips := server_api_params.DeleteMessageTips{}
+//						err := proto.Unmarshal(v.MsgData.Content, &tips)
+//						if err != nil {
+//							log.NewError(triggerID, "tips unmarshal err:", err.Error(), v.String())
+//							continue
+//						}
+//						err = proto.Unmarshal(tips.Detail, &DeleteMessageTips)
+//						if err != nil {
+//							log.NewError(triggerID, "deleteMessageTips unmarshal err:", err.Error(), v.String())
+//							continue
+//						}
+//						if unexistSeqList, err := db.DB.DelMsgBySeqList(DeleteMessageTips.UserID, DeleteMessageTips.SeqList, v.OperationID); err != nil {
+//							log.NewError(v.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList args: ", DeleteMessageTips.UserID, DeleteMessageTips.SeqList, v.OperationID, err.Error(), unexistSeqList)
+//						}
+//
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+
+func (och *OnlineHistoryRedisConsumerHandler) MessagesDistributionHandle() {
 	for {
-		UserAggregationMsgs := make(map[string][]*pbMsg.MsgDataToMQ, ChannelNum)
+		aggregationMsgs := make(map[string][]*pbMsg.MsgDataToMQ, ChannelNum)
 		select {
 		case cmd := <-och.msgDistributionCh:
 			switch cmd.Cmd {
@@ -223,27 +194,24 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 						log.Error(triggerID, "msg_transfer Unmarshal msg err", "msg", string(consumerMessages[i].Value), "err", err.Error())
 						return
 					}
-					log.Debug(triggerID, "single msg come to distribution center", string(consumerMessages[i].Key))
-					if oldM, ok := UserAggregationMsgs[string(consumerMessages[i].Key)]; ok {
+					log.Debug(triggerID, "single msg come to distribution center", msgFromMQ.String(), string(consumerMessages[i].Key))
+					if oldM, ok := aggregationMsgs[string(consumerMessages[i].Key)]; ok {
 						oldM = append(oldM, &msgFromMQ)
-						UserAggregationMsgs[string(consumerMessages[i].Key)] = oldM
+						aggregationMsgs[string(consumerMessages[i].Key)] = oldM
 					} else {
 						m := make([]*pbMsg.MsgDataToMQ, 0, 100)
 						m = append(m, &msgFromMQ)
-						UserAggregationMsgs[string(consumerMessages[i].Key)] = m
+						aggregationMsgs[string(consumerMessages[i].Key)] = m
 					}
 				}
-				log.Debug(triggerID, "generate map list users len", len(UserAggregationMsgs), UserAggregationMsgs)
-				for userID, v := range UserAggregationMsgs {
+				log.Debug(triggerID, "generate map list users len", len(aggregationMsgs))
+				for aggregationID, v := range aggregationMsgs {
 					if len(v) >= 0 {
-						hashCode := getHashCode(userID)
+						hashCode := getHashCode(aggregationID)
 						channelID := hashCode % ChannelNum
-						log.Debug(triggerID, "generate channelID", hashCode, channelID, userID, len(v))
-						for _, y := range v {
-							log.Debug(triggerID, "single user slice is ", y.String())
-						}
+						log.Debug(triggerID, "generate channelID", hashCode, channelID, aggregationID)
 						//go func(cID uint32, userID string, messages []*pbMsg.MsgDataToMQ) {
-						och.chArrays[channelID] <- Cmd2Value{Cmd: UserMessages, Value: MsgChannelValue{userID: userID, msgList: v, triggerID: triggerID}}
+						och.chArrays[channelID] <- Cmd2Value{Cmd: AggregationMessages, Value: MsgChannelValue{aggregationID: aggregationID, msgList: v, triggerID: triggerID}}
 						//}(channelID, userID, v)
 					}
 				}
@@ -253,7 +221,7 @@ func (och *OnlineHistoryConsumerHandler) MessagesDistributionHandle() {
 	}
 
 }
-func (mc *OnlineHistoryConsumerHandler) handleChatWs2Mongo(cMsg *sarama.ConsumerMessage, msgKey string, sess sarama.ConsumerGroupSession) {
+func (mc *OnlineHistoryRedisConsumerHandler) handleChatWs2Mongo(cMsg *sarama.ConsumerMessage, msgKey string, sess sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
 	now := time.Now()
 	msgFromMQ := pbMsg.MsgDataToMQ{}
@@ -325,7 +293,7 @@ func (mc *OnlineHistoryConsumerHandler) handleChatWs2Mongo(cMsg *sarama.Consumer
 	log.NewDebug(msgFromMQ.OperationID, "msg_transfer handle topic data to database success...", msgFromMQ.String())
 }
 
-func (och *OnlineHistoryConsumerHandler) handleChatWs2MongoLowReliability(cMsg *sarama.ConsumerMessage, msgKey string, sess sarama.ConsumerGroupSession) {
+func (och *OnlineHistoryRedisConsumerHandler) handleChatWs2MongoLowReliability(cMsg *sarama.ConsumerMessage, msgKey string, sess sarama.ConsumerGroupSession) {
 	msg := cMsg.Value
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
@@ -365,10 +333,10 @@ func (och *OnlineHistoryConsumerHandler) handleChatWs2MongoLowReliability(cMsg *
 	}
 }
 
-func (OnlineHistoryConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (OnlineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (OnlineHistoryRedisConsumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (OnlineHistoryRedisConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 
-//func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
+//func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 //	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
 //	log.NewDebug("", "online new session msg come", claim.HighWaterMarkOffset(), claim.Topic(), claim.Partition())
 //	for msg := range claim.Messages() {
@@ -385,7 +353,7 @@ func (OnlineHistoryConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error
 //	return nil
 //}
 
-func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
+func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
 
 	for {
@@ -480,7 +448,7 @@ func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupS
 	return nil
 }
 
-//func (och *OnlineHistoryConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
+//func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 //	claim sarama.ConsumerGroupClaim) error { // a instance in the consumer group
 //
 //	for {
@@ -544,7 +512,7 @@ func sendMessageToPush(message *pbMsg.MsgDataToMQ, pushToUserID string) {
 	log.Info(message.OperationID, "msg_transfer send message to push", "message", message.String())
 	rpcPushMsg := pbPush.PushMsgReq{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
 	mqPushMsg := pbMsg.PushMsgDataToMQ{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName)
+	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName, message.OperationID)
 	if grpcConn == nil {
 		log.Error(rpcPushMsg.OperationID, "rpc dial failed", "push data", rpcPushMsg.String())
 		pid, offset, err := producer.SendMessage(&mqPushMsg, mqPushMsg.PushToUserID, rpcPushMsg.OperationID)

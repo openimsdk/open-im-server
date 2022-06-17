@@ -18,7 +18,13 @@ type UpdateSelfUserInfoReq struct {
 	ApiUserInfo
 	OperationID string `json:"operationID" binding:"required"`
 }
-
+type SetGlobalRecvMessageOptReq struct {
+	OperationID      string `json:"operationID" binding:"required"`
+	GlobalRecvMsgOpt *int32 `json:"globalRecvMsgOpt" binding:"omitempty,oneof=0 1 2"`
+}
+type SetGlobalRecvMessageOptResp struct {
+	CommResp
+}
 type UpdateUserInfoResp struct {
 	CommResp
 }

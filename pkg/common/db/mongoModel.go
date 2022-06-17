@@ -10,7 +10,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/gogo/protobuf/sortkeys"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"math/rand"
 	"sync"
@@ -29,6 +31,8 @@ const cTag = "tag"
 const cSendLog = "send_log"
 const cWorkMoment = "work_moment"
 const cCommentMsg = "comment_msg"
+const cSuperGroup = "super_group"
+const cUserToSuperGroup = "user_to_super_group"
 const singleGocMsgNum = 5000
 
 func GetSingleGocMsgNum() int {
@@ -305,6 +309,57 @@ func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operatio
 	}
 	return seqMsg, nil
 }
+func (d *DataBases) GetSuperGroupMsgBySeqListMongo(groupID string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
+	var hasSeqList []uint32
+	singleCount := 0
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+
+	m := func(uid string, seqList []uint32) map[string][]uint32 {
+		t := make(map[string][]uint32)
+		for i := 0; i < len(seqList); i++ {
+			seqUid := getSeqUid(uid, seqList[i])
+			if value, ok := t[seqUid]; !ok {
+				var temp []uint32
+				t[seqUid] = append(temp, seqList[i])
+			} else {
+				t[seqUid] = append(value, seqList[i])
+			}
+		}
+		return t
+	}(groupID, seqList)
+	sChat := UserChat{}
+	for seqUid, value := range m {
+		if err = c.FindOne(ctx, bson.M{"uid": seqUid}).Decode(&sChat); err != nil {
+			log.NewError(operationID, "not find seqGroupID", seqUid, value, groupID, seqList, err.Error())
+			continue
+		}
+		singleCount = 0
+		for i := 0; i < len(sChat.Msg); i++ {
+			msg := new(open_im_sdk.MsgData)
+			if err = proto.Unmarshal(sChat.Msg[i].Msg, msg); err != nil {
+				log.NewError(operationID, "Unmarshal err", seqUid, value, groupID, seqList, err.Error())
+				return nil, err
+			}
+			if isContainInt32(msg.Seq, value) {
+				seqMsg = append(seqMsg, msg)
+				hasSeqList = append(hasSeqList, msg.Seq)
+				singleCount++
+				if singleCount == len(value) {
+					break
+				}
+			}
+		}
+	}
+	if len(hasSeqList) != len(seqList) {
+		var diff []uint32
+		diff = utils.Difference(hasSeqList, seqList)
+		exceptionMSg := genExceptionSuperGroupMessageBySeqList(diff, groupID)
+		seqMsg = append(seqMsg, exceptionMSg...)
+
+	}
+	return seqMsg, nil
+}
 
 func (d *DataBases) GetMsgAndIndexBySeqListInOneMongo2(suffixUserID string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, indexList []int, unexistSeqList []uint32, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
@@ -345,6 +400,17 @@ func genExceptionMessageBySeqList(seqList []uint32) (exceptionMsg []*open_im_sdk
 	for _, v := range seqList {
 		msg := new(open_im_sdk.MsgData)
 		msg.Seq = v
+		exceptionMsg = append(exceptionMsg, msg)
+	}
+	return exceptionMsg
+}
+
+func genExceptionSuperGroupMessageBySeqList(seqList []uint32, groupID string) (exceptionMsg []*open_im_sdk.MsgData) {
+	for _, v := range seqList {
+		msg := new(open_im_sdk.MsgData)
+		msg.Seq = v
+		msg.GroupID = groupID
+		msg.SessionType = constant.SuperGroupChatType
 		exceptionMsg = append(exceptionMsg, msg)
 	}
 	return exceptionMsg
@@ -878,6 +944,171 @@ func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userI
 	return workMomentList, err
 }
 
+type SuperGroup struct {
+	GroupID string `bson:"group_id"`
+	//MemberNumCount int      `bson:"member_num_count"`
+	MemberIDList []string `bson:"member_id_list"`
+}
+
+type UserToSuperGroup struct {
+	UserID      string   `bson:"user_id"`
+	GroupIDList []string `bson:"group_id_list"`
+}
+
+func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, memberNumCount int) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	session, err := d.mongoClient.StartSession()
+	if err != nil {
+		return utils.Wrap(err, "start session failed")
+	}
+	defer session.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, session)
+	superGroup := SuperGroup{
+		GroupID:      groupID,
+		MemberIDList: initMemberIDList,
+	}
+	_, err = c.InsertOne(sCtx, superGroup)
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	var users []UserToSuperGroup
+	for _, v := range initMemberIDList {
+		users = append(users, UserToSuperGroup{
+			UserID: v,
+		})
+	}
+	upsert := true
+	opts := &options.UpdateOptions{
+		Upsert: &upsert,
+	}
+	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+	_, err = c.UpdateMany(sCtx, bson.M{"user_id": bson.M{"$in": initMemberIDList}}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	session.CommitTransaction(ctx)
+	return err
+}
+
+func (d *DataBases) GetSuperGroup(groupID string) (SuperGroup, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	superGroup := SuperGroup{}
+	err := c.FindOne(ctx, bson.M{"group_id": groupID}).Decode(&superGroup)
+	return superGroup, err
+}
+
+func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	session, err := d.mongoClient.StartSession()
+	if err != nil {
+		return utils.Wrap(err, "start session failed")
+	}
+	defer session.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, session)
+	if err != nil {
+		return utils.Wrap(err, "start transaction failed")
+	}
+	_, err = c.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDList}}})
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+	var users []UserToSuperGroup
+	for _, v := range userIDList {
+		users = append(users, UserToSuperGroup{
+			UserID: v,
+		})
+	}
+	upsert := true
+	opts := &options.UpdateOptions{
+		Upsert: &upsert,
+	}
+	for _, userID := range userIDList {
+		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
+		if err != nil {
+			session.AbortTransaction(ctx)
+			return utils.Wrap(err, "transaction failed")
+		}
+	}
+	session.CommitTransaction(ctx)
+	return err
+}
+
+func (d *DataBases) RemoverUserFromSuperGroup(groupID string, userIDList []string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	session, err := d.mongoClient.StartSession()
+	if err != nil {
+		return utils.Wrap(err, "start session failed")
+	}
+	defer session.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, session)
+	_, err = c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	err = d.RemoveGroupFromUser(ctx, sCtx, groupID, userIDList)
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	session.CommitTransaction(ctx)
+	return err
+}
+
+func (d *DataBases) GetSuperGroupByUserID(userID string) (UserToSuperGroup, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+	var user UserToSuperGroup
+	return user, c.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+}
+
+func (d *DataBases) DeleteSuperGroup(groupID string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
+	session, err := d.mongoClient.StartSession()
+	if err != nil {
+		return utils.Wrap(err, "start session failed")
+	}
+	defer session.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, session)
+	superGroup := &SuperGroup{}
+	result := c.FindOneAndDelete(sCtx, bson.M{"group_id": groupID})
+	err = result.Decode(superGroup)
+	if err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	if err = d.RemoveGroupFromUser(ctx, sCtx, groupID, superGroup.MemberIDList); err != nil {
+		session.AbortTransaction(ctx)
+		return utils.Wrap(err, "transaction failed")
+	}
+	session.CommitTransaction(ctx)
+	return nil
+}
+
+func (d *DataBases) RemoveGroupFromUser(ctx, sCtx context.Context, groupID string, userIDList []string) error {
+	var users []UserToSuperGroup
+	for _, v := range userIDList {
+		users = append(users, UserToSuperGroup{
+			UserID: v,
+		})
+	}
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+	_, err := c.UpdateOne(sCtx, bson.M{"user_id": bson.M{"$in": userIDList}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
+	if err != nil {
+		return utils.Wrap(err, "UpdateOne transaction failed")
+	}
+	return err
+}
+
 func generateTagID(tagName, userID string) string {
 	return utils.Md5(tagName + userID + strconv.Itoa(rand.Int()) + time.Now().String())
 }
@@ -900,6 +1131,21 @@ func GetCurrentTimestampByMill() int64 {
 func getSeqUid(uid string, seq uint32) string {
 	seqSuffix := seq / singleGocMsgNum
 	return indexGen(uid, seqSuffix)
+}
+
+func getSeqUserIDList(userID string, maxSeq uint32) []string {
+	seqMaxSuffix := maxSeq / singleGocMsgNum
+	var seqUserIDList []string
+	for i := 0; i <= int(seqMaxSuffix); i++ {
+		seqUserID := indexGen(userID, uint32(i))
+		seqUserIDList = append(seqUserIDList, seqUserID)
+	}
+	return seqUserIDList
+}
+
+func getSeqSuperGroupID(groupID string, seq uint32) string {
+	seqSuffix := seq / singleGocMsgNum
+	return superGroupIndexGen(groupID, seqSuffix)
 }
 
 func GetSeqUid(uid string, seq uint32) string {
@@ -937,4 +1183,27 @@ func isNotContainInt32(target uint32, List []uint32) bool {
 
 func indexGen(uid string, seqSuffix uint32) string {
 	return uid + ":" + strconv.FormatInt(int64(seqSuffix), 10)
+}
+func superGroupIndexGen(groupID string, seqSuffix uint32) string {
+	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
+}
+
+func (d *DataBases) CleanUpUserMsgFromMongo(userID string, operationID string) error {
+	ctx := context.Background()
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	maxSeq, err := d.GetUserMaxSeq(userID)
+	if err == redis.Nil {
+		return nil
+	}
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+
+	seqUsers := getSeqUserIDList(userID, uint32(maxSeq))
+	log.Error(operationID, "getSeqUserIDList", seqUsers)
+	_, err = c.DeleteMany(ctx, bson.M{"uid": bson.M{"$in": seqUsers}})
+	if err == mongo.ErrNoDocuments {
+		return nil
+	}
+	return utils.Wrap(err, "")
 }

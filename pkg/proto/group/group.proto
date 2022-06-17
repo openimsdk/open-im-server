@@ -14,7 +14,6 @@ message GroupAddMemberInfo{
   int32 RoleLevel = 2;
 }
 
-
 message CreateGroupReq{
   repeated GroupAddMemberInfo InitMemberList = 1;
   server_api_params.GroupInfo GroupInfo = 2;
@@ -392,6 +391,28 @@ message SetGroupMemberNicknameResp{
   CommonResp CommonResp = 1;
 }
 
+message GetJoinedSuperGroupListReq {
+  string operationID = 1;
+  string userID = 2;
+  string opUserID = 3;
+}
+
+message GetJoinedSuperGroupListResp {
+  CommonResp commonResp = 1;
+  repeated server_api_params.GroupInfo GroupList = 3;
+}
+
+message GetSuperGroupsInfoReq {
+  repeated string GroupIDList = 1;
+  string OperationID = 2;
+  string OpUserID = 3; //No verification permission
+}
+
+message GetSuperGroupsInfoResp {
+  CommonResp commonResp = 1;
+  repeated server_api_params.GroupInfo GroupInfoList = 3;
+}
+
 message SetGroupMemberInfoReq{
   string groupID = 1;
   string userID = 2;
@@ -441,7 +462,11 @@ service group{
   rpc CancelMuteGroup(CancelMuteGroupReq) returns(CancelMuteGroupResp);
 
   rpc SetGroupMemberNickname(SetGroupMemberNicknameReq) returns (SetGroupMemberNicknameResp);
+
+  rpc GetJoinedSuperGroupList(GetJoinedSuperGroupListReq) returns (GetJoinedSuperGroupListResp);
+  rpc GetSuperGroupsInfo(GetSuperGroupsInfoReq) returns (GetSuperGroupsInfoResp);
   rpc SetGroupMemberInfo(SetGroupMemberInfoReq) returns (SetGroupMemberInfoResp);
+
 }
 
 

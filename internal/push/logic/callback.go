@@ -20,7 +20,7 @@ func callbackOfflinePush(operationID, userID string, msg *commonPb.MsgData) cbAp
 			OperationID:     operationID,
 			UserID:          userID,
 			PlatformID:      msg.SenderPlatformID,
-			Platform:        constant.PlatformIDToName(msg.SenderPlatformID),
+			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 		},
 		OfflinePushInfo: msg.OfflinePushInfo,
 		SendID:          msg.SendID,

@@ -57,16 +57,28 @@ type SeqListData struct {
 	SeqList []int64 `mapstructure:"seqList" validate:"required"`
 }
 
-func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, errMsg string, returnData interface{}) {
+func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass bool, errCode int32, errMsg string, returnData interface{}) {
 	switch r {
-	case constant.WSSendMsg:
-		data := open_im_sdk.MsgData{}
+	case constant.WSGetNewestSeq:
+		data := open_im_sdk.GetMaxAndMinSeqReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.Error("", "Decode Data struct  err", err.Error(), r)
+			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
-			log.Error("", "data args validate  err", err.Error(), r)
+			log.Error(operationID, "data args validate  err", err.Error(), r)
+			return false, 204, err.Error(), nil
+
+		}
+		return true, 0, "", data
+	case constant.WSSendMsg:
+		data := open_im_sdk.MsgData{}
+		if err := proto.Unmarshal(m.Data, &data); err != nil {
+			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
+			return false, 203, err.Error(), nil
+		}
+		if err := validate.Struct(data); err != nil {
+			log.Error(operationID, "data args validate  err", err.Error(), r)
 			return false, 204, err.Error(), nil
 
 		}
@@ -74,11 +86,11 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 	case constant.WSSendSignalMsg:
 		data := pbRtc.SignalReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.Error("", "Decode Data struct  err", err.Error(), r)
+			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
-			log.Error("", "data args validate  err", err.Error(), r)
+			log.Error(operationID, "data args validate  err", err.Error(), r)
 			return false, 204, err.Error(), nil
 
 		}
@@ -86,31 +98,16 @@ func (ws *WServer) argsValidate(m *Req, r int32) (isPass bool, errCode int32, er
 	case constant.WSPullMsgBySeqList:
 		data := open_im_sdk.PullMessageBySeqListReq{}
 		if err := proto.Unmarshal(m.Data, &data); err != nil {
-			log.Error("", "Decode Data struct  err", err.Error(), r)
+			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
 			return false, 203, err.Error(), nil
 		}
 		if err := validate.Struct(data); err != nil {
-			log.Error("", "data args validate  err", err.Error(), r)
+			log.Error(operationID, "data args validate  err", err.Error(), r)
 			return false, 204, err.Error(), nil
 
 		}
 		return true, 0, "", data
-
 	default:
 	}
-
 	return false, 204, "args err", nil
-
-	//b := bytes.NewBuffer(m.Data)
-	//dec := gob.NewDecoder(b)
-	//err := dec.Decode(&data)
-	//if err != nil {
-	//	log.ErrorByKv("Decode Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
-	//	return false, 203, err.Error(), nil
-	//}
-	//if err := mapstructure.WeakDecode(m.Data, &data); err != nil {
-	//	log.ErrorByKv("map to Data struct  err", "", "err", err.Error(), "reqIdentifier", r)
-	//	return false, 203, err.Error(), nil
-	//} else
-
 }

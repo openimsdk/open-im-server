@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func callbackUserOnline(operationID, userID string, platformID int32, token string) cbApi.CommonCallbackResp {
+func callbackUserOnline(operationID, userID string, platformID int, token string) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackUserOnline.Enable {
 		return callbackResp
@@ -20,7 +20,7 @@ func callbackUserOnline(operationID, userID string, platformID int32, token stri
 			CallbackCommand: constant.CallbackUserOnlineCommand,
 			OperationID:     operationID,
 			UserID:          userID,
-			PlatformID:      platformID,
+			PlatformID:      int32(platformID),
 			Platform:        constant.PlatformIDToName(platformID),
 		},
 		Seq: time.Now().Nanosecond() / 1e6,
@@ -33,7 +33,7 @@ func callbackUserOnline(operationID, userID string, platformID int32, token stri
 	return callbackResp
 }
 
-func callbackUserOffline(operationID, userID string, platform string) cbApi.CommonCallbackResp {
+func callbackUserOffline(operationID, userID string, platformID int) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackUserOffline.Enable {
 		return callbackResp
@@ -43,8 +43,8 @@ func callbackUserOffline(operationID, userID string, platform string) cbApi.Comm
 			CallbackCommand: constant.CallbackUserOfflineCommand,
 			OperationID:     operationID,
 			UserID:          userID,
-			PlatformID:      constant.PlatformNameToID(platform),
-			Platform:        platform,
+			PlatformID:      int32(platformID),
+			Platform:        constant.PlatformIDToName(platformID),
 		},
 		Seq: time.Now().Nanosecond() / 1e6,
 	}

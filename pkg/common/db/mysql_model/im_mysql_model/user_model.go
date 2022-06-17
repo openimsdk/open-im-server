@@ -22,7 +22,11 @@ func init() {
 		}
 		var appMgr db.User
 		appMgr.UserID = v
-		appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
+		if k == 0 {
+			appMgr.Nickname = config.Config.Manager.AppSysNotificationName
+		} else {
+			appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
+		}
 		appMgr.AppMangerLevel = constant.AppAdmin
 		err = UserRegister(appMgr)
 		if err != nil {
@@ -103,6 +107,17 @@ func UpdateUserInfo(user db.User) error {
 	}
 	dbConn.LogMode(false)
 	err = dbConn.Table("users").Where("user_id=?", user.UserID).Update(&user).Error
+
+	return err
+}
+
+func UpdateUserInfoByMap(user db.User, m map[string]interface{}) error {
+	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
+	if err != nil {
+		return err
+	}
+	dbConn.LogMode(false)
+	err = dbConn.Table("users").Where("user_id=?", user.UserID).Updates(m).Error
 	return err
 }
 

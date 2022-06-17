@@ -36,7 +36,7 @@ func AddBlack(c *gin.Context) {
 	}
 	log.NewInfo(params.OperationID, "AddBlacklist args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddBlacklist(context.Background(), req)
 	if err != nil {
@@ -69,8 +69,14 @@ func ImportFriend(c *gin.Context) {
 	}
 
 	log.NewInfo(req.OperationID, "ImportFriend args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.ImportFriend(context.Background(), req)
 	if err != nil {
@@ -114,7 +120,13 @@ func AddFriend(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "AddFriend args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddFriend(context.Background(), req)
 	if err != nil {
@@ -153,7 +165,14 @@ func AddFriendResponse(c *gin.Context) {
 	utils.CopyStructFields(req, &params)
 	log.NewInfo(req.CommID.OperationID, "AddFriendResponse args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddFriendResponse(context.Background(), req)
 	if err != nil {
@@ -189,7 +208,13 @@ func DeleteFriend(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "DeleteFriend args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.DeleteFriend(context.Background(), req)
 	if err != nil {
@@ -225,7 +250,13 @@ func GetBlacklist(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "GetBlacklist args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetBlacklist(context.Background(), req)
 	if err != nil {
@@ -268,7 +299,13 @@ func SetFriendRemark(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "SetFriendComment args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.SetFriendRemark(context.Background(), req)
 	if err != nil {
@@ -303,7 +340,14 @@ func RemoveBlack(c *gin.Context) {
 	}
 
 	log.NewInfo(req.CommID.OperationID, "RemoveBlacklist args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.RemoveBlacklist(context.Background(), req)
 	if err != nil {
@@ -338,7 +382,13 @@ func IsFriend(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "IsFriend args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.IsFriend(context.Background(), req)
 	if err != nil {
@@ -375,7 +425,13 @@ func GetFriendList(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "GetFriendList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetFriendList(context.Background(), req)
 	if err != nil {
@@ -413,7 +469,13 @@ func GetFriendApplyList(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 
 	RpcResp, err := client.GetFriendApplyList(context.Background(), req)
@@ -451,7 +513,13 @@ func GetSelfFriendApplyList(c *gin.Context) {
 
 	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetSelfApplyList(context.Background(), req)
 	if err != nil {
