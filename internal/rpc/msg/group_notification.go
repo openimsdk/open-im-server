@@ -101,7 +101,7 @@ func setPublicUserInfo(userID string, publicUserInfo *open_im_sdk.PublicUserInfo
 }
 
 func groupNotification(contentType int32, m proto.Message, sendID, groupID, recvUserID, operationID string) {
-	log.Info(operationID, utils.GetSelfFuncName(), "args: ", contentType)
+	log.Info(operationID, utils.GetSelfFuncName(), "args: ", contentType, sendID, groupID, recvUserID)
 
 	var err error
 	var tips open_im_sdk.TipsComm
@@ -126,10 +126,9 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 	if from != nil {
 		nickname = from.Nickname
 	}
-
 	to, err := imdb.GetUserByUserID(recvUserID)
 	if err != nil {
-		log.Error(operationID, "GetUserByUserID failed ", err.Error(), recvUserID)
+		log.NewWarn(operationID, "GetUserByUserID failed ", err.Error(), recvUserID)
 	}
 	toNickname := ""
 	if to != nil {
