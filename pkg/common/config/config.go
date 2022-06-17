@@ -213,7 +213,7 @@ type config struct {
 			Topic string   `yaml:"topic"`
 		}
 		ConsumerGroupID struct {
-			MsgToRedis string `yaml:"msgToRedis"`
+			MsgToRedis string `yaml:"msgToTransfer"`
 			MsgToMongo string `yaml:"msgToMongo"`
 			MsgToMySql string `yaml:"msgToMySql"`
 			MsgToPush  string `yaml:"msgToPush"`
