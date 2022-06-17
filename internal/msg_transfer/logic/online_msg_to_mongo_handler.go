@@ -18,7 +18,7 @@ type OnlineHistoryMongoConsumerHandler struct {
 	historyConsumerGroup *kfk.MConsumerGroup
 }
 
-func (och *OnlineHistoryMongoConsumerHandler) Init(cmdCh chan Cmd2Value) {
+func (och *OnlineHistoryMongoConsumerHandler) Init() {
 	och.msgHandle = make(map[string]fcb)
 	och.msgHandle[config.Config.Kafka.MsgToMongo.Topic] = och.handleChatWs2Mongo
 	och.historyConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,

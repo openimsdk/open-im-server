@@ -38,6 +38,7 @@ func Init() {
 	w = new(sync.Mutex)
 	persistentCH.Init()
 	historyCH.Init(cmdCh)
+	historyMongoCH.Init()
 	onlineTopicStatus = OnlineTopicVacancy
 	//offlineHistoryCH.Init(cmdCh)
 	statistics.NewStatistics(&singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
@@ -53,7 +54,7 @@ func Run() {
 		fmt.Println("not start mysql consumer")
 	}
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
-	//go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
+	go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
 	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
 }
 func SetOnlineTopicStatus(status int) {
