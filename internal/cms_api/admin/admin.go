@@ -12,6 +12,7 @@ import (
 	"context"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -68,7 +69,14 @@ func AdminLogin(c *gin.Context) {
 	}
 	reqPb.Secret = req.Secret
 	reqPb.AdminID = req.AdminName
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName)
+	reqPb.OperationID = utils.OperationIDGenerator()
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
+	if etcdConn == nil {
+		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(reqPb.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbAdmin.NewAdminCMSClient(etcdConn)
 	respPb, err := client.AdminLogin(context.Background(), &reqPb)
 	if err != nil {

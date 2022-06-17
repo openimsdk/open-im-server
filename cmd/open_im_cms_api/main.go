@@ -15,7 +15,8 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := cms_api.NewGinRouter()
 	router.Use(utils.CorsHandler())
-	ginPort := flag.Int("port", 10006, "get ginServerPort from cmd,default 10006 as port")
+	defaultPorts := config.Config.CmsApi.GinPort
+	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10006 as port")
 	flag.Parse()
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
 	if config.Config.Api.ListenIP != "" {

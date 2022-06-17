@@ -19,5 +19,11 @@ func saveUserChat(uid string, msg *pbMsg.MsgDataToMQ) error {
 	pbSaveData.MsgData = msg.MsgData
 	log.NewInfo(msg.OperationID, "IncrUserSeq cost time", utils.GetCurrentTimestampByMill()-time)
 	return db.DB.SaveUserChatMongo2(uid, pbSaveData.MsgData.SendTime, &pbSaveData)
-//	return db.DB.SaveUserChatMongo2(uid, pbSaveData.MsgData.SendTime, &pbSaveData)
+	//	return db.DB.SaveUserChatMongo2(uid, pbSaveData.MsgData.SendTime, &pbSaveData)
+}
+
+func saveUserChatList(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) (error, uint64) {
+	log.Info(operationID, utils.GetSelfFuncName(), "args ", userID, len(msgList))
+	//return db.DB.BatchInsertChat(userID, msgList, operationID)
+	return db.DB.BatchInsertChat2Cache(userID, msgList, operationID)
 }

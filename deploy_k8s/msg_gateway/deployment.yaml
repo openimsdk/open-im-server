@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msg-gateway-deployment
+spec:
+  selector:
+    matchLabels:
+      app: msg-gateway # 选择这个指定标签执行
+  replicas: 2 # 运行pod数量
+  template:
+    metadata:
+      labels:
+        app: msg-gateway # 标签
+    spec:
+      containers:
+      - name: msg-gateway
+        image: openim/msg_gateway:v2.0.10k
+        # imagePullPolicy: Always
+        ports:
+        - name: rpc-port
+          containerPort: 10140
+        - name: ws-port
+          containerPort: 10001
+        volumeMounts:
+          - name: config
+            mountPath: /Open-IM-Server/config
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: config
+  strategy: #更新策略
+    type: RollingUpdate # 滚动更新
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: msg-gateway
+spec:
+  ports:
+    - name: msg-gateway-port
+      protocol: TCP
+      port: 10001
+      targetPort: ws-port
+  selector:
+    app: msg-gateway
+  type: NodePort   
+
+    

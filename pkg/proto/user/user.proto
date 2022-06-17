@@ -66,6 +66,14 @@ message UpdateUserInfoReq{
 message UpdateUserInfoResp{
   CommonResp  commonResp = 1;
 }
+message SetGlobalRecvMessageOptReq{
+  string userID = 1;
+  string  operationID = 2;
+  int32 globalRecvMsgOpt = 3;
+}
+message SetGlobalRecvMessageOptResp{
+  CommonResp  commonResp = 1;
+}
 
 message Conversation{
   string OwnerUserID = 1;
@@ -293,6 +301,7 @@ message DeleteUserResp {
 service user {
   rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
+  rpc SetGlobalRecvMessageOpt(SetGlobalRecvMessageOptReq) returns(SetGlobalRecvMessageOptResp);
   rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
   rpc GetAllUserID(GetAllUserIDReq)returns(GetAllUserIDResp);
 
@@ -315,8 +324,4 @@ service user {
   rpc GetBlockUsers(GetBlockUsersReq) returns (GetBlockUsersResp);
   rpc GetBlockUserById(GetBlockUserByIdReq) returns (GetBlockUserByIdResp);
   rpc DeleteUser(DeleteUserReq) returns (DeleteUserResp);
-
-
-  rpc GetUserInfoFromCache(GetUserInfoReq) returns(GetUserInfoResp);
-
 }

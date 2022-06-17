@@ -26,14 +26,15 @@ type PersistentConsumerHandler struct {
 func (pc *PersistentConsumerHandler) Init() {
 	pc.msgHandle = make(map[string]fcb)
 	pc.msgHandle[config.Config.Kafka.Ws2mschat.Topic] = pc.handleChatWs2Mysql
-	pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V0_10_2_0,
+	pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql)
 
 }
 
-func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey string) {
-	log.NewInfo("msg come here mysql!!!", "", "msg", string(msg))
+func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
+	msg := cMsg.Value
+	log.NewInfo("msg come here mysql!!!", "", "msg", string(msg), msgKey)
 	var tag bool
 	msgFromMQ := pbMsg.MsgDataToMQ{}
 	err := proto.Unmarshal(msg, &msgFromMQ)
@@ -41,6 +42,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey strin
 		log.NewError(msgFromMQ.OperationID, "msg_transfer Unmarshal msg err", "msg", string(msg), "err", err.Error())
 		return
 	}
+	log.Debug(msgFromMQ.OperationID, "proto.Unmarshal MsgDataToMQ", msgFromMQ.String())
 	//Control whether to store history messages (mysql)
 	isPersist := utils.GetSwitchFromOptions(msgFromMQ.MsgData.Options, constant.IsPersistent)
 	//Only process receiver data
@@ -54,6 +56,8 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(msg []byte, msgKey strin
 			if msgKey == msgFromMQ.MsgData.SendID {
 				tag = true
 			}
+		case constant.SuperGroupChatType:
+			tag = true
 		}
 		if tag {
 			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
@@ -70,8 +74,12 @@ func (PersistentConsumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { 
 func (pc *PersistentConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
-		pc.msgHandle[msg.Topic](msg.Value, string(msg.Key))
+		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value), "key", string(msg.Key))
+		if len(msg.Value) != 0 {
+			pc.msgHandle[msg.Topic](msg, string(msg.Key), sess)
+		} else {
+			log.Error("", "msg get from kafka but is nil", msg.Key)
+		}
 		sess.MarkMessage(msg, "")
 	}
 	return nil

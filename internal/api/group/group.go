@@ -10,6 +10,7 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/golang/protobuf/ptypes/wrappers"
 
 	"github.com/gin-gonic/gin"
 
@@ -42,7 +43,13 @@ func KickGroupMember(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "KickGroupMember args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.KickGroupMember(context.Background(), req)
 	if err != nil {
@@ -87,7 +94,13 @@ func GetGroupMembersInfo(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 
 	RpcResp, err := client.GetGroupMembersInfo(context.Background(), req)
@@ -125,7 +138,13 @@ func GetGroupMemberList(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "GetGroupMemberList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 
 	RpcResp, err := client.GetGroupMemberList(context.Background(), req)
@@ -164,7 +183,13 @@ func GetGroupAllMemberList(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "GetGroupAllMember args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.GetGroupAllMember(context.Background(), req)
 	if err != nil {
@@ -201,7 +226,13 @@ func GetJoinedGroupList(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "GetJoinedGroupList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.GetJoinedGroupList(context.Background(), req)
 	if err != nil {
@@ -238,7 +269,13 @@ func InviteUserToGroup(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "InviteUserToGroup args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.InviteUserToGroup(context.Background(), req)
 	if err != nil {
@@ -290,7 +327,13 @@ func CreateGroup(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "CreateGroup args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.CreateGroup(context.Background(), req)
 	if err != nil {
@@ -327,7 +370,13 @@ func GetRecvGroupApplicationList(c *gin.Context) {
 	//}
 	log.NewInfo(req.OperationID, "GetGroupApplicationList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.GetGroupApplicationList(context.Background(), req)
 	if err != nil {
@@ -358,7 +407,13 @@ func GetUserReqGroupApplicationList(c *gin.Context) {
 	//	return
 	//}
 	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.GetUserReqApplicationList(context.Background(), req)
 	if err != nil {
@@ -394,7 +449,13 @@ func GetGroupsInfo(c *gin.Context) {
 	}
 
 	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.GetGroupsInfo(context.Background(), req)
 	if err != nil {
@@ -432,7 +493,13 @@ func ApplicationGroupResponse(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "ApplicationGroupResponse args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.GroupApplicationResponse(context.Background(), req)
 	if err != nil {
@@ -467,7 +534,13 @@ func JoinGroup(c *gin.Context) {
 	}
 
 	log.NewInfo(req.OperationID, "JoinGroup args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 
 	RpcResp, err := client.JoinGroup(context.Background(), req)
@@ -503,7 +576,13 @@ func QuitGroup(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "QuitGroup args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.QuitGroup(context.Background(), req)
 	if err != nil {
@@ -539,7 +618,13 @@ func SetGroupInfo(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "SetGroupInfo args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.SetGroupInfo(context.Background(), req)
 	if err != nil {
@@ -574,7 +659,13 @@ func TransferGroupOwner(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "TransferGroupOwner args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.TransferGroupOwner(context.Background(), req)
 	if err != nil {
@@ -610,7 +701,13 @@ func DismissGroup(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.DismissGroup(context.Background(), req)
 	if err != nil {
@@ -646,7 +743,13 @@ func MuteGroupMember(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.MuteGroupMember(context.Background(), req)
 	if err != nil {
@@ -682,7 +785,13 @@ func CancelMuteGroupMember(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.CancelMuteGroupMember(context.Background(), req)
 	if err != nil {
@@ -718,7 +827,13 @@ func MuteGroup(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.MuteGroup(context.Background(), req)
 	if err != nil {
@@ -754,7 +869,13 @@ func CancelMuteGroup(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.CancelMuteGroup(context.Background(), req)
 	if err != nil {
@@ -792,7 +913,13 @@ func SetGroupMemberNickname(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.SetGroupMemberNickname(context.Background(), req)
 	if err != nil {
@@ -806,6 +933,62 @@ func SetGroupMemberNickname(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func GetGroupMemberIDListFromCache(c *gin.Context) {
+func SetGroupMemberInfo(c *gin.Context) {
+	var (
+		req  api.SetGroupMemberInfoReq
+		resp api.SetGroupMemberInfoResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
+	var opUserID string
+	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 
+	reqPb := &rpc.SetGroupMemberInfoReq{
+		GroupID:     req.GroupID,
+		UserID:      req.UserID,
+		OperationID: req.OperationID,
+		OpUserID:    opUserID,
+	}
+	if req.Nickname != nil {
+		reqPb.Nickname = &wrappers.StringValue{Value: *req.Nickname}
+	}
+	if req.FaceURL != nil {
+		reqPb.FaceURL = &wrappers.StringValue{Value: *req.FaceURL}
+	}
+	if req.Ex != nil {
+		reqPb.Ex = &wrappers.StringValue{Value: *req.Ex}
+	}
+	if req.RoleLevel != nil {
+		reqPb.RoleLevel = &wrappers.Int32Value{Value: *req.RoleLevel}
+	}
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	client := rpc.NewGroupClient(etcdConn)
+	respPb, err := client.SetGroupMemberInfo(context.Background(), reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	resp.ErrMsg = respPb.CommonResp.ErrMsg
+	resp.ErrCode = respPb.CommonResp.ErrCode
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", resp)
+	c.JSON(http.StatusOK, resp)
 }

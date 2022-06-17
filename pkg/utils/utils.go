@@ -136,17 +136,40 @@ func RemoveRepeatedStringInList(slc []string) []string {
 	return result
 }
 
+func Pb2String(pb proto.Message) (string, error) {
+	marshaler := jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: false,
+	}
+	return marshaler.MarshalToString(pb)
+}
+
+func String2Pb(s string, pb proto.Message) error {
+	return proto.Unmarshal([]byte(s), pb)
+}
+
+func Map2Pb(m map[string]string) (pb proto.Message, err error) {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	err = proto.Unmarshal(b, pb)
+	if err != nil {
+		return nil, err
+	}
+	return pb, nil
+}
 func Pb2Map(pb proto.Message) (map[string]interface{}, error) {
 	_buffer := bytes.Buffer{}
 	jsonbMarshaller := &jsonpb.Marshaler{
 		OrigName:     true,
 		EnumsAsInts:  true,
-		EmitDefaults: true,
+		EmitDefaults: false,
 	}
 	_ = jsonbMarshaller.Marshal(&_buffer, pb)
 	jsonCnt := _buffer.Bytes()
 	var out map[string]interface{}
 	err := json.Unmarshal(jsonCnt, &out)
-
 	return out, err
 }

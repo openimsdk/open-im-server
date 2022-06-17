@@ -27,12 +27,19 @@ func TagSendMessage(operationID string, user *db.User, recvID, content string, s
 	msgData.SenderNickname = user.Nickname
 	msgData.Options = map[string]bool{}
 	msgData.Options[constant.IsSenderConversationUpdate] = false
+	msgData.Options[constant.IsSenderNotificationPush] = false
 	msgData.CreateTime = utils.GetCurrentTimestampByMill()
 	msgData.ClientMsgID = utils.GetMsgID(user.UserID)
 	msgData.SenderPlatformID = senderPlatformID
 	req.MsgData = &msgData
 	req.OperationID = operationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, operationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		return
+	}
+
 	client := pbChat.NewChatClient(etcdConn)
 	respPb, err := client.SendMsg(context.Background(), &req)
 	if err != nil {

@@ -38,7 +38,8 @@ func main() {
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
-		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)              //1
+		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo) //1
+		userRouterGroup.POST("/set_global_msg_recv_opt", user.SetGlobalRecvMessageOpt)
 		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)                  //1
 		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
 		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
@@ -70,7 +71,7 @@ func main() {
 	{
 		groupRouterGroup.POST("/create_group", group.CreateGroup)                                   //1
 		groupRouterGroup.POST("/set_group_info", group.SetGroupInfo)                                //1
-		groupRouterGroup.POST("join_group", group.JoinGroup)                                        //1
+		groupRouterGroup.POST("/join_group", group.JoinGroup)                                       //1
 		groupRouterGroup.POST("/quit_group", group.QuitGroup)                                       //1
 		groupRouterGroup.POST("/group_application_response", group.ApplicationGroupResponse)        //1
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                          //1
@@ -82,15 +83,19 @@ func main() {
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
-		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)        //1
-		groupRouterGroup.POST("/dismiss_group", group.DismissGroup)                      //
+		groupRouterGroup.POST("/get_joined_group_list", group.GetJoinedGroupList)
+		groupRouterGroup.POST("/dismiss_group", group.DismissGroup) //
 		groupRouterGroup.POST("/mute_group_member", group.MuteGroupMember)
 		groupRouterGroup.POST("/cancel_mute_group_member", group.CancelMuteGroupMember) //MuteGroup
 		groupRouterGroup.POST("/mute_group", group.MuteGroup)
 		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
-
 		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
-
+		groupRouterGroup.POST("/set_group_member_info", group.SetGroupMemberInfo)
+	}
+	superGroupRouterGroup := r.Group("/super_group")
+	{
+		superGroupRouterGroup.POST("/get_joined_group_list", group.GetJoinedSuperGroupList)
+		superGroupRouterGroup.POST("/get_groups_info", group.GetSuperGroupsInfo)
 	}
 	//certificate
 	authRouterGroup := r.Group("/auth")
@@ -98,6 +103,7 @@ func main() {
 		authRouterGroup.POST("/user_register", apiAuth.UserRegister) //1
 		authRouterGroup.POST("/user_token", apiAuth.UserToken)       //1
 		authRouterGroup.POST("/parse_token", apiAuth.ParseToken)     //1
+		authRouterGroup.POST("/force_logout", apiAuth.ForceLogout)   //1
 	}
 	//Third service
 	thirdGroup := r.Group("/third")
@@ -108,6 +114,8 @@ func main() {
 		thirdGroup.POST("/minio_upload", apiThird.MinioUploadFile)
 		thirdGroup.POST("/upload_update_app", apiThird.UploadUpdateApp)
 		thirdGroup.POST("/get_download_url", apiThird.GetDownloadURL)
+		thirdGroup.POST("/get_rtc_invitation_info", apiThird.GetRTCInvitationInfo)
+		thirdGroup.POST("/get_rtc_invitation_start_app", apiThird.GetRTCInvitationInfoStartApp)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
@@ -116,16 +124,17 @@ func main() {
 		chatGroup.POST("/send_msg", apiChat.SendMsg)
 		chatGroup.POST("/pull_msg_by_seq", apiChat.PullMsgBySeqList)
 		chatGroup.POST("/del_msg", apiChat.DelMsg)
+		chatGroup.POST("/clear_msg", apiChat.ClearMsg)
 	}
 	//Manager
 	managementGroup := r.Group("/manager")
 	{
 		managementGroup.POST("/delete_user", manage.DeleteUser) //1
 		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
+		managementGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
 		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)             //1
 		managementGroup.POST("/account_check", manage.AccountCheck)                   //1
 		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
-
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
@@ -182,7 +191,8 @@ func main() {
 	}
 
 	go apiThird.MinioInit()
-	ginPort := flag.Int("port", 10002, "get ginServerPort from cmd,default 10002 as port")
+	defaultPorts := config.Config.Api.GinPort
+	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10002 as port")
 	flag.Parse()
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
 	if config.Config.Api.ListenIP != "" {

@@ -9,8 +9,23 @@ message OnlinePushMsgReq {
   string pushToUserID = 3;
 }
 message OnlinePushMsgResp{
-repeated SingleMsgToUser resp = 1;
-}//message SendMsgByWSReq{
+repeated SingleMsgToUserPlatform resp = 1;
+}
+message SingelMsgToUserResultList{
+  string userID =1;
+  repeated SingleMsgToUserPlatform resp = 2;
+  bool onlinePush = 3;
+
+}
+message OnlineBatchPushOneMsgReq{
+  string OperationID = 1;
+  server_api_params.MsgData msgData = 2;
+  repeated string pushToUserIDList = 3;
+}
+message OnlineBatchPushOneMsgResp{
+  repeated SingelMsgToUserResultList singlePushResult= 1;
+}
+//message SendMsgByWSReq{
 //  string SendID = 1;
 //  string RecvID = 2;
 //  string Content = 3;
@@ -22,7 +37,7 @@ repeated SingleMsgToUser resp = 1;
 //  int64  PlatformID = 9;
 //}
 
-message SingleMsgToUser{
+message SingleMsgToUserPlatform{
   int64   ResultCode = 1;
   string  RecvID = 2;
   int32   RecvPlatFormID = 3;
@@ -53,9 +68,20 @@ message GetUsersOnlineStatusResp{
 
   }
 }
+message KickUserOfflineReq{
+  string operationID = 1;
+int32  platformID = 2;
+  repeated string kickUserIDList = 3;
+}
+message KickUserOfflineResp{
+
+}
 service OnlineMessageRelayService {
   rpc OnlinePushMsg(OnlinePushMsgReq) returns(OnlinePushMsgResp);
   rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq)returns(GetUsersOnlineStatusResp);
+  rpc OnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
+  rpc SuperGroupOnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
+  rpc KickUserOffline(KickUserOfflineReq) returns(KickUserOfflineResp);
 //  rpc SendMsgByWS(SendMsgByWSReq)  returns(MsgToUserResp);
 }
 

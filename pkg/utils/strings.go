@@ -51,7 +51,14 @@ func IsContainInt32(target int32, List []int32) bool {
 	}
 	return false
 }
-
+func IsContainInt(target int, List []int) bool {
+	for _, element := range List {
+		if target == element {
+			return true
+		}
+	}
+	return false
+}
 func InterfaceArrayToStringArray(data []interface{}) (i []string) {
 	for _, param := range data {
 		i = append(i, param.(string))

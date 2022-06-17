@@ -26,7 +26,7 @@ func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
 	chatLog := new(db.ChatLog)
 	copier.Copy(chatLog, msg.MsgData)
 	switch msg.MsgData.SessionType {
-	case constant.GroupChatType:
+	case constant.GroupChatType, constant.SuperGroupChatType:
 		chatLog.RecvID = msg.MsgData.GroupID
 	case constant.SingleChatType:
 		chatLog.RecvID = msg.MsgData.RecvID

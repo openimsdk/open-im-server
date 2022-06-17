@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
 	"net/http"
 	"strings"
 )
@@ -41,7 +42,13 @@ func GetUserTags(c *gin.Context) {
 
 	reqPb.UserID = userID
 	reqPb.OperationID = req.OperationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.GetUserTags(context.Background(), &reqPb)
 	if err != nil {
@@ -88,7 +95,13 @@ func CreateTag(c *gin.Context) {
 	}
 
 	reqPb.UserID = userID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.CreateTag(context.Background(), &reqPb)
 	if err != nil {
@@ -130,7 +143,13 @@ func DeleteTag(c *gin.Context) {
 	}
 
 	reqPb.UserID = userID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.DeleteTag(context.Background(), &reqPb)
 	if err != nil {
@@ -172,7 +191,13 @@ func SetTag(c *gin.Context) {
 	}
 
 	reqPb.UserID = userID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.SetTag(context.Background(), &reqPb)
 	if err != nil {
@@ -214,7 +239,13 @@ func SendMsg2Tag(c *gin.Context) {
 	}
 
 	reqPb.SendID = userID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.SendMsg2Tag(context.Background(), &reqPb)
 	if err != nil {
@@ -258,12 +289,19 @@ func GetTagSendLogs(c *gin.Context) {
 		PageNumber: req.PageNumber,
 		ShowNumber: req.ShowNumber,
 	}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
-	respPb, err := client.GetTagSendLogs(context.Background(), &reqPb)
+	maxSizeOption := grpc.MaxCallRecvMsgSize(1024 * 1024 * 20)
+	respPb, err := client.GetTagSendLogs(context.Background(), &reqPb, maxSizeOption)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserTags failed", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "CreateTag rpc server failed" + err.Error()})
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTagSendLogs failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetTagSendLogs rpc server failed" + err.Error()})
 		return
 	}
 	if err := utils.CopyStructFields(&resp.CommResp, respPb.CommonResp); err != nil {
@@ -306,7 +344,13 @@ func GetUserTagByID(c *gin.Context) {
 	reqPb.UserID = userID
 	reqPb.OperationID = req.OperationID
 	reqPb.TagID = req.TagID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfficeName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := pbOffice.NewOfficeServiceClient(etcdConn)
 	respPb, err := client.GetUserTagByID(context.Background(), &reqPb)
 	if err != nil {

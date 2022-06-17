@@ -8,6 +8,7 @@ package kafka
 
 import (
 	"context"
+	"fmt"
 	"github.com/Shopify/sarama"
 )
 
@@ -23,16 +24,13 @@ type MConsumerGroupConfig struct {
 	IsReturnErr    bool
 }
 
-func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addr []string, groupID string) *MConsumerGroup {
+func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []string, groupID string) *MConsumerGroup {
 	config := sarama.NewConfig()
 	config.Version = consumerConfig.KafkaVersion
 	config.Consumer.Offsets.Initial = consumerConfig.OffsetsInitial
 	config.Consumer.Return.Errors = consumerConfig.IsReturnErr
-	client, err := sarama.NewClient(addr, config)
-	if err != nil {
-		panic(err.Error())
-	}
-	consumerGroup, err := sarama.NewConsumerGroupFromClient(groupID, client)
+	fmt.Println("init address is ", addrs, "topics is ", topics)
+	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, config)
 	if err != nil {
 		panic(err.Error())
 	}

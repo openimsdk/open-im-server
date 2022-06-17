@@ -1,6 +1,11 @@
 package db
 
 import (
+	"Open_IM/pkg/common/constant"
+	pbChat "Open_IM/pkg/proto/chat"
+	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	"context"
+	"flag"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -20,8 +25,96 @@ func Test_GetTokenMapByUidPid(t *testing.T) {
 	fmt.Println(m)
 }
 
-func TestDataBases_GetMultiConversationMsgOpt(t *testing.T) {
-	m, err := DB.GetMultiConversationMsgOpt("fg", []string{"user", "age", "color"})
+//func TestDataBases_GetMultiConversationMsgOpt(t *testing.T) {
+//	m, err := DB.GetMultiConversationMsgOpt("fg", []string{"user", "age", "color"})
+//	assert.Nil(t, err)
+//	fmt.Println(m)
+//}
+func Test_GetKeyTTL(t *testing.T) {
+	ctx := context.Background()
+	key := flag.String("key", "key", "key value")
+	flag.Parse()
+	ttl, err := DB.rdb.TTL(ctx, *key).Result()
 	assert.Nil(t, err)
-	fmt.Println(m)
+	fmt.Println(ttl)
+}
+func Test_HGetAll(t *testing.T) {
+	ctx := context.Background()
+	key := flag.String("key", "key", "key value")
+	flag.Parse()
+	ttl, err := DB.rdb.TTL(ctx, *key).Result()
+	assert.Nil(t, err)
+	fmt.Println(ttl)
+}
+
+func Test_NewSetMessageToCache(t *testing.T) {
+	var msg pbChat.MsgDataToMQ
+	m := make(map[string]bool)
+	var offlinePush server_api_params.OfflinePushInfo
+	offlinePush.Title = "3"
+	offlinePush.Ex = "34"
+	offlinePush.IOSPushSound = "+1"
+	offlinePush.IOSBadgeCount = true
+	m[constant.IsPersistent] = true
+	m[constant.IsHistory] = true
+	var data server_api_params.MsgData
+	uid := "test_uid"
+	data.Seq = 11
+	data.ClientMsgID = "23jwhjsdf"
+	data.SendID = "111"
+	data.RecvID = "222"
+	data.Content = []byte{1, 2, 3, 4, 5, 6, 7}
+	data.Seq = 1212
+	data.Options = m
+	data.OfflinePushInfo = &offlinePush
+	data.AtUserIDList = []string{"1212", "23232"}
+	msg.MsgData = &data
+	messageList := []*pbChat.MsgDataToMQ{&msg}
+	err := DB.SetMessageToCache(messageList, uid, "cacheTest")
+	assert.Nil(t, err)
+
+}
+func Test_NewGetMessageListBySeq(t *testing.T) {
+	var msg pbChat.MsgDataToMQ
+	var data server_api_params.MsgData
+	uid := "test_uid"
+	data.Seq = 11
+	data.ClientMsgID = "23jwhjsdf"
+	msg.MsgData = &data
+
+	seqMsg, failedSeqList, err := DB.GetMessageListBySeq(uid, []uint32{1212}, "cacheTest")
+	assert.Nil(t, err)
+	fmt.Println(seqMsg, failedSeqList)
+
+}
+func Test_SetUserGlobalMsgRecvOpt(t *testing.T) {
+	var opt int32
+	uid := "test_uid"
+	opt = 1
+	err := DB.SetUserGlobalMsgRecvOpt(uid, opt)
+	assert.Nil(t, err)
+}
+func Test_GetUserGlobalMsgRecvOpt(t *testing.T) {
+	uid := "test_uid"
+	opt, err := DB.GetUserGlobalMsgRecvOpt(uid)
+	assert.Nil(t, err)
+	fmt.Println("get opt", opt)
+}
+func Test_JudgeAccountEXISTS(t *testing.T) {
+	uid := "test_uid"
+	b, err := DB.JudgeAccountEXISTS(uid)
+	assert.Nil(t, err)
+	fmt.Println(b)
+}
+func Test_SetAccountCode(t *testing.T) {
+	uid := "test_uid"
+	code := 666666
+	err := DB.SetAccountCode(uid, code, 100)
+	assert.Nil(t, err)
+}
+func Test_GetAccountCode(t *testing.T) {
+	uid := "test_uid"
+	code, err := DB.GetAccountCode(uid)
+	assert.Nil(t, err)
+	fmt.Println(code)
 }
