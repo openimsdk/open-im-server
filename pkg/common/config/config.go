@@ -213,10 +213,10 @@ type config struct {
 			Topic string   `yaml:"topic"`
 		}
 		ConsumerGroupID struct {
-			MsgToMongo        string `yaml:"msgToMongo"`
-			MsgToMongoOffline string `yaml:"msgToMongoOffline"`
-			MsgToMySql        string `yaml:"msgToMySql"`
-			MsgToPush         string `yaml:"msgToPush"`
+			MsgToRedis string `yaml:"msgToRedis"`
+			MsgToMongo string `yaml:"msgToMongo"`
+			MsgToMySql string `yaml:"msgToMySql"`
+			MsgToPush  string `yaml:"msgToPush"`
 		}
 	}
 	Secret                            string `yaml:"secret"`

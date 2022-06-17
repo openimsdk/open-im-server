@@ -1,6 +1,5 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-import "Open_IM/pkg/proto/sdk_ws/wrappers.proto";
 option go_package = "./user;user";
 package user;
 
@@ -63,9 +62,16 @@ message UpdateUserInfoReq{
   server_api_params.UserInfo UserInfo = 1;
   string OpUserID = 2;
   string  operationID = 3;
-  google.protobuf.Int32Value globalRecvMsgOpt = 4;
 }
 message UpdateUserInfoResp{
+  CommonResp  commonResp = 1;
+}
+message SetGlobalRecvMessageOptReq{
+  string userID = 1;
+  string  operationID = 2;
+  int32 globalRecvMsgOpt = 3;
+}
+message SetGlobalRecvMessageOptResp{
   CommonResp  commonResp = 1;
 }
 
@@ -295,6 +301,7 @@ message DeleteUserResp {
 service user {
   rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
+  rpc SetGlobalRecvMessageOpt(SetGlobalRecvMessageOptReq) returns(SetGlobalRecvMessageOptResp);
   rpc DeleteUsers(DeleteUsersReq)returns(DeleteUsersResp);
   rpc GetAllUserID(GetAllUserIDReq)returns(GetAllUserIDResp);
 
