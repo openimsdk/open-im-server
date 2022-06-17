@@ -261,7 +261,7 @@ func randomEnglishName() string {
 }
 
 func randomPosition() string {
-	l := []string{"Golang工程师", "前端工程师", "后端工程师", "产品经理", "测试开发工程师", "运维开发工程师"}
+	l := []string{"后端工程师", "前端工程师", "设计师"}
 	rand.Seed(time.Now().UnixNano())
 	index := rand.Intn(len(l) - 1)
 	return l[index]
