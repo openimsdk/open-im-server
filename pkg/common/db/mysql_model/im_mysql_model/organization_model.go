@@ -302,6 +302,6 @@ func GetRandomDepartmentID() (string, error) {
 		return "", err
 	}
 	department := &db.Department{}
-	err = dbConn.Model(department).Order("RAND()").Where("related_group_id != ?", "").First(department).Error
+	err = dbConn.Model(department).Order("RAND()").Where("related_group_id != ? AND department_id != ?", "", "0").First(department).Error
 	return department.DepartmentID, err
 }
