@@ -56,11 +56,11 @@ func init() {
 		uri = config.Config.Mongo.DBUri
 	} else {
 		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress[0],
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress,
 				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
 		} else {
 			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
-				config.Config.Mongo.DBAddress[0], config.Config.Mongo.DBDatabase,
+				config.Config.Mongo.DBAddress, config.Config.Mongo.DBDatabase,
 				config.Config.Mongo.DBMaxPoolSize)
 		}
 	}
@@ -123,7 +123,7 @@ func init() {
 	defer cancel()
 	if config.Config.Redis.EnableCluster {
 		DB.rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
-			Addrs:    []string{config.Config.Redis.DBAddress},
+			Addrs:    config.Config.Redis.DBAddress,
 			PoolSize: 50,
 		})
 		_, err = DB.rdb.Ping(ctx).Result()
@@ -132,7 +132,7 @@ func init() {
 		}
 	} else {
 		DB.rdb = go_redis.NewClient(&go_redis.Options{
-			Addr:     config.Config.Redis.DBAddress,
+			Addr:     config.Config.Redis.DBAddress[0],
 			Password: config.Config.Redis.DBPassWord, // no password set
 			DB:       0,                              // use default DB
 			PoolSize: 100,                            // 连接池大小

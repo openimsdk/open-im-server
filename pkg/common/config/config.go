@@ -85,24 +85,24 @@ type config struct {
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
 	}
 	Mongo struct {
-		DBUri               string   `yaml:"dbUri"`
-		DBAddress           []string `yaml:"dbAddress"`
-		DBDirect            bool     `yaml:"dbDirect"`
-		DBTimeout           int      `yaml:"dbTimeout"`
-		DBDatabase          string   `yaml:"dbDatabase"`
-		DBSource            string   `yaml:"dbSource"`
-		DBUserName          string   `yaml:"dbUserName"`
-		DBPassword          string   `yaml:"dbPassword"`
-		DBMaxPoolSize       int      `yaml:"dbMaxPoolSize"`
-		DBRetainChatRecords int      `yaml:"dbRetainChatRecords"`
+		DBUri               string `yaml:"dbUri"`
+		DBAddress           string `yaml:"dbAddress"`
+		DBDirect            bool   `yaml:"dbDirect"`
+		DBTimeout           int    `yaml:"dbTimeout"`
+		DBDatabase          string `yaml:"dbDatabase"`
+		DBSource            string `yaml:"dbSource"`
+		DBUserName          string `yaml:"dbUserName"`
+		DBPassword          string `yaml:"dbPassword"`
+		DBMaxPoolSize       int    `yaml:"dbMaxPoolSize"`
+		DBRetainChatRecords int    `yaml:"dbRetainChatRecords"`
 	}
 	Redis struct {
-		DBAddress     string `yaml:"dbAddress"`
-		DBMaxIdle     int    `yaml:"dbMaxIdle"`
-		DBMaxActive   int    `yaml:"dbMaxActive"`
-		DBIdleTimeout int    `yaml:"dbIdleTimeout"`
-		DBPassWord    string `yaml:"dbPassWord"`
-		EnableCluster bool   `yaml:"enableCluster"`
+		DBAddress     []string `yaml:"dbAddress"`
+		DBMaxIdle     int      `yaml:"dbMaxIdle"`
+		DBMaxActive   int      `yaml:"dbMaxActive"`
+		DBIdleTimeout int      `yaml:"dbIdleTimeout"`
+		DBPassWord    string   `yaml:"dbPassWord"`
+		EnableCluster bool     `yaml:"enableCluster"`
 	}
 	RpcPort struct {
 		OpenImUserPort           []int `yaml:"openImUserPort"`
