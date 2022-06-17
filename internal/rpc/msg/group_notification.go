@@ -36,7 +36,6 @@ func setOpUserInfo(opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupM
 				return utils.Wrap(err, "")
 			}
 		}
-
 		user, err := imdb.GetUserByUserID(opUserID)
 		if err != nil {
 			return utils.Wrap(err, "")
@@ -118,16 +117,13 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 
 	tips.JsonDetail, _ = marshaler.MarshalToString(m)
 	var nickname string
-	if utils.IsContain(sendID, config.Config.Manager.AppManagerUid) {
-		nickname = sendID
-	} else {
-		from, err := imdb.GetUserByUserID(sendID)
-		if err != nil {
-			log.Error(operationID, "GetUserByUserID failed ", err.Error(), sendID)
-		}
-		if from != nil {
-			nickname = from.Nickname
-		}
+
+	from, err := imdb.GetUserByUserID(sendID)
+	if err != nil {
+		log.Error(operationID, "GetUserByUserID failed ", err.Error(), sendID)
+	}
+	if from != nil {
+		nickname = from.Nickname
 	}
 
 	to, err := imdb.GetUserByUserID(recvUserID)
