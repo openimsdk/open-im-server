@@ -22,7 +22,11 @@ func init() {
 		}
 		var appMgr db.User
 		appMgr.UserID = v
-		appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
+		if k == 0 {
+			appMgr.Nickname = config.Config.Manager.AppSysNotificationName
+		} else {
+			appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
+		}
 		appMgr.AppMangerLevel = constant.AppAdmin
 		err = UserRegister(appMgr)
 		if err != nil {
