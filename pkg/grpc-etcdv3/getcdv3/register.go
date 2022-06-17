@@ -83,9 +83,9 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 			select {
 			case pv, ok := <-kresp:
 				if ok == true {
-					log.Debug(operationID, "KeepAlive kresp ok", pv)
+					log.Debug(operationID, "KeepAlive kresp ok", pv, args)
 				} else {
-					log.Error(operationID, "KeepAlive kresp failed", pv)
+					log.Error(operationID, "KeepAlive kresp failed ", pv, args)
 					t := time.NewTicker(time.Duration(ttl/2) * time.Second)
 					for {
 						select {
@@ -94,15 +94,15 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 						ctx, _ := context.WithCancel(context.Background())
 						resp, err := cli.Grant(ctx, int64(ttl))
 						if err != nil {
-							log.Error(operationID, "Grant failed ", err.Error())
+							log.Error(operationID, "Grant failed ", err.Error(), args)
 							continue
 						}
 
 						if _, err := cli.Put(ctx, serviceKey, serviceValue, clientv3.WithLease(resp.ID)); err != nil {
-							log.Error(operationID, "etcd Put failed ", err.Error(), args, "resp ID: ", resp.ID)
+							log.Error(operationID, "etcd Put failed ", err.Error(), args, " resp ID: ", resp.ID)
 							continue
 						} else {
-							log.Info(operationID, "etcd Put ok ", args, "resp ID: ", resp.ID)
+							log.Info(operationID, "etcd Put ok ", args, " resp ID: ", resp.ID)
 						}
 					}
 				}
