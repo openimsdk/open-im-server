@@ -55,8 +55,8 @@ kafka:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ms2ps_chat"
   consumergroupid:
+    msgToRedis: redis
     msgToMongo: mongo
-    msgToMongoOffline: mongo_offline
     msgToMySql: mysql
     msgToPush: push
 

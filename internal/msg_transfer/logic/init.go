@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
-	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/statistics"
 	"fmt"
 	"sync"
@@ -20,7 +19,8 @@ const ChannelNum = 100
 
 var (
 	persistentCH          PersistentConsumerHandler
-	historyCH             OnlineHistoryConsumerHandler
+	historyCH             OnlineHistoryRedisConsumerHandler
+	historyMongoCH        OnlineHistoryMongoConsumerHandler
 	producer              *kafka.Producer
 	producerToMongo       *kafka.Producer
 	cmdCh                 chan Cmd2Value
@@ -39,7 +39,6 @@ func Init() {
 	persistentCH.Init()
 	historyCH.Init(cmdCh)
 	onlineTopicStatus = OnlineTopicVacancy
-	log.Debug("come msg transfer ts", config.Config.Kafka.ConsumerGroupID.MsgToMongoOffline, config.Config.Kafka.Ws2mschatOffline.Topic)
 	//offlineHistoryCH.Init(cmdCh)
 	statistics.NewStatistics(&singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	statistics.NewStatistics(&groupMsgCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second groupMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
@@ -54,6 +53,7 @@ func Run() {
 		fmt.Println("not start mysql consumer")
 	}
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
+	//go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
 	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
 }
 func SetOnlineTopicStatus(status int) {

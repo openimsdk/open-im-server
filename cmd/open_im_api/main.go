@@ -38,7 +38,8 @@ func main() {
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{
-		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo)              //1
+		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo) //1
+		userRouterGroup.POST("/set_global_msg_recv_opt", user.SetGlobalRecvMessageOpt)
 		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)                  //1
 		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
 		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
