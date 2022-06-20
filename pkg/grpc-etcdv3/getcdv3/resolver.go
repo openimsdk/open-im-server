@@ -76,12 +76,6 @@ func GetConn(schema, etcdaddr, serviceName string, operationID string) *grpc.Cli
 	}
 
 	rwNameResolverMutex.Lock()
-	r, ok = nameResolver[schema+serviceName]
-	if ok {
-		rwNameResolverMutex.Unlock()
-		log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
-		return r.grpcClientConn
-	}
 
 	r, err := NewResolver(schema, etcdaddr, serviceName, operationID)
 	if err != nil {
