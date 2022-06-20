@@ -174,7 +174,7 @@ func joinGroups(operationID, userID, userName string, groupIDList []string) {
 			GroupID:           groupID,
 			Reason:            "register auto join",
 			InvitedUserIDList: []string{userID},
-			OpUserID:          config.Config.Manager.AppManagerUid[0],
+			OpUserID:          config.Config.Manager.AppManagerUid[1],
 		}
 		resp, err := client.InviteUserToGroup(context.Background(), req)
 		if err != nil {

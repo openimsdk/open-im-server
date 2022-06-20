@@ -69,9 +69,11 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				return
 			}
 		}
-		if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
-			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
-			return
+		if pushMsg.MsgData.ContentType == constant.SignalingNotification {
+			if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
+				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
+				return
+			}
 		}
 		//Use offline push messaging
 		var UIDList []string
@@ -153,7 +155,6 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		log.NewError(pushMsg.OperationID, errMsg)
 		return
 	}
-
 	client := pbCache.NewCacheClient(etcdConn)
 	cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
 	if err != nil {

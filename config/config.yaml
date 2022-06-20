@@ -222,6 +222,7 @@ manager:
   #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
   appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]
   secrets: [ "openIM1","openIM2", "openIM333", "openIMAdmin"]
+  appSysNotificationName: "系统通知"
 
 secret: tuoyun
 # 多端互踢策略
@@ -233,7 +234,7 @@ chatpersistencemysql: true
 #可靠性存储
 reliablestorage: false
 #消息缓存时间
-msgCacheTimeout: 1800
+msgCacheTimeout: 86400
 #群聊已读开启
 groupMessageHasReadReceiptEnable: true
 #单聊已读开启
