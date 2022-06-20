@@ -292,11 +292,13 @@ func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOffl
 		oldConnMap := ws.getUserAllCons(v)
 		if conn, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
 			ws.sendKickMsg(conn, &UserConn{})
+			conn.Close()
 		}
+		SetTokenKicked(v, int(req.PlatformID), req.OperationID)
 	}
 	return &pbRelay.KickUserOfflineResp{}, nil
-
 }
+
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.OnlinePushMsgReq, RecvPlatForm int, RecvID string) (ResultCode int64) {
 	err := ws.writeMsg(conn, websocket.BinaryMessage, bMsg)
 	if err != nil {
