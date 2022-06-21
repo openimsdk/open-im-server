@@ -254,7 +254,7 @@ func VerifyToken(token, uid string) (bool, error) {
 }
 
 func WsVerifyToken(token, uid string, platformID string, operationID string) (bool, error, string) {
-	argMsg := "token: " + token + " operationID: " + operationID + " userID: " + uid + " platformID: " + constant.PlatformIDToName(utils.StringToInt(platformID))
+	argMsg := "args: token: " + token + " operationID: " + operationID + " userID: " + uid + " platformID: " + constant.PlatformIDToName(utils.StringToInt(platformID))
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
 		//if errors.Is(err, constant.ErrTokenUnknown) {
@@ -271,11 +271,11 @@ func WsVerifyToken(token, uid string, platformID string, operationID string) (bo
 		return false, utils.Wrap(err, errMsg), errMsg
 	}
 	if claims.UID != uid {
-		errMsg := " uid is not same to token uid " + " claims.UID " + claims.UID + argMsg
+		errMsg := " uid is not same to token uid " + argMsg + " claims.UID: " + claims.UID
 		return false, utils.Wrap(constant.ErrTokenDifferentUserID, errMsg), errMsg
 	}
 	if claims.Platform != constant.PlatformIDToName(utils.StringToInt(platformID)) {
-		errMsg := " platform is not same to token platform " + argMsg + " claims platformID " + claims.Platform
+		errMsg := " platform is not same to token platform " + argMsg + " claims platformID: " + claims.Platform
 		return false, utils.Wrap(constant.ErrTokenDifferentPlatformID, errMsg), errMsg
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), " check ok ", claims.UID, uid, claims.Platform)
