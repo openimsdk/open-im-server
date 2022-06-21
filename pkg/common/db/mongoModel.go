@@ -984,12 +984,19 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 		Upsert: &upsert,
 	}
 	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
-	_, err = c.UpdateMany(sCtx, bson.M{"user_id": bson.M{"$in": initMemberIDList}}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
-	if err != nil {
-		session.AbortTransaction(ctx)
-		return utils.Wrap(err, "transaction failed")
+	//_, err = c.UpdateMany(sCtx, bson.M{"user_id": bson.M{"$in": initMemberIDList}}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
+	//if err != nil {
+	//	session.AbortTransaction(ctx)
+	//	return utils.Wrap(err, "transaction failed")
+	//}
+	for _, userID := range initMemberIDList {
+		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
+		if err != nil {
+			session.AbortTransaction(ctx)
+			return utils.Wrap(err, "transaction failed")
+		}
+
 	}
-	session.CommitTransaction(ctx)
 	return err
 }
 
