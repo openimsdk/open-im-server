@@ -11,6 +11,7 @@ import (
 	"encoding/gob"
 	go_redis "github.com/go-redis/redis/v8"
 	"net/http"
+	"reflect"
 	"sync"
 	"time"
 
@@ -307,7 +308,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 			case constant.ErrTokenDifferentUserID:
 				status = int(constant.ErrTokenDifferentUserID.ErrCode)
 			}
-			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error())
+			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error(), "type: ", reflect.TypeOf(err))
 			w.Header().Set("Sec-Websocket-Version", "13")
 			w.Header().Set("ws_err_msg", err.Error())
 			http.Error(w, err.Error(), status)

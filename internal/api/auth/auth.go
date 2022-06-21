@@ -100,7 +100,7 @@ func UserToken(c *gin.Context) {
 	client := rpc.NewAuthClient(etcdConn)
 	reply, err := client.UserToken(context.Background(), req)
 	if err != nil {
-		errMsg := req.OperationID + " UserToken failed " + err.Error() + req.String()
+		errMsg := req.OperationID + " UserToken failed " + err.Error() + " req: " + req.String()
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
