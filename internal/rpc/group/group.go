@@ -208,8 +208,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		if req.GroupInfo.GroupType != constant.SuperGroup {
 			chat.GroupCreatedNotification(req.OperationID, req.OpUserID, groupId, okUserIDList)
 		} else {
-			chat.SuperGroupNotification(req.OperationID, req.OpUserID, groupId)
-
+			go func() {
+				for _, v := range okUserIDList {
+					chat.SuperGroupNotification(req.OperationID, v, v)
+				}
+			}()
 		}
 		return resp, nil
 	} else {
@@ -406,7 +409,11 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if groupInfo.GroupType != constant.SuperGroup {
 		chat.MemberInvitedNotification(req.OperationID, req.GroupID, req.OpUserID, req.Reason, okUserIDList)
 	} else {
-		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.GroupID)
+		go func() {
+			for _, v := range req.InvitedUserIDList {
+				chat.SuperGroupNotification(req.OperationID, v, v)
+			}
+		}()
 	}
 
 	log.NewInfo(req.OperationID, "InviteUserToGroup rpc return ")
@@ -620,7 +627,12 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 	if groupInfo.GroupType != constant.SuperGroup {
 		chat.MemberKickedNotification(req, okUserIDList)
 	} else {
-		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.GroupID)
+		go func() {
+			for _, v := range req.KickedUserIDList {
+				chat.SuperGroupNotification(req.OperationID, v, v)
+			}
+		}()
+
 	}
 	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp.String())
 	return &resp, nil
@@ -928,7 +940,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 	if groupInfo.GroupType != constant.SuperGroup {
 		chat.MemberQuitNotification(req)
 	} else {
-		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.GroupID)
+		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.OpUserID)
 	}
 
 	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}})
