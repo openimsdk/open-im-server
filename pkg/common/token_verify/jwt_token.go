@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/utils"
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -178,6 +179,11 @@ func ParseTokenGetUserID(token string, operationID string) (error, string) {
 func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 	claims, err = GetClaimFromToken(tokensString)
 	if err != nil {
+		if errors.Is(err, constant.ErrTokenUnknown) {
+			errMsg := "GetClaimFromToken failed ErrTokenUnknown " + err.Error()
+			log.Error(operationID, errMsg)
+		}
+
 		log.NewError(operationID, "token validate err", err.Error(), tokensString)
 		return nil, utils.Wrap(err, "")
 	}
@@ -245,6 +251,11 @@ func WsVerifyToken(token, uid string, platformID string, operationID string) (bo
 	argMsg := "token: " + token + " operationID: " + operationID + " userID: " + uid + " platformID: " + platformID
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
+		if errors.Is(err, constant.ErrTokenUnknown) {
+			errMsg := "ParseToken failed ErrTokenUnknown " + err.Error()
+			log.Error(operationID, errMsg)
+		}
+
 		errMsg := "parse token err " + err.Error() + argMsg
 		return false, utils.Wrap(err, errMsg), errMsg
 	}
