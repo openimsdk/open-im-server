@@ -255,6 +255,11 @@ func WsVerifyToken(token, uid string, platformID string, operationID string) (bo
 			errMsg := "ParseToken failed ErrTokenUnknown " + err.Error()
 			log.Error(operationID, errMsg)
 		}
+		e := errors.Unwrap(err)
+		if errors.Is(e, constant.ErrTokenUnknown) {
+			errMsg := "ParseToken failed ErrTokenUnknown " + e.Error()
+			log.Error(operationID, errMsg)
+		}
 
 		errMsg := "parse token err " + err.Error() + argMsg
 		return false, utils.Wrap(err, errMsg), errMsg
