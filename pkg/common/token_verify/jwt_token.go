@@ -101,23 +101,23 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return nil, &constant.ErrTokenMalformed
+				return nil, constant.ErrTokenMalformed
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return nil, &constant.ErrTokenExpired
+				return nil, constant.ErrTokenExpired
 			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, &constant.ErrTokenNotValidYet
+				return nil, constant.ErrTokenNotValidYet
 			} else {
-				return nil, &constant.ErrTokenUnknown
+				return nil, constant.ErrTokenUnknown
 			}
 		} else {
-			return nil, &constant.ErrTokenNotValidYet
+			return nil, constant.ErrTokenNotValidYet
 		}
 	} else {
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 			//log.NewDebug("", claims.UID, claims.Platform)
 			return claims, nil
 		}
-		return nil, &constant.ErrTokenNotValidYet
+		return nil, constant.ErrTokenNotValidYet
 	}
 }
 
@@ -184,11 +184,11 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 			errMsg := "GetClaimFromToken failed ErrTokenUnknown   " + err.Error()
 			log.Error(operationID, errMsg)
 		}
-		//info := err.(constant.ErrInfo)
-		//if info == constant.ErrTokenUnknown {
-		//	errMsg := "info == constant.ErrTokenUnknown  " + err.Error()
-		//	log.Error(operationID, errMsg)
-		//}
+		info := err.(constant.ErrInfo)
+		if info == constant.ErrTokenUnknown {
+			errMsg := "info == constant.ErrTokenUnknown  " + err.Error()
+			log.Error(operationID, errMsg)
+		}
 
 		e := errors.Unwrap(err)
 		if errors.Is(e, constant.ErrTokenUnknown) {
