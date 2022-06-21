@@ -8,7 +8,6 @@ import (
 	"Open_IM/pkg/utils"
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
-	"reflect"
 	"time"
 )
 
@@ -192,7 +191,6 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 		//	log.Error(operationID, errMsg)
 		//}
 
-		log.NewError(operationID, "token validate err", err.Error(), tokensString, "type ", reflect.TypeOf(err), "type2: ", reflect.TypeOf(e))
 		return nil, utils.Wrap(err, "")
 	}
 
