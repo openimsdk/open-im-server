@@ -188,7 +188,7 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 		return nil, utils.Wrap(&constant.ErrTokenInvalid, "get token from redis err")
 	}
 	if m == nil {
-		log.NewError(operationID, "get token from redis err", "m is nil", tokensString)
+		log.NewError(operationID, "get token from redis err, not in redis ", "m is nil", tokensString)
 		return nil, utils.Wrap(&constant.ErrTokenInvalid, "get token from redis err")
 	}
 	if v, ok := m[tokensString]; ok {
@@ -196,13 +196,9 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 		case constant.NormalToken:
 			log.NewDebug(operationID, "this is normal return", claims)
 			return claims, nil
-		case constant.InValidToken:
-			return nil, utils.Wrap(&constant.ErrTokenInvalid, "")
 		case constant.KickedToken:
 			log.Error(operationID, "this token has been kicked by other same terminal ", constant.ErrTokenKicked)
 			return nil, utils.Wrap(&constant.ErrTokenKicked, "this token has been kicked by other same terminal ")
-		case constant.ExpiredToken:
-			return nil, utils.Wrap(&constant.ErrTokenExpired, "")
 		default:
 			return nil, utils.Wrap(&constant.ErrTokenUnknown, "")
 		}
@@ -244,20 +240,21 @@ func VerifyToken(token, uid string) (bool, error) {
 	log.NewDebug("", claims.UID, claims.Platform)
 	return true, nil
 }
+
 func WsVerifyToken(token, uid string, platformID string, operationID string) (bool, error, string) {
 	argMsg := "token: " + token + " operationID: " + operationID + " userID: " + uid + " platformID: " + platformID
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
-		errMsg := "parse token err " + argMsg
+		errMsg := "parse token err " + err.Error() + argMsg
 		return false, utils.Wrap(err, errMsg), errMsg
 	}
 	if claims.UID != uid {
 		errMsg := " uid is not same to token uid " + " claims.UID " + claims.UID + argMsg
-		return false, utils.Wrap(&constant.ErrTokenUnknown, errMsg), errMsg
+		return false, utils.Wrap(&constant.ErrTokenDifferentUserID, errMsg), errMsg
 	}
 	if claims.Platform != constant.PlatformIDToName(utils.StringToInt(platformID)) {
 		errMsg := " platform is not same to token platform " + argMsg + "claims platformID " + claims.Platform
-		return false, utils.Wrap(&constant.ErrTokenUnknown, errMsg), errMsg
+		return false, utils.Wrap(&constant.ErrTokenDifferentPlatformID, errMsg), errMsg
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), " check ok ", claims.UID, uid, claims.Platform)
 	return true, nil, ""

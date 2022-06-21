@@ -51,7 +51,7 @@ func (j *JPush) Push(accounts []string, alert, detailContent, operationID string
 	var me requestBody.Message
 	me.SetMsgContent(detailContent)
 	var o requestBody.Options
-	o.SetApnsProduction(false)
+	o.SetApnsProduction(config.Config.IOSPush.Production)
 	var po requestBody.PushObj
 	po.SetPlatform(&pf)
 	po.SetAudience(&au)

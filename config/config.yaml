@@ -261,6 +261,7 @@ messageverify:
 iospush:
   pushSound: "xxx"
   badgeCount: true
+  production: false
 
 callback:
   # callback url 需要自行更换callback url

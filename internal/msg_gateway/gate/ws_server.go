@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	go_redis "github.com/go-redis/redis/v8"
+	"gopkg.in/errgo.v2/errors"
 	"net/http"
 	"sync"
 	"time"
@@ -289,6 +290,24 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
 		if ok, err, msg := token_verify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0], operationID); !ok {
+			switch errors.Cause(err) {
+			case constant.ErrTokenExpired:
+				status = int(constant.ErrTokenExpired.ErrCode)
+			case constant.ErrTokenInvalid:
+				status = int(constant.ErrTokenInvalid.ErrCode)
+			case constant.ErrTokenMalformed:
+				status = int(constant.ErrTokenMalformed.ErrCode)
+			case constant.ErrTokenNotValidYet:
+				status = int(constant.ErrTokenNotValidYet.ErrCode)
+			case constant.ErrTokenUnknown:
+				status = int(constant.ErrTokenUnknown.ErrCode)
+			case constant.ErrTokenKicked:
+				status = int(constant.ErrTokenKicked.ErrCode)
+			case constant.ErrTokenDifferentPlatformID:
+				status = int(constant.ErrTokenDifferentPlatformID.ErrCode)
+			case constant.ErrTokenDifferentUserID:
+				status = int(constant.ErrTokenDifferentUserID.ErrCode)
+			}
 			log.Error(operationID, "Token verify failed ", "query ", query, msg, err.Error())
 			w.Header().Set("Sec-Websocket-Version", "13")
 			w.Header().Set("ws_err_msg", err.Error())
@@ -299,6 +318,7 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 			return true
 		}
 	} else {
+		status = int(constant.ErrArgs.ErrCode)
 		log.Error(operationID, "Args err ", "query ", query)
 		w.Header().Set("Sec-Websocket-Version", "13")
 		errMsg := "args err, need token, sendID, platformID"

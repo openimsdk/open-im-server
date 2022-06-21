@@ -3,6 +3,7 @@ package gate
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/chat"
@@ -170,7 +171,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 	sendMsgAllCountLock.Lock()
 	sendMsgAllCount++
 	sendMsgAllCountLock.Unlock()
-	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID, m.Data)
+	log.NewInfo(m.OperationID, "Ws call success to sendMsgReq start", m.MsgIncr, m.ReqIdentifier, m.SendID)
 
 	nReply := new(pbChat.SendMsgResp)
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendMsg, m.OperationID)
@@ -181,7 +182,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 			OperationID: m.OperationID,
 			MsgData:     &data,
 		}
-		log.NewInfo(m.OperationID, "Ws call success to sendMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data)
+		log.NewInfo(m.OperationID, "Ws call success to sendMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data.String())
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, m.OperationID)
 		if etcdConn == nil {
 			errMsg := m.OperationID + "getcdv3.GetConn == nil"
@@ -330,4 +331,20 @@ func (ws *WServer) sendErrMsg(conn *UserConn, errCode int32, errMsg string, reqI
 		OperationID:   operationID,
 	}
 	ws.sendMsg(conn, mReply)
+}
+
+func SetTokenKicked(userID string, platformID int, operationID string) {
+	m, err := db.DB.GetTokenMapByUidPid(userID, constant.PlatformIDToName(platformID))
+	if err != nil {
+		log.Error(operationID, "GetTokenMapByUidPid failed ", err.Error(), userID, constant.PlatformIDToName(platformID))
+		return
+	}
+	for k, _ := range m {
+		m[k] = constant.KickedToken
+	}
+	err = db.DB.SetTokenMapByUidPid(userID, platformID, m)
+	if err != nil {
+		log.Error(operationID, "SetTokenMapByUidPid failed ", err.Error(), userID, constant.PlatformIDToName(platformID))
+		return
+	}
 }
