@@ -292,8 +292,29 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
 		if ok, err, msg := token_verify.WsVerifyToken(query["token"][0], query["sendID"][0], query["platformID"][0], operationID); !ok {
+			if errors.Is(err, constant.ErrTokenExpired) {
+				status = int(constant.ErrTokenExpired.ErrCode)
+			}
+			if errors.Is(err, constant.ErrTokenInvalid) {
+				status = int(constant.ErrTokenInvalid.ErrCode)
+			}
+			if errors.Is(err, constant.ErrTokenMalformed) {
+				status = int(constant.ErrTokenMalformed.ErrCode)
+			}
+			if errors.Is(err, constant.ErrTokenNotValidYet) {
+				status = int(constant.ErrTokenNotValidYet.ErrCode)
+			}
 			if errors.Is(err, constant.ErrTokenUnknown) {
 				status = int(constant.ErrTokenUnknown.ErrCode)
+			}
+			if errors.Is(err, constant.ErrTokenKicked) {
+				status = int(constant.ErrTokenKicked.ErrCode)
+			}
+			if errors.Is(err, constant.ErrTokenDifferentPlatformID) {
+				status = int(constant.ErrTokenDifferentPlatformID.ErrCode)
+			}
+			if errors.Is(err, constant.ErrTokenDifferentUserID) {
+				status = int(constant.ErrTokenDifferentUserID.ErrCode)
 			}
 			//switch errors.Cause(err) {
 			//case constant.ErrTokenExpired:
