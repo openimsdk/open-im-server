@@ -8,7 +8,6 @@ import (
 	"Open_IM/pkg/utils"
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/pkg/errors"
 	"reflect"
 	"time"
 )
