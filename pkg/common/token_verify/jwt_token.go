@@ -181,7 +181,7 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 	claims, err = GetClaimFromToken(tokensString)
 	if err != nil {
 		if errors.Is(err, constant.ErrTokenUnknown) {
-			errMsg := "GetClaimFromToken failed ErrTokenUnknown " + err.Error()
+			errMsg := "GetClaimFromToken failed ErrTokenUnknown   " + err.Error()
 			log.Error(operationID, errMsg)
 		}
 		//info := err.(constant.ErrInfo)
