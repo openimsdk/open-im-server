@@ -208,6 +208,7 @@ type config struct {
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
 		BadgeCount bool   `yaml:"badgeCount"`
+		Production bool   `yaml:"production"`
 	}
 
 	Callback struct {
