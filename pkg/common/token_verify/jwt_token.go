@@ -9,6 +9,7 @@ import (
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pkg/errors"
+	"reflect"
 	"time"
 )
 
@@ -183,8 +184,13 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 			errMsg := "GetClaimFromToken failed ErrTokenUnknown " + err.Error()
 			log.Error(operationID, errMsg)
 		}
+		e := errors.Unwrap(err)
+		if errors.Is(e, constant.ErrTokenUnknown) {
+			errMsg := "ParseToken failed ErrTokenUnknown " + e.Error()
+			log.Error(operationID, errMsg)
+		}
 
-		log.NewError(operationID, "token validate err", err.Error(), tokensString)
+		log.NewError(operationID, "token validate err", err.Error(), tokensString, "type ", reflect.TypeOf(err), "type2: ", reflect.TypeOf(e))
 		return nil, utils.Wrap(err, "")
 	}
 
