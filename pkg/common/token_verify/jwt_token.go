@@ -254,7 +254,7 @@ func VerifyToken(token, uid string) (bool, error) {
 }
 
 func WsVerifyToken(token, uid string, platformID string, operationID string) (bool, error, string) {
-	argMsg := "token: " + token + " operationID: " + operationID + " userID: " + uid + " platformID: " + constant.PlatformIDToName(utils.StringToInt(platformID)
+	argMsg := "token: " + token + " operationID: " + operationID + " userID: " + uid + " platformID: " + constant.PlatformIDToName(utils.StringToInt(platformID))
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
 		//if errors.Is(err, constant.ErrTokenUnknown) {
