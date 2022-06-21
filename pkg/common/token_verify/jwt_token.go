@@ -274,11 +274,11 @@ func WsVerifyToken(token, uid string, platformID string, operationID string) (bo
 	}
 	if claims.UID != uid {
 		errMsg := " uid is not same to token uid " + " claims.UID " + claims.UID + argMsg
-		return false, utils.Wrap(&constant.ErrTokenDifferentUserID, errMsg), errMsg
+		return false, utils.Wrap(constant.ErrTokenDifferentUserID, errMsg), errMsg
 	}
 	if claims.Platform != constant.PlatformIDToName(utils.StringToInt(platformID)) {
 		errMsg := " platform is not same to token platform " + argMsg + "claims platformID " + claims.Platform
-		return false, utils.Wrap(&constant.ErrTokenDifferentPlatformID, errMsg), errMsg
+		return false, utils.Wrap(constant.ErrTokenDifferentPlatformID, errMsg), errMsg
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), " check ok ", claims.UID, uid, claims.Platform)
 	return true, nil, ""
