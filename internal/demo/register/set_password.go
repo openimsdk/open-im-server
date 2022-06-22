@@ -87,7 +87,7 @@ func SetPassword(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register failed: " + openIMRegisterResp.ErrMsg})
 		return
 	}
-	log.Info(params.OperationID, "begin store mysql", account, params.Password, params.FaceURL, params.Nickname)
+	log.Info(params.OperationID, "begin store mysql", account, params.Password, "info", params.FaceURL, params.Nickname)
 	err = im_mysql_model.SetPassword(account, params.Password, params.Ex, userID)
 	if err != nil {
 		log.NewError(params.OperationID, "set phone number password error", account, "err", err.Error())
