@@ -22,6 +22,7 @@ import (
 )
 
 func onboardingProcess(operationID, userID, userName, faceURL string) {
+	log.NewInfo(operationID, utils.GetSelfFuncName(), userName, userID, faceURL)
 	if err := createOrganizationUser(operationID, userID, userName); err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "createOrganizationUser failed", err.Error())
 	}
@@ -39,7 +40,6 @@ func onboardingProcess(operationID, userID, userName, faceURL string) {
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
-	log.NewInfo(operationID, utils.GetSelfFuncName(), groupIDList)
 	joinGroups(operationID, userID, userName, faceURL, groupIDList)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
 	oaNotification(operationID, userID)
