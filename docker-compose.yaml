@@ -20,6 +20,7 @@ services:
     ports:
       - 37017:27017
     container_name: mongo
+    command: --wiredTigerCacheSizeGB 5
     volumes:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
