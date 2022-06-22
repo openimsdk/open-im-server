@@ -553,13 +553,15 @@ func modifyMessageByUserMessageReceiveOptoptimization(userID, sourceID string, s
 }
 
 type NotificationMsg struct {
-	SendID      string
-	RecvID      string
-	Content     []byte //  open_im_sdk.TipsComm
-	MsgFrom     int32
-	ContentType int32
-	SessionType int32
-	OperationID string
+	SendID         string
+	RecvID         string
+	Content        []byte //  open_im_sdk.TipsComm
+	MsgFrom        int32
+	ContentType    int32
+	SessionType    int32
+	OperationID    string
+	SenderNickname string
+	SenderFaceURL  string
 }
 
 func Notification(n *NotificationMsg) {
@@ -579,6 +581,8 @@ func Notification(n *NotificationMsg) {
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(n.SendID)
 	msg.Options = make(map[string]bool, 7)
+	msg.SenderNickname = n.SenderNickname
+	msg.SenderFaceURL = n.SenderFaceURL
 	switch n.SessionType {
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		msg.RecvID = ""

@@ -284,7 +284,7 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 	stringList := strings.Split(req.ConversationID, "_")
 	if len(stringList) > 1 {
 		switch stringList[0] {
-		case "single_":
+		case "single":
 			conversation.UserID = stringList[1]
 			conversation.ConversationType = constant.SingleChatType
 		case "group":
