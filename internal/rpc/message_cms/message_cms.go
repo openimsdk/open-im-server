@@ -63,7 +63,7 @@ func (s *messageCMSServer) Run() {
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbMessageCMS.RegisterMessageCMSServer(srv, s)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {

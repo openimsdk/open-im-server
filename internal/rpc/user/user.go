@@ -62,7 +62,7 @@ func (s *userServer) Run() {
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbUser.RegisterUserServer(srv, s)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
@@ -284,7 +284,7 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 	stringList := strings.Split(req.ConversationID, "_")
 	if len(stringList) > 1 {
 		switch stringList[0] {
-		case "single_":
+		case "single":
 			conversation.UserID = stringList[1]
 			conversation.ConversationType = constant.SingleChatType
 		case "group":

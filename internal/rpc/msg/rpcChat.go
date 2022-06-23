@@ -64,7 +64,7 @@ func (rpc *rpcChat) Run() {
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	pbChat.RegisterChatServer(srv, rpc)
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()

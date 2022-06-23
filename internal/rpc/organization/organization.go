@@ -61,7 +61,7 @@ func (s *organizationServer) Run() {
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	rpc.RegisterOrganizationServer(srv, s)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
