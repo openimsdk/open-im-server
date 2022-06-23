@@ -55,7 +55,7 @@ func (r *RPCServer) run() {
 	defer srv.GracefulStop()
 	pbRelay.RegisterOnlineMessageRelayServiceServer(srv, r)
 
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
@@ -291,9 +291,11 @@ func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOffl
 	for _, v := range req.KickUserIDList {
 		oldConnMap := ws.getUserAllCons(v)
 		if conn, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
+			log.NewWarn(req.OperationID, "send kick msg, close connection ", req.PlatformID, v)
 			ws.sendKickMsg(conn, &UserConn{})
 			conn.Close()
 		}
+		log.NewWarn(req.OperationID, "SetTokenKicked ", v, req.PlatformID, req.OperationID)
 		SetTokenKicked(v, int(req.PlatformID), req.OperationID)
 	}
 	return &pbRelay.KickUserOfflineResp{}, nil

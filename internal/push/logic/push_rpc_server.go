@@ -44,7 +44,7 @@ func (r *RPCServer) run() {
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	pbPush.RegisterPushMsgServiceServer(srv, r)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {

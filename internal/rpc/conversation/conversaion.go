@@ -157,7 +157,7 @@ func (rpc *rpcConversation) Run() {
 
 	//service registers with etcd
 	pbConversation.RegisterConversationServer(srv, rpc)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {

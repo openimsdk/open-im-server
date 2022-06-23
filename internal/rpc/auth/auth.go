@@ -134,7 +134,7 @@ func (rpc *rpcAuth) Run() {
 
 	//service registers with etcd
 	pbAuth.RegisterAuthServer(srv, rpc)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
@@ -142,6 +142,7 @@ func (rpc *rpcAuth) Run() {
 		}
 	}
 	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
+
 	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),

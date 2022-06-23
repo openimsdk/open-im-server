@@ -65,7 +65,7 @@ func (s *cacheServer) Run() {
 	defer srv.GracefulStop()
 	pbCache.RegisterCacheServer(srv, s)
 
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
