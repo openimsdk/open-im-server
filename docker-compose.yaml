@@ -20,7 +20,7 @@ services:
     ports:
       - 37017:27017
     container_name: mongo
-    command: --wiredTigerCacheSizeGB 5
+    command: --wiredTigerCacheSizeGB 1
     volumes:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
@@ -45,7 +45,7 @@ services:
     volumes:
       - ./components/redis/data:/data
       #redis config file
-      #- ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+      - ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
     environment:
       TZ: Asia/Shanghai
     restart: always
