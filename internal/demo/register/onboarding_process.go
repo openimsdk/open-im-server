@@ -21,7 +21,8 @@ import (
 	"time"
 )
 
-func onboardingProcess(operationID, userID, userName string) {
+func onboardingProcess(operationID, userID, userName, faceURL string) {
+	log.NewInfo(operationID, utils.GetSelfFuncName(), userName, userID, faceURL)
 	if err := createOrganizationUser(operationID, userID, userName); err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "createOrganizationUser failed", err.Error())
 	}
@@ -39,8 +40,7 @@ func onboardingProcess(operationID, userID, userName string) {
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
-	log.NewInfo(operationID, utils.GetSelfFuncName(), groupIDList)
-	joinGroups(operationID, userID, userName, groupIDList)
+	joinGroups(operationID, userID, userName, faceURL, groupIDList)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
 	oaNotification(operationID, userID)
 }
@@ -157,7 +157,7 @@ func GetDepartmentGroupIDList(operationID, departmentID string) ([]string, error
 	return getDepartmentParentIDListResp.GroupIDList, nil
 }
 
-func joinGroups(operationID, userID, userName string, groupIDList []string) {
+func joinGroups(operationID, userID, userName, faceURL string, groupIDList []string) {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID, groupIDList)
 	}()
@@ -185,12 +185,12 @@ func joinGroups(operationID, userID, userName string, groupIDList []string) {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), resp)
 			continue
 		}
-		onboardingProcessNotification(operationID, userID, groupID, userName)
+		onboardingProcessNotification(operationID, userID, groupID, userName, faceURL)
 	}
 }
 
 // welcome user join department notification
-func onboardingProcessNotification(operationID, userID, groupID, userName string) {
+func onboardingProcessNotification(operationID, userID, groupID, userName, faceURL string) {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID, groupID)
 	}()
@@ -204,13 +204,15 @@ func onboardingProcessNotification(operationID, userID, groupID, userName string
 	//}
 	welcomeString := fmt.Sprintf("欢迎%s加入部门", userName)
 	notification := &msg.NotificationMsg{
-		SendID:      userID,
-		RecvID:      groupID,
-		Content:     []byte(welcomeString),
-		MsgFrom:     constant.UserMsgType,
-		ContentType: constant.Text,
-		SessionType: constant.GroupChatType,
-		OperationID: operationID,
+		SendID:         userID,
+		RecvID:         groupID,
+		Content:        []byte(welcomeString),
+		MsgFrom:        constant.UserMsgType,
+		ContentType:    constant.Text,
+		SessionType:    constant.GroupChatType,
+		OperationID:    operationID,
+		SenderNickname: userName,
+		SenderFaceURL:  faceURL,
 	}
 
 	// notification user join group

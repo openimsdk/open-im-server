@@ -95,7 +95,11 @@ func (d *DataBases) GetTokenMapByUidPid(userID, platformID string) (map[string]i
 }
 func (d *DataBases) SetTokenMapByUidPid(userID string, platformID int, m map[string]int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
-	return d.rdb.HSet(context.Background(), key, m).Err()
+	mm := make(map[string]interface{})
+	for k, v := range m {
+		mm[k] = v
+	}
+	return d.rdb.HSet(context.Background(), key, mm).Err()
 }
 func (d *DataBases) DeleteTokenByUidPid(userID string, platformID int, fields []string) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
