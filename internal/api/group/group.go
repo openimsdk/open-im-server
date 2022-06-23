@@ -606,6 +606,10 @@ func SetGroupInfo(c *gin.Context) {
 	utils.CopyStructFields(req.GroupInfo, &params)
 	req.OperationID = params.OperationID
 
+	if params.NeedVerification != nil {
+		req.GroupInfo.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
+	}
+
 	var ok bool
 	var errInfo string
 	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
