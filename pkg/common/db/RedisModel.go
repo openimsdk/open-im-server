@@ -18,6 +18,25 @@ import (
 	"strconv"
 	"time"
 )
+const (
+	accountTempCode               = "ACCOUNT_TEMP_CODE"
+	resetPwdTempCode              = "RESET_PWD_TEMP_CODE"
+	userIncrSeq                   = "REDIS_USER_INCR_SEQ:" // user incr seq
+	appleDeviceToken              = "DEVICE_TOKEN"
+	userMinSeq                    = "REDIS_USER_MIN_SEQ:"
+	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
+	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
+	getuiToken                    = "GETUI_TOKEN"
+	userInfoCache                 = "USER_INFO_CACHE:"
+	friendRelationCache           = "FRIEND_RELATION_CACHE:"
+	blackListCache                = "BLACK_LIST_CACHE:"
+	groupCache                    = "GROUP_CACHE:"
+	messageCache                  = "MESSAGE_CACHE:"
+	SignalCache                   = "SIGNAL_CACHE:"
+	SignalListCache               = "SIGNAL_LIST_CACHE:"
+	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
+)
+
 
 //func  (d *  DataBases)pubMessage(channel, msg string) {
 //   d.rdb.Publish(context.Background(),channel,msg)
