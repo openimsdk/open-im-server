@@ -1,42 +1,84 @@
-basePath: /api/v1
-host: localhost:8080
+definitions:
+  base_info.UpdateSelfUserInfoReq:
+    properties:
+      birth:
+        type: integer
+      email:
+        maxLength: 64
+        type: string
+      ex:
+        maxLength: 1024
+        type: string
+      faceURL:
+        maxLength: 1024
+        type: string
+      gender:
+        enum:
+        - 0
+        - 1
+        - 2
+        type: integer
+      nickname:
+        maxLength: 64
+        minLength: 1
+        type: string
+      operationID:
+        type: string
+      phoneNumber:
+        maxLength: 32
+        type: string
+      userID:
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - operationID
+    - userID
+    type: object
+  base_info.UpdateUserInfoResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
 info:
-  contact:
-    email: support@swagger.io
-    name: API Support
-    url: http://www.swagger.io/support
-  description: This is a sample server celler server.
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
-  version: "1.0"
+  contact: {}
 paths:
-  /hello:
-    get:
+  /user/update_user_info:
+    post:
       consumes:
       - application/json
-      description: 向你说Hello
+      description: 修改用户信息 userID faceURL等
+      operationId: UpdateUserInfo
       parameters:
-      - description: 人名
-        in: query
-        name: who
+      - description: im token
+        in: header
+        name: token
         required: true
         type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.UpdateSelfUserInfoReq'
+      produces:
+      - application/json
       responses:
-        "200":
-          description: '{"msg": "hello Razeen"}'
+        "0":
+          description: ""
           schema:
-            type: string
+            $ref: '#/definitions/base_info.UpdateUserInfoResp'
         "400":
-          description: '{"msg": "who are you"}'
+          description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            type: string
-      summary: 测试SayHello
+            $ref: '#/definitions/base_info.UpdateUserInfoResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.UpdateUserInfoResp'
+      summary: 修改用户信息
       tags:
-      - 测试
-securityDefinitions:
-  BasicAuth:
-    type: basic
+      - 用户信息
 swagger: "2.0"

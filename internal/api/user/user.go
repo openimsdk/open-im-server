@@ -196,13 +196,17 @@ func GetUsersInfo(c *gin.Context) {
 }
 
 // @Summary 修改用户信息
-// @Description 修改用户信息
-// @Tags 修改用户信息
+// @Description 修改用户信息 userID faceURL等
+// @Tags 用户信息
+// @ID UpdateUserInfo
 // @Accept json
-// @Param who query string true "人名"
-// @Success 200 {string} string "{"msg": "hello Razeen"}"
-// @Failure 400 {string} string "{"msg": "who are you"}"
-// @Router /update_user_info [post]
+// @Param token header string true "im token"
+// @Param req body api.UpdateSelfUserInfoReq true "请求"
+// @Produce json
+// @Success 0 {object} api.UpdateUserInfoResp
+// @Failure 500 {object} api.UpdateUserInfoResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.UpdateUserInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /user/update_user_info [post]
 func UpdateUserInfo(c *gin.Context) {
 	params := api.UpdateSelfUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {

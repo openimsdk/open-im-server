@@ -10,72 +10,139 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {
-            "name": "API Support",
-            "url": "http://www.swagger.io/support",
-            "email": "support@swagger.io"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/hello": {
-            "get": {
-                "description": "向你说Hello",
+        "/user/update_user_info": {
+            "post": {
+                "description": "修改用户信息 userID faceURL等",
                 "consumes": [
                     "application/json"
                 ],
-                "tags": [
-                    "测试"
+                "produces": [
+                    "application/json"
                 ],
-                "summary": "测试SayHello",
+                "tags": [
+                    "用户信息"
+                ],
+                "summary": "修改用户信息",
+                "operationId": "UpdateUserInfo",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "人名",
-                        "name": "who",
-                        "in": "query",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
                         "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UpdateSelfUserInfoReq"
+                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "{\"msg\": \"hello Razeen\"}",
+                    "0": {
+                        "description": "",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/base_info.UpdateUserInfoResp"
                         }
                     },
                     "400": {
-                        "description": "{\"msg\": \"who are you\"}",
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/base_info.UpdateUserInfoResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UpdateUserInfoResp"
                         }
                     }
                 }
             }
         }
     },
-    "securityDefinitions": {
-        "BasicAuth": {
-            "type": "basic"
+    "definitions": {
+        "base_info.UpdateSelfUserInfoReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "userID"
+            ],
+            "properties": {
+                "birth": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "ex": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "faceURL": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "gender": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1,
+                        2
+                    ]
+                },
+                "nickname": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "userID": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                }
+            }
+        },
+        "base_info.UpdateUserInfoResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Swagger Example API",
-	Description:      "This is a sample server celler server.",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }
