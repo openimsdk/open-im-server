@@ -32,13 +32,16 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/olivere/elastic/v7 v7.0.23
 	github.com/pkg/errors v0.9.1
-	github.com/razeencheng/demo-go/swaggo-gin v0.0.0-20220621231537-0a4e9bb56373
+	github.com/prometheus/client_golang v1.11.1
+	github.com/razeencheng/demo-go/swaggo-gin v0.0.0-20220621231537-0a4e9bb56373 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.2
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 	github.com/swaggo/gin-swagger v1.5.0
 	github.com/swaggo/swag v1.8.3
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.428
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms v1.0.428
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20210325043845-84a0811633ca
 	go.etcd.io/etcd/api/v3 v3.5.4
 	go.etcd.io/etcd/client/v3 v3.5.4
