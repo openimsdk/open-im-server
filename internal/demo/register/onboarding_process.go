@@ -72,11 +72,7 @@ func createOrganizationUser(operationID, userID, userName, phoneNumber, email st
 		OpUserID:    config.Config.Manager.AppManagerUid[0],
 		IsRegister:  false,
 	}
-	if strings.Contains("@", userID) {
-		req.OrganizationUser.Email = userID
-	} else {
-		req.OrganizationUser.Telephone = userID
-	}
+
 	resp, err := client.CreateOrganizationUser(context.Background(), req)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
