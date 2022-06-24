@@ -195,9 +195,9 @@ func GetUsersInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// @Summary 更新用户信息
-// @Description 向你说Hello
-// @Tags 测试
+// @Summary 修改用户信息
+// @Description 修改用户信息
+// @Tags 修改用户信息
 // @Accept json
 // @Param who query string true "人名"
 // @Success 200 {string} string "{"msg": "hello Razeen"}"
