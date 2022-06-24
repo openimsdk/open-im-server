@@ -6,11 +6,16 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"encoding/json"
 	"fmt"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
 	dysmsapi20170525 "github.com/alibabacloud-go/dysmsapi-20170525/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/gin-gonic/gin"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
+	sms "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms/v20210111"
 	"gopkg.in/gomail.v2"
 	"math/rand"
 	"net/http"
@@ -127,4 +132,35 @@ func CreateClient(accessKeyId *string, accessKeySecret *string) (result *dysmsap
 	result = &dysmsapi20170525.Client{}
 	result, err = dysmsapi20170525.NewClient(c)
 	return result, err
+}
+func CreateTencentSMSClient() (string, error) {
+	credential := common.NewCredential(
+		config.Config.Demo.TencentSMS.SecretID,
+		config.Config.Demo.TencentSMS.SecretKey,
+	)
+	cpf := profile.NewClientProfile()
+	client, err := sms.NewClient(credential, config.Config.Demo.TencentSMS.Region, cpf)
+	if err != nil {
+
+	}
+	request := sms.NewSendSmsRequest()
+	request.SmsSdkAppId = common.StringPtr(config.Config.Demo.TencentSMS.AppID)
+	request.SignName = common.StringPtr(config.Config.Demo.TencentSMS.SignName)
+	request.TemplateId = common.StringPtr(config.Config.Demo.TencentSMS.VerificationCodeTemplateCode)
+	request.TemplateParamSet = common.StringPtrs([]string{"1234"})
+	request.PhoneNumberSet = common.StringPtrs([]string{"+8613711112222"})
+	// 通过client对象调用想要访问的接口，需要传入请求对象
+	response, err := client.SendSms(request)
+	// 非SDK异常，直接失败。实际代码中可以加入其他的处理。
+	if err != nil {
+		log.Error("test", "send code to tencent err", err.Error())
+	}
+	// 处理异常
+	if _, ok := err.(*errors.TencentCloudSDKError); ok {
+		log.Error("test", "An API error has returned:", err.Error())
+		return "", err
+	}
+
+	b, _ := json.Marshal(response.Response)
+	return string(b), nil
 }

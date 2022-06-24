@@ -452,6 +452,16 @@ type config struct {
 			AccessKeySecret              string `yaml:"accessKeySecret"`
 			SignName                     string `yaml:"signName"`
 			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
+			Enable                       bool   `yaml:"enable"`
+		}
+		TencentSMS struct {
+			AppID                        string `yaml:"appID"`
+			Region                       string `yaml:"region"`
+			SecretID                     string `yaml:"secretID"`
+			SecretKey                    string `yaml:"secretKey"`
+			SignName                     string `yaml:"signName"`
+			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
+			Enable                       bool   `yaml:"enable"`
 		}
 		SuperCode string `yaml:"superCode"`
 		CodeTTL   int    `yaml:"codeTTL"`
