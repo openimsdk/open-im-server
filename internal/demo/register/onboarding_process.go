@@ -69,11 +69,7 @@ func createOrganizationUser(operationID, userID, userName string) error {
 		OpUserID:    userID,
 		IsRegister:  false,
 	}
-	if strings.Contains("@", userID) {
-		req.OrganizationUser.Email = userID
-	} else {
-		req.OrganizationUser.Telephone = userID
-	}
+
 	resp, err := client.CreateOrganizationUser(context.Background(), req)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
