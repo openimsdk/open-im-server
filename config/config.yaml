@@ -697,9 +697,9 @@ demo:
     enable: true
   tencentsms: #腾讯云短信配置，在腾讯云申请成功后，修改以下选项，enable为true则必须修改
     appID: 1400529182
-    region: ap-chengdu
-    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC1
-    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe1
+    region: ""
+    secretID: AKIDZx6yYruhDm6AxTihQt4ybx1oLbaHisKV
+    secretKey: vay4tSjjSv71e2A1buwhBNJyLRGp66pH
     signName: ""
     verificationCodeTemplateCode: 1449250
     enable: true
