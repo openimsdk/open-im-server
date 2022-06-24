@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 //message GroupCreatedTips{
@@ -231,7 +232,7 @@ func GroupCreatedNotification(operationID, opUserID, groupID string, initMemberL
 //	notification := ""
 //	introduction := ""
 //	faceURL := ""
-func GroupInfoSetNotification(operationID, opUserID, groupID string, groupName, notification, introduction, faceURL string) {
+func GroupInfoSetNotification(operationID, opUserID, groupID string, groupName, notification, introduction, faceURL string, needVerification *wrapperspb.Int32Value) {
 	GroupInfoChangedTips := open_im_sdk.GroupInfoSetTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
 	if err := setGroupInfo(groupID, GroupInfoChangedTips.Group); err != nil {
 		log.Error(operationID, "setGroupInfo failed ", err.Error(), groupID)
@@ -241,6 +242,8 @@ func GroupInfoSetNotification(operationID, opUserID, groupID string, groupName, 
 	GroupInfoChangedTips.Group.Notification = notification
 	GroupInfoChangedTips.Group.Introduction = introduction
 	GroupInfoChangedTips.Group.FaceURL = faceURL
+	GroupInfoChangedTips.Group.NeedVerification = needVerification
+
 	if err := setOpUserInfo(opUserID, groupID, GroupInfoChangedTips.OpUser); err != nil {
 		log.Error(operationID, "setOpUserInfo failed ", err.Error(), opUserID, groupID)
 		return
@@ -553,9 +556,21 @@ func MemberEnterNotification(req *pbGroup.GroupApplicationResponseReq) {
 		return
 	}
 	if err := setGroupMemberInfo(req.GroupID, req.FromUserID, MemberEnterTips.EntrantUser); err != nil {
-		log.Error(req.OperationID, "setOpUserInfo failed ", err.Error(), req.OpUserID, req.GroupID, MemberEnterTips.EntrantUser)
+		log.Error(req.OperationID, "setGroupMemberInfo failed ", err.Error(), req.OpUserID, req.GroupID, MemberEnterTips.EntrantUser)
 		return
 	}
 	groupNotification(constant.MemberEnterNotification, &MemberEnterTips, req.OpUserID, req.GroupID, "", req.OperationID)
+}
 
+func MemberEnterDirectlyNotification(groupID string, entrantUserID string, operationID string) {
+	MemberEnterTips := open_im_sdk.MemberEnterTips{Group: &open_im_sdk.GroupInfo{}, EntrantUser: &open_im_sdk.GroupMemberFullInfo{}}
+	if err := setGroupInfo(groupID, MemberEnterTips.Group); err != nil {
+		log.Error(operationID, "setGroupInfo failed ", err.Error(), groupID, MemberEnterTips.Group)
+		return
+	}
+	if err := setGroupMemberInfo(groupID, entrantUserID, MemberEnterTips.EntrantUser); err != nil {
+		log.Error(operationID, "setGroupMemberInfo failed ", err.Error(), groupID, entrantUserID, MemberEnterTips.EntrantUser)
+		return
+	}
+	groupNotification(constant.MemberEnterNotification, &MemberEnterTips, entrantUserID, groupID, "", operationID)
 }

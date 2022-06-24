@@ -16,6 +16,7 @@ type paramsCertification struct {
 	VerificationCode string `json:"verificationCode"`
 	OperationID      string `json:"operationID" binding:"required"`
 	UsedFor          int    `json:"usedFor"`
+	AreaCode         string `json:"areaCode"`
 }
 
 func Verify(c *gin.Context) {
@@ -31,7 +32,7 @@ func Verify(c *gin.Context) {
 	if params.Email != "" {
 		account = params.Email
 	} else {
-		account = params.PhoneNumber
+		account = params.AreaCode + params.PhoneNumber
 	}
 
 	if params.VerificationCode == config.Config.Demo.SuperCode {

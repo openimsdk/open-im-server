@@ -267,6 +267,12 @@ const (
 	ReliableNotificationMsg   = 3
 )
 
+const (
+	ApplyNeedVerificationInviteDirectly = 0 // 申请需要同意 邀请直接进
+	AllNeedVerification                 = 1 //所有人进群需要验证，除了群主管理员邀请进群
+	Directly                            = 2 //直接进群
+)
+
 const FriendAcceptTip = "You have successfully become friends, so start chatting"
 
 func GroupIsBanChat(status int32) bool {

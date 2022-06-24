@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "Open_IM/cmd/open_im_api/docs"
 	apiAuth "Open_IM/internal/api/auth"
 	apiChat "Open_IM/internal/api/chat"
 	"Open_IM/internal/api/conversation"
@@ -16,6 +17,9 @@ import (
 	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
+	//_ "github.com/razeencheng/demo-go/swaggo-gin/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"io"
 	"os"
 	"strconv"
@@ -35,6 +39,7 @@ func main() {
 	r.Use(utils.CorsHandler())
 
 	log.Info("load  config: ", config.Config)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
 	{

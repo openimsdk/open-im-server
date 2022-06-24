@@ -27,6 +27,7 @@ type paramsVerificationCode struct {
 	PhoneNumber string `json:"phoneNumber"`
 	OperationID string `json:"operationID" binding:"required"`
 	UsedFor     int    `json:"usedFor"`
+	AreaCode    string `json:"areaCode"`
 }
 
 func SendVerificationCode(c *gin.Context) {
@@ -42,28 +43,28 @@ func SendVerificationCode(c *gin.Context) {
 	} else {
 		account = params.PhoneNumber
 	}
-	var accountKey string
+	var accountKey = params.AreaCode + account
 	if params.UsedFor == 0 {
 		params.UsedFor = constant.VerificationCodeForRegister
 	}
 	switch params.UsedFor {
 	case constant.VerificationCodeForRegister:
-		_, err := im_mysql_model.GetRegister(account)
+		_, err := im_mysql_model.GetRegister(account, params.AreaCode)
 		if err == nil {
 			log.NewError(params.OperationID, "The phone number has been registered", params)
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": "The phone number has been registered"})
 			return
 		}
-		ok, err := db.DB.JudgeAccountEXISTS(account)
+		ok, err := db.DB.JudgeAccountEXISTS(accountKey)
 		if ok || err != nil {
 			log.NewError(params.OperationID, "The phone number has been registered", params)
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "The phone number has been registered"})
 			return
 		}
-		accountKey = account + "_" + constant.VerificationCodeForRegisterSuffix
+		accountKey += "_" + constant.VerificationCodeForRegisterSuffix
 
 	case constant.VerificationCodeForReset:
-		accountKey = account + "_" + constant.VerificationCodeForResetSuffix
+		accountKey += "_" + constant.VerificationCodeForResetSuffix
 	}
 	rand.Seed(time.Now().UnixNano())
 	code := 100000 + rand.Intn(900000)
@@ -95,7 +96,7 @@ func SendVerificationCode(c *gin.Context) {
 		}
 
 		sendSmsRequest := &dysmsapi20170525.SendSmsRequest{
-			PhoneNumbers:  tea.String(account),
+			PhoneNumbers:  tea.String(accountKey),
 			SignName:      tea.String(config.Config.Demo.AliSMSVerify.SignName),
 			TemplateCode:  tea.String(config.Config.Demo.AliSMSVerify.VerificationCodeTemplateCode),
 			TemplateParam: tea.String(fmt.Sprintf("{\"code\":\"%d\"}", code)),

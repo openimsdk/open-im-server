@@ -195,6 +195,14 @@ func GetUsersInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 修改用户信息
+// @Description 修改用户信息
+// @Tags 修改用户信息
+// @Accept json
+// @Param who query string true "人名"
+// @Success 200 {string} string "{"msg": "hello Razeen"}"
+// @Failure 400 {string} string "{"msg": "who are you"}"
+// @Router /update_user_info [post]
 func UpdateUserInfo(c *gin.Context) {
 	params := api.UpdateSelfUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -233,6 +241,7 @@ func UpdateUserInfo(c *gin.Context) {
 	log.NewInfo(req.OperationID, "UpdateUserInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
 func SetGlobalRecvMessageOpt(c *gin.Context) {
 	params := api.SetGlobalRecvMessageOptReq{}
 	if err := c.BindJSON(&params); err != nil {

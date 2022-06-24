@@ -21,9 +21,9 @@ import (
 	"time"
 )
 
-func onboardingProcess(operationID, userID, userName, faceURL string) {
+func onboardingProcess(operationID, userID, userName, faceURL, phoneNumber, email string) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), userName, userID, faceURL)
-	if err := createOrganizationUser(operationID, userID, userName); err != nil {
+	if err := createOrganizationUser(operationID, userID, userName, phoneNumber, email); err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "createOrganizationUser failed", err.Error())
 	}
 	departmentID, err := imdb.GetRandomDepartmentID()
@@ -45,7 +45,7 @@ func onboardingProcess(operationID, userID, userName, faceURL string) {
 	oaNotification(operationID, userID)
 }
 
-func createOrganizationUser(operationID, userID, userName string) error {
+func createOrganizationUser(operationID, userID, userName, phoneNumber, email string) error {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID)
 	}()
@@ -64,16 +64,15 @@ func createOrganizationUser(operationID, userID, userName string) error {
 			EnglishName: randomEnglishName(),
 			Gender:      constant.Male,
 			CreateTime:  uint32(time.Now().Unix()),
+			Telephone:   phoneNumber,
+			Mobile:      phoneNumber,
+			Email:       email,
 		},
 		OperationID: operationID,
 		OpUserID:    config.Config.Manager.AppManagerUid[0],
 		IsRegister:  false,
 	}
-	if strings.Contains("@", userID) {
-		req.OrganizationUser.Email = userID
-	} else {
-		req.OrganizationUser.Telephone = userID
-	}
+
 	resp, err := client.CreateOrganizationUser(context.Background(), req)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
