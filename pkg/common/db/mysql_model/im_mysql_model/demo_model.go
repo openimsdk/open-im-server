@@ -5,22 +5,23 @@ import (
 	_ "github.com/jinzhu/gorm"
 )
 
-func GetRegister(account string) (*db.Register, error) {
+func GetRegister(account, areaCode string) (*db.Register, error) {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
 		return nil, err
 	}
 	var r db.Register
-	return &r, dbConn.Table("registers").Where("account = ?",
-		account).Take(&r).Error
+	return &r, dbConn.Table("registers").Where("account = ? or account =? and area_code=?",
+		account, account, areaCode).Take(&r).Error
 }
 
-func SetPassword(account, password, ex, userID string) error {
+func SetPassword(account, password, ex, userID, areaCode string) error {
 	r := db.Register{
 		Account:  account,
 		Password: password,
 		Ex:       ex,
 		UserID:   userID,
+		AreaCode: areaCode,
 	}
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {

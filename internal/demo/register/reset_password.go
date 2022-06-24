@@ -16,6 +16,7 @@ type resetPasswordRequest struct {
 	Email            string `json:"email"`
 	PhoneNumber      string `json:"phoneNumber"`
 	NewPassword      string `json:"newPassword" binding:"required"`
+	AreaCode         string `json:"areaCode"`
 	OperationID      string `json:"operationID"`
 }
 
@@ -34,7 +35,7 @@ func ResetPassword(c *gin.Context) {
 		account = req.PhoneNumber
 	}
 	if req.VerificationCode != config.Config.Demo.SuperCode {
-		accountKey := account + "_" + constant.VerificationCodeForResetSuffix
+		accountKey := req.AreaCode + account + "_" + constant.VerificationCodeForResetSuffix
 		v, err := db.DB.GetAccountCode(accountKey)
 		if err != nil || v != req.VerificationCode {
 			log.NewError(req.OperationID, "password Verification code error", account, req.VerificationCode, v)
@@ -42,7 +43,7 @@ func ResetPassword(c *gin.Context) {
 			return
 		}
 	}
-	user, err := im_mysql_model.GetRegister(account)
+	user, err := im_mysql_model.GetRegister(account, req.AreaCode)
 	if err != nil || user.Account == "" {
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "get register error", err.Error())

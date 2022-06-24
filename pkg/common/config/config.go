@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -486,6 +487,8 @@ type PDefaultTips struct {
 
 func init() {
 	cfgName := os.Getenv("CONFIG_NAME")
+	fmt.Println(Root, cfgName)
+
 	if len(cfgName) == 0 {
 		cfgName = Root + "/config/config.yaml"
 	}
