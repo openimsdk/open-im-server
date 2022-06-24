@@ -6,12 +6,12 @@ serverversion: 2.0.0
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openim  #默认即可
-  etcdAddr: [ 43.128.5.63:2379 ] #单机部署时，默认即可
+  etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
 
 k8sMod: false #开启k8s模式 使用pod里面环境变量请求services调用服务 而并非etcd
 
 mysql:
-  dbMysqlAddress: [ 103.116.45.174:13306 ] #mysql地址 目前仅支持单机，默认即可
+  dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
   dbMysqlUserName: root #mysql用户名，建议修改
   dbMysqlPassword: openIM # mysql密码，建议修改
   dbMysqlDatabaseName: openIM_v2 #默认即可
@@ -23,7 +23,7 @@ mysql:
 
 mongo:
   dbUri: ""#当dbUri值不为空则直接使用该值
-  dbAddress: 103.116.45.174:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
+  dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
   dbDirect: false
   dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
@@ -34,7 +34,7 @@ mongo:
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
 
 redis:
-  dbAddress: [ 103.116.45.174:16379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
+  dbAddress: [ 127.0.0.1:16379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
@@ -43,16 +43,16 @@ redis:
 
 kafka:
   ws2mschat:
-    addr: [ 103.116.45.174:9092 ] #kafka配置，默认即可
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat"
   ws2mschatoffline:
-    addr: [ 103.116.45.174:9092 ] #kafka配置，默认即可
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat_offline"
   msgtomongo:
-    addr: [ 103.116.45.174:9092 ] #kafka配置，默认即可
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "msg_to_mongo"
   ms2pschat:
-    addr: [ 103.116.45.174:9092 ] #kafka配置，默认即可
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ms2ps_chat"
   consumergroupid:
     msgToTransfer: mongo
