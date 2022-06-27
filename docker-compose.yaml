@@ -20,7 +20,7 @@ services:
     ports:
       - 37017:27017
     container_name: mongo
-    command: --wiredTigerCacheSizeGB 1 --auth
+    command: --wiredTigerCacheSizeGB 1
     volumes:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
@@ -29,8 +29,8 @@ services:
       - TZ=Asia/Shanghai
       # cache
       - wiredTigerCacheSizeGB=1
-      - MONGO_INITDB_ROOT_USERNAME=openIM
-      - MONGO_INITDB_ROOT_PASSWORD=openIM
+#      - MONGO_INITDB_ROOT_USERNAME=openIM
+#      - MONGO_INITDB_ROOT_PASSWORD=openIM
       #TZ: Asia/Shanghai
     restart: always
 
