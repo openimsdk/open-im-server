@@ -51,6 +51,9 @@ func main() {
 		userRouterGroup.POST("/get_users_info_from_cache", user.GetUsersInfoFromCache)
 		userRouterGroup.POST("/get_user_friend_from_cache", user.GetFriendIDListFromCache)
 		userRouterGroup.POST("/get_black_list_from_cache", user.GetBlackIDListFromCache)
+		userRouterGroup.POST("/get_all_users_uid", manage.GetAllUsersUid) //1
+		userRouterGroup.POST("/account_check", manage.AccountCheck)       //1
+		//	userRouterGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
@@ -130,16 +133,13 @@ func main() {
 		chatGroup.POST("/pull_msg_by_seq", apiChat.PullMsgBySeqList)
 		chatGroup.POST("/del_msg", apiChat.DelMsg)
 		chatGroup.POST("/clear_msg", apiChat.ClearMsg)
+		chatGroup.POST("/send_msg", manage.ManagementSendMsg)
+		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
 	}
 	//Manager
 	managementGroup := r.Group("/manager")
 	{
 		managementGroup.POST("/delete_user", manage.DeleteUser) //1
-		managementGroup.POST("/send_msg", manage.ManagementSendMsg)
-		managementGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
-		managementGroup.POST("/get_all_users_uid", manage.GetAllUsersUid)             //1
-		managementGroup.POST("/account_check", manage.AccountCheck)                   //1
-		managementGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
