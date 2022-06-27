@@ -133,7 +133,7 @@ func main() {
 		chatGroup.POST("/pull_msg_by_seq", apiChat.PullMsgBySeqList)
 		chatGroup.POST("/del_msg", apiChat.DelMsg)
 		chatGroup.POST("/clear_msg", apiChat.ClearMsg)
-		chatGroup.POST("/send_msg", manage.ManagementSendMsg)
+		chatGroup.POST("/manage_send_msg", manage.ManagementSendMsg)
 		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
 	}
 	//Manager
