@@ -126,6 +126,7 @@ services:
       - mongodb
       - redis
       - etcd
+      - minio
     network_mode: "host"
     logging:
       driver: json-file
