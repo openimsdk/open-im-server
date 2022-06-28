@@ -2,17 +2,20 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 	"strings"
+
+	"go.mongodb.org/mongo-driver/x/bsonx"
 
 	//"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"fmt"
+
 	go_redis "github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"gopkg.in/mgo.v2"
 	"time"
+
+	"gopkg.in/mgo.v2"
 
 	"context"
 	//"go.mongodb.org/mongo-driver/bson"
@@ -56,10 +59,10 @@ func init() {
 		uri = config.Config.Mongo.DBUri
 	} else {
 		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress,
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress,
 				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
 		} else {
-			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
 				config.Config.Mongo.DBAddress, config.Config.Mongo.DBDatabase,
 				config.Config.Mongo.DBMaxPoolSize)
 		}
