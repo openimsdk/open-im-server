@@ -615,13 +615,13 @@ func SetGroupInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.SetGroupInfoReq{GroupInfo: &open_im_sdk.GroupInfo{}}
-	utils.CopyStructFields(req.GroupInfo, &params)
+	req := &rpc.SetGroupInfoReq{GroupInfoForSet: &open_im_sdk.GroupInfoForSet{}}
+	utils.CopyStructFields(req.GroupInfoForSet, &params)
 	req.OperationID = params.OperationID
 
 	if params.NeedVerification != nil {
-		req.GroupInfo.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
-		log.NewInfo(req.OperationID, "NeedVerification ", req.GroupInfo.NeedVerification)
+		req.GroupInfoForSet.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
+		log.NewInfo(req.OperationID, "NeedVerification ", req.GroupInfoForSet.NeedVerification)
 	}
 
 	var ok bool
