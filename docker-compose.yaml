@@ -29,11 +29,8 @@ services:
       - TZ=Asia/Shanghai
       # cache
       - wiredTigerCacheSizeGB=1
-#    environment:
-#      - MONGO_INITDB_ROOT_USERNAME=openIM
-#      - MONGO_INITDB_ROOT_PASSWORD=openIM
-
-
+      - MONGO_INITDB_ROOT_USERNAME=openIM
+      - MONGO_INITDB_ROOT_PASSWORD=openIM
       #TZ: Asia/Shanghai
     restart: always
 
@@ -99,6 +96,21 @@ services:
     restart: always
     command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
+  minio:
+    image: minio/minio
+    ports:
+      - 10005:9000
+      - 9090:9090
+    container_name: minio
+    volumes:
+      - /mnt/data:/data
+      - /mnt/config:/root/.minio
+    environment:
+      MINIO_ROOT_USER: user12345
+      MINIO_ROOT_PASSWORD: key12345
+    restart: always
+    command: minio server /data --console-address ':9090'
+
   open_im_server:
     image: openim/open_im_server:v2.1.0
     container_name: open_im_server
@@ -114,6 +126,7 @@ services:
       - mongodb
       - redis
       - etcd
+      - minio
     network_mode: "host"
     logging:
       driver: json-file

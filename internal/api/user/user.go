@@ -35,7 +35,7 @@ func GetUsersInfoFromCache(c *gin.Context) {
 	if !ok {
 		errMsg := "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
@@ -147,6 +147,18 @@ func GetBlackIDListFromCache(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 获取用户信息
+// @Description 根据用户列表批量获取用户信息
+// @Tags 用户相关
+// @ID GetUsersInfo
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetUsersInfoReq true "请求体"
+// @Produce json
+// @Success 0 {object} api.GetUsersInfoResp
+// @Failure 500 {object} api.GetUsersInfoResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetUsersInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /user/get_users_info [post]
 func GetUsersInfo(c *gin.Context) {
 	params := api.GetUsersInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -163,7 +175,7 @@ func GetUsersInfo(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -197,11 +209,11 @@ func GetUsersInfo(c *gin.Context) {
 
 // @Summary 修改用户信息
 // @Description 修改用户信息 userID faceURL等
-// @Tags 用户信息
+// @Tags 用户相关
 // @ID UpdateUserInfo
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.UpdateSelfUserInfoReq true "请求"
+// @Param req body api.UpdateSelfUserInfoReq true "请求体"
 // @Produce json
 // @Success 0 {object} api.UpdateUserInfoResp
 // @Failure 500 {object} api.UpdateUserInfoResp "errCode为500 一般为服务器内部错误"
@@ -223,7 +235,7 @@ func UpdateUserInfo(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	log.NewInfo(params.OperationID, "UpdateUserInfo args ", req.String())
@@ -246,6 +258,18 @@ func UpdateUserInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 设置全局免打扰
+// @Description 设置全局免打扰
+// @Tags 用户相关
+// @ID SetGlobalRecvMessageOpt
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.SetGlobalRecvMessageOptReq true "请求体"
+// @Produce json
+// @Success 0 {object} api.SetGlobalRecvMessageOptResp
+// @Failure 500 {object} api.SetGlobalRecvMessageOptResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.SetGlobalRecvMessageOptResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /user/set_global_msg_recv_opt [post]
 func SetGlobalRecvMessageOpt(c *gin.Context) {
 	params := api.SetGlobalRecvMessageOptReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -262,7 +286,7 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	log.NewInfo(params.OperationID, "SetGlobalRecvMessageOpt args ", req.String())
@@ -285,6 +309,18 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 获取自己的信息
+// @Description 传入ID获取自己的信息
+// @Tags 用户相关
+// @ID GetSelfUserInfo
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetSelfUserInfoReq true "请求体"
+// @Produce json
+// @Success 0 {object} api.GetSelfUserInfoResp
+// @Failure 500 {object} api.GetSelfUserInfoResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetSelfUserInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /user/get_self_user_info [post]
 func GetSelfUserInfo(c *gin.Context) {
 	params := api.GetSelfUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -302,7 +338,7 @@ func GetSelfUserInfo(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -336,6 +372,18 @@ func GetSelfUserInfo(c *gin.Context) {
 
 }
 
+// @Summary 获取用户在线状态
+// @Description 获取用户在线状态
+// @Tags 用户相关
+// @ID GetUsersOnlineStatus
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetUsersOnlineStatusReq true "请求体"
+// @Produce json
+// @Success 0 {object} api.GetUsersOnlineStatusResp
+// @Failure 500 {object} api.GetUsersOnlineStatusResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetUsersOnlineStatusResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /user/get_users_online_status [post]
 func GetUsersOnlineStatus(c *gin.Context) {
 	params := api.GetUsersOnlineStatusReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -351,7 +399,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
