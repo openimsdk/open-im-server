@@ -18,6 +18,7 @@ import (
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
 	"math/big"
 	"net"
@@ -737,11 +738,13 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		}
 		var groupInfo open_im_sdk.GroupInfo
 		cp.GroupDBCopyOpenIM(&groupInfo, groupInfoFromMysql)
+		//groupInfo.NeedVerification
+		groupInfo.NeedVerification = &wrappers.Int32Value{Value: groupInfoFromMysql.NeedVerification}
 		groupsInfoList = append(groupsInfoList, &groupInfo)
 	}
 
 	resp := pbGroup.GetGroupsInfoResp{GroupInfoList: groupsInfoList}
-	log.NewInfo(req.OperationID, "GetGroupsInfo rpc return ", resp.String())
+	log.NewInfo(req.OperationID, "GetGroupsInfo rpc return  ", resp.String())
 	return &resp, nil
 }
 
