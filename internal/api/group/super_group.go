@@ -82,7 +82,7 @@ func GetSuperGroupsInfo(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetSuperGroupsInfoResp{GetGroupInfoResp: api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: rpcResp.CommonResp.ErrCode, ErrMsg: rpcResp.CommonResp.ErrMsg}, GroupInfoList: transferGroupInfo(rpcResp.GroupInfoList)}}
+	resp := api.GetSuperGroupsInfoResp{GetGroupInfoResp: api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: rpcResp.CommonResp.ErrCode, ErrMsg: rpcResp.CommonResp.ErrMsg}, GroupInfoList: rpcResp.GroupInfoList}}
 	resp.Data = jsonData.JsonDataList(resp.GroupInfoList)
 	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)

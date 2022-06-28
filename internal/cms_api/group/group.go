@@ -553,13 +553,13 @@ func AlterGroupInfo(c *gin.Context) {
 		return
 	}
 	reqPb.OpUserID = c.MustGet("userID").(string)
-	reqPb.GroupInfo = &commonPb.GroupInfo{
+	reqPb.GroupInfoForSet = &commonPb.GroupInfoForSet{
 		GroupID:      req.GroupID,
 		GroupName:    req.GroupName,
 		Introduction: req.Introduction,
 		Notification: req.Notification,
 		FaceURL:      req.ProfilePhoto,
-		GroupType:    int32(req.GroupType),
+		//		GroupType:    int32(req.GroupType),
 	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, reqPb.OperationID)
 	if etcdConn == nil {
