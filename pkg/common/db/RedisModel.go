@@ -35,6 +35,7 @@ const (
 	SignalCache                   = "SIGNAL_CACHE:"
 	SignalListCache               = "SIGNAL_LIST_CACHE:"
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
+	FcmToken                      = "FCM_TOKEN:"
 )
 
 
@@ -426,4 +427,14 @@ func (d *DataBases) GetUserInfoFromCache(userID string) (*pbCommon.UserInfo, err
 	}
 	err = json.Unmarshal(bytes, userInfo)
 	return userInfo, err
+}
+
+func (d *DataBases) SetFcmToken(account string, platformid int, fcmToken string, expireTime int64) (err error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+	return d.rdb.Set(context.Background(), key, fcmToken, time.Duration(expireTime)*time.Second).Err()
+}
+
+func (d *DataBases) GetFcmToken(account string, platformid int) (string, error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+	return d.rdb.Get(context.Background(), key).Result()
 }

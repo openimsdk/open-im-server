@@ -215,6 +215,9 @@ push:
     appKey: ""
     intent: ""
     enable: false
+  fcm:  #firebase cloud message 消息推送
+    serviceAccount: "openim-*-firebase-adminsdk-*-*.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    enable: false
 
 
 

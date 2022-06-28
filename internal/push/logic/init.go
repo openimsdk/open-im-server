@@ -8,6 +8,7 @@ package logic
 
 import (
 	pusher "Open_IM/internal/push"
+	fcm "Open_IM/internal/push/fcm"
 	"Open_IM/internal/push/getui"
 	jpush "Open_IM/internal/push/jpush"
 	"Open_IM/pkg/common/config"
@@ -40,6 +41,10 @@ func init() {
 	}
 	if config.Config.Push.Jpns.Enable {
 		offlinePusher = jpush.JPushClient
+	}
+
+	if config.Config.Push.Fcm.Enable {
+		offlinePusher = fcm.FcmClient
 	}
 }
 
