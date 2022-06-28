@@ -423,8 +423,8 @@ func GetUserReqGroupApplicationList(c *gin.Context) {
 	}
 	log.NewInfo(req.OperationID, RpcResp)
 	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupRequestList: RpcResp.GroupRequestList}
-	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
 	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
+	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
 
