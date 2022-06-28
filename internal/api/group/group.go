@@ -464,10 +464,23 @@ func GetGroupsInfo(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
+	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: transferGroupInfo(RpcResp.GroupInfoList)}
 	resp.Data = jsonData.JsonDataList(resp.GroupInfoList)
 	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
+}
+
+func transferGroupInfo(input []*open_im_sdk.GroupInfo) []*api.GroupInfoAlias {
+	var result []*api.GroupInfoAlias
+	for _, v := range input {
+		t := &api.GroupInfoAlias{}
+		utils.CopyStructFields(t, &v)
+		if v.NeedVerification != nil {
+			t.NeedVerification = v.NeedVerification.Value
+		}
+		result = append(result, t)
+	}
+	return result
 }
 
 //process application
