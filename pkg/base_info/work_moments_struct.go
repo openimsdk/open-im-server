@@ -12,7 +12,8 @@ type CreateOneWorkMomentResp struct {
 }
 
 type DeleteOneWorkMomentReq struct {
-	office.DeleteOneWorkMomentReq
+	WorkMomentID string `json:"workMomentID" binding:"required"`
+	OperationID  string `json:"operationID" binding:"required"`
 }
 
 type DeleteOneWorkMomentResp struct {
@@ -21,7 +22,8 @@ type DeleteOneWorkMomentResp struct {
 }
 
 type LikeOneWorkMomentReq struct {
-	office.LikeOneWorkMomentReq
+	WorkMomentID string `json:"workMomentID" binding:"required"`
+	OperationID  string `json:"operationID" binding:"required"`
 }
 
 type LikeOneWorkMomentResp struct {
@@ -30,7 +32,10 @@ type LikeOneWorkMomentResp struct {
 }
 
 type CommentOneWorkMomentReq struct {
-	office.CommentOneWorkMomentReq
+	WorkMomentID string `json:"workMomentID" binding:"required"`
+	ReplyUserID  string `json:"replyUserID"  binding:"required"`
+	Content      string `json:"content"  binding:"required"`
+	OperationID  string `json:"operationID"  binding:"required"`
 }
 
 type CommentOneWorkMomentResp struct {
@@ -39,7 +44,9 @@ type CommentOneWorkMomentResp struct {
 }
 
 type DeleteCommentReq struct {
-	office.DeleteCommentReq
+	WorkMomentID string `json:"workMomentID" binding:"required"`
+	ContentID    string `json:"contentID" binding:"required"`
+	OperationID  string `json:"operationID" binding:"required"`
 }
 
 type DeleteCommentResp struct {
@@ -54,7 +61,8 @@ type WorkMomentsUserCommonReq struct {
 }
 
 type GetWorkMomentByIDReq struct {
-	office.GetWorkMomentByIDReq
+	WorkMomentID string `json:"workMomentID" binding:"required"`
+	OperationID  string `json:"operationID" binding:"required"`
 }
 
 type WorkMoment struct {

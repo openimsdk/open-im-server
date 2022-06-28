@@ -1,4 +1,512 @@
 definitions:
+  base_info.AccountCheckReq:
+    properties:
+      checkUserIDList:
+        items:
+          type: string
+        maxItems: 100
+        type: array
+      operationID:
+        type: string
+    required:
+    - checkUserIDList
+    - operationID
+    type: object
+  base_info.AccountCheckResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/user.AccountCheckResp_SingleUserStatus'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.Comment:
+    properties:
+      content:
+        type: string
+      contentID:
+        type: string
+      createTime:
+        type: integer
+      replyUserID:
+        type: string
+      replyUserName:
+        type: string
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  base_info.CommentOneWorkMomentReq:
+    properties:
+      content:
+        type: string
+      operationID:
+        type: string
+      replyUserID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - content
+    - operationID
+    - replyUserID
+    - workMomentID
+    type: object
+  base_info.CommentOneWorkMomentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CreateOneWorkMomentReq:
+    properties:
+      operationID:
+        type: string
+      workMoment:
+        $ref: '#/definitions/office.WorkMoment'
+    type: object
+  base_info.CreateOneWorkMomentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CreateTagReq:
+    properties:
+      operationID:
+        type: string
+      tagName:
+        description: tag名称
+        type: string
+      userIDList:
+        description: 用户ID列表
+        items:
+          type: string
+        type: array
+    required:
+    - operationID
+    - tagName
+    - userIDList
+    type: object
+  base_info.CreateTagResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteCommentReq:
+    properties:
+      contentID:
+        type: string
+      operationID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - contentID
+    - operationID
+    - workMomentID
+    type: object
+  base_info.DeleteCommentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteOneWorkMomentReq:
+    properties:
+      operationID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - operationID
+    - workMomentID
+    type: object
+  base_info.DeleteOneWorkMomentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteTagReq:
+    properties:
+      operationID:
+        type: string
+      tagID:
+        type: string
+    required:
+    - operationID
+    - tagID
+    type: object
+  base_info.DeleteTagResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetAllUsersUidReq:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.GetAllUsersUidResp:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetSelfUserInfoReq:
+    properties:
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - operationID
+    - userID
+    type: object
+  base_info.GetSelfUserInfoResp:
+    properties:
+      data:
+        additionalProperties: true
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetTagSendLogsReq:
+    properties:
+      operationID:
+        type: string
+      pageNumber:
+        type: integer
+      showNumber:
+        type: integer
+    required:
+    - operationID
+    - pageNumber
+    - showNumber
+    type: object
+  base_info.GetTagSendLogsResp:
+    properties:
+      data:
+        properties:
+          currentPage:
+            type: integer
+          logs:
+            items:
+              $ref: '#/definitions/office.TagSendLog'
+            type: array
+          showNumber:
+            type: integer
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserFriendWorkMomentsReq:
+    properties:
+      operationID:
+        type: string
+      pageNumber:
+        type: integer
+      showNumber:
+        type: integer
+    required:
+    - operationID
+    - pageNumber
+    - showNumber
+    type: object
+  base_info.GetUserFriendWorkMomentsResp:
+    properties:
+      data:
+        properties:
+          currentPage:
+            type: integer
+          showNumber:
+            type: integer
+          workMoments:
+            items:
+              $ref: '#/definitions/base_info.WorkMoment'
+            type: array
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserTagByIDReq:
+    properties:
+      operationID:
+        type: string
+      tagID:
+        type: string
+    required:
+    - operationID
+    - tagID
+    type: object
+  base_info.GetUserTagByIDResp:
+    properties:
+      data:
+        properties:
+          tag:
+            $ref: '#/definitions/office.Tag'
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserTagsReq:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.GetUserTagsResp:
+    properties:
+      data:
+        properties:
+          tags:
+            items:
+              $ref: '#/definitions/office.Tag'
+            type: array
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserWorkMomentsReq:
+    properties:
+      operationID:
+        type: string
+      pageNumber:
+        type: integer
+      showNumber:
+        type: integer
+      userID:
+        type: string
+    required:
+    - operationID
+    - pageNumber
+    - showNumber
+    type: object
+  base_info.GetUserWorkMomentsResp:
+    properties:
+      data:
+        properties:
+          currentPage:
+            type: integer
+          showNumber:
+            type: integer
+          workMoments:
+            items:
+              $ref: '#/definitions/base_info.WorkMoment'
+            type: array
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUsersInfoReq:
+    properties:
+      operationID:
+        type: string
+      userIDList:
+        items:
+          type: string
+        type: array
+    required:
+    - operationID
+    - userIDList
+    type: object
+  base_info.GetUsersInfoResp:
+    properties:
+      data:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUsersOnlineStatusReq:
+    properties:
+      operationID:
+        type: string
+      userIDList:
+        items:
+          type: string
+        maxItems: 200
+        type: array
+    required:
+    - operationID
+    - userIDList
+    type: object
+  base_info.GetUsersOnlineStatusResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/pbRelay.GetUsersOnlineStatusResp_SuccessResult'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetWorkMomentByIDReq:
+    properties:
+      operationID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - operationID
+    - workMomentID
+    type: object
+  base_info.GetWorkMomentByIDResp:
+    properties:
+      data:
+        properties:
+          workMoment:
+            $ref: '#/definitions/base_info.WorkMoment'
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.LikeOneWorkMomentReq:
+    properties:
+      operationID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - operationID
+    - workMomentID
+    type: object
+  base_info.LikeOneWorkMomentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.SendMsg2TagReq:
+    properties:
+      content:
+        type: string
+      groupList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+      senderPlatformID:
+        type: integer
+      tagList:
+        items:
+          type: string
+        type: array
+      userList:
+        items:
+          type: string
+        type: array
+    required:
+    - content
+    - operationID
+    - senderPlatformID
+    type: object
+  base_info.SendMsg2TagResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.SetGlobalRecvMessageOptReq:
+    properties:
+      globalRecvMsgOpt:
+        enum:
+        - 0
+        - 1
+        - 2
+        type: integer
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.SetGlobalRecvMessageOptResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.SetTagReq:
+    properties:
+      increaseUserIDList:
+        items:
+          type: string
+        type: array
+      newName:
+        type: string
+      operationID:
+        type: string
+      reduceUserIDList:
+        items:
+          type: string
+        type: array
+      tagID:
+        type: string
+    required:
+    - operationID
+    - tagID
+    type: object
+  base_info.SetTagResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
   base_info.UpdateSelfUserInfoReq:
     properties:
       birth:
@@ -42,9 +550,930 @@ definitions:
       errMsg:
         type: string
     type: object
+  base_info.WorkMoment:
+    properties:
+      atUsers:
+        items:
+          $ref: '#/definitions/base_info.WorkMomentUser'
+        type: array
+      comments:
+        items:
+          $ref: '#/definitions/base_info.Comment'
+        type: array
+      content:
+        type: string
+      createTime:
+        type: integer
+      faceURL:
+        type: string
+      likeUsers:
+        items:
+          $ref: '#/definitions/base_info.WorkMomentUser'
+        type: array
+      permission:
+        type: integer
+      permissionUsers:
+        items:
+          $ref: '#/definitions/base_info.WorkMomentUser'
+        type: array
+      userID:
+        type: string
+      userName:
+        type: string
+      workMomentID:
+        type: string
+    type: object
+  base_info.WorkMomentUser:
+    properties:
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  office.Comment:
+    properties:
+      content:
+        type: string
+      contentID:
+        type: string
+      createTime:
+        type: integer
+      faceURL:
+        type: string
+      replyUserID:
+        type: string
+      replyUserName:
+        type: string
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  office.PermissionGroup:
+    properties:
+      groupID:
+        type: string
+      groupName:
+        type: string
+    type: object
+  office.Tag:
+    properties:
+      tagID:
+        type: string
+      tagName:
+        type: string
+      userList:
+        items:
+          $ref: '#/definitions/office.TagUser'
+        type: array
+    type: object
+  office.TagSendLog:
+    properties:
+      content:
+        type: string
+      sendTime:
+        type: integer
+      userList:
+        items:
+          $ref: '#/definitions/office.TagUser'
+        type: array
+    type: object
+  office.TagUser:
+    properties:
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  office.WorkMoment:
+    properties:
+      atUserList:
+        items:
+          $ref: '#/definitions/office.WorkMomentUser'
+        type: array
+      comments:
+        items:
+          $ref: '#/definitions/office.Comment'
+        type: array
+      content:
+        type: string
+      createTime:
+        type: integer
+      faceURL:
+        type: string
+      likeUserList:
+        items:
+          $ref: '#/definitions/office.WorkMomentUser'
+        type: array
+      permission:
+        type: integer
+      permissionGroupList:
+        items:
+          $ref: '#/definitions/office.PermissionGroup'
+        type: array
+      permissionUserList:
+        items:
+          $ref: '#/definitions/office.WorkMomentUser'
+        type: array
+      userID:
+        type: string
+      userName:
+        type: string
+      workMomentID:
+        type: string
+    type: object
+  office.WorkMomentUser:
+    properties:
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  pbRelay.GetUsersOnlineStatusResp_SuccessDetail:
+    properties:
+      platform:
+        type: string
+      status:
+        type: string
+    type: object
+  pbRelay.GetUsersOnlineStatusResp_SuccessResult:
+    properties:
+      detailPlatformStatus:
+        items:
+          $ref: '#/definitions/pbRelay.GetUsersOnlineStatusResp_SuccessDetail'
+        type: array
+      status:
+        type: string
+      userID:
+        type: string
+    type: object
+  user.AccountCheckResp_SingleUserStatus:
+    properties:
+      accountStatus:
+        type: string
+      userID:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /office/comment_one_work_moment:
+    post:
+      consumes:
+      - application/json
+      description: 评论一条工作圈
+      operationId: CommentOneWorkMoment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CommentOneWorkMomentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CommentOneWorkMomentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.CommentOneWorkMomentResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.CommentOneWorkMomentResp'
+      summary: 评论一条工作圈
+      tags:
+      - 工作圈
+  /office/create_one_work_moment:
+    post:
+      consumes:
+      - application/json
+      description: 用户创建一条工作圈
+      operationId: CreateOneWorkMoment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求 atUserList likeUserList permissionGroupList permissionUserList
+          字段中userName可以不填
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CreateOneWorkMomentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CreateOneWorkMomentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.CreateOneWorkMomentResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.CreateOneWorkMomentResp'
+      summary: 创建一条工作圈
+      tags:
+      - 工作圈
+  /office/create_tag:
+    post:
+      consumes:
+      - application/json
+      description: 创建标签
+      operationId: CreateTag
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CreateTagReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CreateTagResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.CreateTagResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.CreateTagResp'
+      summary: 创建标签
+      tags:
+      - 标签
+  /office/delete_comment:
+    post:
+      consumes:
+      - application/json
+      description: 删除一条评论
+      operationId: DeleteComment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteCommentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteCommentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.DeleteCommentResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.DeleteCommentResp'
+      summary: 删除一条评论
+      tags:
+      - 工作圈
+  /office/delete_one_work_moment:
+    post:
+      consumes:
+      - application/json
+      description: 根据用户工作圈ID删除一条工作圈
+      operationId: DeleteOneWorkMoment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteOneWorkMomentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteOneWorkMomentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.DeleteOneWorkMomentResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.DeleteOneWorkMomentResp'
+      summary: 删除一条工作圈
+      tags:
+      - 工作圈
+  /office/delete_tag:
+    post:
+      consumes:
+      - application/json
+      description: 根据标签ID创建标签
+      operationId: DeleteTag
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteTagReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteTagResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.DeleteTagResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.DeleteTagResp'
+      summary: 删除标签
+      tags:
+      - 标签
+  /office/get_send_tag_log:
+    post:
+      consumes:
+      - application/json
+      description: 分页获取发送历史记录
+      operationId: GetTagSendLogs
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetTagSendLogsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetTagSendLogsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetTagSendLogsResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetTagSendLogsResp'
+      summary: 获取发送历史记录
+      tags:
+      - 标签
+  /office/get_user_friend_work_moments:
+    post:
+      consumes:
+      - application/json
+      description: 查询用户工作圈页面
+      operationId: GetUserFriendWorkMoments
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserFriendWorkMomentsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUserFriendWorkMomentsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetUserFriendWorkMomentsResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetUserFriendWorkMomentsResp'
+      summary: 查询自己大工作圈页面
+      tags:
+      - 工作圈
+  /office/get_user_tag_by_id:
+    post:
+      consumes:
+      - application/json
+      description: 通过标签id获取该用户的标签信息
+      operationId: GetUserTagByID
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserTagByIDReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUserTagByIDResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetUserTagByIDResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetUserTagByIDResp'
+      summary: 获取该用户的标签信息
+      tags:
+      - 标签
+  /office/get_user_tags:
+    post:
+      consumes:
+      - application/json
+      description: 用户获取自己的所有的标签
+      operationId: GetUserTags
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserTagsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUserTagsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetUserTagsResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetUserTagsResp'
+      summary: 获取用户标签信息
+      tags:
+      - 标签
+  /office/get_user_work_moments:
+    post:
+      consumes:
+      - application/json
+      description: 查询用户工作圈
+      operationId: GetUserWorkMoments
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserWorkMomentsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUserWorkMomentsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetUserWorkMomentsResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetUserWorkMomentsResp'
+      summary: 查询用户工作圈
+      tags:
+      - 工作圈
+  /office/get_work_moment_by_id:
+    post:
+      consumes:
+      - application/json
+      description: 通过ID获取工作圈
+      operationId: GetWorkMomentByID
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetWorkMomentByIDReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetWorkMomentByIDResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetWorkMomentByIDResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetWorkMomentByIDResp'
+      summary: 通过ID获取工作圈
+      tags:
+      - 工作圈
+  /office/like_one_work_moment:
+    post:
+      consumes:
+      - application/json
+      description: 工作圈ID点赞一条工作圈
+      operationId: LikeOneWorkMoment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.LikeOneWorkMomentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.LikeOneWorkMomentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.LikeOneWorkMomentResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.LikeOneWorkMomentResp'
+      summary: 点赞一条工作圈
+      tags:
+      - 工作圈
+  /office/send_msg_to_tag:
+    post:
+      consumes:
+      - application/json
+      description: 对标签用户发送消息
+      operationId: SendMsg2Tag
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SendMsg2TagReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SendMsg2TagResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.SendMsg2TagResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.SendMsg2TagResp'
+      summary: 发送标签消息
+      tags:
+      - 标签
+  /office/set_tag:
+    post:
+      consumes:
+      - application/json
+      description: 根据标签ID修改标签用户列表, 名称
+      operationId: SetTag
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SetTagReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SetTagResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.SetTagResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.SetTagResp'
+      summary: 修改标签
+      tags:
+      - 标签
+  /user/account_check:
+    post:
+      consumes:
+      - application/json
+      description: 传入UserIDList检查列表账户注册状态，并且返回结果
+      operationId: AccountCheck
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.AccountCheckReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.AccountCheckResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.AccountCheckResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.AccountCheckResp'
+      summary: 检查列表账户注册状态，并且返回结果
+      tags:
+      - 用户相关
+  /user/get_all_users_uid:
+    post:
+      consumes:
+      - application/json
+      description: 获取所有用户uid列表
+      operationId: GetAllUsersUid
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetAllUsersUidReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetAllUsersUidResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetAllUsersUidResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetAllUsersUidResp'
+      summary: 获取所有用户uid列表
+      tags:
+      - 用户相关
+  /user/get_self_user_info:
+    post:
+      consumes:
+      - application/json
+      description: 传入ID获取自己的信息
+      operationId: GetSelfUserInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetSelfUserInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetSelfUserInfoResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetSelfUserInfoResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetSelfUserInfoResp'
+      summary: 获取自己的信息
+      tags:
+      - 用户相关
+  /user/get_users_info:
+    post:
+      consumes:
+      - application/json
+      description: 根据用户列表批量获取用户信息
+      operationId: GetUsersInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUsersInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUsersInfoResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetUsersInfoResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetUsersInfoResp'
+      summary: 获取用户信息
+      tags:
+      - 用户相关
+  /user/get_users_online_status:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户在线状态
+      operationId: GetUsersOnlineStatus
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUsersOnlineStatusReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUsersOnlineStatusResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.GetUsersOnlineStatusResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.GetUsersOnlineStatusResp'
+      summary: 获取用户在线状态
+      tags:
+      - 用户相关
+  /user/set_global_msg_recv_opt:
+    post:
+      consumes:
+      - application/json
+      description: 设置全局免打扰
+      operationId: SetGlobalRecvMessageOpt
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SetGlobalRecvMessageOptReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SetGlobalRecvMessageOptResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.SetGlobalRecvMessageOptResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.SetGlobalRecvMessageOptResp'
+      summary: 设置全局免打扰
+      tags:
+      - 用户相关
   /user/update_user_info:
     post:
       consumes:
@@ -57,7 +1486,7 @@ paths:
         name: token
         required: true
         type: string
-      - description: 请求
+      - description: 请求体
         in: body
         name: req
         required: true
@@ -80,5 +1509,5 @@ paths:
             $ref: '#/definitions/base_info.UpdateUserInfoResp'
       summary: 修改用户信息
       tags:
-      - 用户信息
+      - 用户相关
 swagger: "2.0"
