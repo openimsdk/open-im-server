@@ -4,6 +4,1140 @@
         "contact": {}
     },
     "paths": {
+        "/office/comment_one_work_moment": {
+            "post": {
+                "description": "评论一条工作圈",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作圈"
+                ],
+                "summary": "评论一条工作圈",
+                "operationId": "CommentOneWorkMoment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CommentOneWorkMomentReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CommentOneWorkMomentResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CommentOneWorkMomentResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CommentOneWorkMomentResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/create_one_work_moment": {
+            "post": {
+                "description": "用户创建一条工作圈",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作圈"
+                ],
+                "summary": "创建一条工作圈",
+                "operationId": "CreateOneWorkMoment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求 atUserList likeUserList permissionGroupList permissionUserList 字段中userName可以不填",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateOneWorkMomentReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateOneWorkMomentResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateOneWorkMomentResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateOneWorkMomentResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/create_tag": {
+            "post": {
+                "description": "创建标签",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "标签"
+                ],
+                "summary": "创建标签",
+                "operationId": "CreateTag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateTagReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateTagResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateTagResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateTagResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/delete_comment": {
+            "post": {
+                "description": "删除一条评论",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作圈"
+                ],
+                "summary": "删除一条评论",
+                "operationId": "DeleteComment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteCommentReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteCommentResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteCommentResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteCommentResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/delete_one_work_moment": {
+            "post": {
+                "description": "根据用户工作圈ID删除一条工作圈",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作圈"
+                ],
+                "summary": "删除一条工作圈",
+                "operationId": "DeleteOneWorkMoment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteOneWorkMomentReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteOneWorkMomentResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteOneWorkMomentResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteOneWorkMomentResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/delete_tag": {
+            "post": {
+                "description": "根据标签ID创建标签",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "标签"
+                ],
+                "summary": "删除标签",
+                "operationId": "DeleteTag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteTagReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteTagResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteTagResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteTagResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/get_send_tag_log": {
+            "post": {
+                "description": "分页获取发送历史记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "标签"
+                ],
+                "summary": "获取发送历史记录",
+                "operationId": "GetTagSendLogs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetTagSendLogsReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetTagSendLogsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetTagSendLogsResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetTagSendLogsResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/get_user_friend_work_moments": {
+            "post": {
+                "description": "查询用户工作圈页面",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作圈"
+                ],
+                "summary": "查询自己大工作圈页面",
+                "operationId": "GetUserFriendWorkMoments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserFriendWorkMomentsReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserFriendWorkMomentsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserFriendWorkMomentsResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserFriendWorkMomentsResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/get_user_tag_by_id": {
+            "post": {
+                "description": "通过标签id获取该用户的标签信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "标签"
+                ],
+                "summary": "获取该用户的标签信息",
+                "operationId": "GetUserTagByID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserTagByIDReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserTagByIDResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserTagByIDResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserTagByIDResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/get_user_tags": {
+            "post": {
+                "description": "用户获取自己的所有的标签",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "标签"
+                ],
+                "summary": "获取用户标签信息",
+                "operationId": "GetUserTags",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserTagsReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserTagsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserTagsResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserTagsResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/get_user_work_moments": {
+            "post": {
+                "description": "查询用户工作圈",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作圈"
+                ],
+                "summary": "查询用户工作圈",
+                "operationId": "GetUserWorkMoments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserWorkMomentsReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserWorkMomentsResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserWorkMomentsResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserWorkMomentsResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/get_work_moment_by_id": {
+            "post": {
+                "description": "通过ID获取工作圈",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作圈"
+                ],
+                "summary": "通过ID获取工作圈",
+                "operationId": "GetWorkMomentByID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetWorkMomentByIDReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetWorkMomentByIDResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetWorkMomentByIDResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetWorkMomentByIDResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/like_one_work_moment": {
+            "post": {
+                "description": "工作圈ID点赞一条工作圈",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "工作圈"
+                ],
+                "summary": "点赞一条工作圈",
+                "operationId": "LikeOneWorkMoment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.LikeOneWorkMomentReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.LikeOneWorkMomentResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.LikeOneWorkMomentResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.LikeOneWorkMomentResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/send_msg_to_tag": {
+            "post": {
+                "description": "对标签用户发送消息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "标签"
+                ],
+                "summary": "发送标签消息",
+                "operationId": "SendMsg2Tag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SendMsg2TagReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SendMsg2TagResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SendMsg2TagResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SendMsg2TagResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/office/set_tag": {
+            "post": {
+                "description": "根据标签ID修改标签用户列表, 名称",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "标签"
+                ],
+                "summary": "修改标签",
+                "operationId": "SetTag",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetTagReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetTagResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetTagResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetTagResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/account_check": {
+            "post": {
+                "description": "传入UserIDList检查列表账户注册状态，并且返回结果",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户相关"
+                ],
+                "summary": "检查列表账户注册状态，并且返回结果",
+                "operationId": "AccountCheck",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求体",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AccountCheckReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AccountCheckResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AccountCheckResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AccountCheckResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/get_all_users_uid": {
+            "post": {
+                "description": "获取所有用户uid列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户相关"
+                ],
+                "summary": "获取所有用户uid列表",
+                "operationId": "GetAllUsersUid",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求体",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetAllUsersUidReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetAllUsersUidResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetAllUsersUidResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetAllUsersUidResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/get_self_user_info": {
+            "post": {
+                "description": "传入ID获取自己的信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户相关"
+                ],
+                "summary": "获取自己的信息",
+                "operationId": "GetSelfUserInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求体",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetSelfUserInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetSelfUserInfoResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetSelfUserInfoResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetSelfUserInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/get_users_info": {
+            "post": {
+                "description": "根据用户列表批量获取用户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户相关"
+                ],
+                "summary": "获取用户信息",
+                "operationId": "GetUsersInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求体",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUsersInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUsersInfoResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUsersInfoResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUsersInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/get_users_online_status": {
+            "post": {
+                "description": "获取用户在线状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户相关"
+                ],
+                "summary": "获取用户在线状态",
+                "operationId": "GetUsersOnlineStatus",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求体",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUsersOnlineStatusReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUsersOnlineStatusResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUsersOnlineStatusResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUsersOnlineStatusResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/set_global_msg_recv_opt": {
+            "post": {
+                "description": "设置全局免打扰",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户相关"
+                ],
+                "summary": "设置全局免打扰",
+                "operationId": "SetGlobalRecvMessageOpt",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "请求体",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGlobalRecvMessageOptReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGlobalRecvMessageOptResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGlobalRecvMessageOptResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGlobalRecvMessageOptResp"
+                        }
+                    }
+                }
+            }
+        },
         "/user/update_user_info": {
             "post": {
                 "description": "修改用户信息 userID faceURL等",
@@ -14,7 +1148,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "用户信息"
+                    "用户相关"
                 ],
                 "summary": "修改用户信息",
                 "operationId": "UpdateUserInfo",
@@ -27,7 +1161,7 @@
                         "required": true
                     },
                     {
-                        "description": "请求",
+                        "description": "请求体",
                         "name": "req",
                         "in": "body",
                         "required": true,
@@ -60,6 +1194,776 @@
         }
     },
     "definitions": {
+        "base_info.AccountCheckReq": {
+            "type": "object",
+            "required": [
+                "checkUserIDList",
+                "operationID"
+            ],
+            "properties": {
+                "checkUserIDList": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.AccountCheckResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/user.AccountCheckResp_SingleUserStatus"
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.Comment": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "contentID": {
+                    "type": "string"
+                },
+                "createTime": {
+                    "type": "integer"
+                },
+                "replyUserID": {
+                    "type": "string"
+                },
+                "replyUserName": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CommentOneWorkMomentReq": {
+            "type": "object",
+            "required": [
+                "content",
+                "operationID",
+                "replyUserID",
+                "workMomentID"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "replyUserID": {
+                    "type": "string"
+                },
+                "workMomentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CommentOneWorkMomentResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object"
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CreateOneWorkMomentReq": {
+            "type": "object",
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "workMoment": {
+                    "$ref": "#/definitions/office.WorkMoment"
+                }
+            }
+        },
+        "base_info.CreateOneWorkMomentResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object"
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CreateTagReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "tagName",
+                "userIDList"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "tagName": {
+                    "description": "tag名称",
+                    "type": "string"
+                },
+                "userIDList": {
+                    "description": "用户ID列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "base_info.CreateTagResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DeleteCommentReq": {
+            "type": "object",
+            "required": [
+                "contentID",
+                "operationID",
+                "workMomentID"
+            ],
+            "properties": {
+                "contentID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "workMomentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DeleteCommentResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object"
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DeleteOneWorkMomentReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "workMomentID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "workMomentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DeleteOneWorkMomentResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object"
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DeleteTagReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "tagID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "tagID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DeleteTagResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetAllUsersUidReq": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetAllUsersUidResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetSelfUserInfoReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "userID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetSelfUserInfoResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetTagSendLogsReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "pageNumber",
+                "showNumber"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "pageNumber": {
+                    "type": "integer"
+                },
+                "showNumber": {
+                    "type": "integer"
+                }
+            }
+        },
+        "base_info.GetTagSendLogsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "currentPage": {
+                            "type": "integer"
+                        },
+                        "logs": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/office.TagSendLog"
+                            }
+                        },
+                        "showNumber": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUserFriendWorkMomentsReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "pageNumber",
+                "showNumber"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "pageNumber": {
+                    "type": "integer"
+                },
+                "showNumber": {
+                    "type": "integer"
+                }
+            }
+        },
+        "base_info.GetUserFriendWorkMomentsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "currentPage": {
+                            "type": "integer"
+                        },
+                        "showNumber": {
+                            "type": "integer"
+                        },
+                        "workMoments": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/base_info.WorkMoment"
+                            }
+                        }
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUserTagByIDReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "tagID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "tagID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUserTagByIDResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "tag": {
+                            "$ref": "#/definitions/office.Tag"
+                        }
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUserTagsReq": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUserTagsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "tags": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/office.Tag"
+                            }
+                        }
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUserWorkMomentsReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "pageNumber",
+                "showNumber"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "pageNumber": {
+                    "type": "integer"
+                },
+                "showNumber": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUserWorkMomentsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "currentPage": {
+                            "type": "integer"
+                        },
+                        "showNumber": {
+                            "type": "integer"
+                        },
+                        "workMoments": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/base_info.WorkMoment"
+                            }
+                        }
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUsersInfoReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "userIDList"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "userIDList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "base_info.GetUsersInfoResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUsersOnlineStatusReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "userIDList"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "userIDList": {
+                    "type": "array",
+                    "maxItems": 200,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "base_info.GetUsersOnlineStatusResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pbRelay.GetUsersOnlineStatusResp_SuccessResult"
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetWorkMomentByIDReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "workMomentID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "workMomentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetWorkMomentByIDResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "workMoment": {
+                            "$ref": "#/definitions/base_info.WorkMoment"
+                        }
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.LikeOneWorkMomentReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "workMomentID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "workMomentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.LikeOneWorkMomentResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object"
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SendMsg2TagReq": {
+            "type": "object",
+            "required": [
+                "content",
+                "operationID",
+                "senderPlatformID"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "groupList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "senderPlatformID": {
+                    "type": "integer"
+                },
+                "tagList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "userList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "base_info.SendMsg2TagResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetGlobalRecvMessageOptReq": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "globalRecvMsgOpt": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1,
+                        2
+                    ]
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetGlobalRecvMessageOptResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetTagReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "tagID"
+            ],
+            "properties": {
+                "increaseUserIDList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "newName": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reduceUserIDList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tagID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetTagResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
         "base_info.UpdateSelfUserInfoReq": {
             "type": "object",
             "required": [
@@ -116,6 +2020,258 @@
                     "type": "integer"
                 },
                 "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.WorkMoment": {
+            "type": "object",
+            "properties": {
+                "atUsers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/base_info.WorkMomentUser"
+                    }
+                },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/base_info.Comment"
+                    }
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createTime": {
+                    "type": "integer"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "likeUsers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/base_info.WorkMomentUser"
+                    }
+                },
+                "permission": {
+                    "type": "integer"
+                },
+                "permissionUsers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/base_info.WorkMomentUser"
+                    }
+                },
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                },
+                "workMomentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.WorkMomentUser": {
+            "type": "object",
+            "properties": {
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "office.Comment": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "contentID": {
+                    "type": "string"
+                },
+                "createTime": {
+                    "type": "integer"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "replyUserID": {
+                    "type": "string"
+                },
+                "replyUserName": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "office.PermissionGroup": {
+            "type": "object",
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "groupName": {
+                    "type": "string"
+                }
+            }
+        },
+        "office.Tag": {
+            "type": "object",
+            "properties": {
+                "tagID": {
+                    "type": "string"
+                },
+                "tagName": {
+                    "type": "string"
+                },
+                "userList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/office.TagUser"
+                    }
+                }
+            }
+        },
+        "office.TagSendLog": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "sendTime": {
+                    "type": "integer"
+                },
+                "userList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/office.TagUser"
+                    }
+                }
+            }
+        },
+        "office.TagUser": {
+            "type": "object",
+            "properties": {
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "office.WorkMoment": {
+            "type": "object",
+            "properties": {
+                "atUserList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/office.WorkMomentUser"
+                    }
+                },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/office.Comment"
+                    }
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createTime": {
+                    "type": "integer"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "likeUserList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/office.WorkMomentUser"
+                    }
+                },
+                "permission": {
+                    "type": "integer"
+                },
+                "permissionGroupList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/office.PermissionGroup"
+                    }
+                },
+                "permissionUserList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/office.WorkMomentUser"
+                    }
+                },
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                },
+                "workMomentID": {
+                    "type": "string"
+                }
+            }
+        },
+        "office.WorkMomentUser": {
+            "type": "object",
+            "properties": {
+                "userID": {
+                    "type": "string"
+                },
+                "userName": {
+                    "type": "string"
+                }
+            }
+        },
+        "pbRelay.GetUsersOnlineStatusResp_SuccessDetail": {
+            "type": "object",
+            "properties": {
+                "platform": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "pbRelay.GetUsersOnlineStatusResp_SuccessResult": {
+            "type": "object",
+            "properties": {
+                "detailPlatformStatus": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/pbRelay.GetUsersOnlineStatusResp_SuccessDetail"
+                    }
+                },
+                "status": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.AccountCheckResp_SingleUserStatus": {
+            "type": "object",
+            "properties": {
+                "accountStatus": {
+                    "type": "string"
+                },
+                "userID": {
                     "type": "string"
                 }
             }

@@ -1,7 +1,7 @@
 package office
 
 import (
-	apiStruct "Open_IM/pkg/base_info"
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
@@ -15,10 +15,22 @@ import (
 	"strings"
 )
 
+// @Summary 创建一条工作圈
+// @Description 用户创建一条工作圈
+// @Tags 工作圈
+// @ID CreateOneWorkMoment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.CreateOneWorkMomentReq true "请求 atUserList likeUserList permissionGroupList permissionUserList 字段中userName可以不填"
+// @Produce json
+// @Success 0 {object} api.CreateOneWorkMomentResp
+// @Failure 500 {object} api.CreateOneWorkMomentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.CreateOneWorkMomentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /office/create_one_work_moment [post]
 func CreateOneWorkMoment(c *gin.Context) {
 	var (
-		req    apiStruct.CreateOneWorkMomentReq
-		resp   apiStruct.CreateOneWorkMomentResp
+		req    api.CreateOneWorkMomentReq
+		resp   api.CreateOneWorkMomentResp
 		reqPb  pbOffice.CreateOneWorkMomentReq
 		respPb *pbOffice.CreateOneWorkMomentResp
 	)
@@ -36,7 +48,7 @@ func CreateOneWorkMoment(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -59,7 +71,7 @@ func CreateOneWorkMoment(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "CreateOneWorkMoment rpc server failed" + err.Error()})
 		return
 	}
-	resp.CommResp = apiStruct.CommResp{
+	resp.CommResp = api.CommResp{
 		ErrCode: respPb.CommonResp.ErrCode,
 		ErrMsg:  respPb.CommonResp.ErrMsg,
 	}
@@ -67,10 +79,22 @@ func CreateOneWorkMoment(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 删除一条工作圈
+// @Description 根据用户工作圈ID删除一条工作圈
+// @Tags 工作圈
+// @ID DeleteOneWorkMoment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.DeleteOneWorkMomentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.DeleteOneWorkMomentResp
+// @Failure 500 {object} api.DeleteOneWorkMomentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.DeleteOneWorkMomentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /office/delete_one_work_moment [post]
 func DeleteOneWorkMoment(c *gin.Context) {
 	var (
-		req    apiStruct.DeleteOneWorkMomentReq
-		resp   apiStruct.DeleteOneWorkMomentResp
+		req    api.DeleteOneWorkMomentReq
+		resp   api.DeleteOneWorkMomentResp
 		reqPb  pbOffice.DeleteOneWorkMomentReq
 		respPb *pbOffice.DeleteOneWorkMomentResp
 	)
@@ -88,7 +112,7 @@ func DeleteOneWorkMoment(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -118,10 +142,22 @@ func DeleteOneWorkMoment(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 点赞一条工作圈
+// @Description 工作圈ID点赞一条工作圈
+// @Tags 工作圈
+// @ID LikeOneWorkMoment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.LikeOneWorkMomentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.LikeOneWorkMomentResp
+// @Failure 500 {object} api.LikeOneWorkMomentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.LikeOneWorkMomentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /office/like_one_work_moment [post]
 func LikeOneWorkMoment(c *gin.Context) {
 	var (
-		req    apiStruct.LikeOneWorkMomentReq
-		resp   apiStruct.LikeOneWorkMomentResp
+		req    api.LikeOneWorkMomentReq
+		resp   api.LikeOneWorkMomentResp
 		reqPb  pbOffice.LikeOneWorkMomentReq
 		respPb *pbOffice.LikeOneWorkMomentResp
 	)
@@ -168,10 +204,22 @@ func LikeOneWorkMoment(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 评论一条工作圈
+// @Description 评论一条工作圈
+// @Tags 工作圈
+// @ID CommentOneWorkMoment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.CommentOneWorkMomentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.CommentOneWorkMomentResp
+// @Failure 500 {object} api.CommentOneWorkMomentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.CommentOneWorkMomentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /office/comment_one_work_moment [post]
 func CommentOneWorkMoment(c *gin.Context) {
 	var (
-		req    apiStruct.CommentOneWorkMomentReq
-		resp   apiStruct.CommentOneWorkMomentResp
+		req    api.CommentOneWorkMomentReq
+		resp   api.CommentOneWorkMomentResp
 		reqPb  pbOffice.CommentOneWorkMomentReq
 		respPb *pbOffice.CommentOneWorkMomentResp
 	)
@@ -218,10 +266,22 @@ func CommentOneWorkMoment(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 删除一条评论
+// @Description 删除一条评论
+// @Tags 工作圈
+// @ID DeleteComment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.DeleteCommentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.DeleteCommentResp
+// @Failure 500 {object} api.DeleteCommentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.DeleteCommentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /office/delete_comment [post]
 func DeleteComment(c *gin.Context) {
 	var (
-		req    apiStruct.DeleteCommentReq
-		resp   apiStruct.DeleteCommentResp
+		req    api.DeleteCommentReq
+		resp   api.DeleteCommentResp
 		reqPb  pbOffice.DeleteCommentReq
 		respPb *pbOffice.DeleteCommentResp
 	)
@@ -266,10 +326,22 @@ func DeleteComment(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 通过ID获取工作圈
+// @Description 通过ID获取工作圈
+// @Tags 工作圈
+// @ID GetWorkMomentByID
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetWorkMomentByIDReq true "请求"
+// @Produce json
+// @Success 0 {object} api.GetWorkMomentByIDResp
+// @Failure 500 {object} api.GetWorkMomentByIDResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetWorkMomentByIDResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /office/get_work_moment_by_id [post]
 func GetWorkMomentByID(c *gin.Context) {
 	var (
-		req    apiStruct.GetWorkMomentByIDReq
-		resp   apiStruct.GetWorkMomentByIDResp
+		req    api.GetWorkMomentByIDReq
+		resp   api.GetWorkMomentByIDResp
 		reqPb  pbOffice.GetWorkMomentByIDReq
 		respPb *pbOffice.GetWorkMomentByIDResp
 	)
@@ -311,8 +383,8 @@ func GetWorkMomentByID(c *gin.Context) {
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	resp.Data.WorkMoment = &apiStruct.WorkMoment{LikeUserList: []*apiStruct.WorkMomentUser{}, Comments: []*apiStruct.Comment{},
-		AtUserList: []*apiStruct.WorkMomentUser{}, PermissionUserList: []*apiStruct.WorkMomentUser{}}
+	resp.Data.WorkMoment = &api.WorkMoment{LikeUserList: []*api.WorkMomentUser{}, Comments: []*api.Comment{},
+		AtUserList: []*api.WorkMomentUser{}, PermissionUserList: []*api.WorkMomentUser{}}
 	if err := utils.CopyStructFields(&resp.Data.WorkMoment, respPb.WorkMoment); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
@@ -320,10 +392,22 @@ func GetWorkMomentByID(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 查询用户工作圈
+// @Description 查询用户工作圈
+// @Tags 工作圈
+// @ID GetUserWorkMoments
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetUserWorkMomentsReq true "请求"
+// @Produce json
+// @Success 0 {object} api.GetUserWorkMomentsResp
+// @Failure 500 {object} api.GetUserWorkMomentsResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetUserWorkMomentsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /office/get_user_work_moments [post]
 func GetUserWorkMoments(c *gin.Context) {
 	var (
-		req    apiStruct.GetUserWorkMomentsReq
-		resp   apiStruct.GetUserWorkMomentsResp
+		req    api.GetUserWorkMomentsReq
+		resp   api.GetUserWorkMomentsResp
 		reqPb  pbOffice.GetUserWorkMomentsReq
 		respPb *pbOffice.GetUserWorkMomentsResp
 	)
@@ -366,29 +450,26 @@ func GetUserWorkMoments(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "GetUserWorkMoments rpc server failed" + err.Error()})
 		return
 	}
-	resp.Data.WorkMoments = []*apiStruct.WorkMoment{}
+	resp.Data.WorkMoments = []*api.WorkMoment{}
 	if err := utils.CopyStructFields(&resp, respPb.CommonResp); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
-	//if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
-	//	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
-	//}
 	for _, v := range respPb.WorkMoments {
-		workMoment := apiStruct.WorkMoment{
+		workMoment := api.WorkMoment{
 			WorkMomentID:       v.WorkMomentID,
 			UserID:             v.UserID,
 			Content:            v.Content,
 			FaceURL:            v.FaceURL,
 			UserName:           v.UserName,
 			CreateTime:         v.CreateTime,
-			Comments:           make([]*apiStruct.Comment, len(v.Comments)),
-			LikeUserList:       make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
-			AtUserList:         make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
-			PermissionUserList: make([]*apiStruct.WorkMomentUser, len(v.PermissionUserList)),
+			Comments:           make([]*api.Comment, len(v.Comments)),
+			LikeUserList:       make([]*api.WorkMomentUser, len(v.LikeUserList)),
+			AtUserList:         make([]*api.WorkMomentUser, len(v.AtUserList)),
+			PermissionUserList: make([]*api.WorkMomentUser, len(v.PermissionUserList)),
 			Permission:         v.Permission,
 		}
 		for i, comment := range v.Comments {
-			workMoment.Comments[i] = &apiStruct.Comment{
+			workMoment.Comments[i] = &api.Comment{
 				UserID:        comment.UserID,
 				UserName:      comment.UserName,
 				ReplyUserID:   comment.ReplyUserID,
@@ -399,19 +480,19 @@ func GetUserWorkMoments(c *gin.Context) {
 			}
 		}
 		for i, likeUser := range v.LikeUserList {
-			workMoment.LikeUserList[i] = &apiStruct.WorkMomentUser{
+			workMoment.LikeUserList[i] = &api.WorkMomentUser{
 				UserID:   likeUser.UserID,
 				UserName: likeUser.UserName,
 			}
 		}
 		for i, atUser := range v.AtUserList {
-			workMoment.AtUserList[i] = &apiStruct.WorkMomentUser{
+			workMoment.AtUserList[i] = &api.WorkMomentUser{
 				UserID:   atUser.UserID,
 				UserName: atUser.UserName,
 			}
 		}
 		for i, permissionUser := range v.PermissionUserList {
-			workMoment.PermissionUserList[i] = &apiStruct.WorkMomentUser{
+			workMoment.PermissionUserList[i] = &api.WorkMomentUser{
 				UserID:   permissionUser.UserID,
 				UserName: permissionUser.UserName,
 			}
@@ -424,10 +505,22 @@ func GetUserWorkMoments(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 查询自己大工作圈页面
+// @Description 查询用户工作圈页面
+// @Tags 工作圈
+// @ID GetUserFriendWorkMoments
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetUserFriendWorkMomentsReq true "请求"
+// @Produce json
+// @Success 0 {object} api.GetUserFriendWorkMomentsResp
+// @Failure 500 {object} api.GetUserFriendWorkMomentsResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetUserFriendWorkMomentsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /office/get_user_friend_work_moments [post]
 func GetUserFriendWorkMoments(c *gin.Context) {
 	var (
-		req    apiStruct.GetUserFriendWorkMomentsReq
-		resp   apiStruct.GetUserFriendWorkMomentsResp
+		req    api.GetUserFriendWorkMomentsReq
+		resp   api.GetUserFriendWorkMomentsResp
 		reqPb  pbOffice.GetUserFriendWorkMomentsReq
 		respPb *pbOffice.GetUserFriendWorkMomentsResp
 	)
@@ -475,23 +568,23 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 	//if err := utils.CopyStructFields(&resp.Data.WorkMoments, respPb.WorkMoments); err != nil {
 	//	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	//}
-	resp.Data.WorkMoments = []*apiStruct.WorkMoment{}
+	resp.Data.WorkMoments = []*api.WorkMoment{}
 	for _, v := range respPb.WorkMoments {
-		workMoment := apiStruct.WorkMoment{
+		workMoment := api.WorkMoment{
 			WorkMomentID:       v.WorkMomentID,
 			UserID:             v.UserID,
 			Content:            v.Content,
 			FaceURL:            v.FaceURL,
 			UserName:           v.UserName,
 			CreateTime:         v.CreateTime,
-			Comments:           make([]*apiStruct.Comment, len(v.Comments)),
-			LikeUserList:       make([]*apiStruct.WorkMomentUser, len(v.LikeUserList)),
-			AtUserList:         make([]*apiStruct.WorkMomentUser, len(v.AtUserList)),
-			PermissionUserList: make([]*apiStruct.WorkMomentUser, len(v.PermissionUserList)),
+			Comments:           make([]*api.Comment, len(v.Comments)),
+			LikeUserList:       make([]*api.WorkMomentUser, len(v.LikeUserList)),
+			AtUserList:         make([]*api.WorkMomentUser, len(v.AtUserList)),
+			PermissionUserList: make([]*api.WorkMomentUser, len(v.PermissionUserList)),
 			Permission:         v.Permission,
 		}
 		for i, comment := range v.Comments {
-			workMoment.Comments[i] = &apiStruct.Comment{
+			workMoment.Comments[i] = &api.Comment{
 				UserID:        comment.UserID,
 				UserName:      comment.UserName,
 				ReplyUserID:   comment.ReplyUserID,
@@ -502,19 +595,19 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 			}
 		}
 		for i, likeUser := range v.LikeUserList {
-			workMoment.LikeUserList[i] = &apiStruct.WorkMomentUser{
+			workMoment.LikeUserList[i] = &api.WorkMomentUser{
 				UserID:   likeUser.UserID,
 				UserName: likeUser.UserName,
 			}
 		}
 		for i, atUser := range v.AtUserList {
-			workMoment.AtUserList[i] = &apiStruct.WorkMomentUser{
+			workMoment.AtUserList[i] = &api.WorkMomentUser{
 				UserID:   atUser.UserID,
 				UserName: atUser.UserName,
 			}
 		}
 		for i, permissionUser := range v.PermissionUserList {
-			workMoment.PermissionUserList[i] = &apiStruct.WorkMomentUser{
+			workMoment.PermissionUserList[i] = &api.WorkMomentUser{
 				UserID:   permissionUser.UserID,
 				UserName: permissionUser.UserName,
 			}
@@ -529,8 +622,8 @@ func GetUserFriendWorkMoments(c *gin.Context) {
 
 func SetUserWorkMomentsLevel(c *gin.Context) {
 	var (
-		req    apiStruct.SetUserWorkMomentsLevelReq
-		resp   apiStruct.SetUserWorkMomentsLevelResp
+		req    api.SetUserWorkMomentsLevelReq
+		resp   api.SetUserWorkMomentsLevelResp
 		reqPb  pbOffice.SetUserWorkMomentsLevelReq
 		respPb *pbOffice.SetUserWorkMomentsLevelResp
 	)
