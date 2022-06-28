@@ -33,7 +33,7 @@ type LikeOneWorkMomentResp struct {
 
 type CommentOneWorkMomentReq struct {
 	WorkMomentID string `json:"workMomentID" binding:"required"`
-	ReplyUserID  string `json:"replyUserID"  binding:"required"`
+	ReplyUserID  string `json:"replyUserID"`
 	Content      string `json:"content"  binding:"required"`
 	OperationID  string `json:"operationID"  binding:"required"`
 }
