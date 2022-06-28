@@ -608,6 +608,7 @@ func SetGroupInfo(c *gin.Context) {
 
 	if params.NeedVerification != nil {
 		req.GroupInfo.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
+		log.NewInfo(req.OperationID, "NeedVerification ", req.GroupInfo.NeedVerification)
 	}
 
 	var ok bool
