@@ -11,7 +11,7 @@ type GetUsersInfoReq struct {
 type GetUsersInfoResp struct {
 	CommResp
 	UserInfoList []*open_im_sdk.PublicUserInfo `json:"-"`
-	Data         []map[string]interface{}      `json:"data"`
+	Data         []map[string]interface{}      `json:"data" swaggerignore:"true"`
 }
 
 type UpdateSelfUserInfoReq struct {
@@ -36,7 +36,7 @@ type GetSelfUserInfoReq struct {
 type GetSelfUserInfoResp struct {
 	CommResp
 	UserInfo *open_im_sdk.UserInfo  `json:"-"`
-	Data     map[string]interface{} `json:"data"`
+	Data     map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
 type GetFriendIDListFromCacheReq struct {

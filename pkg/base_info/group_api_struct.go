@@ -95,7 +95,7 @@ type CreateGroupReq struct {
 type CreateGroupResp struct {
 	CommResp
 	GroupInfo open_im_sdk.GroupInfo  `json:"-"`
-	Data      map[string]interface{} `json:"data"`
+	Data      map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
 type GetGroupApplicationListReq struct {

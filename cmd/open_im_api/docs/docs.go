@@ -16,6 +16,2115 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/force_logout": {
+            "post": {
+                "description": "对应的平台强制登出",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "鉴权认证"
+                ],
+                "summary": "强制登出",
+                "operationId": "ForceLogout",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "platform为平台ID, fromUserID为要执行强制登出的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ForceLogoutReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ForceLogoutResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ForceLogoutResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ForceLogoutResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/parse_token": {
+            "post": {
+                "description": "解析用户token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "鉴权认证"
+                ],
+                "summary": "解析token",
+                "operationId": "ParseToken",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "secret为openIM密钥, 详细见服务端config.yaml secret字段, platform为平台ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ParseTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ParseTokenResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ParseTokenResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ParseTokenResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/user_register": {
+            "post": {
+                "description": "用户登录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "鉴权认证"
+                ],
+                "summary": "用户登录",
+                "operationId": "UserRegister",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "secret为openIM密钥, 详细见服务端config.yaml secret字段 \u003cbr\u003e platform为平台ID \u003cbr\u003e ex为拓展字段",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UserRegisterReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UserRegisterResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UserRegisterResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UserRegisterResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/user_token": {
+            "post": {
+                "description": "获取用户的token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "鉴权认证"
+                ],
+                "summary": "用户登录",
+                "operationId": "UserToken",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "secret为openIM密钥, 详细见服务端config.yaml secret字段, platform为平台ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UserTokenReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UserTokenResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UserTokenResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.UserTokenResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/add_black": {
+            "post": {
+                "description": "添加黑名单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "添加黑名单",
+                "operationId": "AddBlack",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为设置的用户, toUserID为被设置的用户",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddBlacklistReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddBlacklistResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddBlacklistResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddBlacklistResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/add_friend": {
+            "post": {
+                "description": "添加好友",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "添加好友",
+                "operationId": "AddFriend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "reqMsg为申请信息, fromUserID为申请用户, toUserID为被添加用户",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddFriendReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddFriendResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddFriendResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddFriendResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/add_friend_response": {
+            "post": {
+                "description": "同意/拒绝好友请求",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "同意/拒绝好友请求",
+                "operationId": "AddFriendResponse",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID同意/拒绝的用户ID, toUserID为申请用户, handleMsg为处理信息, flag为具体操作, 1为同意, 2为拒绝",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddFriendResponseReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddFriendResponseResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddFriendResponseResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.AddFriendResponseResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/delete_friend": {
+            "post": {
+                "description": "删除好友",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "删除好友",
+                "operationId": "DeleteFriend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为操作用户, toUserID为被删除用户",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteFriendReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteFriendResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteFriendResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DeleteFriendResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_black_list": {
+            "post": {
+                "description": "获取黑名单列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "获取黑名单列表",
+                "operationId": "GetBlacklist",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID要获取黑名单的用户",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetBlackListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetBlackListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetBlackListResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetBlackListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_friend_apply_list": {
+            "post": {
+                "description": "删除好友",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "获取好友申请列表",
+                "operationId": "GetFriendApplyList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为要获取申请列表的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetFriendApplyListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetFriendApplyListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetFriendApplyListResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetFriendApplyListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_friend_list": {
+            "post": {
+                "description": "获取用户的好友列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "获取用户的好友列表",
+                "operationId": "GetFriendList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为要获取好友列表的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetFriendListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetFriendListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetFriendListResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetFriendListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/get_self_friend_apply_list": {
+            "post": {
+                "description": "获取自己的好友申请列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "获取自己的好友申请列表",
+                "operationId": "GetSelfFriendApplyList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为自己的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetSelfApplyListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetSelfApplyListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetSelfApplyListResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetSelfApplyListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/import_friend": {
+            "post": {
+                "description": "批量加好友",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "批量加好友",
+                "operationId": "ImportFriend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID批量加好友的用户ID, friendUserIDList为",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ImportFriendReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "data列表中对象的result-1为添加该用户失败, 0为成功",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ImportFriendResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ImportFriendResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ImportFriendResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/is_friend": {
+            "post": {
+                "description": "检查用户之间是否为好友",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "检查用户之间是否为好友",
+                "operationId": "IsFriend",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为请求用户, toUserID为要检查的用户",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.IsFriendReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.IsFriendResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.IsFriendResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.IsFriendResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/remove_black": {
+            "post": {
+                "description": "把用户移除黑名单",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "把用户移除黑名单",
+                "operationId": "RemoveBlack",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID要获取黑名单的用户",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.RemoveBlackListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.RemoveBlackListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.RemoveBlackListResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.RemoveBlackListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/friend/set_friend_remark": {
+            "post": {
+                "description": "设置好友备注",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "好友相关"
+                ],
+                "summary": "设置好友备注",
+                "operationId": "SetFriendRemark",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为设置的用户, toUserID为被设置的用户， remark为好友备注",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetFriendRemarkReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetFriendRemarkResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetFriendRemarkResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetFriendRemarkResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/cancel_mute_group": {
+            "post": {
+                "description": "取消禁言群组",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "取消禁言群组",
+                "operationId": "CancelMuteGroup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupID为群组ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CancelMuteGroupReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CancelMuteGroupResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CancelMuteGroupResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CancelMuteGroupResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/cancel_mute_group_member": {
+            "post": {
+                "description": "取消禁言群成员",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "取消禁言群成员",
+                "operationId": "CancelMuteGroupMember",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupID为群组ID \u003cbr\u003e userID为要取消禁言的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CancelMuteGroupMemberReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CancelMuteGroupMemberResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CancelMuteGroupMemberResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CancelMuteGroupMemberResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/create_group": {
+            "post": {
+                "description": "创建群组",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "创建群组",
+                "operationId": "CreateGroup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "ownerUserID为群主ID \u003cbr\u003e ex为群扩展字段 \u003cbr\u003e roleLevel为群员角色,1为普通用户 2为群主 3为管理员",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateGroupReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/base_info.CreateGroupResp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/server_api_params.GroupInfo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateGroupResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CreateGroupResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/dismiss_group": {
+            "post": {
+                "description": "解散群组",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "解散群组",
+                "operationId": "DismissGroup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupID为要解散的群组ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DismissGroupReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DismissGroupResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DismissGroupResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DismissGroupResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_group_all_member_list": {
+            "post": {
+                "description": "获取全部群成员列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "获取全部群成员列表",
+                "operationId": "GetGroupAllMemberList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "GroupID为要获取群成员的群ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupAllMemberReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/base_info.GetGroupAllMemberResp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/server_api_params.GroupMemberFullInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupAllMemberResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupAllMemberResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_group_members_info": {
+            "post": {
+                "description": "获取群成员信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "获取群成员信息",
+                "operationId": "GetGroupMembersInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "memberList为要获取群成员的群ID列表",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupMembersInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/base_info.GetGroupMembersInfoResp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/server_api_params.GroupMemberFullInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupMembersInfoResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupMembersInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_groups_info": {
+            "post": {
+                "description": "通过群ID列表获取群信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "通过群ID列表获取群信息",
+                "operationId": "GetGroupsInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupIDList为群ID列表",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupInfoResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupInfoResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_joined_group_list": {
+            "post": {
+                "description": "获取用户加入群列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "获取用户加入群列表",
+                "operationId": "GetJoinedGroupList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为要获取的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetJoinedGroupListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/base_info.GetJoinedGroupListResp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/server_api_params.GroupInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetJoinedGroupListResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetJoinedGroupListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_recv_group_applicationList": {
+            "post": {
+                "description": "获取用户收到的加群信息列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "获取用户收到的加群信息列表",
+                "operationId": "GetRecvGroupApplicationList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "fromUserID为要获取的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupApplicationListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupApplicationListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupApplicationListResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupApplicationListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/get_user_req_group_applicationList": {
+            "post": {
+                "description": "获取用户加群申请列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "获取用户加群申请列表",
+                "operationId": "GetUserReqGroupApplicationList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "userID为要获取的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetUserReqGroupApplicationListReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupApplicationListResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupApplicationListResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.GetGroupApplicationListResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/group_application_response": {
+            "post": {
+                "description": "处理加群消息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "处理加群消息",
+                "operationId": "ApplicationGroupResponse",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupID为要处理的群ID \u003cbr\u003e fromUserID为要处理的用户ID \u003cbr\u003e handleMsg为处理结果信息 \u003cbr\u003e handleResult为处理结果 1为同意加群 2为拒绝加群",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ApplicationGroupResponseReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ApplicationGroupResponseResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ApplicationGroupResponseResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.ApplicationGroupResponseResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/invite_user_to_group": {
+            "post": {
+                "description": "将用户拉入群组",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "将用户拉入群组",
+                "operationId": "InviteUserToGroup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupID为要拉进的群组ID \u003cbr\u003e invitedUserIDList为要获取群成员的群ID列表 \u003cbr\u003e reason为原因",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.InviteUserToGroupReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "result为结果码, -1为失败, 0为成功",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.InviteUserToGroupResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.InviteUserToGroupResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.InviteUserToGroupResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/join_group": {
+            "post": {
+                "description": "加入群聊",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "加入群聊",
+                "operationId": "JoinGroup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "reqMessage为申请进群信息",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.JoinGroupReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.JoinGroupResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.JoinGroupResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.JoinGroupResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/kick_group": {
+            "post": {
+                "description": "把用户踢出群组",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "把用户踢出群组",
+                "operationId": "KickGroupMember",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "GroupID为要操作的群ID \u003cbr\u003e kickedUserIDList为要踢出的群用户ID \u003cbr\u003e reason为原因",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.KickGroupMemberReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "result为结果码, -1为失败, 0为成功",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.KickGroupMemberResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.KickGroupMemberResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.KickGroupMemberResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/mute_group": {
+            "post": {
+                "description": "禁言群组",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "禁言群组",
+                "operationId": "MuteGroup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupID为群组ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.MuteGroupReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.MuteGroupResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.MuteGroupResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.MuteGroupResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/mute_group_member": {
+            "post": {
+                "description": "禁言群成员",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "禁言群成员",
+                "operationId": "MuteGroupMember",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupID为群组ID \u003cbr\u003e userID为要禁言的用户ID \u003cbr\u003e mutedSeconds为禁言秒数",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.MuteGroupMemberReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DismissGroupResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DismissGroupResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DismissGroupResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/quit_group": {
+            "post": {
+                "description": "退出群聊",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "退出群聊",
+                "operationId": "QuitGroup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "groupID为要退出的群ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.QuitGroupReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.QuitGroupResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.QuitGroupResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.QuitGroupResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/set_group_info": {
+            "post": {
+                "description": "设置群信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "设置群信息",
+                "operationId": "SetGroupInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "notification为群介绍 \u003cbr\u003e introduction为群公告 \u003cbr\u003e needVerification为加群验证 0为申请需要同意 邀请直接进 1为所有人进群需要验证，除了群主管理员邀请进群 2为直接进群",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGroupInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGroupInfoResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGroupInfoResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGroupInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/set_group_member_info": {
+            "post": {
+                "description": "修改群成员信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "修改群成员信息",
+                "operationId": "SetGroupMemberInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "除了operationID, userID, groupID其他参数可选",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGroupMemberInfoReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGroupMemberInfoResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGroupMemberInfoResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.SetGroupMemberInfoResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/transfer_group": {
+            "post": {
+                "description": "转让群主",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "群组相关"
+                ],
+                "summary": "转让群主",
+                "operationId": "TransferGroupOwner",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "GroupID为要操作的群ID \u003cbr\u003e oldOwnerUserID为老群主ID \u003cbr\u003e newOwnerUserID为新群主ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.TransferGroupOwnerReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.TransferGroupOwnerResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.TransferGroupOwnerResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.TransferGroupOwnerResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/msg/clear_msg": {
+            "post": {
+                "description": "清空用户消息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "消息相关"
+                ],
+                "summary": "清空用户消息",
+                "operationId": "ClearMsg",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "userID为要清空的用户ID",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CleanUpMsgReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CleanUpMsgResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CleanUpMsgResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.CleanUpMsgResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/msg/del_msg": {
+            "post": {
+                "description": "根据seq列表删除消息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "消息相关"
+                ],
+                "summary": "根据seq列表删除消息",
+                "operationId": "DelMsg",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "userID为要删除的用户ID \u003cbr\u003e seqList为seq列表",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DelMsgReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DelMsgResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DelMsgResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.DelMsgResp"
+                        }
+                    }
+                }
+            }
+        },
         "/office/comment_one_work_moment": {
             "post": {
                 "description": "评论一条工作圈",
@@ -826,6 +2935,72 @@ const docTemplate = `{
                 }
             }
         },
+        "/third/minio_upload": {
+            "post": {
+                "description": "minio上传文件(web api), 请注意本api请求为form并非json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "第三方服务相关"
+                ],
+                "summary": "minio上传文件(web api)",
+                "operationId": "MinioUploadFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "im token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "要上传的文件文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "文件类型",
+                        "name": "fileType",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "操作唯一ID",
+                        "name": "operationID",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "0": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.MinioUploadFileResp"
+                        }
+                    },
+                    "400": {
+                        "description": "errCode为400 一般为参数输入错误, token未带上等",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.MinioUploadFileResp"
+                        }
+                    },
+                    "500": {
+                        "description": "errCode为500 一般为服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/base_info.MinioUploadFileResp"
+                        }
+                    }
+                }
+            }
+        },
         "/user/account_check": {
             "post": {
                 "description": "传入UserIDList检查列表账户注册状态，并且返回结果",
@@ -970,7 +3145,19 @@ const docTemplate = `{
                     "0": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetSelfUserInfoResp"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/base_info.GetSelfUserInfoResp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/server_api_params.UserInfo"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -1242,6 +3429,235 @@ const docTemplate = `{
                 }
             }
         },
+        "base_info.AddBlacklistReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID",
+                "toUserID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.AddBlacklistResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.AddFriendReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID",
+                "toUserID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reqMsg": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.AddFriendResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.AddFriendResponseReq": {
+            "type": "object",
+            "required": [
+                "flag",
+                "fromUserID",
+                "operationID",
+                "toUserID"
+            ],
+            "properties": {
+                "flag": {
+                    "type": "integer",
+                    "enum": [
+                        -1,
+                        0,
+                        1
+                    ]
+                },
+                "fromUserID": {
+                    "type": "string"
+                },
+                "handleMsg": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.AddFriendResponseResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.ApplicationGroupResponseReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "groupID",
+                "handleResult",
+                "operationID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "description": "application from FromUserID",
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "handleResult": {
+                    "type": "integer",
+                    "enum": [
+                        -1,
+                        1
+                    ]
+                },
+                "handledMsg": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.ApplicationGroupResponseResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CancelMuteGroupMemberReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID",
+                "userID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CancelMuteGroupMemberResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CancelMuteGroupReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CancelMuteGroupResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CleanUpMsgReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "userID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CleanUpMsgResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
         "base_info.Comment": {
             "type": "object",
             "properties": {
@@ -1273,7 +3689,6 @@ const docTemplate = `{
             "required": [
                 "content",
                 "operationID",
-                "replyUserID",
                 "workMomentID"
             ],
             "properties": {
@@ -1297,6 +3712,58 @@ const docTemplate = `{
                 "data": {
                     "type": "object"
                 },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CreateGroupReq": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "ex": {
+                    "type": "string"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "groupName": {
+                    "type": "string"
+                },
+                "groupType": {
+                    "type": "integer"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "memberList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/base_info.GroupAddMemberInfo"
+                    }
+                },
+                "notification": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "ownerUserID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.CreateGroupResp": {
+            "type": "object",
+            "properties": {
                 "errCode": {
                     "type": "integer"
                 },
@@ -1365,6 +3832,39 @@ const docTemplate = `{
                 }
             }
         },
+        "base_info.DelMsgReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "seqList",
+                "userID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "seqList": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DelMsgResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
         "base_info.DeleteCommentReq": {
             "type": "object",
             "required": [
@@ -1390,6 +3890,36 @@ const docTemplate = `{
                 "data": {
                     "type": "object"
                 },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DeleteFriendReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID",
+                "toUserID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DeleteFriendResp": {
+            "type": "object",
+            "properties": {
                 "errCode": {
                     "type": "integer"
                 },
@@ -1453,6 +3983,66 @@ const docTemplate = `{
                 }
             }
         },
+        "base_info.DismissGroupReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.DismissGroupResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.ForceLogoutReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID",
+                "platform"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "integer",
+                    "maximum": 8,
+                    "minimum": 1
+                }
+            }
+        },
+        "base_info.ForceLogoutResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
         "base_info.GetAllUsersUidReq": {
             "type": "object",
             "required": [
@@ -1481,6 +4071,314 @@ const docTemplate = `{
                 }
             }
         },
+        "base_info.GetBlackListReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetBlackListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetFriendApplyListReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetFriendApplyListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetFriendListReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetFriendListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetGroupAllMemberReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetGroupAllMemberResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetGroupApplicationListReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "description": "作为管理员或群主收到的 进群申请",
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetGroupApplicationListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetGroupInfoReq": {
+            "type": "object",
+            "required": [
+                "groupIDList",
+                "operationID"
+            ],
+            "properties": {
+                "groupIDList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetGroupInfoResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetGroupMembersInfoReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "memberList",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "memberList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetGroupMembersInfoResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetJoinedGroupListReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetJoinedGroupListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetSelfApplyListReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetSelfApplyListResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
         "base_info.GetSelfUserInfoReq": {
             "type": "object",
             "required": [
@@ -1499,10 +4397,6 @@ const docTemplate = `{
         "base_info.GetSelfUserInfoResp": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "errCode": {
                     "type": "integer"
                 },
@@ -1601,6 +4495,21 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.GetUserReqGroupApplicationListReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "userID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "userID": {
                     "type": "string"
                 }
             }
@@ -1743,13 +4652,6 @@ const docTemplate = `{
         "base_info.GetUsersInfoResp": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": true
-                    }
-                },
                 "errCode": {
                     "type": "integer"
                 },
@@ -1828,6 +4730,206 @@ const docTemplate = `{
                 }
             }
         },
+        "base_info.GroupAddMemberInfo": {
+            "type": "object",
+            "required": [
+                "roleLevel",
+                "userID"
+            ],
+            "properties": {
+                "roleLevel": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.ImportFriendReq": {
+            "type": "object",
+            "required": [
+                "friendUserIDList",
+                "fromUserID",
+                "operationID"
+            ],
+            "properties": {
+                "friendUserIDList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.ImportFriendResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/base_info.UserIDResult"
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.InviteUserToGroupReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "invitedUserIDList",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "invitedUserIDList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.InviteUserToGroupResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/base_info.UserIDResult"
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.IsFriendReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID",
+                "toUserID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.IsFriendResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/base_info.Response"
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.JoinGroupReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reqMessage": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.JoinGroupResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.KickGroupMemberReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "kickedUserIDList",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "kickedUserIDList": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.KickGroupMemberResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/base_info.UserIDResult"
+                    }
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
         "base_info.LikeOneWorkMomentReq": {
             "type": "object",
             "required": [
@@ -1854,6 +4956,162 @@ const docTemplate = `{
                 },
                 "errMsg": {
                     "type": "string"
+                }
+            }
+        },
+        "base_info.MinioUploadFileResp": {
+            "type": "object",
+            "properties": {
+                "URL": {
+                    "type": "string"
+                },
+                "newName": {
+                    "type": "string"
+                },
+                "snapshotName": {
+                    "type": "string"
+                },
+                "snapshotURL": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.MuteGroupMemberReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "mutedSeconds",
+                "operationID",
+                "userID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "mutedSeconds": {
+                    "type": "integer"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.MuteGroupReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.MuteGroupResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.ParseTokenReq": {
+            "type": "object",
+            "required": [
+                "operationID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.ParseTokenResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.QuitGroupReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.QuitGroupResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.RemoveBlackListReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID",
+                "toUserID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.RemoveBlackListResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.Response": {
+            "type": "object",
+            "properties": {
+                "isFriend": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1905,6 +5163,40 @@ const docTemplate = `{
                 }
             }
         },
+        "base_info.SetFriendRemarkReq": {
+            "type": "object",
+            "required": [
+                "fromUserID",
+                "operationID",
+                "remark",
+                "toUserID"
+            ],
+            "properties": {
+                "fromUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "toUserID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetFriendRemarkResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
         "base_info.SetGlobalRecvMessageOptReq": {
             "type": "object",
             "required": [
@@ -1925,6 +5217,94 @@ const docTemplate = `{
             }
         },
         "base_info.SetGlobalRecvMessageOptResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetGroupInfoReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID"
+            ],
+            "properties": {
+                "ex": {
+                    "type": "string"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "groupName": {
+                    "type": "string"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "needVerification": {
+                    "type": "integer"
+                },
+                "notification": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetGroupInfoResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetGroupMemberInfoReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "operationID",
+                "userID"
+            ],
+            "properties": {
+                "ex": {
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "roleLevel": {
+                    "type": "integer",
+                    "maximum": 3,
+                    "minimum": 1
+                },
+                "userGroupFaceUrl": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.SetGroupMemberInfoResp": {
             "type": "object",
             "properties": {
                 "errCode": {
@@ -1966,6 +5346,40 @@ const docTemplate = `{
             }
         },
         "base_info.SetTagResp": {
+            "type": "object",
+            "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.TransferGroupOwnerReq": {
+            "type": "object",
+            "required": [
+                "groupID",
+                "newOwnerUserID",
+                "oldOwnerUserID",
+                "operationID"
+            ],
+            "properties": {
+                "groupID": {
+                    "type": "string"
+                },
+                "newOwnerUserID": {
+                    "type": "string"
+                },
+                "oldOwnerUserID": {
+                    "type": "string"
+                },
+                "operationID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.TransferGroupOwnerResp": {
             "type": "object",
             "properties": {
                 "errCode": {
@@ -2028,6 +5442,147 @@ const docTemplate = `{
         "base_info.UpdateUserInfoResp": {
             "type": "object",
             "properties": {
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.UserIDResult": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.UserRegisterReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "platform",
+                "secret",
+                "userID"
+            ],
+            "properties": {
+                "birth": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string",
+                    "maxLength": 64
+                },
+                "ex": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "faceURL": {
+                    "type": "string",
+                    "maxLength": 1024
+                },
+                "gender": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1,
+                        2
+                    ]
+                },
+                "nickname": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                },
+                "operationID": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "platform": {
+                    "type": "integer",
+                    "maximum": 7,
+                    "minimum": 1
+                },
+                "secret": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "userID": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                }
+            }
+        },
+        "base_info.UserRegisterResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/base_info.UserTokenInfo"
+                },
+                "errCode": {
+                    "type": "integer"
+                },
+                "errMsg": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.UserTokenInfo": {
+            "type": "object",
+            "properties": {
+                "expiredTime": {
+                    "type": "integer"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "base_info.UserTokenReq": {
+            "type": "object",
+            "required": [
+                "operationID",
+                "platform",
+                "secret",
+                "userID"
+            ],
+            "properties": {
+                "operationID": {
+                    "type": "string"
+                },
+                "platform": {
+                    "type": "integer",
+                    "maximum": 8,
+                    "minimum": 1
+                },
+                "secret": {
+                    "type": "string",
+                    "maxLength": 32
+                },
+                "userID": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "minLength": 1
+                }
+            }
+        },
+        "base_info.UserTokenResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/base_info.UserTokenInfo"
+                },
                 "errCode": {
                     "type": "integer"
                 },
@@ -2277,6 +5832,126 @@ const docTemplate = `{
                 }
             }
         },
+        "server_api_params.GroupInfo": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "integer"
+                },
+                "creatorUserID": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "groupName": {
+                    "type": "string"
+                },
+                "groupType": {
+                    "type": "integer"
+                },
+                "introduction": {
+                    "type": "string"
+                },
+                "memberCount": {
+                    "type": "integer"
+                },
+                "needVerification": {
+                    "$ref": "#/definitions/wrapperspb.Int32Value"
+                },
+                "notification": {
+                    "type": "string"
+                },
+                "ownerUserID": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "server_api_params.GroupMemberFullInfo": {
+            "type": "object",
+            "properties": {
+                "appMangerLevel": {
+                    "type": "integer"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "groupID": {
+                    "type": "string"
+                },
+                "joinSource": {
+                    "type": "integer"
+                },
+                "joinTime": {
+                    "type": "integer"
+                },
+                "muteEndTime": {
+                    "type": "integer"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "operatorUserID": {
+                    "type": "string"
+                },
+                "roleLevel": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "server_api_params.UserInfo": {
+            "type": "object",
+            "properties": {
+                "appMangerLevel": {
+                    "type": "integer"
+                },
+                "birth": {
+                    "type": "integer"
+                },
+                "createTime": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "ex": {
+                    "type": "string"
+                },
+                "faceURL": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "integer"
+                },
+                "globalRecvMsgOpt": {
+                    "type": "integer"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
         "user.AccountCheckResp_SingleUserStatus": {
             "type": "object",
             "properties": {
@@ -2285,6 +5960,15 @@ const docTemplate = `{
                 },
                 "userID": {
                     "type": "string"
+                }
+            }
+        },
+        "wrapperspb.Int32Value": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "description": "The int32 value.",
+                    "type": "integer"
                 }
             }
         }
