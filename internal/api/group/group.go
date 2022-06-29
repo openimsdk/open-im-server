@@ -464,24 +464,24 @@ func GetGroupsInfo(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: transferGroupInfo(RpcResp.GroupInfoList)}
+	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
 	resp.Data = jsonData.JsonDataList(resp.GroupInfoList)
 	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
 
-func transferGroupInfo(input []*open_im_sdk.GroupInfo) []*api.GroupInfoAlias {
-	var result []*api.GroupInfoAlias
-	for _, v := range input {
-		t := &api.GroupInfoAlias{}
-		utils.CopyStructFields(t, &v)
-		if v.NeedVerification != nil {
-			t.NeedVerification = v.NeedVerification.Value
-		}
-		result = append(result, t)
-	}
-	return result
-}
+//func transferGroupInfo(input []*open_im_sdk.GroupInfo) []*api.GroupInfoAlias {
+//	var result []*api.GroupInfoAlias
+//	for _, v := range input {
+//		t := &api.GroupInfoAlias{}
+//		utils.CopyStructFields(t, &v)
+//		if v.NeedVerification != nil {
+//			t.NeedVerification = v.NeedVerification.Value
+//		}
+//		result = append(result, t)
+//	}
+//	return result
+//}
 
 //process application
 func ApplicationGroupResponse(c *gin.Context) {
@@ -615,13 +615,13 @@ func SetGroupInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.SetGroupInfoReq{GroupInfo: &open_im_sdk.GroupInfo{}}
-	utils.CopyStructFields(req.GroupInfo, &params)
+	req := &rpc.SetGroupInfoReq{GroupInfoForSet: &open_im_sdk.GroupInfoForSet{}}
+	utils.CopyStructFields(req.GroupInfoForSet, &params)
 	req.OperationID = params.OperationID
 
 	if params.NeedVerification != nil {
-		req.GroupInfo.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
-		log.NewInfo(req.OperationID, "NeedVerification ", req.GroupInfo.NeedVerification)
+		req.GroupInfoForSet.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
+		log.NewInfo(req.OperationID, "NeedVerification ", req.GroupInfoForSet.NeedVerification)
 	}
 
 	var ok bool

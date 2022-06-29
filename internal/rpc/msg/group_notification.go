@@ -242,7 +242,9 @@ func GroupInfoSetNotification(operationID, opUserID, groupID string, groupName, 
 	GroupInfoChangedTips.Group.Notification = notification
 	GroupInfoChangedTips.Group.Introduction = introduction
 	GroupInfoChangedTips.Group.FaceURL = faceURL
-	GroupInfoChangedTips.Group.NeedVerification = needVerification
+	if needVerification != nil {
+		GroupInfoChangedTips.Group.NeedVerification = needVerification.Value
+	}
 
 	if err := setOpUserInfo(opUserID, groupID, GroupInfoChangedTips.OpUser); err != nil {
 		log.Error(operationID, "setOpUserInfo failed ", err.Error(), opUserID, groupID)
