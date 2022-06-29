@@ -737,11 +737,14 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		}
 		var groupInfo open_im_sdk.GroupInfo
 		cp.GroupDBCopyOpenIM(&groupInfo, groupInfoFromMysql)
+		//groupInfo.NeedVerification
+
+		groupInfo.NeedVerification = groupInfoFromMysql.NeedVerification
 		groupsInfoList = append(groupsInfoList, &groupInfo)
 	}
 
 	resp := pbGroup.GetGroupsInfoResp{GroupInfoList: groupsInfoList}
-	log.NewInfo(req.OperationID, "GetGroupsInfo rpc return ", resp.String())
+	log.NewInfo(req.OperationID, "GetGroupsInfo rpc return  ", resp.String())
 	return &resp, nil
 }
 
@@ -1027,9 +1030,9 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 	if utils.IsContain(req.OpUserID, config.Config.Manager.AppManagerUid) {
 		return true
 	}
-	groupUserInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupInfo.GroupID, req.OpUserID)
+	groupUserInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupInfoForSet.GroupID, req.OpUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMemberInfoByGroupIDAndUserID failed, ", err.Error(), req.GroupInfo.GroupID, req.OpUserID)
+		log.NewError(req.OperationID, "GetGroupMemberInfoByGroupIDAndUserID failed, ", err.Error(), req.GroupInfoForSet.GroupID, req.OpUserID)
 		return false
 
 	}
@@ -1046,9 +1049,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
-	group, err := imdb.GetGroupInfoByGroupID(req.GroupInfo.GroupID)
+	group, err := imdb.GetGroupInfoByGroupID(req.GroupInfoForSet.GroupID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), req.GroupInfo.GroupID)
+		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), req.GroupInfoForSet.GroupID)
 		return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, http.WrapError(constant.ErrDB)
 	}
 
@@ -1063,28 +1066,28 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	notification := ""
 	introduction := ""
 	faceURL := ""
-	if group.GroupName != req.GroupInfo.GroupName && req.GroupInfo.GroupName != "" {
+	if group.GroupName != req.GroupInfoForSet.GroupName && req.GroupInfoForSet.GroupName != "" {
 		changedType = 1
-		groupName = req.GroupInfo.GroupName
+		groupName = req.GroupInfoForSet.GroupName
 	}
-	if group.Notification != req.GroupInfo.Notification && req.GroupInfo.Notification != "" {
+	if group.Notification != req.GroupInfoForSet.Notification && req.GroupInfoForSet.Notification != "" {
 		changedType = changedType | (1 << 1)
-		notification = req.GroupInfo.Notification
+		notification = req.GroupInfoForSet.Notification
 	}
-	if group.Introduction != req.GroupInfo.Introduction && req.GroupInfo.Introduction != "" {
+	if group.Introduction != req.GroupInfoForSet.Introduction && req.GroupInfoForSet.Introduction != "" {
 		changedType = changedType | (1 << 2)
-		introduction = req.GroupInfo.Introduction
+		introduction = req.GroupInfoForSet.Introduction
 	}
-	if group.FaceURL != req.GroupInfo.FaceURL && req.GroupInfo.FaceURL != "" {
+	if group.FaceURL != req.GroupInfoForSet.FaceURL && req.GroupInfoForSet.FaceURL != "" {
 		changedType = changedType | (1 << 3)
-		faceURL = req.GroupInfo.FaceURL
+		faceURL = req.GroupInfoForSet.FaceURL
 	}
 
-	if req.GroupInfo.NeedVerification != nil {
+	if req.GroupInfoForSet.NeedVerification != nil {
 		changedType = changedType | (1 << 4)
 		m := make(map[string]interface{})
-		m["need_verification"] = req.GroupInfo.NeedVerification.Value
-		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfo.GroupID, m); err != nil {
+		m["need_verification"] = req.GroupInfoForSet.NeedVerification.Value
+		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
 			log.NewError(req.OperationID, "UpdateGroupInfoDefaultZero failed ", err.Error(), m)
 			return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, http.WrapError(constant.ErrDB)
 		}
@@ -1096,7 +1099,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	//}
 	//only administrators can set group information
 	var groupInfo db.Group
-	utils.CopyStructFields(&groupInfo, req.GroupInfo)
+	utils.CopyStructFields(&groupInfo, req.GroupInfoForSet)
 	err = imdb.SetGroupInfo(groupInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "SetGroupInfo failed ", err.Error(), groupInfo)
@@ -1104,11 +1107,11 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	}
 	log.NewInfo(req.OperationID, "SetGroupInfo rpc return ", pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{}})
 	if changedType != 0 {
-		chat.GroupInfoSetNotification(req.OperationID, req.OpUserID, req.GroupInfo.GroupID, groupName, notification, introduction, faceURL, req.GroupInfo.NeedVerification)
+		chat.GroupInfoSetNotification(req.OperationID, req.OpUserID, req.GroupInfoForSet.GroupID, groupName, notification, introduction, faceURL, req.GroupInfoForSet.NeedVerification)
 	}
-	if req.GroupInfo.Notification != "" {
+	if req.GroupInfoForSet.Notification != "" {
 		//get group member user id
-		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: req.OperationID, GroupID: req.GroupInfo.GroupID}
+		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: req.OperationID, GroupID: req.GroupInfoForSet.GroupID}
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
 		if etcdConn == nil {
 			errMsg := req.OperationID + "getcdv3.GetConn == nil"
@@ -1129,9 +1132,9 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 
 		conversation := pbConversation.Conversation{
 			OwnerUserID:      req.OpUserID,
-			ConversationID:   utils.GetConversationIDBySessionType(req.GroupInfo.GroupID, constant.GroupChatType),
+			ConversationID:   utils.GetConversationIDBySessionType(req.GroupInfoForSet.GroupID, constant.GroupChatType),
 			ConversationType: constant.GroupChatType,
-			GroupID:          req.GroupInfo.GroupID,
+			GroupID:          req.GroupInfoForSet.GroupID,
 		}
 		conversationReq.Conversation = &conversation
 		conversationReq.OperationID = req.OperationID

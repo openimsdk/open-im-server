@@ -20,7 +20,17 @@ message GroupInfo{
   int32 status = 10;
   string creatorUserID = 11;
   int32 groupType = 12;
-  google.protobuf.Int32Value needVerification  = 13;
+  int32 needVerification = 13;
+}
+
+message GroupInfoForSet{
+  string groupID = 1;
+  string groupName = 2;
+  string notification = 3;
+  string introduction = 4;
+  string faceURL = 5;
+  string ex = 6;
+  google.protobuf.Int32Value needVerification  = 7;
 }
 
 

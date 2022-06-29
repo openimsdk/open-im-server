@@ -523,8 +523,8 @@ func GetUserReqGroupApplicationList(c *gin.Context) {
 	}
 	log.NewInfo(req.OperationID, RpcResp)
 	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupRequestList: RpcResp.GroupRequestList}
-	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
 	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
+	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -581,6 +581,21 @@ func GetGroupsInfo(c *gin.Context) {
 	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
+//func transferGroupInfo(input []*open_im_sdk.GroupInfo) []*api.GroupInfoAlias {
+//	var result []*api.GroupInfoAlias
+//	for _, v := range input {
+//		t := &api.GroupInfoAlias{}
+//		utils.CopyStructFields(t, &v)
+//		if v.NeedVerification != nil {
+//			t.NeedVerification = v.NeedVerification.Value
+//		}
+//		result = append(result, t)
+//	}
+//	return result
+//}
+
+//process application
 
 // @Summary 处理加群消息
 // @Description 处理加群消息
@@ -761,12 +776,13 @@ func SetGroupInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	req := &rpc.SetGroupInfoReq{GroupInfo: &open_im_sdk.GroupInfo{}}
-	utils.CopyStructFields(req.GroupInfo, &params)
+	req := &rpc.SetGroupInfoReq{GroupInfoForSet: &open_im_sdk.GroupInfoForSet{}}
+	utils.CopyStructFields(req.GroupInfoForSet, &params)
 	req.OperationID = params.OperationID
 
 	if params.NeedVerification != nil {
-		req.GroupInfo.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
+		req.GroupInfoForSet.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
+		log.NewInfo(req.OperationID, "NeedVerification ", req.GroupInfoForSet.NeedVerification)
 	}
 
 	var ok bool

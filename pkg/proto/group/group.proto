@@ -43,7 +43,7 @@ message GetGroupsInfoResp{
 
 
 message SetGroupInfoReq{
-  server_api_params.GroupInfo GroupInfo = 1;
+  server_api_params.GroupInfoForSet groupInfoForSet = 1;
   string OpUserID = 2; //app manager or group owner
   string OperationID = 3;
 }

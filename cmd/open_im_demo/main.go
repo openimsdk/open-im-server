@@ -32,6 +32,14 @@ func main() {
 		authRouterGroup.POST("/login", register.Login)
 		authRouterGroup.POST("/reset_password", register.ResetPassword)
 	}
+	demoRouterGroup := r.Group("/auth")
+	{
+		demoRouterGroup.POST("/code", register.SendVerificationCode)
+		demoRouterGroup.POST("/verify", register.Verify)
+		demoRouterGroup.POST("/password", register.SetPassword)
+		demoRouterGroup.POST("/login", register.Login)
+		demoRouterGroup.POST("/reset_password", register.ResetPassword)
+	}
 	defaultPorts := config.Config.Demo.Port
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 42233 as port")
 	flag.Parse()
