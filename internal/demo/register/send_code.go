@@ -142,14 +142,14 @@ func CreateTencentSMSClient() (string, error) {
 	cpf := profile.NewClientProfile()
 	client, err := sms.NewClient(credential, config.Config.Demo.TencentSMS.Region, cpf)
 	if err != nil {
-
+		return "", err
 	}
 	request := sms.NewSendSmsRequest()
 	request.SmsSdkAppId = common.StringPtr(config.Config.Demo.TencentSMS.AppID)
 	request.SignName = common.StringPtr(config.Config.Demo.TencentSMS.SignName)
 	request.TemplateId = common.StringPtr(config.Config.Demo.TencentSMS.VerificationCodeTemplateCode)
 	request.TemplateParamSet = common.StringPtrs([]string{"1234"})
-	request.PhoneNumberSet = common.StringPtrs([]string{"+8613711112222"})
+	request.PhoneNumberSet = common.StringPtrs([]string{"+971588232183"})
 	// 通过client对象调用想要访问的接口，需要传入请求对象
 	response, err := client.SendSms(request)
 	// 非SDK异常，直接失败。实际代码中可以加入其他的处理。
