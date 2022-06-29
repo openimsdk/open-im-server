@@ -696,12 +696,12 @@ demo:
     verificationCodeTemplateCode: SMS_226810164
     enable: true
   tencentsms: #腾讯云短信配置，在腾讯云申请成功后，修改以下选项，enable为true则必须修改
-    appID: 1400529182
-    region: "na-toronto"
-    secretID: AKIDZx6yYruhDm6AxTihQt4ybx1oLbaHisKV
-    secretKey: vay4tSjjSv71e2A1buwhBNJyLRGp66pH
+    appID:  2400000648
+    region: "ap-chengdu"
+    secretID: IKIDra4JPGsFMDwQedMq42lESQBgwwgBQQAe
+    secretKey: HI6fz4uUotjJdiX6QUIrAE2buxlKdgU2
     signName: ""
-    verificationCodeTemplateCode: 1449250
+    verificationCodeTemplateCode: 2902877
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   #  second
