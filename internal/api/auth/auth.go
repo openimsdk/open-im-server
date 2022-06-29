@@ -16,6 +16,18 @@ import (
 	"strings"
 )
 
+// @Summary 用户登录
+// @Description 用户登录
+// @Tags 鉴权认证
+// @ID UserRegister
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.UserRegisterReq true "secret为openIM密钥, 详细见服务端config.yaml secret字段 <br> platform为平台ID <br> ex为拓展字段"
+// @Produce json
+// @Success 0 {object} api.UserRegisterResp
+// @Failure 500 {object} api.UserRegisterResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.UserRegisterResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /auth/user_register [post]
 func UserRegister(c *gin.Context) {
 	params := api.UserRegisterReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -73,6 +85,18 @@ func UserRegister(c *gin.Context) {
 
 }
 
+// @Summary 用户登录
+// @Description 获取用户的token
+// @Tags 鉴权认证
+// @ID UserToken
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.UserTokenReq true "secret为openIM密钥, 详细见服务端config.yaml secret字段, platform为平台ID"
+// @Produce json
+// @Success 0 {object} api.UserTokenResp
+// @Failure 500 {object} api.UserTokenResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.UserTokenResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /auth/user_token [post]
 func UserToken(c *gin.Context) {
 	params := api.UserTokenReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -111,6 +135,18 @@ func UserToken(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 解析token
+// @Description 解析用户token
+// @Tags 鉴权认证
+// @ID ParseToken
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.ParseTokenReq true "secret为openIM密钥, 详细见服务端config.yaml secret字段, platform为平台ID"
+// @Produce json
+// @Success 0 {object} api.ParseTokenResp
+// @Failure 500 {object} api.ParseTokenResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.ParseTokenResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /auth/parse_token [post]
 func ParseToken(c *gin.Context) {
 	params := api.ParseTokenReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -137,6 +173,18 @@ func ParseToken(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 强制登出
+// @Description 对应的平台强制登出
+// @Tags 鉴权认证
+// @ID ForceLogout
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.ForceLogoutReq true "platform为平台ID, fromUserID为要执行强制登出的用户ID"
+// @Produce json
+// @Success 0 {object} api.ForceLogoutResp
+// @Failure 500 {object} api.ForceLogoutResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.ForceLogoutResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /auth/force_logout [post]
 func ForceLogout(c *gin.Context) {
 	params := api.ForceLogoutReq{}
 	if err := c.BindJSON(&params); err != nil {

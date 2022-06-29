@@ -16,6 +16,18 @@ import (
 	"strings"
 )
 
+// @Summary 根据seq列表删除消息
+// @Description 根据seq列表删除消息
+// @Tags 消息相关
+// @ID DelMsg
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.DelMsgReq true "userID为要删除的用户ID <br> seqList为seq列表"
+// @Produce json
+// @Success 0 {object} api.DelMsgResp
+// @Failure 500 {object} api.DelMsgResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.DelMsgResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /msg/del_msg [post]
 func DelMsg(c *gin.Context) {
 	var (
 		req   api.DelMsgReq
@@ -30,6 +42,17 @@ func DelMsg(c *gin.Context) {
 	if err := utils.CopyStructFields(&reqPb, &req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields", err.Error())
 	}
+
+	var ok bool
+	var errInfo string
+	ok, reqPb.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
 	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, req.OperationID)
 	if grpcConn == nil {
 		errMsg := req.OperationID + " getcdv3.GetConn == nil"
@@ -50,6 +73,18 @@ func DelMsg(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 清空用户消息
+// @Description 清空用户消息
+// @Tags 消息相关
+// @ID ClearMsg
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.CleanUpMsgReq true "userID为要清空的用户ID"
+// @Produce json
+// @Success 0 {object} api.CleanUpMsgResp
+// @Failure 500 {object} api.CleanUpMsgResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.CleanUpMsgResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /msg/clear_msg [post]
 func ClearMsg(c *gin.Context) {
 	params := api.CleanUpMsgReq{}
 	if err := c.BindJSON(&params); err != nil {

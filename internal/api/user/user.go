@@ -317,7 +317,7 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetSelfUserInfoReq true "请求体"
 // @Produce json
-// @Success 0 {object} api.GetSelfUserInfoResp
+// @Success 0 {object} api.GetSelfUserInfoResp{data=open_im_sdk.UserInfo}
 // @Failure 500 {object} api.GetSelfUserInfoResp "errCode为500 一般为服务器内部错误"
 // @Failure 400 {object} api.GetSelfUserInfoResp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_self_user_info [post]
