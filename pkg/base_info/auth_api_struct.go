@@ -63,6 +63,6 @@ type ExpireTime struct {
 
 type ParseTokenResp struct {
 	CommResp
-	Data       map[string]interface{} `json:"data"`
+	Data       map[string]interface{} `json:"data" swaggerignore:"true"`
 	ExpireTime ExpireTime             `json:"-"`
 }

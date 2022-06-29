@@ -16,6 +16,18 @@ import (
 	"strings"
 )
 
+// @Summary 创建部门
+// @Description 创建部门
+// @Tags 组织架构相关
+// @ID CreateDepartment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.CreateDepartmentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.CreateDepartmentResp{data=open_im_sdk.Department}
+// @Failure 500 {object} api.CreateDepartmentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.CreateDepartmentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/create_department [post]
 func CreateDepartment(c *gin.Context) {
 	params := api.CreateDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -59,6 +71,18 @@ func CreateDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 更新部门信息
+// @Description 更新部门信息
+// @Tags 组织架构相关
+// @ID UpdateDepartment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.UpdateDepartmentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.UpdateDepartmentResp
+// @Failure 500 {object} api.UpdateDepartmentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.UpdateDepartmentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/update_department [post]
 func UpdateDepartment(c *gin.Context) {
 	params := api.UpdateDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -101,6 +125,18 @@ func UpdateDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 获取子部门列表
+// @Description 获取子部门列表
+// @Tags 组织架构相关
+// @ID GetSubDepartment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetSubDepartmentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.GetSubDepartmentResp
+// @Failure 500 {object} api.GetSubDepartmentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetSubDepartmentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/get_sub_department [post]
 func GetSubDepartment(c *gin.Context) {
 	params := api.GetSubDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -146,6 +182,18 @@ func GetAllDepartment(c *gin.Context) {
 
 }
 
+// @Summary 删除部门
+// @Description 删除部门
+// @Tags 组织架构相关
+// @ID DeleteDepartment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.DeleteDepartmentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.DeleteDepartmentResp
+// @Failure 500 {object} api.DeleteDepartmentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.DeleteDepartmentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/delete_department [post]
 func DeleteDepartment(c *gin.Context) {
 	params := api.DeleteDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -185,6 +233,18 @@ func DeleteDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 组织架构导入用户
+// @Description 组织架构导入用户
+// @Tags 组织架构相关
+// @ID CreateOrganizationUser
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.CreateOrganizationUserReq true "请求"
+// @Produce json
+// @Success 0 {object} api.CreateOrganizationUserResp
+// @Failure 500 {object} api.CreateOrganizationUserResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.CreateOrganizationUserResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/create_organization_user [post]
 func CreateOrganizationUser(c *gin.Context) {
 	params := api.CreateOrganizationUserReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -227,6 +287,18 @@ func CreateOrganizationUser(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 更新组织架构中的用户
+// @Description 更新组织架构中的用户
+// @Tags 组织架构相关
+// @ID UpdateOrganizationUser
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.UpdateOrganizationUserReq true "请求"
+// @Produce json
+// @Success 0 {object} api.UpdateOrganizationUserResp
+// @Failure 500 {object} api.UpdateOrganizationUserResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.UpdateOrganizationUserResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/update_organization_user [post]
 func UpdateOrganizationUser(c *gin.Context) {
 	params := api.UpdateOrganizationUserReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -262,12 +334,23 @@ func UpdateOrganizationUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-
 	apiResp := api.UpdateOrganizationUserResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api return ", apiResp)
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 创建部门用户
+// @Description 创建部门用户
+// @Tags 组织架构相关
+// @ID CreateDepartmentMember
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.CreateDepartmentMemberReq true "请求"
+// @Produce json
+// @Success 0 {object} api.CreateDepartmentMemberResp
+// @Failure 500 {object} api.CreateDepartmentMemberResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.CreateDepartmentMemberResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/create_department_member [post]
 func CreateDepartmentMember(c *gin.Context) {
 	params := api.CreateDepartmentMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -310,6 +393,18 @@ func CreateDepartmentMember(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 获取部门中的所有用户
+// @Description 获取部门中的所有用户
+// @Tags 组织架构相关
+// @ID GetUserInDepartment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetUserInDepartmentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.GetUserInDepartmentResp{data=open_im_sdk.UserInDepartment}
+// @Failure 500 {object} api.GetUserInDepartmentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetUserInDepartmentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/get_user_in_department [post]
 func GetUserInDepartment(c *gin.Context) {
 	params := api.GetUserInDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -352,6 +447,18 @@ func GetUserInDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 更新部门中某个用户
+// @Description 更新部门中某个用户
+// @Tags 组织架构相关
+// @ID UpdateUserInDepartment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.UpdateUserInDepartmentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.UpdateUserInDepartmentResp
+// @Failure 500 {object} api.UpdateUserInDepartmentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.UpdateUserInDepartmentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/update_user_in_department [post]
 func UpdateUserInDepartment(c *gin.Context) {
 	params := api.UpdateUserInDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -393,6 +500,18 @@ func UpdateUserInDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 删除组织架构中某个用户
+// @Description 删除组织架构中某个用户
+// @Tags 组织架构相关
+// @ID DeleteOrganizationUser
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.DeleteOrganizationUserReq true "请求"
+// @Produce json
+// @Success 0 {object} api.DeleteOrganizationUserResp
+// @Failure 500 {object} api.DeleteOrganizationUserResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.DeleteOrganizationUserResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/delete_organization_user [post]
 func DeleteOrganizationUser(c *gin.Context) {
 	params := api.DeleteOrganizationUserReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -434,6 +553,18 @@ func DeleteOrganizationUser(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 获取部门中所有成员
+// @Description 获取部门中所有成员
+// @Tags 组织架构相关
+// @ID GetDepartmentMember
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetDepartmentMemberReq true "请求"
+// @Produce json
+// @Success 0 {object} api.GetDepartmentMemberResp{data=open_im_sdk.UserDepartmentMember}
+// @Failure 500 {object} api.GetDepartmentMemberResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetDepartmentMemberResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/get_department_member [post]
 func GetDepartmentMember(c *gin.Context) {
 	params := api.GetDepartmentMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -476,6 +607,18 @@ func GetDepartmentMember(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResp)
 }
 
+// @Summary 删除部门中某个用户
+// @Description 删除部门中某个用户
+// @Tags 组织架构相关
+// @ID DeleteUserInDepartment
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.DeleteUserInDepartmentReq true "请求"
+// @Produce json
+// @Success 0 {object} api.DeleteUserInDepartmentResp
+// @Failure 500 {object} api.DeleteUserInDepartmentResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.DeleteUserInDepartmentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /organization/delete_user_in_department [post]
 func DeleteUserInDepartment(c *gin.Context) {
 	params := api.DeleteUserInDepartmentReq{}
 	if err := c.BindJSON(&params); err != nil {

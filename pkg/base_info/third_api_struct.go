@@ -19,11 +19,18 @@ type MinioUploadFileReq struct {
 	FileType    int    `form:"fileType" binding:"required"`
 }
 
-type MinioUploadFileResp struct {
+type MinioUploadFile struct {
 	URL             string `json:"URL"`
 	NewName         string `json:"newName"`
 	SnapshotURL     string `json:"snapshotURL,omitempty"`
 	SnapshotNewName string `json:"snapshotName,omitempty"`
+}
+
+type MinioUploadFileResp struct {
+	CommResp
+	Data struct {
+		MinioUploadFile
+	} `json:"data"`
 }
 
 type UploadUpdateAppReq struct {

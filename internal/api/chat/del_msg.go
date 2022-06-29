@@ -25,8 +25,8 @@ import (
 // @Param req body api.DelMsgReq true "userID为要删除的用户ID <br> seqList为seq列表"
 // @Produce json
 // @Success 0 {object} api.DelMsgResp
-// @Failure 500 {object} api.DelMsgResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.DelMsgResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /msg/del_msg [post]
 func DelMsg(c *gin.Context) {
 	var (
@@ -82,8 +82,8 @@ func DelMsg(c *gin.Context) {
 // @Param req body api.CleanUpMsgReq true "userID为要清空的用户ID"
 // @Produce json
 // @Success 0 {object} api.CleanUpMsgResp
-// @Failure 500 {object} api.CleanUpMsgResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.CleanUpMsgResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /msg/clear_msg [post]
 func ClearMsg(c *gin.Context) {
 	params := api.CleanUpMsgReq{}

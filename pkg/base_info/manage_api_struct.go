@@ -39,20 +39,24 @@ type AccountCheckResp struct {
 	ResultList []*pbUser.AccountCheckResp_SingleUserStatus `json:"data"`
 }
 
+type ManagementSendMsg struct {
+	OperationID      string `json:"operationID" binding:"required"`
+	SendID           string `json:"sendID" binding:"required"`
+	GroupID          string `json:"groupID" `
+	SenderNickname   string `json:"senderNickname" `
+	SenderFaceURL    string `json:"senderFaceURL" `
+	SenderPlatformID int32  `json:"senderPlatformID"`
+	//ForceList        []string                     `json:"forceList" `
+	Content         map[string]interface{}       `json:"content" binding:"required" swaggerignore:"true"`
+	ContentType     int32                        `json:"contentType" binding:"required"`
+	SessionType     int32                        `json:"sessionType" binding:"required"`
+	IsOnlineOnly    bool                         `json:"isOnlineOnly"`
+	OfflinePushInfo *open_im_sdk.OfflinePushInfo `json:"offlinePushInfo"`
+}
+
 type ManagementSendMsgReq struct {
-	OperationID      string                       `json:"operationID" binding:"required"`
-	SendID           string                       `json:"sendID" binding:"required"`
-	RecvID           string                       `json:"recvID" `
-	GroupID          string                       `json:"groupID" `
-	SenderNickname   string                       `json:"senderNickname" `
-	SenderFaceURL    string                       `json:"senderFaceURL" `
-	SenderPlatformID int32                        `json:"senderPlatformID"`
-	ForceList        []string                     `json:"forceList" `
-	Content          map[string]interface{}       `json:"content" binding:"required"`
-	ContentType      int32                        `json:"contentType" binding:"required"`
-	SessionType      int32                        `json:"sessionType" binding:"required"`
-	IsOnlineOnly     bool                         `json:"isOnlineOnly"`
-	OfflinePushInfo  *open_im_sdk.OfflinePushInfo `json:"offlinePushInfo"`
+	ManagementSendMsg
+	RecvID string `json:"recvID" `
 }
 
 type ManagementSendMsgResp struct {
@@ -61,7 +65,7 @@ type ManagementSendMsgResp struct {
 }
 
 type ManagementBatchSendMsgReq struct {
-	ManagementSendMsgReq
+	ManagementSendMsg
 	RecvIDList []string `json:"recvIDList"`
 }
 

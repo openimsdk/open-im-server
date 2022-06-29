@@ -127,6 +127,18 @@ func BatchSetConversations(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 获取用户所有会话
+// @Description 获取用户所有会话
+// @Tags 会话相关
+// @ID GetAllConversations
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetAllConversationsReq true "ownerUserID为要获取的用户ID"
+// @Produce json
+// @Success 0 {object} api.GetAllConversationsResp
+// @Failure 500 {object} api.GetAllConversationsResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetAllConversationsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /msg/get_all_conversations [post]
 func GetAllConversations(c *gin.Context) {
 	var (
 		req   api.GetAllConversationsReq
@@ -165,6 +177,18 @@ func GetAllConversations(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 根据会话ID获取会话
+// @Description 根据会话ID获取会话
+// @Tags 会话相关
+// @ID GetConversation
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetConversationReq true "ownerUserID为要获取的用户ID<br>conversationID为要获取的会话ID"
+// @Produce json
+// @Success 0 {object} api.GetConversationResp
+// @Failure 500 {object} api.GetConversationResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetConversationResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /msg/get_conversation [post]
 func GetConversation(c *gin.Context) {
 	var (
 		req   api.GetConversationReq
@@ -203,6 +227,18 @@ func GetConversation(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 根据会话ID列表获取会话
+// @Description 根据会话ID列表获取会话
+// @Tags 会话相关
+// @ID GetConversations
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetConversationsReq true "ownerUserID为要获取的用户ID<br>conversationIDs为要获取的会话ID列表"
+// @Produce json
+// @Success 0 {object} api.GetConversationsResp
+// @Failure 500 {object} api.GetConversationsResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.GetConversationsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /msg/get_conversations [post]
 func GetConversations(c *gin.Context) {
 	var (
 		req   api.GetConversationsReq

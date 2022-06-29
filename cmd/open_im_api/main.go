@@ -29,6 +29,13 @@ import (
 	"Open_IM/pkg/common/constant"
 )
 
+// @title open-IM-Server API
+// @version 1.0
+// @description  open-IM-Server 的API服务器文档, 文档中所有请求都有一个operationID字段用于链路追踪
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @BasePath /
 func main() {
 	log.NewPrivateLog(constant.LogFileName)
 	gin.SetMode(gin.ReleaseMode)
