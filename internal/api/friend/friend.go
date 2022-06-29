@@ -22,11 +22,11 @@ import (
 // @ID AddBlack
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.AddBlacklistReq true "fromUserID为设置的用户, toUserID为被设置的用户"
+// @Param req body api.AddBlacklistReq true "fromUserID为设置的用户 <br> toUserID为被设置的用户"
 // @Produce json
 // @Success 0 {object} api.AddBlacklistResp
-// @Failure 500 {object} api.AddBlacklistResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.AddBlacklistResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/add_black [post]
 func AddBlack(c *gin.Context) {
 	params := api.AddBlacklistReq{}
@@ -43,7 +43,7 @@ func AddBlack(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	log.NewInfo(params.OperationID, "AddBlacklist args ", req.String())
@@ -67,11 +67,11 @@ func AddBlack(c *gin.Context) {
 // @ID ImportFriend
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.ImportFriendReq true "fromUserID批量加好友的用户ID, friendUserIDList为"
+// @Param req body api.ImportFriendReq true "fromUserID批量加好友的用户ID<br> friendUserIDList为"
 // @Produce json
-// @Success 0 {object} api.ImportFriendResp "data列表中对象的result-1为添加该用户失败, 0为成功"
-// @Failure 500 {object} api.ImportFriendResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.ImportFriendResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Success 0 {object} api.ImportFriendResp "data列表中对象的result-1为添加该用户失败<br>0为成功"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/import_friend [post]
 func ImportFriend(c *gin.Context) {
 	params := api.ImportFriendReq{}
@@ -88,7 +88,7 @@ func ImportFriend(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -127,11 +127,11 @@ func ImportFriend(c *gin.Context) {
 // @ID AddFriend
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.AddFriendReq true "reqMsg为申请信息, fromUserID为申请用户, toUserID为被添加用户"
+// @Param req body api.AddFriendReq true "reqMsg为申请信息 <br> fromUserID为申请用户 <br> toUserID为被添加用户"
 // @Produce json
 // @Success 0 {object} api.AddFriendResp
-// @Failure 500 {object} api.AddFriendResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.AddFriendResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/add_friend [post]
 func AddFriend(c *gin.Context) {
 	params := api.AddFriendReq{}
@@ -182,11 +182,11 @@ func AddFriend(c *gin.Context) {
 // @ID AddFriendResponse
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.AddFriendResponseReq true "fromUserID同意/拒绝的用户ID, toUserID为申请用户, handleMsg为处理信息, flag为具体操作, 1为同意, 2为拒绝"
+// @Param req body api.AddFriendResponseReq true "fromUserID同意/拒绝的用户ID<br>toUserID为申请用户D<br>handleMsg为处理信息<br>flag为具体操作, 1为同意, 2为拒绝"
 // @Produce json
 // @Success 0 {object} api.AddFriendResponseResp
-// @Failure 500 {object} api.AddFriendResponseResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.AddFriendResponseResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/add_friend_response [post]
 func AddFriendResponse(c *gin.Context) {
 	params := api.AddFriendResponseReq{}
@@ -240,11 +240,11 @@ func AddFriendResponse(c *gin.Context) {
 // @ID DeleteFriend
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.DeleteFriendReq true "fromUserID为操作用户, toUserID为被删除用户"
+// @Param req body api.DeleteFriendReq true "fromUserID为操作用户<br>toUserID为被删除用户"
 // @Produce json
 // @Success 0 {object} api.DeleteFriendResp
-// @Failure 500 {object} api.DeleteFriendResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.DeleteFriendResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/delete_friend [post]
 func DeleteFriend(c *gin.Context) {
 	params := api.DeleteFriendReq{}
@@ -262,7 +262,7 @@ func DeleteFriend(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -296,9 +296,9 @@ func DeleteFriend(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetBlackListReq true "fromUserID要获取黑名单的用户"
 // @Produce json
-// @Success 0 {object} api.GetBlackListResp
-// @Failure 500 {object} api.GetBlackListResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetBlackListResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Success 0 {object} api.GetBlackListResp{data=[]open_im_sdk.PublicUserInfo}
+// @Failure 500 {object} api.Swagger400Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger500Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/get_black_list [post]
 func GetBlacklist(c *gin.Context) {
 	params := api.GetBlackListReq{}
@@ -354,11 +354,11 @@ func GetBlacklist(c *gin.Context) {
 // @ID SetFriendRemark
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.SetFriendRemarkReq true "fromUserID为设置的用户, toUserID为被设置的用户， remark为好友备注"
+// @Param req body api.SetFriendRemarkReq true "fromUserID为设置的用户<br> toUserID为被设置的用户<br> remark为好友备注"
 // @Produce json
 // @Success 0 {object} api.SetFriendRemarkResp
-// @Failure 500 {object} api.SetFriendRemarkResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.SetFriendRemarkResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/set_friend_remark [post]
 func SetFriendRemark(c *gin.Context) {
 	params := api.SetFriendRemarkReq{}
@@ -377,7 +377,7 @@ func SetFriendRemark(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -412,8 +412,8 @@ func SetFriendRemark(c *gin.Context) {
 // @Param req body api.RemoveBlackListReq true "fromUserID要获取黑名单的用户"
 // @Produce json
 // @Success 0 {object} api.RemoveBlackListResp
-// @Failure 500 {object} api.RemoveBlackListResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.RemoveBlackListResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/remove_black [post]
 func RemoveBlack(c *gin.Context) {
 	params := api.RemoveBlackListReq{}
@@ -462,11 +462,11 @@ func RemoveBlack(c *gin.Context) {
 // @ID IsFriend
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.IsFriendReq true "fromUserID为请求用户, toUserID为要检查的用户"
+// @Param req body api.IsFriendReq true "fromUserID为请求用户<br> toUserID为要检查的用户"
 // @Produce json
 // @Success 0 {object} api.IsFriendResp
-// @Failure 500 {object} api.IsFriendResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.IsFriendResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/is_friend [post]
 func IsFriend(c *gin.Context) {
 	params := api.IsFriendReq{}
@@ -519,9 +519,9 @@ func IsFriend(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetFriendListReq true "fromUserID为要获取好友列表的用户ID"
 // @Produce json
-// @Success 0 {object} api.GetFriendListResp
-// @Failure 500 {object} api.GetFriendListResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetFriendListResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Success 0 {object} api.GetFriendListResp{data=[]open_im_sdk.FriendInfo}
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/get_friend_list [post]
 func GetFriendList(c *gin.Context) {
 	params := api.GetFriendListReq{}
@@ -539,7 +539,7 @@ func GetFriendList(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -575,9 +575,9 @@ func GetFriendList(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetFriendApplyListReq true "fromUserID为要获取申请列表的用户ID"
 // @Produce json
-// @Success 0 {object} api.GetFriendApplyListResp
-// @Failure 500 {object} api.GetFriendApplyListResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetFriendApplyListResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Success 0 {object} api.GetFriendApplyListResp{data=[]open_im_sdk.FriendRequest}
+// @Failure 500 {object} api.Swagger400Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/get_friend_apply_list [post]
 func GetFriendApplyList(c *gin.Context) {
 	params := api.GetFriendApplyListReq{}
@@ -631,9 +631,9 @@ func GetFriendApplyList(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetSelfApplyListReq true "fromUserID为自己的用户ID"
 // @Produce json
-// @Success 0 {object} api.GetSelfApplyListResp
-// @Failure 500 {object} api.GetSelfApplyListResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetSelfApplyListResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Success 0 {object} api.GetSelfApplyListResp{data=[]open_im_sdk.FriendRequest}
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /friend/get_self_friend_apply_list [post]
 func GetSelfFriendApplyList(c *gin.Context) {
 	params := api.GetSelfApplyListReq{}

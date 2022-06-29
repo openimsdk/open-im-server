@@ -155,9 +155,9 @@ func GetBlackIDListFromCache(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetUsersInfoReq true "请求体"
 // @Produce json
-// @Success 0 {object} api.GetUsersInfoResp
-// @Failure 500 {object} api.GetUsersInfoResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetUsersInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Success 0 {object} api.GetUsersInfoResp{Data=[]open_im_sdk.PublicUserInfo}
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_users_info [post]
 func GetUsersInfo(c *gin.Context) {
 	params := api.GetUsersInfoReq{}
@@ -216,8 +216,8 @@ func GetUsersInfo(c *gin.Context) {
 // @Param req body api.UpdateSelfUserInfoReq true "请求体"
 // @Produce json
 // @Success 0 {object} api.UpdateUserInfoResp
-// @Failure 500 {object} api.UpdateUserInfoResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.UpdateUserInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/update_user_info [post]
 func UpdateUserInfo(c *gin.Context) {
 	params := api.UpdateSelfUserInfoReq{}
@@ -264,11 +264,11 @@ func UpdateUserInfo(c *gin.Context) {
 // @ID SetGlobalRecvMessageOpt
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.SetGlobalRecvMessageOptReq true "请求体"
+// @Param req body api.SetGlobalRecvMessageOptReq true "globalRecvMsgOpt为全局免打扰设置0为关闭 1为开启"
 // @Produce json
 // @Success 0 {object} api.SetGlobalRecvMessageOptResp
-// @Failure 500 {object} api.SetGlobalRecvMessageOptResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.SetGlobalRecvMessageOptResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/set_global_msg_recv_opt [post]
 func SetGlobalRecvMessageOpt(c *gin.Context) {
 	params := api.SetGlobalRecvMessageOptReq{}
@@ -318,8 +318,8 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 // @Param req body api.GetSelfUserInfoReq true "请求体"
 // @Produce json
 // @Success 0 {object} api.GetSelfUserInfoResp{data=open_im_sdk.UserInfo}
-// @Failure 500 {object} api.GetSelfUserInfoResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetSelfUserInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_self_user_info [post]
 func GetSelfUserInfo(c *gin.Context) {
 	params := api.GetSelfUserInfoReq{}
@@ -381,8 +381,8 @@ func GetSelfUserInfo(c *gin.Context) {
 // @Param req body api.GetUsersOnlineStatusReq true "请求体"
 // @Produce json
 // @Success 0 {object} api.GetUsersOnlineStatusResp
-// @Failure 500 {object} api.GetUsersOnlineStatusResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetUsersOnlineStatusResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_users_online_status [post]
 func GetUsersOnlineStatus(c *gin.Context) {
 	params := api.GetUsersOnlineStatusReq{}

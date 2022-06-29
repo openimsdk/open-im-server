@@ -60,7 +60,7 @@ type GetBlackListReq struct {
 type GetBlackListResp struct {
 	CommResp
 	BlackUserInfoList []*open_im_sdk.PublicUserInfo `json:"-"`
-	Data              []map[string]interface{}      `json:"data"`
+	Data              []map[string]interface{}      `json:"data" swaggerignore:"true"`
 }
 
 //type PublicUserInfo struct {
@@ -102,7 +102,7 @@ type GetFriendsInfoReq struct {
 type GetFriendsInfoResp struct {
 	CommResp
 	FriendInfoList []*open_im_sdk.FriendInfo `json:"-"`
-	Data           []map[string]interface{}  `json:"data"`
+	Data           []map[string]interface{}  `json:"data" swaggerignore:"true"`
 }
 
 type GetFriendListReq struct {
@@ -112,7 +112,7 @@ type GetFriendListReq struct {
 type GetFriendListResp struct {
 	CommResp
 	FriendInfoList []*open_im_sdk.FriendInfo `json:"-"`
-	Data           []map[string]interface{}  `json:"data"`
+	Data           []map[string]interface{}  `json:"data" swaggerignore:"true"`
 }
 
 type GetFriendApplyListReq struct {
@@ -122,7 +122,7 @@ type GetFriendApplyListReq struct {
 type GetFriendApplyListResp struct {
 	CommResp
 	FriendRequestList []*open_im_sdk.FriendRequest `json:"-"`
-	Data              []map[string]interface{}     `json:"data"`
+	Data              []map[string]interface{}     `json:"data" swaggerignore:"true"`
 }
 
 type GetSelfApplyListReq struct {
@@ -132,5 +132,5 @@ type GetSelfApplyListReq struct {
 type GetSelfApplyListResp struct {
 	CommResp
 	FriendRequestList []*open_im_sdk.FriendRequest `json:"-"`
-	Data              []map[string]interface{}     `json:"data"`
+	Data              []map[string]interface{}     `json:"data" swaggerignore:"true"`
 }

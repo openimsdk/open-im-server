@@ -59,7 +59,6 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 		OperationID: params.OperationID,
 		MsgData: &open_im_sdk.MsgData{
 			SendID:           params.SendID,
-			RecvID:           params.RecvID,
 			GroupID:          params.GroupID,
 			ClientMsgID:      utils.GetMsgID(params.SendID),
 			SenderPlatformID: params.SenderPlatformID,
@@ -69,6 +68,7 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 			MsgFrom:          constant.SysMsgType,
 			ContentType:      params.ContentType,
 			Content:          []byte(newContent),
+			RecvID:           params.RecvID,
 			//	ForceList:        params.ForceList,
 			CreateTime:      utils.GetCurrentTimestampByMill(),
 			Options:         options,
@@ -89,6 +89,20 @@ func init() {
 	validate = validator.New()
 }
 
+// @Summary 管理员发送/撤回消息
+// @Description 管理员发送/撤回消息 消息格式详细见<a href="https://doc.rentsoft.cn/#/server_doc/admin?id=%e6%b6%88%e6%81%af%e7%b1%bb%e5%9e%8b%e6%a0%bc%e5%bc%8f%e6%8f%8f%e8%bf%b0">消息格式</href>
+// @Tags 消息相关
+// @ID ManagementSendMsg
+// @Accept json
+// @Param token header string true "im token"
+// @Param 管理员发送文字消息 body api.ManagementSendMsgReq{content=TextElem{}} true "该请求和消息结构体一样"
+// @Param 管理员发送OA通知消息 body api.ManagementSendMsgReq{content=OANotificationElem{}} true "该请求和消息结构体一样"
+// @Param 管理员撤回单聊消息 body api.ManagementSendMsgReq{content=RevokeElem{}} true "该请求和消息结构体一样"
+// @Produce json
+// @Success 0 {object} api.ManagementSendMsgResp "serverMsgID为服务器消息ID <br> clientMsgID为客户端消息ID <br> sendTime为发送消息时间"
+// @Failure 500 {object} api.ManagementSendMsgResp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.ManagementSendMsgResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /msg/manage_send_msg [post]
 func ManagementSendMsg(c *gin.Context) {
 	var data interface{}
 	params := api.ManagementSendMsgReq{}
@@ -194,6 +208,19 @@ func ManagementSendMsg(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 管理员批量发送群聊单聊消息
+// @Description 管理员批量发送群聊单聊消息 消息格式详细见<a href="https://doc.rentsoft.cn/#/server_doc/admin?id=%e6%b6%88%e6%81%af%e7%b1%bb%e5%9e%8b%e6%a0%bc%e5%bc%8f%e6%8f%8f%e8%bf%b0">消息格式</href>
+// @Tags 消息相关
+// @ID ManagementBatchSendMsg
+// @Accept json
+// @Param token header string true "im token"
+// @Param 管理员批量发送单聊消息 body api.ManagementBatchSendMsgReq{content=TextElem{}} true "该请求和消息结构体一样 <br> recvIDList为接受消息的用户ID列表"
+// @Param 管理员批量发送OA通知 body api.ManagementSendMsgReq{content=OANotificationElem{}} true "该请求和消息结构体一样 <br> recvIDList为接受消息的用户ID列表"
+// @Produce json
+// @Success 0 {object} api.ManagementBatchSendMsgReq "serverMsgID为服务器消息ID <br> clientMsgID为客户端消息ID <br> sendTime为发送消息时间"
+// @Failure 500 {object} api.ManagementBatchSendMsgReq "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.ManagementBatchSendMsgReq "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /msg/batch_send_msg [post]
 func ManagementBatchSendMsg(c *gin.Context) {
 	var data interface{}
 	params := api.ManagementBatchSendMsgReq{}
@@ -260,7 +287,11 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	}
 	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
 	for _, recvID := range params.RecvIDList {
-		pbData := newUserSendMsgReq(&params.ManagementSendMsgReq)
+		req := &api.ManagementSendMsgReq{
+			ManagementSendMsg: params.ManagementSendMsg,
+			RecvID:            recvID,
+		}
+		pbData := newUserSendMsgReq(req)
 		pbData.MsgData.RecvID = recvID
 		log.Info(params.OperationID, "", "api ManagementSendMsg call start..., ", pbData.String())
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, params.OperationID)

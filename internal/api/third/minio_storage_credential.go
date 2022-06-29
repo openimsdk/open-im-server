@@ -28,13 +28,13 @@ import (
 // @Param operationID formData string true "操作唯一ID"
 // @Produce json
 // @Success 0 {object} api.MinioUploadFileResp ""
-// @Failure 500 {object} api.MinioUploadFileResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.MinioUploadFileResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /third/minio_upload [post]
 func MinioUploadFile(c *gin.Context) {
 	var (
 		req  api.MinioUploadFileReq
-		resp api.MinioUploadFileResp
+		resp api.MinioUploadFile
 	)
 	defer func() {
 		if r := recover(); r != nil {

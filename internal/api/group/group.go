@@ -29,8 +29,8 @@ import (
 // @Param req body api.KickGroupMemberReq true "GroupID为要操作的群ID <br> kickedUserIDList为要踢出的群用户ID <br> reason为原因"
 // @Produce json
 // @Success 0 {object} api.KickGroupMemberResp "result为结果码, -1为失败, 0为成功"
-// @Failure 500 {object} api.KickGroupMemberResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.KickGroupMemberResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/kick_group [post]
 func KickGroupMember(c *gin.Context) {
 	params := api.KickGroupMemberReq{}
@@ -49,7 +49,7 @@ func KickGroupMember(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -90,11 +90,11 @@ func KickGroupMember(c *gin.Context) {
 // @ID GetGroupMembersInfo
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.GetGroupMembersInfoReq true "memberList为要获取群成员的群ID列表"
+// @Param req body api.GetGroupMembersInfoReq true "groupID为要获取的群ID <br> memberList为要获取群成员的群ID列表"
 // @Produce json
 // @Success 0 {object} api.GetGroupMembersInfoResp{data=[]open_im_sdk.GroupMemberFullInfo}
-// @Failure 500 {object} api.GetGroupMembersInfoResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetGroupMembersInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/get_group_members_info [post]
 func GetGroupMembersInfo(c *gin.Context) {
 	params := api.GetGroupMembersInfoReq{}
@@ -112,7 +112,7 @@ func GetGroupMembersInfo(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -156,7 +156,7 @@ func GetGroupMemberList(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -194,8 +194,8 @@ func GetGroupMemberList(c *gin.Context) {
 // @Param req body api.GetGroupAllMemberReq true "GroupID为要获取群成员的群ID"
 // @Produce json
 // @Success 0 {object} api.GetGroupAllMemberResp{data=[]open_im_sdk.GroupMemberFullInfo}
-// @Failure 500 {object} api.GetGroupAllMemberResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetGroupAllMemberResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/get_group_all_member_list [post]
 func GetGroupAllMemberList(c *gin.Context) {
 	params := api.GetGroupAllMemberReq{}
@@ -213,7 +213,7 @@ func GetGroupAllMemberList(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -249,8 +249,8 @@ func GetGroupAllMemberList(c *gin.Context) {
 // @Param req body api.GetJoinedGroupListReq true "fromUserID为要获取的用户ID"
 // @Produce json
 // @Success 0 {object} api.GetJoinedGroupListResp{data=[]open_im_sdk.GroupInfo}
-// @Failure 500 {object} api.GetJoinedGroupListResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetJoinedGroupListResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/get_joined_group_list [post]
 func GetJoinedGroupList(c *gin.Context) {
 	params := api.GetJoinedGroupListReq{}
@@ -268,7 +268,7 @@ func GetJoinedGroupList(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -304,8 +304,8 @@ func GetJoinedGroupList(c *gin.Context) {
 // @Param req body api.InviteUserToGroupReq true "groupID为要拉进的群组ID <br> invitedUserIDList为要获取群成员的群ID列表 <br> reason为原因"
 // @Produce json
 // @Success 0 {object} api.InviteUserToGroupResp "result为结果码, -1为失败, 0为成功""
-// @Failure 500 {object} api.InviteUserToGroupResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.InviteUserToGroupResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/invite_user_to_group [post]
 func InviteUserToGroup(c *gin.Context) {
 	params := api.InviteUserToGroupReq{}
@@ -323,7 +323,7 @@ func InviteUserToGroup(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -363,11 +363,11 @@ func InviteUserToGroup(c *gin.Context) {
 // @ID CreateGroup
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.CreateGroupReq true "ownerUserID为群主ID <br> ex为群扩展字段 <br> roleLevel为群员角色,1为普通用户 2为群主 3为管理员"
+// @Param req body api.CreateGroupReq true "groupType这里填0代表普通群 <br>groupName为群名称<br> introduction为群介绍<br> notification为群公共<br>ownerUserID为群主ID <br> ex为群扩展字段 <br> memberList中对象roleLevel为群员角色,1为普通用户 2为群主 3为管理员"
 // @Produce json
 // @Success 0 {object} api.CreateGroupResp{data=open_im_sdk.GroupInfo}
-// @Failure 500 {object} api.CreateGroupResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.CreateGroupResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/create_group [post]
 func CreateGroup(c *gin.Context) {
 	params := api.CreateGroupReq{}
@@ -431,9 +431,9 @@ func CreateGroup(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetGroupApplicationListReq true "fromUserID为要获取的用户ID"
 // @Produce json
-// @Success 0 {object} api.GetGroupApplicationListResp
-// @Failure 500 {object} api.GetGroupApplicationListResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetGroupApplicationListResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Success 0 {object} api.GetGroupApplicationListResp{data=[]open_im_sdk.GroupRequest}
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/get_recv_group_applicationList [post]
 func GetRecvGroupApplicationList(c *gin.Context) {
 	params := api.GetGroupApplicationListReq{}
@@ -484,9 +484,9 @@ func GetRecvGroupApplicationList(c *gin.Context) {
 // @Param token header string true "im token"
 // @Param req body api.GetUserReqGroupApplicationListReq true "userID为要获取的用户ID"
 // @Produce json
-// @Success 0 {object} api.GetGroupApplicationListResp
-// @Failure 500 {object} api.GetGroupApplicationListResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetGroupApplicationListResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Success 0 {object} api.GetGroupApplicationListResp{data=[]open_im_sdk.GroupRequest}
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/get_user_req_group_applicationList [post]
 func GetUserReqGroupApplicationList(c *gin.Context) {
 	var params api.GetUserReqGroupApplicationListReq
@@ -537,8 +537,8 @@ func GetUserReqGroupApplicationList(c *gin.Context) {
 // @Param req body api.GetGroupInfoReq true "groupIDList为群ID列表"
 // @Produce json
 // @Success 0 {object} api.GetGroupInfoResp
-// @Failure 500 {object} api.GetGroupInfoResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetGroupInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/get_groups_info [post]
 func GetGroupsInfo(c *gin.Context) {
 	params := api.GetGroupInfoReq{}
@@ -556,7 +556,7 @@ func GetGroupsInfo(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -606,8 +606,8 @@ func GetGroupsInfo(c *gin.Context) {
 // @Param req body api.ApplicationGroupResponseReq true "groupID为要处理的群ID <br> fromUserID为要处理的用户ID <br> handleMsg为处理结果信息 <br> handleResult为处理结果 1为同意加群 2为拒绝加群"
 // @Produce json
 // @Success 0 {object} api.ApplicationGroupResponseResp
-// @Failure 500 {object} api.ApplicationGroupResponseResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.ApplicationGroupResponseResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/group_application_response [post]
 func ApplicationGroupResponse(c *gin.Context) {
 	params := api.ApplicationGroupResponseReq{}
@@ -625,7 +625,7 @@ func ApplicationGroupResponse(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -657,11 +657,11 @@ func ApplicationGroupResponse(c *gin.Context) {
 // @ID JoinGroup
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.JoinGroupReq true "reqMessage为申请进群信息"
+// @Param req body api.JoinGroupReq true "reqMessage为申请进群信息<br>groupID为申请的群ID"
 // @Produce json
 // @Success 0 {object} api.JoinGroupResp
-// @Failure 500 {object} api.JoinGroupResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.JoinGroupResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/join_group [post]
 func JoinGroup(c *gin.Context) {
 	params := api.JoinGroupReq{}
@@ -704,8 +704,8 @@ func JoinGroup(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// @Summary 退出群聊
-// @Description 退出群聊
+// @Summary 当前用户退出群聊
+// @Description 当前用户退出群聊
 // @Tags 群组相关
 // @ID QuitGroup
 // @Accept json
@@ -713,8 +713,8 @@ func JoinGroup(c *gin.Context) {
 // @Param req body api.QuitGroupReq true "groupID为要退出的群ID"
 // @Produce json
 // @Success 0 {object} api.QuitGroupResp
-// @Failure 500 {object} api.QuitGroupResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.QuitGroupResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/quit_group [post]
 func QuitGroup(c *gin.Context) {
 	params := api.QuitGroupReq{}
@@ -732,7 +732,7 @@ func QuitGroup(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -763,11 +763,11 @@ func QuitGroup(c *gin.Context) {
 // @ID SetGroupInfo
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.SetGroupInfoReq true "notification为群介绍 <br> introduction为群公告 <br> needVerification为加群验证 0为申请需要同意 邀请直接进 1为所有人进群需要验证，除了群主管理员邀请进群 2为直接进群"
+// @Param req body api.SetGroupInfoReq true "groupID为要修改的群ID<br>groupName为新的群名称<br>notification为群介绍 <br> introduction为群公告 <br> needVerification为加群验证 0为申请需要同意 邀请直接进 1为所有人进群需要验证，除了群主管理员邀请进群 2为直接进群"
 // @Produce json
 // @Success 0 {object} api.SetGroupInfoResp
-// @Failure 500 {object} api.SetGroupInfoResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.SetGroupInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/set_group_info [post]
 func SetGroupInfo(c *gin.Context) {
 	params := api.SetGroupInfoReq{}
@@ -791,7 +791,7 @@ func SetGroupInfo(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -825,8 +825,8 @@ func SetGroupInfo(c *gin.Context) {
 // @Param req body api.TransferGroupOwnerReq true "GroupID为要操作的群ID <br> oldOwnerUserID为老群主ID <br> newOwnerUserID为新群主ID"
 // @Produce json
 // @Success 0 {object} api.TransferGroupOwnerResp
-// @Failure 500 {object} api.TransferGroupOwnerResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.TransferGroupOwnerResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/transfer_group [post]
 func TransferGroupOwner(c *gin.Context) {
 	params := api.TransferGroupOwnerReq{}
@@ -844,7 +844,7 @@ func TransferGroupOwner(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -879,8 +879,8 @@ func TransferGroupOwner(c *gin.Context) {
 // @Param req body api.DismissGroupReq true "groupID为要解散的群组ID"
 // @Produce json
 // @Success 0 {object} api.DismissGroupResp
-// @Failure 500 {object} api.DismissGroupResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.DismissGroupResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/dismiss_group [post]
 func DismissGroup(c *gin.Context) {
 	params := api.DismissGroupReq{}
@@ -898,7 +898,7 @@ func DismissGroup(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -933,8 +933,8 @@ func DismissGroup(c *gin.Context) {
 // @Param req body api.MuteGroupMemberReq true "groupID为群组ID <br> userID为要禁言的用户ID <br> mutedSeconds为禁言秒数"
 // @Produce json
 // @Success 0 {object} api.DismissGroupResp
-// @Failure 500 {object} api.DismissGroupResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.DismissGroupResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/mute_group_member [post]
 func MuteGroupMember(c *gin.Context) {
 	params := api.MuteGroupMemberReq{}
@@ -952,7 +952,7 @@ func MuteGroupMember(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -987,8 +987,8 @@ func MuteGroupMember(c *gin.Context) {
 // @Param req body api.CancelMuteGroupMemberReq true "groupID为群组ID <br> userID为要取消禁言的用户ID"
 // @Produce json
 // @Success 0 {object} api.CancelMuteGroupMemberResp
-// @Failure 500 {object} api.CancelMuteGroupMemberResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.CancelMuteGroupMemberResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/cancel_mute_group_member [post]
 func CancelMuteGroupMember(c *gin.Context) {
 	params := api.CancelMuteGroupMemberReq{}
@@ -1006,7 +1006,7 @@ func CancelMuteGroupMember(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -1060,7 +1060,7 @@ func MuteGroup(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
 		return
 	}
 
@@ -1095,8 +1095,8 @@ func MuteGroup(c *gin.Context) {
 // @Param req body api.CancelMuteGroupReq true "groupID为群组ID"
 // @Produce json
 // @Success 0 {object} api.CancelMuteGroupResp
-// @Failure 500 {object} api.CancelMuteGroupResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.CancelMuteGroupResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/cancel_mute_group [post]
 func CancelMuteGroup(c *gin.Context) {
 	params := api.CancelMuteGroupReq{}
@@ -1114,7 +1114,7 @@ func CancelMuteGroup(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -1158,7 +1158,7 @@ func SetGroupMemberNickname(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
@@ -1190,11 +1190,11 @@ func SetGroupMemberNickname(c *gin.Context) {
 // @ID SetGroupMemberInfo
 // @Accept json
 // @Param token header string true "im token"
-// @Param req body api.SetGroupMemberInfoReq true "除了operationID, userID, groupID其他参数可选"
+// @Param req body api.SetGroupMemberInfoReq true "除了operationID, userID, groupID其他参数可选<br>ex为拓展字段<br>faceURL为群头像<br>nickName为群昵称<br>roleLevel为群员角色,1为普通用户 2为群主 3为管理员"
 // @Produce json
 // @Success 0 {object} api.SetGroupMemberInfoResp
-// @Failure 500 {object} api.SetGroupMemberInfoResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.SetGroupMemberInfoResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/set_group_member_info [post]
 func SetGroupMemberInfo(c *gin.Context) {
 	var (
@@ -1212,7 +1212,7 @@ func SetGroupMemberInfo(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 

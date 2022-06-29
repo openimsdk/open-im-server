@@ -33,7 +33,7 @@ type GetGroupMembersInfoReq struct {
 type GetGroupMembersInfoResp struct {
 	CommResp
 	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
-	Data       []map[string]interface{}           `json:"data"`
+	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
 }
 
 type InviteUserToGroupReq struct {
@@ -54,7 +54,7 @@ type GetJoinedGroupListReq struct {
 type GetJoinedGroupListResp struct {
 	CommResp
 	GroupInfoList []*open_im_sdk.GroupInfo `json:"-"`
-	Data          []map[string]interface{} `json:"data"`
+	Data          []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
 type GetGroupMemberListReq struct {
@@ -67,7 +67,7 @@ type GetGroupMemberListResp struct {
 	CommResp
 	NextSeq    int32                              `json:"nextSeq"`
 	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
-	Data       []map[string]interface{}           `json:"data"`
+	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
 }
 
 type GetGroupAllMemberReq struct {
@@ -77,7 +77,7 @@ type GetGroupAllMemberReq struct {
 type GetGroupAllMemberResp struct {
 	CommResp
 	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
-	Data       []map[string]interface{}           `json:"data"`
+	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
 }
 
 type CreateGroupReq struct {
@@ -105,7 +105,7 @@ type GetGroupApplicationListReq struct {
 type GetGroupApplicationListResp struct {
 	CommResp
 	GroupRequestList []*open_im_sdk.GroupRequest `json:"-"`
-	Data             []map[string]interface{}    `json:"data"`
+	Data             []map[string]interface{}    `json:"data" swaggerignore:"true"`
 }
 
 type GetUserReqGroupApplicationListReq struct {
@@ -125,7 +125,7 @@ type GetGroupInfoReq struct {
 type GetGroupInfoResp struct {
 	CommResp
 	GroupInfoList []*open_im_sdk.GroupInfo `json:"-"`
-	Data          []map[string]interface{} `json:"data"`
+	Data          []map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
 //type GroupInfoAlias struct {
