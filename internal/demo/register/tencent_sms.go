@@ -22,7 +22,6 @@ func (t TencentSMS) SendSms(code int, phoneNumber string) (resp interface{}, err
 	request.TemplateId = common.StringPtr(config.Config.Demo.TencentSMS.VerificationCodeTemplateCode)
 	request.TemplateParamSet = common.StringPtrs([]string{utils.IntToString(code)})
 	request.PhoneNumberSet = common.StringPtrs([]string{phoneNumber})
-	//+971588232183
 	// 通过client对象调用想要访问的接口，需要传入请求对象
 	response, err := t.client.SendSms(request)
 	// 非SDK异常，直接失败。实际代码中可以加入其他的处理。

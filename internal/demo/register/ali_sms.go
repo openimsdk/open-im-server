@@ -51,7 +51,6 @@ func createClient(accessKeyId *string, accessKeySecret *string) (result *dysmsap
 		// 您的AccessKey Secret
 		AccessKeySecret: accessKeySecret,
 	}
-
 	// 访问的域名
 	c.Endpoint = tea.String("dysmsapi.aliyuncs.com")
 	result = &dysmsapi20170525.Client{}
