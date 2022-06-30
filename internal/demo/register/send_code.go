@@ -118,7 +118,7 @@ func SendVerificationCode(c *gin.Context) {
 			return
 		}
 	}
-
+	log.Debug(params.OperationID, "send sms success", code, accountKey)
 	data := make(map[string]interface{})
 	data["account"] = account
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "Verification code has been set!", "data": data})
