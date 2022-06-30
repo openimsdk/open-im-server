@@ -2,7 +2,9 @@ package register
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
+	"encoding/json"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
@@ -31,6 +33,8 @@ func (t TencentSMS) SendSms(code int, phoneNumber string) (resp interface{}, err
 	if _, ok := err.(*errors.TencentCloudSDKError); ok {
 		return response, err
 	}
+	b, _ := json.Marshal(response.Response)
+	log.Debug("tencent send message is ", code, phoneNumber, string(b))
 	return response, nil
 }
 
