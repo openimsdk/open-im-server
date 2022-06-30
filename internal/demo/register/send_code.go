@@ -18,7 +18,7 @@ var sms SMS
 
 func init() {
 	var err error
-	if config.Config.Demo.TencentSMS.Enable {
+	if config.Config.Demo.AliSMSVerify.Enable {
 		sms, err = NewAliSMS()
 		if err != nil {
 			panic(err)
