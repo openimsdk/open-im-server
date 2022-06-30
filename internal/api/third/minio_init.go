@@ -7,6 +7,7 @@ import (
 	"context"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/minio/minio-go/v7/pkg/policy"
 	url2 "net/url"
 )
 
@@ -78,11 +79,11 @@ func MinioInit() {
 		}
 	}
 	// 自动化桶public的代码
-	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
-	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
-	//if err != nil {
-	//	log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
-	//	return
-	//}
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
+	if err != nil {
+		log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+		return
+	}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio create and set policy success")
 }
