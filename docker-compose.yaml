@@ -29,8 +29,8 @@ services:
       - TZ=Asia/Shanghai
       # cache
       - wiredTigerCacheSizeGB=1
-      - MONGO_INITDB_ROOT_USERNAME=openIM
-      - MONGO_INITDB_ROOT_PASSWORD=openIM
+      #- MONGO_INITDB_ROOT_USERNAME=openIM
+      #- MONGO_INITDB_ROOT_PASSWORD=openIM
       #TZ: Asia/Shanghai
     restart: always
 
