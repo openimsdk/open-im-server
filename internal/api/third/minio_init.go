@@ -80,10 +80,23 @@ func MinioInit() {
 	}
 	// 自动化桶public的代码
 	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
+	if err != nil {
+		log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+	}
 	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
 	if err != nil {
-		log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
-		return
+		log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
 	}
+	policyType, err := MinioClient.GetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket)
+	if err != nil {
+		log.NewInfo("", utils.GetSelfFuncName(), err.Error())
+	}
+	log.NewInfo("", utils.GetSelfFuncName(), "policy: ", policyType)
+	policyType, err = MinioClient.GetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket)
+	if err != nil {
+		log.NewInfo("", utils.GetSelfFuncName(), err.Error())
+	}
+	log.NewInfo("", utils.GetSelfFuncName(), "policy: ", policyType)
+
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio create and set policy success")
 }
