@@ -47,7 +47,7 @@ func SetPassword(c *gin.Context) {
 		params.Nickname = account
 	}
 	if params.VerificationCode != config.Config.Demo.SuperCode {
-		accountKey := account + "_" + constant.VerificationCodeForRegisterSuffix
+		accountKey := params.AreaCode + account + "_" + constant.VerificationCodeForRegisterSuffix
 		v, err := db.DB.GetAccountCode(accountKey)
 		if err != nil || v != params.VerificationCode {
 			log.NewError(params.OperationID, "password Verification code error", account, params.VerificationCode)

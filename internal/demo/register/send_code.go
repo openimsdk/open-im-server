@@ -110,7 +110,7 @@ func SendVerificationCode(c *gin.Context) {
 		//	TemplateCode:  tea.String(config.Config.Demo.AliSMSVerify.VerificationCodeTemplateCode),
 		//	TemplateParam: tea.String(fmt.Sprintf("{\"code\":\"%d\"}", code)),
 		//}
-		response, err := sms.SendSms(code, accountKey)
+		response, err := sms.SendSms(code, params.AreaCode+params.PhoneNumber)
 		//response, err := client.SendSms(sendSmsRequest)
 		if err != nil {
 			log.NewError(params.OperationID, "sendSms error", account, "err", err.Error(), response)
