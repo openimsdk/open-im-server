@@ -426,7 +426,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 	case constant.SuperGroupChatType:
 		// callback
-		callbackResp := callbackBeforeSendSingleMsg(pb)
+		callbackResp := callbackBeforeSendGroupMsg(pb)
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSuperGroupMsg resp: ", callbackResp)
 		}
