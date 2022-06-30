@@ -79,11 +79,11 @@ func MinioInit() {
 		}
 	}
 	// 自动化桶public的代码
-	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, "public")
 	if err != nil {
 		log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
 	}
-	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, "public")
 	if err != nil {
 		log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
 	}
