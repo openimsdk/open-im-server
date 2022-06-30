@@ -64,16 +64,16 @@ func SendVerificationCode(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": "The phone number has been registered"})
 			return
 		}
+		accountKey = accountKey + "_" + constant.VerificationCodeForRegisterSuffix
 		ok, err := db.DB.JudgeAccountEXISTS(accountKey)
 		if ok || err != nil {
-			log.NewError(params.OperationID, "The phone number has been registered", params)
-			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "The phone number has been registered"})
+			log.NewError(params.OperationID, "Repeat send code", params)
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "Repeat send code"})
 			return
 		}
-		accountKey += "_" + constant.VerificationCodeForRegisterSuffix
 
 	case constant.VerificationCodeForReset:
-		accountKey += "_" + constant.VerificationCodeForResetSuffix
+		accountKey = accountKey + "_" + constant.VerificationCodeForResetSuffix
 	}
 	rand.Seed(time.Now().UnixNano())
 	code := 100000 + rand.Intn(900000)
@@ -84,7 +84,7 @@ func SendVerificationCode(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.SmsSendCodeErr, "errMsg": "Enter the superCode directly in the verification code box, SuperCode can be configured in config.xml"})
 		return
 	}
-	log.NewDebug("", config.Config.Demo)
+	log.NewDebug(params.OperationID, config.Config.Demo)
 	if params.Email != "" {
 		m := gomail.NewMessage()
 		m.SetHeader(`From`, config.Config.Demo.Mail.SenderMail)
