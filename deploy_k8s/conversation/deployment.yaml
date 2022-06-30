@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: conversation
-          image: openim/conversation:v2.0.10k
+          image: openim/conversation:v2.1.0
           # imagePullPolicy: Always
           ports:
             - containerPort: 10230
@@ -26,7 +26,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: config
+            name: openim-config
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 

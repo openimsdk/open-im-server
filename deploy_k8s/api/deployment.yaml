@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: api # 选择这个指定标签执行
-  replicas: 2 # 运行pod数量
+  replicas: 1 # 运行pod数量
   template:
     metadata:
       labels:
@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
       - name: api
-        image: openim/api:v2.0.10k
-        imagePullPolicy: Always
+        image: openim/api:v2.1.0
+        # imagePullPolicy: Always
         ports:
         - containerPort: 10002
         volumeMounts:
@@ -26,7 +26,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: config
+            name: openim-config
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 ---

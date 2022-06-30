@@ -5,7 +5,7 @@
 
 ### 2. 项目根目录创建im configMap到k8s openim namespace
 kubectl create namespace openim
-kubectl -n openim create configmap config --from-file=config/config.yaml
+kubectl -n openim create configmap openim-config --from-file=config/config.yaml
 openim 为im项目的namespace, 可选
 查看configmap
 kubectl -n openim get configmap
