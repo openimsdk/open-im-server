@@ -74,8 +74,8 @@ func DeleteUser(c *gin.Context) {
 // @Param req body api.GetAllUsersUidReq true "请求体"
 // @Produce json
 // @Success 0 {object} api.GetAllUsersUidResp
-// @Failure 500 {object} api.GetAllUsersUidResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetAllUsersUidResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_all_users_uid [post]
 func GetAllUsersUid(c *gin.Context) {
 	params := api.GetAllUsersUidReq{}
@@ -129,8 +129,8 @@ func GetAllUsersUid(c *gin.Context) {
 // @Param req body api.AccountCheckReq true "请求体"
 // @Produce json
 // @Success 0 {object} api.AccountCheckResp
-// @Failure 500 {object} api.AccountCheckResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.AccountCheckResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/account_check [post]
 func AccountCheck(c *gin.Context) {
 	params := api.AccountCheckReq{}

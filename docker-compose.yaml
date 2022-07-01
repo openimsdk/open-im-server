@@ -25,13 +25,16 @@ services:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
       - ./components/mongodb/data/conf:/etc/mongo
+#      - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
     environment:
       - TZ=Asia/Shanghai
       # cache
       - wiredTigerCacheSizeGB=1
-      #- MONGO_INITDB_ROOT_USERNAME=openIM
-      #- MONGO_INITDB_ROOT_PASSWORD=openIM
-      #TZ: Asia/Shanghai
+#      - MONGO_USERNAME=openIM
+#      - MONGO_PASSWORD=openIM
+#      - MONGO_INITDB_ROOT_USERNAME=root
+#      - MONGO_INITDB_ROOT_PASSWORD=root
+#      - MONGO_INITDB_DATABASE=openIM
     restart: always
 
   redis:
@@ -68,17 +71,16 @@ services:
     container_name: kafka
     restart: always
     ports:
-     - 9093:9093
+     - 9092:9092
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "ws2ms_chat:8:1,ms2ps_chat:8:1,msg_to_mongo:8:1"
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9093
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9092
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-    network_mode: "host"
     depends_on:
       - zookeeper
 
