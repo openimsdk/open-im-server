@@ -2360,13 +2360,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetAllConversationsResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetAllConversationsResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2414,13 +2414,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetConversationResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetConversationResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2468,13 +2468,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetConversationsResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetConversationsResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2630,13 +2630,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CommentOneWorkMomentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CommentOneWorkMomentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2684,13 +2684,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateOneWorkMomentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateOneWorkMomentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2738,13 +2738,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateTagResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateTagResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2792,13 +2792,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteCommentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteCommentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2846,13 +2846,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteOneWorkMomentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteOneWorkMomentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2900,13 +2900,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteTagResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteTagResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -2954,13 +2954,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetTagSendLogsResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetTagSendLogsResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3008,13 +3008,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserFriendWorkMomentsResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserFriendWorkMomentsResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3062,13 +3062,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserTagByIDResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserTagByIDResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3116,13 +3116,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserTagsResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserTagsResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3170,13 +3170,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserWorkMomentsResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserWorkMomentsResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3224,13 +3224,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetWorkMomentByIDResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetWorkMomentByIDResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3278,13 +3278,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.LikeOneWorkMomentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.LikeOneWorkMomentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3332,13 +3332,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.SendMsg2TagResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.SendMsg2TagResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3386,13 +3386,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.SetTagResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.SetTagResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3452,13 +3452,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3506,13 +3506,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateDepartmentMemberResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateDepartmentMemberResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3560,13 +3560,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateOrganizationUserResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.CreateOrganizationUserResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3614,13 +3614,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3668,13 +3668,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteOrganizationUserResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteOrganizationUserResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3722,13 +3722,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteUserInDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.DeleteUserInDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3778,7 +3778,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/server_api_params.UserDepartmentMember"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/server_api_params.UserDepartmentMember"
+                                            }
                                         }
                                     }
                                 }
@@ -3788,13 +3791,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetDepartmentMemberResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetDepartmentMemberResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3836,19 +3839,34 @@ const docTemplate = `{
                     "0": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetSubDepartmentResp"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/base_info.GetSubDepartmentResp"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/server_api_params.Department"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetSubDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetSubDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3908,13 +3926,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserInDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetUserInDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -3962,13 +3980,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.UpdateDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.UpdateDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -4016,13 +4034,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.UpdateOrganizationUserResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.UpdateOrganizationUserResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -4070,13 +4088,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.UpdateUserInDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.UpdateUserInDepartmentResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -4190,13 +4208,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.AccountCheckResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.AccountCheckResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -4244,13 +4262,13 @@ const docTemplate = `{
                     "400": {
                         "description": "errCode为400 一般为参数输入错误, token未带上等",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetAllUsersUidResp"
+                            "$ref": "#/definitions/base_info.Swagger400Resp"
                         }
                     },
                     "500": {
                         "description": "errCode为500 一般为服务器内部错误",
                         "schema": {
-                            "$ref": "#/definitions/base_info.GetAllUsersUidResp"
+                            "$ref": "#/definitions/base_info.Swagger500Resp"
                         }
                     }
                 }
@@ -5213,10 +5231,6 @@ const docTemplate = `{
         "base_info.CreateDepartmentResp": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "errCode": {
                     "type": "integer"
                 },
@@ -5869,13 +5883,6 @@ const docTemplate = `{
         "base_info.GetDepartmentMemberResp": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": true
-                    }
-                },
                 "errCode": {
                     "type": "integer"
                 },
@@ -6147,13 +6154,6 @@ const docTemplate = `{
         "base_info.GetSubDepartmentResp": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": true
-                    }
-                },
                 "errCode": {
                     "type": "integer"
                 },
@@ -6274,10 +6274,6 @@ const docTemplate = `{
         "base_info.GetUserInDepartmentResp": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
                 "errCode": {
                     "type": "integer"
                 },

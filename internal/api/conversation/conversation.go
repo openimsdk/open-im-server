@@ -136,8 +136,8 @@ func BatchSetConversations(c *gin.Context) {
 // @Param req body api.GetAllConversationsReq true "ownerUserID为要获取的用户ID"
 // @Produce json
 // @Success 0 {object} api.GetAllConversationsResp
-// @Failure 500 {object} api.GetAllConversationsResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetAllConversationsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /msg/get_all_conversations [post]
 func GetAllConversations(c *gin.Context) {
 	var (
@@ -186,8 +186,8 @@ func GetAllConversations(c *gin.Context) {
 // @Param req body api.GetConversationReq true "ownerUserID为要获取的用户ID<br>conversationID为要获取的会话ID"
 // @Produce json
 // @Success 0 {object} api.GetConversationResp
-// @Failure 500 {object} api.GetConversationResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetConversationResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /msg/get_conversation [post]
 func GetConversation(c *gin.Context) {
 	var (
@@ -236,8 +236,8 @@ func GetConversation(c *gin.Context) {
 // @Param req body api.GetConversationsReq true "ownerUserID为要获取的用户ID<br>conversationIDs为要获取的会话ID列表"
 // @Produce json
 // @Success 0 {object} api.GetConversationsResp
-// @Failure 500 {object} api.GetConversationsResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetConversationsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /msg/get_conversations [post]
 func GetConversations(c *gin.Context) {
 	var (

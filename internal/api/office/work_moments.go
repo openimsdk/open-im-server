@@ -24,8 +24,8 @@ import (
 // @Param req body api.CreateOneWorkMomentReq true "请求 atUserList likeUserList permissionGroupList permissionUserList 字段中userName可以不填"
 // @Produce json
 // @Success 0 {object} api.CreateOneWorkMomentResp
-// @Failure 500 {object} api.CreateOneWorkMomentResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.CreateOneWorkMomentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/create_one_work_moment [post]
 func CreateOneWorkMoment(c *gin.Context) {
 	var (
@@ -88,8 +88,8 @@ func CreateOneWorkMoment(c *gin.Context) {
 // @Param req body api.DeleteOneWorkMomentReq true "请求"
 // @Produce json
 // @Success 0 {object} api.DeleteOneWorkMomentResp
-// @Failure 500 {object} api.DeleteOneWorkMomentResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.DeleteOneWorkMomentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/delete_one_work_moment [post]
 func DeleteOneWorkMoment(c *gin.Context) {
 	var (
@@ -151,8 +151,8 @@ func DeleteOneWorkMoment(c *gin.Context) {
 // @Param req body api.LikeOneWorkMomentReq true "请求"
 // @Produce json
 // @Success 0 {object} api.LikeOneWorkMomentResp
-// @Failure 500 {object} api.LikeOneWorkMomentResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.LikeOneWorkMomentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/like_one_work_moment [post]
 func LikeOneWorkMoment(c *gin.Context) {
 	var (
@@ -213,8 +213,8 @@ func LikeOneWorkMoment(c *gin.Context) {
 // @Param req body api.CommentOneWorkMomentReq true "请求"
 // @Produce json
 // @Success 0 {object} api.CommentOneWorkMomentResp
-// @Failure 500 {object} api.CommentOneWorkMomentResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.CommentOneWorkMomentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/comment_one_work_moment [post]
 func CommentOneWorkMoment(c *gin.Context) {
 	var (
@@ -275,8 +275,8 @@ func CommentOneWorkMoment(c *gin.Context) {
 // @Param req body api.DeleteCommentReq true "请求"
 // @Produce json
 // @Success 0 {object} api.DeleteCommentResp
-// @Failure 500 {object} api.DeleteCommentResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.DeleteCommentResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/delete_comment [post]
 func DeleteComment(c *gin.Context) {
 	var (
@@ -335,8 +335,8 @@ func DeleteComment(c *gin.Context) {
 // @Param req body api.GetWorkMomentByIDReq true "请求"
 // @Produce json
 // @Success 0 {object} api.GetWorkMomentByIDResp
-// @Failure 500 {object} api.GetWorkMomentByIDResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetWorkMomentByIDResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/get_work_moment_by_id [post]
 func GetWorkMomentByID(c *gin.Context) {
 	var (
@@ -401,8 +401,8 @@ func GetWorkMomentByID(c *gin.Context) {
 // @Param req body api.GetUserWorkMomentsReq true "请求"
 // @Produce json
 // @Success 0 {object} api.GetUserWorkMomentsResp
-// @Failure 500 {object} api.GetUserWorkMomentsResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetUserWorkMomentsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/get_user_work_moments [post]
 func GetUserWorkMoments(c *gin.Context) {
 	var (
@@ -514,8 +514,8 @@ func GetUserWorkMoments(c *gin.Context) {
 // @Param req body api.GetUserFriendWorkMomentsReq true "请求"
 // @Produce json
 // @Success 0 {object} api.GetUserFriendWorkMomentsResp
-// @Failure 500 {object} api.GetUserFriendWorkMomentsResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetUserFriendWorkMomentsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/get_user_friend_work_moments [post]
 func GetUserFriendWorkMoments(c *gin.Context) {
 	var (
