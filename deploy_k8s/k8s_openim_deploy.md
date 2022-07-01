@@ -14,30 +14,30 @@
 
 ### 2. 项目根目录创建im configMap到k8s openim namespace
 1. 为open-IM项目创建单独命名空间
-    ```  
+ ```  
     kubectl create namespace openim
-   ```  
+ ```  
 2. 在项目根目录通过config/config.yaml  
-    ```  
+ ```  
     kubectl -n openim create configmap config --from-file=config/config.yaml
-   ```
+ ```
     查看configmap
-   ```
+ ```
    kubectl -n openim get configmap
-   ``` 
+ ``` 
 
 ### 3(可选). 修改每个deployment.yml
   每个rpc的deployment在Open-IM-SERVER根目录deploy_k8s下
   给需要调度的node打上标签
-  ```
-     kubectl get nodes
+ ```
+    kubectl get nodes
         kubectl label node k8s-node1 role=openIMworker
-  ```
+ ```
   在deployment的spec.template.spec加上
-  ```
+ ```
     nodeSelector:
-      role: openIMworker
-  ``` 
+     role: openIMworker
+ ``` 
    创建资源清单时添加上nodeSelector属性对应即可,
    修改每种服务数量，建议至少每种2个rpc。
    如果修改了config/config.yaml某些配置比如端口，同时需要修改对应deployment端口和ingress端口
@@ -78,3 +78,22 @@ kubectl 启动所有deployment, services, ingress
     telnet demo.openim.xxx.com {{your_ingress_port}}
  ```
 
+#### openIM k8s更新
+1. 暂存配置文件，拉取代码
+ ```
+    git stash push config/config.yaml
+    git pull
+ ```
+2. 合并配置文件, 解决冲突
+ ```
+    git stash pop
+ ```
+3. 重新生成configmap
+ ```
+    kubectl -n openim create configmap config --from-file=config/config.yaml
+ ```
+4.修改所有deployment文件的spec.template.spec.image 改为新版本后在/deploy_k8s下重新执行
+ ```
+    ./kubectl_stop.sh
+    ./kubectl_start.sh
+ ```

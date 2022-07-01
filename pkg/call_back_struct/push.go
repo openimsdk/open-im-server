@@ -5,7 +5,7 @@ import commonPb "Open_IM/pkg/proto/sdk_ws"
 type CallbackOfflinePushReq struct {
 	UserStatusCallbackReq
 	*commonPb.OfflinePushInfo
-	CommonCallbackReq
+	//CommonCallbackReq
 	SendID       string   `json:"sendID"`
 	GroupID      string   `json:"groupID"`
 	ContentType  int32    `json:"contentType"`

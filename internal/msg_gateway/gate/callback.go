@@ -23,7 +23,7 @@ func callbackUserOnline(operationID, userID string, platformID int, token string
 			PlatformID:      int32(platformID),
 			Platform:        constant.PlatformIDToName(platformID),
 		},
-		Seq: time.Now().Nanosecond() / 1e6,
+		Seq: int(time.Now().UnixNano() / 1e6),
 	}
 	callbackUserOnlineResp := &cbApi.CallbackUserOnlineResp{CommonCallbackResp: callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackUserOnlineReq, callbackUserOnlineResp, config.Config.Callback.CallbackUserOnline.CallbackTimeOut); err != nil {
@@ -46,7 +46,7 @@ func callbackUserOffline(operationID, userID string, platformID int) cbApi.Commo
 			PlatformID:      int32(platformID),
 			Platform:        constant.PlatformIDToName(platformID),
 		},
-		Seq: time.Now().Nanosecond() / 1e6,
+		Seq: int(time.Now().UnixNano() / 1e6),
 	}
 	callbackUserOfflineResp := &cbApi.CallbackUserOfflineResp{CommonCallbackResp: callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackOfflineReq, callbackUserOfflineResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
