@@ -62,4 +62,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace github.com/Shopify/sarama => github.com/Shopify/sarama v1.29.1
+replace github.com/Shopify/sarama => github.com/Shopify/sarama v1.29.0
