@@ -705,7 +705,7 @@ demo:
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   #  second
-  codeTTL: 300
+  codeTTL: 60
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
     title: "openIM"
     senderMail: "765567899@qq.com"

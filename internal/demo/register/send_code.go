@@ -75,13 +75,19 @@ func SendVerificationCode(c *gin.Context) {
 		accountKey = accountKey + "_" + constant.VerificationCodeForRegisterSuffix
 		ok, err := db.DB.JudgeAccountEXISTS(accountKey)
 		if ok || err != nil {
-			log.NewError(params.OperationID, "Repeat send code", params)
+			log.NewError(params.OperationID, "Repeat send code", params, accountKey)
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "Repeat send code"})
 			return
 		}
 
 	case constant.VerificationCodeForReset:
 		accountKey = accountKey + "_" + constant.VerificationCodeForResetSuffix
+		ok, err := db.DB.JudgeAccountEXISTS(accountKey)
+		if ok || err != nil {
+			log.NewError(params.OperationID, "Repeat send code", params, accountKey)
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RepeatSendCode, "errMsg": "Repeat send code"})
+			return
+		}
 	}
 	rand.Seed(time.Now().UnixNano())
 	code := 100000 + rand.Intn(900000)
