@@ -28,8 +28,8 @@ mongo:
   dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
   dbSource: admin
-  dbUserName:  #mongo用户名，建议先不设置
-  dbPassword:  #mongo密码，建议先不设置
+  dbUserName: openIM #mongo用户名，建议先不设置
+  dbPassword: openIM #mongo密码，建议先不设置
   dbMaxPoolSize: 100
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
 
