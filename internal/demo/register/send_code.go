@@ -53,7 +53,7 @@ func SendVerificationCode(c *gin.Context) {
 	if operationID == "" {
 		operationID = utils.OperationIDGenerator()
 	}
-	log.Info(operationID, "SendVerificationCode args: ", params)
+	log.Info(operationID, "SendVerificationCode args: ", "area code: ", params.AreaCode, "Phone Number: ", params.PhoneNumber)
 	var account string
 	if params.Email != "" {
 		account = params.Email
