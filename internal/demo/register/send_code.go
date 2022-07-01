@@ -6,11 +6,13 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/gomail.v2"
 	"math/rand"
 	"net/http"
+
 	"time"
 )
 
@@ -41,11 +43,17 @@ type paramsVerificationCode struct {
 
 func SendVerificationCode(c *gin.Context) {
 	params := paramsVerificationCode{}
+
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("", "BindJSON failed", "err:", err.Error(), "phoneNumber", params.PhoneNumber, "email", params.Email)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
 		return
 	}
+	operationID := params.OperationID
+	if operationID == "" {
+		operationID = utils.OperationIDGenerator()
+	}
+	log.Info(operationID, "SendVerificationCode args: ", params)
 	var account string
 	if params.Email != "" {
 		account = params.Email

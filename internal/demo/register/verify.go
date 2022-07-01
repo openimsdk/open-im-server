@@ -5,8 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/utils"
-
+	"Open_IM/pkg/common/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -23,13 +22,14 @@ type paramsCertification struct {
 func Verify(c *gin.Context) {
 	params := paramsCertification{}
 	operationID := params.OperationID
-	if operationID == "" {
-		operationID = utils.OperationIDGenerator()
-	}
+
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError(operationID, "request params json parsing failed", "", "err", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
 		return
+	}
+	if operationID == "" {
+		operationID = utils.OperationIDGenerator()
 	}
 	log.NewInfo(operationID, "recv req: ", params)
 
