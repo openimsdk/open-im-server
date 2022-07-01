@@ -323,6 +323,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendGroupMsg failed", err.Error())
 		}
 		if !sendTag {
+			log.NewWarn(pb.OperationID, "send tag is ", sendTag)
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 		} else {
 			if pb.MsgData.ContentType == constant.AtText {
