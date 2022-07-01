@@ -72,7 +72,7 @@ services:
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CREATE_TOPICS: "ws2ms_chat:8:1,ms2ps_chat:8:1,msg_to_mongo:8:1"
       KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9093
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
