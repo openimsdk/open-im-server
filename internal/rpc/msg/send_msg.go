@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	cacheRpc "Open_IM/pkg/proto/cache"
 	pbCache "Open_IM/pkg/proto/cache"
@@ -297,14 +298,16 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 
 		default:
 		}
+		if len(addUidList) > 0 {
+			memberUserIDList = append(memberUserIDList, addUidList...)
+		}
+		if !token_verify.IsManagerUserID(pb.MsgData.SendID) {
+			if !utils.IsContain(pb.MsgData.SendID, memberUserIDList) {
+				return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
+			}
+		}
 		m := make(map[string][]string, 2)
-		//if len(memberUserIDList) > GroupMemberNum {
-		//	getOnlineAndOfflineUserIDList(memberUserIDList, m, pb.OperationID)
-		//	log.Debug(pb.OperationID, m[constant.OnlineStatus], m[constant.OfflineStatus])
-		//} else {
 		m[constant.OnlineStatus] = memberUserIDList
-		//}
-
 		log.Debug(pb.OperationID, "send msg cost time1 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 		newTime = db.GetCurrentTimestampByMill()
 
@@ -329,9 +332,6 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		}
 		log.Debug(pb.OperationID, "send msg cost time22 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID, "uidList : ", len(addUidList))
 		wg.Add(1)
-		go rpc.sendMsgToGroup(addUidList, *pb, constant.OnlineStatus, &sendTag, &wg)
-		wg.Wait()
-		log.Debug(pb.OperationID, "send msg cost time2 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 		newTime = db.GetCurrentTimestampByMill()
 		// callback
 		callbackResp = callbackAfterSendGroupMsg(pb)
