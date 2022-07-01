@@ -31,7 +31,7 @@ func Verify(c *gin.Context) {
 	if params.Email != "" {
 		account = params.Email
 	} else {
-		account = params.PhoneNumber
+		account = params.AreaCode + params.PhoneNumber
 	}
 
 	if params.VerificationCode == config.Config.Demo.SuperCode {
