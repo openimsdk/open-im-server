@@ -37,7 +37,7 @@ func Verify(c *gin.Context) {
 	if params.Email != "" {
 		account = params.Email
 	} else {
-		account = params.PhoneNumber
+		account = params.AreaCode + params.PhoneNumber
 	}
 
 	if params.VerificationCode == config.Config.Demo.SuperCode {
@@ -56,9 +56,9 @@ func Verify(c *gin.Context) {
 	var accountKey string
 	switch params.UsedFor {
 	case constant.VerificationCodeForRegister:
-		accountKey = params.AreaCode + account + "_" + constant.VerificationCodeForRegisterSuffix
+		accountKey = account + "_" + constant.VerificationCodeForRegisterSuffix
 	case constant.VerificationCodeForReset:
-		accountKey = params.AreaCode + account + "_" + constant.VerificationCodeForResetSuffix
+		accountKey = account + "_" + constant.VerificationCodeForResetSuffix
 	}
 
 	code, err := db.DB.GetAccountCode(accountKey)
