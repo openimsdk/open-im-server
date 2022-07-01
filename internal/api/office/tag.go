@@ -25,8 +25,8 @@ import (
 // @Param req body api.GetUserTagsReq true "请求"
 // @Produce json
 // @Success 0 {object} api.GetUserTagsResp
-// @Failure 500 {object} api.GetUserTagsResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetUserTagsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/get_user_tags [post]
 func GetUserTags(c *gin.Context) {
 	var (
@@ -88,8 +88,8 @@ func GetUserTags(c *gin.Context) {
 // @Param req body api.CreateTagReq true "请求"
 // @Produce json
 // @Success 0 {object} api.CreateTagResp
-// @Failure 500 {object} api.CreateTagResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.CreateTagResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/create_tag [post]
 func CreateTag(c *gin.Context) {
 	var (
@@ -148,8 +148,8 @@ func CreateTag(c *gin.Context) {
 // @Param req body api.DeleteTagReq true "请求"
 // @Produce json
 // @Success 0 {object} api.DeleteTagResp
-// @Failure 500 {object} api.DeleteTagResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.DeleteTagResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/delete_tag [post]
 func DeleteTag(c *gin.Context) {
 	var (
@@ -208,8 +208,8 @@ func DeleteTag(c *gin.Context) {
 // @Param req body api.SetTagReq true "请求"
 // @Produce json
 // @Success 0 {object} api.SetTagResp
-// @Failure 500 {object} api.SetTagResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.SetTagResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/set_tag [post]
 func SetTag(c *gin.Context) {
 	var (
@@ -268,8 +268,8 @@ func SetTag(c *gin.Context) {
 // @Param req body api.SendMsg2TagReq true "请求"
 // @Produce json
 // @Success 0 {object} api.SendMsg2TagResp
-// @Failure 500 {object} api.SendMsg2TagResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.SendMsg2TagResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/send_msg_to_tag [post]
 func SendMsg2Tag(c *gin.Context) {
 	var (
@@ -328,8 +328,8 @@ func SendMsg2Tag(c *gin.Context) {
 // @Param req body api.GetTagSendLogsReq true "请求"
 // @Produce json
 // @Success 0 {object} api.GetTagSendLogsResp
-// @Failure 500 {object} api.GetTagSendLogsResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetTagSendLogsResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/get_send_tag_log [post]
 func GetTagSendLogs(c *gin.Context) {
 	var (
@@ -398,8 +398,8 @@ func GetTagSendLogs(c *gin.Context) {
 // @Param req body api.GetUserTagByIDReq true "请求"
 // @Produce json
 // @Success 0 {object} api.GetUserTagByIDResp
-// @Failure 500 {object} api.GetUserTagByIDResp "errCode为500 一般为服务器内部错误"
-// @Failure 400 {object} api.GetUserTagByIDResp "errCode为400 一般为参数输入错误, token未带上等"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /office/get_user_tag_by_id [post]
 func GetUserTagByID(c *gin.Context) {
 	var (
