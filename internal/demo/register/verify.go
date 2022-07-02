@@ -40,7 +40,7 @@ func Verify(c *gin.Context) {
 		account = params.AreaCode + params.PhoneNumber
 	}
 
-	if params.VerificationCode == config.Config.Demo.SuperCode {
+	if config.Config.Demo.UseSuperCode && params.VerificationCode == config.Config.Demo.SuperCode {
 		log.NewInfo(params.OperationID, "Super Code Verified successfully", account)
 		data := make(map[string]interface{})
 		data["account"] = account
