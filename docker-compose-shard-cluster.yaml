@@ -77,3 +77,20 @@ services:
       - TZ=Asia/Shanghai
       # cache
       - wiredTigerCacheSizeGB=1
+  # shard分片4
+  shard4:
+    image: mongo:latest
+    networks:
+      - mongo-network
+    container_name: shard4
+    restart: always
+    ports:
+      - 27418:27018
+    command: --shardsvr --replSet "shard4" --bind_ip_all
+    volumes:
+      - /data04/mongo/shard4/db:/data/db
+      - /data04/mongo/shard4/configdb:/data/configdb
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
