@@ -127,7 +127,7 @@ services:
     depends_on:
       - kafka
       - mysql
-      - mongodb
+      - mongos
       - redis
       - etcd
       - minio
