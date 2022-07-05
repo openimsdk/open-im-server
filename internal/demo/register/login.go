@@ -15,6 +15,7 @@ import (
 )
 
 type ParamsLogin struct {
+	UserID      string `json:"userID"`
 	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNumber"`
 	Password    string `json:"password"`
@@ -32,11 +33,13 @@ func Login(c *gin.Context) {
 	var account string
 	if params.Email != "" {
 		account = params.Email
-	} else {
+	} else if params.PhoneNumber != "" {
 		account = params.PhoneNumber
+	} else {
+		account = params.UserID
 	}
 
-	r, err := im_mysql_model.GetRegister(account, params.AreaCode)
+	r, err := im_mysql_model.GetRegister(account, params.AreaCode, params.UserID)
 	if err != nil {
 		log.NewError(params.OperationID, "user have not register", params.Password, account, err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.NotRegistered, "errMsg": "Mobile phone number is not registered"})

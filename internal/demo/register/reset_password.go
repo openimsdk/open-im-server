@@ -44,7 +44,7 @@ func ResetPassword(c *gin.Context) {
 			return
 		}
 	}
-	user, err := im_mysql_model.GetRegister(account, req.AreaCode)
+	user, err := im_mysql_model.GetRegister(account, req.AreaCode, "")
 	if err != nil || user.Account == "" {
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "get register error", err.Error())
