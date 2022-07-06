@@ -464,9 +464,10 @@ type config struct {
 			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
 			Enable                       bool   `yaml:"enable"`
 		}
-		SuperCode string `yaml:"superCode"`
-		CodeTTL   int    `yaml:"codeTTL"`
-		Mail      struct {
+		SuperCode    string `yaml:"superCode"`
+		CodeTTL      int    `yaml:"codeTTL"`
+		UseSuperCode bool   `yaml:"useSuperCode"`
+		Mail         struct {
 			Title                   string `yaml:"title"`
 			SenderMail              string `yaml:"senderMail"`
 			SenderAuthorizationCode string `yaml:"senderAuthorizationCode"`
