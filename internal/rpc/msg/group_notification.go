@@ -183,7 +183,16 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 	n.SendID = sendID
 	if groupID != "" {
 		n.RecvID = groupID
-		n.SessionType = constant.GroupChatType
+		group, err := imdb.GetGroupInfoByGroupID(groupID)
+		if err != nil {
+			log.NewError(operationID, "GetGroupInfoByGroupID failed ", err.Error(), groupID)
+		}
+		switch group.GroupType {
+		case constant.NormalGroup:
+			n.SessionType = constant.GroupChatType
+		default:
+			n.SessionType = constant.SuperGroupChatType
+		}
 	} else {
 		n.RecvID = recvUserID
 		n.SessionType = constant.SingleChatType
