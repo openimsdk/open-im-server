@@ -34,7 +34,8 @@ func ResetPassword(c *gin.Context) {
 	} else {
 		account = req.PhoneNumber
 	}
-	if req.VerificationCode != config.Config.Demo.SuperCode {
+
+	if (config.Config.Demo.UseSuperCode && req.VerificationCode != config.Config.Demo.SuperCode) || !config.Config.Demo.UseSuperCode {
 		accountKey := req.AreaCode + account + "_" + constant.VerificationCodeForResetSuffix
 		v, err := db.DB.GetAccountCode(accountKey)
 		if err != nil || v != req.VerificationCode {
@@ -43,7 +44,7 @@ func ResetPassword(c *gin.Context) {
 			return
 		}
 	}
-	user, err := im_mysql_model.GetRegister(account, req.AreaCode)
+	user, err := im_mysql_model.GetRegister(account, req.AreaCode, "")
 	if err != nil || user.Account == "" {
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "get register error", err.Error())

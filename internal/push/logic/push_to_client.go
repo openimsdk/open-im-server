@@ -233,30 +233,32 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 
 			}
 		}
+		if len(onlineFailedUserIDList) > 0 {
+			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList[0], pushMsg.MsgData)
+			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
+			if callbackResp.ErrCode != 0 {
+				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
+			}
+			if callbackResp.ActionCode != constant.ActionAllow {
+				log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
+				return
+			}
+			if offlinePusher == nil {
+				return
+			}
+			opts, err := GetOfflinePushOpts(pushMsg)
+			if err != nil {
+				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
+			}
+			log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), onlineFailedUserIDList, content, jsonCustomContent, "opts:", opts)
+			pushResult, err := offlinePusher.Push(onlineFailedUserIDList, content, jsonCustomContent, pushMsg.OperationID, opts)
+			if err != nil {
+				log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
+			} else {
+				log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
+			}
+		}
 
-		callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList[0], pushMsg.MsgData)
-		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
-		if callbackResp.ErrCode != 0 {
-			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
-		}
-		if callbackResp.ActionCode != constant.ActionAllow {
-			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
-			return
-		}
-		if offlinePusher == nil {
-			return
-		}
-		opts, err := GetOfflinePushOpts(pushMsg)
-		if err != nil {
-			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
-		}
-		log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), onlineFailedUserIDList, content, jsonCustomContent, "opts:", opts)
-		pushResult, err := offlinePusher.Push(onlineFailedUserIDList, content, jsonCustomContent, pushMsg.OperationID, opts)
-		if err != nil {
-			log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
-		} else {
-			log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
-		}
 	}
 }
 
