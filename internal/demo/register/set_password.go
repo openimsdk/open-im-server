@@ -65,7 +65,7 @@ func SetPassword(c *gin.Context) {
 	//userID := utils.Base64Encode(account)
 	var userID string
 	if params.UserID == "" {
-		userID := utils.Md5(params.OperationID + strconv.FormatInt(time.Now().UnixNano(), 10))
+		userID = utils.Md5(params.OperationID + strconv.FormatInt(time.Now().UnixNano(), 10))
 		bi := big.NewInt(0)
 		bi.SetString(userID[0:8], 16)
 		userID = bi.String()
@@ -82,6 +82,7 @@ func SetPassword(c *gin.Context) {
 	openIMRegisterReq.Secret = config.Config.Secret
 	openIMRegisterReq.FaceURL = params.FaceURL
 	openIMRegisterResp := api.UserRegisterResp{}
+	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "register req:", openIMRegisterReq)
 	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
 	if err != nil {
 		log.NewError(params.OperationID, "request openIM register error", account, "err", err.Error())
