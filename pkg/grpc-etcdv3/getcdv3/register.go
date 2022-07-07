@@ -4,12 +4,14 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
 	"fmt"
-	clientv3 "go.etcd.io/etcd/client/v3"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type RegEtcd struct {
@@ -51,64 +53,50 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 		return fmt.Errorf("create etcd clientv3 client failed, errmsg:%v, etcd addr:%s", err, etcdAddr)
 	}
 
-	//lease
-	ctx, cancel := context.WithCancel(context.Background())
-	resp, err := cli.Grant(ctx, int64(ttl))
-	if err != nil {
-		log.Error(operationID, "Grant failed ", err.Error(), ctx, ttl)
-		return fmt.Errorf("grant failed")
-	}
-	log.Info(operationID, "Grant ok, resp ID ", resp.ID)
-
 	//  schema:///serviceName/ip:port ->ip:port
 	serviceValue := net.JoinHostPort(myHost, strconv.Itoa(myPort))
 	serviceKey := GetPrefix(schema, serviceName) + serviceValue
 
-	//set key->value
-	if _, err := cli.Put(ctx, serviceKey, serviceValue, clientv3.WithLease(resp.ID)); err != nil {
-		log.Error(operationID, "cli.Put failed ", err.Error(), ctx, args, resp.ID)
-		return fmt.Errorf("put failed, errmsg:%v， key:%s, value:%s", err, serviceKey, serviceValue)
-	}
-
-	//keepalive
-	kresp, err := cli.KeepAlive(ctx, resp.ID)
-	if err != nil {
-		log.Error(operationID, "KeepAlive failed ", err.Error(), args, resp.ID)
-		return fmt.Errorf("keepalive failed, errmsg:%v, lease id:%d", err, resp.ID)
-	}
-	log.Info(operationID, "RegisterEtcd ok ", args)
-
-	go func() {
-		for {
-			select {
-			case pv, ok := <-kresp:
-				if ok == true {
-					log.Debug(operationID, "KeepAlive kresp ok", pv, args)
-				} else {
-					log.Error(operationID, "KeepAlive kresp failed ", pv, args)
-					t := time.NewTicker(time.Duration(ttl/2) * time.Second)
-					for {
-						select {
-						case <-t.C:
-						}
-						ctx, _ := context.WithCancel(context.Background())
-						resp, err := cli.Grant(ctx, int64(ttl))
-						if err != nil {
-							log.Error(operationID, "Grant failed ", err.Error(), args)
-							continue
-						}
-
-						if _, err := cli.Put(ctx, serviceKey, serviceValue, clientv3.WithLease(resp.ID)); err != nil {
-							log.Error(operationID, "etcd Put failed ", err.Error(), args, " resp ID: ", resp.ID)
-							continue
-						} else {
-							log.Info(operationID, "etcd Put ok ", args, " resp ID: ", resp.ID)
-						}
-					}
-				}
-			}
+	ctx, cancel := context.WithCancel(context.Background())
+	leaseErr := make(chan error, 1)
+	leaseKeepAlive := func() {
+	NEWLEASE:
+		//lease
+		resp, err := cli.Grant(ctx, int64(ttl))
+		if err != nil {
+			log.Error(operationID, "Grant failed ", err.Error(), ctx, ttl)
+			leaseErr <- errors.New("grant failed")
+			return
 		}
-	}()
+		log.Info(operationID, "Grant ok, resp ID ", resp.ID)
+
+		//set key->value
+		if _, err := cli.Put(ctx, serviceKey, serviceValue, clientv3.WithLease(resp.ID)); err != nil {
+			log.Error(operationID, "cli.Put failed ", err.Error(), ctx, args, resp.ID)
+			leaseErr <- fmt.Errorf("put failed, errmsg:%v, key:%s, value:%s", err, serviceKey, serviceValue)
+			return
+		}
+
+		//keepalive
+		kresp, err := cli.KeepAlive(ctx, resp.ID)
+		if err != nil {
+			log.Error(operationID, "KeepAlive failed ", err.Error(), args, resp.ID)
+			leaseErr <- fmt.Errorf("keepalive failed, errmsg:%v, lease id:%d", err, resp.ID)
+			return
+		}
+		leaseErr <- nil
+		log.Info(operationID, "RegisterEtcd ok ", args)
+		for resp := range kresp {
+			log.Debug(operationID, "KeepAlive kresp ok", resp, args)
+		}
+		log.Error(operationID, "KeepAlive kresp failed ", args)
+		time.Sleep(time.Duration(ttl/2) * time.Second)
+		goto NEWLEASE
+	}
+	go leaseKeepAlive()
+	if err := <-leaseErr; err != nil {
+		return err
+	}
 
 	rEtcd = &RegEtcd{ctx: ctx,
 		cli:    cli,
