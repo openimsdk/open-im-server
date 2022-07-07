@@ -32,8 +32,8 @@ services:
       - wiredTigerCacheSizeGB=1
 #      - MONGO_USERNAME=openIM
 #      - MONGO_PASSWORD=openIM
-#      - MONGO_INITDB_ROOT_USERNAME=root
-#      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
 #      - MONGO_INITDB_DATABASE=openIM
     restart: always
 
