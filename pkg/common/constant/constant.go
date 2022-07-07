@@ -161,9 +161,9 @@ const (
 	GroupStatusMuted     = 3
 
 	//GroupType
-	NormalGroup     = 0
-	SuperGroup      = 1
-	DepartmentGroup = 2
+	NormalGroup  = 0
+	SuperGroup   = 1
+	WorkingGroup = 2
 
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
