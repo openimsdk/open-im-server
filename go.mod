@@ -10,6 +10,9 @@ require (
 	github.com/alibabacloud-go/tea v1.1.17
 	github.com/antonfisher/nested-logrus-formatter v1.3.0
 	github.com/bwmarrin/snowflake v0.3.0
+	github.com/dtm-labs/dtmcli v1.15.0
+	github.com/dtm-labs/dtmgrpc v1.15.0
+	github.com/dtm-labs/rockscache v0.0.8
 	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-openapi/spec v0.20.6 // indirect
@@ -28,6 +31,7 @@ require (
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.4 // indirect
 	github.com/lib/pq v1.2.0 // indirect
+	github.com/lithammer/shortuuid v3.0.0+incompatible
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/minio/minio-go/v7 v7.0.22
 	github.com/mitchellh/mapstructure v1.4.2

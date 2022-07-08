@@ -74,6 +74,10 @@ type config struct {
 		} `yaml:"minio"`
 	}
 
+	Dtm struct {
+		ServerURL string `json:"serverURL"`
+	}
+
 	Mysql struct {
 		DBAddress      []string `yaml:"dbMysqlAddress"`
 		DBUserName     string   `yaml:"dbMysqlUserName"`
