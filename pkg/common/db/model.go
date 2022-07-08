@@ -3,6 +3,7 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"go.mongodb.org/mongo-driver/x/bsonx"
+	"open_im_sdk/pkg/log"
 	"strings"
 
 	//"Open_IM/pkg/common/log"
@@ -119,6 +120,7 @@ func init() {
 	//		)
 	//	},
 	//}
+	fmt.Println("tes", config.Config.Redis.DBUserName, config.Config.Redis.DBPassWord)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if config.Config.Redis.EnableCluster {
