@@ -123,8 +123,8 @@ func init() {
 	defer cancel()
 	if config.Config.Redis.EnableCluster {
 		DB.rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
-			Addrs:    config.Config.Redis.DBAddress,
-			Username: config.Config.Redis.DBUserName,
+			Addrs: config.Config.Redis.DBAddress,
+			//Username: config.Config.Redis.DBUserName,
 			Password: config.Config.Redis.DBPassWord, // no password set
 			PoolSize: 50,
 		})
