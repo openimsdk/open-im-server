@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -58,45 +57,32 @@ func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName strin
 	serviceKey := GetPrefix(schema, serviceName) + serviceValue
 
 	ctx, cancel := context.WithCancel(context.Background())
-	leaseErr := make(chan error, 1)
-	leaseKeepAlive := func() {
+
+	go func() {
 	NEWLEASE:
-		//lease
 		resp, err := cli.Grant(ctx, int64(ttl))
 		if err != nil {
 			log.Error(operationID, "Grant failed ", err.Error(), ctx, ttl)
-			leaseErr <- errors.New("grant failed")
-			return
+		} else {
+			if _, err := cli.Put(ctx, serviceKey, serviceValue, clientv3.WithLease(resp.ID)); err != nil {
+				log.Error(operationID, "cli.Put failed ", err.Error(), ctx, args, resp.ID)
+			} else {
+				kresp, err := cli.KeepAlive(ctx, resp.ID)
+				if err != nil {
+					log.Error(operationID, "KeepAlive failed ", err.Error(), args, resp.ID)
+				} else {
+					log.Info(operationID, "RegisterEtcd ok ", args)
+					for resp := range kresp {
+						log.Debug(operationID, "KeepAlive kresp ok", resp, args)
+					}
+				}
+			}
 		}
-		log.Info(operationID, "Grant ok, resp ID ", resp.ID)
 
-		//set key->value
-		if _, err := cli.Put(ctx, serviceKey, serviceValue, clientv3.WithLease(resp.ID)); err != nil {
-			log.Error(operationID, "cli.Put failed ", err.Error(), ctx, args, resp.ID)
-			leaseErr <- fmt.Errorf("put failed, errmsg:%v, key:%s, value:%s", err, serviceKey, serviceValue)
-			return
-		}
-
-		//keepalive
-		kresp, err := cli.KeepAlive(ctx, resp.ID)
-		if err != nil {
-			log.Error(operationID, "KeepAlive failed ", err.Error(), args, resp.ID)
-			leaseErr <- fmt.Errorf("keepalive failed, errmsg:%v, lease id:%d", err, resp.ID)
-			return
-		}
-		leaseErr <- nil
-		log.Info(operationID, "RegisterEtcd ok ", args)
-		for resp := range kresp {
-			log.Debug(operationID, "KeepAlive kresp ok", resp, args)
-		}
 		log.Error(operationID, "KeepAlive kresp failed ", args)
 		time.Sleep(time.Duration(ttl/2) * time.Second)
 		goto NEWLEASE
-	}
-	go leaseKeepAlive()
-	if err := <-leaseErr; err != nil {
-		return err
-	}
+	}()
 
 	rEtcd = &RegEtcd{ctx: ctx,
 		cli:    cli,
