@@ -38,7 +38,7 @@ redis:
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
-  dbUserName: im
+  dbUserName:
   dbPassWord: efH8BKAeUiWQL #redis密码 建议修改
   enableCluster: true #如果外部redis以集群方式启动，需要打开此开关
 
