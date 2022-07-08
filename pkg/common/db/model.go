@@ -3,7 +3,6 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"go.mongodb.org/mongo-driver/x/bsonx"
-	"open_im_sdk/pkg/log"
 	"strings"
 
 	//"Open_IM/pkg/common/log"
