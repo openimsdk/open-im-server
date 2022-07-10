@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: message-cms
-        image: openim/message_cms:v2.1.0
+        image: openim/message_cms:v2.2.0
         # imagePullPolicy: Always
         ports:
         - containerPort: 10190

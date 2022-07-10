@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: openim/api:v2.1.0
+        image: openim/api:v2.2.0
         # imagePullPolicy: Always
         ports:
         - containerPort: 10002
