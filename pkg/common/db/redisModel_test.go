@@ -119,3 +119,9 @@ func Test_GetAccountCode(t *testing.T) {
 	assert.Nil(t, err)
 	fmt.Println(code)
 }
+func Test_GetGroupMemberList(t *testing.T) {
+	groupID := "3791742301"
+	list, err := DB.GetGroupMemberIDListFromCache(groupID)
+	assert.Nil(t, err)
+	fmt.Println(list)
+}
