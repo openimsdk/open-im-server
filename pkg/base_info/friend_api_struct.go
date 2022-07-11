@@ -72,7 +72,7 @@ type GetBlackListResp struct {
 
 type SetFriendRemarkReq struct {
 	ParamsCommFriend
-	Remark string `json:"remark" binding:"required"`
+	Remark string `json:"remark"`
 }
 type SetFriendRemarkResp struct {
 	CommResp
