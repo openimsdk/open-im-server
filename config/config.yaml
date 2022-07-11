@@ -34,7 +34,7 @@ mongo:
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
 
 redis:
-  dbAddress: [ 127.0.0.1:6379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
+  dbAddress: [ 127.0.0.1:16379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
