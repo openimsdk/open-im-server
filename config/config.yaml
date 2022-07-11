@@ -38,8 +38,8 @@ redis:
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
-  dbUserName: im
-  dbPassWord: efH8BKAeUiWQL #redis密码 建议修改
+  dbUserName:     #only redis version 6.0+ need username
+  dbPassWord: openIM #redis密码 建议修改
   enableCluster: true #如果外部redis以集群方式启动，需要打开此开关
 
 kafka:
