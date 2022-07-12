@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/proto"
 	"net/http"
 	"strings"
 )
@@ -69,6 +70,83 @@ func DelMsg(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
+	c.JSON(http.StatusOK, resp)
+}
+func DelSuperGroupMsg(c *gin.Context) {
+	var (
+		req  api.DelSuperGroupMsgReq
+		resp api.DelSuperGroupMsgResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
+
+	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + opUserID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	options := make(map[string]bool, 5)
+	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
+	utils.SetSwitchFromOptions(options, constant.IsSenderConversationUpdate, false)
+	utils.SetSwitchFromOptions(options, constant.IsUnreadCount, false)
+	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
+	pbData := rpc.SendMsgReq{
+		OperationID: req.OperationID,
+		MsgData: &pbCommon.MsgData{
+			SendID:      req.UserID,
+			RecvID:      req.UserID,
+			ClientMsgID: utils.GetMsgID(req.UserID),
+			SessionType: constant.SingleChatType,
+			MsgFrom:     constant.SysMsgType,
+			ContentType: constant.MsgDeleteNotification,
+			//	ForceList:        params.ForceList,
+			CreateTime: utils.GetCurrentTimestampByMill(),
+			Options:    options,
+		},
+	}
+	var tips pbCommon.TipsComm
+	deleteMsg := api.MsgDeleteNotificationElem{
+		GroupID:     req.GroupID,
+		IsAllDelete: req.IsAllDelete,
+		SeqList:     req.SeqList,
+	}
+	tips.JsonDetail = utils.StructToJsonString(deleteMsg)
+	var err error
+	pbData.MsgData.Content, err = proto.Marshal(&tips)
+	if err != nil {
+		log.Error(req.OperationID, "Marshal failed ", err.Error(), tips.String())
+		resp.ErrCode = 400
+		resp.ErrMsg = err.Error()
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
+		c.JSON(http.StatusOK, resp)
+	}
+	log.Info(req.OperationID, "", "api DelSuperGroupMsg call start..., [data: %s]", pbData.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	client := rpc.NewChatClient(etcdConn)
+
+	log.Info(req.OperationID, "", "api DelSuperGroupMsg call, api call rpc...")
+
+	RpcResp, err := client.SendMsg(context.Background(), &pbData)
+	if err != nil {
+		log.NewError(req.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call UserSendMsg  rpc server failed"})
+		return
+	}
+	log.Info(req.OperationID, "", "api DelSuperGroupMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
+	resp.ErrCode = RpcResp.ErrCode
+	resp.ErrMsg = RpcResp.ErrMsg
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }

@@ -139,6 +139,7 @@ func main() {
 		chatGroup.POST("/send_msg", apiChat.SendMsg)
 		chatGroup.POST("/pull_msg_by_seq", apiChat.PullMsgBySeqList)
 		chatGroup.POST("/del_msg", apiChat.DelMsg)
+		chatGroup.POST("/del_super_group_msg", apiChat.DelSuperGroupMsg)
 		chatGroup.POST("/clear_msg", apiChat.ClearMsg)
 		chatGroup.POST("/manage_send_msg", manage.ManagementSendMsg)
 		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
