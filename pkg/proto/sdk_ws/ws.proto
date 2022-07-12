@@ -21,6 +21,8 @@ message GroupInfo{
   string creatorUserID = 11;
   int32 groupType = 12;
   int32 needVerification = 13;
+  int32 lookMemberInfo =14;
+  int32 applyMemberFriend = 15;
 }
 
 message GroupInfoForSet{
@@ -31,6 +33,8 @@ message GroupInfoForSet{
   string faceURL = 5;
   string ex = 6;
   google.protobuf.Int32Value needVerification  = 7;
+  google.protobuf.Int32Value lookMemberInfo  = 8;
+  google.protobuf.Int32Value applyMemberFriend  = 9;
 }
 
 
