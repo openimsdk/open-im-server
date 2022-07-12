@@ -185,9 +185,9 @@ type SetGroupInfoReq struct {
 	FaceURL           string `json:"faceURL"`
 	Ex                string `json:"ex"`
 	OperationID       string `json:"operationID" binding:"required"`
-	NeedVerification  *int32 `json:"needVerification" binding:"oneof=0 1 2"`
-	LookMemberInfo    *int32 `json:"lookMemberInfo" binding:"oneof=0 1"`
-	ApplyMemberFriend *int32 `json:"applyMemberFriend" binding:"oneof=0 1"`
+	NeedVerification  *int32 `json:"needVerification" `
+	LookMemberInfo    *int32 `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32 `json:"applyMemberFriend"`
 }
 
 type SetGroupInfoResp struct {
