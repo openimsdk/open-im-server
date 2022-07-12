@@ -58,6 +58,7 @@ const (
 	FriendRemarkSetNotification           = 1206 //set_friend_remark?
 	BlackAddedNotification                = 1207 //add_black
 	BlackDeletedNotification              = 1208 //remove_black
+	MsgDeleteNotification                 = 1209
 
 	ConversationOptChangeNotification = 1300 // change conversation opt
 
