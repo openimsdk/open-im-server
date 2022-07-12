@@ -378,6 +378,13 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
+	oldNickname := ""
+	if req.UserInfo.Nickname != "" {
+		u, err := imdb.GetUserByUserID(req.UserInfo.UserID)
+		if err == nil {
+			oldNickname = u.Nickname
+		}
+	}
 	var user db.User
 	utils.CopyStructFields(&user, req.UserInfo)
 	if req.UserInfo.Birth != 0 {
@@ -415,6 +422,9 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	log.Info(req.OperationID, "UserInfoUpdatedNotification ", req.UserInfo.UserID, req.OpUserID)
 	if req.UserInfo.FaceURL != "" {
 		go s.SyncJoinedGroupMemberFaceURL(req.UserInfo.UserID, req.UserInfo.FaceURL, req.OperationID, req.OpUserID)
+	}
+	if req.UserInfo.Nickname != "" {
+		go s.SyncJoinedGroupMemberNickname(req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, req.OperationID, req.OpUserID)
 	}
 	//updateUserInfoToCacheReq := &cache.UpdateUserInfoToCacheReq{
 	//	OperationID:  req.OperationID,
@@ -455,6 +465,7 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.Se
 	chat.UserInfoUpdatedNotification(req.OperationID, req.UserID, req.UserID)
 	return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
+
 func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string, operationID string, opUserID string) {
 	joinedGroupIDList, err := imdb.GetJoinedGroupIDListByUserID(userID)
 	if err != nil {
@@ -465,6 +476,26 @@ func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string,
 		groupMemberInfo := db.GroupMember{UserID: userID, GroupID: v, FaceURL: faceURL}
 		imdb.UpdateGroupMemberInfo(groupMemberInfo)
 		chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
+	}
+}
+
+func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, oldNickname string, operationID string, opUserID string) {
+	joinedGroupIDList, err := imdb.GetJoinedGroupIDListByUserID(userID)
+	if err != nil {
+		log.NewWarn(operationID, "GetJoinedGroupIDListByUserID failed ", userID, err.Error())
+		return
+	}
+	for _, v := range joinedGroupIDList {
+		member, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(v, userID)
+		if err != nil {
+			log.NewWarn(operationID, "GetGroupMemberInfoByGroupIDAndUserID failed ", err.Error(), v, userID)
+			continue
+		}
+		if member.Nickname == oldNickname {
+			groupMemberInfo := db.GroupMember{UserID: userID, GroupID: v, Nickname: newNickname}
+			imdb.UpdateGroupMemberInfo(groupMemberInfo)
+			chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
+		}
 	}
 }
 
