@@ -1104,7 +1104,24 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 			return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, http.WrapError(constant.ErrDB)
 		}
 	}
-
+	if req.GroupInfoForSet.LookMemberInfo != nil {
+		changedType = changedType | (1 << 5)
+		m := make(map[string]interface{})
+		m["look_member_info"] = req.GroupInfoForSet.LookMemberInfo.Value
+		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
+			log.NewError(req.OperationID, "UpdateGroupInfoDefaultZero failed ", err.Error(), m)
+			return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, http.WrapError(constant.ErrDB)
+		}
+	}
+	if req.GroupInfoForSet.ApplyMemberFriend != nil {
+		changedType = changedType | (1 << 6)
+		m := make(map[string]interface{})
+		m["apply_member_friend"] = req.GroupInfoForSet.ApplyMemberFriend.Value
+		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
+			log.NewError(req.OperationID, "UpdateGroupInfoDefaultZero failed ", err.Error(), m)
+			return &pbGroup.SetGroupInfoResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, http.WrapError(constant.ErrDB)
+		}
+	}
 	//
 	//if req.RoleLevel != nil {
 	//
