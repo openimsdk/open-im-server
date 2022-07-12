@@ -172,6 +172,10 @@ const (
 	//UserJoinGroupSource
 	JoinByAdmin = 1
 
+	JoinByInvitation = 2
+	JoinBySearch     = 3
+	JoinByQRCode     = 4
+
 	//Minio
 	MinioDurationTimes = 3600
 

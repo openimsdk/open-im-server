@@ -110,6 +110,7 @@ type GroupMember struct {
 	RoleLevel      int32     `gorm:"column:role_level"`
 	JoinTime       time.Time `gorm:"column:join_time"`
 	JoinSource     int32     `gorm:"column:join_source"`
+	InviterUserID  string    `gorm:"column:inviter_user_id;primary_key;size:64"`
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
 	MuteEndTime    time.Time `gorm:"column:mute_end_time"`
 	Ex             string    `gorm:"column:ex;size:1024"`
@@ -127,15 +128,17 @@ type GroupMember struct {
 //string Ex = 9;
 //}open_im_sdk.GroupRequest == imdb.GroupRequest
 type GroupRequest struct {
-	UserID       string    `gorm:"column:user_id;primary_key;size:64"`
-	GroupID      string    `gorm:"column:group_id;primary_key;size:64"`
-	HandleResult int32     `gorm:"column:handle_result"`
-	ReqMsg       string    `gorm:"column:req_msg;size:1024"`
-	HandledMsg   string    `gorm:"column:handle_msg;size:1024"`
-	ReqTime      time.Time `gorm:"column:req_time"`
-	HandleUserID string    `gorm:"column:handle_user_id;size:64"`
-	HandledTime  time.Time `gorm:"column:handle_time"`
-	Ex           string    `gorm:"column:ex;size:1024"`
+	UserID        string    `gorm:"column:user_id;primary_key;size:64"`
+	GroupID       string    `gorm:"column:group_id;primary_key;size:64"`
+	HandleResult  int32     `gorm:"column:handle_result"`
+	ReqMsg        string    `gorm:"column:req_msg;size:1024"`
+	HandledMsg    string    `gorm:"column:handle_msg;size:1024"`
+	ReqTime       time.Time `gorm:"column:req_time"`
+	HandleUserID  string    `gorm:"column:handle_user_id;size:64"`
+	HandledTime   time.Time `gorm:"column:handle_time"`
+	JoinSource    int32     `gorm:"column:join_source"`
+	InviterUserID string    `gorm:"column:inviter_user_id;primary_key;size:64"`
+	Ex            string    `gorm:"column:ex;size:1024"`
 }
 
 //string UserID = 1;

@@ -122,7 +122,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 		}
 		//to group member
-		groupMember = db.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
+		groupMember = db.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID, JoinSource: constant.JoinByInvitation, InviterUserID: req.OpUserID}
 		utils.CopyStructFields(&groupMember, us)
 		err = imdb.InsertIntoGroupMember(groupMember)
 		if err != nil {
@@ -143,6 +143,8 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				continue
 			}
 			groupMember.RoleLevel = user.RoleLevel
+			groupMember.JoinSource = constant.JoinByInvitation
+			groupMember.InviterUserID = req.OpUserID
 			utils.CopyStructFields(&groupMember, us)
 			err = imdb.InsertIntoGroupMember(groupMember)
 			if err != nil {
@@ -281,6 +283,8 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			var groupRequest db.GroupRequest
 			groupRequest.UserID = v
 			groupRequest.GroupID = req.GroupID
+			groupRequest.JoinSource = constant.JoinByInvitation
+			groupRequest.InviterUserID = req.OpUserID
 			err = imdb.InsertIntoGroupRequest(groupRequest)
 			if err != nil {
 				var resultNode pbGroup.Id2Result
@@ -334,6 +338,8 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			toInsertInfo.GroupID = req.GroupID
 			toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
 			toInsertInfo.OperatorUserID = req.OpUserID
+			toInsertInfo.InviterUserID = req.OpUserID
+			toInsertInfo.JoinSource = constant.JoinByInvitation
 			err = imdb.InsertIntoGroupMember(toInsertInfo)
 			if err != nil {
 				log.NewError(req.OperationID, "InsertIntoGroupMember failed ", req.GroupID, toUserInfo.UserID, toUserInfo.Nickname, toUserInfo.FaceURL)
@@ -762,8 +768,12 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 	}
 	err := imdb.UpdateGroupRequest(groupRequest)
 	if err != nil {
-		//{openIM002 7836e478bc43ce1d3b8889cac983f59b 1  ok 0001-01-01 00:00:00 +0000 UTC openIM001 0001-01-01 00:00:00 +0000 UTC }
 		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), groupRequest)
+		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	}
+	request, err := imdb.GetGroupRequestByGroupIDAndUserID(req.GroupID, req.FromUserID)
+	if err != nil {
+		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.GroupID, req.FromUserID)
 		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
@@ -780,7 +790,8 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 		member.OperatorUserID = req.OpUserID
 		member.FaceURL = user.FaceURL
 		member.Nickname = user.Nickname
-
+		member.JoinSource = request.JoinSource
+		member.InviterUserID = request.InviterUserID
 		err = imdb.InsertIntoGroupMember(member)
 		if err != nil {
 			log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), member)
@@ -878,7 +889,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
 		//to group member
-		groupMember := db.GroupMember{GroupID: req.GroupID, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
+		groupMember := db.GroupMember{GroupID: req.GroupID, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID, JoinSource: req.JoinSource}
 		utils.CopyStructFields(&groupMember, us)
 		err = imdb.InsertIntoGroupMember(groupMember)
 		if err != nil {
@@ -920,6 +931,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	groupRequest.UserID = req.OpUserID
 	groupRequest.ReqMsg = req.ReqMessage
 	groupRequest.GroupID = req.GroupID
+	groupRequest.JoinSource = req.JoinSource
 	err = imdb.InsertIntoGroupRequest(groupRequest)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroupRequest failed ", err.Error(), groupRequest)

@@ -161,10 +161,13 @@ type ApplicationGroupResponseResp struct {
 }
 
 type JoinGroupReq struct {
-	GroupID     string `json:"groupID" binding:"required"`
-	ReqMessage  string `json:"reqMessage"`
-	OperationID string `json:"operationID" binding:"required"`
+	GroupID       string `json:"groupID" binding:"required"`
+	ReqMessage    string `json:"reqMessage"`
+	OperationID   string `json:"operationID" binding:"required"`
+	JoinSource    int32  `json:"joinSource"`
+	InviterUserID string `json:"inviterUserID"`
 }
+
 type JoinGroupResp struct {
 	CommResp
 }
