@@ -3,6 +3,7 @@ package group
 import (
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -316,7 +317,12 @@ func InviteUserToGroup(c *gin.Context) {
 	}
 	req := &rpc.InviteUserToGroupReq{}
 	utils.CopyStructFields(req, &params)
-
+	if len(req.InvitedUserIDList) > constant.MaxNotificationNum {
+		errMsg := req.OperationID + " too many, Limit: " + utils.IntToString(constant.MaxNotificationNum)
+		log.NewError(req.OperationID, errMsg, len(req.InvitedUserIDList))
+		c.JSON(http.StatusRequestEntityTooLarge, gin.H{"errCode": 400, "errMsg": errMsg})
+		return
+	}
 	var ok bool
 	var errInfo string
 	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)

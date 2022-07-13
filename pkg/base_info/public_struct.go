@@ -32,7 +32,7 @@ type ApiUserInfo struct {
 
 type GroupAddMemberInfo struct {
 	UserID    string `json:"userID" binding:"required"`
-	RoleLevel int32  `json:"roleLevel" binding:"required"`
+	RoleLevel int32  `json:"roleLevel" binding:"required,oneof= 1 3"`
 }
 
 func SetErrCodeMsg(c *gin.Context, status int) *CommResp {

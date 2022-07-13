@@ -232,6 +232,9 @@ func GroupCreatedNotification(operationID, opUserID, groupID string, initMemberL
 			continue
 		}
 		GroupCreatedTips.MemberList = append(GroupCreatedTips.MemberList, &groupMemberInfo)
+		if len(GroupCreatedTips.MemberList) == constant.MaxNotificationNum {
+			break
+		}
 	}
 	groupNotification(constant.GroupCreatedNotification, &GroupCreatedTips, opUserID, groupID, "", operationID)
 }
@@ -536,7 +539,6 @@ func MemberInvitedNotification(operationID, groupID, opUserID, reason string, in
 		}
 		MemberInvitedTips.InvitedUserList = append(MemberInvitedTips.InvitedUserList, &groupMemberInfo)
 	}
-
 	groupNotification(constant.MemberInvitedNotification, &MemberInvitedTips, opUserID, groupID, "", operationID)
 }
 
