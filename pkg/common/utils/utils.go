@@ -99,6 +99,9 @@ func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *db.Group) error {
 	}
 	dst.CreateTime = uint32(src.CreateTime.Unix())
 	dst.NotificationUpdateTime = uint32(src.NotificationUpdateTime.Unix())
+	if src.NotificationUpdateTime.Unix() < 0 {
+		dst.NotificationUpdateTime = 0
+	}
 	return nil
 }
 
@@ -119,7 +122,7 @@ func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.Group
 		dst.AppMangerLevel = 1
 	}
 	dst.JoinTime = int32(src.JoinTime.Unix())
-	if src.MuteEndTime.Unix() < 0 {
+	if src.JoinTime.Unix() < 0 {
 		dst.JoinTime = 0
 		return nil
 	}

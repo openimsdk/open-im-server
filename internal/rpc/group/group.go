@@ -250,6 +250,10 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 			utils.CopyStructFields(&groupNode, group)
 			groupNode.CreateTime = uint32(group.CreateTime.Unix())
 			groupNode.NotificationUpdateTime = uint32(group.NotificationUpdateTime.Unix())
+			if group.NotificationUpdateTime.Unix() < 0 {
+				groupNode.NotificationUpdateTime = 0
+			}
+
 			groupNode.MemberCount = num
 			groupNode.OwnerUserID = owner.UserID
 			resp.GroupList = append(resp.GroupList, &groupNode)
