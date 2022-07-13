@@ -23,6 +23,8 @@ message GroupInfo{
   int32 needVerification = 13;
   int32 lookMemberInfo =14;
   int32 applyMemberFriend = 15;
+  uint32 notificationUpdateTime = 16;
+  string notificationUserID = 17;
 }
 
 message GroupInfoForSet{

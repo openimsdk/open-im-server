@@ -98,6 +98,7 @@ func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *db.Group) error {
 		return utils.Wrap(err, "")
 	}
 	dst.CreateTime = uint32(src.CreateTime.Unix())
+	dst.NotificationUpdateTime = uint32(src.NotificationUpdateTime.Unix())
 	return nil
 }
 

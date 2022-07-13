@@ -145,10 +145,10 @@ func main() {
 		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
 	}
 	//Manager
-	managementGroup := r.Group("/manager")
-	{
-		managementGroup.POST("/delete_user", manage.DeleteUser) //1
-	}
+	//managementGroup := r.Group("/manager")
+	//{
+	//	managementGroup.POST("/delete_user", manage.DeleteUser) //1
+	//}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
 	{ //1

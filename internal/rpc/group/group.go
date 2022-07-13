@@ -243,13 +243,18 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		owner, err2 := imdb.GetGroupOwnerInfoByGroupID(v)
 		group, err := imdb.GetGroupInfoByGroupID(v)
 		if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
+			if group.Status == constant.GroupStatusDismissed {
+				log.NewError(req.OperationID, "constant.GroupStatusDismissed ", group)
+				continue
+			}
 			utils.CopyStructFields(&groupNode, group)
 			groupNode.CreateTime = uint32(group.CreateTime.Unix())
-			groupNode.MemberCount = uint32(num)
+			groupNode.NotificationUpdateTime = uint32(group.NotificationUpdateTime.Unix())
+			groupNode.MemberCount = num
 			groupNode.OwnerUserID = owner.UserID
 			resp.GroupList = append(resp.GroupList, &groupNode)
 		} else {
-			log.NewError(req.OperationID, "check nil ", num, owner, err, group)
+			log.NewError(req.OperationID, "check nil ", num, owner, err, group, err2)
 			continue
 		}
 		log.NewDebug(req.OperationID, "joinedGroup ", groupNode)
@@ -1129,6 +1134,10 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	//only administrators can set group information
 	var groupInfo db.Group
 	utils.CopyStructFields(&groupInfo, req.GroupInfoForSet)
+	if req.GroupInfoForSet.Notification != "" {
+		groupInfo.NotificationUserID = req.OpUserID
+		groupInfo.NotificationUpdateTime = time.Now()
+	}
 	err = imdb.SetGroupInfo(groupInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "SetGroupInfo failed ", err.Error(), groupInfo)
