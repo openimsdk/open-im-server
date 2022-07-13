@@ -52,6 +52,7 @@ message GroupMemberFullInfo {
   string operatorUserID = 9;
   string ex = 10;
   uint32 muteEndTime = 11;
+  string inviterUserID = 12;
 }
 
 message PublicUserInfo{
