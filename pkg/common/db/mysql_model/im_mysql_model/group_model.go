@@ -3,6 +3,7 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/utils"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
@@ -27,10 +28,15 @@ func InsertIntoGroup(groupInfo db.Group) error {
 		groupInfo.GroupName = "Group Chat"
 	}
 	groupInfo.CreateTime = time.Now()
+
+	if groupInfo.NotificationUpdateTime.Unix() < 0 {
+		groupInfo.NotificationUpdateTime = utils.UnixSecondToTime(0)
+	}
 	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Create(groupInfo).Error
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

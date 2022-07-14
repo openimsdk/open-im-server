@@ -106,6 +106,7 @@ type config struct {
 		DBMaxIdle     int      `yaml:"dbMaxIdle"`
 		DBMaxActive   int      `yaml:"dbMaxActive"`
 		DBIdleTimeout int      `yaml:"dbIdleTimeout"`
+		DBUserName    string   `yaml:"dbUserName"`
 		DBPassWord    string   `yaml:"dbPassWord"`
 		EnableCluster bool     `yaml:"enableCluster"`
 	}

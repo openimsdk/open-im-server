@@ -91,6 +91,9 @@ message JoinGroupReq{
   string ReqMessage = 2;
   string OpUserID = 3;
   string OperationID = 4;
+  int32 JoinSource = 5;
+  string InviterUserID = 6;
+
 }
 message JoinGroupResp{
   CommonResp CommonResp = 1;
