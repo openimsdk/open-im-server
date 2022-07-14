@@ -244,7 +244,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 				groupNode.NotificationUpdateTime = 0
 			}
 
-			groupNode.MemberCount = num
+			groupNode.MemberCount = uint32(num)
 			groupNode.OwnerUserID = owner.UserID
 			resp.GroupList = append(resp.GroupList, &groupNode)
 		} else {
