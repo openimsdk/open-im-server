@@ -107,6 +107,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
 	groupInfo.CreatorUserID = req.OpUserID
 	groupInfo.GroupID = groupId
+
+	if groupInfo.NotificationUpdateTime.Unix() < 0 {
+		groupInfo.NotificationUpdateTime = utils.UnixSecondToTime(0)
+	}
 	err := imdb.InsertIntoGroup(groupInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupInfo)
