@@ -57,7 +57,8 @@ func setGroupInfo(groupID string, groupInfo *open_im_sdk.GroupInfo) error {
 	}
 	err = utils2.GroupDBCopyOpenIM(groupInfo, group)
 	if err != nil {
-		return utils.Wrap(err, "GetGroupMemberNumByGroupID failed")
+		log.NewWarn("", "GroupDBCopyOpenIM failed ", groupID, err.Error())
+		return nil
 	}
 	return nil
 }
