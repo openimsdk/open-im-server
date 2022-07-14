@@ -8,26 +8,6 @@ message CommonResp{
   string errMsg = 2;
 }
 
-message GetUserInfoFromCacheReq{
-  repeated string userIDList = 1;
-  string operationID = 2;
-}
-
-message GetUserInfoFromCacheResp{
-  CommonResp  commonResp = 1;
-  repeated server_api_params.UserInfo userInfoList = 2;
-}
-
-
-message UpdateUserInfoToCacheReq{
-  repeated server_api_params.UserInfo userInfoList = 1;
-  string operationID = 2;
-}
-
-message UpdateUserInfoToCacheResp{
-  CommonResp commonResp = 1;
-}
-
 message GetFriendIDListFromCacheReq {
   string userID = 1;
   string operationID = 2;
@@ -38,24 +18,13 @@ message GetFriendIDListFromCacheResp {
   CommonResp commonResp = 2;
 }
 
-message AddFriendToCacheReq {
-   string userID = 1;
-   string friendID = 2;
-   string operationID = 3;
+message DelFriendIDListFromCacheReq {
+  string userID = 1;
+  string operationID = 2;
 }
 
-message AddFriendToCacheResp {
-  CommonResp commonResp = 1;
-}
-
-message ReduceFriendFromCacheReq {
-   string userID = 1;
-   string friendID = 2;
-   string operationID = 3;
-}
-
-message ReduceFriendFromCacheResp {
-  CommonResp commonResp = 1;
+message DelFriendIDListFromCacheResp {
+   CommonResp commonResp = 1;
 }
 
 message GetBlackIDListFromCacheReq {
@@ -68,23 +37,12 @@ message GetBlackIDListFromCacheResp {
   CommonResp commonResp = 2;
 }
 
-message AddBlackUserToCacheReq {
+message DelBlackIDListFromCacheReq {
   string userID = 1;
-  string blackUserID = 2;
-  string operationID = 3;
+  string operationID = 2;
 }
 
-message AddBlackUserToCacheResp {
-  CommonResp commonResp = 1;
-}
-
-message ReduceBlackUserFromCacheReq {
-  string userID = 1;
-  string blackUserID = 2;
-  string operationID = 3;
-}
-
-message ReduceBlackUserFromCacheResp {
+message DelBlackIDListFromCacheResp {
   CommonResp commonResp = 1;
 }
 
@@ -98,45 +56,34 @@ message GetGroupMemberIDListFromCacheResp {
   repeated string userIDList = 2;
 }
 
-message AddGroupMemberToCacheReq {
-  repeated string userIDList = 1;
-  string groupID = 2;
-  string operationID = 3;
+message DelGroupMemberIDListFromCacheReq {
+  string groupID = 1;
+  string operationID = 2;
 }
 
-message AddGroupMemberToCacheResp {
-  CommonResp commonResp = 1;
-}
-
-message ReduceGroupMemberFromCacheReq {
-  repeated string userIDList = 1;
-  string groupID = 2;
-  string operationID = 3;
-}
-
-message ReduceGroupMemberFromCacheResp {
+message DelGroupMemberIDListFromCacheResp {
   CommonResp commonResp = 1;
 }
 
 service cache{
-  // userInfo
-  rpc GetUserInfoFromCache(GetUserInfoFromCacheReq) returns(GetUserInfoFromCacheResp);
-  rpc UpdateUserInfoToCache(UpdateUserInfoToCacheReq) returns(UpdateUserInfoToCacheResp);
 
   // friendInfo
   rpc GetFriendIDListFromCache(GetFriendIDListFromCacheReq) returns(GetFriendIDListFromCacheResp);
-  rpc AddFriendToCache(AddFriendToCacheReq) returns(AddFriendToCacheResp);
-  rpc ReduceFriendFromCache(ReduceFriendFromCacheReq) returns(ReduceFriendFromCacheResp);
+
+  // for dtm
+  rpc DelFriendIDListFromCache(DelFriendIDListFromCacheReq) returns(DelFriendIDListFromCacheResp);
 
   // blackList
   rpc GetBlackIDListFromCache(GetBlackIDListFromCacheReq) returns(GetBlackIDListFromCacheResp);
-  rpc AddBlackUserToCache(AddBlackUserToCacheReq) returns(AddBlackUserToCacheResp);
-  rpc ReduceBlackUserFromCache(ReduceBlackUserFromCacheReq) returns(ReduceBlackUserFromCacheResp);
+
+  // for dtm
+  rpc DelBlackIDListFromCache(DelBlackIDListFromCacheReq) returns (DelBlackIDListFromCacheResp);
 
   // group
   rpc GetGroupMemberIDListFromCache(GetGroupMemberIDListFromCacheReq) returns(GetGroupMemberIDListFromCacheResp);
-  rpc AddGroupMemberToCache(AddGroupMemberToCacheReq) returns(AddGroupMemberToCacheResp);
-  rpc ReduceGroupMemberFromCache(ReduceGroupMemberFromCacheReq) returns(ReduceGroupMemberFromCacheResp);
+
+  // for dtm
+  rpc DelGroupMemberIDListFromCache(DelGroupMemberIDListFromCacheReq) returns(DelGroupMemberIDListFromCacheResp);
 }
 
 

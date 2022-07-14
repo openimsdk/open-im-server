@@ -37,7 +37,6 @@ type RedisClient struct {
 	client  *go_redis.Client
 	cluster *go_redis.ClusterClient
 	go_redis.UniversalClient
-	enableCluster bool
 }
 
 func key(dbAddress, dbName string) string {
@@ -90,16 +89,14 @@ func init() {
 	if err := createMongoIndex(mongoClient, cWorkMoment, true, "work_moment_id"); err != nil {
 		fmt.Println("work_moment_id", "index create failed", err.Error())
 	}
-
 	if err := createMongoIndex(mongoClient, cWorkMoment, false, "user_id", "-create_time"); err != nil {
 		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
 	}
-
 	if err := createMongoIndex(mongoClient, cTag, false, "user_id", "-create_time"); err != nil {
 		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
-		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
+		fmt.Println("tag_id", "index create failed", err.Error())
 	}
 	fmt.Println("create index success")
 	DB.mongoClient = mongoClient
@@ -145,14 +142,12 @@ func init() {
 		}
 	}
 
-	DB.rc = rockscache.NewClient(go_redis.NewClient(&go_redis.Options{
+	DB.Rc = rockscache.NewClient(go_redis.NewClient(&go_redis.Options{
 		Addr:     config.Config.Redis.DBAddress[0],
 		Password: config.Config.Redis.DBPassWord, // no password set
 		DB:       0,                              // use default DB
 		PoolSize: 100,                            // 连接池大小
 	}), rockscache.NewDefaultOptions())
-	DB.rc.Options.StrongConsistency = true
-
 }
 
 func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {

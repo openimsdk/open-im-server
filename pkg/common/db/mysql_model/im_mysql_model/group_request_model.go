@@ -20,27 +20,18 @@ import (
 //}
 
 func UpdateGroupRequest(groupRequest db.GroupRequest) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
 	if groupRequest.HandledTime.Unix() < 0 {
 		groupRequest.HandledTime = utils.UnixSecondToTime(0)
 	}
-	return dbConn.Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Update(&groupRequest).Error
+	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Updates(&groupRequest).Error
 }
 
 func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
 	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
-
 	if toInsertInfo.HandledTime.Unix() < 0 {
 		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
 	}
-	u := dbConn.Table("group_requests").Where("group_id=? and user_id=?", toInsertInfo.GroupID, toInsertInfo.UserID).Update(&toInsertInfo)
+	u := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", toInsertInfo.GroupID, toInsertInfo.UserID).Updates(&toInsertInfo)
 	if u.RowsAffected != 0 {
 		return nil
 	}
@@ -50,7 +41,7 @@ func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
 		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
 	}
 
-	err = dbConn.Table("group_requests").Create(&toInsertInfo).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Create(&toInsertInfo).Error
 	if err != nil {
 		return err
 	}
@@ -58,12 +49,8 @@ func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
 }
 
 func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*db.GroupRequest, error) {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return nil, err
-	}
 	var groupRequest db.GroupRequest
-	err = dbConn.Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Take(&groupRequest).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Take(&groupRequest).Error
 	if err != nil {
 		return nil, err
 	}
@@ -71,24 +58,12 @@ func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*db.GroupRequest
 }
 
 func DelGroupRequestByGroupIDAndUserID(groupID, userID string) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
-	err = dbConn.Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(db.GroupRequest{}).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(db.GroupRequest{}).Error
 }
 
 func GetGroupRequestByGroupID(groupID string) ([]db.GroupRequest, error) {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return nil, err
-	}
 	var groupRequestList []db.GroupRequest
-	err = dbConn.Table("group_requests").Where("group_id=?", groupID).Find(&groupRequestList).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=?", groupID).Find(&groupRequestList).Error
 	if err != nil {
 		return nil, err
 	}
@@ -119,12 +94,7 @@ func GetGroupApplicationList(userID string) ([]db.GroupRequest, error) {
 
 func GetUserReqGroupByUserID(userID string) ([]db.GroupRequest, error) {
 	var groupRequestList []db.GroupRequest
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return nil, err
-	}
-	dbConn.LogMode(false)
-	err = dbConn.Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
 	return groupRequestList, err
 }
 

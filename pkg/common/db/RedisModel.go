@@ -9,7 +9,6 @@ import (
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	go_redis "github.com/go-redis/redis/v8"
@@ -18,6 +17,7 @@ import (
 	"strconv"
 	"time"
 )
+
 const (
 	accountTempCode               = "ACCOUNT_TEMP_CODE"
 	resetPwdTempCode              = "RESET_PWD_TEMP_CODE"
@@ -27,16 +27,11 @@ const (
 	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
 	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
 	getuiToken                    = "GETUI_TOKEN"
-	userInfoCache                 = "USER_INFO_CACHE:"
-	friendRelationCache           = "FRIEND_RELATION_CACHE:"
-	blackListCache                = "BLACK_LIST_CACHE:"
-	groupCache                    = "GROUP_CACHE:"
 	messageCache                  = "MESSAGE_CACHE:"
 	SignalCache                   = "SIGNAL_CACHE:"
 	SignalListCache               = "SIGNAL_LIST_CACHE:"
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
 )
-
 
 //func  (d *  DataBases)pubMessage(channel, msg string) {
 //   d.rdb.Publish(context.Background(),channel,msg)
@@ -345,85 +340,4 @@ func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
 func (d *DataBases) GetGetuiToken() (string, error) {
 	result := d.rdb.Get(context.Background(), getuiToken)
 	return result.String(), result.Err()
-}
-
-func (d *DataBases) AddFriendToCache(userID string, friendIDList ...string) error {
-	var IDList []interface{}
-	for _, id := range friendIDList {
-		IDList = append(IDList, id)
-	}
-	return d.rdb.SAdd(context.Background(), friendRelationCache+userID, IDList...).Err()
-}
-
-func (d *DataBases) ReduceFriendToCache(userID string, friendIDList ...string) error {
-	var IDList []interface{}
-	for _, id := range friendIDList {
-		IDList = append(IDList, id)
-	}
-	return d.rdb.SRem(context.Background(), friendRelationCache+userID, IDList...).Err()
-}
-
-func (d *DataBases) GetFriendIDListFromCache(userID string) ([]string, error) {
-	result := d.rdb.SMembers(context.Background(), friendRelationCache+userID)
-	return result.Result()
-}
-
-func (d *DataBases) AddBlackUserToCache(userID string, blackList ...string) error {
-	var IDList []interface{}
-	for _, id := range blackList {
-		IDList = append(IDList, id)
-	}
-	return d.rdb.SAdd(context.Background(), blackListCache+userID, IDList...).Err()
-}
-
-func (d *DataBases) ReduceBlackUserFromCache(userID string, blackList ...string) error {
-	var IDList []interface{}
-	for _, id := range blackList {
-		IDList = append(IDList, id)
-	}
-	return d.rdb.SRem(context.Background(), blackListCache+userID, IDList...).Err()
-}
-
-func (d *DataBases) GetBlackListFromCache(userID string) ([]string, error) {
-	result := d.rdb.SMembers(context.Background(), blackListCache+userID)
-	return result.Result()
-}
-
-func (d *DataBases) AddGroupMemberToCache(groupID string, userIDList ...string) error {
-	var IDList []interface{}
-	for _, id := range userIDList {
-		IDList = append(IDList, id)
-	}
-	return d.rdb.SAdd(context.Background(), groupCache+groupID, IDList...).Err()
-}
-
-func (d *DataBases) ReduceGroupMemberFromCache(groupID string, userIDList ...string) error {
-	var IDList []interface{}
-	for _, id := range userIDList {
-		IDList = append(IDList, id)
-	}
-	return d.rdb.SRem(context.Background(), groupCache+groupID, IDList...).Err()
-}
-
-func (d *DataBases) GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
-	result := d.rdb.SMembers(context.Background(), groupCache+groupID)
-	return result.Result()
-}
-
-func (d *DataBases) SetUserInfoToCache(userID string, m map[string]interface{}) error {
-	return d.rdb.HSet(context.Background(), userInfoCache+userID, m).Err()
-}
-
-func (d *DataBases) GetUserInfoFromCache(userID string) (*pbCommon.UserInfo, error) {
-	result, err := d.rdb.HGetAll(context.Background(), userInfoCache+userID).Result()
-	bytes, err := json.Marshal(result)
-	if err != nil {
-		return nil, err
-	}
-	userInfo := &pbCommon.UserInfo{}
-	if err := proto.Unmarshal(bytes, userInfo); err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(bytes, userInfo)
-	return userInfo, err
 }

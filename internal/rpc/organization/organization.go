@@ -182,7 +182,7 @@ func (s *organizationServer) UpdateDepartment(ctx context.Context, req *rpc.Upda
 
 func (s *organizationServer) GetSubDepartment(ctx context.Context, req *rpc.GetSubDepartmentReq) (*rpc.GetSubDepartmentResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	err, departmentList := imdb.GetSubDepartmentList(req.DepartmentID)
+	departmentList, err := imdb.GetSubDepartmentList(req.DepartmentID)
 	if err != nil {
 		errMsg := req.OperationID + " " + "GetDepartment failed " + err.Error()
 		log.Error(req.OperationID, errMsg)
@@ -477,7 +477,7 @@ func (s *organizationServer) DeleteOrganizationUser(ctx context.Context, req *rp
 
 func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.GetDepartmentMemberReq) (*rpc.GetDepartmentMemberResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	err, departmentMemberList := imdb.GetDepartmentMemberList(req.DepartmentID)
+	departmentMemberList, err := imdb.GetDepartmentMemberList(req.DepartmentID)
 	if err != nil {
 		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
