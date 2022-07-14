@@ -114,7 +114,7 @@ type GroupMember struct {
 	RoleLevel      int32     `gorm:"column:role_level"`
 	JoinTime       time.Time `gorm:"column:join_time"`
 	JoinSource     int32     `gorm:"column:join_source"`
-	InviterUserID  string    `gorm:"column:inviter_user_id;primary_key;size:64"`
+	InviterUserID  string    `gorm:"column:inviter_user_id;size:64"`
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
 	MuteEndTime    time.Time `gorm:"column:mute_end_time"`
 	Ex             string    `gorm:"column:ex;size:1024"`
@@ -141,7 +141,7 @@ type GroupRequest struct {
 	HandleUserID  string    `gorm:"column:handle_user_id;size:64"`
 	HandledTime   time.Time `gorm:"column:handle_time"`
 	JoinSource    int32     `gorm:"column:join_source"`
-	InviterUserID string    `gorm:"column:inviter_user_id;primary_key;size:64"`
+	InviterUserID string    `gorm:"column:inviter_user_id;size:64"`
 	Ex            string    `gorm:"column:ex;size:1024"`
 }
 

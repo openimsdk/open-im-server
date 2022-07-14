@@ -36,6 +36,9 @@ func InsertIntoGroup(groupInfo db.Group) error {
 	if err != nil {
 		return err
 	}
+	if groupInfo.NotificationUpdateTime.Unix() < 0 {
+		groupInfo.NotificationUpdateTime = time.Now()
+	}
 	return nil
 }
 
