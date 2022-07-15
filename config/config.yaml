@@ -175,7 +175,7 @@ rpcregistername: #rpc注册服务名，默认即可
 log:
   storageLocation: ../logs/
   rotationTime: 24
-  remainRotationCount: 3 #日志数量
+  remainRotationCount: 2 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
   remainLogLevel: 6
   elasticSearchSwitch: false
