@@ -42,7 +42,13 @@ func DeleteUser(c *gin.Context) {
 	}
 
 	log.NewInfo(params.OperationID, "DeleteUser args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewUserClient(etcdConn)
 
 	RpcResp, err := client.DeleteUsers(context.Background(), req)
@@ -58,6 +64,19 @@ func DeleteUser(c *gin.Context) {
 	log.NewInfo(req.OperationID, "DeleteUser api return", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
+// @Summary 获取所有用户uid列表
+// @Description 获取所有用户uid列表
+// @Tags 用户相关
+// @ID GetAllUsersUid
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetAllUsersUidReq true "请求体"
+// @Produce json
+// @Success 0 {object} api.GetAllUsersUidResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /user/get_all_users_uid [post]
 func GetAllUsersUid(c *gin.Context) {
 	params := api.GetAllUsersUidReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -73,12 +92,18 @@ func GetAllUsersUid(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(params.OperationID, "GetAllUsersUid args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewUserClient(etcdConn)
 	RpcResp, err := client.GetAllUserID(context.Background(), req)
 	if err != nil {
@@ -94,6 +119,19 @@ func GetAllUsersUid(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 
 }
+
+// @Summary 检查列表账户注册状态，并且返回结果
+// @Description 传入UserIDList检查列表账户注册状态，并且返回结果
+// @Tags 用户相关
+// @ID AccountCheck
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.AccountCheckReq true "请求体"
+// @Produce json
+// @Success 0 {object} api.AccountCheckResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /user/account_check [post]
 func AccountCheck(c *gin.Context) {
 	params := api.AccountCheckReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -109,12 +147,18 @@ func AccountCheck(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(params.OperationID, "AccountCheck args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewUserClient(etcdConn)
 
 	RpcResp, err := client.AccountCheck(context.Background(), req)

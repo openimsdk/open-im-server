@@ -30,7 +30,23 @@ message UserTokenResp {
 }
 
 
+
+message ForceLogoutReq {
+    int32  Platform = 1;
+    string FromUserID = 2;
+    string OpUserID = 3;
+    string OperationID = 4;
+}
+message ForceLogoutResp {
+    CommonResp CommonResp = 1;
+}
+
+
+
+
+
 service Auth {
     rpc UserRegister(UserRegisterReq) returns(UserRegisterResp);
     rpc UserToken(UserTokenReq) returns(UserTokenResp);
+    rpc ForceLogout(ForceLogoutReq) returns(ForceLogoutResp);
 }

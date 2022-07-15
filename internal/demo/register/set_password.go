@@ -10,20 +10,24 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"math/big"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 type ParamsSetPassword struct {
 	Email            string `json:"email"`
-	Name             string `json:"name"`
+	Nickname         string `json:"nickname"`
 	PhoneNumber      string `json:"phoneNumber"`
-	Password         string `json:"password"`
+	Password         string `json:"password" binding:"required"`
 	VerificationCode string `json:"verificationCode"`
 	Platform         int32  `json:"platform" binding:"required,min=1,max=7"`
 	Ex               string `json:"ex"`
+	FaceURL          string `json:"faceURL"`
 	OperationID      string `json:"operationID" binding:"required"`
+	AreaCode         string `json:"areaCode"`
 }
 
 func SetPassword(c *gin.Context) {
@@ -39,11 +43,11 @@ func SetPassword(c *gin.Context) {
 	} else {
 		account = params.PhoneNumber
 	}
-	if params.Name == "" {
-		params.Name = account
+	if params.Nickname == "" {
+		params.Nickname = account
 	}
 	if params.VerificationCode != config.Config.Demo.SuperCode {
-		accountKey := account + "_" + constant.VerificationCodeForRegisterSuffix
+		accountKey := params.AreaCode + account + "_" + constant.VerificationCodeForRegisterSuffix
 		v, err := db.DB.GetAccountCode(accountKey)
 		if err != nil || v != params.VerificationCode {
 			log.NewError(params.OperationID, "password Verification code error", account, params.VerificationCode)
@@ -53,13 +57,21 @@ func SetPassword(c *gin.Context) {
 			return
 		}
 	}
-	url := fmt.Sprintf("http://%s:%d/auth/user_register", utils.ServerIP, config.Config.Api.GinPort[0])
+	//userID := utils.Base64Encode(account)
+
+	userID := utils.Md5(params.OperationID + strconv.FormatInt(time.Now().UnixNano(), 10))
+	bi := big.NewInt(0)
+	bi.SetString(userID[0:8], 16)
+	userID = bi.String()
+
+	url := config.Config.Demo.ImAPIURL + "/auth/user_register"
 	openIMRegisterReq := api.UserRegisterReq{}
 	openIMRegisterReq.OperationID = params.OperationID
 	openIMRegisterReq.Platform = params.Platform
-	openIMRegisterReq.UserID = account
-	openIMRegisterReq.Nickname = params.Name
+	openIMRegisterReq.UserID = userID
+	openIMRegisterReq.Nickname = params.Nickname
 	openIMRegisterReq.Secret = config.Config.Secret
+	openIMRegisterReq.FaceURL = params.FaceURL
 	openIMRegisterResp := api.UserRegisterResp{}
 	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
 	if err != nil {
@@ -76,8 +88,8 @@ func SetPassword(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register failed: " + openIMRegisterResp.ErrMsg})
 		return
 	}
-	log.Info(params.OperationID, "begin store mysql", account, params.Password)
-	err = im_mysql_model.SetPassword(account, params.Password, params.Ex)
+	log.Info(params.OperationID, "begin store mysql", account, params.Password, "info", params.FaceURL, params.Nickname)
+	err = im_mysql_model.SetPassword(account, params.Password, params.Ex, userID, params.AreaCode)
 	if err != nil {
 		log.NewError(params.OperationID, "set phone number password error", account, "err", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": err.Error()})
@@ -85,7 +97,7 @@ func SetPassword(c *gin.Context) {
 	}
 	log.Info(params.OperationID, "end setPassword", account, params.Password)
 	// demo onboarding
-	onboardingProcess(params.OperationID, account, params.Name)
+	onboardingProcess(params.OperationID, userID, params.Nickname, params.FaceURL, params.AreaCode+params.PhoneNumber, params.Email)
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": openIMRegisterResp.UserToken})
 	return
 }

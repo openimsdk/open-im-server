@@ -6,6 +6,8 @@ type Register struct {
 	Account  string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
 	Password string `gorm:"column:password;type:varchar(255)" json:"password"`
 	Ex       string `gorm:"column:ex;size:1024" json:"ex"`
+	UserID   string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
+	AreaCode string `gorm:"column:area_code;type:varchar(255)"`
 }
 
 //
@@ -75,16 +77,17 @@ func (FriendRequest) TableName() string {
 type Group struct {
 	//`json:"operationID" binding:"required"`
 	//`protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"` `json:"operationID" binding:"required"`
-	GroupID       string    `gorm:"column:group_id;primary_key;size:64" json:"groupID" binding:"required"`
-	GroupName     string    `gorm:"column:name;size:255" json:"groupName"`
-	Notification  string    `gorm:"column:notification;size:255" json:"notification"`
-	Introduction  string    `gorm:"column:introduction;size:255" json:"introduction"`
-	FaceURL       string    `gorm:"column:face_url;size:255" json:"faceURL"`
-	CreateTime    time.Time `gorm:"column:create_time"`
-	Ex            string    `gorm:"column:ex" json:"ex;size:1024" json:"ex"`
-	Status        int32     `gorm:"column:status"`
-	CreatorUserID string    `gorm:"column:creator_user_id;size:64"`
-	GroupType     int32     `gorm:"column:group_type"`
+	GroupID          string    `gorm:"column:group_id;primary_key;size:64" json:"groupID" binding:"required"`
+	GroupName        string    `gorm:"column:name;size:255" json:"groupName"`
+	Notification     string    `gorm:"column:notification;size:255" json:"notification"`
+	Introduction     string    `gorm:"column:introduction;size:255" json:"introduction"`
+	FaceURL          string    `gorm:"column:face_url;size:255" json:"faceURL"`
+	CreateTime       time.Time `gorm:"column:create_time"`
+	Ex               string    `gorm:"column:ex" json:"ex;size:1024" json:"ex"`
+	Status           int32     `gorm:"column:status"`
+	CreatorUserID    string    `gorm:"column:creator_user_id;size:64"`
+	GroupType        int32     `gorm:"column:group_type"`
+	NeedVerification int32     `gorm:"column:need_verification"`
 }
 
 //message GroupMemberFullInfo {
@@ -147,16 +150,17 @@ type GroupRequest struct {
 //int32 AppMangerLevel = 10;
 //open_im_sdk.User == imdb.User
 type User struct {
-	UserID         string    `gorm:"column:user_id;primary_key;size:64"`
-	Nickname       string    `gorm:"column:name;size:255"`
-	FaceURL        string    `gorm:"column:face_url;size:255"`
-	Gender         int32     `gorm:"column:gender"`
-	PhoneNumber    string    `gorm:"column:phone_number;size:32"`
-	Birth          time.Time `gorm:"column:birth"`
-	Email          string    `gorm:"column:email;size:64"`
-	Ex             string    `gorm:"column:ex;size:1024"`
-	CreateTime     time.Time `gorm:"column:create_time"`
-	AppMangerLevel int32     `gorm:"column:app_manger_level"`
+	UserID           string    `gorm:"column:user_id;primary_key;size:64"`
+	Nickname         string    `gorm:"column:name;size:255"`
+	FaceURL          string    `gorm:"column:face_url;size:255"`
+	Gender           int32     `gorm:"column:gender"`
+	PhoneNumber      string    `gorm:"column:phone_number;size:32"`
+	Birth            time.Time `gorm:"column:birth"`
+	Email            string    `gorm:"column:email;size:64"`
+	Ex               string    `gorm:"column:ex;size:1024"`
+	CreateTime       time.Time `gorm:"column:create_time"`
+	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
+	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 }
 
 //message BlackInfo{

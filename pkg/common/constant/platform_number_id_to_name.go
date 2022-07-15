@@ -27,7 +27,7 @@ const (
 	TerminalMobile = "Mobile"
 )
 
-var PlatformID2Name = map[int32]string{
+var PlatformID2Name = map[int]string{
 	IOSPlatformID:     IOSPlatformStr,
 	AndroidPlatformID: AndroidPlatformStr,
 	WindowsPlatformID: WindowsPlatformStr,
@@ -36,7 +36,7 @@ var PlatformID2Name = map[int32]string{
 	MiniWebPlatformID: MiniWebPlatformStr,
 	LinuxPlatformID:   LinuxPlatformStr,
 }
-var PlatformName2ID = map[string]int32{
+var PlatformName2ID = map[string]int{
 	IOSPlatformStr:     IOSPlatformID,
 	AndroidPlatformStr: AndroidPlatformID,
 	WindowsPlatformStr: WindowsPlatformID,
@@ -55,10 +55,10 @@ var Platform2class = map[string]string{
 	LinuxPlatformStr:   TerminalPC,
 }
 
-func PlatformIDToName(num int32) string {
+func PlatformIDToName(num int) string {
 	return PlatformID2Name[num]
 }
-func PlatformNameToID(name string) int32 {
+func PlatformNameToID(name string) int {
 	return PlatformName2ID[name]
 }
 func PlatformNameToClass(name string) string {

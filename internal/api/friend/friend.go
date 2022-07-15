@@ -16,6 +16,18 @@ import (
 	"strings"
 )
 
+// @Summary 添加黑名单
+// @Description 添加黑名单
+// @Tags 好友相关
+// @ID AddBlack
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.AddBlacklistReq true "fromUserID为设置的用户 <br> toUserID为被设置的用户"
+// @Produce json
+// @Success 0 {object} api.AddBlacklistResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/add_black [post]
 func AddBlack(c *gin.Context) {
 	params := api.AddBlacklistReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -31,12 +43,12 @@ func AddBlack(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	log.NewInfo(params.OperationID, "AddBlacklist args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddBlacklist(context.Background(), req)
 	if err != nil {
@@ -49,6 +61,18 @@ func AddBlack(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 批量加好友
+// @Description 批量加好友
+// @Tags 好友相关
+// @ID ImportFriend
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.ImportFriendReq true "fromUserID批量加好友的用户ID<br> friendUserIDList为"
+// @Produce json
+// @Success 0 {object} api.ImportFriendResp "data列表中对象的result-1为添加该用户失败<br>0为成功"
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/import_friend [post]
 func ImportFriend(c *gin.Context) {
 	params := api.ImportFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -64,13 +88,19 @@ func ImportFriend(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.OperationID, "ImportFriend args ", req.String())
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.ImportFriend(context.Background(), req)
 	if err != nil {
@@ -91,6 +121,18 @@ func ImportFriend(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 添加好友
+// @Description 添加好友
+// @Tags 好友相关
+// @ID AddFriend
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.AddFriendReq true "reqMsg为申请信息 <br> fromUserID为申请用户 <br> toUserID为被添加用户"
+// @Produce json
+// @Success 0 {object} api.AddFriendResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/add_friend [post]
 func AddFriend(c *gin.Context) {
 	params := api.AddFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -108,13 +150,19 @@ func AddFriend(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "AddFriend args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddFriend(context.Background(), req)
 	if err != nil {
@@ -128,6 +176,18 @@ func AddFriend(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 同意/拒绝好友请求
+// @Description 同意/拒绝好友请求
+// @Tags 好友相关
+// @ID AddFriendResponse
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.AddFriendResponseReq true "fromUserID同意/拒绝的用户ID<br>toUserID为申请用户D<br>handleMsg为处理信息<br>flag为具体操作, 1为同意, 2为拒绝"
+// @Produce json
+// @Success 0 {object} api.AddFriendResponseResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/add_friend_response [post]
 func AddFriendResponse(c *gin.Context) {
 	params := api.AddFriendResponseReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -146,14 +206,21 @@ func AddFriendResponse(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
 		return
 	}
 
 	utils.CopyStructFields(req, &params)
 	log.NewInfo(req.CommID.OperationID, "AddFriendResponse args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.AddFriendResponse(context.Background(), req)
 	if err != nil {
@@ -167,6 +234,18 @@ func AddFriendResponse(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 删除好友
+// @Description 删除好友
+// @Tags 好友相关
+// @ID DeleteFriend
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.DeleteFriendReq true "fromUserID为操作用户<br>toUserID为被删除用户"
+// @Produce json
+// @Success 0 {object} api.DeleteFriendResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/delete_friend [post]
 func DeleteFriend(c *gin.Context) {
 	params := api.DeleteFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -183,13 +262,19 @@ func DeleteFriend(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "DeleteFriend args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.DeleteFriend(context.Background(), req)
 	if err != nil {
@@ -203,6 +288,18 @@ func DeleteFriend(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 获取黑名单列表
+// @Description 获取黑名单列表
+// @Tags 好友相关
+// @ID GetBlacklist
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetBlackListReq true "fromUserID要获取黑名单的用户"
+// @Produce json
+// @Success 0 {object} api.GetBlackListResp{data=[]open_im_sdk.PublicUserInfo}
+// @Failure 500 {object} api.Swagger400Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger500Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/get_black_list [post]
 func GetBlacklist(c *gin.Context) {
 	params := api.GetBlackListReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -219,13 +316,19 @@ func GetBlacklist(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "GetBlacklist args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetBlacklist(context.Background(), req)
 	if err != nil {
@@ -245,6 +348,18 @@ func GetBlacklist(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 设置好友备注
+// @Description 设置好友备注
+// @Tags 好友相关
+// @ID SetFriendRemark
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.SetFriendRemarkReq true "fromUserID为设置的用户<br> toUserID为被设置的用户<br> remark为好友备注"
+// @Produce json
+// @Success 0 {object} api.SetFriendRemarkResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/set_friend_remark [post]
 func SetFriendRemark(c *gin.Context) {
 	params := api.SetFriendRemarkReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -262,13 +377,19 @@ func SetFriendRemark(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "SetFriendComment args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.SetFriendRemark(context.Background(), req)
 	if err != nil {
@@ -282,6 +403,18 @@ func SetFriendRemark(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 把用户移除黑名单
+// @Description 把用户移除黑名单
+// @Tags 好友相关
+// @ID RemoveBlack
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.RemoveBlackListReq true "fromUserID要获取黑名单的用户"
+// @Produce json
+// @Success 0 {object} api.RemoveBlackListResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/remove_black [post]
 func RemoveBlack(c *gin.Context) {
 	params := api.RemoveBlackListReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -298,12 +431,19 @@ func RemoveBlack(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "RemoveBlacklist args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.RemoveBlacklist(context.Background(), req)
 	if err != nil {
@@ -316,6 +456,18 @@ func RemoveBlack(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 检查用户之间是否为好友
+// @Description 检查用户之间是否为好友
+// @Tags 好友相关
+// @ID IsFriend
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.IsFriendReq true "fromUserID为请求用户<br> toUserID为要检查的用户"
+// @Produce json
+// @Success 0 {object} api.IsFriendResp
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/is_friend [post]
 func IsFriend(c *gin.Context) {
 	params := api.IsFriendReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -332,13 +484,19 @@ func IsFriend(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "IsFriend args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.IsFriend(context.Background(), req)
 	if err != nil {
@@ -353,6 +511,18 @@ func IsFriend(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 获取用户的好友列表
+// @Description 获取用户的好友列表
+// @Tags 好友相关
+// @ID GetFriendList
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetFriendListReq true "fromUserID为要获取好友列表的用户ID"
+// @Produce json
+// @Success 0 {object} api.GetFriendListResp{data=[]open_im_sdk.FriendInfo}
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/get_friend_list [post]
 func GetFriendList(c *gin.Context) {
 	params := api.GetFriendListReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -369,13 +539,19 @@ func GetFriendList(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "GetFriendList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetFriendList(context.Background(), req)
 	if err != nil {
@@ -391,6 +567,18 @@ func GetFriendList(c *gin.Context) {
 	//c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 获取好友申请列表
+// @Description 删除好友
+// @Tags 好友相关
+// @ID GetFriendApplyList
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetFriendApplyListReq true "fromUserID为要获取申请列表的用户ID"
+// @Produce json
+// @Success 0 {object} api.GetFriendApplyListResp{data=[]open_im_sdk.FriendRequest}
+// @Failure 500 {object} api.Swagger400Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/get_friend_apply_list [post]
 func GetFriendApplyList(c *gin.Context) {
 	params := api.GetFriendApplyListReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -407,13 +595,19 @@ func GetFriendApplyList(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 
 	RpcResp, err := client.GetFriendApplyList(context.Background(), req)
@@ -429,6 +623,18 @@ func GetFriendApplyList(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+// @Summary 获取自己的好友申请列表
+// @Description 获取自己的好友申请列表
+// @Tags 好友相关
+// @ID GetSelfFriendApplyList
+// @Accept json
+// @Param token header string true "im token"
+// @Param req body api.GetSelfApplyListReq true "fromUserID为自己的用户ID"
+// @Produce json
+// @Success 0 {object} api.GetSelfApplyListResp{data=[]open_im_sdk.FriendRequest}
+// @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
+// @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
+// @Router /friend/get_self_friend_apply_list [post]
 func GetSelfFriendApplyList(c *gin.Context) {
 	params := api.GetSelfApplyListReq{}
 	if err := c.BindJSON(&params); err != nil {
@@ -445,13 +651,19 @@ func GetSelfFriendApplyList(c *gin.Context) {
 	if !ok {
 		errMsg := req.CommID.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.CommID.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
 	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.CommID.OperationID)
+	if etcdConn == nil {
+		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.CommID.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
 	client := rpc.NewFriendClient(etcdConn)
 	RpcResp, err := client.GetSelfApplyList(context.Background(), req)
 	if err != nil {

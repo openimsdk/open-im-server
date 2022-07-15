@@ -1,4 +1,5 @@
 # The class cannot be named by Pascal or camel case.
+# The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
 serverversion: 2.0.0
@@ -6,6 +7,8 @@ serverversion: 2.0.0
 etcd:
   etcdSchema: openim  #默认即可
   etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
+
+k8sMod: false #开启k8s模式 使用pod里面环境变量请求services调用服务 而并非etcd
 
 mysql:
   dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
@@ -20,22 +23,23 @@ mysql:
 
 mongo:
   dbUri: ""#当dbUri值不为空则直接使用该值
-  dbAddress: [ 127.0.0.1:37017 ] #mongo地址 目前仅支持单机，默认即可
+  dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
   dbDirect: false
-  dbTimeout: 10
+  dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
   dbSource: admin
-  dbUserName: #mongo用户名，建议先不设置
-  dbPassword: #mongo密码，建议先不设置
-  dbMaxPoolSize: 20
+  dbUserName:  #mongo用户名，建议先不设置
+  dbPassword:  #mongo密码，建议先不设置
+  dbMaxPoolSize: 100
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
 
 redis:
-  dbAddress: 127.0.0.1:16379 #redis地址 目前仅支持单机，默认即可
+  dbAddress: [ 127.0.0.1:16379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
   dbPassWord: openIM #redis密码 建议修改
+  enableCluster: false #如果外部redis以集群方式启动，需要打开此开关
 
 kafka:
   ws2mschat:
@@ -44,12 +48,15 @@ kafka:
   ws2mschatoffline:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat_offline"
+  msgtomongo:
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+    topic: "msg_to_mongo"
   ms2pschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ms2ps_chat"
   consumergroupid:
-    msgToMongo: mongo
-    msgToMongoOffline: mongo_offline
+    msgToTransfer: mongo
+    msgToMongo: mongo_ex
     msgToMySql: mysql
     msgToPush: push
 
@@ -63,10 +70,10 @@ kafka:
 #如果是单机模式，用0.0.0.0或者不填，默认即可
 serverip: 0.0.0.0
 
+#作为rpc时，注册到etcd的地址，单机默认即可，如果是集群部署，需要修改（具体使用内网地址还是外网地址，要依情况而定，目的是api/gateway能访问到）
 rpcRegisterIP: 127.0.0.1
+#默认即可
 listenIP: 0.0.0.0
-
-
 
 # endpoints 内部组件间访问的端点host名称，访问时，可以内部直接访问 host:port 来访问
 endpoints:
@@ -215,6 +222,7 @@ manager:
   #app管理员userID和对应的secret  建议修改。 用于管理后台登录，也可以用户管理后台对应的api
   appManagerUid: [ "openIM123456","openIM654321", "openIM333", "openIMAdmin"]
   secrets: [ "openIM1","openIM2", "openIM333", "openIMAdmin"]
+  appSysNotificationName: "系统通知"
 
 secret: tuoyun
 # 多端互踢策略
@@ -222,7 +230,15 @@ secret: tuoyun
 multiloginpolicy: 1
 
 #chat log insert to db
-chatPersistenceMysql: true
+chatpersistencemysql: true
+#可靠性存储
+reliablestorage: false
+#消息缓存时间
+msgCacheTimeout: 86400
+#群聊已读开启
+groupMessageHasReadReceiptEnable: true
+#单聊已读开启
+singleMessageHasReadReceiptEnable: true
 
 #token config
 tokenpolicy:
@@ -245,12 +261,13 @@ messageverify:
 iospush:
   pushSound: "xxx"
   badgeCount: true
+  production: false
 
 callback:
   # callback url 需要自行更换callback url
   callbackUrl : "http://127.0.0.1:8080/callback"
   # 开启关闭操作前后回调的配置
-  callbackbeforeSendSingleMsg:
+  callbackBeforeSendSingleMsg:
     enable: false # 回调是否启用
     callbackTimeOut: 2 # 回调超时时间
     callbackFailedContinue: true # 回调超时是否继续执行代码
@@ -268,7 +285,16 @@ callback:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true
-
+  callbackUserOnline:
+    enable: false
+    callbackTimeOut: 2
+  callbackUserOffline:
+    enable: false
+    callbackTimeOut: 2
+  callbackOfflinePush:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续离线推送
 
 notification:
   groupCreated:
@@ -655,7 +681,6 @@ notification:
       defaultTips:
         tips: "welcome user join department"
 
-
 #---------------demo configuration---------------------#
 #The following configuration items are applied to openIM Demo configuration
 #是否启动demo，如果自身没有账号体系，设置为true
@@ -664,14 +689,23 @@ demo:
   listenIP: 0.0.0.0
   #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
   openImDemoPort: [ 10004 ]
-  alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，必须修改
+  alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，enable为true则必须修改，阿里云为默认短信验证方式
     accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
     accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
     signName: 托云信息技术
     verificationCodeTemplateCode: SMS_226810164
+    enable: false
+  tencentsms: #腾讯云短信配置，在腾讯云申请成功后，修改以下选项，enable为true则必须修改
+    appID:  2400000648
+    region: "ap-singapore"
+    secretID: IKIDra4JPGsFMDwQedMq42lESQBgwwgBQQAe
+    secretKey: HI6fz4uUotjJdiX6QUIrAE2buxlKdgU2
+    signName: ""
+    verificationCodeTemplateCode: 2902877
+    enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   #  second
-  codeTTL: 300
+  codeTTL: 60
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
     title: "openIM"
     senderMail: "765567899@qq.com"
@@ -679,7 +713,7 @@ demo:
     smtpAddr: "smtp.qq.com"
     smtpPort: 25   #需开放此端口 出口方向
   testDepartMentID: 001
+  imAPIURL: http://127.0.0.1:10002
 
 rtc:
-  port: 11300
-  address: 127.0.0.1
+  signalTimeout: 35

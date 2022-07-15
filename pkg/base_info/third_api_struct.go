@@ -19,11 +19,18 @@ type MinioUploadFileReq struct {
 	FileType    int    `form:"fileType" binding:"required"`
 }
 
-type MinioUploadFileResp struct {
+type MinioUploadFile struct {
 	URL             string `json:"URL"`
 	NewName         string `json:"newName"`
 	SnapshotURL     string `json:"snapshotURL,omitempty"`
 	SnapshotNewName string `json:"snapshotName,omitempty"`
+}
+
+type MinioUploadFileResp struct {
+	CommResp
+	Data struct {
+		MinioUploadFile
+	} `json:"data"`
 }
 
 type UploadUpdateAppReq struct {
@@ -56,4 +63,37 @@ type GetDownloadURLResp struct {
 		Version       string `json:"version"`
 		UpdateLog     string `json:"update_log"`
 	} `json:"data"`
+}
+
+type GetRTCInvitationInfoReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	ClientMsgID string `json:"clientMsgID" binding:"required"`
+}
+
+type GetRTCInvitationInfoResp struct {
+	CommResp
+	Data struct {
+		OpUserID   string `json:"opUserID"`
+		Invitation struct {
+			InviterUserID     string   `json:"inviterUserID"`
+			InviteeUserIDList []string `json:"inviteeUserIDList"`
+			GroupID           string   `json:"groupID"`
+			RoomID            string   `json:"roomID"`
+			Timeout           int32    `json:"timeout"`
+			MediaType         string   `json:"mediaType"`
+			SessionType       int32    `json:"sessionType"`
+			InitiateTime      int32    `json:"initiateTime"`
+			PlatformID        int32    `json:"platformID"`
+			CustomData        string   `json:"customData"`
+		} `json:"invitation"`
+		OfflinePushInfo struct{} `json:"offlinePushInfo"`
+	} `json:"data"`
+}
+
+type GetRTCInvitationInfoStartAppReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type GetRTCInvitationInfoStartAppResp struct {
+	GetRTCInvitationInfoResp
 }

@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-
+	"Open_IM/pkg/common/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -16,22 +16,28 @@ type paramsCertification struct {
 	VerificationCode string `json:"verificationCode"`
 	OperationID      string `json:"operationID" binding:"required"`
 	UsedFor          int    `json:"usedFor"`
+	AreaCode         string `json:"areaCode"`
 }
 
 func Verify(c *gin.Context) {
 	params := paramsCertification{}
+	operationID := params.OperationID
+
 	if err := c.BindJSON(&params); err != nil {
-		log.NewError("", "request params json parsing failed", "", "err", err.Error())
+		log.NewError(operationID, "request params json parsing failed", "", "err", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
 		return
 	}
-	log.NewInfo("recv req: ", params)
+	if operationID == "" {
+		operationID = utils.OperationIDGenerator()
+	}
+	log.NewInfo(operationID, "recv req: ", params)
 
 	var account string
 	if params.Email != "" {
 		account = params.Email
 	} else {
-		account = params.PhoneNumber
+		account = params.AreaCode + params.PhoneNumber
 	}
 
 	if params.VerificationCode == config.Config.Demo.SuperCode {
@@ -56,7 +62,7 @@ func Verify(c *gin.Context) {
 	}
 
 	code, err := db.DB.GetAccountCode(accountKey)
-	log.NewInfo(params.OperationID, "redis phone number and verificating Code", accountKey, code, params)
+	log.NewInfo(params.OperationID, "redis phone number and verificating Code", "key: ", accountKey, "code: ", code, "params: ", params)
 	if err != nil {
 		log.NewError(params.OperationID, "Verification code expired", accountKey, "err", err.Error())
 		data := make(map[string]interface{})

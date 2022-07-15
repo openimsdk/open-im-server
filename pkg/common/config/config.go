@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -85,32 +86,40 @@ type config struct {
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
 	}
 	Mongo struct {
-		DBUri               string   `yaml:"dbUri"`
-		DBAddress           []string `yaml:"dbAddress"`
-		DBDirect            bool     `yaml:"dbDirect"`
-		DBTimeout           int      `yaml:"dbTimeout"`
-		DBDatabase          string   `yaml:"dbDatabase"`
-		DBSource            string   `yaml:"dbSource"`
-		DBUserName          string   `yaml:"dbUserName"`
-		DBPassword          string   `yaml:"dbPassword"`
-		DBMaxPoolSize       int      `yaml:"dbMaxPoolSize"`
-		DBRetainChatRecords int      `yaml:"dbRetainChatRecords"`
+		DBUri               string `yaml:"dbUri"`
+		DBAddress           string `yaml:"dbAddress"`
+		DBDirect            bool   `yaml:"dbDirect"`
+		DBTimeout           int    `yaml:"dbTimeout"`
+		DBDatabase          string `yaml:"dbDatabase"`
+		DBSource            string `yaml:"dbSource"`
+		DBUserName          string `yaml:"dbUserName"`
+		DBPassword          string `yaml:"dbPassword"`
+		DBMaxPoolSize       int    `yaml:"dbMaxPoolSize"`
+		DBRetainChatRecords int    `yaml:"dbRetainChatRecords"`
 	}
 	Redis struct {
-		DBAddress     string `yaml:"dbAddress"`
-		DBMaxIdle     int    `yaml:"dbMaxIdle"`
-		DBMaxActive   int    `yaml:"dbMaxActive"`
-		DBIdleTimeout int    `yaml:"dbIdleTimeout"`
-		DBPassWord    string `yaml:"dbPassWord"`
+		DBAddress     []string `yaml:"dbAddress"`
+		DBMaxIdle     int      `yaml:"dbMaxIdle"`
+		DBMaxActive   int      `yaml:"dbMaxActive"`
+		DBIdleTimeout int      `yaml:"dbIdleTimeout"`
+		DBPassWord    string   `yaml:"dbPassWord"`
+		EnableCluster bool     `yaml:"enableCluster"`
 	}
 	RpcPort struct {
-		OpenImUserPort        []int `yaml:"openImUserPort"`
-		openImFriendPort      []int `yaml:"openImFriendPort"`
-		RpcMessagePort        []int `yaml:"rpcMessagePort"`
-		RpcPushMessagePort    []int `yaml:"rpcPushMessagePort"`
-		OpenImGroupPort       []int `yaml:"openImGroupPort"`
-		RpcModifyUserInfoPort []int `yaml:"rpcModifyUserInfoPort"`
-		RpcGetTokenPort       []int `yaml:"rpcGetTokenPort"`
+		OpenImUserPort           []int `yaml:"openImUserPort"`
+		OpenImFriendPort         []int `yaml:"openImFriendPort"`
+		OpenImMessagePort        []int `yaml:"openImMessagePort"`
+		OpenImMessageGatewayPort []int `yaml:"openImMessageGatewayPort"`
+		OpenImGroupPort          []int `yaml:"openImGroupPort"`
+		OpenImAuthPort           []int `yaml:"openImAuthPort"`
+		OpenImPushPort           []int `yaml:"openImPushPort"`
+		OpenImStatisticsPort     []int `yaml:"openImStatisticsPort"`
+		OpenImMessageCmsPort     []int `yaml:"openImMessageCmsPort"`
+		OpenImAdminCmsPort       []int `yaml:"openImAdminCmsPort"`
+		OpenImOfficePort         []int `yaml:"openImOfficePort"`
+		OpenImOrganizationPort   []int `yaml:"openImOrganizationPort"`
+		OpenImConversationPort   []int `yaml:"openImConversationPort"`
+		OpenImCachePort          []int `yaml:"openImCachePort"`
 	}
 	RpcRegisterName struct {
 		OpenImStatisticsName         string `yaml:"openImStatisticsName"`
@@ -183,8 +192,9 @@ type config struct {
 		}
 	}
 	Manager struct {
-		AppManagerUid []string `yaml:"appManagerUid"`
-		Secrets       []string `yaml:"secrets"`
+		AppManagerUid          []string `yaml:"appManagerUid"`
+		Secrets                []string `yaml:"secrets"`
+		AppSysNotificationName string   `yaml:"appSysNotificationName"`
 	}
 
 	Kafka struct {
@@ -196,20 +206,28 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
+		MsgToMongo struct {
+			Addr  []string `yaml:"addr"`
+			Topic string   `yaml:"topic"`
+		}
 		Ms2pschat struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
 		ConsumerGroupID struct {
-			MsgToMongo        string `yaml:"msgToMongo"`
-			MsgToMongoOffline string `yaml:"msgToMongoOffline"`
-			MsgToMySql        string `yaml:"msgToMySql"`
-			MsgToPush         string `yaml:"msgToPush"`
+			MsgToRedis string `yaml:"msgToTransfer"`
+			MsgToMongo string `yaml:"msgToMongo"`
+			MsgToMySql string `yaml:"msgToMySql"`
+			MsgToPush  string `yaml:"msgToPush"`
 		}
 	}
-	Secret               string `yaml:"secret"`
-	MultiLoginPolicy     int    `yaml:"multiloginpolicy"`
-	ChatPersistenceMysql bool   `yaml:"chatPersistenceMysql"`
+	Secret                            string `yaml:"secret"`
+	MultiLoginPolicy                  int    `yaml:"multiloginpolicy"`
+	ChatPersistenceMysql              bool   `yaml:"chatpersistencemysql"`
+	ReliableStorage                   bool   `yaml:"reliablestorage"`
+	MsgCacheTimeout                   int    `yaml:"msgCacheTimeout"`
+	GroupMessageHasReadReceiptEnable  bool   `yaml:"groupMessageHasReadReceiptEnable"`
+	SingleMessageHasReadReceiptEnable bool   `yaml:"singleMessageHasReadReceiptEnable"`
 
 	TokenPolicy struct {
 		AccessSecret string `yaml:"accessSecret"`
@@ -221,15 +239,19 @@ type config struct {
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
 		BadgeCount bool   `yaml:"badgeCount"`
+		Production bool   `yaml:"production"`
 	}
 
 	Callback struct {
 		CallbackUrl                 string         `yaml:"callbackUrl"`
-		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackbeforeSendSingleMsg"`
+		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackBeforeSendSingleMsg"`
 		CallbackAfterSendSingleMsg  callBackConfig `yaml:"callbackAfterSendSingleMsg"`
 		CallbackBeforeSendGroupMsg  callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
 		CallbackAfterSendGroupMsg   callBackConfig `yaml:"callbackAfterSendGroupMsg"`
 		CallbackWordFilter          callBackConfig `yaml:"callbackWordFilter"`
+		CallbackUserOnline          callBackConfig `yaml:"callbackUserOnline"`
+		CallbackUserOffline         callBackConfig `yaml:"callbackUserOffline"`
+		CallbackOfflinePush         callBackConfig `yaml:"callbackOfflinePush"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
@@ -327,6 +349,16 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"groupMemberInfoSet"`
+		GroupMemberSetToAdmin struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberSetToAdmin"`
+		GroupMemberSetToOrdinary struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"groupMemberSetToOrdinaryUser"`
 		OrganizationChanged struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
@@ -407,6 +439,11 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"joinDepartmentNotification"`
+		Signal struct {
+			OfflinePush struct {
+				Title string `yaml:"title"`
+			} `yaml:"offlinePush"`
+		} `yaml:"signal"`
 	}
 	Demo struct {
 		Port         []int  `yaml:"openImDemoPort"`
@@ -416,6 +453,16 @@ type config struct {
 			AccessKeySecret              string `yaml:"accessKeySecret"`
 			SignName                     string `yaml:"signName"`
 			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
+			Enable                       bool   `yaml:"enable"`
+		}
+		TencentSMS struct {
+			AppID                        string `yaml:"appID"`
+			Region                       string `yaml:"region"`
+			SecretID                     string `yaml:"secretID"`
+			SecretKey                    string `yaml:"secretKey"`
+			SignName                     string `yaml:"signName"`
+			VerificationCodeTemplateCode string `yaml:"verificationCodeTemplateCode"`
+			Enable                       bool   `yaml:"enable"`
 		}
 		SuperCode string `yaml:"superCode"`
 		CodeTTL   int    `yaml:"codeTTL"`
@@ -427,10 +474,10 @@ type config struct {
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
 		TestDepartMentID string `yaml:"testDepartMentID"`
+		ImAPIURL         string `yaml:"imAPIURL"`
 	}
 	Rtc struct {
-		Port    int    `yaml:"port"`
-		Address string `yaml:"address"`
+		SignalTimeout string `yaml:"signalTimeout"`
 	} `yaml:"rtc"`
 }
 type PConversation struct {
@@ -450,6 +497,8 @@ type PDefaultTips struct {
 
 func init() {
 	cfgName := os.Getenv("CONFIG_NAME")
+	fmt.Println(Root, cfgName)
+
 	if len(cfgName) == 0 {
 		cfgName = Root + "/config/config.yaml"
 	}

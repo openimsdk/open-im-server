@@ -12,63 +12,44 @@ var (
 	OK        = ErrInfo{0, ""}
 	ErrServer = ErrInfo{500, "server error"}
 
-	//	ErrMysql             = ErrInfo{100, ""}
-	//	ErrMongo             = ErrInfo{110, ""}
-	//	ErrRedis             = ErrInfo{120, ""}
 	ErrParseToken = ErrInfo{700, ParseTokenMsg.Error()}
-	//	ErrCreateToken       = ErrInfo{201, "Create token failed"}
-	//	ErrAppServerKey      = ErrInfo{300, "key error"}
+
 	ErrTencentCredential = ErrInfo{400, ThirdPartyMsg.Error()}
 
-	//	ErrorUserRegister             = ErrInfo{600, "User registration failed"}
-	//	ErrAccountExists              = ErrInfo{601, "The account is already registered and cannot be registered again"}
-	//	ErrUserPassword               = ErrInfo{602, "User password error"}
-	//	ErrRefreshToken               = ErrInfo{605, "Failed to refresh token"}
-	//	ErrAddFriend                  = ErrInfo{606, "Failed to add friends"}
-	//	ErrAgreeToAddFriend           = ErrInfo{607, "Failed to agree application"}
-	//	ErrAddFriendToBlack           = ErrInfo{608, "Failed to add friends to the blacklist"}
-	//	ErrGetBlackList               = ErrInfo{609, "Failed to get blacklist"}
-	//	ErrDeleteFriend               = ErrInfo{610, "Failed to delete friend"}
-	//	ErrGetFriendApplyList         = ErrInfo{611, "Failed to get friend application list"}
-	//	ErrGetFriendList              = ErrInfo{612, "Failed to get friend list"}
-	//	ErrRemoveBlackList            = ErrInfo{613, "Failed to remove blacklist"}
-	//	ErrSearchUserInfo             = ErrInfo{614, "Can't find the user information"}
-	//	ErrDelAppleDeviceToken        = ErrInfo{615, ""}
-	//	ErrModifyUserInfo             = ErrInfo{616, "update user some attribute failed"}
-	//	ErrSetFriendComment           = ErrInfo{617, "set friend comment failed"}
-	//	ErrSearchUserInfoFromTheGroup = ErrInfo{618, "There is no such group or the user not in the group"}
-	//	ErrCreateGroup                = ErrInfo{619, "create group chat failed"}
-	//	ErrJoinGroupApplication       = ErrInfo{620, "Failed to apply to join the group"}
-	//	ErrQuitGroup                  = ErrInfo{621, "Failed to quit the group"}
-	//	ErrSetGroupInfo               = ErrInfo{622, "Failed to set group info"}
-	//	ErrParam                      = ErrInfo{700, "param failed"}
-	ErrTokenExpired     = ErrInfo{701, TokenExpiredMsg.Error()}
-	ErrTokenInvalid     = ErrInfo{702, TokenInvalidMsg.Error()}
-	ErrTokenMalformed   = ErrInfo{703, TokenMalformedMsg.Error()}
-	ErrTokenNotValidYet = ErrInfo{704, TokenNotValidYetMsg.Error()}
-	ErrTokenUnknown     = ErrInfo{705, TokenUnknownMsg.Error()}
-	ErrTokenKicked      = ErrInfo{706, TokenUserKickedMsg.Error()}
+	ErrTokenExpired             = ErrInfo{701, TokenExpiredMsg.Error()}
+	ErrTokenInvalid             = ErrInfo{702, TokenInvalidMsg.Error()}
+	ErrTokenMalformed           = ErrInfo{703, TokenMalformedMsg.Error()}
+	ErrTokenNotValidYet         = ErrInfo{704, TokenNotValidYetMsg.Error()}
+	ErrTokenUnknown             = ErrInfo{705, TokenUnknownMsg.Error()}
+	ErrTokenKicked              = ErrInfo{706, TokenUserKickedMsg.Error()}
+	ErrTokenDifferentPlatformID = ErrInfo{707, TokenDifferentPlatformIDMsg.Error()}
+	ErrTokenDifferentUserID     = ErrInfo{708, TokenDifferentUserIDMsg.Error()}
 
-	ErrAccess   = ErrInfo{ErrCode: 801, ErrMsg: AccessMsg.Error()}
-	ErrDB       = ErrInfo{ErrCode: 802, ErrMsg: DBMsg.Error()}
-	ErrArgs     = ErrInfo{ErrCode: 803, ErrMsg: ArgsMsg.Error()}
-	ErrStatus   = ErrInfo{ErrCode: 804, ErrMsg: StatusMsg.Error()}
-	ErrCallback = ErrInfo{ErrCode: 809, ErrMsg: CallBackMsg.Error()}
+	ErrAccess                = ErrInfo{ErrCode: 801, ErrMsg: AccessMsg.Error()}
+	ErrDB                    = ErrInfo{ErrCode: 802, ErrMsg: DBMsg.Error()}
+	ErrArgs                  = ErrInfo{ErrCode: 803, ErrMsg: ArgsMsg.Error()}
+	ErrStatus                = ErrInfo{ErrCode: 804, ErrMsg: StatusMsg.Error()}
+	ErrCallback              = ErrInfo{ErrCode: 809, ErrMsg: CallBackMsg.Error()}
+	ErrSendLimit             = ErrInfo{ErrCode: 810, ErrMsg: "send msg limit, to many request, try again later"}
+	ErrMessageHasReadDisable = ErrInfo{ErrCode: 811, ErrMsg: "message has read disable"}
+	ErrInternal              = ErrInfo{ErrCode: 812, ErrMsg: "internal error"}
 )
 
 var (
-	ParseTokenMsg       = errors.New("parse token failed")
-	TokenExpiredMsg     = errors.New("token is timed out, please log in again")
-	TokenInvalidMsg     = errors.New("token has been invalidated")
-	TokenNotValidYetMsg = errors.New("token not active yet")
-	TokenMalformedMsg   = errors.New("that's not even a token")
-	TokenUnknownMsg     = errors.New("couldn't handle this token")
-	TokenUserKickedMsg  = errors.New("user has been kicked")
-	AccessMsg           = errors.New("no permission")
-	StatusMsg           = errors.New("status is abnormal")
-	DBMsg               = errors.New("db failed")
-	ArgsMsg             = errors.New("args failed")
-	CallBackMsg         = errors.New("callback failed")
+	ParseTokenMsg               = errors.New("parse token failed")
+	TokenExpiredMsg             = errors.New("token is timed out, please log in again")
+	TokenInvalidMsg             = errors.New("token has been invalidated")
+	TokenNotValidYetMsg         = errors.New("token not active yet")
+	TokenMalformedMsg           = errors.New("that's not even a token")
+	TokenUnknownMsg             = errors.New("couldn't handle this token")
+	TokenUserKickedMsg          = errors.New("user has been kicked")
+	TokenDifferentPlatformIDMsg = errors.New("different platformID")
+	TokenDifferentUserIDMsg     = errors.New("different userID")
+	AccessMsg                   = errors.New("no permission")
+	StatusMsg                   = errors.New("status is abnormal")
+	DBMsg                       = errors.New("db failed")
+	ArgsMsg                     = errors.New("args failed")
+	CallBackMsg                 = errors.New("callback failed")
 
 	ThirdPartyMsg = errors.New("third party error")
 )

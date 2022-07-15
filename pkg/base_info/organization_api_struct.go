@@ -9,7 +9,7 @@ type CreateDepartmentReq struct {
 type CreateDepartmentResp struct {
 	CommResp
 	Department *open_im_sdk.Department `json:"-"`
-	Data       map[string]interface{}  `json:"data"`
+	Data       map[string]interface{}  `json:"data" swaggerignore:"true"`
 }
 
 type UpdateDepartmentReq struct {
@@ -28,7 +28,7 @@ type GetSubDepartmentReq struct {
 type GetSubDepartmentResp struct {
 	CommResp
 	DepartmentList []*open_im_sdk.Department `json:"-"`
-	Data           []map[string]interface{}  `json:"data"`
+	Data           []map[string]interface{}  `json:"data" swaggerignore:"true"`
 }
 
 type DeleteDepartmentReq struct {
@@ -71,7 +71,7 @@ type GetUserInDepartmentReq struct {
 type GetUserInDepartmentResp struct {
 	CommResp
 	UserInDepartment *open_im_sdk.UserInDepartment `json:"-"`
-	Data             map[string]interface{}        `json:"data"`
+	Data             map[string]interface{}        `json:"data" swaggerignore:"true"`
 }
 
 type UpdateUserInDepartmentReq struct {
@@ -97,7 +97,7 @@ type GetDepartmentMemberReq struct {
 type GetDepartmentMemberResp struct {
 	CommResp
 	UserInDepartmentList []*open_im_sdk.UserDepartmentMember `json:"-"`
-	Data                 []map[string]interface{}            `json:"data"`
+	Data                 []map[string]interface{}            `json:"data" swaggerignore:"true"`
 }
 
 type DeleteUserInDepartmentReq struct {

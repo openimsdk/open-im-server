@@ -16,8 +16,8 @@ type GetUserTagsResp struct {
 }
 
 type CreateTagReq struct {
-	TagName     string   `json:"tagName" binding:"required"`
-	UserIDList  []string `json:"userIDList" binding:"required"`
+	TagName     string   `json:"tagName" binding:"required"`    // tag名称
+	UserIDList  []string `json:"userIDList" binding:"required"` // 用户ID列表
 	OperationID string   `json:"operationID" binding:"required"`
 }
 

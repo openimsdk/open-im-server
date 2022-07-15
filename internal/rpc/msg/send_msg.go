@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	cacheRpc "Open_IM/pkg/proto/cache"
 	pbCache "Open_IM/pkg/proto/cache"
@@ -15,7 +16,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
-	"github.com/garyburd/redigo/redis"
+	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"strconv"
@@ -49,44 +50,81 @@ type MsgCallBackResp struct {
 	}
 }
 
-func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string) {
-	if data.MsgData.SessionType == constant.GroupChatType {
-		return true, 0, ""
-	}
-	log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
-	reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
-	cacheClient := cacheRpc.NewCacheClient(etcdConn)
-	cacheResp, err := cacheClient.GetBlackIDListFromCache(context.Background(), reqGetBlackIDListFromCache)
-	if err != nil {
-		log.NewError(data.OperationID, "GetBlackIDListFromCache rpc call failed ", err.Error())
-	} else {
-		if cacheResp.CommonResp.ErrCode != 0 {
-			log.NewError(data.OperationID, "GetBlackIDListFromCache rpc logic call failed ", cacheResp.String())
+func isMessageHasReadEnabled(pb *pbChat.SendMsgReq) (bool, int32, string) {
+	switch pb.MsgData.ContentType {
+	case constant.HasReadReceipt:
+		if config.Config.SingleMessageHasReadReceiptEnable {
+			return true, 0, ""
 		} else {
-			if utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
-				return false, 600, "in black list"
-			}
+			return false, constant.ErrMessageHasReadDisable.ErrCode, constant.ErrMessageHasReadDisable.ErrMsg
+		}
+	case constant.GroupHasReadReceipt:
+		if config.Config.GroupMessageHasReadReceiptEnable {
+			return true, 0, ""
+		} else {
+			return false, constant.ErrMessageHasReadDisable.ErrCode, constant.ErrMessageHasReadDisable.ErrMsg
 		}
 	}
-	log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
-	if config.Config.MessageVerify.FriendVerify {
-		reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+	return true, 0, ""
+}
+
+func userRelationshipVerification(data *pbChat.SendMsgReq) (bool, int32, string) {
+	if data.MsgData.SessionType == constant.SingleChatType {
+		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+			return true, 0, ""
+		}
+		if data.MsgData.ContentType <= constant.FriendApplicationNotification && data.MsgData.ContentType >= constant.FriendApplicationApprovedNotification {
+			return true, 0, ""
+		}
+		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
+		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+		if etcdConn == nil {
+			errMsg := data.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(data.OperationID, errMsg)
+			return true, 0, ""
+		}
+
 		cacheClient := cacheRpc.NewCacheClient(etcdConn)
-		cacheResp, err := cacheClient.GetFriendIDListFromCache(context.Background(), reqGetFriendIDListFromCache)
+		cacheResp, err := cacheClient.GetBlackIDListFromCache(context.Background(), reqGetBlackIDListFromCache)
 		if err != nil {
-			log.NewError(data.OperationID, "GetFriendIDListFromCache rpc call failed ", err.Error())
+			log.NewError(data.OperationID, "GetBlackIDListFromCache rpc call failed ", err.Error())
 		} else {
 			if cacheResp.CommonResp.ErrCode != 0 {
-				log.NewError(data.OperationID, "GetFriendIDListFromCache rpc logic call failed ", cacheResp.String())
+				log.NewError(data.OperationID, "GetBlackIDListFromCache rpc logic call failed ", cacheResp.String())
 			} else {
-				if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
-					return false, 601, "not friend"
+				if utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
+					return false, 600, "in black list"
 				}
 			}
 		}
-		return true, 0, ""
+		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
+		if config.Config.MessageVerify.FriendVerify {
+			reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
+			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+			if etcdConn == nil {
+				errMsg := data.OperationID + "getcdv3.GetConn == nil"
+				log.NewError(data.OperationID, errMsg)
+				return true, 0, ""
+			}
+			cacheClient := cacheRpc.NewCacheClient(etcdConn)
+			cacheResp, err := cacheClient.GetFriendIDListFromCache(context.Background(), reqGetFriendIDListFromCache)
+			if err != nil {
+				log.NewError(data.OperationID, "GetFriendIDListFromCache rpc call failed ", err.Error())
+			} else {
+				if cacheResp.CommonResp.ErrCode != 0 {
+					log.NewError(data.OperationID, "GetFriendIDListFromCache rpc logic call failed ", cacheResp.String())
+				} else {
+					if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
+						return false, 601, "not friend"
+					}
+				}
+			}
+			return true, 0, ""
+		} else {
+			return true, 0, ""
+		}
+
 	} else {
 		return true, 0, ""
 	}
@@ -137,57 +175,51 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 		utils.SetSwitchFromOptions(msg.Options, constant.IsSenderConversationUpdate, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsUnreadCount, false)
 		utils.SetSwitchFromOptions(msg.Options, constant.IsOfflinePush, false)
-
 	}
 }
 func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
-	log.NewDebug(pb.OperationID, "rpc sendMsg come here", pb.String())
-	flag, errCode, errMsg := userRelationshipVerification(pb)
+	newTime := db.GetCurrentTimestampByMill()
+	log.Info(pb.OperationID, "rpc sendMsg come here ", pb.String())
+	flag, errCode, errMsg := isMessageHasReadEnabled(pb)
+	log.Info(pb.OperationID, "isMessageHasReadEnabled ", flag)
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
-	//if !utils.VerifyToken(pb.Token, pb.SendID) {
-	//	return returnMsg(&replay, pb, http.StatusUnauthorized, "token validate err,not authorized", "", 0)
+	flag, errCode, errMsg = userRelationshipVerification(pb)
+	log.Info(pb.OperationID, "userRelationshipVerification ", flag)
+	if !flag {
+		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
+	}
 	rpc.encapsulateMsgData(pb.MsgData)
-	log.Info("", "this is a test MsgData ", pb.MsgData)
 	msgToMQSingle := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: pb.MsgData}
-	//options := utils.JsonStringToMap(pbData.Options)
-	isHistory := utils.GetSwitchFromOptions(pb.MsgData.Options, constant.IsHistory)
-	mReq := MsgCallBackReq{
-		SendID:      pb.MsgData.SendID,
-		RecvID:      pb.MsgData.RecvID,
-		Content:     string(pb.MsgData.Content),
-		SendTime:    pb.MsgData.SendTime,
-		MsgFrom:     pb.MsgData.MsgFrom,
-		ContentType: pb.MsgData.ContentType,
-		SessionType: pb.MsgData.SessionType,
-		PlatformID:  pb.MsgData.SenderPlatformID,
-		MsgID:       pb.MsgData.ClientMsgID,
-	}
-	if !isHistory {
-		mReq.IsOnlineOnly = true
-	}
-
 	// callback
-	canSend, err := callbackWordFilter(pb)
-	if err != nil {
-		log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter failed", err.Error(), pb.MsgData)
+	callbackResp := callbackWordFilter(pb)
+	log.Info(pb.OperationID, "callbackWordFilter ", callbackResp)
+	if callbackResp.ErrCode != 0 {
+		log.Error(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter resp: ", callbackResp)
 	}
-	if !canSend {
-		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter result", canSend, "end rpc and return", pb.MsgData)
-		return returnMsg(&replay, pb, 201, "callbackWordFilter result stop rpc and return", "", 0)
+	log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackResp: ", callbackResp)
+	if callbackResp.ActionCode != constant.ActionAllow {
+		if callbackResp.ErrCode == 0 {
+			callbackResp.ErrCode = 201
+		}
+		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter result", "end rpc and return", pb.MsgData)
+		return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 	}
 	switch pb.MsgData.SessionType {
 	case constant.SingleChatType:
 		// callback
-		canSend, err := callbackBeforeSendSingleMsg(pb)
-		if err != nil {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg failed", err.Error())
+		callbackResp := callbackBeforeSendSingleMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
 		}
-		if !canSend {
-			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", canSend, "end rpc and return")
-			return returnMsg(&replay, pb, 201, "callbackBeforeSendSingleMsg result stop rpc and return", "", 0)
+		if callbackResp.ActionCode != constant.ActionAllow {
+			if callbackResp.ErrCode == 0 {
+				callbackResp.ErrCode = 201
+			}
+			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
+			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 		}
 		isSend := modifyMessageByUserMessageReceiveOpt(pb.MsgData.RecvID, pb.MsgData.SendID, constant.SingleChatType, pb)
 		if isSend {
@@ -195,7 +227,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.NewInfo(msgToMQSingle.OperationID, msgToMQSingle)
 			err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.RecvID, constant.OnlineStatus)
 			if err1 != nil {
-				log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
+				log.NewError(msgToMQSingle.OperationID, "kafka send msg err :RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String(), err1.Error())
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
@@ -207,22 +239,31 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			}
 		}
 		// callback
-		if err := callbackAfterSendSingleMsg(pb); err != nil {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSingleMsg failed", err.Error())
+		callbackResp = callbackAfterSendSingleMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSingleMsg resp: ", callbackResp)
 		}
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 	case constant.GroupChatType:
 		// callback
-		canSend, err := callbackBeforeSendGroupMsg(pb)
-		if err != nil {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendGroupMsg failed", err.Error())
+		callbackResp := callbackBeforeSendGroupMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendGroupMsg resp:", callbackResp)
 		}
-		if !canSend {
-			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendGroupMsg result", canSend, "end rpc and return")
-			return returnMsg(&replay, pb, 201, "callbackBeforeSendGroupMsg result stop rpc and return", "", 0)
+		if callbackResp.ActionCode != constant.ActionAllow {
+			if callbackResp.ErrCode == 0 {
+				callbackResp.ErrCode = 201
+			}
+			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
+			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 		}
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pb.OperationID, GroupID: pb.MsgData.GroupID}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, msgToMQSingle.OperationID)
+		if etcdConn == nil {
+			errMsg := msgToMQSingle.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(msgToMQSingle.OperationID, errMsg)
+			return returnMsg(&replay, pb, 201, errMsg, "", 0)
+		}
 		client := pbCache.NewCacheClient(etcdConn)
 		cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
 		if err != nil {
@@ -234,7 +275,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache logic failed", "", 0)
 		}
 		memberUserIDList := cacheResp.UserIDList
-		log.Debug(pb.OperationID, "GetGroupAllMember userID list", cacheResp.UserIDList)
+		log.Debug(pb.OperationID, "GetGroupAllMember userID list", cacheResp.UserIDList, "len: ", len(cacheResp.UserIDList))
 		var addUidList []string
 		switch pb.MsgData.ContentType {
 		case constant.MemberKickedNotification:
@@ -257,37 +298,50 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 
 		default:
 		}
-		m := make(map[string][]string, 2)
-		if len(memberUserIDList) > GroupMemberNum {
-			getOnlineAndOfflineUserIDList(memberUserIDList, m, pb.OperationID)
-			log.Debug(pb.OperationID, m[constant.OnlineStatus], m[constant.OfflineStatus])
-		} else {
-			m[constant.OnlineStatus] = memberUserIDList
+		if len(addUidList) > 0 {
+			memberUserIDList = append(memberUserIDList, addUidList...)
 		}
+		if !token_verify.IsManagerUserID(pb.MsgData.SendID) {
+			if !utils.IsContain(pb.MsgData.SendID, memberUserIDList) {
+				return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
+			}
+		}
+		m := make(map[string][]string, 2)
+		m[constant.OnlineStatus] = memberUserIDList
+		log.Debug(pb.OperationID, "send msg cost time1 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
+		newTime = db.GetCurrentTimestampByMill()
 
 		//split  parallel send
 		var wg sync.WaitGroup
 		var sendTag bool
-		var split = 50
+		var split = 20
 		for k, v := range m {
 			remain := len(v) % split
 			for i := 0; i < len(v)/split; i++ {
 				wg.Add(1)
-				go rpc.sendMsgToGroup(v[i*split:(i+1)*split], *pb, k, &sendTag, &wg)
+				tmp := valueCopy(pb)
+				//	go rpc.sendMsgToGroup(v[i*split:(i+1)*split], *pb, k, &sendTag, &wg)
+				go rpc.sendMsgToGroupOptimization(v[i*split:(i+1)*split], tmp, k, &sendTag, &wg)
 			}
 			if remain > 0 {
 				wg.Add(1)
-				go rpc.sendMsgToGroup(v[split*(len(v)/split):], *pb, k, &sendTag, &wg)
+				tmp := valueCopy(pb)
+				//	go rpc.sendMsgToGroup(v[split*(len(v)/split):], *pb, k, &sendTag, &wg)
+				go rpc.sendMsgToGroupOptimization(v[split*(len(v)/split):], tmp, k, &sendTag, &wg)
 			}
 		}
+		log.Debug(pb.OperationID, "send msg cost time22 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID, "uidList : ", len(addUidList))
 		wg.Add(1)
 		go rpc.sendMsgToGroup(addUidList, *pb, constant.OnlineStatus, &sendTag, &wg)
 		wg.Wait()
+		newTime = db.GetCurrentTimestampByMill()
 		// callback
-		if err := callbackAfterSendGroupMsg(pb); err != nil {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendGroupMsg failed", err.Error())
+		callbackResp = callbackAfterSendGroupMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendGroupMsg resp: ", callbackResp)
 		}
 		if !sendTag {
+			log.NewWarn(pb.OperationID, "send tag is ", sendTag)
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 		} else {
 			if pb.MsgData.ContentType == constant.AtText {
@@ -319,7 +373,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 						conversationReq.UserIDList = pb.MsgData.AtUserIDList
 						conversation.GroupAtType = constant.AtMe
 					}
-					etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+					etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
+					if etcdConn == nil {
+						errMsg := pb.OperationID + "getcdv3.GetConn == nil"
+						log.NewError(pb.OperationID, errMsg)
+						return
+					}
 					client := pbConversation.NewConversationClient(etcdConn)
 					conversationReply, err := client.ModifyConversationField(context.Background(), &conversationReq)
 					if err != nil {
@@ -330,7 +389,12 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					if tag {
 						conversationReq.UserIDList = utils.DifferenceString(atUserID, memberUserIDList)
 						conversation.GroupAtType = constant.AtAll
-						etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName)
+						etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
+						if etcdConn == nil {
+							errMsg := pb.OperationID + "getcdv3.GetConn == nil"
+							log.NewError(pb.OperationID, errMsg)
+							return
+						}
 						client := pbConversation.NewConversationClient(etcdConn)
 						conversationReply, err := client.ModifyConversationField(context.Background(), &conversationReq)
 						if err != nil {
@@ -341,8 +405,8 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					}
 				}()
 			}
+			log.Debug(pb.OperationID, "send msg cost time3 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 			return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
-
 		}
 	case constant.NotificationChatType:
 		msgToMQSingle.MsgData = pb.MsgData
@@ -360,22 +424,54 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
+
+		log.Debug(pb.OperationID, "send msg cost time ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
+	case constant.SuperGroupChatType:
+		// callback
+		callbackResp := callbackBeforeSendGroupMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSuperGroupMsg resp: ", callbackResp)
+		}
+		if callbackResp.ActionCode != constant.ActionAllow {
+			if callbackResp.ErrCode == 0 {
+				callbackResp.ErrCode = 201
+			}
+			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSuperGroupMsg result", "end rpc and return", callbackResp)
+			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
+		}
+		msgToMQSingle.MsgData = pb.MsgData
+		log.NewInfo(msgToMQSingle.OperationID, msgToMQSingle)
+		err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.GroupID, constant.OnlineStatus)
+		if err1 != nil {
+			log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
+			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+		}
+
+		// callback
+		callbackResp = callbackAfterSendSingleMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSuperGroupMsg resp: ", callbackResp)
+		}
+		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
+
 	default:
-		return returnMsg(&replay, pb, 203, "unkonwn sessionType", "", 0)
+		return returnMsg(&replay, pb, 203, "unknown sessionType", "", 0)
 	}
 }
 
 func (rpc *rpcChat) sendMsgToKafka(m *pbChat.MsgDataToMQ, key string, status string) error {
 	switch status {
 	case constant.OnlineStatus:
-		pid, offset, err := rpc.onlineProducer.SendMessage(m, key)
+		pid, offset, err := rpc.onlineProducer.SendMessage(m, key, m.OperationID)
 		if err != nil {
 			log.Error(m.OperationID, "kafka send failed", "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key, status)
+		} else {
+			//	log.NewWarn(m.OperationID, "sendMsgToKafka   client msgID ", m.MsgData.ClientMsgID)
 		}
 		return err
 	case constant.OfflineStatus:
-		pid, offset, err := rpc.offlineProducer.SendMessage(m, key)
+		pid, offset, err := rpc.onlineProducer.SendMessage(m, key, m.OperationID)
 		if err != nil {
 			log.Error(m.OperationID, "kafka send failed", "send data", m.String(), "pid", pid, "offset", offset, "err", err.Error(), "key", key, status)
 		}
@@ -398,13 +494,29 @@ func returnMsg(replay *pbChat.SendMsgResp, pb *pbChat.SendMsgReq, errCode int32,
 }
 
 func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType int, pb *pbChat.SendMsgReq) bool {
-	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
-	opt, err := db.DB.GetSingleConversationRecvMsgOpt(userID, conversationID)
-	if err != nil && err != redis.ErrNil {
-		log.NewError(pb.OperationID, "GetSingleConversationMsgOpt from redis err", conversationID, pb.String(), err.Error())
-		return true
+	opt, err := db.DB.GetUserGlobalMsgRecvOpt(userID)
+	if err != nil {
+		log.NewError(pb.OperationID, "GetUserGlobalMsgRecvOpt from redis err", userID, pb.String(), err.Error())
+
 	}
 	switch opt {
+	case constant.ReceiveMessage:
+	case constant.NotReceiveMessage:
+		return false
+	case constant.ReceiveNotNotifyMessage:
+		if pb.MsgData.Options == nil {
+			pb.MsgData.Options = make(map[string]bool, 10)
+		}
+		utils.SetSwitchFromOptions(pb.MsgData.Options, constant.IsOfflinePush, false)
+		return true
+	}
+	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
+	singleOpt, sErr := db.DB.GetSingleConversationRecvMsgOpt(userID, conversationID)
+	if sErr != nil && sErr != go_redis.Nil {
+		log.NewError(pb.OperationID, "GetSingleConversationMsgOpt from redis err", conversationID, pb.String(), sErr.Error())
+		return true
+	}
+	switch singleOpt {
 	case constant.ReceiveMessage:
 		return true
 	case constant.NotReceiveMessage:
@@ -420,14 +532,39 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 	return true
 }
 
+func modifyMessageByUserMessageReceiveOptoptimization(userID, sourceID string, sessionType int, operationID string, options *map[string]bool) bool {
+	conversationID := utils.GetConversationIDBySessionType(sourceID, sessionType)
+	opt, err := db.DB.GetSingleConversationRecvMsgOpt(userID, conversationID)
+	if err != nil && err != go_redis.Nil {
+		log.NewError(operationID, "GetSingleConversationMsgOpt from redis err", userID, conversationID, err.Error())
+		return true
+	}
+
+	switch opt {
+	case constant.ReceiveMessage:
+		return true
+	case constant.NotReceiveMessage:
+		return false
+	case constant.ReceiveNotNotifyMessage:
+		if *options == nil {
+			*options = make(map[string]bool, 10)
+		}
+		utils.SetSwitchFromOptions(*options, constant.IsOfflinePush, false)
+		return true
+	}
+	return true
+}
+
 type NotificationMsg struct {
-	SendID      string
-	RecvID      string
-	Content     []byte //  open_im_sdk.TipsComm
-	MsgFrom     int32
-	ContentType int32
-	SessionType int32
-	OperationID string
+	SendID         string
+	RecvID         string
+	Content        []byte //  open_im_sdk.TipsComm
+	MsgFrom        int32
+	ContentType    int32
+	SessionType    int32
+	OperationID    string
+	SenderNickname string
+	SenderFaceURL  string
 }
 
 func Notification(n *NotificationMsg) {
@@ -447,8 +584,10 @@ func Notification(n *NotificationMsg) {
 	msg.CreateTime = utils.GetCurrentTimestampByMill()
 	msg.ClientMsgID = utils.GetMsgID(n.SendID)
 	msg.Options = make(map[string]bool, 7)
+	msg.SenderNickname = n.SenderNickname
+	msg.SenderFaceURL = n.SenderFaceURL
 	switch n.SessionType {
-	case constant.GroupChatType:
+	case constant.GroupChatType, constant.SuperGroupChatType:
 		msg.RecvID = ""
 		msg.GroupID = n.RecvID
 	}
@@ -667,6 +806,10 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.ConversationSetPrivate.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.ConversationSetPrivate.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.ConversationSetPrivate.Conversation.UnreadCount
+	case constant.DeleteMessageNotification:
+		reliabilityLevel = constant.ReliableNotificationNoMsg
+	case constant.SuperGroupUpdateNotification:
+		reliabilityLevel = constant.UnreliableNotification
 	}
 	switch reliabilityLevel {
 	case constant.UnreliableNotification:
@@ -687,7 +830,13 @@ func Notification(n *NotificationMsg) {
 	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		return
+	}
+
 	client := pbChat.NewChatClient(etcdConn)
 	reply, err := client.SendMsg(context.Background(), &req)
 	if err != nil {
@@ -737,6 +886,23 @@ func getOnlineAndOfflineUserIDList(memberList []string, m map[string][]string, o
 	m[constant.OfflineStatus] = offlUserIDList
 }
 
+func valueCopy(pb *pbChat.SendMsgReq) *pbChat.SendMsgReq {
+	offlinePushInfo := sdk_ws.OfflinePushInfo{}
+	if pb.MsgData.OfflinePushInfo != nil {
+		offlinePushInfo = *pb.MsgData.OfflinePushInfo
+	}
+	msgData := sdk_ws.MsgData{}
+	msgData = *pb.MsgData
+	msgData.OfflinePushInfo = &offlinePushInfo
+
+	options := make(map[string]bool, 10)
+	for key, value := range pb.MsgData.Options {
+		options[key] = value
+	}
+	msgData.Options = options
+	return &pbChat.SendMsgReq{Token: pb.Token, OperationID: pb.OperationID, MsgData: &msgData}
+}
+
 func (rpc *rpcChat) sendMsgToGroup(list []string, pb pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
 	//	log.Debug(pb.OperationID, "split userID ", list)
 	offlinePushInfo := sdk_ws.OfflinePushInfo{}
@@ -760,6 +926,29 @@ func (rpc *rpcChat) sendMsgToGroup(list []string, pb pbChat.SendMsgReq, status s
 		if isSend {
 			msgToMQGroup.MsgData = groupPB.MsgData
 			//	log.Debug(groupPB.OperationID, "sendMsgToKafka, ", v, groupID, msgToMQGroup.String())
+			err := rpc.sendMsgToKafka(&msgToMQGroup, v, status)
+			if err != nil {
+				log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())
+			} else {
+				*sendTag = true
+			}
+		} else {
+			log.Debug(groupPB.OperationID, "not sendMsgToKafka, ", v)
+		}
+	}
+	wg.Done()
+}
+
+func (rpc *rpcChat) sendMsgToGroupOptimization(list []string, groupPB *pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
+	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
+	for _, v := range list {
+		groupPB.MsgData.RecvID = v
+		isSend := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
+		if isSend {
+			if v == "" || groupPB.MsgData.SendID == "" {
+				log.Error(msgToMQGroup.OperationID, "sendMsgToGroupOptimization userID nil ", msgToMQGroup.String())
+				continue
+			}
 			err := rpc.sendMsgToKafka(&msgToMQGroup, v, status)
 			if err != nil {
 				log.NewError(msgToMQGroup.OperationID, "kafka send msg err:UserId", v, msgToMQGroup.String())

@@ -67,7 +67,7 @@ func (s *statisticsServer) Run() {
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbStatistics.RegisterUserServer(srv, s)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {

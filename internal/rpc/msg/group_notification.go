@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 //message GroupCreatedTips{
@@ -36,7 +37,6 @@ func setOpUserInfo(opUserID, groupID string, groupMemberInfo *open_im_sdk.GroupM
 				return utils.Wrap(err, "")
 			}
 		}
-
 		user, err := imdb.GetUserByUserID(opUserID)
 		if err != nil {
 			return utils.Wrap(err, "")
@@ -101,7 +101,7 @@ func setPublicUserInfo(userID string, publicUserInfo *open_im_sdk.PublicUserInfo
 }
 
 func groupNotification(contentType int32, m proto.Message, sendID, groupID, recvUserID, operationID string) {
-	log.Info(operationID, utils.GetSelfFuncName(), "args: ", contentType)
+	log.Info(operationID, utils.GetSelfFuncName(), "args: ", contentType, sendID, groupID, recvUserID)
 
 	var err error
 	var tips open_im_sdk.TipsComm
@@ -117,19 +117,19 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 	}
 
 	tips.JsonDetail, _ = marshaler.MarshalToString(m)
+	var nickname string
 
 	from, err := imdb.GetUserByUserID(sendID)
 	if err != nil {
 		log.Error(operationID, "GetUserByUserID failed ", err.Error(), sendID)
 	}
-	nickname := ""
 	if from != nil {
 		nickname = from.Nickname
 	}
 
 	to, err := imdb.GetUserByUserID(recvUserID)
 	if err != nil {
-		log.Error(operationID, "GetUserByUserID failed ", err.Error(), recvUserID)
+		log.NewWarn(operationID, "GetUserByUserID failed ", err.Error(), recvUserID)
 	}
 	toNickname := ""
 	if to != nil {
@@ -170,7 +170,10 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 		tips.DefaultTips = toNickname + "" + cn.GroupMemberCancelMuted.DefaultTips.Tips
 	case constant.GroupMemberInfoSetNotification:
 		tips.DefaultTips = toNickname + "" + cn.GroupMemberInfoSet.DefaultTips.Tips
-
+	case constant.GroupMemberSetToAdminNotification:
+		tips.DefaultTips = toNickname + "" + cn.GroupMemberSetToAdmin.DefaultTips.Tips
+	case constant.GroupMemberSetToOrdinaryUserNotification:
+		tips.DefaultTips = toNickname + "" + cn.GroupMemberSetToOrdinary.DefaultTips.Tips
 	default:
 		log.Error(operationID, "contentType failed ", contentType)
 		return
@@ -225,12 +228,24 @@ func GroupCreatedNotification(operationID, opUserID, groupID string, initMemberL
 }
 
 //群信息改变后掉用
-func GroupInfoSetNotification(operationID, opUserID, groupID string) {
+//groupName := ""
+//	notification := ""
+//	introduction := ""
+//	faceURL := ""
+func GroupInfoSetNotification(operationID, opUserID, groupID string, groupName, notification, introduction, faceURL string, needVerification *wrapperspb.Int32Value) {
 	GroupInfoChangedTips := open_im_sdk.GroupInfoSetTips{Group: &open_im_sdk.GroupInfo{}, OpUser: &open_im_sdk.GroupMemberFullInfo{}}
 	if err := setGroupInfo(groupID, GroupInfoChangedTips.Group); err != nil {
 		log.Error(operationID, "setGroupInfo failed ", err.Error(), groupID)
 		return
 	}
+	GroupInfoChangedTips.Group.GroupName = groupName
+	GroupInfoChangedTips.Group.Notification = notification
+	GroupInfoChangedTips.Group.Introduction = introduction
+	GroupInfoChangedTips.Group.FaceURL = faceURL
+	if needVerification != nil {
+		GroupInfoChangedTips.Group.NeedVerification = needVerification.Value
+	}
+
 	if err := setOpUserInfo(opUserID, groupID, GroupInfoChangedTips.OpUser); err != nil {
 		log.Error(operationID, "setOpUserInfo failed ", err.Error(), opUserID, groupID)
 		return
@@ -301,6 +316,28 @@ func GroupMemberInfoSetNotification(operationID, opUserID, groupID, groupMemberU
 		return
 	}
 	groupNotification(constant.GroupMemberInfoSetNotification, &tips, opUserID, groupID, "", operationID)
+}
+
+func GroupMemberRoleLevelChangeNotification(operationID, opUserID, groupID, groupMemberUserID string, notificationType int32) {
+	if notificationType != constant.GroupMemberSetToAdminNotification && notificationType != constant.GroupMemberSetToOrdinaryUserNotification {
+		log.NewError(operationID, utils.GetSelfFuncName(), "invalid notificationType: ", notificationType)
+		return
+	}
+	tips := open_im_sdk.GroupMemberInfoSetTips{Group: &open_im_sdk.GroupInfo{},
+		OpUser: &open_im_sdk.GroupMemberFullInfo{}, ChangedUser: &open_im_sdk.GroupMemberFullInfo{}}
+	if err := setGroupInfo(groupID, tips.Group); err != nil {
+		log.Error(operationID, "setGroupInfo failed ", err.Error(), groupID)
+		return
+	}
+	if err := setOpUserInfo(opUserID, groupID, tips.OpUser); err != nil {
+		log.Error(operationID, "setOpUserInfo failed ", err.Error(), opUserID, groupID)
+		return
+	}
+	if err := setGroupMemberInfo(groupID, groupMemberUserID, tips.ChangedUser); err != nil {
+		log.Error(operationID, "setGroupMemberInfo failed ", err.Error(), groupID, groupMemberUserID)
+		return
+	}
+	groupNotification(notificationType, &tips, opUserID, groupID, "", operationID)
 }
 
 func GroupMemberCancelMutedNotification(operationID, opUserID, groupID, groupMemberUserID string) {
@@ -521,9 +558,21 @@ func MemberEnterNotification(req *pbGroup.GroupApplicationResponseReq) {
 		return
 	}
 	if err := setGroupMemberInfo(req.GroupID, req.FromUserID, MemberEnterTips.EntrantUser); err != nil {
-		log.Error(req.OperationID, "setOpUserInfo failed ", err.Error(), req.OpUserID, req.GroupID, MemberEnterTips.EntrantUser)
+		log.Error(req.OperationID, "setGroupMemberInfo failed ", err.Error(), req.OpUserID, req.GroupID, MemberEnterTips.EntrantUser)
 		return
 	}
 	groupNotification(constant.MemberEnterNotification, &MemberEnterTips, req.OpUserID, req.GroupID, "", req.OperationID)
+}
 
+func MemberEnterDirectlyNotification(groupID string, entrantUserID string, operationID string) {
+	MemberEnterTips := open_im_sdk.MemberEnterTips{Group: &open_im_sdk.GroupInfo{}, EntrantUser: &open_im_sdk.GroupMemberFullInfo{}}
+	if err := setGroupInfo(groupID, MemberEnterTips.Group); err != nil {
+		log.Error(operationID, "setGroupInfo failed ", err.Error(), groupID, MemberEnterTips.Group)
+		return
+	}
+	if err := setGroupMemberInfo(groupID, entrantUserID, MemberEnterTips.EntrantUser); err != nil {
+		log.Error(operationID, "setGroupMemberInfo failed ", err.Error(), groupID, entrantUserID, MemberEnterTips.EntrantUser)
+		return
+	}
+	groupNotification(constant.MemberEnterNotification, &MemberEnterTips, entrantUserID, groupID, "", operationID)
 }

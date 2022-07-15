@@ -14,12 +14,14 @@ import (
 	pbCommon "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
+
+	"google.golang.org/grpc"
 )
 
 type officeServer struct {
@@ -27,15 +29,18 @@ type officeServer struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
+	ch              chan tagSendStruct
 }
 
 func NewOfficeServer(port int) *officeServer {
 	log.NewPrivateLog(constant.LogFileName)
+	ch := make(chan tagSendStruct, 100000)
 	return &officeServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfficeName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
+		ch:              ch,
 	}
 }
 
@@ -56,29 +61,55 @@ func (s *officeServer) Run() {
 	log.NewInfo("0", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
-	srv := grpc.NewServer()
+	recvSize := 1024 * 1024 * 30
+	sendSize := 1024 * 1024 * 30
+	var options = []grpc.ServerOption{
+		grpc.MaxRecvMsgSize(recvSize),
+		grpc.MaxSendMsgSize(sendSize),
+	}
+	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbOffice.RegisterOfficeServiceServer(srv, s)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-
+	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		return
 	}
+	go s.sendTagMsgRoutine()
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError("0", "Serve failed ", err.Error())
 		return
 	}
 	log.NewInfo("0", "message cms rpc success")
+}
+
+type tagSendStruct struct {
+	operationID      string
+	user             *db.User
+	userID           string
+	content          string
+	senderPlatformID int32
+}
+
+func (s *officeServer) sendTagMsgRoutine() {
+	log.NewInfo("", utils.GetSelfFuncName(), "start")
+	for {
+		select {
+		case v := <-s.ch:
+			msg.TagSendMessage(v.operationID, v.user, v.userID, v.content, v.senderPlatformID)
+			time.Sleep(time.Millisecond * 100)
+		}
+	}
 }
 
 func (s *officeServer) GetUserTags(_ context.Context, req *pbOffice.GetUserTagsReq) (resp *pbOffice.GetUserTagsResp, err error) {
@@ -174,7 +205,15 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 	}
 	var groupUserIDList []string
 	for _, groupID := range req.GroupList {
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
+		if etcdConn == nil {
+			errMsg := req.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(req.OperationID, errMsg)
+			resp.CommonResp.ErrCode = constant.ErrInternal.ErrCode
+			resp.CommonResp.ErrMsg = errMsg
+			return resp, nil
+		}
+
 		cacheClient := pbCache.NewCacheClient(etcdConn)
 		req := pbCache.GetGroupMemberIDListFromCacheReq{
 			OperationID: req.OperationID,
@@ -207,6 +246,12 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 			userIDList = append(userIDList[:i], userIDList[i+1:]...)
 		}
 	}
+	if unsafe.Sizeof(userIDList) > 1024*1024 {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "size", unsafe.Sizeof(userIDList))
+		resp.CommonResp.ErrMsg = constant.ErrSendLimit.ErrMsg
+		resp.CommonResp.ErrCode = constant.ErrSendLimit.ErrCode
+		return
+	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "total userIDList result: ", userIDList)
 	user, err := imdb.GetUserByUserID(req.SendID)
 	if err != nil {
@@ -215,30 +260,46 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		return resp, nil
 	}
-	var wg sync.WaitGroup
-	wg.Add(len(userIDList))
+	var successUserIDList []string
 	for _, userID := range userIDList {
-		go func(userID string) {
-			defer wg.Done()
-			msg.TagSendMessage(req.OperationID, user, userID, req.Content, req.SenderPlatformID)
-		}(userID)
+		t := tagSendStruct{
+			operationID:      req.OperationID,
+			user:             user,
+			userID:           userID,
+			content:          req.Content,
+			senderPlatformID: req.SenderPlatformID,
+		}
+		select {
+		case s.ch <- t:
+			log.NewDebug(t.operationID, utils.GetSelfFuncName(), "msg: ", t, "send success")
+			successUserIDList = append(successUserIDList, userID)
+		// if channel is full, return grpc req
+		case <-time.After(1 * time.Second):
+			log.NewError(t.operationID, utils.GetSelfFuncName(), s.ch, "channel is full")
+			resp.CommonResp.ErrCode = constant.ErrSendLimit.ErrCode
+			resp.CommonResp.ErrMsg = constant.ErrSendLimit.ErrMsg
+			return resp, nil
+		}
 	}
-	wg.Wait()
-	var tagSendLogs db.TagSendLog
 
-	wg.Add(len(userIDList))
-	for _, userID := range userIDList {
+	var tagSendLogs db.TagSendLog
+	var wg sync.WaitGroup
+	wg.Add(len(successUserIDList))
+	var lock sync.Mutex
+	for _, userID := range successUserIDList {
 		go func(userID string) {
 			defer wg.Done()
 			userName, err := im_mysql_model.GetUserNameByUserID(userID)
 			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error(), userID)
 				return
 			}
+			lock.Lock()
 			tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
 				UserID:   userID,
 				UserName: userName,
 			})
+			lock.Unlock()
 		}(userID)
 	}
 	wg.Wait()
@@ -548,8 +609,17 @@ func (s *officeServer) GetWorkMomentByID(_ context.Context, req *pbOffice.GetWor
 	if !canSee {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "workMoments not access to user", canSee, workMoment, req.OpUserID)
 	}
+
 	if err := utils.CopyStructFields(resp.WorkMoment, workMoment); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields", err.Error())
+	}
+	user, err := imdb.GetUserByUserID(workMoment.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserByUserID failed", err.Error())
+	}
+	if user != nil {
+		resp.WorkMoment.FaceURL = user.FaceURL
+		resp.WorkMoment.UserName = user.Nickname
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -573,6 +643,16 @@ func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUs
 	if err := utils.CopyStructFields(&resp.WorkMoments, workMoments); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
+	for _, v := range resp.WorkMoments {
+		user, err := imdb.GetUserByUserID(v.UserID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		}
+		if user != nil {
+			v.UserName = user.Nickname
+			v.FaceURL = user.FaceURL
+		}
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
@@ -589,6 +669,16 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 	}
 	if err := utils.CopyStructFields(&resp.WorkMoments, workMoments); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
+	}
+	for _, v := range resp.WorkMoments {
+		user, err := imdb.GetUserByUserID(v.UserID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		}
+		if user != nil {
+			v.UserName = user.Nickname
+			v.FaceURL = user.FaceURL
+		}
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil

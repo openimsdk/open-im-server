@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
+	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	url2 "net/url"
@@ -50,39 +51,45 @@ func MinioInit() {
 	}
 	err = MinioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.Bucket, opt)
 	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), "MakeBucket failed ", err.Error())
+		log.NewInfo(operationID, utils.GetSelfFuncName(), "MakeBucket failed ", err.Error())
 		exists, err := MinioClient.BucketExists(context.Background(), config.Config.Credential.Minio.Bucket)
 		if err == nil && exists {
-			log.NewWarn(operationID, utils.GetSelfFuncName(), "We already own ", config.Config.Credential.Minio.Bucket)
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "We already own ", config.Config.Credential.Minio.Bucket)
 		} else {
 			if err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
+				log.NewInfo(operationID, utils.GetSelfFuncName(), err.Error())
 			}
-			log.NewError(operationID, utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
 			return
 		}
 	}
 	// make app bucket
 	err = MinioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.AppBucket, opt)
 	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), "MakeBucket failed ", err.Error())
+		log.NewInfo(operationID, utils.GetSelfFuncName(), "MakeBucket failed ", err.Error())
 		exists, err := MinioClient.BucketExists(context.Background(), config.Config.Credential.Minio.Bucket)
 		if err == nil && exists {
-			log.NewWarn(operationID, utils.GetSelfFuncName(), "We already own ", config.Config.Credential.Minio.Bucket)
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "We already own ", config.Config.Credential.Minio.Bucket)
 		} else {
 			if err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
+				log.NewInfo(operationID, utils.GetSelfFuncName(), err.Error())
 			}
-			log.NewError(operationID, utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "create bucket failed and bucket not exists")
 			return
 		}
 	}
 	// 自动化桶public的代码
-	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
-	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policy.BucketPolicyReadWrite)
-	//if err != nil {
-	//	log.NewDebug("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
-	//	return
-	//}
+	policyJsonString := fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],
+		"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, config.Config.Credential.Minio.Bucket)
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policyJsonString)
+	if err != nil {
+		log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+	}
+	policyJsonString = fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],
+		"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, config.Config.Credential.Minio.AppBucket)
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policyJsonString)
+	if err != nil {
+		log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+	}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio create and set policy success")
 }

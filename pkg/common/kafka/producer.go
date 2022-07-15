@@ -2,6 +2,8 @@ package kafka
 
 import (
 	log2 "Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
+	"errors"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )
@@ -15,8 +17,9 @@ type Producer struct {
 
 func NewKafkaProducer(addr []string, topic string) *Producer {
 	p := Producer{}
-	p.config = sarama.NewConfig()                             //Instantiate a sarama Config
-	p.config.Producer.Return.Successes = true                 //Whether to enable the successes channel to be notified after the message is sent successfully
+	p.config = sarama.NewConfig()             //Instantiate a sarama Config
+	p.config.Producer.Return.Successes = true //Whether to enable the successes channel to be notified after the message is sent successfully
+	p.config.Producer.Return.Errors = true
 	p.config.Producer.RequiredAcks = sarama.WaitForAll        //Set producer Message Reply level 0 1 all
 	p.config.Producer.Partitioner = sarama.NewHashPartitioner //Set the hash-key automatic hash partition. When sending a message, you must specify the key value of the message. If there is no key, the partition will be selected randomly
 
@@ -32,18 +35,27 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	return &p
 }
 
-func (p *Producer) SendMessage(m proto.Message, key ...string) (int32, int64, error) {
+func (p *Producer) SendMessage(m proto.Message, key string, operationID string) (int32, int64, error) {
+	log2.Info(operationID, "SendMessage", "key ", key, m.String(), p.producer)
 	kMsg := &sarama.ProducerMessage{}
 	kMsg.Topic = p.topic
-	if len(key) == 1 {
-		kMsg.Key = sarama.StringEncoder(key[0])
-	}
+	kMsg.Key = sarama.StringEncoder(key)
 	bMsg, err := proto.Marshal(m)
 	if err != nil {
-		log2.Error("", "", "proto marshal err = %s", err.Error())
+		log2.Error(operationID, "", "proto marshal err = %s", err.Error())
 		return -1, -1, err
 	}
+	if len(bMsg) == 0 {
+		log2.Error(operationID, "len(bMsg) == 0 ")
+		return 0, 0, errors.New("len(bMsg) == 0 ")
+	}
 	kMsg.Value = sarama.ByteEncoder(bMsg)
-
-	return p.producer.SendMessage(kMsg)
+	log2.Info(operationID, "ByteEncoder SendMessage begin", "key ", kMsg, p.producer, "len: ", kMsg.Key.Length(), kMsg.Value.Length())
+	if kMsg.Key.Length() == 0 || kMsg.Value.Length() == 0 {
+		log2.Error(operationID, "kMsg.Key.Length() == 0 || kMsg.Value.Length() == 0 ", kMsg)
+		return -1, -1, errors.New("key or value == 0")
+	}
+	a, b, c := p.producer.SendMessage(kMsg)
+	log2.Info(operationID, "ByteEncoder SendMessage end", "key ", kMsg.Key.Length(), kMsg.Value.Length(), p.producer)
+	return a, b, utils.Wrap(c, "")
 }

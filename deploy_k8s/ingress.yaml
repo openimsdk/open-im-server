@@ -1,0 +1,101 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  name: sdk-server-ingress
+spec:
+  rules:
+    - host: sdk-server.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: sdk-server
+                port:
+                  number: 10003
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  name: msg-gateway-ingress
+spec:
+  rules:
+    - host: msg-gateway.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: msg-gateway
+                port:
+                  number: 10001
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  name: api-ingress
+spec:
+  rules:
+    - host: api.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: api
+                port:
+                  number: 10002
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  name: demo-ingress
+spec:
+  rules:
+    - host: demo.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: demo
+                port:
+                  number: 10004 
+            path: /
+            pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  name: cms-api-ingress
+spec:
+  rules:
+    - host: cms-api.openim.xxx.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: cms-api
+                port:
+                  number: 10006
+            path: /
+            pathType: Prefix

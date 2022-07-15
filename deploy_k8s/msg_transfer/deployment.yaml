@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msg-transfer-deployment
+spec:
+  selector:
+    matchLabels:
+      app: msg-transfer # 选择这个指定标签执行
+  replicas: 1 # 运行pod数量
+  template:
+    metadata:
+      labels:
+        app: msg-transfer # 标签
+    spec:
+      containers:
+      - name: msg-transfer
+        image: openim/msg_transfer:v2.1.0
+        # imagePullPolicy: Always
+        volumeMounts:
+          - name: config
+            mountPath: /Open-IM-Server/config
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: openim-config
+  strategy: #更新策略
+    type: RollingUpdate # 滚动更新

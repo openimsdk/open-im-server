@@ -1,0 +1,31 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-deployment
+spec:
+  selector:
+    matchLabels:
+      app: auth # 选择这个指定标签执行
+  replicas: 1 # 运行pod数量
+  template:
+    metadata:
+      labels:
+        app: auth # 标签
+    spec:
+      containers:
+      - name: auth
+        image: openim/auth:v2.1.0
+        # imagePullPolicy: Always
+        ports:
+        - containerPort: 10160
+        volumeMounts:
+          - name: config
+            mountPath: /Open-IM-Server/config
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: openim-config
+  strategy: #更新策略
+    type: RollingUpdate # 滚动更新

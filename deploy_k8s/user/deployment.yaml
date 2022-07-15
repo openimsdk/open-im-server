@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-deployment
+spec:
+  selector:
+    matchLabels:
+      app: user # 选择这个指定标签执行
+  replicas: 1 # 运行pod数量
+  template:
+    metadata:
+      labels:
+        app: user # 标签
+    spec:
+      containers:
+      - name: user
+        image: openim/user:v2.1.0
+        # imagePullPolicy: Always
+        volumeMounts:
+          - name: config
+            mountPath: /Open-IM-Server/config
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: openim-config
+  strategy: #更新策略
+    type: RollingUpdate # 滚动更新

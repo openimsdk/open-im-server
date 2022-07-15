@@ -1,0 +1,5598 @@
+basePath: /
+definitions:
+  Open_IM_internal_api_manage.FileElem:
+    properties:
+      fileName:
+        type: string
+      filePath:
+        type: string
+      fileSize:
+        type: integer
+      sourceURL:
+        type: string
+      uuid:
+        type: string
+    type: object
+  Open_IM_internal_api_manage.OANotificationElem:
+    properties:
+      ex:
+        type: string
+      fileElem:
+        $ref: '#/definitions/Open_IM_internal_api_manage.FileElem'
+      mixType:
+        type: integer
+      notificationFaceURL:
+        type: string
+      notificationName:
+        type: string
+      notificationType:
+        type: integer
+      pictureElem:
+        $ref: '#/definitions/Open_IM_internal_api_manage.PictureElem'
+      soundElem:
+        $ref: '#/definitions/Open_IM_internal_api_manage.SoundElem'
+      text:
+        type: string
+      url:
+        type: string
+      videoElem:
+        $ref: '#/definitions/Open_IM_internal_api_manage.VideoElem'
+    required:
+    - notificationFaceURL
+    - notificationName
+    - notificationType
+    - text
+    type: object
+  Open_IM_internal_api_manage.PictureBaseInfo:
+    properties:
+      height:
+        type: integer
+      size:
+        type: integer
+      type:
+        type: string
+      url:
+        type: string
+      uuid:
+        type: string
+      width:
+        type: integer
+    type: object
+  Open_IM_internal_api_manage.PictureElem:
+    properties:
+      bigPicture:
+        $ref: '#/definitions/Open_IM_internal_api_manage.PictureBaseInfo'
+      snapshotPicture:
+        $ref: '#/definitions/Open_IM_internal_api_manage.PictureBaseInfo'
+      sourcePath:
+        type: string
+      sourcePicture:
+        $ref: '#/definitions/Open_IM_internal_api_manage.PictureBaseInfo'
+    type: object
+  Open_IM_internal_api_manage.RevokeElem:
+    properties:
+      revokeMsgClientID:
+        type: string
+    required:
+    - revokeMsgClientID
+    type: object
+  Open_IM_internal_api_manage.SoundElem:
+    properties:
+      dataSize:
+        type: integer
+      duration:
+        type: integer
+      soundPath:
+        type: string
+      sourceURL:
+        type: string
+      uuid:
+        type: string
+    type: object
+  Open_IM_internal_api_manage.TextElem:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  Open_IM_internal_api_manage.VideoElem:
+    properties:
+      duration:
+        type: integer
+      snapshotHeight:
+        type: integer
+      snapshotPath:
+        type: string
+      snapshotSize:
+        type: integer
+      snapshotURL:
+        type: string
+      snapshotUUID:
+        type: string
+      snapshotWidth:
+        type: integer
+      videoPath:
+        type: string
+      videoSize:
+        type: integer
+      videoType:
+        type: string
+      videoURL:
+        type: string
+      videoUUID:
+        type: string
+    type: object
+  base_info.AccountCheckReq:
+    properties:
+      checkUserIDList:
+        items:
+          type: string
+        maxItems: 100
+        type: array
+      operationID:
+        type: string
+    required:
+    - checkUserIDList
+    - operationID
+    type: object
+  base_info.AccountCheckResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/user.AccountCheckResp_SingleUserStatus'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.AddBlacklistReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+      toUserID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    - toUserID
+    type: object
+  base_info.AddBlacklistResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.AddFriendReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+      reqMsg:
+        type: string
+      toUserID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    - toUserID
+    type: object
+  base_info.AddFriendResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.AddFriendResponseReq:
+    properties:
+      flag:
+        enum:
+        - -1
+        - 0
+        - 1
+        type: integer
+      fromUserID:
+        type: string
+      handleMsg:
+        type: string
+      operationID:
+        type: string
+      toUserID:
+        type: string
+    required:
+    - flag
+    - fromUserID
+    - operationID
+    - toUserID
+    type: object
+  base_info.AddFriendResponseResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.ApplicationGroupResponseReq:
+    properties:
+      fromUserID:
+        description: application from FromUserID
+        type: string
+      groupID:
+        type: string
+      handleResult:
+        enum:
+        - -1
+        - 1
+        type: integer
+      handledMsg:
+        type: string
+      operationID:
+        type: string
+    required:
+    - fromUserID
+    - groupID
+    - handleResult
+    - operationID
+    type: object
+  base_info.ApplicationGroupResponseResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CancelMuteGroupMemberReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    - userID
+    type: object
+  base_info.CancelMuteGroupMemberResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CancelMuteGroupReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  base_info.CancelMuteGroupResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CleanUpMsgReq:
+    properties:
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - operationID
+    - userID
+    type: object
+  base_info.CleanUpMsgResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.Comment:
+    properties:
+      content:
+        type: string
+      contentID:
+        type: string
+      createTime:
+        type: integer
+      replyUserID:
+        type: string
+      replyUserName:
+        type: string
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  base_info.CommentOneWorkMomentReq:
+    properties:
+      content:
+        type: string
+      operationID:
+        type: string
+      replyUserID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - content
+    - operationID
+    - workMomentID
+    type: object
+  base_info.CommentOneWorkMomentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.Conversation:
+    properties:
+      attachedInfo:
+        type: string
+      conversationID:
+        type: string
+      conversationType:
+        type: integer
+      draftTextTime:
+        type: integer
+      ex:
+        type: string
+      groupAtType:
+        type: integer
+      groupID:
+        type: string
+      isNotInGroup:
+        type: boolean
+      isPinned:
+        type: boolean
+      isPrivateChat:
+        type: boolean
+      ownerUserID:
+        type: string
+      recvMsgOpt:
+        enum:
+        - 0
+        - 1
+        - 2
+        type: integer
+      unreadCount:
+        type: integer
+      userID:
+        type: string
+    required:
+    - conversationID
+    - conversationType
+    - ownerUserID
+    type: object
+  base_info.CreateDepartmentMemberReq:
+    properties:
+      departmentID:
+        type: string
+      ex:
+        type: string
+      leader:
+        type: integer
+      operationID:
+        type: string
+      order:
+        type: integer
+      position:
+        type: string
+      status:
+        type: integer
+      userID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.CreateDepartmentMemberResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CreateDepartmentReq:
+    properties:
+      createTime:
+        type: integer
+      departmentID:
+        type: string
+      departmentType:
+        type: integer
+      ex:
+        type: string
+      faceURL:
+        type: string
+      memberNum:
+        type: integer
+      name:
+        type: string
+      operationID:
+        type: string
+      order:
+        type: integer
+      parentID:
+        type: string
+      subDepartmentNum:
+        type: integer
+    required:
+    - operationID
+    type: object
+  base_info.CreateDepartmentResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CreateGroupReq:
+    properties:
+      ex:
+        type: string
+      faceURL:
+        type: string
+      groupID:
+        type: string
+      groupName:
+        type: string
+      groupType:
+        type: integer
+      introduction:
+        type: string
+      memberList:
+        items:
+          $ref: '#/definitions/base_info.GroupAddMemberInfo'
+        type: array
+      notification:
+        type: string
+      operationID:
+        type: string
+      ownerUserID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.CreateGroupResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CreateOneWorkMomentReq:
+    properties:
+      operationID:
+        type: string
+      workMoment:
+        $ref: '#/definitions/office.WorkMoment'
+    type: object
+  base_info.CreateOneWorkMomentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CreateOrganizationUserReq:
+    properties:
+      birth:
+        type: integer
+      createTime:
+        type: integer
+      email:
+        type: string
+      englishName:
+        type: string
+      ex:
+        type: string
+      faceURL:
+        type: string
+      gender:
+        type: integer
+      mobile:
+        type: string
+      nickname:
+        type: string
+      operationID:
+        type: string
+      telephone:
+        type: string
+      userID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.CreateOrganizationUserResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.CreateTagReq:
+    properties:
+      operationID:
+        type: string
+      tagName:
+        description: tag名称
+        type: string
+      userIDList:
+        description: 用户ID列表
+        items:
+          type: string
+        type: array
+    required:
+    - operationID
+    - tagName
+    - userIDList
+    type: object
+  base_info.CreateTagResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DelMsgReq:
+    properties:
+      operationID:
+        type: string
+      seqList:
+        items:
+          type: integer
+        type: array
+      userID:
+        type: string
+    required:
+    - operationID
+    - seqList
+    - userID
+    type: object
+  base_info.DelMsgResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteCommentReq:
+    properties:
+      contentID:
+        type: string
+      operationID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - contentID
+    - operationID
+    - workMomentID
+    type: object
+  base_info.DeleteCommentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteDepartmentReq:
+    properties:
+      departmentID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - departmentID
+    - operationID
+    type: object
+  base_info.DeleteDepartmentResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteFriendReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+      toUserID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    - toUserID
+    type: object
+  base_info.DeleteFriendResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteOneWorkMomentReq:
+    properties:
+      operationID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - operationID
+    - workMomentID
+    type: object
+  base_info.DeleteOneWorkMomentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteOrganizationUserReq:
+    properties:
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - operationID
+    - userID
+    type: object
+  base_info.DeleteOrganizationUserResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteTagReq:
+    properties:
+      operationID:
+        type: string
+      tagID:
+        type: string
+    required:
+    - operationID
+    - tagID
+    type: object
+  base_info.DeleteTagResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DeleteUserInDepartmentReq:
+    properties:
+      departmentID:
+        type: string
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - departmentID
+    - operationID
+    - userID
+    type: object
+  base_info.DeleteUserInDepartmentResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.DismissGroupReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  base_info.DismissGroupResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.ExpireTime:
+    properties:
+      expireTimeSeconds:
+        type: integer
+    type: object
+  base_info.ForceLogoutReq:
+    properties:
+      fromUserID:
+        maxLength: 64
+        minLength: 1
+        type: string
+      operationID:
+        type: string
+      platform:
+        maximum: 8
+        minimum: 1
+        type: integer
+    required:
+    - fromUserID
+    - operationID
+    - platform
+    type: object
+  base_info.ForceLogoutResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetAllConversationsReq:
+    properties:
+      operationID:
+        type: string
+      ownerUserID:
+        type: string
+    required:
+    - operationID
+    - ownerUserID
+    type: object
+  base_info.GetAllConversationsResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/base_info.Conversation'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetAllUsersUidReq:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.GetAllUsersUidResp:
+    properties:
+      data:
+        items:
+          type: string
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetBlackListReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    type: object
+  base_info.GetBlackListResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetConversationReq:
+    properties:
+      conversationID:
+        type: string
+      operationID:
+        type: string
+      ownerUserID:
+        type: string
+    required:
+    - conversationID
+    - operationID
+    - ownerUserID
+    type: object
+  base_info.GetConversationResp:
+    properties:
+      data:
+        $ref: '#/definitions/base_info.Conversation'
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetConversationsReq:
+    properties:
+      conversationIDs:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+      ownerUserID:
+        type: string
+    required:
+    - conversationIDs
+    - operationID
+    - ownerUserID
+    type: object
+  base_info.GetConversationsResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/base_info.Conversation'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetDepartmentMemberReq:
+    properties:
+      departmentID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - departmentID
+    - operationID
+    type: object
+  base_info.GetDepartmentMemberResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetFriendApplyListReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    type: object
+  base_info.GetFriendApplyListResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetFriendListReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    type: object
+  base_info.GetFriendListResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetGroupAllMemberReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  base_info.GetGroupAllMemberResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetGroupApplicationListReq:
+    properties:
+      fromUserID:
+        description: 作为管理员或群主收到的 进群申请
+        type: string
+      operationID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    type: object
+  base_info.GetGroupApplicationListResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetGroupInfoReq:
+    properties:
+      groupIDList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+    required:
+    - groupIDList
+    - operationID
+    type: object
+  base_info.GetGroupInfoResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetGroupMembersInfoReq:
+    properties:
+      groupID:
+        type: string
+      memberList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+    required:
+    - groupID
+    - memberList
+    - operationID
+    type: object
+  base_info.GetGroupMembersInfoResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetJoinedGroupListReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    type: object
+  base_info.GetJoinedGroupListResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetSelfApplyListReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    type: object
+  base_info.GetSelfApplyListResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetSelfUserInfoReq:
+    properties:
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - operationID
+    - userID
+    type: object
+  base_info.GetSelfUserInfoResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetSubDepartmentReq:
+    properties:
+      departmentID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - departmentID
+    - operationID
+    type: object
+  base_info.GetSubDepartmentResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetTagSendLogsReq:
+    properties:
+      operationID:
+        type: string
+      pageNumber:
+        type: integer
+      showNumber:
+        type: integer
+    required:
+    - operationID
+    - pageNumber
+    - showNumber
+    type: object
+  base_info.GetTagSendLogsResp:
+    properties:
+      data:
+        properties:
+          currentPage:
+            type: integer
+          logs:
+            items:
+              $ref: '#/definitions/office.TagSendLog'
+            type: array
+          showNumber:
+            type: integer
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserFriendWorkMomentsReq:
+    properties:
+      operationID:
+        type: string
+      pageNumber:
+        type: integer
+      showNumber:
+        type: integer
+    required:
+    - operationID
+    - pageNumber
+    - showNumber
+    type: object
+  base_info.GetUserFriendWorkMomentsResp:
+    properties:
+      data:
+        properties:
+          currentPage:
+            type: integer
+          showNumber:
+            type: integer
+          workMoments:
+            items:
+              $ref: '#/definitions/base_info.WorkMoment'
+            type: array
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserInDepartmentReq:
+    properties:
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - operationID
+    - userID
+    type: object
+  base_info.GetUserInDepartmentResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserReqGroupApplicationListReq:
+    properties:
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - operationID
+    - userID
+    type: object
+  base_info.GetUserTagByIDReq:
+    properties:
+      operationID:
+        type: string
+      tagID:
+        type: string
+    required:
+    - operationID
+    - tagID
+    type: object
+  base_info.GetUserTagByIDResp:
+    properties:
+      data:
+        properties:
+          tag:
+            $ref: '#/definitions/office.Tag'
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserTagsReq:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.GetUserTagsResp:
+    properties:
+      data:
+        properties:
+          tags:
+            items:
+              $ref: '#/definitions/office.Tag'
+            type: array
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUserWorkMomentsReq:
+    properties:
+      operationID:
+        type: string
+      pageNumber:
+        type: integer
+      showNumber:
+        type: integer
+      userID:
+        type: string
+    required:
+    - operationID
+    - pageNumber
+    - showNumber
+    type: object
+  base_info.GetUserWorkMomentsResp:
+    properties:
+      data:
+        properties:
+          currentPage:
+            type: integer
+          showNumber:
+            type: integer
+          workMoments:
+            items:
+              $ref: '#/definitions/base_info.WorkMoment'
+            type: array
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUsersInfoReq:
+    properties:
+      operationID:
+        type: string
+      userIDList:
+        items:
+          type: string
+        type: array
+    required:
+    - operationID
+    - userIDList
+    type: object
+  base_info.GetUsersInfoResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetUsersOnlineStatusReq:
+    properties:
+      operationID:
+        type: string
+      userIDList:
+        items:
+          type: string
+        maxItems: 200
+        type: array
+    required:
+    - operationID
+    - userIDList
+    type: object
+  base_info.GetUsersOnlineStatusResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/pbRelay.GetUsersOnlineStatusResp_SuccessResult'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GetWorkMomentByIDReq:
+    properties:
+      operationID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - operationID
+    - workMomentID
+    type: object
+  base_info.GetWorkMomentByIDResp:
+    properties:
+      data:
+        properties:
+          workMoment:
+            $ref: '#/definitions/base_info.WorkMoment'
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.GroupAddMemberInfo:
+    properties:
+      roleLevel:
+        type: integer
+      userID:
+        type: string
+    required:
+    - roleLevel
+    - userID
+    type: object
+  base_info.ImportFriendReq:
+    properties:
+      friendUserIDList:
+        items:
+          type: string
+        type: array
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - friendUserIDList
+    - fromUserID
+    - operationID
+    type: object
+  base_info.ImportFriendResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/base_info.UserIDResult'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.InviteUserToGroupReq:
+    properties:
+      groupID:
+        type: string
+      invitedUserIDList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+      reason:
+        type: string
+    required:
+    - groupID
+    - invitedUserIDList
+    - operationID
+    type: object
+  base_info.InviteUserToGroupResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/base_info.UserIDResult'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.IsFriendReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+      toUserID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    - toUserID
+    type: object
+  base_info.IsFriendResp:
+    properties:
+      data:
+        $ref: '#/definitions/base_info.Response'
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.JoinGroupReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+      reqMessage:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  base_info.JoinGroupResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.KickGroupMemberReq:
+    properties:
+      groupID:
+        type: string
+      kickedUserIDList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+      reason:
+        type: string
+    required:
+    - groupID
+    - kickedUserIDList
+    - operationID
+    type: object
+  base_info.KickGroupMemberResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/base_info.UserIDResult'
+        type: array
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.LikeOneWorkMomentReq:
+    properties:
+      operationID:
+        type: string
+      workMomentID:
+        type: string
+    required:
+    - operationID
+    - workMomentID
+    type: object
+  base_info.LikeOneWorkMomentResp:
+    properties:
+      data:
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.ManagementBatchSendMsgReq:
+    properties:
+      contentType:
+        type: integer
+      groupID:
+        type: string
+      isOnlineOnly:
+        type: boolean
+      offlinePushInfo:
+        $ref: '#/definitions/server_api_params.OfflinePushInfo'
+      operationID:
+        type: string
+      recvIDList:
+        items:
+          type: string
+        type: array
+      sendID:
+        type: string
+      senderFaceURL:
+        type: string
+      senderNickname:
+        type: string
+      senderPlatformID:
+        type: integer
+      sessionType:
+        type: integer
+    required:
+    - contentType
+    - operationID
+    - sendID
+    - sessionType
+    type: object
+  base_info.ManagementSendMsgReq:
+    properties:
+      contentType:
+        type: integer
+      groupID:
+        type: string
+      isOnlineOnly:
+        type: boolean
+      offlinePushInfo:
+        $ref: '#/definitions/server_api_params.OfflinePushInfo'
+      operationID:
+        type: string
+      recvID:
+        type: string
+      sendID:
+        type: string
+      senderFaceURL:
+        type: string
+      senderNickname:
+        type: string
+      senderPlatformID:
+        type: integer
+      sessionType:
+        type: integer
+    required:
+    - contentType
+    - operationID
+    - sendID
+    - sessionType
+    type: object
+  base_info.ManagementSendMsgResp:
+    properties:
+      data:
+        $ref: '#/definitions/server_api_params.UserSendMsgResp'
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.MinioUploadFileResp:
+    properties:
+      data:
+        properties:
+          URL:
+            type: string
+          newName:
+            type: string
+          snapshotName:
+            type: string
+          snapshotURL:
+            type: string
+        type: object
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.MuteGroupMemberReq:
+    properties:
+      groupID:
+        type: string
+      mutedSeconds:
+        type: integer
+      operationID:
+        type: string
+      userID:
+        type: string
+    required:
+    - groupID
+    - mutedSeconds
+    - operationID
+    - userID
+    type: object
+  base_info.MuteGroupReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  base_info.MuteGroupResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.ParseTokenReq:
+    properties:
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.ParseTokenResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.QuitGroupReq:
+    properties:
+      groupID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  base_info.QuitGroupResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.RemoveBlackListReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+      toUserID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    - toUserID
+    type: object
+  base_info.RemoveBlackListResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.Response:
+    properties:
+      isFriend:
+        type: boolean
+    type: object
+  base_info.SendMsg2TagReq:
+    properties:
+      content:
+        type: string
+      groupList:
+        items:
+          type: string
+        type: array
+      operationID:
+        type: string
+      senderPlatformID:
+        type: integer
+      tagList:
+        items:
+          type: string
+        type: array
+      userList:
+        items:
+          type: string
+        type: array
+    required:
+    - content
+    - operationID
+    - senderPlatformID
+    type: object
+  base_info.SendMsg2TagResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.SetFriendRemarkReq:
+    properties:
+      fromUserID:
+        type: string
+      operationID:
+        type: string
+      remark:
+        type: string
+      toUserID:
+        type: string
+    required:
+    - fromUserID
+    - operationID
+    - remark
+    - toUserID
+    type: object
+  base_info.SetFriendRemarkResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.SetGlobalRecvMessageOptReq:
+    properties:
+      globalRecvMsgOpt:
+        enum:
+        - 0
+        - 1
+        - 2
+        type: integer
+      operationID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.SetGlobalRecvMessageOptResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.SetGroupInfoReq:
+    properties:
+      ex:
+        type: string
+      faceURL:
+        type: string
+      groupID:
+        type: string
+      groupName:
+        type: string
+      introduction:
+        type: string
+      needVerification:
+        type: integer
+      notification:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    type: object
+  base_info.SetGroupInfoResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.SetGroupMemberInfoReq:
+    properties:
+      ex:
+        type: string
+      groupID:
+        type: string
+      nickname:
+        type: string
+      operationID:
+        type: string
+      roleLevel:
+        maximum: 3
+        minimum: 1
+        type: integer
+      userGroupFaceUrl:
+        type: string
+      userID:
+        type: string
+    required:
+    - groupID
+    - operationID
+    - userID
+    type: object
+  base_info.SetGroupMemberInfoResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.SetTagReq:
+    properties:
+      increaseUserIDList:
+        items:
+          type: string
+        type: array
+      newName:
+        type: string
+      operationID:
+        type: string
+      reduceUserIDList:
+        items:
+          type: string
+        type: array
+      tagID:
+        type: string
+    required:
+    - operationID
+    - tagID
+    type: object
+  base_info.SetTagResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.Swagger400Resp:
+    properties:
+      errCode:
+        example: 400
+        type: integer
+      errMsg:
+        example: err msg
+        type: string
+    type: object
+  base_info.Swagger500Resp:
+    properties:
+      errCode:
+        example: 500
+        type: integer
+      errMsg:
+        example: err msg
+        type: string
+    type: object
+  base_info.TransferGroupOwnerReq:
+    properties:
+      groupID:
+        type: string
+      newOwnerUserID:
+        type: string
+      oldOwnerUserID:
+        type: string
+      operationID:
+        type: string
+    required:
+    - groupID
+    - newOwnerUserID
+    - oldOwnerUserID
+    - operationID
+    type: object
+  base_info.TransferGroupOwnerResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.UpdateDepartmentReq:
+    properties:
+      createTime:
+        type: integer
+      departmentID:
+        type: string
+      departmentType:
+        type: integer
+      ex:
+        type: string
+      faceURL:
+        type: string
+      memberNum:
+        type: integer
+      name:
+        type: string
+      operationID:
+        type: string
+      order:
+        type: integer
+      parentID:
+        type: string
+      subDepartmentNum:
+        type: integer
+    required:
+    - departmentID
+    - operationID
+    type: object
+  base_info.UpdateDepartmentResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.UpdateOrganizationUserReq:
+    properties:
+      birth:
+        type: integer
+      createTime:
+        type: integer
+      email:
+        type: string
+      englishName:
+        type: string
+      ex:
+        type: string
+      faceURL:
+        type: string
+      gender:
+        type: integer
+      mobile:
+        type: string
+      nickname:
+        type: string
+      operationID:
+        type: string
+      telephone:
+        type: string
+      userID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.UpdateOrganizationUserResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.UpdateSelfUserInfoReq:
+    properties:
+      birth:
+        type: integer
+      email:
+        maxLength: 64
+        type: string
+      ex:
+        maxLength: 1024
+        type: string
+      faceURL:
+        maxLength: 1024
+        type: string
+      gender:
+        enum:
+        - 0
+        - 1
+        - 2
+        type: integer
+      nickname:
+        maxLength: 64
+        minLength: 1
+        type: string
+      operationID:
+        type: string
+      phoneNumber:
+        maxLength: 32
+        type: string
+      userID:
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - operationID
+    - userID
+    type: object
+  base_info.UpdateUserInDepartmentReq:
+    properties:
+      departmentID:
+        type: string
+      ex:
+        type: string
+      leader:
+        type: integer
+      operationID:
+        type: string
+      order:
+        type: integer
+      position:
+        type: string
+      status:
+        type: integer
+      userID:
+        type: string
+    required:
+    - operationID
+    type: object
+  base_info.UpdateUserInDepartmentResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.UpdateUserInfoResp:
+    properties:
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.UserIDResult:
+    properties:
+      result:
+        type: integer
+      userID:
+        type: string
+    type: object
+  base_info.UserRegisterReq:
+    properties:
+      birth:
+        type: integer
+      email:
+        maxLength: 64
+        type: string
+      ex:
+        maxLength: 1024
+        type: string
+      faceURL:
+        maxLength: 1024
+        type: string
+      gender:
+        enum:
+        - 0
+        - 1
+        - 2
+        type: integer
+      nickname:
+        maxLength: 64
+        minLength: 1
+        type: string
+      operationID:
+        type: string
+      phoneNumber:
+        maxLength: 32
+        type: string
+      platform:
+        maximum: 7
+        minimum: 1
+        type: integer
+      secret:
+        maxLength: 32
+        type: string
+      userID:
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - operationID
+    - platform
+    - secret
+    - userID
+    type: object
+  base_info.UserRegisterResp:
+    properties:
+      data:
+        $ref: '#/definitions/base_info.UserTokenInfo'
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.UserTokenInfo:
+    properties:
+      expiredTime:
+        type: integer
+      token:
+        type: string
+      userID:
+        type: string
+    type: object
+  base_info.UserTokenReq:
+    properties:
+      operationID:
+        type: string
+      platform:
+        maximum: 8
+        minimum: 1
+        type: integer
+      secret:
+        maxLength: 32
+        type: string
+      userID:
+        maxLength: 64
+        minLength: 1
+        type: string
+    required:
+    - operationID
+    - platform
+    - secret
+    - userID
+    type: object
+  base_info.UserTokenResp:
+    properties:
+      data:
+        $ref: '#/definitions/base_info.UserTokenInfo'
+      errCode:
+        type: integer
+      errMsg:
+        type: string
+    type: object
+  base_info.WorkMoment:
+    properties:
+      atUsers:
+        items:
+          $ref: '#/definitions/base_info.WorkMomentUser'
+        type: array
+      comments:
+        items:
+          $ref: '#/definitions/base_info.Comment'
+        type: array
+      content:
+        type: string
+      createTime:
+        type: integer
+      faceURL:
+        type: string
+      likeUsers:
+        items:
+          $ref: '#/definitions/base_info.WorkMomentUser'
+        type: array
+      permission:
+        type: integer
+      permissionUsers:
+        items:
+          $ref: '#/definitions/base_info.WorkMomentUser'
+        type: array
+      userID:
+        type: string
+      userName:
+        type: string
+      workMomentID:
+        type: string
+    type: object
+  base_info.WorkMomentUser:
+    properties:
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  internal_api_manage.FileElem:
+    properties:
+      fileName:
+        type: string
+      filePath:
+        type: string
+      fileSize:
+        type: integer
+      sourceURL:
+        type: string
+      uuid:
+        type: string
+    type: object
+  internal_api_manage.OANotificationElem:
+    properties:
+      ex:
+        type: string
+      fileElem:
+        $ref: '#/definitions/internal_api_manage.FileElem'
+      mixType:
+        type: integer
+      notificationFaceURL:
+        type: string
+      notificationName:
+        type: string
+      notificationType:
+        type: integer
+      pictureElem:
+        $ref: '#/definitions/internal_api_manage.PictureElem'
+      soundElem:
+        $ref: '#/definitions/internal_api_manage.SoundElem'
+      text:
+        type: string
+      url:
+        type: string
+      videoElem:
+        $ref: '#/definitions/internal_api_manage.VideoElem'
+    required:
+    - notificationFaceURL
+    - notificationName
+    - notificationType
+    - text
+    type: object
+  internal_api_manage.PictureBaseInfo:
+    properties:
+      height:
+        type: integer
+      size:
+        type: integer
+      type:
+        type: string
+      url:
+        type: string
+      uuid:
+        type: string
+      width:
+        type: integer
+    type: object
+  internal_api_manage.PictureElem:
+    properties:
+      bigPicture:
+        $ref: '#/definitions/internal_api_manage.PictureBaseInfo'
+      snapshotPicture:
+        $ref: '#/definitions/internal_api_manage.PictureBaseInfo'
+      sourcePath:
+        type: string
+      sourcePicture:
+        $ref: '#/definitions/internal_api_manage.PictureBaseInfo'
+    type: object
+  internal_api_manage.RevokeElem:
+    properties:
+      revokeMsgClientID:
+        type: string
+    required:
+    - revokeMsgClientID
+    type: object
+  internal_api_manage.SoundElem:
+    properties:
+      dataSize:
+        type: integer
+      duration:
+        type: integer
+      soundPath:
+        type: string
+      sourceURL:
+        type: string
+      uuid:
+        type: string
+    type: object
+  internal_api_manage.TextElem:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  internal_api_manage.VideoElem:
+    properties:
+      duration:
+        type: integer
+      snapshotHeight:
+        type: integer
+      snapshotPath:
+        type: string
+      snapshotSize:
+        type: integer
+      snapshotURL:
+        type: string
+      snapshotUUID:
+        type: string
+      snapshotWidth:
+        type: integer
+      videoPath:
+        type: string
+      videoSize:
+        type: integer
+      videoType:
+        type: string
+      videoURL:
+        type: string
+      videoUUID:
+        type: string
+    type: object
+  office.Comment:
+    properties:
+      content:
+        type: string
+      contentID:
+        type: string
+      createTime:
+        type: integer
+      faceURL:
+        type: string
+      replyUserID:
+        type: string
+      replyUserName:
+        type: string
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  office.PermissionGroup:
+    properties:
+      groupID:
+        type: string
+      groupName:
+        type: string
+    type: object
+  office.Tag:
+    properties:
+      tagID:
+        type: string
+      tagName:
+        type: string
+      userList:
+        items:
+          $ref: '#/definitions/office.TagUser'
+        type: array
+    type: object
+  office.TagSendLog:
+    properties:
+      content:
+        type: string
+      sendTime:
+        type: integer
+      userList:
+        items:
+          $ref: '#/definitions/office.TagUser'
+        type: array
+    type: object
+  office.TagUser:
+    properties:
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  office.WorkMoment:
+    properties:
+      atUserList:
+        items:
+          $ref: '#/definitions/office.WorkMomentUser'
+        type: array
+      comments:
+        items:
+          $ref: '#/definitions/office.Comment'
+        type: array
+      content:
+        type: string
+      createTime:
+        type: integer
+      faceURL:
+        type: string
+      likeUserList:
+        items:
+          $ref: '#/definitions/office.WorkMomentUser'
+        type: array
+      permission:
+        type: integer
+      permissionGroupList:
+        items:
+          $ref: '#/definitions/office.PermissionGroup'
+        type: array
+      permissionUserList:
+        items:
+          $ref: '#/definitions/office.WorkMomentUser'
+        type: array
+      userID:
+        type: string
+      userName:
+        type: string
+      workMomentID:
+        type: string
+    type: object
+  office.WorkMomentUser:
+    properties:
+      userID:
+        type: string
+      userName:
+        type: string
+    type: object
+  pbRelay.GetUsersOnlineStatusResp_SuccessDetail:
+    properties:
+      platform:
+        type: string
+      status:
+        type: string
+    type: object
+  pbRelay.GetUsersOnlineStatusResp_SuccessResult:
+    properties:
+      detailPlatformStatus:
+        items:
+          $ref: '#/definitions/pbRelay.GetUsersOnlineStatusResp_SuccessDetail'
+        type: array
+      status:
+        type: string
+      userID:
+        type: string
+    type: object
+  server_api_params.Department:
+    properties:
+      createTime:
+        type: integer
+      departmentID:
+        type: string
+      departmentType:
+        type: integer
+      ex:
+        type: string
+      faceURL:
+        type: string
+      memberNum:
+        type: integer
+      name:
+        type: string
+      order:
+        type: integer
+      parentID:
+        type: string
+      subDepartmentNum:
+        type: integer
+    type: object
+  server_api_params.DepartmentMember:
+    properties:
+      departmentID:
+        type: string
+      ex:
+        type: string
+      leader:
+        type: integer
+      order:
+        type: integer
+      position:
+        type: string
+      status:
+        type: integer
+      userID:
+        type: string
+    type: object
+  server_api_params.FriendInfo:
+    properties:
+      addSource:
+        type: integer
+      createTime:
+        type: integer
+      ex:
+        type: string
+      friendUser:
+        $ref: '#/definitions/server_api_params.UserInfo'
+      operatorUserID:
+        type: string
+      ownerUserID:
+        type: string
+      remark:
+        type: string
+    type: object
+  server_api_params.FriendRequest:
+    properties:
+      createTime:
+        type: integer
+      ex:
+        type: string
+      fromFaceURL:
+        type: string
+      fromGender:
+        type: integer
+      fromNickname:
+        type: string
+      fromUserID:
+        type: string
+      handleMsg:
+        type: string
+      handleResult:
+        type: integer
+      handleTime:
+        type: integer
+      handlerUserID:
+        type: string
+      reqMsg:
+        type: string
+      toFaceURL:
+        type: string
+      toGender:
+        type: integer
+      toNickname:
+        type: string
+      toUserID:
+        type: string
+    type: object
+  server_api_params.GroupInfo:
+    properties:
+      createTime:
+        type: integer
+      creatorUserID:
+        type: string
+      ex:
+        type: string
+      faceURL:
+        type: string
+      groupID:
+        type: string
+      groupName:
+        type: string
+      groupType:
+        type: integer
+      introduction:
+        type: string
+      memberCount:
+        type: integer
+      needVerification:
+        type: integer
+      notification:
+        type: string
+      ownerUserID:
+        type: string
+      status:
+        type: integer
+    type: object
+  server_api_params.GroupMemberFullInfo:
+    properties:
+      appMangerLevel:
+        type: integer
+      ex:
+        type: string
+      faceURL:
+        type: string
+      groupID:
+        type: string
+      joinSource:
+        type: integer
+      joinTime:
+        type: integer
+      muteEndTime:
+        type: integer
+      nickname:
+        type: string
+      operatorUserID:
+        type: string
+      roleLevel:
+        type: integer
+      userID:
+        type: string
+    type: object
+  server_api_params.GroupRequest:
+    properties:
+      ex:
+        type: string
+      groupInfo:
+        $ref: '#/definitions/server_api_params.GroupInfo'
+      handleMsg:
+        type: string
+      handleResult:
+        type: integer
+      handleTime:
+        type: integer
+      handleUserID:
+        type: string
+      reqMsg:
+        type: string
+      reqTime:
+        type: integer
+      userInfo:
+        $ref: '#/definitions/server_api_params.PublicUserInfo'
+    type: object
+  server_api_params.OfflinePushInfo:
+    properties:
+      desc:
+        type: string
+      ex:
+        type: string
+      iOSBadgeCount:
+        type: boolean
+      iOSPushSound:
+        type: string
+      title:
+        type: string
+    type: object
+  server_api_params.OrganizationUser:
+    properties:
+      birth:
+        type: integer
+      createTime:
+        type: integer
+      email:
+        type: string
+      englishName:
+        type: string
+      ex:
+        type: string
+      faceURL:
+        type: string
+      gender:
+        type: integer
+      mobile:
+        type: string
+      nickname:
+        type: string
+      telephone:
+        type: string
+      userID:
+        type: string
+    type: object
+  server_api_params.PublicUserInfo:
+    properties:
+      ex:
+        type: string
+      faceURL:
+        type: string
+      gender:
+        type: integer
+      nickname:
+        type: string
+      userID:
+        type: string
+    type: object
+  server_api_params.UserDepartmentMember:
+    properties:
+      departmentMember:
+        $ref: '#/definitions/server_api_params.DepartmentMember'
+      organizationUser:
+        $ref: '#/definitions/server_api_params.OrganizationUser'
+    type: object
+  server_api_params.UserInDepartment:
+    properties:
+      departmentMemberList:
+        items:
+          $ref: '#/definitions/server_api_params.DepartmentMember'
+        type: array
+      organizationUser:
+        $ref: '#/definitions/server_api_params.OrganizationUser'
+    type: object
+  server_api_params.UserInfo:
+    properties:
+      appMangerLevel:
+        type: integer
+      birth:
+        type: integer
+      createTime:
+        type: integer
+      email:
+        type: string
+      ex:
+        type: string
+      faceURL:
+        type: string
+      gender:
+        type: integer
+      globalRecvMsgOpt:
+        type: integer
+      nickname:
+        type: string
+      phoneNumber:
+        type: string
+      userID:
+        type: string
+    type: object
+  server_api_params.UserSendMsgResp:
+    properties:
+      clientMsgID:
+        type: string
+      sendTime:
+        type: integer
+      serverMsgID:
+        type: string
+    type: object
+  user.AccountCheckResp_SingleUserStatus:
+    properties:
+      accountStatus:
+        type: string
+      userID:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: open-IM-Server 的API服务器文档, 文档中所有请求都有一个operationID字段用于链路追踪
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: open-IM-Server API
+  version: "1.0"
+paths:
+  /auth/force_logout:
+    post:
+      consumes:
+      - application/json
+      description: 对应的平台强制登出
+      operationId: ForceLogout
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: platform为平台ID <br> fromUserID为要执行强制登出的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.ForceLogoutReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.ForceLogoutResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 强制登出
+      tags:
+      - 鉴权认证
+  /auth/parse_token:
+    post:
+      consumes:
+      - application/json
+      description: 解析当前用户token(token在请求头中传入)
+      operationId: ParseToken
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: secret为openIM密钥, 详细见服务端config.yaml secret字段<br>platform为平台ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.ParseTokenReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.ParseTokenResp'
+            - properties:
+                Data:
+                  $ref: '#/definitions/base_info.ExpireTime'
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 解析当前用户token
+      tags:
+      - 鉴权认证
+  /auth/user_register:
+    post:
+      consumes:
+      - application/json
+      description: 用户注册
+      operationId: UserRegister
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: secret为openIM密钥, 详细见服务端config.yaml secret字段 <br> platform为平台ID
+          <br> ex为拓展字段 <br> gender为性别, 0为女, 1为男
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.UserRegisterReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.UserRegisterResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 用户注册
+      tags:
+      - 鉴权认证
+  /auth/user_token:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户的token
+      operationId: UserToken
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: secret为openIM密钥, 详细见服务端config.yaml secret字段 <br> platform为平台ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.UserTokenReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.UserTokenResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 用户登录
+      tags:
+      - 鉴权认证
+  /friend/add_black:
+    post:
+      consumes:
+      - application/json
+      description: 添加黑名单
+      operationId: AddBlack
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为设置的用户 <br> toUserID为被设置的用户
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.AddBlacklistReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.AddBlacklistResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 添加黑名单
+      tags:
+      - 好友相关
+  /friend/add_friend:
+    post:
+      consumes:
+      - application/json
+      description: 添加好友
+      operationId: AddFriend
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: reqMsg为申请信息 <br> fromUserID为申请用户 <br> toUserID为被添加用户
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.AddFriendReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.AddFriendResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 添加好友
+      tags:
+      - 好友相关
+  /friend/add_friend_response:
+    post:
+      consumes:
+      - application/json
+      description: 同意/拒绝好友请求
+      operationId: AddFriendResponse
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID同意/拒绝的用户ID<br>toUserID为申请用户D<br>handleMsg为处理信息<br>flag为具体操作,
+          1为同意, 2为拒绝
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.AddFriendResponseReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.AddFriendResponseResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 同意/拒绝好友请求
+      tags:
+      - 好友相关
+  /friend/delete_friend:
+    post:
+      consumes:
+      - application/json
+      description: 删除好友
+      operationId: DeleteFriend
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为操作用户<br>toUserID为被删除用户
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteFriendReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteFriendResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 删除好友
+      tags:
+      - 好友相关
+  /friend/get_black_list:
+    post:
+      consumes:
+      - application/json
+      description: 获取黑名单列表
+      operationId: GetBlacklist
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID要获取黑名单的用户
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetBlackListReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetBlackListResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.PublicUserInfo'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+      summary: 获取黑名单列表
+      tags:
+      - 好友相关
+  /friend/get_friend_apply_list:
+    post:
+      consumes:
+      - application/json
+      description: 删除好友
+      operationId: GetFriendApplyList
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为要获取申请列表的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetFriendApplyListReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetFriendApplyListResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.FriendRequest'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+      summary: 获取好友申请列表
+      tags:
+      - 好友相关
+  /friend/get_friend_list:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户的好友列表
+      operationId: GetFriendList
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为要获取好友列表的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetFriendListReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetFriendListResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.FriendInfo'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取用户的好友列表
+      tags:
+      - 好友相关
+  /friend/get_self_friend_apply_list:
+    post:
+      consumes:
+      - application/json
+      description: 获取自己的好友申请列表
+      operationId: GetSelfFriendApplyList
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为自己的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetSelfApplyListReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetSelfApplyListResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.FriendRequest'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取自己的好友申请列表
+      tags:
+      - 好友相关
+  /friend/import_friend:
+    post:
+      consumes:
+      - application/json
+      description: 批量加好友
+      operationId: ImportFriend
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID批量加好友的用户ID<br> friendUserIDList为
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.ImportFriendReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: data列表中对象的result-1为添加该用户失败<br>0为成功
+          schema:
+            $ref: '#/definitions/base_info.ImportFriendResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 批量加好友
+      tags:
+      - 好友相关
+  /friend/is_friend:
+    post:
+      consumes:
+      - application/json
+      description: 检查用户之间是否为好友
+      operationId: IsFriend
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为请求用户<br> toUserID为要检查的用户
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.IsFriendReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.IsFriendResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 检查用户之间是否为好友
+      tags:
+      - 好友相关
+  /friend/remove_black:
+    post:
+      consumes:
+      - application/json
+      description: 把用户移除黑名单
+      operationId: RemoveBlack
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID要获取黑名单的用户
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.RemoveBlackListReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.RemoveBlackListResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 把用户移除黑名单
+      tags:
+      - 好友相关
+  /friend/set_friend_remark:
+    post:
+      consumes:
+      - application/json
+      description: 设置好友备注
+      operationId: SetFriendRemark
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为设置的用户<br> toUserID为被设置的用户<br> remark为好友备注
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SetFriendRemarkReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SetFriendRemarkResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 设置好友备注
+      tags:
+      - 好友相关
+  /group/cancel_mute_group:
+    post:
+      consumes:
+      - application/json
+      description: 取消禁言群组
+      operationId: CancelMuteGroup
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为群组ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CancelMuteGroupReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CancelMuteGroupResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 取消禁言群组
+      tags:
+      - 群组相关
+  /group/cancel_mute_group_member:
+    post:
+      consumes:
+      - application/json
+      description: 取消禁言群成员
+      operationId: CancelMuteGroupMember
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为群组ID <br> userID为要取消禁言的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CancelMuteGroupMemberReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CancelMuteGroupMemberResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 取消禁言群成员
+      tags:
+      - 群组相关
+  /group/create_group:
+    post:
+      consumes:
+      - application/json
+      description: 创建群组
+      operationId: CreateGroup
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupType这里填0代表普通群 <br>groupName为群名称<br> introduction为群介绍<br>
+          notification为群公共<br>ownerUserID为群主ID <br> ex为群扩展字段 <br> memberList中对象roleLevel为群员角色,1为普通用户
+          2为群主 3为管理员
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CreateGroupReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.CreateGroupResp'
+            - properties:
+                data:
+                  $ref: '#/definitions/server_api_params.GroupInfo'
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 创建群组
+      tags:
+      - 群组相关
+  /group/dismiss_group:
+    post:
+      consumes:
+      - application/json
+      description: 解散群组
+      operationId: DismissGroup
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为要解散的群组ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DismissGroupReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DismissGroupResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 解散群组
+      tags:
+      - 群组相关
+  /group/get_group_all_member_list:
+    post:
+      consumes:
+      - application/json
+      description: 获取全部群成员列表
+      operationId: GetGroupAllMemberList
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: GroupID为要获取群成员的群ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetGroupAllMemberReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetGroupAllMemberResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.GroupMemberFullInfo'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取全部群成员列表
+      tags:
+      - 群组相关
+  /group/get_group_members_info:
+    post:
+      consumes:
+      - application/json
+      description: 获取群成员信息
+      operationId: GetGroupMembersInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为要获取的群ID <br> memberList为要获取群成员的群ID列表
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetGroupMembersInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetGroupMembersInfoResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.GroupMemberFullInfo'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取群成员信息
+      tags:
+      - 群组相关
+  /group/get_groups_info:
+    post:
+      consumes:
+      - application/json
+      description: 通过群ID列表获取群信息
+      operationId: GetGroupsInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupIDList为群ID列表
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetGroupInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetGroupInfoResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 通过群ID列表获取群信息
+      tags:
+      - 群组相关
+  /group/get_joined_group_list:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户加入群列表
+      operationId: GetJoinedGroupList
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为要获取的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetJoinedGroupListReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetJoinedGroupListResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.GroupInfo'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取用户加入群列表
+      tags:
+      - 群组相关
+  /group/get_recv_group_applicationList:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户收到的加群信息列表
+      operationId: GetRecvGroupApplicationList
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: fromUserID为要获取的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetGroupApplicationListReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetGroupApplicationListResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.GroupRequest'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取用户收到的加群信息列表
+      tags:
+      - 群组相关
+  /group/get_user_req_group_applicationList:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户加群申请列表
+      operationId: GetUserReqGroupApplicationList
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: userID为要获取的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserReqGroupApplicationListReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetGroupApplicationListResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.GroupRequest'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取用户加群申请列表
+      tags:
+      - 群组相关
+  /group/group_application_response:
+    post:
+      consumes:
+      - application/json
+      description: 处理加群消息
+      operationId: ApplicationGroupResponse
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为要处理的群ID <br> fromUserID为要处理的用户ID <br> handleMsg为处理结果信息
+          <br> handleResult为处理结果 1为同意加群 2为拒绝加群
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.ApplicationGroupResponseReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.ApplicationGroupResponseResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 处理加群消息
+      tags:
+      - 群组相关
+  /group/invite_user_to_group:
+    post:
+      consumes:
+      - application/json
+      description: 将用户拉入群组
+      operationId: InviteUserToGroup
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为要拉进的群组ID <br> invitedUserIDList为要获取群成员的群ID列表 <br> reason为原因
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.InviteUserToGroupReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: result为结果码, -1为失败, 0为成功
+          schema:
+            $ref: '#/definitions/base_info.InviteUserToGroupResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 将用户拉入群组
+      tags:
+      - 群组相关
+  /group/join_group:
+    post:
+      consumes:
+      - application/json
+      description: 加入群聊
+      operationId: JoinGroup
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: reqMessage为申请进群信息<br>groupID为申请的群ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.JoinGroupReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.JoinGroupResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 加入群聊
+      tags:
+      - 群组相关
+  /group/kick_group:
+    post:
+      consumes:
+      - application/json
+      description: 把用户踢出群组
+      operationId: KickGroupMember
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: GroupID为要操作的群ID <br> kickedUserIDList为要踢出的群用户ID <br> reason为原因
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.KickGroupMemberReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: result为结果码, -1为失败, 0为成功
+          schema:
+            $ref: '#/definitions/base_info.KickGroupMemberResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 把用户踢出群组
+      tags:
+      - 群组相关
+  /group/mute_group:
+    post:
+      consumes:
+      - application/json
+      description: 禁言群组
+      operationId: MuteGroup
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为群组ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.MuteGroupReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.MuteGroupResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.MuteGroupResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.MuteGroupResp'
+      summary: 禁言群组
+      tags:
+      - 群组相关
+  /group/mute_group_member:
+    post:
+      consumes:
+      - application/json
+      description: 禁言群成员
+      operationId: MuteGroupMember
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为群组ID <br> userID为要禁言的用户ID <br> mutedSeconds为禁言秒数
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.MuteGroupMemberReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DismissGroupResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 禁言群成员
+      tags:
+      - 群组相关
+  /group/quit_group:
+    post:
+      consumes:
+      - application/json
+      description: 当前用户退出群聊
+      operationId: QuitGroup
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为要退出的群ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.QuitGroupReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.QuitGroupResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 当前用户退出群聊
+      tags:
+      - 群组相关
+  /group/set_group_info:
+    post:
+      consumes:
+      - application/json
+      description: 设置群信息
+      operationId: SetGroupInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: groupID为要修改的群ID<br>groupName为新的群名称<br>notification为群介绍 <br> introduction为群公告
+          <br> needVerification为加群验证 0为申请需要同意 邀请直接进 1为所有人进群需要验证，除了群主管理员邀请进群 2为直接进群
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SetGroupInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SetGroupInfoResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 设置群信息
+      tags:
+      - 群组相关
+  /group/set_group_member_info:
+    post:
+      consumes:
+      - application/json
+      description: 修改群成员信息
+      operationId: SetGroupMemberInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 除了operationID, userID, groupID其他参数可选<br>ex为拓展字段<br>faceURL为群头像<br>nickName为群昵称<br>roleLevel为群员角色,1为普通用户
+          2为群主 3为管理员
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SetGroupMemberInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SetGroupMemberInfoResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 修改群成员信息
+      tags:
+      - 群组相关
+  /group/transfer_group:
+    post:
+      consumes:
+      - application/json
+      description: 转让群主
+      operationId: TransferGroupOwner
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: GroupID为要操作的群ID <br> oldOwnerUserID为老群主ID <br> newOwnerUserID为新群主ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.TransferGroupOwnerReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.TransferGroupOwnerResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 转让群主
+      tags:
+      - 群组相关
+  /msg/batch_send_msg:
+    post:
+      consumes:
+      - application/json
+      description: 管理员批量发送群聊单聊消息 消息格式详细见<a href="https://doc.rentsoft.cn/#/server_doc/admin?id=%e6%b6%88%e6%81%af%e7%b1%bb%e5%9e%8b%e6%a0%bc%e5%bc%8f%e6%8f%8f%e8%bf%b0">消息格式</href>
+      operationId: ManagementBatchSendMsg
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 该请求和消息结构体一样 <br> recvIDList为接受消息的用户ID列表
+        in: body
+        name: 管理员批量发送单聊消息
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/base_info.ManagementBatchSendMsgReq'
+          - properties:
+              content:
+                $ref: '#/definitions/Open_IM_internal_api_manage.TextElem'
+            type: object
+      - description: 该请求和消息结构体一样 <br> recvIDList为接受消息的用户ID列表
+        in: body
+        name: 管理员批量发送OA通知
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/base_info.ManagementSendMsgReq'
+          - properties:
+              content:
+                $ref: '#/definitions/Open_IM_internal_api_manage.OANotificationElem'
+            type: object
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: serverMsgID为服务器消息ID <br> clientMsgID为客户端消息ID <br> sendTime为发送消息时间
+          schema:
+            $ref: '#/definitions/base_info.ManagementBatchSendMsgReq'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.ManagementBatchSendMsgReq'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.ManagementBatchSendMsgReq'
+      summary: 管理员批量发送群聊单聊消息
+      tags:
+      - 消息相关
+  /msg/clear_msg:
+    post:
+      consumes:
+      - application/json
+      description: 清空用户消息
+      operationId: ClearMsg
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: userID为要清空的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CleanUpMsgReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CleanUpMsgResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 清空用户消息
+      tags:
+      - 消息相关
+  /msg/del_msg:
+    post:
+      consumes:
+      - application/json
+      description: 根据seq列表删除消息
+      operationId: DelMsg
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: userID为要删除的用户ID <br> seqList为seq列表
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DelMsgReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DelMsgResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 根据seq列表删除消息
+      tags:
+      - 消息相关
+  /msg/get_all_conversations:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户所有会话
+      operationId: GetAllConversations
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ownerUserID为要获取的用户ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetAllConversationsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetAllConversationsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取用户所有会话
+      tags:
+      - 会话相关
+  /msg/get_conversation:
+    post:
+      consumes:
+      - application/json
+      description: 根据会话ID获取会话
+      operationId: GetConversation
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ownerUserID为要获取的用户ID<br>conversationID为要获取的会话ID
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetConversationReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetConversationResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 根据会话ID获取会话
+      tags:
+      - 会话相关
+  /msg/get_conversations:
+    post:
+      consumes:
+      - application/json
+      description: 根据会话ID列表获取会话
+      operationId: GetConversations
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ownerUserID为要获取的用户ID<br>conversationIDs为要获取的会话ID列表
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetConversationsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetConversationsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 根据会话ID列表获取会话
+      tags:
+      - 会话相关
+  /msg/manage_send_msg:
+    post:
+      consumes:
+      - application/json
+      description: 管理员发送/撤回消息 消息格式详细见<a href="https://doc.rentsoft.cn/#/server_doc/admin?id=%e6%b6%88%e6%81%af%e7%b1%bb%e5%9e%8b%e6%a0%bc%e5%bc%8f%e6%8f%8f%e8%bf%b0">消息格式</href>
+      operationId: ManagementSendMsg
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 该请求和消息结构体一样
+        in: body
+        name: 管理员发送文字消息
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/base_info.ManagementSendMsgReq'
+          - properties:
+              content:
+                $ref: '#/definitions/Open_IM_internal_api_manage.TextElem'
+            type: object
+      - description: 该请求和消息结构体一样
+        in: body
+        name: 管理员发送OA通知消息
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/base_info.ManagementSendMsgReq'
+          - properties:
+              content:
+                $ref: '#/definitions/Open_IM_internal_api_manage.OANotificationElem'
+            type: object
+      - description: 该请求和消息结构体一样
+        in: body
+        name: 管理员撤回单聊消息
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/base_info.ManagementSendMsgReq'
+          - properties:
+              content:
+                $ref: '#/definitions/Open_IM_internal_api_manage.RevokeElem'
+            type: object
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: serverMsgID为服务器消息ID <br> clientMsgID为客户端消息ID <br> sendTime为发送消息时间
+          schema:
+            $ref: '#/definitions/base_info.ManagementSendMsgResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.ManagementSendMsgResp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.ManagementSendMsgResp'
+      summary: 管理员发送/撤回消息
+      tags:
+      - 消息相关
+  /office/comment_one_work_moment:
+    post:
+      consumes:
+      - application/json
+      description: 评论一条工作圈
+      operationId: CommentOneWorkMoment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CommentOneWorkMomentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CommentOneWorkMomentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 评论一条工作圈
+      tags:
+      - 工作圈
+  /office/create_one_work_moment:
+    post:
+      consumes:
+      - application/json
+      description: 用户创建一条工作圈
+      operationId: CreateOneWorkMoment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求 atUserList likeUserList permissionGroupList permissionUserList
+          字段中userName可以不填
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CreateOneWorkMomentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CreateOneWorkMomentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 创建一条工作圈
+      tags:
+      - 工作圈
+  /office/create_tag:
+    post:
+      consumes:
+      - application/json
+      description: 创建标签
+      operationId: CreateTag
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CreateTagReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CreateTagResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 创建标签
+      tags:
+      - 标签
+  /office/delete_comment:
+    post:
+      consumes:
+      - application/json
+      description: 删除一条评论
+      operationId: DeleteComment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteCommentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteCommentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 删除一条评论
+      tags:
+      - 工作圈
+  /office/delete_one_work_moment:
+    post:
+      consumes:
+      - application/json
+      description: 根据用户工作圈ID删除一条工作圈
+      operationId: DeleteOneWorkMoment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteOneWorkMomentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteOneWorkMomentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 删除一条工作圈
+      tags:
+      - 工作圈
+  /office/delete_tag:
+    post:
+      consumes:
+      - application/json
+      description: 根据标签ID创建标签
+      operationId: DeleteTag
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteTagReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteTagResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 删除标签
+      tags:
+      - 标签
+  /office/get_send_tag_log:
+    post:
+      consumes:
+      - application/json
+      description: 分页获取发送历史记录
+      operationId: GetTagSendLogs
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetTagSendLogsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetTagSendLogsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取发送历史记录
+      tags:
+      - 标签
+  /office/get_user_friend_work_moments:
+    post:
+      consumes:
+      - application/json
+      description: 查询用户工作圈页面
+      operationId: GetUserFriendWorkMoments
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserFriendWorkMomentsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUserFriendWorkMomentsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 查询自己大工作圈页面
+      tags:
+      - 工作圈
+  /office/get_user_tag_by_id:
+    post:
+      consumes:
+      - application/json
+      description: 通过标签id获取该用户的标签信息
+      operationId: GetUserTagByID
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserTagByIDReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUserTagByIDResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取该用户的标签信息
+      tags:
+      - 标签
+  /office/get_user_tags:
+    post:
+      consumes:
+      - application/json
+      description: 用户获取自己的所有的标签
+      operationId: GetUserTags
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserTagsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUserTagsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取用户标签信息
+      tags:
+      - 标签
+  /office/get_user_work_moments:
+    post:
+      consumes:
+      - application/json
+      description: 查询用户工作圈
+      operationId: GetUserWorkMoments
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserWorkMomentsReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUserWorkMomentsResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 查询用户工作圈
+      tags:
+      - 工作圈
+  /office/get_work_moment_by_id:
+    post:
+      consumes:
+      - application/json
+      description: 通过ID获取工作圈
+      operationId: GetWorkMomentByID
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetWorkMomentByIDReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetWorkMomentByIDResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 通过ID获取工作圈
+      tags:
+      - 工作圈
+  /office/like_one_work_moment:
+    post:
+      consumes:
+      - application/json
+      description: 工作圈ID点赞一条工作圈
+      operationId: LikeOneWorkMoment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.LikeOneWorkMomentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.LikeOneWorkMomentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 点赞一条工作圈
+      tags:
+      - 工作圈
+  /office/send_msg_to_tag:
+    post:
+      consumes:
+      - application/json
+      description: 对标签用户发送消息
+      operationId: SendMsg2Tag
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SendMsg2TagReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SendMsg2TagResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 发送标签消息
+      tags:
+      - 标签
+  /office/set_tag:
+    post:
+      consumes:
+      - application/json
+      description: 根据标签ID修改标签用户列表, 名称
+      operationId: SetTag
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SetTagReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SetTagResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 修改标签
+      tags:
+      - 标签
+  /organization/create_department:
+    post:
+      consumes:
+      - application/json
+      description: 创建部门
+      operationId: CreateDepartment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CreateDepartmentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.CreateDepartmentResp'
+            - properties:
+                data:
+                  $ref: '#/definitions/server_api_params.Department'
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 创建部门
+      tags:
+      - 组织架构相关
+  /organization/create_department_member:
+    post:
+      consumes:
+      - application/json
+      description: 创建部门用户
+      operationId: CreateDepartmentMember
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CreateDepartmentMemberReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CreateDepartmentMemberResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 创建部门用户
+      tags:
+      - 组织架构相关
+  /organization/create_organization_user:
+    post:
+      consumes:
+      - application/json
+      description: 组织架构导入用户
+      operationId: CreateOrganizationUser
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.CreateOrganizationUserReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.CreateOrganizationUserResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 组织架构导入用户
+      tags:
+      - 组织架构相关
+  /organization/delete_department:
+    post:
+      consumes:
+      - application/json
+      description: 删除部门
+      operationId: DeleteDepartment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteDepartmentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteDepartmentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 删除部门
+      tags:
+      - 组织架构相关
+  /organization/delete_organization_user:
+    post:
+      consumes:
+      - application/json
+      description: 删除组织架构中某个用户
+      operationId: DeleteOrganizationUser
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteOrganizationUserReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteOrganizationUserResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 删除组织架构中某个用户
+      tags:
+      - 组织架构相关
+  /organization/delete_user_in_department:
+    post:
+      consumes:
+      - application/json
+      description: 删除部门中某个用户
+      operationId: DeleteUserInDepartment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.DeleteUserInDepartmentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.DeleteUserInDepartmentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 删除部门中某个用户
+      tags:
+      - 组织架构相关
+  /organization/get_department_member:
+    post:
+      consumes:
+      - application/json
+      description: 获取部门中所有成员
+      operationId: GetDepartmentMember
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetDepartmentMemberReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetDepartmentMemberResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.UserDepartmentMember'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取部门中所有成员
+      tags:
+      - 组织架构相关
+  /organization/get_sub_department:
+    post:
+      consumes:
+      - application/json
+      description: 获取子部门列表
+      operationId: GetSubDepartment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetSubDepartmentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetSubDepartmentResp'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/server_api_params.Department'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取子部门列表
+      tags:
+      - 组织架构相关
+  /organization/get_user_in_department:
+    post:
+      consumes:
+      - application/json
+      description: 获取部门中的所有用户
+      operationId: GetUserInDepartment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUserInDepartmentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetUserInDepartmentResp'
+            - properties:
+                data:
+                  $ref: '#/definitions/server_api_params.UserInDepartment'
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取部门中的所有用户
+      tags:
+      - 组织架构相关
+  /organization/update_department:
+    post:
+      consumes:
+      - application/json
+      description: 更新部门信息
+      operationId: UpdateDepartment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.UpdateDepartmentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.UpdateDepartmentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 更新部门信息
+      tags:
+      - 组织架构相关
+  /organization/update_organization_user:
+    post:
+      consumes:
+      - application/json
+      description: 更新组织架构中的用户
+      operationId: UpdateOrganizationUser
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.UpdateOrganizationUserReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.UpdateOrganizationUserResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 更新组织架构中的用户
+      tags:
+      - 组织架构相关
+  /organization/update_user_in_department:
+    post:
+      consumes:
+      - application/json
+      description: 更新部门中某个用户
+      operationId: UpdateUserInDepartment
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.UpdateUserInDepartmentReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.UpdateUserInDepartmentResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 更新部门中某个用户
+      tags:
+      - 组织架构相关
+  /third/minio_upload:
+    post:
+      consumes:
+      - application/json
+      description: minio上传文件(web api), 请注意本api请求为form并非json
+      operationId: MinioUploadFile
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 要上传的文件文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      - description: 文件类型
+        in: formData
+        name: fileType
+        required: true
+        type: integer
+      - description: 操作唯一ID
+        in: formData
+        name: operationID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.MinioUploadFileResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: minio上传文件(web api)
+      tags:
+      - 第三方服务相关
+  /user/account_check:
+    post:
+      consumes:
+      - application/json
+      description: 传入UserIDList检查列表账户注册状态，并且返回结果
+      operationId: AccountCheck
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.AccountCheckReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.AccountCheckResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 检查列表账户注册状态，并且返回结果
+      tags:
+      - 用户相关
+  /user/get_all_users_uid:
+    post:
+      consumes:
+      - application/json
+      description: 获取所有用户uid列表
+      operationId: GetAllUsersUid
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetAllUsersUidReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetAllUsersUidResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取所有用户uid列表
+      tags:
+      - 用户相关
+  /user/get_self_user_info:
+    post:
+      consumes:
+      - application/json
+      description: 传入ID获取自己的信息
+      operationId: GetSelfUserInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetSelfUserInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetSelfUserInfoResp'
+            - properties:
+                data:
+                  $ref: '#/definitions/server_api_params.UserInfo'
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取自己的信息
+      tags:
+      - 用户相关
+  /user/get_users_info:
+    post:
+      consumes:
+      - application/json
+      description: 根据用户列表批量获取用户信息
+      operationId: GetUsersInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUsersInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            allOf:
+            - $ref: '#/definitions/base_info.GetUsersInfoResp'
+            - properties:
+                Data:
+                  items:
+                    $ref: '#/definitions/server_api_params.PublicUserInfo'
+                  type: array
+              type: object
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取用户信息
+      tags:
+      - 用户相关
+  /user/get_users_online_status:
+    post:
+      consumes:
+      - application/json
+      description: 获取用户在线状态
+      operationId: GetUsersOnlineStatus
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.GetUsersOnlineStatusReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.GetUsersOnlineStatusResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 获取用户在线状态
+      tags:
+      - 用户相关
+  /user/set_global_msg_recv_opt:
+    post:
+      consumes:
+      - application/json
+      description: 设置全局免打扰
+      operationId: SetGlobalRecvMessageOpt
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: globalRecvMsgOpt为全局免打扰设置0为关闭 1为开启
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.SetGlobalRecvMessageOptReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.SetGlobalRecvMessageOptResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 设置全局免打扰
+      tags:
+      - 用户相关
+  /user/update_user_info:
+    post:
+      consumes:
+      - application/json
+      description: 修改用户信息 userID faceURL等
+      operationId: UpdateUserInfo
+      parameters:
+      - description: im token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/base_info.UpdateSelfUserInfoReq'
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: ""
+          schema:
+            $ref: '#/definitions/base_info.UpdateUserInfoResp'
+        "400":
+          description: errCode为400 一般为参数输入错误, token未带上等
+          schema:
+            $ref: '#/definitions/base_info.Swagger400Resp'
+        "500":
+          description: errCode为500 一般为服务器内部错误
+          schema:
+            $ref: '#/definitions/base_info.Swagger500Resp'
+      summary: 修改用户信息
+      tags:
+      - 用户相关
+swagger: "2.0"

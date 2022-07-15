@@ -14,6 +14,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"sync"
 
 	"google.golang.org/grpc"
 )
@@ -64,14 +65,14 @@ func (s *cacheServer) Run() {
 	defer srv.GracefulStop()
 	pbCache.RegisterCacheServer(srv, s)
 
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-
+	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
@@ -94,36 +95,54 @@ func SyncDB2Cache() error {
 		return utils.Wrap(err, "")
 	}
 	//err = updateAllUserToCache(userList)
-	err = updateAllFriendToCache(userList)
-	err = updateAllBlackListToCache(userList)
-	err = updateAllGroupMemberListToCache()
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		err = updateAllFriendToCache(userList)
+	}()
+	go func() {
+		defer wg.Done()
+		err = updateAllBlackListToCache(userList)
+	}()
+	go func() {
+		defer wg.Done()
+		err = updateAllGroupMemberListToCache()
+	}()
+	wg.Wait()
 	return utils.Wrap(err, "")
 }
 
 func DelRelationCache() {}
 
 func updateAllUserToCache(userList []db.User) error {
+	wg := &sync.WaitGroup{}
+	wg.Add(len(userList))
 	for _, userInfo := range userList {
-		userInfoPb := &commonPb.UserInfo{
-			UserID:         userInfo.UserID,
-			Nickname:       userInfo.Nickname,
-			FaceURL:        userInfo.FaceURL,
-			Gender:         userInfo.Gender,
-			PhoneNumber:    userInfo.PhoneNumber,
-			Birth:          uint32(userInfo.Birth.Unix()),
-			Email:          userInfo.Email,
-			Ex:             userInfo.Ex,
-			CreateTime:     uint32(userInfo.CreateTime.Unix()),
-			AppMangerLevel: userInfo.AppMangerLevel,
-		}
-		m, err := utils.Pb2Map(userInfoPb)
-		if err != nil {
-			log.NewWarn("", utils.GetSelfFuncName(), err.Error())
-		}
-		if err := db.DB.SetUserInfoToCache(userInfo.UserID, m); err != nil {
-			log.NewWarn("0", utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
-		}
+		go func() {
+			defer wg.Done()
+			userInfoPb := &commonPb.UserInfo{
+				UserID:         userInfo.UserID,
+				Nickname:       userInfo.Nickname,
+				FaceURL:        userInfo.FaceURL,
+				Gender:         userInfo.Gender,
+				PhoneNumber:    userInfo.PhoneNumber,
+				Birth:          uint32(userInfo.Birth.Unix()),
+				Email:          userInfo.Email,
+				Ex:             userInfo.Ex,
+				CreateTime:     uint32(userInfo.CreateTime.Unix()),
+				AppMangerLevel: userInfo.AppMangerLevel,
+			}
+			m, err := utils.Pb2Map(userInfoPb)
+			if err != nil {
+				log.NewWarn("", utils.GetSelfFuncName(), err.Error())
+			}
+			if err := db.DB.SetUserInfoToCache(userInfo.UserID, m); err != nil {
+				log.NewWarn("0", utils.GetSelfFuncName(), "set userInfo to cache failed", err.Error())
+			}
+		}()
 	}
+	wg.Wait()
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }
@@ -135,13 +154,13 @@ func updateAllGroupMemberListToCache() error {
 		log.NewWarn("0", utils.GetSelfFuncName(), "getAllGroupIDList failed", err.Error())
 		panic(err.Error())
 	}
+
 	for _, groupID := range groupIDList {
 		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
 		if err != nil {
 			log.NewWarn("", utils.GetSelfFuncName(), "GetGroupMemberIDListByGroupID", err.Error())
 			continue
 		}
-		//log.NewDebug("", utils.GetSelfFuncName(), "groupMemberIDList", groupMemberIDList)
 		if len(groupMemberIDList) > 0 {
 			if err := db.DB.AddGroupMemberToCache(groupID, groupMemberIDList...); err != nil {
 				log.NewWarn("", utils.GetSelfFuncName(), "AddGroupMemberToCache", err.Error())
@@ -166,6 +185,7 @@ func updateAllFriendToCache(userList []db.User) error {
 			}
 		}
 	}
+
 	log.NewInfo("0", utils.GetSelfFuncName(), "ok")
 	return nil
 }

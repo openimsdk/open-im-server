@@ -2,6 +2,7 @@ package logic
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/push"
@@ -43,7 +44,7 @@ func (r *RPCServer) run() {
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
 	pbPush.RegisterPushMsgServiceServer(srv, r)
-	rpcRegisterIP := ""
+	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
@@ -63,7 +64,12 @@ func (r *RPCServer) run() {
 }
 func (r *RPCServer) PushMsg(_ context.Context, pbData *pbPush.PushMsgReq) (*pbPush.PushMsgResp, error) {
 	//Call push module to send message to the user
-	MsgToUser(pbData)
+	switch pbData.MsgData.SessionType {
+	case constant.SuperGroupChatType:
+		MsgToSuperGroupUser(pbData)
+	default:
+		MsgToUser(pbData)
+	}
 	return &pbPush.PushMsgResp{
 		ResultCode: 0,
 	}, nil

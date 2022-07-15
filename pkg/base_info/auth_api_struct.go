@@ -38,6 +38,16 @@ type UserTokenResp struct {
 	UserToken UserTokenInfo `json:"data"`
 }
 
+type ForceLogoutReq struct {
+	Platform    int32  `json:"platform" binding:"required,min=1,max=8"`
+	FromUserID  string `json:"fromUserID" binding:"required,min=1,max=64"`
+	OperationID string `json:"operationID" binding:"required"`
+}
+
+type ForceLogoutResp struct {
+	CommResp
+}
+
 type ParseTokenReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 }
@@ -53,6 +63,6 @@ type ExpireTime struct {
 
 type ParseTokenResp struct {
 	CommResp
-	Data       map[string]interface{} `json:"data"`
+	Data       map[string]interface{} `json:"data" swaggerignore:"true"`
 	ExpireTime ExpireTime             `json:"-"`
 }

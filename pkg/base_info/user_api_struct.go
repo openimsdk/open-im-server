@@ -11,14 +11,20 @@ type GetUsersInfoReq struct {
 type GetUsersInfoResp struct {
 	CommResp
 	UserInfoList []*open_im_sdk.PublicUserInfo `json:"-"`
-	Data         []map[string]interface{}      `json:"data"`
+	Data         []map[string]interface{}      `json:"data" swaggerignore:"true"`
 }
 
 type UpdateSelfUserInfoReq struct {
 	ApiUserInfo
 	OperationID string `json:"operationID" binding:"required"`
 }
-
+type SetGlobalRecvMessageOptReq struct {
+	OperationID      string `json:"operationID" binding:"required"`
+	GlobalRecvMsgOpt *int32 `json:"globalRecvMsgOpt" binding:"omitempty,oneof=0 1 2"`
+}
+type SetGlobalRecvMessageOptResp struct {
+	CommResp
+}
 type UpdateUserInfoResp struct {
 	CommResp
 }
@@ -30,7 +36,7 @@ type GetSelfUserInfoReq struct {
 type GetSelfUserInfoResp struct {
 	CommResp
 	UserInfo *open_im_sdk.UserInfo  `json:"-"`
-	Data     map[string]interface{} `json:"data"`
+	Data     map[string]interface{} `json:"data" swaggerignore:"true"`
 }
 
 type GetFriendIDListFromCacheReq struct {
