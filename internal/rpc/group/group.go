@@ -442,6 +442,13 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
 
+	for _, userID := range okUserIDList {
+		err = rocksCache.DelJoinedGroupIDListFromCache(userID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
+		}
+	}
+
 	if groupInfo.GroupType != constant.SuperGroup {
 		if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
@@ -665,6 +672,13 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 	if cacheResp.CommonResp.ErrCode != 0 {
 		log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 		return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	}
+
+	for _, userID := range okUserIDList {
+		err = rocksCache.DelJoinedGroupIDListFromCache(userID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
+		}
 	}
 
 	if groupInfo.GroupType != constant.SuperGroup {
@@ -956,6 +970,13 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 				log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 				return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
+			//for _, userID := range okUserIDList {
+			//	err = rocksCache.DelJoinedGroupIDListFromCache(userID)
+			//	if err != nil {
+			//		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
+			//	}
+			//}
+
 			chat.MemberEnterDirectlyNotification(req.GroupID, req.OpUserID, req.OperationID)
 			log.NewInfo(req.OperationID, "JoinGroup rpc return ")
 			return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
