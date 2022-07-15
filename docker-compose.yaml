@@ -79,6 +79,21 @@ services:
     depends_on:
       - zookeeper
 
+  minio:
+    image: minio/minio
+    ports:
+      - 10005:9000
+      - 9090:9090
+    container_name: minio
+    volumes:
+      - /mnt/data:/data
+      - /mnt/config:/root/.minio
+    environment:
+      MINIO_ROOT_USER: user12345
+      MINIO_ROOT_PASSWORD: key12345
+    restart: always
+    command: minio server /data --console-address ':9090'
+
   etcd:
     image: quay.io/coreos/etcd
     ports:
@@ -108,6 +123,7 @@ services:
       - mongodb
       - redis
       - etcd
+      - minio
     network_mode: "host"
     logging:
       driver: json-file
