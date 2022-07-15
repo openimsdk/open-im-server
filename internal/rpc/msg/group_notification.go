@@ -57,7 +57,8 @@ func setGroupInfo(groupID string, groupInfo *open_im_sdk.GroupInfo) error {
 	}
 	err = utils2.GroupDBCopyOpenIM(groupInfo, group)
 	if err != nil {
-		return utils.Wrap(err, "GetGroupMemberNumByGroupID failed")
+		log.NewWarn("", "GroupDBCopyOpenIM failed ", groupID, err.Error())
+		return nil
 	}
 	return nil
 }
@@ -183,7 +184,16 @@ func groupNotification(contentType int32, m proto.Message, sendID, groupID, recv
 	n.SendID = sendID
 	if groupID != "" {
 		n.RecvID = groupID
-		n.SessionType = constant.GroupChatType
+		group, err := imdb.GetGroupInfoByGroupID(groupID)
+		if err != nil {
+			log.NewError(operationID, "GetGroupInfoByGroupID failed ", err.Error(), groupID)
+		}
+		switch group.GroupType {
+		case constant.NormalGroup:
+			n.SessionType = constant.GroupChatType
+		default:
+			n.SessionType = constant.SuperGroupChatType
+		}
 	} else {
 		n.RecvID = recvUserID
 		n.SessionType = constant.SingleChatType
@@ -223,6 +233,9 @@ func GroupCreatedNotification(operationID, opUserID, groupID string, initMemberL
 			continue
 		}
 		GroupCreatedTips.MemberList = append(GroupCreatedTips.MemberList, &groupMemberInfo)
+		if len(GroupCreatedTips.MemberList) == constant.MaxNotificationNum {
+			break
+		}
 	}
 	groupNotification(constant.GroupCreatedNotification, &GroupCreatedTips, opUserID, groupID, "", operationID)
 }
@@ -527,7 +540,6 @@ func MemberInvitedNotification(operationID, groupID, opUserID, reason string, in
 		}
 		MemberInvitedTips.InvitedUserList = append(MemberInvitedTips.InvitedUserList, &groupMemberInfo)
 	}
-
 	groupNotification(constant.MemberInvitedNotification, &MemberInvitedTips, opUserID, groupID, "", operationID)
 }
 

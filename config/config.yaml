@@ -38,6 +38,7 @@ redis:
   dbMaxIdle: 128
   dbMaxActive: 0
   dbIdleTimeout: 120
+  dbUserName:     #only redis version 6.0+ need username
   dbPassWord: openIM #redis密码 建议修改
   enableCluster: false #如果外部redis以集群方式启动，需要打开此开关
 
@@ -174,7 +175,7 @@ rpcregistername: #rpc注册服务名，默认即可
 log:
   storageLocation: ../logs/
   rotationTime: 24
-  remainRotationCount: 3 #日志数量
+  remainRotationCount: 2 #日志数量
   #日志级别 6表示全都打印，测试阶段建议设置为6
   remainLogLevel: 6
   elasticSearchSwitch: false
@@ -706,6 +707,7 @@ demo:
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   #  second
   codeTTL: 60
+  useSuperCode: true
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
     title: "openIM"
     senderMail: "765567899@qq.com"

@@ -66,7 +66,7 @@ func SendVerificationCode(c *gin.Context) {
 	}
 	switch params.UsedFor {
 	case constant.VerificationCodeForRegister:
-		_, err := im_mysql_model.GetRegister(account, params.AreaCode)
+		_, err := im_mysql_model.GetRegister(account, params.AreaCode, "")
 		if err == nil {
 			log.NewError(params.OperationID, "The phone number has been registered", params)
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": "The phone number has been registered"})

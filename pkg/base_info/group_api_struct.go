@@ -161,10 +161,13 @@ type ApplicationGroupResponseResp struct {
 }
 
 type JoinGroupReq struct {
-	GroupID     string `json:"groupID" binding:"required"`
-	ReqMessage  string `json:"reqMessage"`
-	OperationID string `json:"operationID" binding:"required"`
+	GroupID       string `json:"groupID" binding:"required"`
+	ReqMessage    string `json:"reqMessage"`
+	OperationID   string `json:"operationID" binding:"required"`
+	JoinSource    int32  `json:"joinSource"`
+	InviterUserID string `json:"inviterUserID"`
 }
+
 type JoinGroupResp struct {
 	CommResp
 }
@@ -178,14 +181,16 @@ type QuitGroupResp struct {
 }
 
 type SetGroupInfoReq struct {
-	GroupID          string `json:"groupID" binding:"required"`
-	GroupName        string `json:"groupName"`
-	Notification     string `json:"notification"`
-	Introduction     string `json:"introduction"`
-	FaceURL          string `json:"faceURL"`
-	Ex               string `json:"ex"`
-	OperationID      string `json:"operationID" binding:"required"`
-	NeedVerification *int32 `json:"needVerification" binding "oneof=0 1 2"`
+	GroupID           string `json:"groupID" binding:"required"`
+	GroupName         string `json:"groupName"`
+	Notification      string `json:"notification"`
+	Introduction      string `json:"introduction"`
+	FaceURL           string `json:"faceURL"`
+	Ex                string `json:"ex"`
+	OperationID       string `json:"operationID" binding:"required"`
+	NeedVerification  *int32 `json:"needVerification" `
+	LookMemberInfo    *int32 `json:"lookMemberInfo"`
+	ApplyMemberFriend *int32 `json:"applyMemberFriend"`
 }
 
 type SetGroupInfoResp struct {

@@ -58,6 +58,7 @@ const (
 	FriendRemarkSetNotification           = 1206 //set_friend_remark?
 	BlackAddedNotification                = 1207 //add_black
 	BlackDeletedNotification              = 1208 //remove_black
+	MsgDeleteNotification                 = 1209
 
 	ConversationOptChangeNotification = 1300 // change conversation opt
 
@@ -161,15 +162,19 @@ const (
 	GroupStatusMuted     = 3
 
 	//GroupType
-	NormalGroup     = 0
-	SuperGroup      = 1
-	DepartmentGroup = 2
+	NormalGroup  = 0
+	SuperGroup   = 1
+	WorkingGroup = 2
 
 	GroupBaned          = 3
 	GroupBanPrivateChat = 4
 
 	//UserJoinGroupSource
 	JoinByAdmin = 1
+
+	JoinByInvitation = 2
+	JoinBySearch     = 3
+	JoinByQRCode     = 4
 
 	//Minio
 	MinioDurationTimes = 3600
@@ -298,3 +303,5 @@ const BigVersion = "v2"
 const LogFileName = "OpenIM.log"
 
 const StatisticsTimeInterval = 60
+
+const MaxNotificationNum = 100

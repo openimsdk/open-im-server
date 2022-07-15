@@ -3,6 +3,7 @@ package group
 import (
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -316,7 +317,12 @@ func InviteUserToGroup(c *gin.Context) {
 	}
 	req := &rpc.InviteUserToGroupReq{}
 	utils.CopyStructFields(req, &params)
-
+	if len(req.InvitedUserIDList) > constant.MaxNotificationNum {
+		errMsg := req.OperationID + " too many, Limit: " + utils.IntToString(constant.MaxNotificationNum)
+		log.NewError(req.OperationID, errMsg, len(req.InvitedUserIDList))
+		c.JSON(http.StatusRequestEntityTooLarge, gin.H{"errCode": 400, "errMsg": errMsg})
+		return
+	}
 	var ok bool
 	var errInfo string
 	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
@@ -779,12 +785,7 @@ func SetGroupInfo(c *gin.Context) {
 	req := &rpc.SetGroupInfoReq{GroupInfoForSet: &open_im_sdk.GroupInfoForSet{}}
 	utils.CopyStructFields(req.GroupInfoForSet, &params)
 	req.OperationID = params.OperationID
-
-	if params.NeedVerification != nil {
-		req.GroupInfoForSet.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
-		log.NewInfo(req.OperationID, "NeedVerification ", req.GroupInfoForSet.NeedVerification)
-	}
-
+	argsHandle(&params, req)
 	var ok bool
 	var errInfo string
 	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
@@ -814,6 +815,20 @@ func SetGroupInfo(c *gin.Context) {
 	resp := api.SetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 	log.NewInfo(req.OperationID, "SetGroupInfo api return ", resp)
+}
+func argsHandle(params *api.SetGroupInfoReq, req *rpc.SetGroupInfoReq) {
+	if params.NeedVerification != nil {
+		req.GroupInfoForSet.NeedVerification = &wrappers.Int32Value{Value: *params.NeedVerification}
+		log.NewInfo(req.OperationID, "NeedVerification ", req.GroupInfoForSet.NeedVerification)
+	}
+	if params.LookMemberInfo != nil {
+		req.GroupInfoForSet.LookMemberInfo = &wrappers.Int32Value{Value: *params.LookMemberInfo}
+		log.NewInfo(req.OperationID, "LookMemberInfo ", req.GroupInfoForSet.LookMemberInfo)
+	}
+	if params.ApplyMemberFriend != nil {
+		req.GroupInfoForSet.ApplyMemberFriend = &wrappers.Int32Value{Value: *params.ApplyMemberFriend}
+		log.NewInfo(req.OperationID, "ApplyMemberFriend ", req.GroupInfoForSet.ApplyMemberFriend)
+	}
 }
 
 // @Summary 转让群主

@@ -32,10 +32,12 @@ func InsertIntoGroup(groupInfo db.Group) error {
 		groupInfo.GroupName = "Group Chat"
 	}
 	groupInfo.CreateTime = time.Now()
+
 	err = dbConn.Table("groups").Create(groupInfo).Error
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

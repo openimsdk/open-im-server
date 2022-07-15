@@ -1,0 +1,113 @@
+version: '3'
+networks:
+  mongo-network:
+    external: false
+services:
+  # 配置服务器configsvr
+  config:
+    image: mongo:latest
+    networks:
+      - mongo-network
+    container_name: config
+    restart: always
+    ports:
+      - 27019:27019
+    command: --configsvr --replSet "config" --bind_ip_all
+    volumes:
+      - ./components/config_mongodb/data/db:/data/db
+      - ./components/config_mongodb/data/logs:/data/logs
+      - ./components/config_mongodb/data/conf:/etc/mongo
+      - ./components/config_mongodb/data/configdb:/data/configdb
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
+
+  # shard分片1
+  shard1:
+    image: mongo:latest
+    networks:
+      - mongo-network
+    container_name: shard1
+    restart: always
+    ports:
+      - 27118:27018
+    command: --shardsvr --replSet "shard1" --bind_ip_all
+    volumes:
+      - /data01/mongo/shard1/db:/data/db
+      - /data01/mongo/shard1/configdb:/data/configdb
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
+
+  # shard分片2
+  shard2:
+    image: mongo:latest
+    networks:
+      - mongo-network
+    container_name: shard2
+    restart: always
+    ports:
+      - 27218:27018
+    command: --shardsvr --replSet "shard2" --bind_ip_all
+    volumes:
+      - /data02/mongo/shard2/db:/data/db
+      - /data02/mongo/shard2/configdb:/data/configdb
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
+  #      - ${PWD}/key.file:/data/mongodb/key.file
+
+  # shard分片3
+  shard3:
+    image: mongo:latest
+    networks:
+      - mongo-network
+    container_name: shard3
+    restart: always
+    ports:
+      - 27318:27018
+    command: --shardsvr --replSet "shard3" --bind_ip_all
+    volumes:
+      - /data03/mongo/shard3/db:/data/db
+      - /data03/mongo/shard3/configdb:/data/configdb
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
+  # shard分片4
+  shard4:
+    image: mongo:latest
+    networks:
+      - mongo-network
+    container_name: shard4
+    restart: always
+    ports:
+      - 27418:27018
+    command: --shardsvr --replSet "shard4" --bind_ip_all
+    volumes:
+      - /data04/mongo/shard4/db:/data/db
+      - /data04/mongo/shard4/configdb:/data/configdb
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
+  # shard分片5
+  shard5:
+    image: mongo:latest
+    networks:
+      - mongo-network
+    container_name: shard5
+    restart: always
+    ports:
+      - 27518:27018
+    command: --shardsvr --replSet "shard5" --bind_ip_all
+    volumes:
+      - /data05/mongo/shard5/db:/data/db
+      - /data05/mongo/shard5/configdb:/data/configdb
+    environment:
+      - TZ=Asia/Shanghai
+      # cache
+      - wiredTigerCacheSizeGB=1
