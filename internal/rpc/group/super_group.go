@@ -10,14 +10,19 @@ import (
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.GetJoinedSuperGroupListReq) (*pbGroup.GetJoinedSuperGroupListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbGroup.GetJoinedSuperGroupListResp{CommonResp: &pbGroup.CommonResp{}}
 	userToSuperGroup, err := db.DB.GetSuperGroupByUserID(req.UserID)
+	if err == mongo.ErrNoDocuments {
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroupByUserID failed ", err.Error(), req.UserID)
+		return resp, nil
+	}
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroupByUserID failed", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroupByUserID failed ", err.Error(), req.UserID)
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil

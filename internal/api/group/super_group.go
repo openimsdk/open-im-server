@@ -47,7 +47,7 @@ func GetJoinedSuperGroupList(c *gin.Context) {
 	}
 	GroupListResp := api.GetJoinedSuperGroupListResp{GetJoinedGroupListResp: api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: rpcResp.CommonResp.ErrCode, ErrMsg: rpcResp.CommonResp.ErrMsg}, GroupInfoList: rpcResp.GroupList}}
 	GroupListResp.Data = jsonData.JsonDataList(GroupListResp.GroupInfoList)
-	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
+	log.NewInfo(req.OperationID, "GetJoinedSuperGroupList api return ", GroupListResp)
 	c.JSON(http.StatusOK, GroupListResp)
 }
 

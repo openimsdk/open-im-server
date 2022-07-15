@@ -262,7 +262,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 			groupNode.OwnerUserID = owner.UserID
 			resp.GroupList = append(resp.GroupList, &groupNode)
 		} else {
-			log.NewError(req.OperationID, "check nil ", num, owner, err, group, err2)
+			log.Debug(req.OperationID, "check nil ", num, owner, err, group, err2)
 			continue
 		}
 		log.NewDebug(req.OperationID, "joinedGroup ", groupNode)
