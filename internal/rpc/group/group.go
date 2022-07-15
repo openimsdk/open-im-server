@@ -680,6 +680,9 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
 		}
 	}
+	if err = rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+	}
 
 	if groupInfo.GroupType != constant.SuperGroup {
 		if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
@@ -976,6 +979,15 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			//		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
 			//	}
 			//}
+			err = rocksCache.DelJoinedGroupIDListFromCache(req.OpUserID)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+			}
+
+			err = rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+			}
 
 			chat.MemberEnterDirectlyNotification(req.GroupID, req.OpUserID, req.OperationID)
 			log.NewInfo(req.OperationID, "JoinGroup rpc return ")
@@ -1088,6 +1100,12 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		chat.MemberQuitNotification(req)
 	} else {
 		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.OpUserID)
+	}
+	if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+	}
+	if err := rocksCache.DelJoinedGroupIDListFromCache(req.OpUserID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.OpUserID)
 	}
 
 	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}})
