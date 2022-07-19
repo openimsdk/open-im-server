@@ -713,7 +713,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 }
 
 func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
-	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())
+	log.NewInfo(req.OperationID, "GetGroupApplicationList args ", req.String())
 	reply, err := imdb.GetGroupApplicationList(req.FromUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.FromUserID)
