@@ -28,7 +28,7 @@ func GetFriendIDListFromCache(userID string) ([]string, error) {
 		friendIDList, err := imdb.GetFriendIDListByUserID(userID)
 		return strings.Join(friendIDList, ","), err
 	}
-	friendIDListStr, err := db.DB.Rc.Fetch(friendRelationCache+userID, time.Second, getFriendIDList)
+	friendIDListStr, err := db.DB.Rc.Fetch(friendRelationCache+userID, time.Second*30, getFriendIDList)
 	return strings.Split(friendIDListStr, ","), err
 }
 
@@ -42,7 +42,7 @@ func GetBlackListFromCache(userID string) ([]string, error) {
 		blackIDList, err := imdb.GetBlackIDListByUserID(userID)
 		return strings.Join(blackIDList, ","), err
 	}
-	blackIDListStr, err := db.DB.Rc.Fetch(blackListCache+userID, time.Second, getBlackIDList)
+	blackIDListStr, err := db.DB.Rc.Fetch(blackListCache+userID, time.Second*30, getBlackIDList)
 	return strings.Split(blackIDListStr, ","), err
 }
 
@@ -55,7 +55,7 @@ func GetJoinedGroupIDListFromCache(userID string) ([]string, error) {
 		joinedGroupList, err := imdb.GetJoinedGroupIDListByUserID(userID)
 		return strings.Join(joinedGroupList, ","), err
 	}
-	joinedGroupIDListStr, err := db.DB.Rc.Fetch(joinedGroupListCache+userID, time.Second, getJoinedGroupIDList)
+	joinedGroupIDListStr, err := db.DB.Rc.Fetch(joinedGroupListCache+userID, time.Second*30, getJoinedGroupIDList)
 	return strings.Split(joinedGroupIDListStr, ","), err
 }
 
@@ -71,7 +71,7 @@ func GetGroupOwnerFromCache(groupID string) (string, error) {
 		}
 		return groupOwner.UserID, err
 	}
-	groupOwnerID, err := db.DB.Rc.Fetch(groupOwnerIDCache+groupID, time.Second, getGroupOwnerIDList)
+	groupOwnerID, err := db.DB.Rc.Fetch(groupOwnerIDCache+groupID, time.Second*30, getGroupOwnerIDList)
 	return groupOwnerID, err
 }
 
@@ -84,7 +84,7 @@ func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
 		return strings.Join(groupMemberIDList, ","), err
 	}
-	groupIDListStr, err := db.DB.Rc.Fetch(groupCache+groupID, time.Second, getGroupMemberIDList)
+	groupIDListStr, err := db.DB.Rc.Fetch(groupCache+groupID, time.Second*30, getGroupMemberIDList)
 	return strings.Split(groupIDListStr, ","), err
 }
 
@@ -102,7 +102,7 @@ func GetUserInfoFromCache(userID string) (*db.User, error) {
 		bytes, err := json.Marshal(userInfo)
 		return string(bytes), err
 	}
-	userInfoStr, err := db.DB.Rc.Fetch(userInfoCache+userID, time.Second, getUserInfo)
+	userInfoStr, err := db.DB.Rc.Fetch(userInfoCache+userID, time.Second*30, getUserInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func GetGroupMemberInfoFromCache(groupID, userID string) (*db.GroupMember, error
 		bytes, err := json.Marshal(groupMemberInfo)
 		return string(bytes), err
 	}
-	groupMemberInfoStr, err := db.DB.Rc.Fetch(groupMemberInfoCache+groupID+"-"+userID, time.Second, getGroupMemberInfo)
+	groupMemberInfoStr, err := db.DB.Rc.Fetch(groupMemberInfoCache+groupID+"-"+userID, time.Second*30, getGroupMemberInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func GetAllGroupMembersInfoFromCache(groupID string) ([]*db.GroupMember, error) 
 		bytes, err := json.Marshal(groupMembers)
 		return string(bytes), err
 	}
-	groupMembersStr, err := db.DB.Rc.Fetch(groupAllMemberInfoCache+groupID, time.Second, getGroupMemberInfo)
+	groupMembersStr, err := db.DB.Rc.Fetch(groupAllMemberInfoCache+groupID, time.Second*30, getGroupMemberInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func GetGroupInfoFromCache(groupID string) (*db.Group, error) {
 		bytes, err := json.Marshal(groupInfo)
 		return string(bytes), err
 	}
-	groupInfoStr, err := db.DB.Rc.Fetch(groupInfoCache+groupID, time.Second, getGroupInfo)
+	groupInfoStr, err := db.DB.Rc.Fetch(groupInfoCache+groupID, time.Second*30, getGroupInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +190,7 @@ func GetAllFriendsInfoFromCache(userID string) ([]*db.Friend, error) {
 		bytes, err := json.Marshal(friendInfoList)
 		return string(bytes), err
 	}
-	allFriendInfoStr, err := db.DB.Rc.Fetch(allFriendInfoCache+userID, time.Second, getAllFriendInfo)
+	allFriendInfoStr, err := db.DB.Rc.Fetch(allFriendInfoCache+userID, time.Second*30, getAllFriendInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +212,7 @@ func GetAllDepartmentsFromCache() ([]*db.Department, error) {
 		bytes, err := json.Marshal(departmentList)
 		return string(bytes), err
 	}
-	allDepartmentsStr, err := db.DB.Rc.Fetch(allDepartmentCache, time.Second, getAllDepartments)
+	allDepartmentsStr, err := db.DB.Rc.Fetch(allDepartmentCache, time.Second*30, getAllDepartments)
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func GetAllDepartmentMembersFromCache() ([]*db.DepartmentMember, error) {
 		bytes, err := json.Marshal(departmentMembers)
 		return string(bytes), err
 	}
-	allDepartmentMembersStr, err := db.DB.Rc.Fetch(allDepartmentMemberCache, time.Second, getAllDepartmentMembers)
+	allDepartmentMembersStr, err := db.DB.Rc.Fetch(allDepartmentMemberCache, time.Second*30, getAllDepartmentMembers)
 	if err != nil {
 		return nil, err
 	}
