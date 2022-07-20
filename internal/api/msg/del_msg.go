@@ -249,7 +249,7 @@ func SetMsgMinSeq(c *gin.Context) {
 		return
 	}
 
-	resp := api.CleanUpMsgResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp := api.SetMsgMinSeqResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
 
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
