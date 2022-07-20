@@ -224,29 +224,53 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	for _, v := range joinedGroupList {
 		var groupNode open_im_sdk.GroupInfo
 		num, err := imdb.GetGroupMemberNumByGroupID(v)
-		owner, err2 := imdb.GetGroupOwnerInfoByGroupID(v)
-		group, err := rocksCache.GetGroupInfoFromCache(v)
-
-		log.NewInfo(req.OperationID, num, owner, err2, group, err)
-		if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
-			if group.Status == constant.GroupStatusDismissed {
-				log.NewError(req.OperationID, "constant.GroupStatusDismissed ", group)
-				continue
-			}
-			utils.CopyStructFields(&groupNode, group)
-			groupNode.CreateTime = uint32(group.CreateTime.Unix())
-			groupNode.NotificationUpdateTime = uint32(group.NotificationUpdateTime.Unix())
-			if group.NotificationUpdateTime.Unix() < 0 {
-				groupNode.NotificationUpdateTime = 0
-			}
-
-			groupNode.MemberCount = uint32(num)
-			groupNode.OwnerUserID = owner.UserID
-			resp.GroupList = append(resp.GroupList, &groupNode)
-		} else {
-			log.NewError(req.OperationID, "check nil ", num, owner, err, group, err2)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), v)
 			continue
 		}
+		owner, err2 := imdb.GetGroupOwnerInfoByGroupID(v)
+		if err2 != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err2.Error(), v)
+			continue
+		}
+		group, err := rocksCache.GetGroupInfoFromCache(v)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), v)
+			continue
+		}
+		//if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
+		//	if group.Status == constant.GroupStatusDismissed {
+		//		log.NewError(req.OperationID, "constant.GroupStatusDismissed ", group)
+		//		continue
+		//	}
+		//	utils.CopyStructFields(&groupNode, group)
+		//	groupNode.CreateTime = uint32(group.CreateTime.Unix())
+		//	groupNode.NotificationUpdateTime = uint32(group.NotificationUpdateTime.Unix())
+		//	if group.NotificationUpdateTime.Unix() < 0 {
+		//		groupNode.NotificationUpdateTime = 0
+		//	}
+		//
+		//	groupNode.MemberCount = uint32(num)
+		//	groupNode.OwnerUserID = owner.UserID
+		//	resp.GroupList = append(resp.GroupList, &groupNode)
+		//} else {
+		//	log.NewError(req.OperationID, "check nil ", num, owner, err, group, err2)
+		//	continue
+		//}
+		if group.Status == constant.GroupStatusDismissed {
+			log.NewError(req.OperationID, "constant.GroupStatusDismissed ", group)
+			continue
+		}
+		utils.CopyStructFields(&groupNode, group)
+		groupNode.CreateTime = uint32(group.CreateTime.Unix())
+		groupNode.NotificationUpdateTime = uint32(group.NotificationUpdateTime.Unix())
+		if group.NotificationUpdateTime.Unix() < 0 {
+			groupNode.NotificationUpdateTime = 0
+		}
+
+		groupNode.MemberCount = uint32(num)
+		groupNode.OwnerUserID = owner.UserID
+		resp.GroupList = append(resp.GroupList, &groupNode)
 		log.NewDebug(req.OperationID, "joinedGroup ", groupNode)
 	}
 	log.NewInfo(req.OperationID, "GetJoinedGroupList rpc return ", resp.String())

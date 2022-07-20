@@ -94,7 +94,7 @@ func (s *cacheServer) GetFriendIDListFromCache(_ context.Context, req *pbCache.G
 // this is for dtm call
 func (s *cacheServer) DelFriendIDListFromCache(_ context.Context, req *pbCache.DelFriendIDListFromCacheReq) (resp *pbCache.DelFriendIDListFromCacheResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.DelFriendIDListFromCacheResp{}
+	resp = &pbCache.DelFriendIDListFromCacheResp{CommonResp: &pbCache.CommonResp{}}
 	if err := rocksCache.DelFriendIDListFromCache(req.UserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "args: ", req.UserID, err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
@@ -123,7 +123,7 @@ func (s *cacheServer) GetBlackIDListFromCache(_ context.Context, req *pbCache.Ge
 
 func (s *cacheServer) DelBlackIDListFromCache(_ context.Context, req *pbCache.DelBlackIDListFromCacheReq) (resp *pbCache.DelBlackIDListFromCacheResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.DelBlackIDListFromCacheResp{}
+	resp = &pbCache.DelBlackIDListFromCacheResp{CommonResp: &pbCache.CommonResp{}}
 	if err := rocksCache.DelBlackIDListFromCache(req.UserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "args: ", req.UserID, err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
@@ -153,7 +153,7 @@ func (s *cacheServer) GetGroupMemberIDListFromCache(_ context.Context, req *pbCa
 
 func (s *cacheServer) DelGroupMemberIDListFromCache(_ context.Context, req *pbCache.DelGroupMemberIDListFromCacheReq) (resp *pbCache.DelGroupMemberIDListFromCacheResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.DelGroupMemberIDListFromCacheResp{}
+	resp = &pbCache.DelGroupMemberIDListFromCacheResp{CommonResp: &pbCache.CommonResp{}}
 	if err := rocksCache.DelGroupMemberIDListFromCache(req.GroupID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "args: ", req.GroupID, err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
