@@ -123,21 +123,22 @@ type config struct {
 		OpenImCachePort          []int `yaml:"openImCachePort"`
 	}
 	RpcRegisterName struct {
-		OpenImStatisticsName         string `yaml:"openImStatisticsName"`
-		OpenImUserName               string `yaml:"openImUserName"`
-		OpenImFriendName             string `yaml:"openImFriendName"`
-		OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`
-		OpenImPushName               string `yaml:"openImPushName"`
-		OpenImOnlineMessageRelayName string `yaml:"openImOnlineMessageRelayName"`
-		OpenImGroupName              string `yaml:"openImGroupName"`
-		OpenImAuthName               string `yaml:"openImAuthName"`
-		OpenImMessageCMSName         string `yaml:"openImMessageCMSName"`
-		OpenImAdminCMSName           string `yaml:"openImAdminCMSName"`
-		OpenImOfficeName             string `yaml:"openImOfficeName"`
-		OpenImOrganizationName       string `yaml:"openImOrganizationName"`
-		OpenImConversationName       string `yaml:"openImConversationName"`
-		OpenImCacheName              string `yaml:"openImCacheName"`
-		OpenImRealTimeCommName       string `yaml:"openImRealTimeCommName"`
+		OpenImStatisticsName string `yaml:"openImStatisticsName"`
+		OpenImUserName       string `yaml:"openImUserName"`
+		OpenImFriendName     string `yaml:"openImFriendName"`
+		//	OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`
+		OpenImMsgName          string `yaml:"openImMsgName"`
+		OpenImPushName         string `yaml:"openImPushName"`
+		OpenImRelayName        string `yaml:"openImRelayName"`
+		OpenImGroupName        string `yaml:"openImGroupName"`
+		OpenImAuthName         string `yaml:"openImAuthName"`
+		OpenImMessageCMSName   string `yaml:"openImMessageCMSName"`
+		OpenImAdminCMSName     string `yaml:"openImAdminCMSName"`
+		OpenImOfficeName       string `yaml:"openImOfficeName"`
+		OpenImOrganizationName string `yaml:"openImOrganizationName"`
+		OpenImConversationName string `yaml:"openImConversationName"`
+		OpenImCacheName        string `yaml:"openImCacheName"`
+		OpenImRealTimeCommName string `yaml:"openImRealTimeCommName"`
 	}
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`

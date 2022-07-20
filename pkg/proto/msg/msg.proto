@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-option go_package = "./chat;pbChat";
-package pbChat;
+option go_package = "./msg;msg";
+package msg;
 
 
 
@@ -92,10 +92,23 @@ message ClearMsgResp{
   string errMsg = 2;
 }
 
-service Chat {
+message SetMsgMinSeqReq{
+  string userID = 1;
+  string groupID = 2;
+  uint32 minSeq = 3;
+  string operationID = 4;
+  string opUserID = 5;
+}
+message SetMsgMinSeqResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+}
+
+service msg {
   rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
   rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
   rpc DelMsgList(server_api_params.DelMsgListReq) returns(server_api_params.DelMsgListResp);
   rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
+  rpc SetMsgMinSeq(SetMsgMinSeqReq) returns(SetMsgMinSeqResp);
 }

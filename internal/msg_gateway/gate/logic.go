@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbChat "Open_IM/pkg/proto/chat"
+	pbChat "Open_IM/pkg/proto/msg"
 	pbRtc "Open_IM/pkg/proto/rtc"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -69,7 +69,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 		rpcReq.UserID = m.SendID
 		rpcReq.OperationID = m.OperationID
 		log.Debug(m.OperationID, "Ws call success to getMaxAndMinSeq", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.GetMaxAndMinSeqReq).GroupIDList)
-		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, rpcReq.OperationID)
+		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, rpcReq.OperationID)
 		if grpcConn == nil {
 			errMsg := rpcReq.OperationID + "getcdv3.GetConn == nil"
 			nReply.ErrCode = 500
@@ -78,7 +78,7 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 			ws.getSeqResp(conn, m, nReply)
 			return
 		}
-		msgClient := pbChat.NewChatClient(grpcConn)
+		msgClient := pbChat.NewMsgClient(grpcConn)
 		rpcReply, err := msgClient.GetMaxAndMinSeq(context.Background(), &rpcReq)
 		if err != nil {
 			nReply.ErrCode = 500
@@ -124,7 +124,7 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 		rpcReq.OperationID = m.OperationID
 		rpcReq.GroupSeqList = data.(sdk_ws.PullMessageBySeqListReq).GroupSeqList
 		log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList)
-		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, m.OperationID)
+		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
 		if grpcConn == nil {
 			errMsg := rpcReq.OperationID + "getcdv3.GetConn == nil"
 			nReply.ErrCode = 500
@@ -133,7 +133,7 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 			ws.pullMsgBySeqListResp(conn, m, nReply)
 			return
 		}
-		msgClient := pbChat.NewChatClient(grpcConn)
+		msgClient := pbChat.NewMsgClient(grpcConn)
 		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
 		if err != nil {
 			log.NewError(rpcReq.OperationID, "pullMsgBySeqListReq err", err.Error())
@@ -183,7 +183,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 			MsgData:     &data,
 		}
 		log.NewInfo(m.OperationID, "Ws call success to sendMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data.String())
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, m.OperationID)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
 		if etcdConn == nil {
 			errMsg := m.OperationID + "getcdv3.GetConn == nil"
 			nReply.ErrCode = 500
@@ -192,7 +192,7 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 			ws.sendMsgResp(conn, m, nReply)
 			return
 		}
-		client := pbChat.NewChatClient(etcdConn)
+		client := pbChat.NewMsgClient(etcdConn)
 		reply, err := client.SendMsg(context.Background(), &pbData)
 		if err != nil {
 			log.NewError(pbData.OperationID, "UserSendMsg err", err.Error())
@@ -264,14 +264,14 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 			}
 			log.NewInfo(m.OperationID, utils.GetSelfFuncName(), "pbData: ", pbData)
 			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
-			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, m.OperationID)
+			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
 			if etcdConn == nil {
 				errMsg := m.OperationID + "getcdv3.GetConn == nil"
 				log.NewError(m.OperationID, errMsg)
 				ws.sendSignalMsgResp(conn, 200, errMsg, m, &signalResp)
 				return
 			}
-			client := pbChat.NewChatClient(etcdConn)
+			client := pbChat.NewMsgClient(etcdConn)
 			reply, err := client.SendMsg(context.Background(), &pbData)
 			if err != nil {
 				log.NewError(pbData.OperationID, utils.GetSelfFuncName(), "rpc sendMsg err", err.Error())

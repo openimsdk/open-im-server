@@ -324,8 +324,9 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 func GetSelfUserInfo(c *gin.Context) {
 	params := api.GetSelfUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
+		errMsg := "BindJSON failed " + err.Error()
+		log.NewError("0", "BindJSON failed ", errMsg)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	req := &rpc.GetUserInfoReq{}

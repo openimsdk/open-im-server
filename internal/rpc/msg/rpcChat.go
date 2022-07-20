@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbChat "Open_IM/pkg/proto/chat"
+	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
 	"google.golang.org/grpc"
 	"net"
@@ -36,7 +36,7 @@ func NewRpcChatServer(port int) *rpcChat {
 	log.NewPrivateLog(constant.LogFileName)
 	rc := rpcChat{
 		rpcPort:         port,
-		rpcRegisterName: config.Config.RpcRegisterName.OpenImOfflineMessageName,
+		rpcRegisterName: config.Config.RpcRegisterName.OpenImMsgName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
@@ -65,7 +65,7 @@ func (rpc *rpcChat) Run() {
 	defer srv.GracefulStop()
 
 	rpcRegisterIP := config.Config.RpcRegisterIP
-	pbChat.RegisterChatServer(srv, rpc)
+	msg.RegisterMsgServer(srv, rpc)
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {

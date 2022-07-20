@@ -37,7 +37,7 @@ func (m *OnlinePushMsgReq) Reset()         { *m = OnlinePushMsgReq{} }
 func (m *OnlinePushMsgReq) String() string { return proto.CompactTextString(m) }
 func (*OnlinePushMsgReq) ProtoMessage()    {}
 func (*OnlinePushMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{0}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{0}
 }
 func (m *OnlinePushMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OnlinePushMsgReq.Unmarshal(m, b)
@@ -89,7 +89,7 @@ func (m *OnlinePushMsgResp) Reset()         { *m = OnlinePushMsgResp{} }
 func (m *OnlinePushMsgResp) String() string { return proto.CompactTextString(m) }
 func (*OnlinePushMsgResp) ProtoMessage()    {}
 func (*OnlinePushMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{1}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{1}
 }
 func (m *OnlinePushMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OnlinePushMsgResp.Unmarshal(m, b)
@@ -129,7 +129,7 @@ func (m *SingelMsgToUserResultList) Reset()         { *m = SingelMsgToUserResult
 func (m *SingelMsgToUserResultList) String() string { return proto.CompactTextString(m) }
 func (*SingelMsgToUserResultList) ProtoMessage()    {}
 func (*SingelMsgToUserResultList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{2}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{2}
 }
 func (m *SingelMsgToUserResultList) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SingelMsgToUserResultList.Unmarshal(m, b)
@@ -183,7 +183,7 @@ func (m *OnlineBatchPushOneMsgReq) Reset()         { *m = OnlineBatchPushOneMsgR
 func (m *OnlineBatchPushOneMsgReq) String() string { return proto.CompactTextString(m) }
 func (*OnlineBatchPushOneMsgReq) ProtoMessage()    {}
 func (*OnlineBatchPushOneMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{3}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{3}
 }
 func (m *OnlineBatchPushOneMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OnlineBatchPushOneMsgReq.Unmarshal(m, b)
@@ -235,7 +235,7 @@ func (m *OnlineBatchPushOneMsgResp) Reset()         { *m = OnlineBatchPushOneMsg
 func (m *OnlineBatchPushOneMsgResp) String() string { return proto.CompactTextString(m) }
 func (*OnlineBatchPushOneMsgResp) ProtoMessage()    {}
 func (*OnlineBatchPushOneMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{4}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{4}
 }
 func (m *OnlineBatchPushOneMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_OnlineBatchPushOneMsgResp.Unmarshal(m, b)
@@ -275,7 +275,7 @@ func (m *SingleMsgToUserPlatform) Reset()         { *m = SingleMsgToUserPlatform
 func (m *SingleMsgToUserPlatform) String() string { return proto.CompactTextString(m) }
 func (*SingleMsgToUserPlatform) ProtoMessage()    {}
 func (*SingleMsgToUserPlatform) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{5}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{5}
 }
 func (m *SingleMsgToUserPlatform) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SingleMsgToUserPlatform.Unmarshal(m, b)
@@ -329,7 +329,7 @@ func (m *GetUsersOnlineStatusReq) Reset()         { *m = GetUsersOnlineStatusReq
 func (m *GetUsersOnlineStatusReq) String() string { return proto.CompactTextString(m) }
 func (*GetUsersOnlineStatusReq) ProtoMessage()    {}
 func (*GetUsersOnlineStatusReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{6}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{6}
 }
 func (m *GetUsersOnlineStatusReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUsersOnlineStatusReq.Unmarshal(m, b)
@@ -384,7 +384,7 @@ func (m *GetUsersOnlineStatusResp) Reset()         { *m = GetUsersOnlineStatusRe
 func (m *GetUsersOnlineStatusResp) String() string { return proto.CompactTextString(m) }
 func (*GetUsersOnlineStatusResp) ProtoMessage()    {}
 func (*GetUsersOnlineStatusResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{7}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{7}
 }
 func (m *GetUsersOnlineStatusResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUsersOnlineStatusResp.Unmarshal(m, b)
@@ -446,7 +446,7 @@ func (m *GetUsersOnlineStatusResp_SuccessDetail) Reset() {
 func (m *GetUsersOnlineStatusResp_SuccessDetail) String() string { return proto.CompactTextString(m) }
 func (*GetUsersOnlineStatusResp_SuccessDetail) ProtoMessage()    {}
 func (*GetUsersOnlineStatusResp_SuccessDetail) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{7, 0}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{7, 0}
 }
 func (m *GetUsersOnlineStatusResp_SuccessDetail) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUsersOnlineStatusResp_SuccessDetail.Unmarshal(m, b)
@@ -493,7 +493,7 @@ func (m *GetUsersOnlineStatusResp_FailedDetail) Reset()         { *m = GetUsersO
 func (m *GetUsersOnlineStatusResp_FailedDetail) String() string { return proto.CompactTextString(m) }
 func (*GetUsersOnlineStatusResp_FailedDetail) ProtoMessage()    {}
 func (*GetUsersOnlineStatusResp_FailedDetail) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{7, 1}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{7, 1}
 }
 func (m *GetUsersOnlineStatusResp_FailedDetail) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUsersOnlineStatusResp_FailedDetail.Unmarshal(m, b)
@@ -549,7 +549,7 @@ func (m *GetUsersOnlineStatusResp_SuccessResult) Reset() {
 func (m *GetUsersOnlineStatusResp_SuccessResult) String() string { return proto.CompactTextString(m) }
 func (*GetUsersOnlineStatusResp_SuccessResult) ProtoMessage()    {}
 func (*GetUsersOnlineStatusResp_SuccessResult) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{7, 2}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{7, 2}
 }
 func (m *GetUsersOnlineStatusResp_SuccessResult) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUsersOnlineStatusResp_SuccessResult.Unmarshal(m, b)
@@ -603,7 +603,7 @@ func (m *KickUserOfflineReq) Reset()         { *m = KickUserOfflineReq{} }
 func (m *KickUserOfflineReq) String() string { return proto.CompactTextString(m) }
 func (*KickUserOfflineReq) ProtoMessage()    {}
 func (*KickUserOfflineReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{8}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{8}
 }
 func (m *KickUserOfflineReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KickUserOfflineReq.Unmarshal(m, b)
@@ -654,7 +654,7 @@ func (m *KickUserOfflineResp) Reset()         { *m = KickUserOfflineResp{} }
 func (m *KickUserOfflineResp) String() string { return proto.CompactTextString(m) }
 func (*KickUserOfflineResp) ProtoMessage()    {}
 func (*KickUserOfflineResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_relay_eb517eee82ca0aca, []int{9}
+	return fileDescriptor_relay_9ac412c3c8c99f28, []int{9}
 }
 func (m *KickUserOfflineResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KickUserOfflineResp.Unmarshal(m, b)
@@ -698,9 +698,9 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// Client API for OnlineMessageRelayService service
+// Client API for Relay service
 
-type OnlineMessageRelayServiceClient interface {
+type RelayClient interface {
 	OnlinePushMsg(ctx context.Context, in *OnlinePushMsgReq, opts ...grpc.CallOption) (*OnlinePushMsgResp, error)
 	GetUsersOnlineStatus(ctx context.Context, in *GetUsersOnlineStatusReq, opts ...grpc.CallOption) (*GetUsersOnlineStatusResp, error)
 	OnlineBatchPushOneMsg(ctx context.Context, in *OnlineBatchPushOneMsgReq, opts ...grpc.CallOption) (*OnlineBatchPushOneMsgResp, error)
@@ -708,62 +708,62 @@ type OnlineMessageRelayServiceClient interface {
 	KickUserOffline(ctx context.Context, in *KickUserOfflineReq, opts ...grpc.CallOption) (*KickUserOfflineResp, error)
 }
 
-type onlineMessageRelayServiceClient struct {
+type relayClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewOnlineMessageRelayServiceClient(cc *grpc.ClientConn) OnlineMessageRelayServiceClient {
-	return &onlineMessageRelayServiceClient{cc}
+func NewRelayClient(cc *grpc.ClientConn) RelayClient {
+	return &relayClient{cc}
 }
 
-func (c *onlineMessageRelayServiceClient) OnlinePushMsg(ctx context.Context, in *OnlinePushMsgReq, opts ...grpc.CallOption) (*OnlinePushMsgResp, error) {
+func (c *relayClient) OnlinePushMsg(ctx context.Context, in *OnlinePushMsgReq, opts ...grpc.CallOption) (*OnlinePushMsgResp, error) {
 	out := new(OnlinePushMsgResp)
-	err := grpc.Invoke(ctx, "/relay.OnlineMessageRelayService/OnlinePushMsg", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/relay.relay/OnlinePushMsg", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *onlineMessageRelayServiceClient) GetUsersOnlineStatus(ctx context.Context, in *GetUsersOnlineStatusReq, opts ...grpc.CallOption) (*GetUsersOnlineStatusResp, error) {
+func (c *relayClient) GetUsersOnlineStatus(ctx context.Context, in *GetUsersOnlineStatusReq, opts ...grpc.CallOption) (*GetUsersOnlineStatusResp, error) {
 	out := new(GetUsersOnlineStatusResp)
-	err := grpc.Invoke(ctx, "/relay.OnlineMessageRelayService/GetUsersOnlineStatus", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/relay.relay/GetUsersOnlineStatus", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *onlineMessageRelayServiceClient) OnlineBatchPushOneMsg(ctx context.Context, in *OnlineBatchPushOneMsgReq, opts ...grpc.CallOption) (*OnlineBatchPushOneMsgResp, error) {
+func (c *relayClient) OnlineBatchPushOneMsg(ctx context.Context, in *OnlineBatchPushOneMsgReq, opts ...grpc.CallOption) (*OnlineBatchPushOneMsgResp, error) {
 	out := new(OnlineBatchPushOneMsgResp)
-	err := grpc.Invoke(ctx, "/relay.OnlineMessageRelayService/OnlineBatchPushOneMsg", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/relay.relay/OnlineBatchPushOneMsg", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *onlineMessageRelayServiceClient) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, in *OnlineBatchPushOneMsgReq, opts ...grpc.CallOption) (*OnlineBatchPushOneMsgResp, error) {
+func (c *relayClient) SuperGroupOnlineBatchPushOneMsg(ctx context.Context, in *OnlineBatchPushOneMsgReq, opts ...grpc.CallOption) (*OnlineBatchPushOneMsgResp, error) {
 	out := new(OnlineBatchPushOneMsgResp)
-	err := grpc.Invoke(ctx, "/relay.OnlineMessageRelayService/SuperGroupOnlineBatchPushOneMsg", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/relay.relay/SuperGroupOnlineBatchPushOneMsg", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *onlineMessageRelayServiceClient) KickUserOffline(ctx context.Context, in *KickUserOfflineReq, opts ...grpc.CallOption) (*KickUserOfflineResp, error) {
+func (c *relayClient) KickUserOffline(ctx context.Context, in *KickUserOfflineReq, opts ...grpc.CallOption) (*KickUserOfflineResp, error) {
 	out := new(KickUserOfflineResp)
-	err := grpc.Invoke(ctx, "/relay.OnlineMessageRelayService/KickUserOffline", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/relay.relay/KickUserOffline", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// Server API for OnlineMessageRelayService service
+// Server API for Relay service
 
-type OnlineMessageRelayServiceServer interface {
+type RelayServer interface {
 	OnlinePushMsg(context.Context, *OnlinePushMsgReq) (*OnlinePushMsgResp, error)
 	GetUsersOnlineStatus(context.Context, *GetUsersOnlineStatusReq) (*GetUsersOnlineStatusResp, error)
 	OnlineBatchPushOneMsg(context.Context, *OnlineBatchPushOneMsgReq) (*OnlineBatchPushOneMsgResp, error)
@@ -771,178 +771,178 @@ type OnlineMessageRelayServiceServer interface {
 	KickUserOffline(context.Context, *KickUserOfflineReq) (*KickUserOfflineResp, error)
 }
 
-func RegisterOnlineMessageRelayServiceServer(s *grpc.Server, srv OnlineMessageRelayServiceServer) {
-	s.RegisterService(&_OnlineMessageRelayService_serviceDesc, srv)
+func RegisterRelayServer(s *grpc.Server, srv RelayServer) {
+	s.RegisterService(&_Relay_serviceDesc, srv)
 }
 
-func _OnlineMessageRelayService_OnlinePushMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Relay_OnlinePushMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OnlinePushMsgReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OnlineMessageRelayServiceServer).OnlinePushMsg(ctx, in)
+		return srv.(RelayServer).OnlinePushMsg(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/relay.OnlineMessageRelayService/OnlinePushMsg",
+		FullMethod: "/relay.relay/OnlinePushMsg",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OnlineMessageRelayServiceServer).OnlinePushMsg(ctx, req.(*OnlinePushMsgReq))
+		return srv.(RelayServer).OnlinePushMsg(ctx, req.(*OnlinePushMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OnlineMessageRelayService_GetUsersOnlineStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Relay_GetUsersOnlineStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUsersOnlineStatusReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OnlineMessageRelayServiceServer).GetUsersOnlineStatus(ctx, in)
+		return srv.(RelayServer).GetUsersOnlineStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/relay.OnlineMessageRelayService/GetUsersOnlineStatus",
+		FullMethod: "/relay.relay/GetUsersOnlineStatus",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OnlineMessageRelayServiceServer).GetUsersOnlineStatus(ctx, req.(*GetUsersOnlineStatusReq))
+		return srv.(RelayServer).GetUsersOnlineStatus(ctx, req.(*GetUsersOnlineStatusReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OnlineMessageRelayService_OnlineBatchPushOneMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Relay_OnlineBatchPushOneMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OnlineBatchPushOneMsgReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OnlineMessageRelayServiceServer).OnlineBatchPushOneMsg(ctx, in)
+		return srv.(RelayServer).OnlineBatchPushOneMsg(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/relay.OnlineMessageRelayService/OnlineBatchPushOneMsg",
+		FullMethod: "/relay.relay/OnlineBatchPushOneMsg",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OnlineMessageRelayServiceServer).OnlineBatchPushOneMsg(ctx, req.(*OnlineBatchPushOneMsgReq))
+		return srv.(RelayServer).OnlineBatchPushOneMsg(ctx, req.(*OnlineBatchPushOneMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OnlineMessageRelayService_SuperGroupOnlineBatchPushOneMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Relay_SuperGroupOnlineBatchPushOneMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(OnlineBatchPushOneMsgReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OnlineMessageRelayServiceServer).SuperGroupOnlineBatchPushOneMsg(ctx, in)
+		return srv.(RelayServer).SuperGroupOnlineBatchPushOneMsg(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/relay.OnlineMessageRelayService/SuperGroupOnlineBatchPushOneMsg",
+		FullMethod: "/relay.relay/SuperGroupOnlineBatchPushOneMsg",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OnlineMessageRelayServiceServer).SuperGroupOnlineBatchPushOneMsg(ctx, req.(*OnlineBatchPushOneMsgReq))
+		return srv.(RelayServer).SuperGroupOnlineBatchPushOneMsg(ctx, req.(*OnlineBatchPushOneMsgReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OnlineMessageRelayService_KickUserOffline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Relay_KickUserOffline_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(KickUserOfflineReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(OnlineMessageRelayServiceServer).KickUserOffline(ctx, in)
+		return srv.(RelayServer).KickUserOffline(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/relay.OnlineMessageRelayService/KickUserOffline",
+		FullMethod: "/relay.relay/KickUserOffline",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OnlineMessageRelayServiceServer).KickUserOffline(ctx, req.(*KickUserOfflineReq))
+		return srv.(RelayServer).KickUserOffline(ctx, req.(*KickUserOfflineReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-var _OnlineMessageRelayService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "relay.OnlineMessageRelayService",
-	HandlerType: (*OnlineMessageRelayServiceServer)(nil),
+var _Relay_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "relay.relay",
+	HandlerType: (*RelayServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "OnlinePushMsg",
-			Handler:    _OnlineMessageRelayService_OnlinePushMsg_Handler,
+			Handler:    _Relay_OnlinePushMsg_Handler,
 		},
 		{
 			MethodName: "GetUsersOnlineStatus",
-			Handler:    _OnlineMessageRelayService_GetUsersOnlineStatus_Handler,
+			Handler:    _Relay_GetUsersOnlineStatus_Handler,
 		},
 		{
 			MethodName: "OnlineBatchPushOneMsg",
-			Handler:    _OnlineMessageRelayService_OnlineBatchPushOneMsg_Handler,
+			Handler:    _Relay_OnlineBatchPushOneMsg_Handler,
 		},
 		{
 			MethodName: "SuperGroupOnlineBatchPushOneMsg",
-			Handler:    _OnlineMessageRelayService_SuperGroupOnlineBatchPushOneMsg_Handler,
+			Handler:    _Relay_SuperGroupOnlineBatchPushOneMsg_Handler,
 		},
 		{
 			MethodName: "KickUserOffline",
-			Handler:    _OnlineMessageRelayService_KickUserOffline_Handler,
+			Handler:    _Relay_KickUserOffline_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "relay/relay.proto",
 }
 
-func init() { proto.RegisterFile("relay/relay.proto", fileDescriptor_relay_eb517eee82ca0aca) }
+func init() { proto.RegisterFile("relay/relay.proto", fileDescriptor_relay_9ac412c3c8c99f28) }
 
-var fileDescriptor_relay_eb517eee82ca0aca = []byte{
-	// 749 bytes of a gzipped FileDescriptorProto
+var fileDescriptor_relay_9ac412c3c8c99f28 = []byte{
+	// 737 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0xcd, 0x4e, 0xdb, 0x5a,
 	0x10, 0x96, 0x31, 0xe1, 0x67, 0x80, 0x0b, 0x9c, 0x0b, 0x17, 0xe3, 0x45, 0xc8, 0xf5, 0xe2, 0x2a,
 	0xba, 0x6a, 0x13, 0x29, 0xed, 0xae, 0x3b, 0x88, 0xa0, 0x51, 0x89, 0x82, 0x4e, 0x5a, 0xb5, 0x62,
 	0x13, 0x99, 0xe4, 0x24, 0x58, 0x71, 0xe2, 0xc3, 0x19, 0x1b, 0xc4, 0xa6, 0xdb, 0xee, 0xfa, 0x08,
-	0x5d, 0xf4, 0x25, 0xfa, 0x02, 0x7d, 0xb0, 0xea, 0xfc, 0xc4, 0xb5, 0xf3, 0x03, 0x65, 0xc1, 0x06,
-	0x31, 0x73, 0xe6, 0xcc, 0xcc, 0xf7, 0x7d, 0x73, 0x26, 0x86, 0x5d, 0xc1, 0x42, 0xff, 0xbe, 0xaa,
-	0xfe, 0x56, 0xb8, 0x88, 0xe2, 0x88, 0x14, 0x94, 0xe1, 0xfe, 0xdb, 0xe2, 0x6c, 0xdc, 0x69, 0x34,
-	0xab, 0x7c, 0x38, 0xa8, 0xaa, 0x93, 0x2a, 0xf6, 0x86, 0x9d, 0x3b, 0xac, 0xde, 0xa1, 0x8e, 0xf4,
-	0xbe, 0x5a, 0xb0, 0xd3, 0x1a, 0x87, 0xc1, 0x98, 0x5d, 0x24, 0x78, 0xdd, 0xc4, 0x01, 0x65, 0x37,
-	0xa4, 0x04, 0x1b, 0x2d, 0xce, 0x84, 0x1f, 0x07, 0xd1, 0xb8, 0x51, 0x77, 0xac, 0x92, 0x55, 0x5e,
-	0xa7, 0x59, 0x17, 0x79, 0x0d, 0xab, 0x23, 0x1c, 0xd4, 0xfd, 0xd8, 0x77, 0x96, 0x4a, 0x56, 0x79,
-	0xa3, 0xe6, 0x56, 0x90, 0x89, 0x5b, 0x26, 0x3a, 0x3e, 0x0f, 0x3a, 0xdc, 0x17, 0xfe, 0x08, 0x2b,
-	0x4d, 0x1d, 0x41, 0x27, 0xa1, 0xc4, 0x83, 0x4d, 0x9e, 0xe0, 0xf5, 0xfb, 0xe8, 0x03, 0x32, 0xd1,
-	0xa8, 0x3b, 0xb6, 0x4a, 0x9c, 0xf3, 0x79, 0x67, 0xb0, 0x3b, 0xd5, 0x0f, 0x72, 0x52, 0x83, 0x65,
-	0xc1, 0x90, 0x3b, 0x56, 0xc9, 0x2e, 0x6f, 0xd4, 0x8a, 0x15, 0x8d, 0xb5, 0x1d, 0x8c, 0x07, 0x21,
-	0x6b, 0xe2, 0x40, 0x5f, 0xbe, 0x08, 0xfd, 0xb8, 0x1f, 0x89, 0x11, 0x55, 0xb1, 0xde, 0x17, 0x0b,
-	0x0e, 0x65, 0x04, 0x0b, 0xd3, 0x08, 0xca, 0x30, 0x09, 0xe3, 0xf3, 0x00, 0x63, 0xf2, 0x0f, 0xac,
-	0x24, 0xba, 0x09, 0x8d, 0xce, 0x58, 0x69, 0xa5, 0xa5, 0x3f, 0xaf, 0x44, 0x8a, 0x00, 0x51, 0xda,
-	0xb2, 0x02, 0xb5, 0x46, 0x33, 0x1e, 0xef, 0x9b, 0x05, 0x8e, 0xc6, 0x74, 0xec, 0xc7, 0xdd, 0x6b,
-	0xe9, 0x6b, 0x8d, 0xd9, 0x33, 0x73, 0xfd, 0x3f, 0xec, 0x64, 0x79, 0x95, 0xa0, 0x1d, 0xbb, 0x64,
-	0x97, 0xd7, 0xe9, 0x8c, 0xdf, 0x0b, 0xe0, 0x70, 0x41, 0x7f, 0xc8, 0xc9, 0x39, 0xec, 0xa0, 0x82,
-	0x2f, 0xfd, 0x9a, 0x41, 0xa3, 0x43, 0x29, 0xc3, 0xce, 0x5c, 0x96, 0xe9, 0xcc, 0x4d, 0xef, 0x1e,
-	0x0e, 0x16, 0x90, 0x29, 0x69, 0xd4, 0x41, 0x27, 0x51, 0x8f, 0x29, 0x22, 0x6c, 0x9a, 0xf1, 0x48,
-	0xc9, 0x28, 0xeb, 0xde, 0x36, 0xea, 0x8a, 0x86, 0x75, 0x6a, 0x2c, 0xf2, 0x1f, 0xfc, 0x25, 0xff,
-	0x93, 0x79, 0x4e, 0x23, 0x31, 0x32, 0x73, 0x55, 0xa0, 0x53, 0x5e, 0xef, 0x0e, 0x0e, 0xce, 0x58,
-	0x2c, 0x4b, 0xa2, 0x46, 0xdb, 0x8e, 0xfd, 0x38, 0x41, 0x29, 0x42, 0x11, 0x20, 0xf9, 0x4d, 0x93,
-	0xa5, 0x68, 0xca, 0x78, 0xa4, 0x48, 0x51, 0x46, 0x24, 0x5d, 0x3f, 0xeb, 0x22, 0x2e, 0xac, 0x45,
-	0x3c, 0x37, 0xd6, 0xa9, 0xed, 0xfd, 0x58, 0x06, 0x67, 0x7e, 0x65, 0xe4, 0xc4, 0x81, 0x55, 0x26,
-	0x44, 0x0a, 0xb9, 0x40, 0x27, 0xa6, 0xc4, 0xcb, 0x84, 0x68, 0xe2, 0x60, 0x82, 0x57, 0x5b, 0xa4,
-	0x0d, 0x5b, 0x98, 0x74, 0xbb, 0x0c, 0xd1, 0xa8, 0x61, 0x2b, 0x35, 0x5e, 0x1a, 0x35, 0x16, 0x55,
-	0xaa, 0xb4, 0xb3, 0x97, 0x68, 0x3e, 0x07, 0xb9, 0x80, 0xcd, 0xbe, 0x1f, 0x84, 0xac, 0x67, 0x72,
-	0x2e, 0xab, 0x9c, 0x2f, 0x1e, 0xcb, 0x79, 0xaa, 0xee, 0xd4, 0x59, 0xec, 0x07, 0x21, 0xcd, 0x65,
-	0x70, 0x4f, 0x60, 0xcb, 0x54, 0xd4, 0xc7, 0x92, 0x22, 0x6e, 0xb4, 0x36, 0x63, 0x9e, 0xda, 0x12,
-	0x2b, 0xaa, 0xac, 0x13, 0xac, 0xda, 0x72, 0x3f, 0xc1, 0x66, 0xb6, 0x44, 0xe6, 0xd9, 0xda, 0xb9,
-	0x67, 0xfb, 0x64, 0x16, 0xdd, 0xef, 0x56, 0xda, 0x9f, 0xa1, 0x60, 0xd1, 0x4a, 0x58, 0xd0, 0x1b,
-	0xf1, 0x61, 0xaf, 0xa7, 0xba, 0x9a, 0x4c, 0xb0, 0xe6, 0xe5, 0x89, 0x72, 0x18, 0xee, 0xe6, 0xa6,
-	0xf2, 0x3e, 0x03, 0x79, 0x17, 0x74, 0x87, 0x32, 0x41, 0xab, 0xdf, 0x97, 0x09, 0xcc, 0xca, 0x88,
-	0x66, 0x57, 0x46, 0x76, 0x1a, 0x8b, 0x00, 0x13, 0x6a, 0xcd, 0xb8, 0x16, 0x68, 0xc6, 0x23, 0x9f,
-	0xcc, 0xd0, 0xe4, 0xcd, 0xad, 0x86, 0x29, 0xaf, 0xb7, 0x0f, 0x7f, 0xcf, 0xd4, 0x47, 0x5e, 0xfb,
-	0x69, 0x4f, 0x16, 0x46, 0x93, 0x21, 0xfa, 0x03, 0x46, 0x25, 0xd4, 0x36, 0x13, 0xb7, 0x41, 0x97,
-	0x91, 0x63, 0xd8, 0xca, 0x6d, 0x70, 0x72, 0x60, 0xa8, 0x98, 0xfe, 0x9d, 0x71, 0x9d, 0xf9, 0x07,
-	0xc8, 0xc9, 0x47, 0xd8, 0x9b, 0x47, 0x1c, 0x29, 0x3e, 0xc8, 0xea, 0x8d, 0x7b, 0xf4, 0x08, 0xeb,
-	0xe4, 0x12, 0xf6, 0xe7, 0xae, 0x3a, 0x72, 0x94, 0xeb, 0x65, 0x76, 0x51, 0xbb, 0xa5, 0x87, 0x03,
-	0x90, 0x93, 0x1e, 0x1c, 0xb5, 0x13, 0xce, 0xc4, 0x99, 0x88, 0x12, 0xfe, 0x6c, 0x55, 0xde, 0xc2,
-	0xf6, 0x94, 0x26, 0xe4, 0xd0, 0x5c, 0x9a, 0x9d, 0x15, 0xd7, 0x5d, 0x74, 0x84, 0xfc, 0x78, 0xf7,
-	0x72, 0xbb, 0xa2, 0x3f, 0x1b, 0xde, 0xf0, 0x2b, 0x25, 0xe1, 0xd5, 0x8a, 0xfa, 0x2a, 0x78, 0xf5,
-	0x2b, 0x00, 0x00, 0xff, 0xff, 0x01, 0x6a, 0x94, 0x1f, 0x54, 0x08, 0x00, 0x00,
+	0x5d, 0xf4, 0x09, 0xba, 0xeb, 0xeb, 0x55, 0xe7, 0x27, 0xae, 0x9d, 0x1f, 0x28, 0x0b, 0x36, 0x90,
+	0x99, 0x33, 0xe7, 0x9b, 0xf9, 0xbe, 0x19, 0x8f, 0x0d, 0xbb, 0x82, 0x85, 0xfe, 0x7d, 0x55, 0xfd,
+	0xad, 0x70, 0x11, 0xc5, 0x11, 0x29, 0x28, 0xc3, 0xfd, 0xb7, 0xc5, 0xd9, 0xb8, 0xd3, 0x68, 0x56,
+	0xf9, 0x70, 0x50, 0x55, 0x27, 0x55, 0xec, 0x0d, 0x3b, 0x77, 0x58, 0xbd, 0x43, 0x1d, 0xe9, 0x7d,
+	0xb5, 0x60, 0xa7, 0x35, 0x0e, 0x83, 0x31, 0xbb, 0x48, 0xf0, 0xba, 0x89, 0x03, 0xca, 0x6e, 0x48,
+	0x09, 0x36, 0x5a, 0x9c, 0x09, 0x3f, 0x0e, 0xa2, 0x71, 0xa3, 0xee, 0x58, 0x25, 0xab, 0xbc, 0x4e,
+	0xb3, 0x2e, 0xf2, 0x1a, 0x56, 0x47, 0x38, 0xa8, 0xfb, 0xb1, 0xef, 0x2c, 0x95, 0xac, 0xf2, 0x46,
+	0xcd, 0xad, 0x20, 0x13, 0xb7, 0x4c, 0x74, 0x7c, 0x1e, 0x74, 0xb8, 0x2f, 0xfc, 0x11, 0x56, 0x9a,
+	0x3a, 0x82, 0x4e, 0x42, 0x89, 0x07, 0x9b, 0x3c, 0xc1, 0xeb, 0xf7, 0xd1, 0x07, 0x64, 0xa2, 0x51,
+	0x77, 0x6c, 0x05, 0x9c, 0xf3, 0x79, 0x67, 0xb0, 0x3b, 0x55, 0x0f, 0x72, 0x52, 0x83, 0x65, 0xc1,
+	0x90, 0x3b, 0x56, 0xc9, 0x2e, 0x6f, 0xd4, 0x8a, 0x15, 0xcd, 0xb5, 0x1d, 0x8c, 0x07, 0x21, 0x6b,
+	0xe2, 0x40, 0x5f, 0xbe, 0x08, 0xfd, 0xb8, 0x1f, 0x89, 0x11, 0x55, 0xb1, 0xde, 0x17, 0x0b, 0x0e,
+	0x65, 0x04, 0x0b, 0xd3, 0x08, 0xca, 0x30, 0x09, 0xe3, 0xf3, 0x00, 0x63, 0xf2, 0x0f, 0xac, 0x24,
+	0xba, 0x08, 0xcd, 0xce, 0x58, 0x69, 0xa6, 0xa5, 0x3f, 0xcf, 0x44, 0x8a, 0x00, 0x51, 0x5a, 0xb2,
+	0x22, 0xb5, 0x46, 0x33, 0x1e, 0xef, 0x9b, 0x05, 0x8e, 0xe6, 0x74, 0xec, 0xc7, 0xdd, 0x6b, 0xe9,
+	0x6b, 0x8d, 0xd9, 0x33, 0x6b, 0xfd, 0x3f, 0xec, 0x64, 0x75, 0x95, 0xa4, 0x1d, 0xbb, 0x64, 0x97,
+	0xd7, 0xe9, 0x8c, 0xdf, 0x0b, 0xe0, 0x70, 0x41, 0x7d, 0xc8, 0xc9, 0x39, 0xec, 0xa0, 0xa2, 0x2f,
+	0xfd, 0x5a, 0x41, 0xd3, 0x87, 0x52, 0x46, 0x9d, 0xb9, 0x2a, 0xd3, 0x99, 0x9b, 0xde, 0x3d, 0x1c,
+	0x2c, 0x10, 0x53, 0xca, 0xa8, 0x83, 0x4e, 0xa2, 0x1e, 0x53, 0x42, 0xd8, 0x34, 0xe3, 0x91, 0x2d,
+	0xa3, 0xac, 0x7b, 0xdb, 0xa8, 0x2b, 0x19, 0xd6, 0xa9, 0xb1, 0xc8, 0x7f, 0xf0, 0x97, 0xfc, 0x25,
+	0x71, 0x4e, 0x23, 0x31, 0x32, 0x73, 0x55, 0xa0, 0x53, 0x5e, 0xef, 0x0e, 0x0e, 0xce, 0x58, 0x2c,
+	0x53, 0xa2, 0x66, 0xdb, 0x8e, 0xfd, 0x38, 0x41, 0xd9, 0x84, 0x22, 0x40, 0xf2, 0x5b, 0x26, 0x4b,
+	0xc9, 0x94, 0xf1, 0xc8, 0x26, 0x45, 0x99, 0x26, 0xe9, 0xfc, 0x59, 0x17, 0x71, 0x61, 0x2d, 0xe2,
+	0xb9, 0xb1, 0x4e, 0x6d, 0xef, 0xe7, 0x32, 0x38, 0xf3, 0x33, 0x23, 0x27, 0x0e, 0xac, 0x32, 0x21,
+	0x52, 0xca, 0x05, 0x3a, 0x31, 0x25, 0x5f, 0x26, 0x44, 0x13, 0x07, 0x13, 0xbe, 0xda, 0x22, 0x6d,
+	0xd8, 0xc2, 0xa4, 0xdb, 0x65, 0x88, 0xa6, 0x1b, 0xb6, 0xea, 0xc6, 0x4b, 0xd3, 0x8d, 0x45, 0x99,
+	0x2a, 0xed, 0xec, 0x25, 0x9a, 0xc7, 0x20, 0x17, 0xb0, 0xd9, 0xf7, 0x83, 0x90, 0xf5, 0x0c, 0xe6,
+	0xb2, 0xc2, 0x7c, 0xf1, 0x18, 0xe6, 0xa9, 0xba, 0x53, 0x67, 0xb1, 0x1f, 0x84, 0x34, 0x87, 0xe0,
+	0x9e, 0xc0, 0x96, 0xc9, 0xa8, 0x8f, 0xa5, 0x44, 0xdc, 0xf4, 0xda, 0x8c, 0x79, 0x6a, 0x4b, 0xae,
+	0xa8, 0x50, 0x27, 0x5c, 0xb5, 0xe5, 0x7e, 0x82, 0xcd, 0x6c, 0x8a, 0xcc, 0x63, 0x6b, 0xe7, 0x1e,
+	0xdb, 0x27, 0xab, 0xe8, 0x7e, 0xb7, 0xd2, 0xfa, 0x8c, 0x04, 0x8b, 0x56, 0xc2, 0x82, 0xda, 0x88,
+	0x0f, 0x7b, 0x3d, 0x55, 0xd5, 0x64, 0x82, 0xb5, 0x2e, 0x4f, 0x6c, 0x87, 0xd1, 0x6e, 0x2e, 0x94,
+	0xf7, 0x19, 0xc8, 0xbb, 0xa0, 0x3b, 0x94, 0x00, 0xad, 0x7e, 0x5f, 0x02, 0x98, 0x95, 0x11, 0xcd,
+	0xae, 0x8c, 0xec, 0x34, 0x16, 0x01, 0x26, 0xd2, 0x9a, 0x71, 0x2d, 0xd0, 0x8c, 0x47, 0x3e, 0x32,
+	0x43, 0x83, 0x9b, 0x5b, 0x0d, 0x53, 0x5e, 0x6f, 0x1f, 0xfe, 0x9e, 0xc9, 0x8f, 0xbc, 0xf6, 0xc3,
+	0x06, 0xfd, 0x86, 0x21, 0xc7, 0xb0, 0x95, 0xdb, 0xd6, 0xe4, 0xc0, 0xd0, 0x9e, 0x7e, 0xa7, 0xb8,
+	0xce, 0xfc, 0x03, 0xe4, 0xe4, 0x23, 0xec, 0xcd, 0x13, 0x89, 0x14, 0x1f, 0x54, 0xf0, 0xc6, 0x3d,
+	0x7a, 0x44, 0x61, 0x72, 0x09, 0xfb, 0x73, 0xd7, 0x1a, 0x39, 0xca, 0xd5, 0x32, 0xbb, 0x94, 0xdd,
+	0xd2, 0xc3, 0x01, 0xc8, 0x49, 0x0f, 0x8e, 0xda, 0x09, 0x67, 0xe2, 0x4c, 0x44, 0x09, 0x7f, 0xb6,
+	0x2c, 0x6f, 0x61, 0x7b, 0x4a, 0x7f, 0x72, 0x68, 0x2e, 0xcd, 0xce, 0x85, 0xeb, 0x2e, 0x3a, 0x42,
+	0x7e, 0xbc, 0x7b, 0xb9, 0x5d, 0xd1, 0x9f, 0x08, 0x6f, 0xf8, 0x15, 0x95, 0xff, 0xaf, 0x56, 0xd4,
+	0x17, 0xc0, 0xab, 0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x08, 0x9a, 0x1f, 0x1c, 0x40, 0x08, 0x00,
+	0x00,
 }
