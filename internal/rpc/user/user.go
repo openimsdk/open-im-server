@@ -151,7 +151,7 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 			continue
 		}
 		resp.Success = append(resp.Success, v.ConversationID)
-		// if is set private chat operation，then peer user need to sync and set tips\
+		// if is set private msg operation，then peer user need to sync and set tips\
 		if v.ConversationType == constant.SingleChatType && req.NotificationType == constant.ConversationPrivateChatNotification {
 			if err := syncPeerUserConversation(v, req.OperationID); err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())

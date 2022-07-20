@@ -3,11 +3,11 @@ package main
 import (
 	_ "Open_IM/cmd/open_im_api/docs"
 	apiAuth "Open_IM/internal/api/auth"
-	apiChat "Open_IM/internal/api/chat"
 	"Open_IM/internal/api/conversation"
 	"Open_IM/internal/api/friend"
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
+	apiChat "Open_IM/internal/api/msg"
 	"Open_IM/internal/api/office"
 	"Open_IM/internal/api/organization"
 	apiThird "Open_IM/internal/api/third"

@@ -1,4 +1,4 @@
-package apiChat
+package msg
 
 import (
 	"Open_IM/pkg/common/config"

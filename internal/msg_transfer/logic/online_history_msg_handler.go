@@ -7,7 +7,7 @@ import (
 	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbMsg "Open_IM/pkg/proto/chat"
+	pbMsg "Open_IM/pkg/proto/msg"
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
 	"context"

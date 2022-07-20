@@ -230,7 +230,7 @@ secret: tuoyun
 # 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
 multiloginpolicy: 1
 
-#chat log insert to db
+#msg log insert to db
 chatpersistencemysql: true
 #可靠性存储
 reliablestorage: false
@@ -344,7 +344,7 @@ notification:
       desc: "memberQuit desc"
       ext: "memberQuit ext"
     defaultTips:
-      tips: "quit group chat"  # group info changed by xx
+      tips: "quit group msg"  # group info changed by xx
 
   groupApplicationAccepted:
     conversation:

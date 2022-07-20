@@ -1,9 +1,9 @@
-package apiChat
+package msg
 
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	pbChat "Open_IM/pkg/proto/chat"
+	pbChat "Open_IM/pkg/proto/msg"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"context"
 
@@ -71,14 +71,14 @@ func SendMsg(c *gin.Context) {
 	pbData := newUserSendMsgReq(token, &params)
 	log.Info(params.OperationID, "", "api SendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, params.OperationID)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 	if etcdConn == nil {
 		errMsg := params.OperationID + "getcdv3.GetConn == nil"
 		log.NewError(params.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	client := pbChat.NewChatClient(etcdConn)
+	client := pbChat.NewMsgClient(etcdConn)
 
 	log.Info("", "", "api SendMsg call, api call rpc...")
 

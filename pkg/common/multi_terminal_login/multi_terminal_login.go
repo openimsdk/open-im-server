@@ -7,7 +7,7 @@ package multi_terminal_login
 //	"Open_IM/pkg/common/config"
 //	"Open_IM/pkg/common/constant"
 //	"Open_IM/pkg/common/db"
-//	pbChat "Open_IM/pkg/proto/chat"
+//	pbChat "Open_IM/pkg/proto/msg"
 //	"Open_IM/pkg/utils"
 //)
 //

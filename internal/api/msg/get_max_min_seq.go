@@ -1,4 +1,4 @@
-package apiChat
+package msg
 
 import (
 	"Open_IM/pkg/common/config"
@@ -35,7 +35,7 @@ func GetSeq(c *gin.Context) {
 	pbData := sdk_ws.GetMaxAndMinSeqReq{}
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, pbData.OperationID)
+	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, pbData.OperationID)
 	if grpcConn == nil {
 		errMsg := pbData.OperationID + " getcdv3.GetConn == nil"
 		log.NewError(pbData.OperationID, errMsg)
@@ -43,7 +43,7 @@ func GetSeq(c *gin.Context) {
 		return
 	}
 
-	msgClient := pbChat.NewChatClient(grpcConn)
+	msgClient := pbChat.NewMsgClient(grpcConn)
 	reply, err := msgClient.GetMaxAndMinSeq(context.Background(), &pbData)
 	if err != nil {
 		log.NewError(params.OperationID, "UserGetSeq rpc failed, ", params, err.Error())

@@ -1,4 +1,4 @@
-package apiChat
+package msg
 
 import (
 	api "Open_IM/pkg/base_info"
@@ -61,7 +61,7 @@ func DelMsg(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	msgClient := rpc.NewChatClient(grpcConn)
+	msgClient := rpc.NewMsgClient(grpcConn)
 	respPb, err := msgClient.DelMsgList(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelMsgList failed", err.Error(), reqPb)
@@ -134,7 +134,7 @@ func DelSuperGroupMsg(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	client := rpc.NewChatClient(etcdConn)
+	client := rpc.NewMsgClient(etcdConn)
 
 	log.Info(req.OperationID, "", "api DelSuperGroupMsg call, api call rpc...")
 
@@ -193,7 +193,7 @@ func ClearMsg(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	client := rpc.NewChatClient(etcdConn)
+	client := rpc.NewMsgClient(etcdConn)
 	RpcResp, err := client.ClearMsg(context.Background(), req)
 	if err != nil {
 		log.NewError(req.OperationID, " CleanUpMsg failed ", err.Error(), req.String(), RpcResp.ErrMsg)
@@ -241,7 +241,7 @@ func SetMsgMinSeq(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	client := rpc.NewChatClient(etcdConn)
+	client := rpc.NewMsgClient(etcdConn)
 	RpcResp, err := client.SetMsgMinSeq(context.Background(), req)
 	if err != nil {
 		log.NewError(req.OperationID, " SetMsgMinSeq failed ", err.Error(), req.String(), RpcResp.ErrMsg)

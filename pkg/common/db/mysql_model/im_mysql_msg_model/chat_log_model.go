@@ -10,7 +10,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	pbMsg "Open_IM/pkg/proto/chat"
+	pbMsg "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
