@@ -45,12 +45,12 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	log.Debug(pushMsg.OperationID, "Get msg from msg_transfer And push msg", pushMsg.String())
 	if len(grpcCons) == 0 {
 		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
-		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 	}
 	//Online push message
 	log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
 	for _, v := range grpcCons {
-		msgClient := pbRelay.NewOnlineMessageRelayServiceClient(v)
+		msgClient := pbRelay.NewRelayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: []string{pushMsg.PushToUserID}})
 		if err != nil {
 			log.NewError("SuperGroupOnlineBatchPushOneMsg push data to client rpc err", pushMsg.OperationID, "err", err)
@@ -167,12 +167,12 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	}
 	if len(grpcCons) == 0 {
 		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
-		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 	}
 	//Online push message
 	log.Debug("test", pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
 	for _, v := range grpcCons {
-		msgClient := pbRelay.NewOnlineMessageRelayServiceClient(v)
+		msgClient := pbRelay.NewRelayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: cacheResp.UserIDList})
 		if err != nil {
 			log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
