@@ -159,9 +159,9 @@ rpcport: #rpc服务端口 默认即可
 rpcregistername: #rpc注册服务名，默认即可
   openImUserName: User
   openImFriendName: Friend
-  openImOfflineMessageName: OfflineMessage
+  openImMsgName: Msg
   openImPushName: Push
-  openImOnlineMessageRelayName: OnlineMessageRelay
+  openImRelayName: Relay
   openImGroupName: Group
   openImAuthName: Auth
   openImStatisticsName: Statistics
