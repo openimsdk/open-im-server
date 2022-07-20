@@ -51,7 +51,6 @@ func init() {
 			}
 		}
 	}
-
 }
 
 func GetFriendIDListFromCache(userID string) ([]string, error) {
@@ -121,22 +120,6 @@ func DelJoinedGroupIDListFromCache(userID string) error {
 	return db.DB.Rc.TagAsDeleted(joinedGroupListCache + userID)
 }
 
-func GetGroupOwnerFromCache(groupID string) (string, error) {
-	getGroupOwnerIDList := func() (string, error) {
-		groupOwner, err := imdb.GetGroupOwnerInfoByGroupID(groupID)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return groupOwner.UserID, utils.Wrap(err, "")
-	}
-	groupOwnerID, err := db.DB.Rc.Fetch(groupOwnerIDCache+groupID, time.Second*30*60, getGroupOwnerIDList)
-	return groupOwnerID, utils.Wrap(err, "")
-}
-
-func DelGroupOwnerListFromCache(groupID string) error {
-	return db.DB.Rc.TagAsDeleted(groupOwnerIDCache + groupID)
-}
-
 func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 	getGroupMemberIDList := func() (string, error) {
 		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
@@ -146,7 +129,7 @@ func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 		bytes, err := json.Marshal(groupMemberIDList)
 		return string(bytes), utils.Wrap(err, "")
 	}
-	groupIDListStr, err := db.DB.Rc.Fetch(groupCache+groupID, time.Second*30*60, getGroupMemberIDList)
+	groupIDListStr, err := db.DB.WeakRc.Fetch(groupCache+groupID, time.Second*30*60, getGroupMemberIDList)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -156,7 +139,7 @@ func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 }
 
 func DelGroupMemberIDListFromCache(userID string) error {
-	err := db.DB.Rc.TagAsDeleted(groupCache + userID)
+	err := db.DB.WeakRc.TagAsDeleted(groupCache + userID)
 	return err
 }
 

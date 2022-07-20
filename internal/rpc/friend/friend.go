@@ -233,6 +233,27 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		resp.CommonResp.ErrMsg = cacheResp.CommonResp.ErrMsg
 		return &resp, nil
 	}
+	if err := rocksCache.DelAllFriendsInfoFromCache(req.FromUserID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.FromUserID)
+	}
+
+	for _, userID := range req.FriendUserIDList {
+		cacheResp, err := cacheClient.DelFriendIDListFromCache(context.Background(), &pbCache.DelFriendIDListFromCacheReq{UserID: userID, OperationID: req.OperationID})
+		if err != nil {
+			log.NewError(req.OperationID, "DelBlackIDListFromCache rpc call failed ", err.Error())
+		}
+		if cacheResp != nil && cacheResp.CommonResp != nil {
+			if cacheResp.CommonResp.ErrCode != 0 {
+				log.NewError(req.OperationID, "DelBlackIDListFromCache rpc logic call failed ", cacheResp.String())
+				resp.CommonResp.ErrCode = 500
+				resp.CommonResp.ErrMsg = cacheResp.CommonResp.ErrMsg
+				return &resp, nil
+			}
+		}
+		if err := rocksCache.DelAllFriendsInfoFromCache(userID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
+		}
+	}
 
 	resp.CommonResp.ErrCode = 0
 	log.NewInfo(req.OperationID, "ImportFriend rpc ok ", resp.String())
@@ -321,6 +342,12 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "DelFriendIDListFromCache failed", respPb.CommonResp.String())
 				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: respPb.CommonResp.ErrCode, ErrMsg: respPb.CommonResp.ErrMsg}}, nil
 			}
+			if err := rocksCache.DelAllFriendsInfoFromCache(req.CommID.ToUserID); err != nil {
+				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.ToUserID)
+			}
+			if err := rocksCache.DelAllFriendsInfoFromCache(req.CommID.FromUserID); err != nil {
+				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
+			}
 			chat.FriendAddedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID)
 		}
 	}
@@ -366,6 +393,12 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 	if respPb.CommonResp.ErrCode != 0 {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "DelFriendIDListFromCache failed", respPb.CommonResp.String())
 		return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: respPb.CommonResp.ErrCode, ErrMsg: respPb.CommonResp.ErrMsg}}, nil
+	}
+	if err := rocksCache.DelAllFriendsInfoFromCache(req.CommID.FromUserID); err != nil {
+		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
+	}
+	if err := rocksCache.DelAllFriendsInfoFromCache(req.CommID.ToUserID); err != nil {
+		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
 	}
 	chat.FriendDeletedNotification(req)
 	return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{}}, nil

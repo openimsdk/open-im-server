@@ -189,6 +189,12 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 	}
 
+	for _, userID := range okUserIDList {
+		if err := rocksCache.DelJoinedGroupIDListFromCache(userID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), userID, err.Error())
+		}
+	}
+
 	if len(okUserIDList) != 0 {
 		log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
 		if req.GroupInfo.GroupType != constant.SuperGroup {
