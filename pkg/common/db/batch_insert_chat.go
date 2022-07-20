@@ -131,7 +131,7 @@ func (d *DataBases) BatchInsertChat2Cache(userID string, msgList []*pbMsg.MsgDat
 	if err != nil {
 		log.Error(operationID, "setMessageToCache failed, continue ", err.Error(), len(msgList), userID)
 	}
-	log.NewWarn(operationID, "batch to redis  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
+	log.Debug(operationID, "batch to redis  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
 	return utils.Wrap(d.SetUserMaxSeq(userID, uint64(currentMaxSeq)), ""), lastMaxSeq
 }
 

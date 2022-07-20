@@ -168,6 +168,7 @@ type User struct {
 	CreateTime       time.Time `gorm:"column:create_time"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
+	status           int32     `gorm:"column:status"`
 }
 
 //message BlackInfo{

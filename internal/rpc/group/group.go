@@ -248,7 +248,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		group, err := imdb.GetGroupInfoByGroupID(v)
 		if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
 			if group.Status == constant.GroupStatusDismissed {
-				log.NewError(req.OperationID, "constant.GroupStatusDismissed ", group)
+				log.Info(req.OperationID, "constant.GroupStatusDismissed ", group)
 				continue
 			}
 			utils.CopyStructFields(&groupNode, group)
@@ -727,6 +727,10 @@ func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.Ge
 		group, err := imdb.GetGroupInfoByGroupID(v.GroupID)
 		if err != nil {
 			log.Error(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), v.GroupID)
+			continue
+		}
+		if group.Status == constant.GroupStatusDismissed {
+			log.Debug(req.OperationID, "group constant.GroupStatusDismissed  ", group.GroupID)
 			continue
 		}
 		user, err := imdb.GetUserByUserID(v.UserID)
