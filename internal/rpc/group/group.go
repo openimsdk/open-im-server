@@ -219,19 +219,15 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetJoinedGroupIDListFromCache failed", err.Error(), req.FromUserID)
 		return &pbGroup.GetJoinedGroupListResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
-
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "joinedGroupList: ", joinedGroupList)
 	var resp pbGroup.GetJoinedGroupListResp
 	for _, v := range joinedGroupList {
 		var groupNode open_im_sdk.GroupInfo
 		num, err := imdb.GetGroupMemberNumByGroupID(v)
-
-		groupOwnerID, err2 := rocksCache.GetGroupOwnerFromCache(v)
-		owner, err2 := rocksCache.GetGroupMemberInfoFromCache(v, groupOwnerID)
-		//owner, err2 := imdb.GetGroupOwnerInfoByGroupID(v)
-
+		owner, err2 := imdb.GetGroupOwnerInfoByGroupID(v)
 		group, err := rocksCache.GetGroupInfoFromCache(v)
-		//group, err := imdb.GetGroupInfoByGroupID(v)
 
+		log.NewInfo(req.OperationID, num, owner, err2, group, err)
 		if num > 0 && owner != nil && err2 == nil && group != nil && err == nil {
 			if group.Status == constant.GroupStatusDismissed {
 				log.NewError(req.OperationID, "constant.GroupStatusDismissed ", group)
