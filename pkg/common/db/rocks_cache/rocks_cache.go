@@ -40,9 +40,11 @@ func init() {
 			}
 			n += len(keys)
 			fmt.Printf("\n %s key found %d keys: %v, current cursor %d\n", key, n, keys, cursor)
-			err = db.DB.RDB.Del(context.Background(), keys...).Err()
-			if err != nil {
-				panic(err.Error())
+			if len(keys) > 0 {
+				err = db.DB.RDB.Del(context.Background(), keys...).Err()
+				if err != nil {
+					panic(err.Error())
+				}
 			}
 			if cursor == 0 {
 				break
