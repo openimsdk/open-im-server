@@ -3,7 +3,7 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	pbMsg "Open_IM/pkg/proto/chat"
+	pbMsg "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"

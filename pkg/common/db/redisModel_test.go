@@ -2,7 +2,7 @@ package db
 
 import (
 	"Open_IM/pkg/common/constant"
-	pbChat "Open_IM/pkg/proto/chat"
+	pbChat "Open_IM/pkg/proto/msg"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"context"
 	"flag"
