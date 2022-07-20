@@ -68,7 +68,7 @@ func GetFriendIDListFromCache(userID string) ([]string, error) {
 		return nil, utils.Wrap(err, "")
 	}
 	var friendIDList []string
-	err = json.Unmarshal([]byte(friendIDListStr), friendIDList)
+	err = json.Unmarshal([]byte(friendIDListStr), &friendIDList)
 	return friendIDList, utils.Wrap(err, "")
 }
 
@@ -91,7 +91,7 @@ func GetBlackListFromCache(userID string) ([]string, error) {
 		return nil, utils.Wrap(err, "")
 	}
 	var blackIDList []string
-	err = json.Unmarshal([]byte(blackIDListStr), blackIDList)
+	err = json.Unmarshal([]byte(blackIDListStr), &blackIDList)
 	return blackIDList, utils.Wrap(err, "")
 }
 
@@ -113,7 +113,7 @@ func GetJoinedGroupIDListFromCache(userID string) ([]string, error) {
 		return nil, utils.Wrap(err, "")
 	}
 	var joinedGroupList []string
-	err = json.Unmarshal([]byte(joinedGroupIDListStr), joinedGroupList)
+	err = json.Unmarshal([]byte(joinedGroupIDListStr), &joinedGroupList)
 	return joinedGroupList, utils.Wrap(err, "")
 }
 
@@ -151,7 +151,7 @@ func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 		return nil, utils.Wrap(err, "")
 	}
 	var groupMemberIDList []string
-	err = json.Unmarshal([]byte(groupIDListStr), groupMemberIDList)
+	err = json.Unmarshal([]byte(groupIDListStr), &groupMemberIDList)
 	return groupMemberIDList, utils.Wrap(err, "")
 }
 
