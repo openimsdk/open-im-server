@@ -253,7 +253,7 @@ func DelAllFriendsInfoFromCache(userID string) error {
 	return db.DB.Rc.TagAsDeleted(allFriendInfoCache + userID)
 }
 
-func GetAllDepartmentsFromCache() ([]*db.Department, error) {
+func GetAllDepartmentsFromCache() ([]db.Department, error) {
 	getAllDepartments := func() (string, error) {
 		departmentList, err := imdb.GetSubDepartmentList("-1")
 		if err != nil {
@@ -266,7 +266,7 @@ func GetAllDepartmentsFromCache() ([]*db.Department, error) {
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	var allDepartments []*db.Department
+	var allDepartments []db.Department
 	err = json.Unmarshal([]byte(allDepartmentsStr), &allDepartments)
 	return allDepartments, utils.Wrap(err, "")
 }
@@ -275,7 +275,7 @@ func DelAllDepartmentsFromCache() error {
 	return db.DB.Rc.TagAsDeleted(allDepartmentCache)
 }
 
-func GetAllDepartmentMembersFromCache() ([]*db.DepartmentMember, error) {
+func GetAllDepartmentMembersFromCache() ([]db.DepartmentMember, error) {
 	getAllDepartmentMembers := func() (string, error) {
 		departmentMembers, err := imdb.GetDepartmentMemberList("-1")
 		if err != nil {
@@ -288,7 +288,7 @@ func GetAllDepartmentMembersFromCache() ([]*db.DepartmentMember, error) {
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	var allDepartmentMembers []*db.DepartmentMember
+	var allDepartmentMembers []db.DepartmentMember
 	err = json.Unmarshal([]byte(allDepartmentMembersStr), &allDepartmentMembers)
 	return allDepartmentMembers, utils.Wrap(err, "")
 }
