@@ -185,14 +185,14 @@ func ManagementSendMsg(c *gin.Context) {
 	pbData := newUserSendMsgReq(&params)
 	log.Info(params.OperationID, "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, params.OperationID)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 	if etcdConn == nil {
 		errMsg := params.OperationID + "getcdv3.GetConn == nil"
 		log.NewError(params.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	client := pbChat.NewChatClient(etcdConn)
+	client := pbChat.NewMsgClient(etcdConn)
 
 	log.Info(params.OperationID, "", "api ManagementSendMsg call, api call rpc...")
 
@@ -294,14 +294,14 @@ func ManagementBatchSendMsg(c *gin.Context) {
 		pbData := newUserSendMsgReq(req)
 		pbData.MsgData.RecvID = recvID
 		log.Info(params.OperationID, "", "api ManagementSendMsg call start..., ", pbData.String())
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, params.OperationID)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 		if etcdConn == nil {
 			errMsg := params.OperationID + "getcdv3.GetConn == nil"
 			log.NewError(params.OperationID, errMsg)
 			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
 			continue
 		}
-		client := pbChat.NewChatClient(etcdConn)
+		client := pbChat.NewMsgClient(etcdConn)
 		rpcResp, err := client.SendMsg(context.Background(), pbData)
 		if err != nil {
 			log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
