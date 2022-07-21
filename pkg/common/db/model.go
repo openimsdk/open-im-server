@@ -2,6 +2,7 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
+	"github.com/dtm-labs/rockscache"
 	"go.mongodb.org/mongo-driver/x/bsonx"
 	"strings"
 
@@ -28,14 +29,15 @@ type DataBases struct {
 	mgoSession *mgo.Session
 	//redisPool   *redis.Pool
 	mongoClient *mongo.Client
-	rdb         go_redis.UniversalClient
+	RDB         go_redis.UniversalClient
+	Rc          *rockscache.Client
+	WeakRc      *rockscache.Client
 }
 
 type RedisClient struct {
 	client  *go_redis.Client
 	cluster *go_redis.ClusterClient
 	go_redis.UniversalClient
-	enableCluster bool
 }
 
 func key(dbAddress, dbName string) string {
@@ -88,16 +90,14 @@ func init() {
 	if err := createMongoIndex(mongoClient, cWorkMoment, true, "work_moment_id"); err != nil {
 		fmt.Println("work_moment_id", "index create failed", err.Error())
 	}
-
 	if err := createMongoIndex(mongoClient, cWorkMoment, false, "user_id", "-create_time"); err != nil {
 		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
 	}
-
 	if err := createMongoIndex(mongoClient, cTag, false, "user_id", "-create_time"); err != nil {
 		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
-		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
+		fmt.Println("tag_id", "index create failed", err.Error())
 	}
 	fmt.Println("create index success")
 	DB.mongoClient = mongoClient
@@ -123,29 +123,46 @@ func init() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if config.Config.Redis.EnableCluster {
-		DB.rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
+		DB.RDB = go_redis.NewClusterClient(&go_redis.ClusterOptions{
 			Addrs:    config.Config.Redis.DBAddress,
 			Username: config.Config.Redis.DBUserName,
 			Password: config.Config.Redis.DBPassWord, // no password set
 			PoolSize: 50,
 		})
-		_, err = DB.rdb.Ping(ctx).Result()
+		_, err = DB.RDB.Ping(ctx).Result()
 		if err != nil {
 			panic(err.Error())
 		}
 	} else {
-		DB.rdb = go_redis.NewClient(&go_redis.Options{
+		DB.RDB = go_redis.NewClient(&go_redis.Options{
 			Addr:     config.Config.Redis.DBAddress[0],
 			Username: config.Config.Redis.DBUserName,
 			Password: config.Config.Redis.DBPassWord, // no password set
 			DB:       0,                              // use default DB
 			PoolSize: 100,                            // 连接池大小
 		})
-		_, err = DB.rdb.Ping(ctx).Result()
+		_, err = DB.RDB.Ping(ctx).Result()
 		if err != nil {
 			panic(err.Error())
 		}
 	}
+	// 强一致性缓存，当一个key被标记删除，其他请求线程会被锁住轮询直到新的key生成，适合各种同步的拉取, 如果弱一致可能导致拉取还是老数据，毫无意义
+	DB.Rc = rockscache.NewClient(go_redis.NewClient(&go_redis.Options{
+		Addr:     config.Config.Redis.DBAddress[0],
+		Password: config.Config.Redis.DBPassWord, // no password set
+		DB:       0,                              // use default DB
+		PoolSize: 100,                            // 连接池大小
+	}), rockscache.NewDefaultOptions())
+	DB.Rc.Options.StrongConsistency = true
+
+	// 弱一致性缓存，当一个key被标记删除，其他请求线程直接返回该key的value，适合高频并且生成很缓存很慢的情况 如大群发消息缓存的缓存
+	DB.WeakRc = rockscache.NewClient(go_redis.NewClient(&go_redis.Options{
+		Addr:     config.Config.Redis.DBAddress[0],
+		Password: config.Config.Redis.DBPassWord, // no password set
+		DB:       0,                              // use default DB
+		PoolSize: 100,                            // 连接池大小
+	}), rockscache.NewDefaultOptions())
+	DB.WeakRc.Options.StrongConsistency = false
 }
 
 func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {

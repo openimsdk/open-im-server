@@ -7,13 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type mysqlDB struct {
 	sync.RWMutex
-	dbMap map[string]*gorm.DB
+	db *gorm.DB
 }
 
 func initMysqlDB() {
@@ -22,13 +22,13 @@ func initMysqlDB() {
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], "mysql")
 	var db *gorm.DB
 	var err1 error
-	db, err := gorm.Open("mysql", dsn)
+	db, err := gorm.Open(mysql.Open(dsn), nil)
 	if err != nil {
 		fmt.Println("0", "Open failed ", err.Error(), dsn)
 	}
 	if err != nil {
 		time.Sleep(time.Duration(30) * time.Second)
-		db, err1 = gorm.Open("mysql", dsn)
+		db, err1 = gorm.Open(mysql.Open(dsn), nil)
 		if err1 != nil {
 			fmt.Println("0", "Open failed ", err1.Error(), dsn)
 			panic(err1.Error())
@@ -42,11 +42,10 @@ func initMysqlDB() {
 		fmt.Println("0", "Exec failed ", err.Error(), sql)
 		panic(err.Error())
 	}
-	db.Close()
 
 	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
-	db, err = gorm.Open("mysql", dsn)
+	db, err = gorm.Open(mysql.Open(dsn), nil)
 	if err != nil {
 		fmt.Println("0", "Open failed ", err.Error(), dsn)
 		panic(err.Error())
@@ -65,103 +64,70 @@ func initMysqlDB() {
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 
-	if !db.HasTable(&Friend{}) {
+	if !db.Migrator().HasTable(&Friend{}) {
 		fmt.Println("CreateTable Friend")
-		db.CreateTable(&Friend{})
+		db.Migrator().CreateTable(&Friend{})
 	}
 
-	if !db.HasTable(&FriendRequest{}) {
+	if !db.Migrator().HasTable(&FriendRequest{}) {
 		fmt.Println("CreateTable FriendRequest")
-		db.CreateTable(&FriendRequest{})
+		db.Migrator().CreateTable(&FriendRequest{})
 	}
 
-	if !db.HasTable(&Group{}) {
+	if !db.Migrator().HasTable(&Group{}) {
 		fmt.Println("CreateTable Group")
-		db.CreateTable(&Group{})
+		db.Migrator().CreateTable(&Group{})
 	}
 
-	if !db.HasTable(&GroupMember{}) {
+	if !db.Migrator().HasTable(&GroupMember{}) {
 		fmt.Println("CreateTable GroupMember")
-		db.CreateTable(&GroupMember{})
+		db.Migrator().CreateTable(&GroupMember{})
 	}
-	if !db.HasTable(&GroupRequest{}) {
+	if !db.Migrator().HasTable(&GroupRequest{}) {
 		fmt.Println("CreateTable GroupRequest")
-		db.CreateTable(&GroupRequest{})
+		db.Migrator().CreateTable(&GroupRequest{})
 	}
-	if !db.HasTable(&User{}) {
+	if !db.Migrator().HasTable(&User{}) {
 		fmt.Println("CreateTable User")
-		db.CreateTable(&User{})
+		db.Migrator().CreateTable(&User{})
 	}
-	if !db.HasTable(&Black{}) {
+	if !db.Migrator().HasTable(&Black{}) {
 		fmt.Println("CreateTable Black")
-		db.CreateTable(&Black{})
+		db.Migrator().CreateTable(&Black{})
 	}
-	if !db.HasTable(&ChatLog{}) {
+	if !db.Migrator().HasTable(&ChatLog{}) {
 		fmt.Println("CreateTable ChatLog")
-		db.CreateTable(&ChatLog{})
+		db.Migrator().CreateTable(&ChatLog{})
 	}
-	if !db.HasTable(&Register{}) {
+	if !db.Migrator().HasTable(&Register{}) {
 		fmt.Println("CreateTable Register")
-		db.CreateTable(&Register{})
+		db.Migrator().CreateTable(&Register{})
 	}
-	if !db.HasTable(&Conversation{}) {
+	if !db.Migrator().HasTable(&Conversation{}) {
 		fmt.Println("CreateTable Conversation")
-		db.CreateTable(&Conversation{})
+		db.Migrator().CreateTable(&Conversation{})
 	}
 
-	if !db.HasTable(&Department{}) {
+	if !db.Migrator().HasTable(&Department{}) {
 		fmt.Println("CreateTable Department")
-		db.CreateTable(&Department{})
+		db.Migrator().CreateTable(&Department{})
 	}
-	if !db.HasTable(&OrganizationUser{}) {
+	if !db.Migrator().HasTable(&OrganizationUser{}) {
 		fmt.Println("CreateTable OrganizationUser")
-		db.CreateTable(&OrganizationUser{})
+		db.Migrator().CreateTable(&OrganizationUser{})
 	}
-	if !db.HasTable(&DepartmentMember{}) {
+	if !db.Migrator().HasTable(&DepartmentMember{}) {
 		fmt.Println("CreateTable DepartmentMember")
-		db.CreateTable(&DepartmentMember{})
+		db.Migrator().CreateTable(&DepartmentMember{})
 	}
-	if !db.HasTable(&AppVersion{}) {
+	if !db.Migrator().HasTable(&AppVersion{}) {
 		fmt.Println("CreateTable DepartmentMember")
-		db.CreateTable(&AppVersion{})
+		db.Migrator().CreateTable(&AppVersion{})
 	}
+	DB.MysqlDB.db = db
 	return
 }
 
-func (m *mysqlDB) DefaultGormDB() (*gorm.DB, error) {
-	return m.GormDB(config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
-}
-
-func (m *mysqlDB) GormDB(dbAddress, dbName string) (*gorm.DB, error) {
-	m.Lock()
-	defer m.Unlock()
-
-	k := key(dbAddress, dbName)
-	if _, ok := m.dbMap[k]; !ok {
-		if err := m.open(dbAddress, dbName); err != nil {
-			return nil, err
-		}
-	}
-	return m.dbMap[k], nil
-}
-
-func (m *mysqlDB) open(dbAddress, dbName string) error {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
-		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, dbAddress, dbName)
-	db, err := gorm.Open("mysql", dsn)
-	if err != nil {
-		return err
-	}
-
-	db.SingularTable(true)
-	db.DB().SetMaxOpenConns(config.Config.Mysql.DBMaxOpenConns)
-	db.DB().SetMaxIdleConns(config.Config.Mysql.DBMaxIdleConns)
-	db.DB().SetConnMaxLifetime(time.Duration(config.Config.Mysql.DBMaxLifeTime) * time.Second)
-
-	if m.dbMap == nil {
-		m.dbMap = make(map[string]*gorm.DB)
-	}
-	k := key(dbAddress, dbName)
-	m.dbMap[k] = db
-	return nil
+func (m *mysqlDB) DefaultGormDB() *gorm.DB {
+	return DB.MysqlDB.db
 }

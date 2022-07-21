@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: user
-        image: openim/user:v2.1.0
+        image: openim/user:v2.2.0
         # imagePullPolicy: Always
         volumeMounts:
           - name: config

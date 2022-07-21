@@ -50,6 +50,7 @@ func main() {
 	}
 	address = config.Config.CmsApi.ListenIP + ":" + strconv.Itoa(*ginPort)
 	fmt.Println("start demo api server address: ", address)
+	go register.OnboardingProcessRoutine()
 	err := r.Run(address)
 	if err != nil {
 		log.Error("", "run failed ", *ginPort, err.Error())

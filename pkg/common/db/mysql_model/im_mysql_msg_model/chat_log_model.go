@@ -19,10 +19,6 @@ import (
 )
 
 func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
 	chatLog := new(db.ChatLog)
 	copier.Copy(chatLog, msg.MsgData)
 	switch msg.MsgData.SessionType {
@@ -47,5 +43,5 @@ func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
 	chatLog.CreateTime = utils.UnixMillSecondToTime(msg.MsgData.CreateTime)
 	chatLog.SendTime = utils.UnixMillSecondToTime(msg.MsgData.SendTime)
 	log.NewDebug("test", "this is ", chatLog)
-	return dbConn.Table("chat_logs").Create(chatLog).Error
+	return db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Create(chatLog).Error
 }
