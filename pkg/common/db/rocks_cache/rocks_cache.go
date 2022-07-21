@@ -129,7 +129,7 @@ func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 		bytes, err := json.Marshal(groupMemberIDList)
 		return string(bytes), utils.Wrap(err, "")
 	}
-	groupIDListStr, err := db.DB.WeakRc.Fetch(groupCache+groupID, time.Second*30*60, getGroupMemberIDList)
+	groupIDListStr, err := db.DB.Rc.Fetch(groupCache+groupID, time.Second*30*60, getGroupMemberIDList)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -139,7 +139,7 @@ func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 }
 
 func DelGroupMemberIDListFromCache(userID string) error {
-	err := db.DB.WeakRc.TagAsDeleted(groupCache + userID)
+	err := db.DB.Rc.TagAsDeleted(groupCache + userID)
 	return err
 }
 
