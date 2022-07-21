@@ -93,11 +93,11 @@ func (d *DataBases) GetUserMinSeq(uid string) (uint64, error) {
 
 func (d *DataBases) SetGroupUserMinSeq(groupID, userID string, minSeq uint32) (err error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
-	return d.rdb.Set(context.Background(), key, minSeq, 0).Err()
+	return d.RDB.Set(context.Background(), key, minSeq, 0).Err()
 }
 func (d *DataBases) GetGroupUserMinSeq(groupID, userID string) (uint64, error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
-	seq, err := d.rdb.Get(context.Background(), key).Result()
+	seq, err := d.RDB.Get(context.Background(), key).Result()
 	return uint64(utils.StringToInt(seq)), err
 }
 
