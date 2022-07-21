@@ -28,7 +28,7 @@ const (
 func init() {
 	fmt.Println("init to del old keys")
 	for _, key := range []string{groupCache, friendRelationCache, blackListCache, userInfoCache, groupInfoCache, groupOwnerIDCache, joinedGroupListCache,
-		groupMemberInfoCache, groupAllMemberInfoCache} {
+		groupMemberInfoCache, groupAllMemberInfoCache, allFriendInfoCache} {
 		var cursor uint64
 		var n int
 		for {
@@ -39,7 +39,7 @@ func init() {
 				panic(err.Error())
 			}
 			n += len(keys)
-			fmt.Printf("\n %s key found %d keys: %v, current cursor %d\n", key, n, keys, cursor)
+			//fmt.Printf("\n %s key found %d keys: %v, current cursor %d\n", key, n, keys, cursor)
 			if len(keys) > 0 {
 				err = db.DB.RDB.Del(context.Background(), keys...).Err()
 				if err != nil {
