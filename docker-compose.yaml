@@ -112,18 +112,18 @@ services:
       MINIO_ROOT_PASSWORD: key12345
     restart: always
     command: minio server /data --console-address ':9090'
-
-  dtm:
-    image: yedf/dtm
-    ports:
-      - 36789:36789
-      - 36790:36790
-    environment:
-      STORE_DRIVER: mysql
-      STORE_HOST: localhost
-      STORE_USER: root
-      STORE_PASSWORD: ''
-      STORE_PORT: 3306
+#
+#  dtm:
+#    image: yedf/dtm
+#    ports:
+#      - 36789:36789
+#      - 36790:36790
+#    environment:
+#      STORE_DRIVER: mysql
+#      STORE_HOST: localhost
+#      STORE_USER: root
+#      STORE_PASSWORD: ''
+#      STORE_PORT: 3306
 
   open_im_server:
     image: openim/open_im_server:v2.3.0-rc0
@@ -141,7 +141,6 @@ services:
       - redis
       - etcd
       - minio
-      - dtm
     network_mode: "host"
     logging:
       driver: json-file
