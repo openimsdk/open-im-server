@@ -2,6 +2,7 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
+	"gorm.io/gorm/logger"
 
 	"fmt"
 	"sync"
@@ -14,6 +15,12 @@ import (
 type mysqlDB struct {
 	sync.RWMutex
 	db *gorm.DB
+}
+
+type Writer struct{}
+
+func (w Writer) Printf(format string, args ...interface{}) {
+	fmt.Printf(format, args...)
 }
 
 func initMysqlDB() {
@@ -45,7 +52,19 @@ func initMysqlDB() {
 
 	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
-	db, err = gorm.Open(mysql.Open(dsn), nil)
+
+	newLogger := logger.New(
+		Writer{},
+		logger.Config{
+			SlowThreshold:             200 * time.Millisecond, // Slow SQL threshold
+			LogLevel:                  logger.Info,            // Log level
+			IgnoreRecordNotFoundError: true,                   // Ignore ErrRecordNotFound error for logger
+			Colorful:                  true,                   // Disable color
+		},
+	)
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+	})
 	if err != nil {
 		fmt.Println("0", "Open failed ", err.Error(), dsn)
 		panic(err.Error())
