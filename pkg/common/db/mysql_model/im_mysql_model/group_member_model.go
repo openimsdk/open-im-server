@@ -178,7 +178,7 @@ func GetJoinedGroupIDListByUserID(userID string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var groupIDList []string = make([]string, len(memberList))
+	var groupIDList []string
 	for _, v := range memberList {
 		groupIDList = append(groupIDList, v.GroupID)
 	}
