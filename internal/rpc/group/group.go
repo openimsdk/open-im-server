@@ -978,7 +978,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 				return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
 			//to group member
-			groupMember := db.GroupMember{GroupID: req.GroupID, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID}
+			groupMember := db.GroupMember{GroupID: req.GroupID, RoleLevel: constant.GroupOrdinaryUsers, OperatorUserID: req.OpUserID}
 			utils.CopyStructFields(&groupMember, us)
 			err = imdb.InsertIntoGroupMember(groupMember)
 			if err != nil {
