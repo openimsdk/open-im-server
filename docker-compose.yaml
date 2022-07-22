@@ -126,7 +126,7 @@ services:
 #      STORE_PORT: 3306
 
   open_im_server:
-    image: openim/open_im_server:v2.3.0-rc0
+    image: openim/open_im_server:v2.3.0-rc1
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
