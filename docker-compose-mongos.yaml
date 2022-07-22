@@ -116,7 +116,7 @@ services:
     command: minio server /data --console-address ':9090'
 
   open_im_server:
-    image: openim/open_im_server:v2.2.0
+    image: openim/open_im_server::v2.3.0-rc1
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
