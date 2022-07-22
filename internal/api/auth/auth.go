@@ -21,7 +21,6 @@ import (
 // @Tags 鉴权认证
 // @ID UserRegister
 // @Accept json
-// @Param token header string true "im token"
 // @Param req body api.UserRegisterReq true "secret为openIM密钥, 详细见服务端config.yaml secret字段 <br> platform为平台ID <br> ex为拓展字段 <br> gender为性别, 0为女, 1为男"
 // @Produce json
 // @Success 0 {object} api.UserRegisterResp
@@ -90,7 +89,6 @@ func UserRegister(c *gin.Context) {
 // @Tags 鉴权认证
 // @ID UserToken
 // @Accept json
-// @Param token header string true "im token"
 // @Param req body api.UserTokenReq true "secret为openIM密钥, 详细见服务端config.yaml secret字段 <br> platform为平台ID"
 // @Produce json
 // @Success 0 {object} api.UserTokenResp

@@ -3,11 +3,11 @@ package main
 import (
 	_ "Open_IM/cmd/open_im_api/docs"
 	apiAuth "Open_IM/internal/api/auth"
-	apiChat "Open_IM/internal/api/chat"
 	"Open_IM/internal/api/conversation"
 	"Open_IM/internal/api/friend"
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
+	apiChat "Open_IM/internal/api/msg"
 	"Open_IM/internal/api/office"
 	"Open_IM/internal/api/organization"
 	apiThird "Open_IM/internal/api/third"
@@ -143,12 +143,8 @@ func main() {
 		chatGroup.POST("/clear_msg", apiChat.ClearMsg)
 		chatGroup.POST("/manage_send_msg", manage.ManagementSendMsg)
 		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
+		chatGroup.POST("/set_msg_min_seq", apiChat.SetMsgMinSeq)
 	}
-	//Manager
-	//managementGroup := r.Group("/manager")
-	//{
-	//	managementGroup.POST("/delete_user", manage.DeleteUser) //1
-	//}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
 	{ //1

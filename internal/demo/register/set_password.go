@@ -108,7 +108,18 @@ func SetPassword(c *gin.Context) {
 	log.Info(params.OperationID, "end setPassword", account, params.Password)
 	// demo onboarding
 	if params.UserID == "" {
-		onboardingProcess(params.OperationID, userID, params.Nickname, params.FaceURL, params.AreaCode+params.PhoneNumber, params.Email)
+		select {
+		case Ch <- OnboardingProcessReq{
+			OperationID: params.OperationID,
+			UserID:      params.UserID,
+			NickName:    params.Nickname,
+			FaceURL:     params.FaceURL,
+			PhoneNumber: params.AreaCode + params.PhoneNumber,
+			Email:       params.Email,
+		}:
+		case <-time.After(time.Second * 2):
+			log.NewWarn(params.OperationID, utils.GetSelfFuncName(), "to ch timeOut")
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": openIMRegisterResp.UserToken})
 	return

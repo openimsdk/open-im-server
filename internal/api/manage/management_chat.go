@@ -13,7 +13,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbChat "Open_IM/pkg/proto/chat"
+	pbChat "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdk_ws"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -185,14 +185,14 @@ func ManagementSendMsg(c *gin.Context) {
 	pbData := newUserSendMsgReq(&params)
 	log.Info(params.OperationID, "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, params.OperationID)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 	if etcdConn == nil {
 		errMsg := params.OperationID + "getcdv3.GetConn == nil"
 		log.NewError(params.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	client := pbChat.NewChatClient(etcdConn)
+	client := pbChat.NewMsgClient(etcdConn)
 
 	log.Info(params.OperationID, "", "api ManagementSendMsg call, api call rpc...")
 
@@ -294,14 +294,14 @@ func ManagementBatchSendMsg(c *gin.Context) {
 		pbData := newUserSendMsgReq(req)
 		pbData.MsgData.RecvID = recvID
 		log.Info(params.OperationID, "", "api ManagementSendMsg call start..., ", pbData.String())
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, params.OperationID)
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 		if etcdConn == nil {
 			errMsg := params.OperationID + "getcdv3.GetConn == nil"
 			log.NewError(params.OperationID, errMsg)
 			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
 			continue
 		}
-		client := pbChat.NewChatClient(etcdConn)
+		client := pbChat.NewMsgClient(etcdConn)
 		rpcResp, err := client.SendMsg(context.Background(), pbData)
 		if err != nil {
 			log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())

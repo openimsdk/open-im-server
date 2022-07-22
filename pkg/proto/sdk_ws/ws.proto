@@ -106,6 +106,8 @@ message GroupRequest{
   string handleUserID = 7;
   uint32 handleTime = 8;
   string ex = 9;
+  int32 joinSource = 10;
+  string inviterUserID = 11;
 }
 
 message FriendRequest{

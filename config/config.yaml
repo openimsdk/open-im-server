@@ -2,7 +2,7 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-serverversion: 2.0.0
+serverversion: 2.3.0-rc1
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openim  #默认即可
@@ -129,7 +129,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     stsDurationSeconds: 3600
     OssRoleArn: "acs:ram::xxx:role/xxx"
 
-
+dtm:
+  serverURL: 43.128.5.63:10007
 
 rpcport: #rpc服务端口 默认即可
   openImUserPort: [ 10110 ]
@@ -159,9 +160,9 @@ rpcport: #rpc服务端口 默认即可
 rpcregistername: #rpc注册服务名，默认即可
   openImUserName: User
   openImFriendName: Friend
-  openImOfflineMessageName: OfflineMessage
+  openImMsgName: Msg
   openImPushName: Push
-  openImOnlineMessageRelayName: OnlineMessageRelay
+  openImRelayName: Relay
   openImGroupName: Group
   openImAuthName: Auth
   openImStatisticsName: Statistics
@@ -230,7 +231,7 @@ secret: tuoyun
 # 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
 multiloginpolicy: 1
 
-#chat log insert to db
+#msg log insert to db
 chatpersistencemysql: true
 #可靠性存储
 reliablestorage: false
@@ -344,7 +345,7 @@ notification:
       desc: "memberQuit desc"
       ext: "memberQuit ext"
     defaultTips:
-      tips: "quit group chat"  # group info changed by xx
+      tips: "quit group msg"  # group info changed by xx
 
   groupApplicationAccepted:
     conversation:

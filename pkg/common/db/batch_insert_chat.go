@@ -2,8 +2,9 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	pbMsg "Open_IM/pkg/proto/chat"
+	pbMsg "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
@@ -104,21 +105,28 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 	return nil
 }
 
-func (d *DataBases) BatchInsertChat2Cache(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) (error, uint64) {
+func (d *DataBases) BatchInsertChat2Cache(insertID string, msgList []*pbMsg.MsgDataToMQ, operationID string) (error, uint64) {
 	newTime := getCurrentTimestampByMill()
-	if len(msgList) > GetSingleGocMsgNum() {
+	lenList := len(msgList)
+	if lenList > GetSingleGocMsgNum() {
 		return errors.New("too large"), 0
 	}
-	currentMaxSeq, err := d.GetUserMaxSeq(userID)
-	if err == nil {
-
-	} else if err == go_redis.Nil {
-		currentMaxSeq = 0
+	if lenList < 1 {
+		return errors.New("too short as 0"), 0
+	}
+	// judge sessionType to get seq
+	var currentMaxSeq uint64
+	var err error
+	if msgList[0].MsgData.SessionType == constant.SuperGroupChatType {
+		currentMaxSeq, err = d.GetGroupMaxSeq(insertID)
 	} else {
+		currentMaxSeq, err = d.GetUserMaxSeq(insertID)
+	}
+	if err != nil && err != go_redis.Nil {
 		return utils.Wrap(err, ""), 0
 	}
-	lastMaxSeq := currentMaxSeq
 
+	lastMaxSeq := currentMaxSeq
 	for _, m := range msgList {
 		log.Debug(operationID, "msg node ", m.String(), m.MsgData.ClientMsgID)
 		currentMaxSeq++
@@ -126,13 +134,18 @@ func (d *DataBases) BatchInsertChat2Cache(userID string, msgList []*pbMsg.MsgDat
 		sMsg.SendTime = m.MsgData.SendTime
 		m.MsgData.Seq = uint32(currentMaxSeq)
 	}
-	log.Debug(operationID, "SetMessageToCache ", userID, len(msgList))
-	err = d.SetMessageToCache(msgList, userID, operationID)
+	log.Debug(operationID, "SetMessageToCache ", insertID, len(msgList))
+	err = d.SetMessageToCache(msgList, insertID, operationID)
 	if err != nil {
-		log.Error(operationID, "setMessageToCache failed, continue ", err.Error(), len(msgList), userID)
+		log.Error(operationID, "setMessageToCache failed, continue ", err.Error(), len(msgList), insertID)
 	}
-	log.NewWarn(operationID, "batch to redis  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
-	return utils.Wrap(d.SetUserMaxSeq(userID, uint64(currentMaxSeq)), ""), lastMaxSeq
+	log.Debug(operationID, "batch to redis  cost time ", getCurrentTimestampByMill()-newTime, insertID, len(msgList))
+	if msgList[0].MsgData.SessionType == constant.SuperGroupChatType {
+		err = d.SetGroupMaxSeq(insertID, currentMaxSeq)
+	} else {
+		err = d.SetUserMaxSeq(insertID, currentMaxSeq)
+	}
+	return utils.Wrap(err, ""), lastMaxSeq
 }
 
 //func (d *DataBases) BatchInsertChatBoth(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) (error, uint64) {

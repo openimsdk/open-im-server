@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/pkg/utils"
 	"context"
 	go_redis "github.com/go-redis/redis/v8"
 
@@ -13,34 +14,32 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAnd
 	log.NewInfo(in.OperationID, "rpc getMaxAndMinSeq is arriving", in.String())
 	resp := new(open_im_sdk.GetMaxAndMinSeqResp)
 	m := make(map[string]*open_im_sdk.MaxAndMinSeq)
-	//seq, err := model.GetBiggestSeqFromReceive(in.UserID)
-	maxSeq, err1 := commonDB.DB.GetUserMaxSeq(in.UserID)
-	//minSeq, err2 := commonDB.DB.GetUserMinSeq(in.UserID)
-	if err1 == nil {
-		resp.MaxSeq = uint32(maxSeq)
-		for _, v := range in.GroupIDList {
-			x := new(open_im_sdk.MaxAndMinSeq)
-			maxSeq, _ := commonDB.DB.GetUserMaxSeq(v)
-			x.MaxSeq = uint32(maxSeq)
-			m[v] = x
+	var maxSeq, minSeq uint64
+	var err1, err2 error
+	maxSeq, err1 = commonDB.DB.GetUserMaxSeq(in.UserID)
+	minSeq, err2 = commonDB.DB.GetUserMinSeq(in.UserID)
+	if (err1 != nil && err1 != go_redis.Nil) || (err2 != nil && err2 != go_redis.Nil) {
+		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String())
+		if err1 != nil {
+			log.NewError(in.OperationID, utils.GetSelfFuncName(), err1.Error())
 		}
-		resp.GroupMaxAndMinSeq = m
-	} else if err1 == go_redis.Nil {
-		resp.MaxSeq = 0
-	} else {
-		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err1.Error())
+		if err2 != nil {
+			log.NewError(in.OperationID, utils.GetSelfFuncName(), err2.Error())
+		}
 		resp.ErrCode = 200
 		resp.ErrMsg = "redis get err"
+		return resp, nil
 	}
-	//if err2 == nil {
-	//	resp.MinSeq = uint32(minSeq)
-	//} else if err2 == redis.ErrNil {
-	//	resp.MinSeq = 0
-	//} else {
-	//	log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err2.Error())
-	//	resp.ErrCode = 201
-	//	resp.ErrMsg = "redis get err"
-	//}
+	resp.MaxSeq = uint32(maxSeq)
+	resp.MinSeq = uint32(minSeq)
+	for _, groupID := range in.GroupIDList {
+		x := new(open_im_sdk.MaxAndMinSeq)
+		maxSeq, _ := commonDB.DB.GetGroupMaxSeq(groupID)
+		minSeq, _ := commonDB.DB.GetGroupUserMinSeq(groupID, in.UserID)
+		x.MaxSeq = uint32(maxSeq)
+		x.MinSeq = uint32(minSeq)
+		m[groupID] = x
+	}
 	return resp, nil
 }
 func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.PullMessageBySeqListReq) (*open_im_sdk.PullMessageBySeqListResp, error) {

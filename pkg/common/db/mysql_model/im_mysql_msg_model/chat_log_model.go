@@ -10,7 +10,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	pbMsg "Open_IM/pkg/proto/chat"
+	pbMsg "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/jsonpb"
@@ -19,10 +19,6 @@ import (
 )
 
 func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
 	chatLog := new(db.ChatLog)
 	copier.Copy(chatLog, msg.MsgData)
 	switch msg.MsgData.SessionType {
@@ -47,5 +43,5 @@ func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
 	chatLog.CreateTime = utils.UnixMillSecondToTime(msg.MsgData.CreateTime)
 	chatLog.SendTime = utils.UnixMillSecondToTime(msg.MsgData.SendTime)
 	log.NewDebug("test", "this is ", chatLog)
-	return dbConn.Table("chat_logs").Create(chatLog).Error
+	return db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Create(chatLog).Error
 }

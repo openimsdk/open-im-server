@@ -198,9 +198,9 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
 	var respResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
 	flag := false
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 	for _, v := range grpcCons {
-		client := pbRelay.NewOnlineMessageRelayServiceClient(v)
+		client := pbRelay.NewRelayClient(v)
 		reply, err := client.GetUsersOnlineStatus(context.Background(), req)
 		if err != nil {
 			log.NewError(params.OperationID, "GetUsersOnlineStatus rpc  err", req.String(), err.Error())

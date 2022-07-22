@@ -21,6 +21,30 @@ import (
 	"time"
 )
 
+type OnboardingProcessReq struct {
+	OperationID string
+	UserID      string
+	NickName    string
+	FaceURL     string
+	PhoneNumber string
+	Email       string
+}
+
+var Ch chan OnboardingProcessReq
+
+func init() {
+	Ch = make(chan OnboardingProcessReq, 1000)
+}
+
+func OnboardingProcessRoutine() {
+	for {
+		req := <-Ch
+		go func() {
+			onboardingProcess(req.OperationID, req.UserID, req.NickName, req.FaceURL, req.PhoneNumber, req.Email)
+		}()
+	}
+}
+
 func onboardingProcess(operationID, userID, userName, faceURL, phoneNumber, email string) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), userName, userID, faceURL)
 	if err := createOrganizationUser(operationID, userID, userName, phoneNumber, email); err != nil {
@@ -208,7 +232,7 @@ func onboardingProcessNotification(operationID, userID, groupID, userName, faceU
 		Content:        []byte(welcomeString),
 		MsgFrom:        constant.UserMsgType,
 		ContentType:    constant.Text,
-		SessionType:    constant.GroupChatType,
+		SessionType:    constant.SuperGroupChatType,
 		OperationID:    operationID,
 		SenderNickname: userName,
 		SenderFaceURL:  faceURL,

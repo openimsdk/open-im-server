@@ -7,13 +7,8 @@ import (
 )
 
 func InsertInToUserBlackList(black db.Black) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
 	black.CreateTime = time.Now()
-	err = dbConn.Table("blacks").Create(black).Error
-	return err
+	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Create(black).Error
 }
 
 //type Black struct {
@@ -26,31 +21,18 @@ func InsertInToUserBlackList(black db.Black) error {
 //}
 
 func CheckBlack(ownerUserID, blockUserID string) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
 	var black db.Black
-	err = dbConn.Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
-	return err
+	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
 }
 
 func RemoveBlackList(ownerUserID, blockUserID string) error {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return err
-	}
-	err = dbConn.Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(db.Black{}).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(db.Black{}).Error
 	return utils.Wrap(err, "RemoveBlackList failed")
 }
 
 func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return nil, err
-	}
 	var blackListUsersInfo []db.Black
-	err = dbConn.Table("blacks").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -58,12 +40,8 @@ func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
 }
 
 func GetBlackIDListByUserID(ownerUserID string) ([]string, error) {
-	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-	if err != nil {
-		return nil, err
-	}
 	var blackIDList []string
-	err = dbConn.Table("blacks").Where("owner_user_id=?", ownerUserID).Pluck("block_user_id", &blackIDList).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=?", ownerUserID).Pluck("block_user_id", &blackIDList).Error
 	if err != nil {
 		return nil, err
 	}

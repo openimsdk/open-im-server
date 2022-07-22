@@ -32,7 +32,7 @@ type RPCServer struct {
 
 func (r *RPCServer) onInit(rpcPort int) {
 	r.rpcPort = rpcPort
-	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImOnlineMessageRelayName
+	r.rpcRegisterName = config.Config.RpcRegisterName.OpenImRelayName
 	r.etcdSchema = config.Config.Etcd.EtcdSchema
 	r.etcdAddr = config.Config.Etcd.EtcdAddr
 	r.platformList = genPlatformArray()
@@ -53,7 +53,7 @@ func (r *RPCServer) run() {
 	defer listener.Close()
 	srv := grpc.NewServer()
 	defer srv.GracefulStop()
-	pbRelay.RegisterOnlineMessageRelayServiceServer(srv, r)
+	pbRelay.RegisterRelayServer(srv, r)
 
 	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {

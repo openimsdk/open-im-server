@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbChat "Open_IM/pkg/proto/chat"
+	pbChat "Open_IM/pkg/proto/msg"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
@@ -89,14 +89,14 @@ func (r *RPCServer) GetSingleUserMsg(operationID string, currentMsgSeq uint32, u
 	rpcReq.SeqList = seqList
 	rpcReq.UserID = userID
 	rpcReq.OperationID = operationID
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOfflineMessageName, rpcReq.OperationID)
+	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, rpcReq.OperationID)
 	if grpcConn == nil {
 		errMsg := "getcdv3.GetConn == nil"
 		log.NewError(rpcReq.OperationID, errMsg)
 		return nil
 	}
 
-	msgClient := pbChat.NewChatClient(grpcConn)
+	msgClient := pbChat.NewMsgClient(grpcConn)
 	reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
 	if err != nil {
 		log.Error(operationID, "PullMessageBySeqList failed ", err.Error(), rpcReq.String())

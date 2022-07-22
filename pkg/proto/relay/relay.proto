@@ -76,7 +76,7 @@ int32  platformID = 2;
 message KickUserOfflineResp{
 
 }
-service OnlineMessageRelayService {
+service relay {
   rpc OnlinePushMsg(OnlinePushMsgReq) returns(OnlinePushMsgResp);
   rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq)returns(GetUsersOnlineStatusResp);
   rpc OnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);

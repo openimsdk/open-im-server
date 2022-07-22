@@ -33,6 +33,10 @@ func Int32ToString(i int32) string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
+func Uint32ToString(i uint32) string {
+	return strconv.FormatInt(int64(i), 10)
+}
+
 //judge a string whether in the  string list
 func IsContain(target string, List []string) bool {
 	for _, element := range List {

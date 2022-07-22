@@ -324,8 +324,9 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 func GetSelfUserInfo(c *gin.Context) {
 	params := api.GetSelfUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
+		errMsg := "BindJSON failed " + err.Error()
+		log.NewError("0", "BindJSON failed ", errMsg)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	req := &rpc.GetUserInfoReq{}
@@ -414,9 +415,9 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
 	var respResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
 	flag := false
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOnlineMessageRelayName)
+	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 	for _, v := range grpcCons {
-		client := pbRelay.NewOnlineMessageRelayServiceClient(v)
+		client := pbRelay.NewRelayClient(v)
 		reply, err := client.GetUsersOnlineStatus(context.Background(), req)
 		if err != nil {
 			log.NewError(params.OperationID, "GetUsersOnlineStatus rpc  err", req.String(), err.Error())
