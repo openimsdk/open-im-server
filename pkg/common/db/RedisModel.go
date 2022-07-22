@@ -108,7 +108,7 @@ func (d *DataBases) IncrGroupMaxSeq(groupID string) (uint64, error) {
 	return uint64(seq), err
 }
 
-func (d *DataBases) SetGroupMaxSeq(groupID string, maxSeq uint32) error {
+func (d *DataBases) SetGroupMaxSeq(groupID string, maxSeq uint64) error {
 	key := groupMaxSeq + groupID
 	return d.RDB.Set(context.Background(), key, maxSeq, 0).Err()
 }

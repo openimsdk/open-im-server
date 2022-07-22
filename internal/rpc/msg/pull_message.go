@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/pkg/utils"
 	"context"
 	go_redis "github.com/go-redis/redis/v8"
 
@@ -14,11 +15,17 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAnd
 	resp := new(open_im_sdk.GetMaxAndMinSeqResp)
 	m := make(map[string]*open_im_sdk.MaxAndMinSeq)
 	var maxSeq, minSeq uint64
-	var err error
-	maxSeq, err = commonDB.DB.GetUserMaxSeq(in.UserID)
-	minSeq, err = commonDB.DB.GetUserMinSeq(in.UserID)
-	if err != nil && err != go_redis.Nil {
-		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String(), err.Error())
+	var err1, err2 error
+	maxSeq, err1 = commonDB.DB.GetUserMaxSeq(in.UserID)
+	minSeq, err2 = commonDB.DB.GetUserMinSeq(in.UserID)
+	if (err1 != nil && err1 != go_redis.Nil) || (err2 != nil && err2 != go_redis.Nil) {
+		log.NewError(in.OperationID, "getMaxSeq from redis error", in.String())
+		if err1 != nil {
+			log.NewError(in.OperationID, utils.GetSelfFuncName(), err1.Error())
+		}
+		if err2 != nil {
+			log.NewError(in.OperationID, utils.GetSelfFuncName(), err2.Error())
+		}
 		resp.ErrCode = 200
 		resp.ErrMsg = "redis get err"
 		return resp, nil
