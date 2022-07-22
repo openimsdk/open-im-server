@@ -111,7 +111,7 @@ func SetPassword(c *gin.Context) {
 		select {
 		case Ch <- OnboardingProcessReq{
 			OperationID: params.OperationID,
-			UserID:      params.UserID,
+			UserID:      userID,
 			NickName:    params.Nickname,
 			FaceURL:     params.FaceURL,
 			PhoneNumber: params.AreaCode + params.PhoneNumber,
