@@ -34,6 +34,7 @@ func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *pbMsg.GetMaxAndMinSeq
 		resp.ErrCode = 201
 		resp.ErrMsg = "redis get err"
 	}
+	resp.GroupMaxAndMinSeq = m
 	return resp, nil
 }
 func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.PullMessageBySeqListReq) (*open_im_sdk.PullMessageBySeqListResp, error) {
