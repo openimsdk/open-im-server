@@ -32,14 +32,9 @@ const (
 	SignalListCache               = "SIGNAL_LIST_CACHE:"
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
+	groupMaxSeq                   = "GROUP_MAX_SEQ"
 )
 
-//func  (d *  DataBases)pubMessage(channel, msg string) {
-//   d.rdb.Publish(context.Background(),channel,msg)
-//}
-//func  (d *  DataBases)pubMessage(channel, msg string) {
-//	d.rdb.Publish(context.Background(),channel,msg)
-//}
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
 	key := accountTempCode + account
 	n, err := d.RDB.Exists(context.Background(), key).Result()
@@ -99,6 +94,23 @@ func (d *DataBases) GetGroupUserMinSeq(groupID, userID string) (uint64, error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
 	seq, err := d.RDB.Get(context.Background(), key).Result()
 	return uint64(utils.StringToInt(seq)), err
+}
+
+func (d *DataBases) GetGroupMaxSeq(groupID string) (uint64, error) {
+	key := groupMaxSeq + groupID
+	seq, err := d.RDB.Get(context.Background(), key).Result()
+	return uint64(utils.StringToInt(seq)), err
+}
+
+func (d *DataBases) IncrGroupMaxSeq(groupID string) (uint64, error) {
+	key := groupMaxSeq + groupID
+	seq, err := d.RDB.Incr(context.Background(), key).Result()
+	return uint64(seq), err
+}
+
+func (d *DataBases) SetGroupMaxSeq(groupID string, maxSeq uint32) error {
+	key := groupMaxSeq + groupID
+	return d.RDB.Set(context.Background(), key, maxSeq, 0).Err()
 }
 
 //Store userid and platform class to redis

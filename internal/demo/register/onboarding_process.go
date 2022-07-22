@@ -232,7 +232,7 @@ func onboardingProcessNotification(operationID, userID, groupID, userName, faceU
 		Content:        []byte(welcomeString),
 		MsgFrom:        constant.UserMsgType,
 		ContentType:    constant.Text,
-		SessionType:    constant.GroupChatType,
+		SessionType:    constant.SuperGroupChatType,
 		OperationID:    operationID,
 		SenderNickname: userName,
 		SenderFaceURL:  faceURL,
