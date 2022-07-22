@@ -300,7 +300,7 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 	log.Debug(req.OperationID, "CreateOrganizationUser ", organizationUser)
 	resp := &rpc.CreateOrganizationUserResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", *resp)
-	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
+	//chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
 	return resp, nil
 }
 
