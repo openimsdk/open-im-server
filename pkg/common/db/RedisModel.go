@@ -31,9 +31,10 @@ const (
 	SignalCache                   = "SIGNAL_CACHE:"
 	SignalListCache               = "SIGNAL_LIST_CACHE:"
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
+	FcmToken                      = "FCM_TOKEN:"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
 	groupMaxSeq                   = "GROUP_MAX_SEQ"
-)
+	)
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
 	key := accountTempCode + account

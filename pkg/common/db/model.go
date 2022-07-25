@@ -38,6 +38,7 @@ type RedisClient struct {
 	client  *go_redis.Client
 	cluster *go_redis.ClusterClient
 	go_redis.UniversalClient
+	enableCluster bool
 }
 
 func key(dbAddress, dbName string) string {
@@ -58,10 +59,10 @@ func init() {
 		uri = config.Config.Mongo.DBUri
 	} else {
 		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress,
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress,
 				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
 		} else {
-			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
 				config.Config.Mongo.DBAddress, config.Config.Mongo.DBDatabase,
 				config.Config.Mongo.DBMaxPoolSize)
 		}

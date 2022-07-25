@@ -3,6 +3,8 @@ module Open_IM
 go 1.15
 
 require (
+	cloud.google.com/go/firestore v1.6.1 // indirect
+	firebase.google.com/go v3.13.0+incompatible
 	github.com/Shopify/sarama v1.32.0
 	github.com/alibabacloud-go/darabonba-openapi v0.1.11
 	github.com/alibabacloud-go/dysmsapi-20170525/v2 v2.0.8
@@ -52,7 +54,7 @@ require (
 	golang.org/x/net v0.0.0-20220622184535-263ec571b305
 	golang.org/x/sys v0.0.0-20220622161953-175b2fd9d664 // indirect
 	golang.org/x/tools v0.1.11 // indirect
-	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71 // indirect
+	google.golang.org/api v0.59.0
 	google.golang.org/grpc v1.45.0
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

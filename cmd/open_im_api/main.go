@@ -131,6 +131,7 @@ func main() {
 		thirdGroup.POST("/get_download_url", apiThird.GetDownloadURL)
 		thirdGroup.POST("/get_rtc_invitation_info", apiThird.GetRTCInvitationInfo)
 		thirdGroup.POST("/get_rtc_invitation_start_app", apiThird.GetRTCInvitationInfoStartApp)
+		thirdGroup.POST("/fcm_update_token", apiThird.FcmUpdateToken)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
