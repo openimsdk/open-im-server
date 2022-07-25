@@ -458,6 +458,11 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		}
 		msgToMQSingle.MsgData = pb.MsgData
 		log.NewInfo(msgToMQSingle.OperationID, msgToMQSingle)
+		err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.GroupID, constant.OnlineStatus)
+		if err1 != nil {
+			log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
+			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+		}
 		// callback
 		callbackResp = callbackAfterSendSingleMsg(pb)
 		if callbackResp.ErrCode != 0 {
