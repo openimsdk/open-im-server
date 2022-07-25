@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	FcmClient = newFcmClient()
+	//FcmClient = newFcmClient()
 }
 
 func newFcmClient() *Fcm {
@@ -77,7 +77,7 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 		ctx := context.Background()
 		max := (i+1)*limit - 1
 		if max >= tokenlen {
-			max = tokenlen-1
+			max = tokenlen - 1
 		}
 		Msg.Tokens = Tokens[i*limit : max]
 		//SendMulticast sends the given multicast message to all the FCM registration tokens specified.
