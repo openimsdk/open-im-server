@@ -34,7 +34,7 @@ const (
 	FcmToken                      = "FCM_TOKEN:"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
 	groupMaxSeq                   = "GROUP_MAX_SEQ"
-	)
+)
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
 	key := accountTempCode + account
@@ -364,4 +364,13 @@ func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
 func (d *DataBases) GetGetuiToken() (string, error) {
 	result := d.RDB.Get(context.Background(), getuiToken)
 	return result.String(), result.Err()
+}
+func (d *DataBases) SetFcmToken(account string, platformid int, fcmToken string, expireTime int64) (err error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+	return d.RDB.Set(context.Background(), key, fcmToken, time.Duration(expireTime)*time.Second).Err()
+}
+
+func (d *DataBases) GetFcmToken(account string, platformid int) (string, error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+	return d.RDB.Get(context.Background(), key).Result()
 }
