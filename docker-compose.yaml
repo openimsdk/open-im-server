@@ -20,20 +20,21 @@ services:
     ports:
       - 37017:27017
     container_name: mongo
+    command: --wiredTigerCacheSizeGB 1
     volumes:
       - ./components/mongodb/data/db:/data/db
       - ./components/mongodb/data/logs:/data/logs
       - ./components/mongodb/data/conf:/etc/mongo
+    #      - ./script/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
     environment:
       - TZ=Asia/Shanghai
       # cache
       - wiredTigerCacheSizeGB=1
-#    environment:
-#      - MONGO_INITDB_ROOT_USERNAME=openIM
-#      - MONGO_INITDB_ROOT_PASSWORD=openIM
-
-
-      #TZ: Asia/Shanghai
+    #      - MONGO_USERNAME=openIM
+    #      - MONGO_PASSWORD=openIM
+    #      - MONGO_INITDB_ROOT_USERNAME=root
+    #      - MONGO_INITDB_ROOT_PASSWORD=root
+    #      - MONGO_INITDB_DATABASE=openIM
     restart: always
 
   redis:
@@ -44,7 +45,7 @@ services:
     volumes:
       - ./components/redis/data:/data
       #redis config file
-      #- ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
+      - ./components/redis/config/redis.conf:/usr/local/redis/config/redis.conf
     environment:
       TZ: Asia/Shanghai
     restart: always
@@ -69,15 +70,33 @@ services:
     image: wurstmeister/kafka
     container_name: kafka
     restart: always
+    ports:
+      - 9092:9092
     environment:
       TZ: Asia/Shanghai
       KAFKA_BROKER_ID: 0
-      KAFKA_ZOOKEEPER_CONNECT: 127.0.0.1:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-    network_mode: "host"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "ws2ms_chat:8:1,ms2ps_chat:8:1,msg_to_mongo:8:1"
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://127.0.0.1:9092,OUTSIDE://103.116.45.174:9092
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
     depends_on:
       - zookeeper
+
+  etcd:
+    image: quay.io/coreos/etcd
+    ports:
+      - 2379:2379
+      - 2380:2380
+    container_name: etcd
+    volumes:
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+    environment:
+      ETCDCTL_API: 3
+    restart: always
+    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
 
   minio:
     image: minio/minio
@@ -93,32 +112,18 @@ services:
       MINIO_ROOT_PASSWORD: key12345
     restart: always
     command: minio server /data --console-address ':9090'
-#
-#  dtm:
-#    image: yedf/dtm
-#    ports:
-#      - 36789:36789
-#      - 36790:36790
-#    environment:
-#      STORE_DRIVER: mysql
-#      STORE_HOST: localhost
-#      STORE_USER: root
-#      STORE_PASSWORD: ''
-#      STORE_PORT: 3306
-
-  etcd:
-    image: quay.io/coreos/etcd
-    ports:
-      - 2379:2379
-      - 2380:2380
-    container_name: etcd
-    volumes:
-      - /etc/timezone:/etc/timezone
-      - /etc/localtime:/etc/localtime
-    environment:
-      ETCDCTL_API: 3
-    restart: always
-    command: /usr/local/bin/etcd --name etcd0 --data-dir /etcd-data --listen-client-urls http://0.0.0.0:2379 --advertise-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster etcd0=http://0.0.0.0:2380 --initial-cluster-token tkn --initial-cluster-state new
+  #
+  #  dtm:
+  #    image: yedf/dtm
+  #    ports:
+  #      - 36789:36789
+  #      - 36790:36790
+  #    environment:
+  #      STORE_DRIVER: mysql
+  #      STORE_HOST: localhost
+  #      STORE_USER: root
+  #      STORE_PASSWORD: ''
+  #      STORE_PORT: 3306
 
   open_im_server:
     image: openim/open_im_server:v2.3.0-rc1
