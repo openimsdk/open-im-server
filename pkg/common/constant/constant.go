@@ -217,6 +217,7 @@ const (
 	FieldGroupAtType   = 5
 	FieldIsNotInGroup  = 6
 	FieldEx            = 7
+	FieldUnread        = 8
 )
 
 const (
