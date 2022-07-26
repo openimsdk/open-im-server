@@ -3,8 +3,6 @@ import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 option go_package = "./msg;msg";
 package msg;
 
-
-
 message MsgDataToMQ{
   string token =1;
   string operationID = 2;
@@ -104,6 +102,25 @@ message SetMsgMinSeqResp{
   string errMsg = 2;
 }
 
+message SetSendMsgFailedFlagReq{
+  string operationID = 1;
+}
+
+message SetSendMsgFailedFlagResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+}
+
+message GetSendMsgStatusReq{
+  string operationID = 1;
+}
+
+message GetSendMsgStatusResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+  int32 status = 3;
+}
+
 service msg {
   rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
   rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);
@@ -111,4 +128,6 @@ service msg {
   rpc DelMsgList(server_api_params.DelMsgListReq) returns(server_api_params.DelMsgListResp);
   rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
   rpc SetMsgMinSeq(SetMsgMinSeqReq) returns(SetMsgMinSeqResp);
+  rpc SetSendMsgFailedFlag(SetSendMsgFailedFlagReq) returns(SetSendMsgFailedFlagResp);
+  rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
 }

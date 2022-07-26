@@ -33,6 +33,7 @@ const (
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
 	groupMaxSeq                   = "GROUP_MAX_SEQ"
+	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG"
 )
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
@@ -363,4 +364,12 @@ func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
 func (d *DataBases) GetGetuiToken() (string, error) {
 	result := d.RDB.Get(context.Background(), getuiToken)
 	return result.String(), result.Err()
+}
+
+func (d *DataBases) SetSendMsgFailedFlag(operationID string) error {
+	return d.RDB.Set(context.Background(), sendMsgFailedFlag+operationID, 1, time.Hour*24).Err()
+}
+
+func (d *DataBases) GetSendMsgStatus(operationID string) error {
+	return d.RDB.Get(context.Background(), sendMsgFailedFlag+operationID).Err()
 }

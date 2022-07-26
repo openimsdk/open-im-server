@@ -40,12 +40,13 @@ type AccountCheckResp struct {
 }
 
 type ManagementSendMsg struct {
-	OperationID      string `json:"operationID" binding:"required"`
-	SendID           string `json:"sendID" binding:"required"`
-	GroupID          string `json:"groupID" `
-	SenderNickname   string `json:"senderNickname" `
-	SenderFaceURL    string `json:"senderFaceURL" `
-	SenderPlatformID int32  `json:"senderPlatformID"`
+	OperationID         string `json:"operationID" binding:"required"`
+	BusinessOperationID string `json:"businessOperationID"`
+	SendID              string `json:"sendID" binding:"required"`
+	GroupID             string `json:"groupID" `
+	SenderNickname      string `json:"senderNickname" `
+	SenderFaceURL       string `json:"senderFaceURL" `
+	SenderPlatformID    int32  `json:"senderPlatformID"`
 	//ForceList        []string                     `json:"forceList" `
 	Content         map[string]interface{}       `json:"content" binding:"required" swaggerignore:"true"`
 	ContentType     int32                        `json:"contentType" binding:"required"`
@@ -75,4 +76,13 @@ type ManagementBatchSendMsgResp struct {
 		ResultList   []server_api_params.UserSendMsgResp `json:"resultList"`
 		FailedIDList []string
 	} `json:"data"`
+}
+
+type CheckMsgIsSendSuccessReq struct {
+	OperationID string
+}
+
+type CheckMsgIsSendSuccessResp struct {
+	CommResp
+	Status int32 `json:"status"`
 }

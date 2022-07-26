@@ -3,6 +3,7 @@ package rocksCache
 import (
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
@@ -29,6 +30,7 @@ func init() {
 	fmt.Println("init to del old keys")
 	for _, key := range []string{groupCache, friendRelationCache, blackListCache, userInfoCache, groupInfoCache, groupOwnerIDCache, joinedGroupListCache,
 		groupMemberInfoCache, groupAllMemberInfoCache, allFriendInfoCache} {
+		fName := utils.GetSelfFuncName()
 		var cursor uint64
 		var n int
 		for {
@@ -40,10 +42,19 @@ func init() {
 			}
 			n += len(keys)
 			//fmt.Printf("\n %s key found %d keys: %v, current cursor %d\n", key, n, keys, cursor)
-			if len(keys) > 0 {
-				err = db.DB.RDB.Del(context.Background(), keys...).Err()
-				if err != nil {
-					panic(err.Error())
+			//if len(keys) > 0 {
+			//	err = db.DB.RDB.Del(context.Background(), keys...).Err()
+			//	if err != nil {
+			//		panic(err.Error())
+			//	}
+			//}
+			for _, key := range keys {
+				if err = db.DB.RDB.Del(context.Background(), key).Err(); err != nil {
+					log.NewError("", fName, key, err.Error())
+					err = db.DB.RDB.Del(context.Background(), key).Err()
+					if err != nil {
+						panic(err.Error())
+					}
 				}
 			}
 			if cursor == 0 {

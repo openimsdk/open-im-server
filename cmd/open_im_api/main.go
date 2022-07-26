@@ -143,6 +143,7 @@ func main() {
 		chatGroup.POST("/clear_msg", apiChat.ClearMsg)
 		chatGroup.POST("/manage_send_msg", manage.ManagementSendMsg)
 		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
+		chatGroup.POST("/check_msg_is_send_success", manage.CheckMsgIsSendSuccess)
 		chatGroup.POST("/set_msg_min_seq", apiChat.SetMsgMinSeq)
 	}
 	//Conversation
