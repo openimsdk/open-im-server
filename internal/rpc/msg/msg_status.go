@@ -11,6 +11,7 @@ import (
 )
 
 func (rpc *rpcChat) SetSendMsgFailedFlag(_ context.Context, req *pbMsg.SetSendMsgFailedFlagReq) (resp *pbMsg.SetSendMsgFailedFlagResp, err error) {
+	resp = &pbMsg.SetSendMsgFailedFlagResp{}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	if err := db.DB.SetSendMsgFailedFlag(req.OperationID); err != nil {
 		resp.ErrCode = constant.ErrDB.ErrCode
@@ -23,15 +24,16 @@ func (rpc *rpcChat) SetSendMsgFailedFlag(_ context.Context, req *pbMsg.SetSendMs
 
 func (rpc *rpcChat) GetSendMsgStatus(_ context.Context, req *pbMsg.GetSendMsgStatusReq) (resp *pbMsg.GetSendMsgStatusResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
+	resp = &pbMsg.GetSendMsgStatusResp{}
 	if err := db.DB.GetSendMsgStatus(req.OperationID); err != nil {
 		if err == goRedis.Nil {
 			resp.Status = 0
-			return
+			return resp, nil
 		} else {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 			resp.ErrMsg = err.Error()
 			resp.ErrCode = constant.ErrDB.ErrCode
-			return
+			return resp, nil
 		}
 	}
 	resp.Status = 1
