@@ -460,7 +460,7 @@ type RevokeElem struct {
 }
 type OANotificationElem struct {
 	NotificationName    string      `mapstructure:"notificationName" json:"notificationName" validate:"required"`
-	NotificationFaceURL string      `mapstructure:"notificationFaceURL" json:"notificationFaceURL" validate:"required"`
+	NotificationFaceURL string      `mapstructure:"notificationFaceURL" json:"notificationFaceURL"`
 	NotificationType    int32       `mapstructure:"notificationType" json:"notificationType" validate:"required"`
 	Text                string      `mapstructure:"text" json:"text" validate:"required"`
 	Url                 string      `mapstructure:"url" json:"url"`
