@@ -107,32 +107,24 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 						singleMsgSuccessCount += uint64(len(storageMsgList))
 						singleMsgSuccessCountMutex.Unlock()
 						och.SendMessageToMongoCH(msgChannelValue.aggregationID, triggerID, storageMsgList, lastSeq)
-						go func(push, storage []*pbMsg.MsgDataToMQ) {
-							for _, v := range storage {
-								sendMessageToPush(v, msgChannelValue.aggregationID)
-							}
-							for _, x := range push {
-								sendMessageToPush(x, msgChannelValue.aggregationID)
-							}
-
-						}(notStoragePushMsgList, storageMsgList)
-
+						for _, v := range storageMsgList {
+							sendMessageToPushMQ(v, msgChannelValue.aggregationID)
+						}
+						for _, x := range notStoragePushMsgList {
+							sendMessageToPushMQ(x, msgChannelValue.aggregationID)
+						}
 					}
 
 				} else {
-					go func(push []*pbMsg.MsgDataToMQ) {
-						for _, x := range push {
-							sendMessageToPush(x, msgChannelValue.aggregationID)
-						}
-					}(notStoragePushMsgList)
-
+					for _, x := range notStoragePushMsgList {
+						sendMessageToPushMQ(x, msgChannelValue.aggregationID)
+					}
 				}
 			}
-
 		}
 	}
-
 }
+
 func (och *OnlineHistoryRedisConsumerHandler) SendMessageToMongoCH(aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ, lastSeq uint64) {
 	if len(messages) > 0 {
 		pid, offset, err := producerToMongo.SendMessage(&pbMsg.MsgDataToMongoByMQ{LastSeq: lastSeq, AggregationID: aggregationID, MessageList: messages, TriggerID: triggerID}, aggregationID, triggerID)
@@ -522,6 +514,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 //	}
 //	return nil
 //}
+
 func sendMessageToPush(message *pbMsg.MsgDataToMQ, pushToUserID string) {
 	log.Info(message.OperationID, "msg_transfer send message to push", "message", message.String())
 	rpcPushMsg := pbPush.PushMsgReq{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
@@ -547,6 +540,17 @@ func sendMessageToPush(message *pbMsg.MsgDataToMQ, pushToUserID string) {
 		log.Info(message.OperationID, "rpc send success", rpcPushMsg.OperationID, "push data", rpcPushMsg.String())
 
 	}
+}
+
+func sendMessageToPushMQ(message *pbMsg.MsgDataToMQ, pushToUserID string) {
+	log.Info(message.OperationID, utils.GetSelfFuncName(), "msg ", message.String(), pushToUserID)
+	rpcPushMsg := pbPush.PushMsgReq{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
+	mqPushMsg := pbMsg.PushMsgDataToMQ{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
+	pid, offset, err := producer.SendMessage(&mqPushMsg, mqPushMsg.PushToUserID, rpcPushMsg.OperationID)
+	if err != nil {
+		log.Error(mqPushMsg.OperationID, "kafka send failed", "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
+	}
+	return
 }
 
 // String hashes a string to a unique hashcode.
