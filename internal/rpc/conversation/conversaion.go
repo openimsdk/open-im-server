@@ -70,6 +70,9 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"ex": conversation.Ex})
 	case constant.FieldAttachedInfo:
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"attached_info": conversation.AttachedInfo})
+	case constant.FieldUnread:
+		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"unread_count": conversation.UnreadCount})
+
 	}
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateColumnsConversations error", err.Error())

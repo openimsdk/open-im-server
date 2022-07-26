@@ -636,7 +636,7 @@ notification:
   #####################conversation#########################
   conversationOptUpdate:
     conversation:
-      reliabilityLevel: 2
+      reliabilityLevel: 1
       unreadCount: false
       offlinePush:
         switch: true
