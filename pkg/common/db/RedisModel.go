@@ -33,7 +33,8 @@ const (
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
 	FcmToken                      = "FCM_TOKEN:"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
-	groupMaxSeq                   = "GROUP_MAX_SEQ"
+	groupMaxSeq                   = "GROUP_MAX_SEQ:"
+	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
 )
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
@@ -365,6 +366,15 @@ func (d *DataBases) GetGetuiToken() (string, error) {
 	result := d.RDB.Get(context.Background(), getuiToken)
 	return result.String(), result.Err()
 }
+
+func (d *DataBases) SetSendMsgFailedFlag(operationID string) error {
+	return d.RDB.Set(context.Background(), sendMsgFailedFlag+operationID, 1, time.Hour*24).Err()
+}
+
+func (d *DataBases) GetSendMsgStatus(operationID string) error {
+	return d.RDB.Get(context.Background(), sendMsgFailedFlag+operationID).Err()
+}
+
 func (d *DataBases) SetFcmToken(account string, platformid int, fcmToken string, expireTime int64) (err error) {
 	key := FcmToken + account + ":" + strconv.Itoa(platformid)
 	return d.RDB.Set(context.Background(), key, fcmToken, time.Duration(expireTime)*time.Second).Err()
