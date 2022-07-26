@@ -196,6 +196,10 @@ type config struct {
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
 		}
+		Fcm struct {
+			ServiceAccount string `yaml:"serviceAccount"`
+			Enable         bool   `yaml:"enable"`
+		}
 	}
 	Manager struct {
 		AppManagerUid          []string `yaml:"appManagerUid"`

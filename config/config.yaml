@@ -211,11 +211,14 @@ push:
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
     enable: true
-  getui:  #个推推送，暂未测试 暂不要使用
+  getui:  #个推推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     intent: ""
+    enable: false
+  fcm:  #firebase cloud message 消息推送
+    serviceAccount: "openim-*-firebase-adminsdk-*-*.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
     enable: false
 
 

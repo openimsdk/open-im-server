@@ -31,6 +31,7 @@ const (
 	SignalCache                   = "SIGNAL_CACHE:"
 	SignalListCache               = "SIGNAL_LIST_CACHE:"
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
+	FcmToken                      = "FCM_TOKEN:"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
 	groupMaxSeq                   = "GROUP_MAX_SEQ"
 	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG"
@@ -372,4 +373,14 @@ func (d *DataBases) SetSendMsgFailedFlag(operationID string) error {
 
 func (d *DataBases) GetSendMsgStatus(operationID string) error {
 	return d.RDB.Get(context.Background(), sendMsgFailedFlag+operationID).Err()
+}
+
+func (d *DataBases) SetFcmToken(account string, platformid int, fcmToken string, expireTime int64) (err error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+	return d.RDB.Set(context.Background(), key, fcmToken, time.Duration(expireTime)*time.Second).Err()
+}
+
+func (d *DataBases) GetFcmToken(account string, platformid int) (string, error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+	return d.RDB.Get(context.Background(), key).Result()
 }
