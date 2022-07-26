@@ -10,7 +10,7 @@ import (
 	goRedis "github.com/go-redis/redis/v8"
 )
 
-func (rpc *rpcChat) SetSendMsgFailedFlag(_ context.Context, req pbMsg.SetSendMsgFailedFlagReq) (resp pbMsg.SetSendMsgFailedFlagResp, err error) {
+func (rpc *rpcChat) SetSendMsgFailedFlag(_ context.Context, req *pbMsg.SetSendMsgFailedFlagReq) (resp *pbMsg.SetSendMsgFailedFlagResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	if err := db.DB.SetSendMsgFailedFlag(req.OperationID); err != nil {
 		resp.ErrCode = constant.ErrDB.ErrCode
@@ -21,7 +21,7 @@ func (rpc *rpcChat) SetSendMsgFailedFlag(_ context.Context, req pbMsg.SetSendMsg
 	return resp, nil
 }
 
-func (rpc *rpcChat) GetSendMsgStatus(_ context.Context, req pbMsg.GetSendMsgStatusReq) (resp pbMsg.GetSendMsgStatusResp, err error) {
+func (rpc *rpcChat) GetSendMsgStatus(_ context.Context, req *pbMsg.GetSendMsgStatusReq) (resp *pbMsg.GetSendMsgStatusResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	if err := db.DB.GetSendMsgStatus(req.OperationID); err != nil {
 		if err == goRedis.Nil {
