@@ -33,8 +33,8 @@ const (
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
 	FcmToken                      = "FCM_TOKEN:"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
-	groupMaxSeq                   = "GROUP_MAX_SEQ"
-	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG"
+	groupMaxSeq                   = "GROUP_MAX_SEQ:"
+	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
 )
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {

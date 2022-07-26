@@ -79,7 +79,7 @@ type ManagementBatchSendMsgResp struct {
 }
 
 type CheckMsgIsSendSuccessReq struct {
-	OperationID string
+	OperationID string `json:"operationID"`
 }
 
 type CheckMsgIsSendSuccessResp struct {
