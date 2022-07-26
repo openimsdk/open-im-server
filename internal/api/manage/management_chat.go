@@ -367,6 +367,11 @@ func ManagementBatchSendMsg(c *gin.Context) {
 func CheckMsgIsSendSuccess(c *gin.Context) {
 	var req api.CheckMsgIsSendSuccessReq
 	var resp api.CheckMsgIsSendSuccessResp
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		log.Error(c.PostForm("operationID"), "json unmarshal err", err.Error(), c.PostForm("content"))
+		return
+	}
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetConn == nil"
