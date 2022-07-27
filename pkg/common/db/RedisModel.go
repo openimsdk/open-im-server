@@ -221,6 +221,19 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 	_, err := pipe.Exec(ctx)
 	return err
 }
+func (d *DataBases) DeleteMessageFromCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
+	ctx := context.Background()
+	var keys []string
+	for _, msg := range msgList {
+		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
+		keys = append(keys, key)
+	}
+	err := d.RDB.Del(ctx, keys...).Err()
+	if err != nil {
+		log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", keys, uid, err.Error(), msgList)
+	}
+	return err
+}
 
 func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID string) error {
 	ctx := context.Background()
