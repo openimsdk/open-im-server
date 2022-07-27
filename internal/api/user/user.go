@@ -417,6 +417,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	flag := false
 	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 	for _, v := range grpcCons {
+		log.Debug(params.OperationID, "get node ", v)
 		client := pbRelay.NewRelayClient(v)
 		reply, err := client.GetUsersOnlineStatus(context.Background(), req)
 		if err != nil {
