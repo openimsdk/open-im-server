@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	//FcmClient = newFcmClient()
+	FcmClient = newFcmClient()
 }
 
 func newFcmClient() *Fcm {
