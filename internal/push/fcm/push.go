@@ -1,4 +1,4 @@
-package push
+package fcm
 
 import (
 	"Open_IM/internal/push"
@@ -17,12 +17,9 @@ type Fcm struct {
 	FcmMsgCli *messaging.Client
 }
 
-var FcmClient *Fcm
-
-func init() {
-	FcmClient = newFcmClient()
+func NewFcm() *Fcm {
+	return newFcmClient()
 }
-
 func newFcmClient() *Fcm {
 	opt := option.WithCredentialsFile(filepath.Join(config.Root, "config", config.Config.Push.Fcm.ServiceAccount))
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
