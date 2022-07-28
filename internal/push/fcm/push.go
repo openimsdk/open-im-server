@@ -4,23 +4,20 @@ import (
 	"Open_IM/internal/push"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/log"
 	"context"
-	"log"
-	"path/filepath"
-	"strconv"
-
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 	"google.golang.org/api/option"
+	"path/filepath"
+	"strconv"
 )
 
 type Fcm struct {
+	FcmMsgCli *messaging.Client
 }
 
-var (
-	FcmClient *Fcm
-	FcmMsgCli *messaging.Client
-)
+var FcmClient *Fcm
 
 func init() {
 	FcmClient = newFcmClient()
@@ -30,7 +27,7 @@ func newFcmClient() *Fcm {
 	opt := option.WithCredentialsFile(filepath.Join(config.Root, "config", config.Config.Push.Fcm.ServiceAccount))
 	fcmApp, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		log.Println("error initializing app: %v\n", err)
+		log.Debug("", "error initializing app: ", err.Error())
 		return nil
 	}
 	//授权
@@ -41,13 +38,12 @@ func newFcmClient() *Fcm {
 	// }
 	// log.Printf("%#v\r\n", fcmClient)
 	ctx := context.Background()
-	FcmMsgCli, err = fcmApp.Messaging(ctx)
+	fcmMsgClient, err := fcmApp.Messaging(ctx)
 	if err != nil {
-		log.Fatalf("error getting Messaging client: %v\n", err)
+		panic(err.Error())
 		return nil
 	}
-	log.Println(FcmMsgCli)
-	return &Fcm{}
+	return &Fcm{FcmMsgCli: fcmMsgClient}
 }
 
 func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, opts push.PushOpts) (string, error) {
@@ -87,9 +83,9 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 		//An error from SendMulticast indicates a total failure -- i.e.
 		//the message could not be sent to any of the recipients.
 		//Partial failures are indicated by a `BatchResponse` return value.
-		response, err := FcmMsgCli.SendMulticast(ctx, Msg)
+		response, err := f.FcmMsgCli.SendMulticast(ctx, Msg)
 		if err != nil {
-			log.Fatalln(err)
+			return "", err
 		}
 		Success = Success + response.SuccessCount
 		Fail = Fail + response.FailureCount

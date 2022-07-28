@@ -52,6 +52,7 @@ type ManagementSendMsg struct {
 	ContentType     int32                        `json:"contentType" binding:"required"`
 	SessionType     int32                        `json:"sessionType" binding:"required"`
 	IsOnlineOnly    bool                         `json:"isOnlineOnly"`
+	NotOfflinePush  bool                         `json:"notOfflinePush"`
 	OfflinePushInfo *open_im_sdk.OfflinePushInfo `json:"offlinePushInfo"`
 }
 
@@ -73,9 +74,15 @@ type ManagementBatchSendMsgReq struct {
 type ManagementBatchSendMsgResp struct {
 	CommResp
 	Data struct {
-		ResultList   []server_api_params.UserSendMsgResp `json:"resultList"`
+		ResultList   []*SingleReturnResult `json:"resultList"`
 		FailedIDList []string
 	} `json:"data"`
+}
+type SingleReturnResult struct {
+	ServerMsgID string `json:"serverMsgID"`
+	ClientMsgID string `json:"clientMsgID"`
+	SendTime    int64  `json:"sendTime"`
+	RecvID      string `json:"recvID" `
 }
 
 type CheckMsgIsSendSuccessReq struct {
