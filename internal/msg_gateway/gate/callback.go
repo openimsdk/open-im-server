@@ -17,11 +17,13 @@ func callbackUserOnline(operationID, userID string, platformID int, token string
 	callbackUserOnlineReq := cbApi.CallbackUserOnlineReq{
 		Token: token,
 		UserStatusCallbackReq: cbApi.UserStatusCallbackReq{
-			CallbackCommand: constant.CallbackUserOnlineCommand,
-			OperationID:     operationID,
-			UserID:          userID,
-			PlatformID:      int32(platformID),
-			Platform:        constant.PlatformIDToName(platformID),
+			UserStatusBaseCallback: cbApi.UserStatusBaseCallback{
+				CallbackCommand: constant.CallbackUserOnlineCommand,
+				OperationID:     operationID,
+				PlatformID:      int32(platformID),
+				Platform:        constant.PlatformIDToName(platformID),
+			},
+			UserID: userID,
 		},
 		Seq: int(time.Now().UnixNano() / 1e6),
 	}
@@ -40,11 +42,13 @@ func callbackUserOffline(operationID, userID string, platformID int) cbApi.Commo
 	}
 	callbackOfflineReq := cbApi.CallbackUserOfflineReq{
 		UserStatusCallbackReq: cbApi.UserStatusCallbackReq{
-			CallbackCommand: constant.CallbackUserOfflineCommand,
-			OperationID:     operationID,
-			UserID:          userID,
-			PlatformID:      int32(platformID),
-			Platform:        constant.PlatformIDToName(platformID),
+			UserStatusBaseCallback: cbApi.UserStatusBaseCallback{
+				CallbackCommand: constant.CallbackUserOnlineCommand,
+				OperationID:     operationID,
+				PlatformID:      int32(platformID),
+				Platform:        constant.PlatformIDToName(platformID),
+			},
+			UserID: userID,
 		},
 		Seq: int(time.Now().UnixNano() / 1e6),
 	}
