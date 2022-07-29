@@ -71,6 +71,7 @@ type config struct {
 			SecretAccessKey     string `yaml:"secretAccessKey"`
 			EndpointInner       string `yaml:"endpointInner"`
 			EndpointInnerEnable bool   `yaml:"endpointInnerEnable"`
+			StorageTime         int    `yaml:"storageTime"`
 		} `yaml:"minio"`
 	}
 
@@ -196,6 +197,10 @@ type config struct {
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
 		}
+		Fcm struct {
+			ServiceAccount string `yaml:"serviceAccount"`
+			Enable         bool   `yaml:"enable"`
+		}
 	}
 	Manager struct {
 		AppManagerUid          []string `yaml:"appManagerUid"`
@@ -249,15 +254,17 @@ type config struct {
 	}
 
 	Callback struct {
-		CallbackUrl                 string         `yaml:"callbackUrl"`
-		CallbackBeforeSendSingleMsg callBackConfig `yaml:"callbackBeforeSendSingleMsg"`
-		CallbackAfterSendSingleMsg  callBackConfig `yaml:"callbackAfterSendSingleMsg"`
-		CallbackBeforeSendGroupMsg  callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
-		CallbackAfterSendGroupMsg   callBackConfig `yaml:"callbackAfterSendGroupMsg"`
-		CallbackWordFilter          callBackConfig `yaml:"callbackWordFilter"`
-		CallbackUserOnline          callBackConfig `yaml:"callbackUserOnline"`
-		CallbackUserOffline         callBackConfig `yaml:"callbackUserOffline"`
-		CallbackOfflinePush         callBackConfig `yaml:"callbackOfflinePush"`
+		CallbackUrl                        string         `yaml:"callbackUrl"`
+		CallbackBeforeSendSingleMsg        callBackConfig `yaml:"callbackBeforeSendSingleMsg"`
+		CallbackAfterSendSingleMsg         callBackConfig `yaml:"callbackAfterSendSingleMsg"`
+		CallbackBeforeSendGroupMsg         callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
+		CallbackAfterSendGroupMsg          callBackConfig `yaml:"callbackAfterSendGroupMsg"`
+		CallbackWordFilter                 callBackConfig `yaml:"callbackWordFilter"`
+		CallbackUserOnline                 callBackConfig `yaml:"callbackUserOnline"`
+		CallbackUserOffline                callBackConfig `yaml:"callbackUserOffline"`
+		CallbackOfflinePush                callBackConfig `yaml:"callbackOfflinePush"`
+		CallbackOnlinePush                 callBackConfig `yaml:"callbackOnlinePush"`
+		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////

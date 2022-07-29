@@ -28,6 +28,13 @@ import (
 
 var validate *validator.Validate
 
+func SetOptions(options map[string]bool, value bool) {
+	utils.SetSwitchFromOptions(options, constant.IsHistory, value)
+	utils.SetSwitchFromOptions(options, constant.IsPersistent, value)
+	utils.SetSwitchFromOptions(options, constant.IsSenderSync, value)
+	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
+}
+
 func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 	var newContent string
 	var err error
@@ -50,11 +57,17 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 	}
 	options := make(map[string]bool, 5)
 	if params.IsOnlineOnly {
-		utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
-		utils.SetSwitchFromOptions(options, constant.IsHistory, false)
-		utils.SetSwitchFromOptions(options, constant.IsPersistent, false)
-		utils.SetSwitchFromOptions(options, constant.IsSenderSync, false)
+		SetOptions(options, false)
 	}
+	if params.NotOfflinePush {
+		utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
+	}
+	if params.ContentType == constant.CustomOnlineOnly {
+		SetOptions(options, false)
+	} else if params.ContentType == constant.CustomNotTriggerConversation {
+		utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
+	}
+
 	pbData := pbChat.SendMsgReq{
 		OperationID: params.OperationID,
 		MsgData: &open_im_sdk.MsgData{
@@ -135,6 +148,10 @@ func ManagementSendMsg(c *gin.Context) {
 	case constant.OANotification:
 		data = OANotificationElem{}
 		params.SessionType = constant.NotificationChatType
+	case constant.CustomNotTriggerConversation:
+		data = CustomElem{}
+	case constant.CustomOnlineOnly:
+		data = CustomElem{}
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
 	//case constant.Quote:
@@ -193,14 +210,21 @@ func ManagementSendMsg(c *gin.Context) {
 		return
 	}
 	client := pbChat.NewMsgClient(etcdConn)
-
 	log.Info(params.OperationID, "", "api ManagementSendMsg call, api call rpc...")
-
 	RpcResp, err := client.SendMsg(context.Background(), pbData)
-	if err != nil {
-		log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call UserSendMsg  rpc server failed"})
-		return
+	if err != nil || (RpcResp != nil && RpcResp.ErrCode != 0) {
+		resp, err2 := client.SetSendMsgFailedFlag(context.Background(), &pbChat.SetSendMsgFailedFlagReq{OperationID: params.OperationID})
+		if err2 != nil {
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), err.Error())
+		}
+		if resp != nil && resp.ErrCode != 0 {
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), resp.ErrCode, resp.ErrMsg)
+		}
+		if err != nil {
+			log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call UserSendMsg  rpc server failed"})
+			return
+		}
 	}
 	log.Info(params.OperationID, "", "api ManagementSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
 	resp := api.ManagementSendMsgResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, ResultList: server_api_params.UserSendMsgResp{ServerMsgID: RpcResp.ServerMsgID, ClientMsgID: RpcResp.ClientMsgID, SendTime: RpcResp.SendTime}}
@@ -255,6 +279,10 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	case constant.OANotification:
 		data = OANotificationElem{}
 		params.SessionType = constant.NotificationChatType
+	case constant.CustomNotTriggerConversation:
+		data = CustomElem{}
+	case constant.CustomOnlineOnly:
+		data = CustomElem{}
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
 	//case constant.Quote:
@@ -283,44 +311,87 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not authorized", "sendTime": 0, "MsgID": ""})
 		return
-
 	}
 	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
+	var msgSendFailedFlag bool
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
+	if etcdConn == nil {
+		errMsg := params.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(params.OperationID, errMsg)
+		//resp.Data.FailedIDList = params.RecvIDList
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "rpc server error: etcdConn == nil"})
+		return
+	}
+	client := pbChat.NewMsgClient(etcdConn)
+	req := &api.ManagementSendMsgReq{
+		ManagementSendMsg: params.ManagementSendMsg,
+	}
+	pbData := newUserSendMsgReq(req)
 	for _, recvID := range params.RecvIDList {
-		req := &api.ManagementSendMsgReq{
-			ManagementSendMsg: params.ManagementSendMsg,
-			RecvID:            recvID,
-		}
-		pbData := newUserSendMsgReq(req)
 		pbData.MsgData.RecvID = recvID
 		log.Info(params.OperationID, "", "api ManagementSendMsg call start..., ", pbData.String())
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
-		if etcdConn == nil {
-			errMsg := params.OperationID + "getcdv3.GetConn == nil"
-			log.NewError(params.OperationID, errMsg)
-			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
-			continue
-		}
-		client := pbChat.NewMsgClient(etcdConn)
+
 		rpcResp, err := client.SendMsg(context.Background(), pbData)
 		if err != nil {
 			log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
 			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
+			msgSendFailedFlag = true
 			continue
 		}
 		if rpcResp.ErrCode != 0 {
 			log.NewError(params.OperationID, utils.GetSelfFuncName(), "rpc failed", pbData, rpcResp)
 			resp.Data.FailedIDList = append(resp.Data.FailedIDList, recvID)
+			msgSendFailedFlag = true
 			continue
 		}
-		resp.Data.ResultList = append(resp.Data.ResultList, server_api_params.UserSendMsgResp{
+		resp.Data.ResultList = append(resp.Data.ResultList, &api.SingleReturnResult{
 			ServerMsgID: rpcResp.ServerMsgID,
 			ClientMsgID: rpcResp.ClientMsgID,
 			SendTime:    rpcResp.SendTime,
+			RecvID:      recvID,
 		})
+	}
+	if msgSendFailedFlag {
+		resp, err2 := client.SetSendMsgFailedFlag(context.Background(), &pbChat.SetSendMsgFailedFlagReq{OperationID: params.OperationID})
+		if err2 != nil {
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), err2.Error())
+		}
+		if resp != nil && resp.ErrCode != 0 {
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), resp.ErrCode, resp.ErrMsg)
+		}
 	}
 
 	log.NewInfo(params.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
+	c.JSON(http.StatusOK, resp)
+}
+
+func CheckMsgIsSendSuccess(c *gin.Context) {
+	var req api.CheckMsgIsSendSuccessReq
+	var resp api.CheckMsgIsSendSuccessResp
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		log.Error(c.PostForm("operationID"), "json unmarshal err", err.Error(), c.PostForm("content"))
+		return
+	}
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
+	client := pbChat.NewMsgClient(etcdConn)
+	rpcResp, err := client.GetSendMsgStatus(context.Background(), &pbChat.GetSendMsgStatusReq{OperationID: req.OperationID})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call GetSendMsgStatus  rpc server failed"})
+		return
+	}
+	resp.ErrMsg = rpcResp.ErrMsg
+	resp.ErrCode = rpcResp.ErrCode
+	resp.Status = rpcResp.Status
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -391,7 +462,7 @@ type RevokeElem struct {
 }
 type OANotificationElem struct {
 	NotificationName    string      `mapstructure:"notificationName" json:"notificationName" validate:"required"`
-	NotificationFaceURL string      `mapstructure:"notificationFaceURL" json:"notificationFaceURL" validate:"required"`
+	NotificationFaceURL string      `mapstructure:"notificationFaceURL" json:"notificationFaceURL"`
 	NotificationType    int32       `mapstructure:"notificationType" json:"notificationType" validate:"required"`
 	Text                string      `mapstructure:"text" json:"text" validate:"required"`
 	Url                 string      `mapstructure:"url" json:"url"`

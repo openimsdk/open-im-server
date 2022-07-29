@@ -31,8 +31,10 @@ const (
 	SignalCache                   = "SIGNAL_CACHE:"
 	SignalListCache               = "SIGNAL_LIST_CACHE:"
 	GlobalMsgRecvOpt              = "GLOBAL_MSG_RECV_OPT"
+	FcmToken                      = "FCM_TOKEN:"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
-	groupMaxSeq                   = "GROUP_MAX_SEQ"
+	groupMaxSeq                   = "GROUP_MAX_SEQ:"
+	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
 )
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
@@ -86,7 +88,7 @@ func (d *DataBases) GetUserMinSeq(uid string) (uint64, error) {
 	return uint64(utils.StringToInt(seq)), err
 }
 
-func (d *DataBases) SetGroupUserMinSeq(groupID, userID string, minSeq uint32) (err error) {
+func (d *DataBases) SetGroupUserMinSeq(groupID, userID string, minSeq uint64) (err error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
 	return d.RDB.Set(context.Background(), key, minSeq, 0).Err()
 }
@@ -217,6 +219,19 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, operationID))
 	}
 	_, err := pipe.Exec(ctx)
+	return err
+}
+func (d *DataBases) DeleteMessageFromCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
+	ctx := context.Background()
+	var keys []string
+	for _, msg := range msgList {
+		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
+		keys = append(keys, key)
+	}
+	err := d.RDB.Del(ctx, keys...).Err()
+	if err != nil {
+		log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", keys, uid, err.Error(), msgList)
+	}
 	return err
 }
 
@@ -363,4 +378,22 @@ func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
 func (d *DataBases) GetGetuiToken() (string, error) {
 	result := d.RDB.Get(context.Background(), getuiToken)
 	return result.String(), result.Err()
+}
+
+func (d *DataBases) SetSendMsgFailedFlag(operationID string) error {
+	return d.RDB.Set(context.Background(), sendMsgFailedFlag+operationID, 1, time.Hour*24).Err()
+}
+
+func (d *DataBases) GetSendMsgStatus(operationID string) error {
+	return d.RDB.Get(context.Background(), sendMsgFailedFlag+operationID).Err()
+}
+
+func (d *DataBases) SetFcmToken(account string, platformid int, fcmToken string, expireTime int64) (err error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+	return d.RDB.Set(context.Background(), key, fcmToken, time.Duration(expireTime)*time.Second).Err()
+}
+
+func (d *DataBases) GetFcmToken(account string, platformid int) (string, error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+	return d.RDB.Get(context.Background(), key).Result()
 }

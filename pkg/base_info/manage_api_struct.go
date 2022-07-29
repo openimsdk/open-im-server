@@ -40,17 +40,19 @@ type AccountCheckResp struct {
 }
 
 type ManagementSendMsg struct {
-	OperationID      string `json:"operationID" binding:"required"`
-	SendID           string `json:"sendID" binding:"required"`
-	GroupID          string `json:"groupID" `
-	SenderNickname   string `json:"senderNickname" `
-	SenderFaceURL    string `json:"senderFaceURL" `
-	SenderPlatformID int32  `json:"senderPlatformID"`
+	OperationID         string `json:"operationID" binding:"required"`
+	BusinessOperationID string `json:"businessOperationID"`
+	SendID              string `json:"sendID" binding:"required"`
+	GroupID             string `json:"groupID" `
+	SenderNickname      string `json:"senderNickname" `
+	SenderFaceURL       string `json:"senderFaceURL" `
+	SenderPlatformID    int32  `json:"senderPlatformID"`
 	//ForceList        []string                     `json:"forceList" `
 	Content         map[string]interface{}       `json:"content" binding:"required" swaggerignore:"true"`
 	ContentType     int32                        `json:"contentType" binding:"required"`
 	SessionType     int32                        `json:"sessionType" binding:"required"`
 	IsOnlineOnly    bool                         `json:"isOnlineOnly"`
+	NotOfflinePush  bool                         `json:"notOfflinePush"`
 	OfflinePushInfo *open_im_sdk.OfflinePushInfo `json:"offlinePushInfo"`
 }
 
@@ -72,7 +74,22 @@ type ManagementBatchSendMsgReq struct {
 type ManagementBatchSendMsgResp struct {
 	CommResp
 	Data struct {
-		ResultList   []server_api_params.UserSendMsgResp `json:"resultList"`
+		ResultList   []*SingleReturnResult `json:"resultList"`
 		FailedIDList []string
 	} `json:"data"`
+}
+type SingleReturnResult struct {
+	ServerMsgID string `json:"serverMsgID"`
+	ClientMsgID string `json:"clientMsgID"`
+	SendTime    int64  `json:"sendTime"`
+	RecvID      string `json:"recvID" `
+}
+
+type CheckMsgIsSendSuccessReq struct {
+	OperationID string `json:"operationID"`
+}
+
+type CheckMsgIsSendSuccessResp struct {
+	CommResp
+	Status int32 `json:"status"`
 }

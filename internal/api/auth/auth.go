@@ -150,7 +150,7 @@ func ParseToken(c *gin.Context) {
 	if err := c.BindJSON(&params); err != nil {
 		errMsg := " BindJSON failed " + err.Error()
 		log.NewError("0", errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
+		c.JSON(http.StatusOK, gin.H{"errCode": 1001, "errMsg": errMsg})
 		return
 	}
 
@@ -159,9 +159,9 @@ func ParseToken(c *gin.Context) {
 	var expireTime int64
 	ok, _, errInfo, expireTime = token_verify.GetUserIDFromTokenExpireTime(c.Request.Header.Get("token"), params.OperationID)
 	if !ok {
-		errMsg := params.OperationID + " " + "GetUserIDFromTokenExpireTime failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		errMsg := params.OperationID + " " + "GetUserIDFromTokenExpireTime failed " + errInfo
 		log.NewError(params.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusOK, gin.H{"errCode": 1001, "errMsg": errMsg})
 		return
 	}
 

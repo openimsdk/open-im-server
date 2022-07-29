@@ -131,6 +131,7 @@ func main() {
 		thirdGroup.POST("/get_download_url", apiThird.GetDownloadURL)
 		thirdGroup.POST("/get_rtc_invitation_info", apiThird.GetRTCInvitationInfo)
 		thirdGroup.POST("/get_rtc_invitation_start_app", apiThird.GetRTCInvitationInfoStartApp)
+		thirdGroup.POST("/fcm_update_token", apiThird.FcmUpdateToken)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
@@ -143,6 +144,7 @@ func main() {
 		chatGroup.POST("/clear_msg", apiChat.ClearMsg)
 		chatGroup.POST("/manage_send_msg", manage.ManagementSendMsg)
 		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
+		chatGroup.POST("/check_msg_is_send_success", manage.CheckMsgIsSendSuccess)
 		chatGroup.POST("/set_msg_min_seq", apiChat.SetMsgMinSeq)
 	}
 	//Conversation

@@ -6,11 +6,15 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"bytes"
+	"context"
 	"encoding/gob"
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
+	"strings"
 
 	//"gopkg.in/errgo.v2/errors"
 	"net/http"
@@ -113,6 +117,79 @@ func (ws *WServer) SetWriteTimeoutWriteMsg(conn *UserConn, a int, msg []byte, ti
 	conn.SetWriteDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
 	return conn.WriteMessage(a, msg)
 }
+
+func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int32, token string, operationID string) {
+	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	for _, v := range grpcCons {
+		if v.Target() == rpcSvr.target {
+			log.Debug(operationID, "Filter out this node ", rpcSvr.target)
+			continue
+		}
+		client := pbRelay.NewRelayClient(v)
+		req := &pbRelay.MultiTerminalLoginCheckReq{OperationID: operationID, PlatformID: platformID, UserID: userID, Token: token}
+		log.NewInfo(operationID, "MultiTerminalLoginCheckReq ", client, req.String())
+		resp, err := client.MultiTerminalLoginCheck(context.Background(), req)
+		if err != nil {
+			log.Error(operationID, "MultiTerminalLoginCheck failed ", err.Error())
+		}
+		if resp.ErrCode != 0 {
+			log.Error(operationID, "MultiTerminalLoginCheck errCode, errMsg: ", resp.ErrCode, resp.ErrMsg)
+		}
+	}
+}
+
+func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int, token string, operationID string) {
+	rwLock.Lock()
+	defer rwLock.Unlock()
+	switch config.Config.MultiLoginPolicy {
+	case constant.AllLoginButSameTermKick:
+		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
+			if oldConn, ok := oldConnMap[platformID]; ok {
+				log.NewDebug(operationID, uid, platformID, "kick old conn")
+				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
+				if err != nil && err != go_redis.Nil {
+					log.NewError(operationID, "get token from redis err", err.Error(), uid, constant.PlatformIDToName(platformID))
+					return
+				}
+				if m == nil {
+					log.NewError(operationID, "get token from redis err", "m is nil", uid, constant.PlatformIDToName(platformID))
+					return
+				}
+				log.NewDebug(operationID, "get token map is ", m, uid, constant.PlatformIDToName(platformID))
+
+				for k, _ := range m {
+					if k != token {
+						m[k] = constant.KickedToken
+					}
+				}
+				log.NewDebug(operationID, "set token map is ", m, uid, constant.PlatformIDToName(platformID))
+				err = db.DB.SetTokenMapByUidPid(uid, platformID, m)
+				if err != nil {
+					log.NewError(operationID, "SetTokenMapByUidPid err", err.Error(), uid, platformID, m)
+					return
+				}
+				err = oldConn.Close()
+				delete(oldConnMap, platformID)
+				ws.wsUserToConn[uid] = oldConnMap
+				if len(oldConnMap) == 0 {
+					delete(ws.wsUserToConn, uid)
+				}
+				delete(ws.wsConnToUser, oldConn)
+				if err != nil {
+					log.NewError(operationID, "conn close err", err.Error(), uid, platformID)
+				}
+			} else {
+				log.NewWarn(operationID, "abnormal uid-conn  ", uid, platformID, oldConnMap[platformID])
+			}
+
+		} else {
+			log.NewDebug(operationID, "no other conn", ws.wsUserToConn, uid, platformID)
+		}
+	case constant.SingleTerminalLogin:
+	case constant.WebAndOther:
+	}
+}
+
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
 	case constant.AllLoginButSameTermKick:
@@ -191,6 +268,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
 	}
+	//go ws.MultiTerminalLoginRemoteChecker(uid, int32(platformID), token, operationID)
 	ws.MultiTerminalLoginChecker(uid, platformID, conn, token, operationID)
 	if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
 		oldConnMap[platformID] = conn

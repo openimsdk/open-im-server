@@ -38,6 +38,7 @@ type RedisClient struct {
 	client  *go_redis.Client
 	cluster *go_redis.ClusterClient
 	go_redis.UniversalClient
+	enableCluster bool
 }
 
 func key(dbAddress, dbName string) string {
@@ -58,10 +59,10 @@ func init() {
 		uri = config.Config.Mongo.DBUri
 	} else {
 		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress,
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress,
 				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
 		} else {
-			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
 				config.Config.Mongo.DBAddress, config.Config.Mongo.DBDatabase,
 				config.Config.Mongo.DBMaxPoolSize)
 		}
@@ -146,21 +147,11 @@ func init() {
 		}
 	}
 	// 强一致性缓存，当一个key被标记删除，其他请求线程会被锁住轮询直到新的key生成，适合各种同步的拉取, 如果弱一致可能导致拉取还是老数据，毫无意义
-	DB.Rc = rockscache.NewClient(go_redis.NewClient(&go_redis.Options{
-		Addr:     config.Config.Redis.DBAddress[0],
-		Password: config.Config.Redis.DBPassWord, // no password set
-		DB:       0,                              // use default DB
-		PoolSize: 100,                            // 连接池大小
-	}), rockscache.NewDefaultOptions())
+	DB.Rc = rockscache.NewClient(DB.RDB, rockscache.NewDefaultOptions())
 	DB.Rc.Options.StrongConsistency = true
 
 	// 弱一致性缓存，当一个key被标记删除，其他请求线程直接返回该key的value，适合高频并且生成很缓存很慢的情况 如大群发消息缓存的缓存
-	DB.WeakRc = rockscache.NewClient(go_redis.NewClient(&go_redis.Options{
-		Addr:     config.Config.Redis.DBAddress[0],
-		Password: config.Config.Redis.DBPassWord, // no password set
-		DB:       0,                              // use default DB
-		PoolSize: 100,                            // 连接池大小
-	}), rockscache.NewDefaultOptions())
+	DB.WeakRc = rockscache.NewClient(DB.RDB, rockscache.NewDefaultOptions())
 	DB.WeakRc.Options.StrongConsistency = false
 }
 

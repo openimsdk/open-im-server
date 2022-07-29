@@ -101,7 +101,7 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 			return utils.Wrap(err, "")
 		}
 	}
-	log.NewWarn(operationID, "batch mgo  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
+	log.Debug(operationID, "batch mgo  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
 	return nil
 }
 

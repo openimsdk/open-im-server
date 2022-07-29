@@ -37,7 +37,7 @@ func (m *MsgDataToMQ) Reset()         { *m = MsgDataToMQ{} }
 func (m *MsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMQ) ProtoMessage()    {}
 func (*MsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{0}
+	return fileDescriptor_msg_110411abaacf415d, []int{0}
 }
 func (m *MsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMQ.Unmarshal(m, b)
@@ -90,7 +90,7 @@ func (m *MsgDataToDB) Reset()         { *m = MsgDataToDB{} }
 func (m *MsgDataToDB) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToDB) ProtoMessage()    {}
 func (*MsgDataToDB) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{1}
+	return fileDescriptor_msg_110411abaacf415d, []int{1}
 }
 func (m *MsgDataToDB) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToDB.Unmarshal(m, b)
@@ -137,7 +137,7 @@ func (m *PushMsgDataToMQ) Reset()         { *m = PushMsgDataToMQ{} }
 func (m *PushMsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*PushMsgDataToMQ) ProtoMessage()    {}
 func (*PushMsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{2}
+	return fileDescriptor_msg_110411abaacf415d, []int{2}
 }
 func (m *PushMsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PushMsgDataToMQ.Unmarshal(m, b)
@@ -192,7 +192,7 @@ func (m *MsgDataToMongoByMQ) Reset()         { *m = MsgDataToMongoByMQ{} }
 func (m *MsgDataToMongoByMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMongoByMQ) ProtoMessage()    {}
 func (*MsgDataToMongoByMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{3}
+	return fileDescriptor_msg_110411abaacf415d, []int{3}
 }
 func (m *MsgDataToMongoByMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMongoByMQ.Unmarshal(m, b)
@@ -272,7 +272,7 @@ func (m *GetMaxAndMinSeqReq) Reset()         { *m = GetMaxAndMinSeqReq{} }
 func (m *GetMaxAndMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqReq) ProtoMessage()    {}
 func (*GetMaxAndMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{4}
+	return fileDescriptor_msg_110411abaacf415d, []int{4}
 }
 func (m *GetMaxAndMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqReq.Unmarshal(m, b)
@@ -320,7 +320,7 @@ func (m *GetMaxAndMinSeqResp) Reset()         { *m = GetMaxAndMinSeqResp{} }
 func (m *GetMaxAndMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqResp) ProtoMessage()    {}
 func (*GetMaxAndMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{5}
+	return fileDescriptor_msg_110411abaacf415d, []int{5}
 }
 func (m *GetMaxAndMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqResp.Unmarshal(m, b)
@@ -381,7 +381,7 @@ func (m *SendMsgReq) Reset()         { *m = SendMsgReq{} }
 func (m *SendMsgReq) String() string { return proto.CompactTextString(m) }
 func (*SendMsgReq) ProtoMessage()    {}
 func (*SendMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{6}
+	return fileDescriptor_msg_110411abaacf415d, []int{6}
 }
 func (m *SendMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgReq.Unmarshal(m, b)
@@ -437,7 +437,7 @@ func (m *SendMsgResp) Reset()         { *m = SendMsgResp{} }
 func (m *SendMsgResp) String() string { return proto.CompactTextString(m) }
 func (*SendMsgResp) ProtoMessage()    {}
 func (*SendMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{7}
+	return fileDescriptor_msg_110411abaacf415d, []int{7}
 }
 func (m *SendMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgResp.Unmarshal(m, b)
@@ -505,7 +505,7 @@ func (m *ClearMsgReq) Reset()         { *m = ClearMsgReq{} }
 func (m *ClearMsgReq) String() string { return proto.CompactTextString(m) }
 func (*ClearMsgReq) ProtoMessage()    {}
 func (*ClearMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{8}
+	return fileDescriptor_msg_110411abaacf415d, []int{8}
 }
 func (m *ClearMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClearMsgReq.Unmarshal(m, b)
@@ -558,7 +558,7 @@ func (m *ClearMsgResp) Reset()         { *m = ClearMsgResp{} }
 func (m *ClearMsgResp) String() string { return proto.CompactTextString(m) }
 func (*ClearMsgResp) ProtoMessage()    {}
 func (*ClearMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{9}
+	return fileDescriptor_msg_110411abaacf415d, []int{9}
 }
 func (m *ClearMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClearMsgResp.Unmarshal(m, b)
@@ -607,7 +607,7 @@ func (m *SetMsgMinSeqReq) Reset()         { *m = SetMsgMinSeqReq{} }
 func (m *SetMsgMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*SetMsgMinSeqReq) ProtoMessage()    {}
 func (*SetMsgMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{10}
+	return fileDescriptor_msg_110411abaacf415d, []int{10}
 }
 func (m *SetMsgMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMsgMinSeqReq.Unmarshal(m, b)
@@ -674,7 +674,7 @@ func (m *SetMsgMinSeqResp) Reset()         { *m = SetMsgMinSeqResp{} }
 func (m *SetMsgMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*SetMsgMinSeqResp) ProtoMessage()    {}
 func (*SetMsgMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_f78465087fd6709c, []int{11}
+	return fileDescriptor_msg_110411abaacf415d, []int{11}
 }
 func (m *SetMsgMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMsgMinSeqResp.Unmarshal(m, b)
@@ -708,6 +708,290 @@ func (m *SetMsgMinSeqResp) GetErrMsg() string {
 	return ""
 }
 
+type SetSendMsgFailedFlagReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SetSendMsgFailedFlagReq) Reset()         { *m = SetSendMsgFailedFlagReq{} }
+func (m *SetSendMsgFailedFlagReq) String() string { return proto.CompactTextString(m) }
+func (*SetSendMsgFailedFlagReq) ProtoMessage()    {}
+func (*SetSendMsgFailedFlagReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_110411abaacf415d, []int{12}
+}
+func (m *SetSendMsgFailedFlagReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetSendMsgFailedFlagReq.Unmarshal(m, b)
+}
+func (m *SetSendMsgFailedFlagReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetSendMsgFailedFlagReq.Marshal(b, m, deterministic)
+}
+func (dst *SetSendMsgFailedFlagReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetSendMsgFailedFlagReq.Merge(dst, src)
+}
+func (m *SetSendMsgFailedFlagReq) XXX_Size() int {
+	return xxx_messageInfo_SetSendMsgFailedFlagReq.Size(m)
+}
+func (m *SetSendMsgFailedFlagReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetSendMsgFailedFlagReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetSendMsgFailedFlagReq proto.InternalMessageInfo
+
+func (m *SetSendMsgFailedFlagReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type SetSendMsgFailedFlagResp struct {
+	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SetSendMsgFailedFlagResp) Reset()         { *m = SetSendMsgFailedFlagResp{} }
+func (m *SetSendMsgFailedFlagResp) String() string { return proto.CompactTextString(m) }
+func (*SetSendMsgFailedFlagResp) ProtoMessage()    {}
+func (*SetSendMsgFailedFlagResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_110411abaacf415d, []int{13}
+}
+func (m *SetSendMsgFailedFlagResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetSendMsgFailedFlagResp.Unmarshal(m, b)
+}
+func (m *SetSendMsgFailedFlagResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetSendMsgFailedFlagResp.Marshal(b, m, deterministic)
+}
+func (dst *SetSendMsgFailedFlagResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetSendMsgFailedFlagResp.Merge(dst, src)
+}
+func (m *SetSendMsgFailedFlagResp) XXX_Size() int {
+	return xxx_messageInfo_SetSendMsgFailedFlagResp.Size(m)
+}
+func (m *SetSendMsgFailedFlagResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetSendMsgFailedFlagResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetSendMsgFailedFlagResp proto.InternalMessageInfo
+
+func (m *SetSendMsgFailedFlagResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *SetSendMsgFailedFlagResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+type GetSendMsgStatusReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetSendMsgStatusReq) Reset()         { *m = GetSendMsgStatusReq{} }
+func (m *GetSendMsgStatusReq) String() string { return proto.CompactTextString(m) }
+func (*GetSendMsgStatusReq) ProtoMessage()    {}
+func (*GetSendMsgStatusReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_110411abaacf415d, []int{14}
+}
+func (m *GetSendMsgStatusReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetSendMsgStatusReq.Unmarshal(m, b)
+}
+func (m *GetSendMsgStatusReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetSendMsgStatusReq.Marshal(b, m, deterministic)
+}
+func (dst *GetSendMsgStatusReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetSendMsgStatusReq.Merge(dst, src)
+}
+func (m *GetSendMsgStatusReq) XXX_Size() int {
+	return xxx_messageInfo_GetSendMsgStatusReq.Size(m)
+}
+func (m *GetSendMsgStatusReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetSendMsgStatusReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetSendMsgStatusReq proto.InternalMessageInfo
+
+func (m *GetSendMsgStatusReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetSendMsgStatusResp struct {
+	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	Status               int32    `protobuf:"varint,3,opt,name=status" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetSendMsgStatusResp) Reset()         { *m = GetSendMsgStatusResp{} }
+func (m *GetSendMsgStatusResp) String() string { return proto.CompactTextString(m) }
+func (*GetSendMsgStatusResp) ProtoMessage()    {}
+func (*GetSendMsgStatusResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_110411abaacf415d, []int{15}
+}
+func (m *GetSendMsgStatusResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetSendMsgStatusResp.Unmarshal(m, b)
+}
+func (m *GetSendMsgStatusResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetSendMsgStatusResp.Marshal(b, m, deterministic)
+}
+func (dst *GetSendMsgStatusResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetSendMsgStatusResp.Merge(dst, src)
+}
+func (m *GetSendMsgStatusResp) XXX_Size() int {
+	return xxx_messageInfo_GetSendMsgStatusResp.Size(m)
+}
+func (m *GetSendMsgStatusResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetSendMsgStatusResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetSendMsgStatusResp proto.InternalMessageInfo
+
+func (m *GetSendMsgStatusResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *GetSendMsgStatusResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *GetSendMsgStatusResp) GetStatus() int32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+type DelSuperGroupMsgReq struct {
+	OpUserID             string   `protobuf:"bytes,1,opt,name=opUserID" json:"opUserID,omitempty"`
+	UserID               string   `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	GroupID              string   `protobuf:"bytes,3,opt,name=groupID" json:"groupID,omitempty"`
+	OperationID          string   `protobuf:"bytes,4,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DelSuperGroupMsgReq) Reset()         { *m = DelSuperGroupMsgReq{} }
+func (m *DelSuperGroupMsgReq) String() string { return proto.CompactTextString(m) }
+func (*DelSuperGroupMsgReq) ProtoMessage()    {}
+func (*DelSuperGroupMsgReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_110411abaacf415d, []int{16}
+}
+func (m *DelSuperGroupMsgReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DelSuperGroupMsgReq.Unmarshal(m, b)
+}
+func (m *DelSuperGroupMsgReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DelSuperGroupMsgReq.Marshal(b, m, deterministic)
+}
+func (dst *DelSuperGroupMsgReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DelSuperGroupMsgReq.Merge(dst, src)
+}
+func (m *DelSuperGroupMsgReq) XXX_Size() int {
+	return xxx_messageInfo_DelSuperGroupMsgReq.Size(m)
+}
+func (m *DelSuperGroupMsgReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_DelSuperGroupMsgReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DelSuperGroupMsgReq proto.InternalMessageInfo
+
+func (m *DelSuperGroupMsgReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
+	}
+	return ""
+}
+
+func (m *DelSuperGroupMsgReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *DelSuperGroupMsgReq) GetGroupID() string {
+	if m != nil {
+		return m.GroupID
+	}
+	return ""
+}
+
+func (m *DelSuperGroupMsgReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type DelSuperGroupMsgResp struct {
+	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DelSuperGroupMsgResp) Reset()         { *m = DelSuperGroupMsgResp{} }
+func (m *DelSuperGroupMsgResp) String() string { return proto.CompactTextString(m) }
+func (*DelSuperGroupMsgResp) ProtoMessage()    {}
+func (*DelSuperGroupMsgResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_110411abaacf415d, []int{17}
+}
+func (m *DelSuperGroupMsgResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DelSuperGroupMsgResp.Unmarshal(m, b)
+}
+func (m *DelSuperGroupMsgResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DelSuperGroupMsgResp.Marshal(b, m, deterministic)
+}
+func (dst *DelSuperGroupMsgResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DelSuperGroupMsgResp.Merge(dst, src)
+}
+func (m *DelSuperGroupMsgResp) XXX_Size() int {
+	return xxx_messageInfo_DelSuperGroupMsgResp.Size(m)
+}
+func (m *DelSuperGroupMsgResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_DelSuperGroupMsgResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DelSuperGroupMsgResp proto.InternalMessageInfo
+
+func (m *DelSuperGroupMsgResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *DelSuperGroupMsgResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*MsgDataToMQ)(nil), "msg.MsgDataToMQ")
 	proto.RegisterType((*MsgDataToDB)(nil), "msg.MsgDataToDB")
@@ -721,6 +1005,12 @@ func init() {
 	proto.RegisterType((*ClearMsgResp)(nil), "msg.ClearMsgResp")
 	proto.RegisterType((*SetMsgMinSeqReq)(nil), "msg.SetMsgMinSeqReq")
 	proto.RegisterType((*SetMsgMinSeqResp)(nil), "msg.SetMsgMinSeqResp")
+	proto.RegisterType((*SetSendMsgFailedFlagReq)(nil), "msg.SetSendMsgFailedFlagReq")
+	proto.RegisterType((*SetSendMsgFailedFlagResp)(nil), "msg.SetSendMsgFailedFlagResp")
+	proto.RegisterType((*GetSendMsgStatusReq)(nil), "msg.GetSendMsgStatusReq")
+	proto.RegisterType((*GetSendMsgStatusResp)(nil), "msg.GetSendMsgStatusResp")
+	proto.RegisterType((*DelSuperGroupMsgReq)(nil), "msg.DelSuperGroupMsgReq")
+	proto.RegisterType((*DelSuperGroupMsgResp)(nil), "msg.DelSuperGroupMsgResp")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -738,8 +1028,11 @@ type MsgClient interface {
 	PullMessageBySeqList(ctx context.Context, in *sdk_ws.PullMessageBySeqListReq, opts ...grpc.CallOption) (*sdk_ws.PullMessageBySeqListResp, error)
 	SendMsg(ctx context.Context, in *SendMsgReq, opts ...grpc.CallOption) (*SendMsgResp, error)
 	DelMsgList(ctx context.Context, in *sdk_ws.DelMsgListReq, opts ...grpc.CallOption) (*sdk_ws.DelMsgListResp, error)
+	DelSuperGroupMsg(ctx context.Context, in *DelSuperGroupMsgReq, opts ...grpc.CallOption) (*DelSuperGroupMsgResp, error)
 	ClearMsg(ctx context.Context, in *ClearMsgReq, opts ...grpc.CallOption) (*ClearMsgResp, error)
 	SetMsgMinSeq(ctx context.Context, in *SetMsgMinSeqReq, opts ...grpc.CallOption) (*SetMsgMinSeqResp, error)
+	SetSendMsgFailedFlag(ctx context.Context, in *SetSendMsgFailedFlagReq, opts ...grpc.CallOption) (*SetSendMsgFailedFlagResp, error)
+	GetSendMsgStatus(ctx context.Context, in *GetSendMsgStatusReq, opts ...grpc.CallOption) (*GetSendMsgStatusResp, error)
 }
 
 type msgClient struct {
@@ -786,6 +1079,15 @@ func (c *msgClient) DelMsgList(ctx context.Context, in *sdk_ws.DelMsgListReq, op
 	return out, nil
 }
 
+func (c *msgClient) DelSuperGroupMsg(ctx context.Context, in *DelSuperGroupMsgReq, opts ...grpc.CallOption) (*DelSuperGroupMsgResp, error) {
+	out := new(DelSuperGroupMsgResp)
+	err := grpc.Invoke(ctx, "/msg.msg/DelSuperGroupMsg", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *msgClient) ClearMsg(ctx context.Context, in *ClearMsgReq, opts ...grpc.CallOption) (*ClearMsgResp, error) {
 	out := new(ClearMsgResp)
 	err := grpc.Invoke(ctx, "/msg.msg/ClearMsg", in, out, c.cc, opts...)
@@ -804,6 +1106,24 @@ func (c *msgClient) SetMsgMinSeq(ctx context.Context, in *SetMsgMinSeqReq, opts 
 	return out, nil
 }
 
+func (c *msgClient) SetSendMsgFailedFlag(ctx context.Context, in *SetSendMsgFailedFlagReq, opts ...grpc.CallOption) (*SetSendMsgFailedFlagResp, error) {
+	out := new(SetSendMsgFailedFlagResp)
+	err := grpc.Invoke(ctx, "/msg.msg/SetSendMsgFailedFlag", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) GetSendMsgStatus(ctx context.Context, in *GetSendMsgStatusReq, opts ...grpc.CallOption) (*GetSendMsgStatusResp, error) {
+	out := new(GetSendMsgStatusResp)
+	err := grpc.Invoke(ctx, "/msg.msg/GetSendMsgStatus", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Msg service
 
 type MsgServer interface {
@@ -811,8 +1131,11 @@ type MsgServer interface {
 	PullMessageBySeqList(context.Context, *sdk_ws.PullMessageBySeqListReq) (*sdk_ws.PullMessageBySeqListResp, error)
 	SendMsg(context.Context, *SendMsgReq) (*SendMsgResp, error)
 	DelMsgList(context.Context, *sdk_ws.DelMsgListReq) (*sdk_ws.DelMsgListResp, error)
+	DelSuperGroupMsg(context.Context, *DelSuperGroupMsgReq) (*DelSuperGroupMsgResp, error)
 	ClearMsg(context.Context, *ClearMsgReq) (*ClearMsgResp, error)
 	SetMsgMinSeq(context.Context, *SetMsgMinSeqReq) (*SetMsgMinSeqResp, error)
+	SetSendMsgFailedFlag(context.Context, *SetSendMsgFailedFlagReq) (*SetSendMsgFailedFlagResp, error)
+	GetSendMsgStatus(context.Context, *GetSendMsgStatusReq) (*GetSendMsgStatusResp, error)
 }
 
 func RegisterMsgServer(s *grpc.Server, srv MsgServer) {
@@ -891,6 +1214,24 @@ func _Msg_DelMsgList_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_DelSuperGroupMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DelSuperGroupMsgReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).DelSuperGroupMsg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/msg.msg/DelSuperGroupMsg",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).DelSuperGroupMsg(ctx, req.(*DelSuperGroupMsgReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Msg_ClearMsg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ClearMsgReq)
 	if err := dec(in); err != nil {
@@ -927,6 +1268,42 @@ func _Msg_SetMsgMinSeq_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_SetSendMsgFailedFlag_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetSendMsgFailedFlagReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).SetSendMsgFailedFlag(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/msg.msg/SetSendMsgFailedFlag",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).SetSendMsgFailedFlag(ctx, req.(*SetSendMsgFailedFlagReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_GetSendMsgStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSendMsgStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GetSendMsgStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/msg.msg/GetSendMsgStatus",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GetSendMsgStatus(ctx, req.(*GetSendMsgStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "msg.msg",
 	HandlerType: (*MsgServer)(nil),
@@ -948,6 +1325,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_DelMsgList_Handler,
 		},
 		{
+			MethodName: "DelSuperGroupMsg",
+			Handler:    _Msg_DelSuperGroupMsg_Handler,
+		},
+		{
 			MethodName: "ClearMsg",
 			Handler:    _Msg_ClearMsg_Handler,
 		},
@@ -955,57 +1336,75 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			MethodName: "SetMsgMinSeq",
 			Handler:    _Msg_SetMsgMinSeq_Handler,
 		},
+		{
+			MethodName: "SetSendMsgFailedFlag",
+			Handler:    _Msg_SetSendMsgFailedFlag_Handler,
+		},
+		{
+			MethodName: "GetSendMsgStatus",
+			Handler:    _Msg_GetSendMsgStatus_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "msg/msg.proto",
 }
 
-func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_msg_f78465087fd6709c) }
+func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_msg_110411abaacf415d) }
 
-var fileDescriptor_msg_f78465087fd6709c = []byte{
-	// 696 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x55, 0xc1, 0x6e, 0xd3, 0x4c,
-	0x10, 0x96, 0x9b, 0x26, 0x69, 0xc6, 0xad, 0xd2, 0x7f, 0xff, 0x52, 0x45, 0x16, 0x07, 0xd7, 0x02,
-	0x14, 0x01, 0x4a, 0xa4, 0xc0, 0xad, 0x17, 0x48, 0x53, 0xa1, 0x4a, 0x98, 0xb6, 0x4e, 0xb9, 0x70,
-	0x09, 0xa6, 0x59, 0x6d, 0xad, 0xc6, 0xf6, 0x66, 0xc7, 0xa1, 0x2d, 0x3c, 0x03, 0x0f, 0xc0, 0x89,
-	0x1b, 0xaf, 0xc2, 0x6b, 0xa1, 0xdd, 0x75, 0x92, 0x75, 0x12, 0xa9, 0x51, 0x0f, 0x1c, 0xbf, 0xcf,
-	0xb3, 0x33, 0xdf, 0x37, 0x3b, 0xb3, 0x86, 0x9d, 0x18, 0x59, 0x3b, 0x46, 0xd6, 0xe2, 0x22, 0xcd,
-	0x52, 0x52, 0x8a, 0x91, 0x39, 0x07, 0xa7, 0x9c, 0x26, 0x83, 0x13, 0xbf, 0xcd, 0xaf, 0x59, 0x5b,
-	0xf1, 0x6d, 0x1c, 0x5e, 0x0f, 0x6e, 0xb0, 0x7d, 0x83, 0x3a, 0xce, 0xfb, 0x0e, 0xb6, 0x8f, 0xac,
-	0x17, 0x66, 0xe1, 0x45, 0xea, 0x9f, 0x93, 0x3d, 0x28, 0x67, 0xe9, 0x35, 0x4d, 0x1a, 0x96, 0x6b,
-	0x35, 0x6b, 0x81, 0x06, 0xc4, 0x05, 0x3b, 0xe5, 0x54, 0x84, 0x59, 0x94, 0x26, 0x27, 0xbd, 0xc6,
-	0x86, 0xfa, 0x66, 0x52, 0xe4, 0x35, 0x54, 0x63, 0x9d, 0xa6, 0x51, 0x72, 0xad, 0xa6, 0xdd, 0x71,
-	0x5a, 0x48, 0xc5, 0x57, 0x2a, 0x06, 0x21, 0x8f, 0x06, 0x3c, 0x14, 0x61, 0x8c, 0xad, 0xbc, 0x50,
-	0x30, 0x0d, 0xf5, 0xa8, 0x51, 0xbc, 0xd7, 0x35, 0x93, 0x58, 0x6b, 0x27, 0xb9, 0x5f, 0x9c, 0xf7,
-	0xc3, 0x82, 0xfa, 0xd9, 0x04, 0xaf, 0x4c, 0xa3, 0x2e, 0xd8, 0xa7, 0xc6, 0x29, 0x6d, 0xd7, 0xa4,
-	0x4c, 0x35, 0x1b, 0xeb, 0xab, 0xf1, 0x60, 0x9b, 0x4f, 0xf0, 0xea, 0x22, 0xfd, 0x88, 0x54, 0x9c,
-	0xf4, 0x54, 0x37, 0x6a, 0x41, 0x81, 0xf3, 0x7e, 0x5b, 0x40, 0xe6, 0x5a, 0xd2, 0x84, 0xa5, 0xdd,
-	0x3b, 0xff, 0x9c, 0x34, 0xa0, 0x3a, 0x0a, 0x31, 0xeb, 0xd3, 0xb1, 0x92, 0xb3, 0x19, 0x4c, 0x21,
-	0x79, 0x02, 0x3b, 0x21, 0x63, 0x82, 0xb2, 0xa2, 0xc9, 0x22, 0x49, 0x3a, 0x60, 0xc7, 0x14, 0x31,
-	0x64, 0xf4, 0x7d, 0x84, 0x59, 0xa3, 0xe4, 0x96, 0x9a, 0x76, 0x67, 0xb7, 0x25, 0x67, 0xc2, 0x70,
-	0x1e, 0x98, 0x41, 0xe4, 0x31, 0xd4, 0x32, 0x11, 0x31, 0xa6, 0xb4, 0x6e, 0xaa, 0xac, 0x73, 0xc2,
-	0xfb, 0x00, 0xe4, 0x1d, 0xcd, 0xfc, 0xf0, 0xf6, 0x6d, 0x32, 0xf4, 0xa3, 0xa4, 0x4f, 0xc7, 0x01,
-	0x1d, 0x93, 0x7d, 0xa8, 0xe4, 0xe6, 0x74, 0xd7, 0x72, 0xb4, 0xd8, 0xd2, 0x8d, 0xa5, 0x96, 0x7a,
-	0x37, 0xf0, 0xff, 0x52, 0x3e, 0xe4, 0xd2, 0xf8, 0xb1, 0x10, 0x47, 0xe9, 0x90, 0xaa, 0x8c, 0xe5,
-	0x60, 0x0a, 0x65, 0xa9, 0x63, 0x21, 0x7c, 0x64, 0x79, 0xb6, 0x1c, 0x49, 0xde, 0x0f, 0x6f, 0x65,
-	0xa7, 0x64, 0x7f, 0x77, 0x82, 0x1c, 0x29, 0x5e, 0xe5, 0x55, 0x5e, 0x24, 0xaf, 0x90, 0xf7, 0x0d,
-	0xa0, 0x4f, 0x93, 0xa1, 0x8f, 0x4c, 0x1a, 0xf8, 0xb7, 0x43, 0xfe, 0xcb, 0x02, 0x7b, 0x56, 0x5c,
-	0xbb, 0xa5, 0x45, 0xb7, 0x74, 0xee, 0x96, 0x16, 0xdc, 0x6a, 0x24, 0x95, 0xe9, 0x3a, 0x3e, 0xb2,
-	0xd9, 0x35, 0x99, 0x94, 0x8c, 0xb8, 0x1c, 0x45, 0x34, 0xc9, 0x74, 0x44, 0x59, 0x47, 0x18, 0x14,
-	0x71, 0x60, 0x0b, 0x69, 0x32, 0xbc, 0x88, 0x62, 0xda, 0xa8, 0xb8, 0x56, 0xb3, 0x14, 0xcc, 0xb0,
-	0x77, 0x09, 0xf6, 0xd1, 0x88, 0x86, 0x22, 0x6f, 0xcf, 0x3e, 0x54, 0x26, 0x85, 0xfb, 0xd5, 0x48,
-	0xa6, 0x48, 0x79, 0x7e, 0xf3, 0x5a, 0xe0, 0x0c, 0x2f, 0x36, 0xaf, 0xb4, 0xbc, 0x84, 0x6f, 0x60,
-	0x7b, 0x5e, 0xe4, 0x21, 0x6d, 0xf0, 0x7e, 0x5a, 0x50, 0xef, 0x53, 0xe9, 0xa7, 0x30, 0x8b, 0x2b,
-	0xb5, 0x36, 0xa0, 0xca, 0x44, 0x3a, 0xe1, 0x33, 0xa9, 0x53, 0x28, 0x4f, 0xc4, 0x7a, 0x44, 0xf2,
-	0xd1, 0xd1, 0x68, 0xd1, 0xc1, 0xe6, 0xf2, 0xf5, 0x9b, 0xfe, 0xcb, 0x45, 0xff, 0x5e, 0x0f, 0x76,
-	0x8b, 0xd2, 0x1e, 0xe2, 0xb0, 0xf3, 0xa7, 0x04, 0xf2, 0xdd, 0x26, 0x9f, 0xa1, 0xbe, 0xb0, 0x27,
-	0xe4, 0xe9, 0x8a, 0x51, 0x5b, 0xde, 0x4d, 0xe7, 0xd9, 0x3a, 0x61, 0xc8, 0x49, 0x0a, 0x7b, 0x67,
-	0x93, 0xd1, 0xc8, 0xd7, 0x4f, 0x41, 0xf7, 0xae, 0x4f, 0xc7, 0xea, 0x3d, 0x78, 0xbe, 0xe2, 0xfc,
-	0xaa, 0x40, 0x59, 0xeb, 0xc5, 0xda, 0xb1, 0xc8, 0xc9, 0x4b, 0xa8, 0xe6, 0x4b, 0x40, 0xea, 0xea,
-	0x49, 0x9a, 0xef, 0xa3, 0xb3, 0x5b, 0x24, 0x90, 0x93, 0x73, 0x80, 0x1e, 0x1d, 0xf9, 0xc8, 0x94,
-	0x28, 0x77, 0x45, 0xa1, 0xf9, 0x67, 0x99, 0xe1, 0xe0, 0x9e, 0x08, 0xe4, 0xa4, 0x0d, 0x5b, 0xd3,
-	0xf9, 0x23, 0xba, 0xa0, 0x31, 0xf3, 0xce, 0x7f, 0x0b, 0x0c, 0x72, 0x72, 0x08, 0xdb, 0xe6, 0x95,
-	0x92, 0xbd, 0x5c, 0x65, 0x61, 0x00, 0x9d, 0x47, 0x2b, 0x58, 0xe4, 0x5d, 0xfb, 0x53, 0xad, 0x25,
-	0xff, 0xc6, 0x87, 0x31, 0xb2, 0x2f, 0x15, 0xf5, 0xab, 0x7d, 0xf5, 0x37, 0x00, 0x00, 0xff, 0xff,
-	0x3e, 0x48, 0x33, 0x18, 0xa3, 0x07, 0x00, 0x00,
+var fileDescriptor_msg_110411abaacf415d = []byte{
+	// 850 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x56, 0xcd, 0x6f, 0x1b, 0x55,
+	0x10, 0xd7, 0xc6, 0xb1, 0xd3, 0xcc, 0x26, 0xb2, 0x79, 0x35, 0x61, 0x59, 0x15, 0xc9, 0x5d, 0x01,
+	0xb2, 0x00, 0xd9, 0x92, 0x41, 0xe2, 0x90, 0x0b, 0xb8, 0x6e, 0x43, 0xa4, 0x2e, 0x6d, 0x76, 0xc3,
+	0x85, 0x8b, 0xbb, 0xd4, 0x4f, 0xaf, 0xab, 0xec, 0xc7, 0xf3, 0xce, 0x9a, 0xb4, 0x70, 0xe6, 0xc8,
+	0x1f, 0xc0, 0x89, 0x1b, 0x47, 0xfe, 0x46, 0xf4, 0x3e, 0x6c, 0xef, 0x57, 0x88, 0xe5, 0x43, 0x8f,
+	0x33, 0x3b, 0x6f, 0xe6, 0xf7, 0x9b, 0xf9, 0xbd, 0x79, 0x0b, 0xa7, 0x31, 0xb2, 0x71, 0x8c, 0x6c,
+	0xc4, 0xb3, 0x34, 0x4f, 0x49, 0x2b, 0x46, 0x66, 0x3f, 0x7e, 0xc1, 0x69, 0x32, 0xbf, 0x74, 0xc7,
+	0xfc, 0x86, 0x8d, 0xa5, 0x7f, 0x8c, 0x8b, 0x9b, 0xf9, 0x2d, 0x8e, 0x6f, 0x51, 0xc5, 0x39, 0xbf,
+	0x83, 0xe9, 0x22, 0x9b, 0x05, 0x79, 0x70, 0x9d, 0xba, 0x57, 0xa4, 0x0f, 0xed, 0x3c, 0xbd, 0xa1,
+	0x89, 0x65, 0x0c, 0x8c, 0xe1, 0xb1, 0xa7, 0x0c, 0x32, 0x00, 0x33, 0xe5, 0x34, 0x0b, 0xf2, 0x30,
+	0x4d, 0x2e, 0x67, 0xd6, 0x81, 0xfc, 0x56, 0x74, 0x91, 0x6f, 0xe0, 0x28, 0x56, 0x69, 0xac, 0xd6,
+	0xc0, 0x18, 0x9a, 0x13, 0x7b, 0x84, 0x34, 0xfb, 0x95, 0x66, 0xf3, 0x80, 0x87, 0x73, 0x1e, 0x64,
+	0x41, 0x8c, 0x23, 0x5d, 0xc8, 0x5b, 0x87, 0x3a, 0xb4, 0x50, 0x7c, 0x36, 0x2d, 0x26, 0x31, 0x76,
+	0x4e, 0x72, 0x3f, 0x38, 0xe7, 0x4f, 0x03, 0xba, 0x2f, 0x57, 0xf8, 0xa6, 0x48, 0x74, 0x00, 0xe6,
+	0x8b, 0xc2, 0x29, 0x45, 0xb7, 0xe8, 0x2a, 0xa2, 0x39, 0xd8, 0x1d, 0x8d, 0x03, 0x27, 0x7c, 0x85,
+	0x6f, 0xae, 0xd3, 0x9f, 0x90, 0x66, 0x97, 0x33, 0xd9, 0x8d, 0x63, 0xaf, 0xe4, 0x73, 0xfe, 0x31,
+	0x80, 0x6c, 0xb1, 0xa4, 0x09, 0x4b, 0xa7, 0xef, 0xdc, 0x2b, 0x62, 0xc1, 0x51, 0x14, 0x60, 0xee,
+	0xd3, 0xa5, 0x84, 0x73, 0xe8, 0xad, 0x4d, 0xf2, 0x29, 0x9c, 0x06, 0x8c, 0x65, 0x94, 0x95, 0x49,
+	0x96, 0x9d, 0x64, 0x02, 0x66, 0x4c, 0x11, 0x03, 0x46, 0x9f, 0x87, 0x98, 0x5b, 0xad, 0x41, 0x6b,
+	0x68, 0x4e, 0x7a, 0x23, 0xa1, 0x89, 0x02, 0x73, 0xaf, 0x18, 0x44, 0x1e, 0xc1, 0x71, 0x9e, 0x85,
+	0x8c, 0x49, 0xac, 0x87, 0x32, 0xeb, 0xd6, 0xe1, 0xfc, 0x08, 0xe4, 0x82, 0xe6, 0x6e, 0xf0, 0xf6,
+	0xfb, 0x64, 0xe1, 0x86, 0x89, 0x4f, 0x97, 0x1e, 0x5d, 0x92, 0x33, 0xe8, 0x68, 0x72, 0xaa, 0x6b,
+	0xda, 0xaa, 0xb6, 0xf4, 0xa0, 0xd6, 0x52, 0xe7, 0x16, 0x1e, 0xd6, 0xf2, 0x21, 0x17, 0xc4, 0x9f,
+	0x66, 0xd9, 0x93, 0x74, 0x41, 0x65, 0xc6, 0xb6, 0xb7, 0x36, 0x45, 0xa9, 0xa7, 0x59, 0xe6, 0x22,
+	0xd3, 0xd9, 0xb4, 0x25, 0xfc, 0x6e, 0xf0, 0x56, 0x74, 0x4a, 0xf4, 0xf7, 0xd4, 0xd3, 0x96, 0xf4,
+	0xcb, 0xbc, 0x92, 0x8b, 0xf0, 0x4b, 0xcb, 0xf9, 0x0d, 0xc0, 0xa7, 0xc9, 0xc2, 0x45, 0x26, 0x08,
+	0xbc, 0x5f, 0x91, 0xff, 0x6d, 0x80, 0xb9, 0x29, 0xae, 0xd8, 0xd2, 0x32, 0x5b, 0xba, 0x65, 0x4b,
+	0x4b, 0x6c, 0x95, 0x25, 0x90, 0xa9, 0x3a, 0x2e, 0xb2, 0xcd, 0x98, 0x8a, 0x2e, 0x11, 0xf1, 0x3a,
+	0x0a, 0x69, 0x92, 0xab, 0x88, 0xb6, 0x8a, 0x28, 0xb8, 0x88, 0x0d, 0x0f, 0x90, 0x26, 0x8b, 0xeb,
+	0x30, 0xa6, 0x56, 0x67, 0x60, 0x0c, 0x5b, 0xde, 0xc6, 0x76, 0x5e, 0x83, 0xf9, 0x24, 0xa2, 0x41,
+	0xa6, 0xdb, 0x73, 0x06, 0x9d, 0x55, 0x69, 0xbe, 0xca, 0x12, 0x29, 0x52, 0xae, 0x27, 0xaf, 0x00,
+	0x6e, 0xec, 0x6a, 0xf3, 0x5a, 0xf5, 0x4b, 0xf8, 0x1d, 0x9c, 0x6c, 0x8b, 0xec, 0xd3, 0x06, 0xe7,
+	0x2f, 0x03, 0xba, 0x3e, 0x15, 0x7c, 0x4a, 0x5a, 0x6c, 0xc4, 0x6a, 0xc1, 0x11, 0xcb, 0xd2, 0x15,
+	0xdf, 0x40, 0x5d, 0x9b, 0xe2, 0x44, 0xac, 0x24, 0xa2, 0xa5, 0xa3, 0xac, 0x2a, 0x83, 0xc3, 0xfa,
+	0xf8, 0x8b, 0xfc, 0xdb, 0x65, 0xfe, 0xce, 0x0c, 0x7a, 0x65, 0x68, 0x7b, 0x31, 0x3c, 0x87, 0x8f,
+	0x7c, 0x9a, 0x6b, 0xb1, 0x3c, 0x0b, 0xc2, 0x88, 0x2e, 0x9e, 0x45, 0x81, 0x1c, 0x4a, 0x05, 0x9e,
+	0x51, 0x6f, 0xf0, 0x73, 0xb0, 0x9a, 0x0f, 0xef, 0x05, 0xe5, 0x5b, 0x79, 0x55, 0x75, 0x36, 0x3f,
+	0x0f, 0xf2, 0x15, 0xee, 0x06, 0xe3, 0x15, 0xf4, 0xeb, 0x07, 0xf7, 0x92, 0xfd, 0x19, 0x74, 0x50,
+	0x9e, 0x97, 0x93, 0x6a, 0x7b, 0xda, 0x72, 0xfe, 0x30, 0xe0, 0xe1, 0x8c, 0x46, 0xfe, 0x8a, 0xd3,
+	0xec, 0x42, 0x4c, 0x55, 0xeb, 0xb6, 0x38, 0x1f, 0xa3, 0xa2, 0xcf, 0xad, 0x4e, 0x0e, 0xee, 0xd2,
+	0x49, 0xab, 0xac, 0x93, 0x7b, 0xf5, 0xe0, 0xfc, 0x00, 0xfd, 0x3a, 0x8c, 0x7d, 0x98, 0x4e, 0xfe,
+	0x6d, 0x83, 0x78, 0xaf, 0xc9, 0x2b, 0xe8, 0x56, 0xf6, 0x23, 0xf9, 0xac, 0x61, 0xc5, 0xd4, 0x77,
+	0xb2, 0xfd, 0xf9, 0x2e, 0x61, 0xc8, 0x49, 0x0a, 0xfd, 0x97, 0xab, 0x28, 0x72, 0xd5, 0x13, 0x30,
+	0x7d, 0xe7, 0xd3, 0xa5, 0x7c, 0x07, 0xbe, 0x68, 0x38, 0xdf, 0x14, 0x28, 0x6a, 0x7d, 0xb9, 0x73,
+	0x2c, 0x72, 0xf2, 0x15, 0x1c, 0x69, 0x2d, 0x90, 0xae, 0x7c, 0x8a, 0xb6, 0x7b, 0xd8, 0xee, 0x95,
+	0x1d, 0xc8, 0xc9, 0x15, 0xc0, 0x8c, 0x46, 0x2e, 0x32, 0x09, 0x6a, 0xd0, 0x50, 0x68, 0xfb, 0x59,
+	0x64, 0x78, 0x7c, 0x4f, 0x04, 0x72, 0x72, 0x01, 0xbd, 0xea, 0x94, 0x88, 0x25, 0x0b, 0x37, 0x68,
+	0xc8, 0xfe, 0xf8, 0x8e, 0x2f, 0xc8, 0xc9, 0x18, 0x1e, 0xac, 0x17, 0x18, 0x51, 0xc8, 0x0b, 0x4b,
+	0xd3, 0xfe, 0xa0, 0xe2, 0x41, 0x4e, 0xce, 0xe1, 0xa4, 0xb8, 0x13, 0x48, 0x5f, 0xd3, 0x2d, 0x6d,
+	0x30, 0xfb, 0xc3, 0x06, 0x2f, 0x72, 0xe2, 0x43, 0xbf, 0xe9, 0x36, 0x93, 0x47, 0xeb, 0xf0, 0xa6,
+	0x2d, 0x61, 0x7f, 0xf2, 0x3f, 0x5f, 0x55, 0x2f, 0xaa, 0x77, 0x53, 0xf7, 0xa2, 0xe1, 0xae, 0xeb,
+	0x5e, 0x34, 0x5d, 0xe6, 0xa9, 0xf9, 0xf3, 0xf1, 0x48, 0xfc, 0x6c, 0x9e, 0xc7, 0xc8, 0x7e, 0xe9,
+	0xc8, 0x3f, 0xc9, 0xaf, 0xff, 0x0b, 0x00, 0x00, 0xff, 0xff, 0xa9, 0xcc, 0x3b, 0xac, 0x82, 0x0a,
+	0x00, 0x00,
 }
