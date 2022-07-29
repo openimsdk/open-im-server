@@ -11,7 +11,7 @@ import (
 	http2 "net/http"
 )
 
-func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.MsgData) cbApi.CommonCallbackResp {
+func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.MsgData, offlinePushUserIDList *[]string) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return callbackResp
@@ -46,6 +46,10 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 			return callbackResp
 		}
 	}
+	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow && len(resp.UserIDList) != 0 {
+		*offlinePushUserIDList = resp.UserIDList
+	}
+	log.NewDebug(operationID, utils.GetSelfFuncName(), offlinePushUserIDList, resp.UserIDList)
 	return callbackResp
 }
 

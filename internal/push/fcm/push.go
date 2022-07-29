@@ -5,10 +5,10 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/tools"
 	"context"
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
-	"fmt"
 	"google.golang.org/api/option"
 	"path/filepath"
 	"strconv"
@@ -47,7 +47,6 @@ func newFcmClient() *Fcm {
 }
 
 func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, opts push.PushOpts) (string, error) {
-	//需要一个客户端的Token
 	// accounts->registrationToken
 	Tokens := make([]string, 0)
 	for _, account := range accounts {
@@ -61,23 +60,16 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 			Tokens = append(Tokens, AndroidfcmToken)
 		}
 	}
-	tokenlen := len(Tokens)
-	// 500组为一个推送，我们用400好了
-	pages := int((tokenlen-1)/SinglePushCountLimit + 1)
 	Success := 0
 	Fail := 0
-	fmt.Println(operationID, "fcm args", tokenlen, pages)
-	for i := 0; i < pages; i++ {
-		Msg := new(messaging.MulticastMessage)
-		Msg.Notification = &messaging.Notification{}
-		Msg.Notification.Body = detailContent
-		Msg.Notification.Title = alert
-		ctx := context.Background()
-		max := (i+1)*SinglePushCountLimit - 1
-		if max >= tokenlen {
-			max = tokenlen - 1
-		}
-		Msg.Tokens = Tokens[i*SinglePushCountLimit : max]
+	result := tools.NewSplitter(SinglePushCountLimit, Tokens).GetSplitResult()
+	Msg := new(messaging.MulticastMessage)
+	Msg.Notification = &messaging.Notification{}
+	Msg.Notification.Body = detailContent
+	Msg.Notification.Title = alert
+	ctx := context.Background()
+	for _, v := range result {
+		Msg.Tokens = v.Item
 		//SendMulticast sends the given multicast message to all the FCM registration tokens specified.
 		//The tokens array in MulticastMessage may contain up to 500 tokens.
 		//SendMulticast uses the `SendAll()` function to send the given message to all the target recipients.
@@ -87,7 +79,9 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 		//Partial failures are indicated by a `BatchResponse` return value.
 		response, err := f.FcmMsgCli.SendMulticast(ctx, Msg)
 		if err != nil {
-			return "", err
+			Fail = Fail + len(v.Item)
+			log.Info(operationID, "some token push err", err.Error(), len(v.Item))
+			continue
 		}
 		Success = Success + response.SuccessCount
 		Fail = Fail + response.FailureCount
