@@ -192,14 +192,16 @@ const (
 	VerificationCodeForResetSuffix    = "_forReset"
 
 	//callbackCommand
-	CallbackBeforeSendSingleMsgCommand = "callbackBeforeSendSingleMsgCommand"
-	CallbackAfterSendSingleMsgCommand  = "callbackAfterSendSingleMsgCommand"
-	CallbackBeforeSendGroupMsgCommand  = "callbackBeforeSendGroupMsgCommand"
-	CallbackAfterSendGroupMsgCommand   = "callbackAfterSendGroupMsgCommand"
-	CallbackWordFilterCommand          = "callbackWordFilterCommand"
-	CallbackUserOnlineCommand          = "callbackUserOnlineCommand"
-	CallbackUserOfflineCommand         = "callbackUserOfflineCommand"
-	CallbackOfflinePushCommand         = "callbackOfflinePushCommand"
+	CallbackBeforeSendSingleMsgCommand  = "callbackBeforeSendSingleMsgCommand"
+	CallbackAfterSendSingleMsgCommand   = "callbackAfterSendSingleMsgCommand"
+	CallbackBeforeSendGroupMsgCommand   = "callbackBeforeSendGroupMsgCommand"
+	CallbackAfterSendGroupMsgCommand    = "callbackAfterSendGroupMsgCommand"
+	CallbackWordFilterCommand           = "callbackWordFilterCommand"
+	CallbackUserOnlineCommand           = "callbackUserOnlineCommand"
+	CallbackUserOfflineCommand          = "callbackUserOfflineCommand"
+	CallbackOfflinePushCommand          = "callbackOfflinePushCommand"
+	CallbackOnlinePushCommand           = "callbackOnlinePushCommand"
+	CallbackSuperGroupOnlinePushCommand = "callbackSuperGroupOnlinePushCommand"
 	//callback actionCode
 	ActionAllow     = 0
 	ActionForbidden = 1
