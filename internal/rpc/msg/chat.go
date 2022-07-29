@@ -53,7 +53,7 @@ func (rpc *rpcChat) SetMsgMinSeq(_ context.Context, req *pbChat.SetMsgMinSeqReq)
 		}
 		return &pbChat.SetMsgMinSeqResp{}, nil
 	}
-	err := db.DB.SetGroupUserMinSeq(req.GroupID, req.UserID, req.MinSeq)
+	err := db.DB.SetGroupUserMinSeq(req.GroupID, req.UserID, uint64(req.MinSeq))
 	if err != nil {
 		errMsg := "SetGroupUserMinSeq failed " + err.Error() + req.OperationID + req.GroupID + req.UserID + utils.Uint32ToString(req.MinSeq)
 		log.Error(req.OperationID, errMsg)
