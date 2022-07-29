@@ -2,7 +2,7 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-serverversion: 2.3.0-rc1
+serverversion: 2.3.0-rc2
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openim  #默认即可
