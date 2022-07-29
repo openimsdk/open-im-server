@@ -210,7 +210,7 @@ push:
     masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
-    enable: true
+    enable: false
   getui:  #个推推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
@@ -218,8 +218,8 @@ push:
     intent: ""
     enable: false
   fcm:  #firebase cloud message 消息推送
-    serviceAccount: "openim-*-firebase-adminsdk-*-*.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
-    enable: false
+    serviceAccount: "openim-47ece-firebase-adminsdk-cj2bl-ad09c38418.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    enable: true
 
 
 
