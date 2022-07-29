@@ -28,6 +28,7 @@ type RPCServer struct {
 	etcdAddr        []string
 	platformList    []int
 	pushTerminal    []int
+	target          string
 }
 
 func (r *RPCServer) onInit(rpcPort int) {
@@ -66,6 +67,7 @@ func (r *RPCServer) run() {
 	if err != nil {
 		log.Error("", "register push message rpc to etcd err", "", "err", err.Error(), r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName)
 	}
+	r.target = getcdv3.GetTarget(r.etcdSchema, rpcRegisterIP, r.rpcPort, r.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
 		log.Error("", "push message rpc listening err", "", "err", err.Error())
@@ -299,6 +301,11 @@ func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOffl
 		SetTokenKicked(v, int(req.PlatformID), req.OperationID)
 	}
 	return &pbRelay.KickUserOfflineResp{}, nil
+}
+
+func (r *RPCServer) MultiTerminalLoginCheck(ctx context.Context, req *pbRelay.MultiTerminalLoginCheckReq) (*pbRelay.MultiTerminalLoginCheckResp, error) {
+	ws.MultiTerminalLoginCheckerWithLock(req.UserID, int(req.PlatformID), req.Token, req.OperationID)
+	return &pbRelay.MultiTerminalLoginCheckResp{}, nil
 }
 
 func sendMsgToUser(conn *UserConn, bMsg []byte, in *pbRelay.OnlinePushMsgReq, RecvPlatForm int, RecvID string) (ResultCode int64) {
