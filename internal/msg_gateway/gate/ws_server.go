@@ -268,7 +268,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
 	}
-	go ws.MultiTerminalLoginRemoteChecker(uid, int32(platformID), token, operationID)
+	//go ws.MultiTerminalLoginRemoteChecker(uid, int32(platformID), token, operationID)
 	ws.MultiTerminalLoginChecker(uid, platformID, conn, token, operationID)
 	if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
 		oldConnMap[platformID] = conn
