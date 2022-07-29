@@ -160,6 +160,7 @@ func MinioStorageCredential(c *gin.Context) {
 	resp.AccessKeyID = v.AccessKeyID
 	resp.BucketName = config.Config.Credential.Minio.Bucket
 	resp.StsEndpointURL = config.Config.Credential.Minio.Endpoint
+	resp.StorageTime = config.Config.Credential.Minio.StorageTime
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 }
 

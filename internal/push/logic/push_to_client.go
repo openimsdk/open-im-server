@@ -47,6 +47,18 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
 		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 	}
+
+	var UIDList = []string{pushMsg.PushToUserID}
+	callbackResp := callbackOnlinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData)
+	log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "OnlinePush callback Resp")
+	if callbackResp.ErrCode != 0 {
+		log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOnlinePush result: ", callbackResp)
+	}
+	if callbackResp.ActionCode != constant.ActionAllow {
+		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "OnlinePush stop")
+		return
+	}
+
 	//Online push message
 	log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
 	for _, v := range grpcCons {
@@ -75,9 +87,6 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				return
 			}
 		}
-		//Use offline push messaging
-		var UIDList []string
-		UIDList = append(UIDList, pushMsg.PushToUserID)
 		customContent := OpenIMContent{
 			SessionType: int(pushMsg.MsgData.SessionType),
 			From:        pushMsg.MsgData.SendID,
@@ -118,7 +127,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 			}
 		}
 
-		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList[0], pushMsg.MsgData)
+		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData)
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
@@ -148,32 +157,49 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingelMsgToUserResultList
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
 	log.Debug(pushMsg.OperationID, "Get super group msg from msg_transfer And push msg", pushMsg.String())
-	getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
-	if etcdConn == nil {
-		errMsg := pushMsg.OperationID + "getcdv3.GetConn == nil"
-		log.NewError(pushMsg.OperationID, errMsg)
-		return
+	var pushToUserIDList []string
+	if config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
+		callbackResp := callbackBeforeSuperGroupOnlinePush(pushMsg.OperationID, pushMsg.PushToUserID, pushMsg.MsgData, &pushToUserIDList)
+		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
+		}
+		if callbackResp.ActionCode != constant.ActionAllow {
+			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "onlinePush stop")
+			return
+		}
+		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "callback userIDList Resp", pushToUserIDList)
+	} else {
+		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
+		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
+		if etcdConn == nil {
+			errMsg := pushMsg.OperationID + "getcdv3.GetConn == nil"
+			log.NewError(pushMsg.OperationID, errMsg)
+			return
+		}
+		client := pbCache.NewCacheClient(etcdConn)
+		cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+		if err != nil {
+			log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+			return
+		}
+		if cacheResp.CommonResp.ErrCode != 0 {
+			log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
+			return
+		}
+		pushToUserIDList = cacheResp.UserIDList
 	}
-	client := pbCache.NewCacheClient(etcdConn)
-	cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
-	if err != nil {
-		log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
-		return
-	}
-	if cacheResp.CommonResp.ErrCode != 0 {
-		log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
-		return
-	}
+
 	if len(grpcCons) == 0 {
 		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
 		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 	}
+
 	//Online push message
 	log.Debug("test", pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
 	for _, v := range grpcCons {
 		msgClient := pbRelay.NewRelayClient(v)
-		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: cacheResp.UserIDList})
+		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: pushToUserIDList})
 		if err != nil {
 			log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
 			continue
@@ -192,7 +218,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 				onlineSuccessUserIDList = append(onlineSuccessUserIDList, v.UserID)
 			}
 		}
-		onlineFailedUserIDList := utils.DifferenceString(onlineSuccessUserIDList, cacheResp.UserIDList)
+		onlineFailedUserIDList := utils.DifferenceString(onlineSuccessUserIDList, pushToUserIDList)
 		//Use offline push messaging
 		customContent := OpenIMContent{
 			SessionType: int(pushMsg.MsgData.SessionType),
@@ -234,7 +260,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			}
 		}
 		if len(onlineFailedUserIDList) > 0 {
-			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList[0], pushMsg.MsgData)
+			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList, pushMsg.MsgData)
 			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 			if callbackResp.ErrCode != 0 {
 				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)

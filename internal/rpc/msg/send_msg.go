@@ -74,7 +74,7 @@ func messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
 			return true, 0, "", nil
 		}
-		if data.MsgData.ContentType <= constant.FriendApplicationNotification && data.MsgData.ContentType >= constant.FriendApplicationApprovedNotification {
+		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
 			return true, 0, "", nil
 		}
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)

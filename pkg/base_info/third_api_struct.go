@@ -12,6 +12,7 @@ type MiniostorageCredentialResp struct {
 	SessionToken    string `json:"sessionToken"`
 	BucketName      string `json:"bucketName"`
 	StsEndpointURL  string `json:"stsEndpointURL"`
+	StorageTime     int    `json:"storageTime"`
 }
 
 type MinioUploadFileReq struct {
