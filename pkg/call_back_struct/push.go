@@ -15,6 +15,7 @@ type CallbackBeforePushReq struct {
 
 type CallbackBeforePushResp struct {
 	*CommonCallbackResp
+	UserIDList []string `json:"userIDList"`
 }
 
 type CallbackBeforeSuperGroupOnlinePushReq struct {
