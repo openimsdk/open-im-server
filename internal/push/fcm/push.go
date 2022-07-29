@@ -8,6 +8,7 @@ import (
 	"context"
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
+	"fmt"
 	"google.golang.org/api/option"
 	"path/filepath"
 	"strconv"
@@ -65,7 +66,7 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 	pages := int((tokenlen-1)/SinglePushCountLimit + 1)
 	Success := 0
 	Fail := 0
-	log.Info(operationID, "fmc args", tokenlen, pages)
+	fmt.Println(operationID, "fcm args", tokenlen, pages)
 	for i := 0; i < pages; i++ {
 		Msg := new(messaging.MulticastMessage)
 		Msg.Notification = &messaging.Notification{}
