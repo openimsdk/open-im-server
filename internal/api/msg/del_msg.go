@@ -78,15 +78,18 @@ func DelSuperGroupMsg(c *gin.Context) {
 		req  api.DelSuperGroupMsgReq
 		resp api.DelSuperGroupMsgResp
 	)
+	rpcReq := &rpc.DelSuperGroupMsgReq{}
+	utils.CopyStructFields(req, &req)
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
-
-	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	var ok bool
+	var errInfo string
+	ok, rpcReq.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
-		errMsg := req.OperationID + " " + opUserID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		errMsg := req.OperationID + " " + rpcReq.OpUserID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -137,18 +140,32 @@ func DelSuperGroupMsg(c *gin.Context) {
 	client := rpc.NewMsgClient(etcdConn)
 
 	log.Info(req.OperationID, "", "api DelSuperGroupMsg call, api call rpc...")
-
-	RpcResp, err := client.SendMsg(context.Background(), &pbData)
-	if err != nil {
-		log.NewError(req.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call UserSendMsg  rpc server failed"})
-		return
+	if req.IsAllDelete  {
+		RpcResp, err := client.DelSuperGroupMsg(context.Background(),rpcReq)
+		if err != nil {
+			log.NewError(req.OperationID, "call delete DelSuperGroupMsg rpc server failed", err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call DelSuperGroupMsg  rpc server failed"})
+			return
+		}
+		log.Info(req.OperationID, "", "api DelSuperGroupMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
+		resp.ErrCode = RpcResp.ErrCode
+		resp.ErrMsg = RpcResp.ErrMsg
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
+		c.JSON(http.StatusOK, resp)
+	}else{
+		RpcResp, err := client.SendMsg(context.Background(), &pbData)
+		if err != nil {
+			log.NewError(req.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call UserSendMsg  rpc server failed"})
+			return
+		}
+		log.Info(req.OperationID, "", "api DelSuperGroupMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
+		resp.ErrCode = RpcResp.ErrCode
+		resp.ErrMsg = RpcResp.ErrMsg
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
+		c.JSON(http.StatusOK, resp)
 	}
-	log.Info(req.OperationID, "", "api DelSuperGroupMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
-	resp.ErrCode = RpcResp.ErrCode
-	resp.ErrMsg = RpcResp.ErrMsg
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
-	c.JSON(http.StatusOK, resp)
+
 }
 
 // @Summary 清空用户消息
