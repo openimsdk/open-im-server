@@ -66,6 +66,7 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 	Fail := 0
 	for i := 0; i < pages; i++ {
 		Msg := new(messaging.MulticastMessage)
+		Msg.Notification = &messaging.Notification{}
 		Msg.Notification.Body = detailContent
 		Msg.Notification.Title = alert
 		ctx := context.Background()
