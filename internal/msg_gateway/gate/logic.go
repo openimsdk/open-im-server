@@ -54,7 +54,7 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 		ws.pullMsgBySeqListReq(conn, &m)
 	case constant.WsLogoutMsg:
 		log.NewInfo(m.OperationID, "conn.Close()", m.SendID, m.MsgIncr, m.ReqIdentifier)
-		conn.Close()
+	//	conn.Close()
 	default:
 		log.Error(m.OperationID, "ReqIdentifier failed ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 	}
