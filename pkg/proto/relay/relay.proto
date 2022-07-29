@@ -70,18 +70,32 @@ message GetUsersOnlineStatusResp{
 }
 message KickUserOfflineReq{
   string operationID = 1;
-int32  platformID = 2;
+    int32  platformID = 2;
   repeated string kickUserIDList = 3;
 }
 message KickUserOfflineResp{
 
 }
+
+
+message MultiTerminalLoginCheckReq{
+    string userID = 1;
+    int32 platformID = 2;
+    string token = 3;
+    string operationID = 4;
+}
+message MultiTerminalLoginCheckResp{
+    int32   errCode = 1;
+    string  errMsg = 2;
+}
+
+
 service relay {
   rpc OnlinePushMsg(OnlinePushMsgReq) returns(OnlinePushMsgResp);
-  rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq)returns(GetUsersOnlineStatusResp);
+  rpc GetUsersOnlineStatus(GetUsersOnlineStatusReq) returns(GetUsersOnlineStatusResp);
   rpc OnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
   rpc SuperGroupOnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
   rpc KickUserOffline(KickUserOfflineReq) returns(KickUserOfflineResp);
-//  rpc SendMsgByWS(SendMsgByWSReq)  returns(MsgToUserResp);
+  rpc MultiTerminalLoginCheck(MultiTerminalLoginCheckReq) returns(MultiTerminalLoginCheckResp);
 }
 
