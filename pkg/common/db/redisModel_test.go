@@ -35,7 +35,7 @@ func Test_GetKeyTTL(t *testing.T) {
 	ctx := context.Background()
 	key := flag.String("key", "key", "key value")
 	flag.Parse()
-	ttl, err := DB.rdb.TTL(ctx, *key).Result()
+	ttl, err := DB.RDB.TTL(ctx, *key).Result()
 	assert.Nil(t, err)
 	fmt.Println(ttl)
 }
@@ -43,7 +43,7 @@ func Test_HGetAll(t *testing.T) {
 	ctx := context.Background()
 	key := flag.String("key", "key", "key value")
 	flag.Parse()
-	ttl, err := DB.rdb.TTL(ctx, *key).Result()
+	ttl, err := DB.RDB.TTL(ctx, *key).Result()
 	assert.Nil(t, err)
 	fmt.Println(ttl)
 }
@@ -119,9 +119,17 @@ func Test_GetAccountCode(t *testing.T) {
 	assert.Nil(t, err)
 	fmt.Println(code)
 }
-func Test_GetGroupMemberList(t *testing.T) {
-	groupID := "3791742301"
-	list, err := DB.GetGroupMemberIDListFromCache(groupID)
+func Test_SetFcmToken(t *testing.T) {
+	uid := "test_uid"
+	token := "dfnWBtOjSj-XIZnUvDlegv:APA91bG09XTtiXfpE6U7gUVMOhnKcUkNCv4WHn0UZr2clUi-tS1jEH-HiCEW8GIAhjLIGcfUJ6NIKteC023ZxDH7J0PJ5sTxoup3fHDUPLU7KgQoZS4tPyFqCbZ6bRB7esDPEnD1n_s0"
+	platformID := 2
+	err := DB.SetFcmToken(uid, platformID, token, 0)
 	assert.Nil(t, err)
-	fmt.Println(list)
 }
+
+//func Test_GetGroupMemberList(t *testing.T) {
+//	groupID := "3791742301"
+//	list, err := DB.GetGroupMemberIDListFromCache(groupID)
+//	assert.Nil(t, err)
+//	fmt.Println(list)
+//}

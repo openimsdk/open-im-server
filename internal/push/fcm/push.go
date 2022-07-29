@@ -50,6 +50,7 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 	for _, account := range accounts {
 		IosfcmToken, IosErr := db.DB.GetFcmToken(account, 1)
 		AndroidfcmToken, AndroidErr := db.DB.GetFcmToken(account, 2)
+
 		if IosErr == nil {
 			Tokens = append(Tokens, IosfcmToken)
 		}

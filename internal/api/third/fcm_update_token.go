@@ -39,7 +39,7 @@ func FcmUpdateToken(c *gin.Context) {
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req, UserId)
 	//逻辑处理开始
-	err := db.DB.SetFcmToken(UserId, int(req.Platform), req.FcmToken, 0)
+	err := db.DB.SetFcmToken(UserId, req.Platform, req.FcmToken, 0)
 	if err != nil {
 		errMsg := req.OperationID + " " + "SetFcmToken failed " + err.Error() + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
