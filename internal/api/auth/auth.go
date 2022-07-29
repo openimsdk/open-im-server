@@ -159,7 +159,7 @@ func ParseToken(c *gin.Context) {
 	var expireTime int64
 	ok, _, errInfo, expireTime = token_verify.GetUserIDFromTokenExpireTime(c.Request.Header.Get("token"), params.OperationID)
 	if !ok {
-		errMsg := params.OperationID + " " + "GetUserIDFromTokenExpireTime failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		errMsg := params.OperationID + " " + "GetUserIDFromTokenExpireTime failed " + errInfo
 		log.NewError(params.OperationID, errMsg)
 		c.JSON(http.StatusOK, gin.H{"errCode": 1001, "errMsg": errMsg})
 		return
