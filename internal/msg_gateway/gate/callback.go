@@ -43,7 +43,7 @@ func callbackUserOffline(operationID, userID string, platformID int) cbApi.Commo
 	callbackOfflineReq := cbApi.CallbackUserOfflineReq{
 		UserStatusCallbackReq: cbApi.UserStatusCallbackReq{
 			UserStatusBaseCallback: cbApi.UserStatusBaseCallback{
-				CallbackCommand: constant.CallbackUserOnlineCommand,
+				CallbackCommand: constant.CallbackUserOfflineCommand,
 				OperationID:     operationID,
 				PlatformID:      int32(platformID),
 				Platform:        constant.PlatformIDToName(platformID),
