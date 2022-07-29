@@ -9,6 +9,7 @@ import (
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/go-redis/redis/v8"
 )
 
 func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.GetJoinedSuperGroupListReq) (*pbGroup.GetJoinedSuperGroupListResp, error) {
@@ -17,6 +18,10 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 	//userToSuperGroup, err := db.DB.GetSuperGroupByUserID(req.UserID)
 	groupIDList, err := rocksCache.GetJoinedSuperGroupListFromCache(req.UserID)
 	if err != nil {
+		if err == redis.Nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroupByUserID nil ", err.Error(), req.UserID)
+			return resp, nil
+		}
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroupByUserID failed ", err.Error(), req.UserID)
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
