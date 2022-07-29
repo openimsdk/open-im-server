@@ -118,6 +118,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID: user12345
     secretAccessKey: key12345
+    storageTime: 50 #文件在minio中保存的时间
   ali: # ali oss
     regionID: "oss-cn-beijing"
     accessKeyID: ""
@@ -130,7 +131,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     OssRoleArn: "acs:ram::xxx:role/xxx"
 
 dtm:
-  serverURL: 43.128.5.63:10007
+  serverURL: 127.0.0.1:10007
 
 rpcport: #rpc服务端口 默认即可
   openImUserPort: [ 10110 ]
@@ -210,7 +211,7 @@ push:
     masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
-    enable: true
+    enable: false
   getui:  #个推推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
@@ -218,8 +219,8 @@ push:
     intent: ""
     enable: false
   fcm:  #firebase cloud message 消息推送
-    serviceAccount: "openim-*-firebase-adminsdk-*-*.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
-    enable: false
+    serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    enable: true
 
 
 
@@ -300,6 +301,15 @@ callback:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续离线推送
+  callbackOnlinePush:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续离线推送
+  callbackSuperGroupOnlinePush:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续离线推送
+
 
 notification:
   groupCreated:

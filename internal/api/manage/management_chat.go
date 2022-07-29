@@ -29,10 +29,10 @@ import (
 var validate *validator.Validate
 
 func SetOptions(options map[string]bool, value bool) {
-	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, value)
 	utils.SetSwitchFromOptions(options, constant.IsHistory, value)
 	utils.SetSwitchFromOptions(options, constant.IsPersistent, value)
 	utils.SetSwitchFromOptions(options, constant.IsSenderSync, value)
+	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, value)
 }
 
 func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
@@ -59,10 +59,12 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 	if params.IsOnlineOnly {
 		SetOptions(options, false)
 	}
-	if params.ContentType == constant.CustomMsgOnlineOnly {
+	if params.NotOfflinePush {
+		utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
+	}
+	if params.ContentType == constant.CustomOnlineOnly {
 		SetOptions(options, false)
-	} else if params.ContentType == constant.CustomMsgNotTriggerConversation {
-		SetOptions(options, false)
+	} else if params.ContentType == constant.CustomNotTriggerConversation {
 		utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
 	}
 
@@ -146,9 +148,9 @@ func ManagementSendMsg(c *gin.Context) {
 	case constant.OANotification:
 		data = OANotificationElem{}
 		params.SessionType = constant.NotificationChatType
-	case constant.CustomMsgNotTriggerConversation:
+	case constant.CustomNotTriggerConversation:
 		data = CustomElem{}
-	case constant.CustomMsgOnlineOnly:
+	case constant.CustomOnlineOnly:
 		data = CustomElem{}
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
@@ -277,9 +279,9 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	case constant.OANotification:
 		data = OANotificationElem{}
 		params.SessionType = constant.NotificationChatType
-	case constant.CustomMsgNotTriggerConversation:
+	case constant.CustomNotTriggerConversation:
 		data = CustomElem{}
-	case constant.CustomMsgOnlineOnly:
+	case constant.CustomOnlineOnly:
 		data = CustomElem{}
 	//case constant.HasReadReceipt:
 	//case constant.Typing:
@@ -322,12 +324,11 @@ func ManagementBatchSendMsg(c *gin.Context) {
 		return
 	}
 	client := pbChat.NewMsgClient(etcdConn)
+	req := &api.ManagementSendMsgReq{
+		ManagementSendMsg: params.ManagementSendMsg,
+	}
+	pbData := newUserSendMsgReq(req)
 	for _, recvID := range params.RecvIDList {
-		req := &api.ManagementSendMsgReq{
-			ManagementSendMsg: params.ManagementSendMsg,
-			RecvID:            recvID,
-		}
-		pbData := newUserSendMsgReq(req)
 		pbData.MsgData.RecvID = recvID
 		log.Info(params.OperationID, "", "api ManagementSendMsg call start..., ", pbData.String())
 
@@ -344,10 +345,11 @@ func ManagementBatchSendMsg(c *gin.Context) {
 			msgSendFailedFlag = true
 			continue
 		}
-		resp.Data.ResultList = append(resp.Data.ResultList, server_api_params.UserSendMsgResp{
+		resp.Data.ResultList = append(resp.Data.ResultList, &api.SingleReturnResult{
 			ServerMsgID: rpcResp.ServerMsgID,
 			ClientMsgID: rpcResp.ClientMsgID,
 			SendTime:    rpcResp.SendTime,
+			RecvID:      recvID,
 		})
 	}
 	if msgSendFailedFlag {

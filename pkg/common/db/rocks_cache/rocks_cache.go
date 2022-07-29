@@ -1,6 +1,7 @@
 package rocksCache
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
@@ -12,18 +13,19 @@ import (
 )
 
 const (
-	userInfoCache            = "USER_INFO_CACHE:"
-	friendRelationCache      = "FRIEND_RELATION_CACHE:"
-	blackListCache           = "BLACK_LIST_CACHE:"
-	groupCache               = "GROUP_CACHE:"
-	groupInfoCache           = "GROUP_INFO_CACHE:"
-	groupOwnerIDCache        = "GROUP_OWNER_ID:"
-	joinedGroupListCache     = "JOINED_GROUP_LIST_CACHE:"
-	groupMemberInfoCache     = "GROUP_MEMBER_INFO_CACHE:"
-	groupAllMemberInfoCache  = "GROUP_ALL_MEMBER_INFO_CACHE:"
-	allFriendInfoCache       = "ALL_FRIEND_INFO_CACHE:"
-	allDepartmentCache       = "ALL_DEPARTMENT_CACHE:"
-	allDepartmentMemberCache = "ALL_DEPARTMENT_MEMBER_CACHE:"
+	userInfoCache             = "USER_INFO_CACHE:"
+	friendRelationCache       = "FRIEND_RELATION_CACHE:"
+	blackListCache            = "BLACK_LIST_CACHE:"
+	groupCache                = "GROUP_CACHE:"
+	groupInfoCache            = "GROUP_INFO_CACHE:"
+	groupOwnerIDCache         = "GROUP_OWNER_ID:"
+	joinedGroupListCache      = "JOINED_GROUP_LIST_CACHE:"
+	groupMemberInfoCache      = "GROUP_MEMBER_INFO_CACHE:"
+	groupAllMemberInfoCache   = "GROUP_ALL_MEMBER_INFO_CACHE:"
+	allFriendInfoCache        = "ALL_FRIEND_INFO_CACHE:"
+	allDepartmentCache        = "ALL_DEPARTMENT_CACHE:"
+	allDepartmentMemberCache  = "ALL_DEPARTMENT_MEMBER_CACHE:"
+	joinedSuperGroupListCache = "JOINED_SUPER_GROUP_LIST_CACHE:"
 )
 
 func init() {
@@ -41,13 +43,7 @@ func init() {
 				panic(err.Error())
 			}
 			n += len(keys)
-			//fmt.Printf("\n %s key found %d keys: %v, current cursor %d\n", key, n, keys, cursor)
-			//if len(keys) > 0 {
-			//	err = db.DB.RDB.Del(context.Background(), keys...).Err()
-			//	if err != nil {
-			//		panic(err.Error())
-			//	}
-			//}
+			// for each for redis cluster
 			for _, key := range keys {
 				if err = db.DB.RDB.Del(context.Background(), key).Err(); err != nil {
 					log.NewError("", fName, key, err.Error())
@@ -132,15 +128,28 @@ func DelJoinedGroupIDListFromCache(userID string) error {
 }
 
 func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
-	getGroupMemberIDList := func() (string, error) {
-		groupMemberIDList, err := imdb.GetGroupMemberIDListByGroupID(groupID)
+	f := func() (string, error) {
+		groupInfo, err := GetGroupInfoFromCache(groupID)
 		if err != nil {
-			return "", utils.Wrap(err, "")
+			return "", utils.Wrap(err, "GetGroupInfoFromCache failed")
+		}
+		var groupMemberIDList []string
+		if groupInfo.GroupType == constant.SuperGroup {
+			superGroup, err := db.DB.GetSuperGroup(groupID)
+			if err != nil {
+				return "", utils.Wrap(err, "")
+			}
+			groupMemberIDList = superGroup.MemberIDList
+		} else {
+			groupMemberIDList, err = imdb.GetGroupMemberIDListByGroupID(groupID)
+			if err != nil {
+				return "", utils.Wrap(err, "")
+			}
 		}
 		bytes, err := json.Marshal(groupMemberIDList)
 		return string(bytes), utils.Wrap(err, "")
 	}
-	groupIDListStr, err := db.DB.Rc.Fetch(groupCache+groupID, time.Second*30*60, getGroupMemberIDList)
+	groupIDListStr, err := db.DB.Rc.Fetch(groupCache+groupID, time.Second*30*60, f)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -149,8 +158,8 @@ func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 	return groupMemberIDList, utils.Wrap(err, "")
 }
 
-func DelGroupMemberIDListFromCache(userID string) error {
-	err := db.DB.Rc.TagAsDeleted(groupCache + userID)
+func DelGroupMemberIDListFromCache(groupID string) error {
+	err := db.DB.Rc.TagAsDeleted(groupCache + groupID)
 	return err
 }
 
@@ -306,4 +315,32 @@ func GetAllDepartmentMembersFromCache() ([]db.DepartmentMember, error) {
 
 func DelAllDepartmentMembersFromCache() error {
 	return db.DB.Rc.TagAsDeleted(allDepartmentMemberCache)
+}
+
+func GetJoinedSuperGroupListFromCache(userID string) ([]string, error) {
+	getJoinedSuperGroupIDList := func() (string, error) {
+		userToSuperGroup, err := db.DB.GetSuperGroupByUserID(userID)
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		bytes, err := json.Marshal(userToSuperGroup.GroupIDList)
+		return string(bytes), utils.Wrap(err, "")
+	}
+	joinedSuperGroupListStr, err := db.DB.Rc.Fetch(joinedSuperGroupListCache+userID, time.Second, getJoinedSuperGroupIDList)
+	var joinedSuperGroupList []string
+	err = json.Unmarshal([]byte(joinedSuperGroupListStr), &joinedSuperGroupList)
+	return joinedSuperGroupList, err
+}
+
+func DelJoinedSuperGroupIDListFromCache(userID string) error {
+	err := db.DB.Rc.TagAsDeleted(joinedSuperGroupListCache + userID)
+	return err
+}
+
+func GetSuperGroupMemberIDListFromCache(groupID string) ([]string, error) {
+	return GetGroupMemberIDListFromCache(groupID)
+}
+
+func DelSuperGroupMemberIDListFromCache(groupID string) error {
+	return DelGroupMemberIDListFromCache(groupID)
 }

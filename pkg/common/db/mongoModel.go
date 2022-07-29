@@ -908,8 +908,8 @@ func (d *DataBases) GetUserWorkMoments(opUserID, userID string, showNumber, page
 	result, err := c.Find(ctx, bson.D{ // 等价条件: select * from
 		{"user_id", userID},
 		{"$or", bson.A{
-			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {"permission_user_id_list", bson.D{{"$nin", bson.A{userID}}}}},
-			bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {"permission_user_id_list", bson.D{{"$in", bson.A{userID}}}}},
+			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {"permission_user_id_list", bson.D{{"$nin", bson.A{opUserID}}}}},
+			bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {"permission_user_id_list", bson.D{{"$in", bson.A{opUserID}}}}},
 			bson.D{{"permission", constant.WorkMomentPublic}},
 		}},
 	}, findOpts)
@@ -970,7 +970,7 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 	}
 	_, err = c.InsertOne(sCtx, superGroup)
 	if err != nil {
-		session.AbortTransaction(ctx)
+		_ = session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
 	}
 	var users []UserToSuperGroup
@@ -992,7 +992,7 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 	for _, userID := range initMemberIDList {
 		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 		if err != nil {
-			session.AbortTransaction(ctx)
+			_ = session.AbortTransaction(ctx)
 			return utils.Wrap(err, "transaction failed")
 		}
 
@@ -1022,7 +1022,7 @@ func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) err
 	}
 	_, err = c.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDList}}})
 	if err != nil {
-		session.AbortTransaction(ctx)
+		_ = session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
 	}
 	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
@@ -1039,11 +1039,11 @@ func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) err
 	for _, userID := range userIDList {
 		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 		if err != nil {
-			session.AbortTransaction(ctx)
+			_ = session.AbortTransaction(ctx)
 			return utils.Wrap(err, "transaction failed")
 		}
 	}
-	session.CommitTransaction(ctx)
+	_ = session.CommitTransaction(ctx)
 	return err
 }
 
@@ -1058,15 +1058,15 @@ func (d *DataBases) RemoverUserFromSuperGroup(groupID string, userIDList []strin
 	sCtx := mongo.NewSessionContext(ctx, session)
 	_, err = c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
 	if err != nil {
-		session.AbortTransaction(ctx)
+		_ = session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
 	}
 	err = d.RemoveGroupFromUser(ctx, sCtx, groupID, userIDList)
 	if err != nil {
-		session.AbortTransaction(ctx)
+		_ = session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
 	}
-	session.CommitTransaction(ctx)
+	_ = session.CommitTransaction(ctx)
 	return err
 }
 

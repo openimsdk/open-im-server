@@ -88,7 +88,7 @@ func (d *DataBases) GetUserMinSeq(uid string) (uint64, error) {
 	return uint64(utils.StringToInt(seq)), err
 }
 
-func (d *DataBases) SetGroupUserMinSeq(groupID, userID string, minSeq uint32) (err error) {
+func (d *DataBases) SetGroupUserMinSeq(groupID, userID string, minSeq uint64) (err error) {
 	key := groupUserMinSeq + "g:" + groupID + "u:" + userID
 	return d.RDB.Set(context.Background(), key, minSeq, 0).Err()
 }
@@ -219,6 +219,19 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, operationID))
 	}
 	_, err := pipe.Exec(ctx)
+	return err
+}
+func (d *DataBases) DeleteMessageFromCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
+	ctx := context.Background()
+	var keys []string
+	for _, msg := range msgList {
+		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
+		keys = append(keys, key)
+	}
+	err := d.RDB.Del(ctx, keys...).Err()
+	if err != nil {
+		log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", keys, uid, err.Error(), msgList)
+	}
 	return err
 }
 
