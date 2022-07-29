@@ -28,25 +28,25 @@ const (
 
 	///ContentType
 	//UserRelated
-	Text                            = 101
-	Picture                         = 102
-	Voice                           = 103
-	Video                           = 104
-	File                            = 105
-	AtText                          = 106
-	Merger                          = 107
-	Card                            = 108
-	Location                        = 109
-	Custom                          = 110
-	Revoke                          = 111
-	HasReadReceipt                  = 112
-	Typing                          = 113
-	Quote                           = 114
-	GroupHasReadReceipt             = 116
-	AdvancedText                    = 117
-	AdvancedRevoke                  = 118 //影响前者消息
-	CustomMsgNotTriggerConversation = 119
-	CustomMsgOnlineOnly             = 120
+	Text                         = 101
+	Picture                      = 102
+	Voice                        = 103
+	Video                        = 104
+	File                         = 105
+	AtText                       = 106
+	Merger                       = 107
+	Card                         = 108
+	Location                     = 109
+	Custom                       = 110
+	Revoke                       = 111
+	HasReadReceipt               = 112
+	Typing                       = 113
+	Quote                        = 114
+	GroupHasReadReceipt          = 116
+	AdvancedText                 = 117
+	AdvancedRevoke               = 118 //影响前者消息
+	CustomNotTriggerConversation = 119
+	CustomOnlineOnly             = 120
 
 	Common             = 200
 	GroupMsg           = 201

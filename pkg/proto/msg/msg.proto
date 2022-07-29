@@ -120,12 +120,22 @@ message GetSendMsgStatusResp{
   string errMsg = 2;
   int32 status = 3;
 }
-
+message DelSuperGroupMsgReq{
+  string opUserID = 1;
+  string userID = 2;
+  string groupID = 3;
+  string operationID = 4;
+}
+message DelSuperGroupMsgResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+}
 service msg {
   rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
   rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);
   rpc SendMsg(SendMsgReq) returns(SendMsgResp);
   rpc DelMsgList(server_api_params.DelMsgListReq) returns(server_api_params.DelMsgListResp);
+  rpc DelSuperGroupMsg(DelSuperGroupMsgReq) returns(DelSuperGroupMsgResp);
   rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
   rpc SetMsgMinSeq(SetMsgMinSeqReq) returns(SetMsgMinSeqResp);
   rpc SetSendMsgFailedFlag(SetSendMsgFailedFlagReq) returns(SetSendMsgFailedFlagResp);

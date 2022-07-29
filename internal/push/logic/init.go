@@ -44,7 +44,7 @@ func init() {
 	}
 
 	if config.Config.Push.Fcm.Enable {
-		offlinePusher = fcm.FcmClient
+		offlinePusher = fcm.NewFcm()
 	}
 }
 
