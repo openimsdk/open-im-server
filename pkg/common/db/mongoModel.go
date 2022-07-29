@@ -970,7 +970,7 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 	}
 	_, err = c.InsertOne(sCtx, superGroup)
 	if err != nil {
-		_ := session.AbortTransaction(ctx)
+		_ = session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
 	}
 	var users []UserToSuperGroup
@@ -992,7 +992,7 @@ func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, 
 	for _, userID := range initMemberIDList {
 		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 		if err != nil {
-			_ := session.AbortTransaction(ctx)
+			_ = session.AbortTransaction(ctx)
 			return utils.Wrap(err, "transaction failed")
 		}
 
@@ -1022,7 +1022,7 @@ func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) err
 	}
 	_, err = c.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDList}}})
 	if err != nil {
-		_ := session.AbortTransaction(ctx)
+		_ = session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
 	}
 	c = d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
@@ -1039,11 +1039,11 @@ func (d *DataBases) AddUserToSuperGroup(groupID string, userIDList []string) err
 	for _, userID := range userIDList {
 		_, err = c.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 		if err != nil {
-			_ := session.AbortTransaction(ctx)
+			_ = session.AbortTransaction(ctx)
 			return utils.Wrap(err, "transaction failed")
 		}
 	}
-	_ := session.CommitTransaction(ctx)
+	_ = session.CommitTransaction(ctx)
 	return err
 }
 
@@ -1058,15 +1058,15 @@ func (d *DataBases) RemoverUserFromSuperGroup(groupID string, userIDList []strin
 	sCtx := mongo.NewSessionContext(ctx, session)
 	_, err = c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
 	if err != nil {
-		_ := session.AbortTransaction(ctx)
+		_ = session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
 	}
 	err = d.RemoveGroupFromUser(ctx, sCtx, groupID, userIDList)
 	if err != nil {
-		_ := session.AbortTransaction(ctx)
+		_ = session.AbortTransaction(ctx)
 		return utils.Wrap(err, "transaction failed")
 	}
-	_ := session.CommitTransaction(ctx)
+	_ = session.CommitTransaction(ctx)
 	return err
 }
 
