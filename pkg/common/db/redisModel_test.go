@@ -126,6 +126,13 @@ func Test_SetFcmToken(t *testing.T) {
 	err := DB.SetFcmToken(uid, platformID, token, 0)
 	assert.Nil(t, err)
 }
+func Test_GetFcmToken(t *testing.T) {
+	uid := "test_uid"
+	platformID := 2
+	token, err := DB.GetFcmToken(uid, platformID)
+	assert.Nil(t, err)
+	fmt.Println("token is :", token)
+}
 
 //func Test_GetGroupMemberList(t *testing.T) {
 //	groupID := "3791742301"

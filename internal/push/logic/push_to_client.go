@@ -169,7 +169,8 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			return
 		}
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "callback userIDList Resp", pushToUserIDList)
-	} else {
+	}
+	if len(pushToUserIDList) == 0 {
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
 		if etcdConn == nil {
