@@ -8,10 +8,13 @@ import (
 	"context"
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
+	"fmt"
 	"google.golang.org/api/option"
 	"path/filepath"
 	"strconv"
 )
+
+const SinglePushCountLimit = 400
 
 type Fcm struct {
 	FcmMsgCli *messaging.Client
@@ -60,21 +63,21 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 	}
 	tokenlen := len(Tokens)
 	// 500组为一个推送，我们用400好了
-	limit := 400
-	pages := int((tokenlen-1)/limit + 1)
+	pages := int((tokenlen-1)/SinglePushCountLimit + 1)
 	Success := 0
 	Fail := 0
+	fmt.Println(operationID, "fcm args", tokenlen, pages)
 	for i := 0; i < pages; i++ {
 		Msg := new(messaging.MulticastMessage)
 		Msg.Notification = &messaging.Notification{}
 		Msg.Notification.Body = detailContent
 		Msg.Notification.Title = alert
 		ctx := context.Background()
-		max := (i+1)*limit - 1
+		max := (i+1)*SinglePushCountLimit - 1
 		if max >= tokenlen {
 			max = tokenlen - 1
 		}
-		Msg.Tokens = Tokens[i*limit : max]
+		Msg.Tokens = Tokens[i*SinglePushCountLimit : max]
 		//SendMulticast sends the given multicast message to all the FCM registration tokens specified.
 		//The tokens array in MulticastMessage may contain up to 500 tokens.
 		//SendMulticast uses the `SendAll()` function to send the given message to all the target recipients.
