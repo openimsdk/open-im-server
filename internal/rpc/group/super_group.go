@@ -1,7 +1,6 @@
 package group
 
 import (
-	"Open_IM/pkg/common/constant"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	cp "Open_IM/pkg/common/utils"
@@ -15,7 +14,6 @@ import (
 func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.GetJoinedSuperGroupListReq) (*pbGroup.GetJoinedSuperGroupListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbGroup.GetJoinedSuperGroupListResp{CommonResp: &pbGroup.CommonResp{}}
-	//userToSuperGroup, err := db.DB.GetSuperGroupByUserID(req.UserID)
 	groupIDList, err := rocksCache.GetJoinedSuperGroupListFromCache(req.UserID)
 	if err != nil {
 		if err == redis.Nil {
@@ -23,8 +21,8 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 			return resp, nil
 		}
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroupByUserID failed ", err.Error(), req.UserID)
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		//resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		//resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 		return resp, nil
 	}
 	for _, groupID := range groupIDList {

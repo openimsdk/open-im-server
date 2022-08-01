@@ -119,6 +119,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     accessKeyID: user12345
     secretAccessKey: key12345
     storageTime: 50 #文件在minio中保存的时间
+    isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
   ali: # ali oss
     regionID: "oss-cn-beijing"
     accessKeyID: ""
