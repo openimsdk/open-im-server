@@ -57,6 +57,9 @@ func MinioInit() {
 			return
 		}
 	}
+	policy, err := MinioClient.GetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket)
+	log.NewInfo("", utils.GetSelfFuncName(), policy)
+
 	// 自动化桶public的代码
 	//err = minioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policy.BucketPolicyReadWrite)
 	//if err != nil {
