@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -128,34 +129,41 @@ func messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string
 	case constant.GroupChatType:
 		fallthrough
 	case constant.SuperGroupChatType:
-		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: data.OperationID, GroupID: data.MsgData.GroupID}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
-		if etcdConn == nil {
-			errMsg := data.OperationID + "getcdv3.GetConn == nil"
-			log.NewError(data.OperationID, errMsg)
-			//return returnMsg(&replay, pb, 201, errMsg, "", 0)
-			return false, 201, errMsg, nil
-		}
-		client := pbCache.NewCacheClient(etcdConn)
-		cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+		groupInfo, err := rocksCache.GetGroupInfoFromCache(data.MsgData.GroupID)
 		if err != nil {
-			log.NewError(data.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
-			//return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache failed", "", 0)
 			return false, 201, err.Error(), nil
 		}
-		if cacheResp.CommonResp.ErrCode != 0 {
-			log.NewError(data.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
-			//return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache logic failed", "", 0)
-			return false, cacheResp.CommonResp.ErrCode, cacheResp.CommonResp.ErrMsg, nil
-		}
-		if !token_verify.IsManagerUserID(data.MsgData.SendID) {
-			if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
-				//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
-				return false, 202, "you are not in group", nil
+		if groupInfo.GroupType == constant.SuperGroup {
+			return true, 0, "", nil
+		} else {
+			getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: data.OperationID, GroupID: data.MsgData.GroupID}
+			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+			if etcdConn == nil {
+				errMsg := data.OperationID + "getcdv3.GetConn == nil"
+				log.NewError(data.OperationID, errMsg)
+				//return returnMsg(&replay, pb, 201, errMsg, "", 0)
+				return false, 201, errMsg, nil
 			}
+			client := pbCache.NewCacheClient(etcdConn)
+			cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+			if err != nil {
+				log.NewError(data.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+				//return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache failed", "", 0)
+				return false, 201, err.Error(), nil
+			}
+			if cacheResp.CommonResp.ErrCode != 0 {
+				log.NewError(data.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
+				//return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache logic failed", "", 0)
+				return false, cacheResp.CommonResp.ErrCode, cacheResp.CommonResp.ErrMsg, nil
+			}
+			if !token_verify.IsManagerUserID(data.MsgData.SendID) {
+				if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
+					//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
+					return false, 202, "you are not in group", nil
+				}
+			}
+			return true, 0, "", cacheResp.UserIDList
 		}
-		return true, 0, "", cacheResp.UserIDList
-
 	default:
 		return true, 0, "", nil
 	}
