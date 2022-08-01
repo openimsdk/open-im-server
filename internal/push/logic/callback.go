@@ -92,6 +92,7 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 }
 
 func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg *commonPb.MsgData, pushToUserList *[]string) cbApi.CommonCallbackResp {
+	log.Debug(operationID, utils.GetSelfFuncName(), groupID, msg.String(), pushToUserList)
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
 		return callbackResp
