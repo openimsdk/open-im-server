@@ -156,7 +156,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingelMsgToUserResultList
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
-	log.Debug(pushMsg.OperationID, "Get super group msg from msg_transfer And push msg", pushMsg.String())
+	log.Debug(pushMsg.OperationID, "Get super group msg from msg_transfer And push msg", pushMsg.String(), config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable)
 	var pushToUserIDList []string
 	if config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
 		callbackResp := callbackBeforeSuperGroupOnlinePush(pushMsg.OperationID, pushMsg.PushToUserID, pushMsg.MsgData, &pushToUserIDList)
