@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
+	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	url2 "net/url"
@@ -84,17 +85,17 @@ func MinioInit() {
 	log.NewInfo("", utils.GetSelfFuncName(), policy)
 
 	// 自动化桶public的代码
-	//policyJsonString := fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],
-	//	"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, config.Config.Credential.Minio.Bucket)
-	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policyJsonString)
-	//if err != nil {
-	//	log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
-	//}
-	//policyJsonString = fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],
-	//	"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, config.Config.Credential.Minio.AppBucket)
-	//err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policyJsonString)
-	//if err != nil {
-	//	log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
-	//}
-	//log.NewInfo(operationID, utils.GetSelfFuncName(), "minio create and set policy success")
+	policyJsonString := fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],
+		"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, config.Config.Credential.Minio.Bucket)
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket, policyJsonString)
+	if err != nil {
+		log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+	}
+	policyJsonString = fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],
+		"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, config.Config.Credential.Minio.AppBucket)
+	err = MinioClient.SetBucketPolicy(context.Background(), config.Config.Credential.Minio.AppBucket, policyJsonString)
+	if err != nil {
+		log.NewInfo("", utils.GetSelfFuncName(), "SetBucketPolicy failed please set in web", err.Error())
+	}
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio create and set policy success")
 }
