@@ -945,14 +945,14 @@ func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userI
 }
 
 type SuperGroup struct {
-	GroupID string `bson:"group_id"`
+	GroupID string `bson:"group_id" json:"groupID"`
 	//MemberNumCount int      `bson:"member_num_count"`
-	MemberIDList []string `bson:"member_id_list"`
+	MemberIDList []string `bson:"member_id_list" json:"memberIDList"`
 }
 
 type UserToSuperGroup struct {
-	UserID      string   `bson:"user_id"`
-	GroupIDList []string `bson:"group_id_list"`
+	UserID      string   `bson:"user_id" json:"userID"`
+	GroupIDList []string `bson:"group_id_list" json:"groupIDList"`
 }
 
 func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, memberNumCount int) error {
