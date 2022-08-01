@@ -80,6 +80,9 @@ func MinioInit() {
 			return
 		}
 	}
+	policy, err := MinioClient.GetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket)
+	log.NewInfo("", utils.GetSelfFuncName(), policy)
+
 	// 自动化桶public的代码
 	//policyJsonString := fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],
 	//	"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, config.Config.Credential.Minio.Bucket)
