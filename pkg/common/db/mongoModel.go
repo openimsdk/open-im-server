@@ -1074,7 +1074,8 @@ func (d *DataBases) GetSuperGroupByUserID(userID string) (UserToSuperGroup, erro
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
 	var user UserToSuperGroup
-	return user, c.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+	_ = c.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+	return user, nil
 }
 
 func (d *DataBases) DeleteSuperGroup(groupID string) error {

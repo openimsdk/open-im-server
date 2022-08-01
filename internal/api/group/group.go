@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	"google.golang.org/grpc"
 
 	"github.com/gin-gonic/gin"
 
@@ -227,8 +228,9 @@ func GetGroupAllMemberList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+	maxSizeOption := grpc.MaxCallRecvMsgSize(1024 * 1024 * constant.GroupRPCRecvSize)
 	client := rpc.NewGroupClient(etcdConn)
-	RpcResp, err := client.GetGroupAllMember(context.Background(), req)
+	RpcResp, err := client.GetGroupAllMember(context.Background(), req, maxSizeOption)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupAllMember failed err", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})

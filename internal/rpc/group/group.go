@@ -61,8 +61,8 @@ func (s *groupServer) Run() {
 	log.NewInfo("", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
-	recvSize := 1024 * 1024 * 30
-	sendSize := 1024 * 1024 * 30
+	recvSize := 1024 * 1024 * constant.GroupRPCRecvSize
+	sendSize := 1024 * 1024 * constant.GroupRPCSendSize
 	var options = []grpc.ServerOption{
 		grpc.MaxRecvMsgSize(recvSize),
 		grpc.MaxSendMsgSize(sendSize),
