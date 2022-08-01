@@ -31,7 +31,8 @@ func MinioInit() {
 		return
 	}
 	opts := &minio.Options{
-		Creds: credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+		Region: config.Config.Credential.Minio.Location,
 	}
 	if minioUrl.Scheme == "http" {
 		opts.Secure = false
