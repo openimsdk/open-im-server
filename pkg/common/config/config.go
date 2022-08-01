@@ -512,8 +512,7 @@ type PDefaultTips struct {
 
 func init() {
 	cfgName := os.Getenv("CONFIG_NAME")
-	fmt.Println("GET IM CONFIG PATH :", Root, cfgName)
-
+	fmt.Println("GET IM DEFAULT CONFIG PATH :", Root, "ENV PATH:", cfgName, b, filepath.Dir(b))
 	if len(cfgName) != 0 {
 		Root = cfgName
 	}
