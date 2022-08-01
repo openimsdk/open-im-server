@@ -31,8 +31,8 @@ func MinioInit() {
 		return
 	}
 	opts := &minio.Options{
-		Creds:  credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
-		Region: config.Config.Credential.Minio.Location,
+		Creds: credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+		//Region: config.Config.Credential.Minio.Location,
 	}
 	if minioUrl.Scheme == "http" {
 		opts.Secure = false
@@ -48,7 +48,7 @@ func MinioInit() {
 	}
 	opt := minio.MakeBucketOptions{
 		Region:        config.Config.Credential.Minio.Location,
-		ObjectLocking: true,
+		ObjectLocking: false,
 	}
 	err = MinioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.Bucket, opt)
 	if err != nil {
