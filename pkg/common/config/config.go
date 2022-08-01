@@ -512,11 +512,10 @@ type PDefaultTips struct {
 
 func init() {
 	cfgName := os.Getenv("CONFIG_NAME")
-	fmt.Println("GET IM DEFAULT CONFIG PATH :", Root, "ENV PATH:", cfgName, b, filepath.Dir(b))
 	if len(cfgName) != 0 {
 		Root = cfgName
 	}
-
+	fmt.Println("GET IM DEFAULT CONFIG PATH :", Root, "ENV PATH:", cfgName)
 	bytes, err := ioutil.ReadFile(filepath.Join(Root, "config", "config.yaml"))
 	if err != nil {
 		panic(err.Error())
