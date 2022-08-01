@@ -47,8 +47,10 @@ func MinioInit() {
 		return
 	}
 	opt := minio.MakeBucketOptions{
-		Region:        config.Config.Credential.Minio.Location,
-		ObjectLocking: false,
+		Region: config.Config.Credential.Minio.Location,
+	}
+	if config.Config.Credential.Minio.IsDistributedMod == true {
+		opt.ObjectLocking = true
 	}
 	err = MinioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.Bucket, opt)
 	if err != nil {

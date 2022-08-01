@@ -72,6 +72,7 @@ type config struct {
 			EndpointInner       string `yaml:"endpointInner"`
 			EndpointInnerEnable bool   `yaml:"endpointInnerEnable"`
 			StorageTime         int    `yaml:"storageTime"`
+			IsDistributedMod    bool   `yaml:"isDistributedMod"`
 		} `yaml:"minio"`
 	}
 
