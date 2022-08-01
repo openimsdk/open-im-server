@@ -61,7 +61,13 @@ func (s *groupServer) Run() {
 	log.NewInfo("", "listen network success, ", address, listener)
 	defer listener.Close()
 	//grpc server
-	srv := grpc.NewServer()
+	recvSize := 1024 * 1024 * 30
+	sendSize := 1024 * 1024 * 30
+	var options = []grpc.ServerOption{
+		grpc.MaxRecvMsgSize(recvSize),
+		grpc.MaxSendMsgSize(sendSize),
+	}
+	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbGroup.RegisterGroupServer(srv, s)
