@@ -510,7 +510,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 			resp.MemberList = append(resp.MemberList, &node)
 		}
 	}
-	log.NewInfo(req.OperationID, "GetGroupAllMember rpc return ", resp.String())
+	log.NewInfo(req.OperationID, "GetGroupAllMember rpc return ", len(resp.MemberList))
 	return &resp, nil
 }
 
