@@ -217,23 +217,30 @@ func GetGroupMembersInfoFromCache(count, offset int32, groupID string) ([]*db.Gr
 		return nil, nil
 	}
 	var groupMemberList []*db.GroupMember
+	var start, stop int32
+	start = offset
+	stop = offset + count
+	l := int32(len(groupMemberIDList))
+	if start > stop {
+		return nil, nil
+	}
+	if start >= l {
+		return nil, nil
+	}
 	if count != 0 {
-		l := int32(len(groupMemberIDList))
-		var start, stop int32
-		start = offset
-		stop = offset + count
-		if start > stop {
-			return nil, nil
-		}
-		if start >= l {
-			return nil, nil
-		}
 		if stop >= l {
 			stop = l
 		}
 		groupMemberIDList = groupMemberIDList[start:stop]
+	} else {
+		if l < 1000 {
+			stop = l
+		} else {
+			stop = 1000
+		}
+		groupMemberIDList = groupMemberIDList[start:stop]
 	}
-	log.NewDebug("", utils.GetSelfFuncName(), "ID list: ", groupMemberIDList)
+	//log.NewDebug("", utils.GetSelfFuncName(), "ID list: ", groupMemberIDList)
 	for _, userID := range groupMemberIDList {
 		groupMembers, err := GetGroupMemberInfoFromCache(groupID, userID)
 		if err != nil {
