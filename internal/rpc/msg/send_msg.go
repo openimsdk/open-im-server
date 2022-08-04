@@ -70,14 +70,14 @@ func isMessageHasReadEnabled(pb *pbChat.SendMsgReq) (bool, int32, string) {
 }
 
 func messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string) {
+	if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
+		return true, 0, "", nil
+	}
+	if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+		return true, 0, "", nil
+	}
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
-		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
-			return true, 0, "", nil
-		}
-		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-			return true, 0, "", nil
-		}
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
