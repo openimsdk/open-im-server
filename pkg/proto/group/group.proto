@@ -204,6 +204,8 @@ message GetGroupAllMemberReq {
   string GroupID = 1;
   string OpUserID = 2; //No verification permission
   string OperationID = 3;
+  int32 Offset = 4;
+  int32 Count = 5;
 }
 message GetGroupAllMemberResp {
   int32   ErrCode = 1;

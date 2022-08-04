@@ -21,7 +21,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/golang/protobuf/proto"
-	"google.golang.org/grpc"
 	"strings"
 )
 
@@ -37,16 +36,13 @@ type AtContent struct {
 	IsAtSelf   bool     `json:"isAtSelf"`
 }
 
-var grpcCons []*grpc.ClientConn
+//var grpcCons []*grpc.ClientConn
 
 func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingelMsgToUserResultList
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
 	log.Debug(pushMsg.OperationID, "Get msg from msg_transfer And push msg", pushMsg.String())
-	if len(grpcCons) == 0 {
-		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
-		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
-	}
+	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 
 	var UIDList = []string{pushMsg.PushToUserID}
 	callbackResp := callbackOnlinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData)
@@ -191,13 +187,10 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		pushToUserIDList = cacheResp.UserIDList
 	}
 
-	if len(grpcCons) == 0 {
-		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
-		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
-	}
+	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 
 	//Online push message
-	log.Debug("test", pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
+	log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
 	for _, v := range grpcCons {
 		msgClient := pbRelay.NewRelayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: pushToUserIDList})
