@@ -262,6 +262,8 @@ message MsgData {
   OfflinePushInfo offlinePushInfo = 19;
   repeated string atUserIDList = 20;
   bytes msgDataList = 21;
+  string attachedInfo = 22;
+  string  ex = 23;
 
 }
 message OfflinePushInfo{

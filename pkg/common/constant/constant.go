@@ -287,6 +287,11 @@ const (
 	Directly                            = 2 //直接进群
 )
 
+const (
+	GroupRPCRecvSize = 30
+	GroupRPCSendSize = 30
+)
+
 const FriendAcceptTip = "You have successfully become friends, so start chatting"
 
 func GroupIsBanChat(status int32) bool {
