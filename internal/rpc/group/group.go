@@ -721,7 +721,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	resp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 
 	for _, userID := range req.MemberList {
-		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, userID, "")
+		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, userID)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, userID, err.Error())
 			continue
