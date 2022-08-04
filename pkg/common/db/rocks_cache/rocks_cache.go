@@ -214,17 +214,18 @@ func DelGroupMemberInfoFromCache(groupID, userID string) error {
 func GetGroupMembersInfoFromCache(count, offset int32, groupID string) ([]*db.GroupMember, error) {
 	var cursor uint64
 	var err error
-	var keys []string
+	var keys, currentKeys []string
 	key := groupMemberInfoCache + groupID + "-"
 	if count != 0 {
 		keys, cursor, err = db.DB.RDB.Scan(context.Background(), uint64(offset), key, int64(count)).Result()
 		if err != nil {
 			return nil, err
 		}
+		keys = append(keys, currentKeys...)
 	} else {
 		for {
 			var currentKeys []string
-			currentKeys, cursor, err = db.DB.RDB.Scan(context.Background(), cursor, key, 3000).Result()
+			currentKeys, cursor, err = db.DB.RDB.Scan(context.Background(), cursor, key, int64(count)).Result()
 			if err != nil {
 				return nil, err
 			}
