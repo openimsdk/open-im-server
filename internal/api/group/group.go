@@ -241,6 +241,50 @@ func GetGroupAllMemberList(c *gin.Context) {
 	c.JSON(http.StatusOK, memberListResp)
 }
 
+//get_group_all_member_list_by_split
+func GetGroupAllMemberListBySplit(c *gin.Context) {
+	params := api.GetGroupAllMemberListBySplitReq{}
+	if err := c.BindJSON(&params); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	req := &rpc.GetGroupAllMemberReq{}
+	utils.CopyStructFields(req, &params)
+
+	var ok bool
+	var errInfo string
+	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
+	log.NewInfo(req.OperationID, "GetGroupAllMember args ", req.String())
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	client := rpc.NewGroupClient(etcdConn)
+	RpcResp, err := client.GetGroupAllMember(context.Background(), req)
+	if err != nil {
+		log.NewError(req.OperationID, "GetGroupAllMember failed err", err.Error(), req.String())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+
+	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
+	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
+	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
+	c.JSON(http.StatusOK, memberListResp)
+}
+
 // @Summary 获取用户加入群列表
 // @Description 获取用户加入群列表
 // @Tags 群组相关
