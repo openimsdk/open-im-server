@@ -5,22 +5,26 @@ package constant
 
 const (
 	//Platform ID
-	IOSPlatformID     = 1
-	AndroidPlatformID = 2
-	WindowsPlatformID = 3
-	OSXPlatformID     = 4
-	WebPlatformID     = 5
-	MiniWebPlatformID = 6
-	LinuxPlatformID   = 7
+	IOSPlatformID        = 1
+	AndroidPlatformID    = 2
+	WindowsPlatformID    = 3
+	OSXPlatformID        = 4
+	WebPlatformID        = 5
+	MiniWebPlatformID    = 6
+	LinuxPlatformID      = 7
+	AndroidPadPlatformID = 8
+	IPadPlatformID       = 9
 
 	//Platform string match to Platform ID
-	IOSPlatformStr     = "IOS"
-	AndroidPlatformStr = "Android"
-	WindowsPlatformStr = "Windows"
-	OSXPlatformStr     = "OSX"
-	WebPlatformStr     = "Web"
-	MiniWebPlatformStr = "MiniWeb"
-	LinuxPlatformStr   = "Linux"
+	IOSPlatformStr        = "IOS"
+	AndroidPlatformStr    = "Android"
+	WindowsPlatformStr    = "Windows"
+	OSXPlatformStr        = "OSX"
+	WebPlatformStr        = "Web"
+	MiniWebPlatformStr    = "MiniWeb"
+	LinuxPlatformStr      = "Linux"
+	AndroidPadPlatformStr = "APad"
+	IPadPlatformStr       = "IPad"
 
 	//terminal types
 	TerminalPC     = "PC"
@@ -28,22 +32,26 @@ const (
 )
 
 var PlatformID2Name = map[int]string{
-	IOSPlatformID:     IOSPlatformStr,
-	AndroidPlatformID: AndroidPlatformStr,
-	WindowsPlatformID: WindowsPlatformStr,
-	OSXPlatformID:     OSXPlatformStr,
-	WebPlatformID:     WebPlatformStr,
-	MiniWebPlatformID: MiniWebPlatformStr,
-	LinuxPlatformID:   LinuxPlatformStr,
+	IOSPlatformID:        IOSPlatformStr,
+	AndroidPlatformID:    AndroidPlatformStr,
+	WindowsPlatformID:    WindowsPlatformStr,
+	OSXPlatformID:        OSXPlatformStr,
+	WebPlatformID:        WebPlatformStr,
+	MiniWebPlatformID:    MiniWebPlatformStr,
+	LinuxPlatformID:      LinuxPlatformStr,
+	AndroidPadPlatformID: AndroidPadPlatformStr,
+	IPadPlatformID:       IPadPlatformStr,
 }
 var PlatformName2ID = map[string]int{
-	IOSPlatformStr:     IOSPlatformID,
-	AndroidPlatformStr: AndroidPlatformID,
-	WindowsPlatformStr: WindowsPlatformID,
-	OSXPlatformStr:     OSXPlatformID,
-	WebPlatformStr:     WebPlatformID,
-	MiniWebPlatformStr: MiniWebPlatformID,
-	LinuxPlatformStr:   LinuxPlatformID,
+	IOSPlatformStr:        IOSPlatformID,
+	AndroidPlatformStr:    AndroidPlatformID,
+	WindowsPlatformStr:    WindowsPlatformID,
+	OSXPlatformStr:        OSXPlatformID,
+	WebPlatformStr:        WebPlatformID,
+	MiniWebPlatformStr:    MiniWebPlatformID,
+	LinuxPlatformStr:      LinuxPlatformID,
+	AndroidPadPlatformStr: AndroidPadPlatformID,
+	IPadPlatformStr:       IPadPlatformID,
 }
 var Platform2class = map[string]string{
 	IOSPlatformStr:     TerminalMobile,

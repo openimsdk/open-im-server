@@ -230,7 +230,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 					log.NewError(operationID, "conn close err", err.Error(), uid, platformID)
 				}
 			} else {
-				log.NewWarn(operationID, "abnormal uid-conn  ", uid, platformID, oldConnMap[platformID])
+				log.NewWarn(operationID, "normal uid-conn  ", uid, platformID, oldConnMap[platformID])
 			}
 
 		} else {
