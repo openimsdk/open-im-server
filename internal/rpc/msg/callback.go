@@ -2,6 +2,7 @@ package msg
 
 import (
 	cbApi "Open_IM/pkg/call_back_struct"
+	"Open_IM/pkg/common/callback"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
@@ -12,7 +13,7 @@ import (
 )
 
 func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq {
-	return cbApi.CommonCallbackReq{
+	req := cbApi.CommonCallbackReq{
 		SendID:           msg.MsgData.SendID,
 		ServerMsgID:      msg.MsgData.ServerMsgID,
 		ClientMsgID:      msg.MsgData.ClientMsgID,
@@ -24,10 +25,11 @@ func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq
 		ContentType:      msg.MsgData.ContentType,
 		Status:           msg.MsgData.Status,
 		CreateTime:       msg.MsgData.CreateTime,
-		Content:          string(msg.MsgData.Content),
 		AtUserIDList:     msg.MsgData.AtUserIDList,
 		SenderFaceURL:    msg.MsgData.SenderFaceURL,
+		Content:          callback.GetContent(msg.MsgData),
 	}
+	return req
 }
 
 func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {

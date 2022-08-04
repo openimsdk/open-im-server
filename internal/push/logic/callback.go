@@ -2,6 +2,7 @@ package logic
 
 import (
 	cbApi "Open_IM/pkg/call_back_struct"
+	"Open_IM/pkg/common/callback"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
@@ -32,7 +33,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 		ContentType:     msg.ContentType,
 		SessionType:     msg.SessionType,
 		AtUserIDList:    msg.AtUserIDList,
-		Content:         string(msg.Content),
+		Content:         callback.GetContent(msg),
 	}
 	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackOfflinePush.CallbackTimeOut); err != nil {
@@ -74,7 +75,7 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 		ContentType:     msg.ContentType,
 		SessionType:     msg.SessionType,
 		AtUserIDList:    msg.AtUserIDList,
-		Content:         string(msg.Content),
+		Content:         callback.GetContent(msg),
 	}
 	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackOnlinePush.CallbackTimeOut); err != nil {
@@ -110,7 +111,7 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 		ContentType:     msg.ContentType,
 		SessionType:     msg.SessionType,
 		AtUserIDList:    msg.AtUserIDList,
-		Content:         string(msg.Content),
+		Content:         callback.GetContent(msg),
 	}
 	resp := &cbApi.CallbackBeforeSuperGroupOnlinePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.CallbackTimeOut); err != nil {
