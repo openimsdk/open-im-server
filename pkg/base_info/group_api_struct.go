@@ -73,6 +73,8 @@ type GetGroupMemberListResp struct {
 type GetGroupAllMemberReq struct {
 	GroupID     string `json:"groupID" binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
+	Offset      int    `json:"offset"`
+	Count       int    `json:"count"`
 }
 type GetGroupAllMemberResp struct {
 	CommResp

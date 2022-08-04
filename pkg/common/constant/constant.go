@@ -225,6 +225,13 @@ const (
 	WorkMomentLikeNotification    = 1
 	WorkMomentAtUserNotification  = 2
 )
+
+const (
+	// diffusionType
+	WriteDiffusion = 0
+	ReadDiffusion  = 1
+)
+
 const (
 	AtAllString       = "AtAllTag"
 	AtNormal          = 0

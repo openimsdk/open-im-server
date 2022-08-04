@@ -186,7 +186,7 @@ func DelUserInfoFromCache(userID string) error {
 	return db.DB.Rc.TagAsDeleted(userInfoCache + userID)
 }
 
-func GetGroupMemberInfoFromCache(groupID, userID string) (*db.GroupMember, error) {
+func GetGroupMemberInfoFromCache(groupID, userID, fullKey string) (*db.GroupMember, error) {
 	getGroupMemberInfo := func() (string, error) {
 		groupMemberInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
 		if err != nil {
@@ -195,7 +195,10 @@ func GetGroupMemberInfoFromCache(groupID, userID string) (*db.GroupMember, error
 		bytes, err := json.Marshal(groupMemberInfo)
 		return string(bytes), utils.Wrap(err, "")
 	}
-	groupMemberInfoStr, err := db.DB.Rc.Fetch(groupMemberInfoCache+groupID+"-"+userID, time.Second*30*60, getGroupMemberInfo)
+	if fullKey == "" {
+		fullKey = groupMemberInfoCache + groupID + "-" + userID
+	}
+	groupMemberInfoStr, err := db.DB.Rc.Fetch(fullKey, time.Second*30*60, getGroupMemberInfo)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -206,6 +209,42 @@ func GetGroupMemberInfoFromCache(groupID, userID string) (*db.GroupMember, error
 
 func DelGroupMemberInfoFromCache(groupID, userID string) error {
 	return db.DB.Rc.TagAsDeleted(groupMemberInfoCache + groupID + "-" + userID)
+}
+
+func GetGroupMembersInfoFromCache(count, offset int32, groupID string) ([]*db.GroupMember, error) {
+	var cursor uint64
+	var err error
+	var keys []string
+	key := groupMemberInfoCache + groupID + "-"
+	if count != 0 {
+		keys, cursor, err = db.DB.RDB.Scan(context.Background(), uint64(offset), key, int64(count)).Result()
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		for {
+			var currentKeys []string
+			currentKeys, cursor, err = db.DB.RDB.Scan(context.Background(), cursor, key, 3000).Result()
+			if err != nil {
+				return nil, err
+			}
+			keys = append(keys, currentKeys...)
+			if cursor == 0 {
+				break
+			}
+		}
+	}
+
+	var groupMemberList []*db.GroupMember
+	for _, key := range keys {
+		v, err := GetGroupMemberInfoFromCache("", "", key)
+		if err != nil {
+			log.NewError("", utils.GetSelfFuncName(), key, err.Error())
+			continue
+		}
+		groupMemberList = append(groupMemberList, v)
+	}
+	return groupMemberList, nil
 }
 
 func GetAllGroupMembersInfoFromCache(groupID string) ([]*db.GroupMember, error) {
