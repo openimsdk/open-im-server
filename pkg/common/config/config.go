@@ -488,8 +488,12 @@ type config struct {
 			SmtpAddr                string `yaml:"smtpAddr"`
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
-		TestDepartMentID string `yaml:"testDepartMentID"`
-		ImAPIURL         string `yaml:"imAPIURL"`
+		TestDepartMentID     string   `yaml:"testDepartMentID"`
+		ImAPIURL             string   `yaml:"imAPIURL"`
+		OnboardProcess       bool     `yaml:"onboardProcess"`
+		JoinDepartmentIDList []string `yaml:"joinDepartmentIDList"`
+		JoinDepartmentGroups bool     `yaml:"joinDepartmentGroups"`
+		OaNotification       bool     `yaml:"oaNotification"`
 	}
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
