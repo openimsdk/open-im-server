@@ -34,6 +34,10 @@ type groupServer struct {
 	etcdAddr        []string
 }
 
+func (s *groupServer) GetGroupAbstractInfo(c context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
+	panic("implement me")
+}
+
 func NewGroupServer(port int) *groupServer {
 	log.NewPrivateLog(constant.LogFileName)
 	return &groupServer{

@@ -202,6 +202,7 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 	}
 	return seqMsg, failedSeqList, errResult
 }
+
 func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	ctx := context.Background()
 	pipe := d.RDB.Pipeline()
