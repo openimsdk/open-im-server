@@ -50,23 +50,38 @@ func onboardingProcess(operationID, userID, userName, faceURL, phoneNumber, emai
 	if err := createOrganizationUser(operationID, userID, userName, phoneNumber, email); err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "createOrganizationUser failed", err.Error())
 	}
-	departmentID, err := imdb.GetRandomDepartmentID()
+	var joinDepartmentIDList []string
+	if len(config.Config.Demo.JoinDepartmentIDList) == 0 {
+		departmentID, err := imdb.GetRandomDepartmentID()
+		if err != nil {
+			log.NewError(utils.GetSelfFuncName(), "GetRandomDepartmentID failed", err.Error())
+			return
+		}
+		joinDepartmentIDList = []string{departmentID}
+	} else {
+		joinDepartmentIDList = config.Config.Demo.JoinDepartmentIDList
+	}
 
-	if err := joinTestDepartment(operationID, userID, departmentID); err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
+	for _, departmentID := range joinDepartmentIDList {
+		if err := joinTestDepartment(operationID, userID, departmentID); err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
+		}
 	}
-	log.NewInfo(operationID, utils.GetSelfFuncName(), "random departmentID", departmentID)
-	if err != nil {
-		log.NewError(utils.GetSelfFuncName(), "GetRandomDepartmentID failed", err.Error())
-		return
+
+	if config.Config.Demo.JoinDepartmentGroups {
+		for _, departmentID := range joinDepartmentIDList {
+			groupIDList, err := GetDepartmentGroupIDList(operationID, departmentID)
+			if err != nil {
+				log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
+			}
+			joinGroups(operationID, userID, userName, faceURL, groupIDList)
+			log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
+		}
 	}
-	groupIDList, err := GetDepartmentGroupIDList(operationID, departmentID)
-	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
+
+	if config.Config.Demo.OaNotification {
+		oaNotification(operationID, userID)
 	}
-	joinGroups(operationID, userID, userName, faceURL, groupIDList)
-	log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
-	oaNotification(operationID, userID)
 }
 
 func createOrganizationUser(operationID, userID, userName, phoneNumber, email string) error {

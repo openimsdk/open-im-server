@@ -107,7 +107,7 @@ func SetPassword(c *gin.Context) {
 	}
 	log.Info(params.OperationID, "end setPassword", account, params.Password)
 	// demo onboarding
-	if params.UserID == "" {
+	if params.UserID == "" && config.Config.Demo.OnboardProcess {
 		select {
 		case Ch <- OnboardingProcessReq{
 			OperationID: params.OperationID,
