@@ -82,7 +82,7 @@ func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (
 }
 
 func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID string) error {
-
+	return nil
 	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
