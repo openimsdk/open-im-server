@@ -482,8 +482,12 @@ func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string,
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
 			continue
 		}
-		if err := rocksCache.DelAllGroupMembersInfoFromCache(groupID); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
+		//if err := rocksCache.DelAllGroupMembersInfoFromCache(groupID); err != nil {
+		//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
+		//	continue
+		//}
+		if err := rocksCache.DelGroupMemberInfoFromCache(groupID, userID); err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userID)
 			continue
 		}
 		chat.GroupMemberInfoSetNotification(operationID, opUserID, groupID, userID)
@@ -508,9 +512,12 @@ func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, o
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
 				continue
 			}
-			if err := rocksCache.DelAllGroupMembersInfoFromCache(v); err != nil {
+			//if err := rocksCache.DelAllGroupMembersInfoFromCache(v); err != nil {
+			//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
+			//	continue
+			//}
+			if err := rocksCache.DelGroupMemberInfoFromCache(v, userID); err != nil {
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
-				continue
 			}
 			chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
 		}

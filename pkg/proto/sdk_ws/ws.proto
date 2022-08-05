@@ -487,6 +487,7 @@ message UserInfoUpdatedTips{
 //////////////////////conversation/////////////////////
 message ConversationUpdateTips{
  string UserID = 1;
+ repeated string conversationIDList = 2;
 }
 
 message ConversationSetPrivateTips{

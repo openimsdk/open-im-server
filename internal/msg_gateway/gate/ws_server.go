@@ -196,7 +196,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[platformID]; ok {
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
-				//	ws.sendKickMsg(oldConn, newConn)
+				ws.sendKickMsg(oldConn, newConn)
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != go_redis.Nil {
 					log.NewError(operationID, "get token from redis err", err.Error(), uid, constant.PlatformIDToName(platformID))
@@ -230,7 +230,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 					log.NewError(operationID, "conn close err", err.Error(), uid, platformID)
 				}
 			} else {
-				log.NewWarn(operationID, "abnormal uid-conn  ", uid, platformID, oldConnMap[platformID])
+				log.NewWarn(operationID, "normal uid-conn  ", uid, platformID, oldConnMap[platformID])
 			}
 
 		} else {

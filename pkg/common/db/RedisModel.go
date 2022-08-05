@@ -34,6 +34,7 @@ const (
 	FcmToken                      = "FCM_TOKEN:"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
 	groupMaxSeq                   = "GROUP_MAX_SEQ:"
+	groupMinSeq                   = "GROUP_MIN_SEQ:"
 	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
 )
 
@@ -113,6 +114,11 @@ func (d *DataBases) IncrGroupMaxSeq(groupID string) (uint64, error) {
 func (d *DataBases) SetGroupMaxSeq(groupID string, maxSeq uint64) error {
 	key := groupMaxSeq + groupID
 	return d.RDB.Set(context.Background(), key, maxSeq, 0).Err()
+}
+
+func (d *DataBases) SetGroupMinSeq(groupID string, minSeq uint32) error {
+	key := groupMinSeq + groupID
+	return d.RDB.Set(context.Background(), key, minSeq, 0).Err()
 }
 
 //Store userid and platform class to redis

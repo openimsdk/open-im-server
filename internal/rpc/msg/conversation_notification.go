@@ -68,3 +68,15 @@ func ConversationChangeNotification(operationID, userID string) {
 	tips.DefaultTips = config.Config.Notification.ConversationOptUpdate.DefaultTips.Tips
 	SetConversationNotification(operationID, userID, userID, constant.ConversationOptChangeNotification, ConversationChangedTips, tips)
 }
+
+//会话未读数同步
+func ConversationUnreadChangeNotification(operationID, userID, conversationID string) {
+	log.NewInfo(operationID, utils.GetSelfFuncName())
+	ConversationChangedTips := &open_im_sdk.ConversationUpdateTips{
+		UserID:             userID,
+		ConversationIDList: []string{conversationID},
+	}
+	var tips open_im_sdk.TipsComm
+	tips.DefaultTips = config.Config.Notification.ConversationOptUpdate.DefaultTips.Tips
+	SetConversationNotification(operationID, userID, userID, constant.ConversationUnreadNotification, ConversationChangedTips, tips)
+}

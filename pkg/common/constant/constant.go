@@ -103,6 +103,7 @@ const (
 	SuperGroupNotificationEnd    = 1699
 
 	ConversationPrivateChatNotification = 1701
+	ConversationUnreadNotification      = 1702
 
 	OrganizationChangedNotification = 1801
 
@@ -225,6 +226,13 @@ const (
 	WorkMomentLikeNotification    = 1
 	WorkMomentAtUserNotification  = 2
 )
+
+const (
+	// diffusionType
+	WriteDiffusion = 0
+	ReadDiffusion  = 1
+)
+
 const (
 	AtAllString       = "AtAllTag"
 	AtNormal          = 0
