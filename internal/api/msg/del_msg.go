@@ -79,7 +79,7 @@ func DelSuperGroupMsg(c *gin.Context) {
 		resp api.DelSuperGroupMsgResp
 	)
 	rpcReq := &rpc.DelSuperGroupMsgReq{}
-	utils.CopyStructFields(req, &req)
+	utils.CopyStructFields(rpcReq, &req)
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
@@ -140,8 +140,8 @@ func DelSuperGroupMsg(c *gin.Context) {
 	client := rpc.NewMsgClient(etcdConn)
 
 	log.Info(req.OperationID, "", "api DelSuperGroupMsg call, api call rpc...")
-	if req.IsAllDelete  {
-		RpcResp, err := client.DelSuperGroupMsg(context.Background(),rpcReq)
+	if req.IsAllDelete {
+		RpcResp, err := client.DelSuperGroupMsg(context.Background(), rpcReq)
 		if err != nil {
 			log.NewError(req.OperationID, "call delete DelSuperGroupMsg rpc server failed", err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call DelSuperGroupMsg  rpc server failed"})
@@ -152,7 +152,7 @@ func DelSuperGroupMsg(c *gin.Context) {
 		resp.ErrMsg = RpcResp.ErrMsg
 		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 		c.JSON(http.StatusOK, resp)
-	}else{
+	} else {
 		RpcResp, err := client.SendMsg(context.Background(), &pbData)
 		if err != nil {
 			log.NewError(req.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
