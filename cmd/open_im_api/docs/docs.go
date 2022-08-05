@@ -156,13 +156,6 @@ const docTemplate = `{
                 "operationId": "UserRegister",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "im token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
                         "description": "secret为openIM密钥, 详细见服务端config.yaml secret字段 \u003cbr\u003e platform为平台ID \u003cbr\u003e ex为拓展字段 \u003cbr\u003e gender为性别, 0为女, 1为男",
                         "name": "req",
                         "in": "body",
@@ -209,13 +202,6 @@ const docTemplate = `{
                 "summary": "用户登录",
                 "operationId": "UserToken",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "im token",
-                        "name": "token",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "description": "secret为openIM密钥, 详细见服务端config.yaml secret字段 \u003cbr\u003e platform为平台ID",
                         "name": "req",
@@ -4596,7 +4582,6 @@ const docTemplate = `{
         "Open_IM_internal_api_manage.OANotificationElem": {
             "type": "object",
             "required": [
-                "notificationFaceURL",
                 "notificationName",
                 "notificationType",
                 "text"
@@ -5950,8 +5935,14 @@ const docTemplate = `{
                 "operationID"
             ],
             "properties": {
+                "count": {
+                    "type": "integer"
+                },
                 "groupID": {
                     "type": "string"
+                },
+                "offset": {
+                    "type": "integer"
                 },
                 "operationID": {
                     "type": "string"
@@ -6521,7 +6512,11 @@ const docTemplate = `{
             ],
             "properties": {
                 "roleLevel": {
-                    "type": "integer"
+                    "type": "integer",
+                    "enum": [
+                        1,
+                        3
+                    ]
                 },
                 "userID": {
                     "type": "string"
@@ -6652,6 +6647,12 @@ const docTemplate = `{
                 "groupID": {
                     "type": "string"
                 },
+                "inviterUserID": {
+                    "type": "string"
+                },
+                "joinSource": {
+                    "type": "integer"
+                },
                 "operationID": {
                     "type": "string"
                 },
@@ -6751,6 +6752,9 @@ const docTemplate = `{
                 "sessionType"
             ],
             "properties": {
+                "businessOperationID": {
+                    "type": "string"
+                },
                 "contentType": {
                     "type": "integer"
                 },
@@ -6758,6 +6762,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "isOnlineOnly": {
+                    "type": "boolean"
+                },
+                "notOfflinePush": {
                     "type": "boolean"
                 },
                 "offlinePushInfo": {
@@ -6798,6 +6805,9 @@ const docTemplate = `{
                 "sessionType"
             ],
             "properties": {
+                "businessOperationID": {
+                    "type": "string"
+                },
                 "contentType": {
                     "type": "integer"
                 },
@@ -6805,6 +6815,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "isOnlineOnly": {
+                    "type": "boolean"
+                },
+                "notOfflinePush": {
                     "type": "boolean"
                 },
                 "offlinePushInfo": {
@@ -7063,7 +7076,6 @@ const docTemplate = `{
             "required": [
                 "fromUserID",
                 "operationID",
-                "remark",
                 "toUserID"
             ],
             "properties": {
@@ -7129,6 +7141,9 @@ const docTemplate = `{
                 "operationID"
             ],
             "properties": {
+                "applyMemberFriend": {
+                    "type": "integer"
+                },
                 "ex": {
                     "type": "string"
                 },
@@ -7143,6 +7158,9 @@ const docTemplate = `{
                 },
                 "introduction": {
                     "type": "string"
+                },
+                "lookMemberInfo": {
+                    "type": "integer"
                 },
                 "needVerification": {
                     "type": "integer"
@@ -7747,7 +7765,6 @@ const docTemplate = `{
         "internal_api_manage.OANotificationElem": {
             "type": "object",
             "required": [
-                "notificationFaceURL",
                 "notificationName",
                 "notificationType",
                 "text"
@@ -8231,6 +8248,9 @@ const docTemplate = `{
         "server_api_params.GroupInfo": {
             "type": "object",
             "properties": {
+                "applyMemberFriend": {
+                    "type": "integer"
+                },
                 "createTime": {
                     "type": "integer"
                 },
@@ -8255,6 +8275,9 @@ const docTemplate = `{
                 "introduction": {
                     "type": "string"
                 },
+                "lookMemberInfo": {
+                    "type": "integer"
+                },
                 "memberCount": {
                     "type": "integer"
                 },
@@ -8262,6 +8285,12 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "notification": {
+                    "type": "string"
+                },
+                "notificationUpdateTime": {
+                    "type": "integer"
+                },
+                "notificationUserID": {
                     "type": "string"
                 },
                 "ownerUserID": {
@@ -8285,6 +8314,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "groupID": {
+                    "type": "string"
+                },
+                "inviterUserID": {
                     "type": "string"
                 },
                 "joinSource": {
@@ -8330,6 +8362,12 @@ const docTemplate = `{
                 },
                 "handleUserID": {
                     "type": "string"
+                },
+                "inviterUserID": {
+                    "type": "string"
+                },
+                "joinSource": {
+                    "type": "integer"
                 },
                 "reqMsg": {
                     "type": "string"
