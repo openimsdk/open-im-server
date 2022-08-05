@@ -510,7 +510,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 			resp.MemberList = append(resp.MemberList, &node)
 		}
 	}
-	log.NewInfo(req.OperationID, "GetGroupAllMember rpc return ", resp.String())
+	log.NewInfo(req.OperationID, "GetGroupAllMember rpc return ", len(resp.MemberList))
 	return &resp, nil
 }
 
@@ -721,7 +721,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	resp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 
 	for _, userID := range req.MemberList {
-		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, userID, "")
+		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, userID)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, userID, err.Error())
 			continue

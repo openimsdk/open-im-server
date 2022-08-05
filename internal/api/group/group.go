@@ -239,7 +239,7 @@ func GetGroupAllMemberList(c *gin.Context) {
 
 	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
 	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
-	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", memberListResp)
+	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", len(memberListResp.MemberList))
 	c.JSON(http.StatusOK, memberListResp)
 }
 
