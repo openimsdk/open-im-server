@@ -433,6 +433,19 @@ message SetGroupMemberInfoResp{
   CommonResp CommonResp = 1;
 }
 
+message GetGroupAbstractInfoReq{
+  string groupID = 1;
+  string opUserID = 2; 
+  string operationID = 3;
+}
+
+message GetGroupAbstractInfoResp{
+  CommonResp CommonResp = 1;
+  int32 groupMemberNumber = 2;
+  uint64 groupMemberListHash = 3;
+}
+
+
 service group{
   rpc createGroup(CreateGroupReq) returns(CreateGroupResp);
   rpc joinGroup(JoinGroupReq) returns(JoinGroupResp);
@@ -471,7 +484,7 @@ service group{
   rpc GetJoinedSuperGroupList(GetJoinedSuperGroupListReq) returns (GetJoinedSuperGroupListResp);
   rpc GetSuperGroupsInfo(GetSuperGroupsInfoReq) returns (GetSuperGroupsInfoResp);
   rpc SetGroupMemberInfo(SetGroupMemberInfoReq) returns (SetGroupMemberInfoResp);
-
+  rpc GetGroupAbstractInfo(GetGroupAbstractInfoReq) returns (GetGroupAbstractInfoResp);
 }
 
 

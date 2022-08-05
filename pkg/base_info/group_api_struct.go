@@ -73,8 +73,8 @@ type GetGroupMemberListResp struct {
 type GetGroupAllMemberReq struct {
 	GroupID     string `json:"groupID" binding:"required"`
 	OperationID string `json:"operationID" binding:"required"`
-	Offset      int    `json:"offset"`
-	Count       int    `json:"count"`
+	Offset      int32  `json:"offset" binding:"required"`
+	Count       int32  `json:"count" binding:"required"`
 }
 type GetGroupAllMemberResp struct {
 	CommResp
@@ -82,17 +82,18 @@ type GetGroupAllMemberResp struct {
 	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
 }
 
-type GetGroupAllMemberListBySplitReq struct {
-	GroupID     string `json:"groupID" binding:"required"`
-	OperationID string `json:"operationID" binding:"required"`
-	Offset      int32  `json:"offset" binding:"required"`
-	Count       int32  `json:"count" binding:"required"`
-}
-type GetGroupAllMemberListBySplitResp struct {
-	CommResp
-	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
-	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
-}
+//
+//type GetGroupAllMemberListBySplitReq struct {
+//	GroupID     string `json:"groupID" binding:"required"`
+//	OperationID string `json:"operationID" binding:"required"`
+//	Offset      int32  `json:"offset" binding:"required"`
+//	Count       int32  `json:"count" binding:"required"`
+//}
+//type GetGroupAllMemberListBySplitResp struct {
+//	CommResp
+//	MemberList []*open_im_sdk.GroupMemberFullInfo `json:"-"`
+//	Data       []map[string]interface{}           `json:"data" swaggerignore:"true"`
+//}
 
 type CreateGroupReq struct {
 	MemberList   []*GroupAddMemberInfo `json:"memberList"`
