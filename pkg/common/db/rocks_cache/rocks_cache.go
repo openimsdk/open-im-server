@@ -245,6 +245,7 @@ func GetGroupMembersInfoFromCache(count, offset int32, groupID string) ([]*db.Gr
 		groupMembers, err := GetGroupMemberInfoFromCache(groupID, userID)
 		if err != nil {
 			log.NewError("", utils.GetSelfFuncName(), err.Error(), groupID, userID)
+			continue
 		}
 		groupMemberList = append(groupMemberList, groupMembers)
 	}
