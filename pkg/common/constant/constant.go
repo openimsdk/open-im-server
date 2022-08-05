@@ -103,6 +103,7 @@ const (
 	SuperGroupNotificationEnd    = 1699
 
 	ConversationPrivateChatNotification = 1701
+	ConversationUnreadNotification      = 1702
 
 	OrganizationChangedNotification = 1801
 

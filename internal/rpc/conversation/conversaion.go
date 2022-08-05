@@ -30,6 +30,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbConversation.ModifyConversationFieldResp{}
 	var err error
+	isSyncConversation := true
 	if req.Conversation.ConversationType == constant.GroupChatType {
 		groupInfo, err := imdb.GetGroupInfoByGroupID(req.Conversation.GroupID)
 		if err != nil {
@@ -71,8 +72,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	case constant.FieldAttachedInfo:
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"attached_info": conversation.AttachedInfo})
 	case constant.FieldUnread:
-		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"unread_count": conversation.UnreadCount})
-
+		isSyncConversation = false
 	}
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateColumnsConversations error", err.Error())
@@ -97,9 +97,16 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 			return resp, nil
 		}
 	} else {
-		for _, v := range req.UserIDList {
-			chat.ConversationChangeNotification(req.OperationID, v)
+		if isSyncConversation {
+			for _, v := range req.UserIDList {
+				chat.ConversationChangeNotification(req.OperationID, v)
+			}
+		} else {
+			for _, v := range req.UserIDList {
+				chat.ConversationUnreadChangeNotification(req.OperationID, v, req.Conversation.ConversationID)
+			}
 		}
+
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return", resp.String())
 	resp.CommonResp = &pbConversation.CommonResp{}
