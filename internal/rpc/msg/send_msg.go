@@ -29,6 +29,8 @@ import (
 //When the number of group members is greater than this value，Online users will be sent first，Guaranteed service availability
 const GroupMemberNum = 500
 
+var ExcludeContentType = []int{constant.HasReadReceipt, constant.GroupHasReadReceipt}
+
 type MsgCallBackReq struct {
 	SendID       string `json:"sendID"`
 	RecvID       string `json:"recvID"`
@@ -546,6 +548,9 @@ func modifyMessageByUserMessageReceiveOpt(userID, sourceID string, sessionType i
 	case constant.ReceiveMessage:
 		return true
 	case constant.NotReceiveMessage:
+		if utils.IsContainInt(int(pb.MsgData.ContentType), ExcludeContentType) {
+			return true
+		}
 		return false
 	case constant.ReceiveNotNotifyMessage:
 		if pb.MsgData.Options == nil {
