@@ -10,11 +10,12 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"math/big"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ParamsSetPassword struct {
@@ -81,6 +82,11 @@ func SetPassword(c *gin.Context) {
 	openIMRegisterReq.Nickname = params.Nickname
 	openIMRegisterReq.Secret = config.Config.Secret
 	openIMRegisterReq.FaceURL = params.FaceURL
+	createIp := c.Request.Header.Get("X-Forward-For")
+	if createIp == "" {
+		createIp = c.ClientIP()
+	}
+	openIMRegisterReq.CreateIp = createIp
 	openIMRegisterResp := api.UserRegisterResp{}
 	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "register req:", openIMRegisterReq)
 	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
@@ -95,7 +101,11 @@ func SetPassword(c *gin.Context) {
 		if err != nil {
 			log.NewError(params.OperationID, utils.GetSelfFuncName(), err.Error())
 		}
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register failed: " + openIMRegisterResp.ErrMsg})
+		if openIMRegisterResp.ErrCode == constant.RegisterLimit {
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterLimit, "errMsg": "用户注册被限制"})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register failed: " + openIMRegisterResp.ErrMsg})
+		}
 		return
 	}
 	log.Info(params.OperationID, "begin store mysql", account, params.Password, "info", params.FaceURL, params.Nickname)

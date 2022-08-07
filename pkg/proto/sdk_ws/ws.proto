@@ -72,9 +72,14 @@ message UserInfo{
   uint32 birth = 6;
   string email = 7;
   string ex = 8;
-  uint32 createTime = 9;
-  int32 appMangerLevel = 10;
-  int32  globalRecvMsgOpt = 11;
+  string createIp = 9;
+  uint32 createTime = 10;
+  string LastLoginIp =11;
+  uint32 LastLoginTime = 12;
+  int32  LoginTimes = 13;
+  int32 LoginLimit = 14;
+  int32 appMangerLevel = 15;
+  int32  globalRecvMsgOpt = 16;
 }
 
 message FriendInfo{

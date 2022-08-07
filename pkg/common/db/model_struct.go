@@ -153,8 +153,9 @@ type GroupRequest struct {
 //string Birth = 6;
 //string Email = 7;
 //string Ex = 8;
-//int64 CreateTime = 9;
-//int32 AppMangerLevel = 10;
+//string CreateIp = 9;
+//int64 CreateTime = 10;
+//int32 AppMangerLevel = 11;
 //open_im_sdk.User == imdb.User
 type User struct {
 	UserID           string    `gorm:"column:user_id;primary_key;size:64"`
@@ -166,9 +167,28 @@ type User struct {
 	Email            string    `gorm:"column:email;size:64"`
 	Ex               string    `gorm:"column:ex;size:1024"`
 	CreateTime       time.Time `gorm:"column:create_time"`
+	CreateIp         string    `gorm:"column:create_ip;size:15"`
+	LastLoginTime    time.Time `gorm:"column:last_login_time"`
+	LastLoginIp      string    `gorm:"column:last_login_ip;size:15"`
+	LoginTimes       int32     `gorm:"column:login_times"`
+	LoginLimit       int32     `gorm:"column:login_limit"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 	status           int32     `gorm:"column:status"`
+}
+
+type IpLimit struct {
+	Ip            string    `gorm:"column:ip;primary_key;size:15"`
+	LimitRegister int32     `gorm:"column:limit_register;size:1"`
+	LimitLogin    int32     `gorm:"column:limit_login;size:1"`
+	CreateTime    time.Time `gorm:"column:create_time"`
+	LimitTime     time.Time `gorm:"column:limit_time"`
+}
+
+type UserIpLimit struct {
+	UserID     string    `gorm:"column:user_id;primary_key;size:64"`
+	Ip         string    `gorm:"column:ip;primary_key;size:15"`
+	CreateTime time.Time `gorm:"column:create_time"`
 }
 
 //message BlackInfo{
