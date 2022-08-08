@@ -1312,8 +1312,8 @@ func GetGroupAbstractInfo(c *gin.Context) {
 	}
 	resp.ErrMsg = respPb.CommonResp.ErrMsg
 	resp.ErrCode = respPb.CommonResp.ErrCode
-	resp.Data.GroupMemberNumber = respPb.GroupMemberNumber
-	resp.Data.GroupMemberListHash = respPb.GroupMemberListHash
+	resp.GroupMemberNumber = respPb.GroupMemberNumber
+	resp.GroupMemberListHash = respPb.GroupMemberListHash
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
 	return
