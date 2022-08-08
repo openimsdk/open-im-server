@@ -10,6 +10,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
+	"sort"
+	"strconv"
 	"time"
 )
 
@@ -27,6 +30,8 @@ const (
 	allDepartmentCache        = "ALL_DEPARTMENT_CACHE:"
 	allDepartmentMemberCache  = "ALL_DEPARTMENT_MEMBER_CACHE:"
 	joinedSuperGroupListCache = "JOINED_SUPER_GROUP_LIST_CACHE:"
+	groupMemberListHashCache  = "GROUP_MEMBER_LIST_HASH_CACHE:"
+	groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
 )
 
 func init() {
@@ -374,7 +379,7 @@ func GetJoinedSuperGroupListFromCache(userID string) ([]string, error) {
 		bytes, err := json.Marshal(userToSuperGroup.GroupIDList)
 		return string(bytes), utils.Wrap(err, "")
 	}
-	joinedSuperGroupListStr, err := db.DB.Rc.Fetch(joinedSuperGroupListCache+userID, time.Second, getJoinedSuperGroupIDList)
+	joinedSuperGroupListStr, err := db.DB.Rc.Fetch(joinedSuperGroupListCache+userID, time.Second*30*60, getJoinedSuperGroupIDList)
 	var joinedSuperGroupList []string
 	err = json.Unmarshal([]byte(joinedSuperGroupListStr), &joinedSuperGroupList)
 	return joinedSuperGroupList, err
@@ -385,10 +390,44 @@ func DelJoinedSuperGroupIDListFromCache(userID string) error {
 	return err
 }
 
-func GetSuperGroupMemberIDListFromCache(groupID string) ([]string, error) {
-	return GetGroupMemberIDListFromCache(groupID)
+func GetGroupMemberListHashFromCache(groupID string) (uint64, error) {
+	generateHash := func() (string, error) {
+		groupMemberIDList, err := GetGroupMemberIDListFromCache(groupID)
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		sort.Strings(groupMemberIDList)
+		var all string
+		for _, v := range groupMemberIDList {
+			all += v
+		}
+		bi := big.NewInt(0)
+		bi.SetString(utils.Md5(all)[0:8], 16)
+		return strconv.Itoa(int(bi.Uint64())), nil
+	}
+	hashCode, err := db.DB.Rc.Fetch(groupMemberListHashCache+groupID, time.Second*30*60, generateHash)
+	hashCodeUint64, err := strconv.Atoi(hashCode)
+	return uint64(hashCodeUint64), err
 }
 
-func DelSuperGroupMemberIDListFromCache(groupID string) error {
-	return DelGroupMemberIDListFromCache(groupID)
+func DelGroupMemberListHashFromCache(groupID string) error {
+	err := db.DB.Rc.TagAsDeleted(groupMemberListHashCache + groupID)
+	return err
+}
+
+func GetGroupMemberNumFromCache(groupID string) (int64, error) {
+	getGroupMemberNum := func() (string, error) {
+		num, err := imdb.GetGroupMemberNumByGroupID(groupID)
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return strconv.Itoa(int(num)), nil
+	}
+	groupMember, err := db.DB.Rc.Fetch(groupMemberNumCache+groupID, time.Second*30*60, getGroupMemberNum)
+	num, err := strconv.Atoi(groupMember)
+	return int64(num), err
+}
+
+func DelGroupMemberNumFromCache(groupID string) error {
+	return db.DB.Rc.TagAsDeleted(groupMemberNumCache + groupID)
 }

@@ -46,6 +46,7 @@ type MsgInfo struct {
 
 type UserChat struct {
 	UID string
+	//ListIndex int `bson:"index"`
 	Msg []MsgInfo
 }
 
@@ -256,6 +257,45 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID st
 
 	}
 	return seqMsg, nil
+}
+
+func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (msg *UserChat, err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	regex := fmt.Sprintf("^%s", ID)
+	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"$regex": regex})
+	msg = &UserChat{}
+	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.Decode(&msg)
+	return msg, err
+}
+
+func (d *DataBases) DelMongoMsgs(IDList []string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	_, err := c.DeleteMany(ctx, bson.M{"uid": bson.M{"$in": IDList}})
+	return err
+}
+
+func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	userChat := &UserChat{}
+	err := c.FindOne(ctx, bson.M{"uid": suffixID}).Decode(&userChat)
+	if err != nil {
+		return err
+	}
+	for i, msg := range userChat.Msg {
+		if i <= index {
+			msg.Msg = nil
+			msg.SendTime = 0
+		}
+	}
+	_, err = c.UpdateOne(ctx, bson.M{"uid": suffixID}, userChat)
+	return err
 }
 
 func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
@@ -1192,6 +1232,7 @@ func isNotContainInt32(target uint32, List []uint32) bool {
 func indexGen(uid string, seqSuffix uint32) string {
 	return uid + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }
+
 func superGroupIndexGen(groupID string, seqSuffix uint32) string {
 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }

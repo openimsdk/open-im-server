@@ -5931,7 +5931,9 @@ const docTemplate = `{
         "base_info.GetGroupAllMemberReq": {
             "type": "object",
             "required": [
+                "count",
                 "groupID",
+                "offset",
                 "operationID"
             ],
             "properties": {

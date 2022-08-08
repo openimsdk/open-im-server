@@ -34,10 +34,6 @@ type groupServer struct {
 	etcdAddr        []string
 }
 
-func (s *groupServer) GetGroupAbstractInfo(c context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
-	panic("implement me")
-}
-
 func NewGroupServer(port int) *groupServer {
 	log.NewPrivateLog(constant.LogFileName)
 	return &groupServer{
@@ -148,7 +144,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if req.GroupInfo.GroupType != constant.SuperGroup {
 		//to group member
 		for _, user := range req.InitMemberList {
-			us, err := imdb.GetUserByUserID(user.UserID)
+			us, err := rocksCache.GetUserInfoFromCache(user.UserID)
 			if err != nil {
 				log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), user.UserID)
 				continue
@@ -168,7 +164,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 			okUserIDList = append(okUserIDList, user.UserID)
 		}
-		group, err := imdb.GetGroupInfoByGroupID(groupId)
+		group, err := rocksCache.GetGroupInfoFromCache(groupId)
 		if err != nil {
 			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupId)
 			resp.ErrCode = constant.ErrDB.ErrCode
@@ -176,7 +172,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			return resp, nil
 		}
 		utils.CopyStructFields(resp.GroupInfo, group)
-		memberCount, err := imdb.GetGroupMemberNumByGroupID(groupId)
+		memberCount, err := rocksCache.GetGroupMemberNumFromCache(groupId)
 		resp.GroupInfo.MemberCount = uint32(memberCount)
 		if err != nil {
 			log.NewError(req.OperationID, "GetGroupMemberNumByGroupID failed ", err.Error(), groupId)
@@ -245,7 +241,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	var resp pbGroup.GetJoinedGroupListResp
 	for _, v := range joinedGroupList {
 		var groupNode open_im_sdk.GroupInfo
-		num, err := imdb.GetGroupMemberNumByGroupID(v)
+		num, err := rocksCache.GetGroupMemberNumFromCache(v)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), v)
 			continue
@@ -463,7 +459,12 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 		return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
-
+	if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
+	}
+	if err := rocksCache.DelGroupMemberNumFromCache(req.GroupID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+	}
 	if groupInfo.GroupType != constant.SuperGroup {
 		for _, userID := range okUserIDList {
 			err = rocksCache.DelJoinedGroupIDListFromCache(userID)
@@ -687,6 +688,9 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 		return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
+	if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
+	}
 
 	if groupInfo.GroupType != constant.SuperGroup {
 		for _, userID := range okUserIDList {
@@ -698,7 +702,9 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
 			}
 		}
-
+		if err := rocksCache.DelGroupMemberNumFromCache(req.GroupID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+		}
 		chat.MemberKickedNotification(req, okUserIDList)
 	} else {
 		for _, userID := range okUserIDList {
@@ -913,19 +919,15 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 			log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
-
-		//group, err := rocksCache.GetGroupInfoFromCache(req.GroupID)
-		//if err != nil {
-		//	log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
-		//}
-		//if group != nil {
-		//	if group.GroupType != constant.SuperGroup {
-		//		if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
-		//			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-		//		}
-		//	}
-		//}
-
+		if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
+		}
+		if err := rocksCache.DelJoinedGroupIDListFromCache(req.FromUserID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.FromUserID, err.Error())
+		}
+		if err := rocksCache.DelGroupMemberNumFromCache(req.GroupID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+		}
 		chat.GroupApplicationAcceptedNotification(req)
 		chat.MemberEnterNotification(req)
 	} else if req.HandleResult == constant.GroupResponseRefuse {
@@ -991,22 +993,16 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 				log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 				return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
-			//for _, userID := range okUserIDList {
-			//	err = rocksCache.DelJoinedGroupIDListFromCache(userID)
-			//	if err != nil {
-			//		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
-			//	}
-			//}
 			err = rocksCache.DelJoinedGroupIDListFromCache(req.OpUserID)
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 			}
-
-			//err = rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID)
-			//if err != nil {
-			//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-			//}
-
+			if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
+			}
+			if err := rocksCache.DelGroupMemberNumFromCache(req.GroupID); err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+			}
 			chat.MemberEnterDirectlyNotification(req.GroupID, req.OpUserID, req.OperationID)
 			log.NewInfo(req.OperationID, "JoinGroup rpc return ")
 			return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
@@ -1113,16 +1109,18 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 		return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-
+	if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
+	}
 	if groupInfo.GroupType != constant.SuperGroup {
-		//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
-		//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-		//}
-		if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.OpUserID); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-		}
 		if err := rocksCache.DelJoinedGroupIDListFromCache(req.OpUserID); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.OpUserID)
+		}
+		if err := rocksCache.DelGroupMemberNumFromCache(req.GroupID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupId)
+		}
+		if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.OpUserID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
 		}
 		chat.MemberQuitNotification(req)
 	} else {
@@ -1322,9 +1320,6 @@ func (s *groupServer) TransferGroupOwner(_ context.Context, req *pbGroup.Transfe
 		log.NewError(req.OperationID, "UpdateGroupMemberInfo failed ", groupMemberInfo)
 		return &pbGroup.TransferGroupOwnerResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-	//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
-	//}
 	err = rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.NewOwnerUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "DelGroupMemberInfoFromCache failed ", req.GroupID, req.NewOwnerUserID)
@@ -1607,9 +1602,13 @@ func (s *groupServer) RemoveGroupMembersCMS(_ context.Context, req *pbGroup.Remo
 		log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 		return resp, http.WrapError(constant.ErrDB)
 	}
-	//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupId); err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupId)
-	//}
+	if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupId); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupId)
+	}
+	if err := rocksCache.DelGroupMemberNumFromCache(req.GroupId); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupId)
+	}
+
 	for _, userID := range resp.Success {
 		if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupId, userID); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupId, userID)
@@ -1674,9 +1673,12 @@ func (s *groupServer) AddGroupMembersCMS(_ context.Context, req *pbGroup.AddGrou
 		log.NewError(req.OperationId, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 		return resp, http.WrapError(constant.ErrDB)
 	}
-	//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupId); err != nil {
-	//	log.NewError(req.OperationId, utils.GetSelfFuncName(), err.Error(), req.GroupId)
-	//}
+	if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupId); err != nil {
+		log.NewError(req.OperationId, utils.GetSelfFuncName(), err.Error(), req.GroupId)
+	}
+	if err := rocksCache.DelGroupMemberNumFromCache(req.GroupId); err != nil {
+		log.NewError(req.OperationId, utils.GetSelfFuncName(), err.Error(), req.GroupId)
+	}
 
 	chat.MemberInvitedNotification(req.OperationId, req.GroupId, req.OpUserId, "admin add you to group", resp.Success)
 	return resp, nil
@@ -1798,9 +1800,9 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
 		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}, nil
 	}
-	//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-	//}
+	if err := rocksCache.DelGroupInfoFromCache(req.GroupID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
 	return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
 }
@@ -1846,9 +1848,6 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 		log.Error(req.OperationID, "UpdateGroupMemberInfo failed ", err.Error(), groupMemberInfo)
 		return &pbGroup.MuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-	//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-	//}
 	if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.UserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
 	}
@@ -1893,9 +1892,6 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 		log.Error(req.OperationID, "UpdateGroupMemberInfo failed ", err.Error(), groupMemberInfo)
 		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-	//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-	//}
 	if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.UserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
 	}
@@ -2016,9 +2012,6 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 		log.Error(req.OperationID, errMsg)
 		return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-	//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-	//}
 	if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.UserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
 	}
@@ -2054,9 +2047,6 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg + ":" + err.Error()
 		return resp, nil
 	}
-	//if err := rocksCache.DelAllGroupMembersInfoFromCache(req.GroupID); err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-	//}
 	if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.UserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID, req.UserID)
 	}
@@ -2073,5 +2063,28 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *groupServer) GetGroupAbstractInfo(c context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbGroup.GetGroupAbstractInfoResp{CommonResp: &pbGroup.CommonResp{}}
+	hashCode, err := rocksCache.GetGroupMemberListHashFromCache(req.GroupID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberListHashFromCache failed", req.GroupID, err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
+		return resp, nil
+	}
+	resp.GroupMemberListHash = hashCode
+	num, err := rocksCache.GetGroupMemberNumFromCache(req.GroupID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberNumByGroupID failed", req.GroupID, err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
+		return resp, nil
+	}
+	resp.GroupMemberNumber = int32(num)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", resp.String())
 	return resp, nil
 }
