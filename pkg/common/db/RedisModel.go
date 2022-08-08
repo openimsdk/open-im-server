@@ -383,8 +383,8 @@ func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
 }
 
 func (d *DataBases) GetGetuiToken() (string, error) {
-	result := d.RDB.Get(context.Background(), getuiToken)
-	return result.String(), result.Err()
+	result, err := d.RDB.Get(context.Background(), getuiToken).Result()
+	return result, err
 }
 
 func (d *DataBases) SetSendMsgFailedFlag(operationID string) error {
