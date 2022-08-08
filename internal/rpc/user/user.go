@@ -109,6 +109,7 @@ func syncPeerUserConversation(conversation *pbUser.Conversation, operationID str
 
 func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq) (*pbUser.GetUserInfoResp, error) {
 	log.NewInfo(req.OperationID, "GetUserInfo args ", req.String())
+
 	var userInfoList []*sdkws.UserInfo
 	if len(req.UserIDList) > 0 {
 		for _, userID := range req.UserIDList {

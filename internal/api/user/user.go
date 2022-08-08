@@ -342,8 +342,7 @@ func GetSelfUserInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-
-	req.UserIDList = append(req.UserIDList, req.OpUserID)
+	req.UserIDList = append(req.UserIDList, params.UserID)
 	log.NewInfo(params.OperationID, "GetUserInfo args ", req.String())
 
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
