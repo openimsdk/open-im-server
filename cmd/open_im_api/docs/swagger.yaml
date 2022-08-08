@@ -918,7 +918,9 @@ definitions:
       operationID:
         type: string
     required:
+    - count
     - groupID
+    - offset
     - operationID
     type: object
   base_info.GetGroupAllMemberResp:

@@ -179,7 +179,7 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 		return err
 	}
 	client := &http.Client{}
-	log.Debug(operationID, utils.GetSelfFuncName(), "json:", string(con))
+	log.Debug(operationID, utils.GetSelfFuncName(), "json:", string(con), "token:", token)
 	req, err := http.NewRequest("POST", config.Config.Push.Getui.PushUrl+url, bytes.NewBuffer(con))
 	if err != nil {
 		return err
@@ -197,7 +197,7 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 	if err != nil {
 		return err
 	}
-	log.NewInfo(operationID, "getui", utils.GetSelfFuncName(), "resp, ", string(result))
+	log.NewDebug(operationID, "getui", utils.GetSelfFuncName(), "resp, ", string(result))
 	commonResp := GetuiCommonResp{}
 	commonResp.Data = returnStruct
 	if err := json.Unmarshal(result, &commonResp); err != nil {

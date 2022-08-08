@@ -289,3 +289,14 @@ type SetGroupMemberInfoReq struct {
 type SetGroupMemberInfoResp struct {
 	CommResp
 }
+
+type GetGroupAbstractInfoReq struct {
+	OperationID string `json:"operationID"`
+	GroupID     string `json:"groupID"`
+}
+
+type GetGroupAbstractInfoResp struct {
+	CommResp
+	GroupMemberNumber   int32  `json:"groupMemberNumber"`
+	GroupMemberListHash uint64 `json:"groupMemberListHash"`
+}

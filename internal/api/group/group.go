@@ -1251,7 +1251,7 @@ func SetGroupMemberInfo(c *gin.Context) {
 	if req.RoleLevel != nil {
 		reqPb.RoleLevel = &wrappers.Int32Value{Value: *req.RoleLevel}
 	}
-
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetConn == nil"
@@ -1269,6 +1269,52 @@ func SetGroupMemberInfo(c *gin.Context) {
 
 	resp.ErrMsg = respPb.CommonResp.ErrMsg
 	resp.ErrCode = respPb.CommonResp.ErrCode
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", resp)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
+}
+
+func GetGroupAbstractInfo(c *gin.Context) {
+	var (
+		req  api.GetGroupAbstractInfoReq
+		resp api.GetGroupAbstractInfoResp
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError("0", "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	client := rpc.NewGroupClient(etcdConn)
+	respPb, err := client.GetGroupAbstractInfo(context.Background(), &rpc.GetGroupAbstractInfoReq{
+		GroupID:     req.GroupID,
+		OpUserID:    opUserID,
+		OperationID: req.OperationID,
+	})
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", respPb.String())
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+	resp.ErrMsg = respPb.CommonResp.ErrMsg
+	resp.ErrCode = respPb.CommonResp.ErrCode
+	resp.GroupMemberNumber = respPb.GroupMemberNumber
+	resp.GroupMemberListHash = respPb.GroupMemberListHash
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
+	c.JSON(http.StatusOK, resp)
+	return
 }
