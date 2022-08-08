@@ -476,11 +476,6 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 		}
-		// callback
-		callbackResp = callbackAfterSendSingleMsg(pb)
-		if callbackResp.ErrCode != 0 {
-			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSuperGroupMsg resp: ", callbackResp)
-		}
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 
 	default:
