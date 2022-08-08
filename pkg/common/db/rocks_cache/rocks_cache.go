@@ -394,7 +394,7 @@ func GetGroupMemberListHashFromCache(groupID string) (uint64, error) {
 	generateHash := func() (string, error) {
 		groupMemberIDList, err := GetGroupMemberIDListFromCache(groupID)
 		if err != nil {
-			return "", utils.Wrap(err, "")
+			return "", utils.Wrap(err, "GetGroupMemberIDListFromCache failed")
 		}
 		sort.Strings(groupMemberIDList)
 		var all string
