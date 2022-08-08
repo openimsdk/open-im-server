@@ -402,7 +402,7 @@ func GetGroupMemberListHashFromCache(groupID string) (uint64, error) {
 			all += v
 		}
 		bi := big.NewInt(0)
-		bi.SetString(utils.Md5(all)[0:8], 16)
+		bi.SetString(utils.Md5(all)[0:8], 10)
 		return strconv.Itoa(int(bi.Uint64())), nil
 	}
 	hashCode, err := db.DB.Rc.Fetch(groupMemberListHashCache+groupID, time.Second*30*60, generateHash)
