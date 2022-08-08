@@ -1308,5 +1308,9 @@ func GetGroupAbstractInfo(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
+	resp.ErrMsg = respPb.CommonResp.ErrMsg
+	resp.ErrCode = respPb.CommonResp.ErrCode
+	resp.GroupMemberNumber = respPb.GroupMemberNumber
+	resp.GroupMemberListHash = respPb.GroupMemberListHash
 	return
 }
