@@ -1251,7 +1251,7 @@ func SetGroupMemberInfo(c *gin.Context) {
 	if req.RoleLevel != nil {
 		reqPb.RoleLevel = &wrappers.Int32Value{Value: *req.RoleLevel}
 	}
-
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", reqPb.String())
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetConn == nil"
@@ -1269,7 +1269,7 @@ func SetGroupMemberInfo(c *gin.Context) {
 
 	resp.ErrMsg = respPb.CommonResp.ErrMsg
 	resp.ErrCode = respPb.CommonResp.ErrCode
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", resp)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
 
@@ -1290,6 +1290,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetConn == nil"
@@ -1303,6 +1304,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 		OpUserID:    opUserID,
 		OperationID: req.OperationID,
 	})
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", respPb.String())
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
@@ -1312,6 +1314,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 	resp.ErrCode = respPb.CommonResp.ErrCode
 	resp.Data.GroupMemberNumber = respPb.GroupMemberNumber
 	resp.Data.GroupMemberListHash = respPb.GroupMemberListHash
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
 	return
 }
