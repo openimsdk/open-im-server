@@ -297,6 +297,8 @@ type GetGroupAbstractInfoReq struct {
 
 type GetGroupAbstractInfoResp struct {
 	CommResp
-	GroupMemberNumber   int32  `json:"groupMemberNumber"`
-	GroupMemberListHash uint64 `json:"groupMemberListHash"`
+	Data struct {
+		GroupMemberNumber   int32  `json:"groupMemberNumber"`
+		GroupMemberListHash uint64 `json:"groupMemberListHash"`
+	} `json:"data"`
 }
