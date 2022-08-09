@@ -324,9 +324,9 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 func GetSelfUserInfo(c *gin.Context) {
 	params := api.GetSelfUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
-		errMsg := "BindJSON failed " + err.Error()
-		log.NewError("0", "BindJSON failed ", errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		errMsg := " BindJSON failed " + err.Error()
+		log.NewError("0", errMsg)
+		c.JSON(http.StatusOK, gin.H{"errCode": 1001, "errMsg": errMsg})
 		return
 	}
 	req := &rpc.GetUserInfoReq{}
@@ -338,8 +338,8 @@ func GetSelfUserInfo(c *gin.Context) {
 	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		log.NewError(params.OperationID, errMsg)
+		c.JSON(http.StatusOK, gin.H{"errCode": 1001, "errMsg": errMsg})
 		return
 	}
 

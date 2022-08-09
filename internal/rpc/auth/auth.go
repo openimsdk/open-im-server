@@ -67,11 +67,11 @@ func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (
 		log.NewError(req.OperationID, errMsg)
 		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
 	}
-	if err := token_verify.DeleteToken(req.FromUserID, int(req.Platform)); err != nil {
-		errMsg := req.OperationID + " DeleteToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	}
+	//if err := token_verify.DeleteToken(req.FromUserID, int(req.Platform)); err != nil {
+	//	errMsg := req.OperationID + " DeleteToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
+	//	log.NewError(req.OperationID, errMsg)
+	//	return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+	//}
 	if err := rpc.forceKickOff(req.FromUserID, req.Platform, req.OperationID); err != nil {
 		errMsg := req.OperationID + " forceKickOff failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
 		log.NewError(req.OperationID, errMsg)
