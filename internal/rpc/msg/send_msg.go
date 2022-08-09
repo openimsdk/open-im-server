@@ -974,6 +974,11 @@ func (rpc *rpcChat) sendMsgToGroupOptimization(list []string, groupPB *pbChat.Se
 	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
 	for _, v := range list {
 		groupPB.MsgData.RecvID = v
+		options := make(map[string]bool, 1)
+		for k, v := range groupPB.MsgData.Options {
+			options[k] = v
+		}
+		groupPB.MsgData.Options = options
 		isSend := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
 		if isSend {
 			if v == "" || groupPB.MsgData.SendID == "" {
