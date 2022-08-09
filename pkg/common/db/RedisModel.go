@@ -363,7 +363,7 @@ func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID st
 		result := d.RDB.Get(context.Background(), key).String()
 		var msg pbCommon.MsgData
 		if err := utils.String2Pb(result, &msg); err != nil {
-			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, err.Error())
+			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, result, key, err.Error())
 			continue
 		}
 		msg.Status = constant.MsgDeleted

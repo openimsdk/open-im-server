@@ -228,12 +228,6 @@ const (
 )
 
 const (
-	// diffusionType
-	WriteDiffusion = 0
-	ReadDiffusion  = 1
-)
-
-const (
 	AtAllString       = "AtAllTag"
 	AtNormal          = 0
 	AtMe              = 1

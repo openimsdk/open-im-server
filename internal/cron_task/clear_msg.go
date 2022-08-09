@@ -2,7 +2,6 @@ package cronTask
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
@@ -15,19 +14,19 @@ import (
 const oldestList = 0
 const newestList = -1
 
-func DeleteMongoMsgAndResetRedisSeq(operationID, ID string, diffusionType int) error {
+func ResetUserGroupMinSeq(operationID, groupID, userID string) error {
+	return nil
+}
+
+func DeleteMongoMsgAndResetRedisSeq(operationID, userID string) error {
 	// -1 表示从当前最早的一个开始
 	var delMsgIDList []string
-	minSeq, err := deleteMongoMsg(operationID, ID, oldestList, &delMsgIDList)
+	minSeq, err := deleteMongoMsg(operationID, userID, oldestList, &delMsgIDList)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDList: ", delMsgIDList)
-	if diffusionType == constant.WriteDiffusion {
-		err = db.DB.SetUserMinSeq(ID, minSeq)
-	} else if diffusionType == constant.ReadDiffusion {
-		err = db.DB.SetGroupMinSeq(ID, minSeq)
-	}
+	err = db.DB.SetUserMinSeq(userID, minSeq)
 	return err
 }
 

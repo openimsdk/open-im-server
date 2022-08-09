@@ -3,6 +3,7 @@ package cronTask
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"github.com/robfig/cron/v3"
@@ -19,8 +20,8 @@ func StartCronTask() {
 		if err == nil {
 			log.NewDebug(operationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
 			for _, userID := range userIDList {
-				if err := DeleteMongoMsgAndResetRedisSeq(operationID, userID, constant.WriteDiffusion); err != nil {
-					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), userID, constant.WriteDiffusion)
+				if err := DeleteMongoMsgAndResetRedisSeq(operationID, userID); err != nil {
+					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), userID)
 				}
 			}
 		} else {
@@ -30,8 +31,16 @@ func StartCronTask() {
 		workingGroupIDList, err := im_mysql_model.GetGroupIDListByGroupType(constant.WorkingGroup)
 		if err == nil {
 			for _, groupID := range workingGroupIDList {
-				if err := DeleteMongoMsgAndResetRedisSeq(operationID, groupID, constant.ReadDiffusion); err != nil {
-					log.NewError(operationID, utils.GetSelfFuncName(), operationID, groupID, constant.ReadDiffusion, err.Error())
+				userIDList, err = rocksCache.GetGroupMemberIDListFromCache(groupID)
+				if err != nil {
+					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
+					continue
+				}
+				log.NewDebug(operationID, utils.GetSelfFuncName(), "groupID:", groupID, "userIDList:", userIDList)
+				for _, userID := range userIDList {
+					if err := ResetUserGroupMinSeq(operationID, groupID, userID); err != nil {
+						log.NewError(operationID, utils.GetSelfFuncName(), operationID, groupID, userID, err.Error())
+					}
 				}
 			}
 		} else {
