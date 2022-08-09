@@ -79,11 +79,11 @@ func DelSuperGroupMsg(c *gin.Context) {
 		resp api.DelSuperGroupMsgResp
 	)
 	rpcReq := &rpc.DelSuperGroupMsgReq{}
-	utils.CopyStructFields(rpcReq, &req)
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
+	utils.CopyStructFields(rpcReq, &req)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
 	var ok bool
 	var errInfo string
