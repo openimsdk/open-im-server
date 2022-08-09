@@ -28,6 +28,7 @@ func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq
 		AtUserIDList:     msg.MsgData.AtUserIDList,
 		SenderFaceURL:    msg.MsgData.SenderFaceURL,
 		Content:          callback.GetContent(msg.MsgData),
+		Seq:              msg.MsgData.Seq,
 	}
 	return req
 }

@@ -14,6 +14,7 @@ type CommonCallbackReq struct {
 	Status           int32    `json:"status"`
 	CreateTime       int64    `json:"createTime"`
 	Content          string   `json:"content"`
+	Seq              uint32   `json:"seq"`
 	AtUserIDList     []string `json:"atUserList"`
 	SenderFaceURL    string   `json:"faceURL"`
 }
