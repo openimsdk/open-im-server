@@ -972,10 +972,14 @@ func (rpc *rpcChat) sendMsgToGroup(list []string, pb pbChat.SendMsgReq, status s
 
 func (rpc *rpcChat) sendMsgToGroupOptimization(list []string, groupPB *pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
 	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
+	tempOptions := make(map[string]bool, 1)
+	for k, v := range groupPB.MsgData.Options {
+		tempOptions[k] = v
+	}
 	for _, v := range list {
 		groupPB.MsgData.RecvID = v
 		options := make(map[string]bool, 1)
-		for k, v := range groupPB.MsgData.Options {
+		for k, v := range tempOptions {
 			options[k] = v
 		}
 		groupPB.MsgData.Options = options
