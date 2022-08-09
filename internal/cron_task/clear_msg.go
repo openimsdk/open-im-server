@@ -1,4 +1,4 @@
-package timedTask
+package cronTask
 
 import (
 	"Open_IM/pkg/common/config"
@@ -67,7 +67,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, IDList *[]string
 		}
 	}
 	*IDList = append(*IDList, msgs.UID)
-	// 没有找到 代表需要全部删除掉 继续查找下一个比较旧的列表
+	// 没有找到 代表需要全部删除掉 继续递归查找下一个比较旧的列表
 	seq, err := deleteMongoMsg(operationID, utils.GetSelfFuncName(), index-1, IDList)
 	if err != nil {
 		return 0, utils.Wrap(err, "deleteMongoMsg failed")

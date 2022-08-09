@@ -184,3 +184,11 @@ func GetAllGroupIDList() ([]string, error) {
 	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Pluck("group_id", &groupIDList).Error
 	return groupIDList, err
 }
+
+func GetGroupIDListByGroupType(groupType int) ([]string, error) {
+	var groupIDList []string
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_type = ? ", groupType).Pluck("group_id", &groupIDList).Error; err != nil {
+		return nil, err
+	}
+	return groupIDList, nil
+}
