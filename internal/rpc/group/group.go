@@ -568,7 +568,7 @@ func (s *groupServer) getGroupUserLevel(groupID, userID string) (int, error) {
 
 func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (*pbGroup.KickGroupMemberResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	groupInfo, err := imdb.GetGroupInfoByGroupID(req.GroupID)
+	groupInfo, err := rocksCache.GetGroupInfoFromCache(req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupInfoByGroupID", req.GroupID, err.Error())
 		return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
@@ -578,7 +578,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 	if groupInfo.GroupType != constant.SuperGroup {
 		opFlag := 0
 		if !token_verify.IsManagerUserID(req.OpUserID) {
-			opInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.OpUserID)
+			opInfo, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, req.OpUserID)
 			if err != nil {
 				errMsg := req.OperationID + " GetGroupMemberInfoByGroupIDAndUserID  failed " + err.Error() + req.GroupID + req.OpUserID
 				log.Error(req.OperationID, errMsg)
@@ -605,7 +605,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 
 		//remove
 		for _, v := range req.KickedUserIDList {
-			kickedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, v)
+			kickedInfo, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, v)
 			if err != nil {
 				log.NewError(req.OperationID, " GetGroupMemberInfoByGroupIDAndUserID failed ", req.GroupID, v, err.Error())
 				resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: -1})
