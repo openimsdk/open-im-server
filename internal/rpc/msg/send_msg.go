@@ -334,7 +334,7 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		}
 		m := make(map[string][]string, 2)
 		m[constant.OnlineStatus] = memberUserIDList
-		log.Debug(pb.OperationID, "send msg cost time1 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
+		log.Debug(pb.OperationID, "send msg cost time1 ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID, pb)
 		newTime = db.GetCurrentTimestampByMill()
 
 		//split  parallel send
@@ -475,6 +475,11 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		if err1 != nil {
 			log.NewError(msgToMQSingle.OperationID, "kafka send msg err:RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String())
 			return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
+		}
+		// callback
+		callbackResp = callbackAfterSendGroupMsg(pb)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSuperGroupMsg resp: ", callbackResp)
 		}
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 
@@ -967,8 +972,17 @@ func (rpc *rpcChat) sendMsgToGroup(list []string, pb pbChat.SendMsgReq, status s
 
 func (rpc *rpcChat) sendMsgToGroupOptimization(list []string, groupPB *pbChat.SendMsgReq, status string, sendTag *bool, wg *sync.WaitGroup) {
 	msgToMQGroup := pbChat.MsgDataToMQ{Token: groupPB.Token, OperationID: groupPB.OperationID, MsgData: groupPB.MsgData}
+	tempOptions := make(map[string]bool, 1)
+	for k, v := range groupPB.MsgData.Options {
+		tempOptions[k] = v
+	}
 	for _, v := range list {
 		groupPB.MsgData.RecvID = v
+		options := make(map[string]bool, 1)
+		for k, v := range tempOptions {
+			options[k] = v
+		}
+		groupPB.MsgData.Options = options
 		isSend := modifyMessageByUserMessageReceiveOpt(v, groupPB.MsgData.GroupID, constant.GroupChatType, groupPB)
 		if isSend {
 			if v == "" || groupPB.MsgData.SendID == "" {

@@ -360,10 +360,18 @@ func (d *DataBases) DelUserSignalList(userID string) error {
 func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID string) {
 	for _, seq := range seqList {
 		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
-		result := d.RDB.Get(context.Background(), key).String()
+		result, err := d.RDB.Get(context.Background(), key).Result()
+		if err != nil {
+			if err == go_redis.Nil {
+				log2.NewDebug(operationID, utils.GetSelfFuncName(), err.Error(), "redis nil")
+			} else {
+				log2.NewError(operationID, utils.GetSelfFuncName(), err.Error(), key)
+			}
+			continue
+		}
 		var msg pbCommon.MsgData
 		if err := utils.String2Pb(result, &msg); err != nil {
-			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, err.Error())
+			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, result, key, err.Error())
 			continue
 		}
 		msg.Status = constant.MsgDeleted
