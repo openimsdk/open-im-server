@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/utils"
 	"fmt"
 	"github.com/robfig/cron/v3"
+	"time"
 )
 
 const cronTaskOperationID = "cronTaskOperationID-"
@@ -54,6 +55,9 @@ func StartCronTask() {
 	}
 	c.Start()
 	fmt.Println("start cron task success")
+	for {
+		time.Sleep(time.Second)
+	}
 }
 
 func getCronTaskOperationID() string {
