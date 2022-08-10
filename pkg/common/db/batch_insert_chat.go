@@ -62,11 +62,11 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 			msgListToMongo = append(msgListToMongo, sMsg)
 			insertCounter++
 			seqUid = getSeqUid(userID, uint32(currentMaxSeq))
-			log.Debug(operationID, "msgListToMongo ", seqUid, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain)
+			log.Debug(operationID, "msgListToMongo ", seqUid, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain, "userID: ", userID)
 		} else {
 			msgListToMongoNext = append(msgListToMongoNext, sMsg)
 			seqUidNext = getSeqUid(userID, uint32(currentMaxSeq))
-			log.Debug(operationID, "msgListToMongoNext ", seqUidNext, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain)
+			log.Debug(operationID, "msgListToMongoNext ", seqUidNext, m.MsgData.Seq, m.MsgData.ClientMsgID, insertCounter, remain, "userID: ", userID)
 		}
 	}
 
@@ -75,7 +75,7 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 
 	if seqUid != "" {
 		filter := bson.M{"uid": seqUid}
-		log.NewDebug(operationID, "filter ", seqUid, "list ", msgListToMongo)
+		log.NewDebug(operationID, "filter ", seqUid, "list ", msgListToMongo, "userID: ", userID)
 		err := c.FindOneAndUpdate(ctx, filter, bson.M{"$push": bson.M{"msg": bson.M{"$each": msgListToMongo}}}).Err()
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
@@ -99,7 +99,7 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 		sChat := UserChat{}
 		sChat.UID = seqUidNext
 		sChat.Msg = msgListToMongoNext
-		log.NewDebug(operationID, "filter ", seqUidNext, "list ", msgListToMongoNext)
+		log.NewDebug(operationID, "filter ", seqUidNext, "list ", msgListToMongoNext, "userID: ", userID)
 		if _, err = c.InsertOne(ctx, &sChat); err != nil {
 			log.NewError(operationID, "InsertOne failed", filter, err.Error(), sChat)
 			return utils.Wrap(err, "")
