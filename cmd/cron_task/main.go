@@ -1,4 +1,4 @@
-package cron_task
+package main
 
 import (
 	"Open_IM/internal/cron_task"
