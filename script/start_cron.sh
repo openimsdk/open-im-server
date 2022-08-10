@@ -17,9 +17,9 @@ fi
 sleep 1
 
 cd ${cron_task_binary_root}
-for ((i = 0; i < ${cron_task_service_num}; i++)); do
+#for ((i = 0; i < ${cron_task_service_num}; i++)); do
       nohup ./${cron_task_name}  >>../logs/openIM.log 2>&1 &
-done
+#done
 
 #Check launched service process
 check=`ps aux | grep -w ./${cron_task_name} | grep -v grep| wc -l`

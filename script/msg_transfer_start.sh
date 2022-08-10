@@ -17,9 +17,9 @@ fi
 sleep 1
 
 cd ${msg_transfer_binary_root}
-#for ((i = 0; i < ${msg_transfer_service_num}; i++)); do
-#      nohup ./${msg_transfer_name}  >>../logs/openIM.log 2>&1 &
-#done
+for ((i = 0; i < ${msg_transfer_service_num}; i++)); do
+      nohup ./${msg_transfer_name}  >>../logs/openIM.log 2>&1 &
+done
 
 #Check launched service process
 check=`ps aux | grep -w ./${msg_transfer_name} | grep -v grep| wc -l`
