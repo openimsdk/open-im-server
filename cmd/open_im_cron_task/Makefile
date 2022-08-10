@@ -1,7 +1,7 @@
 .PHONY: all build run gotool install clean help
 
 BINARY_NAME=open_im_cron_task
-BIN_DIR=../../../bin/
+BIN_DIR=../../bin/
 
 all: gotool build
 
