@@ -6,6 +6,7 @@ import (
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
+	"fmt"
 	"github.com/robfig/cron/v3"
 )
 
@@ -37,11 +38,10 @@ func StartCronTask() {
 					continue
 				}
 				log.NewDebug(operationID, utils.GetSelfFuncName(), "groupID:", groupID, "userIDList:", userIDList)
-				for _, userID := range userIDList {
-					if err := ResetUserGroupMinSeq(operationID, groupID, userID); err != nil {
-						log.NewError(operationID, utils.GetSelfFuncName(), operationID, groupID, userID, err.Error())
-					}
+				if err := ResetUserGroupMinSeq(operationID, groupID, userIDList); err != nil {
+					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userIDList)
 				}
+
 			}
 		} else {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
@@ -49,6 +49,7 @@ func StartCronTask() {
 		}
 	})
 	if err != nil {
+		fmt.Println("start cron failed", err.Error())
 		panic(err)
 	}
 	c.Start()
