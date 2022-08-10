@@ -53,6 +53,7 @@ func StartCronTask() {
 		panic(err)
 	}
 	c.Start()
+	fmt.Println("start cron task success")
 }
 
 func getCronTaskOperationID() string {
