@@ -38,7 +38,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 			resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 			return resp, nil
 		}
-		if groupInfo.Status == constant.GroupStatusDismissed && !req.Conversation.IsNotInGroup {
+		if groupInfo.Status == constant.GroupStatusDismissed && !req.Conversation.IsNotInGroup && req.FieldType != constant.FieldUnread {
 			errMsg := "group status is dismissed"
 			resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}
 			return resp, nil
