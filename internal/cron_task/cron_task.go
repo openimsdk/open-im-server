@@ -20,6 +20,7 @@ func StartCronTask() {
 	fmt.Println("config", config.Config.Mongo.ChatRecordsClearTime)
 	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, func() {
 		operationID := getCronTaskOperationID()
+		log.NewInfo(operationID, "start", utils.GetSelfFuncName())
 		userIDList, err := im_mysql_model.SelectAllUserID()
 		if err == nil {
 			log.NewDebug(operationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
