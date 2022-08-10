@@ -26,12 +26,15 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 	isInit := false
 	var remain uint64
 	blk0 := uint64(GetSingleGocMsgNum() - 1)
+	//currentMaxSeq 4998
 	if currentMaxSeq < uint64(GetSingleGocMsgNum()) {
-		remain = blk0 - currentMaxSeq
+		remain = blk0 - currentMaxSeq //1
 	} else {
-		excludeBlk0 := currentMaxSeq - blk0
+		excludeBlk0 := currentMaxSeq - blk0 //=1
+		//(5000-1)%5000 == 4999
 		remain = (uint64(GetSingleGocMsgNum()) - (excludeBlk0 % uint64(GetSingleGocMsgNum()))) % uint64(GetSingleGocMsgNum())
 	}
+	//remain=1
 	insertCounter := uint64(0)
 	msgListToMongo := make([]MsgInfo, 0)
 	msgListToMongoNext := make([]MsgInfo, 0)
@@ -120,8 +123,10 @@ func (d *DataBases) BatchInsertChat2Cache(insertID string, msgList []*pbMsg.MsgD
 	var err error
 	if msgList[0].MsgData.SessionType == constant.SuperGroupChatType {
 		currentMaxSeq, err = d.GetGroupMaxSeq(insertID)
+		log.Debug(operationID, "constant.SuperGroupChatType  lastMaxSeq before add ", currentMaxSeq, "userID ", insertID, err)
 	} else {
 		currentMaxSeq, err = d.GetUserMaxSeq(insertID)
+		log.Debug(operationID, "constant.SingleChatType  lastMaxSeq before add ", currentMaxSeq, "userID ", insertID, err)
 	}
 	if err != nil && err != go_redis.Nil {
 		return utils.Wrap(err, ""), 0
