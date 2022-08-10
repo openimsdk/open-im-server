@@ -179,16 +179,6 @@ func UploadUpdateApp(c *gin.Context) {
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
 
-	var ok bool
-	var errInfo string
-	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-	if !ok {
-		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
-		return
-	}
-
 	var yamlName string
 	if req.Yaml == nil {
 		yamlName = ""
