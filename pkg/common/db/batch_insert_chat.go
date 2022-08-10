@@ -45,6 +45,7 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 		sMsg := MsgInfo{}
 		sMsg.SendTime = m.MsgData.SendTime
 		m.MsgData.Seq = uint32(currentMaxSeq)
+		log.Debug(operationID, "mongo msg node ", m.String(), m.MsgData.ClientMsgID, "userID: ", userID, "seq: ", currentMaxSeq)
 		if sMsg.Msg, err = proto.Marshal(m.MsgData); err != nil {
 			return utils.Wrap(err, "")
 		}
@@ -128,11 +129,12 @@ func (d *DataBases) BatchInsertChat2Cache(insertID string, msgList []*pbMsg.MsgD
 
 	lastMaxSeq := currentMaxSeq
 	for _, m := range msgList {
-		log.Debug(operationID, "msg node ", m.String(), m.MsgData.ClientMsgID)
+
 		currentMaxSeq++
 		sMsg := MsgInfo{}
 		sMsg.SendTime = m.MsgData.SendTime
 		m.MsgData.Seq = uint32(currentMaxSeq)
+		log.Debug(operationID, "cache msg node ", m.String(), m.MsgData.ClientMsgID, "userID: ", insertID, "seq: ", currentMaxSeq)
 	}
 	log.Debug(operationID, "SetMessageToCache ", insertID, len(msgList))
 	err = d.SetMessageToCache(msgList, insertID, operationID)
