@@ -259,18 +259,22 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID st
 	return seqMsg, nil
 }
 
-func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (msg *UserChat, err error) {
+func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 	regex := fmt.Sprintf("^%s", ID)
-	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"$regex": regex})
-	msg = &UserChat{}
+	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"$regex": regex}).SetSort(bson.M{"uid": 1})
+	var msgs []UserChat
 	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
 	if err != nil {
 		return nil, err
 	}
-	err = cursor.Decode(&msg)
-	return msg, err
+	err = cursor.Decode(&msgs)
+	if len(msgs) > 0 {
+		return &msgs[0], err
+	} else {
+		return nil, errors.New("get msg list failed")
+	}
 }
 
 func (d *DataBases) DelMongoMsgs(IDList []string) error {
@@ -296,6 +300,26 @@ func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
 	}
 	_, err = c.UpdateOne(ctx, bson.M{"uid": suffixID}, userChat)
 	return err
+}
+
+func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	regex := fmt.Sprintf("^%s", ID)
+	findOpts := options.Find().SetLimit(1).SetSort(bson.M{"$regex": regex}).SetSort(bson.M{"uid": -1})
+	var userChats []UserChat
+	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.Decode(&userChats)
+	if len(userChats) > 0 {
+		if len(userChats[0].Msg) > 0 {
+			return &userChats[0].Msg[len(userChats[0].Msg)], nil
+		}
+		return nil, errors.New("len(userChats[0].Msg) < 0")
+	}
+	return nil, errors.New("len(userChats) < 0")
 }
 
 func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {

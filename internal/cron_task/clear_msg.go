@@ -2,11 +2,13 @@ package cronTask
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/proto"
+	"math"
 )
 
 const oldestList = 0
@@ -19,6 +21,7 @@ func ResetUserGroupMinSeq(operationID, groupID string, userIDList []string) erro
 		log.NewError(operationID, utils.GetSelfFuncName(), groupID, "deleteMongoMsg failed")
 		return utils.Wrap(err, "")
 	}
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDList:", delMsgIDList, "minSeq", minSeq)
 	for _, userID := range userIDList {
 		userMinSeq, err := db.DB.GetGroupUserMinSeq(groupID, userID)
 		if err != nil {
@@ -43,7 +46,7 @@ func DeleteMongoMsgAndResetRedisSeq(operationID, userID string) error {
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDMap: ", userID, delMsgIDList)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDMap: ", delMsgIDList, "minSeq", minSeq)
 	err = db.DB.SetUserMinSeq(userID, minSeq)
 	return err
 }
@@ -122,4 +125,30 @@ func getDelMaxSeqByIDList(delMsgIDList [][2]interface{}) uint32 {
 		return 0
 	}
 	return delMsgIDList[len(delMsgIDList)-1][1].(uint32)
+}
+
+func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
+	var maxSeq uint64
+	var err error
+	if diffusionType == constant.WriteDiffusion {
+		maxSeq, err = db.DB.GetUserMaxSeq(ID)
+	} else {
+		maxSeq, err = db.DB.GetGroupMaxSeq(ID)
+	}
+	if err != nil {
+		return utils.Wrap(err, "GetUserMaxSeq failed")
+	}
+	msg, err := db.DB.GetNewestMsg(ID)
+	if err != nil {
+		return utils.Wrap(err, "GetNewestMsg failed")
+	}
+	msgPb := &server_api_params.MsgData{}
+	err = proto.Unmarshal(msg.Msg, msgPb)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	if math.Abs(float64(msgPb.Seq-uint32(maxSeq))) > 10 {
+		log.NewWarn(operationID, utils.GetSelfFuncName(), maxSeq, msgPb.Seq, "redis maxSeq is different with msg.Seq")
+	}
+	return nil
 }
