@@ -18,7 +18,6 @@ service_filename=(
   open_im_message_cms
   open_im_statistics
   ${msg_name}
-  ${cron_task_name}
   open_im_office
   open_im_organization
   open_im_conversation
