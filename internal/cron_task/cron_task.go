@@ -1,6 +1,7 @@
 package cronTask
 
 import (
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
@@ -16,7 +17,7 @@ const cronTaskOperationID = "cronTaskOperationID-"
 func StartCronTask() {
 	log.NewInfo(utils.OperationIDGenerator(), "start cron task")
 	c := cron.New()
-	_, err := c.AddFunc("30 3-6,20-23 * * *", func() {
+	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, func() {
 		operationID := getCronTaskOperationID()
 		userIDList, err := im_mysql_model.SelectAllUserID()
 		if err == nil {
