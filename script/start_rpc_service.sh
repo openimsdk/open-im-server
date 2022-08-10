@@ -22,6 +22,7 @@ service_filename=(
   open_im_organization
   open_im_conversation
   open_im_cache
+  cron_task
 )
 
 #service config port name
