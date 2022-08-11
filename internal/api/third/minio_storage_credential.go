@@ -15,6 +15,8 @@ import (
 	_ "github.com/minio/minio-go/v7"
 	cr "github.com/minio/minio-go/v7/pkg/credentials"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 // @Summary minio上传文件(web api)
@@ -176,6 +178,7 @@ func UploadUpdateApp(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
+
 	var yamlName string
 	if req.Yaml == nil {
 		yamlName = ""
@@ -218,6 +221,13 @@ func UploadUpdateApp(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+func version2Int(version string) (int, error) {
+	versions := strings.Split(version, ".")
+	s := strings.Join(versions, "")
+	versionInt, err := strconv.Atoi(s)
+	return versionInt, err
+}
+
 func GetDownloadURL(c *gin.Context) {
 	var (
 		req  api.GetDownloadURLReq
@@ -238,7 +248,13 @@ func GetDownloadURL(c *gin.Context) {
 	}
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "app: ", app)
 	if app != nil {
-		if app.Version != req.Version && app.Version != "" {
+		appVersion, err := version2Int(app.Version)
+		reqVersion, err := version2Int(req.Version)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), "req version", req.Version, "app version", app.Version)
+		}
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "req version:", reqVersion, "app version:", appVersion)
+		if appVersion > reqVersion && app.Version != "" {
 			resp.Data.HasNewVersion = true
 			if app.ForceUpdate == true {
 				resp.Data.ForceUpdate = true

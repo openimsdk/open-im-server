@@ -2,11 +2,13 @@ package cronTask
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"github.com/golang/protobuf/proto"
+	"math"
 )
 
 const oldestList = 0
@@ -19,6 +21,7 @@ func ResetUserGroupMinSeq(operationID, groupID string, userIDList []string) erro
 		log.NewError(operationID, utils.GetSelfFuncName(), groupID, "deleteMongoMsg failed")
 		return utils.Wrap(err, "")
 	}
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDList:", delMsgIDList, "minSeq", minSeq)
 	for _, userID := range userIDList {
 		userMinSeq, err := db.DB.GetGroupUserMinSeq(groupID, userID)
 		if err != nil {
@@ -43,17 +46,34 @@ func DeleteMongoMsgAndResetRedisSeq(operationID, userID string) error {
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDMap: ", userID, delMsgIDList)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDMap: ", delMsgIDList, "minSeq", minSeq)
 	err = db.DB.SetUserMinSeq(userID, minSeq)
 	return err
+}
+
+func delMongoMsgs(operationID string, delMsgIDList *[][2]interface{}) error {
+	if len(*delMsgIDList) > 0 {
+		var IDList []string
+		for _, v := range *delMsgIDList {
+			IDList = append(IDList, v[0].(string))
+		}
+		err := db.DB.DelMongoMsgs(IDList)
+		if err != nil {
+			return utils.Wrap(err, "DelMongoMsgs failed")
+		}
+	}
+	return nil
 }
 
 // recursion
 func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[][2]interface{}) (uint32, error) {
 	// 从最旧的列表开始找
 	msgs, err := db.DB.GetUserMsgListByIndex(ID, index)
-	if err != nil {
-		return 0, utils.Wrap(err, "GetUserMsgListByIndex failed")
+	if err != nil || msgs.UID == "" {
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
+		}
+		return getDelMaxSeqByIDList(*delMsgIDList), delMongoMsgs(operationID, delMsgIDList)
 	}
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
@@ -62,15 +82,8 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 	for i, msg := range msgs.Msg {
 		// 找到列表中不需要删除的消息了
 		if utils.GetCurrentTimestampByMill() < msg.SendTime+int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000 {
-			if len(*delMsgIDList) > 0 {
-				var IDList []string
-				for _, v := range *delMsgIDList {
-					IDList = append(IDList, v[0].(string))
-				}
-				err := db.DB.DelMongoMsgs(IDList)
-				if err != nil {
-					return 0, utils.Wrap(err, "DelMongoMsgs failed")
-				}
+			if err := delMongoMsgs(operationID, delMsgIDList); err != nil {
+				return 0, err
 			}
 			minSeq := getDelMaxSeqByIDList(*delMsgIDList)
 			if i > 0 {
@@ -84,19 +97,21 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 						log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), msgs.UID, i)
 						return minSeq, nil
 					}
-					minSeq = msgPb.Seq - 1
+					minSeq = msgPb.Seq
 				}
 			}
 			return minSeq, nil
 		}
 	}
-	msgPb := &server_api_params.MsgData{}
-	err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, msgPb)
-	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
-		return 0, utils.Wrap(err, "proto.Unmarshal failed")
+	if len(msgs.Msg) > 0 {
+		msgPb := &server_api_params.MsgData{}
+		err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, msgPb)
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
+			return 0, utils.Wrap(err, "proto.Unmarshal failed")
+		}
+		*delMsgIDList = append(*delMsgIDList, [2]interface{}{msgs.UID, msgPb.Seq})
 	}
-	*delMsgIDList = append(*delMsgIDList, [2]interface{}{msgs.UID, msgPb.Seq})
 	// 没有找到 代表需要全部删除掉 继续递归查找下一个比较旧的列表
 	seq, err := deleteMongoMsg(operationID, utils.GetSelfFuncName(), index+1, delMsgIDList)
 	if err != nil {
@@ -110,4 +125,30 @@ func getDelMaxSeqByIDList(delMsgIDList [][2]interface{}) uint32 {
 		return 0
 	}
 	return delMsgIDList[len(delMsgIDList)-1][1].(uint32)
+}
+
+func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
+	var maxSeq uint64
+	var err error
+	if diffusionType == constant.WriteDiffusion {
+		maxSeq, err = db.DB.GetUserMaxSeq(ID)
+	} else {
+		maxSeq, err = db.DB.GetGroupMaxSeq(ID)
+	}
+	if err != nil {
+		return utils.Wrap(err, "GetUserMaxSeq failed")
+	}
+	msg, err := db.DB.GetNewestMsg(ID)
+	if err != nil {
+		return utils.Wrap(err, "GetNewestMsg failed")
+	}
+	msgPb := &server_api_params.MsgData{}
+	err = proto.Unmarshal(msg.Msg, msgPb)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	if math.Abs(float64(msgPb.Seq-uint32(maxSeq))) > 10 {
+		log.NewWarn(operationID, utils.GetSelfFuncName(), maxSeq, msgPb.Seq, "redis maxSeq is different with msg.Seq")
+	}
+	return nil
 }

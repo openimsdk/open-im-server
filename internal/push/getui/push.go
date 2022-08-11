@@ -83,6 +83,7 @@ type Alert struct {
 type Android struct {
 	Ups struct {
 		Notification Notification `json:"notification"`
+		Options      Options      `json:"options"`
 	} `json:"ups"`
 }
 
@@ -90,6 +91,18 @@ type Notification struct {
 	Title     string `json:"title"`
 	Body      string `json:"body"`
 	ClickType string `json:"click_type"`
+}
+
+type Options struct {
+	HW struct {
+		DefaultSound bool   `json:"/message/android/notification/default_sound"`
+		ChannelID    string `json:"/message/android/notification/channel_id"`
+		Sound        string `json:"/message/android/notification/sound"`
+		Importance   string `json:"/message/android/notification/importance"`
+	} `json:"HW"`
+	XM struct {
+		ChannelID string `json:"/extra.channel_id"`
+	} `json:""`
 }
 
 type PushResp struct {
@@ -132,6 +145,17 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, operationID stri
 		Title:     alert,
 		Body:      alert,
 		ClickType: "startapp",
+	}
+	pushReq.PushChannel.Android.Ups.Options = Options{
+		HW: struct {
+			DefaultSound bool   `json:"/message/android/notification/default_sound"`
+			ChannelID    string `json:"/message/android/notification/channel_id"`
+			Sound        string `json:"/message/android/notification/sound"`
+			Importance   string `json:"/message/android/notification/importance"`
+		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "importance"},
+		XM: struct {
+			ChannelID string `json:"/extra.channel_id"`
+		}{ChannelID: "Default"},
 	}
 	pushResp := PushResp{}
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)

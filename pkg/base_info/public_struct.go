@@ -1,19 +1,26 @@
 package base_info
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ApiUserInfo struct {
-	UserID      string `json:"userID" binding:"required,min=1,max=64" swaggo:"true,用户ID,"`
-	Nickname    string `json:"nickname" binding:"omitempty,min=1,max=64" swaggo:"true,my id,19"`
-	FaceURL     string `json:"faceURL" binding:"omitempty,max=1024"`
-	Gender      int32  `json:"gender" binding:"omitempty,oneof=0 1 2"`
-	PhoneNumber string `json:"phoneNumber" binding:"omitempty,max=32"`
-	Birth       uint32 `json:"birth" binding:"omitempty"`
-	Email       string `json:"email" binding:"omitempty,max=64"`
-	Ex          string `json:"ex" binding:"omitempty,max=1024"`
+	UserID        string `json:"userID" binding:"required,min=1,max=64" swaggo:"true,用户ID,"`
+	Nickname      string `json:"nickname" binding:"omitempty,min=1,max=64" swaggo:"true,my id,19"`
+	FaceURL       string `json:"faceURL" binding:"omitempty,max=1024"`
+	Gender        int32  `json:"gender" binding:"omitempty,oneof=0 1 2"`
+	PhoneNumber   string `json:"phoneNumber" binding:"omitempty,max=32"`
+	Birth         uint32 `json:"birth" binding:"omitempty"`
+	Email         string `json:"email" binding:"omitempty,max=64"`
+	CreateIp      string `json:"createIp" binding:"omitempty,max=15"`
+	CreateTime    int64  `json:"createTime"`
+	LastLoginIp   string `json:"LastLoginIp" binding:"omitempty,max=15"`
+	LastLoginTime int64  `json:"lastLoginTime"`
+	LoginTimes    int32  `json:"loginTimes" binding:"omitempty"`
+	LoginLimit    int32  `json:"loginLimit" binding:"omitempty"`
+	Ex            string `json:"ex" binding:"omitempty,max=1024"`
 }
 
 //type Conversation struct {

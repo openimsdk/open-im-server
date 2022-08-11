@@ -178,7 +178,16 @@ message User{
   string Nickname = 2;
   string UserId = 3;
   string CreateTime = 4;
-  bool IsBlock = 5;
+  string PhoneNumber = 5;
+  string Email = 6;
+  string Birth = 7;
+  string CreateIp = 8;
+  string LastLoginTime = 9;
+  string LastLoginIp = 10;
+  int32 LoginTimes = 11;
+  int32 Gender = 12;
+  int32 LoginLimit = 13;
+  bool IsBlock = 14;
 }
 
 message GetUserByIdResp{
