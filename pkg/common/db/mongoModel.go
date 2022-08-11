@@ -263,13 +263,16 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 	regex := fmt.Sprintf("^%s", ID)
-	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"$regex": regex}).SetSort(bson.M{"uid": 1})
+	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
 	var msgs []UserChat
 	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
 	if err != nil {
 		return nil, err
 	}
 	err = cursor.Decode(&msgs)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
 	if len(msgs) > 0 {
 		return &msgs[0], err
 	} else {
@@ -306,13 +309,16 @@ func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 	regex := fmt.Sprintf("^%s", ID)
-	findOpts := options.Find().SetLimit(1).SetSort(bson.M{"$regex": regex}).SetSort(bson.M{"uid": -1})
+	findOpts := options.Find().SetLimit(1).SetSort(bson.M{"uid": -1})
 	var userChats []UserChat
 	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
 	if err != nil {
 		return nil, err
 	}
 	err = cursor.Decode(&userChats)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
 	if len(userChats) > 0 {
 		if len(userChats[0].Msg) > 0 {
 			return &userChats[0].Msg[len(userChats[0].Msg)], nil

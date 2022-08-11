@@ -20,7 +20,7 @@ func StartCronTask() {
 	fmt.Println("config", config.Config.Mongo.ChatRecordsClearTime)
 	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, func() {
 		operationID := getCronTaskOperationID()
-		log.NewInfo(operationID, "start", utils.GetSelfFuncName())
+		log.NewInfo(operationID, "====================== start del cron task ======================")
 		userIDList, err := im_mysql_model.SelectAllUserID()
 		if err == nil {
 			log.NewDebug(operationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
@@ -56,6 +56,8 @@ func StartCronTask() {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 			return
 		}
+
+		log.NewInfo(operationID, "====================== start del cron finished ======================")
 	})
 	if err != nil {
 		fmt.Println("start cron failed", err.Error())

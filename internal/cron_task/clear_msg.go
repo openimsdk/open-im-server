@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/log"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	goRedis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 	"math"
 )
@@ -21,10 +22,13 @@ func ResetUserGroupMinSeq(operationID, groupID string, userIDList []string) erro
 		log.NewError(operationID, utils.GetSelfFuncName(), groupID, "deleteMongoMsg failed")
 		return utils.Wrap(err, "")
 	}
+	if minSeq == 0 {
+		return nil
+	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDList:", delMsgIDList, "minSeq", minSeq)
 	for _, userID := range userIDList {
 		userMinSeq, err := db.DB.GetGroupUserMinSeq(groupID, userID)
-		if err != nil {
+		if err != nil && err != goRedis.Nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), "GetGroupUserMinSeq failed", groupID, userID, err.Error())
 			continue
 		}
@@ -45,6 +49,9 @@ func DeleteMongoMsgAndResetRedisSeq(operationID, userID string) error {
 	minSeq, err := deleteMongoMsg(operationID, userID, oldestList, &delMsgIDList)
 	if err != nil {
 		return utils.Wrap(err, "")
+	}
+	if minSeq == 0 {
+		return nil
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDMap: ", delMsgIDList, "minSeq", minSeq)
 	err = db.DB.SetUserMinSeq(userID, minSeq)
@@ -136,6 +143,9 @@ func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 		maxSeq, err = db.DB.GetGroupMaxSeq(ID)
 	}
 	if err != nil {
+		if err == goRedis.Nil {
+			return nil
+		}
 		return utils.Wrap(err, "GetUserMaxSeq failed")
 	}
 	msg, err := db.DB.GetNewestMsg(ID)
