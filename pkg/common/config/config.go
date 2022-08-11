@@ -264,6 +264,7 @@ type config struct {
 		CallbackWordFilter                 callBackConfig `yaml:"callbackWordFilter"`
 		CallbackUserOnline                 callBackConfig `yaml:"callbackUserOnline"`
 		CallbackUserOffline                callBackConfig `yaml:"callbackUserOffline"`
+		CallbackUserKickOff                callBackConfig `yaml:"callbackUserKickOff"`
 		CallbackOfflinePush                callBackConfig `yaml:"callbackOfflinePush"`
 		CallbackOnlinePush                 callBackConfig `yaml:"callbackOnlinePush"`
 		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`

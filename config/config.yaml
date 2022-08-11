@@ -299,6 +299,9 @@ callback:
   callbackUserOffline:
     enable: false
     callbackTimeOut: 2
+  callbackUserKickOff:
+    enable: false
+    callbackTimeOut: 2
   callbackOfflinePush:
     enable: false
     callbackTimeOut: 2

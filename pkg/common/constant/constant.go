@@ -200,6 +200,7 @@ const (
 	CallbackWordFilterCommand           = "callbackWordFilterCommand"
 	CallbackUserOnlineCommand           = "callbackUserOnlineCommand"
 	CallbackUserOfflineCommand          = "callbackUserOfflineCommand"
+	CallbackUserKickOffCommand          = "callbackUserKickOffCommand"
 	CallbackOfflinePushCommand          = "callbackOfflinePushCommand"
 	CallbackOnlinePushCommand           = "callbackOnlinePushCommand"
 	CallbackSuperGroupOnlinePushCommand = "callbackSuperGroupOnlinePushCommand"
