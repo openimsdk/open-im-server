@@ -1,21 +1,18 @@
 package cms_api_struct
 
+import server_api_params "Open_IM/pkg/proto/sdk_ws"
+
 type GroupResponse struct {
-	GroupName        string `json:"group_name"`
-	GroupID          string `json:"group_id"`
-	GroupMasterName  string `json:"group_master_name"`
-	GroupMasterId    string `json:"group_master_id"`
-	CreateTime       string `json:"create_time"`
-	IsBanChat        bool   `json:"is_ban_chat"`
-	IsBanPrivateChat bool   `json:"is_ban_private_chat"`
-	ProfilePhoto     string `json:"profile_photo"`
+	GroupOwnerName string `json:"GroupOwnerName"`
+	GroupOwnerID   string `json:"GroupOwnerID"`
+	*server_api_params.GroupInfo
 }
 
-type GetGroupByIdRequest struct {
-	GroupId string `form:"group_id" binding:"required"`
+type GetGroupByIDRequest struct {
+	GroupID string `form:"groupID" binding:"required"`
 }
 
-type GetGroupByIdResponse struct {
+type GetGroupByIDResponse struct {
 	GroupResponse
 }
 

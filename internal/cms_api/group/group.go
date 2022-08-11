@@ -18,10 +18,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetGroupById(c *gin.Context) {
+func GetGroupByID(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetGroupByIdRequest
-		resp  cms_api_struct.GetGroupByIdResponse
+		req   cms_api_struct.GetGroupByIDRequest
+		resp  cms_api_struct.GetGroupByIDResponse
 		reqPb pbGroup.GetGroupByIdReq
 	)
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -31,7 +31,7 @@ func GetGroupById(c *gin.Context) {
 	}
 	reqPb.OperationID = utils.OperationIDGenerator()
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	reqPb.GroupId = req.GroupId
+	reqPb.GroupID = req.GroupID
 	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, reqPb.OperationID)
 	if etcdConn == nil {
 		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
@@ -40,19 +40,13 @@ func GetGroupById(c *gin.Context) {
 		return
 	}
 	client := pbGroup.NewGroupClient(etcdConn)
-	respPb, err := client.GetGroupById(context.Background(), &reqPb)
+	respPb, err := client.GetGroupByID(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetGroupById failed ", err.Error())
 		openIMHttp.RespHttp200(c, err, nil)
 		return
 	}
-	resp.GroupName = respPb.CMSGroup.GroupInfo.GroupName
-	resp.GroupID = respPb.CMSGroup.GroupInfo.GroupID
-	resp.CreateTime = (utils.UnixSecondToTime(int64(respPb.CMSGroup.GroupInfo.CreateTime))).String()
-	resp.ProfilePhoto = respPb.CMSGroup.GroupInfo.FaceURL
-	resp.GroupMasterName = respPb.CMSGroup.GroupMasterName
-	resp.GroupMasterId = respPb.CMSGroup.GroupMasterId
-	resp.IsBanChat = constant.GroupIsBanChat(respPb.CMSGroup.GroupInfo.Status)
+	utils.CopyStructFields(&resp, respPb)
 	log.NewInfo("", utils.GetSelfFuncName(), "req: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }

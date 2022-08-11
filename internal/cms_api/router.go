@@ -47,7 +47,7 @@ func NewGinRouter() *gin.Engine {
 	}
 	groupRouterGroup := r2.Group("/group")
 	{
-		groupRouterGroup.GET("/get_group_by_id", group.GetGroupById)
+		groupRouterGroup.GET("/get_group_by_id", group.GetGroupByID)
 		groupRouterGroup.GET("/get_groups", group.GetGroups)
 		groupRouterGroup.GET("/get_group_by_name", group.GetGroupByName)
 		groupRouterGroup.GET("/get_group_members", group.GetGroupMembers)
