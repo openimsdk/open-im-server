@@ -125,6 +125,7 @@ func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int
 			log.Debug(operationID, "Filter out this node ", rpcSvr.target)
 			continue
 		}
+		log.Debug(operationID, "call this node ", v.Target(), rpcSvr.target)
 		client := pbRelay.NewRelayClient(v)
 		req := &pbRelay.MultiTerminalLoginCheckReq{OperationID: operationID, PlatformID: platformID, UserID: userID, Token: token}
 		log.NewInfo(operationID, "MultiTerminalLoginCheckReq ", client, req.String())
@@ -141,6 +142,8 @@ func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int
 func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int, token string, operationID string) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
+	log.NewInfo(operationID, utils.GetSelfFuncName(), " rpc args: ", uid, platformID, token)
+	return
 	switch config.Config.MultiLoginPolicy {
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
@@ -268,7 +271,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
 	}
-	//go ws.MultiTerminalLoginRemoteChecker(uid, int32(platformID), token, operationID)
+	go ws.MultiTerminalLoginRemoteChecker(uid, int32(platformID), token, operationID)
 	ws.MultiTerminalLoginChecker(uid, platformID, conn, token, operationID)
 	if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
 		oldConnMap[platformID] = conn
