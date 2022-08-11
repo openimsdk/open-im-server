@@ -1,11 +1,30 @@
 package cms_api_struct
 
-import server_api_params "Open_IM/pkg/proto/sdk_ws"
+import (
+	server_api_params "Open_IM/pkg/proto/sdk_ws"
+)
 
 type GroupResponse struct {
 	GroupOwnerName string `json:"GroupOwnerName"`
 	GroupOwnerID   string `json:"GroupOwnerID"`
-	*server_api_params.GroupInfo
+	//*server_api_params.GroupInfo
+	GroupID                string `json:"groupID"`
+	GroupName              string `json:"groupName"`
+	Notification           string `json:"notification"`
+	Introduction           string `json:"introduction"`
+	FaceURL                string `json:"faceURL"`
+	OwnerUserID            string `json:"ownerUserID"`
+	CreateTime             uint32 `json:"createTime"`
+	MemberCount            uint32 `json:"memberCount"`
+	Ex                     string `json:"ex"`
+	Status                 int32  `json:"status"`
+	CreatorUserID          string `json:"creatorUserID"`
+	GroupType              int32  `json:"groupType"`
+	NeedVerification       int32  `json:"needVerification"`
+	LookMemberInfo         int32  `json:"lookMemberInfo"`
+	ApplyMemberFriend      int32  `json:"applyMemberFriend"`
+	NotificationUpdateTime uint32 `json:"notificationUpdateTime"`
+	NotificationUserID     string `json:"notificationUserID"`
 }
 
 type GetGroupByIDRequest struct {
@@ -17,13 +36,13 @@ type GetGroupByIDResponse struct {
 }
 
 type GetGroupRequest struct {
-	GroupName string `form:"group_name" binding:"required"`
+	GroupName string `form:"groupName" binding:"required"`
 	RequestPagination
 }
 
 type GetGroupResponse struct {
 	Groups    []GroupResponse `json:"groups"`
-	GroupNums int             `json:"group_nums"`
+	GroupNums int             `json:"groupNums"`
 	ResponsePagination
 }
 
@@ -33,77 +52,70 @@ type GetGroupsRequest struct {
 
 type GetGroupsResponse struct {
 	Groups    []GroupResponse `json:"groups"`
-	GroupNums int             `json:"group_nums"`
+	GroupNums int             `json:"groupNums"`
 	ResponsePagination
 }
 
 type CreateGroupRequest struct {
-	GroupName     string   `json:"group_name" binding:"required"`
-	GroupMasterId string   `json:"group_master_id" binding:"required"`
-	GroupMembers  []string `json:"group_members" binding:"required"`
+	GroupName     string   `json:"groupName" binding:"required"`
+	GroupMasterId string   `json:"groupOwnerID" binding:"required"`
+	GroupMembers  []string `json:"groupMembers" binding:"required"`
 }
 
 type CreateGroupResponse struct {
 }
 
 type SetGroupMasterRequest struct {
-	GroupId string `json:"group_id" binding:"required"`
-	UserId  string `json:"user_id" binding:"required"`
+	GroupId string `json:"groupID" binding:"required"`
+	UserId  string `json:"userID" binding:"required"`
 }
 
 type SetGroupMasterResponse struct {
 }
 
 type SetGroupMemberRequest struct {
-	GroupId string `json:"group_id" binding:"required"`
-	UserId  string `json:"user_id" binding:"required"`
+	GroupId string `json:"groupID" binding:"required"`
+	UserId  string `json:"userID" binding:"required"`
 }
 
 type SetGroupMemberRespones struct {
 }
 
 type BanGroupChatRequest struct {
-	GroupId string `json:"group_id" binding:"required"`
+	GroupId string `json:"groupID" binding:"required"`
 }
 
 type BanGroupChatResponse struct {
 }
 
 type BanPrivateChatRequest struct {
-	GroupId string `json:"group_id" binding:"required"`
+	GroupId string `json:"groupID" binding:"required"`
 }
 
 type BanPrivateChatResponse struct {
 }
 
 type DeleteGroupRequest struct {
-	GroupId string `json:"group_id" binding:"required"`
+	GroupId string `json:"groupID" binding:"required"`
 }
 
 type DeleteGroupResponse struct {
 }
 
 type GetGroupMembersRequest struct {
-	GroupId  string `form:"group_id" binding:"required"`
-	UserName string `form:"user_name"`
+	GroupID  string `form:"groupID" binding:"required"`
+	UserName string `form:"userName"`
 	RequestPagination
 }
 
-type GroupMemberResponse struct {
-	MemberPosition int    `json:"member_position"`
-	MemberNickName string `json:"member_nick_name"`
-	MemberId       string `json:"member_id"`
-	JoinTime       string `json:"join_time"`
-}
-
 type GetGroupMembersResponse struct {
-	GroupMembers []GroupMemberResponse `json:"group_members"`
+	GroupMembers []server_api_params.GroupMemberFullInfo `json:"groupMembers"`
 	ResponsePagination
-	MemberNums int `json:"member_nums"`
+	MemberNums int `json:"memberNums"`
 }
 
 type GroupMemberRequest struct {
-	GroupId string   `json:"group_id" binding:"required"`
+	GroupId string   `json:"groupID" binding:"required"`
 	Members []string `json:"members" binding:"required"`
 }
 
@@ -129,12 +141,12 @@ type RemoveGroupMembersResponse struct {
 }
 
 type AlterGroupInfoRequest struct {
-	GroupID      string `json:"group_id"`
-	GroupName    string `json:"group_name"`
+	GroupID      string `json:"groupID"`
+	GroupName    string `json:"groupName"`
 	Notification string `json:"notification"`
 	Introduction string `json:"introduction"`
-	ProfilePhoto string `json:"profile_photo"`
-	GroupType    int    `json:"group_type"`
+	ProfilePhoto string `json:"profilePhoto"`
+	GroupType    int    `json:"groupType"`
 }
 
 type AlterGroupInfoResponse struct {

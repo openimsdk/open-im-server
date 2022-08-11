@@ -247,16 +247,6 @@ message GetGroupMemberReq {
     string OperationID = 2;
 }
 
-message OperateGroupStatusReq {
-    string GroupID = 1;
-    int32 Status = 2;
-    string OperationID = 3;
-}
-
-message OperateGroupStatusResp {
-
-}
-
 message OperateUserRoleReq {
   string GroupID = 1;
   string UserID = 2;
@@ -265,15 +255,6 @@ message OperateUserRoleReq {
 }
  
 message OperateUserRoleResp {
-
-}
-
-message DeleteGroupReq {
-  string GroupID = 1;
-  string OperationID = 2;
-}
-
-message DeleteGroupResp {
 
 }
 
@@ -463,12 +444,10 @@ service group{
   rpc inviteUserToGroup(InviteUserToGroupReq) returns (InviteUserToGroupResp);
   rpc getGroupAllMember(GetGroupAllMemberReq) returns(GetGroupAllMemberResp);
 
-  rpc GetGroupById(GetGroupByIDReq) returns(GetGroupByIDResp);
+  rpc GetGroupByID(GetGroupByIDReq) returns(GetGroupByIDResp);
   rpc GetGroup(GetGroupReq) returns(GetGroupResp);
   rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);
-  rpc OperateGroupStatus(OperateGroupStatusReq) returns(OperateGroupStatusResp);
   rpc OperateUserRole(OperateUserRoleReq) returns(OperateUserRoleResp);
-  rpc DeleteGroup(DeleteGroupReq) returns(DeleteGroupResp);
   rpc GetGroupMembersCMS(GetGroupMembersCMSReq) returns(GetGroupMembersCMSResp);
   rpc RemoveGroupMembersCMS(RemoveGroupMembersCMSReq) returns(RemoveGroupMembersCMSResp);
   rpc AddGroupMembersCMS(AddGroupMembersCMSReq) returns(AddGroupMembersCMSResp);
