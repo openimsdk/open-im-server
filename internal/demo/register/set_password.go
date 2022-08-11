@@ -30,6 +30,7 @@ type ParamsSetPassword struct {
 	FaceURL          string `json:"faceURL"`
 	OperationID      string `json:"operationID" binding:"required"`
 	AreaCode         string `json:"areaCode"`
+	InvitationCode   string `json:"invitationCode"`
 }
 
 func SetPassword(c *gin.Context) {

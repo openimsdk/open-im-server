@@ -253,8 +253,8 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID str
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	if err = d.RDB.Del(ctx, vals...).Err(); err != nil {
-		return utils.Wrap(err, "")
+	for _, v := range vals {
+		err = d.RDB.Del(ctx, v).Err()
 	}
 	return nil
 }

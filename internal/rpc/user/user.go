@@ -467,6 +467,10 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.Se
 		log.NewError(req.OperationID, "SetGlobalRecvMessageOpt failed ", err.Error(), user)
 		return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
+	if err := rocksCache.DelUserInfoFromCache(user.UserID); err != nil {
+		log.NewError(req.OperationID, "DelUserInfoFromCache failed ", err.Error(), req.String())
+		return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+	}
 	chat.UserInfoUpdatedNotification(req.OperationID, req.UserID, req.UserID)
 	return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
