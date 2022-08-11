@@ -144,7 +144,6 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), " rpc args: ", uid, platformID, token)
-	return
 	switch config.Config.MultiLoginPolicy {
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
