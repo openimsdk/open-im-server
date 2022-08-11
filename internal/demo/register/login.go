@@ -10,8 +10,9 @@ import (
 	"Open_IM/pkg/utils"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type ParamsLogin struct {
@@ -62,6 +63,11 @@ func Login(c *gin.Context) {
 	openIMGetUserToken.Platform = params.Platform
 	openIMGetUserToken.Secret = config.Config.Secret
 	openIMGetUserToken.UserID = userID
+	loginIp := c.Request.Header.Get("X-Forward-For")
+	if loginIp == "" {
+		loginIp = c.ClientIP()
+	}
+	openIMGetUserToken.LoginIp = loginIp
 	openIMGetUserTokenResp := api.UserTokenResp{}
 	bMsg, err := http2.Post(url, openIMGetUserToken, 2)
 	if err != nil {
@@ -72,7 +78,11 @@ func Login(c *gin.Context) {
 	err = json.Unmarshal(bMsg, &openIMGetUserTokenResp)
 	if err != nil || openIMGetUserTokenResp.ErrCode != 0 {
 		log.NewError(params.OperationID, "request get user token", account, "err", "")
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.GetIMTokenErr, "errMsg": ""})
+		if openIMGetUserTokenResp.ErrCode == constant.LoginLimit {
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.LoginLimit, "errMsg": "用户登录被限制"})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.GetIMTokenErr, "errMsg": ""})
+		}
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": openIMGetUserTokenResp.UserToken})

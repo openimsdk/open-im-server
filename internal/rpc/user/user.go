@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
-	"Open_IM/pkg/common/db/rocks_cache"
+	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	errors "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
@@ -540,11 +540,20 @@ func (s *userServer) GetUsersByName(ctx context.Context, req *pbUser.GetUsersByN
 			continue
 		}
 		resp.Users = append(resp.Users, &pbUser.User{
-			ProfilePhoto: user.FaceURL,
-			Nickname:     user.Nickname,
-			UserId:       user.UserID,
-			CreateTime:   user.CreateTime.String(),
-			IsBlock:      isBlock,
+			ProfilePhoto:  user.FaceURL,
+			Nickname:      user.Nickname,
+			UserId:        user.UserID,
+			CreateTime:    user.CreateTime.Format("2006-01-02 15:04:05"),
+			CreateIp:      user.CreateIp,
+			IsBlock:       isBlock,
+			Birth:         user.Birth.Format("2006-01-02"),
+			PhoneNumber:   user.PhoneNumber,
+			Email:         user.Email,
+			LastLoginIp:   user.LastLoginIp,
+			LastLoginTime: user.LastLoginTime.Format("2006-01-02 15:04:05"),
+			LoginTimes:    user.LoginTimes,
+			Gender:        user.Gender,
+			LoginLimit:    user.LoginLimit,
 		})
 	}
 	user := db.User{Nickname: req.UserName}
@@ -576,11 +585,20 @@ func (s *userServer) GetUserById(ctx context.Context, req *pbUser.GetUserByIdReq
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	resp.User = &pbUser.User{
-		ProfilePhoto: user.FaceURL,
-		Nickname:     user.Nickname,
-		UserId:       user.UserID,
-		CreateTime:   user.CreateTime.String(),
-		IsBlock:      isBlock,
+		ProfilePhoto:  user.FaceURL,
+		Nickname:      user.Nickname,
+		UserId:        user.UserID,
+		CreateTime:    user.CreateTime.Format("2006-01-02 15:04:05"),
+		CreateIp:      user.CreateIp,
+		IsBlock:       isBlock,
+		Birth:         user.Birth.Format("2006-01-02"),
+		PhoneNumber:   user.PhoneNumber,
+		Email:         user.Email,
+		LastLoginIp:   user.LastLoginIp,
+		LastLoginTime: user.LastLoginTime.Format("2006-01-02 15:04:05"),
+		LoginTimes:    user.LoginTimes,
+		Gender:        user.Gender,
+		LoginLimit:    user.LoginLimit,
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -598,11 +616,20 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		isBlock, err := imdb.UserIsBlock(v.UserID)
 		if err == nil {
 			user := &pbUser.User{
-				ProfilePhoto: v.FaceURL,
-				UserId:       v.UserID,
-				CreateTime:   v.CreateTime.String(),
-				Nickname:     v.Nickname,
-				IsBlock:      isBlock,
+				ProfilePhoto:  v.FaceURL,
+				UserId:        v.UserID,
+				CreateTime:    v.CreateTime.Format("2006-01-02 15:04:05"),
+				CreateIp:      v.CreateIp,
+				Nickname:      v.Nickname,
+				Birth:         v.Birth.Format("2006-01-02"),
+				PhoneNumber:   v.PhoneNumber,
+				Email:         v.Email,
+				IsBlock:       isBlock,
+				LastLoginIp:   v.LastLoginIp,
+				LastLoginTime: v.LastLoginTime.Format("2006-01-02 15:04:05"),
+				LoginTimes:    v.LoginTimes,
+				Gender:        v.Gender,
+				LoginLimit:    v.LoginLimit,
 			}
 			resp.User = append(resp.User, user)
 		} else {

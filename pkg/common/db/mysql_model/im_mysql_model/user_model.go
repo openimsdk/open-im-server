@@ -42,6 +42,9 @@ func UserRegister(user db.User) error {
 	if user.Birth.Unix() < 0 {
 		user.Birth = utils.UnixSecondToTime(0)
 	}
+	user.LastLoginTime = time.Now()
+	user.LoginTimes = 0
+	user.LastLoginIp = user.CreateIp
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user).Error
 	if err != nil {
 		return err
@@ -130,7 +133,7 @@ func UserIsBlock(userId string) (bool, error) {
 	var user db.BlackList
 	rows := db.DB.MysqlDB.DefaultGormDB().Table("black_lists").Where("uid=?", userId).First(&user).RowsAffected
 	if rows >= 1 {
-		return true, nil
+		return user.EndDisableTime.After(time.Now()), nil
 	}
 	return false, nil
 }
@@ -151,6 +154,9 @@ func BlockUser(userId, endDisableTime string) error {
 	db.DB.MysqlDB.DefaultGormDB().Table("black_lists").Where("uid=?", userId).First(&blockUser)
 	if blockUser.UserId != "" {
 		db.DB.MysqlDB.DefaultGormDB().Model(&blockUser).Where("uid=?", blockUser.UserId).Update("end_disable_time", end)
+		if user.LoginLimit != 2 {
+			db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).Update("login_limit", 2)
+		}
 		return nil
 	}
 	blockUser = db.BlackList{
@@ -159,11 +165,20 @@ func BlockUser(userId, endDisableTime string) error {
 		EndDisableTime:   end,
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Create(&blockUser)
+	if result.Error == nil {
+		if user.LoginLimit != 2 {
+			db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).Update("login_limit", 2)
+		}
+	}
 	return result.Error
 }
 
 func UnBlockUser(userId string) error {
-	return db.DB.MysqlDB.DefaultGormDB().Where("uid=?", userId).Delete(&db.BlackList{}).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Where("uid=?", userId).Delete(&db.BlackList{}).Error
+	if err != nil {
+		return err
+	}
+	return db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", userId).Update("login_limit", 0).Error
 }
 
 type BlockUserInfo struct {
@@ -237,4 +252,31 @@ func GetBlockUsersNumCount() (int32, error) {
 		return 0, err
 	}
 	return int32(count), nil
+}
+
+func IsLimitRegisterIp(RegisterIp string) (bool, error) {
+	//如果已经存在则限制
+	var count int64
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("ip_limits").Where("ip=? and limit_register=? and limit_time>now()", RegisterIp, 1).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func IsLimitLoginIp(LoginIp string) (bool, error) {
+	//如果已经存在则限制
+	var count int64
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("ip_limits").Where("ip=? and limit_login=? and limit_time>now()", LoginIp, 1).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func IsLimitUserLoginIp(userID string, LoginIp string) (bool, error) {
+	//如果已经存在则放行
+	var count int64
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("user_ip_limits").Where("ip=? and user_id=?", LoginIp, userID).Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count == 0, nil
 }

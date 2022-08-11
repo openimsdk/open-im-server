@@ -67,6 +67,8 @@ const (
 	CodeInvalidOrExpired = 10009
 	RegisterFailed       = 10010
 	ResetPasswordFailed  = 10011
+	RegisterLimit        = 10012
+	LoginLimit           = 10013
 	DatabaseError        = 10002
 	ServerError          = 10004
 	HttpError            = 10005
