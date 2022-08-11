@@ -3,11 +3,17 @@ package db
 import "time"
 
 type Register struct {
-	Account  string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
-	Password string `gorm:"column:password;type:varchar(255)" json:"password"`
-	Ex       string `gorm:"column:ex;size:1024" json:"ex"`
-	UserID   string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
-	AreaCode string `gorm:"column:area_code;type:varchar(255)"`
+	Account        string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
+	Password       string `gorm:"column:password;type:varchar(255)" json:"password"`
+	Ex             string `gorm:"column:ex;size:1024" json:"ex"`
+	UserID         string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
+	AreaCode       string `gorm:"column:area_code;type:varchar(255)"`
+	InvitationCode string `gorm:"column:invitation_code;type:varchar(255)"`
+}
+
+type Invitation struct {
+	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:varchar(255)"`
+	CreateTime     time.Time `gorm:"column:create_time"`
 }
 
 //

@@ -34,11 +34,12 @@ func init() {
 }
 
 type paramsVerificationCode struct {
-	Email       string `json:"email"`
-	PhoneNumber string `json:"phoneNumber"`
-	OperationID string `json:"operationID" binding:"required"`
-	UsedFor     int    `json:"usedFor"`
-	AreaCode    string `json:"areaCode"`
+	Email          string `json:"email"`
+	PhoneNumber    string `json:"phoneNumber"`
+	OperationID    string `json:"operationID" binding:"required"`
+	UsedFor        int    `json:"usedFor"`
+	AreaCode       string `json:"areaCode"`
+	InvitationCode string `json:"invitationCode"`
 }
 
 func SendVerificationCode(c *gin.Context) {
