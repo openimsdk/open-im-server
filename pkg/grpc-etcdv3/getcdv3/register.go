@@ -38,7 +38,7 @@ func RegisterEtcd4Unique(schema, etcdAddr, myHost string, myPort int, serviceNam
 }
 
 func GetTarget(schema, myHost string, myPort int, serviceName string) string {
-	return GetPrefix(schema, serviceName) + ":" + net.JoinHostPort(myHost, strconv.Itoa(myPort)) + "/"
+	return GetPrefix4Unique(schema, serviceName) + ":" + net.JoinHostPort(myHost, strconv.Itoa(myPort)) + "/"
 }
 
 //etcdAddr separated by commas
