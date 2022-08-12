@@ -325,3 +325,11 @@ type AppVersion struct {
 func (AppVersion) TableName() string {
 	return "app_version"
 }
+
+type RegisterAddFriend struct {
+	UserID string `gorm:"column:user_id;size:64"`
+}
+
+func (RegisterAddFriend) TableName() string {
+	return "register_add_friend"
+}

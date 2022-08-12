@@ -78,7 +78,7 @@ func initMysqlDB() {
 		&GroupMember{},
 		&GroupRequest{},
 		&User{},
-		&Black{}, &ChatLog{}, &Register{}, &Conversation{}, &AppVersion{}, &Department{}, &BlackList{}, &IpLimit{}, &UserIpLimit{}, &Invitation{})
+		&Black{}, &ChatLog{}, &Register{}, &Conversation{}, &AppVersion{}, &Department{}, &BlackList{}, &IpLimit{}, &UserIpLimit{}, &Invitation{}, &RegisterAddFriend{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 
@@ -153,6 +153,11 @@ func initMysqlDB() {
 	if !db.Migrator().HasTable(&UserIpLimit{}) {
 		fmt.Println("CreateTable UserIpLimit")
 		db.Migrator().CreateTable(&UserIpLimit{})
+	}
+
+	if !db.Migrator().HasTable(&RegisterAddFriend{}) {
+		fmt.Println("CreateTable RegisterAddFriend")
+		db.Migrator().CreateTable(&RegisterAddFriend{})
 	}
 	DB.MysqlDB.db = db
 	return

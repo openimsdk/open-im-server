@@ -15,7 +15,7 @@ import (
 const cronTaskOperationID = "cronTaskOperationID-"
 
 func StartCronTask() {
-	log.NewPrivateLog("cron.log")
+	log.NewPrivateLog("cron")
 	log.NewInfo(utils.OperationIDGenerator(), "start cron task")
 	c := cron.New()
 	fmt.Println("config", config.Config.Mongo.ChatRecordsClearTime)

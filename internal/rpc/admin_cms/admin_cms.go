@@ -3,11 +3,13 @@ package admin_cms
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	openIMHttp "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAdminCMS "Open_IM/pkg/proto/admin_cms"
+	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"net"
@@ -98,5 +100,52 @@ func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLogi
 		return resp, openIMHttp.WrapError(constant.ErrTokenMalformed)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
+func (s *adminCMSServer) AddUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.AddUserRegisterAddFriendIDListReq) (*pbAdminCMS.AddUserRegisterAddFriendIDListResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbAdminCMS.AddUserRegisterAddFriendIDListResp{}
+	if err := imdb.AddUserRegisterAddFriendIDList(req.UserIDList...); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
+		return resp, openIMHttp.WrapError(constant.ErrDB)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
+	return resp, nil
+}
+
+func (s *adminCMSServer) ReduceUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.ReduceUserRegisterAddFriendIDListReq) (*pbAdminCMS.ReduceUserRegisterAddFriendIDListResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbAdminCMS.ReduceUserRegisterAddFriendIDListResp{}
+	if req.Operation == 0 {
+		if err := imdb.ReduceUserRegisterAddFriendIDList(req.UserIDList...); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
+			return resp, openIMHttp.WrapError(constant.ErrDB)
+		}
+	} else {
+		if err := imdb.DeleteAllRegisterAddFriendIDList(); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
+			return resp, openIMHttp.WrapError(constant.ErrDB)
+		}
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
+	return resp, nil
+}
+
+func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.GetUserRegisterAddFriendIDListReq) (*pbAdminCMS.GetUserRegisterAddFriendIDListResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbAdminCMS.GetUserRegisterAddFriendIDListResp{UserInfoList: []*server_api_params.UserInfo{}}
+	userIDList, err := imdb.GetRegisterAddFriendList(req.Pagination.ShowNumber, req.Pagination.ShowNumber)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		return resp, openIMHttp.WrapError(constant.ErrDB)
+	}
+	userList, err := imdb.GetUsersByUserIDList(userIDList)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userIDList)
+		return resp, openIMHttp.WrapError(constant.ErrDB)
+	}
+	utils.CopyStructFields(&resp.UserInfoList, userList)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
 	return resp, nil
 }

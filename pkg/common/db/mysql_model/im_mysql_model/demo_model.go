@@ -28,3 +28,38 @@ func ResetPassword(account, password string) error {
 	}
 	return db.DB.MysqlDB.DefaultGormDB().Table("registers").Where("account = ?", account).Updates(&r).Error
 }
+
+func GetRegisterAddFriendList(showNumber, pageNumber int32) ([]string, error) {
+	var IDList []string
+	var err error
+	model := db.DB.MysqlDB.DefaultGormDB().Model(&db.RegisterAddFriend{})
+	if showNumber == 0 {
+		err = model.Pluck("user_id", &IDList).Error
+	} else {
+		err = model.Limit(int(showNumber)).Offset(int(showNumber*(pageNumber-1))).Pluck("user_id", &IDList).Error
+	}
+	return IDList, err
+}
+
+func AddUserRegisterAddFriendIDList(userIDList ...string) error {
+	var list []db.RegisterAddFriend
+	for _, v := range userIDList {
+		list = append(list, db.RegisterAddFriend{UserID: v})
+	}
+	err := db.DB.MysqlDB.DefaultGormDB().Create(list).Error
+	return err
+}
+
+func ReduceUserRegisterAddFriendIDList(userIDList ...string) error {
+	var list []db.RegisterAddFriend
+	for _, v := range userIDList {
+		list = append(list, db.RegisterAddFriend{UserID: v})
+	}
+	err := db.DB.MysqlDB.DefaultGormDB().Delete(list).Error
+	return err
+}
+
+func DeleteAllRegisterAddFriendIDList() error {
+	err := db.DB.MysqlDB.DefaultGormDB().Where("1 = 1").Delete(&db.RegisterAddFriend{}).Error
+	return err
+}

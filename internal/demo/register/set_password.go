@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
+	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
 	"encoding/json"
 	"math/big"
@@ -132,6 +133,17 @@ func SetPassword(c *gin.Context) {
 			log.NewWarn(params.OperationID, utils.GetSelfFuncName(), "to ch timeOut")
 		}
 	}
+
+	select {
+	case ChImportFriend <- &pbFriend.ImportFriendReq{
+		OperationID: params.OperationID,
+		FromUserID:  userID,
+		OpUserID:    userID,
+	}:
+	case <-time.After(time.Second * 2):
+		log.NewWarn(params.OperationID, utils.GetSelfFuncName(), "to ChImportFriend timeOut")
+	}
+
 	c.JSON(http.StatusOK, gin.H{"errCode": constant.NoError, "errMsg": "", "data": openIMRegisterResp.UserToken})
 	return
 }

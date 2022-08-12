@@ -72,6 +72,12 @@ func GetUserByUserID(userID string) (*db.User, error) {
 	return &user, nil
 }
 
+func GetUsersByUserIDList(userIDList []string) ([]*db.User, error) {
+	var userList []*db.User
+	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id in (?)", userIDList).Find(&userList).Error
+	return userList, err
+}
+
 func GetUserNameByUserID(userID string) (string, error) {
 	var user db.User
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Select("name").Where("user_id=?", userID).First(&user).Error

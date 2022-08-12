@@ -4,14 +4,14 @@ type GroupResponse struct {
 	GroupOwnerName string `json:"GroupOwnerName"`
 	GroupOwnerID   string `json:"GroupOwnerID"`
 	//*server_api_params.GroupInfo
-	GroupID      string `json:"groupID"`
-	GroupName    string `json:"groupName"`
-	Notification string `json:"notification"`
-	Introduction string `json:"introduction"`
-	FaceURL      string `json:"faceURL"`
-	OwnerUserID  string `json:"ownerUserID"`
-	CreateTime   uint32 `json:"createTime"`
-	//MemberCount            uint32 `json:"memberCount"`
+	GroupID                string `json:"groupID"`
+	GroupName              string `json:"groupName"`
+	Notification           string `json:"notification"`
+	Introduction           string `json:"introduction"`
+	FaceURL                string `json:"faceURL"`
+	OwnerUserID            string `json:"ownerUserID"`
+	CreateTime             uint32 `json:"createTime"`
+	MemberCount            uint32 `json:"memberCount"`
 	Ex                     string `json:"ex"`
 	Status                 int32  `json:"status"`
 	CreatorUserID          string `json:"creatorUserID"`
