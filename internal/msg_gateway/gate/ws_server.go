@@ -237,7 +237,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 					log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 				}
 			} else {
-				log.NewWarn(operationID, "normal uid-conn  ", uid, platformID, oldConnMap[platformID])
+				log.Debug(operationID, "normal uid-conn  ", uid, platformID, oldConnMap[platformID])
 			}
 
 		} else {

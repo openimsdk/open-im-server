@@ -185,14 +185,14 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 		if err != nil {
 			errResult = err
 			failedSeqList = append(failedSeqList, v)
-			log2.NewWarn(operationID, "redis get message error:", err.Error(), v)
+			log2.Debug(operationID, "redis get message error: ", err.Error(), v)
 		} else {
 			msg := pbCommon.MsgData{}
 			err = jsonpb.UnmarshalString(result, &msg)
 			if err != nil {
 				errResult = err
 				failedSeqList = append(failedSeqList, v)
-				log2.NewWarn(operationID, "Unmarshal err", result, err.Error())
+				log2.NewWarn(operationID, "Unmarshal err ", result, err.Error())
 			} else {
 				log2.NewDebug(operationID, "redis get msg is ", msg.String())
 				seqMsg = append(seqMsg, &msg)
