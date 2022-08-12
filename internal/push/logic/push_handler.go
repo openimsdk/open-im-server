@@ -13,6 +13,7 @@ import (
 	"Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/msg"
 	pbPush "Open_IM/pkg/proto/push"
+	"Open_IM/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )
@@ -42,6 +43,11 @@ func (ms *PushConsumerHandler) handleMs2PsChat(msg []byte) {
 		OperationID:  msgFromMQ.OperationID,
 		MsgData:      msgFromMQ.MsgData,
 		PushToUserID: msgFromMQ.PushToUserID,
+	}
+	sec := msgFromMQ.MsgData.SendTime / 1000
+	nowSec := utils.GetCurrentTimestampBySecond()
+	if nowSec-sec > 10 {
+		return
 	}
 	switch msgFromMQ.MsgData.SessionType {
 	case constant.SuperGroupChatType:
