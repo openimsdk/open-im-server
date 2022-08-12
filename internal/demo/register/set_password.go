@@ -138,7 +138,7 @@ func SetPassword(c *gin.Context) {
 	case ChImportFriend <- &pbFriend.ImportFriendReq{
 		OperationID: params.OperationID,
 		FromUserID:  userID,
-		OpUserID:    userID,
+		OpUserID:    config.Config.Manager.AppManagerUid[0],
 	}:
 	case <-time.After(time.Second * 2):
 		log.NewWarn(params.OperationID, utils.GetSelfFuncName(), "to ChImportFriend timeOut")
