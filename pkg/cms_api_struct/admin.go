@@ -22,7 +22,7 @@ type AddUserRegisterAddFriendIDListResponse struct {
 type ReduceUserRegisterAddFriendIDListRequest struct {
 	OperationID string   `json:"operationID" binding:"required"`
 	UserIDList  []string `json:"userIDList" binding:"required"`
-	Operation   int32    `json:"operation" binding:"required"`
+	Operation   int32    `json:"operation"`
 }
 
 type ReduceUserRegisterAddFriendIDListResponse struct {
@@ -30,10 +30,10 @@ type ReduceUserRegisterAddFriendIDListResponse struct {
 
 type GetUserRegisterAddFriendIDListRequest struct {
 	OperationID string `json:"operationID" binding:"required"`
-	RequestPagination
+	RequestPaginationBody
 }
 
 type GetUserRegisterAddFriendIDListResponse struct {
-	Users []*server_api_params.UserInfo `json:"Users"`
+	Users []*server_api_params.UserInfo `json:"users"`
 	ResponsePagination
 }

@@ -21,9 +21,9 @@ func NewGinRouter() *gin.Engine {
 	{
 		adminRouterGroup.POST("/login", admin.AdminLogin)
 		adminRouterGroup.Use(middleware.JWTAuth())
-		adminRouterGroup.POST("/add_user_register_add_friend_ID", admin.AddUserRegisterAddFriendIDList)
-		adminRouterGroup.POST("/reduce_user_register_reduce_friend_ID", admin.ReduceUserRegisterAddFriendIDList)
-		adminRouterGroup.POST("/get_user_register_reduce_friend_ID_list", admin.GetUserRegisterAddFriendIDList)
+		adminRouterGroup.POST("/add_user_register_add_friend_id", admin.AddUserRegisterAddFriendIDList)
+		adminRouterGroup.POST("/reduce_user_register_reduce_friend_id", admin.ReduceUserRegisterAddFriendIDList)
+		adminRouterGroup.POST("/get_user_register_reduce_friend_id_list", admin.GetUserRegisterAddFriendIDList)
 	}
 	r2 := router.Group("")
 	r2.Use(middleware.JWTAuth())

@@ -64,7 +64,7 @@ func AdminLogin(c *gin.Context) {
 		reqPb pbAdmin.AdminLoginReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewInfo("0", utils.GetSelfFuncName(), err.Error())
+		log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -95,7 +95,7 @@ func AddUserRegisterAddFriendIDList(c *gin.Context) {
 		resp apiStruct.AddUserRegisterAddFriendIDListResponse
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewInfo("0", utils.GetSelfFuncName(), err.Error())
+		log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -123,7 +123,7 @@ func ReduceUserRegisterAddFriendIDList(c *gin.Context) {
 		resp apiStruct.ReduceUserRegisterAddFriendIDListResponse
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewInfo("0", utils.GetSelfFuncName(), err.Error())
+		log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}
@@ -151,7 +151,7 @@ func GetUserRegisterAddFriendIDList(c *gin.Context) {
 		resp apiStruct.GetUserRegisterAddFriendIDListResponse
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewInfo("0", utils.GetSelfFuncName(), err.Error())
+		log.NewError("0", utils.GetSelfFuncName(), err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
 		return
 	}

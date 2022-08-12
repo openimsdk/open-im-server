@@ -327,7 +327,7 @@ func (AppVersion) TableName() string {
 }
 
 type RegisterAddFriend struct {
-	UserID string `gorm:"column:user_id;size:64"`
+	UserID string `gorm:"column:user_id;primary_key;size:64"`
 }
 
 func (RegisterAddFriend) TableName() string {
