@@ -26,7 +26,9 @@ func ImportFriendRoutine() {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), req, err.Error())
 				return
 			}
+			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "ImportFriendRoutine IDList", friendUserIDList)
 			if len(friendUserIDList) == 0 {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "len==0")
 				return
 			}
 			req.FriendUserIDList = friendUserIDList
