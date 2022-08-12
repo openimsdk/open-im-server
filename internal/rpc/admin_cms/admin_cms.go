@@ -135,7 +135,7 @@ func (s *adminCMSServer) ReduceUserRegisterAddFriendIDList(_ context.Context, re
 func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.GetUserRegisterAddFriendIDListReq) (*pbAdminCMS.GetUserRegisterAddFriendIDListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbAdminCMS.GetUserRegisterAddFriendIDListResp{UserInfoList: []*server_api_params.UserInfo{}}
-	userIDList, err := imdb.GetRegisterAddFriendList(req.Pagination.ShowNumber, req.Pagination.ShowNumber)
+	userIDList, err := imdb.GetRegisterAddFriendList(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		return resp, openIMHttp.WrapError(constant.ErrDB)
@@ -144,6 +144,11 @@ func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userIDList)
 		return resp, openIMHttp.WrapError(constant.ErrDB)
+	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), userList, userIDList)
+	resp.Pagination = &server_api_params.ResponsePagination{
+		CurrentPage: req.Pagination.PageNumber,
+		ShowNumber:  req.Pagination.ShowNumber,
 	}
 	utils.CopyStructFields(&resp.UserInfoList, userList)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
