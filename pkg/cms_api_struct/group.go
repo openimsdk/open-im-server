@@ -1,21 +1,17 @@
 package cms_api_struct
 
-import (
-	server_api_params "Open_IM/pkg/proto/sdk_ws"
-)
-
 type GroupResponse struct {
 	GroupOwnerName string `json:"GroupOwnerName"`
 	GroupOwnerID   string `json:"GroupOwnerID"`
 	//*server_api_params.GroupInfo
-	GroupID                string `json:"groupID"`
-	GroupName              string `json:"groupName"`
-	Notification           string `json:"notification"`
-	Introduction           string `json:"introduction"`
-	FaceURL                string `json:"faceURL"`
-	OwnerUserID            string `json:"ownerUserID"`
-	CreateTime             uint32 `json:"createTime"`
-	MemberCount            uint32 `json:"memberCount"`
+	GroupID      string `json:"groupID"`
+	GroupName    string `json:"groupName"`
+	Notification string `json:"notification"`
+	Introduction string `json:"introduction"`
+	FaceURL      string `json:"faceURL"`
+	OwnerUserID  string `json:"ownerUserID"`
+	CreateTime   uint32 `json:"createTime"`
+	//MemberCount            uint32 `json:"memberCount"`
 	Ex                     string `json:"ex"`
 	Status                 int32  `json:"status"`
 	CreatorUserID          string `json:"creatorUserID"`
@@ -108,8 +104,23 @@ type GetGroupMembersRequest struct {
 	RequestPagination
 }
 
+type GroupMemberResponse struct {
+	GroupID        string `json:"groupID"`
+	UserID         string `json:"userID"`
+	RoleLevel      int32  `json:"roleLevel"`
+	JoinTime       int32  `json:"joinTime"`
+	Nickname       string `json:"nickname"`
+	FaceURL        string `json:"faceURL"`
+	AppMangerLevel int32  `json:"appMangerLevel"` //if >0
+	JoinSource     int32  `json:"joinSource"`
+	OperatorUserID string `json:"operatorUserID"`
+	Ex             string `json:"ex"`
+	MuteEndTime    uint32 `json:"muteEndTime"`
+	InviterUserID  string `json:"inviterUserID"`
+}
+
 type GetGroupMembersResponse struct {
-	GroupMembers []server_api_params.GroupMemberFullInfo `json:"groupMembers"`
+	GroupMembers []GroupMemberResponse `json:"groupMembers"`
 	ResponsePagination
 	MemberNums int `json:"memberNums"`
 }

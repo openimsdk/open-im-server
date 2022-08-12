@@ -1358,6 +1358,7 @@ func (s *groupServer) GetGroupByID(_ context.Context, req *pbGroup.GetGroupByIDR
 	resp.CMSGroup.GroupOwnerUserName = groupMember.Nickname
 	resp.CMSGroup.GroupOwnerUserID = groupMember.UserID
 	resp.CMSGroup.GroupInfo.CreatorUserID = group.CreatorUserID
+	resp.CMSGroup.GroupInfo.CreateTime = uint32(group.CreateTime.Unix())
 	utils.CopyStructFields(resp.CMSGroup.GroupInfo, group)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -1392,7 +1393,8 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMaster error", err.Error())
 			continue
 		}
-		group.GroupOwnerUserID = groupMember.GroupID
+		group.GroupInfo.CreateTime = uint32(v.CreateTime.Unix())
+		group.GroupOwnerUserID = groupMember.UserID
 		group.GroupOwnerUserName = groupMember.Nickname
 		resp.CMSGroups = append(resp.CMSGroups, group)
 	}
@@ -1411,13 +1413,7 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroups error", err.Error())
 		return resp, http.WrapError(constant.ErrDB)
 	}
-	groupsCountNum, err := imdb.GetGroupsCountNum(db.Group{})
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "groupsCountNum ", groupsCountNum)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupsCountNum", err.Error())
-		return resp, http.WrapError(constant.ErrDB)
-	}
-	resp.GroupNum = groupsCountNum
+
 	resp.Pagination.PageNumber = req.Pagination.PageNumber
 	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
 	for _, v := range groups {
@@ -1428,7 +1424,14 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMaster failed", err.Error(), v)
 			continue
 		}
-		group.GroupOwnerUserID = groupMember.GroupID
+		//groupCountNum, err := imdb.GetGroupsCountNum(v)
+		//if err != nil {
+		//	log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupsCountNum failed", err.Error(), v)
+		//	continue
+		//}
+		//group.GroupInfo.MemberCount = uint32(groupCountNum)
+		group.GroupInfo.CreateTime = uint32(v.CreateTime.Unix())
+		group.GroupOwnerUserID = groupMember.UserID
 		group.GroupOwnerUserName = groupMember.Nickname
 		resp.CMSGroups = append(resp.CMSGroups, group)
 	}
@@ -1485,6 +1488,8 @@ func (s *groupServer) GetGroupMembersCMS(_ context.Context, req *pbGroup.GetGrou
 	for _, groupMember := range groupMembers {
 		member := open_im_sdk.GroupMemberFullInfo{}
 		utils.CopyStructFields(&member, groupMember)
+		member.JoinTime = int32(groupMember.JoinTime.Unix())
+		member.MuteEndTime = uint32(groupMember.MuteEndTime.Unix())
 		resp.Members = append(resp.Members, &member)
 	}
 	resp.Pagination = &open_im_sdk.ResponsePagination{

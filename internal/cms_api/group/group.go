@@ -220,8 +220,10 @@ func GetGroupMembers(c *gin.Context) {
 		ShowNumber:  int(respPb.Pagination.ShowNumber),
 	}
 	resp.MemberNums = int(respPb.MemberNums)
-	for _, groupMembers := range respPb.Members {
-		resp.GroupMembers = append(resp.GroupMembers, *groupMembers)
+	for _, groupMember := range respPb.Members {
+		memberResp := cms_api_struct.GroupMemberResponse{}
+		utils.CopyStructFields(&memberResp, groupMember)
+		resp.GroupMembers = append(resp.GroupMembers, memberResp)
 	}
 	log.NewInfo("", utils.GetSelfFuncName(), "req: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
