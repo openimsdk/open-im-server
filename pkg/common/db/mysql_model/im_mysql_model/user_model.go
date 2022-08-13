@@ -45,9 +45,19 @@ func UserRegister(user db.User) error {
 	user.LastLoginTime = time.Now()
 	user.LoginTimes = 0
 	user.LastLoginIp = user.CreateIp
+	if config.Config.Demo.NeedInvitationCode {
+		//判断一下验证码的使用情况
+		LockSucc := TryLockInvitationCode(user.InvitationCode, user.UserID)
+		if !LockSucc {
+			return constant.InvitationMsg
+		}
+	}
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user).Error
 	if err != nil {
 		return err
+	}
+	if config.Config.Demo.NeedInvitationCode {
+		FinishInvitationCode(user.InvitationCode, user.UserID)
 	}
 	return nil
 }
@@ -125,11 +135,12 @@ func GetUsers(showNumber, pageNumber int32) ([]db.User, error) {
 
 func AddUser(userId, phoneNumber, name string) error {
 	user := db.User{
-		PhoneNumber: phoneNumber,
-		Birth:       time.Now(),
-		CreateTime:  time.Now(),
-		UserID:      userId,
-		Nickname:    name,
+		PhoneNumber:   phoneNumber,
+		Birth:         time.Now(),
+		CreateTime:    time.Now(),
+		UserID:        userId,
+		Nickname:      name,
+		LastLoginTime: time.Now(),
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user)
 	return result.Error

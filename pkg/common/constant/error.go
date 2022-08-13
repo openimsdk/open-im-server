@@ -50,6 +50,7 @@ var (
 	DBMsg                       = errors.New("db failed")
 	ArgsMsg                     = errors.New("args failed")
 	CallBackMsg                 = errors.New("callback failed")
+	InvitationMsg               = errors.New("invitationCode error")
 
 	ThirdPartyMsg = errors.New("third party error")
 )
@@ -69,6 +70,7 @@ const (
 	ResetPasswordFailed  = 10011
 	RegisterLimit        = 10012
 	LoginLimit           = 10013
+	InvitationError      = 10014
 	DatabaseError        = 10002
 	ServerError          = 10004
 	HttpError            = 10005

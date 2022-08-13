@@ -56,8 +56,9 @@ type ResignUserResponse struct {
 type AlterUserRequest struct {
 	UserId      string `json:"user_id" binding:"required"`
 	Nickname    string `json:"nickname"`
-	PhoneNumber int    `json:"phone_number" validate:"len=11"`
+	PhoneNumber string `json:"phone_number" validate:"len=11"`
 	Email       string `json:"email"`
+	Birth       string `json:"birth"`
 }
 
 type AlterUserResponse struct {

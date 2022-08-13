@@ -64,6 +64,12 @@ func SetPassword(c *gin.Context) {
 				return
 			}
 		}
+		if config.Config.Demo.NeedInvitationCode {
+			err := im_mysql_model.CheckInvitationCode(params.InvitationCode)
+			if err != nil {
+				c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
+			}
+		}
 	}
 	//userID := utils.Base64Encode(account)
 	var userID string
@@ -89,6 +95,7 @@ func SetPassword(c *gin.Context) {
 		createIp = c.ClientIP()
 	}
 	openIMRegisterReq.CreateIp = createIp
+	openIMRegisterReq.InvitationCode = params.InvitationCode
 	openIMRegisterResp := api.UserRegisterResp{}
 	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "register req:", openIMRegisterReq)
 	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
@@ -105,6 +112,8 @@ func SetPassword(c *gin.Context) {
 		}
 		if openIMRegisterResp.ErrCode == constant.RegisterLimit {
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterLimit, "errMsg": "用户注册被限制"})
+		} else if openIMRegisterResp.ErrCode == constant.InvitationError {
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
 		} else {
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register failed: " + openIMRegisterResp.ErrMsg})
 		}
