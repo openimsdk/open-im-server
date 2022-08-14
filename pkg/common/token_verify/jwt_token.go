@@ -6,9 +6,10 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
+	"time"
+
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
-	"time"
 )
 
 //var (
@@ -103,7 +104,9 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
 				return nil, constant.ErrTokenExpired
 			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, constant.ErrTokenNotValidYet
+				log.Error("", "ParseToken failed, ", err.Error(), token)
+				return nil, nil
+				// return nil, constant.ErrTokenNotValidYet
 			} else {
 				return nil, constant.ErrTokenUnknown
 			}
