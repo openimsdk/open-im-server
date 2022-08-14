@@ -80,6 +80,7 @@ message UserInfo{
   int32 LoginLimit = 14;
   int32 appMangerLevel = 15;
   int32  globalRecvMsgOpt = 16;
+  string  invitationCode = 17;
 }
 
 message FriendInfo{

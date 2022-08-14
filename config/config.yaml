@@ -724,6 +724,7 @@ demo:
     verificationCodeTemplateCode: 2902877
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
+  needInvitationCode: false
   #  second
   codeTTL: 60
   useSuperCode: true

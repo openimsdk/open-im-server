@@ -159,6 +159,10 @@ func initMysqlDB() {
 		fmt.Println("CreateTable RegisterAddFriend")
 		db.Migrator().CreateTable(&RegisterAddFriend{})
 	}
+	if !db.Migrator().HasTable(&Invitation{}) {
+		fmt.Println("CreateTable Invitation")
+		db.Migrator().CreateTable(&Invitation{})
+	}
 	DB.MysqlDB.db = db
 	return
 }

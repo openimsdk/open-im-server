@@ -492,6 +492,7 @@ type config struct {
 		}
 		TestDepartMentID     string   `yaml:"testDepartMentID"`
 		ImAPIURL             string   `yaml:"imAPIURL"`
+		NeedInvitationCode   bool     `yaml:"needInvitationCode"`
 		OnboardProcess       bool     `yaml:"onboardProcess"`
 		JoinDepartmentIDList []string `yaml:"joinDepartmentIDList"`
 		JoinDepartmentGroups bool     `yaml:"joinDepartmentGroups"`

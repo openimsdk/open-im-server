@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -45,9 +46,19 @@ func UserRegister(user db.User) error {
 	user.LastLoginTime = time.Now()
 	user.LoginTimes = 0
 	user.LastLoginIp = user.CreateIp
+	if config.Config.Demo.NeedInvitationCode {
+		//判断一下验证码的使用情况
+		LockSucc := TryLockInvitationCode(user.InvitationCode, user.UserID)
+		if !LockSucc {
+			return constant.InvitationMsg
+		}
+	}
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user).Error
 	if err != nil {
 		return err
+	}
+	if config.Config.Demo.NeedInvitationCode {
+		FinishInvitationCode(user.InvitationCode, user.UserID)
 	}
 	return nil
 }
@@ -123,13 +134,31 @@ func GetUsers(showNumber, pageNumber int32) ([]db.User, error) {
 	return users, err
 }
 
-func AddUser(userId, phoneNumber, name string) error {
+func AddUser(userId string, phoneNumber string, name string, email string, gender string, photo string, birth string) error {
+	_gender, _err := strconv.Atoi(gender)
+	if _err != nil {
+		_gender = 0
+	}
+	_birth, _err := time.ParseInLocation("2006-01-02", birth, time.Local)
+	if _err != nil {
+		_birth = time.Now()
+	}
 	user := db.User{
-		PhoneNumber: phoneNumber,
-		Birth:       time.Now(),
-		CreateTime:  time.Now(),
-		UserID:      userId,
-		Nickname:    name,
+		UserID:         userId,
+		Nickname:       name,
+		FaceURL:        photo,
+		Gender:         int32(_gender),
+		PhoneNumber:    phoneNumber,
+		Birth:          _birth,
+		Email:          email,
+		Ex:             "",
+		CreateTime:     time.Now(),
+		CreateIp:       "",
+		LastLoginTime:  time.Now(),
+		LastLoginIp:    "",
+		LoginTimes:     0,
+		LoginLimit:     0,
+		InvitationCode: "",
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user)
 	return result.Error

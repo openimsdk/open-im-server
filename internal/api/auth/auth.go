@@ -69,6 +69,8 @@ func UserRegister(c *gin.Context) {
 		log.NewError(req.OperationID, errMsg)
 		if reply.CommonResp.ErrCode == constant.RegisterLimit {
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterLimit, "errMsg": "用户注册被限制"})
+		} else if reply.CommonResp.ErrCode == constant.InvitationError {
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		}
