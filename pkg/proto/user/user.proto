@@ -215,7 +215,8 @@ message AlterUserReq{
   string Email = 5;
   string Gender = 6;
   string Birth =7;
-  string OpUserId = 8;
+  string Photo = 8;
+  string OpUserId = 9;
 }
 
 message AlterUserResp{
@@ -240,7 +241,11 @@ message AddUserReq{
   string PhoneNumber = 2;
   string UserId = 3;
   string name = 4;
-  string OpUserId = 5;
+  string Email = 5;
+  string Gender = 6;
+  string Birth =7;
+  string Photo = 8;
+  string OpUserId = 9;
 }
 
 message AddUserResp{

@@ -19,6 +19,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -660,11 +661,19 @@ func (s *userServer) ResignUser(ctx context.Context, req *pbUser.ResignUserReq) 
 func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*pbUser.AlterUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AlterUserResp{}
+	birth, _ := time.ParseInLocation("2006-01-02", req.Birth, time.Local)
+	gender, gendererr := strconv.Atoi(req.Gender)
+	if gendererr != nil {
+		gender = 0
+	}
 	user := db.User{
-		PhoneNumber: strconv.FormatInt(req.PhoneNumber, 10),
+		PhoneNumber: req.PhoneNumber,
 		Nickname:    req.Nickname,
 		Email:       req.Email,
 		UserID:      req.UserId,
+		Gender:      int32(gender),
+		FaceURL:     req.Photo,
+		Birth:       birth,
 	}
 	if err := imdb.UpdateUserInfo(user); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateUserInfo", err.Error())
@@ -678,7 +687,7 @@ func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AddUserResp{}
-	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name)
+	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name, req.Email, req.Gender, req.Photo, req.Birth)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)

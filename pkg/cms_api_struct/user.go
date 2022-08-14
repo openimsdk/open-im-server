@@ -59,6 +59,8 @@ type AlterUserRequest struct {
 	PhoneNumber string `json:"phone_number" validate:"len=11"`
 	Email       string `json:"email"`
 	Birth       string `json:"birth"`
+	Gender      string `json:"gender"`
+	Photo       string `json:"photo"`
 }
 
 type AlterUserResponse struct {
@@ -68,6 +70,10 @@ type AddUserRequest struct {
 	PhoneNumber string `json:"phone_number" binding:"required"`
 	UserId      string `json:"user_id" binding:"required"`
 	Name        string `json:"name" binding:"required"`
+	Email       string `json:"email"`
+	Birth       string `json:"birth"`
+	Gender      string `json:"gender"`
+	Photo       string `json:"photo"`
 }
 
 type AddUserResponse struct {
