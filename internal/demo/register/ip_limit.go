@@ -8,7 +8,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
+	//"github.com/jinzhu/gorm"
 	"net/http"
 	"time"
 )
