@@ -227,8 +227,12 @@ func GetBlockUserById(userId string) (BlockUserInfo, error) {
 		return blockUserInfo, err
 	}
 	blockUserInfo.User.UserID = user.UserID
-	blockUserInfo.User.FaceURL = user.UserID
+	blockUserInfo.User.FaceURL = user.FaceURL
 	blockUserInfo.User.Nickname = user.Nickname
+	blockUserInfo.User.Birth = user.Birth
+	blockUserInfo.User.PhoneNumber = user.PhoneNumber
+	blockUserInfo.User.Email = user.Email
+	blockUserInfo.User.Gender = user.Gender
 	blockUserInfo.BeginDisableTime = blockUser.BeginDisableTime
 	blockUserInfo.EndDisableTime = blockUser.EndDisableTime
 	return blockUserInfo, nil
@@ -245,9 +249,13 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 		if err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).First(&user).Error; err == nil {
 			blockUserInfos = append(blockUserInfos, BlockUserInfo{
 				User: db.User{
-					UserID:   user.UserID,
-					Nickname: user.Nickname,
-					FaceURL:  user.FaceURL,
+					UserID:      user.UserID,
+					Nickname:    user.Nickname,
+					FaceURL:     user.FaceURL,
+					Birth:       user.Birth,
+					PhoneNumber: user.PhoneNumber,
+					Email:       user.Email,
+					Gender:      user.Gender,
 				},
 				BeginDisableTime: blockUser.BeginDisableTime,
 				EndDisableTime:   blockUser.EndDisableTime,
