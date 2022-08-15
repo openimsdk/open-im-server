@@ -1,6 +1,9 @@
 package im_mysql_model
 
-import "Open_IM/pkg/common/db"
+import (
+	"Open_IM/pkg/common/db"
+	"time"
+)
 
 func IsLimitRegisterIp(RegisterIp string) (bool, error) {
 	//如果已经存在则限制
@@ -37,4 +40,20 @@ func QueryUserIPLimits(ip string) ([]db.UserIpLimit, error) {
 
 func InsertOneIntoIpLimits(ipLimits db.IpLimit) error {
 	return db.DB.MysqlDB.DefaultGormDB().Model(&db.IpLimit{}).Create(ipLimits).Error
+}
+
+func GetIpLimitsLoginByUserID(userID string) ([]db.UserIpLimit, error) {
+	var ips []db.UserIpLimit
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Where("user_id=?", userID).Take(&ips).Error
+	return ips, err
+}
+
+func InsertUserIpLimitsLogin(userIp *db.UserIpLimit) error {
+	userIp.CreateTime = time.Now()
+	return db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Create(userIp).Error
+}
+
+func DeleteUserIpLimitsLogin(userID, ip string) error {
+	userIp := db.UserIpLimit{UserID: userID, Ip: ip}
+	return db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Delete(&userIp).Error
 }

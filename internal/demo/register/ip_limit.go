@@ -101,37 +101,83 @@ func RemoveIPLimit(c *gin.Context) {
 
 }
 
-// ===========================================sk 写
+// ===========================================sk ==========================
 
-type QueryUserIDIPLimitReq struct {
-	UserID string `json:"userID" binding:"required"`
+type QueryUserIDIPLimitLoginReq struct {
+	UserID      string `json:"userID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
-type QueryUserIDIPLimitResp struct {
+//type QueryUserIDIPLimitLoginResp struct {
+//	UserIpLimit []db.UserIpLimit `json:"userIpLimit"`
+//}
+
+func QueryUserIPLimitLogin(c *gin.Context) {
+	req := QueryUserIDIPLimitLoginReq{}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
+	resp, err := imdb.GetIpLimitsLoginByUserID(req.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "GetIpLimitsByUserID error!"})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 }
 
-func QueryUserIDIPLimit(c *gin.Context) {
-
+type AddUserIPLimitLoginReq struct {
+	UserID      string `json:"userID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
+	IP          string `json:"ip"`
 }
 
-type AddUserIPLimitReq struct {
-}
-
-type AddUserIPLimitResp struct {
+type AddUserIPLimitLoginResp struct {
 }
 
 // 添加ip 特定用户才能登录 user_ip_limits 表
-func AddUserIPLimit(c *gin.Context) {
-
+func AddUserIPLimitLogin(c *gin.Context) {
+	req := AddUserIPLimitLoginReq{}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
+	userIp := db.UserIpLimit{UserID: req.UserID, Ip: req.IP}
+	err := imdb.InsertUserIpLimitsLogin(&userIp)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "InsertUserIpLimitsLogin error!"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
 }
 
 type RemoveUserIPLimitReq struct {
+	UserID      string `json:"userID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
+	IP          string `json:"ip"`
 }
 
 type RemoveUserIPLimitResp struct {
 }
 
 // 删除ip 特定用户才能登录 user_ip_limits 表
-func RemoveUserIPLimit(c *gin.Context) {
-
+func RemoveUserIPLimitLogin(c *gin.Context) {
+	req := RemoveUserIPLimitReq{}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
+	err := imdb.DeleteUserIpLimitsLogin(req.UserID, req.IP)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "DeleteUserIpLimitsLogin error!"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
 }
