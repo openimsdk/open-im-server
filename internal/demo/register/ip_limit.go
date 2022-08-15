@@ -47,6 +47,7 @@ func QueryIPRegister(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "QueryIPLimits error!"})
 		return
 	}
+
 	if ipLimits.Ip != "" {
 		resp.Status = 1
 	}
