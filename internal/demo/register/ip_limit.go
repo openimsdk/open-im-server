@@ -203,5 +203,21 @@ func RemoveUserIPLimitLogin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "DeleteUserIpLimitsLogin error!"})
 		return
 	}
+	ips, err := imdb.GetIpLimitsLoginByUserID(req.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "GetIpLimitsLoginByUserID error!"})
+		return
+	}
+	if len(ips) == 0 {
+		err := imdb.UpdateUserInfoByMap(db.User{
+			UserID: req.UserID,
+		}, map[string]interface{}{"limit_login": 0})
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+			c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "UpdateUserInfo error!"})
+			return
+		}
+	}
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
 }
