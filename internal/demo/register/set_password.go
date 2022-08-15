@@ -81,10 +81,11 @@ func SetPassword(c *gin.Context) {
 				return
 			}
 		}
-		if config.Config.Demo.NeedInvitationCode {
+		if config.Config.Demo.NeedInvitationCode && params.InvitationCode != "" {
 			err := imdb.CheckInvitationCode(params.InvitationCode)
 			if err != nil {
 				c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
+				return
 			}
 		}
 	}
@@ -142,7 +143,7 @@ func SetPassword(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": err.Error()})
 		return
 	}
-	if config.Config.Demo.NeedInvitationCode {
+	if config.Config.Demo.NeedInvitationCode && params.InvitationCode != "" {
 		//判断一下验证码的使用情况
 		LockSucc := imdb.TryLockInvitationCode(params.InvitationCode, userID)
 		if LockSucc {

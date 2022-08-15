@@ -162,7 +162,16 @@ func AddUserIPLimitLogin(c *gin.Context) {
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
 	userIp := db.UserIpLimit{UserID: req.UserID, Ip: req.IP}
-	err := imdb.InsertUserIpLimitsLogin(&userIp)
+	err := imdb.UpdateUserInfo(db.User{
+		UserID:     req.UserID,
+		LoginLimit: 1,
+	})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "InsertUserIpLimitsLogin error!"})
+		return
+	}
+	err = imdb.InsertUserIpLimitsLogin(&userIp)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "InsertUserIpLimitsLogin error!"})
