@@ -1,7 +1,7 @@
 package register
 
 import (
-	api "Open_IM/pkg/base_info"
+	//api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
