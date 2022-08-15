@@ -28,13 +28,14 @@ type Claims struct {
 
 func BuildClaims(uid, platform string, ttl int64) Claims {
 	now := time.Now()
+	before := now.Add(-time.Minute * 5)
 	return Claims{
 		UID:      uid,
 		Platform: platform,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), //Expiration time
 			IssuedAt:  jwt.NewNumericDate(now),                                        //Issuing time
-			NotBefore: jwt.NewNumericDate(now),                                        //Begin Effective time
+			NotBefore: jwt.NewNumericDate(before),                                     //Begin Effective time
 		}}
 }
 

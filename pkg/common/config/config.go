@@ -524,7 +524,7 @@ func init() {
 		if err != nil {
 			bytes, err = ioutil.ReadFile(filepath.Join(Root, "config", "config.yaml"))
 			if err != nil {
-				panic(err.Error())
+				panic(err.Error() + " config: " + filepath.Join(cfgName, "config", "config.yaml"))
 			}
 		} else {
 			Root = cfgName
@@ -541,5 +541,4 @@ func init() {
 			panic(err.Error())
 		}
 	}
-
 }
