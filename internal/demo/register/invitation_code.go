@@ -87,7 +87,7 @@ type GetInvitationCodesReq struct {
 
 type GetInvitationCodesResp struct {
 	apiStruct.Pagination
-	codes []InvitationCode
+	Codes []InvitationCode `json:"codes"`
 }
 
 func GetInvitationCodes(c *gin.Context) {
@@ -106,7 +106,15 @@ func GetInvitationCodes(c *gin.Context) {
 	}
 	resp.Pagination.PageNumber = req.PageNumber
 	resp.Pagination.ShowNumber = req.ShowNumber
-	utils.CopyStructFields(codes, resp.codes)
+	for _, v := range codes {
+		resp.Codes = append(resp.Codes, InvitationCode{
+			InvitationCode: v.InvitationCode,
+			CreateTime:     v.CreateTime,
+			UserID:         v.UserID,
+			LastTime:       v.LastTime,
+			Status:         v.Status,
+		})
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 }
