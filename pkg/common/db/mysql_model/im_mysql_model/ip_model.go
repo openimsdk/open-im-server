@@ -37,7 +37,7 @@ func QueryIPLimits(ip string) (*db.IpLimit, error) {
 	var ipLimit db.IpLimit
 	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.IpLimit{}).Where("ip=?", ip).Take(&ip).Error
 	if gorm.IsRecordNotFoundError(err) {
-		return nil, nil
+		return &ipLimit, nil
 	}
 	return &ipLimit, err
 }
