@@ -34,7 +34,7 @@ func QueryIP(c *gin.Context) {
 	ips, err := imdb.QueryUserIPLimits(req.IP)
 	if err != nil {
 		log.NewError(req.OperationID, "GetInvitationCode failed", req.IP)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "QueryUserIPLimits error!"})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "QueryUserIPLimits error!"})
 		return
 	}
 	resp.IP = req.IP
@@ -85,7 +85,7 @@ func AddIPLimit(c *gin.Context) {
 		LimitTime:     time.Time{},
 	}); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.IP, req.LimitTime)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "InsertOneIntoIpLimits error!"})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "InsertOneIntoIpLimits error!"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
@@ -122,7 +122,7 @@ func QueryUserIPLimitLogin(c *gin.Context) {
 	resp, err := imdb.GetIpLimitsLoginByUserID(req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "GetIpLimitsByUserID error!"})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "GetIpLimitsByUserID error!"})
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)

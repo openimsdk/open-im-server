@@ -47,9 +47,11 @@ func SetPassword(c *gin.Context) {
 	if LimitError != nil {
 		log.Error(params.OperationID, utils.GetSelfFuncName(), LimitError, ip)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": LimitError.Error()})
+		return
 	}
 	if Limited {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": "limited"})
+		return
 	}
 
 	var account string
