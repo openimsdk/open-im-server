@@ -133,8 +133,12 @@ func QueryUserIPLimitLogin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "GetIpLimitsByUserID error!"})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
-	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
+	if len(resp) > 0 {
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
+		c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": "[]"})
 }
 
 type AddUserIPLimitLoginReq struct {
