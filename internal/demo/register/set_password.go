@@ -126,12 +126,14 @@ func SetPassword(c *gin.Context) {
 		}
 		if openIMRegisterResp.ErrCode == constant.RegisterLimit {
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterLimit, "errMsg": "用户注册被限制"})
+			return
 		} else if openIMRegisterResp.ErrCode == constant.InvitationError {
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
+			return
 		} else {
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register failed: " + openIMRegisterResp.ErrMsg})
+			return
 		}
-		return
 	}
 	log.Info(params.OperationID, "begin store mysql", account, params.Password, "info", params.FaceURL, params.Nickname)
 	err = imdb.SetPassword(account, params.Password, params.Ex, userID, params.AreaCode, ip)
