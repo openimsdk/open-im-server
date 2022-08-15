@@ -44,7 +44,7 @@ func InsertOneIntoIpLimits(ipLimits db.IpLimit) error {
 
 func GetIpLimitsLoginByUserID(userID string) ([]db.UserIpLimit, error) {
 	var ips []db.UserIpLimit
-	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Where("user_id=?", userID).Take(&ips).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Where("user_id=?", userID).Find(&ips).Error
 	return ips, err
 }
 
