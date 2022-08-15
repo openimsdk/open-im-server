@@ -2,7 +2,6 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
-	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -35,10 +34,7 @@ func IsLimitUserLoginIp(userID string, LoginIp string) (bool, error) {
 
 func QueryIPLimits(ip string) (*db.IpLimit, error) {
 	var ipLimit db.IpLimit
-	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.IpLimit{}).Where("ip=?", ip).Take(&ip).Error
-	if gorm.IsRecordNotFoundError(err) {
-		return &ipLimit, nil
-	}
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.IpLimit{}).Where("ip=?", ip).First(&ip).Error
 	return &ipLimit, err
 }
 

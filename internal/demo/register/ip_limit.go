@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 	"net/http"
 	"time"
 )
@@ -41,16 +42,19 @@ func QueryIPRegister(c *gin.Context) {
 	resp.IP = req.IP
 	resp.RegisterNum = len(userIDList)
 	resp.UserIDList = userIDList
-	ipLimits, err := imdb.QueryIPLimits(req.IP)
+	_, err = imdb.QueryIPLimits(req.IP)
 	if err != nil {
-		log.NewError(req.OperationID, "QueryIPLimits failed", req.IP, err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "QueryIPLimits error!"})
-		return
-	}
-
-	if ipLimits.Ip != "" {
+		if gorm.IsRecordNotFoundError(err) {
+			resp.Status = 0
+		} else {
+			log.NewError(req.OperationID, "QueryIPLimits failed", req.IP, err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "QueryIPLimits error!"})
+			return
+		}
+	} else {
 		resp.Status = 1
 	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 }
