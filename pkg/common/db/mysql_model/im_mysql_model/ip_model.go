@@ -34,7 +34,7 @@ func IsLimitUserLoginIp(userID string, LoginIp string) (bool, error) {
 
 func QueryIPLimits(ip string) (*db.IpLimit, error) {
 	var ipLimit db.IpLimit
-	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.IpLimit{}).Where("ip=?", ip).First(&ip).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.IpLimit{}).Where("ip=?", ip).First(&ipLimit).Error
 	return &ipLimit, err
 }
 
