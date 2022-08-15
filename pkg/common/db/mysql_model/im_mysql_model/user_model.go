@@ -46,19 +46,9 @@ func UserRegister(user db.User) error {
 	user.LastLoginTime = time.Now()
 	user.LoginTimes = 0
 	user.LastLoginIp = user.CreateIp
-	if config.Config.Demo.NeedInvitationCode {
-		//判断一下验证码的使用情况
-		LockSucc := TryLockInvitationCode(user.InvitationCode, user.UserID)
-		if !LockSucc {
-			return constant.InvitationMsg
-		}
-	}
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user).Error
 	if err != nil {
 		return err
-	}
-	if config.Config.Demo.NeedInvitationCode {
-		FinishInvitationCode(user.InvitationCode, user.UserID)
 	}
 	return nil
 }
@@ -287,31 +277,4 @@ func GetBlockUsersNumCount() (int32, error) {
 		return 0, err
 	}
 	return int32(count), nil
-}
-
-func IsLimitRegisterIp(RegisterIp string) (bool, error) {
-	//如果已经存在则限制
-	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("ip_limits").Where("ip=? and limit_register=? and limit_time>now()", RegisterIp, 1).Count(&count).Error; err != nil {
-		return false, err
-	}
-	return count > 0, nil
-}
-
-func IsLimitLoginIp(LoginIp string) (bool, error) {
-	//如果已经存在则限制
-	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("ip_limits").Where("ip=? and limit_login=? and limit_time>now()", LoginIp, 1).Count(&count).Error; err != nil {
-		return false, err
-	}
-	return count > 0, nil
-}
-
-func IsLimitUserLoginIp(userID string, LoginIp string) (bool, error) {
-	//如果已经存在则放行
-	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("user_ip_limits").Where("ip=? and user_id=?", LoginIp, userID).Count(&count).Error; err != nil {
-		return false, err
-	}
-	return count == 0, nil
 }

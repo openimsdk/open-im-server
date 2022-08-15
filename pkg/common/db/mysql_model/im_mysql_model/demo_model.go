@@ -2,6 +2,7 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"errors"
 	_ "gorm.io/gorm"
 )
 
@@ -46,7 +47,11 @@ func AddUserRegisterAddFriendIDList(userIDList ...string) error {
 	for _, v := range userIDList {
 		list = append(list, db.RegisterAddFriend{UserID: v})
 	}
-	err := db.DB.MysqlDB.DefaultGormDB().Create(list).Error
+	result := db.DB.MysqlDB.DefaultGormDB().Create(list)
+	if int(result.RowsAffected) < len(userIDList) {
+		return errors.New("some line insert failed")
+	}
+	err := result.Error
 	return err
 }
 

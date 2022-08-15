@@ -40,8 +40,14 @@ func main() {
 		demoRouterGroup.POST("/login", register.Login)
 		demoRouterGroup.POST("/reset_password", register.ResetPassword)
 	}
+	cmsRouterGroup := r.Group("/cms")
+	{
+		cmsRouterGroup.POST("/generate_invitation_code", register.GenerateInvitationCode)
+		cmsRouterGroup.POST("/query_invitation_code", register.QueryInvitationCode)
+		cmsRouterGroup.POST("/get_invitation_codes", register.GetInvitationCodes)
+	}
 	defaultPorts := config.Config.Demo.Port
-	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 42233 as port")
+	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10004 as port")
 	flag.Parse()
 	fmt.Println("start demo api server, port: ", *ginPort)
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)

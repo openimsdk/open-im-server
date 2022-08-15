@@ -58,7 +58,7 @@ fi
 
 check=$(ps aux | grep -w ./${cron_task_name} | grep -v grep | wc -l)
 if [ $check -ge 1 ]; then
-  echo -e ${GREEN_PREFIX}"none  port has been listening,belongs service is cron_task_name"${COLOR_SUFFIX}
+  echo -e ${GREEN_PREFIX}"none  port has been listening,belongs service is openImCronTask"${COLOR_SUFFIX}
 else
   echo -e ${RED_PREFIX}"cron_task_name service does not start normally"${COLOR_SUFFIX}
         echo -e ${RED_PREFIX}"please check ../logs/openIM.log "${COLOR_SUFFIX}

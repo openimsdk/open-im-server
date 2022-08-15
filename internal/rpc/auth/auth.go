@@ -30,13 +30,6 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
 	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
-	Limited, LimitError := imdb.IsLimitRegisterIp(req.UserInfo.CreateIp)
-	if LimitError != nil {
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
-	}
-	if Limited {
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.RegisterLimit, ErrMsg: "Register Limit"}}, nil
-	}
 	err := imdb.UserRegister(user)
 	if err != nil {
 		if err == constant.InvitationMsg {
