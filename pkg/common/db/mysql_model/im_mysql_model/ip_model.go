@@ -53,7 +53,7 @@ func InsertOneIntoIpLimits(ipLimits db.IpLimit) error {
 }
 
 func DeleteOneFromIpLimits(ip string) error {
-	ipLimits := &db.IpLimit{}
+	ipLimits := &db.IpLimit{Ip: ip}
 	return db.DB.MysqlDB.DefaultGormDB().Model(ipLimits).Where("ip=?", ip).Delete(ipLimits).Error
 }
 

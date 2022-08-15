@@ -43,7 +43,7 @@ func QueryIPRegister(c *gin.Context) {
 	resp.UserIDList = userIDList
 	ipLimits, err := imdb.QueryIPLimits(req.IP)
 	if err != nil {
-		log.NewError(req.OperationID, "QueryIPLimits failed", req.IP)
+		log.NewError(req.OperationID, "QueryIPLimits failed", req.IP, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "QueryIPLimits error!"})
 		return
 	}
@@ -76,7 +76,7 @@ func AddIPLimit(c *gin.Context) {
 		LimitRegister: 1,
 		LimitLogin:    1,
 		CreateTime:    time.Now(),
-		LimitTime:     time.Time{},
+		LimitTime:     utils.UnixSecondToTime(int64(req.LimitTime)),
 	}); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.IP, req.LimitTime)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "InsertOneIntoIpLimits error!"})
@@ -94,15 +94,15 @@ type RemoveIPLimitResp struct {
 }
 
 func RemoveIPLimit(c *gin.Context) {
-	req := AddIPLimitReq{}
+	req := RemoveIPLimitReq{}
 	//resp := AddIPLimitResp{}
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.ErrArgs, "errMsg": err.Error()})
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
 	if err := imdb.DeleteOneFromIpLimits(req.IP); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.IP, req.LimitTime)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.IP)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "InsertOneIntoIpLimits error!"})
 		return
 	}
@@ -120,7 +120,7 @@ type QueryUserIDIPLimitLoginReq struct {
 //	UserIpLimit []db.UserIpLimit `json:"userIpLimit"`
 //}
 
-func QueryUserIPLimitLogin(c *gin.Context) {
+func QueryUserIDLimitLogin(c *gin.Context) {
 	req := QueryUserIDIPLimitLoginReq{}
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
@@ -138,7 +138,7 @@ func QueryUserIPLimitLogin(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": "[]"})
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 }
 
 type AddUserIPLimitLoginReq struct {
