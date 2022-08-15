@@ -8,7 +8,6 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
-	pbAuth "Open_IM/pkg/proto/auth"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
 	"encoding/json"
@@ -47,10 +46,10 @@ func SetPassword(c *gin.Context) {
 	Limited, LimitError := imdb.IsLimitRegisterIp(ip)
 	if LimitError != nil {
 		log.Error(params.OperationID, utils.GetSelfFuncName(), LimitError, ip)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": LimitError.Error()})
 	}
 	if Limited {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": "limited"})
 	}
 
 	var account string
