@@ -12,13 +12,14 @@ func GetRegister(account, areaCode, userID string) (*db.Register, error) {
 		userID, "", account, account, areaCode).Take(&r).Error
 }
 
-func SetPassword(account, password, ex, userID, areaCode string) error {
+func SetPassword(account, password, ex, userID, areaCode, ip string) error {
 	r := db.Register{
-		Account:  account,
-		Password: password,
-		Ex:       ex,
-		UserID:   userID,
-		AreaCode: areaCode,
+		Account:    account,
+		Password:   password,
+		Ex:         ex,
+		UserID:     userID,
+		RegisterIP: ip,
+		AreaCode:   areaCode,
 	}
 	return db.DB.MysqlDB.DefaultGormDB().Table("registers").Create(&r).Error
 }

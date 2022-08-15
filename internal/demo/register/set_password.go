@@ -42,7 +42,11 @@ func SetPassword(c *gin.Context) {
 		return
 	}
 
-	var ip string
+	ip := c.Request.Header.Get("X-Forward-For")
+	if ip == "" {
+		ip = c.ClientIP()
+	}
+	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "ip:", ip)
 	Limited, LimitError := imdb.IsLimitRegisterIp(ip)
 	if LimitError != nil {
 		log.Error(params.OperationID, utils.GetSelfFuncName(), LimitError, ip)
@@ -133,7 +137,7 @@ func SetPassword(c *gin.Context) {
 		return
 	}
 	log.Info(params.OperationID, "begin store mysql", account, params.Password, "info", params.FaceURL, params.Nickname)
-	err = imdb.SetPassword(account, params.Password, params.Ex, userID, params.AreaCode)
+	err = imdb.SetPassword(account, params.Password, params.Ex, userID, params.AreaCode, ip)
 	if err != nil {
 		log.NewError(params.OperationID, "set phone number password error", account, "err", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": err.Error()})
