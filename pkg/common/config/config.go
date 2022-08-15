@@ -74,6 +74,16 @@ type config struct {
 			StorageTime         int    `yaml:"storageTime"`
 			IsDistributedMod    bool   `yaml:"isDistributedMod"`
 		} `yaml:"minio"`
+		Aws struct {
+			AccessKeyID     string `yaml:"accessKeyID"`
+			AccessKeySecret string `yaml:"accessKeySecret"`
+			Region          string `yaml:"region"`
+			Bucket          string `yaml:"bucket"`
+			FinalHost       string `yaml:"finalHost"`
+			RoleArn         string `yaml:"roleArn"`
+			ExternalId      string `yaml:"externalId"`
+			RoleSessionName string `yaml:"roleSessionName"`
+		} `yaml:"aws"`
 	}
 
 	Dtm struct {
@@ -215,10 +225,10 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
-		Ws2mschatOffline struct {
-			Addr  []string `yaml:"addr"`
-			Topic string   `yaml:"topic"`
-		}
+		//Ws2mschatOffline struct {
+		//	Addr  []string `yaml:"addr"`
+		//	Topic string   `yaml:"topic"`
+		//}
 		MsgToMongo struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
