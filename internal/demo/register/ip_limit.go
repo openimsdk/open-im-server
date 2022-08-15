@@ -212,7 +212,7 @@ func RemoveUserIPLimitLogin(c *gin.Context) {
 	if len(ips) == 0 {
 		err := imdb.UpdateUserInfoByMap(db.User{
 			UserID: req.UserID,
-		}, map[string]interface{}{"limit_login": 0})
+		}, map[string]interface{}{"login_limit": 0})
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
 			c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "UpdateUserInfo error!"})
