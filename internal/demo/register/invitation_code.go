@@ -80,7 +80,7 @@ func QueryInvitationCode(c *gin.Context) {
 }
 
 type GetInvitationCodesReq struct {
-	Status      int32  `json:"status"  binding:"required"`
+	Status      int32  `json:"status"`
 	OperationID string `json:"operationID"  binding:"required"`
 	apiStruct.Pagination
 }

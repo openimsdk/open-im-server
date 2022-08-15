@@ -1,6 +1,7 @@
 package register
 
 import (
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
@@ -11,21 +12,21 @@ import (
 	"time"
 )
 
-type QueryIPReq struct {
+type QueryIPRegisterReq struct {
 	OperationID string `json:"operationID"`
 	IP          string `json:"ip"`
 }
 
-type QueryIPResp struct {
+type QueryIPRegisterResp struct {
 	IP          string   `json:"ip"`
 	RegisterNum int      `json:"num"`
 	UserIDList  []string `json:"userIDList"`
-	Status      int
+	Status      int      `json:"status"`
 }
 
-func QueryIP(c *gin.Context) {
-	req := QueryIPReq{}
-	resp := QueryIPResp{}
+func QueryIPRegister(c *gin.Context) {
+	req := QueryIPRegisterReq{}
+	resp := QueryIPRegisterResp{}
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
 		return
@@ -42,22 +43,9 @@ func QueryIP(c *gin.Context) {
 	for _, ip := range ips {
 		resp.UserIDList = append(resp.UserIDList, ip.UserID)
 	}
-	b, _ := imdb.IsLimitLoginIp(req.IP)
-	if b == true {
-		resp.Status = 1
-	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
-}
-
-type GetIPListReq struct {
-}
-
-type GetIPListResp struct {
-}
-
-func GetIPList(c *gin.Context) {
-
 }
 
 type AddIPLimitReq struct {
@@ -98,7 +86,7 @@ type RemoveIPLimitResp struct {
 }
 
 func RemoveIPLimit(c *gin.Context) {
-
+	//DeleteOneFromIpLimits
 }
 
 // ===========================================sk 写
