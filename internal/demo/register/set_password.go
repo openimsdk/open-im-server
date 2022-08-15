@@ -107,11 +107,8 @@ func SetPassword(c *gin.Context) {
 	openIMRegisterReq.Nickname = params.Nickname
 	openIMRegisterReq.Secret = config.Config.Secret
 	openIMRegisterReq.FaceURL = params.FaceURL
-	createIp := c.Request.Header.Get("X-Forward-For")
-	if createIp == "" {
-		createIp = c.ClientIP()
-	}
-	openIMRegisterReq.CreateIp = createIp
+	openIMRegisterReq.CreateIp = ip
+	openIMRegisterReq.LastLoginIp = ip
 	openIMRegisterReq.InvitationCode = params.InvitationCode
 	openIMRegisterResp := api.UserRegisterResp{}
 	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "register req:", openIMRegisterReq)
