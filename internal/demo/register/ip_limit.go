@@ -20,8 +20,8 @@ type QueryIPRegisterReq struct {
 type QueryIPRegisterResp struct {
 	IP          string   `json:"ip"`
 	RegisterNum int      `json:"num"`
-	UserIDList  []string `json:"userIDList"`
 	Status      int      `json:"status"`
+	UserIDList  []string `json:"userIDList"`
 }
 
 func QueryIPRegister(c *gin.Context) {
@@ -32,18 +32,24 @@ func QueryIPRegister(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
-	ips, err := imdb.QueryUserIPLimits(req.IP)
+	userIDList, err := imdb.GetRegisterUserNum(req.IP)
 	if err != nil {
 		log.NewError(req.OperationID, "GetInvitationCode failed", req.IP)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "QueryUserIPLimits error!"})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "GetRegisterUserNum error!"})
 		return
 	}
 	resp.IP = req.IP
-	resp.RegisterNum = len(ips)
-	for _, ip := range ips {
-		resp.UserIDList = append(resp.UserIDList, ip.UserID)
+	resp.RegisterNum = len(userIDList)
+	resp.UserIDList = userIDList
+	ipLimits, err := imdb.QueryIPLimits(req.IP)
+	if err != nil {
+		log.NewError(req.OperationID, "QueryIPLimits failed", req.IP)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "QueryIPLimits error!"})
+		return
 	}
-
+	if ipLimits.Ip != "" {
+		resp.Status = 1
+	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 }
@@ -73,53 +79,113 @@ func AddIPLimit(c *gin.Context) {
 		LimitTime:     time.Time{},
 	}); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.IP, req.LimitTime)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "InsertOneIntoIpLimits error!"})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "InsertOneIntoIpLimits error!"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
 }
 
 type RemoveIPLimitReq struct {
+	OperationID string `json:"operationID"`
+	IP          string `json:"ip"`
 }
 
 type RemoveIPLimitResp struct {
 }
 
 func RemoveIPLimit(c *gin.Context) {
-	//DeleteOneFromIpLimits
+	req := AddIPLimitReq{}
+	//resp := AddIPLimitResp{}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
+	if err := imdb.DeleteOneFromIpLimits(req.IP); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.IP, req.LimitTime)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "InsertOneIntoIpLimits error!"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
 }
 
-// ===========================================sk 写
+// ===========================================sk ==========================
 
-type QueryUserIDIPLimitReq struct {
-	UserID string `json:"userID" binding:"required"`
+type QueryUserIDIPLimitLoginReq struct {
+	UserID      string `json:"userID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
-type QueryUserIDIPLimitResp struct {
+//type QueryUserIDIPLimitLoginResp struct {
+//	UserIpLimit []db.UserIpLimit `json:"userIpLimit"`
+//}
+
+func QueryUserIPLimitLogin(c *gin.Context) {
+	req := QueryUserIDIPLimitLoginReq{}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
+	resp, err := imdb.GetIpLimitsLoginByUserID(req.UserID)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "GetIpLimitsByUserID error!"})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 }
 
-func QueryUserIDIPLimit(c *gin.Context) {
-
+type AddUserIPLimitLoginReq struct {
+	UserID      string `json:"userID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
+	IP          string `json:"ip"`
 }
 
-type AddUserIPLimitReq struct {
-}
-
-type AddUserIPLimitResp struct {
+type AddUserIPLimitLoginResp struct {
 }
 
 // 添加ip 特定用户才能登录 user_ip_limits 表
-func AddUserIPLimit(c *gin.Context) {
-
+func AddUserIPLimitLogin(c *gin.Context) {
+	req := AddUserIPLimitLoginReq{}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
+	userIp := db.UserIpLimit{UserID: req.UserID, Ip: req.IP}
+	err := imdb.InsertUserIpLimitsLogin(&userIp)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "InsertUserIpLimitsLogin error!"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
 }
 
 type RemoveUserIPLimitReq struct {
+	UserID      string `json:"userID" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
+	IP          string `json:"ip"`
 }
 
 type RemoveUserIPLimitResp struct {
 }
 
 // 删除ip 特定用户才能登录 user_ip_limits 表
-func RemoveUserIPLimit(c *gin.Context) {
-
+func RemoveUserIPLimitLogin(c *gin.Context) {
+	req := RemoveUserIPLimitReq{}
+	if err := c.BindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
+	err := imdb.DeleteUserIpLimitsLogin(req.UserID, req.IP)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "DeleteUserIpLimitsLogin error!"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
 }

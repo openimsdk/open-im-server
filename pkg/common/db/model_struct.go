@@ -9,6 +9,7 @@ type Register struct {
 	UserID         string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
 	AreaCode       string `gorm:"column:area_code;type:varchar(255)"`
 	InvitationCode string `gorm:"column:invitation_code;type:varchar(255)"`
+	RegisterIP     string `gorm:"column:register_ip;type:varchar(255)"`
 }
 
 type Invitation struct {

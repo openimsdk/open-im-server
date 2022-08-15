@@ -1,6 +1,10 @@
 package im_mysql_model
 
-import "Open_IM/pkg/common/db"
+import (
+	"Open_IM/pkg/common/db"
+	"github.com/jinzhu/gorm"
+	"time"
+)
 
 func IsLimitRegisterIp(RegisterIp string) (bool, error) {
 	//如果已经存在则限制
@@ -29,6 +33,15 @@ func IsLimitUserLoginIp(userID string, LoginIp string) (bool, error) {
 	return count == 0, nil
 }
 
+func QueryIPLimits(ip string) (*db.IpLimit, error) {
+	var ipLimit db.IpLimit
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.IpLimit{}).Where("ip=?", ip).Take(&ip).Error
+	if gorm.IsRecordNotFoundError(err) {
+		return nil, nil
+	}
+	return &ipLimit, err
+}
+
 func QueryUserIPLimits(ip string) ([]db.UserIpLimit, error) {
 	var ips []db.UserIpLimit
 	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Where("ip=?", ip).Find(&ips).Error
@@ -42,4 +55,26 @@ func InsertOneIntoIpLimits(ipLimits db.IpLimit) error {
 func DeleteOneFromIpLimits(ip string) error {
 	ipLimits := &db.IpLimit{}
 	return db.DB.MysqlDB.DefaultGormDB().Model(ipLimits).Where("ip=?", ip).Delete(ipLimits).Error
+}
+
+func GetIpLimitsLoginByUserID(userID string) ([]db.UserIpLimit, error) {
+	var ips []db.UserIpLimit
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Where("user_id=?", userID).Take(&ips).Error
+	return ips, err
+}
+
+func InsertUserIpLimitsLogin(userIp *db.UserIpLimit) error {
+	userIp.CreateTime = time.Now()
+	return db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Create(userIp).Error
+}
+
+func DeleteUserIpLimitsLogin(userID, ip string) error {
+	userIp := db.UserIpLimit{UserID: userID, Ip: ip}
+	return db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Delete(&userIp).Error
+}
+
+func GetRegisterUserNum(ip string) ([]string, error) {
+	var userIDList []string
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Register{}).Where("register_ip=?", ip).Pluck("user_id", &userIDList).Error
+	return userIDList, err
 }

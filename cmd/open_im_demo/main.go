@@ -40,11 +40,18 @@ func main() {
 		demoRouterGroup.POST("/login", register.Login)
 		demoRouterGroup.POST("/reset_password", register.ResetPassword)
 	}
-	cmsRouterGroup := r.Group("/cms")
+	cmsRouterGroup := r.Group("/cms_admin")
 	{
 		cmsRouterGroup.POST("/generate_invitation_code", register.GenerateInvitationCode)
 		cmsRouterGroup.POST("/query_invitation_code", register.QueryInvitationCode)
 		cmsRouterGroup.POST("/get_invitation_codes", register.GetInvitationCodes)
+		cmsRouterGroup.POST("/query_user_ip_limit_login", register.QueryUserIPLimitLogin)
+		cmsRouterGroup.POST("/add_user_ip_limit_login", register.AddUserIPLimitLogin)
+		cmsRouterGroup.POST("/remove_user_ip_limit_login", register.RemoveUserIPLimitLogin)
+
+		cmsRouterGroup.POST("/query_ip_register", register.QueryIPRegister)
+		cmsRouterGroup.POST("/add_ip_limit", register.AddIPLimit)
+		cmsRouterGroup.POST("/remove_ip_Limit", register.RemoveIPLimit)
 	}
 	defaultPorts := config.Config.Demo.Port
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10004 as port")
