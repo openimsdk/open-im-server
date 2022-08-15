@@ -105,7 +105,7 @@ func CreateRandomString(strlen int) string {
 	return string(result)
 }
 
-func GetInvitationCodes(pageNumber, showNumber, status int32) ([]db.Invitation, error) {
+func GetInvitationCodes(showNumber, pageNumber, status int32) ([]db.Invitation, error) {
 	var invitationList []db.Invitation
 	err := db.DB.MysqlDB.DefaultGormDB().Model(db.Invitation{}).Limit(int(showNumber)).Offset(int(showNumber*(pageNumber-1))).Where("status=?", status).
 		Order("create_time desc").Find(&invitationList).Error
