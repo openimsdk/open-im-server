@@ -44,17 +44,14 @@ func QueryIPRegister(c *gin.Context) {
 	resp.UserIDList = userIDList
 	ipLimit, err := imdb.QueryIPLimits(req.IP)
 	if err != nil {
-		if gorm.IsRecordNotFoundError(err) {
-			resp.Status = 0
-		} else {
-			log.NewError(req.OperationID, "QueryIPLimits failed", req.IP, err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": "QueryIPLimits error!"})
-			return
-		}
+		log.NewError(req.OperationID, "QueryIPLimits failed", req.IP, err.Error())
 	} else {
-		if ipLimit.Ip != "" {
-			resp.Status = 1
+		if ipLimit != nil {
+			if ipLimit.Ip != "" {
+				resp.Status = 1
+			}
 		}
+
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
