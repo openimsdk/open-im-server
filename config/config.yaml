@@ -17,8 +17,8 @@ mysql:
   dbMysqlDatabaseName: openIM_v2 #默认即可
   dbTableName: eMsg #默认即可
   dbMsgTableNum: 1
-  dbMaxOpenConns: 20
-  dbMaxIdleConns: 10
+  dbMaxOpenConns: 200
+  dbMaxIdleConns: 100
   dbMaxLifeTime: 120
 
 mongo:
