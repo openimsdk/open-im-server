@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/tools"
+	"Open_IM/pkg/tools/splitter"
 	"context"
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
@@ -62,7 +62,7 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 	}
 	Success := 0
 	Fail := 0
-	result := tools.NewSplitter(SinglePushCountLimit, Tokens).GetSplitResult()
+	result := splitter.NewSplitter(SinglePushCountLimit, Tokens).GetSplitResult()
 	Msg := new(messaging.MulticastMessage)
 	Msg.Notification = &messaging.Notification{}
 	Msg.Notification.Body = detailContent
