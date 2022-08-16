@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
+	pbOrganization "Open_IM/pkg/proto/organization"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
@@ -431,21 +432,34 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if req.UserInfo.Nickname != "" {
 		go s.SyncJoinedGroupMemberNickname(req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, req.OperationID, req.OpUserID)
 	}
-	//updateUserInfoToCacheReq := &cache.UpdateUserInfoToCacheReq{
-	//	OperationID:  req.OperationID,
-	//	UserInfoList: []*sdkws.UserInfo{req.UserInfo},
-	//}
-	//cacheEtcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
-	//cacheClient := cache.NewCacheClient(cacheEtcdConn)
-	//resp, err := cacheClient.UpdateUserInfoToCache(context.Background(), updateUserInfoToCacheReq)
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), updateUserInfoToCacheReq.String())
-	//	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: err.Error()}}, nil
-	//}
-	//if resp.CommonResp.ErrCode != 0 {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), resp.String())
-	//	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: resp.CommonResp.ErrMsg}}, nil
-	//}
+
+	clientOrg := pbOrganization.NewOrganizationClient(etcdConn)
+	out, err := clientOrg.UpdateOrganizationUser(context.Background(), &pbOrganization.UpdateOrganizationUserReq{
+		OrganizationUser: &sdkws.OrganizationUser{
+			UserID:      req.UserInfo.UserID,
+			Nickname:    req.UserInfo.Nickname,
+			EnglishName: req.UserInfo.Nickname,
+			FaceURL:     req.UserInfo.FaceURL,
+			Gender:      req.UserInfo.Gender,
+			Mobile:      req.UserInfo.PhoneNumber,
+			Telephone:   req.UserInfo.PhoneNumber,
+			Birth:       req.UserInfo.Birth,
+			Email:       req.UserInfo.Email,
+			Ex:          req.UserInfo.Ex,
+		},
+		OperationID: req.OperationID,
+		OpUserID:    req.OpUserID,
+	})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateOrganizationUser failed")
+	} else {
+		if out.ErrCode == 0 {
+			chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
+		} else {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "grpc resp: ", out)
+		}
+	}
+
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (*pbUser.SetGlobalRecvMessageOptResp, error) {
