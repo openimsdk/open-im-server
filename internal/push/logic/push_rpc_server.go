@@ -63,7 +63,7 @@ func (r *RPCServer) run() {
 	}
 }
 func (r *RPCServer) PushMsg(_ context.Context, pbData *pbPush.PushMsgReq) (*pbPush.PushMsgResp, error) {
-	//Call push module to send message to the user
+	//Call push module to send message to the user, but the service is not currently used
 	switch pbData.MsgData.SessionType {
 	case constant.SuperGroupChatType:
 		MsgToSuperGroupUser(pbData)
