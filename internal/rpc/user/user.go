@@ -451,7 +451,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		OpUserID:    req.OpUserID,
 	})
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateOrganizationUser failed")
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateOrganizationUser failed", err.Error())
 	} else {
 		if out.ErrCode == 0 {
 			chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
