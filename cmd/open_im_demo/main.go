@@ -40,8 +40,22 @@ func main() {
 		demoRouterGroup.POST("/login", register.Login)
 		demoRouterGroup.POST("/reset_password", register.ResetPassword)
 	}
+	cmsRouterGroup := r.Group("/cms_admin")
+	{
+		cmsRouterGroup.POST("/generate_invitation_code", register.GenerateInvitationCode)
+		cmsRouterGroup.POST("/query_invitation_code", register.QueryInvitationCode)
+		cmsRouterGroup.POST("/get_invitation_codes", register.GetInvitationCodes)
+
+		cmsRouterGroup.POST("/query_user_ip_limit_login", register.QueryUserIDLimitLogin)
+		cmsRouterGroup.POST("/add_user_ip_limit_login", register.AddUserIPLimitLogin)
+		cmsRouterGroup.POST("/remove_user_ip_limit_login", register.RemoveUserIPLimitLogin)
+
+		cmsRouterGroup.POST("/query_ip_register", register.QueryIPRegister)
+		cmsRouterGroup.POST("/add_ip_limit", register.AddIPLimit)
+		cmsRouterGroup.POST("/remove_ip_Limit", register.RemoveIPLimit)
+	}
 	defaultPorts := config.Config.Demo.Port
-	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 42233 as port")
+	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10004 as port")
 	flag.Parse()
 	fmt.Println("start demo api server, port: ", *ginPort)
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
@@ -51,6 +65,7 @@ func main() {
 	address = config.Config.CmsApi.ListenIP + ":" + strconv.Itoa(*ginPort)
 	fmt.Println("start demo api server address: ", address)
 	go register.OnboardingProcessRoutine()
+	go register.ImportFriendRoutine()
 	err := r.Run(address)
 	if err != nil {
 		log.Error("", "run failed ", *ginPort, err.Error())

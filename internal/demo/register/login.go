@@ -57,12 +57,17 @@ func Login(c *gin.Context) {
 	} else {
 		userID = r.Account
 	}
+	ip := c.Request.Header.Get("X-Forward-For")
+	if ip == "" {
+		ip = c.ClientIP()
+	}
 	url := fmt.Sprintf("http://%s:%d/auth/user_token", utils.ServerIP, config.Config.Api.GinPort[0])
 	openIMGetUserToken := api.UserTokenReq{}
 	openIMGetUserToken.OperationID = params.OperationID
 	openIMGetUserToken.Platform = params.Platform
 	openIMGetUserToken.Secret = config.Config.Secret
 	openIMGetUserToken.UserID = userID
+	openIMGetUserToken.LoginIp = ip
 	loginIp := c.Request.Header.Get("X-Forward-For")
 	if loginIp == "" {
 		loginIp = c.ClientIP()

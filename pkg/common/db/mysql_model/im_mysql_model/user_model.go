@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
 	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -72,6 +73,12 @@ func GetUserByUserID(userID string) (*db.User, error) {
 	return &user, nil
 }
 
+func GetUsersByUserIDList(userIDList []string) ([]*db.User, error) {
+	var userList []*db.User
+	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id in (?)", userIDList).Find(&userList).Error
+	return userList, err
+}
+
 func GetUserNameByUserID(userID string) (string, error) {
 	var user db.User
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Select("name").Where("user_id=?", userID).First(&user).Error
@@ -117,13 +124,31 @@ func GetUsers(showNumber, pageNumber int32) ([]db.User, error) {
 	return users, err
 }
 
-func AddUser(userId, phoneNumber, name string) error {
+func AddUser(userId string, phoneNumber string, name string, email string, gender string, photo string, birth string) error {
+	_gender, _err := strconv.Atoi(gender)
+	if _err != nil {
+		_gender = 0
+	}
+	_birth, _err := time.ParseInLocation("2006-01-02", birth, time.Local)
+	if _err != nil {
+		_birth = time.Now()
+	}
 	user := db.User{
-		PhoneNumber: phoneNumber,
-		Birth:       time.Now(),
-		CreateTime:  time.Now(),
-		UserID:      userId,
-		Nickname:    name,
+		UserID:         userId,
+		Nickname:       name,
+		FaceURL:        photo,
+		Gender:         int32(_gender),
+		PhoneNumber:    phoneNumber,
+		Birth:          _birth,
+		Email:          email,
+		Ex:             "",
+		CreateTime:     time.Now(),
+		CreateIp:       "",
+		LastLoginTime:  time.Now(),
+		LastLoginIp:    "",
+		LoginTimes:     0,
+		LoginLimit:     0,
+		InvitationCode: "",
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user)
 	return result.Error
@@ -202,8 +227,12 @@ func GetBlockUserById(userId string) (BlockUserInfo, error) {
 		return blockUserInfo, err
 	}
 	blockUserInfo.User.UserID = user.UserID
-	blockUserInfo.User.FaceURL = user.UserID
+	blockUserInfo.User.FaceURL = user.FaceURL
 	blockUserInfo.User.Nickname = user.Nickname
+	blockUserInfo.User.Birth = user.Birth
+	blockUserInfo.User.PhoneNumber = user.PhoneNumber
+	blockUserInfo.User.Email = user.Email
+	blockUserInfo.User.Gender = user.Gender
 	blockUserInfo.BeginDisableTime = blockUser.BeginDisableTime
 	blockUserInfo.EndDisableTime = blockUser.EndDisableTime
 	return blockUserInfo, nil
@@ -220,9 +249,13 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 		if err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).First(&user).Error; err == nil {
 			blockUserInfos = append(blockUserInfos, BlockUserInfo{
 				User: db.User{
-					UserID:   user.UserID,
-					Nickname: user.Nickname,
-					FaceURL:  user.FaceURL,
+					UserID:      user.UserID,
+					Nickname:    user.Nickname,
+					FaceURL:     user.FaceURL,
+					Birth:       user.Birth,
+					PhoneNumber: user.PhoneNumber,
+					Email:       user.Email,
+					Gender:      user.Gender,
 				},
 				BeginDisableTime: blockUser.BeginDisableTime,
 				EndDisableTime:   blockUser.EndDisableTime,
@@ -252,31 +285,4 @@ func GetBlockUsersNumCount() (int32, error) {
 		return 0, err
 	}
 	return int32(count), nil
-}
-
-func IsLimitRegisterIp(RegisterIp string) (bool, error) {
-	//如果已经存在则限制
-	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("ip_limits").Where("ip=? and limit_register=? and limit_time>now()", RegisterIp, 1).Count(&count).Error; err != nil {
-		return false, err
-	}
-	return count > 0, nil
-}
-
-func IsLimitLoginIp(LoginIp string) (bool, error) {
-	//如果已经存在则限制
-	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("ip_limits").Where("ip=? and limit_login=? and limit_time>now()", LoginIp, 1).Count(&count).Error; err != nil {
-		return false, err
-	}
-	return count > 0, nil
-}
-
-func IsLimitUserLoginIp(userID string, LoginIp string) (bool, error) {
-	//如果已经存在则放行
-	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("user_ip_limits").Where("ip=? and user_id=?", LoginIp, userID).Count(&count).Error; err != nil {
-		return false, err
-	}
-	return count == 0, nil
 }

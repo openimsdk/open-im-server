@@ -20,6 +20,10 @@ func NewGinRouter() *gin.Engine {
 	adminRouterGroup := router.Group("/admin")
 	{
 		adminRouterGroup.POST("/login", admin.AdminLogin)
+		adminRouterGroup.Use(middleware.JWTAuth())
+		adminRouterGroup.POST("/add_user_register_add_friend_id", admin.AddUserRegisterAddFriendIDList)
+		adminRouterGroup.POST("/reduce_user_register_reduce_friend_id", admin.ReduceUserRegisterAddFriendIDList)
+		adminRouterGroup.POST("/get_user_register_reduce_friend_id_list", admin.GetUserRegisterAddFriendIDList)
 	}
 	r2 := router.Group("")
 	r2.Use(middleware.JWTAuth())
@@ -72,12 +76,6 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.GET("/get_block_user", user.GetBlockUserById)
 		userRouterGroup.POST("/delete_user", user.DeleteUser)
 		userRouterGroup.GET("/get_users_by_name", user.GetUsersByName)
-	}
-	friendRouterGroup := r2.Group("/friend")
-	{
-		friendRouterGroup.POST("/get_friends_by_id")
-		friendRouterGroup.POST("/set_friend")
-		friendRouterGroup.POST("/remove_friend")
 	}
 	messageCMSRouterGroup := r2.Group("/message")
 	{

@@ -46,16 +46,16 @@ redis:
 kafka:
   ws2mschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
-    topic: "ws2ms_chat"
-  ws2mschatoffline:
-    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
-    topic: "ws2ms_chat_offline"
+    topic: "ws2ms_chat" #用于mongo和mysql保存消息
+#  ws2mschatoffline:
+#    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+#    topic: "ws2ms_chat_offline" #原为离线用户消息处理，目前暂时弃用
   msgtomongo:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "msg_to_mongo"
   ms2pschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
-    topic: "ms2ps_chat"
+    topic: "ms2ps_chat" #消息push
   consumergroupid:
     msgToTransfer: mongo
     msgToMongo: mongo_ex
@@ -131,6 +131,15 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     finalHost: "http://bucket1.oss-cn-beijing.aliyuncs.com"
     stsDurationSeconds: 3600
     OssRoleArn: "acs:ram::xxx:role/xxx"
+  aws:
+    accessKeyID: 1                            #AssumeRole用户关联的accessKeyID
+    accessKeySecret: 2     #AssumeRole用户关联的accessKeySecrect
+    region: ap-southeast-1                                        #分区
+    bucket: ouyang                                                #桶
+    finalHost:  ouyang.s3.ap-southeast-1.amazonaws.com            #对外Host
+    roleArn: arn:aws:iam::192209831083:role/AWS_S3_FOR_OUYANG     #RoleArn
+    externalId: AssumeRoleExtend                                  #角色扩展Id
+    roleSessionName: Required-AWS-ID-OPENIM                       #角色SESSION名称
 
 dtm:
   serverURL: 127.0.0.1:10007
@@ -724,6 +733,7 @@ demo:
     verificationCodeTemplateCode: 2902877
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
+  needInvitationCode: false
   #  second
   codeTTL: 60
   useSuperCode: true

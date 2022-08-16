@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
+	pbOrganization "Open_IM/pkg/proto/organization"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
@@ -19,6 +20,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -431,21 +433,33 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if req.UserInfo.Nickname != "" {
 		go s.SyncJoinedGroupMemberNickname(req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, req.OperationID, req.OpUserID)
 	}
-	//updateUserInfoToCacheReq := &cache.UpdateUserInfoToCacheReq{
-	//	OperationID:  req.OperationID,
-	//	UserInfoList: []*sdkws.UserInfo{req.UserInfo},
-	//}
-	//cacheEtcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
-	//cacheClient := cache.NewCacheClient(cacheEtcdConn)
-	//resp, err := cacheClient.UpdateUserInfoToCache(context.Background(), updateUserInfoToCacheReq)
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), updateUserInfoToCacheReq.String())
-	//	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: err.Error()}}, nil
-	//}
-	//if resp.CommonResp.ErrCode != 0 {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), resp.String())
-	//	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: resp.CommonResp.ErrMsg}}, nil
-	//}
+
+	etcdConn = getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, req.OperationID)
+	clientOrg := pbOrganization.NewOrganizationClient(etcdConn)
+	out, err := clientOrg.UpdateOrganizationUser(context.Background(), &pbOrganization.UpdateOrganizationUserReq{
+		OrganizationUser: &sdkws.OrganizationUser{
+			UserID:      req.UserInfo.UserID,
+			Nickname:    req.UserInfo.Nickname,
+			EnglishName: req.UserInfo.Nickname,
+			FaceURL:     req.UserInfo.FaceURL,
+			Gender:      req.UserInfo.Gender,
+			Mobile:      req.UserInfo.PhoneNumber,
+			Telephone:   req.UserInfo.PhoneNumber,
+			Birth:       req.UserInfo.Birth,
+			Email:       req.UserInfo.Email,
+			Ex:          req.UserInfo.Ex,
+		},
+		OperationID: req.OperationID,
+		OpUserID:    req.OpUserID,
+	})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateOrganizationUser failed", err.Error())
+	} else {
+		if out.ErrCode != 0 {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "grpc resp: ", out)
+		}
+	}
+
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (*pbUser.SetGlobalRecvMessageOptResp, error) {
@@ -660,11 +674,19 @@ func (s *userServer) ResignUser(ctx context.Context, req *pbUser.ResignUserReq) 
 func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*pbUser.AlterUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AlterUserResp{}
+	birth, _ := time.ParseInLocation("2006-01-02", req.Birth, time.Local)
+	gender, gendererr := strconv.Atoi(req.Gender)
+	if gendererr != nil {
+		gender = 0
+	}
 	user := db.User{
-		PhoneNumber: strconv.FormatInt(req.PhoneNumber, 10),
+		PhoneNumber: req.PhoneNumber,
 		Nickname:    req.Nickname,
 		Email:       req.Email,
 		UserID:      req.UserId,
+		Gender:      int32(gender),
+		FaceURL:     req.Photo,
+		Birth:       birth,
 	}
 	if err := imdb.UpdateUserInfo(user); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateUserInfo", err.Error())
@@ -678,7 +700,7 @@ func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AddUserResp{}
-	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name)
+	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name, req.Email, req.Gender, req.Photo, req.Birth)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
@@ -723,6 +745,10 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 				Nickname:     v.User.Nickname,
 				UserId:       v.User.UserID,
 				IsBlock:      true,
+				Birth:        v.User.Birth.Format("2006-01-02"),
+				PhoneNumber:  v.User.PhoneNumber,
+				Email:        v.User.Email,
+				Gender:       v.User.Gender,
 			},
 			BeginDisableTime: (v.BeginDisableTime).String(),
 			EndDisableTime:   (v.EndDisableTime).String(),
@@ -755,6 +781,10 @@ func (s *userServer) GetBlockUserById(_ context.Context, req *pbUser.GetBlockUse
 			Nickname:     user.User.Nickname,
 			UserId:       user.User.UserID,
 			IsBlock:      true,
+			Birth:        user.User.Birth.Format("2006-01-02"),
+			PhoneNumber:  user.User.PhoneNumber,
+			Email:        user.User.Email,
+			Gender:       user.User.Gender,
 		},
 		BeginDisableTime: (user.BeginDisableTime).String(),
 		EndDisableTime:   (user.EndDisableTime).String(),

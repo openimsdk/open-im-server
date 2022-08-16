@@ -140,14 +140,6 @@ func IsExistGroupMember(groupID, userID string) bool {
 	return true
 }
 
-func RemoveGroupMember(groupID string, UserID string) error {
-	return DeleteGroupMemberByGroupIDAndUserID(groupID, UserID)
-}
-
-func GetMemberInfoByID(groupID string, userID string) (*db.GroupMember, error) {
-	return GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
-}
-
 func GetGroupMemberByGroupID(groupID string, filter int32, begin int32, maxNumber int32) ([]db.GroupMember, error) {
 	var memberList []db.GroupMember
 	var err error

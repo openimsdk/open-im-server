@@ -9,6 +9,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	groupRpc "Open_IM/pkg/proto/group"
+
 	organizationRpc "Open_IM/pkg/proto/organization"
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"

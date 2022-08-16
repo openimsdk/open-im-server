@@ -9,11 +9,15 @@ type Register struct {
 	UserID         string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
 	AreaCode       string `gorm:"column:area_code;type:varchar(255)"`
 	InvitationCode string `gorm:"column:invitation_code;type:varchar(255)"`
+	RegisterIP     string `gorm:"column:register_ip;type:varchar(255)"`
 }
 
 type Invitation struct {
-	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:varchar(255)"`
+	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:varchar(32)"`
 	CreateTime     time.Time `gorm:"column:create_time"`
+	UserID         string    `gorm:"column:user_id"`
+	LastTime       time.Time `gorm:"column:last_time"`
+	Status         int32     `gorm:"column:status"`
 }
 
 //
@@ -180,6 +184,7 @@ type User struct {
 	LoginLimit       int32     `gorm:"column:login_limit"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
+	InvitationCode   string    `gorm:"column:invitation_code"`
 	status           int32     `gorm:"column:status"`
 }
 
@@ -324,4 +329,12 @@ type AppVersion struct {
 
 func (AppVersion) TableName() string {
 	return "app_version"
+}
+
+type RegisterAddFriend struct {
+	UserID string `gorm:"column:user_id;primary_key;size:64"`
+}
+
+func (RegisterAddFriend) TableName() string {
+	return "register_add_friend"
 }

@@ -185,7 +185,8 @@ const (
 
 	//Minio
 	MinioDurationTimes = 3600
-
+	//Aws
+	AwsDurationTimes = 3600
 	// verificationCode used for
 	VerificationCodeForRegister       = 1
 	VerificationCodeForReset          = 2
