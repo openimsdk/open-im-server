@@ -407,7 +407,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 					rwLock.Unlock()
 					split := 1000
 					triggerID = utils.OperationIDGenerator()
-					log.NewWarn(triggerID, "timer trigger msg consumer start", len(ccMsg))
+					log.Debug(triggerID, "timer trigger msg consumer start", len(ccMsg))
 					for i := 0; i < len(ccMsg)/split; i++ {
 						//log.Debug()
 						och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
@@ -419,9 +419,8 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 					}
 					//sess.MarkMessage(ccMsg[len(cMsg)-1], "")
 
-					log.NewWarn(triggerID, "timer trigger msg consumer end", len(cMsg))
+					log.Debug(triggerID, "timer trigger msg consumer end", len(cMsg))
 				}
-
 			}
 		}
 

@@ -6,9 +6,10 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
+	"time"
+
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v4"
-	"time"
 )
 
 //var (
@@ -27,13 +28,14 @@ type Claims struct {
 
 func BuildClaims(uid, platform string, ttl int64) Claims {
 	now := time.Now()
+	before := now.Add(-time.Minute * 5)
 	return Claims{
 		UID:      uid,
 		Platform: platform,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(time.Duration(ttl*24) * time.Hour)), //Expiration time
 			IssuedAt:  jwt.NewNumericDate(now),                                        //Issuing time
-			NotBefore: jwt.NewNumericDate(now),                                        //Begin Effective time
+			NotBefore: jwt.NewNumericDate(before),                                     //Begin Effective time
 		}}
 }
 
@@ -99,23 +101,22 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 	if err != nil {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return nil, constant.ErrTokenMalformed
+				return nil, utils.Wrap(constant.ErrTokenMalformed, "")
 			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return nil, constant.ErrTokenExpired
+				return nil, utils.Wrap(constant.ErrTokenExpired, "")
 			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, constant.ErrTokenNotValidYet
+				return nil, utils.Wrap(constant.ErrTokenNotValidYet, "")
 			} else {
-				return nil, constant.ErrTokenUnknown
+				return nil, utils.Wrap(constant.ErrTokenUnknown, "")
 			}
 		} else {
-			return nil, constant.ErrTokenNotValidYet
+			return nil, utils.Wrap(constant.ErrTokenNotValidYet, "")
 		}
 	} else {
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-			//log.NewDebug("", claims.UID, claims.Platform)
 			return claims, nil
 		}
-		return nil, constant.ErrTokenNotValidYet
+		return nil, utils.Wrap(constant.ErrTokenNotValidYet, "")
 	}
 }
 
