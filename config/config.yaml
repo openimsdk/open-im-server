@@ -132,8 +132,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     stsDurationSeconds: 3600
     OssRoleArn: "acs:ram::xxx:role/xxx"
   aws:
-    accessKeyID: ********************                             #AssumeRole用户关联的accessKeyID
-    accessKeySecret: ****************************************     #AssumeRole用户关联的accessKeySecrect
+    accessKeyID: 1                            #AssumeRole用户关联的accessKeyID
+    accessKeySecret: 2     #AssumeRole用户关联的accessKeySecrect
     region: ap-southeast-1                                        #分区
     bucket: ouyang                                                #桶
     finalHost:  ouyang.s3.ap-southeast-1.amazonaws.com            #对外Host
