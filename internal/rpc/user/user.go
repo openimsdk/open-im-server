@@ -433,6 +433,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		go s.SyncJoinedGroupMemberNickname(req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, req.OperationID, req.OpUserID)
 	}
 
+	etcdConn = getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, req.OperationID)
 	clientOrg := pbOrganization.NewOrganizationClient(etcdConn)
 	out, err := clientOrg.UpdateOrganizationUser(context.Background(), &pbOrganization.UpdateOrganizationUserReq{
 		OrganizationUser: &sdkws.OrganizationUser{
