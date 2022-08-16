@@ -20,8 +20,9 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"github.com/golang/protobuf/proto"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 )
 
 type OpenIMContent struct {
@@ -94,8 +95,8 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		var content string
 		if pushMsg.MsgData.OfflinePushInfo != nil {
 			content = pushMsg.MsgData.OfflinePushInfo.Title
-
-		} else {
+		}
+		if content == "" {
 			switch pushMsg.MsgData.ContentType {
 			case constant.Text:
 				content = constant.ContentType2PushContent[constant.Text]
