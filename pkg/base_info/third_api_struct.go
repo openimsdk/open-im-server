@@ -99,3 +99,16 @@ type GetRTCInvitationInfoStartAppReq struct {
 type GetRTCInvitationInfoStartAppResp struct {
 	GetRTCInvitationInfoResp
 }
+
+/**
+ * FCM第三方上报Token
+ */
+type FcmUpdateTokenReq struct {
+	OperationID string `json:"operationID" binding:"required"`
+	Platform    int    `json:"platform" binding:"required,min=1,max=2"` //only for ios + android
+	FcmToken    string `json:"fcmToken" binding:"required"`
+}
+
+type FcmUpdateTokenResp struct {
+	CommResp
+}

@@ -305,31 +305,8 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 }
 
 func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rpc.UpdateOrganizationUserReq) (*rpc.UpdateOrganizationUserResp, error) {
-	authReq := &pbAuth.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
-	utils.CopyStructFields(authReq.UserInfo, req.OrganizationUser)
-	authReq.OperationID = req.OperationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
-	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
-		log.NewError(req.OperationID, errMsg)
-		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
-	}
-	client := pbAuth.NewAuthClient(etcdConn)
-
-	reply, err := client.UserRegister(context.Background(), authReq)
-	if err != nil {
-		errMsg := "UserRegister failed " + err.Error()
-		log.NewError(req.OperationID, errMsg)
-		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
-	}
-	if reply.CommonResp.ErrCode != 0 {
-		errMsg := "UserRegister failed " + reply.CommonResp.ErrMsg
-		log.NewError(req.OperationID, errMsg)
-		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
-	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	if !token_verify.IsManagerUserID(req.OpUserID) {
+	if !token_verify.IsManagerUserID(req.OpUserID) && req.OpUserID != req.OrganizationUser.UserID {
 		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
 		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
@@ -342,7 +319,7 @@ func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rp
 	}
 
 	log.Debug(req.OperationID, "src ", *req.OrganizationUser, "dst ", organizationUser)
-	err = imdb.UpdateOrganizationUser(&organizationUser, nil)
+	err := imdb.UpdateOrganizationUser(&organizationUser, nil)
 	if err != nil {
 		errMsg := req.OperationID + " " + "CreateOrganizationUser failed " + err.Error()
 		log.Error(req.OperationID, errMsg, organizationUser)

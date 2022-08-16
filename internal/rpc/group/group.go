@@ -1414,7 +1414,11 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroups error", err.Error())
 		return resp, http.WrapError(constant.ErrDB)
 	}
-
+	resp.GroupNum, err = imdb.GetGroupsCountNum(db.Group{})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupsCountNum error", err.Error())
+		return resp, http.WrapError(constant.ErrDB)
+	}
 	resp.Pagination.PageNumber = req.Pagination.PageNumber
 	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
 	for _, v := range groups {

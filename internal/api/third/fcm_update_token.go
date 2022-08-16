@@ -1,6 +1,7 @@
 package apiThird
 
 import (
+	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
@@ -10,18 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/**
- * FCM第三方上报Token
- */
-type FcmUpdateTokenReq struct {
-	OperationID string `json:"operationID"`
-	Platform    int    `json:"platform" binding:"required,min=1,max=2"` //only for ios + android
-	FcmToken    string `json:"fcmToken"`
-}
-
 func FcmUpdateToken(c *gin.Context) {
 	var (
-		req FcmUpdateTokenReq
+		req  api.FcmUpdateTokenReq
+		resp api.FcmUpdateTokenResp
 	)
 	if err := c.Bind(&req); err != nil {
 		log.NewError("0", utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
@@ -34,7 +27,9 @@ func FcmUpdateToken(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		resp.ErrCode = 500
+		resp.ErrMsg = errMsg
+		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req, UserId)
@@ -43,10 +38,12 @@ func FcmUpdateToken(c *gin.Context) {
 	if err != nil {
 		errMsg := req.OperationID + " " + "SetFcmToken failed " + err.Error() + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		resp.ErrCode = 500
+		resp.ErrMsg = errMsg
+		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 	//逻辑处理完毕
-	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": ""})
+	c.JSON(http.StatusOK, resp)
 	return
 }
