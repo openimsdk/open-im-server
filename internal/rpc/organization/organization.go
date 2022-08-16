@@ -306,7 +306,7 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 
 func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rpc.UpdateOrganizationUserReq) (*rpc.UpdateOrganizationUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	if !token_verify.IsManagerUserID(req.OpUserID) {
+	if !token_verify.IsManagerUserID(req.OpUserID) || req.OpUserID != req.OrganizationUser.UserID {
 		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"
 		log.Error(req.OperationID, errMsg)
 		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
