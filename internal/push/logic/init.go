@@ -29,7 +29,7 @@ var (
 
 func Init(rpcPort int) {
 
-	rpcServer.Init(rpcPort)
+	//rpcServer.Init(rpcPort)
 	pushCh.Init()
 	pushTerminal = []int32{constant.IOSPlatformID, constant.AndroidPlatformID}
 }
@@ -49,6 +49,6 @@ func init() {
 }
 
 func Run() {
-	go rpcServer.run()
+	//go rpcServer.run()
 	go pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&pushCh)
 }
