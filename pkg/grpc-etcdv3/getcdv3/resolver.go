@@ -96,6 +96,16 @@ func GetConn(schema, etcdaddr, serviceName string, operationID string) *grpc.Cli
 	return r.grpcClientConn
 }
 
+func GetDefaultConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
+	conn := GetConn(schema, etcdaddr, serviceName, operationID)
+	if conn != nil {
+		log.NewWarn(operationID, utils.GetSelfFuncName(), schema, etcdaddr, serviceName, "conn is nil")
+		return conn
+	}
+	conn = GetConfigConn(serviceName, operationID)
+	return conn
+}
+
 func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
 	if r.cli == nil {
 		return nil, fmt.Errorf("etcd clientv3 client failed, etcd:%s", target)
