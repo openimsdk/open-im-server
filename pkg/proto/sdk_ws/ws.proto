@@ -529,6 +529,7 @@ message SignalReq {
       SignalAcceptReq accept = 4;
       SignalHungUpReq hungUp = 5;
       SignalRejectReq reject = 6;
+      SignalGetRoomByGroupIDReq GetRoomByGroupID = 7;
   }
 }
 
@@ -540,6 +541,7 @@ message SignalResp {
     SignalAcceptReply accept = 4;
     SignalHungUpReply hungUp = 5;
     SignalRejectReply reject = 6;
+    SignalGetRoomByGroupIDReply GetRoomByGroupID = 7;
   }
 }
 
@@ -635,6 +637,19 @@ message SignalRejectReq {
 
 message SignalRejectReply {
 
+}
+
+message SignalGetRoomByGroupIDReq {
+  string opUserID = 1;
+  string groupID = 2;
+}
+
+message SignalGetRoomByGroupIDReply {
+  InvitationInfo invitation = 1;
+  repeated string onConnectingUserIDList = 2;
+  string token = 3;
+  string roomID = 4;
+  string liveURL = 5;
 }
 
 
