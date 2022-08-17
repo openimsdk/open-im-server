@@ -1,6 +1,7 @@
 package getcdv3
 
 import (
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
@@ -67,6 +68,118 @@ func (r1 *Resolver) Close() {
 }
 
 func GetConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
+	rwNameResolverMutex.RLock()
+	r, ok := nameResolver[schema+serviceName]
+	rwNameResolverMutex.RUnlock()
+	if ok {
+		log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
+		return r.grpcClientConn
+	}
+
+	rwNameResolverMutex.Lock()
+	r, ok = nameResolver[schema+serviceName]
+	if ok {
+		rwNameResolverMutex.Unlock()
+		log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
+		return r.grpcClientConn
+	}
+
+	r, err := NewResolver(schema, etcdaddr, serviceName, operationID)
+	if err != nil {
+		log.Error(operationID, "etcd failed ", schema, etcdaddr, serviceName, err.Error())
+		rwNameResolverMutex.Unlock()
+		return nil
+	}
+
+	log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
+	nameResolver[schema+serviceName] = r
+	rwNameResolverMutex.Unlock()
+	return r.grpcClientConn
+}
+
+func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
+	rpcRegisterIP := config.Config.RpcRegisterIP
+	var err error
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+			return nil
+		}
+	}
+
+	var configPortList []int
+	//1
+	if config.Config.RpcRegisterName.OpenImUserName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//2
+	if config.Config.RpcRegisterName.OpenImFriendName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//3
+	if config.Config.RpcRegisterName.OpenImMsgName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//4
+	if config.Config.RpcRegisterName.OpenImPushName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//5
+	if config.Config.RpcRegisterName.OpenImRelayName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//6
+	if config.Config.RpcRegisterName.OpenImGroupName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//7
+	if config.Config.RpcRegisterName.OpenImAuthName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//8
+	if config.Config.RpcRegisterName.OpenImMessageCMSName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//9
+	if config.Config.RpcRegisterName.OpenImAdminCMSName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//10
+	if config.Config.RpcRegisterName.OpenImOfficeName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//11
+	if config.Config.RpcRegisterName.OpenImOrganizationName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//12
+	if config.Config.RpcRegisterName.OpenImConversationName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//13
+	if config.Config.RpcRegisterName.OpenImCacheName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//14
+	if config.Config.RpcRegisterName.OpenImRealTimeCommName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	if len(configPortList) == 0 {
+		log.Error("", "len(configPortList) == 0  ")
+		return nil
+	}
+	target := rpcRegisterIP + ":" + utils.Int32ToString(int32(configPortList[0]))
+	log.Info("", "rpcRegisterIP  ", rpcRegisterIP, "port ", configPortList, "grpc target: ", target, "serviceName: ", serviceName)
+	conn, err := grpc.Dial(target, grpc.WithInsecure())
+	if err != nil {
+		log.Error("", "grpc.Dail failed ", err.Error())
+		return nil
+	}
+	return conn
+}
+
+func GetDefaultConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
 	rwNameResolverMutex.RLock()
 	r, ok := nameResolver[schema+serviceName]
 	rwNameResolverMutex.RUnlock()
