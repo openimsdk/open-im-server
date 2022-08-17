@@ -124,7 +124,7 @@ func GetUsers(showNumber, pageNumber int32) ([]db.User, error) {
 	return users, err
 }
 
-func AddUser(userId string, phoneNumber string, name string, email string, gender string, photo string, birth string) error {
+func AddUser(userId string, phoneNumber string, name string, email string, gender string, photo string, birth string, password string) error {
 	_gender, _err := strconv.Atoi(gender)
 	if _err != nil {
 		_gender = 0
@@ -151,7 +151,25 @@ func AddUser(userId string, phoneNumber string, name string, email string, gende
 		InvitationCode: "",
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user)
-	return result.Error
+	if result.Error != nil {
+		return result.Error
+	}
+	if password != "" {
+		register := db.Register{
+			Account:        phoneNumber,
+			Password:       utils.Md5(password),
+			Ex:             "",
+			UserID:         userId,
+			AreaCode:       "+86",
+			InvitationCode: "",
+			RegisterIP:     "",
+		}
+		result := db.DB.MysqlDB.DefaultGormDB().Table("registers").Create(&register)
+		if result.Error != nil {
+			return result.Error
+		}
+	}
+	return nil
 }
 
 func UserIsBlock(userId string) (bool, error) {

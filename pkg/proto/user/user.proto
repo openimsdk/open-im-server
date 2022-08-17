@@ -246,6 +246,7 @@ message AddUserReq{
   string Birth =7;
   string Photo = 8;
   string OpUserId = 9;
+  string Password = 10;
 }
 
 message AddUserResp{

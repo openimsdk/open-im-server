@@ -74,6 +74,7 @@ type AddUserRequest struct {
 	Birth       string `json:"birth"`
 	Gender      string `json:"gender"`
 	Photo       string `json:"photo"`
+	Password    string `json:"password"`
 }
 
 type AddUserResponse struct {

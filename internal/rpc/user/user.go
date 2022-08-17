@@ -700,7 +700,7 @@ func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AddUserResp{}
-	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name, req.Email, req.Gender, req.Photo, req.Birth)
+	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name, req.Email, req.Gender, req.Photo, req.Birth, req.Password)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
