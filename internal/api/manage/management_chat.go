@@ -50,6 +50,8 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 	case constant.Video:
 		fallthrough
 	case constant.File:
+		fallthrough
+	case constant.AdvancedRevoke:
 		newContent = utils.StructToJsonString(params.Content)
 	case constant.Revoke:
 		newContent = params.Content["revokeMsgClientID"].(string)
@@ -145,6 +147,8 @@ func ManagementSendMsg(c *gin.Context) {
 		data = CustomElem{}
 	case constant.Revoke:
 		data = RevokeElem{}
+	case constant.AdvancedRevoke:
+		data = MessageRevoked{}
 	case constant.OANotification:
 		data = OANotificationElem{}
 		params.SessionType = constant.NotificationChatType
@@ -189,7 +193,7 @@ func ManagementSendMsg(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "recvID is a null string", "sendTime": 0, "MsgID": ""})
 			return
 		}
-	case constant.GroupChatType:
+	case constant.GroupChatType, constant.SuperGroupChatType:
 		if len(params.GroupID) == 0 {
 			log.NewError(params.OperationID, "groupID is a null string")
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "groupID is a null string", "sendTime": 0, "MsgID": ""})
@@ -472,4 +476,11 @@ type OANotificationElem struct {
 	VideoElem           VideoElem   `mapstructure:"videoElem" json:"videoElem"`
 	FileElem            FileElem    `mapstructure:"fileElem" json:"fileElem"`
 	Ex                  string      `mapstructure:"ex" json:"ex"`
+}
+type MessageRevoked struct {
+	RevokerID       string `mapstructure:"notificationName" json:"revokerID" validate:"required"`
+	RevokerRole     int32  `mapstructure:"notificationName" json:"revokerRole" validate:"required"`
+	ClientMsgID     string `mapstructure:"notificationName" json:"clientMsgID" validate:"required"`
+	RevokerNickname string `mapstructure:"notificationName" json:"revokerNickname"`
+	SessionType     int32  `mapstructure:"notificationName" json:"sessionType" validate:"required"`
 }

@@ -133,7 +133,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, operationID stri
 	}
 	pushReq.PushMessage.Notification = Notification{
 		Title:     alert,
-		Body:      alert,
+		Body:      detailContent,
 		ClickType: "startapp",
 	}
 	pushReq.PushChannel.Ios.Aps.Sound = "default"
