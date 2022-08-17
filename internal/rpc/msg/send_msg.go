@@ -839,7 +839,7 @@ func Notification(n *NotificationMsg) {
 		unReadCount = config.Config.Notification.ConversationSetPrivate.Conversation.UnreadCount
 	case constant.DeleteMessageNotification:
 		reliabilityLevel = constant.ReliableNotificationNoMsg
-	case constant.SuperGroupUpdateNotification, constant.ConversationUnreadNotification:
+	case constant.ConversationUnreadNotification, constant.SuperGroupUpdateNotification:
 		reliabilityLevel = constant.UnreliableNotification
 	}
 	switch reliabilityLevel {

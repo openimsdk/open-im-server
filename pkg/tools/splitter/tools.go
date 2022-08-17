@@ -1,4 +1,4 @@
-package tools
+package splitter
 
 type SplitResult struct {
 	Item []string

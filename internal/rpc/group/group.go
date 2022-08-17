@@ -256,6 +256,9 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), v)
 			continue
 		}
+		if group.GroupType == constant.SuperGroup {
+			continue
+		}
 		if group.Status == constant.GroupStatusDismissed {
 			log.NewError(req.OperationID, "constant.GroupStatusDismissed ", group)
 			continue
