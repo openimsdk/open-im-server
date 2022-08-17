@@ -128,6 +128,7 @@ type config struct {
 		OpenImOrganizationPort   []int `yaml:"openImOrganizationPort"`
 		OpenImConversationPort   []int `yaml:"openImConversationPort"`
 		OpenImCachePort          []int `yaml:"openImCachePort"`
+		OpenImRealTimeCommPort   []int `yaml:"openImRealTimeCommPort"`
 	}
 	RpcRegisterName struct {
 		OpenImStatisticsName string `yaml:"openImStatisticsName"`

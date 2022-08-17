@@ -103,7 +103,7 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
 		if err != nil {
-			log.Error("", "GetLocalIP failed ", err.Error())
+			log.Error(operationID, "GetLocalIP failed ", err.Error())
 			return nil
 		}
 	}
@@ -111,27 +111,27 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	var configPortList []int
 	//1
 	if config.Config.RpcRegisterName.OpenImUserName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImUserPort
 	}
 	//2
 	if config.Config.RpcRegisterName.OpenImFriendName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImFriendPort
 	}
 	//3
 	if config.Config.RpcRegisterName.OpenImMsgName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImMessagePort
 	}
 	//4
 	if config.Config.RpcRegisterName.OpenImPushName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImPushPort
 	}
 	//5
 	if config.Config.RpcRegisterName.OpenImRelayName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenIm
 	}
 	//6
 	if config.Config.RpcRegisterName.OpenImGroupName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImGroupPort
 	}
 	//7
 	if config.Config.RpcRegisterName.OpenImAuthName == serviceName {
@@ -139,41 +139,41 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	}
 	//8
 	if config.Config.RpcRegisterName.OpenImMessageCMSName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImMessageCmsPort
 	}
 	//9
 	if config.Config.RpcRegisterName.OpenImAdminCMSName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImAdminCmsPort
 	}
 	//10
 	if config.Config.RpcRegisterName.OpenImOfficeName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImOfficePort
 	}
 	//11
 	if config.Config.RpcRegisterName.OpenImOrganizationName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImOrganizationPort
 	}
 	//12
 	if config.Config.RpcRegisterName.OpenImConversationName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImConversationPort
 	}
 	//13
 	if config.Config.RpcRegisterName.OpenImCacheName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImCachePort
 	}
 	//14
 	if config.Config.RpcRegisterName.OpenImRealTimeCommName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAuthPort
+		configPortList = config.Config.RpcPort.OpenImRealTimeCommPort
 	}
 	if len(configPortList) == 0 {
-		log.Error("", "len(configPortList) == 0  ")
+		log.Error(operationID, "len(configPortList) == 0  ")
 		return nil
 	}
 	target := rpcRegisterIP + ":" + utils.Int32ToString(int32(configPortList[0]))
-	log.Info("", "rpcRegisterIP  ", rpcRegisterIP, "port ", configPortList, "grpc target: ", target, "serviceName: ", serviceName)
+	log.Info(operationID, "rpcRegisterIP ", rpcRegisterIP, " port ", configPortList, " grpc target: ", target, " serviceName: ", serviceName)
 	conn, err := grpc.Dial(target, grpc.WithInsecure())
 	if err != nil {
-		log.Error("", "grpc.Dail failed ", err.Error())
+		log.Error(operationID, "grpc.Dail failed ", err.Error())
 		return nil
 	}
 	return conn
