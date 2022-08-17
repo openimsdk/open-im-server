@@ -178,6 +178,7 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 		log.Error(operationID, "grpc.Dail failed ", err.Error())
 		return nil
 	}
+	log.NewDebug(operationID, utils.GetSelfFuncName(), serviceName, conn)
 	return conn
 }
 
@@ -283,6 +284,7 @@ func GetDefaultGatewayConn4Unique(schema, etcdaddr, operationID string) []*grpc.
 	}
 	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) < 0 ", schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
 	grpcConns = GetDefaultGatewayConn4UniqueFromcfg(operationID)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), config.Config.RpcRegisterName.OpenImRelayName, grpcConns)
 	return grpcConns
 }
 
