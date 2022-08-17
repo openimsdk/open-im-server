@@ -12,9 +12,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"strings"
+
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
-	"strings"
 
 	//"gopkg.in/errgo.v2/errors"
 	"net/http"
@@ -119,7 +120,7 @@ func (ws *WServer) SetWriteTimeoutWriteMsg(conn *UserConn, a int, msg []byte, ti
 }
 
 func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int32, token string, operationID string) {
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "args  grpcCons: ", userID, platformID, grpcCons)
 	for _, v := range grpcCons {
 		if v.Target() == rpcSvr.target {

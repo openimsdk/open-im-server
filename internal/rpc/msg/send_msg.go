@@ -17,13 +17,14 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
-	go_redis "github.com/go-redis/redis/v8"
-	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	go_redis "github.com/go-redis/redis/v8"
+	"github.com/golang/protobuf/proto"
 )
 
 //When the number of group members is greater than this value，Online users will be sent first，Guaranteed service availability
@@ -884,7 +885,7 @@ func getOnlineAndOfflineUserIDList(memberList []string, m map[string][]string, o
 	req.OperationID = operationID
 	req.OpUserID = config.Config.Manager.AppManagerUid[0]
 	flag := false
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
 		reply, err := client.GetUsersOnlineStatus(context.Background(), req)

@@ -43,7 +43,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingelMsgToUserResultList
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
 	log.Debug(pushMsg.OperationID, "Get msg from msg_transfer And push msg", pushMsg.String())
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
 
 	var UIDList = []string{pushMsg.PushToUserID}
 	callbackResp := callbackOnlinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData)
@@ -188,7 +188,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		pushToUserIDList = cacheResp.UserIDList
 	}
 
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
 
 	//Online push message
 	log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
