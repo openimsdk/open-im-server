@@ -837,9 +837,9 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.ConversationSetPrivate.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.ConversationSetPrivate.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.ConversationSetPrivate.Conversation.UnreadCount
-	case constant.DeleteMessageNotification, constant.SuperGroupUpdateNotification:
+	case constant.DeleteMessageNotification:
 		reliabilityLevel = constant.ReliableNotificationNoMsg
-	case constant.ConversationUnreadNotification:
+	case constant.ConversationUnreadNotification, constant.SuperGroupUpdateNotification:
 		reliabilityLevel = constant.UnreliableNotification
 	}
 	switch reliabilityLevel {
