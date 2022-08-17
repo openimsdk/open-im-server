@@ -67,7 +67,7 @@ func (r1 *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
 func (r1 *Resolver) Close() {
 }
 
-func GetConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
+func getConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
 	rwNameResolverMutex.RLock()
 	r, ok := nameResolver[schema+serviceName]
 	rwNameResolverMutex.RUnlock()
@@ -180,33 +180,13 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 }
 
 func GetDefaultConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
-	rwNameResolverMutex.RLock()
-	r, ok := nameResolver[schema+serviceName]
-	rwNameResolverMutex.RUnlock()
-	if ok {
-		log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
-		return r.grpcClientConn
+	con := getConn(schema, etcdaddr, serviceName, operationID)
+	if con != nil {
+		log.NewWarn(operationID, utils.GetSelfFuncName(), "conn is nil !!!!!", schema, etcdaddr, serviceName, operationID)
+		return con
 	}
-
-	rwNameResolverMutex.Lock()
-	r, ok = nameResolver[schema+serviceName]
-	if ok {
-		rwNameResolverMutex.Unlock()
-		log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
-		return r.grpcClientConn
-	}
-
-	r, err := NewResolver(schema, etcdaddr, serviceName, operationID)
-	if err != nil {
-		log.Error(operationID, "etcd failed ", schema, etcdaddr, serviceName, err.Error())
-		rwNameResolverMutex.Unlock()
-		return nil
-	}
-
-	log.Debug(operationID, "etcd key ", schema+serviceName, "value ", *r.grpcClientConn, *r)
-	nameResolver[schema+serviceName] = r
-	rwNameResolverMutex.Unlock()
-	return r.grpcClientConn
+	con = GetConfigConn(serviceName, operationID)
+	return con
 }
 
 func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
