@@ -274,7 +274,30 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 	}
 }
 
-func GetConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
+func GetDefaultConn4Unique(schema, etcdaddr, servicename, operationID string) []*grpc.ClientConn {
+	grpcConns := getConn4Unique(schema, etcdaddr, servicename)
+	if len(grpcConns) > 0 {
+		return grpcConns
+	}
+	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) < 0 ", schema, etcdaddr, servicename)
+	grpcConns = getConn4UniqueFromConfig(servicename, operationID)
+	return grpcConns
+}
+
+func getConn4UniqueFromConfig(servicename, operationID string) []*grpc.ClientConn {
+	rpcRegisterIP := config.Config.RpcRegisterIP
+	var err error
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+			return nil
+		}
+	}
+	return nil
+}
+
+func getConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
 	gEtcdCli, err := clientv3.New(clientv3.Config{Endpoints: strings.Split(etcdaddr, ",")})
 	if err != nil {
 		log.Error("clientv3.New failed", err.Error())
