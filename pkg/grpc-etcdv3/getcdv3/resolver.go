@@ -182,9 +182,9 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 func GetDefaultConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
 	con := getConn(schema, etcdaddr, serviceName, operationID)
 	if con != nil {
-		log.NewWarn(operationID, utils.GetSelfFuncName(), "conn is nil !!!!!", schema, etcdaddr, serviceName, operationID)
 		return con
 	}
+	log.NewWarn(operationID, utils.GetSelfFuncName(), "conn is nil !!!!!", schema, etcdaddr, serviceName, operationID)
 	con = GetConfigConn(serviceName, operationID)
 	return con
 }
