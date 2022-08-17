@@ -23,9 +23,9 @@ func BroadcastMessage(c *gin.Context) {
 		reqPb pbMessage.BoradcastMessageReq
 	)
 	reqPb.OperationID = utils.OperationIDGenerator()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
 	if etcdConn == nil {
-		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -45,9 +45,9 @@ func MassSendMassage(c *gin.Context) {
 		reqPb pbMessage.MassSendMessageReq
 	)
 	reqPb.OperationID = utils.OperationIDGenerator()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
 	if etcdConn == nil {
-		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -67,9 +67,9 @@ func WithdrawMessage(c *gin.Context) {
 		reqPb pbMessage.WithdrawMessageReq
 	)
 	reqPb.OperationID = utils.OperationIDGenerator()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
 	if etcdConn == nil {
-		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -101,9 +101,9 @@ func GetChatLogs(c *gin.Context) {
 	}
 	utils.CopyStructFields(&reqPb, &req)
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
 	if etcdConn == nil {
-		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return

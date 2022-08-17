@@ -89,9 +89,9 @@ func createOrganizationUser(operationID, userID, userName, phoneNumber, email st
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID)
 	}()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "start createOrganizationUser")
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
 	if etcdConn == nil {
-		errMsg := operationID + "getcdv3.GetConn == nil"
+		errMsg := operationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(operationID, errMsg)
 		return errors.New(errMsg)
 	}
@@ -128,9 +128,9 @@ func joinTestDepartment(operationID, userID, departmentID string) error {
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID)
 	}()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
 	if etcdConn == nil {
-		errMsg := operationID + "getcdv3.GetConn == nil"
+		errMsg := operationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(operationID, errMsg)
 		return errors.New(errMsg)
 	}
@@ -160,9 +160,9 @@ func GetDepartmentGroupIDList(operationID, departmentID string) ([]string, error
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), departmentID)
 	}()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, operationID)
 	if etcdConn == nil {
-		errMsg := operationID + "getcdv3.GetConn == nil"
+		errMsg := operationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(operationID, errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -199,9 +199,9 @@ func joinGroups(operationID, userID, userName, faceURL string, groupIDList []str
 	defer func() {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), userID, groupIDList)
 	}()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, operationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, operationID)
 	if etcdConn == nil {
-		errMsg := operationID + "getcdv3.GetConn == nil"
+		errMsg := operationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(operationID, errMsg)
 		return
 	}

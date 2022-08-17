@@ -308,7 +308,7 @@ func GetConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
 
 	allConn := make([]*grpc.ClientConn, 0)
 	for _, v := range allService {
-		r := GetConn(schema, etcdaddr, v, "0")
+		r := getConn(schema, etcdaddr, v, "0")
 		allConn = append(allConn, r)
 	}
 
@@ -321,7 +321,7 @@ var (
 )
 
 func GetconnFactory(schema, etcdaddr, servicename string) (*grpc.ClientConn, error) {
-	c := GetConn(schema, etcdaddr, servicename, "0")
+	c := getConn(schema, etcdaddr, servicename, "0")
 	if c != nil {
 		return c, nil
 	} else {

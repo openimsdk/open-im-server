@@ -169,9 +169,9 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	}
 	if len(pushToUserIDList) == 0 {
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
 		if etcdConn == nil {
-			errMsg := pushMsg.OperationID + "getcdv3.GetConn == nil"
+			errMsg := pushMsg.OperationID + "getcdv3.GetDefaultConn == nil"
 			log.NewError(pushMsg.OperationID, errMsg)
 			return
 		}
@@ -315,7 +315,7 @@ func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err err
 //		sendMsgToKafka(m, m.SendID, "msgKey--sendID")
 //		sendMsgToKafka(m, m.RecvID, "msgKey--recvID")
 //	case constant.GroupChatType:
-//		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+//		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 //		client := pbGroup.NewGroupClient(etcdConn)
 //		req := &pbGroup.Req{
 //			GroupID:     m.RecvID,

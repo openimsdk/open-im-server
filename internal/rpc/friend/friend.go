@@ -100,9 +100,9 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	}
 	log.NewInfo(req.CommID.OperationID, "AddBlacklist rpc ok ", req.CommID.FromUserID, req.CommID.ToUserID)
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
 	if etcdConn == nil {
-		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.CommID.OperationID, errMsg)
 		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
 	}
@@ -211,9 +211,9 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		}
 	}
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		resp.CommonResp.ErrMsg = errMsg
 		resp.CommonResp.ErrCode = 500
@@ -315,9 +315,9 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 			}
 			// cache rpc
 			delFriendIDListFromCacheReq := &pbCache.DelFriendIDListFromCacheReq{OperationID: req.CommID.OperationID}
-			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
 			if etcdConn == nil {
-				errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+				errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 				log.NewError(req.CommID.OperationID, errMsg)
 				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
 			}
@@ -378,9 +378,9 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 	}
 	log.NewInfo(req.CommID.OperationID, "DeleteFriend rpc ok")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
 	if etcdConn == nil {
-		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.CommID.OperationID, errMsg)
 		return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
 	}
@@ -473,9 +473,9 @@ func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.Remove
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc RemoveBlacklist ok ")
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
 	if etcdConn == nil {
-		errMsg := req.CommID.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.CommID.OperationID, errMsg)
 		return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
 	}
