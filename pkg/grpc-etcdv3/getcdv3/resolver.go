@@ -127,7 +127,7 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	}
 	//5
 	if config.Config.RpcRegisterName.OpenImRelayName == serviceName {
-		configPortList = config.Config.RpcPort.OpenIm
+		configPortList = config.Config.RpcPort.OpenImMessageGatewayPort
 	}
 	//6
 	if config.Config.RpcRegisterName.OpenImGroupName == serviceName {
