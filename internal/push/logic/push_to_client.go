@@ -94,6 +94,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		var content string
 		if pushMsg.MsgData.OfflinePushInfo != nil {
 			content = pushMsg.MsgData.OfflinePushInfo.Title
+			jsonCustomContent = pushMsg.MsgData.OfflinePushInfo.Desc
 
 		} else {
 			switch pushMsg.MsgData.ContentType {
@@ -225,6 +226,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		var content string
 		if pushMsg.MsgData.OfflinePushInfo != nil {
 			content = pushMsg.MsgData.OfflinePushInfo.Title
+			jsonCustomContent = pushMsg.MsgData.OfflinePushInfo.Desc
 
 		} else {
 			switch pushMsg.MsgData.ContentType {

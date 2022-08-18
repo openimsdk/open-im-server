@@ -133,7 +133,7 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, operationID stri
 	}
 	pushReq.PushMessage.Notification = Notification{
 		Title:     alert,
-		Body:      alert,
+		Body:      detailContent,
 		ClickType: "startapp",
 	}
 	pushReq.PushChannel.Ios.Aps.Sound = "default"
@@ -152,10 +152,10 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, operationID stri
 			ChannelID    string `json:"/message/android/notification/channel_id"`
 			Sound        string `json:"/message/android/notification/sound"`
 			Importance   string `json:"/message/android/notification/importance"`
-		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "importance"},
+		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
 		XM: struct {
 			ChannelID string `json:"/extra.channel_id"`
-		}{ChannelID: "Default"},
+		}{ChannelID: "high_system"},
 	}
 	pushResp := PushResp{}
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
