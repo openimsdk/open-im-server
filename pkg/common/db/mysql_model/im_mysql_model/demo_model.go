@@ -12,6 +12,11 @@ func GetRegister(account, areaCode, userID string) (*db.Register, error) {
 		userID, "", account, account, areaCode).Take(&r).Error
 }
 
+func GetRegisterInfo(userID string) (*db.Register, error) {
+	var r db.Register
+	return &r, db.DB.MysqlDB.DefaultGormDB().Table("registers").Where("user_id = ?", userID).Take(&r).Error
+}
+
 func SetPassword(account, password, ex, userID, areaCode, ip string) error {
 	r := db.Register{
 		Account:    account,

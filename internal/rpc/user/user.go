@@ -630,9 +630,16 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
 	}
+
 	for _, v := range users {
 		isBlock, err := imdb.UserIsBlock(v.UserID)
 		if err == nil {
+			registerIP := ""
+			registerInfo, err := imdb.GetRegisterInfo(v.UserID)
+			if registerInfo != nil && err == nil {
+				registerIP = registerInfo.RegisterIP
+			}
+
 			user := &pbUser.User{
 				ProfilePhoto:  v.FaceURL,
 				UserId:        v.UserID,
@@ -648,6 +655,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 				LoginTimes:    v.LoginTimes,
 				Gender:        v.Gender,
 				LoginLimit:    v.LoginLimit,
+				RegisterIp:    registerIP,
 			}
 			resp.User = append(resp.User, user)
 		} else {
