@@ -12,7 +12,7 @@ COPY . .
 WORKDIR /Open-IM-Server/script
 RUN chmod +x *.sh
 
-RUN /bin/sh -c ./batch_build_all_service.sh
+RUN /bin/sh -c ./build_all_service.sh
 
 #Blank image Multi-Stage Build
 FROM ubuntu
