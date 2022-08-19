@@ -6,17 +6,19 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
+
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
 	//"go.etcd.io/etcd/mvcc/mvccpb"
 	//"google.golang.org/genproto/googleapis/ads/googleads/v1/services"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/balancer/roundrobin"
-	"google.golang.org/grpc/resolver"
 	"strings"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer/roundrobin"
+	"google.golang.org/grpc/resolver"
 )
 
 type Resolver struct {
@@ -176,6 +178,7 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 		log.Error(operationID, "grpc.Dail failed ", err.Error())
 		return nil
 	}
+	log.NewDebug(operationID, utils.GetSelfFuncName(), serviceName, conn)
 	return conn
 }
 
@@ -274,17 +277,18 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 	}
 }
 
-func GetDefaultConn4Unique(schema, etcdaddr, servicename, operationID string) []*grpc.ClientConn {
-	grpcConns := getConn4Unique(schema, etcdaddr, servicename)
+func GetDefaultGatewayConn4Unique(schema, etcdaddr, operationID string) []*grpc.ClientConn {
+	grpcConns := getConn4Unique(schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
 	if len(grpcConns) > 0 {
 		return grpcConns
 	}
-	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) < 0 ", schema, etcdaddr, servicename)
-	grpcConns = getConn4UniqueFromConfig(servicename, operationID)
+	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) < 0 ", schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+	grpcConns = GetDefaultGatewayConn4UniqueFromcfg(operationID)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), config.Config.RpcRegisterName.OpenImRelayName, grpcConns)
 	return grpcConns
 }
 
-func getConn4UniqueFromConfig(servicename, operationID string) []*grpc.ClientConn {
+func GetDefaultGatewayConn4UniqueFromcfg(operationID string) []*grpc.ClientConn {
 	rpcRegisterIP := config.Config.RpcRegisterIP
 	var err error
 	if config.Config.RpcRegisterIP == "" {
@@ -294,7 +298,21 @@ func getConn4UniqueFromConfig(servicename, operationID string) []*grpc.ClientCon
 			return nil
 		}
 	}
-	return nil
+	var conns []*grpc.ClientConn
+	configPortList := config.Config.RpcPort.OpenImMessageGatewayPort
+	for _, port := range configPortList {
+		target := rpcRegisterIP + ":" + utils.Int32ToString(int32(port))
+		log.Info(operationID, "rpcRegisterIP ", rpcRegisterIP, " port ", configPortList, " grpc target: ", target, " serviceName: ", "msgGateway")
+		conn, err := grpc.Dial(target, grpc.WithInsecure())
+		if err != nil {
+			log.Error(operationID, "grpc.Dail failed ", err.Error())
+			continue
+		}
+		conns = append(conns, conn)
+
+	}
+	return conns
+
 }
 
 func getConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
