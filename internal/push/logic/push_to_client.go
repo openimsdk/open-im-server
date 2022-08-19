@@ -17,6 +17,7 @@ import (
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
 	pbRtc "Open_IM/pkg/proto/rtc"
+	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
@@ -123,8 +124,8 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 
 			}
 		}
-
-		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData, &[]string{})
+		var offlineInfo commonPb.OfflinePushInfo
+		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData, &[]string{}, &offlineInfo)
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
@@ -132,6 +133,12 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		if callbackResp.ActionCode != constant.ActionAllow {
 			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
 			return
+		}
+		if offlineInfo.Title != "" {
+			content = offlineInfo.Title
+		}
+		if offlineInfo.Desc != "" {
+			jsonCustomContent = offlineInfo.Desc
 		}
 		if offlinePusher == nil {
 			return
@@ -258,7 +265,8 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		if len(onlineFailedUserIDList) > 0 {
 			var offlinePushUserIDList []string
 			var needOfflinePushUserIDList []string
-			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList, pushMsg.MsgData, &offlinePushUserIDList)
+			var offlineInfo commonPb.OfflinePushInfo
+			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList, pushMsg.MsgData, &offlinePushUserIDList, &offlineInfo)
 			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 			if callbackResp.ErrCode != 0 {
 				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
@@ -271,6 +279,12 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 				needOfflinePushUserIDList = offlinePushUserIDList
 			} else {
 				needOfflinePushUserIDList = onlineFailedUserIDList
+			}
+			if offlineInfo.Title != "" {
+				content = offlineInfo.Title
+			}
+			if offlineInfo.Desc != "" {
+				jsonCustomContent = offlineInfo.Desc
 			}
 			if offlinePusher == nil {
 				return
