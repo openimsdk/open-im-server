@@ -83,12 +83,20 @@ func GetConversations(OwnerUserID string, conversationIDs []string) ([]db.Conver
 	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("conversation_id IN (?) and  owner_user_id=?", conversationIDs, OwnerUserID).Find(&conversations).Error
 	return conversations, err
 }
+
 func GetConversationsByConversationIDMultipleOwner(OwnerUserIDList []string, conversationID string) ([]db.Conversation, error) {
 	var conversations []db.Conversation
 	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", OwnerUserIDList, conversationID).Find(&conversations).Error
 	return conversations, err
 }
+
 func UpdateColumnsConversations(ownerUserIDList []string, conversationID string, args map[string]interface{}) error {
 	return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", ownerUserIDList, conversationID).Updates(args).Error
 
+}
+
+func GetConversationIDListByUserID(userID string) ([]string, error) {
+	var IDList []string
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("user_id=?", userID).Pluck("conversation_id", &IDList).Error
+	return IDList, err
 }
