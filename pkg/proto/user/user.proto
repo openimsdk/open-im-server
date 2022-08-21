@@ -188,6 +188,7 @@ message User{
   int32 Gender = 12;
   int32 LoginLimit = 13;
   bool IsBlock = 14;
+  string RegisterIp = 15;
 }
 
 message GetUserByIdResp{

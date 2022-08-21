@@ -1,21 +1,24 @@
 package getcdv3
 
 import (
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
+
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
 	//"go.etcd.io/etcd/mvcc/mvccpb"
 	//"google.golang.org/genproto/googleapis/ads/googleads/v1/services"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/balancer/roundrobin"
-	"google.golang.org/grpc/resolver"
 	"strings"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/balancer/roundrobin"
+	"google.golang.org/grpc/resolver"
 )
 
 type Resolver struct {
@@ -66,7 +69,7 @@ func (r1 *Resolver) ResolveNow(rn resolver.ResolveNowOptions) {
 func (r1 *Resolver) Close() {
 }
 
-func GetConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
+func getConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
 	rwNameResolverMutex.RLock()
 	r, ok := nameResolver[schema+serviceName]
 	rwNameResolverMutex.RUnlock()
@@ -94,6 +97,99 @@ func GetConn(schema, etcdaddr, serviceName string, operationID string) *grpc.Cli
 	nameResolver[schema+serviceName] = r
 	rwNameResolverMutex.Unlock()
 	return r.grpcClientConn
+}
+
+func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
+	rpcRegisterIP := config.Config.RpcRegisterIP
+	var err error
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error(operationID, "GetLocalIP failed ", err.Error())
+			return nil
+		}
+	}
+
+	var configPortList []int
+	//1
+	if config.Config.RpcRegisterName.OpenImUserName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImUserPort
+	}
+	//2
+	if config.Config.RpcRegisterName.OpenImFriendName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImFriendPort
+	}
+	//3
+	if config.Config.RpcRegisterName.OpenImMsgName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImMessagePort
+	}
+	//4
+	if config.Config.RpcRegisterName.OpenImPushName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImPushPort
+	}
+	//5
+	if config.Config.RpcRegisterName.OpenImRelayName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImMessageGatewayPort
+	}
+	//6
+	if config.Config.RpcRegisterName.OpenImGroupName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImGroupPort
+	}
+	//7
+	if config.Config.RpcRegisterName.OpenImAuthName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAuthPort
+	}
+	//8
+	if config.Config.RpcRegisterName.OpenImMessageCMSName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImMessageCmsPort
+	}
+	//9
+	if config.Config.RpcRegisterName.OpenImAdminCMSName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImAdminCmsPort
+	}
+	//10
+	if config.Config.RpcRegisterName.OpenImOfficeName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImOfficePort
+	}
+	//11
+	if config.Config.RpcRegisterName.OpenImOrganizationName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImOrganizationPort
+	}
+	//12
+	if config.Config.RpcRegisterName.OpenImConversationName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImConversationPort
+	}
+	//13
+	if config.Config.RpcRegisterName.OpenImCacheName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImCachePort
+	}
+	//14
+	if config.Config.RpcRegisterName.OpenImRealTimeCommName == serviceName {
+		configPortList = config.Config.RpcPort.OpenImRealTimeCommPort
+	}
+	if len(configPortList) == 0 {
+		log.Error(operationID, "len(configPortList) == 0  ")
+		return nil
+	}
+	target := rpcRegisterIP + ":" + utils.Int32ToString(int32(configPortList[0]))
+	log.Info(operationID, "rpcRegisterIP ", rpcRegisterIP, " port ", configPortList, " grpc target: ", target, " serviceName: ", serviceName)
+	conn, err := grpc.Dial(target, grpc.WithInsecure())
+	if err != nil {
+		log.Error(operationID, "grpc.Dail failed ", err.Error())
+		return nil
+	}
+	log.NewDebug(operationID, utils.GetSelfFuncName(), serviceName, conn)
+	return conn
+}
+
+func GetDefaultConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
+	con := getConn(schema, etcdaddr, serviceName, operationID)
+	if con != nil {
+		return con
+	}
+	log.NewWarn(operationID, utils.GetSelfFuncName(), "conn is nil !!!!!", schema, etcdaddr, serviceName, operationID)
+	con = GetConfigConn(serviceName, operationID)
+	return con
 }
 
 func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
@@ -181,7 +277,45 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 	}
 }
 
-func GetConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
+func GetDefaultGatewayConn4Unique(schema, etcdaddr, operationID string) []*grpc.ClientConn {
+	grpcConns := getConn4Unique(schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+	if len(grpcConns) > 0 {
+		return grpcConns
+	}
+	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) < 0 ", schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+	grpcConns = GetDefaultGatewayConn4UniqueFromcfg(operationID)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), config.Config.RpcRegisterName.OpenImRelayName, grpcConns)
+	return grpcConns
+}
+
+func GetDefaultGatewayConn4UniqueFromcfg(operationID string) []*grpc.ClientConn {
+	rpcRegisterIP := config.Config.RpcRegisterIP
+	var err error
+	if config.Config.RpcRegisterIP == "" {
+		rpcRegisterIP, err = utils.GetLocalIP()
+		if err != nil {
+			log.Error("", "GetLocalIP failed ", err.Error())
+			return nil
+		}
+	}
+	var conns []*grpc.ClientConn
+	configPortList := config.Config.RpcPort.OpenImMessageGatewayPort
+	for _, port := range configPortList {
+		target := rpcRegisterIP + ":" + utils.Int32ToString(int32(port))
+		log.Info(operationID, "rpcRegisterIP ", rpcRegisterIP, " port ", configPortList, " grpc target: ", target, " serviceName: ", "msgGateway")
+		conn, err := grpc.Dial(target, grpc.WithInsecure())
+		if err != nil {
+			log.Error(operationID, "grpc.Dail failed ", err.Error())
+			continue
+		}
+		conns = append(conns, conn)
+
+	}
+	return conns
+
+}
+
+func getConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
 	gEtcdCli, err := clientv3.New(clientv3.Config{Endpoints: strings.Split(etcdaddr, ",")})
 	if err != nil {
 		log.Error("clientv3.New failed", err.Error())
@@ -215,7 +349,7 @@ func GetConn4Unique(schema, etcdaddr, servicename string) []*grpc.ClientConn {
 
 	allConn := make([]*grpc.ClientConn, 0)
 	for _, v := range allService {
-		r := GetConn(schema, etcdaddr, v, "0")
+		r := getConn(schema, etcdaddr, v, "0")
 		allConn = append(allConn, r)
 	}
 
@@ -228,7 +362,7 @@ var (
 )
 
 func GetconnFactory(schema, etcdaddr, servicename string) (*grpc.ClientConn, error) {
-	c := GetConn(schema, etcdaddr, servicename, "0")
+	c := getConn(schema, etcdaddr, servicename, "0")
 	if c != nil {
 		return c, nil
 	} else {
