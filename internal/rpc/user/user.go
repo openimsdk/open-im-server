@@ -268,7 +268,7 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 		return resp, nil
 	}
 	if isUpdate {
-		err = rocksCache.DelConversationFromCache(req.Conversation.OwnerUserID ,req.Conversation.ConversationID)
+		err = rocksCache.DelConversationFromCache(req.Conversation.OwnerUserID, req.Conversation.ConversationID)
 	} else {
 		err = rocksCache.DelUserConversationIDListFromCache(req.Conversation.OwnerUserID)
 	}
@@ -320,6 +320,7 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
+	}
 	if err = rocksCache.DelConversationFromCache(conversation.OwnerUserID, conversation.ConversationID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), conversation.ConversationID, err.Error())
 	}
@@ -329,7 +330,7 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 	return resp, nil
 }
 
-func (s *userServer) DeleteUsers(ctx context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
+func (s *userServer) DeleteUsers(_ context.Context, req *pbUser.DeleteUsersReq) (*pbUser.DeleteUsersResp, error) {
 	log.NewInfo(req.OperationID, "DeleteUsers args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {
 		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
