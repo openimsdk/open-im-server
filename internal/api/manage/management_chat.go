@@ -10,20 +10,21 @@ import (
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/msg"
-	"Open_IM/pkg/proto/sdk_ws"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang/protobuf/proto"
 	"github.com/mitchellh/mapstructure"
-	"net/http"
-	"strings"
 )
 
 var validate *validator.Validate
@@ -332,7 +333,13 @@ func ManagementBatchSendMsg(c *gin.Context) {
 		ManagementSendMsg: params.ManagementSendMsg,
 	}
 	pbData := newUserSendMsgReq(req)
-	for _, recvID := range params.RecvIDList {
+	var recvList []string
+	if params.IsSendAll {
+		recvList, err = im_mysql_model.SelectAllUserID()
+	} else {
+		recvList = params.RecvIDList
+	}
+	for _, recvID := range recvList {
 		pbData.MsgData.RecvID = recvID
 		log.Info(params.OperationID, "", "api ManagementSendMsg call start..., ", pbData.String())
 

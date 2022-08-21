@@ -2,8 +2,7 @@ package base_info
 
 import (
 	pbRelay "Open_IM/pkg/proto/relay"
-	"Open_IM/pkg/proto/sdk_ws"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 )
 
@@ -68,6 +67,7 @@ type ManagementSendMsgResp struct {
 
 type ManagementBatchSendMsgReq struct {
 	ManagementSendMsg
+	IsSendAll  bool     `json:"isSendAll"`
 	RecvIDList []string `json:"recvIDList"`
 }
 
