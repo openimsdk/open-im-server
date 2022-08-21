@@ -7,7 +7,7 @@ func SetClientInitConfig(m map[string]interface{}) error {
 	if result.Error != nil {
 		return result.Error
 	}
-	if result.RowsAffected == 1 {
+	if result.RowsAffected == 0 {
 		err := db.DB.MysqlDB.DefaultGormDB().Model(&db.ClientInitConfig{}).Create(m).Error
 		return err
 	}
