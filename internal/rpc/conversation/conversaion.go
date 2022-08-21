@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbConversation "Open_IM/pkg/proto/conversation"
@@ -88,6 +89,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 			return resp, nil
 		}
 	}
+
 	// notification
 	if req.Conversation.ConversationType == constant.SingleChatType && req.FieldType == constant.FieldIsPrivateChat {
 		//sync peer user conversation if conversation is singleChatType
@@ -96,13 +98,20 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 			resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 			return resp, nil
 		}
+
 	} else {
 		if isSyncConversation {
 			for _, v := range req.UserIDList {
+				if err = rocksCache.DelConversationFromCache(v, req.Conversation.ConversationID); err != nil {
+					log.NewError(req.OperationID, utils.GetSelfFuncName(), v, req.Conversation.ConversationID, err.Error())
+				}
 				chat.ConversationChangeNotification(req.OperationID, v)
 			}
 		} else {
 			for _, v := range req.UserIDList {
+				if err = rocksCache.DelConversationFromCache(v, req.Conversation.ConversationID); err != nil {
+					log.NewError(req.OperationID, utils.GetSelfFuncName(), v, req.Conversation.ConversationID, err.Error())
+				}
 				chat.ConversationUnreadChangeNotification(req.OperationID, v, req.Conversation.ConversationID)
 			}
 		}
@@ -131,6 +140,10 @@ func syncPeerUserConversation(conversation *pbConversation.Conversation, operati
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 		return err
+	}
+	err = rocksCache.DelConversationFromCache(conversation.UserID, utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType))
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "DelConversationFromCache failed", err.Error())
 	}
 	chat.ConversationSetPrivateNotification(operationID, conversation.OwnerUserID, conversation.UserID, conversation.IsPrivateChat)
 	return nil
