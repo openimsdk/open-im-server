@@ -74,6 +74,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"attached_info": conversation.AttachedInfo})
 	case constant.FieldUnread:
 		isSyncConversation = false
+		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"update_unread_count_time": utils.GetCurrentTimestampByMill()})
 	}
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateColumnsConversations error", err.Error())
@@ -82,6 +83,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	}
 	for _, v := range utils.DifferenceString(haveUserID, req.UserIDList) {
 		conversation.OwnerUserID = v
+		conversation.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 		err := imdb.SetOneConversation(conversation)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
