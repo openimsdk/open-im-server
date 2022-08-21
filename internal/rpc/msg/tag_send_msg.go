@@ -33,9 +33,9 @@ func TagSendMessage(operationID string, user *db.User, recvID, content string, s
 	msgData.SenderPlatformID = senderPlatformID
 	req.MsgData = &msgData
 	req.OperationID = operationID
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, operationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, operationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		return
 	}

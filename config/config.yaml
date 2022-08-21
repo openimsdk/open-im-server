@@ -17,8 +17,8 @@ mysql:
   dbMysqlDatabaseName: openIM_v2 #默认即可
   dbTableName: eMsg #默认即可
   dbMsgTableNum: 1
-  dbMaxOpenConns: 20
-  dbMaxIdleConns: 10
+  dbMaxOpenConns: 200
+  dbMaxIdleConns: 100
   dbMaxLifeTime: 120
 
 mongo:
@@ -73,7 +73,7 @@ kafka:
 serverip: 0.0.0.0
 
 #作为rpc时，注册到etcd的地址，单机默认即可，如果是集群部署，需要修改（具体使用内网地址还是外网地址，要依情况而定，目的是api/gateway能访问到）
-rpcRegisterIP: 127.0.0.1
+rpcRegisterIP:
 #默认即可
 listenIP: 0.0.0.0
 
@@ -158,7 +158,8 @@ rpcport: #rpc服务端口 默认即可
   openImOfficePort: [ 10210 ]
   openImOrganizationPort: [ 10220 ]
   openImConversationPort: [ 10230 ]
-  openImCachePort: [10240]
+  openImCachePort: [ 10240 ]
+  openImRealTimeCommPort: [ 11300 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false

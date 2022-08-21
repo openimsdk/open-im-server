@@ -17,13 +17,14 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
-	go_redis "github.com/go-redis/redis/v8"
-	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	go_redis "github.com/go-redis/redis/v8"
+	"github.com/golang/protobuf/proto"
 )
 
 //When the number of group members is greater than this value，Online users will be sent first，Guaranteed service availability
@@ -82,9 +83,9 @@ func messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string
 		}
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
 		if etcdConn == nil {
-			errMsg := data.OperationID + "getcdv3.GetConn == nil"
+			errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
 			log.NewError(data.OperationID, errMsg)
 			return true, 0, "", nil
 		}
@@ -105,9 +106,9 @@ func messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string
 		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
 		if config.Config.MessageVerify.FriendVerify {
 			reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
 			if etcdConn == nil {
-				errMsg := data.OperationID + "getcdv3.GetConn == nil"
+				errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
 				log.NewError(data.OperationID, errMsg)
 				return true, 0, "", nil
 			}
@@ -139,9 +140,9 @@ func messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string
 			return true, 0, "", nil
 		} else {
 			getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: data.OperationID, GroupID: data.MsgData.GroupID}
-			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
 			if etcdConn == nil {
-				errMsg := data.OperationID + "getcdv3.GetConn == nil"
+				errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
 				log.NewError(data.OperationID, errMsg)
 				//return returnMsg(&replay, pb, 201, errMsg, "", 0)
 				return false, 201, errMsg, nil
@@ -399,9 +400,9 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 						conversationReq.UserIDList = pb.MsgData.AtUserIDList
 						conversation.GroupAtType = constant.AtMe
 					}
-					etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
+					etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
 					if etcdConn == nil {
-						errMsg := pb.OperationID + "getcdv3.GetConn == nil"
+						errMsg := pb.OperationID + "getcdv3.GetDefaultConn == nil"
 						log.NewError(pb.OperationID, errMsg)
 						return
 					}
@@ -415,9 +416,9 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 					if tag {
 						conversationReq.UserIDList = utils.DifferenceString(atUserID, memberUserIDList)
 						conversation.GroupAtType = constant.AtAll
-						etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
+						etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
 						if etcdConn == nil {
-							errMsg := pb.OperationID + "getcdv3.GetConn == nil"
+							errMsg := pb.OperationID + "getcdv3.GetDefaultConn == nil"
 							log.NewError(pb.OperationID, errMsg)
 							return
 						}
@@ -861,9 +862,9 @@ func Notification(n *NotificationMsg) {
 	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		return
 	}
@@ -884,7 +885,7 @@ func getOnlineAndOfflineUserIDList(memberList []string, m map[string][]string, o
 	req.OperationID = operationID
 	req.OpUserID = config.Config.Manager.AppManagerUid[0]
 	flag := false
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
 		reply, err := client.GetUsersOnlineStatus(context.Background(), req)

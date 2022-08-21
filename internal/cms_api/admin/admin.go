@@ -71,9 +71,9 @@ func AdminLogin(c *gin.Context) {
 	reqPb.Secret = req.Secret
 	reqPb.AdminID = req.AdminName
 	reqPb.OperationID = utils.OperationIDGenerator()
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
 	if etcdConn == nil {
-		errMsg := reqPb.OperationID + "getcdv3.GetConn == nil"
+		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return

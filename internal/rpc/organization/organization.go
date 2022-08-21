@@ -119,9 +119,9 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 		return &rpc.CreateDepartmentResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
 	}
 	chat.OrganizationNotificationToAll(req.OpUserID, req.OperationID)
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		resp.ErrCode = constant.ErrInternal.ErrCode
 		resp.ErrMsg = errMsg
@@ -262,9 +262,9 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 	utils.CopyStructFields(authReq.UserInfo, req.OrganizationUser)
 	authReq.OperationID = req.OperationID
 	if req.IsRegister {
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
 		if etcdConn == nil {
-			errMsg := req.OperationID + "getcdv3.GetConn == nil"
+			errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 			log.NewError(req.OperationID, errMsg)
 			return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
 		}
@@ -305,6 +305,32 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 }
 
 func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rpc.UpdateOrganizationUserReq) (*rpc.UpdateOrganizationUserResp, error) {
+<<<<<<< HEAD
+=======
+	authReq := &pbAuth.UserRegisterReq{UserInfo: &open_im_sdk.UserInfo{}}
+	utils.CopyStructFields(authReq.UserInfo, req.OrganizationUser)
+	authReq.OperationID = req.OperationID
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
+	}
+	client := pbAuth.NewAuthClient(etcdConn)
+
+	reply, err := client.UserRegister(context.Background(), authReq)
+	if err != nil {
+		errMsg := "UserRegister failed " + err.Error()
+		log.NewError(req.OperationID, errMsg)
+		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+	}
+	if reply.CommonResp.ErrCode != 0 {
+		errMsg := "UserRegister failed " + reply.CommonResp.ErrMsg
+		log.NewError(req.OperationID, errMsg)
+		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+	}
+
+>>>>>>> shichuang
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) && req.OpUserID != req.OrganizationUser.UserID {
 		errMsg := req.OperationID + " " + req.OpUserID + " is not app manager"

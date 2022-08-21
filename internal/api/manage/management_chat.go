@@ -206,9 +206,9 @@ func ManagementSendMsg(c *gin.Context) {
 	pbData := newUserSendMsgReq(&params)
 	log.Info(params.OperationID, "", "api ManagementSendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 	if etcdConn == nil {
-		errMsg := params.OperationID + "getcdv3.GetConn == nil"
+		errMsg := params.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(params.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -319,9 +319,9 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
 	var msgSendFailedFlag bool
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 	if etcdConn == nil {
-		errMsg := params.OperationID + "getcdv3.GetConn == nil"
+		errMsg := params.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(params.OperationID, errMsg)
 		//resp.Data.FailedIDList = params.RecvIDList
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "rpc server error: etcdConn == nil"})
@@ -378,9 +378,9 @@ func CheckMsgIsSendSuccess(c *gin.Context) {
 		log.Error(c.PostForm("operationID"), "json unmarshal err", err.Error(), c.PostForm("content"))
 		return
 	}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
