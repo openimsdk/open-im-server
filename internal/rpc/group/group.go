@@ -384,7 +384,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			haveConUserID = append(haveConUserID, v.OwnerUserID)
 		}
 		var reqPb pbUser.SetConversationReq
-		var c pbUser.Conversation
+		var c pbConversation.Conversation
 		for _, v := range conversations {
 			reqPb.OperationID = req.OperationID
 			c.OwnerUserID = v.OwnerUserID
@@ -637,7 +637,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			}
 		}
 		var reqPb pbUser.SetConversationReq
-		var c pbUser.Conversation
+		var c pbConversation.Conversation
 		for _, v := range okUserIDList {
 			reqPb.OperationID = req.OperationID
 			c.OwnerUserID = v
@@ -870,7 +870,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 		}
 		var reqPb pbUser.SetConversationReq
 		reqPb.OperationID = req.OperationID
-		var c pbUser.Conversation
+		var c pbConversation.Conversation
 		conversation, err := imdb.GetConversation(req.FromUserID, utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType))
 		if err != nil {
 			c.OwnerUserID = req.FromUserID
@@ -1064,7 +1064,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		}
 		//modify quitter conversation info
 		var reqPb pbUser.SetConversationReq
-		var c pbUser.Conversation
+		var c pbConversation.Conversation
 		reqPb.OperationID = req.OperationID
 		c.OwnerUserID = req.OpUserID
 		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
@@ -1522,7 +1522,7 @@ func (s *groupServer) RemoveGroupMembersCMS(_ context.Context, req *pbGroup.Remo
 		OpUserID:         req.OpUserID,
 	}
 	var reqPb pbUser.SetConversationReq
-	var c pbUser.Conversation
+	var c pbConversation.Conversation
 	for _, v := range resp.Success {
 		reqPb.OperationID = req.OperationID
 		c.OwnerUserID = v
@@ -1707,7 +1707,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		}
 		//modify quitter conversation info
 		var reqPb pbUser.SetConversationReq
-		var c pbUser.Conversation
+		var c pbConversation.Conversation
 		for _, v := range memberList {
 			reqPb.OperationID = req.OperationID
 			c.OwnerUserID = v.UserID
