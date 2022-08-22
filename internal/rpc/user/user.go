@@ -11,6 +11,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	pbFriend "Open_IM/pkg/proto/friend"
 	pbOrganization "Open_IM/pkg/proto/organization"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
@@ -85,7 +86,7 @@ func (s *userServer) Run() {
 	log.NewInfo("0", "rpc  user success")
 }
 
-func syncPeerUserConversation(conversation *pbUser.Conversation, operationID string) error {
+func syncPeerUserConversation(conversation *pbConversation.Conversation, operationID string) error {
 	peerUserConversation := db.Conversation{
 		OwnerUserID:      conversation.UserID,
 		ConversationID:   utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType),
@@ -180,7 +181,7 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 
 func (s *userServer) GetAllConversations(ctx context.Context, req *pbUser.GetAllConversationsReq) (*pbUser.GetAllConversationsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetAllConversationsResp{Conversations: []*pbUser.Conversation{}}
+	resp := &pbUser.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
 	conversations, err := rocksCache.GetUserAllConversationList(req.OwnerUserID)
 	log.NewDebug(req.OperationID, "conversations: ", conversations)
 	if err != nil {
@@ -198,7 +199,7 @@ func (s *userServer) GetAllConversations(ctx context.Context, req *pbUser.GetAll
 
 func (s *userServer) GetConversation(ctx context.Context, req *pbUser.GetConversationReq) (*pbUser.GetConversationResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetConversationResp{Conversation: &pbUser.Conversation{}}
+	resp := &pbUser.GetConversationResp{Conversation: &pbConversation.Conversation{}}
 	conversation, err := rocksCache.GetConversationFromCache(req.OwnerUserID, req.ConversationID)
 	log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation)
 	if err != nil {
@@ -216,7 +217,7 @@ func (s *userServer) GetConversation(ctx context.Context, req *pbUser.GetConvers
 
 func (s *userServer) GetConversations(ctx context.Context, req *pbUser.GetConversationsReq) (*pbUser.GetConversationsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetConversationsResp{Conversations: []*pbUser.Conversation{}}
+	resp := &pbUser.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
 	conversations, err := rocksCache.GetConversationsFromCache(req.OwnerUserID, req.ConversationIDs)
 	log.NewDebug("", utils.GetSelfFuncName(), "conversations", conversations)
 	if err != nil {

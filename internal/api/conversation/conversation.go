@@ -26,7 +26,7 @@ func SetConversation(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	reqPb.Conversation = &pbUser.Conversation{}
+	reqPb.Conversation = &pbConversation.Conversation{}
 	err := utils.CopyStructFields(&reqPb, req)
 	err = utils.CopyStructFields(reqPb.Conversation, req.Conversation)
 	if err != nil {

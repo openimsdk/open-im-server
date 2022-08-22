@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+import "Open_IM/pkg/proto/conversation/conversation.proto";
 option go_package = "./user;user";
 package user;
 
@@ -75,25 +76,8 @@ message SetGlobalRecvMessageOptResp{
   CommonResp  commonResp = 1;
 }
 
-message Conversation{
-  string OwnerUserID = 1;
-  string ConversationID = 2;
-  int32 RecvMsgOpt = 3;
-  int32 ConversationType = 4;
-  string UserID = 5;
-  string GroupID = 6;
-  int32 UnreadCount = 7;
-  int64 DraftTextTime = 8;
-  bool IsPinned = 9;
-  string AttachedInfo = 10;
-  bool IsPrivateChat = 11;
-  int32 GroupAtType = 12;
-  bool IsNotInGroup = 13;
-  string Ex = 14;
-}
-
 message SetConversationReq{
-  Conversation Conversation = 1;
+  conversation.Conversation Conversation = 1;
   int32 notificationType = 2;
   string OperationID = 3;
 }
@@ -122,7 +106,7 @@ message GetConversationReq{
 
 message GetConversationResp{
   CommonResp  commonResp = 1;
-  Conversation Conversation = 2;
+  conversation.Conversation Conversation = 2;
 }
 
 message GetConversationsReq{
@@ -133,7 +117,7 @@ message GetConversationsReq{
 
 message GetConversationsResp{
   CommonResp  commonResp = 1;
-  repeated Conversation Conversations = 2;
+  repeated conversation.Conversation Conversations = 2;
 }
 
 message GetAllConversationsReq{
@@ -143,11 +127,11 @@ message GetAllConversationsReq{
 
 message GetAllConversationsResp{
   CommonResp  commonResp = 1;
-  repeated Conversation Conversations = 2;
+  repeated conversation.Conversation Conversations = 2;
 }
 
 message BatchSetConversationsReq{
-  repeated Conversation Conversations = 1;
+  repeated conversation.Conversation Conversations = 1;
   string OwnerUserID = 2;
   int32 notificationType = 3;
   string OperationID = 4;
