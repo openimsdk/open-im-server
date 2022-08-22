@@ -492,6 +492,7 @@ func GetUserAllConversationList(ownerUserID string) ([]db.Conversation, error) {
 		return nil, err
 	}
 	var conversationList []db.Conversation
+	log.NewDebug("", utils.GetSelfFuncName(), IDList)
 	for _, conversationID := range IDList {
 		conversation, err := GetConversationFromCache(ownerUserID, conversationID)
 		if err != nil {
