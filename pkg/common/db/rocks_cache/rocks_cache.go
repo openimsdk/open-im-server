@@ -463,9 +463,15 @@ func GetConversationFromCache(ownerUserID, conversationID string) (*db.Conversat
 			return "", utils.Wrap(err, "get failed")
 		}
 		bytes, err := json.Marshal(conversation)
-		return string(bytes), utils.Wrap(err, "Marshal failed")
+		if err != nil {
+			return "", utils.Wrap(err, "Marshal failed")
+		}
+		return string(bytes), nil
 	}
 	conversationStr, err := db.DB.Rc.Fetch(conversationCache+ownerUserID+":"+conversationID, time.Second*30*60, getConversation)
+	if err != nil {
+		return nil, utils.Wrap(err, "Fetch failed")
+	}
 	conversation := db.Conversation{}
 	err = json.Unmarshal([]byte(conversationStr), &conversation)
 	if err != nil {
