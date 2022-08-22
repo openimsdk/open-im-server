@@ -84,6 +84,10 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	for _, v := range utils.DifferenceString(haveUserID, req.UserIDList) {
 		conversation.OwnerUserID = v
 		conversation.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
+		err = rocksCache.DelUserConversationIDListFromCache(v)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), v, req.Conversation.ConversationID, err.Error())
+		}
 		err := imdb.SetOneConversation(conversation)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
