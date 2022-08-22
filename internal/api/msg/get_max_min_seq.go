@@ -35,9 +35,9 @@ func GetSeq(c *gin.Context) {
 	pbData := sdk_ws.GetMaxAndMinSeqReq{}
 	pbData.UserID = params.SendID
 	pbData.OperationID = params.OperationID
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, pbData.OperationID)
+	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, pbData.OperationID)
 	if grpcConn == nil {
-		errMsg := pbData.OperationID + " getcdv3.GetConn == nil"
+		errMsg := pbData.OperationID + " getcdv3.GetDefaultConn == nil"
 		log.NewError(pbData.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return

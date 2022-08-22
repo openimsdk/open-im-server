@@ -72,9 +72,9 @@ func (ws *WServer) getSeqReq(conn *UserConn, m *Req) {
 		rpcReq.UserID = m.SendID
 		rpcReq.OperationID = m.OperationID
 		log.Debug(m.OperationID, "Ws call success to getMaxAndMinSeq", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.GetMaxAndMinSeqReq).GroupIDList)
-		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, rpcReq.OperationID)
+		grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, rpcReq.OperationID)
 		if grpcConn == nil {
-			errMsg := rpcReq.OperationID + "getcdv3.GetConn == nil"
+			errMsg := rpcReq.OperationID + "getcdv3.GetDefaultConn == nil"
 			nReply.ErrCode = 500
 			nReply.ErrMsg = errMsg
 			log.NewError(rpcReq.OperationID, errMsg)
@@ -127,9 +127,9 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 		rpcReq.OperationID = m.OperationID
 		rpcReq.GroupSeqList = data.(sdk_ws.PullMessageBySeqListReq).GroupSeqList
 		log.NewInfo(m.OperationID, "Ws call success to pullMsgBySeqListReq middle", m.SendID, m.ReqIdentifier, m.MsgIncr, data.(sdk_ws.PullMessageBySeqListReq).SeqList)
-		grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
+		grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
 		if grpcConn == nil {
-			errMsg := rpcReq.OperationID + "getcdv3.GetConn == nil"
+			errMsg := rpcReq.OperationID + "getcdv3.GetDefaultConn == nil"
 			nReply.ErrCode = 500
 			nReply.ErrMsg = errMsg
 			log.NewError(rpcReq.OperationID, errMsg)
@@ -186,9 +186,9 @@ func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 			MsgData:     &data,
 		}
 		log.NewInfo(m.OperationID, "Ws call success to sendMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, data.String())
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
 		if etcdConn == nil {
-			errMsg := m.OperationID + "getcdv3.GetConn == nil"
+			errMsg := m.OperationID + "getcdv3.GetDefaultConn == nil"
 			nReply.ErrCode = 500
 			nReply.ErrMsg = errMsg
 			log.NewError(m.OperationID, errMsg)
@@ -237,9 +237,9 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WSSendSignalMsg, m.OperationID)
 	if isPass {
 		signalResp := pbRtc.SignalResp{}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRealTimeCommName, m.OperationID)
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRealTimeCommName, m.OperationID)
 		if etcdConn == nil {
-			errMsg := m.OperationID + "getcdv3.GetConn == nil"
+			errMsg := m.OperationID + "getcdv3.GetDefaultConn == nil"
 			log.NewError(m.OperationID, errMsg)
 			ws.sendSignalMsgResp(conn, 204, errMsg, m, &signalResp)
 			return
@@ -267,9 +267,9 @@ func (ws *WServer) sendSignalMsgReq(conn *UserConn, m *Req) {
 			}
 			log.NewInfo(m.OperationID, utils.GetSelfFuncName(), "pbData: ", pbData)
 			log.NewInfo(m.OperationID, "Ws call success to sendSignalMsgReq middle", m.ReqIdentifier, m.SendID, m.MsgIncr, msgData)
-			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
+			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, m.OperationID)
 			if etcdConn == nil {
-				errMsg := m.OperationID + "getcdv3.GetConn == nil"
+				errMsg := m.OperationID + "getcdv3.GetDefaultConn == nil"
 				log.NewError(m.OperationID, errMsg)
 				ws.sendSignalMsgResp(conn, 200, errMsg, m, &signalResp)
 				return

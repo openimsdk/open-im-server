@@ -339,3 +339,11 @@ type RegisterAddFriend struct {
 func (RegisterAddFriend) TableName() string {
 	return "register_add_friend"
 }
+
+type ClientInitConfig struct {
+	DiscoverPageURL string `gorm:"column:discover_page_url;size:64" json:"version"`
+}
+
+func (ClientInitConfig) TableName() string {
+	return "client_init_config"
+}

@@ -6,16 +6,18 @@ import (
 	"Open_IM/pkg/utils"
 )
 
-func SetConversation(conversation db.Conversation) error {
+func SetConversation(conversation db.Conversation) (bool, error) {
+	var isUpdate bool
 	newConversation := conversation
 	if db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Find(&newConversation).RowsAffected == 0 {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "not exist in db, create")
-		return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
+		return isUpdate, db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
 		// if exist, then update record
 	} else {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
 		//force update
-		return db.DB.MysqlDB.DefaultGormDB().Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
+		isUpdate = true
+		return isUpdate, db.DB.MysqlDB.DefaultGormDB().Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
 			Updates(map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt, "is_pinned": conversation.IsPinned, "is_private_chat": conversation.IsPrivateChat,
 				"group_at_type": conversation.GroupAtType, "is_not_in_group": conversation.IsNotInGroup}).Error
 	}
@@ -83,12 +85,20 @@ func GetConversations(OwnerUserID string, conversationIDs []string) ([]db.Conver
 	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("conversation_id IN (?) and  owner_user_id=?", conversationIDs, OwnerUserID).Find(&conversations).Error
 	return conversations, err
 }
+
 func GetConversationsByConversationIDMultipleOwner(OwnerUserIDList []string, conversationID string) ([]db.Conversation, error) {
 	var conversations []db.Conversation
 	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", OwnerUserIDList, conversationID).Find(&conversations).Error
 	return conversations, err
 }
+
 func UpdateColumnsConversations(ownerUserIDList []string, conversationID string, args map[string]interface{}) error {
 	return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("owner_user_id IN (?) and  conversation_id=?", ownerUserIDList, conversationID).Updates(args).Error
 
+}
+
+func GetConversationIDListByUserID(userID string) ([]string, error) {
+	var IDList []string
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("owner_user_id=?", userID).Pluck("conversation_id", &IDList).Error
+	return IDList, err
 }

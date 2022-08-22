@@ -32,7 +32,7 @@ func ImportFriendRoutine() {
 				return
 			}
 			req.FriendUserIDList = friendUserIDList
-			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.OperationID)
+			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.OperationID)
 			if etcdConn == nil {
 				errMsg := req.OperationID + "getcdv3.GetConn == nil"
 				log.NewError(req.OperationID, errMsg)

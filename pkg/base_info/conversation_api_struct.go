@@ -33,20 +33,21 @@ type SetReceiveMessageOptResp struct {
 }
 
 type Conversation struct {
-	OwnerUserID      string `json:"ownerUserID" binding:"required"`
-	ConversationID   string `json:"conversationID" binding:"required"`
-	ConversationType int32  `json:"conversationType" binding:"required"`
-	UserID           string `json:"userID"`
-	GroupID          string `json:"groupID"`
-	RecvMsgOpt       int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
-	UnreadCount      int32  `json:"unreadCount"  binding:"omitempty"`
-	DraftTextTime    int64  `json:"draftTextTime"`
-	IsPinned         bool   `json:"isPinned" binding:"omitempty"`
-	IsPrivateChat    bool   `json:"isPrivateChat"`
-	GroupAtType      int32  `json:"groupAtType"`
-	IsNotInGroup     bool   `json:"isNotInGroup"`
-	AttachedInfo     string `json:"attachedInfo"`
-	Ex               string `json:"ex"`
+	OwnerUserID           string `json:"ownerUserID" binding:"required"`
+	ConversationID        string `json:"conversationID" binding:"required"`
+	ConversationType      int32  `json:"conversationType" binding:"required"`
+	UserID                string `json:"userID"`
+	GroupID               string `json:"groupID"`
+	RecvMsgOpt            int32  `json:"recvMsgOpt"  binding:"omitempty,oneof=0 1 2"`
+	UnreadCount           int32  `json:"unreadCount"  binding:"omitempty"`
+	DraftTextTime         int64  `json:"draftTextTime"`
+	IsPinned              bool   `json:"isPinned" binding:"omitempty"`
+	IsPrivateChat         bool   `json:"isPrivateChat"`
+	GroupAtType           int32  `json:"groupAtType"`
+	IsNotInGroup          bool   `json:"isNotInGroup"`
+	UpdateUnreadCountTime int64  ` json:"updateUnreadCountTime"`
+	AttachedInfo          string `json:"attachedInfo"`
+	Ex                    string `json:"ex"`
 }
 
 type SetConversationReq struct {

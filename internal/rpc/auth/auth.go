@@ -15,7 +15,6 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"time"
 
 	"Open_IM/pkg/common/config"
 
@@ -30,6 +29,13 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
 	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
+	Limited, LimitError := imdb.IsLimitRegisterIp(req.UserInfo.CreateIp)
+	if LimitError != nil {
+		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
+	}
+	if Limited {
+		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.RegisterLimit, ErrMsg: "Register Limit"}}, nil
+	}
 	err := imdb.UserRegister(user)
 	if err != nil {
 		if err == constant.InvitationMsg {
@@ -46,43 +52,20 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 
 func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	user, err := imdb.GetUserByUserID(req.FromUserID)
+	_, err := imdb.GetUserByUserID(req.FromUserID)
 	if err != nil {
 		errMsg := req.OperationID + " imdb.GetUserByUserID failed " + err.Error() + req.FromUserID
 		log.NewError(req.OperationID, errMsg)
 		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
-	var Limited bool
-	var LimitError error
-	if user.LoginLimit == 0 {
-		Limited, LimitError = imdb.IsLimitLoginIp(req.LoginIp)
-	} else if user.LoginLimit == 1 {
-		Limited, LimitError = imdb.IsLimitUserLoginIp(user.UserID, req.LoginIp)
-	} else if user.LoginLimit == 2 {
-		Limited, LimitError = imdb.UserIsBlock(user.UserID)
-	}
-	if LimitError != nil {
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
-	}
-	if Limited {
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.LoginLimit, ErrMsg: "用户被限制"}}, nil
-	}
+
 	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, int(req.Platform))
 	if err != nil {
 		errMsg := req.OperationID + " token_verify.CreateToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
 		log.NewError(req.OperationID, errMsg)
 		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
-	//增加用户登录信息
-	user.LoginTimes = user.LoginTimes + 1
-	user.LastLoginIp = req.LoginIp
-	user.LastLoginTime = time.Now()
-	err = imdb.UpdateUserInfo(*user)
-	if err != nil {
-		errMsg := req.OperationID + " imdb.UpdateUserInfo failed " + err.Error() + req.FromUserID
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	}
+
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime})
 	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }
@@ -110,7 +93,7 @@ func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (
 
 func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID string) error {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), " args ", userID, platformID)
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
 		kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}

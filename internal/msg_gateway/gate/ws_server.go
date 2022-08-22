@@ -120,7 +120,7 @@ func (ws *WServer) SetWriteTimeoutWriteMsg(conn *UserConn, a int, msg []byte, ti
 }
 
 func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int32, token string, operationID string) {
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "args  grpcCons: ", userID, platformID, grpcCons)
 	for _, v := range grpcCons {
 		if v.Target() == rpcSvr.target {
@@ -147,6 +147,11 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 	defer rwLock.Unlock()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), " rpc args: ", uid, platformID, token)
 	switch config.Config.MultiLoginPolicy {
+	case constant.PCAndOther:
+		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
+			return
+		}
+		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[platformID]; ok {
@@ -197,6 +202,11 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
+	case constant.PCAndOther:
+		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
+			return
+		}
+		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[platformID]; ok {

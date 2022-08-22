@@ -3,6 +3,7 @@ package main
 import (
 	_ "Open_IM/cmd/open_im_api/docs"
 	apiAuth "Open_IM/internal/api/auth"
+	clientInit "Open_IM/internal/api/client_init"
 	"Open_IM/internal/api/conversation"
 	"Open_IM/internal/api/friend"
 	"Open_IM/internal/api/group"
@@ -204,6 +205,12 @@ func main() {
 		organizationGroup.POST("/get_department_member", organization.GetDepartmentMember)
 		organizationGroup.POST("/delete_user_in_department", organization.DeleteUserInDepartment)
 
+	}
+
+	initGroup := r.Group("/init")
+	{
+		initGroup.POST("/set_client_config", clientInit.SetClientInitConfig)
+		initGroup.POST("/get_client_config", clientInit.GetClientInitConfig)
 	}
 
 	go apiThird.MinioInit()

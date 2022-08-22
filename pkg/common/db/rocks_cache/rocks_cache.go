@@ -32,6 +32,8 @@ const (
 	joinedSuperGroupListCache = "JOINED_SUPER_GROUP_LIST_CACHE:"
 	groupMemberListHashCache  = "GROUP_MEMBER_LIST_HASH_CACHE:"
 	groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
+	conversationCache         = "CONVERSATION_CACHE:"
+	conversationIDListCache   = "CONVERSATION_ID_LIST_CACHE:"
 )
 
 func init() {
@@ -430,4 +432,84 @@ func GetGroupMemberNumFromCache(groupID string) (int64, error) {
 
 func DelGroupMemberNumFromCache(groupID string) error {
 	return db.DB.Rc.TagAsDeleted(groupMemberNumCache + groupID)
+}
+
+func GetUserConversationIDListFromCache(userID string) ([]string, error) {
+	getConversationIDList := func() (string, error) {
+		conversationIDList, err := imdb.GetConversationIDListByUserID(userID)
+		if err != nil {
+			return "", utils.Wrap(err, "getConversationIDList failed")
+		}
+		log.NewDebug("", utils.GetSelfFuncName(), conversationIDList)
+		bytes, err := json.Marshal(conversationIDList)
+		return string(bytes), utils.Wrap(err, "")
+	}
+	conversationIDListStr, err := db.DB.Rc.Fetch(conversationIDListCache+userID, time.Second*30*60, getConversationIDList)
+	var conversationIDList []string
+	err = json.Unmarshal([]byte(conversationIDListStr), &conversationIDList)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	return conversationIDList, nil
+}
+
+func DelUserConversationIDListFromCache(userID string) error {
+	return db.DB.Rc.TagAsDeleted(conversationIDListCache + userID)
+}
+
+func GetConversationFromCache(ownerUserID, conversationID string) (*db.Conversation, error) {
+	getConversation := func() (string, error) {
+		conversation, err := imdb.GetConversation(ownerUserID, conversationID)
+		if err != nil {
+			return "", utils.Wrap(err, "get failed")
+		}
+		bytes, err := json.Marshal(conversation)
+		if err != nil {
+			return "", utils.Wrap(err, "Marshal failed")
+		}
+		return string(bytes), nil
+	}
+	conversationStr, err := db.DB.Rc.Fetch(conversationCache+ownerUserID+":"+conversationID, time.Second*30*60, getConversation)
+	if err != nil {
+		return nil, utils.Wrap(err, "Fetch failed")
+	}
+	conversation := db.Conversation{}
+	err = json.Unmarshal([]byte(conversationStr), &conversation)
+	if err != nil {
+		return nil, utils.Wrap(err, "Unmarshal failed")
+	}
+	return &conversation, nil
+}
+
+func GetConversationsFromCache(ownerUserID string, conversationIDList []string) ([]db.Conversation, error) {
+	var conversationList []db.Conversation
+	for _, conversationID := range conversationIDList {
+		conversation, err := GetConversationFromCache(ownerUserID, conversationID)
+		if err != nil {
+			return nil, utils.Wrap(err, "GetConversationFromCache failed")
+		}
+		conversationList = append(conversationList, *conversation)
+	}
+	return conversationList, nil
+}
+
+func GetUserAllConversationList(ownerUserID string) ([]db.Conversation, error) {
+	IDList, err := GetUserConversationIDListFromCache(ownerUserID)
+	if err != nil {
+		return nil, err
+	}
+	var conversationList []db.Conversation
+	log.NewDebug("", utils.GetSelfFuncName(), IDList)
+	for _, conversationID := range IDList {
+		conversation, err := GetConversationFromCache(ownerUserID, conversationID)
+		if err != nil {
+			return nil, utils.Wrap(err, "GetConversationFromCache failed")
+		}
+		conversationList = append(conversationList, *conversation)
+	}
+	return conversationList, nil
+}
+
+func DelConversationFromCache(ownerUserID, conversationID string) error {
+	return db.DB.Rc.TagAsDeleted(conversationCache + ownerUserID + ":" + conversationID)
 }
