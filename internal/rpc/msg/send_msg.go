@@ -225,6 +225,7 @@ func (rpc *rpcChat) encapsulateMsgData(msg *sdk_ws.MsgData) {
 func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.SendMsgResp, error) {
 	replay := pbChat.SendMsgResp{}
 	newTime := db.GetCurrentTimestampByMill()
+	t1 := time.Now()
 	log.Info(pb.OperationID, "rpc sendMsg come here ", pb.String())
 	flag, errCode, errMsg := isMessageHasReadEnabled(pb)
 	log.Info(pb.OperationID, "isMessageHasReadEnabled ", flag)
@@ -232,15 +233,18 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
 	flag, errCode, errMsg, _ = messageVerification(pb)
-	log.Info(pb.OperationID, "userRelationshipVerification ", flag)
+	log.Info(pb.OperationID, "messageVerification ", flag, " cost time: ", time.Since(t1))
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
+	t1 = time.Now()
 	rpc.encapsulateMsgData(pb.MsgData)
+	log.Info(pb.OperationID, "encapsulateMsgData ", " cost time: ", time.Since(t1))
 	msgToMQSingle := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: pb.MsgData}
 	// callback
+	t1 = time.Now()
 	callbackResp := callbackWordFilter(pb)
-	log.Info(pb.OperationID, "callbackWordFilter ", callbackResp)
+	log.Info(pb.OperationID, "callbackWordFilter ", callbackResp, "cost time: ", time.Since(t1))
 	if callbackResp.ErrCode != 0 {
 		log.Error(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter resp: ", callbackResp)
 	}
@@ -255,7 +259,9 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	switch pb.MsgData.SessionType {
 	case constant.SingleChatType:
 		// callback
+		t1 = time.Now()
 		callbackResp := callbackBeforeSendSingleMsg(pb)
+		log.Info(pb.OperationID, "callbackBeforeSendSingleMsg ", " cost time: ", time.Since(t1))
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
 		}
@@ -266,28 +272,37 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
 			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 		}
+		t1 = time.Now()
 		isSend := modifyMessageByUserMessageReceiveOpt(pb.MsgData.RecvID, pb.MsgData.SendID, constant.SingleChatType, pb)
+		log.Info(pb.OperationID, "modifyMessageByUserMessageReceiveOpt ", " cost time: ", time.Since(t1))
 		if isSend {
 			msgToMQSingle.MsgData = pb.MsgData
 			log.NewInfo(msgToMQSingle.OperationID, msgToMQSingle)
+			t1 = time.Now()
 			err1 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.RecvID, constant.OnlineStatus)
+			log.Info(pb.OperationID, "sendMsgToKafka ", " cost time: ", time.Since(t1))
 			if err1 != nil {
 				log.NewError(msgToMQSingle.OperationID, "kafka send msg err :RecvID", msgToMQSingle.MsgData.RecvID, msgToMQSingle.String(), err1.Error())
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
 		if msgToMQSingle.MsgData.SendID != msgToMQSingle.MsgData.RecvID { //Filter messages sent to yourself
+			t1 = time.Now()
 			err2 := rpc.sendMsgToKafka(&msgToMQSingle, msgToMQSingle.MsgData.SendID, constant.OnlineStatus)
+			log.Info(pb.OperationID, "sendMsgToKafka ", " cost time: ", time.Since(t1))
 			if err2 != nil {
 				log.NewError(msgToMQSingle.OperationID, "kafka send msg err:SendID", msgToMQSingle.MsgData.SendID, msgToMQSingle.String())
 				return returnMsg(&replay, pb, 201, "kafka send msg err", "", 0)
 			}
 		}
 		// callback
+		t1 = time.Now()
 		callbackResp = callbackAfterSendSingleMsg(pb)
+		log.Info(pb.OperationID, "callbackAfterSendSingleMsg ", " cost time: ", time.Since(t1))
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pb.OperationID, utils.GetSelfFuncName(), "callbackAfterSendSingleMsg resp: ", callbackResp)
 		}
+		log.Debug(pb.OperationID, "send msg cost time all: ", db.GetCurrentTimestampByMill()-newTime, pb.MsgData.ClientMsgID)
 		return returnMsg(&replay, pb, 0, "", msgToMQSingle.MsgData.ServerMsgID, msgToMQSingle.MsgData.SendTime)
 	case constant.GroupChatType:
 		// callback
