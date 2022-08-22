@@ -440,6 +440,7 @@ func GetUserConversationIDListFromCache(userID string) ([]string, error) {
 		if err != nil {
 			return "", utils.Wrap(err, "getConversationIDList failed")
 		}
+		log.NewDebug("", utils.GetSelfFuncName(), conversationIDList)
 		bytes, err := json.Marshal(conversationIDList)
 		return string(bytes), utils.Wrap(err, "")
 	}
@@ -447,7 +448,7 @@ func GetUserConversationIDListFromCache(userID string) ([]string, error) {
 	var conversationIDList []string
 	err = json.Unmarshal([]byte(conversationIDListStr), &conversationIDList)
 	if err != nil {
-		return nil, err
+		return nil, utils.Wrap(err, "")
 	}
 	return conversationIDList, nil
 }
