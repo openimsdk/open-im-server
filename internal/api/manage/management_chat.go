@@ -336,6 +336,10 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	var recvList []string
 	if params.IsSendAll {
 		recvList, err = im_mysql_model.SelectAllUserID()
+		if err != nil {
+			log.NewError(params.OperationID, utils.GetSelfFuncName(), err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		}
 	} else {
 		recvList = params.RecvIDList
 	}

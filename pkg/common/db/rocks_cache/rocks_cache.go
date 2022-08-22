@@ -460,16 +460,16 @@ func GetConversationFromCache(ownerUserID, conversationID string) (*db.Conversat
 	getConversation := func() (string, error) {
 		conversation, err := imdb.GetConversation(ownerUserID, conversationID)
 		if err != nil {
-			return "", utils.Wrap(err, "")
+			return "", utils.Wrap(err, "get failed")
 		}
 		bytes, err := json.Marshal(conversation)
-		return string(bytes), utils.Wrap(err, "")
+		return string(bytes), utils.Wrap(err, "Marshal failed")
 	}
 	conversationStr, err := db.DB.Rc.Fetch(conversationCache+ownerUserID+":"+conversationID, time.Second*30*60, getConversation)
 	conversation := db.Conversation{}
 	err = json.Unmarshal([]byte(conversationStr), &conversation)
 	if err != nil {
-		return nil, err
+		return nil, utils.Wrap(err, "Unmarshal failed")
 	}
 	return &conversation, nil
 }
