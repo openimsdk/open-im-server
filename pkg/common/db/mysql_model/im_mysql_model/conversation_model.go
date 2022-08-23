@@ -99,6 +99,6 @@ func UpdateColumnsConversations(ownerUserIDList []string, conversationID string,
 
 func GetConversationIDListByUserID(userID string) ([]string, error) {
 	var IDList []string
-	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("user_id=?", userID).Pluck("conversation_id", &IDList).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Where("owner_user_id=?", userID).Pluck("conversation_id", &IDList).Error
 	return IDList, err
 }
