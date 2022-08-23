@@ -316,13 +316,18 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 			conversation.ConversationType = constant.GroupChatType
 		}
 	}
-	err := imdb.SetRecvMsgOpt(conversation)
+	isUpdate, err := imdb.SetRecvMsgOpt(conversation)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	if err = rocksCache.DelConversationFromCache(conversation.OwnerUserID, conversation.ConversationID); err != nil {
+	if isUpdate {
+		err = rocksCache.DelConversationFromCache(conversation.OwnerUserID, conversation.ConversationID)
+	} else {
+		err = rocksCache.DelUserConversationIDListFromCache(conversation.OwnerUserID)
+	}
+	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), conversation.ConversationID, err.Error())
 	}
 	chat.ConversationChangeNotification(req.OperationID, req.OwnerUserID)

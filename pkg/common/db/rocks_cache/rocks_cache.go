@@ -454,7 +454,7 @@ func GetUserConversationIDListFromCache(userID string) ([]string, error) {
 }
 
 func DelUserConversationIDListFromCache(userID string) error {
-	return db.DB.Rc.TagAsDeleted(conversationIDListCache + userID)
+	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationIDListCache+userID), "DelUserConversationIDListFromCache err")
 }
 
 func GetConversationFromCache(ownerUserID, conversationID string) (*db.Conversation, error) {
@@ -511,5 +511,5 @@ func GetUserAllConversationList(ownerUserID string) ([]db.Conversation, error) {
 }
 
 func DelConversationFromCache(ownerUserID, conversationID string) error {
-	return db.DB.Rc.TagAsDeleted(conversationCache + ownerUserID + ":" + conversationID)
+	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationCache+ownerUserID+":"+conversationID), "DelConversationFromCache err")
 }

@@ -41,16 +41,18 @@ func PeerUserSetConversation(conversation db.Conversation) error {
 
 }
 
-func SetRecvMsgOpt(conversation db.Conversation) error {
+func SetRecvMsgOpt(conversation db.Conversation) (bool, error) {
+	var isUpdate bool
 	newConversation := conversation
 	if db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Find(&newConversation).RowsAffected == 0 {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "not exist in db, create")
-		return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
+		return isUpdate, db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
 		// if exist, then update record
 	} else {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
 		//force update
-		return db.DB.MysqlDB.DefaultGormDB().Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
+		isUpdate = true
+		return isUpdate, db.DB.MysqlDB.DefaultGormDB().Model(conversation).Where("owner_user_id = ? and conversation_id = ?", conversation.OwnerUserID, conversation.ConversationID).
 			Updates(map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt}).Error
 	}
 }
