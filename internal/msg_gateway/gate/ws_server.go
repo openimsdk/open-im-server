@@ -282,7 +282,7 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string, operationID string) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
-	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token)
+	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token, "ip: ", conn.RemoteAddr().String())
 	callbackResp := callbackUserOnline(operationID, uid, platformID, token)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
