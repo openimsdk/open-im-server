@@ -14,9 +14,10 @@ import (
 	rpc "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetUsersInfoFromCache(c *gin.Context) {
@@ -38,9 +39,9 @@ func GetUsersInfoFromCache(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -86,9 +87,9 @@ func GetFriendIDListFromCache(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -128,9 +129,9 @@ func GetBlackIDListFromCache(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -181,9 +182,9 @@ func GetUsersInfo(c *gin.Context) {
 
 	log.NewInfo(params.OperationID, "GetUserInfo args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -239,9 +240,9 @@ func UpdateUserInfo(c *gin.Context) {
 		return
 	}
 	log.NewInfo(params.OperationID, "UpdateUserInfo args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -290,9 +291,9 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 		return
 	}
 	log.NewInfo(params.OperationID, "SetGlobalRecvMessageOpt args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -324,9 +325,9 @@ func SetGlobalRecvMessageOpt(c *gin.Context) {
 func GetSelfUserInfo(c *gin.Context) {
 	params := api.GetSelfUserInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
-		errMsg := "BindJSON failed " + err.Error()
-		log.NewError("0", "BindJSON failed ", errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		errMsg := " BindJSON failed " + err.Error()
+		log.NewError("0", errMsg)
+		c.JSON(http.StatusOK, gin.H{"errCode": 1001, "errMsg": errMsg})
 		return
 	}
 	req := &rpc.GetUserInfoReq{}
@@ -338,17 +339,17 @@ func GetSelfUserInfo(c *gin.Context) {
 	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		log.NewError(params.OperationID, errMsg)
+		c.JSON(http.StatusOK, gin.H{"errCode": 1001, "errMsg": errMsg})
 		return
 	}
 
-	req.UserIDList = append(req.UserIDList, req.OpUserID)
+	req.UserIDList = append(req.UserIDList, params.UserID)
 	log.NewInfo(params.OperationID, "GetUserInfo args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -366,11 +367,10 @@ func GetSelfUserInfo(c *gin.Context) {
 		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
 		c.JSON(http.StatusOK, resp)
 	} else {
-		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
+		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}
 		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
 		c.JSON(http.StatusOK, resp)
 	}
-
 }
 
 // @Summary 获取用户在线状态
@@ -415,7 +415,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
 	var respResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult
 	flag := false
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), params.OperationID)
 	for _, v := range grpcCons {
 		log.Debug(params.OperationID, "get node ", *v, v.Target())
 		client := pbRelay.NewRelayClient(v)

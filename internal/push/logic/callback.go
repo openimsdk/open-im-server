@@ -2,6 +2,7 @@ package logic
 
 import (
 	cbApi "Open_IM/pkg/call_back_struct"
+	"Open_IM/pkg/common/callback"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
@@ -11,7 +12,7 @@ import (
 	http2 "net/http"
 )
 
-func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.MsgData, offlinePushUserIDList *[]string) cbApi.CommonCallbackResp {
+func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.MsgData, offlinePushUserIDList *[]string, offlineInfo *commonPb.OfflinePushInfo) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return callbackResp
@@ -32,7 +33,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 		ContentType:     msg.ContentType,
 		SessionType:     msg.SessionType,
 		AtUserIDList:    msg.AtUserIDList,
-		Content:         string(msg.Content),
+		Content:         callback.GetContent(msg),
 	}
 	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackOfflinePush.CallbackTimeOut); err != nil {
@@ -46,8 +47,13 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 			return callbackResp
 		}
 	}
-	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow && len(resp.UserIDList) != 0 {
-		*offlinePushUserIDList = resp.UserIDList
+	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow {
+		if len(resp.UserIDList) != 0 {
+			*offlinePushUserIDList = resp.UserIDList
+		}
+		if resp.OfflinePushInfo != nil {
+			*offlineInfo = *resp.OfflinePushInfo
+		}
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), offlinePushUserIDList, resp.UserIDList)
 	return callbackResp
@@ -74,7 +80,7 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 		ContentType:     msg.ContentType,
 		SessionType:     msg.SessionType,
 		AtUserIDList:    msg.AtUserIDList,
-		Content:         string(msg.Content),
+		Content:         callback.GetContent(msg),
 	}
 	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackOnlinePush.CallbackTimeOut); err != nil {
@@ -92,6 +98,7 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 }
 
 func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg *commonPb.MsgData, pushToUserList *[]string) cbApi.CommonCallbackResp {
+	log.Debug(operationID, utils.GetSelfFuncName(), groupID, msg.String(), pushToUserList)
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
 		return callbackResp
@@ -109,7 +116,7 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 		ContentType:     msg.ContentType,
 		SessionType:     msg.SessionType,
 		AtUserIDList:    msg.AtUserIDList,
-		Content:         string(msg.Content),
+		Content:         callback.GetContent(msg),
 	}
 	resp := &cbApi.CallbackBeforeSuperGroupOnlinePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.CallbackTimeOut); err != nil {

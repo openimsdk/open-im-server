@@ -291,19 +291,20 @@ func (r *RPCServer) encodeWsData(wsData *sdk_ws.MsgData, operationID string) (by
 func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOfflineReq) (*pbRelay.KickUserOfflineResp, error) {
 	log.NewInfo(req.OperationID, "KickUserOffline is arriving", req.String())
 	for _, v := range req.KickUserIDList {
+		log.NewWarn(req.OperationID, "SetTokenKicked ", v, req.PlatformID, req.OperationID)
+		SetTokenKicked(v, int(req.PlatformID), req.OperationID)
 		oldConnMap := ws.getUserAllCons(v)
 		if conn, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
 			log.NewWarn(req.OperationID, "send kick msg, close connection ", req.PlatformID, v)
 			ws.sendKickMsg(conn, &UserConn{})
 			conn.Close()
 		}
-		log.NewWarn(req.OperationID, "SetTokenKicked ", v, req.PlatformID, req.OperationID)
-		SetTokenKicked(v, int(req.PlatformID), req.OperationID)
 	}
 	return &pbRelay.KickUserOfflineResp{}, nil
 }
 
 func (r *RPCServer) MultiTerminalLoginCheck(ctx context.Context, req *pbRelay.MultiTerminalLoginCheckReq) (*pbRelay.MultiTerminalLoginCheckResp, error) {
+
 	ws.MultiTerminalLoginCheckerWithLock(req.UserID, int(req.PlatformID), req.Token, req.OperationID)
 	return &pbRelay.MultiTerminalLoginCheckResp{}, nil
 }

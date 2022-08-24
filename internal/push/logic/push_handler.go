@@ -13,6 +13,7 @@ import (
 	"Open_IM/pkg/common/log"
 	pbChat "Open_IM/pkg/proto/msg"
 	pbPush "Open_IM/pkg/proto/push"
+	"Open_IM/pkg/utils"
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 )
@@ -43,6 +44,11 @@ func (ms *PushConsumerHandler) handleMs2PsChat(msg []byte) {
 		MsgData:      msgFromMQ.MsgData,
 		PushToUserID: msgFromMQ.PushToUserID,
 	}
+	sec := msgFromMQ.MsgData.SendTime / 1000
+	nowSec := utils.GetCurrentTimestampBySecond()
+	if nowSec-sec > 10 {
+		return
+	}
 	switch msgFromMQ.MsgData.SessionType {
 	case constant.SuperGroupChatType:
 		MsgToSuperGroupUser(pbData)
@@ -59,6 +65,7 @@ func (ms *PushConsumerHandler) ConsumeClaim(sess sarama.ConsumerGroupSession,
 	for msg := range claim.Messages() {
 		log.NewDebug("", "kafka get info to mysql", "msgTopic", msg.Topic, "msgPartition", msg.Partition, "msg", string(msg.Value))
 		ms.msgHandle[msg.Topic](msg.Value)
+		sess.MarkMessage(msg, "")
 	}
 	return nil
 }

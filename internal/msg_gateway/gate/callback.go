@@ -59,3 +59,28 @@ func callbackUserOffline(operationID, userID string, platformID int) cbApi.Commo
 	}
 	return callbackResp
 }
+
+func callbackUserKickOff(operationID string, userID string, platformID int) cbApi.CommonCallbackResp {
+	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
+	if !config.Config.Callback.CallbackUserKickOff.Enable {
+		return callbackResp
+	}
+	callbackUserKickOffReq := cbApi.CallbackUserKickOffReq{
+		UserStatusCallbackReq: cbApi.UserStatusCallbackReq{
+			UserStatusBaseCallback: cbApi.UserStatusBaseCallback{
+				CallbackCommand: constant.CallbackUserKickOffCommand,
+				OperationID:     operationID,
+				PlatformID:      int32(platformID),
+				Platform:        constant.PlatformIDToName(platformID),
+			},
+			UserID: userID,
+		},
+		Seq: int(time.Now().UnixNano() / 1e6),
+	}
+	callbackUserKickOffResp := &cbApi.CallbackUserKickOffResp{CommonCallbackResp: callbackResp}
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackUserKickOffReq, callbackUserKickOffResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
+		callbackResp.ErrCode = http2.StatusInternalServerError
+		callbackResp.ErrMsg = err.Error()
+	}
+	return callbackResp
+}

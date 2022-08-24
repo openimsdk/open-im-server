@@ -2,7 +2,7 @@
 # The class cannot be named by Pascal or camel case.
 # If it is not used, the corresponding structure will not be set,
 # and it will not be read naturally.
-serverversion: 2.3.0
+serverversion: 2.3.1
 #---------------Infrastructure configuration---------------------#
 etcd:
   etcdSchema: openim  #默认即可
@@ -17,8 +17,8 @@ mysql:
   dbMysqlDatabaseName: openIM_v2 #默认即可
   dbTableName: eMsg #默认即可
   dbMsgTableNum: 1
-  dbMaxOpenConns: 20
-  dbMaxIdleConns: 10
+  dbMaxOpenConns: 200
+  dbMaxIdleConns: 100
   dbMaxLifeTime: 120
 
 mongo:
@@ -32,6 +32,7 @@ mongo:
   dbPassword:  #mongo密码，建议先不设置
   dbMaxPoolSize: 100
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
+  chatRecordsClearTime: "* * * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
 
 redis:
   dbAddress: [ 127.0.0.1:16379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
@@ -46,9 +47,9 @@ kafka:
   ws2mschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat" #用于mongo和mysql保存消息
-  ws2mschatoffline:
-    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
-    topic: "ws2ms_chat_offline" #原为离线用户消息处理，目前暂时弃用
+#  ws2mschatoffline:
+#    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+#    topic: "ws2ms_chat_offline" #原为离线用户消息处理，目前暂时弃用
   msgtomongo:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "msg_to_mongo"
@@ -63,7 +64,6 @@ kafka:
 
 
 
-
 #---------------Internal service configuration---------------------#
 
 # The service ip default is empty,
@@ -72,7 +72,7 @@ kafka:
 #如果是单机模式，用0.0.0.0或者不填，默认即可
 serverip: 0.0.0.0
 
-#作为rpc时，注册到etcd的地址，单机或内网集群调用默认为空即可(会默认注册本机ip），如果需要注册外网ip，需要修改（目的是api/gateway能访问到）
+#作为rpc时，注册到etcd的地址，单机默认即可，如果是集群部署，需要修改（具体使用内网地址还是外网地址，要依情况而定，目的是api/gateway能访问到）
 rpcRegisterIP:
 #默认即可
 listenIP: 0.0.0.0
@@ -102,6 +102,9 @@ cmsapi:
 sdk:
   openImSdkWsPort: [ 10003 ] #jssdk服务端口，默认即可，项目中使用jssdk才需开放此端口或做nginx转发
   dataDir: [ ../db/sdk/ ]
+  openImWsAddress: ws://127.0.0.1:10001
+  openImApiAddress: http://127.0.0.1:10002
+
 #对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
 credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
   tencent:
@@ -120,6 +123,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     accessKeyID: user12345
     secretAccessKey: key12345
     storageTime: 50 #文件在minio中保存的时间
+    isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
   ali: # ali oss
     regionID: "oss-cn-beijing"
     accessKeyID: ""
@@ -131,14 +135,15 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     stsDurationSeconds: 3600
     OssRoleArn: "acs:ram::xxx:role/xxx"
   aws:
-    accessKeyID: AKIASZQEZISVRBN4UEWJ                           #AssumeRole用户关联的accessKeyID
-    accessKeySecret: eBS3RyCRD8yUa7I7EGPbxjyBlKtdzN5a6tDnY/wZ   #AssumeRole用户关联的accessKeySecrect
-    region: ap-southeast-1                                      #分区
-    bucket: ouyang                                              #桶
-    finalHost: ouyang.s3.ap-southeast-1.amazonaws.com           #对外Host
-    roleArn: arn:aws:iam::192209831083:role/AWS_S3_FOR_OUYANG   #RoleArn
-    externalId: AssumeRoleExtend                                #角色扩展Id
-    roleSessionName: Required-AWS-ID-OPENIM                     #角色SESSION名称
+    accessKeyID: 1                            #AssumeRole用户关联的accessKeyID
+    accessKeySecret: 2     #AssumeRole用户关联的accessKeySecrect
+    region: ap-southeast-1                                        #分区
+    bucket: ouyang                                                #桶
+    finalHost:  ouyang.s3.ap-southeast-1.amazonaws.com            #对外Host
+    roleArn: arn:aws:iam::192209831083:role/AWS_S3_FOR_OUYANG     #RoleArn
+    externalId: AssumeRoleExtend                                  #角色扩展Id
+    roleSessionName: Required-AWS-ID-OPENIM                       #角色SESSION名称
+
 dtm:
   serverURL: 127.0.0.1:10007
 
@@ -156,7 +161,8 @@ rpcport: #rpc服务端口 默认即可
   openImOfficePort: [ 10210 ]
   openImOrganizationPort: [ 10220 ]
   openImConversationPort: [ 10230 ]
-  openImCachePort: [10240]
+  openImCachePort: [ 10240 ]
+  openImRealTimeCommPort: [ 11300 ]
   c2c:
     callbackBeforeSendMsg:
       switch: false
@@ -259,7 +265,7 @@ singleMessageHasReadReceiptEnable: true
 tokenpolicy:
   accessSecret: "open_im_server" #token生成相关，默认即可
   # Token effective time day as a unit
-  accessExpire: 3650 #token过期时间（天） 默认即可
+  accessExpire: 90 #token过期时间（天） 默认即可
 messageverify:
   friendVerify: false
 
@@ -304,6 +310,9 @@ callback:
     enable: false
     callbackTimeOut: 2
   callbackUserOffline:
+    enable: false
+    callbackTimeOut: 2
+  callbackUserKickOff:
     enable: false
     callbackTimeOut: 2
   callbackOfflinePush:
@@ -728,6 +737,7 @@ demo:
     verificationCodeTemplateCode: 2902877
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
+  needInvitationCode: false
   #  second
   codeTTL: 60
   useSuperCode: true
@@ -739,6 +749,10 @@ demo:
     smtpPort: 25   #需开放此端口 出口方向
   testDepartMentID: 001
   imAPIURL: http://127.0.0.1:10002
+  onboardProcess: false # 是否开启注册流程
+  joinDepartmentIDList: [] # 用户注册进来默认加的部门ID列表 不填就随机
+  joinDepartmentGroups: false # 注册是否加部门群
+  oaNotification: false # 注册是否发送OA通知
 
 rtc:
   signalTimeout: 35

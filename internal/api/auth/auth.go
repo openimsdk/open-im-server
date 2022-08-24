@@ -3,6 +3,7 @@ package apiAuth
 import (
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -10,10 +11,11 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/fatih/structs"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
+
+	"github.com/fatih/structs"
+	"github.com/gin-gonic/gin"
 )
 
 // @Summary 用户注册
@@ -47,9 +49,9 @@ func UserRegister(c *gin.Context) {
 	//copier.Copy(req.UserInfo, &params)
 	req.OperationID = params.OperationID
 	log.NewInfo(req.OperationID, "UserRegister args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + " getcdv3.GetConn == nil"
+		errMsg := req.OperationID + " getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -65,11 +67,17 @@ func UserRegister(c *gin.Context) {
 	if reply.CommonResp.ErrCode != 0 {
 		errMsg := req.OperationID + " " + " UserRegister failed " + reply.CommonResp.ErrMsg + req.String()
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		if reply.CommonResp.ErrCode == constant.RegisterLimit {
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterLimit, "errMsg": "用户注册被限制"})
+		} else if reply.CommonResp.ErrCode == constant.InvitationError {
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		}
 		return
 	}
 
-	pbDataToken := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID}
+	pbDataToken := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID, LoginIp: params.CreateIp}
 	replyToken, err := client.UserToken(context.Background(), pbDataToken)
 	if err != nil {
 		errMsg := req.OperationID + " " + " client.UserToken failed " + err.Error() + pbDataToken.String()
@@ -110,11 +118,11 @@ func UserToken(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": errMsg})
 		return
 	}
-	req := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID}
+	req := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID, LoginIp: params.LoginIp}
 	log.NewInfo(req.OperationID, "UserToken args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + " getcdv3.GetConn == nil"
+		errMsg := req.OperationID + " getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
@@ -206,9 +214,9 @@ func ForceLogout(c *gin.Context) {
 	}
 
 	log.NewInfo(req.OperationID, "ForceLogout args ", req.String())
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAuthName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + " getcdv3.GetConn == nil"
+		errMsg := req.OperationID + " getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
