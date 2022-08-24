@@ -18,3 +18,12 @@ type CallbackUserOfflineReq struct {
 type CallbackUserOfflineResp struct {
 	CommonCallbackResp
 }
+
+type CallbackUserKickOffReq struct {
+	UserStatusCallbackReq
+	Seq int `json:"seq"`
+}
+
+type CallbackUserKickOffResp struct {
+	CommonCallbackResp
+}

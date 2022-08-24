@@ -407,7 +407,7 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 					rwLock.Unlock()
 					split := 1000
 					triggerID = utils.OperationIDGenerator()
-					log.NewWarn(triggerID, "timer trigger msg consumer start", len(ccMsg))
+					log.Debug(triggerID, "timer trigger msg consumer start", len(ccMsg))
 					for i := 0; i < len(ccMsg)/split; i++ {
 						//log.Debug()
 						och.msgDistributionCh <- Cmd2Value{Cmd: ConsumerMsgs, Value: TriggerChannelValue{
@@ -419,9 +419,8 @@ func (och *OnlineHistoryRedisConsumerHandler) ConsumeClaim(sess sarama.ConsumerG
 					}
 					//sess.MarkMessage(ccMsg[len(cMsg)-1], "")
 
-					log.NewWarn(triggerID, "timer trigger msg consumer end", len(cMsg))
+					log.Debug(triggerID, "timer trigger msg consumer end", len(cMsg))
 				}
-
 			}
 		}
 
@@ -519,7 +518,7 @@ func sendMessageToPush(message *pbMsg.MsgDataToMQ, pushToUserID string) {
 	log.Info(message.OperationID, "msg_transfer send message to push", "message", message.String())
 	rpcPushMsg := pbPush.PushMsgReq{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
 	mqPushMsg := pbMsg.PushMsgDataToMQ{OperationID: message.OperationID, MsgData: message.MsgData, PushToUserID: pushToUserID}
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName, message.OperationID)
+	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName, message.OperationID)
 	if grpcConn == nil {
 		log.Error(rpcPushMsg.OperationID, "rpc dial failed", "push data", rpcPushMsg.String())
 		pid, offset, err := producer.SendMessage(&mqPushMsg, mqPushMsg.PushToUserID, rpcPushMsg.OperationID)

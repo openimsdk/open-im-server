@@ -51,9 +51,9 @@ func PullMsgBySeqList(c *gin.Context) {
 	pbData.OperationID = params.OperationID
 	pbData.SeqList = params.SeqList
 
-	grpcConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, pbData.OperationID)
+	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, pbData.OperationID)
 	if grpcConn == nil {
-		errMsg := pbData.OperationID + "getcdv3.GetConn == nil"
+		errMsg := pbData.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(pbData.OperationID, errMsg)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return

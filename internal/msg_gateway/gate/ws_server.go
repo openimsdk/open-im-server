@@ -12,9 +12,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"strings"
+
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/pkg/errors"
-	"strings"
 
 	//"gopkg.in/errgo.v2/errors"
 	"net/http"
@@ -119,18 +120,21 @@ func (ws *WServer) SetWriteTimeoutWriteMsg(conn *UserConn, a int, msg []byte, ti
 }
 
 func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int32, token string, operationID string) {
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), "args  grpcCons: ", userID, platformID, grpcCons)
 	for _, v := range grpcCons {
 		if v.Target() == rpcSvr.target {
 			log.Debug(operationID, "Filter out this node ", rpcSvr.target)
 			continue
 		}
+		log.Debug(operationID, "call this node ", v.Target(), rpcSvr.target)
 		client := pbRelay.NewRelayClient(v)
 		req := &pbRelay.MultiTerminalLoginCheckReq{OperationID: operationID, PlatformID: platformID, UserID: userID, Token: token}
 		log.NewInfo(operationID, "MultiTerminalLoginCheckReq ", client, req.String())
 		resp, err := client.MultiTerminalLoginCheck(context.Background(), req)
 		if err != nil {
 			log.Error(operationID, "MultiTerminalLoginCheck failed ", err.Error())
+			continue
 		}
 		if resp.ErrCode != 0 {
 			log.Error(operationID, "MultiTerminalLoginCheck errCode, errMsg: ", resp.ErrCode, resp.ErrMsg)
@@ -141,7 +145,13 @@ func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int
 func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int, token string, operationID string) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
+	log.NewInfo(operationID, utils.GetSelfFuncName(), " rpc args: ", uid, platformID, token)
 	switch config.Config.MultiLoginPolicy {
+	case constant.PCAndOther:
+		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
+			return
+		}
+		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[platformID]; ok {
@@ -192,11 +202,16 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 
 func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn *UserConn, token string, operationID string) {
 	switch config.Config.MultiLoginPolicy {
+	case constant.PCAndOther:
+		if constant.PlatformNameToClass(constant.PlatformIDToName(platformID)) == constant.TerminalPC {
+			return
+		}
+		fallthrough
 	case constant.AllLoginButSameTermKick:
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[platformID]; ok {
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
-				//	ws.sendKickMsg(oldConn, newConn)
+				ws.sendKickMsg(oldConn, newConn)
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != go_redis.Nil {
 					log.NewError(operationID, "get token from redis err", err.Error(), uid, constant.PlatformIDToName(platformID))
@@ -229,8 +244,12 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 				if err != nil {
 					log.NewError(operationID, "conn close err", err.Error(), uid, platformID)
 				}
+				callbackResp := callbackUserKickOff(operationID, uid, platformID)
+				if callbackResp.ErrCode != 0 {
+					log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+				}
 			} else {
-				log.NewWarn(operationID, "abnormal uid-conn  ", uid, platformID, oldConnMap[platformID])
+				log.Debug(operationID, "normal uid-conn  ", uid, platformID, oldConnMap[platformID])
 			}
 
 		} else {
@@ -263,12 +282,12 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string, operationID string) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
-	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token)
+	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token, "ip: ", conn.RemoteAddr().String())
 	callbackResp := callbackUserOnline(operationID, uid, platformID, token)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
 	}
-	//go ws.MultiTerminalLoginRemoteChecker(uid, int32(platformID), token, operationID)
+	go ws.MultiTerminalLoginRemoteChecker(uid, int32(platformID), token, operationID)
 	ws.MultiTerminalLoginChecker(uid, platformID, conn, token, operationID)
 	if oldConnMap, ok := ws.wsUserToConn[uid]; ok {
 		oldConnMap[platformID] = conn

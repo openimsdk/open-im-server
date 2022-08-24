@@ -2,14 +2,13 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
-	"gorm.io/gorm/logger"
-
 	"fmt"
 	"sync"
 	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type mysqlDB struct {
@@ -79,7 +78,8 @@ func initMysqlDB() {
 		&GroupMember{},
 		&GroupRequest{},
 		&User{},
-		&Black{}, &ChatLog{}, &Register{}, &Conversation{}, &AppVersion{}, &Department{})
+		&Black{}, &ChatLog{}, &Register{}, &Conversation{}, &AppVersion{}, &Department{}, &BlackList{}, &IpLimit{}, &UserIpLimit{}, &Invitation{}, &RegisterAddFriend{},
+		&ClientInitConfig{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 
@@ -143,6 +143,33 @@ func initMysqlDB() {
 		fmt.Println("CreateTable DepartmentMember")
 		db.Migrator().CreateTable(&AppVersion{})
 	}
+	if !db.Migrator().HasTable(&BlackList{}) {
+		fmt.Println("CreateTable BlackList")
+		db.Migrator().CreateTable(&BlackList{})
+	}
+	if !db.Migrator().HasTable(&IpLimit{}) {
+		fmt.Println("CreateTable IpLimit")
+		db.Migrator().CreateTable(&IpLimit{})
+	}
+	if !db.Migrator().HasTable(&UserIpLimit{}) {
+		fmt.Println("CreateTable UserIpLimit")
+		db.Migrator().CreateTable(&UserIpLimit{})
+	}
+
+	if !db.Migrator().HasTable(&RegisterAddFriend{}) {
+		fmt.Println("CreateTable RegisterAddFriend")
+		db.Migrator().CreateTable(&RegisterAddFriend{})
+	}
+	if !db.Migrator().HasTable(&Invitation{}) {
+		fmt.Println("CreateTable Invitation")
+		db.Migrator().CreateTable(&Invitation{})
+	}
+
+	if !db.Migrator().HasTable(&ClientInitConfig{}) {
+		fmt.Println("CreateTable ClientInitConfig")
+		db.Migrator().CreateTable(&ClientInitConfig{})
+	}
+
 	DB.MysqlDB.db = db
 	return
 }

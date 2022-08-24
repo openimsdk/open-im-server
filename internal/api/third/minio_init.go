@@ -32,6 +32,7 @@ func MinioInit() {
 	}
 	opts := &minio.Options{
 		Creds: credentials.NewStaticV4(config.Config.Credential.Minio.AccessKeyID, config.Config.Credential.Minio.SecretAccessKey, ""),
+		//Region: config.Config.Credential.Minio.Location,
 	}
 	if minioUrl.Scheme == "http" {
 		opts.Secure = false
@@ -46,8 +47,10 @@ func MinioInit() {
 		return
 	}
 	opt := minio.MakeBucketOptions{
-		Region:        config.Config.Credential.Minio.Location,
-		ObjectLocking: false,
+		Region: config.Config.Credential.Minio.Location,
+	}
+	if config.Config.Credential.Minio.IsDistributedMod == true {
+		opt.ObjectLocking = true
 	}
 	err = MinioClient.MakeBucket(context.Background(), config.Config.Credential.Minio.Bucket, opt)
 	if err != nil {
@@ -78,6 +81,9 @@ func MinioInit() {
 			return
 		}
 	}
+	policy, err := MinioClient.GetBucketPolicy(context.Background(), config.Config.Credential.Minio.Bucket)
+	log.NewInfo("", utils.GetSelfFuncName(), policy)
+
 	// 自动化桶public的代码
 	policyJsonString := fmt.Sprintf(`{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject","s3:PutObject"],
 		"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::%s/*"],"Sid": ""}]}`, config.Config.Credential.Minio.Bucket)

@@ -72,6 +72,7 @@ type config struct {
 			EndpointInner       string `yaml:"endpointInner"`
 			EndpointInnerEnable bool   `yaml:"endpointInnerEnable"`
 			StorageTime         int    `yaml:"storageTime"`
+			IsDistributedMod    bool   `yaml:"isDistributedMod"`
 		} `yaml:"minio"`
 		Aws struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
@@ -101,16 +102,17 @@ type config struct {
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
 	}
 	Mongo struct {
-		DBUri               string `yaml:"dbUri"`
-		DBAddress           string `yaml:"dbAddress"`
-		DBDirect            bool   `yaml:"dbDirect"`
-		DBTimeout           int    `yaml:"dbTimeout"`
-		DBDatabase          string `yaml:"dbDatabase"`
-		DBSource            string `yaml:"dbSource"`
-		DBUserName          string `yaml:"dbUserName"`
-		DBPassword          string `yaml:"dbPassword"`
-		DBMaxPoolSize       int    `yaml:"dbMaxPoolSize"`
-		DBRetainChatRecords int    `yaml:"dbRetainChatRecords"`
+		DBUri                string `yaml:"dbUri"`
+		DBAddress            string `yaml:"dbAddress"`
+		DBDirect             bool   `yaml:"dbDirect"`
+		DBTimeout            int    `yaml:"dbTimeout"`
+		DBDatabase           string `yaml:"dbDatabase"`
+		DBSource             string `yaml:"dbSource"`
+		DBUserName           string `yaml:"dbUserName"`
+		DBPassword           string `yaml:"dbPassword"`
+		DBMaxPoolSize        int    `yaml:"dbMaxPoolSize"`
+		DBRetainChatRecords  int    `yaml:"dbRetainChatRecords"`
+		ChatRecordsClearTime string `yaml:"chatRecordsClearTime"`
 	}
 	Redis struct {
 		DBAddress     []string `yaml:"dbAddress"`
@@ -136,6 +138,7 @@ type config struct {
 		OpenImOrganizationPort   []int `yaml:"openImOrganizationPort"`
 		OpenImConversationPort   []int `yaml:"openImConversationPort"`
 		OpenImCachePort          []int `yaml:"openImCachePort"`
+		OpenImRealTimeCommPort   []int `yaml:"openImRealTimeCommPort"`
 	}
 	RpcRegisterName struct {
 		OpenImStatisticsName string `yaml:"openImStatisticsName"`
@@ -272,6 +275,7 @@ type config struct {
 		CallbackWordFilter                 callBackConfig `yaml:"callbackWordFilter"`
 		CallbackUserOnline                 callBackConfig `yaml:"callbackUserOnline"`
 		CallbackUserOffline                callBackConfig `yaml:"callbackUserOffline"`
+		CallbackUserKickOff                callBackConfig `yaml:"callbackUserKickOff"`
 		CallbackOfflinePush                callBackConfig `yaml:"callbackOfflinePush"`
 		CallbackOnlinePush                 callBackConfig `yaml:"callbackOnlinePush"`
 		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`
@@ -497,8 +501,13 @@ type config struct {
 			SmtpAddr                string `yaml:"smtpAddr"`
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
-		TestDepartMentID string `yaml:"testDepartMentID"`
-		ImAPIURL         string `yaml:"imAPIURL"`
+		TestDepartMentID     string   `yaml:"testDepartMentID"`
+		ImAPIURL             string   `yaml:"imAPIURL"`
+		NeedInvitationCode   bool     `yaml:"needInvitationCode"`
+		OnboardProcess       bool     `yaml:"onboardProcess"`
+		JoinDepartmentIDList []string `yaml:"joinDepartmentIDList"`
+		JoinDepartmentGroups bool     `yaml:"joinDepartmentGroups"`
+		OaNotification       bool     `yaml:"oaNotification"`
 	}
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
@@ -521,17 +530,27 @@ type PDefaultTips struct {
 
 func init() {
 	cfgName := os.Getenv("CONFIG_NAME")
-	fmt.Println("get config path is:", Root, cfgName)
-
+	fmt.Println("GET IM DEFAULT CONFIG PATH :", Root, "ENV PATH:", cfgName)
 	if len(cfgName) != 0 {
-		Root = cfgName
-	}
-
-	bytes, err := ioutil.ReadFile(filepath.Join(Root, "config", "config.yaml"))
-	if err != nil {
-		panic(err.Error())
-	}
-	if err = yaml.Unmarshal(bytes, &Config); err != nil {
-		panic(err.Error())
+		bytes, err := ioutil.ReadFile(filepath.Join(cfgName, "config", "config.yaml"))
+		if err != nil {
+			bytes, err = ioutil.ReadFile(filepath.Join(Root, "config", "config.yaml"))
+			if err != nil {
+				panic(err.Error() + " config: " + filepath.Join(cfgName, "config", "config.yaml"))
+			}
+		} else {
+			Root = cfgName
+		}
+		if err = yaml.Unmarshal(bytes, &Config); err != nil {
+			panic(err.Error())
+		}
+	} else {
+		bytes, err := ioutil.ReadFile(filepath.Join(Root, "config", "config.yaml"))
+		if err != nil {
+			panic(err.Error())
+		}
+		if err = yaml.Unmarshal(bytes, &Config); err != nil {
+			panic(err.Error())
+		}
 	}
 }

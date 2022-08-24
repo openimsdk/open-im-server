@@ -3,11 +3,21 @@ package db
 import "time"
 
 type Register struct {
-	Account  string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
-	Password string `gorm:"column:password;type:varchar(255)" json:"password"`
-	Ex       string `gorm:"column:ex;size:1024" json:"ex"`
-	UserID   string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
-	AreaCode string `gorm:"column:area_code;type:varchar(255)"`
+	Account        string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
+	Password       string `gorm:"column:password;type:varchar(255)" json:"password"`
+	Ex             string `gorm:"column:ex;size:1024" json:"ex"`
+	UserID         string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
+	AreaCode       string `gorm:"column:area_code;type:varchar(255)"`
+	InvitationCode string `gorm:"column:invitation_code;type:varchar(255)"`
+	RegisterIP     string `gorm:"column:register_ip;type:varchar(255)"`
+}
+
+type Invitation struct {
+	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:varchar(32)"`
+	CreateTime     time.Time `gorm:"column:create_time"`
+	UserID         string    `gorm:"column:user_id"`
+	LastTime       time.Time `gorm:"column:last_time"`
+	Status         int32     `gorm:"column:status"`
 }
 
 //
@@ -153,8 +163,9 @@ type GroupRequest struct {
 //string Birth = 6;
 //string Email = 7;
 //string Ex = 8;
-//int64 CreateTime = 9;
-//int32 AppMangerLevel = 10;
+//string CreateIp = 9;
+//int64 CreateTime = 10;
+//int32 AppMangerLevel = 11;
 //open_im_sdk.User == imdb.User
 type User struct {
 	UserID           string    `gorm:"column:user_id;primary_key;size:64"`
@@ -166,9 +177,29 @@ type User struct {
 	Email            string    `gorm:"column:email;size:64"`
 	Ex               string    `gorm:"column:ex;size:1024"`
 	CreateTime       time.Time `gorm:"column:create_time"`
+	CreateIp         string    `gorm:"column:create_ip;size:15"`
+	LastLoginTime    time.Time `gorm:"column:last_login_time"`
+	LastLoginIp      string    `gorm:"column:last_login_ip;size:15"`
+	LoginTimes       int32     `gorm:"column:login_times"`
+	LoginLimit       int32     `gorm:"column:login_limit"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
+	InvitationCode   string    `gorm:"column:invitation_code"`
 	status           int32     `gorm:"column:status"`
+}
+
+type IpLimit struct {
+	Ip            string    `gorm:"column:ip;primary_key;size:15"`
+	LimitRegister int32     `gorm:"column:limit_register;size:1"`
+	LimitLogin    int32     `gorm:"column:limit_login;size:1"`
+	CreateTime    time.Time `gorm:"column:create_time"`
+	LimitTime     time.Time `gorm:"column:limit_time"`
+}
+
+type UserIpLimit struct {
+	UserID     string    `gorm:"column:user_id;primary_key;size:64"`
+	Ip         string    `gorm:"column:ip;primary_key;size:15"`
+	CreateTime time.Time `gorm:"column:create_time"`
 }
 
 //message BlackInfo{
@@ -217,20 +248,21 @@ type BlackList struct {
 	EndDisableTime   time.Time `gorm:"column:end_disable_time"`
 }
 type Conversation struct {
-	OwnerUserID      string `gorm:"column:owner_user_id;primary_key;type:char(128)" json:"OwnerUserID"`
-	ConversationID   string `gorm:"column:conversation_id;primary_key;type:char(128)" json:"conversationID"`
-	ConversationType int32  `gorm:"column:conversation_type" json:"conversationType"`
-	UserID           string `gorm:"column:user_id;type:char(64)" json:"userID"`
-	GroupID          string `gorm:"column:group_id;type:char(128)" json:"groupID"`
-	RecvMsgOpt       int32  `gorm:"column:recv_msg_opt" json:"recvMsgOpt"`
-	UnreadCount      int32  `gorm:"column:unread_count" json:"unreadCount"`
-	DraftTextTime    int64  `gorm:"column:draft_text_time" json:"draftTextTime"`
-	IsPinned         bool   `gorm:"column:is_pinned" json:"isPinned"`
-	IsPrivateChat    bool   `gorm:"column:is_private_chat" json:"isPrivateChat"`
-	GroupAtType      int32  `gorm:"column:group_at_type" json:"groupAtType"`
-	IsNotInGroup     bool   `gorm:"column:is_not_in_group" json:"isNotInGroup"`
-	AttachedInfo     string `gorm:"column:attached_info;type:varchar(1024)" json:"attachedInfo"`
-	Ex               string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+	OwnerUserID           string `gorm:"column:owner_user_id;primary_key;type:char(128)" json:"OwnerUserID"`
+	ConversationID        string `gorm:"column:conversation_id;primary_key;type:char(128)" json:"conversationID"`
+	ConversationType      int32  `gorm:"column:conversation_type" json:"conversationType"`
+	UserID                string `gorm:"column:user_id;type:char(64)" json:"userID"`
+	GroupID               string `gorm:"column:group_id;type:char(128)" json:"groupID"`
+	RecvMsgOpt            int32  `gorm:"column:recv_msg_opt" json:"recvMsgOpt"`
+	UnreadCount           int32  `gorm:"column:unread_count" json:"unreadCount"`
+	DraftTextTime         int64  `gorm:"column:draft_text_time" json:"draftTextTime"`
+	IsPinned              bool   `gorm:"column:is_pinned" json:"isPinned"`
+	IsPrivateChat         bool   `gorm:"column:is_private_chat" json:"isPrivateChat"`
+	GroupAtType           int32  `gorm:"column:group_at_type" json:"groupAtType"`
+	IsNotInGroup          bool   `gorm:"column:is_not_in_group" json:"isNotInGroup"`
+	UpdateUnreadCountTime int64  `gorm:"column:update_unread_count_time" json:"updateUnreadCountTime"`
+	AttachedInfo          string `gorm:"column:attached_info;type:varchar(1024)" json:"attachedInfo"`
+	Ex                    string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }
 
 func (Conversation) TableName() string {
@@ -298,4 +330,20 @@ type AppVersion struct {
 
 func (AppVersion) TableName() string {
 	return "app_version"
+}
+
+type RegisterAddFriend struct {
+	UserID string `gorm:"column:user_id;primary_key;size:64"`
+}
+
+func (RegisterAddFriend) TableName() string {
+	return "register_add_friend"
+}
+
+type ClientInitConfig struct {
+	DiscoverPageURL string `gorm:"column:discover_page_url;size:64" json:"version"`
+}
+
+func (ClientInitConfig) TableName() string {
+	return "client_init_config"
 }

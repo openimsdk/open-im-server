@@ -3,6 +3,7 @@ package main
 import (
 	_ "Open_IM/cmd/open_im_api/docs"
 	apiAuth "Open_IM/internal/api/auth"
+	clientInit "Open_IM/internal/api/client_init"
 	"Open_IM/internal/api/conversation"
 	"Open_IM/internal/api/friend"
 	"Open_IM/internal/api/group"
@@ -43,7 +44,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
 	gin.DefaultWriter = io.MultiWriter(f)
-	gin.SetMode(gin.DebugMode)
+	//	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
 
@@ -108,6 +109,8 @@ func main() {
 		groupRouterGroup.POST("/cancel_mute_group", group.CancelMuteGroup)
 		groupRouterGroup.POST("/set_group_member_nickname", group.SetGroupMemberNickname)
 		groupRouterGroup.POST("/set_group_member_info", group.SetGroupMemberInfo)
+		groupRouterGroup.POST("/get_group_abstract_info", group.GetGroupAbstractInfo)
+		//groupRouterGroup.POST("/get_group_all_member_list_by_split", group.GetGroupAllMemberListBySplit)
 	}
 	superGroupRouterGroup := r.Group("/super_group")
 	{
@@ -202,6 +205,12 @@ func main() {
 		organizationGroup.POST("/get_department_member", organization.GetDepartmentMember)
 		organizationGroup.POST("/delete_user_in_department", organization.DeleteUserInDepartment)
 
+	}
+
+	initGroup := r.Group("/init")
+	{
+		initGroup.POST("/set_client_config", clientInit.SetClientInitConfig)
+		initGroup.POST("/get_client_config", clientInit.GetClientInitConfig)
 	}
 
 	go apiThird.MinioInit()

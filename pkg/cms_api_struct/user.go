@@ -1,11 +1,20 @@
 package cms_api_struct
 
 type UserResponse struct {
-	ProfilePhoto string `json:"profile_photo"`
-	Nickname     string `json:"nick_name"`
-	UserId       string `json:"user_id"`
-	CreateTime   string `json:"create_time,omitempty"`
-	IsBlock      bool   `json:"is_block"`
+	ProfilePhoto  string `json:"profile_photo"`
+	Nickname      string `json:"nick_name"`
+	UserId        string `json:"user_id"`
+	CreateTime    string `json:"create_time,omitempty"`
+	CreateIp      string `json:"create_ip,omitempty"`
+	LastLoginTime string `json:"last_login_time,omitempty"`
+	LastLoginIp   string `json:"last_login_ip,omitempty"`
+	LoginTimes    int32  `json:"login_times"`
+	LoginLimit    int32  `json:"login_limit"`
+	IsBlock       bool   `json:"is_block"`
+	PhoneNumber   string `json:"phone_number"`
+	Email         string `json:"email"`
+	Birth         string `json:"birth"`
+	Gender        int    `json:"gender"`
 }
 
 type GetUserRequest struct {
@@ -47,8 +56,11 @@ type ResignUserResponse struct {
 type AlterUserRequest struct {
 	UserId      string `json:"user_id" binding:"required"`
 	Nickname    string `json:"nickname"`
-	PhoneNumber int    `json:"phone_number" validate:"len=11"`
+	PhoneNumber string `json:"phone_number" validate:"len=11"`
 	Email       string `json:"email"`
+	Birth       string `json:"birth"`
+	Gender      string `json:"gender"`
+	Photo       string `json:"photo"`
 }
 
 type AlterUserResponse struct {
@@ -58,6 +70,10 @@ type AddUserRequest struct {
 	PhoneNumber string `json:"phone_number" binding:"required"`
 	UserId      string `json:"user_id" binding:"required"`
 	Name        string `json:"name" binding:"required"`
+	Email       string `json:"email"`
+	Birth       string `json:"birth"`
+	Gender      string `json:"gender"`
+	Photo       string `json:"photo"`
 }
 
 type AddUserResponse struct {

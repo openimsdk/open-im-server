@@ -17,12 +17,13 @@ import (
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
 	pbRtc "Open_IM/pkg/proto/rtc"
+	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"github.com/golang/protobuf/proto"
-	"google.golang.org/grpc"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 )
 
 type OpenIMContent struct {
@@ -37,16 +38,13 @@ type AtContent struct {
 	IsAtSelf   bool     `json:"isAtSelf"`
 }
 
-var grpcCons []*grpc.ClientConn
+//var grpcCons []*grpc.ClientConn
 
 func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingelMsgToUserResultList
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
 	log.Debug(pushMsg.OperationID, "Get msg from msg_transfer And push msg", pushMsg.String())
-	if len(grpcCons) == 0 {
-		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
-		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
-	}
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
 
 	var UIDList = []string{pushMsg.PushToUserID}
 	callbackResp := callbackOnlinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData)
@@ -98,8 +96,9 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		var content string
 		if pushMsg.MsgData.OfflinePushInfo != nil {
 			content = pushMsg.MsgData.OfflinePushInfo.Title
-
-		} else {
+			jsonCustomContent = pushMsg.MsgData.OfflinePushInfo.Desc
+		}
+		if content == "" {
 			switch pushMsg.MsgData.ContentType {
 			case constant.Text:
 				content = constant.ContentType2PushContent[constant.Text]
@@ -126,8 +125,8 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 
 			}
 		}
-
-		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData, &[]string{})
+		var offlineInfo commonPb.OfflinePushInfo
+		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData, &[]string{}, &offlineInfo)
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
@@ -135,6 +134,12 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		if callbackResp.ActionCode != constant.ActionAllow {
 			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
 			return
+		}
+		if offlineInfo.Title != "" {
+			content = offlineInfo.Title
+		}
+		if offlineInfo.Desc != "" {
+			jsonCustomContent = offlineInfo.Desc
 		}
 		if offlinePusher == nil {
 			return
@@ -156,7 +161,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	var wsResult []*pbRelay.SingelMsgToUserResultList
 	isOfflinePush := utils.GetSwitchFromOptions(pushMsg.MsgData.Options, constant.IsOfflinePush)
-	log.Debug(pushMsg.OperationID, "Get super group msg from msg_transfer And push msg", pushMsg.String())
+	log.Debug(pushMsg.OperationID, "Get super group msg from msg_transfer And push msg", pushMsg.String(), config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable)
 	var pushToUserIDList []string
 	if config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.Enable {
 		callbackResp := callbackBeforeSuperGroupOnlinePush(pushMsg.OperationID, pushMsg.PushToUserID, pushMsg.MsgData, &pushToUserIDList)
@@ -172,9 +177,9 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	}
 	if len(pushToUserIDList) == 0 {
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
-		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
 		if etcdConn == nil {
-			errMsg := pushMsg.OperationID + "getcdv3.GetConn == nil"
+			errMsg := pushMsg.OperationID + "getcdv3.GetDefaultConn == nil"
 			log.NewError(pushMsg.OperationID, errMsg)
 			return
 		}
@@ -191,13 +196,10 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		pushToUserIDList = cacheResp.UserIDList
 	}
 
-	if len(grpcCons) == 0 {
-		log.NewWarn(pushMsg.OperationID, "first GetConn4Unique ")
-		grpcCons = getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
-	}
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
 
 	//Online push message
-	log.Debug("test", pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
+	log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
 	for _, v := range grpcCons {
 		msgClient := pbRelay.NewRelayClient(v)
 		reply, err := msgClient.SuperGroupOnlineBatchPushOneMsg(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData, PushToUserIDList: pushToUserIDList})
@@ -232,6 +234,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		var content string
 		if pushMsg.MsgData.OfflinePushInfo != nil {
 			content = pushMsg.MsgData.OfflinePushInfo.Title
+			jsonCustomContent = pushMsg.MsgData.OfflinePushInfo.Desc
 
 		} else {
 			switch pushMsg.MsgData.ContentType {
@@ -263,7 +266,8 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		if len(onlineFailedUserIDList) > 0 {
 			var offlinePushUserIDList []string
 			var needOfflinePushUserIDList []string
-			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList, pushMsg.MsgData, &offlinePushUserIDList)
+			var offlineInfo commonPb.OfflinePushInfo
+			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList, pushMsg.MsgData, &offlinePushUserIDList, &offlineInfo)
 			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 			if callbackResp.ErrCode != 0 {
 				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
@@ -276,6 +280,12 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 				needOfflinePushUserIDList = offlinePushUserIDList
 			} else {
 				needOfflinePushUserIDList = onlineFailedUserIDList
+			}
+			if offlineInfo.Title != "" {
+				content = offlineInfo.Title
+			}
+			if offlineInfo.Desc != "" {
+				jsonCustomContent = offlineInfo.Desc
 			}
 			if offlinePusher == nil {
 				return
@@ -321,7 +331,7 @@ func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err err
 //		sendMsgToKafka(m, m.SendID, "msgKey--sendID")
 //		sendMsgToKafka(m, m.RecvID, "msgKey--recvID")
 //	case constant.GroupChatType:
-//		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
+//		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName)
 //		client := pbGroup.NewGroupClient(etcdConn)
 //		req := &pbGroup.Req{
 //			GroupID:     m.RecvID,

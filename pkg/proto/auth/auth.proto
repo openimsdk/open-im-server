@@ -22,6 +22,7 @@ message UserTokenReq {
     string FromUserID = 2;
     string OpUserID = 3;
     string OperationID = 4;
+    string LoginIp = 5;
 }
 message UserTokenResp {
     CommonResp CommonResp = 1;

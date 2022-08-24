@@ -11,11 +11,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	"strconv"
-	"time"
 )
 
 const (
@@ -34,6 +35,7 @@ const (
 	FcmToken                      = "FCM_TOKEN:"
 	groupUserMinSeq               = "GROUP_USER_MIN_SEQ:"
 	groupMaxSeq                   = "GROUP_MAX_SEQ:"
+	groupMinSeq                   = "GROUP_MIN_SEQ:"
 	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
 )
 
@@ -115,6 +117,11 @@ func (d *DataBases) SetGroupMaxSeq(groupID string, maxSeq uint64) error {
 	return d.RDB.Set(context.Background(), key, maxSeq, 0).Err()
 }
 
+func (d *DataBases) SetGroupMinSeq(groupID string, minSeq uint32) error {
+	key := groupMinSeq + groupID
+	return d.RDB.Set(context.Background(), key, minSeq, 0).Err()
+}
+
 //Store userid and platform class to redis
 func (d *DataBases) AddTokenFlag(userID string, platformID int, token string, flag int) error {
 	key := uidPidToken + userID + ":" + constant.PlatformIDToName(platformID)
@@ -179,14 +186,14 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 		if err != nil {
 			errResult = err
 			failedSeqList = append(failedSeqList, v)
-			log2.NewWarn(operationID, "redis get message error:", err.Error(), v)
+			log2.Debug(operationID, "redis get message error: ", err.Error(), v)
 		} else {
 			msg := pbCommon.MsgData{}
 			err = jsonpb.UnmarshalString(result, &msg)
 			if err != nil {
 				errResult = err
 				failedSeqList = append(failedSeqList, v)
-				log2.NewWarn(operationID, "Unmarshal err", result, err.Error())
+				log2.NewWarn(operationID, "Unmarshal err ", result, err.Error())
 			} else {
 				log2.NewDebug(operationID, "redis get msg is ", msg.String())
 				seqMsg = append(seqMsg, &msg)
@@ -196,6 +203,7 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 	}
 	return seqMsg, failedSeqList, errResult
 }
+
 func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	ctx := context.Background()
 	pipe := d.RDB.Pipeline()
@@ -223,16 +231,14 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 }
 func (d *DataBases) DeleteMessageFromCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	ctx := context.Background()
-	var keys []string
 	for _, msg := range msgList {
 		key := messageCache + uid + "_" + strconv.Itoa(int(msg.MsgData.Seq))
-		keys = append(keys, key)
+		err := d.RDB.Del(ctx, key).Err()
+		if err != nil {
+			log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", key, uid, err.Error(), msgList)
+		}
 	}
-	err := d.RDB.Del(ctx, keys...).Err()
-	if err != nil {
-		log2.NewWarn(operationID, utils.GetSelfFuncName(), "redis failed", "args:", keys, uid, err.Error(), msgList)
-	}
-	return err
+	return nil
 }
 
 func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID string) error {
@@ -246,8 +252,8 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID str
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	if err = d.RDB.Del(ctx, vals...).Err(); err != nil {
-		return utils.Wrap(err, "")
+	for _, v := range vals {
+		err = d.RDB.Del(ctx, v).Err()
 	}
 	return nil
 }
@@ -353,10 +359,18 @@ func (d *DataBases) DelUserSignalList(userID string) error {
 func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID string) {
 	for _, seq := range seqList {
 		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
-		result := d.RDB.Get(context.Background(), key).String()
+		result, err := d.RDB.Get(context.Background(), key).Result()
+		if err != nil {
+			if err == go_redis.Nil {
+				log2.NewDebug(operationID, utils.GetSelfFuncName(), err.Error(), "redis nil")
+			} else {
+				log2.NewError(operationID, utils.GetSelfFuncName(), err.Error(), key)
+			}
+			continue
+		}
 		var msg pbCommon.MsgData
 		if err := utils.String2Pb(result, &msg); err != nil {
-			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, err.Error())
+			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, result, key, err.Error())
 			continue
 		}
 		msg.Status = constant.MsgDeleted
@@ -376,8 +390,8 @@ func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
 }
 
 func (d *DataBases) GetGetuiToken() (string, error) {
-	result := d.RDB.Get(context.Background(), getuiToken)
-	return result.String(), result.Err()
+	result, err := d.RDB.Get(context.Background(), getuiToken).Result()
+	return result, err
 }
 
 func (d *DataBases) SetSendMsgFailedFlag(operationID string) error {

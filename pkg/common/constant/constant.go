@@ -64,7 +64,6 @@ const (
 	FriendRemarkSetNotification           = 1206 //set_friend_remark?
 	BlackAddedNotification                = 1207 //add_black
 	BlackDeletedNotification              = 1208 //remove_black
-	MsgDeleteNotification                 = 1209
 
 	ConversationOptChangeNotification = 1300 // change conversation opt
 
@@ -100,9 +99,11 @@ const (
 
 	SuperGroupNotificationBegin  = 1650
 	SuperGroupUpdateNotification = 1651
+	MsgDeleteNotification        = 1652
 	SuperGroupNotificationEnd    = 1699
 
 	ConversationPrivateChatNotification = 1701
+	ConversationUnreadNotification      = 1702
 
 	OrganizationChangedNotification = 1801
 
@@ -139,6 +140,8 @@ const (
 	WebAndOther = 3
 	//The PC side is mutually exclusive, and the mobile side is mutually exclusive, but the web side can be online at the same time
 	PcMobileAndWeb = 4
+	//The PC terminal can be online at the same time,but other terminal only one of the endpoints can login
+	PCAndOther = 5
 
 	OnlineStatus  = "online"
 	OfflineStatus = "offline"
@@ -200,6 +203,7 @@ const (
 	CallbackWordFilterCommand           = "callbackWordFilterCommand"
 	CallbackUserOnlineCommand           = "callbackUserOnlineCommand"
 	CallbackUserOfflineCommand          = "callbackUserOfflineCommand"
+	CallbackUserKickOffCommand          = "callbackUserKickOffCommand"
 	CallbackOfflinePushCommand          = "callbackOfflinePushCommand"
 	CallbackOnlinePushCommand           = "callbackOnlinePushCommand"
 	CallbackSuperGroupOnlinePushCommand = "callbackSuperGroupOnlinePushCommand"
@@ -226,6 +230,12 @@ const (
 	WorkMomentLikeNotification    = 1
 	WorkMomentAtUserNotification  = 2
 )
+
+const (
+	WriteDiffusion = 0
+	ReadDiffusion  = 1
+)
+
 const (
 	AtAllString       = "AtAllTag"
 	AtNormal          = 0
@@ -286,6 +296,11 @@ const (
 	ApplyNeedVerificationInviteDirectly = 0 // 申请需要同意 邀请直接进
 	AllNeedVerification                 = 1 //所有人进群需要验证，除了群主管理员邀请进群
 	Directly                            = 2 //直接进群
+)
+
+const (
+	GroupRPCRecvSize = 30
+	GroupRPCSendSize = 30
 )
 
 const FriendAcceptTip = "You have successfully become friends, so start chatting"

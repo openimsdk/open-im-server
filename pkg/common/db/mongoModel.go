@@ -46,6 +46,7 @@ type MsgInfo struct {
 
 type UserChat struct {
 	UID string
+	//ListIndex int `bson:"index"`
 	Msg []MsgInfo
 }
 
@@ -256,6 +257,75 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID st
 
 	}
 	return seqMsg, nil
+}
+
+func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	regex := fmt.Sprintf("^%s", ID)
+	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
+	var msgs []UserChat
+	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.Decode(&msgs)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	if len(msgs) > 0 {
+		return &msgs[0], err
+	} else {
+		return nil, errors.New("get msg list failed")
+	}
+}
+
+func (d *DataBases) DelMongoMsgs(IDList []string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	_, err := c.DeleteMany(ctx, bson.M{"uid": bson.M{"$in": IDList}})
+	return err
+}
+
+func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	userChat := &UserChat{}
+	err := c.FindOne(ctx, bson.M{"uid": suffixID}).Decode(&userChat)
+	if err != nil {
+		return err
+	}
+	for i, msg := range userChat.Msg {
+		if i <= index {
+			msg.Msg = nil
+			msg.SendTime = 0
+		}
+	}
+	_, err = c.UpdateOne(ctx, bson.M{"uid": suffixID}, userChat)
+	return err
+}
+
+func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	regex := fmt.Sprintf("^%s", ID)
+	findOpts := options.Find().SetLimit(1).SetSort(bson.M{"uid": -1})
+	var userChats []UserChat
+	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.Decode(&userChats)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	if len(userChats) > 0 {
+		if len(userChats[0].Msg) > 0 {
+			return &userChats[0].Msg[len(userChats[0].Msg)], nil
+		}
+		return nil, errors.New("len(userChats[0].Msg) < 0")
+	}
+	return nil, errors.New("len(userChats) < 0")
 }
 
 func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
@@ -945,14 +1015,14 @@ func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userI
 }
 
 type SuperGroup struct {
-	GroupID string `bson:"group_id"`
+	GroupID string `bson:"group_id" json:"groupID"`
 	//MemberNumCount int      `bson:"member_num_count"`
-	MemberIDList []string `bson:"member_id_list"`
+	MemberIDList []string `bson:"member_id_list" json:"memberIDList"`
 }
 
 type UserToSuperGroup struct {
-	UserID      string   `bson:"user_id"`
-	GroupIDList []string `bson:"group_id_list"`
+	UserID      string   `bson:"user_id" json:"userID"`
+	GroupIDList []string `bson:"group_id_list" json:"groupIDList"`
 }
 
 func (d *DataBases) CreateSuperGroup(groupID string, initMemberIDList []string, memberNumCount int) error {
@@ -1074,7 +1144,8 @@ func (d *DataBases) GetSuperGroupByUserID(userID string) (UserToSuperGroup, erro
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
 	var user UserToSuperGroup
-	return user, c.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+	_ = c.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+	return user, nil
 }
 
 func (d *DataBases) DeleteSuperGroup(groupID string) error {
@@ -1191,6 +1262,7 @@ func isNotContainInt32(target uint32, List []uint32) bool {
 func indexGen(uid string, seqSuffix uint32) string {
 	return uid + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }
+
 func superGroupIndexGen(groupID string, seqSuffix uint32) string {
 	return "super_group_" + groupID + ":" + strconv.FormatInt(int64(seqSuffix), 10)
 }

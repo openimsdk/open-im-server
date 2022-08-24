@@ -38,7 +38,6 @@ definitions:
       videoElem:
         $ref: '#/definitions/Open_IM_internal_api_manage.VideoElem'
     required:
-    - notificationFaceURL
     - notificationName
     - notificationType
     - text
@@ -910,12 +909,18 @@ definitions:
     type: object
   base_info.GetGroupAllMemberReq:
     properties:
+      count:
+        type: integer
       groupID:
         type: string
+      offset:
+        type: integer
       operationID:
         type: string
     required:
+    - count
     - groupID
+    - offset
     - operationID
     type: object
   base_info.GetGroupAllMemberResp:
@@ -1285,6 +1290,9 @@ definitions:
   base_info.GroupAddMemberInfo:
     properties:
       roleLevel:
+        enum:
+        - 1
+        - 3
         type: integer
       userID:
         type: string
@@ -1372,6 +1380,10 @@ definitions:
     properties:
       groupID:
         type: string
+      inviterUserID:
+        type: string
+      joinSource:
+        type: integer
       operationID:
         type: string
       reqMessage:
@@ -1436,11 +1448,15 @@ definitions:
     type: object
   base_info.ManagementBatchSendMsgReq:
     properties:
+      businessOperationID:
+        type: string
       contentType:
         type: integer
       groupID:
         type: string
       isOnlineOnly:
+        type: boolean
+      notOfflinePush:
         type: boolean
       offlinePushInfo:
         $ref: '#/definitions/server_api_params.OfflinePushInfo'
@@ -1468,11 +1484,15 @@ definitions:
     type: object
   base_info.ManagementSendMsgReq:
     properties:
+      businessOperationID:
+        type: string
       contentType:
         type: integer
       groupID:
         type: string
       isOnlineOnly:
+        type: boolean
+      notOfflinePush:
         type: boolean
       offlinePushInfo:
         $ref: '#/definitions/server_api_params.OfflinePushInfo'
@@ -1657,7 +1677,6 @@ definitions:
     required:
     - fromUserID
     - operationID
-    - remark
     - toUserID
     type: object
   base_info.SetFriendRemarkResp:
@@ -1689,6 +1708,8 @@ definitions:
     type: object
   base_info.SetGroupInfoReq:
     properties:
+      applyMemberFriend:
+        type: integer
       ex:
         type: string
       faceURL:
@@ -1699,6 +1720,8 @@ definitions:
         type: string
       introduction:
         type: string
+      lookMemberInfo:
+        type: integer
       needVerification:
         type: integer
       notification:
@@ -2134,7 +2157,6 @@ definitions:
       videoElem:
         $ref: '#/definitions/internal_api_manage.VideoElem'
     required:
-    - notificationFaceURL
     - notificationName
     - notificationType
     - text
@@ -2428,6 +2450,8 @@ definitions:
     type: object
   server_api_params.GroupInfo:
     properties:
+      applyMemberFriend:
+        type: integer
       createTime:
         type: integer
       creatorUserID:
@@ -2444,11 +2468,17 @@ definitions:
         type: integer
       introduction:
         type: string
+      lookMemberInfo:
+        type: integer
       memberCount:
         type: integer
       needVerification:
         type: integer
       notification:
+        type: string
+      notificationUpdateTime:
+        type: integer
+      notificationUserID:
         type: string
       ownerUserID:
         type: string
@@ -2464,6 +2494,8 @@ definitions:
       faceURL:
         type: string
       groupID:
+        type: string
+      inviterUserID:
         type: string
       joinSource:
         type: integer
@@ -2494,6 +2526,10 @@ definitions:
         type: integer
       handleUserID:
         type: string
+      inviterUserID:
+        type: string
+      joinSource:
+        type: integer
       reqMsg:
         type: string
       reqTime:
@@ -2702,11 +2738,6 @@ paths:
       description: 用户注册
       operationId: UserRegister
       parameters:
-      - description: im token
-        in: header
-        name: token
-        required: true
-        type: string
       - description: secret为openIM密钥, 详细见服务端config.yaml secret字段 <br> platform为平台ID
           <br> ex为拓展字段 <br> gender为性别, 0为女, 1为男
         in: body
@@ -2739,11 +2770,6 @@ paths:
       description: 获取用户的token
       operationId: UserToken
       parameters:
-      - description: im token
-        in: header
-        name: token
-        required: true
-        type: string
       - description: secret为openIM密钥, 详细见服务端config.yaml secret字段 <br> platform为平台ID
         in: body
         name: req

@@ -20,6 +20,10 @@ func NewGinRouter() *gin.Engine {
 	adminRouterGroup := router.Group("/admin")
 	{
 		adminRouterGroup.POST("/login", admin.AdminLogin)
+		adminRouterGroup.Use(middleware.JWTAuth())
+		adminRouterGroup.POST("/add_user_register_add_friend_id", admin.AddUserRegisterAddFriendIDList)
+		adminRouterGroup.POST("/reduce_user_register_reduce_friend_id", admin.ReduceUserRegisterAddFriendIDList)
+		adminRouterGroup.POST("/get_user_register_reduce_friend_id_list", admin.GetUserRegisterAddFriendIDList)
 	}
 	r2 := router.Group("")
 	r2.Use(middleware.JWTAuth())
@@ -47,20 +51,15 @@ func NewGinRouter() *gin.Engine {
 	}
 	groupRouterGroup := r2.Group("/group")
 	{
-		groupRouterGroup.GET("/get_group_by_id", group.GetGroupById)
+		groupRouterGroup.GET("/get_group_by_id", group.GetGroupByID)
 		groupRouterGroup.GET("/get_groups", group.GetGroups)
 		groupRouterGroup.GET("/get_group_by_name", group.GetGroupByName)
 		groupRouterGroup.GET("/get_group_members", group.GetGroupMembers)
 		groupRouterGroup.POST("/create_group", group.CreateGroup)
 		groupRouterGroup.POST("/add_members", group.AddGroupMembers)
 		groupRouterGroup.POST("/remove_members", group.RemoveGroupMembers)
-		groupRouterGroup.POST("/ban_group_private_chat", group.BanPrivateChat)
-		groupRouterGroup.POST("/open_group_private_chat", group.OpenPrivateChat)
-		groupRouterGroup.POST("/ban_group_chat", group.BanGroupChat)
-		groupRouterGroup.POST("/open_group_chat", group.OpenGroupChat)
-		groupRouterGroup.POST("/delete_group", group.DeleteGroup)
 		groupRouterGroup.POST("/get_members_in_group", group.GetGroupMembers)
-		groupRouterGroup.POST("/set_group_master", group.SetGroupMaster)
+		groupRouterGroup.POST("/set_group_master", group.SetGroupOwner)
 		groupRouterGroup.POST("/set_group_ordinary_user", group.SetGroupOrdinaryUsers)
 		groupRouterGroup.POST("/alter_group_info", group.AlterGroupInfo)
 	}
@@ -77,12 +76,6 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.GET("/get_block_user", user.GetBlockUserById)
 		userRouterGroup.POST("/delete_user", user.DeleteUser)
 		userRouterGroup.GET("/get_users_by_name", user.GetUsersByName)
-	}
-	friendRouterGroup := r2.Group("/friend")
-	{
-		friendRouterGroup.POST("/get_friends_by_id")
-		friendRouterGroup.POST("/set_friend")
-		friendRouterGroup.POST("/remove_friend")
 	}
 	messageCMSRouterGroup := r2.Group("/message")
 	{

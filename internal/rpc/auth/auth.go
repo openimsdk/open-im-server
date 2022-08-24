@@ -29,8 +29,18 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
 	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
+	Limited, LimitError := imdb.IsLimitRegisterIp(req.UserInfo.CreateIp)
+	if LimitError != nil {
+		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
+	}
+	if Limited {
+		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.RegisterLimit, ErrMsg: "Register Limit"}}, nil
+	}
 	err := imdb.UserRegister(user)
 	if err != nil {
+		if err == constant.InvitationMsg {
+			return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.InvitationError, ErrMsg: "邀请码错误"}}, nil
+		}
 		errMsg := req.OperationID + " imdb.UserRegister failed " + err.Error() + user.UserID
 		log.NewError(req.OperationID, errMsg, user)
 		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
@@ -67,11 +77,11 @@ func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (
 		log.NewError(req.OperationID, errMsg)
 		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
 	}
-	if err := token_verify.DeleteToken(req.FromUserID, int(req.Platform)); err != nil {
-		errMsg := req.OperationID + " DeleteToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	}
+	//if err := token_verify.DeleteToken(req.FromUserID, int(req.Platform)); err != nil {
+	//	errMsg := req.OperationID + " DeleteToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
+	//	log.NewError(req.OperationID, errMsg)
+	//	return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+	//}
 	if err := rpc.forceKickOff(req.FromUserID, req.Platform, req.OperationID); err != nil {
 		errMsg := req.OperationID + " forceKickOff failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
 		log.NewError(req.OperationID, errMsg)
@@ -82,8 +92,8 @@ func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (
 }
 
 func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID string) error {
-
-	grpcCons := getcdv3.GetConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImRelayName)
+	log.NewInfo(operationID, utils.GetSelfFuncName(), " args ", userID, platformID)
+	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
 		kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
@@ -91,7 +101,6 @@ func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID st
 		_, err := client.KickUserOffline(context.Background(), kickReq)
 		return utils.Wrap(err, "")
 	}
-
 	return errors.New("no rpc node ")
 }
 

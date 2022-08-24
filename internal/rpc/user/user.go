@@ -6,12 +6,14 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
-	"Open_IM/pkg/common/db/rocks_cache"
+	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	errors "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	pbFriend "Open_IM/pkg/proto/friend"
+	pbOrganization "Open_IM/pkg/proto/organization"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
@@ -19,6 +21,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -83,7 +86,7 @@ func (s *userServer) Run() {
 	log.NewInfo("0", "rpc  user success")
 }
 
-func syncPeerUserConversation(conversation *pbUser.Conversation, operationID string) error {
+func syncPeerUserConversation(conversation *pbConversation.Conversation, operationID string) error {
 	peerUserConversation := db.Conversation{
 		OwnerUserID:      conversation.UserID,
 		ConversationID:   utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType),
@@ -109,6 +112,7 @@ func syncPeerUserConversation(conversation *pbUser.Conversation, operationID str
 
 func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq) (*pbUser.GetUserInfoResp, error) {
 	log.NewInfo(req.OperationID, "GetUserInfo args ", req.String())
+
 	var userInfoList []*sdkws.UserInfo
 	if len(req.UserIDList) > 0 {
 		for _, userID := range req.UserIDList {
@@ -146,10 +150,20 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 			return resp, nil
 		}
-		if err := imdb.SetConversation(conversation); err != nil {
+
+		isUpdate, err := imdb.SetConversation(conversation)
+		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 			resp.Failed = append(resp.Failed, v.ConversationID)
 			continue
+		}
+		if isUpdate {
+			err = rocksCache.DelConversationFromCache(v.OwnerUserID, v.ConversationID)
+		} else {
+			err = rocksCache.DelUserConversationIDListFromCache(v.OwnerUserID)
+		}
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), v.ConversationID, v.OwnerUserID)
 		}
 		resp.Success = append(resp.Success, v.ConversationID)
 		// if is set private msg operation，then peer user need to sync and set tips\
@@ -167,8 +181,8 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 
 func (s *userServer) GetAllConversations(ctx context.Context, req *pbUser.GetAllConversationsReq) (*pbUser.GetAllConversationsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetAllConversationsResp{Conversations: []*pbUser.Conversation{}}
-	conversations, err := imdb.GetUserAllConversations(req.OwnerUserID)
+	resp := &pbUser.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
+	conversations, err := rocksCache.GetUserAllConversationList(req.OwnerUserID)
 	log.NewDebug(req.OperationID, "conversations: ", conversations)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversations error", err.Error())
@@ -185,8 +199,8 @@ func (s *userServer) GetAllConversations(ctx context.Context, req *pbUser.GetAll
 
 func (s *userServer) GetConversation(ctx context.Context, req *pbUser.GetConversationReq) (*pbUser.GetConversationResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetConversationResp{Conversation: &pbUser.Conversation{}}
-	conversation, err := imdb.GetConversation(req.OwnerUserID, req.ConversationID)
+	resp := &pbUser.GetConversationResp{Conversation: &pbConversation.Conversation{}}
+	conversation, err := rocksCache.GetConversationFromCache(req.OwnerUserID, req.ConversationID)
 	log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversation error", err.Error())
@@ -203,8 +217,8 @@ func (s *userServer) GetConversation(ctx context.Context, req *pbUser.GetConvers
 
 func (s *userServer) GetConversations(ctx context.Context, req *pbUser.GetConversationsReq) (*pbUser.GetConversationsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetConversationsResp{Conversations: []*pbUser.Conversation{}}
-	conversations, err := imdb.GetConversations(req.OwnerUserID, req.ConversationIDs)
+	resp := &pbUser.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
+	conversations, err := rocksCache.GetConversationsFromCache(req.OwnerUserID, req.ConversationIDs)
 	log.NewDebug("", utils.GetSelfFuncName(), "conversations", conversations)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversations error", err.Error())
@@ -248,12 +262,21 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
-	err := imdb.SetConversation(conversation)
+	isUpdate, err := imdb.SetConversation(conversation)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
 	}
+	if isUpdate {
+		err = rocksCache.DelConversationFromCache(req.Conversation.OwnerUserID, req.Conversation.ConversationID)
+	} else {
+		err = rocksCache.DelUserConversationIDListFromCache(req.Conversation.OwnerUserID)
+	}
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.Conversation.ConversationID, req.Conversation.OwnerUserID)
+	}
+
 	// notification
 	if req.Conversation.ConversationType == constant.SingleChatType && req.NotificationType == constant.ConversationPrivateChatNotification {
 		//sync peer user conversation if conversation is singleChatType
@@ -293,11 +316,19 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 			conversation.ConversationType = constant.GroupChatType
 		}
 	}
-	err := imdb.SetRecvMsgOpt(conversation)
+	isUpdate, err := imdb.SetRecvMsgOpt(conversation)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 		return resp, nil
+	}
+	if isUpdate {
+		err = rocksCache.DelConversationFromCache(conversation.OwnerUserID, conversation.ConversationID)
+	} else {
+		err = rocksCache.DelUserConversationIDListFromCache(conversation.OwnerUserID)
+	}
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), conversation.ConversationID, err.Error())
 	}
 	chat.ConversationChangeNotification(req.OperationID, req.OwnerUserID)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
@@ -397,9 +428,9 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		log.NewError(req.OperationID, "UpdateUserInfo failed ", err.Error(), user)
 		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.OperationID)
 	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetConn == nil"
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
 		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
 	}
@@ -430,21 +461,31 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if req.UserInfo.Nickname != "" {
 		go s.SyncJoinedGroupMemberNickname(req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, req.OperationID, req.OpUserID)
 	}
-	//updateUserInfoToCacheReq := &cache.UpdateUserInfoToCacheReq{
-	//	OperationID:  req.OperationID,
-	//	UserInfoList: []*sdkws.UserInfo{req.UserInfo},
-	//}
-	//cacheEtcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName)
-	//cacheClient := cache.NewCacheClient(cacheEtcdConn)
-	//resp, err := cacheClient.UpdateUserInfoToCache(context.Background(), updateUserInfoToCacheReq)
-	//if err != nil {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), updateUserInfoToCacheReq.String())
-	//	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: err.Error()}}, nil
-	//}
-	//if resp.CommonResp.ErrCode != 0 {
-	//	log.NewError(req.OperationID, utils.GetSelfFuncName(), resp.String())
-	//	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: resp.CommonResp.ErrMsg}}, nil
-	//}
+	etcdConn = getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, req.OperationID)
+	clientOrg := pbOrganization.NewOrganizationClient(etcdConn)
+	out, err := clientOrg.UpdateOrganizationUser(context.Background(), &pbOrganization.UpdateOrganizationUserReq{
+		OrganizationUser: &sdkws.OrganizationUser{
+			UserID:      req.UserInfo.UserID,
+			Nickname:    req.UserInfo.Nickname,
+			EnglishName: req.UserInfo.Nickname,
+			FaceURL:     req.UserInfo.FaceURL,
+			Gender:      req.UserInfo.Gender,
+			Mobile:      req.UserInfo.PhoneNumber,
+			Telephone:   req.UserInfo.PhoneNumber,
+			Birth:       req.UserInfo.Birth,
+			Email:       req.UserInfo.Email,
+			Ex:          req.UserInfo.Ex,
+		},
+		OperationID: req.OperationID,
+		OpUserID:    req.OpUserID,
+	})
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateOrganizationUser failed", err.Error())
+	} else {
+		if out.ErrCode != 0 {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "grpc resp: ", out)
+		}
+	}
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (*pbUser.SetGlobalRecvMessageOptResp, error) {
@@ -466,6 +507,10 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.Se
 		log.NewError(req.OperationID, "SetGlobalRecvMessageOpt failed ", err.Error(), user)
 		return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
+	if err := rocksCache.DelUserInfoFromCache(user.UserID); err != nil {
+		log.NewError(req.OperationID, "DelUserInfoFromCache failed ", err.Error(), req.String())
+		return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+	}
 	chat.UserInfoUpdatedNotification(req.OperationID, req.UserID, req.UserID)
 	return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
@@ -482,8 +527,12 @@ func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string,
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
 			continue
 		}
-		if err := rocksCache.DelAllGroupMembersInfoFromCache(groupID); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
+		//if err := rocksCache.DelAllGroupMembersInfoFromCache(groupID); err != nil {
+		//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
+		//	continue
+		//}
+		if err := rocksCache.DelGroupMemberInfoFromCache(groupID, userID); err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userID)
 			continue
 		}
 		chat.GroupMemberInfoSetNotification(operationID, opUserID, groupID, userID)
@@ -508,9 +557,12 @@ func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, o
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
 				continue
 			}
-			if err := rocksCache.DelAllGroupMembersInfoFromCache(v); err != nil {
+			//if err := rocksCache.DelAllGroupMembersInfoFromCache(v); err != nil {
+			//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
+			//	continue
+			//}
+			if err := rocksCache.DelGroupMemberInfoFromCache(v, userID); err != nil {
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
-				continue
 			}
 			chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
 		}
@@ -532,11 +584,20 @@ func (s *userServer) GetUsersByName(ctx context.Context, req *pbUser.GetUsersByN
 			continue
 		}
 		resp.Users = append(resp.Users, &pbUser.User{
-			ProfilePhoto: user.FaceURL,
-			Nickname:     user.Nickname,
-			UserId:       user.UserID,
-			CreateTime:   user.CreateTime.String(),
-			IsBlock:      isBlock,
+			ProfilePhoto:  user.FaceURL,
+			Nickname:      user.Nickname,
+			UserId:        user.UserID,
+			CreateTime:    user.CreateTime.Format("2006-01-02 15:04:05"),
+			CreateIp:      user.CreateIp,
+			IsBlock:       isBlock,
+			Birth:         user.Birth.Format("2006-01-02"),
+			PhoneNumber:   user.PhoneNumber,
+			Email:         user.Email,
+			LastLoginIp:   user.LastLoginIp,
+			LastLoginTime: user.LastLoginTime.Format("2006-01-02 15:04:05"),
+			LoginTimes:    user.LoginTimes,
+			Gender:        user.Gender,
+			LoginLimit:    user.LoginLimit,
 		})
 	}
 	user := db.User{Nickname: req.UserName}
@@ -568,11 +629,20 @@ func (s *userServer) GetUserById(ctx context.Context, req *pbUser.GetUserByIdReq
 		return resp, errors.WrapError(constant.ErrDB)
 	}
 	resp.User = &pbUser.User{
-		ProfilePhoto: user.FaceURL,
-		Nickname:     user.Nickname,
-		UserId:       user.UserID,
-		CreateTime:   user.CreateTime.String(),
-		IsBlock:      isBlock,
+		ProfilePhoto:  user.FaceURL,
+		Nickname:      user.Nickname,
+		UserId:        user.UserID,
+		CreateTime:    user.CreateTime.Format("2006-01-02 15:04:05"),
+		CreateIp:      user.CreateIp,
+		IsBlock:       isBlock,
+		Birth:         user.Birth.Format("2006-01-02"),
+		PhoneNumber:   user.PhoneNumber,
+		Email:         user.Email,
+		LastLoginIp:   user.LastLoginIp,
+		LastLoginTime: user.LastLoginTime.Format("2006-01-02 15:04:05"),
+		LoginTimes:    user.LoginTimes,
+		Gender:        user.Gender,
+		LoginLimit:    user.LoginLimit,
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
@@ -586,15 +656,32 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
 	}
+
 	for _, v := range users {
 		isBlock, err := imdb.UserIsBlock(v.UserID)
 		if err == nil {
+			registerIP := ""
+			registerInfo, err := imdb.GetRegisterInfo(v.UserID)
+			if registerInfo != nil && err == nil {
+				registerIP = registerInfo.RegisterIP
+			}
+
 			user := &pbUser.User{
-				ProfilePhoto: v.FaceURL,
-				UserId:       v.UserID,
-				CreateTime:   v.CreateTime.String(),
-				Nickname:     v.Nickname,
-				IsBlock:      isBlock,
+				ProfilePhoto:  v.FaceURL,
+				UserId:        v.UserID,
+				CreateTime:    v.CreateTime.Format("2006-01-02 15:04:05"),
+				CreateIp:      v.CreateIp,
+				Nickname:      v.Nickname,
+				Birth:         v.Birth.Format("2006-01-02"),
+				PhoneNumber:   v.PhoneNumber,
+				Email:         v.Email,
+				IsBlock:       isBlock,
+				LastLoginIp:   v.LastLoginIp,
+				LastLoginTime: v.LastLoginTime.Format("2006-01-02 15:04:05"),
+				LoginTimes:    v.LoginTimes,
+				Gender:        v.Gender,
+				LoginLimit:    v.LoginLimit,
+				RegisterIp:    registerIP,
 			}
 			resp.User = append(resp.User, user)
 		} else {
@@ -621,11 +708,19 @@ func (s *userServer) ResignUser(ctx context.Context, req *pbUser.ResignUserReq) 
 func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*pbUser.AlterUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AlterUserResp{}
+	birth, _ := time.ParseInLocation("2006-01-02", req.Birth, time.Local)
+	gender, gendererr := strconv.Atoi(req.Gender)
+	if gendererr != nil {
+		gender = 0
+	}
 	user := db.User{
-		PhoneNumber: strconv.FormatInt(req.PhoneNumber, 10),
+		PhoneNumber: req.PhoneNumber,
 		Nickname:    req.Nickname,
 		Email:       req.Email,
 		UserID:      req.UserId,
+		Gender:      int32(gender),
+		FaceURL:     req.Photo,
+		Birth:       birth,
 	}
 	if err := imdb.UpdateUserInfo(user); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateUserInfo", err.Error())
@@ -639,7 +734,7 @@ func (s *userServer) AlterUser(ctx context.Context, req *pbUser.AlterUserReq) (*
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AddUserResp{}
-	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name)
+	err := imdb.AddUser(req.UserId, req.PhoneNumber, req.Name, req.Email, req.Gender, req.Photo, req.Birth)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error())
 		return resp, errors.WrapError(constant.ErrDB)
@@ -684,6 +779,10 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 				Nickname:     v.User.Nickname,
 				UserId:       v.User.UserID,
 				IsBlock:      true,
+				Birth:        v.User.Birth.Format("2006-01-02"),
+				PhoneNumber:  v.User.PhoneNumber,
+				Email:        v.User.Email,
+				Gender:       v.User.Gender,
 			},
 			BeginDisableTime: (v.BeginDisableTime).String(),
 			EndDisableTime:   (v.EndDisableTime).String(),
@@ -716,6 +815,10 @@ func (s *userServer) GetBlockUserById(_ context.Context, req *pbUser.GetBlockUse
 			Nickname:     user.User.Nickname,
 			UserId:       user.User.UserID,
 			IsBlock:      true,
+			Birth:        user.User.Birth.Format("2006-01-02"),
+			PhoneNumber:  user.User.PhoneNumber,
+			Email:        user.User.Email,
+			Gender:       user.User.Gender,
 		},
 		BeginDisableTime: (user.BeginDisableTime).String(),
 		EndDisableTime:   (user.EndDisableTime).String(),

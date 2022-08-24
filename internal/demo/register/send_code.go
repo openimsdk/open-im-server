@@ -8,12 +8,12 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/utils"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"gopkg.in/gomail.v2"
 	"math/rand"
 	"net/http"
-
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"gopkg.in/gomail.v2"
 )
 
 var sms SMS
@@ -34,11 +34,12 @@ func init() {
 }
 
 type paramsVerificationCode struct {
-	Email       string `json:"email"`
-	PhoneNumber string `json:"phoneNumber"`
-	OperationID string `json:"operationID" binding:"required"`
-	UsedFor     int    `json:"usedFor"`
-	AreaCode    string `json:"areaCode"`
+	Email          string `json:"email"`
+	PhoneNumber    string `json:"phoneNumber"`
+	OperationID    string `json:"operationID" binding:"required"`
+	UsedFor        int    `json:"usedFor"`
+	AreaCode       string `json:"areaCode"`
+	InvitationCode string `json:"invitationCode"`
 }
 
 func SendVerificationCode(c *gin.Context) {
@@ -71,6 +72,15 @@ func SendVerificationCode(c *gin.Context) {
 			log.NewError(params.OperationID, "The phone number has been registered", params)
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.HasRegistered, "errMsg": "The phone number has been registered"})
 			return
+		}
+		//需要邀请码
+		if config.Config.Demo.NeedInvitationCode {
+			err = im_mysql_model.CheckInvitationCode(params.InvitationCode)
+			if err != nil {
+				log.NewError(params.OperationID, "邀请码错误", params)
+				c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
+				return
+			}
 		}
 		accountKey = accountKey + "_" + constant.VerificationCodeForRegisterSuffix
 		ok, err := db.DB.JudgeAccountEXISTS(accountKey)

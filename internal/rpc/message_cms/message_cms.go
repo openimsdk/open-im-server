@@ -150,7 +150,7 @@ func (s *messageCMSServer) GetChatLogs(_ context.Context, req *pbMessageCMS.GetC
 			pbChatLog.ReciverNickName = recvUser.Nickname
 
 		case constant.GroupChatType:
-			group, err := imdb.GetGroupById(chatLog.RecvID)
+			group, err := imdb.GetGroupInfoByGroupID(chatLog.RecvID)
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupById failed")
 				continue
