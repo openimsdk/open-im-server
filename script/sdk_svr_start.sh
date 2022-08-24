@@ -5,8 +5,8 @@ source ./path_info.cfg
 source ./function.sh
 ulimit -n 200000
 
-ws_address=$(cat $config_path | grep openImWsAddress | awk -F '[:]' '{print $NF}')
-api_address=$(cat $config_path | grep openImApiAddress | awk -F '[:]' '{print $NF}')
+ws_address=$(cat $config_path | grep openImWsAddress | awk -F '[ ]' '{print $NF}')
+api_address=$(cat $config_path | grep openImApiAddress | awk -F '[ ]' '{print $NF}')
 list3=$(cat $config_path | grep openImSdkWsPort | awk -F '[:]' '{print $NF}')
 logLevel=$(cat $config_path | grep remainLogLevel | awk -F '[:]' '{print $NF}')
 list_to_string $list3
