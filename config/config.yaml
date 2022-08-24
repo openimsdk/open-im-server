@@ -102,8 +102,8 @@ cmsapi:
 sdk:
   openImSdkWsPort: [ 10003 ] #jssdk服务端口，默认即可，项目中使用jssdk才需开放此端口或做nginx转发
   dataDir: [ ../db/sdk/ ]
-  openImWsAddress: ""
-  openImApiAddress: ""
+  openImWsAddress:
+  openImApiAddress:
 
 #对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
 credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
