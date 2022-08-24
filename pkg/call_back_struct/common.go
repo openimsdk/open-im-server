@@ -17,6 +17,7 @@ type CommonCallbackReq struct {
 	Seq              uint32   `json:"seq"`
 	AtUserIDList     []string `json:"atUserList"`
 	SenderFaceURL    string   `json:"faceURL"`
+	Ex               string   `json:"ex"`
 }
 
 type CommonCallbackResp struct {
