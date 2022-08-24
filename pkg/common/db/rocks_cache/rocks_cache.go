@@ -382,9 +382,12 @@ func GetJoinedSuperGroupListFromCache(userID string) ([]string, error) {
 		return string(bytes), utils.Wrap(err, "")
 	}
 	joinedSuperGroupListStr, err := db.DB.Rc.Fetch(joinedSuperGroupListCache+userID, time.Second*30*60, getJoinedSuperGroupIDList)
+	if err != nil {
+		return nil, err
+	}
 	var joinedSuperGroupList []string
 	err = json.Unmarshal([]byte(joinedSuperGroupListStr), &joinedSuperGroupList)
-	return joinedSuperGroupList, err
+	return joinedSuperGroupList, utils.Wrap(err, "")
 }
 
 func DelJoinedSuperGroupIDListFromCache(userID string) error {
