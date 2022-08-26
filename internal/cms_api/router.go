@@ -5,7 +5,6 @@ import (
 	"Open_IM/internal/cms_api/group"
 	messageCMS "Open_IM/internal/cms_api/message_cms"
 	"Open_IM/internal/cms_api/middleware"
-	"Open_IM/internal/cms_api/organization"
 	"Open_IM/internal/cms_api/statistics"
 	"Open_IM/internal/cms_api/user"
 
@@ -35,20 +34,6 @@ func NewGinRouter() *gin.Engine {
 		statisticsRouterGroup.GET("/get_active_user", statistics.GetActiveUser)
 		statisticsRouterGroup.GET("/get_active_group", statistics.GetActiveGroup)
 	}
-	organizationRouterGroup := r2.Group("/organization")
-	{
-		organizationRouterGroup.GET("/get_staffs", organization.GetStaffs)
-		organizationRouterGroup.GET("/get_organizations", organization.GetOrganizations)
-		organizationRouterGroup.GET("/get_squad", organization.GetSquads)
-		organizationRouterGroup.POST("/add_organization", organization.AddOrganization)
-		organizationRouterGroup.POST("/alter_staff", organization.AlterStaff)
-		organizationRouterGroup.GET("/inquire_organization", organization.InquireOrganization)
-		organizationRouterGroup.POST("/alter_organization", organization.AlterOrganization)
-		organizationRouterGroup.POST("/delete_organization", organization.DeleteOrganization)
-		organizationRouterGroup.POST("/get_organization_squad", organization.GetOrganizationSquads)
-		organizationRouterGroup.PATCH("/alter_corps_info", organization.AlterStaffsInfo)
-		organizationRouterGroup.POST("/add_child_org", organization.AddChildOrganization)
-	}
 	groupRouterGroup := r2.Group("/group")
 	{
 		groupRouterGroup.GET("/get_group_by_id", group.GetGroupByID)
@@ -65,24 +50,15 @@ func NewGinRouter() *gin.Engine {
 	}
 	userRouterGroup := r2.Group("/user")
 	{
-		userRouterGroup.POST("/resign", user.ResignUser)
-		userRouterGroup.GET("/get_user", user.GetUserById)
-		userRouterGroup.POST("/alter_user", user.AlterUser)
-		userRouterGroup.GET("/get_users", user.GetUsers)
 		userRouterGroup.POST("/add_user", user.AddUser)
 		userRouterGroup.POST("/unblock_user", user.UnblockUser)
 		userRouterGroup.POST("/block_user", user.BlockUser)
 		userRouterGroup.GET("/get_block_users", user.GetBlockUsers)
 		userRouterGroup.GET("/get_block_user", user.GetBlockUserById)
-		userRouterGroup.POST("/delete_user", user.DeleteUser)
-		userRouterGroup.GET("/get_users_by_name", user.GetUsersByName)
 	}
 	messageCMSRouterGroup := r2.Group("/message")
 	{
 		messageCMSRouterGroup.GET("/get_chat_logs", messageCMS.GetChatLogs)
-		messageCMSRouterGroup.POST("/broadcast_message", messageCMS.BroadcastMessage)
-		messageCMSRouterGroup.POST("/mass_send_message", messageCMS.MassSendMassage)
-		messageCMSRouterGroup.POST("/withdraw_message", messageCMS.WithdrawMessage)
 	}
 	return baseRouter
 }

@@ -3,15 +3,22 @@ option go_package = "./admin_cms;admin_cms";
 import "Open_IM/pkg/proto/sdk_ws/ws.proto";
 package admin_cms;
 
+
+message CommonResp {
+  int32  errCode = 1;
+  string errMsg = 2;
+}
+
 message AdminLoginReq  {
     string OperationID = 1;
     string AdminID = 2;
     string Secret = 3;
 }
-
+ 
 
 message AdminLoginResp {
     string token = 1;
+    CommonResp commonResp = 2;
 }
 
 message AddUserRegisterAddFriendIDListReq {
@@ -20,7 +27,7 @@ message AddUserRegisterAddFriendIDListReq {
 }
 
 message AddUserRegisterAddFriendIDListResp {
-
+    CommonResp commonResp = 1;
 }
 
 message ReduceUserRegisterAddFriendIDListReq {
@@ -30,17 +37,143 @@ message ReduceUserRegisterAddFriendIDListReq {
 }
 
 message ReduceUserRegisterAddFriendIDListResp {
-
+    CommonResp commonResp = 1;
 }
 
 message GetUserRegisterAddFriendIDListReq {
     string operationID = 1;
-    server_api_params.RequestPagination Pagination = 2;
+    server_api_params.RequestPagination pagination = 2;
 }
 
 message GetUserRegisterAddFriendIDListResp {
-   repeated server_api_params.UserInfo UserInfoList = 1;
+   repeated server_api_params.UserInfo userInfoList = 1;
+    server_api_params.ResponsePagination pagination = 2;
+    CommonResp commonResp = 3;
+}
+
+message GetChatLogsReq {
+    string Content = 1;
+    string SendID = 2;
+    string RecvID = 3;
+    string SendTime = 4;
+    int32 SessionType = 5;
+    int32 ContentType = 6;
+    server_api_params.RequestPagination Pagination = 7;
+    string OperationID = 8;
+
+}
+
+message ChatLog {
+    string ServerMsgID = 1;
+	string stringClientMsgID = 2;
+	string SendID = 3;
+	string RecvID = 4;       
+	int32 SenderPlatformID = 5;
+	string SenderNickname = 6;
+	string SenderFaceURL = 7;  
+	int32 SessionType = 8;           
+	int32 MsgFrom = 9;      
+	int32 ContentType = 10;          
+	string Content = 11;             
+	int32 Status = 12;    
+	int64 SendTime = 13;     
+	int64 CreateTime = 14;  
+	string Ex = 15;    
+}
+
+message GetChatLogsResp {
+    repeated ChatLog ChatLogs = 1;
     server_api_params.ResponsePagination Pagination = 2;
+    int32 ChatLogsNum = 3;
+    CommonResp CommonResp = 4;
+}
+
+
+message StatisticsReq {
+    string from = 1;
+    string to = 2;
+}
+
+message GetActiveUserReq{
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+message UserResp{
+    string NickName = 1;
+    string UserId = 2;
+    int32 MessageNum = 3;
+}
+
+message GetActiveUserResp {
+    repeated UserResp Users = 1;
+    CommonResp CommonResp = 2;
+}
+
+message GetActiveGroupReq{
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+message GroupResp {
+    string GroupName = 1;
+    string GroupId = 2;
+    int32 MessageNum = 3;
+    CommonResp CommonResp = 4;
+}
+
+message GetActiveGroupResp {
+    repeated GroupResp Groups = 1;
+    CommonResp CommonResp = 2;
+}
+
+message DateNumList {
+    string Date = 1;
+    int32 Num = 2;
+}
+
+
+message GetMessageStatisticsReq {
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+
+message GetMessageStatisticsResp {
+    int32 PrivateMessageNum = 1;
+    int32 GroupMessageNum = 2;
+    repeated DateNumList PrivateMessageNumList = 3;
+    repeated DateNumList GroupMessageNumList = 4;
+    CommonResp CommonResp = 5;
+}
+
+message GetGroupStatisticsReq {
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+
+message GetGroupStatisticsResp {
+    int32 IncreaseGroupNum = 1;
+    int32 TotalGroupNum = 2;
+    repeated DateNumList IncreaseGroupNumList = 3;
+    repeated DateNumList TotalGroupNumList = 4;
+    CommonResp CommonResp = 5;
+}
+
+message GetUserStatisticsReq {
+    StatisticsReq StatisticsReq = 1;
+    string OperationID = 2;
+}
+
+message GetUserStatisticsResp {
+    int32 IncreaseUserNum = 1;
+    int32 ActiveUserNum = 2;
+    int32 TotalUserNum = 3;
+    repeated DateNumList IncreaseUserNumList = 4;
+    repeated DateNumList ActiveUserNumList = 5;
+    repeated DateNumList TotalUserNumList = 6;
+    CommonResp CommonResp = 7;
 }
 
 service adminCMS {
@@ -48,4 +181,13 @@ service adminCMS {
     rpc AddUserRegisterAddFriendIDList(AddUserRegisterAddFriendIDListReq) returns(AddUserRegisterAddFriendIDListResp);
     rpc ReduceUserRegisterAddFriendIDList(ReduceUserRegisterAddFriendIDListReq) returns(ReduceUserRegisterAddFriendIDListResp);
     rpc GetUserRegisterAddFriendIDList(GetUserRegisterAddFriendIDListReq) returns(GetUserRegisterAddFriendIDListResp);
+
+
+    rpc GetChatLogs(GetChatLogsReq) returns(GetChatLogsResp);
+
+    rpc GetActiveUser(GetActiveUserReq) returns(GetActiveUserResp);
+    rpc GetActiveGroup(GetActiveGroupReq) returns(GetActiveGroupResp);
+    rpc GetMessageStatistics(GetMessageStatisticsReq) returns(GetMessageStatisticsResp);
+    rpc GetGroupStatistics(GetGroupStatisticsReq) returns(GetGroupStatisticsResp);
+    rpc GetUserStatistics(GetUserStatisticsReq) returns(GetUserStatisticsResp);
 }

@@ -75,7 +75,10 @@ func GetFriendIDListFromCache(userID string) ([]string, error) {
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(friendIDList)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	friendIDListStr, err := db.DB.Rc.Fetch(friendRelationCache+userID, time.Second*30*60, getFriendIDList)
 	if err != nil {
@@ -98,7 +101,10 @@ func GetBlackListFromCache(userID string) ([]string, error) {
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(blackIDList)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	blackIDListStr, err := db.DB.Rc.Fetch(blackListCache+userID, time.Second*30*60, getBlackIDList)
 	if err != nil {
@@ -120,7 +126,10 @@ func GetJoinedGroupIDListFromCache(userID string) ([]string, error) {
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(joinedGroupList)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	joinedGroupIDListStr, err := db.DB.Rc.Fetch(joinedGroupListCache+userID, time.Second*30*60, getJoinedGroupIDList)
 	if err != nil {
@@ -155,7 +164,10 @@ func GetGroupMemberIDListFromCache(groupID string) ([]string, error) {
 			}
 		}
 		bytes, err := json.Marshal(groupMemberIDList)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	groupIDListStr, err := db.DB.Rc.Fetch(groupCache+groupID, time.Second*30*60, f)
 	if err != nil {
@@ -178,7 +190,10 @@ func GetUserInfoFromCache(userID string) (*db.User, error) {
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(userInfo)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	userInfoStr, err := db.DB.Rc.Fetch(userInfoCache+userID, time.Second*30*60, getUserInfo)
 	if err != nil {
@@ -200,7 +215,10 @@ func GetGroupMemberInfoFromCache(groupID, userID string) (*db.GroupMember, error
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(groupMemberInfo)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	groupMemberInfoStr, err := db.DB.Rc.Fetch(groupMemberInfoCache+groupID+"-"+userID, time.Second*30*60, getGroupMemberInfo)
 	if err != nil {
@@ -266,7 +284,10 @@ func GetAllGroupMembersInfoFromCache(groupID string) ([]*db.GroupMember, error) 
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(groupMembers)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	groupMembersStr, err := db.DB.Rc.Fetch(groupAllMemberInfoCache+groupID, time.Second*30*60, getGroupMemberInfo)
 	if err != nil {
@@ -288,7 +309,10 @@ func GetGroupInfoFromCache(groupID string) (*db.Group, error) {
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(groupInfo)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	groupInfoStr, err := db.DB.Rc.Fetch(groupInfoCache+groupID, time.Second*30*60, getGroupInfo)
 	if err != nil {
@@ -310,7 +334,10 @@ func GetAllFriendsInfoFromCache(userID string) ([]*db.Friend, error) {
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(friendInfoList)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	allFriendInfoStr, err := db.DB.Rc.Fetch(allFriendInfoCache+userID, time.Second*30*60, getAllFriendInfo)
 	if err != nil {
@@ -332,7 +359,10 @@ func GetAllDepartmentsFromCache() ([]db.Department, error) {
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(departmentList)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	allDepartmentsStr, err := db.DB.Rc.Fetch(allDepartmentCache, time.Second*30*60, getAllDepartments)
 	if err != nil {
@@ -354,7 +384,10 @@ func GetAllDepartmentMembersFromCache() ([]db.DepartmentMember, error) {
 			return "", utils.Wrap(err, "")
 		}
 		bytes, err := json.Marshal(departmentMembers)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	allDepartmentMembersStr, err := db.DB.Rc.Fetch(allDepartmentMemberCache, time.Second*30*60, getAllDepartmentMembers)
 	if err != nil {
@@ -379,7 +412,10 @@ func GetJoinedSuperGroupListFromCache(userID string) ([]string, error) {
 			return "", errors.New("GroupIDList == 0")
 		}
 		bytes, err := json.Marshal(userToSuperGroup.GroupIDList)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	joinedSuperGroupListStr, err := db.DB.Rc.Fetch(joinedSuperGroupListCache+userID, time.Second*30*60, getJoinedSuperGroupIDList)
 	var joinedSuperGroupList []string
@@ -442,7 +478,10 @@ func GetUserConversationIDListFromCache(userID string) ([]string, error) {
 		}
 		log.NewDebug("", utils.GetSelfFuncName(), conversationIDList)
 		bytes, err := json.Marshal(conversationIDList)
-		return string(bytes), utils.Wrap(err, "")
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bytes), nil
 	}
 	conversationIDListStr, err := db.DB.Rc.Fetch(conversationIDListCache+userID, time.Second*30*60, getConversationIDList)
 	var conversationIDList []string

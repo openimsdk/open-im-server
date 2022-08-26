@@ -177,15 +177,19 @@ type User struct {
 	Email            string    `gorm:"column:email;size:64"`
 	Ex               string    `gorm:"column:ex;size:1024"`
 	CreateTime       time.Time `gorm:"column:create_time"`
-	CreateIp         string    `gorm:"column:create_ip;size:15"`
-	LastLoginTime    time.Time `gorm:"column:last_login_time"`
-	LastLoginIp      string    `gorm:"column:last_login_ip;size:15"`
-	LoginTimes       int32     `gorm:"column:login_times"`
-	LoginLimit       int32     `gorm:"column:login_limit"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 	InvitationCode   string    `gorm:"column:invitation_code"`
 	status           int32     `gorm:"column:status"`
+}
+
+type UserIpRecord struct {
+	UserID        string    `gorm:"column:user_id;primary_key;size:64"`
+	CreateIp      string    `gorm:"column:create_ip;size:15"`
+	LastLoginTime time.Time `gorm:"column:last_login_time"`
+	LastLoginIp   string    `gorm:"column:last_login_ip;size:15"`
+	LoginTimes    int32     `gorm:"column:login_times"`
+	LoginLimit    int32     `gorm:"column:login_limit"`
 }
 
 type IpLimit struct {
