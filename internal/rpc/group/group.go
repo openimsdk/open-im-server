@@ -83,7 +83,8 @@ func (s *groupServer) Run() {
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("", "RegisterEtcd failed ", err.Error())
-		return
+		panic(utils.Wrap(err, "register group module  rpc to etcd err"))
+
 	}
 	log.Info("", "RegisterEtcd ", s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
 	err = srv.Serve(listener)

@@ -76,7 +76,7 @@ func (s *userServer) Run() {
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
-		return
+		panic(utils.Wrap(err, "register user module  rpc to etcd err"))
 	}
 	err = srv.Serve(listener)
 	if err != nil {

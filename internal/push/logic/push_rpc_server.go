@@ -55,6 +55,7 @@ func (r *RPCServer) run() {
 	err = getcdv3.RegisterEtcd(r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName, 10)
 	if err != nil {
 		log.Error("", "register push module  rpc to etcd err", err.Error(), r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName)
+		panic(utils.Wrap(err, "register push module  rpc to etcd err"))
 	}
 	err = srv.Serve(listener)
 	if err != nil {

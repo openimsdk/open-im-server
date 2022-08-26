@@ -82,7 +82,7 @@ func (s *officeServer) Run() {
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
-		return
+		panic(utils.Wrap(err, "register office module  rpc to etcd err"))
 	}
 	go s.sendTagMsgRoutine()
 	err = srv.Serve(listener)

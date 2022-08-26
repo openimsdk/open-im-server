@@ -156,7 +156,8 @@ func (rpc *rpcAuth) Run() {
 	if err != nil {
 		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
 			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
-		return
+		panic(utils.Wrap(err, "register auth module  rpc to etcd err"))
+
 	}
 	log.NewInfo(operationID, "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
 	err = srv.Serve(listener)
