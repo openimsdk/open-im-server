@@ -153,20 +153,20 @@ func SetPassword(c *gin.Context) {
 
 	log.Info(params.OperationID, "end setPassword", account, params.Password)
 	// demo onboarding
-	if params.UserID == "" && config.Config.Demo.OnboardProcess {
-		select {
-		case Ch <- OnboardingProcessReq{
-			OperationID: params.OperationID,
-			UserID:      userID,
-			NickName:    params.Nickname,
-			FaceURL:     params.FaceURL,
-			PhoneNumber: params.AreaCode + params.PhoneNumber,
-			Email:       params.Email,
-		}:
-		case <-time.After(time.Second * 2):
-			log.NewWarn(params.OperationID, utils.GetSelfFuncName(), "to ch timeOut")
-		}
-	}
+	// if params.UserID == "" && config.Config.Demo.OnboardProcess {
+	// 	select {
+	// 	case Ch <- OnboardingProcessReq{
+	// 		OperationID: params.OperationID,
+	// 		UserID:      userID,
+	// 		NickName:    params.Nickname,
+	// 		FaceURL:     params.FaceURL,
+	// 		PhoneNumber: params.AreaCode + params.PhoneNumber,
+	// 		Email:       params.Email,
+	// 	}:
+	// 	case <-time.After(time.Second * 2):
+	// 		log.NewWarn(params.OperationID, utils.GetSelfFuncName(), "to ch timeOut")
+	// 	}
+	// }
 
 	select {
 	case ChImportFriend <- &pbFriend.ImportFriendReq{
