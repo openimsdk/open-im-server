@@ -483,11 +483,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 			}
 		}
-		go func() {
-			for _, v := range req.InvitedUserIDList {
-				chat.SuperGroupNotification(req.OperationID, v, v)
-			}
-		}()
+		for _, v := range req.InvitedUserIDList {
+			chat.SuperGroupNotification(req.OperationID, v, v)
+		}
 	}
 
 	log.NewInfo(req.OperationID, "InviteUserToGroup rpc return ", resp)
