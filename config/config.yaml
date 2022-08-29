@@ -17,9 +17,9 @@ mysql:
   dbMysqlDatabaseName: openIM_v2 #默认即可
   dbTableName: eMsg #默认即可
   dbMsgTableNum: 1
-  dbMaxOpenConns: 200
+  dbMaxOpenConns: 2000
   dbMaxIdleConns: 100
-  dbMaxLifeTime: 120
+  dbMaxLifeTime: 3600
 
 mongo:
   dbUri: ""#当dbUri值不为空则直接使用该值

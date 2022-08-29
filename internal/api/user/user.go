@@ -368,7 +368,7 @@ func GetSelfUserInfo(c *gin.Context) {
 		c.JSON(http.StatusOK, resp)
 	} else {
 		resp := api.GetSelfUserInfoResp{CommResp: api.CommResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}
-		log.NewInfo(req.OperationID, "GetUserInfo api return ", resp)
+		log.NewError(req.OperationID, "GetUserInfo api return ", resp)
 		c.JSON(http.StatusOK, resp)
 	}
 }

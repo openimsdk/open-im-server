@@ -69,6 +69,15 @@ func initMysqlDB() {
 		panic(err.Error())
 	}
 
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.Config.Mysql.DBMaxLifeTime))
+	sqlDB.SetMaxOpenConns(config.Config.Mysql.DBMaxOpenConns)
+	sqlDB.SetMaxIdleConns(config.Config.Mysql.DBMaxIdleConns)
+
 	fmt.Println("open db ok ", dsn)
 	db.AutoMigrate(
 		&Register{},
