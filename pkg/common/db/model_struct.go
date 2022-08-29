@@ -237,7 +237,7 @@ type ChatLog struct {
 	ContentType      int32     `gorm:"column:content_type;index:search" json:"contentType"`
 	Content          string    `gorm:"column:content;type:varchar(3000);index:search" json:"content"`
 	Status           int32     `gorm:"column:status" json:"status"`
-	SendTime         time.Time `gorm:"column:send_time;;index:search" json:"sendTime"`
+	SendTime         time.Time `gorm:"column:send_time;index:search;priority:1" json:"sendTime"`
 	CreateTime       time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex               string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }
