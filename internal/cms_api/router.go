@@ -38,7 +38,6 @@ func NewGinRouter() *gin.Engine {
 	{
 		groupRouterGroup.POST("/get_groups", group.GetGroups)
 		groupRouterGroup.POST("/get_group_members", group.GetGroupMembers)
-		groupRouterGroup.POST("/get_members_in_group", group.GetGroupMembers)
 	}
 	userRouterGroup := r2.Group("/user")
 	{
