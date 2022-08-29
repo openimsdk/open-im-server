@@ -1,17 +1,17 @@
 package cms_api_struct
 
 type UserResponse struct {
-	ProfilePhoto  string `json:"profile_photo"`
-	Nickname      string `json:"nick_name"`
-	UserId        string `json:"user_id"`
-	CreateTime    string `json:"create_time,omitempty"`
-	CreateIp      string `json:"create_ip,omitempty"`
-	LastLoginTime string `json:"last_login_time,omitempty"`
-	LastLoginIp   string `json:"last_login_ip,omitempty"`
-	LoginTimes    int32  `json:"login_times"`
-	LoginLimit    int32  `json:"login_limit"`
-	IsBlock       bool   `json:"is_block"`
-	PhoneNumber   string `json:"phone_number"`
+	FaceURL       string `json:"faceURL"`
+	Nickname      string `json:"nickName"`
+	UserID        string `json:"userID"`
+	CreateTime    string `json:"createTime,omitempty"`
+	CreateIp      string `json:"createIp,omitempty"`
+	LastLoginTime string `json:"lastLoginTime,omitempty"`
+	LastLoginIp   string `json:"lastLoginIP,omitempty"`
+	LoginTimes    int32  `json:"loginTimes"`
+	LoginLimit    int32  `json:"loginLimit"`
+	IsBlock       bool   `json:"isBlock"`
+	PhoneNumber   string `json:"phoneNumber"`
 	Email         string `json:"email"`
 	Birth         string `json:"birth"`
 	Gender        int    `json:"gender"`

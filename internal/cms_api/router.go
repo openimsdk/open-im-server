@@ -54,7 +54,6 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.POST("/unblock_user", user.UnblockUser)
 		userRouterGroup.POST("/block_user", user.BlockUser)
 		userRouterGroup.GET("/get_block_users", user.GetBlockUsers)
-		userRouterGroup.GET("/get_block_user", user.GetBlockUserById)
 	}
 	messageCMSRouterGroup := r2.Group("/message")
 	{

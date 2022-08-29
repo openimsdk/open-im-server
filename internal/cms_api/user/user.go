@@ -143,15 +143,13 @@ func GetBlockUsers(c *gin.Context) {
 	for _, v := range respPb.BlockUsers {
 		resp.BlockUsers = append(resp.BlockUsers, cms_api_struct.BlockUser{
 			UserResponse: cms_api_struct.UserResponse{
-				UserId:       v.User.UserId,
-				ProfilePhoto: v.User.ProfilePhoto,
-				Nickname:     v.User.Nickname,
-				IsBlock:      v.User.IsBlock,
-				Birth:        v.User.Birth,
-				PhoneNumber:  v.User.PhoneNumber,
-				Email:        v.User.Email,
-				Gender:       int(v.User.Gender),
-				CreateTime:   v.User.CreateTime,
+				UserID:      v.UserInfo.UserID,
+				FaceURL:     v.UserInfo.FaceURL,
+				Nickname:    v.UserInfo.Nickname,
+				PhoneNumber: v.UserInfo.PhoneNumber,
+				Email:       v.UserInfo.Email,
+				Gender:      int(v.UserInfo.Gender),
+				// CreateTime:   v.UserInfo.CreateTime,
 			},
 			BeginDisableTime: v.BeginDisableTime,
 			EndDisableTime:   v.EndDisableTime,
@@ -161,40 +159,5 @@ func GetBlockUsers(c *gin.Context) {
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	resp.UserNums = respPb.UserNums
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", resp)
-	openIMHttp.RespHttp200(c, constant.OK, resp)
-}
-
-func GetBlockUserById(c *gin.Context) {
-	var (
-		req   cms_api_struct.GetBlockUserRequest
-		resp  cms_api_struct.GetBlockUserResponse
-		reqPb pb.GetBlockUserByIdReq
-	)
-	if err := c.ShouldBindQuery(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
-		return
-	}
-	reqPb.OperationID = utils.OperationIDGenerator()
-	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	reqPb.UserId = req.UserId
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, reqPb.OperationID)
-	if etcdConn == nil {
-		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
-		log.NewError(reqPb.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
-		return
-	}
-	client := pb.NewUserClient(etcdConn)
-	respPb, err := client.GetBlockUserById(context.Background(), &reqPb)
-	if err != nil {
-		log.NewError(reqPb.OperationID, "GetBlockUserById rpc failed ", err.Error())
-		openIMHttp.RespHttp200(c, err, nil)
-		return
-	}
-	resp.EndDisableTime = respPb.BlockUser.EndDisableTime
-	resp.BeginDisableTime = respPb.BlockUser.BeginDisableTime
-	utils.CopyStructFields(&resp, respPb.BlockUser.User)
-	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	openIMHttp.RespHttp200(c, constant.OK, resp)
 }
