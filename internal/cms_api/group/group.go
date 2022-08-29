@@ -38,6 +38,8 @@ func GetGroups(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
+	reqPb.GroupID = req.GroupID
+	reqPb.GroupName = req.GroupName
 	client := pbGroup.NewGroupClient(etcdConn)
 	respPb, err := client.GetGroups(context.Background(), &reqPb)
 	if err != nil {
@@ -55,7 +57,7 @@ func GetGroups(c *gin.Context) {
 	resp.GroupNums = int(respPb.GroupNum)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
-	log.NewInfo("", utils.GetSelfFuncName(), "resp: ", resp)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	c.JSON(http.StatusOK, gin.H{"errCode": respPb.CommonResp.ErrCode, "errMsg": respPb.CommonResp.ErrMsg, "data": resp})
 }
 

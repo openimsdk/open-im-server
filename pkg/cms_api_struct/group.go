@@ -25,6 +25,8 @@ type GroupResponse struct {
 type GetGroupsRequest struct {
 	RequestPagination
 	OperationID string `json:"operationID" binding:"required"`
+	GroupID     string `json:"groupID"`
+	GroupName   string `json:"groupName"`
 }
 
 type GetGroupsResponse struct {
@@ -36,7 +38,7 @@ type GetGroupsResponse struct {
 type GetGroupMembersRequest struct {
 	GroupID     string `form:"groupID" binding:"required"`
 	UserName    string `form:"userName"`
-	OperationID string `json:"operationID"`
+	OperationID string `json:"operationID" binding:"required"`
 	RequestPagination
 }
 
