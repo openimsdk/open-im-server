@@ -879,6 +879,7 @@ func (s *groupServer) GetGroup(_ context.Context, req *pbGroup.GetGroupReq) (*pb
 func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*pbGroup.GetGroupsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetGroups ", req.String())
 	resp := &pbGroup.GetGroupsResp{
+		CommonResp: &pbGroup.CommonResp{},
 		CMSGroups:  []*pbGroup.CMSGroup{},
 		Pagination: &open_im_sdk.RequestPagination{},
 	}
