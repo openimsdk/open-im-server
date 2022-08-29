@@ -71,14 +71,15 @@ message ChatLog {
 	int32 SenderPlatformID = 5;
 	string SenderNickname = 6;
 	string SenderFaceURL = 7;  
-	int32 SessionType = 8;           
-	int32 MsgFrom = 9;      
-	int32 ContentType = 10;          
-	string Content = 11;             
-	int32 Status = 12;    
-	int64 SendTime = 13;     
-	int64 CreateTime = 14;  
-	string Ex = 15;    
+    string GroupName = 8;
+	int32 SessionType = 9;           
+	int32 MsgFrom = 10;      
+	int32 ContentType = 11;          
+	string Content = 12;             
+	int32 Status = 13;    
+	int64 SendTime = 14;     
+	int64 CreateTime = 15;  
+	string Ex = 16;    
 }
 
 message GetChatLogsResp {

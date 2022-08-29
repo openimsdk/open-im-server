@@ -1318,3 +1318,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 	return
 }
+
+func GetGroups(c *gin.Context) {
+	
+}

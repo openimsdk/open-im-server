@@ -463,13 +463,11 @@ func GetUsers(c *gin.Context) {
 		resp  api.GetUsersResp
 		reqPb rpc.GetUsersReq
 	)
-
 	if err := c.Bind(&req); err != nil {
 		log.NewError(req.OperationID, "Bind failed ", err.Error(), req)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-
 	var ok bool
 	var errInfo string
 	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
@@ -479,9 +477,7 @@ func GetUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
-
 	reqPb.OperationID = req.OperationID
 	reqPb.UserID = req.UserID
 	reqPb.UserName = req.UserName
@@ -499,7 +495,6 @@ func GetUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
-
 	utils.CopyStructFields(&resp.Data.UserList, respPb.UserList)
 	resp.CommResp.ErrCode = respPb.CommonResp.ErrCode
 	resp.CommResp.ErrMsg = respPb.CommonResp.ErrMsg

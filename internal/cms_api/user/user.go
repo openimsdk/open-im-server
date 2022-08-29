@@ -54,7 +54,6 @@ func BlockUser(c *gin.Context) {
 		reqPb pb.BlockUserReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		fmt.Println(err)
 		log.NewError("0", "BindJSON failed ", err.Error())
 		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
 		return

@@ -16,7 +16,7 @@ type GetChatLogsReq struct {
 }
 
 type GetChatLogsResp struct {
-	ChatLogs    []*pbCommon.MsgData `json:"chat_logs"`
-	ChatLogsNum int                 `json:"log_nums"`
+	ChatLogs    []*pbCommon.MsgData `json:"chatLogs"`
+	ChatLogsNum int                 `json:"logNums"`
 	ResponsePagination
 }
