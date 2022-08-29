@@ -496,7 +496,15 @@ func GetUsers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
-	utils.CopyStructFields(&resp.Data.UserList, respPb.UserList)
+	for _, v := range respPb.UserList {
+		resp.Data.UserList = append(resp.Data.UserList, &struct {
+			open_im_sdk.UserInfo
+			IsBlock bool "json:\"isBlock\""
+		}{
+			IsBlock:  v.IsBlock,
+			UserInfo: *v.User,
+		})
+	}
 	resp.CommResp.ErrCode = respPb.CommonResp.ErrCode
 	resp.CommResp.ErrMsg = respPb.CommonResp.ErrMsg
 	resp.Data.TotalNum = respPb.TotalNums
