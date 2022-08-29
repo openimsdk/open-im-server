@@ -750,6 +750,7 @@ demo:
   testDepartMentID: 001
   imAPIURL: http://127.0.0.1:10002
   onboardProcess: false # 是否开启注册流程
+  createOrganizationUserAndJoinDepartment: false
   joinDepartmentIDList: [] # 用户注册进来默认加的部门ID列表 不填就随机
   joinDepartmentGroups: false # 注册是否加部门群
   oaNotification: false # 注册是否发送OA通知

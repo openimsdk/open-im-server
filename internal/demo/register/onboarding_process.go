@@ -49,9 +49,7 @@ func OnboardingProcessRoutine() {
 
 func onboardingProcess(operationID, userID, userName, faceURL, phoneNumber, email string) {
 	log.NewInfo(operationID, utils.GetSelfFuncName(), userName, userID, faceURL)
-	if err := createOrganizationUser(operationID, userID, userName, phoneNumber, email); err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), "createOrganizationUser failed", err.Error())
-	}
+
 	var joinDepartmentIDList []string
 	if len(config.Config.Demo.JoinDepartmentIDList) == 0 {
 		departmentID, err := imdb.GetRandomDepartmentID()
@@ -63,10 +61,14 @@ func onboardingProcess(operationID, userID, userName, faceURL, phoneNumber, emai
 	} else {
 		joinDepartmentIDList = config.Config.Demo.JoinDepartmentIDList
 	}
-
-	for _, departmentID := range joinDepartmentIDList {
-		if err := joinTestDepartment(operationID, userID, departmentID); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
+	if config.Config.Demo.CreateOrganizationUserAndJoinDepartment && len(joinDepartmentIDList) > 0 {
+		if err := createOrganizationUser(operationID, userID, userName, phoneNumber, email); err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "createOrganizationUser failed", err.Error())
+		}
+		for _, departmentID := range joinDepartmentIDList {
+			if err := joinTestDepartment(operationID, userID, departmentID); err != nil {
+				log.NewError(operationID, utils.GetSelfFuncName(), "joinTestDepartment failed", err.Error())
+			}
 		}
 	}
 
