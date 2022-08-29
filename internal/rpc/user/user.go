@@ -13,7 +13,6 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbFriend "Open_IM/pkg/proto/friend"
-	pbOrganization "Open_IM/pkg/proto/organization"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
@@ -456,35 +455,10 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	chat.UserInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID, req.OpUserID)
 	log.Info(req.OperationID, "UserInfoUpdatedNotification ", req.UserInfo.UserID, req.OpUserID)
 	if req.UserInfo.FaceURL != "" {
-		go s.SyncJoinedGroupMemberFaceURL(req.UserInfo.UserID, req.UserInfo.FaceURL, req.OperationID, req.OpUserID)
+		s.SyncJoinedGroupMemberFaceURL(req.UserInfo.UserID, req.UserInfo.FaceURL, req.OperationID, req.OpUserID)
 	}
 	if req.UserInfo.Nickname != "" {
-		go s.SyncJoinedGroupMemberNickname(req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, req.OperationID, req.OpUserID)
-	}
-	etcdConn = getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, req.OperationID)
-	clientOrg := pbOrganization.NewOrganizationClient(etcdConn)
-	out, err := clientOrg.UpdateOrganizationUser(context.Background(), &pbOrganization.UpdateOrganizationUserReq{
-		OrganizationUser: &sdkws.OrganizationUser{
-			UserID:      req.UserInfo.UserID,
-			Nickname:    req.UserInfo.Nickname,
-			EnglishName: req.UserInfo.Nickname,
-			FaceURL:     req.UserInfo.FaceURL,
-			Gender:      req.UserInfo.Gender,
-			Mobile:      req.UserInfo.PhoneNumber,
-			Telephone:   req.UserInfo.PhoneNumber,
-			Birth:       req.UserInfo.Birth,
-			Email:       req.UserInfo.Email,
-			Ex:          req.UserInfo.Ex,
-		},
-		OperationID: req.OperationID,
-		OpUserID:    req.OpUserID,
-	})
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateOrganizationUser failed", err.Error())
-	} else {
-		if out.ErrCode != 0 {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "grpc resp: ", out)
-		}
+		s.SyncJoinedGroupMemberNickname(req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, req.OperationID, req.OpUserID)
 	}
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
