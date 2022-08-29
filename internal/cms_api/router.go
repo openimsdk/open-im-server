@@ -28,25 +28,17 @@ func NewGinRouter() *gin.Engine {
 	r2.Use(middleware.JWTAuth())
 	statisticsRouterGroup := r2.Group("/statistics")
 	{
-		statisticsRouterGroup.GET("/get_messages_statistics", statistics.GetMessagesStatistics)
-		statisticsRouterGroup.GET("/get_user_statistics", statistics.GetUserStatistics)
-		statisticsRouterGroup.GET("/get_group_statistics", statistics.GetGroupStatistics)
-		statisticsRouterGroup.GET("/get_active_user", statistics.GetActiveUser)
-		statisticsRouterGroup.GET("/get_active_group", statistics.GetActiveGroup)
+		statisticsRouterGroup.POST("/get_messages_statistics", statistics.GetMessagesStatistics)
+		statisticsRouterGroup.POST("/get_user_statistics", statistics.GetUserStatistics)
+		statisticsRouterGroup.POST("/get_group_statistics", statistics.GetGroupStatistics)
+		statisticsRouterGroup.POST("/get_active_user", statistics.GetActiveUser)
+		statisticsRouterGroup.POST("/get_active_group", statistics.GetActiveGroup)
 	}
 	groupRouterGroup := r2.Group("/group")
 	{
-		groupRouterGroup.GET("/get_group_by_id", group.GetGroupByID)
-		groupRouterGroup.GET("/get_groups", group.GetGroups)
-		groupRouterGroup.GET("/get_group_by_name", group.GetGroupByName)
-		groupRouterGroup.GET("/get_group_members", group.GetGroupMembers)
-		// groupRouterGroup.POST("/create_group", group.CreateGroup)
-		// groupRouterGroup.POST("/add_members", group.AddGroupMembers)
-		// groupRouterGroup.POST("/remove_members", group.RemoveGroupMembers)
-		// groupRouterGroup.POST("/get_members_in_group", group.GetGroupMembers)
-		// groupRouterGroup.POST("/set_group_master", group.SetGroupOwner)
-		// groupRouterGroup.POST("/set_group_ordinary_user", group.SetGroupOrdinaryUsers)
-		// groupRouterGroup.POST("/alter_group_info", group.AlterGroupInfo)
+		groupRouterGroup.POST("/get_groups", group.GetGroups)
+		groupRouterGroup.POST("/get_group_members", group.GetGroupMembers)
+		groupRouterGroup.POST("/get_members_in_group", group.GetGroupMembers)
 	}
 	userRouterGroup := r2.Group("/user")
 	{

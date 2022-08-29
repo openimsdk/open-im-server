@@ -140,7 +140,7 @@ func (s *adminCMSServer) ReduceUserRegisterAddFriendIDList(_ context.Context, re
 		}
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
-	return resp, nil	
+	return resp, nil
 }
 
 func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.GetUserRegisterAddFriendIDListReq) (*pbAdminCMS.GetUserRegisterAddFriendIDListResp, error) {
@@ -223,7 +223,7 @@ func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatL
 			}
 			pbChatLog.SenderNickname = recvUser.Nickname
 
-		case constant.GroupChatType:
+		case constant.GroupChatType, constant.SuperGroupChatType:
 			group, err := imdb.GetGroupInfoByGroupID(chatLog.RecvID)
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupById failed")

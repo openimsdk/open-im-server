@@ -3,7 +3,6 @@ package messageCMS
 import (
 	"Open_IM/pkg/cms_api_struct"
 	"Open_IM/pkg/common/config"
-	openIMHttp "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAdminCMS "Open_IM/pkg/proto/admin_cms"
@@ -12,8 +11,6 @@ import (
 	"context"
 	"net/http"
 	"strings"
-
-	"Open_IM/pkg/common/constant"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,9 +21,9 @@ func GetChatLogs(c *gin.Context) {
 		resp  cms_api_struct.GetChatLogsResp
 		reqPb pbAdminCMS.GetChatLogsReq
 	)
-	if err := c.ShouldBindQuery(&req); err != nil {
+	if err := c.Bind(&req); err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "ShouldBindQuery failed ", err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrArgs, resp)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	reqPb.Pagination = &pbCommon.RequestPagination{
@@ -46,7 +43,7 @@ func GetChatLogs(c *gin.Context) {
 	respPb, err := client.GetChatLogs(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetChatLogs rpc failed", err.Error())
-		openIMHttp.RespHttp200(c, err, resp)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	for _, v := range respPb.ChatLogs {
@@ -58,5 +55,5 @@ func GetChatLogs(c *gin.Context) {
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	resp.ChatLogsNum = int(respPb.ChatLogsNum)
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "resp", resp)
-	openIMHttp.RespHttp200(c, constant.OK, resp)
+	c.JSON(http.StatusOK, gin.H{"errCode": respPb.CommonResp.ErrCode, "errMsg": respPb.CommonResp.ErrMsg, "data": resp})
 }

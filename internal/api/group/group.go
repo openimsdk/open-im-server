@@ -11,6 +11,7 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
 
@@ -1317,8 +1318,4 @@ func GetGroupAbstractInfo(c *gin.Context) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
 	return
-}
-
-func GetGroups(c *gin.Context) {
-	
 }

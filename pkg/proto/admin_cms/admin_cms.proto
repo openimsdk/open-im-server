@@ -65,21 +65,23 @@ message GetChatLogsReq {
 
 message ChatLog {
     string ServerMsgID = 1;
-	string stringClientMsgID = 2;
+	string ClientMsgID = 2;
 	string SendID = 3;
-	string RecvID = 4;       
-	int32 SenderPlatformID = 5;
-	string SenderNickname = 6;
-	string SenderFaceURL = 7;  
-    string GroupName = 8;
-	int32 SessionType = 9;           
-	int32 MsgFrom = 10;      
-	int32 ContentType = 11;          
-	string Content = 12;             
-	int32 Status = 13;    
-	int64 SendTime = 14;     
-	int64 CreateTime = 15;  
-	string Ex = 16;    
+	string RecvID = 4;  
+    string groupID = 5;    
+    string recvNickname = 6; 
+	int32 SenderPlatformID = 7;
+	string SenderNickname = 8;
+	string SenderFaceURL = 9;  
+    string GroupName = 10;
+	int32 SessionType = 11;           
+	int32 MsgFrom = 12;      
+	int32 ContentType = 13;          
+	string Content = 14;             
+	int32 Status = 15;    
+	int64 SendTime = 16;     
+	int64 CreateTime = 17;  
+	string Ex = 18;    
 }
 
 message GetChatLogsResp {

@@ -21,7 +21,7 @@ func GetMessagesStatistics(c *gin.Context) {
 		reqPb admin.GetMessageStatisticsReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
-	if err := c.Bind(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
@@ -75,7 +75,7 @@ func GetUserStatistics(c *gin.Context) {
 		reqPb admin.GetUserStatisticsReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
-	if err := c.Bind(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
@@ -138,7 +138,7 @@ func GetGroupStatistics(c *gin.Context) {
 		reqPb admin.GetGroupStatisticsReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
-	if err := c.Bind(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		log.NewError(req.OperationID, "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
@@ -195,7 +195,7 @@ func GetActiveUser(c *gin.Context) {
 		reqPb admin.GetActiveUserReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
-	if err := c.Bind(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		log.NewError(req.OperationID, "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
@@ -229,8 +229,8 @@ func GetActiveGroup(c *gin.Context) {
 		reqPb admin.GetActiveGroupReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
-	if err := c.Bind(&req); err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}

@@ -1,6 +1,7 @@
 package im_mysql_model
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
@@ -15,8 +16,10 @@ func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog,
 	if chatLog.SessionType != 0 {
 		db = db.Where("session_type = ?", chatLog.SessionType)
 	}
-	if chatLog.ContentType != 0 {
+	if chatLog.ContentType == 1 {
 		db = db.Where("content_type = ?", chatLog.ContentType)
+	} else if chatLog.ContentType == 2 {
+		db = db.Where("content_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
 	}
 	if chatLog.SendID != "" {
 		db = db.Where("send_id = ?", chatLog.SendID)

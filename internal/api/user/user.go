@@ -463,7 +463,7 @@ func GetUsers(c *gin.Context) {
 		resp  api.GetUsersResp
 		reqPb rpc.GetUsersReq
 	)
-	if err := c.Bind(&req); err != nil {
+	if err := c.BindJSON(&req); err != nil {
 		log.NewError(req.OperationID, "Bind failed ", err.Error(), req)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
