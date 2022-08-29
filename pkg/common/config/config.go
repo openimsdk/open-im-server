@@ -501,13 +501,14 @@ type config struct {
 			SmtpAddr                string `yaml:"smtpAddr"`
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
-		TestDepartMentID     string   `yaml:"testDepartMentID"`
-		ImAPIURL             string   `yaml:"imAPIURL"`
-		NeedInvitationCode   bool     `yaml:"needInvitationCode"`
-		OnboardProcess       bool     `yaml:"onboardProcess"`
-		JoinDepartmentIDList []string `yaml:"joinDepartmentIDList"`
-		JoinDepartmentGroups bool     `yaml:"joinDepartmentGroups"`
-		OaNotification       bool     `yaml:"oaNotification"`
+		TestDepartMentID                        string   `yaml:"testDepartMentID"`
+		ImAPIURL                                string   `yaml:"imAPIURL"`
+		NeedInvitationCode                      bool     `yaml:"needInvitationCode"`
+		OnboardProcess                          bool     `yaml:"onboardProcess"`
+		JoinDepartmentIDList                    []string `yaml:"joinDepartmentIDList"`
+		JoinDepartmentGroups                    bool     `yaml:"joinDepartmentGroups"`
+		OaNotification                          bool     `yaml:"oaNotification"`
+		CreateOrganizationUserAndJoinDepartment bool     `json:"createOrganizationUserAndJoinDepartment"`
 	}
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
