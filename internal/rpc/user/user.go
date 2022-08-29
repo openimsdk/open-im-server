@@ -200,7 +200,7 @@ func (s *userServer) GetConversation(ctx context.Context, req *pbUser.GetConvers
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.GetConversationResp{Conversation: &pbConversation.Conversation{}}
 	conversation, err := rocksCache.GetConversationFromCache(req.OwnerUserID, req.ConversationID)
-	log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "conversation", conversation)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversation error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -218,7 +218,7 @@ func (s *userServer) GetConversations(ctx context.Context, req *pbUser.GetConver
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
 	conversations, err := rocksCache.GetConversationsFromCache(req.OwnerUserID, req.ConversationIDs)
-	log.NewDebug("", utils.GetSelfFuncName(), "conversations", conversations)
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "conversations", conversations)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversations error", err.Error())
 		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
