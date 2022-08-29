@@ -29,6 +29,7 @@ func copyCallbackCommonReqStruct(msg *pbChat.SendMsgReq) cbApi.CommonCallbackReq
 		SenderFaceURL:    msg.MsgData.SenderFaceURL,
 		Content:          callback.GetContent(msg.MsgData),
 		Seq:              msg.MsgData.Seq,
+		Ex:               msg.MsgData.Ex,
 	}
 	return req
 }
@@ -137,11 +138,11 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp 
 }
 
 func callbackWordFilter(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
+	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	callbackResp := cbApi.CommonCallbackResp{OperationID: msg.OperationID}
 	if !config.Config.Callback.CallbackWordFilter.Enable || msg.MsgData.ContentType != constant.Text {
 		return callbackResp
 	}
-	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), msg)
 	commonCallbackReq := copyCallbackCommonReqStruct(msg)
 	commonCallbackReq.CallbackCommand = constant.CallbackWordFilterCommand
 	req := cbApi.CallbackWordFilterReq{

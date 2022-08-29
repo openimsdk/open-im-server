@@ -45,7 +45,7 @@ type Conversation struct {
 	IsPrivateChat         bool   `json:"isPrivateChat"`
 	GroupAtType           int32  `json:"groupAtType"`
 	IsNotInGroup          bool   `json:"isNotInGroup"`
-	UpdateUnreadCountTime int64  ` json:"updateUnreadCountTime"`
+	UpdateUnreadCountTime int64  `json:"updateUnreadCountTime"`
 	AttachedInfo          string `json:"attachedInfo"`
 	Ex                    string `json:"ex"`
 }

@@ -418,9 +418,12 @@ func GetJoinedSuperGroupListFromCache(userID string) ([]string, error) {
 		return string(bytes), nil
 	}
 	joinedSuperGroupListStr, err := db.DB.Rc.Fetch(joinedSuperGroupListCache+userID, time.Second*30*60, getJoinedSuperGroupIDList)
+	if err != nil {
+		return nil, err
+	}
 	var joinedSuperGroupList []string
 	err = json.Unmarshal([]byte(joinedSuperGroupListStr), &joinedSuperGroupList)
-	return joinedSuperGroupList, err
+	return joinedSuperGroupList, utils.Wrap(err, "")
 }
 
 func DelJoinedSuperGroupIDListFromCache(userID string) error {
@@ -493,7 +496,7 @@ func GetUserConversationIDListFromCache(userID string) ([]string, error) {
 }
 
 func DelUserConversationIDListFromCache(userID string) error {
-	return db.DB.Rc.TagAsDeleted(conversationIDListCache + userID)
+	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationIDListCache+userID), "DelUserConversationIDListFromCache err")
 }
 
 func GetConversationFromCache(ownerUserID, conversationID string) (*db.Conversation, error) {
@@ -550,5 +553,5 @@ func GetUserAllConversationList(ownerUserID string) ([]db.Conversation, error) {
 }
 
 func DelConversationFromCache(ownerUserID, conversationID string) error {
-	return db.DB.Rc.TagAsDeleted(conversationCache + ownerUserID + ":" + conversationID)
+	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationCache+ownerUserID+":"+conversationID), "DelConversationFromCache err")
 }

@@ -84,6 +84,10 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	for _, v := range utils.DifferenceString(haveUserID, req.UserIDList) {
 		conversation.OwnerUserID = v
 		conversation.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
+		err = rocksCache.DelUserConversationIDListFromCache(v)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), v, req.Conversation.ConversationID, err.Error())
+		}
 		err := imdb.SetOneConversation(conversation)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
@@ -194,7 +198,7 @@ func (rpc *rpcConversation) Run() {
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error(),
 			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
-		return
+		panic(utils.Wrap(err, "register conversation module  rpc to etcd err"))
 	}
 	log.NewInfo("0", "RegisterConversationServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
 	err = srv.Serve(listener)

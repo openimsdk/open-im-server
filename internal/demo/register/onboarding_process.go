@@ -16,10 +16,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	"math/rand"
 	"strings"
 	"time"
+
+	"github.com/golang/protobuf/proto"
 )
 
 type OnboardingProcessReq struct {
@@ -75,6 +76,7 @@ func onboardingProcess(operationID, userID, userName, faceURL, phoneNumber, emai
 			if err != nil {
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 			}
+			log.Debug(operationID, utils.GetSelfFuncName(), "getjoinGroupIDListdepartmentID", groupIDList)
 			joinGroups(operationID, userID, userName, faceURL, groupIDList)
 			log.NewInfo(operationID, utils.GetSelfFuncName(), "fineshed")
 		}
