@@ -1337,6 +1337,7 @@ func (s *groupServer) TransferGroupOwner(_ context.Context, req *pbGroup.Transfe
 func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*pbGroup.GetGroupsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetGroups ", req.String())
 	resp := &pbGroup.GetGroupsResp{
+		CommonResp: &pbGroup.CommonResp{},
 		CMSGroups:  []*pbGroup.CMSGroup{},
 		Pagination: &open_im_sdk.ResponsePagination{},
 	}
