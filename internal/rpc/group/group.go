@@ -7,7 +7,6 @@ import (
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
-	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	cp "Open_IM/pkg/common/utils"
@@ -122,7 +121,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	err := imdb.InsertIntoGroup(groupInfo)
 	if err != nil {
 		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupInfo)
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
+		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 	}
 	var okUserIDList []string
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
@@ -132,7 +131,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		us, err = imdb.GetUserByUserID(req.OwnerUserID)
 		if err != nil {
 			log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OwnerUserID)
-			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
+			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 		}
 		//to group member
 		groupMember = db.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID, JoinSource: constant.JoinByInvitation, InviterUserID: req.OpUserID}
@@ -140,7 +139,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		err = imdb.InsertIntoGroupMember(groupMember)
 		if err != nil {
 			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
-			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
+			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
 		}
 	}
 	if req.GroupInfo.GroupType != constant.SuperGroup {
