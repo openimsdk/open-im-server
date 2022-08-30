@@ -171,7 +171,7 @@ func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *
 
 func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatLogsReq) (*pbAdminCMS.GetChatLogsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetChatLogs", req.String())
-	resp := &pbAdminCMS.GetChatLogsResp{CommonResp: &pbAdminCMS.CommonResp{}}
+	resp := &pbAdminCMS.GetChatLogsResp{CommonResp: &pbAdminCMS.CommonResp{}, Pagination: &server_api_params.ResponsePagination{}}
 	time, err := utils.TimeStringToTime(req.SendTime)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "time string parse error", err.Error())
