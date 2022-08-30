@@ -60,9 +60,10 @@ func GetGroupMemberUserIDList(groupID string, operationID string) ([]string, err
 	defer CacheGroupMtx.Unlock()
 	groupInLocalCache, ok := CacheGroupMemberUserIDList[groupID]
 	if ok && groupInLocalCache.MemberListHash == groupHashRemote {
+		log.Debug(operationID, "in local cache ", groupID)
 		return groupInLocalCache.UserIDList, nil
 	}
-
+	log.Debug(operationID, "not in local cache or hash changed", groupID, " remote hash ", groupHashRemote, " in cache ", ok)
 	memberUserIDListRemote, err := GetGroupMemberUserIDListFromRemote(groupID, operationID)
 	if err != nil {
 		log.Error(operationID, "GetGroupMemberUserIDListFromRemote failed ", err.Error(), groupID)
@@ -234,24 +235,30 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "callback userIDList Resp", pushToUserIDList)
 	}
 	if len(pushToUserIDList) == 0 {
-		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
-		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
-		if etcdConn == nil {
-			errMsg := pushMsg.OperationID + "getcdv3.GetDefaultConn == nil"
-			log.NewError(pushMsg.OperationID, errMsg)
-			return
-		}
-		client := pbCache.NewCacheClient(etcdConn)
-		cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+		userIDList, err := GetGroupMemberUserIDList(pushMsg.MsgData.GroupID, pushMsg.OperationID)
 		if err != nil {
-			log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+			log.Error(pushMsg.OperationID, "GetGroupMemberUserIDList failed ", err.Error(), pushMsg.MsgData.GroupID)
 			return
 		}
-		if cacheResp.CommonResp.ErrCode != 0 {
-			log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
-			return
-		}
-		pushToUserIDList = cacheResp.UserIDList
+		pushToUserIDList = userIDList
+		//getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
+		//etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
+		//if etcdConn == nil {
+		//	errMsg := pushMsg.OperationID + "getcdv3.GetDefaultConn == nil"
+		//	log.NewError(pushMsg.OperationID, errMsg)
+		//	return
+		//}
+		//client := pbCache.NewCacheClient(etcdConn)
+		//cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+		//if err != nil {
+		//	log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+		//	return
+		//}
+		//if cacheResp.CommonResp.ErrCode != 0 {
+		//	log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
+		//	return
+		//}
+		//pushToUserIDList = cacheResp.UserIDList
 	}
 
 	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
