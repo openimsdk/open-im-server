@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: demo
-        image: openim/demo:v2.2.0
+        image: openim/demo:v2.3.0release
         imagePullPolicy: Always
         ports:
         - containerPort: 10004
