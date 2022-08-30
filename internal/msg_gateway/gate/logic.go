@@ -153,6 +153,7 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 		ws.pullMsgBySeqListResp(conn, m, nReply)
 	}
 }
+
 func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullMessageBySeqListResp) {
 	log.NewInfo(m.OperationID, "pullMsgBySeqListResp come  here ", pb.String())
 	c, _ := proto.Marshal(pb)
@@ -166,10 +167,9 @@ func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullM
 	}
 	log.NewInfo(m.OperationID, "pullMsgBySeqListResp all data  is ", mReply.ReqIdentifier, mReply.MsgIncr, mReply.ErrCode, mReply.ErrMsg,
 		len(mReply.Data))
-
 	ws.sendMsg(conn, mReply)
-
 }
+
 func (ws *WServer) sendMsgReq(conn *UserConn, m *Req) {
 	sendMsgAllCountLock.Lock()
 	sendMsgAllCount++

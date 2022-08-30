@@ -16,22 +16,25 @@ import (
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/statistics"
 	"fmt"
+	"sync"
 )
 
 var (
-	rpcServer     RPCServer
-	pushCh        PushConsumerHandler
-	pushTerminal  []int32
-	producer      *kafka.Producer
-	offlinePusher pusher.OfflinePusher
-	successCount  uint64
+	rpcServer                  RPCServer
+	pushCh                     PushConsumerHandler
+	pushTerminal               []int32
+	producer                   *kafka.Producer
+	offlinePusher              pusher.OfflinePusher
+	successCount               uint64
+	CacheGroupMemberUserIDList map[string]*GroupMemberUserIDListHash
+	CacheGroupMtx              sync.RWMutex
 )
 
 func Init(rpcPort int) {
-
 	rpcServer.Init(rpcPort)
 	pushCh.Init()
 	pushTerminal = []int32{constant.IOSPlatformID, constant.AndroidPlatformID}
+	CacheGroupMemberUserIDList = make(map[string]*GroupMemberUserIDListHash, 0)
 }
 func init() {
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
