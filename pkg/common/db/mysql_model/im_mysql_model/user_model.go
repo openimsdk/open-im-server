@@ -254,7 +254,7 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 
 func GetUserByName(userName string, showNumber, pageNumber int32) ([]db.User, error) {
 	var users []db.User
-	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like '%%%s%%' ", userName).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like %?%", userName).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
 	return users, err
 }
 

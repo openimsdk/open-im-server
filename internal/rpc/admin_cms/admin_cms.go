@@ -199,6 +199,8 @@ func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatL
 	chatLogs, err := imdb.GetChatLog(chatLog, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLog", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	for _, chatLog := range chatLogs {
@@ -249,12 +251,16 @@ func (s *adminCMSServer) GetActiveGroup(_ context.Context, req *pbAdminCMS.GetAc
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "time: ", fromTime, toTime)
 	activeGroups, err := imdb.GetActiveGroups(fromTime, toTime, 12)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveGroups failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	for _, activeGroup := range activeGroups {
@@ -271,16 +277,20 @@ func (s *adminCMSServer) GetActiveGroup(_ context.Context, req *pbAdminCMS.GetAc
 
 func (s *adminCMSServer) GetActiveUser(_ context.Context, req *pbAdminCMS.GetActiveUserReq) (*pbAdminCMS.GetActiveUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
-	resp := &pbAdminCMS.GetActiveUserResp{}
+	resp := &pbAdminCMS.GetActiveUserResp{CommonResp: &pbAdminCMS.CommonResp{}}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "time: ", fromTime, toTime)
 	activeUsers, err := imdb.GetActiveUsers(fromTime, toTime, 12)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveUsers failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	for _, activeUser := range activeUsers {
@@ -384,20 +394,27 @@ func getFirstDateOfNextNMonth(currentTime time.Time, n int) time.Time {
 
 func (s *adminCMSServer) GetGroupStatistics(_ context.Context, req *pbAdminCMS.GetGroupStatisticsReq) (*pbAdminCMS.GetGroupStatisticsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
-	resp := &pbAdminCMS.GetGroupStatisticsResp{}
+	resp := &pbAdminCMS.GetGroupStatisticsResp{CommonResp: &pbAdminCMS.CommonResp{}}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupStatistics failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	increaseGroupNum, err := imdb.GetIncreaseGroupNum(fromTime, toTime.Add(time.Hour*24))
+
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseGroupNum failed", err.Error(), fromTime, toTime)
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	totalGroupNum, err := imdb.GetTotalGroupNum()
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	resp.IncreaseGroupNum = increaseGroupNum
@@ -436,21 +453,27 @@ func (s *adminCMSServer) GetGroupStatistics(_ context.Context, req *pbAdminCMS.G
 
 func (s *adminCMSServer) GetMessageStatistics(_ context.Context, req *pbAdminCMS.GetMessageStatisticsReq) (*pbAdminCMS.GetMessageStatisticsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
-	resp := &pbAdminCMS.GetMessageStatisticsResp{}
+	resp := &pbAdminCMS.GetMessageStatisticsResp{CommonResp: &pbAdminCMS.CommonResp{}}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "times: ", fromTime, toTime)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	privateMessageNum, err := imdb.GetPrivateMessageNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetPrivateMessageNum failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	groupMessageNum, err := imdb.GetGroupMessageNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMessageNum failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), privateMessageNum, groupMessageNum)
@@ -489,25 +512,33 @@ func (s *adminCMSServer) GetMessageStatistics(_ context.Context, req *pbAdminCMS
 
 func (s *adminCMSServer) GetUserStatistics(_ context.Context, req *pbAdminCMS.GetUserStatisticsReq) (*pbAdminCMS.GetUserStatisticsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbAdminCMS.GetUserStatisticsResp{}
+	resp := &pbAdminCMS.GetUserStatisticsResp{CommonResp: &pbAdminCMS.CommonResp{}}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	activeUserNum, err := imdb.GetActiveUserNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveUserNum failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	increaseUserNum, err := imdb.GetIncreaseUserNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseUserNum failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	totalUserNum, err := imdb.GetTotalUserNum()
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetTotalUserNum failed", err.Error())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	resp.ActiveUserNum = activeUserNum
