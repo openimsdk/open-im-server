@@ -254,13 +254,13 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 
 func GetUserByName(userName string, showNumber, pageNumber int32) ([]db.User, error) {
 	var users []db.User
-	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like %?%", userName).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
 	return users, err
 }
 
-func GetUsersCount(nickname string) (int32, error) {
+func GetUsersCount(userName string) (int32, error) {
 	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like '%%%s%%' ", nickname).Count(&count).Error; err != nil {
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return int32(count), nil

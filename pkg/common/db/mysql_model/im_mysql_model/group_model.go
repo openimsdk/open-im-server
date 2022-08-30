@@ -54,7 +54,7 @@ type GroupWithNum struct {
 func GetGroupsByName(groupName string, pageNumber, showNumber int32) ([]GroupWithNum, error) {
 	var groups []GroupWithNum
 	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Select("groups.*, (select count(*) from group_members where group_members.group_id=groups.group_id) as num").
-		Where(fmt.Sprintf(" name like '%%%s%%' ", groupName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groups).Error
+		Where(" name like ? ", fmt.Sprintf("%%%s%%", groupName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groups).Error
 	return groups, err
 }
 
@@ -80,7 +80,7 @@ func OperateGroupStatus(groupId string, groupStatus int32) error {
 
 func GetGroupsCountNum(group db.Group) (int32, error) {
 	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where(" name like '%%%s%%' ", group.GroupName).Count(&count).Error; err != nil {
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where(" name like ? ", fmt.Sprintf("%%%s%%", group.GroupName)).Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return int32(count), nil
