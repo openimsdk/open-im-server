@@ -22,8 +22,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc"
+	"gorm.io/gorm"
 )
 
 type userServer struct {
@@ -550,15 +550,19 @@ func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, o
 
 func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetUsersResp{CommonResp: &pbUser.CommonResp{}}
+	resp := &pbUser.GetUsersResp{CommonResp: &pbUser.CommonResp{}, Pagination: &sdkws.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}}
 	if req.UserID != "" {
 		userDB, err := imdb.GetUserByUserID(req.UserID)
-		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return resp, nil
+			}
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserID, err.Error())
 			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 			resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 			return resp, nil
 		}
+
 		user := pbUser.CmsUser{User: &sdkws.UserInfo{}}
 		utils.CopyStructFields(&user.User, userDB)
 		resp.UserList = append(resp.UserList, &user)
@@ -621,7 +625,6 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			v.IsBlock = true
 		}
 	}
-	resp.Pagination = &sdkws.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
@@ -655,7 +658,7 @@ func (s *userServer) BlockUser(ctx context.Context, req *pbUser.BlockUserReq) (*
 
 func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq) (*pbUser.UnBlockUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.UnBlockUserResp{}
+	resp := &pbUser.UnBlockUserResp{CommonResp: &pbUser.CommonResp{}}
 	err := imdb.UnBlockUser(req.UserID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "unBlockUser", err.Error())
@@ -667,15 +670,40 @@ func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq
 	return resp, nil
 }
 
-func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUsersReq) (*pbUser.GetBlockUsersResp, error) {
+func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUsersReq) (resp *pbUser.GetBlockUsersResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetBlockUsersResp{}
-	blockUsers, err := imdb.GetBlockUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
-	if err != nil {
-		log.Error(req.OperationID, utils.GetSelfFuncName(), "GetBlockUsers", err.Error(), req.Pagination.ShowNumber, req.Pagination.PageNumber)
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+	resp = &pbUser.GetBlockUsersResp{CommonResp: &pbUser.CommonResp{}, Pagination: &sdkws.ResponsePagination{ShowNumber: req.Pagination.ShowNumber, CurrentPage: req.Pagination.PageNumber}}
+	var blockUsers []imdb.BlockUserInfo
+	if req.UserID != "" {
+		blockUser, err := imdb.GetBlockUserByID(req.UserID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return resp, nil
+			}
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
+			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		blockUsers = append(blockUsers, blockUser)
+		resp.UserNums = 1
+	} else {
+		blockUsers, err = imdb.GetBlockUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		if err != nil {
+			log.Error(req.OperationID, utils.GetSelfFuncName(), "GetBlockUsers", err.Error(), req.Pagination.ShowNumber, req.Pagination.PageNumber)
+			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+
+		nums, err := imdb.GetBlockUsersNumCount()
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetBlockUsersNumCount failed", err.Error())
+			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		resp.UserNums = nums
 	}
 	for _, v := range blockUsers {
 		resp.BlockUsers = append(resp.BlockUsers, &pbUser.BlockUser{
@@ -691,17 +719,6 @@ func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUser
 			EndDisableTime:   (v.EndDisableTime).String(),
 		})
 	}
-	resp.Pagination = &sdkws.ResponsePagination{}
-	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
-	resp.Pagination.CurrentPage = req.Pagination.PageNumber
-	nums, err := imdb.GetBlockUsersNumCount()
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetBlockUsersNumCount failed", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
-	resp.UserNums = nums
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	return resp, nil
 }

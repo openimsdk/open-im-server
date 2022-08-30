@@ -1341,15 +1341,20 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 	resp := &pbGroup.GetGroupsResp{
 		CommonResp: &pbGroup.CommonResp{},
 		CMSGroups:  []*pbGroup.CMSGroup{},
-		Pagination: &open_im_sdk.ResponsePagination{},
+		Pagination: &open_im_sdk.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber},
 	}
 	if req.GroupID != "" {
 		groupInfoDB, err := imdb.GetGroupInfoByGroupID(req.GroupID)
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return resp, nil
+			}
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
 			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 			resp.CommonResp.ErrMsg = err.Error()
 			return resp, nil
+		} else {
+
 		}
 		resp.GroupNum = 1
 		groupInfo := &open_im_sdk.GroupInfo{}
@@ -1388,8 +1393,6 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 			return resp, nil
 		}
 	}
-	resp.Pagination.CurrentPage = req.Pagination.PageNumber
-	resp.Pagination.ShowNumber = req.Pagination.ShowNumber
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetGroups resp", resp.String())
 	return resp, nil
 }

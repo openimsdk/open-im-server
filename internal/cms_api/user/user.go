@@ -47,13 +47,12 @@ func AddUser(c *gin.Context) {
 
 func BlockUser(c *gin.Context) {
 	var (
-		req cms_api_struct.BlockUserRequest
-		// resp  cms_api_struct.BlockUserResponse
+		req   cms_api_struct.BlockUserRequest
 		reqPb pb.BlockUserReq
 	)
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	reqPb.OperationID = utils.OperationIDGenerator()
@@ -84,7 +83,7 @@ func UnblockUser(c *gin.Context) {
 	)
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError(req.OperationID, "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	reqPb.OperationID = utils.OperationIDGenerator()

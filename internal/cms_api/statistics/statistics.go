@@ -29,7 +29,7 @@ func GetMessagesStatistics(c *gin.Context) {
 	reqPb.OperationID = utils.OperationIDGenerator()
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
 	if etcdConn == nil {
 		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
@@ -83,7 +83,7 @@ func GetUserStatistics(c *gin.Context) {
 	reqPb.OperationID = utils.OperationIDGenerator()
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
 	if etcdConn == nil {
 		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
@@ -146,7 +146,7 @@ func GetGroupStatistics(c *gin.Context) {
 	reqPb.OperationID = utils.OperationIDGenerator()
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, &req)
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
 	if etcdConn == nil {
 		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
@@ -203,7 +203,7 @@ func GetActiveUser(c *gin.Context) {
 	reqPb.OperationID = utils.OperationIDGenerator()
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, req)
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
 	if etcdConn == nil {
 		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
@@ -237,7 +237,7 @@ func GetActiveGroup(c *gin.Context) {
 	reqPb.OperationID = utils.OperationIDGenerator()
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
 	utils.CopyStructFields(&reqPb.StatisticsReq, req)
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImStatisticsName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
 	if etcdConn == nil {
 		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)

@@ -18,7 +18,7 @@ type UserResponse struct {
 }
 
 type AddUserRequest struct {
-	OperationID string `json:"operationID"`
+	OperationID string `json:"operationID" binding:"required"`
 	PhoneNumber string `json:"phoneNumber" binding:"required"`
 	UserId      string `json:"userID" binding:"required"`
 	Name        string `json:"name" binding:"required"`
@@ -38,7 +38,7 @@ type BlockUser struct {
 }
 
 type BlockUserRequest struct {
-	OperationID    string `json:"operationID"`
+	OperationID    string `json:"operationID" binding:"required"`
 	UserID         string `json:"userID" binding:"required"`
 	EndDisableTime string `json:"endDisableTime" binding:"required"`
 }
@@ -47,7 +47,7 @@ type BlockUserResponse struct {
 }
 
 type UnblockUserRequest struct {
-	OperationID string `json:"operationID"`
+	OperationID string `json:"operationID" binding:"required"`
 	UserID      string `json:"userID" binding:"required"`
 }
 
@@ -55,7 +55,7 @@ type UnBlockUserResponse struct {
 }
 
 type GetBlockUsersRequest struct {
-	OperationID string `json:"operationID"`
+	OperationID string `json:"operationID" binding:"required"`
 	RequestPagination
 }
 

@@ -44,11 +44,11 @@ func NewGinRouter() *gin.Engine {
 		userRouterGroup.POST("/add_user", user.AddUser)
 		userRouterGroup.POST("/unblock_user", user.UnblockUser)
 		userRouterGroup.POST("/block_user", user.BlockUser)
-		userRouterGroup.GET("/get_block_users", user.GetBlockUsers)
+		userRouterGroup.POST("/get_block_users", user.GetBlockUsers)
 	}
 	messageCMSRouterGroup := r2.Group("/message")
 	{
-		messageCMSRouterGroup.GET("/get_chat_logs", messageCMS.GetChatLogs)
+		messageCMSRouterGroup.POST("/get_chat_logs", messageCMS.GetChatLogs)
 	}
 	return baseRouter
 }

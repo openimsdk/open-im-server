@@ -80,7 +80,7 @@ func OperateGroupStatus(groupId string, groupStatus int32) error {
 
 func GetGroupsCountNum(group db.Group) (int32, error) {
 	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where(fmt.Sprintf(" name like '%%%s%%' ", group.GroupName)).Count(&count).Error; err != nil {
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where(" name like '%%%s%%' ", group.GroupName).Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return int32(count), nil
