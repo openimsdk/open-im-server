@@ -296,7 +296,7 @@ func (s *adminCMSServer) GetActiveUser(_ context.Context, req *pbAdminCMS.GetAct
 	for _, activeUser := range activeUsers {
 		resp.Users = append(resp.Users,
 			&pbAdminCMS.UserResp{
-				UserId:     activeUser.Id,
+				UserId:     activeUser.ID,
 				NickName:   activeUser.Name,
 				MessageNum: int32(activeUser.MessageNum),
 			},

@@ -32,7 +32,7 @@ func GetChatLogs(c *gin.Context) {
 	}
 	utils.CopyStructFields(&reqPb, &req)
 	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMessageCMSName, reqPb.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, reqPb.OperationID)
 	if etcdConn == nil {
 		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(reqPb.OperationID, errMsg)
@@ -43,7 +43,7 @@ func GetChatLogs(c *gin.Context) {
 	respPb, err := client.GetChatLogs(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetChatLogs rpc failed", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 400, "errMsg": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 	for _, v := range respPb.ChatLogs {

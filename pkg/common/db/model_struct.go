@@ -92,7 +92,7 @@ type Group struct {
 	Notification           string    `gorm:"column:notification;size:255" json:"notification"`
 	Introduction           string    `gorm:"column:introduction;size:255" json:"introduction"`
 	FaceURL                string    `gorm:"column:face_url;size:255" json:"faceURL"`
-	CreateTime             time.Time `gorm:"column:create_time"`
+	CreateTime             time.Time `gorm:"column:create_time;index:create_time"`
 	Ex                     string    `gorm:"column:ex" json:"ex;size:1024" json:"ex"`
 	Status                 int32     `gorm:"column:status"`
 	CreatorUserID          string    `gorm:"column:creator_user_id;size:64"`
@@ -176,7 +176,7 @@ type User struct {
 	Birth            time.Time `gorm:"column:birth"`
 	Email            string    `gorm:"column:email;size:64"`
 	Ex               string    `gorm:"column:ex;size:1024"`
-	CreateTime       time.Time `gorm:"column:create_time"`
+	CreateTime       time.Time `gorm:"column:create_time;index:create_time"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 	InvitationCode   string    `gorm:"column:invitation_code"`
@@ -232,7 +232,7 @@ type ChatLog struct {
 	SenderPlatformID int32     `gorm:"column:sender_platform_id" json:"senderPlatformID"`
 	SenderNickname   string    `gorm:"column:sender_nick_name;type:varchar(255)" json:"senderNickname"`
 	SenderFaceURL    string    `gorm:"column:sender_face_url;type:varchar(255)" json:"senderFaceURL"`
-	SessionType      int32     `gorm:"column:session_type;;index:session_type" json:"sessionType"`
+	SessionType      int32     `gorm:"column:session_type;index:session_type" json:"sessionType"`
 	MsgFrom          int32     `gorm:"column:msg_from" json:"msgFrom"`
 	ContentType      int32     `gorm:"column:content_type;index:content_type" json:"contentType"`
 	Content          string    `gorm:"column:content;type:varchar(3000);index:search" json:"content"`

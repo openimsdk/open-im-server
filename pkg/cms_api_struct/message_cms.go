@@ -13,6 +13,7 @@ type GetChatLogsReq struct {
 	GroupID     string `json:"groupID"`
 	SendTime    string `json:"sendTime"`
 	RequestPagination
+	OperationID string `json:"operationID"`
 }
 
 type GetChatLogsResp struct {
