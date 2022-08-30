@@ -17,6 +17,7 @@ import (
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
 	"net"
 	"strconv"
 	"strings"
@@ -552,7 +553,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	resp := &pbUser.GetUsersResp{CommonResp: &pbUser.CommonResp{}}
 	if req.UserID != "" {
 		userDB, err := imdb.GetUserByUserID(req.UserID)
-		if err != nil && !gorm.IsRecordNotFoundError(err) {
+		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserID, err.Error())
 			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 			resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
