@@ -21,6 +21,9 @@ spec:
           - name: config
             mountPath: /Open-IM-Server/config
             readOnly: true
+        env:
+          - name: CONFIG_NAME
+            value: "/Open-IM-Server"         
       volumes:
         - name: config
           configMap:
