@@ -110,7 +110,7 @@ func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLogi
 
 func (s *adminCMSServer) AddUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.AddUserRegisterAddFriendIDListReq) (*pbAdminCMS.AddUserRegisterAddFriendIDListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbAdminCMS.AddUserRegisterAddFriendIDListResp{}
+	resp := &pbAdminCMS.AddUserRegisterAddFriendIDListResp{CommonResp: &pbAdminCMS.CommonResp{}}
 	if err := imdb.AddUserRegisterAddFriendIDList(req.UserIDList...); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
@@ -123,7 +123,7 @@ func (s *adminCMSServer) AddUserRegisterAddFriendIDList(_ context.Context, req *
 
 func (s *adminCMSServer) ReduceUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.ReduceUserRegisterAddFriendIDListReq) (*pbAdminCMS.ReduceUserRegisterAddFriendIDListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbAdminCMS.ReduceUserRegisterAddFriendIDListResp{}
+	resp := &pbAdminCMS.ReduceUserRegisterAddFriendIDListResp{CommonResp: &pbAdminCMS.CommonResp{}}
 	if req.Operation == 0 {
 		if err := imdb.ReduceUserRegisterAddFriendIDList(req.UserIDList...); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
@@ -145,7 +145,7 @@ func (s *adminCMSServer) ReduceUserRegisterAddFriendIDList(_ context.Context, re
 
 func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.GetUserRegisterAddFriendIDListReq) (*pbAdminCMS.GetUserRegisterAddFriendIDListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbAdminCMS.GetUserRegisterAddFriendIDListResp{}
+	resp := &pbAdminCMS.GetUserRegisterAddFriendIDListResp{CommonResp: &pbAdminCMS.CommonResp{}}
 	userIDList, err := imdb.GetRegisterAddFriendList(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())

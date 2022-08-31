@@ -10,6 +10,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,7 +38,9 @@ func GetMessagesStatistics(c *gin.Context) {
 		return
 	}
 	client := admin.NewAdminCMSClient(etcdConn)
-	respPb, err := client.GetMessageStatistics(context.Background(), &reqPb)
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*100)
+	defer cancel()
+	respPb, err := client.GetMessageStatistics(ctx, &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetMessageStatistics failed", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -91,7 +94,9 @@ func GetUserStatistics(c *gin.Context) {
 		return
 	}
 	client := admin.NewAdminCMSClient(etcdConn)
-	respPb, err := client.GetUserStatistics(context.Background(), &reqPb)
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*100)
+	defer cancel()
+	respPb, err := client.GetUserStatistics(ctx, &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetUserStatistics failed", err.Error(), reqPb.String())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
@@ -154,7 +159,9 @@ func GetGroupStatistics(c *gin.Context) {
 		return
 	}
 	client := admin.NewAdminCMSClient(etcdConn)
-	respPb, err := client.GetGroupStatistics(context.Background(), &reqPb)
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*100)
+	defer cancel()
+	respPb, err := client.GetGroupStatistics(ctx, &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetGroupStatistics failed", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
@@ -211,7 +218,9 @@ func GetActiveUser(c *gin.Context) {
 		return
 	}
 	client := admin.NewAdminCMSClient(etcdConn)
-	respPb, err := client.GetActiveUser(context.Background(), &reqPb)
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*100)
+	defer cancel()
+	respPb, err := client.GetActiveUser(ctx, &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetActiveUser failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
@@ -245,7 +254,9 @@ func GetActiveGroup(c *gin.Context) {
 		return
 	}
 	client := admin.NewAdminCMSClient(etcdConn)
-	respPb, err := client.GetActiveGroup(context.Background(), &reqPb)
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*100)
+	defer cancel()
+	respPb, err := client.GetActiveGroup(ctx, &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "GetActiveGroup failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})

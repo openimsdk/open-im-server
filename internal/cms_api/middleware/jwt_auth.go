@@ -12,7 +12,7 @@ import (
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ok, userID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), "")
-		log.NewInfo("0", utils.GetSelfFuncName(), "userID: ", userID)
+		// log.NewInfo("0", utils.GetSelfFuncName(), "userID: ", userID)
 		c.Set("userID", userID)
 		if !ok {
 			log.NewError("", "GetUserIDFromToken false ", c.Request.Header.Get("token"))
