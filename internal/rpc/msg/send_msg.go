@@ -1,6 +1,7 @@
 package msg
 
 import (
+	utils2 "Open_IM/internal/utils"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
@@ -9,7 +10,6 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	cacheRpc "Open_IM/pkg/proto/cache"
-	pbCache "Open_IM/pkg/proto/cache"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbChat "Open_IM/pkg/proto/msg"
 	pbRelay "Open_IM/pkg/proto/relay"
@@ -139,36 +139,45 @@ func messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string
 		if groupInfo.GroupType == constant.SuperGroup {
 			return true, 0, "", nil
 		} else {
-			getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: data.OperationID, GroupID: data.MsgData.GroupID}
-			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
-			if etcdConn == nil {
-				errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
+			userIDList, err := utils2.GetGroupMemberUserIDList(data.MsgData.GroupID, data.OperationID)
+			if err != nil {
+				errMsg := data.OperationID + err.Error()
 				log.NewError(data.OperationID, errMsg)
-				//return returnMsg(&replay, pb, 201, errMsg, "", 0)
 				return false, 201, errMsg, nil
 			}
-			client := pbCache.NewCacheClient(etcdConn)
-			cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
-			if err != nil {
-				log.NewError(data.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
-				//return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache failed", "", 0)
-				return false, 201, err.Error(), nil
-			}
-			if cacheResp.CommonResp.ErrCode != 0 {
-				log.NewError(data.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
-				//return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache logic failed", "", 0)
-				return false, cacheResp.CommonResp.ErrCode, cacheResp.CommonResp.ErrMsg, nil
-			}
+
+			//
+			//getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: data.OperationID, GroupID: data.MsgData.GroupID}
+			//etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
+			//if etcdConn == nil {
+			//	errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
+			//	log.NewError(data.OperationID, errMsg)
+			//	return false, 201, errMsg, nil
+			//}
+			//client := pbCache.NewCacheClient(etcdConn)
+			//	cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+			//
+			//
+			//if err != nil {
+			//	log.NewError(data.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+			//	//return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache failed", "", 0)
+			//	return false, 201, err.Error(), nil
+			//}
+			//if cacheResp.CommonResp.ErrCode != 0 {
+			//	log.NewError(data.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
+			//	//return returnMsg(&replay, pb, 201, "GetGroupMemberIDListFromCache logic failed", "", 0)
+			//	return false, cacheResp.CommonResp.ErrCode, cacheResp.CommonResp.ErrMsg, nil
+			//}
 			if !token_verify.IsManagerUserID(data.MsgData.SendID) {
 				if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-					return true, 0, "", cacheResp.UserIDList
+					return true, 0, "", userIDList
 				}
-				if !utils.IsContain(data.MsgData.SendID, cacheResp.UserIDList) {
+				if !utils.IsContain(data.MsgData.SendID, userIDList) {
 					//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
 					return false, 202, "you are not in group", nil
 				}
 			}
-			return true, 0, "", cacheResp.UserIDList
+			return true, 0, "", userIDList
 		}
 	default:
 		return true, 0, "", nil

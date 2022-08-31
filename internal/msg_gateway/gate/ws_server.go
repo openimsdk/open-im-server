@@ -138,7 +138,9 @@ func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int
 		}
 		if resp.ErrCode != 0 {
 			log.Error(operationID, "MultiTerminalLoginCheck errCode, errMsg: ", resp.ErrCode, resp.ErrMsg)
+			continue
 		}
+		log.Debug(operationID, "MultiTerminalLoginCheck resp ", resp.String())
 	}
 }
 

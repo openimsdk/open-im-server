@@ -8,12 +8,12 @@ package logic
 
 import (
 	"Open_IM/internal/push"
+	utils2 "Open_IM/internal/utils"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	pbCache "Open_IM/pkg/proto/cache"
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
 	pbRtc "Open_IM/pkg/proto/rtc"
@@ -21,9 +21,8 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"strings"
-
 	"github.com/golang/protobuf/proto"
+	"strings"
 )
 
 type OpenIMContent struct {
@@ -176,24 +175,30 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "callback userIDList Resp", pushToUserIDList)
 	}
 	if len(pushToUserIDList) == 0 {
-		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
-		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
-		if etcdConn == nil {
-			errMsg := pushMsg.OperationID + "getcdv3.GetDefaultConn == nil"
-			log.NewError(pushMsg.OperationID, errMsg)
-			return
-		}
-		client := pbCache.NewCacheClient(etcdConn)
-		cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+		userIDList, err := utils2.GetGroupMemberUserIDList(pushMsg.MsgData.GroupID, pushMsg.OperationID)
 		if err != nil {
-			log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+			log.Error(pushMsg.OperationID, "GetGroupMemberUserIDList failed ", err.Error(), pushMsg.MsgData.GroupID)
 			return
 		}
-		if cacheResp.CommonResp.ErrCode != 0 {
-			log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
-			return
-		}
-		pushToUserIDList = cacheResp.UserIDList
+		pushToUserIDList = userIDList
+		//getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: pushMsg.OperationID, GroupID: pushMsg.MsgData.GroupID}
+		//etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, pushMsg.OperationID)
+		//if etcdConn == nil {
+		//	errMsg := pushMsg.OperationID + "getcdv3.GetDefaultConn == nil"
+		//	log.NewError(pushMsg.OperationID, errMsg)
+		//	return
+		//}
+		//client := pbCache.NewCacheClient(etcdConn)
+		//cacheResp, err := client.GetGroupMemberIDListFromCache(context.Background(), getGroupMemberIDListFromCacheReq)
+		//if err != nil {
+		//	log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc call failed ", err.Error())
+		//	return
+		//}
+		//if cacheResp.CommonResp.ErrCode != 0 {
+		//	log.NewError(pushMsg.OperationID, "GetGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
+		//	return
+		//}
+		//pushToUserIDList = cacheResp.UserIDList
 	}
 
 	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)

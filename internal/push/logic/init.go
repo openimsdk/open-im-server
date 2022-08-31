@@ -28,10 +28,10 @@ var (
 )
 
 func Init(rpcPort int) {
-
 	rpcServer.Init(rpcPort)
 	pushCh.Init()
 	pushTerminal = []int32{constant.IOSPlatformID, constant.AndroidPlatformID}
+
 }
 func init() {
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
