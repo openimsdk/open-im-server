@@ -143,7 +143,7 @@ func QueryUserIDLimitLogin(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": gin.H{"limit": resp}})
 }
 
 type AddUserIPLimitLoginReq struct {
