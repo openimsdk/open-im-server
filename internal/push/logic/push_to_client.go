@@ -21,8 +21,9 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"github.com/golang/protobuf/proto"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 )
 
 type OpenIMContent struct {
@@ -323,9 +324,9 @@ func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err err
 			opts.Signal.ClientMsgID = pushMsg.MsgData.ClientMsgID
 			log.NewDebug(pushMsg.OperationID, opts)
 		}
-		opts.IOSBadgeCount = pushMsg.MsgData.OfflinePushInfo.IOSBadgeCount
-		opts.IOSPushSound = pushMsg.MsgData.OfflinePushInfo.IOSPushSound
 	}
+	opts.IOSBadgeCount = pushMsg.MsgData.OfflinePushInfo.IOSBadgeCount
+	opts.IOSPushSound = pushMsg.MsgData.OfflinePushInfo.IOSPushSound
 	return opts, nil
 }
 
