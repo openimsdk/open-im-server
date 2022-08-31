@@ -68,6 +68,7 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 	Msg.Notification = &messaging.Notification{}
 	Msg.Notification.Body = detailContent
 	Msg.Notification.Title = alert
+	Msg.APNS = &messaging.APNSConfig{Payload: &messaging.APNSPayload{Aps: &messaging.Aps{}}}
 	if opts.IOSBadgeCount {
 		i := 1
 		Msg.APNS.Payload.Aps.Badge = &i
