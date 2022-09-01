@@ -35,7 +35,8 @@ func loggerInit(moduleName string) *Logger {
 	//All logs will be printed
 	logger.SetLevel(logrus.Level(config.Config.Log.RemainLogLevel))
 	//Close std console output
-	src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+	//os.O_WRONLY | os.O_CREATE | os.O_APPEND
+	src, err := os.OpenFile(os.DevNull, os.O_APPEND|os.O_RDWR|os.O_CREATE, os.ModeAppend)
 	if err != nil {
 		panic(err.Error())
 	}
