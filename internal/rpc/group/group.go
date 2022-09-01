@@ -142,6 +142,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, http.WrapError(constant.ErrDB)
 		}
 	}
+
 	if req.GroupInfo.GroupType != constant.SuperGroup {
 		//to group member
 		for _, user := range req.InitMemberList {
