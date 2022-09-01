@@ -112,7 +112,7 @@ func newGetuiClient() *Getui {
 	return &Getui{}
 }
 
-func (g *Getui) Push(userIDList []string, alert, detailContent, operationID string, opts push.PushOpts) (resp string, err error) {
+func (g *Getui) Push(userIDList []string, title, detailContent, operationID string, opts push.PushOpts) (resp string, err error) {
 	token, err := db.DB.GetGetuiToken()
 	log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
 	if err != nil {
@@ -132,18 +132,18 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, operationID stri
 		}{Alias: []string{userIDList[0]}},
 	}
 	pushReq.PushMessage.Notification = Notification{
-		Title:     alert,
+		Title:     title,
 		Body:      detailContent,
 		ClickType: "startapp",
 	}
 	pushReq.PushChannel.Ios.Aps.Sound = "default"
 	pushReq.PushChannel.Ios.Aps.Alert = Alert{
-		Title: alert,
-		Body:  alert,
+		Title: title,
+		Body:  title,
 	}
 	pushReq.PushChannel.Android.Ups.Notification = Notification{
-		Title:     alert,
-		Body:      alert,
+		Title:     title,
+		Body:      title,
 		ClickType: "startapp",
 	}
 	pushReq.PushChannel.Android.Ups.Options = Options{

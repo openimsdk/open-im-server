@@ -74,7 +74,15 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"attached_info": conversation.AttachedInfo})
 	case constant.FieldUnread:
 		isSyncConversation = false
-		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"update_unread_count_time": utils.GetCurrentTimestampByMill()})
+		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"update_unread_count_time": conversation.UpdateUnreadCountTime})
+		for _, v := range req.UserIDList {
+			if err = db.DB.SetUserBadgeUnreadCountSum(v, int(req.BadgeUnreadCountSum)); err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetUserBadgeUnreadCountSum, rpc return", err.Error())
+				resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}
+				return resp, nil
+			}
+		}
+
 	}
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateColumnsConversations error", err.Error())
@@ -83,7 +91,6 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	}
 	for _, v := range utils.DifferenceString(haveUserID, req.UserIDList) {
 		conversation.OwnerUserID = v
-		conversation.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 		err = rocksCache.DelUserConversationIDListFromCache(v)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), v, req.Conversation.ConversationID, err.Error())

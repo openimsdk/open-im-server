@@ -21,7 +21,6 @@ import (
 var (
 	rpcServer     RPCServer
 	pushCh        PushConsumerHandler
-	pushTerminal  []int32
 	producer      *kafka.Producer
 	offlinePusher pusher.OfflinePusher
 	successCount  uint64
@@ -30,7 +29,6 @@ var (
 func Init(rpcPort int) {
 	rpcServer.Init(rpcPort)
 	pushCh.Init()
-	pushTerminal = []int32{constant.IOSPlatformID, constant.AndroidPlatformID}
 
 }
 func init() {
