@@ -17,10 +17,8 @@ import (
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
 	pbRtc "Open_IM/pkg/proto/rtc"
-	commonPb "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
 	"strings"
 
 	"github.com/golang/protobuf/proto"
@@ -85,48 +83,8 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				return
 			}
 		}
-		customContent := OpenIMContent{
-			SessionType: int(pushMsg.MsgData.SessionType),
-			From:        pushMsg.MsgData.SendID,
-			To:          pushMsg.MsgData.RecvID,
-			Seq:         pushMsg.MsgData.Seq,
-		}
-		bCustomContent, _ := json.Marshal(customContent)
-		jsonCustomContent := string(bCustomContent)
-		var content string
-		if pushMsg.MsgData.OfflinePushInfo != nil {
-			content = pushMsg.MsgData.OfflinePushInfo.Title
-			jsonCustomContent = pushMsg.MsgData.OfflinePushInfo.Desc
-		}
-		if content == "" {
-			switch pushMsg.MsgData.ContentType {
-			case constant.Text:
-				content = constant.ContentType2PushContent[constant.Text]
-			case constant.Picture:
-				content = constant.ContentType2PushContent[constant.Picture]
-			case constant.Voice:
-				content = constant.ContentType2PushContent[constant.Voice]
-			case constant.Video:
-				content = constant.ContentType2PushContent[constant.Video]
-			case constant.File:
-				content = constant.ContentType2PushContent[constant.File]
-			case constant.AtText:
-				a := AtContent{}
-				_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
-				if utils.IsContain(pushMsg.PushToUserID, a.AtUserList) {
-					content = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
-				} else {
-					content = constant.ContentType2PushContent[constant.GroupMsg]
-				}
-			case constant.SignalingNotification:
-				content = constant.ContentType2PushContent[constant.SignalMsg]
-			default:
-				content = constant.ContentType2PushContent[constant.Common]
-
-			}
-		}
-		var offlineInfo commonPb.OfflinePushInfo
-		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData, &[]string{}, &offlineInfo)
+		var title, detailContent string
+		callbackResp := callbackOfflinePush(pushMsg.OperationID, UIDList, pushMsg.MsgData, &[]string{})
 		log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 		if callbackResp.ErrCode != 0 {
 			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
@@ -135,12 +93,11 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
 			return
 		}
-		if offlineInfo.Title != "" {
-			content = offlineInfo.Title
+		if pushMsg.MsgData.OfflinePushInfo != nil {
+			title = pushMsg.MsgData.OfflinePushInfo.Title
+			detailContent = pushMsg.MsgData.OfflinePushInfo.Desc
 		}
-		if offlineInfo.Desc != "" {
-			jsonCustomContent = offlineInfo.Desc
-		}
+
 		if offlinePusher == nil {
 			return
 		}
@@ -148,8 +105,36 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		if err != nil {
 			log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
 		}
-		log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), UIDList, content, jsonCustomContent, "opts:", opts)
-		pushResult, err := offlinePusher.Push(UIDList, content, jsonCustomContent, pushMsg.OperationID, opts)
+		log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), UIDList, title, detailContent, "opts:", opts)
+		if title == "" {
+			switch pushMsg.MsgData.ContentType {
+			case constant.Text:
+				fallthrough
+			case constant.Picture:
+				fallthrough
+			case constant.Voice:
+				fallthrough
+			case constant.Video:
+				fallthrough
+			case constant.File:
+				title = constant.ContentType2PushContent[int64(pushMsg.MsgData.ContentType)]
+			case constant.AtText:
+				a := AtContent{}
+				_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
+				if utils.IsContain(pushMsg.PushToUserID, a.AtUserList) {
+					title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
+				} else {
+					title = constant.ContentType2PushContent[constant.GroupMsg]
+				}
+			case constant.SignalingNotification:
+				title = constant.ContentType2PushContent[constant.SignalMsg]
+			default:
+				title = constant.ContentType2PushContent[constant.Common]
+
+			}
+			detailContent = title
+		}
+		pushResult, err := offlinePusher.Push(UIDList, title, detailContent, pushMsg.OperationID, opts)
 		if err != nil {
 			log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
 		} else {
@@ -229,51 +214,11 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 		}
 		onlineFailedUserIDList := utils.DifferenceString(onlineSuccessUserIDList, pushToUserIDList)
 		//Use offline push messaging
-		customContent := OpenIMContent{
-			SessionType: int(pushMsg.MsgData.SessionType),
-			From:        pushMsg.MsgData.SendID,
-			To:          pushMsg.MsgData.RecvID,
-			Seq:         pushMsg.MsgData.Seq,
-		}
-		bCustomContent, _ := json.Marshal(customContent)
-		jsonCustomContent := string(bCustomContent)
-		var content string
-		if pushMsg.MsgData.OfflinePushInfo != nil {
-			content = pushMsg.MsgData.OfflinePushInfo.Title
-			jsonCustomContent = pushMsg.MsgData.OfflinePushInfo.Desc
-
-		} else {
-			switch pushMsg.MsgData.ContentType {
-			case constant.Text:
-				content = constant.ContentType2PushContent[constant.Text]
-			case constant.Picture:
-				content = constant.ContentType2PushContent[constant.Picture]
-			case constant.Voice:
-				content = constant.ContentType2PushContent[constant.Voice]
-			case constant.Video:
-				content = constant.ContentType2PushContent[constant.Video]
-			case constant.File:
-				content = constant.ContentType2PushContent[constant.File]
-			case constant.AtText:
-				a := AtContent{}
-				_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
-				if utils.IsContain(pushMsg.PushToUserID, a.AtUserList) {
-					content = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
-				} else {
-					content = constant.ContentType2PushContent[constant.GroupMsg]
-				}
-			case constant.SignalingNotification:
-				content = constant.ContentType2PushContent[constant.SignalMsg]
-			default:
-				content = constant.ContentType2PushContent[constant.Common]
-
-			}
-		}
+		var title, detailContent string
 		if len(onlineFailedUserIDList) > 0 {
 			var offlinePushUserIDList []string
 			var needOfflinePushUserIDList []string
-			var offlineInfo commonPb.OfflinePushInfo
-			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList, pushMsg.MsgData, &offlinePushUserIDList, &offlineInfo)
+			callbackResp := callbackOfflinePush(pushMsg.OperationID, onlineFailedUserIDList, pushMsg.MsgData, &offlinePushUserIDList)
 			log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offline callback Resp")
 			if callbackResp.ErrCode != 0 {
 				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "callbackOfflinePush result: ", callbackResp)
@@ -282,17 +227,16 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 				log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "offlinePush stop")
 				return
 			}
+			if pushMsg.MsgData.OfflinePushInfo != nil {
+				title = pushMsg.MsgData.OfflinePushInfo.Title
+				detailContent = pushMsg.MsgData.OfflinePushInfo.Desc
+			}
 			if len(offlinePushUserIDList) > 0 {
 				needOfflinePushUserIDList = offlinePushUserIDList
 			} else {
 				needOfflinePushUserIDList = onlineFailedUserIDList
 			}
-			if offlineInfo.Title != "" {
-				content = offlineInfo.Title
-			}
-			if offlineInfo.Desc != "" {
-				jsonCustomContent = offlineInfo.Desc
-			}
+
 			if offlinePusher == nil {
 				return
 			}
@@ -300,8 +244,36 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			if err != nil {
 				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
 			}
-			log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), onlineFailedUserIDList, content, jsonCustomContent, "opts:", opts)
-			pushResult, err := offlinePusher.Push(needOfflinePushUserIDList, content, jsonCustomContent, pushMsg.OperationID, opts)
+			log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), onlineFailedUserIDList, title, detailContent, "opts:", opts)
+			if title == "" {
+				switch pushMsg.MsgData.ContentType {
+				case constant.Text:
+					fallthrough
+				case constant.Picture:
+					fallthrough
+				case constant.Voice:
+					fallthrough
+				case constant.Video:
+					fallthrough
+				case constant.File:
+					title = constant.ContentType2PushContent[int64(pushMsg.MsgData.ContentType)]
+				case constant.AtText:
+					a := AtContent{}
+					_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
+					if utils.IsContain(pushMsg.PushToUserID, a.AtUserList) {
+						title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
+					} else {
+						title = constant.ContentType2PushContent[constant.GroupMsg]
+					}
+				case constant.SignalingNotification:
+					title = constant.ContentType2PushContent[constant.SignalMsg]
+				default:
+					title = constant.ContentType2PushContent[constant.Common]
+
+				}
+				detailContent = title
+			}
+			pushResult, err := offlinePusher.Push(needOfflinePushUserIDList, title, detailContent, pushMsg.OperationID, opts)
 			if err != nil {
 				log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
 			} else {

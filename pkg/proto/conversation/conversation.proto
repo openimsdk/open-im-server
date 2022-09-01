@@ -29,6 +29,7 @@ message ModifyConversationFieldReq{
   int32 fieldType = 2;
   repeated string userIDList = 3;
   string operationID = 4;
+  int32 badgeUnreadCountSum = 5;
 }
 
 message ModifyConversationFieldResp{

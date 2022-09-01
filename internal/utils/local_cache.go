@@ -18,7 +18,7 @@ type GroupMemberUserIDListHash struct {
 	UserIDList     []string
 }
 
-var CacheGroupMemberUserIDList map[string]*GroupMemberUserIDListHash = make(map[string]*GroupMemberUserIDListHash, 0)
+var CacheGroupMemberUserIDList = make(map[string]*GroupMemberUserIDListHash, 0)
 var CacheGroupMtx sync.RWMutex
 
 func GetGroupMemberUserIDList(groupID string, operationID string) ([]string, error) {
