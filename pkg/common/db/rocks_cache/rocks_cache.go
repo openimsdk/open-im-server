@@ -36,7 +36,7 @@ const (
 	conversationIDListCache   = "CONVERSATION_ID_LIST_CACHE:"
 )
 
-func init() {
+func DelKeys() {
 	fmt.Println("init to del old keys")
 	for _, key := range []string{groupCache, friendRelationCache, blackListCache, userInfoCache, groupInfoCache, groupOwnerIDCache, joinedGroupListCache,
 		groupMemberInfoCache, groupAllMemberInfoCache, allFriendInfoCache} {
