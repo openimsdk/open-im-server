@@ -5,7 +5,9 @@ type OfflinePusher interface {
 }
 
 type PushOpts struct {
-	Signal Signal
+	Signal        Signal
+	IOSPushSound  string
+	IOSBadgeCount bool
 }
 
 type Signal struct {

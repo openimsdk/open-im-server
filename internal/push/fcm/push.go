@@ -7,11 +7,12 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/tools/splitter"
 	"context"
+	"path/filepath"
+	"strconv"
+
 	firebase "firebase.google.com/go"
 	"firebase.google.com/go/messaging"
 	"google.golang.org/api/option"
-	"path/filepath"
-	"strconv"
 )
 
 const SinglePushCountLimit = 400
@@ -67,6 +68,14 @@ func (f *Fcm) Push(accounts []string, alert, detailContent, operationID string, 
 	Msg.Notification = &messaging.Notification{}
 	Msg.Notification.Body = detailContent
 	Msg.Notification.Title = alert
+	Msg.APNS = &messaging.APNSConfig{Payload: &messaging.APNSPayload{Aps: &messaging.Aps{}}}
+	if opts.IOSBadgeCount {
+		i := 1
+		Msg.APNS.Payload.Aps.Badge = &i
+	}
+	if opts.IOSPushSound != "" {
+		Msg.APNS.Payload.Aps.Sound = opts.IOSPushSound
+	}
 	ctx := context.Background()
 	for _, v := range result {
 		Msg.Tokens = v.Item
