@@ -102,7 +102,10 @@ type Options struct {
 	} `json:"HW"`
 	XM struct {
 		ChannelID string `json:"/extra.channel_id"`
-	} `json:""`
+	} `json:"XM"`
+	VV struct {
+		Classification int `json:"/classification"`
+	} `json:"VV"`
 }
 
 type PushResp struct {
@@ -156,6 +159,11 @@ func (g *Getui) Push(userIDList []string, alert, detailContent, operationID stri
 		XM: struct {
 			ChannelID string `json:"/extra.channel_id"`
 		}{ChannelID: "high_system"},
+		VV: struct {
+			Classification int "json:\"/classification\""
+		}{
+			Classification: 1,
+		},
 	}
 	pushResp := PushResp{}
 	err = g.request(PushURL, pushReq, token, &pushResp, operationID)

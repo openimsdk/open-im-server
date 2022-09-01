@@ -21,6 +21,8 @@ message Conversation{
   int32 groupAtType = 12;
   bool isNotInGroup = 13;
   string ex = 14;
+  int64  updateUnreadCountTime = 15;
+
 }
 message ModifyConversationFieldReq{
   Conversation conversation = 1;
