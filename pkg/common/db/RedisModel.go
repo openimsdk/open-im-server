@@ -37,6 +37,7 @@ const (
 	groupMaxSeq                   = "GROUP_MAX_SEQ:"
 	groupMinSeq                   = "GROUP_MIN_SEQ:"
 	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
+	userBadgeUnreadCountSum       = "USER_BADGE_UNREAD_COUNT_SUM:"
 )
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
@@ -410,4 +411,13 @@ func (d *DataBases) SetFcmToken(account string, platformid int, fcmToken string,
 func (d *DataBases) GetFcmToken(account string, platformid int) (string, error) {
 	key := FcmToken + account + ":" + strconv.Itoa(platformid)
 	return d.RDB.Get(context.Background(), key).Result()
+}
+func (d *DataBases) IncrUserBadgeUnreadCountSum(uid string) (int, error) {
+	key := userBadgeUnreadCountSum + uid
+	seq, err := d.RDB.Incr(context.Background(), key).Result()
+	return int(seq), err
+}
+func (d *DataBases) SetUserBadgeUnreadCountSum(uid string, value int) error {
+	key := userBadgeUnreadCountSum + uid
+	return d.RDB.Set(context.Background(), key, value, 0).Err()
 }
