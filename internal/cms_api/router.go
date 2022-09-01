@@ -2,6 +2,7 @@ package cms_api
 
 import (
 	"Open_IM/internal/cms_api/admin"
+	"Open_IM/internal/cms_api/friend"
 	"Open_IM/internal/cms_api/group"
 	messageCMS "Open_IM/internal/cms_api/message_cms"
 	"Open_IM/internal/cms_api/middleware"
@@ -62,6 +63,10 @@ func NewGinRouter() *gin.Engine {
 	messageCMSRouterGroup := r2.Group("/message")
 	{
 		messageCMSRouterGroup.POST("/get_chat_logs", messageCMS.GetChatLogs)
+	}
+	friendCMSRouterGroup := r2.Group("friend")
+	{
+		friendCMSRouterGroup.POST("/get_friends", friend.GetUserFriends)
 	}
 	return baseRouter
 }

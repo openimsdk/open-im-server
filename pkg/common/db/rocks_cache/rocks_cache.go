@@ -6,10 +6,8 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
-	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"math/big"
 	"sort"
 	"strconv"
@@ -35,38 +33,6 @@ const (
 	conversationCache         = "CONVERSATION_CACHE:"
 	conversationIDListCache   = "CONVERSATION_ID_LIST_CACHE:"
 )
-
-func init() {
-	fmt.Println("init to del old keys")
-	for _, key := range []string{groupCache, friendRelationCache, blackListCache, userInfoCache, groupInfoCache, groupOwnerIDCache, joinedGroupListCache,
-		groupMemberInfoCache, groupAllMemberInfoCache, allFriendInfoCache} {
-		fName := utils.GetSelfFuncName()
-		var cursor uint64
-		var n int
-		for {
-			var keys []string
-			var err error
-			keys, cursor, err = db.DB.RDB.Scan(context.Background(), cursor, key+"*", 3000).Result()
-			if err != nil {
-				panic(err.Error())
-			}
-			n += len(keys)
-			// for each for redis cluster
-			for _, key := range keys {
-				if err = db.DB.RDB.Del(context.Background(), key).Err(); err != nil {
-					log.NewError("", fName, key, err.Error())
-					err = db.DB.RDB.Del(context.Background(), key).Err()
-					if err != nil {
-						panic(err.Error())
-					}
-				}
-			}
-			if cursor == 0 {
-				break
-			}
-		}
-	}
-}
 
 func GetFriendIDListFromCache(userID string) ([]string, error) {
 	getFriendIDList := func() (string, error) {

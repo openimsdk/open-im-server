@@ -15,7 +15,7 @@ type Register struct {
 type Invitation struct {
 	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:varchar(32)"`
 	CreateTime     time.Time `gorm:"column:create_time"`
-	UserID         string    `gorm:"column:user_id"`
+	UserID         string    `gorm:"column:user_id;index:userID"`
 	LastTime       time.Time `gorm:"column:last_time"`
 	Status         int32     `gorm:"column:status"`
 }
@@ -179,8 +179,8 @@ type User struct {
 	CreateTime       time.Time `gorm:"column:create_time;index:create_time"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
-	InvitationCode   string    `gorm:"column:invitation_code"`
-	status           int32     `gorm:"column:status"`
+
+	status int32 `gorm:"column:status"`
 }
 
 type UserIpRecord struct {

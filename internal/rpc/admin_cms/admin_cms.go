@@ -12,6 +12,7 @@ import (
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
 	"net"
 	"strconv"
 	"strings"
@@ -19,6 +20,7 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"gorm.io/gorm"
 )
 
 type adminCMSServer struct {
@@ -296,7 +298,7 @@ func (s *adminCMSServer) GetActiveUser(_ context.Context, req *pbAdminCMS.GetAct
 	for _, activeUser := range activeUsers {
 		resp.Users = append(resp.Users,
 			&pbAdminCMS.UserResp{
-				UserId:     activeUser.ID,
+				UserID:     activeUser.ID,
 				NickName:   activeUser.Name,
 				MessageNum: int32(activeUser.MessageNum),
 			},
@@ -583,4 +585,81 @@ func (s *adminCMSServer) GetUserStatistics(_ context.Context, req *pbAdminCMS.Ge
 	wg.Wait()
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	return resp, nil
+}
+
+func (s *adminCMSServer) GetUserFriends(_ context.Context, req *pbAdminCMS.GetUserFriendsReq) (*pbAdminCMS.GetUserFriendsResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbAdminCMS.GetUserFriendsResp{CommonResp: &pbAdminCMS.CommonResp{}, Pagination: &server_api_params.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}}
+	var friendList []*imdb.FriendUser
+	var err error
+	if req.FriendUserID != "" {
+		friend, err := imdb.GetFriendByIDCMS(req.UserID, req.FriendUserID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return resp, nil
+			}
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID, req.FriendUserID)
+			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		friendList = append(friendList, friend)
+	} else {
+		friendList, err = imdb.GetUserFriendsCMS(req.UserID, req.FriendUserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID, req.FriendUserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+	}
+	for _, v := range friendList {
+		friendInfo := &server_api_params.FriendInfo{}
+		userInfo := &server_api_params.UserInfo{UserID: v.FriendUserID, Nickname: v.Nickname}
+		utils.CopyStructFields(friendInfo, v)
+		friendInfo.FriendUser = userInfo
+		resp.FriendInfoList = append(resp.FriendInfoList, friendInfo)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return nil, nil
+}
+
+func (s *adminCMSServer) GenerateInvitationCode(_ context.Context, req *pbAdminCMS.GenerateInvitationCodeReq) (*pbAdminCMS.GenerateInvitationCodeResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) GetInvitationCodes(_ context.Context, req *pbAdminCMS.GetInvitationCodesReq) (*pbAdminCMS.GetInvitationCodesResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) QueryIPRegister(_ context.Context, req *pbAdminCMS.QueryIPRegisterReq) (*pbAdminCMS.QueryIPRegisterResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) AddIPLimit(_ context.Context, req *pbAdminCMS.AddIPLimitReq) (*pbAdminCMS.AddIPLimitResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) RemoveIPLimit(_ context.Context, req *pbAdminCMS.RemoveIPLimitReq) (*pbAdminCMS.RemoveIPLimitResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) QueryUserIDIPLimitLogin(_ context.Context, req *pbAdminCMS.QueryUserIDIPLimitLoginReq) (*pbAdminCMS.QueryUserIDIPLimitLoginResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) AddUserIPLimitLogin(_ context.Context, req *pbAdminCMS.AddUserIPLimitLoginReq) (*pbAdminCMS.AddUserIPLimitLoginResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) RemoveUserIPLimit(_ context.Context, req *pbAdminCMS.RemoveUserIPLimitReq) (*pbAdminCMS.RemoveUserIPLimitResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) GetClientInitConfig(_ context.Context, req *pbAdminCMS.GetClientInitConfigReq) (*pbAdminCMS.GetClientInitConfigResp, error) {
+	return nil, nil
+}
+
+func (s *adminCMSServer) SetClientInitConfig(_ context.Context, req *pbAdminCMS.SetClientInitConfigReq) (*pbAdminCMS.SetClientInitConfigResp, error) {
+	return nil, nil
 }

@@ -130,19 +130,27 @@ func AddUser(userID string, phoneNumber string, name string, email string, gende
 		_birth = time.Now()
 	}
 	user := db.User{
-		UserID:         userID,
-		Nickname:       name,
-		FaceURL:        faceURL,
-		Gender:         gender,
-		PhoneNumber:    phoneNumber,
-		Birth:          _birth,
-		Email:          email,
-		Ex:             "",
-		CreateTime:     time.Now(),
-		InvitationCode: "",
+		UserID:      userID,
+		Nickname:    name,
+		FaceURL:     faceURL,
+		Gender:      gender,
+		PhoneNumber: phoneNumber,
+		Birth:       _birth,
+		Email:       email,
+		Ex:          "",
+		CreateTime:  time.Now(),
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user)
 	return result.Error
+}
+
+func UserIsBlock(userId string) (bool, error) {
+	var user db.BlackList
+	rows := db.DB.MysqlDB.DefaultGormDB().Table("black_lists").Where("uid=?", userId).First(&user).RowsAffected
+	if rows >= 1 {
+		return user.EndDisableTime.After(time.Now()), nil
+	}
+	return false, nil
 }
 
 func UsersIsBlock(userIDList []string) (inBlockUserIDList []string, err error) {

@@ -1353,8 +1353,6 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 			resp.CommonResp.ErrMsg = err.Error()
 			return resp, nil
-		} else {
-
 		}
 		resp.GroupNum = 1
 		groupInfo := &open_im_sdk.GroupInfo{}

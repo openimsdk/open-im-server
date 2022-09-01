@@ -47,7 +47,7 @@ func GetChatLogs(c *gin.Context) {
 		return
 	}
 	for _, v := range respPb.ChatLogs {
-		chatLog := pbCommon.MsgData{}
+		chatLog := cms_api_struct.ChatLog{}
 		utils.CopyStructFields(&chatLog, v)
 		resp.ChatLogs = append(resp.ChatLogs, &chatLog)
 	}

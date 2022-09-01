@@ -1,9 +1,11 @@
 package im_mysql_model
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
 	"fmt"
+
 	"time"
 )
 
@@ -54,7 +56,7 @@ type GroupWithNum struct {
 func GetGroupsByName(groupName string, pageNumber, showNumber int32) ([]GroupWithNum, error) {
 	var groups []GroupWithNum
 	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Select("groups.*, (select count(*) from group_members where group_members.group_id=groups.group_id) as num").
-		Where(" name like ? ", fmt.Sprintf("%%%s%%", groupName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groups).Error
+		Where(" name like ? and status != ?", fmt.Sprintf("%%%s%%", groupName), constant.GroupStatusDismissed).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groups).Error
 	return groups, err
 }
 

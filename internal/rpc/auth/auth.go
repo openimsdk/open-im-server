@@ -52,11 +52,38 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 
 func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	_, err := imdb.GetUserByUserID(req.FromUserID)
-	if err != nil {
-		errMsg := req.OperationID + " imdb.GetUserByUserID failed " + err.Error() + req.FromUserID
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+
+	if config.Config.Demo.UseIPLimit {
+		user, err := imdb.GetUserIPLimit(req.FromUserID)
+		if err != nil {
+			errMsg := req.OperationID + " imdb.GetUserByUserID failed " + err.Error() + req.FromUserID
+			log.NewError(req.OperationID, errMsg)
+			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+		}
+
+		var Limited bool
+		var LimitError error
+		Limited, LimitError = imdb.IsLimitLoginIp(req.LoginIp)
+		if LimitError != nil {
+			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
+		}
+		if Limited {
+			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.LoginLimit, ErrMsg: "limited Login"}}, nil
+		}
+		Limited, LimitError = imdb.IsLimitUserLoginIp(user.UserID, req.LoginIp)
+		if LimitError != nil {
+			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
+		}
+		if Limited {
+			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.LoginLimit, ErrMsg: "limited Login"}}, nil
+		}
+		Limited, LimitError = imdb.UserIsBlock(user.UserID)
+		if LimitError != nil {
+			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
+		}
+		if Limited {
+			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.LoginLimit, ErrMsg: "limited Login"}}, nil
+		}
 	}
 
 	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, int(req.Platform))

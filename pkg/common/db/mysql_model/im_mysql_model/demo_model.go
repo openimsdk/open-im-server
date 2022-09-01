@@ -3,6 +3,7 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/db"
 	"errors"
+
 	_ "gorm.io/gorm"
 )
 
@@ -73,4 +74,11 @@ func ReduceUserRegisterAddFriendIDList(userIDList ...string) error {
 func DeleteAllRegisterAddFriendIDList() error {
 	err := db.DB.MysqlDB.DefaultGormDB().Where("1 = 1").Delete(&db.RegisterAddFriend{}).Error
 	return err
+}
+
+func GetUserIPLimit(userID string) (db.UserIpLimit, error) {
+	var limit db.UserIpLimit
+	limit.UserID = userID
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Take(&limit).Error
+	return limit, err
 }

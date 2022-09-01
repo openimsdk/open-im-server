@@ -634,7 +634,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.AddUserResp{}
+	resp := &pbUser.AddUserResp{CommonResp: &pbUser.CommonResp{}}
 	err := imdb.AddUser(req.UserInfo.UserID, req.UserInfo.PhoneNumber, req.UserInfo.Nickname, req.UserInfo.Email, req.UserInfo.Gender, req.UserInfo.FaceURL, req.UserInfo.Birth)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error(), req.String())

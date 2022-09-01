@@ -11,15 +11,17 @@ import (
 func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog, error) {
 	var chatLogs []db.ChatLog
 	db := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").
-		Where(fmt.Sprintf(" content like '%%%s%%'", chatLog.Content)).
 		Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1)))
-	if chatLog.SessionType != 0 {
-		db = db.Where("session_type = ?", chatLog.SessionType)
+	if chatLog.Content != "" {
+		db = db.Where(" name like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
 	}
-	if chatLog.ContentType == 1 {
-		db = db.Where("content_type = ?", chatLog.ContentType)
-	} else if chatLog.ContentType == 2 {
+	if chatLog.SessionType == 1 {
+		db = db.Where("session_type = ?", chatLog.SessionType)
+	} else if chatLog.SessionType == 2 {
 		db = db.Where("content_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
+	}
+	if chatLog.ContentType != 0 {
+		db = db.Where("content_type = ?", chatLog.ContentType)
 	}
 	if chatLog.SendID != "" {
 		db = db.Where("send_id = ?", chatLog.SendID)
@@ -37,13 +39,17 @@ func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog,
 func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
 	var chatLogs []db.ChatLog
 	var count int64
-	db := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").
-		Where(fmt.Sprintf(" content like '%%%s%%'", chatLog.Content))
+	db := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs")
+	if chatLog.Content != "" {
+		db = db.Where(" name like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
+	}
 	if chatLog.SessionType != 0 {
 		db = db.Where("session_type = ?", chatLog.SessionType)
 	}
-	if chatLog.ContentType != 0 {
+	if chatLog.ContentType == 1 {
 		db = db.Where("content_type = ?", chatLog.ContentType)
+	} else if chatLog.ContentType == 2 {
+		db = db.Where("content_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
 	}
 	if chatLog.SendID != "" {
 		db = db.Where("send_id = ?", chatLog.SendID)

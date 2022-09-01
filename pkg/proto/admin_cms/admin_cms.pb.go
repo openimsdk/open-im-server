@@ -36,7 +36,7 @@ func (m *CommonResp) Reset()         { *m = CommonResp{} }
 func (m *CommonResp) String() string { return proto.CompactTextString(m) }
 func (*CommonResp) ProtoMessage()    {}
 func (*CommonResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{0}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{0}
 }
 func (m *CommonResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CommonResp.Unmarshal(m, b)
@@ -71,9 +71,9 @@ func (m *CommonResp) GetErrMsg() string {
 }
 
 type AdminLoginReq struct {
-	OperationID          string   `protobuf:"bytes,1,opt,name=OperationID" json:"OperationID,omitempty"`
-	AdminID              string   `protobuf:"bytes,2,opt,name=AdminID" json:"AdminID,omitempty"`
-	Secret               string   `protobuf:"bytes,3,opt,name=Secret" json:"Secret,omitempty"`
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	AdminID              string   `protobuf:"bytes,2,opt,name=adminID" json:"adminID,omitempty"`
+	Secret               string   `protobuf:"bytes,3,opt,name=secret" json:"secret,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -83,7 +83,7 @@ func (m *AdminLoginReq) Reset()         { *m = AdminLoginReq{} }
 func (m *AdminLoginReq) String() string { return proto.CompactTextString(m) }
 func (*AdminLoginReq) ProtoMessage()    {}
 func (*AdminLoginReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{1}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{1}
 }
 func (m *AdminLoginReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AdminLoginReq.Unmarshal(m, b)
@@ -136,7 +136,7 @@ func (m *AdminLoginResp) Reset()         { *m = AdminLoginResp{} }
 func (m *AdminLoginResp) String() string { return proto.CompactTextString(m) }
 func (*AdminLoginResp) ProtoMessage()    {}
 func (*AdminLoginResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{2}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{2}
 }
 func (m *AdminLoginResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AdminLoginResp.Unmarshal(m, b)
@@ -182,7 +182,7 @@ func (m *AddUserRegisterAddFriendIDListReq) Reset()         { *m = AddUserRegist
 func (m *AddUserRegisterAddFriendIDListReq) String() string { return proto.CompactTextString(m) }
 func (*AddUserRegisterAddFriendIDListReq) ProtoMessage()    {}
 func (*AddUserRegisterAddFriendIDListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{3}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{3}
 }
 func (m *AddUserRegisterAddFriendIDListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddUserRegisterAddFriendIDListReq.Unmarshal(m, b)
@@ -227,7 +227,7 @@ func (m *AddUserRegisterAddFriendIDListResp) Reset()         { *m = AddUserRegis
 func (m *AddUserRegisterAddFriendIDListResp) String() string { return proto.CompactTextString(m) }
 func (*AddUserRegisterAddFriendIDListResp) ProtoMessage()    {}
 func (*AddUserRegisterAddFriendIDListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{4}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{4}
 }
 func (m *AddUserRegisterAddFriendIDListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddUserRegisterAddFriendIDListResp.Unmarshal(m, b)
@@ -267,7 +267,7 @@ func (m *ReduceUserRegisterAddFriendIDListReq) Reset()         { *m = ReduceUser
 func (m *ReduceUserRegisterAddFriendIDListReq) String() string { return proto.CompactTextString(m) }
 func (*ReduceUserRegisterAddFriendIDListReq) ProtoMessage()    {}
 func (*ReduceUserRegisterAddFriendIDListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{5}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{5}
 }
 func (m *ReduceUserRegisterAddFriendIDListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReduceUserRegisterAddFriendIDListReq.Unmarshal(m, b)
@@ -319,7 +319,7 @@ func (m *ReduceUserRegisterAddFriendIDListResp) Reset()         { *m = ReduceUse
 func (m *ReduceUserRegisterAddFriendIDListResp) String() string { return proto.CompactTextString(m) }
 func (*ReduceUserRegisterAddFriendIDListResp) ProtoMessage()    {}
 func (*ReduceUserRegisterAddFriendIDListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{6}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{6}
 }
 func (m *ReduceUserRegisterAddFriendIDListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReduceUserRegisterAddFriendIDListResp.Unmarshal(m, b)
@@ -358,7 +358,7 @@ func (m *GetUserRegisterAddFriendIDListReq) Reset()         { *m = GetUserRegist
 func (m *GetUserRegisterAddFriendIDListReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserRegisterAddFriendIDListReq) ProtoMessage()    {}
 func (*GetUserRegisterAddFriendIDListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{7}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{7}
 }
 func (m *GetUserRegisterAddFriendIDListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserRegisterAddFriendIDListReq.Unmarshal(m, b)
@@ -405,7 +405,7 @@ func (m *GetUserRegisterAddFriendIDListResp) Reset()         { *m = GetUserRegis
 func (m *GetUserRegisterAddFriendIDListResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserRegisterAddFriendIDListResp) ProtoMessage()    {}
 func (*GetUserRegisterAddFriendIDListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{8}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{8}
 }
 func (m *GetUserRegisterAddFriendIDListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserRegisterAddFriendIDListResp.Unmarshal(m, b)
@@ -447,14 +447,14 @@ func (m *GetUserRegisterAddFriendIDListResp) GetCommonResp() *CommonResp {
 }
 
 type GetChatLogsReq struct {
-	Content              string                    `protobuf:"bytes,1,opt,name=Content" json:"Content,omitempty"`
-	SendID               string                    `protobuf:"bytes,2,opt,name=SendID" json:"SendID,omitempty"`
-	RecvID               string                    `protobuf:"bytes,3,opt,name=RecvID" json:"RecvID,omitempty"`
-	SendTime             string                    `protobuf:"bytes,4,opt,name=SendTime" json:"SendTime,omitempty"`
-	SessionType          int32                     `protobuf:"varint,5,opt,name=SessionType" json:"SessionType,omitempty"`
-	ContentType          int32                     `protobuf:"varint,6,opt,name=ContentType" json:"ContentType,omitempty"`
-	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,7,opt,name=Pagination" json:"Pagination,omitempty"`
-	OperationID          string                    `protobuf:"bytes,8,opt,name=OperationID" json:"OperationID,omitempty"`
+	Content              string                    `protobuf:"bytes,1,opt,name=content" json:"content,omitempty"`
+	SendID               string                    `protobuf:"bytes,2,opt,name=sendID" json:"sendID,omitempty"`
+	RecvID               string                    `protobuf:"bytes,3,opt,name=recvID" json:"recvID,omitempty"`
+	SendTime             string                    `protobuf:"bytes,4,opt,name=sendTime" json:"sendTime,omitempty"`
+	SessionType          int32                     `protobuf:"varint,5,opt,name=sessionType" json:"sessionType,omitempty"`
+	ContentType          int32                     `protobuf:"varint,6,opt,name=contentType" json:"contentType,omitempty"`
+	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,7,opt,name=pagination" json:"pagination,omitempty"`
+	OperationID          string                    `protobuf:"bytes,8,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
 	XXX_unrecognized     []byte                    `json:"-"`
 	XXX_sizecache        int32                     `json:"-"`
@@ -464,7 +464,7 @@ func (m *GetChatLogsReq) Reset()         { *m = GetChatLogsReq{} }
 func (m *GetChatLogsReq) String() string { return proto.CompactTextString(m) }
 func (*GetChatLogsReq) ProtoMessage()    {}
 func (*GetChatLogsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{9}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{9}
 }
 func (m *GetChatLogsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetChatLogsReq.Unmarshal(m, b)
@@ -541,24 +541,24 @@ func (m *GetChatLogsReq) GetOperationID() string {
 }
 
 type ChatLog struct {
-	ServerMsgID          string   `protobuf:"bytes,1,opt,name=ServerMsgID" json:"ServerMsgID,omitempty"`
-	ClientMsgID          string   `protobuf:"bytes,2,opt,name=ClientMsgID" json:"ClientMsgID,omitempty"`
-	SendID               string   `protobuf:"bytes,3,opt,name=SendID" json:"SendID,omitempty"`
-	RecvID               string   `protobuf:"bytes,4,opt,name=RecvID" json:"RecvID,omitempty"`
+	ServerMsgID          string   `protobuf:"bytes,1,opt,name=serverMsgID" json:"serverMsgID,omitempty"`
+	ClientMsgID          string   `protobuf:"bytes,2,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	SendID               string   `protobuf:"bytes,3,opt,name=sendID" json:"sendID,omitempty"`
+	RecvID               string   `protobuf:"bytes,4,opt,name=recvID" json:"recvID,omitempty"`
 	GroupID              string   `protobuf:"bytes,5,opt,name=groupID" json:"groupID,omitempty"`
 	RecvNickname         string   `protobuf:"bytes,6,opt,name=recvNickname" json:"recvNickname,omitempty"`
-	SenderPlatformID     int32    `protobuf:"varint,7,opt,name=SenderPlatformID" json:"SenderPlatformID,omitempty"`
-	SenderNickname       string   `protobuf:"bytes,8,opt,name=SenderNickname" json:"SenderNickname,omitempty"`
-	SenderFaceURL        string   `protobuf:"bytes,9,opt,name=SenderFaceURL" json:"SenderFaceURL,omitempty"`
-	GroupName            string   `protobuf:"bytes,10,opt,name=GroupName" json:"GroupName,omitempty"`
-	SessionType          int32    `protobuf:"varint,11,opt,name=SessionType" json:"SessionType,omitempty"`
-	MsgFrom              int32    `protobuf:"varint,12,opt,name=MsgFrom" json:"MsgFrom,omitempty"`
-	ContentType          int32    `protobuf:"varint,13,opt,name=ContentType" json:"ContentType,omitempty"`
-	Content              string   `protobuf:"bytes,14,opt,name=Content" json:"Content,omitempty"`
-	Status               int32    `protobuf:"varint,15,opt,name=Status" json:"Status,omitempty"`
-	SendTime             int64    `protobuf:"varint,16,opt,name=SendTime" json:"SendTime,omitempty"`
-	CreateTime           int64    `protobuf:"varint,17,opt,name=CreateTime" json:"CreateTime,omitempty"`
-	Ex                   string   `protobuf:"bytes,18,opt,name=Ex" json:"Ex,omitempty"`
+	SenderPlatformID     int32    `protobuf:"varint,7,opt,name=senderPlatformID" json:"senderPlatformID,omitempty"`
+	SenderNickname       string   `protobuf:"bytes,8,opt,name=senderNickname" json:"senderNickname,omitempty"`
+	SenderFaceURL        string   `protobuf:"bytes,9,opt,name=senderFaceURL" json:"senderFaceURL,omitempty"`
+	GroupName            string   `protobuf:"bytes,10,opt,name=groupName" json:"groupName,omitempty"`
+	SessionType          int32    `protobuf:"varint,11,opt,name=sessionType" json:"sessionType,omitempty"`
+	MsgFrom              int32    `protobuf:"varint,12,opt,name=msgFrom" json:"msgFrom,omitempty"`
+	ContentType          int32    `protobuf:"varint,13,opt,name=contentType" json:"contentType,omitempty"`
+	Content              string   `protobuf:"bytes,14,opt,name=content" json:"content,omitempty"`
+	Status               int32    `protobuf:"varint,15,opt,name=status" json:"status,omitempty"`
+	SendTime             int64    `protobuf:"varint,16,opt,name=sendTime" json:"sendTime,omitempty"`
+	CreateTime           int64    `protobuf:"varint,17,opt,name=createTime" json:"createTime,omitempty"`
+	Ex                   string   `protobuf:"bytes,18,opt,name=ex" json:"ex,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -568,7 +568,7 @@ func (m *ChatLog) Reset()         { *m = ChatLog{} }
 func (m *ChatLog) String() string { return proto.CompactTextString(m) }
 func (*ChatLog) ProtoMessage()    {}
 func (*ChatLog) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{10}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{10}
 }
 func (m *ChatLog) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ChatLog.Unmarshal(m, b)
@@ -715,10 +715,10 @@ func (m *ChatLog) GetEx() string {
 }
 
 type GetChatLogsResp struct {
-	ChatLogs             []*ChatLog                 `protobuf:"bytes,1,rep,name=ChatLogs" json:"ChatLogs,omitempty"`
-	Pagination           *sdk_ws.ResponsePagination `protobuf:"bytes,2,opt,name=Pagination" json:"Pagination,omitempty"`
-	ChatLogsNum          int32                      `protobuf:"varint,3,opt,name=ChatLogsNum" json:"ChatLogsNum,omitempty"`
-	CommonResp           *CommonResp                `protobuf:"bytes,4,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	ChatLogs             []*ChatLog                 `protobuf:"bytes,1,rep,name=chatLogs" json:"chatLogs,omitempty"`
+	Pagination           *sdk_ws.ResponsePagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
+	ChatLogsNum          int32                      `protobuf:"varint,3,opt,name=chatLogsNum" json:"chatLogsNum,omitempty"`
+	CommonResp           *CommonResp                `protobuf:"bytes,4,opt,name=commonResp" json:"commonResp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
 	XXX_unrecognized     []byte                     `json:"-"`
 	XXX_sizecache        int32                      `json:"-"`
@@ -728,7 +728,7 @@ func (m *GetChatLogsResp) Reset()         { *m = GetChatLogsResp{} }
 func (m *GetChatLogsResp) String() string { return proto.CompactTextString(m) }
 func (*GetChatLogsResp) ProtoMessage()    {}
 func (*GetChatLogsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{11}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{11}
 }
 func (m *GetChatLogsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetChatLogsResp.Unmarshal(m, b)
@@ -788,7 +788,7 @@ func (m *StatisticsReq) Reset()         { *m = StatisticsReq{} }
 func (m *StatisticsReq) String() string { return proto.CompactTextString(m) }
 func (*StatisticsReq) ProtoMessage()    {}
 func (*StatisticsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{12}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{12}
 }
 func (m *StatisticsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_StatisticsReq.Unmarshal(m, b)
@@ -823,8 +823,8 @@ func (m *StatisticsReq) GetTo() string {
 }
 
 type GetActiveUserReq struct {
-	StatisticsReq        *StatisticsReq `protobuf:"bytes,1,opt,name=StatisticsReq" json:"StatisticsReq,omitempty"`
-	OperationID          string         `protobuf:"bytes,2,opt,name=OperationID" json:"OperationID,omitempty"`
+	StatisticsReq        *StatisticsReq `protobuf:"bytes,1,opt,name=statisticsReq" json:"statisticsReq,omitempty"`
+	OperationID          string         `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -834,7 +834,7 @@ func (m *GetActiveUserReq) Reset()         { *m = GetActiveUserReq{} }
 func (m *GetActiveUserReq) String() string { return proto.CompactTextString(m) }
 func (*GetActiveUserReq) ProtoMessage()    {}
 func (*GetActiveUserReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{13}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{13}
 }
 func (m *GetActiveUserReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetActiveUserReq.Unmarshal(m, b)
@@ -869,9 +869,9 @@ func (m *GetActiveUserReq) GetOperationID() string {
 }
 
 type UserResp struct {
-	NickName             string   `protobuf:"bytes,1,opt,name=NickName" json:"NickName,omitempty"`
-	UserId               string   `protobuf:"bytes,2,opt,name=UserId" json:"UserId,omitempty"`
-	MessageNum           int32    `protobuf:"varint,3,opt,name=MessageNum" json:"MessageNum,omitempty"`
+	NickName             string   `protobuf:"bytes,1,opt,name=nickName" json:"nickName,omitempty"`
+	UserID               string   `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	MessageNum           int32    `protobuf:"varint,3,opt,name=messageNum" json:"messageNum,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -881,7 +881,7 @@ func (m *UserResp) Reset()         { *m = UserResp{} }
 func (m *UserResp) String() string { return proto.CompactTextString(m) }
 func (*UserResp) ProtoMessage()    {}
 func (*UserResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{14}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{14}
 }
 func (m *UserResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserResp.Unmarshal(m, b)
@@ -908,9 +908,9 @@ func (m *UserResp) GetNickName() string {
 	return ""
 }
 
-func (m *UserResp) GetUserId() string {
+func (m *UserResp) GetUserID() string {
 	if m != nil {
-		return m.UserId
+		return m.UserID
 	}
 	return ""
 }
@@ -924,7 +924,7 @@ func (m *UserResp) GetMessageNum() int32 {
 
 type GetActiveUserResp struct {
 	Users                []*UserResp `protobuf:"bytes,1,rep,name=Users" json:"Users,omitempty"`
-	CommonResp           *CommonResp `protobuf:"bytes,2,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	CommonResp           *CommonResp `protobuf:"bytes,2,opt,name=commonResp" json:"commonResp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -934,7 +934,7 @@ func (m *GetActiveUserResp) Reset()         { *m = GetActiveUserResp{} }
 func (m *GetActiveUserResp) String() string { return proto.CompactTextString(m) }
 func (*GetActiveUserResp) ProtoMessage()    {}
 func (*GetActiveUserResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{15}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{15}
 }
 func (m *GetActiveUserResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetActiveUserResp.Unmarshal(m, b)
@@ -969,8 +969,8 @@ func (m *GetActiveUserResp) GetCommonResp() *CommonResp {
 }
 
 type GetActiveGroupReq struct {
-	StatisticsReq        *StatisticsReq `protobuf:"bytes,1,opt,name=StatisticsReq" json:"StatisticsReq,omitempty"`
-	OperationID          string         `protobuf:"bytes,2,opt,name=OperationID" json:"OperationID,omitempty"`
+	StatisticsReq        *StatisticsReq `protobuf:"bytes,1,opt,name=statisticsReq" json:"statisticsReq,omitempty"`
+	OperationID          string         `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -980,7 +980,7 @@ func (m *GetActiveGroupReq) Reset()         { *m = GetActiveGroupReq{} }
 func (m *GetActiveGroupReq) String() string { return proto.CompactTextString(m) }
 func (*GetActiveGroupReq) ProtoMessage()    {}
 func (*GetActiveGroupReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{16}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{16}
 }
 func (m *GetActiveGroupReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetActiveGroupReq.Unmarshal(m, b)
@@ -1018,7 +1018,7 @@ type GroupResp struct {
 	GroupName            string      `protobuf:"bytes,1,opt,name=GroupName" json:"GroupName,omitempty"`
 	GroupId              string      `protobuf:"bytes,2,opt,name=GroupId" json:"GroupId,omitempty"`
 	MessageNum           int32       `protobuf:"varint,3,opt,name=MessageNum" json:"MessageNum,omitempty"`
-	CommonResp           *CommonResp `protobuf:"bytes,4,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	CommonResp           *CommonResp `protobuf:"bytes,4,opt,name=commonResp" json:"commonResp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
@@ -1028,7 +1028,7 @@ func (m *GroupResp) Reset()         { *m = GroupResp{} }
 func (m *GroupResp) String() string { return proto.CompactTextString(m) }
 func (*GroupResp) ProtoMessage()    {}
 func (*GroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{17}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{17}
 }
 func (m *GroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GroupResp.Unmarshal(m, b)
@@ -1078,7 +1078,7 @@ func (m *GroupResp) GetCommonResp() *CommonResp {
 
 type GetActiveGroupResp struct {
 	Groups               []*GroupResp `protobuf:"bytes,1,rep,name=Groups" json:"Groups,omitempty"`
-	CommonResp           *CommonResp  `protobuf:"bytes,2,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	CommonResp           *CommonResp  `protobuf:"bytes,2,opt,name=commonResp" json:"commonResp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
 	XXX_unrecognized     []byte       `json:"-"`
 	XXX_sizecache        int32        `json:"-"`
@@ -1088,7 +1088,7 @@ func (m *GetActiveGroupResp) Reset()         { *m = GetActiveGroupResp{} }
 func (m *GetActiveGroupResp) String() string { return proto.CompactTextString(m) }
 func (*GetActiveGroupResp) ProtoMessage()    {}
 func (*GetActiveGroupResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{18}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{18}
 }
 func (m *GetActiveGroupResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetActiveGroupResp.Unmarshal(m, b)
@@ -1134,7 +1134,7 @@ func (m *DateNumList) Reset()         { *m = DateNumList{} }
 func (m *DateNumList) String() string { return proto.CompactTextString(m) }
 func (*DateNumList) ProtoMessage()    {}
 func (*DateNumList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{19}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{19}
 }
 func (m *DateNumList) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DateNumList.Unmarshal(m, b)
@@ -1180,7 +1180,7 @@ func (m *GetMessageStatisticsReq) Reset()         { *m = GetMessageStatisticsReq
 func (m *GetMessageStatisticsReq) String() string { return proto.CompactTextString(m) }
 func (*GetMessageStatisticsReq) ProtoMessage()    {}
 func (*GetMessageStatisticsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{20}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{20}
 }
 func (m *GetMessageStatisticsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMessageStatisticsReq.Unmarshal(m, b)
@@ -1219,7 +1219,7 @@ type GetMessageStatisticsResp struct {
 	GroupMessageNum       int32          `protobuf:"varint,2,opt,name=GroupMessageNum" json:"GroupMessageNum,omitempty"`
 	PrivateMessageNumList []*DateNumList `protobuf:"bytes,3,rep,name=PrivateMessageNumList" json:"PrivateMessageNumList,omitempty"`
 	GroupMessageNumList   []*DateNumList `protobuf:"bytes,4,rep,name=GroupMessageNumList" json:"GroupMessageNumList,omitempty"`
-	CommonResp            *CommonResp    `protobuf:"bytes,5,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	CommonResp            *CommonResp    `protobuf:"bytes,5,opt,name=commonResp" json:"commonResp,omitempty"`
 	XXX_NoUnkeyedLiteral  struct{}       `json:"-"`
 	XXX_unrecognized      []byte         `json:"-"`
 	XXX_sizecache         int32          `json:"-"`
@@ -1229,7 +1229,7 @@ func (m *GetMessageStatisticsResp) Reset()         { *m = GetMessageStatisticsRe
 func (m *GetMessageStatisticsResp) String() string { return proto.CompactTextString(m) }
 func (*GetMessageStatisticsResp) ProtoMessage()    {}
 func (*GetMessageStatisticsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{21}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{21}
 }
 func (m *GetMessageStatisticsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMessageStatisticsResp.Unmarshal(m, b)
@@ -1296,7 +1296,7 @@ func (m *GetGroupStatisticsReq) Reset()         { *m = GetGroupStatisticsReq{} }
 func (m *GetGroupStatisticsReq) String() string { return proto.CompactTextString(m) }
 func (*GetGroupStatisticsReq) ProtoMessage()    {}
 func (*GetGroupStatisticsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{22}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{22}
 }
 func (m *GetGroupStatisticsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupStatisticsReq.Unmarshal(m, b)
@@ -1335,7 +1335,7 @@ type GetGroupStatisticsResp struct {
 	TotalGroupNum        int32          `protobuf:"varint,2,opt,name=TotalGroupNum" json:"TotalGroupNum,omitempty"`
 	IncreaseGroupNumList []*DateNumList `protobuf:"bytes,3,rep,name=IncreaseGroupNumList" json:"IncreaseGroupNumList,omitempty"`
 	TotalGroupNumList    []*DateNumList `protobuf:"bytes,4,rep,name=TotalGroupNumList" json:"TotalGroupNumList,omitempty"`
-	CommonResp           *CommonResp    `protobuf:"bytes,5,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	CommonResp           *CommonResp    `protobuf:"bytes,5,opt,name=commonResp" json:"commonResp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -1345,7 +1345,7 @@ func (m *GetGroupStatisticsResp) Reset()         { *m = GetGroupStatisticsResp{}
 func (m *GetGroupStatisticsResp) String() string { return proto.CompactTextString(m) }
 func (*GetGroupStatisticsResp) ProtoMessage()    {}
 func (*GetGroupStatisticsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{23}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{23}
 }
 func (m *GetGroupStatisticsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetGroupStatisticsResp.Unmarshal(m, b)
@@ -1412,7 +1412,7 @@ func (m *GetUserStatisticsReq) Reset()         { *m = GetUserStatisticsReq{} }
 func (m *GetUserStatisticsReq) String() string { return proto.CompactTextString(m) }
 func (*GetUserStatisticsReq) ProtoMessage()    {}
 func (*GetUserStatisticsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{24}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{24}
 }
 func (m *GetUserStatisticsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserStatisticsReq.Unmarshal(m, b)
@@ -1453,7 +1453,7 @@ type GetUserStatisticsResp struct {
 	IncreaseUserNumList  []*DateNumList `protobuf:"bytes,4,rep,name=IncreaseUserNumList" json:"IncreaseUserNumList,omitempty"`
 	ActiveUserNumList    []*DateNumList `protobuf:"bytes,5,rep,name=ActiveUserNumList" json:"ActiveUserNumList,omitempty"`
 	TotalUserNumList     []*DateNumList `protobuf:"bytes,6,rep,name=TotalUserNumList" json:"TotalUserNumList,omitempty"`
-	CommonResp           *CommonResp    `protobuf:"bytes,7,opt,name=CommonResp" json:"CommonResp,omitempty"`
+	CommonResp           *CommonResp    `protobuf:"bytes,7,opt,name=commonResp" json:"commonResp,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
 	XXX_unrecognized     []byte         `json:"-"`
 	XXX_sizecache        int32          `json:"-"`
@@ -1463,7 +1463,7 @@ func (m *GetUserStatisticsResp) Reset()         { *m = GetUserStatisticsResp{} }
 func (m *GetUserStatisticsResp) String() string { return proto.CompactTextString(m) }
 func (*GetUserStatisticsResp) ProtoMessage()    {}
 func (*GetUserStatisticsResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_admin_cms_521fdb68576e364f, []int{25}
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{25}
 }
 func (m *GetUserStatisticsResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetUserStatisticsResp.Unmarshal(m, b)
@@ -1532,6 +1532,1198 @@ func (m *GetUserStatisticsResp) GetCommonResp() *CommonResp {
 	return nil
 }
 
+type GenerateInvitationCodeReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	CodeLen              int32    `protobuf:"varint,2,opt,name=codeLen" json:"codeLen,omitempty"`
+	CodeNum              int32    `protobuf:"varint,3,opt,name=codeNum" json:"codeNum,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GenerateInvitationCodeReq) Reset()         { *m = GenerateInvitationCodeReq{} }
+func (m *GenerateInvitationCodeReq) String() string { return proto.CompactTextString(m) }
+func (*GenerateInvitationCodeReq) ProtoMessage()    {}
+func (*GenerateInvitationCodeReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{26}
+}
+func (m *GenerateInvitationCodeReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GenerateInvitationCodeReq.Unmarshal(m, b)
+}
+func (m *GenerateInvitationCodeReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GenerateInvitationCodeReq.Marshal(b, m, deterministic)
+}
+func (dst *GenerateInvitationCodeReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GenerateInvitationCodeReq.Merge(dst, src)
+}
+func (m *GenerateInvitationCodeReq) XXX_Size() int {
+	return xxx_messageInfo_GenerateInvitationCodeReq.Size(m)
+}
+func (m *GenerateInvitationCodeReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GenerateInvitationCodeReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GenerateInvitationCodeReq proto.InternalMessageInfo
+
+func (m *GenerateInvitationCodeReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GenerateInvitationCodeReq) GetCodeLen() int32 {
+	if m != nil {
+		return m.CodeLen
+	}
+	return 0
+}
+
+func (m *GenerateInvitationCodeReq) GetCodeNum() int32 {
+	if m != nil {
+		return m.CodeNum
+	}
+	return 0
+}
+
+type GenerateInvitationCodeResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *GenerateInvitationCodeResp) Reset()         { *m = GenerateInvitationCodeResp{} }
+func (m *GenerateInvitationCodeResp) String() string { return proto.CompactTextString(m) }
+func (*GenerateInvitationCodeResp) ProtoMessage()    {}
+func (*GenerateInvitationCodeResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{27}
+}
+func (m *GenerateInvitationCodeResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GenerateInvitationCodeResp.Unmarshal(m, b)
+}
+func (m *GenerateInvitationCodeResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GenerateInvitationCodeResp.Marshal(b, m, deterministic)
+}
+func (dst *GenerateInvitationCodeResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GenerateInvitationCodeResp.Merge(dst, src)
+}
+func (m *GenerateInvitationCodeResp) XXX_Size() int {
+	return xxx_messageInfo_GenerateInvitationCodeResp.Size(m)
+}
+func (m *GenerateInvitationCodeResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GenerateInvitationCodeResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GenerateInvitationCodeResp proto.InternalMessageInfo
+
+func (m *GenerateInvitationCodeResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type GetInvitationCodesReq struct {
+	OperationID          string                    `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	Code                 string                    `protobuf:"bytes,2,opt,name=code" json:"code,omitempty"`
+	Status               int32                     `protobuf:"varint,3,opt,name=status" json:"status,omitempty"`
+	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,4,opt,name=pagination" json:"pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
+	XXX_unrecognized     []byte                    `json:"-"`
+	XXX_sizecache        int32                     `json:"-"`
+}
+
+func (m *GetInvitationCodesReq) Reset()         { *m = GetInvitationCodesReq{} }
+func (m *GetInvitationCodesReq) String() string { return proto.CompactTextString(m) }
+func (*GetInvitationCodesReq) ProtoMessage()    {}
+func (*GetInvitationCodesReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{28}
+}
+func (m *GetInvitationCodesReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetInvitationCodesReq.Unmarshal(m, b)
+}
+func (m *GetInvitationCodesReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetInvitationCodesReq.Marshal(b, m, deterministic)
+}
+func (dst *GetInvitationCodesReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetInvitationCodesReq.Merge(dst, src)
+}
+func (m *GetInvitationCodesReq) XXX_Size() int {
+	return xxx_messageInfo_GetInvitationCodesReq.Size(m)
+}
+func (m *GetInvitationCodesReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetInvitationCodesReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetInvitationCodesReq proto.InternalMessageInfo
+
+func (m *GetInvitationCodesReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GetInvitationCodesReq) GetCode() string {
+	if m != nil {
+		return m.Code
+	}
+	return ""
+}
+
+func (m *GetInvitationCodesReq) GetStatus() int32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+func (m *GetInvitationCodesReq) GetPagination() *sdk_ws.RequestPagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+type InvitationCode struct {
+	InvitationCode       string   `protobuf:"bytes,1,opt,name=invitationCode" json:"invitationCode,omitempty"`
+	CreateTime           int32    `protobuf:"varint,2,opt,name=createTime" json:"createTime,omitempty"`
+	LastTime             int32    `protobuf:"varint,3,opt,name=lastTime" json:"lastTime,omitempty"`
+	UserID               string   `protobuf:"bytes,4,opt,name=userID" json:"userID,omitempty"`
+	Status               int32    `protobuf:"varint,5,opt,name=status" json:"status,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *InvitationCode) Reset()         { *m = InvitationCode{} }
+func (m *InvitationCode) String() string { return proto.CompactTextString(m) }
+func (*InvitationCode) ProtoMessage()    {}
+func (*InvitationCode) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{29}
+}
+func (m *InvitationCode) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_InvitationCode.Unmarshal(m, b)
+}
+func (m *InvitationCode) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_InvitationCode.Marshal(b, m, deterministic)
+}
+func (dst *InvitationCode) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InvitationCode.Merge(dst, src)
+}
+func (m *InvitationCode) XXX_Size() int {
+	return xxx_messageInfo_InvitationCode.Size(m)
+}
+func (m *InvitationCode) XXX_DiscardUnknown() {
+	xxx_messageInfo_InvitationCode.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InvitationCode proto.InternalMessageInfo
+
+func (m *InvitationCode) GetInvitationCode() string {
+	if m != nil {
+		return m.InvitationCode
+	}
+	return ""
+}
+
+func (m *InvitationCode) GetCreateTime() int32 {
+	if m != nil {
+		return m.CreateTime
+	}
+	return 0
+}
+
+func (m *InvitationCode) GetLastTime() int32 {
+	if m != nil {
+		return m.LastTime
+	}
+	return 0
+}
+
+func (m *InvitationCode) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *InvitationCode) GetStatus() int32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+type GetInvitationCodesResp struct {
+	InvitationCodes      []*InvitationCode          `protobuf:"bytes,1,rep,name=invitationCodes" json:"invitationCodes,omitempty"`
+	Pagination           *sdk_ws.ResponsePagination `protobuf:"bytes,2,opt,name=Pagination" json:"Pagination,omitempty"`
+	CommonResp           *CommonResp                `protobuf:"bytes,3,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
+	XXX_unrecognized     []byte                     `json:"-"`
+	XXX_sizecache        int32                      `json:"-"`
+}
+
+func (m *GetInvitationCodesResp) Reset()         { *m = GetInvitationCodesResp{} }
+func (m *GetInvitationCodesResp) String() string { return proto.CompactTextString(m) }
+func (*GetInvitationCodesResp) ProtoMessage()    {}
+func (*GetInvitationCodesResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{30}
+}
+func (m *GetInvitationCodesResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetInvitationCodesResp.Unmarshal(m, b)
+}
+func (m *GetInvitationCodesResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetInvitationCodesResp.Marshal(b, m, deterministic)
+}
+func (dst *GetInvitationCodesResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetInvitationCodesResp.Merge(dst, src)
+}
+func (m *GetInvitationCodesResp) XXX_Size() int {
+	return xxx_messageInfo_GetInvitationCodesResp.Size(m)
+}
+func (m *GetInvitationCodesResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetInvitationCodesResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetInvitationCodesResp proto.InternalMessageInfo
+
+func (m *GetInvitationCodesResp) GetInvitationCodes() []*InvitationCode {
+	if m != nil {
+		return m.InvitationCodes
+	}
+	return nil
+}
+
+func (m *GetInvitationCodesResp) GetPagination() *sdk_ws.ResponsePagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+func (m *GetInvitationCodesResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type QueryIPRegisterReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	IP                   string   `protobuf:"bytes,2,opt,name=IP" json:"IP,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *QueryIPRegisterReq) Reset()         { *m = QueryIPRegisterReq{} }
+func (m *QueryIPRegisterReq) String() string { return proto.CompactTextString(m) }
+func (*QueryIPRegisterReq) ProtoMessage()    {}
+func (*QueryIPRegisterReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{31}
+}
+func (m *QueryIPRegisterReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QueryIPRegisterReq.Unmarshal(m, b)
+}
+func (m *QueryIPRegisterReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QueryIPRegisterReq.Marshal(b, m, deterministic)
+}
+func (dst *QueryIPRegisterReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIPRegisterReq.Merge(dst, src)
+}
+func (m *QueryIPRegisterReq) XXX_Size() int {
+	return xxx_messageInfo_QueryIPRegisterReq.Size(m)
+}
+func (m *QueryIPRegisterReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIPRegisterReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryIPRegisterReq proto.InternalMessageInfo
+
+func (m *QueryIPRegisterReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *QueryIPRegisterReq) GetIP() string {
+	if m != nil {
+		return m.IP
+	}
+	return ""
+}
+
+type QueryIPRegisterResp struct {
+	IP                   string      `protobuf:"bytes,1,opt,name=IP" json:"IP,omitempty"`
+	RegisterNum          int32       `protobuf:"varint,2,opt,name=RegisterNum" json:"RegisterNum,omitempty"`
+	Status               int32       `protobuf:"varint,3,opt,name=Status" json:"Status,omitempty"`
+	UserIDList           []string    `protobuf:"bytes,4,rep,name=userIDList" json:"userIDList,omitempty"`
+	CommonResp           *CommonResp `protobuf:"bytes,5,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *QueryIPRegisterResp) Reset()         { *m = QueryIPRegisterResp{} }
+func (m *QueryIPRegisterResp) String() string { return proto.CompactTextString(m) }
+func (*QueryIPRegisterResp) ProtoMessage()    {}
+func (*QueryIPRegisterResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{32}
+}
+func (m *QueryIPRegisterResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QueryIPRegisterResp.Unmarshal(m, b)
+}
+func (m *QueryIPRegisterResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QueryIPRegisterResp.Marshal(b, m, deterministic)
+}
+func (dst *QueryIPRegisterResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryIPRegisterResp.Merge(dst, src)
+}
+func (m *QueryIPRegisterResp) XXX_Size() int {
+	return xxx_messageInfo_QueryIPRegisterResp.Size(m)
+}
+func (m *QueryIPRegisterResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryIPRegisterResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryIPRegisterResp proto.InternalMessageInfo
+
+func (m *QueryIPRegisterResp) GetIP() string {
+	if m != nil {
+		return m.IP
+	}
+	return ""
+}
+
+func (m *QueryIPRegisterResp) GetRegisterNum() int32 {
+	if m != nil {
+		return m.RegisterNum
+	}
+	return 0
+}
+
+func (m *QueryIPRegisterResp) GetStatus() int32 {
+	if m != nil {
+		return m.Status
+	}
+	return 0
+}
+
+func (m *QueryIPRegisterResp) GetUserIDList() []string {
+	if m != nil {
+		return m.UserIDList
+	}
+	return nil
+}
+
+func (m *QueryIPRegisterResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type AddIPLimitReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	IP                   string   `protobuf:"bytes,2,opt,name=IP" json:"IP,omitempty"`
+	LimitTime            int32    `protobuf:"varint,3,opt,name=limitTime" json:"limitTime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddIPLimitReq) Reset()         { *m = AddIPLimitReq{} }
+func (m *AddIPLimitReq) String() string { return proto.CompactTextString(m) }
+func (*AddIPLimitReq) ProtoMessage()    {}
+func (*AddIPLimitReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{33}
+}
+func (m *AddIPLimitReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddIPLimitReq.Unmarshal(m, b)
+}
+func (m *AddIPLimitReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddIPLimitReq.Marshal(b, m, deterministic)
+}
+func (dst *AddIPLimitReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddIPLimitReq.Merge(dst, src)
+}
+func (m *AddIPLimitReq) XXX_Size() int {
+	return xxx_messageInfo_AddIPLimitReq.Size(m)
+}
+func (m *AddIPLimitReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddIPLimitReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddIPLimitReq proto.InternalMessageInfo
+
+func (m *AddIPLimitReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *AddIPLimitReq) GetIP() string {
+	if m != nil {
+		return m.IP
+	}
+	return ""
+}
+
+func (m *AddIPLimitReq) GetLimitTime() int32 {
+	if m != nil {
+		return m.LimitTime
+	}
+	return 0
+}
+
+type AddIPLimitResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *AddIPLimitResp) Reset()         { *m = AddIPLimitResp{} }
+func (m *AddIPLimitResp) String() string { return proto.CompactTextString(m) }
+func (*AddIPLimitResp) ProtoMessage()    {}
+func (*AddIPLimitResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{34}
+}
+func (m *AddIPLimitResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddIPLimitResp.Unmarshal(m, b)
+}
+func (m *AddIPLimitResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddIPLimitResp.Marshal(b, m, deterministic)
+}
+func (dst *AddIPLimitResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddIPLimitResp.Merge(dst, src)
+}
+func (m *AddIPLimitResp) XXX_Size() int {
+	return xxx_messageInfo_AddIPLimitResp.Size(m)
+}
+func (m *AddIPLimitResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddIPLimitResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddIPLimitResp proto.InternalMessageInfo
+
+func (m *AddIPLimitResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type RemoveIPLimitReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	IP                   string   `protobuf:"bytes,2,opt,name=IP" json:"IP,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RemoveIPLimitReq) Reset()         { *m = RemoveIPLimitReq{} }
+func (m *RemoveIPLimitReq) String() string { return proto.CompactTextString(m) }
+func (*RemoveIPLimitReq) ProtoMessage()    {}
+func (*RemoveIPLimitReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{35}
+}
+func (m *RemoveIPLimitReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveIPLimitReq.Unmarshal(m, b)
+}
+func (m *RemoveIPLimitReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveIPLimitReq.Marshal(b, m, deterministic)
+}
+func (dst *RemoveIPLimitReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveIPLimitReq.Merge(dst, src)
+}
+func (m *RemoveIPLimitReq) XXX_Size() int {
+	return xxx_messageInfo_RemoveIPLimitReq.Size(m)
+}
+func (m *RemoveIPLimitReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveIPLimitReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveIPLimitReq proto.InternalMessageInfo
+
+func (m *RemoveIPLimitReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *RemoveIPLimitReq) GetIP() string {
+	if m != nil {
+		return m.IP
+	}
+	return ""
+}
+
+type RemoveIPLimitResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *RemoveIPLimitResp) Reset()         { *m = RemoveIPLimitResp{} }
+func (m *RemoveIPLimitResp) String() string { return proto.CompactTextString(m) }
+func (*RemoveIPLimitResp) ProtoMessage()    {}
+func (*RemoveIPLimitResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{36}
+}
+func (m *RemoveIPLimitResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveIPLimitResp.Unmarshal(m, b)
+}
+func (m *RemoveIPLimitResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveIPLimitResp.Marshal(b, m, deterministic)
+}
+func (dst *RemoveIPLimitResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveIPLimitResp.Merge(dst, src)
+}
+func (m *RemoveIPLimitResp) XXX_Size() int {
+	return xxx_messageInfo_RemoveIPLimitResp.Size(m)
+}
+func (m *RemoveIPLimitResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveIPLimitResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveIPLimitResp proto.InternalMessageInfo
+
+func (m *RemoveIPLimitResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type QueryUserIDIPLimitLoginReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	UserID               string   `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *QueryUserIDIPLimitLoginReq) Reset()         { *m = QueryUserIDIPLimitLoginReq{} }
+func (m *QueryUserIDIPLimitLoginReq) String() string { return proto.CompactTextString(m) }
+func (*QueryUserIDIPLimitLoginReq) ProtoMessage()    {}
+func (*QueryUserIDIPLimitLoginReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{37}
+}
+func (m *QueryUserIDIPLimitLoginReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QueryUserIDIPLimitLoginReq.Unmarshal(m, b)
+}
+func (m *QueryUserIDIPLimitLoginReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QueryUserIDIPLimitLoginReq.Marshal(b, m, deterministic)
+}
+func (dst *QueryUserIDIPLimitLoginReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryUserIDIPLimitLoginReq.Merge(dst, src)
+}
+func (m *QueryUserIDIPLimitLoginReq) XXX_Size() int {
+	return xxx_messageInfo_QueryUserIDIPLimitLoginReq.Size(m)
+}
+func (m *QueryUserIDIPLimitLoginReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryUserIDIPLimitLoginReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryUserIDIPLimitLoginReq proto.InternalMessageInfo
+
+func (m *QueryUserIDIPLimitLoginReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *QueryUserIDIPLimitLoginReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+type UserIPLimit struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	IP                   string   `protobuf:"bytes,2,opt,name=IP" json:"IP,omitempty"`
+	CreateTime           int32    `protobuf:"varint,3,opt,name=createTime" json:"createTime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UserIPLimit) Reset()         { *m = UserIPLimit{} }
+func (m *UserIPLimit) String() string { return proto.CompactTextString(m) }
+func (*UserIPLimit) ProtoMessage()    {}
+func (*UserIPLimit) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{38}
+}
+func (m *UserIPLimit) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserIPLimit.Unmarshal(m, b)
+}
+func (m *UserIPLimit) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserIPLimit.Marshal(b, m, deterministic)
+}
+func (dst *UserIPLimit) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserIPLimit.Merge(dst, src)
+}
+func (m *UserIPLimit) XXX_Size() int {
+	return xxx_messageInfo_UserIPLimit.Size(m)
+}
+func (m *UserIPLimit) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserIPLimit.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserIPLimit proto.InternalMessageInfo
+
+func (m *UserIPLimit) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *UserIPLimit) GetIP() string {
+	if m != nil {
+		return m.IP
+	}
+	return ""
+}
+
+func (m *UserIPLimit) GetCreateTime() int32 {
+	if m != nil {
+		return m.CreateTime
+	}
+	return 0
+}
+
+type QueryUserIDIPLimitLoginResp struct {
+	UserIPLimits         []*UserIPLimit `protobuf:"bytes,1,rep,name=UserIPLimits" json:"UserIPLimits,omitempty"`
+	CommonResp           *CommonResp    `protobuf:"bytes,2,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
+}
+
+func (m *QueryUserIDIPLimitLoginResp) Reset()         { *m = QueryUserIDIPLimitLoginResp{} }
+func (m *QueryUserIDIPLimitLoginResp) String() string { return proto.CompactTextString(m) }
+func (*QueryUserIDIPLimitLoginResp) ProtoMessage()    {}
+func (*QueryUserIDIPLimitLoginResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{39}
+}
+func (m *QueryUserIDIPLimitLoginResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QueryUserIDIPLimitLoginResp.Unmarshal(m, b)
+}
+func (m *QueryUserIDIPLimitLoginResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QueryUserIDIPLimitLoginResp.Marshal(b, m, deterministic)
+}
+func (dst *QueryUserIDIPLimitLoginResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryUserIDIPLimitLoginResp.Merge(dst, src)
+}
+func (m *QueryUserIDIPLimitLoginResp) XXX_Size() int {
+	return xxx_messageInfo_QueryUserIDIPLimitLoginResp.Size(m)
+}
+func (m *QueryUserIDIPLimitLoginResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryUserIDIPLimitLoginResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryUserIDIPLimitLoginResp proto.InternalMessageInfo
+
+func (m *QueryUserIDIPLimitLoginResp) GetUserIPLimits() []*UserIPLimit {
+	if m != nil {
+		return m.UserIPLimits
+	}
+	return nil
+}
+
+func (m *QueryUserIDIPLimitLoginResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type AddUserIPLimitLoginReq struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	IP                   string   `protobuf:"bytes,3,opt,name=IP" json:"IP,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AddUserIPLimitLoginReq) Reset()         { *m = AddUserIPLimitLoginReq{} }
+func (m *AddUserIPLimitLoginReq) String() string { return proto.CompactTextString(m) }
+func (*AddUserIPLimitLoginReq) ProtoMessage()    {}
+func (*AddUserIPLimitLoginReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{40}
+}
+func (m *AddUserIPLimitLoginReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddUserIPLimitLoginReq.Unmarshal(m, b)
+}
+func (m *AddUserIPLimitLoginReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddUserIPLimitLoginReq.Marshal(b, m, deterministic)
+}
+func (dst *AddUserIPLimitLoginReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddUserIPLimitLoginReq.Merge(dst, src)
+}
+func (m *AddUserIPLimitLoginReq) XXX_Size() int {
+	return xxx_messageInfo_AddUserIPLimitLoginReq.Size(m)
+}
+func (m *AddUserIPLimitLoginReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddUserIPLimitLoginReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddUserIPLimitLoginReq proto.InternalMessageInfo
+
+func (m *AddUserIPLimitLoginReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *AddUserIPLimitLoginReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *AddUserIPLimitLoginReq) GetIP() string {
+	if m != nil {
+		return m.IP
+	}
+	return ""
+}
+
+type AddUserIPLimitLoginResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *AddUserIPLimitLoginResp) Reset()         { *m = AddUserIPLimitLoginResp{} }
+func (m *AddUserIPLimitLoginResp) String() string { return proto.CompactTextString(m) }
+func (*AddUserIPLimitLoginResp) ProtoMessage()    {}
+func (*AddUserIPLimitLoginResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{41}
+}
+func (m *AddUserIPLimitLoginResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddUserIPLimitLoginResp.Unmarshal(m, b)
+}
+func (m *AddUserIPLimitLoginResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddUserIPLimitLoginResp.Marshal(b, m, deterministic)
+}
+func (dst *AddUserIPLimitLoginResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddUserIPLimitLoginResp.Merge(dst, src)
+}
+func (m *AddUserIPLimitLoginResp) XXX_Size() int {
+	return xxx_messageInfo_AddUserIPLimitLoginResp.Size(m)
+}
+func (m *AddUserIPLimitLoginResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddUserIPLimitLoginResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddUserIPLimitLoginResp proto.InternalMessageInfo
+
+func (m *AddUserIPLimitLoginResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type RemoveUserIPLimitReq struct {
+	UserID               string   `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
+	OperationID          string   `protobuf:"bytes,2,opt,name=operationID" json:"operationID,omitempty"`
+	IP                   string   `protobuf:"bytes,3,opt,name=IP" json:"IP,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RemoveUserIPLimitReq) Reset()         { *m = RemoveUserIPLimitReq{} }
+func (m *RemoveUserIPLimitReq) String() string { return proto.CompactTextString(m) }
+func (*RemoveUserIPLimitReq) ProtoMessage()    {}
+func (*RemoveUserIPLimitReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{42}
+}
+func (m *RemoveUserIPLimitReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveUserIPLimitReq.Unmarshal(m, b)
+}
+func (m *RemoveUserIPLimitReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveUserIPLimitReq.Marshal(b, m, deterministic)
+}
+func (dst *RemoveUserIPLimitReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveUserIPLimitReq.Merge(dst, src)
+}
+func (m *RemoveUserIPLimitReq) XXX_Size() int {
+	return xxx_messageInfo_RemoveUserIPLimitReq.Size(m)
+}
+func (m *RemoveUserIPLimitReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveUserIPLimitReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveUserIPLimitReq proto.InternalMessageInfo
+
+func (m *RemoveUserIPLimitReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *RemoveUserIPLimitReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *RemoveUserIPLimitReq) GetIP() string {
+	if m != nil {
+		return m.IP
+	}
+	return ""
+}
+
+type RemoveUserIPLimitResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *RemoveUserIPLimitResp) Reset()         { *m = RemoveUserIPLimitResp{} }
+func (m *RemoveUserIPLimitResp) String() string { return proto.CompactTextString(m) }
+func (*RemoveUserIPLimitResp) ProtoMessage()    {}
+func (*RemoveUserIPLimitResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{43}
+}
+func (m *RemoveUserIPLimitResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveUserIPLimitResp.Unmarshal(m, b)
+}
+func (m *RemoveUserIPLimitResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveUserIPLimitResp.Marshal(b, m, deterministic)
+}
+func (dst *RemoveUserIPLimitResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveUserIPLimitResp.Merge(dst, src)
+}
+func (m *RemoveUserIPLimitResp) XXX_Size() int {
+	return xxx_messageInfo_RemoveUserIPLimitResp.Size(m)
+}
+func (m *RemoveUserIPLimitResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveUserIPLimitResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveUserIPLimitResp proto.InternalMessageInfo
+
+func (m *RemoveUserIPLimitResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type GetClientInitConfigReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetClientInitConfigReq) Reset()         { *m = GetClientInitConfigReq{} }
+func (m *GetClientInitConfigReq) String() string { return proto.CompactTextString(m) }
+func (*GetClientInitConfigReq) ProtoMessage()    {}
+func (*GetClientInitConfigReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{44}
+}
+func (m *GetClientInitConfigReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetClientInitConfigReq.Unmarshal(m, b)
+}
+func (m *GetClientInitConfigReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetClientInitConfigReq.Marshal(b, m, deterministic)
+}
+func (dst *GetClientInitConfigReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetClientInitConfigReq.Merge(dst, src)
+}
+func (m *GetClientInitConfigReq) XXX_Size() int {
+	return xxx_messageInfo_GetClientInitConfigReq.Size(m)
+}
+func (m *GetClientInitConfigReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetClientInitConfigReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetClientInitConfigReq proto.InternalMessageInfo
+
+func (m *GetClientInitConfigReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+type GetClientInitConfigResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *GetClientInitConfigResp) Reset()         { *m = GetClientInitConfigResp{} }
+func (m *GetClientInitConfigResp) String() string { return proto.CompactTextString(m) }
+func (*GetClientInitConfigResp) ProtoMessage()    {}
+func (*GetClientInitConfigResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{45}
+}
+func (m *GetClientInitConfigResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetClientInitConfigResp.Unmarshal(m, b)
+}
+func (m *GetClientInitConfigResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetClientInitConfigResp.Marshal(b, m, deterministic)
+}
+func (dst *GetClientInitConfigResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetClientInitConfigResp.Merge(dst, src)
+}
+func (m *GetClientInitConfigResp) XXX_Size() int {
+	return xxx_messageInfo_GetClientInitConfigResp.Size(m)
+}
+func (m *GetClientInitConfigResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetClientInitConfigResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetClientInitConfigResp proto.InternalMessageInfo
+
+func (m *GetClientInitConfigResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type SetClientInitConfigReq struct {
+	OperationID          string   `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	DiscoverPageURL      string   `protobuf:"bytes,2,opt,name=discoverPageURL" json:"discoverPageURL,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SetClientInitConfigReq) Reset()         { *m = SetClientInitConfigReq{} }
+func (m *SetClientInitConfigReq) String() string { return proto.CompactTextString(m) }
+func (*SetClientInitConfigReq) ProtoMessage()    {}
+func (*SetClientInitConfigReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{46}
+}
+func (m *SetClientInitConfigReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetClientInitConfigReq.Unmarshal(m, b)
+}
+func (m *SetClientInitConfigReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetClientInitConfigReq.Marshal(b, m, deterministic)
+}
+func (dst *SetClientInitConfigReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetClientInitConfigReq.Merge(dst, src)
+}
+func (m *SetClientInitConfigReq) XXX_Size() int {
+	return xxx_messageInfo_SetClientInitConfigReq.Size(m)
+}
+func (m *SetClientInitConfigReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetClientInitConfigReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetClientInitConfigReq proto.InternalMessageInfo
+
+func (m *SetClientInitConfigReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *SetClientInitConfigReq) GetDiscoverPageURL() string {
+	if m != nil {
+		return m.DiscoverPageURL
+	}
+	return ""
+}
+
+type SetClientInitConfigResp struct {
+	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *SetClientInitConfigResp) Reset()         { *m = SetClientInitConfigResp{} }
+func (m *SetClientInitConfigResp) String() string { return proto.CompactTextString(m) }
+func (*SetClientInitConfigResp) ProtoMessage()    {}
+func (*SetClientInitConfigResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{47}
+}
+func (m *SetClientInitConfigResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetClientInitConfigResp.Unmarshal(m, b)
+}
+func (m *SetClientInitConfigResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetClientInitConfigResp.Marshal(b, m, deterministic)
+}
+func (dst *SetClientInitConfigResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetClientInitConfigResp.Merge(dst, src)
+}
+func (m *SetClientInitConfigResp) XXX_Size() int {
+	return xxx_messageInfo_SetClientInitConfigResp.Size(m)
+}
+func (m *SetClientInitConfigResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetClientInitConfigResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetClientInitConfigResp proto.InternalMessageInfo
+
+func (m *SetClientInitConfigResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
+type GetUserFriendsReq struct {
+	OperationID          string                    `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	UserID               string                    `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
+	FriendUserID         string                    `protobuf:"bytes,3,opt,name=friendUserID" json:"friendUserID,omitempty"`
+	FriendUserName       string                    `protobuf:"bytes,4,opt,name=friendUserName" json:"friendUserName,omitempty"`
+	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,5,opt,name=pagination" json:"pagination,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
+	XXX_unrecognized     []byte                    `json:"-"`
+	XXX_sizecache        int32                     `json:"-"`
+}
+
+func (m *GetUserFriendsReq) Reset()         { *m = GetUserFriendsReq{} }
+func (m *GetUserFriendsReq) String() string { return proto.CompactTextString(m) }
+func (*GetUserFriendsReq) ProtoMessage()    {}
+func (*GetUserFriendsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{48}
+}
+func (m *GetUserFriendsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetUserFriendsReq.Unmarshal(m, b)
+}
+func (m *GetUserFriendsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetUserFriendsReq.Marshal(b, m, deterministic)
+}
+func (dst *GetUserFriendsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserFriendsReq.Merge(dst, src)
+}
+func (m *GetUserFriendsReq) XXX_Size() int {
+	return xxx_messageInfo_GetUserFriendsReq.Size(m)
+}
+func (m *GetUserFriendsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserFriendsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserFriendsReq proto.InternalMessageInfo
+
+func (m *GetUserFriendsReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GetUserFriendsReq) GetUserID() string {
+	if m != nil {
+		return m.UserID
+	}
+	return ""
+}
+
+func (m *GetUserFriendsReq) GetFriendUserID() string {
+	if m != nil {
+		return m.FriendUserID
+	}
+	return ""
+}
+
+func (m *GetUserFriendsReq) GetFriendUserName() string {
+	if m != nil {
+		return m.FriendUserName
+	}
+	return ""
+}
+
+func (m *GetUserFriendsReq) GetPagination() *sdk_ws.RequestPagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+type GetUserFriendsResp struct {
+	Pagination           *sdk_ws.ResponsePagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
+	FriendInfoList       []*sdk_ws.FriendInfo       `protobuf:"bytes,2,rep,name=friendInfoList" json:"friendInfoList,omitempty"`
+	FriendNums           int32                      `protobuf:"varint,3,opt,name=friendNums" json:"friendNums,omitempty"`
+	CommonResp           *CommonResp                `protobuf:"bytes,4,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
+	XXX_unrecognized     []byte                     `json:"-"`
+	XXX_sizecache        int32                      `json:"-"`
+}
+
+func (m *GetUserFriendsResp) Reset()         { *m = GetUserFriendsResp{} }
+func (m *GetUserFriendsResp) String() string { return proto.CompactTextString(m) }
+func (*GetUserFriendsResp) ProtoMessage()    {}
+func (*GetUserFriendsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_admin_cms_886b2bcb88d5841f, []int{49}
+}
+func (m *GetUserFriendsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetUserFriendsResp.Unmarshal(m, b)
+}
+func (m *GetUserFriendsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetUserFriendsResp.Marshal(b, m, deterministic)
+}
+func (dst *GetUserFriendsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetUserFriendsResp.Merge(dst, src)
+}
+func (m *GetUserFriendsResp) XXX_Size() int {
+	return xxx_messageInfo_GetUserFriendsResp.Size(m)
+}
+func (m *GetUserFriendsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetUserFriendsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetUserFriendsResp proto.InternalMessageInfo
+
+func (m *GetUserFriendsResp) GetPagination() *sdk_ws.ResponsePagination {
+	if m != nil {
+		return m.Pagination
+	}
+	return nil
+}
+
+func (m *GetUserFriendsResp) GetFriendInfoList() []*sdk_ws.FriendInfo {
+	if m != nil {
+		return m.FriendInfoList
+	}
+	return nil
+}
+
+func (m *GetUserFriendsResp) GetFriendNums() int32 {
+	if m != nil {
+		return m.FriendNums
+	}
+	return 0
+}
+
+func (m *GetUserFriendsResp) GetCommonResp() *CommonResp {
+	if m != nil {
+		return m.CommonResp
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*CommonResp)(nil), "admin_cms.CommonResp")
 	proto.RegisterType((*AdminLoginReq)(nil), "admin_cms.AdminLoginReq")
@@ -1559,6 +2751,30 @@ func init() {
 	proto.RegisterType((*GetGroupStatisticsResp)(nil), "admin_cms.GetGroupStatisticsResp")
 	proto.RegisterType((*GetUserStatisticsReq)(nil), "admin_cms.GetUserStatisticsReq")
 	proto.RegisterType((*GetUserStatisticsResp)(nil), "admin_cms.GetUserStatisticsResp")
+	proto.RegisterType((*GenerateInvitationCodeReq)(nil), "admin_cms.GenerateInvitationCodeReq")
+	proto.RegisterType((*GenerateInvitationCodeResp)(nil), "admin_cms.GenerateInvitationCodeResp")
+	proto.RegisterType((*GetInvitationCodesReq)(nil), "admin_cms.GetInvitationCodesReq")
+	proto.RegisterType((*InvitationCode)(nil), "admin_cms.invitationCode")
+	proto.RegisterType((*GetInvitationCodesResp)(nil), "admin_cms.GetInvitationCodesResp")
+	proto.RegisterType((*QueryIPRegisterReq)(nil), "admin_cms.QueryIPRegisterReq")
+	proto.RegisterType((*QueryIPRegisterResp)(nil), "admin_cms.QueryIPRegisterResp")
+	proto.RegisterType((*AddIPLimitReq)(nil), "admin_cms.AddIPLimitReq")
+	proto.RegisterType((*AddIPLimitResp)(nil), "admin_cms.AddIPLimitResp")
+	proto.RegisterType((*RemoveIPLimitReq)(nil), "admin_cms.RemoveIPLimitReq")
+	proto.RegisterType((*RemoveIPLimitResp)(nil), "admin_cms.RemoveIPLimitResp")
+	proto.RegisterType((*QueryUserIDIPLimitLoginReq)(nil), "admin_cms.QueryUserIDIPLimitLoginReq")
+	proto.RegisterType((*UserIPLimit)(nil), "admin_cms.UserIPLimit")
+	proto.RegisterType((*QueryUserIDIPLimitLoginResp)(nil), "admin_cms.QueryUserIDIPLimitLoginResp")
+	proto.RegisterType((*AddUserIPLimitLoginReq)(nil), "admin_cms.AddUserIPLimitLoginReq")
+	proto.RegisterType((*AddUserIPLimitLoginResp)(nil), "admin_cms.AddUserIPLimitLoginResp")
+	proto.RegisterType((*RemoveUserIPLimitReq)(nil), "admin_cms.RemoveUserIPLimitReq")
+	proto.RegisterType((*RemoveUserIPLimitResp)(nil), "admin_cms.RemoveUserIPLimitResp")
+	proto.RegisterType((*GetClientInitConfigReq)(nil), "admin_cms.GetClientInitConfigReq")
+	proto.RegisterType((*GetClientInitConfigResp)(nil), "admin_cms.GetClientInitConfigResp")
+	proto.RegisterType((*SetClientInitConfigReq)(nil), "admin_cms.SetClientInitConfigReq")
+	proto.RegisterType((*SetClientInitConfigResp)(nil), "admin_cms.SetClientInitConfigResp")
+	proto.RegisterType((*GetUserFriendsReq)(nil), "admin_cms.GetUserFriendsReq")
+	proto.RegisterType((*GetUserFriendsResp)(nil), "admin_cms.GetUserFriendsResp")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1582,6 +2798,17 @@ type AdminCMSClient interface {
 	GetMessageStatistics(ctx context.Context, in *GetMessageStatisticsReq, opts ...grpc.CallOption) (*GetMessageStatisticsResp, error)
 	GetGroupStatistics(ctx context.Context, in *GetGroupStatisticsReq, opts ...grpc.CallOption) (*GetGroupStatisticsResp, error)
 	GetUserStatistics(ctx context.Context, in *GetUserStatisticsReq, opts ...grpc.CallOption) (*GetUserStatisticsResp, error)
+	GenerateInvitationCode(ctx context.Context, in *GenerateInvitationCodeReq, opts ...grpc.CallOption) (*GenerateInvitationCodeResp, error)
+	GetInvitationCodes(ctx context.Context, in *GetInvitationCodesReq, opts ...grpc.CallOption) (*GetInvitationCodesResp, error)
+	QueryIPRegister(ctx context.Context, in *QueryIPRegisterReq, opts ...grpc.CallOption) (*QueryIPRegisterResp, error)
+	AddIPLimit(ctx context.Context, in *AddIPLimitReq, opts ...grpc.CallOption) (*AddIPLimitResp, error)
+	RemoveIPLimit(ctx context.Context, in *RemoveIPLimitReq, opts ...grpc.CallOption) (*RemoveIPLimitResp, error)
+	QueryUserIDIPLimitLogin(ctx context.Context, in *QueryUserIDIPLimitLoginReq, opts ...grpc.CallOption) (*QueryUserIDIPLimitLoginResp, error)
+	AddUserIPLimitLogin(ctx context.Context, in *AddUserIPLimitLoginReq, opts ...grpc.CallOption) (*AddUserIPLimitLoginResp, error)
+	RemoveUserIPLimit(ctx context.Context, in *RemoveUserIPLimitReq, opts ...grpc.CallOption) (*RemoveUserIPLimitResp, error)
+	GetClientInitConfig(ctx context.Context, in *GetClientInitConfigReq, opts ...grpc.CallOption) (*GetClientInitConfigResp, error)
+	SetClientInitConfig(ctx context.Context, in *SetClientInitConfigReq, opts ...grpc.CallOption) (*SetClientInitConfigResp, error)
+	GetUserFriends(ctx context.Context, in *GetUserFriendsReq, opts ...grpc.CallOption) (*GetUserFriendsResp, error)
 }
 
 type adminCMSClient struct {
@@ -1682,6 +2909,105 @@ func (c *adminCMSClient) GetUserStatistics(ctx context.Context, in *GetUserStati
 	return out, nil
 }
 
+func (c *adminCMSClient) GenerateInvitationCode(ctx context.Context, in *GenerateInvitationCodeReq, opts ...grpc.CallOption) (*GenerateInvitationCodeResp, error) {
+	out := new(GenerateInvitationCodeResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/GenerateInvitationCode", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) GetInvitationCodes(ctx context.Context, in *GetInvitationCodesReq, opts ...grpc.CallOption) (*GetInvitationCodesResp, error) {
+	out := new(GetInvitationCodesResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/GetInvitationCodes", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) QueryIPRegister(ctx context.Context, in *QueryIPRegisterReq, opts ...grpc.CallOption) (*QueryIPRegisterResp, error) {
+	out := new(QueryIPRegisterResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/QueryIPRegister", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) AddIPLimit(ctx context.Context, in *AddIPLimitReq, opts ...grpc.CallOption) (*AddIPLimitResp, error) {
+	out := new(AddIPLimitResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/AddIPLimit", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) RemoveIPLimit(ctx context.Context, in *RemoveIPLimitReq, opts ...grpc.CallOption) (*RemoveIPLimitResp, error) {
+	out := new(RemoveIPLimitResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/RemoveIPLimit", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) QueryUserIDIPLimitLogin(ctx context.Context, in *QueryUserIDIPLimitLoginReq, opts ...grpc.CallOption) (*QueryUserIDIPLimitLoginResp, error) {
+	out := new(QueryUserIDIPLimitLoginResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/QueryUserIDIPLimitLogin", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) AddUserIPLimitLogin(ctx context.Context, in *AddUserIPLimitLoginReq, opts ...grpc.CallOption) (*AddUserIPLimitLoginResp, error) {
+	out := new(AddUserIPLimitLoginResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/AddUserIPLimitLogin", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) RemoveUserIPLimit(ctx context.Context, in *RemoveUserIPLimitReq, opts ...grpc.CallOption) (*RemoveUserIPLimitResp, error) {
+	out := new(RemoveUserIPLimitResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/RemoveUserIPLimit", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) GetClientInitConfig(ctx context.Context, in *GetClientInitConfigReq, opts ...grpc.CallOption) (*GetClientInitConfigResp, error) {
+	out := new(GetClientInitConfigResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/GetClientInitConfig", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) SetClientInitConfig(ctx context.Context, in *SetClientInitConfigReq, opts ...grpc.CallOption) (*SetClientInitConfigResp, error) {
+	out := new(SetClientInitConfigResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/SetClientInitConfig", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCMSClient) GetUserFriends(ctx context.Context, in *GetUserFriendsReq, opts ...grpc.CallOption) (*GetUserFriendsResp, error) {
+	out := new(GetUserFriendsResp)
+	err := grpc.Invoke(ctx, "/admin_cms.adminCMS/GetUserFriends", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for AdminCMS service
 
 type AdminCMSServer interface {
@@ -1695,6 +3021,17 @@ type AdminCMSServer interface {
 	GetMessageStatistics(context.Context, *GetMessageStatisticsReq) (*GetMessageStatisticsResp, error)
 	GetGroupStatistics(context.Context, *GetGroupStatisticsReq) (*GetGroupStatisticsResp, error)
 	GetUserStatistics(context.Context, *GetUserStatisticsReq) (*GetUserStatisticsResp, error)
+	GenerateInvitationCode(context.Context, *GenerateInvitationCodeReq) (*GenerateInvitationCodeResp, error)
+	GetInvitationCodes(context.Context, *GetInvitationCodesReq) (*GetInvitationCodesResp, error)
+	QueryIPRegister(context.Context, *QueryIPRegisterReq) (*QueryIPRegisterResp, error)
+	AddIPLimit(context.Context, *AddIPLimitReq) (*AddIPLimitResp, error)
+	RemoveIPLimit(context.Context, *RemoveIPLimitReq) (*RemoveIPLimitResp, error)
+	QueryUserIDIPLimitLogin(context.Context, *QueryUserIDIPLimitLoginReq) (*QueryUserIDIPLimitLoginResp, error)
+	AddUserIPLimitLogin(context.Context, *AddUserIPLimitLoginReq) (*AddUserIPLimitLoginResp, error)
+	RemoveUserIPLimit(context.Context, *RemoveUserIPLimitReq) (*RemoveUserIPLimitResp, error)
+	GetClientInitConfig(context.Context, *GetClientInitConfigReq) (*GetClientInitConfigResp, error)
+	SetClientInitConfig(context.Context, *SetClientInitConfigReq) (*SetClientInitConfigResp, error)
+	GetUserFriends(context.Context, *GetUserFriendsReq) (*GetUserFriendsResp, error)
 }
 
 func RegisterAdminCMSServer(s *grpc.Server, srv AdminCMSServer) {
@@ -1881,6 +3218,204 @@ func _AdminCMS_GetUserStatistics_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminCMS_GenerateInvitationCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateInvitationCodeReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).GenerateInvitationCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/GenerateInvitationCode",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).GenerateInvitationCode(ctx, req.(*GenerateInvitationCodeReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_GetInvitationCodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInvitationCodesReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).GetInvitationCodes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/GetInvitationCodes",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).GetInvitationCodes(ctx, req.(*GetInvitationCodesReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_QueryIPRegister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryIPRegisterReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).QueryIPRegister(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/QueryIPRegister",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).QueryIPRegister(ctx, req.(*QueryIPRegisterReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_AddIPLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddIPLimitReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).AddIPLimit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/AddIPLimit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).AddIPLimit(ctx, req.(*AddIPLimitReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_RemoveIPLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveIPLimitReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).RemoveIPLimit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/RemoveIPLimit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).RemoveIPLimit(ctx, req.(*RemoveIPLimitReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_QueryUserIDIPLimitLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryUserIDIPLimitLoginReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).QueryUserIDIPLimitLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/QueryUserIDIPLimitLogin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).QueryUserIDIPLimitLogin(ctx, req.(*QueryUserIDIPLimitLoginReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_AddUserIPLimitLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddUserIPLimitLoginReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).AddUserIPLimitLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/AddUserIPLimitLogin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).AddUserIPLimitLogin(ctx, req.(*AddUserIPLimitLoginReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_RemoveUserIPLimit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveUserIPLimitReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).RemoveUserIPLimit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/RemoveUserIPLimit",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).RemoveUserIPLimit(ctx, req.(*RemoveUserIPLimitReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_GetClientInitConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetClientInitConfigReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).GetClientInitConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/GetClientInitConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).GetClientInitConfig(ctx, req.(*GetClientInitConfigReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_SetClientInitConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetClientInitConfigReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).SetClientInitConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/SetClientInitConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).SetClientInitConfig(ctx, req.(*SetClientInitConfigReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCMS_GetUserFriends_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserFriendsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCMSServer).GetUserFriends(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_cms.adminCMS/GetUserFriends",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCMSServer).GetUserFriends(ctx, req.(*GetUserFriendsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _AdminCMS_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "admin_cms.adminCMS",
 	HandlerType: (*AdminCMSServer)(nil),
@@ -1925,105 +3460,192 @@ var _AdminCMS_serviceDesc = grpc.ServiceDesc{
 			MethodName: "GetUserStatistics",
 			Handler:    _AdminCMS_GetUserStatistics_Handler,
 		},
+		{
+			MethodName: "GenerateInvitationCode",
+			Handler:    _AdminCMS_GenerateInvitationCode_Handler,
+		},
+		{
+			MethodName: "GetInvitationCodes",
+			Handler:    _AdminCMS_GetInvitationCodes_Handler,
+		},
+		{
+			MethodName: "QueryIPRegister",
+			Handler:    _AdminCMS_QueryIPRegister_Handler,
+		},
+		{
+			MethodName: "AddIPLimit",
+			Handler:    _AdminCMS_AddIPLimit_Handler,
+		},
+		{
+			MethodName: "RemoveIPLimit",
+			Handler:    _AdminCMS_RemoveIPLimit_Handler,
+		},
+		{
+			MethodName: "QueryUserIDIPLimitLogin",
+			Handler:    _AdminCMS_QueryUserIDIPLimitLogin_Handler,
+		},
+		{
+			MethodName: "AddUserIPLimitLogin",
+			Handler:    _AdminCMS_AddUserIPLimitLogin_Handler,
+		},
+		{
+			MethodName: "RemoveUserIPLimit",
+			Handler:    _AdminCMS_RemoveUserIPLimit_Handler,
+		},
+		{
+			MethodName: "GetClientInitConfig",
+			Handler:    _AdminCMS_GetClientInitConfig_Handler,
+		},
+		{
+			MethodName: "SetClientInitConfig",
+			Handler:    _AdminCMS_SetClientInitConfig_Handler,
+		},
+		{
+			MethodName: "GetUserFriends",
+			Handler:    _AdminCMS_GetUserFriends_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "admin_cms/admin_cms.proto",
 }
 
 func init() {
-	proto.RegisterFile("admin_cms/admin_cms.proto", fileDescriptor_admin_cms_521fdb68576e364f)
+	proto.RegisterFile("admin_cms/admin_cms.proto", fileDescriptor_admin_cms_886b2bcb88d5841f)
 }
 
-var fileDescriptor_admin_cms_521fdb68576e364f = []byte{
-	// 1436 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x58, 0xdd, 0x6e, 0x13, 0xc7,
-	0x17, 0xd7, 0xda, 0x71, 0x1c, 0x1f, 0x93, 0x90, 0x1c, 0x12, 0x58, 0x0c, 0x7f, 0xfe, 0xce, 0x16,
-	0xaa, 0xb4, 0xa2, 0x49, 0x15, 0xd4, 0xab, 0x4a, 0x54, 0x21, 0x86, 0xd4, 0x28, 0x86, 0x68, 0x81,
-	0x4a, 0x6d, 0x55, 0xac, 0xad, 0x3d, 0xb8, 0xab, 0xe0, 0xdd, 0x61, 0x67, 0x1c, 0x40, 0x55, 0x6f,
-	0xb9, 0xe9, 0x7d, 0x2f, 0x7a, 0xd9, 0x17, 0xe8, 0x45, 0x9f, 0xa0, 0x97, 0x7d, 0x8c, 0xaa, 0x2f,
-	0x52, 0xcd, 0xcc, 0x7e, 0xcc, 0xec, 0x6e, 0x6c, 0x13, 0x54, 0xee, 0xe6, 0x9c, 0x39, 0x1f, 0x73,
-	0x7e, 0xe7, 0x63, 0x66, 0x17, 0x2e, 0x7b, 0xc3, 0xb1, 0x1f, 0xf4, 0x07, 0x63, 0xb6, 0x93, 0xae,
-	0xb6, 0x69, 0x14, 0xf2, 0x10, 0x1b, 0x29, 0xa3, 0xb5, 0xf9, 0x90, 0x92, 0xa0, 0xdf, 0xed, 0xed,
-	0xd0, 0xe3, 0xd1, 0x8e, 0xdc, 0xdd, 0x61, 0xc3, 0xe3, 0xfe, 0x4b, 0xb6, 0xf3, 0x32, 0x96, 0x76,
-	0x6e, 0x03, 0xec, 0x87, 0xe3, 0x71, 0x18, 0xb8, 0x84, 0x51, 0xb4, 0xa1, 0x4e, 0xa2, 0x68, 0x3f,
-	0x1c, 0x12, 0xdb, 0x6a, 0x5b, 0x5b, 0x35, 0x37, 0x21, 0xf1, 0x22, 0x2c, 0x92, 0x28, 0xea, 0xb1,
-	0x91, 0x5d, 0x69, 0x5b, 0x5b, 0x0d, 0x37, 0xa6, 0x9c, 0x01, 0x2c, 0xef, 0x09, 0x7f, 0x87, 0xe1,
-	0xc8, 0x0f, 0x5c, 0xf2, 0x02, 0xdb, 0xd0, 0x7c, 0x48, 0x49, 0xe4, 0x71, 0x3f, 0x0c, 0xba, 0x1d,
-	0x69, 0xa6, 0xe1, 0xea, 0x2c, 0xe1, 0x44, 0xaa, 0x74, 0x3b, 0xb1, 0xad, 0x84, 0x14, 0x4e, 0x1e,
-	0x91, 0x41, 0x44, 0xb8, 0x5d, 0x55, 0x4e, 0x14, 0xe5, 0x7c, 0x07, 0x2b, 0xba, 0x13, 0x46, 0x71,
-	0x1d, 0x6a, 0x3c, 0x3c, 0x26, 0x41, 0x6c, 0x5f, 0x11, 0xf8, 0x19, 0xc0, 0x20, 0x0d, 0x46, 0x1a,
-	0x6f, 0xee, 0x6e, 0x6c, 0x67, 0x00, 0x65, 0x91, 0xba, 0x9a, 0xa0, 0x43, 0x60, 0x73, 0x6f, 0x38,
-	0x7c, 0xc2, 0x48, 0xe4, 0x92, 0x91, 0xcf, 0x38, 0x89, 0xf6, 0x86, 0xc3, 0x7b, 0x91, 0x4f, 0x82,
-	0x61, 0xb7, 0x73, 0xe8, 0x33, 0x1e, 0xc7, 0x15, 0x16, 0xe3, 0xd2, 0x58, 0x78, 0x0d, 0x60, 0xc2,
-	0x48, 0xa4, 0x54, 0xec, 0x4a, 0xbb, 0xba, 0xd5, 0x70, 0x35, 0x8e, 0xf3, 0x2d, 0x38, 0xb3, 0xdc,
-	0x30, 0x9a, 0x8b, 0xc1, 0x9a, 0x37, 0x86, 0x37, 0x16, 0x5c, 0x77, 0xc9, 0x70, 0x32, 0x20, 0xef,
-	0x1c, 0xc7, 0x55, 0x68, 0xa4, 0xa4, 0x04, 0xb1, 0xe6, 0x66, 0x8c, 0x5c, 0x94, 0xd5, 0x42, 0x94,
-	0x4f, 0xe1, 0xc6, 0x1c, 0xe7, 0x38, 0x7b, 0xa0, 0x3f, 0x5b, 0xb0, 0x79, 0x40, 0xf8, 0x3b, 0x47,
-	0xd9, 0x01, 0xa0, 0xde, 0xc8, 0x0f, 0xb2, 0x30, 0x9b, 0xbb, 0xd7, 0xb7, 0x19, 0x89, 0x4e, 0x48,
-	0xd4, 0xf7, 0xa8, 0xdf, 0xa7, 0x5e, 0xe4, 0x8d, 0xd9, 0xb6, 0x4b, 0x5e, 0x4c, 0x08, 0xe3, 0x47,
-	0xa9, 0xac, 0xab, 0xe9, 0x39, 0xff, 0x58, 0xe0, 0xcc, 0x3a, 0x0d, 0xa3, 0xf8, 0x05, 0x9c, 0x93,
-	0x10, 0x05, 0xcf, 0x42, 0x09, 0x9b, 0xd5, 0xae, 0x6e, 0x35, 0x77, 0xaf, 0x94, 0xb8, 0x7b, 0x12,
-	0x8b, 0xb9, 0x86, 0x02, 0xde, 0x2d, 0x39, 0xed, 0x8d, 0xd2, 0xd3, 0x32, 0x1a, 0x06, 0x8c, 0x94,
-	0x1f, 0x37, 0x87, 0x79, 0x75, 0x5e, 0xcc, 0x7f, 0xab, 0xc0, 0xca, 0x01, 0xe1, 0xfb, 0x3f, 0x78,
-	0xfc, 0x30, 0x1c, 0x31, 0x01, 0xb0, 0x0d, 0xf5, 0xfd, 0x30, 0xe0, 0x24, 0xe0, 0x31, 0xb8, 0x09,
-	0xa9, 0x9a, 0x58, 0x44, 0x9f, 0x4c, 0x0a, 0x45, 0x09, 0xbe, 0x4b, 0x06, 0x27, 0xdd, 0x4e, 0xd2,
-	0xdc, 0x8a, 0xc2, 0x16, 0x2c, 0x09, 0x89, 0xc7, 0xfe, 0x98, 0xd8, 0x0b, 0x72, 0x27, 0xa5, 0x45,
-	0x1a, 0x1f, 0x11, 0xc6, 0xfc, 0x30, 0x78, 0xfc, 0x9a, 0x12, 0xbb, 0x26, 0x8b, 0x51, 0x67, 0x09,
-	0x89, 0xd8, 0xb1, 0x94, 0x58, 0x54, 0x12, 0x1a, 0x4b, 0x24, 0x3a, 0x43, 0xc3, 0xae, 0xbf, 0x4d,
-	0xa2, 0xb3, 0x75, 0x7e, 0xac, 0x2d, 0x15, 0xc6, 0x9a, 0xf3, 0xfb, 0x02, 0xd4, 0x63, 0x84, 0xd4,
-	0xb9, 0x85, 0x83, 0x1e, 0x1b, 0x65, 0xe5, 0xa7, 0xb1, 0xe4, 0xb9, 0x9f, 0xfb, 0x24, 0xe0, 0x4a,
-	0x42, 0x41, 0xa5, 0xb3, 0x34, 0x1c, 0xab, 0xa7, 0xe0, 0xb8, 0x60, 0xe0, 0x68, 0x43, 0x7d, 0x14,
-	0x85, 0x13, 0xda, 0xed, 0x48, 0x9c, 0x1a, 0x6e, 0x42, 0xa2, 0x03, 0xe7, 0x22, 0x32, 0x38, 0x79,
-	0xe0, 0x0f, 0x8e, 0x03, 0x6f, 0xac, 0x40, 0x6a, 0xb8, 0x06, 0x0f, 0x3f, 0x86, 0x55, 0x61, 0x9f,
-	0x44, 0x47, 0xcf, 0x3d, 0xfe, 0x2c, 0x8c, 0xc6, 0xdd, 0x8e, 0xc4, 0xaa, 0xe6, 0x16, 0xf8, 0xf8,
-	0x21, 0xac, 0x28, 0x5e, 0x6a, 0x51, 0xc1, 0x91, 0xe3, 0xe2, 0x75, 0x58, 0x56, 0x9c, 0x7b, 0xde,
-	0x80, 0x3c, 0x71, 0x0f, 0xed, 0x86, 0x14, 0x33, 0x99, 0x62, 0xdc, 0x1c, 0x88, 0x83, 0x3e, 0x10,
-	0x86, 0x40, 0x4a, 0x64, 0x8c, 0x7c, 0x05, 0x34, 0x8b, 0x15, 0x60, 0x43, 0xbd, 0xc7, 0x46, 0xf7,
-	0xa2, 0x70, 0x6c, 0x9f, 0x53, 0x77, 0x56, 0x4c, 0xe6, 0x6b, 0x63, 0xb9, 0x58, 0x1b, 0x5a, 0x15,
-	0xaf, 0x14, 0xab, 0x98, 0x7b, 0x7c, 0xc2, 0xec, 0xf3, 0x52, 0x2d, 0xa6, 0x8c, 0x6a, 0x5d, 0x6d,
-	0x5b, 0x5b, 0x55, 0xad, 0x5a, 0xaf, 0x01, 0xec, 0x47, 0xc4, 0xe3, 0x44, 0xee, 0xae, 0xc9, 0x5d,
-	0x8d, 0x83, 0x2b, 0x50, 0xb9, 0xfb, 0xca, 0x46, 0xe9, 0xa8, 0x72, 0xf7, 0x95, 0xf3, 0xb7, 0x05,
-	0xe7, 0x8d, 0xb6, 0x62, 0x14, 0xb7, 0x61, 0x29, 0xa1, 0xe3, 0x29, 0x81, 0x7a, 0x7f, 0xaa, 0x2d,
-	0x37, 0x95, 0x11, 0x83, 0xe1, 0xe8, 0xac, 0x83, 0xc1, 0x2c, 0xef, 0xc4, 0xe4, 0x83, 0xc9, 0x58,
-	0x56, 0x9c, 0x80, 0x2a, 0x63, 0x89, 0xd1, 0x91, 0x4d, 0x07, 0x59, 0x7a, 0xa7, 0x8f, 0x8e, 0x6c,
-	0xed, 0xdc, 0x82, 0x65, 0x81, 0x9c, 0xcf, 0xb8, 0x3f, 0x90, 0x83, 0x03, 0x61, 0xe1, 0x99, 0xc8,
-	0x95, 0xea, 0x09, 0xb9, 0x16, 0xc0, 0xf0, 0x30, 0xee, 0x81, 0x0a, 0x0f, 0x1d, 0x0e, 0xab, 0x07,
-	0x84, 0xef, 0x0d, 0xb8, 0x7f, 0x12, 0x5f, 0x23, 0x2f, 0xf0, 0x76, 0xce, 0x50, 0x7c, 0x63, 0xd8,
-	0xda, 0x11, 0x8c, 0x7d, 0x37, 0xe7, 0x37, 0xd7, 0xc0, 0x95, 0x62, 0x03, 0x3f, 0x85, 0x25, 0xe5,
-	0x8c, 0x51, 0x91, 0x66, 0x51, 0xc6, 0xb2, 0x26, 0xd5, 0x49, 0x53, 0x5a, 0x94, 0x86, 0x9c, 0xd2,
-	0xc3, 0x64, 0xc0, 0x29, 0x4a, 0xa4, 0xbf, 0x47, 0x18, 0xf3, 0x46, 0x24, 0x83, 0x50, 0xe3, 0x38,
-	0x13, 0x58, 0xcb, 0x45, 0xc5, 0x28, 0x7e, 0x04, 0x35, 0xb1, 0x4e, 0x92, 0x7d, 0x41, 0x0b, 0x27,
-	0x91, 0x71, 0x95, 0x44, 0x2e, 0x03, 0x95, 0x79, 0x33, 0xa0, 0xbb, 0x95, 0x7d, 0xf5, 0x7e, 0xd0,
-	0xfc, 0xd5, 0x8a, 0xfb, 0x5a, 0x86, 0x69, 0x34, 0xb9, 0x95, 0x6f, 0x72, 0x1b, 0xea, 0x92, 0x48,
-	0x21, 0x4d, 0xc8, 0x59, 0x98, 0x9e, 0xb5, 0x2a, 0x5f, 0x03, 0xe6, 0x31, 0x61, 0x14, 0x6f, 0xc2,
-	0xa2, 0x24, 0x92, 0x64, 0xac, 0x6b, 0x86, 0x52, 0x29, 0x37, 0x96, 0x39, 0x6b, 0x3a, 0x6e, 0x41,
-	0xb3, 0xe3, 0x71, 0x71, 0x78, 0x79, 0xb1, 0x23, 0x2c, 0x08, 0x32, 0x69, 0x07, 0xb1, 0xc6, 0x55,
-	0xa8, 0x8a, 0x68, 0xd5, 0xd3, 0x4b, 0x2c, 0x9d, 0x1f, 0xe1, 0xd2, 0x01, 0xe1, 0x71, 0xdc, 0x66,
-	0x26, 0xfe, 0xfb, 0x4c, 0xfe, 0x59, 0x01, 0xbb, 0xdc, 0xbb, 0xc4, 0x6c, 0xed, 0x28, 0xf2, 0x4f,
-	0x3c, 0x4e, 0xb4, 0x3c, 0xa9, 0x6f, 0x87, 0xe2, 0x06, 0x6e, 0xc1, 0x79, 0x89, 0x9e, 0x26, 0xab,
-	0xa2, 0xcc, 0xb3, 0xf1, 0x10, 0x36, 0x0a, 0xea, 0xe9, 0x8b, 0xb3, 0xb9, 0x7b, 0x51, 0x0b, 0x4f,
-	0x83, 0xd3, 0x2d, 0x57, 0xc2, 0x2f, 0xe1, 0x42, 0xce, 0x81, 0xb4, 0xb5, 0x30, 0xd5, 0x56, 0x99,
-	0x4a, 0x2e, 0xeb, 0xb5, 0xf9, 0x0b, 0x6e, 0xe3, 0x80, 0x70, 0x69, 0xf0, 0x7d, 0xa7, 0xef, 0x8f,
-	0x0a, 0x5c, 0x2c, 0xf3, 0xcd, 0xa8, 0xb8, 0xf4, 0xbb, 0xc1, 0x20, 0x22, 0x1e, 0x53, 0x5d, 0x90,
-	0xe5, 0xae, 0xc0, 0x17, 0x97, 0xf9, 0xe3, 0x90, 0x7b, 0xcf, 0x53, 0x41, 0x95, 0x38, 0x93, 0x89,
-	0xf7, 0x61, 0x3d, 0xaf, 0x39, 0x47, 0xd6, 0x4a, 0x75, 0xb0, 0x03, 0x6b, 0x86, 0xf1, 0x39, 0x52,
-	0x56, 0x54, 0x38, 0x6b, 0xc2, 0x5e, 0xc1, 0x7a, 0xfc, 0xae, 0x7f, 0xdf, 0xf9, 0xfa, 0xa5, 0x2a,
-	0x6b, 0x25, 0xef, 0x9a, 0x51, 0xd1, 0x3d, 0x09, 0x50, 0x62, 0x37, 0xcb, 0x56, 0x9e, 0x2d, 0x92,
-	0x95, 0xdd, 0x33, 0x5a, 0xb2, 0x0c, 0xa6, 0x78, 0x17, 0x4a, 0xbc, 0x12, 0x21, 0x35, 0x5e, 0x0d,
-	0x9e, 0xe8, 0x9c, 0x9c, 0xf1, 0x79, 0x3a, 0xa7, 0x44, 0x45, 0xa4, 0xd3, 0x70, 0x2f, 0xed, 0xd4,
-	0xa6, 0xa7, 0xb3, 0xa0, 0x80, 0x77, 0x60, 0x55, 0x3f, 0x9f, 0x34, 0xb2, 0x38, 0xd5, 0x48, 0x41,
-	0x3e, 0x57, 0x12, 0xf5, 0x39, 0x4b, 0x62, 0xf7, 0xaf, 0x3a, 0x2c, 0x49, 0xa1, 0xfd, 0xde, 0x23,
-	0xdc, 0x03, 0xc8, 0x7e, 0x49, 0xa0, 0x9e, 0x7e, 0xe3, 0x77, 0x48, 0xeb, 0xf2, 0x29, 0x3b, 0x8c,
-	0xe2, 0x4f, 0x70, 0x6d, 0xfa, 0xff, 0x00, 0xbc, 0x69, 0x28, 0xcf, 0xf8, 0x43, 0xd1, 0xfa, 0xe4,
-	0x2d, 0xa4, 0x19, 0xc5, 0x37, 0x16, 0x6c, 0xce, 0xfc, 0x52, 0xc7, 0x1d, 0xcd, 0xe8, 0x3c, 0xff,
-	0x17, 0x5a, 0x9f, 0xbe, 0x9d, 0x82, 0xc2, 0x61, 0xfa, 0x27, 0xb4, 0x81, 0xc3, 0xcc, 0x6f, 0x7f,
-	0x03, 0x87, 0x39, 0xbe, 0xcd, 0x3b, 0xd0, 0xd4, 0x1e, 0xe1, 0x78, 0xd9, 0xd4, 0xd6, 0xbe, 0x79,
-	0x5b, 0xad, 0xd3, 0xb6, 0x18, 0xc5, 0xfb, 0xb0, 0x6c, 0x3c, 0xee, 0xf0, 0x8a, 0x29, 0x6c, 0x3c,
-	0x66, 0x5b, 0x57, 0x4f, 0xdf, 0x64, 0x14, 0x7b, 0xf2, 0x6b, 0x5b, 0x7b, 0x9d, 0x60, 0xa9, 0x7c,
-	0xf2, 0x98, 0x6b, 0xfd, 0x6f, 0xca, 0x2e, 0xa3, 0xd8, 0x97, 0xa3, 0xac, 0x70, 0x7d, 0xa3, 0x63,
-	0xaa, 0x95, 0xbd, 0x2e, 0x5a, 0x1f, 0xcc, 0x94, 0x61, 0x14, 0xbf, 0x96, 0xaf, 0xa9, 0xdc, 0x05,
-	0x83, 0x6d, 0x53, 0xb5, 0x78, 0xf7, 0xb5, 0x36, 0x67, 0x48, 0x30, 0x8a, 0x5f, 0xc9, 0xc7, 0xab,
-	0x39, 0x0b, 0xf1, 0xff, 0xc5, 0x04, 0x9b, 0x86, 0xdb, 0xd3, 0x05, 0x18, 0xbd, 0x73, 0xe9, 0x9b,
-	0x8d, 0xed, 0xec, 0xcf, 0xe9, 0xe7, 0xe9, 0xea, 0xfb, 0x45, 0xf9, 0x5b, 0xf4, 0xd6, 0xbf, 0x01,
-	0x00, 0x00, 0xff, 0xff, 0x9c, 0x40, 0xb4, 0xf6, 0x61, 0x15, 0x00, 0x00,
+var fileDescriptor_admin_cms_886b2bcb88d5841f = []byte{
+	// 2119 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x1a, 0x4d, 0x6f, 0x23, 0x49,
+	0x55, 0xed, 0x8f, 0x24, 0x7e, 0x9e, 0x7c, 0x55, 0x3e, 0xc6, 0xe9, 0xd9, 0x1d, 0x92, 0x66, 0x66,
+	0x15, 0xd0, 0x92, 0xa0, 0x8c, 0xb8, 0x2c, 0xd2, 0xa0, 0x6c, 0xbc, 0x31, 0x1e, 0x25, 0x59, 0xd3,
+	0x9e, 0x59, 0x09, 0x58, 0x36, 0xf4, 0xda, 0x15, 0x6f, 0x2b, 0x71, 0x77, 0x4d, 0x57, 0x3b, 0x3b,
+	0x23, 0xc4, 0x75, 0x2e, 0x5c, 0x38, 0x81, 0xc4, 0x11, 0x71, 0xe3, 0xc0, 0x01, 0x89, 0x3b, 0xbf,
+	0x83, 0x03, 0x42, 0xfc, 0x0a, 0x6e, 0xa8, 0xaa, 0xfa, 0xa3, 0xaa, 0xba, 0x6d, 0xf7, 0x74, 0x46,
+	0x73, 0x73, 0xbd, 0x7a, 0xf5, 0xbe, 0xdf, 0xab, 0x57, 0xaf, 0x0d, 0x3b, 0xce, 0x70, 0xec, 0x7a,
+	0x97, 0x83, 0x31, 0x3d, 0x4c, 0x7e, 0x1d, 0x90, 0xc0, 0x0f, 0x7d, 0xd4, 0x48, 0x00, 0xe6, 0xde,
+	0xe7, 0x04, 0x7b, 0x97, 0xdd, 0xf3, 0x43, 0x72, 0x3d, 0x3a, 0xe4, 0xbb, 0x87, 0x74, 0x78, 0x7d,
+	0xf9, 0x2d, 0x3d, 0xfc, 0x36, 0xc2, 0xb6, 0x9e, 0x02, 0x9c, 0xf8, 0xe3, 0xb1, 0xef, 0xd9, 0x98,
+	0x12, 0xd4, 0x82, 0x45, 0x1c, 0x04, 0x27, 0xfe, 0x10, 0xb7, 0x8c, 0x5d, 0x63, 0xbf, 0x6e, 0xc7,
+	0x4b, 0xb4, 0x0d, 0x0b, 0x38, 0x08, 0xce, 0xe9, 0xa8, 0x55, 0xd9, 0x35, 0xf6, 0x1b, 0x76, 0xb4,
+	0xb2, 0x06, 0xb0, 0x7c, 0xcc, 0xf8, 0x9d, 0xf9, 0x23, 0xd7, 0xb3, 0xf1, 0x4b, 0xb4, 0x0b, 0x4d,
+	0x9f, 0xe0, 0xc0, 0x09, 0x5d, 0xdf, 0xeb, 0xb6, 0x39, 0x99, 0x86, 0x2d, 0x83, 0x18, 0x13, 0x2e,
+	0x62, 0xb7, 0x1d, 0xd1, 0x8a, 0x97, 0x8c, 0x09, 0xc5, 0x83, 0x00, 0x87, 0xad, 0xaa, 0x60, 0x22,
+	0x56, 0xd6, 0xaf, 0x60, 0x45, 0x66, 0x42, 0x09, 0xda, 0x84, 0x7a, 0xe8, 0x5f, 0x63, 0x2f, 0xa2,
+	0x2f, 0x16, 0xe8, 0x47, 0x00, 0x83, 0x44, 0x19, 0x4e, 0xbc, 0x79, 0xb4, 0x75, 0x90, 0x1a, 0x28,
+	0xd5, 0xd4, 0x96, 0x10, 0x2d, 0x0c, 0x7b, 0xc7, 0xc3, 0xe1, 0x0b, 0x8a, 0x03, 0x1b, 0x8f, 0x5c,
+	0x1a, 0xe2, 0xe0, 0x78, 0x38, 0x3c, 0x0d, 0x5c, 0xec, 0x0d, 0xbb, 0xed, 0x33, 0x97, 0x86, 0xc5,
+	0xf4, 0x7a, 0x08, 0x30, 0xa1, 0x38, 0x10, 0x47, 0x5a, 0x95, 0xdd, 0xea, 0x7e, 0xc3, 0x96, 0x20,
+	0xd6, 0x2f, 0xc1, 0x9a, 0xc7, 0x86, 0x12, 0x4d, 0x07, 0xa3, 0xa8, 0x0e, 0x6f, 0x0c, 0x78, 0x64,
+	0xe3, 0xe1, 0x64, 0x80, 0xef, 0xac, 0xc7, 0x07, 0xd0, 0x48, 0x96, 0xdc, 0x88, 0x75, 0x3b, 0x05,
+	0x68, 0x5a, 0x56, 0x33, 0x5a, 0x7e, 0x05, 0x8f, 0x0b, 0xc8, 0x51, 0x5e, 0xd1, 0xdf, 0x19, 0xb0,
+	0xd7, 0xc1, 0xe1, 0x9d, 0xb5, 0x6c, 0x03, 0x10, 0x67, 0xe4, 0x7a, 0xa9, 0x9a, 0xcd, 0xa3, 0x47,
+	0x07, 0x14, 0x07, 0xb7, 0x38, 0xb8, 0x74, 0x88, 0x7b, 0x49, 0x9c, 0xc0, 0x19, 0xd3, 0x03, 0x1b,
+	0xbf, 0x9c, 0x60, 0x1a, 0xf6, 0x12, 0x5c, 0x5b, 0x3a, 0x67, 0xfd, 0xd7, 0x00, 0x6b, 0x9e, 0x34,
+	0x94, 0xa0, 0x9f, 0xc0, 0x3d, 0x6e, 0x22, 0xef, 0xca, 0xe7, 0x66, 0x33, 0x76, 0xab, 0xfb, 0xcd,
+	0xa3, 0x07, 0x39, 0xec, 0x5e, 0x44, 0x68, 0xb6, 0x72, 0x00, 0x7d, 0x96, 0x23, 0xed, 0xe3, 0x5c,
+	0x69, 0x29, 0xf1, 0x3d, 0x8a, 0xf3, 0xc5, 0xd5, 0x6c, 0x5e, 0x2d, 0x6a, 0xf3, 0x3f, 0x57, 0x60,
+	0xa5, 0x83, 0xc3, 0x93, 0x6f, 0x9c, 0xf0, 0xcc, 0x1f, 0x51, 0x66, 0xe0, 0x16, 0x2c, 0x0e, 0x7c,
+	0x2f, 0xc4, 0x5e, 0x18, 0x19, 0x37, 0x5e, 0x8a, 0x24, 0x66, 0xda, 0xc7, 0x95, 0x42, 0xac, 0x18,
+	0x3c, 0xc0, 0x83, 0xdb, 0x6e, 0x3b, 0x4e, 0x6e, 0xb1, 0x42, 0x26, 0x2c, 0x31, 0x8c, 0xe7, 0xee,
+	0x18, 0xb7, 0x6a, 0x7c, 0x27, 0x59, 0x33, 0x37, 0x52, 0x4c, 0xa9, 0xeb, 0x7b, 0xcf, 0x5f, 0x13,
+	0xdc, 0xaa, 0xf3, 0x60, 0x94, 0x41, 0x0c, 0x23, 0x62, 0xcc, 0x31, 0x16, 0x04, 0x86, 0x04, 0xd2,
+	0x1c, 0xbd, 0x58, 0xce, 0xd1, 0x7a, 0x40, 0x2d, 0x65, 0x02, 0xca, 0xfa, 0x5b, 0x0d, 0x16, 0x23,
+	0x0b, 0x09, 0xb9, 0x19, 0x83, 0x73, 0x3a, 0x4a, 0xc3, 0x4f, 0x02, 0x71, 0xb9, 0x6f, 0x5c, 0xec,
+	0x85, 0x02, 0x43, 0x98, 0x4a, 0x06, 0x49, 0x76, 0xac, 0x4e, 0xb1, 0x63, 0x4d, 0xb1, 0x63, 0x0b,
+	0x16, 0x47, 0x81, 0x3f, 0x21, 0xdd, 0x36, 0xb7, 0x53, 0xc3, 0x8e, 0x97, 0xc8, 0x82, 0x7b, 0x0c,
+	0xe7, 0xc2, 0x1d, 0x5c, 0x7b, 0xce, 0x58, 0x18, 0xa9, 0x61, 0x2b, 0x30, 0xf4, 0x7d, 0x58, 0x63,
+	0xf4, 0x71, 0xd0, 0xbb, 0x71, 0xc2, 0x2b, 0x3f, 0x18, 0x77, 0xdb, 0xdc, 0x56, 0x75, 0x3b, 0x03,
+	0x47, 0x1f, 0xc1, 0x8a, 0x80, 0x25, 0x14, 0x85, 0x39, 0x34, 0x28, 0x7a, 0x04, 0xcb, 0x02, 0x72,
+	0xea, 0x0c, 0xf0, 0x0b, 0xfb, 0xac, 0xd5, 0xe0, 0x68, 0x2a, 0x90, 0x95, 0x1b, 0x2e, 0xe8, 0x05,
+	0x23, 0x04, 0x1c, 0x23, 0x05, 0xe8, 0x11, 0xd0, 0xcc, 0x46, 0x40, 0x0b, 0x16, 0xc7, 0x74, 0x74,
+	0x1a, 0xf8, 0xe3, 0xd6, 0x3d, 0x71, 0x67, 0x45, 0x4b, 0x3d, 0x36, 0x96, 0xb3, 0xb1, 0x21, 0x45,
+	0xf1, 0x4a, 0x36, 0x8a, 0x43, 0x27, 0x9c, 0xd0, 0xd6, 0x2a, 0x3f, 0x16, 0xad, 0x94, 0x68, 0x5d,
+	0xdb, 0x35, 0xf6, 0xab, 0x52, 0xb4, 0x3e, 0x04, 0x18, 0x04, 0xd8, 0x09, 0x31, 0xdf, 0x5d, 0xe7,
+	0xbb, 0x12, 0x04, 0xad, 0x40, 0x05, 0xbf, 0x6a, 0x21, 0xce, 0xa8, 0x82, 0x5f, 0x59, 0xff, 0x31,
+	0x60, 0x55, 0x49, 0x2b, 0x4a, 0xd0, 0x01, 0x2c, 0x0d, 0xa2, 0x75, 0x54, 0x25, 0x90, 0x9c, 0x9f,
+	0x62, 0xcb, 0x4e, 0x70, 0xde, 0x55, 0x61, 0x60, 0xa6, 0x8a, 0x48, 0x5e, 0x4c, 0xc6, 0x3c, 0xe2,
+	0x98, 0xa9, 0x52, 0x90, 0x56, 0x3a, 0x6a, 0x45, 0x4b, 0xc7, 0x13, 0x58, 0xee, 0x87, 0x4e, 0xe8,
+	0xd2, 0xd0, 0x1d, 0xf0, 0xc2, 0x81, 0xa0, 0x76, 0xc5, 0x7c, 0x25, 0x72, 0x82, 0xff, 0x66, 0x86,
+	0x09, 0xfd, 0x28, 0x07, 0x2a, 0xa1, 0x6f, 0x85, 0xb0, 0xd6, 0xc1, 0xe1, 0xf1, 0x20, 0x74, 0x6f,
+	0xa3, 0x6b, 0xe4, 0x25, 0x7a, 0x0a, 0xcb, 0x54, 0x26, 0x14, 0xdd, 0x18, 0x2d, 0x49, 0x04, 0x85,
+	0x91, 0xad, 0xa2, 0xeb, 0x09, 0x5c, 0xc9, 0x26, 0xf0, 0x57, 0xb0, 0x24, 0x98, 0x51, 0xc2, 0xdc,
+	0xec, 0xb9, 0x83, 0x6b, 0x1e, 0x93, 0x42, 0xd2, 0x64, 0xcd, 0x42, 0x43, 0xdc, 0x77, 0x71, 0x81,
+	0x13, 0x2b, 0xe6, 0xfe, 0x31, 0xa6, 0xd4, 0x19, 0xe1, 0xd4, 0x84, 0x12, 0xc4, 0x9a, 0xc0, 0xba,
+	0xa6, 0x15, 0x25, 0xe8, 0x7b, 0x50, 0x67, 0xbf, 0x63, 0x67, 0x6f, 0x48, 0xea, 0xc4, 0x38, 0xb6,
+	0xc0, 0x28, 0xdb, 0xdd, 0xc8, 0x6c, 0x3b, 0x2c, 0xaf, 0xde, 0x8f, 0x35, 0xff, 0x64, 0x40, 0x23,
+	0x62, 0x47, 0x09, 0x4b, 0xf2, 0x4e, 0x92, 0xe4, 0xc2, 0xa0, 0x29, 0x80, 0xa5, 0x21, 0x5f, 0x74,
+	0x87, 0x71, 0x47, 0x18, 0x2d, 0x99, 0x4d, 0xcf, 0x33, 0x36, 0x4d, 0x21, 0x65, 0xa3, 0xf2, 0x35,
+	0x20, 0xdd, 0x26, 0x94, 0xa0, 0x8f, 0x61, 0x81, 0x2f, 0x62, 0x67, 0x6c, 0x4a, 0x84, 0x12, 0x2c,
+	0x3b, 0xc2, 0x29, 0xeb, 0x8e, 0x27, 0xd0, 0x6c, 0x3b, 0x21, 0x13, 0x9e, 0x5f, 0xec, 0x08, 0x6a,
+	0x6c, 0x19, 0xa7, 0x03, 0xfb, 0x8d, 0xd6, 0xa0, 0xca, 0xb4, 0x15, 0xad, 0x17, 0xfb, 0x69, 0xfd,
+	0x06, 0xee, 0x77, 0x70, 0x18, 0xe9, 0xad, 0xe6, 0xd3, 0x53, 0x2d, 0xc1, 0xe6, 0x7b, 0xb2, 0xaf,
+	0x7b, 0xf2, 0xf3, 0xac, 0x27, 0x25, 0x90, 0xf5, 0xcf, 0x0a, 0xb4, 0xf2, 0xb9, 0x73, 0x9b, 0xad,
+	0xf7, 0x02, 0xf7, 0xd6, 0x09, 0xb1, 0xe4, 0x27, 0xf1, 0x76, 0xc8, 0x6e, 0xa0, 0x7d, 0x58, 0xe5,
+	0xd6, 0x93, 0x70, 0x85, 0x96, 0x3a, 0x18, 0x9d, 0xc1, 0x56, 0xe6, 0x78, 0xd2, 0x71, 0x36, 0x8f,
+	0xb6, 0x25, 0xf5, 0x24, 0x73, 0xda, 0xf9, 0x87, 0xd0, 0x4f, 0x61, 0x43, 0x63, 0xc0, 0x69, 0xd5,
+	0x66, 0xd2, 0xca, 0x3b, 0xa2, 0x79, 0xbd, 0x5e, 0x3c, 0xe0, 0xb6, 0x3a, 0x38, 0xe4, 0x04, 0xdf,
+	0xb7, 0xfb, 0xfe, 0x5e, 0x81, 0xed, 0x3c, 0xde, 0x94, 0xb0, 0x4b, 0xbf, 0xeb, 0xb1, 0x0b, 0x8a,
+	0x8a, 0x2c, 0x48, 0x7d, 0x97, 0x81, 0xb3, 0xcb, 0xfc, 0xb9, 0x1f, 0x3a, 0x37, 0x09, 0xa2, 0x70,
+	0x9c, 0x0a, 0x44, 0xcf, 0x60, 0x53, 0x3f, 0x59, 0xc0, 0x6b, 0xb9, 0x67, 0x50, 0x1b, 0xd6, 0x15,
+	0xe2, 0x05, 0x5c, 0x96, 0x3d, 0x50, 0xd6, 0x61, 0xaf, 0x60, 0x33, 0xea, 0xeb, 0xdf, 0xb7, 0xbf,
+	0xfe, 0x50, 0xe5, 0xb1, 0xa2, 0xb3, 0xa6, 0x84, 0x65, 0x4f, 0x6c, 0x28, 0xb6, 0x9b, 0x7a, 0x4b,
+	0x07, 0x33, 0x67, 0xa5, 0xf7, 0x8c, 0xe4, 0x2c, 0x05, 0xc8, 0xfa, 0x42, 0x6e, 0xaf, 0x18, 0x49,
+	0x94, 0x57, 0x05, 0xc6, 0x32, 0x47, 0x23, 0x5e, 0x24, 0x73, 0x72, 0x8e, 0x30, 0x77, 0x2a, 0xec,
+	0x39, 0x9d, 0xfa, 0x6c, 0x77, 0x66, 0x0e, 0xa0, 0x4f, 0x61, 0x4d, 0x96, 0x8f, 0x13, 0x59, 0x98,
+	0x49, 0x24, 0x83, 0xaf, 0x85, 0xc4, 0x62, 0xd1, 0x90, 0x78, 0x09, 0x3b, 0x1d, 0xec, 0x31, 0x47,
+	0xe1, 0xae, 0x77, 0xeb, 0x86, 0xdc, 0x61, 0x27, 0xfe, 0x10, 0x17, 0x1e, 0x7b, 0x0c, 0xfc, 0x21,
+	0x3e, 0xc3, 0xf1, 0xa3, 0x3a, 0x5e, 0xc6, 0x3b, 0xa9, 0x0b, 0xe2, 0xa5, 0xd5, 0x07, 0x73, 0x1a,
+	0xcb, 0xf2, 0x2f, 0xe8, 0xbf, 0x1a, 0x3c, 0xc0, 0x54, 0x82, 0xb4, 0x98, 0x12, 0x08, 0x6a, 0x4c,
+	0xb6, 0x28, 0x6e, 0xf9, 0x6f, 0xa9, 0x55, 0xae, 0x2a, 0xad, 0xb2, 0xfa, 0xf0, 0xaa, 0x95, 0x7c,
+	0x61, 0xff, 0xc5, 0x80, 0x15, 0x57, 0x11, 0x95, 0xbd, 0x3f, 0x54, 0x48, 0x24, 0xa9, 0x8e, 0xa7,
+	0xf6, 0xe3, 0xc2, 0xe8, 0x72, 0x3f, 0x6e, 0xc2, 0xd2, 0x8d, 0x43, 0x43, 0xbe, 0x2b, 0x44, 0x4f,
+	0xd6, 0x52, 0x93, 0x57, 0x53, 0x9a, 0xbc, 0x54, 0xd9, 0xba, 0xac, 0xac, 0xf5, 0x2f, 0x83, 0x57,
+	0xd9, 0x8c, 0x51, 0x29, 0x41, 0x27, 0xb0, 0xaa, 0x0a, 0x16, 0xf7, 0x17, 0x3b, 0x92, 0xaf, 0x54,
+	0x0c, 0x5b, 0x3f, 0xc1, 0xfa, 0xfc, 0x5e, 0xd9, 0x3e, 0xbf, 0x77, 0xe7, 0x01, 0xc0, 0x29, 0xa0,
+	0x9f, 0x4d, 0x70, 0xf0, 0xba, 0xdb, 0x8b, 0xa7, 0x1c, 0xc5, 0xc2, 0x65, 0x05, 0x2a, 0xdd, 0x5e,
+	0xdc, 0xd8, 0x77, 0x7b, 0xd6, 0x3f, 0x0c, 0xd8, 0xc8, 0x10, 0xa2, 0x24, 0xc2, 0x33, 0x62, 0x3c,
+	0x46, 0x39, 0xde, 0x4f, 0xab, 0x97, 0x0c, 0x62, 0x7e, 0xe8, 0x2b, 0x41, 0x27, 0x56, 0xda, 0x78,
+	0xaa, 0xa6, 0x8f, 0xa7, 0xca, 0x5e, 0x07, 0x97, 0xb0, 0x7c, 0x3c, 0x1c, 0x76, 0x7b, 0x67, 0xee,
+	0xd8, 0x0d, 0x4b, 0xe9, 0xce, 0x5a, 0xe0, 0x1b, 0x76, 0x5a, 0x0a, 0xb7, 0x14, 0x60, 0x75, 0x60,
+	0x45, 0x66, 0x50, 0x3e, 0xbb, 0xdb, 0xb0, 0x66, 0xe3, 0xb1, 0x7f, 0x8b, 0xef, 0x22, 0xac, 0xf5,
+	0x0c, 0xd6, 0x35, 0x2a, 0xe5, 0x25, 0xfa, 0x02, 0x4c, 0xee, 0x73, 0x3e, 0xda, 0x6a, 0x47, 0x04,
+	0xdf, 0x62, 0x5e, 0x3c, 0xe5, 0xbd, 0x65, 0xbd, 0x80, 0x26, 0x27, 0x29, 0x08, 0x4a, 0x68, 0x86,
+	0x92, 0xb1, 0xba, 0x1f, 0xd4, 0xaa, 0x50, 0xd5, 0xab, 0x82, 0xf5, 0x7b, 0x03, 0x1e, 0x4c, 0x95,
+	0x97, 0x12, 0xf4, 0x09, 0xdc, 0x93, 0xd8, 0xc6, 0xb9, 0xbc, 0xad, 0x3d, 0xdc, 0x62, 0xbb, 0x29,
+	0xb8, 0x65, 0xdf, 0x0c, 0x5f, 0xc3, 0x76, 0x34, 0x39, 0xd6, 0xad, 0x37, 0x4d, 0xe9, 0xb9, 0xef,
+	0xb3, 0xc8, 0x2c, 0xd5, 0xc4, 0xe3, 0x3d, 0xb8, 0x9f, 0xcb, 0xa3, 0xbc, 0xdf, 0x7f, 0x0d, 0x9b,
+	0x22, 0x86, 0x64, 0x7b, 0xbc, 0x53, 0x99, 0x2f, 0x60, 0x2b, 0x87, 0x43, 0x79, 0x89, 0x3f, 0xe1,
+	0x35, 0xfc, 0x84, 0x0f, 0xe1, 0xba, 0x9e, 0x1b, 0x9e, 0xf8, 0xde, 0x95, 0x3b, 0x2a, 0x14, 0xa5,
+	0xcc, 0x7e, 0xb9, 0x67, 0xcb, 0x4b, 0x33, 0x84, 0xed, 0x7e, 0x49, 0x69, 0x58, 0xab, 0x38, 0x74,
+	0xe9, 0xc0, 0xbf, 0xc5, 0x41, 0xcf, 0x19, 0xf1, 0xe1, 0x9b, 0xb0, 0xa7, 0x0e, 0x66, 0x72, 0xf7,
+	0xdf, 0xad, 0xdc, 0xff, 0x36, 0xf8, 0xc4, 0x81, 0xf9, 0x44, 0x0c, 0xc2, 0xe9, 0x9d, 0xf2, 0x9c,
+	0xb5, 0xa9, 0x57, 0x9c, 0x8e, 0x48, 0xc8, 0xc8, 0xff, 0x0a, 0x8c, 0xb5, 0x04, 0xe9, 0x9a, 0x0f,
+	0x19, 0xc4, 0xb5, 0xad, 0x41, 0xb5, 0x9e, 0xa4, 0x5e, 0xb2, 0x27, 0xf9, 0x9f, 0xc1, 0xe7, 0x07,
+	0x8a, 0x86, 0x94, 0x68, 0xb3, 0x38, 0xa3, 0xec, 0x2c, 0xee, 0xb3, 0x58, 0x97, 0xe4, 0x73, 0x41,
+	0x85, 0x97, 0x98, 0x0f, 0x73, 0x48, 0x9d, 0x26, 0x88, 0xb6, 0x76, 0x88, 0xd5, 0x39, 0x01, 0xb9,
+	0x98, 0x8c, 0xe3, 0x5b, 0x52, 0x82, 0x94, 0x1c, 0x9d, 0x1c, 0xfd, 0x71, 0x15, 0x96, 0x38, 0xd2,
+	0xc9, 0x79, 0x1f, 0x1d, 0x03, 0xa4, 0x1f, 0xe6, 0x90, 0xfc, 0x08, 0x52, 0x3e, 0x0a, 0x9a, 0x3b,
+	0x53, 0x76, 0x28, 0x41, 0xbf, 0x85, 0x87, 0xb3, 0xbf, 0x8a, 0xa1, 0x8f, 0x95, 0xc3, 0x73, 0xbe,
+	0xd3, 0x99, 0x3f, 0x78, 0x0b, 0x6c, 0x4a, 0xd0, 0x1b, 0x03, 0xf6, 0xe6, 0x7e, 0xaf, 0x42, 0x87,
+	0x12, 0xd1, 0x22, 0x5f, 0xd9, 0xcc, 0x1f, 0xbe, 0xdd, 0x01, 0x61, 0x87, 0xd9, 0x1f, 0x92, 0x14,
+	0x3b, 0xcc, 0xfd, 0x02, 0xa6, 0xd8, 0xa1, 0xc0, 0x17, 0xaa, 0x36, 0x34, 0xa5, 0x51, 0x34, 0xda,
+	0x51, 0x4f, 0x4b, 0x5f, 0x7e, 0x4c, 0x73, 0xda, 0x16, 0x25, 0xe8, 0x19, 0x2c, 0x2b, 0x23, 0x4e,
+	0xf4, 0x40, 0x45, 0x56, 0x46, 0xba, 0xe6, 0x07, 0xd3, 0x37, 0x29, 0x41, 0xe7, 0xfc, 0x9b, 0x93,
+	0x34, 0xa3, 0x43, 0xb9, 0xf8, 0xf1, 0x48, 0xd3, 0xfc, 0x70, 0xc6, 0x2e, 0x25, 0xe8, 0x92, 0x3f,
+	0xe8, 0x33, 0x43, 0x2c, 0x64, 0xa9, 0xc7, 0xf2, 0x66, 0x6c, 0xe6, 0x77, 0xe7, 0xe2, 0x50, 0x82,
+	0x7e, 0xce, 0x6b, 0x82, 0x36, 0x66, 0x41, 0xbb, 0xea, 0xd1, 0xec, 0x04, 0xc8, 0xdc, 0x9b, 0x83,
+	0x41, 0x09, 0xfa, 0x22, 0x29, 0xa8, 0x12, 0xe5, 0xef, 0x64, 0x1d, 0xac, 0x12, 0xde, 0x9d, 0x8d,
+	0x40, 0x09, 0xc2, 0xec, 0xbe, 0xcb, 0x7b, 0x5e, 0xa2, 0x47, 0xca, 0xd9, 0x29, 0x8f, 0x5e, 0xf3,
+	0x71, 0x01, 0xac, 0xc4, 0x32, 0xda, 0xd3, 0x48, 0xb7, 0x4c, 0xf6, 0x39, 0xaa, 0x5b, 0x26, 0xef,
+	0x6d, 0xd5, 0x83, 0x55, 0xed, 0x3d, 0x81, 0xe4, 0x38, 0xc8, 0x3e, 0x5a, 0xcc, 0x87, 0xb3, 0xb6,
+	0x29, 0x11, 0x25, 0x2d, 0x6e, 0xc4, 0xb5, 0x92, 0x26, 0x3d, 0x00, 0xb4, 0x92, 0xa6, 0x74, 0xee,
+	0xcf, 0x60, 0x59, 0x69, 0x9e, 0x95, 0x2c, 0xd0, 0x9b, 0x73, 0x25, 0x0b, 0xb2, 0x3d, 0xf7, 0x37,
+	0x70, 0x7f, 0x4a, 0x33, 0x8a, 0x1e, 0xeb, 0x9a, 0xe4, 0x36, 0xd8, 0xe6, 0x47, 0x45, 0xd0, 0x28,
+	0x41, 0x5f, 0xc2, 0x46, 0x4e, 0x03, 0x88, 0xf6, 0xb2, 0xf5, 0x54, 0xe7, 0x60, 0xcd, 0x43, 0x11,
+	0x21, 0x9c, 0x69, 0xd5, 0x94, 0x10, 0xce, 0x6b, 0x15, 0x95, 0x10, 0xce, 0xef, 0xf4, 0xbe, 0x84,
+	0x8d, 0x9c, 0xb6, 0x0b, 0x69, 0xa1, 0x93, 0xd3, 0x44, 0x99, 0xd6, 0x3c, 0x14, 0x41, 0xbd, 0x3f,
+	0x87, 0x7a, 0x7f, 0x3e, 0xf5, 0x69, 0xfd, 0x95, 0xa8, 0x70, 0x52, 0x17, 0xa1, 0x57, 0x38, 0xb5,
+	0x85, 0xd2, 0x2b, 0x9c, 0xd6, 0x7e, 0x7c, 0x7a, 0xff, 0x17, 0x5b, 0x07, 0xe9, 0xbf, 0x81, 0x7e,
+	0x9c, 0xfc, 0xfa, 0x7a, 0x81, 0xff, 0xd5, 0xe7, 0xc9, 0xff, 0x03, 0x00, 0x00, 0xff, 0xff, 0xec,
+	0x87, 0x51, 0x01, 0x35, 0x24, 0x00, 0x00,
 }

@@ -508,6 +508,8 @@ type config struct {
 		JoinDepartmentIDList []string `yaml:"joinDepartmentIDList"`
 		JoinDepartmentGroups bool     `yaml:"joinDepartmentGroups"`
 		OaNotification       bool     `yaml:"oaNotification"`
+
+		UseIPLimit bool `yaml:"useIPLimit"`
 	}
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
