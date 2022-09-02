@@ -108,9 +108,9 @@ func SetPassword(c *gin.Context) {
 	openIMRegisterReq.Nickname = params.Nickname
 	openIMRegisterReq.Secret = config.Config.Secret
 	openIMRegisterReq.FaceURL = params.FaceURL
-	openIMRegisterReq.CreateIp = ip
-	openIMRegisterReq.LastLoginIp = ip
-	openIMRegisterReq.InvitationCode = params.InvitationCode
+	// openIMRegisterReq.CreateIp = ip
+	// openIMRegisterReq.LastLoginIp = ip
+	// openIMRegisterReq.InvitationCode = params.InvitationCode
 	openIMRegisterResp := api.UserRegisterResp{}
 	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "register req:", openIMRegisterReq)
 	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
