@@ -61,10 +61,9 @@ type SetConversationResp struct {
 }
 type ModifyConversationFieldReq struct {
 	Conversation
-	FieldType           int32    `json:"fieldType" binding:"required"`
-	UserIDList          []string `json:"userIDList" binding:"required"`
-	BadgeUnreadCountSum int32    `json:"badgeUnreadCountSum"`
-	OperationID         string   `json:"operationID" binding:"required"`
+	FieldType   int32    `json:"fieldType" binding:"required"`
+	UserIDList  []string `json:"userIDList" binding:"required"`
+	OperationID string   `json:"operationID" binding:"required"`
 }
 type ModifyConversationFieldResp struct {
 	CommResp

@@ -112,3 +112,12 @@ type FcmUpdateTokenReq struct {
 type FcmUpdateTokenResp struct {
 	CommResp
 }
+type SetAppBadgeReq struct {
+	OperationID    string `json:"operationID" binding:"required"`
+	FromUserID     string `json:"fromUserID" binding:"required"`
+	AppUnreadCount int32  `json:"appUnreadCount"`
+}
+
+type SetAppBadgeResp struct {
+	CommResp
+}

@@ -138,6 +138,7 @@ func main() {
 		thirdGroup.POST("/get_rtc_invitation_start_app", apiThird.GetRTCInvitationInfoStartApp)
 		thirdGroup.POST("/fcm_update_token", apiThird.FcmUpdateToken)
 		thirdGroup.POST("/aws_storage_credential", apiThird.AwsStorageCredential)
+		thirdGroup.POST("/set_app_badge", apiThird.SetAppBadge)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
