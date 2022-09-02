@@ -77,7 +77,7 @@ func GetFriendByIDCMS(ownerUserID, friendUserID string) (friendUser *FriendUser,
 	err = db.DB.MysqlDB.DefaultGormDB().Table("friends").
 		Select("friends.*, users.name").
 		Where("friends.owner_user_id=? and friends.friend_user_id=?", ownerUserID, friendUserID).
-		Joins("left join friends on friends.friend_user_id = users.user_id").
+		Joins("left join users on friends.friend_user_id = users.user_id").
 		Take(friendUser).Error
 	return friendUser, err
 }

@@ -37,7 +37,6 @@ func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog,
 }
 
 func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
-	var chatLogs []db.ChatLog
 	var count int64
 	db := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs")
 	if chatLog.Content != "" {
@@ -62,6 +61,6 @@ func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
 		db = db.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
 	}
 
-	err := db.Find(&chatLogs).Count(&count).Error
+	err := db.Count(&count).Error
 	return count, err
 }

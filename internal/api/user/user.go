@@ -497,13 +497,10 @@ func GetUsers(c *gin.Context) {
 		return
 	}
 	for _, v := range respPb.UserList {
-		resp.Data.UserList = append(resp.Data.UserList, &struct {
-			open_im_sdk.UserInfo
-			IsBlock bool "json:\"isBlock\""
-		}{
-			IsBlock:  v.IsBlock,
-			UserInfo: *v.User,
-		})
+		user := api.CMSUser{}
+		utils.CopyStructFields(&user, v.User)
+		user.IsBlock = v.IsBlock
+		resp.Data.UserList = append(resp.Data.UserList, &user)
 	}
 	resp.CommResp.ErrCode = respPb.CommonResp.ErrCode
 	resp.CommResp.ErrMsg = respPb.CommonResp.ErrMsg

@@ -102,15 +102,30 @@ type GetUsersReq struct {
 	ShowNumber  int32  `json:"showNumber" binding:"required"`
 }
 
+type CMSUser struct {
+	UserID           string `json:"userID"`
+	Nickname         string `json:"nickname"`
+	FaceURL          string `json:"faceURL"`
+	Gender           int32  `json:"gender"`
+	PhoneNumber      string `json:"phoneNumber"`
+	Birth            uint32 `json:"birth"`
+	Email            string `json:"email"`
+	Ex               string `json:"ex"`
+	CreateIp         string `json:"createIp"`
+	CreateTime       uint32 `json:"createTime"`
+	LastLoginIp      string `json:"LastLoginIp"`
+	LastLoginTime    uint32 `json:"LastLoginTime"`
+	AppMangerLevel   int32  `json:"appMangerLevel"`
+	GlobalRecvMsgOpt int32  `json:"globalRecvMsgOpt"`
+	IsBlock          bool   `json:"isBlock"`
+}
+
 type GetUsersResp struct {
 	CommResp
 	Data struct {
-		UserList []*struct {
-			server_api_params.UserInfo
-			IsBlock bool `json:"isBlock"`
-		} `json:"userList"`
-		TotalNum    int32 `json:"totalNum"`
-		CurrentPage int32 `json:"currentPage"`
-		ShowNumber  int32 `json:"showNumber"`
+		UserList    []*CMSUser `json:"userList"`
+		TotalNum    int32      `json:"totalNum"`
+		CurrentPage int32      `json:"currentPage"`
+		ShowNumber  int32      `json:"showNumber"`
 	} `json:"data"`
 }
