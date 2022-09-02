@@ -621,7 +621,7 @@ func (s *adminCMSServer) GetUserFriends(_ context.Context, req *pbAdminCMS.GetUs
 		resp.FriendInfoList = append(resp.FriendInfoList, friendInfo)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return nil, nil
+	return resp, nil
 }
 
 func (s *adminCMSServer) GenerateInvitationCode(_ context.Context, req *pbAdminCMS.GenerateInvitationCodeReq) (*pbAdminCMS.GenerateInvitationCodeResp, error) {
