@@ -596,6 +596,7 @@ func (s *adminCMSServer) GetUserFriends(_ context.Context, req *pbAdminCMS.GetUs
 		friend, err := imdb.GetFriendByIDCMS(req.UserID, req.FriendUserID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), err, req.UserID, req.FriendUserID)
 				return resp, nil
 			}
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID, req.FriendUserID)
@@ -604,14 +605,17 @@ func (s *adminCMSServer) GetUserFriends(_ context.Context, req *pbAdminCMS.GetUs
 			return resp, nil
 		}
 		friendList = append(friendList, friend)
+		resp.FriendNums = 1
 	} else {
-		friendList, err = imdb.GetUserFriendsCMS(req.UserID, req.FriendUserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+		var count int64
+		friendList, count, err = imdb.GetUserFriendsCMS(req.UserID, req.FriendUserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID, req.FriendUserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 			resp.CommonResp.ErrMsg = err.Error()
 			return resp, nil
 		}
+		resp.FriendNums = int32(count)
 	}
 	for _, v := range friendList {
 		friendInfo := &server_api_params.FriendInfo{}

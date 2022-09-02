@@ -59,7 +59,7 @@ type FriendUser struct {
 	Nickname string `gorm:"column:name;size:255"`
 }
 
-func GetUserFriendsCMS(ownerUserID, friendUserName string, pageNumber, showNumber int32) (friendUserList []*FriendUser, err error) {
+func GetUserFriendsCMS(ownerUserID, friendUserName string, pageNumber, showNumber int32) (friendUserList []*FriendUser, count int64, err error) {
 	db := db.DB.MysqlDB.DefaultGormDB().Table("friends").
 		Select("friends.*, users.name").
 		Where("friends.owner_user_id=?", ownerUserID).Limit(int(showNumber)).
@@ -67,6 +67,9 @@ func GetUserFriendsCMS(ownerUserID, friendUserName string, pageNumber, showNumbe
 		Offset(int(showNumber * (pageNumber - 1)))
 	if friendUserName != "" {
 		db = db.Where("users.name like ?", fmt.Sprintf("%%%s%%", friendUserName))
+	}
+	if err = db.Count(&count).Error; err != nil {
+		return
 	}
 	err = db.Find(&friendUserList).Error
 	return
