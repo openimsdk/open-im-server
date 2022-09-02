@@ -66,8 +66,8 @@ func (f *Fcm) Push(accounts []string, title, detailContent, operationID string, 
 	notification.Title = title
 	var messages []*messaging.Message
 	ctx := context.Background()
-	apns := &messaging.APNSConfig{Payload: &messaging.APNSPayload{Aps: &messaging.Aps{Sound: opts.IOSPushSound}}}
 	for uid, personTokens := range allTokens {
+		apns := &messaging.APNSConfig{Payload: &messaging.APNSPayload{Aps: &messaging.Aps{Sound: opts.IOSPushSound}}}
 		messageCount := len(messages)
 		if messageCount >= SinglePushCountLimit {
 			response, err := f.FcmMsgCli.SendAll(ctx, messages)
