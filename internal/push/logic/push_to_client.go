@@ -79,8 +79,12 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 			}
 		}
 		if pushMsg.MsgData.ContentType == constant.SignalingNotification {
-			if err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData); err != nil {
+			isSend, err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData, pushMsg.PushToUserID)
+			if err != nil {
 				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), err.Error(), pushMsg.MsgData)
+				return
+			}
+			if !isSend {
 				return
 			}
 		}
