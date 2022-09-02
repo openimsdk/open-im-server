@@ -13,7 +13,7 @@ func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog,
 	db := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").
 		Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1)))
 	if chatLog.Content != "" {
-		db = db.Where(" name like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
+		db = db.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
 	}
 	if chatLog.SessionType == 1 {
 		db = db.Where("session_type = ?", chatLog.SessionType)
@@ -40,7 +40,7 @@ func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
 	var count int64
 	db := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs")
 	if chatLog.Content != "" {
-		db = db.Where(" name like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
+		db = db.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
 	}
 	if chatLog.SessionType != 0 {
 		db = db.Where("session_type = ?", chatLog.SessionType)

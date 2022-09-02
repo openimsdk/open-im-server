@@ -63,7 +63,7 @@ func GetUserFriendsCMS(ownerUserID, friendUserName string, pageNumber, showNumbe
 	db := db.DB.MysqlDB.DefaultGormDB().Table("friends").
 		Select("friends.*, users.name").
 		Where("friends.owner_user_id=?", ownerUserID).Limit(int(showNumber)).
-		Joins("left join friends on friends.friend_user_id = users.user_id").
+		Joins("left join users on friends.friend_user_id = users.user_id").
 		Offset(int(showNumber * (pageNumber - 1)))
 	if friendUserName != "" {
 		db = db.Where("users.name like ?", fmt.Sprintf("%%%s%%", friendUserName))
