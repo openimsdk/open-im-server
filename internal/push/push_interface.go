@@ -12,6 +12,7 @@ type PushOpts struct {
 	Signal        Signal
 	IOSPushSound  string
 	IOSBadgeCount bool
+	Data          string
 }
 
 type Signal struct {
