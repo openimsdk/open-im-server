@@ -297,8 +297,11 @@ func GetOfflinePushOpts(pushMsg *pbPush.PushMsgReq) (opts push.PushOpts, err err
 			log.NewDebug(pushMsg.OperationID, opts)
 		}
 	}
-	opts.IOSBadgeCount = pushMsg.MsgData.OfflinePushInfo.IOSBadgeCount
-	opts.IOSPushSound = pushMsg.MsgData.OfflinePushInfo.IOSPushSound
+	if pushMsg.MsgData.OfflinePushInfo != nil {
+		opts.IOSBadgeCount = pushMsg.MsgData.OfflinePushInfo.IOSBadgeCount
+		opts.IOSPushSound = pushMsg.MsgData.OfflinePushInfo.IOSPushSound
+	}
+
 	return opts, nil
 }
 

@@ -34,6 +34,20 @@ func InsertIntoGroupMember(toInsertInfo db.GroupMember) error {
 	return nil
 }
 
+func BatchInsertIntoGroupMember(toInsertInfoList []*db.GroupMember) error {
+	//MessageList []*model_struct.LocalChatLog
+	//return utils.Wrap(d.conn.Create(MessageList).Error, "BatchInsertMessageList failed")
+	for _, toInsertInfo := range toInsertInfoList {
+		toInsertInfo.JoinTime = time.Now()
+		if toInsertInfo.RoleLevel == 0 {
+			toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
+		}
+		toInsertInfo.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
+	}
+	return db.DB.MysqlDB.DefaultGormDB().Create(toInsertInfoList).Error
+
+}
+
 func GetGroupMemberListByUserID(userID string) ([]db.GroupMember, error) {
 	var groupMemberList []db.GroupMember
 	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("user_id=?", userID).Find(&groupMemberList).Error
