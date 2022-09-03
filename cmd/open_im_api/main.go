@@ -47,7 +47,6 @@ func main() {
 	//	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
-
 	log.Info("load  config: ", config.Config)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// user routing group, which handles user registration and login services
@@ -225,6 +224,6 @@ func main() {
 	fmt.Println("start api server, address: ", address)
 	err := r.Run(address)
 	if err != nil {
-		log.Error("", "run failed ", *ginPort, err.Error())
+		log.Error("", "api run failed ", *ginPort, err.Error())
 	}
 }
