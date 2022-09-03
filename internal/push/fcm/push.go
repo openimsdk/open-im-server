@@ -90,6 +90,7 @@ func (f *Fcm) Push(accounts []string, title, detailContent, operationID string, 
 		}
 		for _, token := range personTokens {
 			temp := &messaging.Message{
+				Data:         map[string]string{"ex": opts.Data},
 				Token:        token,
 				Notification: notification,
 				APNS:         apns,
