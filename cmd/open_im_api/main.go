@@ -33,7 +33,6 @@ func main() {
 	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
-
 	log.Info("load  config: ", config.Config)
 	// user routing group, which handles user registration and login services
 	userRouterGroup := r.Group("/user")
@@ -183,6 +182,6 @@ func main() {
 	fmt.Println("start api server, port: ", *ginPort)
 	err := r.Run(":" + strconv.Itoa(*ginPort))
 	if err != nil {
-		log.Error("", "run failed ", *ginPort, err.Error())
+		log.Error("", "api run failed ", *ginPort, err.Error())
 	}
 }
