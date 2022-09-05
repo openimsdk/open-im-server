@@ -205,8 +205,6 @@ message GetBlockUsersResp{
 }
 
 
-
-
 service user {
   rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);

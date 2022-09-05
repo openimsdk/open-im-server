@@ -259,10 +259,10 @@ func (d *DataBases) CleanUpOneUserAllMsgFromRedis(userID string, operationID str
 	return nil
 }
 
-func (d *DataBases) HandleSignalInfo(operationID string, msg *pbCommon.MsgData) error {
+func (d *DataBases) HandleSignalInfo(operationID string, msg *pbCommon.MsgData, pushToUserID string) (isSend bool, err error) {
 	req := &pbRtc.SignalReq{}
 	if err := proto.Unmarshal(msg.Content, req); err != nil {
-		return err
+		return false, err
 	}
 	//log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), "SignalReq: ", req.String())
 	var inviteeUserIDList []string
@@ -274,37 +274,40 @@ func (d *DataBases) HandleSignalInfo(operationID string, msg *pbCommon.MsgData) 
 	case *pbRtc.SignalReq_InviteInGroup:
 		inviteeUserIDList = signalInfo.InviteInGroup.Invitation.InviteeUserIDList
 		isInviteSignal = true
+		if !utils.IsContain(pushToUserID, inviteeUserIDList) {
+			return false, nil
+		}
 	case *pbRtc.SignalReq_HungUp, *pbRtc.SignalReq_Cancel, *pbRtc.SignalReq_Reject, *pbRtc.SignalReq_Accept:
-		return errors.New("signalInfo do not need offlinePush")
+		return false, errors.New("signalInfo do not need offlinePush")
 	default:
 		log2.NewDebug(operationID, utils.GetSelfFuncName(), "req invalid type", string(msg.Content))
-		return nil
+		return false, nil
 	}
 	if isInviteSignal {
-		log2.NewInfo(operationID, utils.GetSelfFuncName(), "invite userID list:", inviteeUserIDList)
+		log2.NewDebug(operationID, utils.GetSelfFuncName(), "invite userID list:", inviteeUserIDList)
 		for _, userID := range inviteeUserIDList {
 			log2.NewInfo(operationID, utils.GetSelfFuncName(), "invite userID:", userID)
 			timeout, err := strconv.Atoi(config.Config.Rtc.SignalTimeout)
 			if err != nil {
-				return err
+				return false, err
 			}
 			keyList := SignalListCache + userID
 			err = d.RDB.LPush(context.Background(), keyList, msg.ClientMsgID).Err()
 			if err != nil {
-				return err
+				return false, err
 			}
 			err = d.RDB.Expire(context.Background(), keyList, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
-				return err
+				return false, err
 			}
 			key := SignalCache + msg.ClientMsgID
 			err = d.RDB.Set(context.Background(), key, msg.Content, time.Duration(timeout)*time.Second).Err()
 			if err != nil {
-				return err
+				return false, err
 			}
 		}
 	}
-	return nil
+	return true, nil
 }
 
 func (d *DataBases) GetSignalInfoFromCacheByClientMsgID(clientMsgID string) (invitationInfo *pbRtc.SignalInviteReq, err error) {
