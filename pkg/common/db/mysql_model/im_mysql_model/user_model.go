@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -48,11 +49,6 @@ func UserRegister(user db.User) error {
 		return err
 	}
 	return nil
-}
-
-func DeleteUser(userID string) (i int64) {
-	i = db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", userID).Delete(db.User{}).RowsAffected
-	return i
 }
 
 func GetAllUser() ([]db.User, error) {
@@ -165,15 +161,12 @@ func BlockUser(userID, endDisableTime string) error {
 		return err
 	}
 	if end.Before(time.Now()) {
-		return constant.ErrDB
+		return errors.New("endDisableTime is before now")
 	}
 	var blockUser db.BlackList
 	db.DB.MysqlDB.DefaultGormDB().Table("black_lists").Where("uid=?", userID).First(&blockUser)
 	if blockUser.UserId != "" {
 		db.DB.MysqlDB.DefaultGormDB().Model(&blockUser).Where("uid=?", blockUser.UserId).Update("end_disable_time", end)
-		// if user.LoginLimit != 2 {
-		// 	db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).Update("login_limit", 2)
-		// }
 		return nil
 	}
 	blockUser = db.BlackList{
@@ -181,21 +174,12 @@ func BlockUser(userID, endDisableTime string) error {
 		BeginDisableTime: time.Now(),
 		EndDisableTime:   end,
 	}
-	result := db.DB.MysqlDB.DefaultGormDB().Create(&blockUser)
-	if result.Error == nil {
-		// if user.LoginLimit != 2 {
-		// 	db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).Update("login_limit", 2)
-		// }
-	}
-	return result.Error
+	err = db.DB.MysqlDB.DefaultGormDB().Create(&blockUser).Error
+	return err
 }
 
 func UnBlockUser(userID string) error {
-	err := db.DB.MysqlDB.DefaultGormDB().Where("uid=?", userID).Delete(&db.BlackList{}).Error
-	if err != nil {
-		return err
-	}
-	return db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", userID).Update("login_limit", 0).Error
+	return db.DB.MysqlDB.DefaultGormDB().Where("uid=?", userID).Delete(&db.BlackList{}).Error
 }
 
 type BlockUserInfo struct {
