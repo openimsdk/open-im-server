@@ -117,7 +117,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 				if err = rocksCache.DelConversationFromCache(v, req.Conversation.ConversationID); err != nil {
 					log.NewError(req.OperationID, utils.GetSelfFuncName(), v, req.Conversation.ConversationID, err.Error())
 				}
-				chat.ConversationUnreadChangeNotification(req.OperationID, v, req.Conversation.ConversationID)
+				chat.ConversationUnreadChangeNotification(req.OperationID, v, req.Conversation.ConversationID, conversation.UpdateUnreadCountTime)
 			}
 		}
 

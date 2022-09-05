@@ -488,6 +488,9 @@ message UserInfoUpdatedTips{
 message ConversationUpdateTips{
  string UserID = 1;
  repeated string conversationIDList = 2;
+ int64 updateUnreadCountTime = 3;
+
+
 }
 
 message ConversationSetPrivateTips{
