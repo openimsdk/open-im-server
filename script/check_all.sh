@@ -16,8 +16,6 @@ service_port_name=(
   openImGroupPort
   openImAuthPort
   openImPushPort
-  openImStatisticsPort
-  openImMessageCmsPort
   openImAdminCmsPort
   openImOfficePort
   openImOrganizationPort
