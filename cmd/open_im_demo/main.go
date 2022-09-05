@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +32,7 @@ func main() {
 		authRouterGroup.POST("/password", register.SetPassword)
 		authRouterGroup.POST("/login", register.Login)
 		authRouterGroup.POST("/reset_password", register.ResetPassword)
+		authRouterGroup.POST("/check_login", register.CheckLoginLimit)
 	}
 	demoRouterGroup := r.Group("/auth")
 	{
@@ -39,7 +41,10 @@ func main() {
 		demoRouterGroup.POST("/password", register.SetPassword)
 		demoRouterGroup.POST("/login", register.Login)
 		demoRouterGroup.POST("/reset_password", register.ResetPassword)
+		demoRouterGroup.POST("/check_login", register.CheckLoginLimit)
 	}
+
+	//deprecated
 	cmsRouterGroup := r.Group("/cms_admin")
 	{
 		cmsRouterGroup.POST("/generate_invitation_code", register.GenerateInvitationCode)

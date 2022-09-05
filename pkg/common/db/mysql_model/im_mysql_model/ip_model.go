@@ -74,3 +74,15 @@ func GetRegisterUserNum(ip string) ([]string, error) {
 	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.Register{}).Where("register_ip=?", ip).Pluck("user_id", &userIDList).Error
 	return userIDList, err
 }
+
+func InsertIpRecord(userID, createIp string) error {
+	record := &db.UserIpRecord{UserID: userID, CreateIp: createIp, LastLoginTime: time.Now(), LoginTimes: 1}
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpRecord{}).Create(record).Error
+	return err
+}
+
+func UpdateIpReocord(userID, ip string) error {
+	record := &db.UserIpRecord{UserID: userID, LastLoginIp: ip, LastLoginTime: time.Now()}
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpRecord{}).Updates(record).Updates("login_times = login_times + 1").Error
+	return err
+}

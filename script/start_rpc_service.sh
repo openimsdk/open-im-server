@@ -15,8 +15,6 @@ service_filename=(
   open_im_group
   open_im_auth
   open_im_admin_cms
-  open_im_message_cms
-  open_im_statistics
   ${msg_name}
   open_im_office
   open_im_organization
@@ -35,8 +33,6 @@ service_port_name=(
   openImGroupPort
   openImAuthPort
   openImAdminCmsPort
-  openImMessageCmsPort
-  openImStatisticsPort
   openImMessagePort
   openImOfficePort
   openImOrganizationPort

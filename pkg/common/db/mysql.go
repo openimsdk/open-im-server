@@ -56,7 +56,7 @@ func initMysqlDB() {
 		Writer{},
 		logger.Config{
 			SlowThreshold:             200 * time.Millisecond, // Slow SQL threshold
-			LogLevel:                  logger.Error,           // Log level
+			LogLevel:                  logger.Info,            // Log level
 			IgnoreRecordNotFoundError: true,                   // Ignore ErrRecordNotFound error for logger
 			Colorful:                  true,                   // Disable color
 		},

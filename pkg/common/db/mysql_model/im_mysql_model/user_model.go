@@ -43,9 +43,6 @@ func UserRegister(user db.User) error {
 	if user.Birth.Unix() < 0 {
 		user.Birth = utils.UnixSecondToTime(0)
 	}
-	user.LastLoginTime = time.Now()
-	user.LoginTimes = 0
-	user.LastLoginIp = user.CreateIp
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user).Error
 	if err != nil {
 		return err
@@ -124,31 +121,21 @@ func GetUsers(showNumber, pageNumber int32) ([]db.User, error) {
 	return users, err
 }
 
-func AddUser(userId string, phoneNumber string, name string, email string, gender string, photo string, birth string) error {
-	_gender, _err := strconv.Atoi(gender)
-	if _err != nil {
-		_gender = 0
-	}
-	_birth, _err := time.ParseInLocation("2006-01-02", birth, time.Local)
+func AddUser(userID string, phoneNumber string, name string, email string, gender int32, faceURL string, birth uint32) error {
+	_birth, _err := time.ParseInLocation("2006-01-02", strconv.Itoa(int(birth)), time.Local)
 	if _err != nil {
 		_birth = time.Now()
 	}
 	user := db.User{
-		UserID:         userId,
-		Nickname:       name,
-		FaceURL:        photo,
-		Gender:         int32(_gender),
-		PhoneNumber:    phoneNumber,
-		Birth:          _birth,
-		Email:          email,
-		Ex:             "",
-		CreateTime:     time.Now(),
-		CreateIp:       "",
-		LastLoginTime:  time.Now(),
-		LastLoginIp:    "",
-		LoginTimes:     0,
-		LoginLimit:     0,
-		InvitationCode: "",
+		UserID:      userID,
+		Nickname:    name,
+		FaceURL:     faceURL,
+		Gender:      gender,
+		PhoneNumber: phoneNumber,
+		Birth:       _birth,
+		Email:       email,
+		Ex:          "",
+		CreateTime:  time.Now(),
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user)
 	return result.Error
@@ -163,8 +150,13 @@ func UserIsBlock(userId string) (bool, error) {
 	return false, nil
 }
 
-func BlockUser(userId, endDisableTime string) error {
-	user, err := GetUserByUserID(userId)
+func UsersIsBlock(userIDList []string) (inBlockUserIDList []string, err error) {
+	err = db.DB.MysqlDB.DefaultGormDB().Table("black_lists").Where("uid in (?) and end_disable_time > now()", userIDList).Pluck("uid", &inBlockUserIDList).Error
+	return inBlockUserIDList, err
+}
+
+func BlockUser(userID, endDisableTime string) error {
+	user, err := GetUserByUserID(userID)
 	if err != nil || user.UserID == "" {
 		return err
 	}
@@ -176,34 +168,34 @@ func BlockUser(userId, endDisableTime string) error {
 		return constant.ErrDB
 	}
 	var blockUser db.BlackList
-	db.DB.MysqlDB.DefaultGormDB().Table("black_lists").Where("uid=?", userId).First(&blockUser)
+	db.DB.MysqlDB.DefaultGormDB().Table("black_lists").Where("uid=?", userID).First(&blockUser)
 	if blockUser.UserId != "" {
 		db.DB.MysqlDB.DefaultGormDB().Model(&blockUser).Where("uid=?", blockUser.UserId).Update("end_disable_time", end)
-		if user.LoginLimit != 2 {
-			db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).Update("login_limit", 2)
-		}
+		// if user.LoginLimit != 2 {
+		// 	db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).Update("login_limit", 2)
+		// }
 		return nil
 	}
 	blockUser = db.BlackList{
-		UserId:           userId,
+		UserId:           userID,
 		BeginDisableTime: time.Now(),
 		EndDisableTime:   end,
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Create(&blockUser)
 	if result.Error == nil {
-		if user.LoginLimit != 2 {
-			db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).Update("login_limit", 2)
-		}
+		// if user.LoginLimit != 2 {
+		// 	db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", blockUser.UserId).Update("login_limit", 2)
+		// }
 	}
 	return result.Error
 }
 
-func UnBlockUser(userId string) error {
-	err := db.DB.MysqlDB.DefaultGormDB().Where("uid=?", userId).Delete(&db.BlackList{}).Error
+func UnBlockUser(userID string) error {
+	err := db.DB.MysqlDB.DefaultGormDB().Where("uid=?", userID).Delete(&db.BlackList{}).Error
 	if err != nil {
 		return err
 	}
-	return db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", userId).Update("login_limit", 0).Error
+	return db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", userID).Update("login_limit", 0).Error
 }
 
 type BlockUserInfo struct {
@@ -212,7 +204,7 @@ type BlockUserInfo struct {
 	EndDisableTime   time.Time
 }
 
-func GetBlockUserById(userId string) (BlockUserInfo, error) {
+func GetBlockUserByID(userId string) (BlockUserInfo, error) {
 	var blockUserInfo BlockUserInfo
 	blockUser := db.BlackList{
 		UserId: userId,
@@ -267,13 +259,13 @@ func GetBlockUsers(showNumber, pageNumber int32) ([]BlockUserInfo, error) {
 
 func GetUserByName(userName string, showNumber, pageNumber int32) ([]db.User, error) {
 	var users []db.User
-	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(fmt.Sprintf(" name like '%%%s%%' ", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
 	return users, err
 }
 
-func GetUsersCount(user db.User) (int32, error) {
+func GetUsersCount(userName string) (int32, error) {
 	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(fmt.Sprintf(" name like '%%%s%%' ", user.Nickname)).Count(&count).Error; err != nil {
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error; err != nil {
 		return 0, err
 	}
 	return int32(count), nil

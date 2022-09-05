@@ -8,6 +8,7 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/token_verify"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"Open_IM/pkg/utils"
 	"encoding/json"
@@ -41,28 +42,33 @@ func SetPassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.FormattingError, "errMsg": err.Error()})
 		return
 	}
-
 	ip := c.Request.Header.Get("X-Forward-For")
 	if ip == "" {
 		ip = c.ClientIP()
 	}
 	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "ip:", ip)
-	Limited, LimitError := imdb.IsLimitRegisterIp(ip)
-	if LimitError != nil {
-		log.Error(params.OperationID, utils.GetSelfFuncName(), LimitError, ip)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": LimitError.Error()})
-		return
-	}
-	if Limited {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.RegisterLimit, "errMsg": "limited"})
-		return
-	}
 
+	ok, opUserID, _ := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), params.OperationID)
+	if !ok || !utils.IsContain(opUserID, config.Config.Manager.AppManagerUid) {
+		Limited, LimitError := imdb.IsLimitRegisterIp(ip)
+		if LimitError != nil {
+			log.Error(params.OperationID, utils.GetSelfFuncName(), LimitError, ip)
+			c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": LimitError.Error()})
+			return
+		}
+		if Limited {
+			c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.RegisterLimit, "errMsg": "limited"})
+			return
+		}
+	}
+	openIMRegisterReq := api.UserRegisterReq{}
 	var account string
 	if params.Email != "" {
 		account = params.Email
+		openIMRegisterReq.Email = params.Email
 	} else if params.PhoneNumber != "" {
 		account = params.PhoneNumber
+		openIMRegisterReq.PhoneNumber = params.PhoneNumber
 	} else {
 		account = params.UserID
 	}
@@ -84,7 +90,7 @@ func SetPassword(c *gin.Context) {
 		if config.Config.Demo.NeedInvitationCode && params.InvitationCode != "" {
 			err := imdb.CheckInvitationCode(params.InvitationCode)
 			if err != nil {
-				c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
+				c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "InvitationCode error"})
 				return
 			}
 		}
@@ -99,18 +105,13 @@ func SetPassword(c *gin.Context) {
 	} else {
 		userID = params.UserID
 	}
-
 	url := config.Config.Demo.ImAPIURL + "/auth/user_register"
-	openIMRegisterReq := api.UserRegisterReq{}
 	openIMRegisterReq.OperationID = params.OperationID
 	openIMRegisterReq.Platform = params.Platform
 	openIMRegisterReq.UserID = userID
 	openIMRegisterReq.Nickname = params.Nickname
 	openIMRegisterReq.Secret = config.Config.Secret
 	openIMRegisterReq.FaceURL = params.FaceURL
-	openIMRegisterReq.CreateIp = ip
-	openIMRegisterReq.LastLoginIp = ip
-	openIMRegisterReq.InvitationCode = params.InvitationCode
 	openIMRegisterResp := api.UserRegisterResp{}
 	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "register req:", openIMRegisterReq)
 	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
@@ -124,14 +125,10 @@ func SetPassword(c *gin.Context) {
 		log.NewError(params.OperationID, "request openIM register error", account, "err", "resp: ", openIMRegisterResp.ErrCode)
 		if err != nil {
 			log.NewError(params.OperationID, utils.GetSelfFuncName(), err.Error())
+			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register limit"})
+			return
 		}
-		if openIMRegisterResp.ErrCode == constant.RegisterLimit {
-			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterLimit, "errMsg": "用户注册被限制"})
-			return
-		} else if openIMRegisterResp.ErrCode == constant.InvitationError {
-			c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
-			return
-		} else {
+		if openIMRegisterResp.ErrCode != 0 {
 			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterFailed, "errMsg": "register failed: " + openIMRegisterResp.ErrMsg})
 			return
 		}
@@ -150,8 +147,11 @@ func SetPassword(c *gin.Context) {
 			imdb.FinishInvitationCode(params.InvitationCode, userID)
 		}
 	}
+	if err := imdb.InsertIpRecord(userID, ip); err != nil {
+		log.NewError(params.OperationID, utils.GetSelfFuncName(), userID, ip, err.Error())
+	}
 
-	log.Info(params.OperationID, "end setPassword", account, params.Password)
+	log.Info(params.OperationID, "end  setuserInfo", account, params.Password)
 	// demo onboarding
 	if params.UserID == "" && config.Config.Demo.OnboardProcess {
 		select {
@@ -168,6 +168,7 @@ func SetPassword(c *gin.Context) {
 		}
 	}
 
+	// register add friend
 	select {
 	case ChImportFriend <- &pbFriend.ImportFriendReq{
 		OperationID: params.OperationID,

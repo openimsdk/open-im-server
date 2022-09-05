@@ -456,3 +456,58 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	log.NewInfo(req.OperationID, "GetUsersOnlineStatus api return", resp)
 	c.JSON(http.StatusOK, resp)
 }
+
+func GetUsers(c *gin.Context) {
+	var (
+		req   api.GetUsersReq
+		resp  api.GetUsersResp
+		reqPb rpc.GetUsersReq
+	)
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, "Bind failed ", err.Error(), req)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	var ok bool
+	var errInfo string
+	ok, _, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	if !ok {
+		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	log.NewInfo(reqPb.OperationID, utils.GetSelfFuncName(), "req: ", req)
+	reqPb.OperationID = req.OperationID
+	reqPb.UserID = req.UserID
+	reqPb.UserName = req.UserName
+	reqPb.Pagination = &open_im_sdk.RequestPagination{ShowNumber: req.ShowNumber, PageNumber: req.PageNumber}
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, reqPb.OperationID)
+	if etcdConn == nil {
+		errMsg := reqPb.OperationID + "getcdv3.GetDefaultConn == nil"
+		log.NewError(reqPb.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	client := rpc.NewUserClient(etcdConn)
+	respPb, err := client.GetUsers(context.Background(), &reqPb)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), reqPb.String())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+	for _, v := range respPb.UserList {
+		user := api.CMSUser{}
+		utils.CopyStructFields(&user, v.User)
+		user.IsBlock = v.IsBlock
+		resp.Data.UserList = append(resp.Data.UserList, &user)
+	}
+	resp.CommResp.ErrCode = respPb.CommonResp.ErrCode
+	resp.CommResp.ErrMsg = respPb.CommonResp.ErrMsg
+	resp.Data.TotalNum = respPb.TotalNums
+	resp.Data.CurrentPage = respPb.Pagination.CurrentPage
+	resp.Data.ShowNumber = respPb.Pagination.ShowNumber
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
+	c.JSON(http.StatusOK, resp)
+	return
+}
