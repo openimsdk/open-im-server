@@ -29,70 +29,24 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
 	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
-	Limited, LimitError := imdb.IsLimitRegisterIp(req.UserInfo.CreateIp)
-	if LimitError != nil {
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
-	}
-	if Limited {
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.RegisterLimit, ErrMsg: "Register Limit"}}, nil
-	}
 	err := imdb.UserRegister(user)
 	if err != nil {
-		if err == constant.InvitationMsg {
-			return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.InvitationError, ErrMsg: "邀请码错误"}}, nil
-		}
 		errMsg := req.OperationID + " imdb.UserRegister failed " + err.Error() + user.UserID
 		log.NewError(req.OperationID, errMsg, user)
 		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}})
 	return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}}, nil
 }
 
 func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-
-	if config.Config.Demo.UseIPLimit {
-		user, err := imdb.GetUserIPLimit(req.FromUserID)
-		if err != nil {
-			errMsg := req.OperationID + " imdb.GetUserByUserID failed " + err.Error() + req.FromUserID
-			log.NewError(req.OperationID, errMsg)
-			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-		}
-
-		var Limited bool
-		var LimitError error
-		Limited, LimitError = imdb.IsLimitLoginIp(req.LoginIp)
-		if LimitError != nil {
-			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
-		}
-		if Limited {
-			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.LoginLimit, ErrMsg: "limited Login"}}, nil
-		}
-		Limited, LimitError = imdb.IsLimitUserLoginIp(user.UserID, req.LoginIp)
-		if LimitError != nil {
-			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
-		}
-		if Limited {
-			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.LoginLimit, ErrMsg: "limited Login"}}, nil
-		}
-		Limited, LimitError = imdb.UserIsBlock(user.UserID)
-		if LimitError != nil {
-			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
-		}
-		if Limited {
-			return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.LoginLimit, ErrMsg: "limited Login"}}, nil
-		}
-	}
-
 	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, int(req.Platform))
 	if err != nil {
 		errMsg := req.OperationID + " token_verify.CreateToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
 		log.NewError(req.OperationID, errMsg)
 		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime})
 	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }

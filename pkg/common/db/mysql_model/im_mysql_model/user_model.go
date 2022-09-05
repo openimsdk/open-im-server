@@ -43,9 +43,6 @@ func UserRegister(user db.User) error {
 	if user.Birth.Unix() < 0 {
 		user.Birth = utils.UnixSecondToTime(0)
 	}
-	// user.LastLoginTime = time.Now()
-	// user.LoginTimes = 0
-	// user.LastLoginIp = user.CreateIp
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Create(&user).Error
 	if err != nil {
 		return err
