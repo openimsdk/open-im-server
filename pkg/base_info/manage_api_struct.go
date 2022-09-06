@@ -98,6 +98,7 @@ type GetUsersReq struct {
 	OperationID string `json:"operationID" binding:"required"`
 	UserName    string `json:"userName"`
 	UserID      string `json:"userID"`
+	Content     string `json:"content"`
 	PageNumber  int32  `json:"pageNumber" binding:"required"`
 	ShowNumber  int32  `json:"showNumber" binding:"required"`
 }

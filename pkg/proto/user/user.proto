@@ -139,6 +139,7 @@ message GetUsersReq {
   server_api_params.RequestPagination pagination = 2;
   string userName = 3;
   string userID = 4;
+  string content = 5;
 }
 
 message CmsUser {

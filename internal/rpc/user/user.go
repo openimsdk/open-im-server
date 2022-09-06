@@ -524,6 +524,8 @@ func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, o
 
 func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	var usersDB []db.User
+	var err error
 	resp := &pbUser.GetUsersResp{CommonResp: &pbUser.CommonResp{}, Pagination: &sdkws.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}}
 	if req.UserID != "" {
 		userDB, err := imdb.GetUserByUserID(req.UserID)
@@ -536,14 +538,10 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
 			return resp, nil
 		}
-
-		user := pbUser.CmsUser{User: &sdkws.UserInfo{}}
-		utils.CopyStructFields(&user.User, userDB)
-		user.User.CreateTime = uint32(userDB.CreateTime.Unix())
-		resp.UserList = append(resp.UserList, &user)
+		usersDB = append(usersDB, *userDB)
 		resp.TotalNums = 1
 	} else if req.UserName != "" {
-		usersDB, err := imdb.GetUserByName(req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		usersDB, err = imdb.GetUserByName(req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
 			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
@@ -557,15 +555,19 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			resp.CommonResp.ErrMsg = err.Error()
 			return resp, nil
 		}
-		for _, userDB := range usersDB {
-			var user sdkws.UserInfo
-			utils.CopyStructFields(&user, userDB)
-			user.CreateTime = uint32(userDB.CreateTime.Unix())
-			user.Birth = uint32(userDB.Birth.Unix())
-			resp.UserList = append(resp.UserList, &pbUser.CmsUser{User: &user})
+
+	} else if req.Content != "" {
+		var count int64
+		usersDB, count, err = imdb.GetUsersByNameAndID(req.Content, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
+			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
 		}
+		resp.TotalNums = int32(count)
 	} else {
-		usersDB, err := imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		usersDB, err = imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
 			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
@@ -579,14 +581,15 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			resp.CommonResp.ErrMsg = err.Error()
 			return resp, nil
 		}
-		for _, userDB := range usersDB {
-			var user sdkws.UserInfo
-			utils.CopyStructFields(&user, userDB)
-			user.CreateTime = uint32(userDB.CreateTime.Unix())
-			user.Birth = uint32(userDB.Birth.Unix())
-			resp.UserList = append(resp.UserList, &pbUser.CmsUser{User: &user})
-		}
 	}
+	for _, userDB := range usersDB {
+		var user sdkws.UserInfo
+		utils.CopyStructFields(&user, userDB)
+		user.CreateTime = uint32(userDB.CreateTime.Unix())
+		user.Birth = uint32(userDB.Birth.Unix())
+		resp.UserList = append(resp.UserList, &pbUser.CmsUser{User: &user})
+	}
+
 	var userIDList []string
 	for _, v := range resp.UserList {
 		userIDList = append(userIDList, v.User.UserID)

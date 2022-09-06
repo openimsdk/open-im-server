@@ -247,6 +247,17 @@ func GetUserByName(userName string, showNumber, pageNumber int32) ([]db.User, er
 	return users, err
 }
 
+func GetUsersByNameAndID(content string, showNumber, pageNumber int32) ([]db.User, int64, error) {
+	var users []db.User
+	var count int64
+	db := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
+	if err := db.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+	err := db.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
+	return users, count, err
+}
+
 func GetUsersCount(userName string) (int32, error) {
 	var count int64
 	if err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error; err != nil {
