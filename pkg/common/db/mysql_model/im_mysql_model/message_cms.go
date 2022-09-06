@@ -47,13 +47,13 @@ func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
 	if chatLog.Content != "" {
 		db = db.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
 	}
-	if chatLog.SessionType != 0 {
+	if chatLog.SessionType == 1 {
 		db = db.Where("session_type = ?", chatLog.SessionType)
-	}
-	if chatLog.ContentType == 1 {
-		db = db.Where("content_type = ?", chatLog.ContentType)
-	} else if chatLog.ContentType == 2 {
+	} else if chatLog.SessionType == 2 {
 		db = db.Where("content_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
+	}
+	if chatLog.ContentType != 0 {
+		db = db.Where("content_type = ?", chatLog.ContentType)
 	}
 	if chatLog.SendID != "" {
 		db = db.Where("send_id = ?", chatLog.SendID)

@@ -97,6 +97,7 @@ func GetActiveUsers(from, to time.Time, limit int) ([]*activeUser, error) {
 			continue
 		}
 		activeUser.Name = user.Nickname
+		activeUser.ID = user.UserID
 	}
 	return activeUsers, err
 }
