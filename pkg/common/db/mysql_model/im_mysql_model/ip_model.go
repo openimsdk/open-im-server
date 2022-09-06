@@ -81,8 +81,14 @@ func InsertIpRecord(userID, createIp string) error {
 	return err
 }
 
-func UpdateIpReocord(userID, ip string) error {
+func UpdateIpReocord(userID, ip string) (err error) {
 	record := &db.UserIpRecord{UserID: userID, LastLoginIp: ip, LastLoginTime: time.Now()}
-	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpRecord{}).Updates(record).Updates("login_times = login_times + 1").Error
+	result := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpRecord{}).Where("user_id=?", userID).Updates(record).Updates("login_times = login_times + 1")
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		err = InsertIpRecord(userID, ip)
+	}
 	return err
 }

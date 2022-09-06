@@ -6,9 +6,10 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type InvitationCode struct {
@@ -87,7 +88,8 @@ type GetInvitationCodesReq struct {
 
 type GetInvitationCodesResp struct {
 	apiStruct.Pagination
-	Codes []InvitationCode `json:"codes"`
+	Codes    []InvitationCode `json:"codes"`
+	CodeNums int64            `json:"codeNums"`
 }
 
 func GetInvitationCodes(c *gin.Context) {
@@ -98,7 +100,7 @@ func GetInvitationCodes(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
-	codes, err := imdb.GetInvitationCodes(req.ShowNumber, req.PageNumber, req.Status)
+	codes, count, err := imdb.GetInvitationCodes(req.ShowNumber, req.PageNumber, req.Status)
 	if err != nil {
 		log.NewError(req.OperationID, "GetInvitationCode failed", req.ShowNumber, req.PageNumber, req.Status)
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrDB, "errMsg": "Verification code error!"})
@@ -115,6 +117,7 @@ func GetInvitationCodes(c *gin.Context) {
 			Status:         v.Status,
 		})
 	}
+	resp.CodeNums = count
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", resp)
 	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 }

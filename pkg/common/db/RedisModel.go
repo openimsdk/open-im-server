@@ -398,12 +398,17 @@ func (d *DataBases) GetGetuiToken() (string, error) {
 	return result, err
 }
 
-func (d *DataBases) SetSendMsgFailedFlag(operationID string) error {
-	return d.RDB.Set(context.Background(), sendMsgFailedFlag+operationID, 1, time.Hour*24).Err()
+func (d *DataBases) SetSendMsgStatus(status int32, operationID string) error {
+	return d.RDB.Set(context.Background(), sendMsgFailedFlag+operationID, status, time.Hour*24).Err()
 }
 
-func (d *DataBases) GetSendMsgStatus(operationID string) error {
-	return d.RDB.Get(context.Background(), sendMsgFailedFlag+operationID).Err()
+func (d *DataBases) GetSendMsgStatus(operationID string) (int, error) {
+	result, err := d.RDB.Get(context.Background(), sendMsgFailedFlag+operationID).Result()
+	if err != nil {
+		return 0, err
+	}
+	status, err := strconv.Atoi(result)
+	return status, err
 }
 
 func (d *DataBases) SetFcmToken(account string, platformid int, fcmToken string, expireTime int64) (err error) {

@@ -3,9 +3,10 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/db"
 	"errors"
-	"github.com/jinzhu/gorm"
 	"math/rand"
 	"time"
+
+	"github.com/jinzhu/gorm"
 )
 
 /**
@@ -105,9 +106,12 @@ func CreateRandomString(strlen int) string {
 	return string(result)
 }
 
-func GetInvitationCodes(showNumber, pageNumber, status int32) ([]db.Invitation, error) {
+func GetInvitationCodes(showNumber, pageNumber, status int32) ([]db.Invitation, int64, error) {
 	var invitationList []db.Invitation
-	err := db.DB.MysqlDB.DefaultGormDB().Model(db.Invitation{}).Limit(int(showNumber)).Offset(int(showNumber*(pageNumber-1))).Where("status=?", status).
+	db := db.DB.MysqlDB.DefaultGormDB().Model(db.Invitation{}).Where("status=?", status)
+	var count int64
+	err := db.Count(&count).Error
+	err = db.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).
 		Order("create_time desc").Find(&invitationList).Error
-	return invitationList, err
+	return invitationList, count, err
 }
