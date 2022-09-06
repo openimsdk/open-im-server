@@ -85,6 +85,8 @@ func AdminLogin(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
+	resp.FaceURL = respPb.FaceURL
+	resp.UserName = respPb.UserName
 	resp.Token = respPb.Token
 	c.JSON(http.StatusOK, gin.H{"errCode": respPb.CommonResp.ErrCode, "errMsg": respPb.CommonResp.ErrMsg, "data": resp})
 }

@@ -12,7 +12,9 @@ type AdminLoginRequest struct {
 }
 
 type AdminLoginResponse struct {
-	Token string `json:"token"`
+	Token    string `json:"token"`
+	UserName string `json:"userName"`
+	FaceURL  string `json:"faceURL"`
 }
 
 type AddUserRegisterAddFriendIDListRequest struct {

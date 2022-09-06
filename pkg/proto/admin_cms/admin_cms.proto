@@ -18,7 +18,9 @@ message AdminLoginReq  {
 
 message AdminLoginResp {
     string token = 1;
-    CommonResp commonResp = 2;
+    string userName = 2;
+    string faceURL = 3;
+    CommonResp commonResp = 4;
 }
 
 message AddUserRegisterAddFriendIDListReq {
