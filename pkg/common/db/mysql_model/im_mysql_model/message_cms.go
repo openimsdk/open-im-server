@@ -21,7 +21,7 @@ func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog,
 	if chatLog.SessionType == 1 {
 		db = db.Where("session_type = ?", chatLog.SessionType)
 	} else if chatLog.SessionType == 2 {
-		db = db.Where("content_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
+		db = db.Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
 	}
 	if chatLog.ContentType != 0 {
 		db = db.Where("content_type = ?", chatLog.ContentType)
@@ -50,7 +50,7 @@ func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
 	if chatLog.SessionType == 1 {
 		db = db.Where("session_type = ?", chatLog.SessionType)
 	} else if chatLog.SessionType == 2 {
-		db = db.Where("content_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
+		db = db.Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
 	}
 	if chatLog.ContentType != 0 {
 		db = db.Where("content_type = ?", chatLog.ContentType)
