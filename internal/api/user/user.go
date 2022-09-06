@@ -481,6 +481,7 @@ func GetUsers(c *gin.Context) {
 	reqPb.OperationID = req.OperationID
 	reqPb.UserID = req.UserID
 	reqPb.UserName = req.UserName
+	reqPb.Content = req.Content
 	reqPb.Pagination = &open_im_sdk.RequestPagination{ShowNumber: req.ShowNumber, PageNumber: req.PageNumber}
 	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, reqPb.OperationID)
 	if etcdConn == nil {
