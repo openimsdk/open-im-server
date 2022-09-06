@@ -5,9 +5,11 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type CheckLoginLimitReq struct {
@@ -22,18 +24,20 @@ func CheckLoginLimit(c *gin.Context) {
 	req := CheckLoginLimitReq{}
 	if err := c.BindJSON(&req); err != nil {
 		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.ErrArgs, "errMsg": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	ip := c.Request.Header.Get("X-Forward-For")
 	if ip == "" {
 		ip = c.ClientIP()
 	}
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "IP: ", ip)
 	user, err := imdb.GetUserIPLimit(req.UserID)
-	if err != nil {
+	if err != nil && !errors.Is(gorm.ErrRecordNotFound, err) {
 		errMsg := req.OperationID + " imdb.GetUserByUserID failed " + err.Error() + req.UserID
 		log.NewError(req.OperationID, errMsg)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": errMsg})
+		return
 	}
 
 	if err := imdb.UpdateIpReocord(req.UserID, ip); err != nil {

@@ -57,6 +57,7 @@ func SetPassword(c *gin.Context) {
 			return
 		}
 		if Limited {
+			log.NewInfo(params.OperationID, utils.GetSelfFuncName(), "is limited", ip, "params:", params)
 			c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.RegisterLimit, "errMsg": "limited"})
 			return
 		}

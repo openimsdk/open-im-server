@@ -189,9 +189,9 @@ type UserIpRecord struct {
 	LastLoginTime time.Time `gorm:"column:last_login_time"`
 	LastLoginIp   string    `gorm:"column:last_login_ip;size:15"`
 	LoginTimes    int32     `gorm:"column:login_times"`
-	LoginLimit    int32     `gorm:"column:login_limit"`
 }
 
+// ip limit login
 type IpLimit struct {
 	Ip            string    `gorm:"column:ip;primary_key;size:15"`
 	LimitRegister int32     `gorm:"column:limit_register;size:1"`
@@ -200,6 +200,7 @@ type IpLimit struct {
 	LimitTime     time.Time `gorm:"column:limit_time"`
 }
 
+// ip login
 type UserIpLimit struct {
 	UserID     string    `gorm:"column:user_id;primary_key;size:64"`
 	Ip         string    `gorm:"column:ip;primary_key;size:15"`
