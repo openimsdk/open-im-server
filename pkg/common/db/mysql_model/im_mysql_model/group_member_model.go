@@ -213,9 +213,9 @@ func GetGroupMembersByGroupIdCMS(groupId string, userName string, showNumber, pa
 	return groupMembers, nil
 }
 
-func GetGroupMembersCount(groupId, userName string) (int64, error) {
+func GetGroupMembersCount(groupID, userName string) (int64, error) {
 	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupID).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
 		return count, err
 	}
 	return count, nil

@@ -561,6 +561,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			var user sdkws.UserInfo
 			utils.CopyStructFields(&user, userDB)
 			user.CreateTime = uint32(userDB.CreateTime.Unix())
+			user.Birth = uint32(userDB.Birth.Unix())
 			resp.UserList = append(resp.UserList, &pbUser.CmsUser{User: &user})
 		}
 	} else {
@@ -582,6 +583,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			var user sdkws.UserInfo
 			utils.CopyStructFields(&user, userDB)
 			user.CreateTime = uint32(userDB.CreateTime.Unix())
+			user.Birth = uint32(userDB.Birth.Unix())
 			resp.UserList = append(resp.UserList, &pbUser.CmsUser{User: &user})
 		}
 	}

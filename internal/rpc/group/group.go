@@ -1365,6 +1365,14 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 			resp.CommonResp.ErrMsg = err.Error()
 			return resp, nil
 		}
+		memberNum, err := imdb.GetGroupMembersCount(req.GroupID, "")
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		groupInfo.MemberCount = uint32(memberNum)
 		resp.CMSGroups = append(resp.CMSGroups, &pbGroup.CMSGroup{GroupInfo: groupInfo, GroupOwnerUserName: groupMember.Nickname, GroupOwnerUserID: groupMember.UserID})
 	} else {
 		groups, err := imdb.GetGroupsByName(req.GroupName, req.Pagination.PageNumber, req.Pagination.ShowNumber)

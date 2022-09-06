@@ -33,6 +33,8 @@ type ParamsSetPassword struct {
 	OperationID      string `json:"operationID" binding:"required"`
 	AreaCode         string `json:"areaCode"`
 	InvitationCode   string `json:"invitationCode"`
+	Gender           int32  `json:"gender"`
+	Birth            int32  `json:"birth"`
 }
 
 func SetPassword(c *gin.Context) {
@@ -113,6 +115,8 @@ func SetPassword(c *gin.Context) {
 	openIMRegisterReq.Nickname = params.Nickname
 	openIMRegisterReq.Secret = config.Config.Secret
 	openIMRegisterReq.FaceURL = params.FaceURL
+	openIMRegisterReq.Gender = params.Gender
+	openIMRegisterReq.Birth = uint32(params.Birth)
 	openIMRegisterResp := api.UserRegisterResp{}
 	log.NewDebug(params.OperationID, utils.GetSelfFuncName(), "register req:", openIMRegisterReq)
 	bMsg, err := http2.Post(url, openIMRegisterReq, 2)
