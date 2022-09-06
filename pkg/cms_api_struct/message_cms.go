@@ -8,7 +8,7 @@ type GetChatLogsReq struct {
 	SessionType int    `json:"sessionType"`
 	ContentType int    `json:"contentType"`
 	Content     string `json:"content"`
-	SendID      string `json:"userID"`
+	SendID      string `json:"sendID"`
 	RecvID      string `json:"recvID"`
 	GroupID     string `json:"groupID"`
 	SendTime    string `json:"sendTime"`
