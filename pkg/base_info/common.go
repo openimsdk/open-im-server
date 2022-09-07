@@ -1,8 +1,8 @@
-package cms_api_struct
+package base_info
 
 type RequestPagination struct {
-	PageNumber int `json:"pageNumber" binding:"required"`
-	ShowNumber int `json:"showNumber" binding:"required"`
+	PageNumber int `json:"pageNumber"  binding:"required"`
+	ShowNumber int `json:"showNumber"  binding:"required"`
 }
 
 type ResponsePagination struct {

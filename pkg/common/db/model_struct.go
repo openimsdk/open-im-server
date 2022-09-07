@@ -15,7 +15,7 @@ type Register struct {
 type Invitation struct {
 	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:varchar(32)"`
 	CreateTime     time.Time `gorm:"column:create_time"`
-	UserID         string    `gorm:"column:user_id"`
+	UserID         string    `gorm:"column:user_id;index:userID"`
 	LastTime       time.Time `gorm:"column:last_time"`
 	Status         int32     `gorm:"column:status"`
 }
@@ -92,7 +92,7 @@ type Group struct {
 	Notification           string    `gorm:"column:notification;size:255" json:"notification"`
 	Introduction           string    `gorm:"column:introduction;size:255" json:"introduction"`
 	FaceURL                string    `gorm:"column:face_url;size:255" json:"faceURL"`
-	CreateTime             time.Time `gorm:"column:create_time"`
+	CreateTime             time.Time `gorm:"column:create_time;index:create_time"`
 	Ex                     string    `gorm:"column:ex" json:"ex;size:1024" json:"ex"`
 	Status                 int32     `gorm:"column:status"`
 	CreatorUserID          string    `gorm:"column:creator_user_id;size:64"`
@@ -176,18 +176,22 @@ type User struct {
 	Birth            time.Time `gorm:"column:birth"`
 	Email            string    `gorm:"column:email;size:64"`
 	Ex               string    `gorm:"column:ex;size:1024"`
-	CreateTime       time.Time `gorm:"column:create_time"`
-	CreateIp         string    `gorm:"column:create_ip;size:15"`
-	LastLoginTime    time.Time `gorm:"column:last_login_time"`
-	LastLoginIp      string    `gorm:"column:last_login_ip;size:15"`
-	LoginTimes       int32     `gorm:"column:login_times"`
-	LoginLimit       int32     `gorm:"column:login_limit"`
+	CreateTime       time.Time `gorm:"column:create_time;index:create_time"`
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
-	InvitationCode   string    `gorm:"column:invitation_code"`
-	status           int32     `gorm:"column:status"`
+
+	status int32 `gorm:"column:status"`
 }
 
+type UserIpRecord struct {
+	UserID        string    `gorm:"column:user_id;primary_key;size:64"`
+	CreateIp      string    `gorm:"column:create_ip;size:15"`
+	LastLoginTime time.Time `gorm:"column:last_login_time"`
+	LastLoginIp   string    `gorm:"column:last_login_ip;size:15"`
+	LoginTimes    int32     `gorm:"column:login_times"`
+}
+
+// ip limit login
 type IpLimit struct {
 	Ip            string    `gorm:"column:ip;primary_key;size:15"`
 	LimitRegister int32     `gorm:"column:limit_register;size:1"`
@@ -196,6 +200,7 @@ type IpLimit struct {
 	LimitTime     time.Time `gorm:"column:limit_time"`
 }
 
+// ip login
 type UserIpLimit struct {
 	UserID     string    `gorm:"column:user_id;primary_key;size:64"`
 	Ip         string    `gorm:"column:ip;primary_key;size:15"`
@@ -223,17 +228,17 @@ type Black struct {
 type ChatLog struct {
 	ServerMsgID      string    `gorm:"column:server_msg_id;primary_key;type:char(64)" json:"serverMsgID"`
 	ClientMsgID      string    `gorm:"column:client_msg_id;type:char(64)" json:"clientMsgID"`
-	SendID           string    `gorm:"column:send_id;type:char(64)" json:"sendID"`
-	RecvID           string    `gorm:"column:recv_id;type:char(64)" json:"recvID"`
+	SendID           string    `gorm:"column:send_id;type:char(64);index:send_id,priority:2" json:"sendID"`
+	RecvID           string    `gorm:"column:recv_id;type:char(64);index:recv_id,priority:2" json:"recvID"`
 	SenderPlatformID int32     `gorm:"column:sender_platform_id" json:"senderPlatformID"`
 	SenderNickname   string    `gorm:"column:sender_nick_name;type:varchar(255)" json:"senderNickname"`
-	SenderFaceURL    string    `gorm:"column:sender_face_url;type:varchar(255)" json:"senderFaceURL"`
-	SessionType      int32     `gorm:"column:session_type" json:"sessionType"`
+	SenderFaceURL    string    `gorm:"column:sender_face_url;type:varchar(255);" json:"senderFaceURL"`
+	SessionType      int32     `gorm:"column:session_type;index:session_type,priority:2;index:session_type_alone" json:"sessionType"`
 	MsgFrom          int32     `gorm:"column:msg_from" json:"msgFrom"`
-	ContentType      int32     `gorm:"column:content_type" json:"contentType"`
+	ContentType      int32     `gorm:"column:content_type;index:content_type,priority:2;index:content_type_alone" json:"contentType"`
 	Content          string    `gorm:"column:content;type:varchar(3000)" json:"content"`
 	Status           int32     `gorm:"column:status" json:"status"`
-	SendTime         time.Time `gorm:"column:send_time" json:"sendTime"`
+	SendTime         time.Time `gorm:"column:send_time;index:sendTime;index:content_type,priority:1;index:session_type,priority:1;index:recv_id,priority:1;index:send_id,priority:1" json:"sendTime"`
 	CreateTime       time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex               string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
 }

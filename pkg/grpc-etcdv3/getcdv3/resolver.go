@@ -282,7 +282,7 @@ func GetDefaultGatewayConn4Unique(schema, etcdaddr, operationID string) []*grpc.
 	if len(grpcConns) > 0 {
 		return grpcConns
 	}
-	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) < 0 ", schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) == 0 ", schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
 	grpcConns = GetDefaultGatewayConn4UniqueFromcfg(operationID)
 	log.NewDebug(operationID, utils.GetSelfFuncName(), config.Config.RpcRegisterName.OpenImRelayName, grpcConns)
 	return grpcConns

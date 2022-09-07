@@ -3,7 +3,6 @@ package apiAuth
 import (
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -67,17 +66,11 @@ func UserRegister(c *gin.Context) {
 	if reply.CommonResp.ErrCode != 0 {
 		errMsg := req.OperationID + " " + " UserRegister failed " + reply.CommonResp.ErrMsg + req.String()
 		log.NewError(req.OperationID, errMsg)
-		if reply.CommonResp.ErrCode == constant.RegisterLimit {
-			c.JSON(http.StatusOK, gin.H{"errCode": constant.RegisterLimit, "errMsg": "用户注册被限制"})
-		} else if reply.CommonResp.ErrCode == constant.InvitationError {
-			c.JSON(http.StatusOK, gin.H{"errCode": constant.InvitationError, "errMsg": "邀请码错误"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
-	pbDataToken := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID, LoginIp: params.CreateIp}
+	pbDataToken := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID}
 	replyToken, err := client.UserToken(context.Background(), pbDataToken)
 	if err != nil {
 		errMsg := req.OperationID + " " + " client.UserToken failed " + err.Error() + pbDataToken.String()

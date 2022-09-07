@@ -1,50 +1,48 @@
 package cms_api_struct
 
-type BroadcastRequest struct {
-	Message string `json:"message"`
-}
+import (
+	pbCommon "Open_IM/pkg/proto/sdk_ws"
+)
 
-type BroadcastResponse struct {
-}
-
-type MassSendMassageRequest struct {
-	Message string `json:"message"`
-	Users []string `json:"users"`
-}
-
-type MassSendMassageResponse struct {
-}
-
-type GetChatLogsRequest struct {
-	SessionType int    `form:"session_type"`
-	ContentType int    `form:"content_type"`
-	Content     string `form:"content"`
-	UserId      string `form:"user_id"`
-	GroupId     string `form:"group_id"`
-	Date        string `form:"date"`
-
+type GetChatLogsReq struct {
+	SessionType int    `json:"sessionType"`
+	ContentType int    `json:"contentType"`
+	Content     string `json:"content"`
+	SendID      string `json:"sendID"`
+	RecvID      string `json:"recvID"`
+	GroupID     string `json:"groupID"`
+	SendTime    string `json:"sendTime"`
 	RequestPagination
+	OperationID string `json:"operationID"`
 }
 
 type ChatLog struct {
-	SessionType    int    `json:"session_type"`
-	ContentType    int    `json:"content_type"`
-	SenderNickName string `json:"sender_nick_name"`
-	SenderId       string    `json:"sender_id"`
-	SearchContent  string `json:"search_content"`
-	WholeContent   string `json:"whole_content"`
-
-	ReceiverNickName string `json:"receiver_nick_name,omitempty"`
-	ReceiverID       string  `json:"receiver_id,omitempty"`
-
-	GroupName string `json:"group_name,omitempty"`
-	GroupId   string `json:"group_id,omitempty"`
-
-	Date string `json:"date"`
+	SendID           string                    `json:"sendID,omitempty"`
+	RecvID           string                    `json:"recvID,omitempty"`
+	GroupID          string                    `json:"groupID,omitempty"`
+	ClientMsgID      string                    `json:"clientMsgID,omitempty"`
+	ServerMsgID      string                    `json:"serverMsgID,omitempty"`
+	SenderPlatformID int32                     `json:"senderPlatformID,omitempty"`
+	SenderNickname   string                    `json:"senderNickname,omitempty"`
+	SenderFaceURL    string                    `json:"senderFaceURL,omitempty"`
+	SessionType      int32                     `json:"sessionType,omitempty"`
+	MsgFrom          int32                     `json:"msgFrom,omitempty"`
+	ContentType      int32                     `json:"contentType,omitempty"`
+	Content          string                    `json:"content,omitempty"`
+	Seq              uint32                    `json:"seq,omitempty"`
+	SendTime         int64                     `json:"sendTime,omitempty"`
+	CreateTime       int64                     `json:"createTime,omitempty"`
+	Status           int32                     `json:"status,omitempty"`
+	Options          map[string]bool           `json:"options,omitempty"`
+	OfflinePushInfo  *pbCommon.OfflinePushInfo `json:"offlinePushInfo,omitempty"`
+	AtUserIDList     []string                  `json:"atUserIDList,omitempty"`
+	MsgDataList      []byte                    `json:"msgDataList,omitempty"`
+	AttachedInfo     string                    `json:"attachedInfo,omitempty"`
+	Ex               string                    `json:"ex,omitempty"`
 }
 
-type GetChatLogsResponse struct {
-	ChatLogs []ChatLog `json:"chat_logs"`
-	ChatLogsNum int `json:"log_nums"`
+type GetChatLogsResp struct {
+	ChatLogs    []*ChatLog `json:"chatLogs"`
+	ChatLogsNum int        `json:"logNums"`
 	ResponsePagination
 }

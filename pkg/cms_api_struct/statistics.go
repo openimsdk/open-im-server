@@ -1,8 +1,9 @@
 package cms_api_struct
 
 type GetStatisticsRequest struct {
-	From string `form:"from" binding:"required"`
-	To   string `form:"to" binding:"required"`
+	From        string `json:"from" binding:"required"`
+	To          string `json:"to" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
 type GetMessageStatisticsRequest struct {
@@ -10,16 +11,16 @@ type GetMessageStatisticsRequest struct {
 }
 
 type GetMessageStatisticsResponse struct {
-	PrivateMessageNum     int `json:"private_message_num"`
-	GroupMessageNum       int `json:"group_message_num"`
+	PrivateMessageNum     int `json:"privateMessageNum"`
+	GroupMessageNum       int `json:"groupMessageNum"`
 	PrivateMessageNumList []struct {
 		Date       string `json:"date"`
-		MessageNum int    `json:"message_num"`
-	} `json:"private_message_num_list"`
+		MessageNum int    `json:"messageNum"`
+	} `json:"privateMessageNumList"`
 	GroupMessageNumList []struct {
 		Date       string `json:"date"`
-		MessageNum int    `json:"message_num"`
-	} `json:"group_message_num_list"`
+		MessageNum int    `json:"messageNum"`
+	} `json:"groupMessageNumList"`
 }
 
 type GetUserStatisticsRequest struct {
@@ -27,21 +28,21 @@ type GetUserStatisticsRequest struct {
 }
 
 type GetUserStatisticsResponse struct {
-	IncreaseUserNum     int `json:"increase_user_num"`
-	ActiveUserNum       int `json:"active_user_num"`
-	TotalUserNum        int `json:"total_user_num"`
+	IncreaseUserNum     int `json:"increaseUserNum"`
+	ActiveUserNum       int `json:"activeUserNum"`
+	TotalUserNum        int `json:"totalUserNum"`
 	IncreaseUserNumList []struct {
 		Date            string `json:"date"`
-		IncreaseUserNum int    `json:"increase_user_num"`
-	} `json:"increase_user_num_list"`
+		IncreaseUserNum int    `json:"increaseUserNum"`
+	} `json:"increaseUserNumList"`
 	ActiveUserNumList []struct {
 		Date          string `json:"date"`
-		ActiveUserNum int    `json:"active_user_num"`
-	} `json:"active_user_num_list"`
+		ActiveUserNum int    `json:"activeUserNum"`
+	} `json:"activeUserNumList"`
 	TotalUserNumList []struct {
 		Date         string `json:"date"`
-		TotalUserNum int    `json:"total_user_num"`
-	} `json:"total_user_num_list"`
+		TotalUserNum int    `json:"totalUserNum"`
+	} `json:"totalUserNumList"`
 }
 
 type GetGroupStatisticsRequest struct {
@@ -50,16 +51,16 @@ type GetGroupStatisticsRequest struct {
 
 // 群聊统计
 type GetGroupStatisticsResponse struct {
-	IncreaseGroupNum     int `json:"increase_group_num"`
-	TotalGroupNum        int `json:"total_group_num"`
+	IncreaseGroupNum     int `json:"increaseGroupNum"`
+	TotalGroupNum        int `json:"totalGroupNum"`
 	IncreaseGroupNumList []struct {
 		Date             string `json:"date"`
-		IncreaseGroupNum int    `json:"increase_group_num"`
-	} `json:"increase_group_num_list"`
+		IncreaseGroupNum int    `json:"increaseGroupNum"`
+	} `json:"increaseGroupNumList"`
 	TotalGroupNumList []struct {
 		Date          string `json:"date"`
-		TotalGroupNum int    `json:"total_group_num"`
-	} `json:"total_group_num_list"`
+		TotalGroupNum int    `json:"totalGroupNum"`
+	} `json:"totalGroupNumList"`
 }
 
 type GetActiveUserRequest struct {
@@ -69,10 +70,10 @@ type GetActiveUserRequest struct {
 
 type GetActiveUserResponse struct {
 	ActiveUserList []struct {
-		NickName   string `json:"nick_name"`
-		UserId     string `json:"user_id"`
-		MessageNum int    `json:"message_num"`
-	} `json:"active_user_list"`
+		NickName   string `json:"nickName"`
+		UserId     string `json:"userID"`
+		MessageNum int    `json:"messageNum"`
+	} `json:"activeUserList"`
 }
 
 type GetActiveGroupRequest struct {
@@ -82,8 +83,8 @@ type GetActiveGroupRequest struct {
 
 type GetActiveGroupResponse struct {
 	ActiveGroupList []struct {
-		GroupName  string `json:"group_name"`
-		GroupId    string `json:"group_id"`
-		MessageNum int    `json:"message_num"`
-	} `json:"active_group_list"`
+		GroupName  string `json:"groupName"`
+		GroupId    string `json:"groupID"`
+		MessageNum int    `json:"messageNum"`
+	} `json:"activeGroupList"`
 }

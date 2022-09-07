@@ -216,21 +216,22 @@ func ManagementSendMsg(c *gin.Context) {
 	}
 	client := pbChat.NewMsgClient(etcdConn)
 	log.Info(params.OperationID, "", "api ManagementSendMsg call, api call rpc...")
+	var status int32
 	RpcResp, err := client.SendMsg(context.Background(), pbData)
 	if err != nil || (RpcResp != nil && RpcResp.ErrCode != 0) {
-		resp, err2 := client.SetSendMsgFailedFlag(context.Background(), &pbChat.SetSendMsgFailedFlagReq{OperationID: params.OperationID})
-		if err2 != nil {
-			log.NewError(params.OperationID, utils.GetSelfFuncName(), err.Error())
-		}
-		if resp != nil && resp.ErrCode != 0 {
-			log.NewError(params.OperationID, utils.GetSelfFuncName(), resp.ErrCode, resp.ErrMsg)
-		}
-		if err != nil {
-			log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call UserSendMsg  rpc server failed"})
-			return
-		}
+		status = constant.MsgSendFailed
+	} else {
+		status = constant.MsgSendSuccessed
 	}
+
+	respSetSendMsgStatus, err2 := client.SetSendMsgStatus(context.Background(), &pbChat.SetSendMsgStatusReq{OperationID: params.OperationID, Status: status})
+	if err2 != nil {
+		log.NewError(params.OperationID, utils.GetSelfFuncName(), err2.Error())
+	}
+	if respSetSendMsgStatus != nil && respSetSendMsgStatus.ErrCode != 0 {
+		log.NewError(params.OperationID, utils.GetSelfFuncName(), respSetSendMsgStatus.ErrCode, respSetSendMsgStatus.ErrMsg)
+	}
+
 	log.Info(params.OperationID, "", "api ManagementSendMsg call end..., [data: %s] [reply: %s]", pbData.String(), RpcResp.String())
 	resp := api.ManagementSendMsgResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, ResultList: open_im_sdk.UserSendMsgResp{ServerMsgID: RpcResp.ServerMsgID, ClientMsgID: RpcResp.ClientMsgID, SendTime: RpcResp.SendTime}}
 	log.Info(params.OperationID, "ManagementSendMsg return", resp)
@@ -319,16 +320,26 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	}
 	log.NewInfo(params.OperationID, "Ws call success to ManagementSendMsgReq", params)
 	var msgSendFailedFlag bool
-
 	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 	if etcdConn == nil {
 		errMsg := params.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(params.OperationID, errMsg)
-		//resp.Data.FailedIDList = params.RecvIDList
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": "rpc server error: etcdConn == nil"})
 		return
 	}
 	client := pbChat.NewMsgClient(etcdConn)
+	respSetSendMsgStatus, err := client.SetSendMsgStatus(context.Background(), &pbChat.SetSendMsgStatusReq{OperationID: params.OperationID, Status: constant.MsgIsSending})
+	if err != nil {
+		log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+	}
+	if respSetSendMsgStatus.ErrCode != 0 {
+		log.NewError(params.OperationID, utils.GetSelfFuncName(), "rpc failed", respSetSendMsgStatus)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": respSetSendMsgStatus.ErrMsg})
+		return
+	}
+
 	req := &api.ManagementSendMsgReq{
 		ManagementSendMsg: params.ManagementSendMsg,
 	}
@@ -346,7 +357,6 @@ func ManagementBatchSendMsg(c *gin.Context) {
 	for _, recvID := range recvList {
 		pbData.MsgData.RecvID = recvID
 		log.Info(params.OperationID, "", "api ManagementSendMsg call start..., ", pbData.String())
-
 		rpcResp, err := client.SendMsg(context.Background(), pbData)
 		if err != nil {
 			log.NewError(params.OperationID, "call delete UserSendMsg rpc server failed", err.Error())
@@ -367,14 +377,18 @@ func ManagementBatchSendMsg(c *gin.Context) {
 			RecvID:      recvID,
 		})
 	}
+	var status int32
 	if msgSendFailedFlag {
-		resp, err2 := client.SetSendMsgFailedFlag(context.Background(), &pbChat.SetSendMsgFailedFlagReq{OperationID: params.OperationID})
-		if err2 != nil {
-			log.NewError(params.OperationID, utils.GetSelfFuncName(), err2.Error())
-		}
-		if resp != nil && resp.ErrCode != 0 {
-			log.NewError(params.OperationID, utils.GetSelfFuncName(), resp.ErrCode, resp.ErrMsg)
-		}
+		status = constant.MsgSendFailed
+	} else {
+		status = constant.MsgSendSuccessed
+	}
+	respSetSendMsgStatus, err2 := client.SetSendMsgStatus(context.Background(), &pbChat.SetSendMsgStatusReq{OperationID: params.OperationID, Status: status})
+	if err2 != nil {
+		log.NewError(params.OperationID, utils.GetSelfFuncName(), err2.Error())
+	}
+	if respSetSendMsgStatus != nil && resp.ErrCode != 0 {
+		log.NewError(params.OperationID, utils.GetSelfFuncName(), resp.ErrCode, resp.ErrMsg)
 	}
 
 	log.NewInfo(params.OperationID, utils.GetSelfFuncName(), "resp: ", resp)

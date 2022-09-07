@@ -42,7 +42,7 @@ func loggerInit(moduleName string) *Logger {
 	}
 	writer := bufio.NewWriter(src)
 	logger.SetOutput(writer)
-	//logger.SetOutput(os.Stdout)
+	// logger.SetOutput(os.Stdout)
 	//Log Console Print Style Setting
 	logger.SetFormatter(&nested.Formatter{
 		TimestampFormat: "2006-01-02 15:04:05.000",

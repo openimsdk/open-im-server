@@ -147,13 +147,13 @@ func MinioStorageCredential(c *gin.Context) {
 	}
 	li, err := cr.NewSTSAssumeRole(endpoint, stsOpts)
 	if err != nil {
-		log.NewError("", utils.GetSelfFuncName(), "NewSTSAssumeRole failed", err.Error(), stsOpts, config.Config.Credential.Minio.Endpoint)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "NewSTSAssumeRole failed", err.Error(), stsOpts, config.Config.Credential.Minio.Endpoint)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	v, err := li.Get()
 	if err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), "li.Get error", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "li.Get error", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}

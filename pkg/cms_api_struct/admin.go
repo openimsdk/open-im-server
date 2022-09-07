@@ -1,14 +1,20 @@
 package cms_api_struct
 
-import server_api_params "Open_IM/pkg/proto/sdk_ws"
+import (
+	"Open_IM/pkg/base_info"
+	server_api_params "Open_IM/pkg/proto/sdk_ws"
+)
 
 type AdminLoginRequest struct {
-	AdminName string `json:"admin_name" binding:"required"`
-	Secret    string `json:"secret" binding:"required"`
+	AdminName   string `json:"adminID" binding:"required"`
+	Secret      string `json:"secret" binding:"required"`
+	OperationID string `json:"operationID" binding:"required"`
 }
 
 type AdminLoginResponse struct {
-	Token string `json:"token"`
+	Token    string `json:"token"`
+	UserName string `json:"userName"`
+	FaceURL  string `json:"faceURL"`
 }
 
 type AddUserRegisterAddFriendIDListRequest struct {
@@ -30,10 +36,10 @@ type ReduceUserRegisterAddFriendIDListResponse struct {
 
 type GetUserRegisterAddFriendIDListRequest struct {
 	OperationID string `json:"operationID" binding:"required"`
-	RequestPaginationBody
+	base_info.RequestPagination
 }
 
 type GetUserRegisterAddFriendIDListResponse struct {
 	Users []*server_api_params.UserInfo `json:"users"`
-	ResponsePagination
+	base_info.ResponsePagination
 }

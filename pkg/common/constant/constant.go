@@ -229,6 +229,12 @@ const (
 	WorkMomentCommentNotification = 0
 	WorkMomentLikeNotification    = 1
 	WorkMomentAtUserNotification  = 2
+
+	// sendMsgStaus
+	MsgStatusNotExist = 0
+	MsgIsSending      = 1
+	MsgSendSuccessed  = 2
+	MsgSendFailed     = 3
 )
 
 const (
