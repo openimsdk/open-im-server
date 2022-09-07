@@ -112,18 +112,7 @@ services:
       MINIO_ROOT_PASSWORD: key12345
     restart: always
     command: minio server /data --console-address ':9090'
-  #
-  #  dtm:
-  #    image: yedf/dtm
-  #    ports:
-  #      - 36789:36789
-  #      - 36790:36790
-  #    environment:
-  #      STORE_DRIVER: mysql
-  #      STORE_HOST: localhost
-  #      STORE_USER: root
-  #      STORE_PASSWORD: ''
-  #      STORE_PORT: 3306
+
 
   open_im_server:
     image: openim/open_im_server:v2.3.1
@@ -147,3 +136,33 @@ services:
       options:
         max-size: "1g"
         max-file: "2"
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+    - ./docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
+    container_name: prometheus
+    networks:
+      webnet:
+        aliases:
+        - "prometheus"
+    ports:
+    - "10007:9090"
+    depends_on:
+    - open_im_server
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+    - ./grafana/dashboards/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
+    - ./grafana/provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+    - ./docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    container_name: grafana
+    networks:
+      webnet:
+        aliases:
+        - "grafana"
+    ports:
+    - "10008:3000"
+    depends_on:
+    - prometheus
