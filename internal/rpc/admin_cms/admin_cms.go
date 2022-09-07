@@ -69,7 +69,7 @@ func (s *adminCMSServer) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
+	log.NewInfo("", "rpcRegisterIP ", rpcRegisterIP)
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
