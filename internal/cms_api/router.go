@@ -64,9 +64,14 @@ func NewGinRouter() *gin.Engine {
 	{
 		messageCMSRouterGroup.POST("/get_chat_logs", messageCMS.GetChatLogs)
 	}
-	friendCMSRouterGroup := r2.Group("friend")
+	friendCMSRouterGroup := r2.Group("/friend")
 	{
 		friendCMSRouterGroup.POST("/get_friends", friend.GetUserFriends)
+	}
+
+	prometheusRouterGroup := r2.Group("/prometheus")
+	{
+		prometheusRouterGroup.GET("/metrics", prometheusHandler())
 	}
 	return baseRouter
 }
