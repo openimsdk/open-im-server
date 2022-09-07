@@ -18,6 +18,10 @@ func NewGinRouter() *gin.Engine {
 	baseRouter := gin.Default()
 	router := baseRouter.Group("/cms")
 	router.Use(middleware.CorsHandler())
+	prometheusRouterGroup := router.Group("/prometheus")
+	{
+		prometheusRouterGroup.GET("/metrics", prometheusHandler())
+	}
 	adminRouterGroup := router.Group("/admin")
 	{
 		adminRouterGroup.POST("/login", admin.AdminLogin)
@@ -69,9 +73,5 @@ func NewGinRouter() *gin.Engine {
 		friendCMSRouterGroup.POST("/get_friends", friend.GetUserFriends)
 	}
 
-	prometheusRouterGroup := r2.Group("/prometheus")
-	{
-		prometheusRouterGroup.GET("/metrics", prometheusHandler())
-	}
 	return baseRouter
 }
