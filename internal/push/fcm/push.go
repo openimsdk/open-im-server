@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"context"
+	go_redis "github.com/go-redis/redis/v8"
 	"path/filepath"
 	"strconv"
 
@@ -85,6 +86,20 @@ func (f *Fcm) Push(accounts []string, title, detailContent, operationID string, 
 			if err == nil {
 				apns.Payload.Aps.Badge = &unreadCountSum
 			} else {
+				log.Error(operationID, "IncrUserBadgeUnreadCountSum redis err", err.Error(), uid)
+				Fail++
+				continue
+			}
+		} else {
+			unreadCountSum, err := db.DB.GetUserBadgeUnreadCountSum(uid)
+			if err == nil && unreadCountSum != 0 {
+				apns.Payload.Aps.Badge = &unreadCountSum
+			} else if err == go_redis.Nil || unreadCountSum == 0 {
+				zero := 1
+				apns.Payload.Aps.Badge = &zero
+			} else {
+				log.Error(operationID, "GetUserBadgeUnreadCountSum redis err", err.Error(), uid)
+				Fail++
 				continue
 			}
 		}
