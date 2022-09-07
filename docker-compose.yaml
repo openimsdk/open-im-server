@@ -142,10 +142,6 @@ services:
     volumes:
     - ./docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
     container_name: prometheus
-    networks:
-      webnet:
-        aliases:
-        - "prometheus"
     ports:
     - "10007:9090"
     depends_on:
@@ -158,10 +154,6 @@ services:
     - ./grafana/provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
     - ./docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
     container_name: grafana
-    networks:
-      webnet:
-        aliases:
-        - "grafana"
     ports:
     - "10008:3000"
     depends_on:
