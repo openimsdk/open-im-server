@@ -8,6 +8,7 @@ scrape_configs:
       static_configs:
       - targets: ['localhost:10007']
     - job_name: 'openIM-server'
+      metrics_path: /cms/prometheus/metrics
       static_configs:
-      - targets: ['localhost:10006/cms/prometheus/']  
+      - targets: ['localhost:10006']  
      

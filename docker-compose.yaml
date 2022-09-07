@@ -140,21 +140,23 @@ services:
   prometheus:
     image: prom/prometheus
     volumes:
-    - ./docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
+      - ./docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
+      - ./components/prometheus_data:/prometheus
     container_name: prometheus
     ports:
-    - "10007:9090"
+    - 10007:9090
     depends_on:
     - open_im_server
 
   grafana:
     image: grafana/grafana
     volumes:
-    - ./grafana/dashboards/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
-    - ./grafana/provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+    # - ./grafana/dashboards/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
+    # - ./grafana/provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
     - ./docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    - ./components/grafana_data:/var/lib/grafana
     container_name: grafana
     ports:
-    - "10008:3000"
+    - 10008:3000
     depends_on:
     - prometheus
