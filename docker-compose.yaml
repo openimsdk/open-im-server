@@ -147,7 +147,6 @@ services:
     - 10007:9090
     depends_on:
     - open_im_server
-    network_mode: "host"
 
   grafana:
     image: grafana/grafana
@@ -155,10 +154,11 @@ services:
     # - ./grafana/dashboards/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
     # - ./grafana/provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
     - ./docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    - ./docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
     # - ./components/grafana_data:/var/lib/grafana
     container_name: grafana
     ports:
-    - 10008:3000
+    - 10008:10008
     depends_on:
     - prometheus
     network_mode: "host" 
