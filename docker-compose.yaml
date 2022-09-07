@@ -157,6 +157,6 @@ services:
     # - ./components/grafana_data:/var/lib/grafana
     container_name: grafana
     ports:
-    - 10008:3000
+    - 40003:3000
     depends_on:
     - prometheus
