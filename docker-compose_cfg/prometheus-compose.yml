@@ -2,15 +2,26 @@
 global:
   scrape_interval:     15s 
   evaluation_interval: 15s 
+  external_labels:
+    monitor: 'openIM-monitor'
 
 scrape_configs:
     - job_name: 'prometheus'
       static_configs:
       - targets: ['localhost:9091']
+
     - job_name: 'openIM-server'
-      metrics_path: /cms/prometheus/metrics
       static_configs:
-      - targets: ['localhost:10006']  
+      - targets: ['localhost:10006']
+        metrics_path: /cms/prometheus/metrics
+        labels:
+          group: 'cms-api'
+      - targets: ['localhost:21400']
+        metrics_path: /metrics
+        labels:
+          group: 'msg-transfer'
+
+
     - job_name: 'node'  
       scrape_interval: 8s
       static_configs:

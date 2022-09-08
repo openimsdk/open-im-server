@@ -131,8 +131,6 @@ type config struct {
 		OpenImGroupPort          []int `yaml:"openImGroupPort"`
 		OpenImAuthPort           []int `yaml:"openImAuthPort"`
 		OpenImPushPort           []int `yaml:"openImPushPort"`
-		OpenImStatisticsPort     []int `yaml:"openImStatisticsPort"`
-		OpenImMessageCmsPort     []int `yaml:"openImMessageCmsPort"`
 		OpenImAdminCmsPort       []int `yaml:"openImAdminCmsPort"`
 		OpenImOfficePort         []int `yaml:"openImOfficePort"`
 		OpenImOrganizationPort   []int `yaml:"openImOrganizationPort"`
@@ -150,8 +148,6 @@ type config struct {
 		OpenImRelayName        string `yaml:"openImRelayName"`
 		OpenImGroupName        string `yaml:"openImGroupName"`
 		OpenImAuthName         string `yaml:"openImAuthName"`
-		OpenImMessageCMSName   string `yaml:"openImMessageCMSName"`
-		OpenImAdminCMSName     string `yaml:"openImAdminCMSName"`
 		OpenImOfficeName       string `yaml:"openImOfficeName"`
 		OpenImOrganizationName string `yaml:"openImOrganizationName"`
 		OpenImConversationName string `yaml:"openImConversationName"`
@@ -513,6 +509,24 @@ type config struct {
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
 	} `yaml:"rtc"`
+
+	Prometheus struct {
+		Enable                        bool  `yaml:"enable"`
+		UserPrometheusPort            []int `yaml:"userPrometheusPort"`
+		FriendPrometheusPort          []int `yaml:"friendPrometheusPort"`
+		MessagePrometheusPort         []int `yaml:"messagePrometheusPort"`
+		MessageGatewayPrometheusPort  []int `yaml:"messageGatewayPrometheusPort"`
+		GroupPrometheusPort           []int `yaml:"groupPrometheusPort"`
+		AuthPrometheusPort            []int `yaml:"authPrometheusPort"`
+		PushPrometheusPort            []int `yaml:"pushPrometheusPort"`
+		AdminCmsPrometheusPort        []int `yaml:"adminCmsPrometheusPort"`
+		OfficePrometheusPort          []int `yaml:"officePrometheusPort"`
+		OrganizationPrometheusPort    []int `yaml:"organizationPrometheusPort"`
+		ConversationPrometheusPort    []int `yaml:"conversationPrometheusPort"`
+		CachePrometheusPort           []int `yaml:"cachePrometheusPort"`
+		RealTimeCommPrometheusPort    []int `yaml:"realTimeCommPrometheusPort"`
+		MessageTransferPrometheusPort []int `yaml:"messageTransferPrometheusPort"`
+	} `yaml:"prometheus"`
 }
 type PConversation struct {
 	ReliabilityLevel int  `yaml:"reliabilityLevel"`

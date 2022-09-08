@@ -157,7 +157,7 @@ services:
     # - ./grafana/provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
     - ./docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
     - ./docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
-    # - ./components/grafana_data:/var/lib/grafana
+    - ./docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
     container_name: grafana
     ports:
     - 10007:10007
@@ -171,3 +171,4 @@ services:
     restart: always
     ports:
       - "9100:9100"
+    command: --collector.ENTER-THE-NAME-OF-COLLECTOR

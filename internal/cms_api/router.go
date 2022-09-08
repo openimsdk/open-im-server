@@ -9,6 +9,7 @@ import (
 	"Open_IM/internal/cms_api/statistics"
 	"Open_IM/internal/cms_api/user"
 	"Open_IM/internal/demo/register"
+	"Open_IM/pkg/common/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,9 +19,11 @@ func NewGinRouter() *gin.Engine {
 	baseRouter := gin.Default()
 	router := baseRouter.Group("/cms")
 	router.Use(middleware.CorsHandler())
-	prometheusRouterGroup := router.Group("/prometheus")
-	{
-		prometheusRouterGroup.GET("/metrics", prometheusHandler())
+	if config.Config.Prometheus.Enable {
+		prometheusRouterGroup := router.Group("/prometheus")
+		{
+			prometheusRouterGroup.GET("/metrics", prometheusHandler())
+		}
 	}
 	adminRouterGroup := router.Group("/admin")
 	{

@@ -6,7 +6,11 @@ import (
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/statistics"
 	"fmt"
+	"net/http"
+	"strconv"
 	"sync"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const OnlineTopicBusy = 1
@@ -46,7 +50,7 @@ func Init() {
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ms2pschat.Addr, config.Config.Kafka.Ms2pschat.Topic)
 	producerToMongo = kafka.NewKafkaProducer(config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.MsgToMongo.Topic)
 }
-func Run() {
+func Run(promethuesPort int) {
 	//register mysqlConsumerHandler to
 	if config.Config.ChatPersistenceMysql {
 		go persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&persistentCH)
@@ -56,6 +60,10 @@ func Run() {
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
 	go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
 	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
+	if config.Config.Prometheus.Enable {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(":"+strconv.Itoa(promethuesPort), nil)
+	}
 }
 func SetOnlineTopicStatus(status int) {
 	w.Lock()
