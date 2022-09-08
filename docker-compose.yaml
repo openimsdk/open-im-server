@@ -147,7 +147,7 @@ services:
     - 9091:9091
     depends_on:
     - open_im_server
-    # command: --web.listen-address=:9091
+    command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
     network_mode: "host" 
 
   grafana:
