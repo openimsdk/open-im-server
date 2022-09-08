@@ -144,9 +144,11 @@ services:
       # - ./components/prometheus_data:/prometheus
     container_name: prometheus
     ports:
-    - 10007:9090
+    - 9091:9091
     depends_on:
     - open_im_server
+    command: --web.listen-address=:9091
+    network_mode: "host" 
 
   grafana:
     image: grafana/grafana
@@ -158,7 +160,14 @@ services:
     # - ./components/grafana_data:/var/lib/grafana
     container_name: grafana
     ports:
-    - 10008:10008
+    - 10007:10007
     depends_on:
     - prometheus
     network_mode: "host" 
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
