@@ -79,6 +79,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 				return
 			}
 			if config.Config.Prometheus.Enable {
+				log.NewDebug(msgFromMQ.OperationID, utils.GetSelfFuncName(), "inc msgInsertMysqlProcessed")
 				msgInsertMysqlProcessed.Inc()
 			}
 		}
