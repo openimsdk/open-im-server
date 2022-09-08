@@ -11,13 +11,12 @@ scrape_configs:
       - targets: ['localhost:9091']
 
     - job_name: 'openIM-server'
+      metrics_path: /metrics
       static_configs:
       - targets: ['localhost:10006']
-        metrics_path: /cms/prometheus/metrics
         labels:
           group: 'cms-api'
       - targets: ['localhost:21400']
-        metrics_path: /metrics
         labels:
           group: 'msg-transfer'
 

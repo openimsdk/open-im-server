@@ -171,4 +171,4 @@ services:
     restart: always
     ports:
       - "9100:9100"
-    command: --collector.ENTER-THE-NAME-OF-COLLECTOR
+    # command: --collector.ENTER-THE-NAME-OF-COLLECTOR

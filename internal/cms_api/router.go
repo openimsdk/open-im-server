@@ -17,14 +17,11 @@ import (
 func NewGinRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	baseRouter := gin.Default()
+	if config.Config.Prometheus.Enable {
+		baseRouter.GET("/metrics", prometheusHandler())
+	}
 	router := baseRouter.Group("/cms")
 	router.Use(middleware.CorsHandler())
-	if config.Config.Prometheus.Enable {
-		prometheusRouterGroup := router.Group("/prometheus")
-		{
-			prometheusRouterGroup.GET("/metrics", prometheusHandler())
-		}
-	}
 	adminRouterGroup := router.Group("/admin")
 	{
 		adminRouterGroup.POST("/login", admin.AdminLogin)

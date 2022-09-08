@@ -139,15 +139,15 @@ type config struct {
 		OpenImRealTimeCommPort   []int `yaml:"openImRealTimeCommPort"`
 	}
 	RpcRegisterName struct {
-		OpenImStatisticsName string `yaml:"openImStatisticsName"`
-		OpenImUserName       string `yaml:"openImUserName"`
-		OpenImFriendName     string `yaml:"openImFriendName"`
+		OpenImUserName   string `yaml:"openImUserName"`
+		OpenImFriendName string `yaml:"openImFriendName"`
 		//	OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`
 		OpenImMsgName          string `yaml:"openImMsgName"`
 		OpenImPushName         string `yaml:"openImPushName"`
 		OpenImRelayName        string `yaml:"openImRelayName"`
 		OpenImGroupName        string `yaml:"openImGroupName"`
 		OpenImAuthName         string `yaml:"openImAuthName"`
+		OpenImAdminCMSName     string `yaml:"openImAdminCMSName"`
 		OpenImOfficeName       string `yaml:"openImOfficeName"`
 		OpenImOrganizationName string `yaml:"openImOrganizationName"`
 		OpenImConversationName string `yaml:"openImConversationName"`
