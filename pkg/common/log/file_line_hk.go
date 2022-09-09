@@ -7,6 +7,7 @@
 package log
 
 import (
+	"Open_IM/pkg/utils"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"runtime"
@@ -25,6 +26,7 @@ func (f *fileHook) Levels() []logrus.Level {
 
 func (f *fileHook) Fire(entry *logrus.Entry) error {
 	entry.Data["FilePath"] = findCaller(6)
+	utils.GetSelfFuncName()
 	return nil
 }
 
@@ -56,7 +58,7 @@ func getCaller(skip int) (string, int) {
 	if !ok {
 		return "", 0
 	}
-
+	fmt.Println("skip:", skip, "file:", file, "line", line)
 	n := 0
 	for i := len(file) - 1; i > 0; i-- {
 		if file[i] == '/' {
