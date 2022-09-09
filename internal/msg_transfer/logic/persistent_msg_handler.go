@@ -78,7 +78,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
 				return
 			}
-			msgInsertMysqlProcessed.Add(1)
+			msgInsertMysqlProcessed.Inc()
 			if config.Config.Prometheus.Enable {
 				log.NewDebug(msgFromMQ.OperationID, utils.GetSelfFuncName(), "inc msgInsertMysqlProcessed", msgInsertMysqlProcessed.Desc())
 				msgInsertMysqlProcessed.Inc()
