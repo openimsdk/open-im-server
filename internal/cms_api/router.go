@@ -9,6 +9,7 @@ import (
 	"Open_IM/internal/cms_api/statistics"
 	"Open_IM/internal/cms_api/user"
 	"Open_IM/internal/demo/register"
+	"Open_IM/pkg/common/config"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,9 @@ import (
 func NewGinRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	baseRouter := gin.Default()
+	if config.Config.Prometheus.Enable {
+		baseRouter.GET("/metrics", prometheusHandler())
+	}
 	router := baseRouter.Group("/cms")
 	router.Use(middleware.CorsHandler())
 	adminRouterGroup := router.Group("/admin")
@@ -64,9 +68,10 @@ func NewGinRouter() *gin.Engine {
 	{
 		messageCMSRouterGroup.POST("/get_chat_logs", messageCMS.GetChatLogs)
 	}
-	friendCMSRouterGroup := r2.Group("friend")
+	friendCMSRouterGroup := r2.Group("/friend")
 	{
 		friendCMSRouterGroup.POST("/get_friends", friend.GetUserFriends)
 	}
+
 	return baseRouter
 }

@@ -429,3 +429,8 @@ func (d *DataBases) SetUserBadgeUnreadCountSum(uid string, value int) error {
 	key := userBadgeUnreadCountSum + uid
 	return d.RDB.Set(context.Background(), key, value, 0).Err()
 }
+func (d *DataBases) GetUserBadgeUnreadCountSum(uid string) (int, error) {
+	key := userBadgeUnreadCountSum + uid
+	seq, err := d.RDB.Get(context.Background(), key).Result()
+	return utils.StringToInt(seq), err
+}

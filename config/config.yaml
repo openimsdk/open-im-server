@@ -88,9 +88,7 @@ endpoints:
   rpc_group: openim_rpc_group
   rpc_msg: openim_rpc_msg
   rpc_user: openim_rpc_user
-  rpc_statistic: openim_rpc_statistic
   rpc_admin_cms: openim_rpc_admin_cms
-  rpc_message_cms: openim_rpc_admin_cms
   rpc_office: openim_rpc_office
 
 api:
@@ -155,8 +153,6 @@ rpcport: #rpc服务端口 默认即可
   openImGroupPort: [ 10150 ]
   openImAuthPort: [ 10160 ]
   openImPushPort: [ 10170 ]
-  openImStatisticsPort: [ 10180 ]
-  openImMessageCmsPort: [ 10190 ]
   openImAdminCmsPort: [ 10200 ]
   openImOfficePort: [ 10210 ]
   openImOrganizationPort: [ 10220 ]
@@ -181,8 +177,6 @@ rpcregistername: #rpc注册服务名，默认即可
   openImRelayName: Relay
   openImGroupName: Group
   openImAuthName: Auth
-  openImStatisticsName: Statistics
-  openImMessageCMSName: MessageCMS
   openImAdminCMSName: AdminCMS
   openImOfficeName: Office
   openImOrganizationName: Organization
@@ -757,3 +751,20 @@ demo:
 
 rtc:
   signalTimeout: 35
+
+prometheus:
+  enable: false
+  userPrometheusPort: [ 20110 ]
+  friendPrometheusPort: [ 20120 ]
+  messagePrometheusPort: [ 20130 ]
+  messageGatewayPrometheusPort: [ 20140 ]
+  groupPrometheusPort: [ 20150 ]
+  authPrometheusPort: [ 20160 ]
+  pushPrometheusPort: [ 20170 ]
+  adminCmsPrometheusPort: [ 20200 ]
+  officePrometheusPort: [ 20210 ]
+  organizationPrometheusPort: [ 20220 ]
+  conversationPrometheusPort: [ 20230 ]
+  cachePrometheusPort: [ 20240 ]
+  realTimeCommPrometheusPort: [ 21300 ]
+  messageTransferPrometheusPort: [ 21400 ]

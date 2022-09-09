@@ -139,14 +139,6 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	if config.Config.RpcRegisterName.OpenImAuthName == serviceName {
 		configPortList = config.Config.RpcPort.OpenImAuthPort
 	}
-	//8
-	if config.Config.RpcRegisterName.OpenImMessageCMSName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImMessageCmsPort
-	}
-	//9
-	if config.Config.RpcRegisterName.OpenImAdminCMSName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAdminCmsPort
-	}
 	//10
 	if config.Config.RpcRegisterName.OpenImOfficeName == serviceName {
 		configPortList = config.Config.RpcPort.OpenImOfficePort
