@@ -42,6 +42,7 @@ func (pc *PersistentConsumerHandler) Init() {
 			Name: "insert_mysql_msg_total",
 			Help: "The total number of msg insert mysql events",
 		})
+		prometheus.MustRegister(msgInsertMysqlProcessed)
 	}
 }
 
