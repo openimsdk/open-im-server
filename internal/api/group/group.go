@@ -320,12 +320,7 @@ func InviteUserToGroup(c *gin.Context) {
 	}
 	req := &rpc.InviteUserToGroupReq{}
 	utils.CopyStructFields(req, &params)
-	if len(req.InvitedUserIDList) > constant.MaxNotificationNum {
-		errMsg := req.OperationID + " too many, Limit: " + utils.IntToString(constant.MaxNotificationNum)
-		log.NewError(req.OperationID, errMsg, len(req.InvitedUserIDList))
-		c.JSON(http.StatusRequestEntityTooLarge, gin.H{"errCode": 400, "errMsg": errMsg})
-		return
-	}
+
 	var ok bool
 	var errInfo string
 	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
@@ -385,7 +380,13 @@ func CreateGroup(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	//
+
+	if len(params.MemberList) > constant.MaxNotificationNum {
+		errMsg := params.OperationID + " too many members " + utils.Int32ToString(int32(len(params.MemberList)))
+		log.Error(params.OperationID, errMsg)
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": errMsg})
+		return
+	}
 	req := &rpc.CreateGroupReq{GroupInfo: &open_im_sdk.GroupInfo{}}
 	utils.CopyStructFields(req.GroupInfo, &params)
 
