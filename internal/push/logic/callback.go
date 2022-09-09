@@ -113,6 +113,7 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 		},
 		OfflinePushInfo: msg.OfflinePushInfo,
+		ClientMsgID:     msg.ClientMsgID,
 		SendID:          msg.SendID,
 		GroupID:         groupID,
 		ContentType:     msg.ContentType,
