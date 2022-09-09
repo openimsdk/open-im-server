@@ -160,7 +160,7 @@ func GetBlackIDListFromCache(c *gin.Context) {
 // @Failure 500 {object} api.Swagger500Resp "errCode为500 一般为服务器内部错误"
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /user/get_users_info [post]
-func GetUsersInfo(c *gin.Context) {
+func GetUsersPublicInfo(c *gin.Context) {
 	params := api.GetUsersInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())

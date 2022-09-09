@@ -40,8 +40,8 @@ var (
 func Init() {
 	cmdCh = make(chan Cmd2Value, 10000)
 	w = new(sync.Mutex)
-	persistentCH.Init()   // 订阅ws2mschat 消费到 mysql
-	historyCH.Init(cmdCh) // 订阅ws2mschat 如果可靠性存储 消费到 incrseq 再存入mongo 再push || 非可靠性 直接incr再push 初始化ws2mschat
+	persistentCH.Init()   // ws2mschat save mysql
+	historyCH.Init(cmdCh) //
 	historyMongoCH.Init()
 	onlineTopicStatus = OnlineTopicVacancy
 	//offlineHistoryCH.Init(cmdCh)
