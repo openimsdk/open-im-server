@@ -23,7 +23,11 @@ import (
 )
 
 var (
-	msgInsertMysqlProcessed prometheus.Counter
+	// msgInsertMysqlProcessed perometheus.Countr
+	msgInsertMysqlProcessed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "insert_mysql_msg_total",
+		Help: "The total number of msg insert mysql events",
+	})
 )
 
 type PersistentConsumerHandler struct {
@@ -42,7 +46,6 @@ func (pc *PersistentConsumerHandler) Init() {
 			Name: "insert_mysql_msg_total",
 			Help: "The total number of msg insert mysql events",
 		})
-		prometheus.MustRegister(msgInsertMysqlProcessed)
 	}
 }
 
