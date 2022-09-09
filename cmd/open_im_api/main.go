@@ -54,7 +54,7 @@ func main() {
 	{
 		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo) //1
 		userRouterGroup.POST("/set_global_msg_recv_opt", user.SetGlobalRecvMessageOpt)
-		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)                  //1
+		userRouterGroup.POST("/get_users_info", user.GetUsersPublicInfo)            //1
 		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
 		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
 		userRouterGroup.POST("/get_users_info_from_cache", user.GetUsersInfoFromCache)
@@ -95,9 +95,9 @@ func main() {
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                          //1
 		groupRouterGroup.POST("/get_recv_group_applicationList", group.GetRecvGroupApplicationList) //1
 		groupRouterGroup.POST("/get_user_req_group_applicationList", group.GetUserReqGroupApplicationList)
-		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                   //1
-		groupRouterGroup.POST("/kick_group", group.KickGroupMember)                      //1
-		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)        //no use
+		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo) //1
+		groupRouterGroup.POST("/kick_group", group.KickGroupMember)    //1
+		//	groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)        //no use
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1

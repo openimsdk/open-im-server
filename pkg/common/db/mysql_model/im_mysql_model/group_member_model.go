@@ -35,8 +35,6 @@ func InsertIntoGroupMember(toInsertInfo db.GroupMember) error {
 }
 
 func BatchInsertIntoGroupMember(toInsertInfoList []*db.GroupMember) error {
-	//MessageList []*model_struct.LocalChatLog
-	//return utils.Wrap(d.conn.Create(MessageList).Error, "BatchInsertMessageList failed")
 	for _, toInsertInfo := range toInsertInfoList {
 		toInsertInfo.JoinTime = time.Now()
 		if toInsertInfo.RoleLevel == 0 {
