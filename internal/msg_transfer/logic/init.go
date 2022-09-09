@@ -42,6 +42,7 @@ func Init() {
 	w = new(sync.Mutex)
 	persistentCH.Init()   // ws2mschat save mysql
 	historyCH.Init(cmdCh) //
+	historyMongoCH.Init()
 	onlineTopicStatus = OnlineTopicVacancy
 	//offlineHistoryCH.Init(cmdCh)
 	statistics.NewStatistics(&singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
