@@ -3,8 +3,6 @@ package admin
 import (
 	apiStruct "Open_IM/pkg/cms_api_struct"
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/constant"
-	openIMHttp "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAdmin "Open_IM/pkg/proto/admin_cms"
@@ -66,8 +64,8 @@ func AdminLogin(c *gin.Context) {
 		reqPb pbAdmin.AdminLoginReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	reqPb.Secret = req.Secret
@@ -84,24 +82,26 @@ func AdminLogin(c *gin.Context) {
 	respPb, err := client.AdminLogin(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "rpc failed", err.Error())
-		openIMHttp.RespHttp200(c, err, nil)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
+	resp.FaceURL = respPb.FaceURL
+	resp.UserName = respPb.UserName
 	resp.Token = respPb.Token
-	openIMHttp.RespHttp200(c, constant.OK, resp)
+	c.JSON(http.StatusOK, gin.H{"errCode": respPb.CommonResp.ErrCode, "errMsg": respPb.CommonResp.ErrMsg, "data": resp})
 }
 
 func AddUserRegisterAddFriendIDList(c *gin.Context) {
 	var (
-		req  apiStruct.AddUserRegisterAddFriendIDListRequest
-		resp apiStruct.AddUserRegisterAddFriendIDListResponse
+		req apiStruct.AddUserRegisterAddFriendIDListRequest
+		// resp apiStruct.AddUserRegisterAddFriendIDListResponse
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
 	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImAdminCMSName, req.OperationID)
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetConn == nil"
@@ -110,23 +110,24 @@ func AddUserRegisterAddFriendIDList(c *gin.Context) {
 		return
 	}
 	client := pbAdmin.NewAdminCMSClient(etcdConn)
-	_, err := client.AddUserRegisterAddFriendIDList(context.Background(), &pbAdmin.AddUserRegisterAddFriendIDListReq{OperationID: req.OperationID, UserIDList: req.UserIDList})
+	respPb, err := client.AddUserRegisterAddFriendIDList(context.Background(), &pbAdmin.AddUserRegisterAddFriendIDListReq{OperationID: req.OperationID, UserIDList: req.UserIDList})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "rpc failed", err.Error())
-		openIMHttp.RespHttp200(c, err, nil)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
-	openIMHttp.RespHttp200(c, constant.OK, resp)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp:", respPb.String())
+	c.JSON(http.StatusOK, gin.H{"errCode": respPb.CommonResp.ErrCode, "errMsg": respPb.CommonResp.ErrMsg})
 }
 
 func ReduceUserRegisterAddFriendIDList(c *gin.Context) {
 	var (
-		req  apiStruct.ReduceUserRegisterAddFriendIDListRequest
-		resp apiStruct.ReduceUserRegisterAddFriendIDListResponse
+		req apiStruct.ReduceUserRegisterAddFriendIDListRequest
+		// resp apiStruct.ReduceUserRegisterAddFriendIDListResponse
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
@@ -138,13 +139,13 @@ func ReduceUserRegisterAddFriendIDList(c *gin.Context) {
 		return
 	}
 	client := pbAdmin.NewAdminCMSClient(etcdConn)
-	_, err := client.ReduceUserRegisterAddFriendIDList(context.Background(), &pbAdmin.ReduceUserRegisterAddFriendIDListReq{OperationID: req.OperationID, UserIDList: req.UserIDList, Operation: req.Operation})
+	respPb, err := client.ReduceUserRegisterAddFriendIDList(context.Background(), &pbAdmin.ReduceUserRegisterAddFriendIDListReq{OperationID: req.OperationID, UserIDList: req.UserIDList, Operation: req.Operation})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "rpc failed", err.Error())
-		openIMHttp.RespHttp200(c, err, nil)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
-	openIMHttp.RespHttp200(c, constant.OK, resp)
+	c.JSON(http.StatusOK, gin.H{"errCode": respPb.CommonResp.ErrCode, "errMsg": respPb.CommonResp.ErrMsg})
 }
 
 func GetUserRegisterAddFriendIDList(c *gin.Context) {
@@ -153,8 +154,8 @@ func GetUserRegisterAddFriendIDList(c *gin.Context) {
 		resp apiStruct.GetUserRegisterAddFriendIDListResponse
 	)
 	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), err.Error())
-		openIMHttp.RespHttp200(c, constant.ErrArgs, nil)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req)
@@ -172,12 +173,12 @@ func GetUserRegisterAddFriendIDList(c *gin.Context) {
 	}})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "rpc failed", err.Error())
-		openIMHttp.RespHttp200(c, err, nil)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 	resp.Users = respPb.UserInfoList
 	resp.ShowNumber = int(respPb.Pagination.ShowNumber)
 	resp.CurrentPage = int(respPb.Pagination.CurrentPage)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
-	openIMHttp.RespHttp200(c, constant.OK, resp)
+	c.JSON(http.StatusOK, gin.H{"errCode": respPb.CommonResp.ErrCode, "errMsg": respPb.CommonResp.ErrMsg, "data": resp})
 }

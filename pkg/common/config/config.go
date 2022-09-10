@@ -131,8 +131,6 @@ type config struct {
 		OpenImGroupPort          []int `yaml:"openImGroupPort"`
 		OpenImAuthPort           []int `yaml:"openImAuthPort"`
 		OpenImPushPort           []int `yaml:"openImPushPort"`
-		OpenImStatisticsPort     []int `yaml:"openImStatisticsPort"`
-		OpenImMessageCmsPort     []int `yaml:"openImMessageCmsPort"`
 		OpenImAdminCmsPort       []int `yaml:"openImAdminCmsPort"`
 		OpenImOfficePort         []int `yaml:"openImOfficePort"`
 		OpenImOrganizationPort   []int `yaml:"openImOrganizationPort"`
@@ -141,16 +139,14 @@ type config struct {
 		OpenImRealTimeCommPort   []int `yaml:"openImRealTimeCommPort"`
 	}
 	RpcRegisterName struct {
-		OpenImStatisticsName string `yaml:"openImStatisticsName"`
-		OpenImUserName       string `yaml:"openImUserName"`
-		OpenImFriendName     string `yaml:"openImFriendName"`
+		OpenImUserName   string `yaml:"openImUserName"`
+		OpenImFriendName string `yaml:"openImFriendName"`
 		//	OpenImOfflineMessageName     string `yaml:"openImOfflineMessageName"`
 		OpenImMsgName          string `yaml:"openImMsgName"`
 		OpenImPushName         string `yaml:"openImPushName"`
 		OpenImRelayName        string `yaml:"openImRelayName"`
 		OpenImGroupName        string `yaml:"openImGroupName"`
 		OpenImAuthName         string `yaml:"openImAuthName"`
-		OpenImMessageCMSName   string `yaml:"openImMessageCMSName"`
 		OpenImAdminCMSName     string `yaml:"openImAdminCMSName"`
 		OpenImOfficeName       string `yaml:"openImOfficeName"`
 		OpenImOrganizationName string `yaml:"openImOrganizationName"`
@@ -501,17 +497,36 @@ type config struct {
 			SmtpAddr                string `yaml:"smtpAddr"`
 			SmtpPort                int    `yaml:"smtpPort"`
 		}
-		TestDepartMentID     string   `yaml:"testDepartMentID"`
-		ImAPIURL             string   `yaml:"imAPIURL"`
-		NeedInvitationCode   bool     `yaml:"needInvitationCode"`
-		OnboardProcess       bool     `yaml:"onboardProcess"`
-		JoinDepartmentIDList []string `yaml:"joinDepartmentIDList"`
-		JoinDepartmentGroups bool     `yaml:"joinDepartmentGroups"`
-		OaNotification       bool     `yaml:"oaNotification"`
+		TestDepartMentID                        string   `yaml:"testDepartMentID"`
+		ImAPIURL                                string   `yaml:"imAPIURL"`
+		NeedInvitationCode                      bool     `yaml:"needInvitationCode"`
+		OnboardProcess                          bool     `yaml:"onboardProcess"`
+		JoinDepartmentIDList                    []string `yaml:"joinDepartmentIDList"`
+		JoinDepartmentGroups                    bool     `yaml:"joinDepartmentGroups"`
+		OaNotification                          bool     `yaml:"oaNotification"`
+		CreateOrganizationUserAndJoinDepartment bool     `json:"createOrganizationUserAndJoinDepartment"`
 	}
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
 	} `yaml:"rtc"`
+
+	Prometheus struct {
+		Enable                        bool  `yaml:"enable"`
+		UserPrometheusPort            []int `yaml:"userPrometheusPort"`
+		FriendPrometheusPort          []int `yaml:"friendPrometheusPort"`
+		MessagePrometheusPort         []int `yaml:"messagePrometheusPort"`
+		MessageGatewayPrometheusPort  []int `yaml:"messageGatewayPrometheusPort"`
+		GroupPrometheusPort           []int `yaml:"groupPrometheusPort"`
+		AuthPrometheusPort            []int `yaml:"authPrometheusPort"`
+		PushPrometheusPort            []int `yaml:"pushPrometheusPort"`
+		AdminCmsPrometheusPort        []int `yaml:"adminCmsPrometheusPort"`
+		OfficePrometheusPort          []int `yaml:"officePrometheusPort"`
+		OrganizationPrometheusPort    []int `yaml:"organizationPrometheusPort"`
+		ConversationPrometheusPort    []int `yaml:"conversationPrometheusPort"`
+		CachePrometheusPort           []int `yaml:"cachePrometheusPort"`
+		RealTimeCommPrometheusPort    []int `yaml:"realTimeCommPrometheusPort"`
+		MessageTransferPrometheusPort []int `yaml:"messageTransferPrometheusPort"`
+	} `yaml:"prometheus"`
 }
 type PConversation struct {
 	ReliabilityLevel int  `yaml:"reliabilityLevel"`

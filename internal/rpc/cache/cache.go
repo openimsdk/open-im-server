@@ -3,16 +3,17 @@ package cache
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/rocks_cache"
+	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"google.golang.org/grpc"
 )
 
 type cacheServer struct {
@@ -65,8 +66,9 @@ func (s *cacheServer) Run() {
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
-		return
+		panic(utils.Wrap(err, "register cache module  rpc to etcd err"))
 	}
+	go rocksCache.DelKeys()
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError("0", "Serve failed ", err.Error())

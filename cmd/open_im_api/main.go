@@ -47,7 +47,6 @@ func main() {
 	//	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
-
 	log.Info("load  config: ", config.Config)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// user routing group, which handles user registration and login services
@@ -55,7 +54,7 @@ func main() {
 	{
 		userRouterGroup.POST("/update_user_info", user.UpdateUserInfo) //1
 		userRouterGroup.POST("/set_global_msg_recv_opt", user.SetGlobalRecvMessageOpt)
-		userRouterGroup.POST("/get_users_info", user.GetUsersInfo)                  //1
+		userRouterGroup.POST("/get_users_info", user.GetUsersPublicInfo)            //1
 		userRouterGroup.POST("/get_self_user_info", user.GetSelfUserInfo)           //1
 		userRouterGroup.POST("/get_users_online_status", user.GetUsersOnlineStatus) //1
 		userRouterGroup.POST("/get_users_info_from_cache", user.GetUsersInfoFromCache)
@@ -64,6 +63,7 @@ func main() {
 		userRouterGroup.POST("/get_all_users_uid", manage.GetAllUsersUid) //1
 		userRouterGroup.POST("/account_check", manage.AccountCheck)       //1
 		//	userRouterGroup.POST("/get_users_online_status", manage.GetUsersOnlineStatus) //1
+		userRouterGroup.POST("/get_users", user.GetUsers)
 	}
 	//friend routing group
 	friendRouterGroup := r.Group("/friend")
@@ -95,9 +95,9 @@ func main() {
 		groupRouterGroup.POST("/transfer_group", group.TransferGroupOwner)                          //1
 		groupRouterGroup.POST("/get_recv_group_applicationList", group.GetRecvGroupApplicationList) //1
 		groupRouterGroup.POST("/get_user_req_group_applicationList", group.GetUserReqGroupApplicationList)
-		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo)                   //1
-		groupRouterGroup.POST("/kick_group", group.KickGroupMember)                      //1
-		groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)        //no use
+		groupRouterGroup.POST("/get_groups_info", group.GetGroupsInfo) //1
+		groupRouterGroup.POST("/kick_group", group.KickGroupMember)    //1
+		//	groupRouterGroup.POST("/get_group_member_list", group.GetGroupMemberList)        //no use
 		groupRouterGroup.POST("/get_group_all_member_list", group.GetGroupAllMemberList) //1
 		groupRouterGroup.POST("/get_group_members_info", group.GetGroupMembersInfo)      //1
 		groupRouterGroup.POST("/invite_user_to_group", group.InviteUserToGroup)          //1
@@ -138,6 +138,7 @@ func main() {
 		thirdGroup.POST("/get_rtc_invitation_start_app", apiThird.GetRTCInvitationInfoStartApp)
 		thirdGroup.POST("/fcm_update_token", apiThird.FcmUpdateToken)
 		thirdGroup.POST("/aws_storage_credential", apiThird.AwsStorageCredential)
+		thirdGroup.POST("/set_app_badge", apiThird.SetAppBadge)
 	}
 	//Message
 	chatGroup := r.Group("/msg")
@@ -225,6 +226,6 @@ func main() {
 	fmt.Println("start api server, address: ", address)
 	err := r.Run(address)
 	if err != nil {
-		log.Error("", "run failed ", *ginPort, err.Error())
+		log.Error("", "api run failed ", *ginPort, err.Error())
 	}
 }

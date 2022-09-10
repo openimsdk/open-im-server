@@ -102,11 +102,12 @@ message SetMsgMinSeqResp{
   string errMsg = 2;
 }
 
-message SetSendMsgFailedFlagReq{
+message SetSendMsgStatusReq{
   string operationID = 1;
+  int32 status = 2;
 }
 
-message SetSendMsgFailedFlagResp{
+message SetSendMsgStatusResp{
   int32 errCode = 1;
   string errMsg = 2;
 }
@@ -138,6 +139,6 @@ service msg {
   rpc DelSuperGroupMsg(DelSuperGroupMsgReq) returns(DelSuperGroupMsgResp);
   rpc ClearMsg(ClearMsgReq) returns(ClearMsgResp);
   rpc SetMsgMinSeq(SetMsgMinSeqReq) returns(SetMsgMinSeqResp);
-  rpc SetSendMsgFailedFlag(SetSendMsgFailedFlagReq) returns(SetSendMsgFailedFlagResp);
+  rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
   rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
 }

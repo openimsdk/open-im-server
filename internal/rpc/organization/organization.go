@@ -73,7 +73,7 @@ func (s *organizationServer) Run() {
 	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	if err != nil {
 		log.NewError("", "RegisterEtcd failed ", err.Error())
-		return
+		panic(utils.Wrap(err, "register organization module  rpc to etcd err"))
 	}
 	log.NewInfo("", "organization rpc RegisterEtcd success", rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
 	err = srv.Serve(listener)

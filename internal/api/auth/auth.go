@@ -77,7 +77,7 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
-	pbDataToken := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID, LoginIp: params.CreateIp}
+	pbDataToken := &rpc.UserTokenReq{Platform: params.Platform, FromUserID: params.UserID, OperationID: params.OperationID}
 	replyToken, err := client.UserToken(context.Background(), pbDataToken)
 	if err != nil {
 		errMsg := req.OperationID + " " + " client.UserToken failed " + err.Error() + pbDataToken.String()

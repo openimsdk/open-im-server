@@ -56,7 +56,7 @@ func initMysqlDB() {
 		Writer{},
 		logger.Config{
 			SlowThreshold:             200 * time.Millisecond, // Slow SQL threshold
-			LogLevel:                  logger.Error,           // Log level
+			LogLevel:                  logger.Warn,            // Log level
 			IgnoreRecordNotFoundError: true,                   // Ignore ErrRecordNotFound error for logger
 			Colorful:                  true,                   // Disable color
 		},
@@ -68,6 +68,15 @@ func initMysqlDB() {
 		fmt.Println("0", "Open failed ", err.Error(), dsn)
 		panic(err.Error())
 	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.Config.Mysql.DBMaxLifeTime))
+	sqlDB.SetMaxOpenConns(config.Config.Mysql.DBMaxOpenConns)
+	sqlDB.SetMaxIdleConns(config.Config.Mysql.DBMaxIdleConns)
 
 	fmt.Println("open db ok ", dsn)
 	db.AutoMigrate(

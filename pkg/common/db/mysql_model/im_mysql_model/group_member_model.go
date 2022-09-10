@@ -34,6 +34,18 @@ func InsertIntoGroupMember(toInsertInfo db.GroupMember) error {
 	return nil
 }
 
+func BatchInsertIntoGroupMember(toInsertInfoList []*db.GroupMember) error {
+	for _, toInsertInfo := range toInsertInfoList {
+		toInsertInfo.JoinTime = time.Now()
+		if toInsertInfo.RoleLevel == 0 {
+			toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
+		}
+		toInsertInfo.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
+	}
+	return db.DB.MysqlDB.DefaultGormDB().Create(toInsertInfoList).Error
+
+}
+
 func GetGroupMemberListByUserID(userID string) ([]db.GroupMember, error) {
 	var groupMemberList []db.GroupMember
 	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("user_id=?", userID).Find(&groupMemberList).Error
@@ -199,9 +211,9 @@ func GetGroupMembersByGroupIdCMS(groupId string, userName string, showNumber, pa
 	return groupMembers, nil
 }
 
-func GetGroupMembersCount(groupId, userName string) (int64, error) {
+func GetGroupMembersCount(groupID, userName string) (int64, error) {
 	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
+	if err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupID).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
 		return count, err
 	}
 	return count, nil

@@ -107,3 +107,15 @@ func int64ToString(i int64) string {
 func Int64ToString(i int64) string {
 	return strconv.FormatInt(i, 10)
 }
+
+func RemoveDuplicateElement(idList []string) []string {
+	result := make([]string, 0, len(idList))
+	temp := map[string]struct{}{}
+	for _, item := range idList {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
+}

@@ -2,8 +2,10 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"fmt"
 	"time"
+
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 func InsertToFriend(toInsertFollow *db.Friend) error {
@@ -50,4 +52,35 @@ func UpdateFriendComment(OwnerUserID, FriendUserID, Remark string) error {
 
 func DeleteSingleFriendInfo(OwnerUserID, FriendUserID string) error {
 	return db.DB.MysqlDB.DefaultGormDB().Table("friends").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Delete(db.Friend{}).Error
+}
+
+type FriendUser struct {
+	db.Friend
+	Nickname string `gorm:"column:name;size:255"`
+}
+
+func GetUserFriendsCMS(ownerUserID, friendUserName string, pageNumber, showNumber int32) (friendUserList []*FriendUser, count int64, err error) {
+	db := db.DB.MysqlDB.DefaultGormDB().Table("friends").
+		Select("friends.*, users.name").
+		Where("friends.owner_user_id=?", ownerUserID).Limit(int(showNumber)).
+		Joins("left join users on friends.friend_user_id = users.user_id").
+		Offset(int(showNumber * (pageNumber - 1)))
+	if friendUserName != "" {
+		db = db.Where("users.name like ?", fmt.Sprintf("%%%s%%", friendUserName))
+	}
+	if err = db.Count(&count).Error; err != nil {
+		return
+	}
+	err = db.Find(&friendUserList).Error
+	return
+}
+
+func GetFriendByIDCMS(ownerUserID, friendUserID string) (friendUser *FriendUser, err error) {
+	friendUser = &FriendUser{}
+	err = db.DB.MysqlDB.DefaultGormDB().Table("friends").
+		Select("friends.*, users.name").
+		Where("friends.owner_user_id=? and friends.friend_user_id=?", ownerUserID, friendUserID).
+		Joins("left join users on friends.friend_user_id = users.user_id").
+		Take(friendUser).Error
+	return friendUser, err
 }

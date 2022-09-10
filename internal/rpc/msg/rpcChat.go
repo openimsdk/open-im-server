@@ -75,7 +75,7 @@ func (rpc *rpcChat) Run() {
 	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
 	if err != nil {
 		log.Error("", "register rpcChat to etcd failed ", err.Error())
-		return
+		panic(utils.Wrap(err, "register chat module  rpc to etcd err"))
 	}
 	go rpc.runCh()
 	err = srv.Serve(listener)

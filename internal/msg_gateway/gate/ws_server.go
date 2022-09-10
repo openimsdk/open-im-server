@@ -138,7 +138,9 @@ func (ws *WServer) MultiTerminalLoginRemoteChecker(userID string, platformID int
 		}
 		if resp.ErrCode != 0 {
 			log.Error(operationID, "MultiTerminalLoginCheck errCode, errMsg: ", resp.ErrCode, resp.ErrMsg)
+			continue
 		}
+		log.Debug(operationID, "MultiTerminalLoginCheck resp ", resp.String())
 	}
 }
 
@@ -366,7 +368,11 @@ func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
 	rwLock.RLock()
 	defer rwLock.RUnlock()
 	if connMap, ok := ws.wsUserToConn[uid]; ok {
-		return connMap
+		newConnMap := make(map[int]*UserConn)
+		for k, v := range connMap {
+			newConnMap[k] = v
+		}
+		return newConnMap
 	}
 	return nil
 }

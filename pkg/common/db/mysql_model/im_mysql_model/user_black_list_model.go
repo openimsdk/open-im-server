@@ -11,14 +11,14 @@ func InsertInToUserBlackList(black db.Black) error {
 	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Create(black).Error
 }
 
-//type Black struct {
-//	OwnerUserID    string    `gorm:"column:owner_user_id;primaryKey;"`
-//	BlockUserID    string    `gorm:"column:block_user_id;primaryKey;"`
-//	CreateTime     time.Time `gorm:"column:create_time"`
-//	AddSource      int32     `gorm:"column:add_source"`
-//	OperatorUserID int32     `gorm:"column:operator_user_id"`
-//	Ex             string    `gorm:"column:ex"`
-//}
+// type Black struct {
+// 	OwnerUserID    string    `gorm:"column:owner_user_id;primaryKey;"`
+// 	BlockUserID    string    `gorm:"column:block_user_id;primaryKey;"`
+// 	CreateTime     time.Time `gorm:"column:create_time"`
+// 	AddSource      int32     `gorm:"column:add_source"`
+// 	OperatorUserID int32     `gorm:"column:operator_user_id"`
+// 	Ex             string    `gorm:"column:ex"`
+// }
 
 func CheckBlack(ownerUserID, blockUserID string) error {
 	var black db.Black

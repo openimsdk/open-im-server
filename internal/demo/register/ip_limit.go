@@ -7,7 +7,9 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
+
 	"github.com/gin-gonic/gin"
+
 	//"github.com/jinzhu/gorm"
 	"net/http"
 	"time"
@@ -141,7 +143,7 @@ func QueryUserIDLimitLogin(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": resp})
+	c.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": gin.H{"limit": resp}})
 }
 
 type AddUserIPLimitLoginReq struct {
@@ -163,8 +165,8 @@ func AddUserIPLimitLogin(c *gin.Context) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
 	userIp := db.UserIpLimit{UserID: req.UserID, Ip: req.IP}
 	err := imdb.UpdateUserInfo(db.User{
-		UserID:     req.UserID,
-		LoginLimit: 1,
+		UserID: req.UserID,
+		// LoginLimit: 1,
 	})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)

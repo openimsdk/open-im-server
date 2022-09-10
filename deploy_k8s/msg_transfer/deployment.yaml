@@ -15,12 +15,15 @@ spec:
     spec:
       containers:
       - name: msg-transfer
-        image: openim/msg_transfer:v2.2.0
+        image: openim/msg_transfer:v2.3.0release
         # imagePullPolicy: Always
         volumeMounts:
           - name: config
             mountPath: /Open-IM-Server/config
             readOnly: true
+        env:
+          - name: CONFIG_NAME
+            value: "/Open-IM-Server"         
       volumes:
         - name: config
           configMap:

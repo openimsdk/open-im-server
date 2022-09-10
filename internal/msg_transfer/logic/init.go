@@ -6,7 +6,11 @@ import (
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/statistics"
 	"fmt"
+	"net/http"
+	"strconv"
 	"sync"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const OnlineTopicBusy = 1
@@ -36,8 +40,8 @@ var (
 func Init() {
 	cmdCh = make(chan Cmd2Value, 10000)
 	w = new(sync.Mutex)
-	persistentCH.Init()   // 订阅ws2mschat 消费到 mysql
-	historyCH.Init(cmdCh) // 订阅ws2mschat 如果可靠性存储 消费到 incrseq 再存入mongo 再push || 非可靠性 直接incr再push 初始化ws2mschat
+	persistentCH.Init()   // ws2mschat save mysql
+	historyCH.Init(cmdCh) //
 	historyMongoCH.Init()
 	onlineTopicStatus = OnlineTopicVacancy
 	//offlineHistoryCH.Init(cmdCh)
@@ -46,7 +50,7 @@ func Init() {
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ms2pschat.Addr, config.Config.Kafka.Ms2pschat.Topic)
 	producerToMongo = kafka.NewKafkaProducer(config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.MsgToMongo.Topic)
 }
-func Run() {
+func Run(promethuesPort int) {
 	//register mysqlConsumerHandler to
 	if config.Config.ChatPersistenceMysql {
 		go persistentCH.persistentConsumerGroup.RegisterHandleAndConsumer(&persistentCH)
@@ -56,6 +60,10 @@ func Run() {
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
 	go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
 	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
+	if config.Config.Prometheus.Enable {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(":"+strconv.Itoa(promethuesPort), nil)
+	}
 }
 func SetOnlineTopicStatus(status int) {
 	w.Lock()

@@ -74,7 +74,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"attached_info": conversation.AttachedInfo})
 	case constant.FieldUnread:
 		isSyncConversation = false
-		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"update_unread_count_time": utils.GetCurrentTimestampByMill()})
+		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"update_unread_count_time": conversation.UpdateUnreadCountTime})
 	}
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateColumnsConversations error", err.Error())
@@ -83,7 +83,6 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	}
 	for _, v := range utils.DifferenceString(haveUserID, req.UserIDList) {
 		conversation.OwnerUserID = v
-		conversation.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 		err = rocksCache.DelUserConversationIDListFromCache(v)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), v, req.Conversation.ConversationID, err.Error())
@@ -118,7 +117,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 				if err = rocksCache.DelConversationFromCache(v, req.Conversation.ConversationID); err != nil {
 					log.NewError(req.OperationID, utils.GetSelfFuncName(), v, req.Conversation.ConversationID, err.Error())
 				}
-				chat.ConversationUnreadChangeNotification(req.OperationID, v, req.Conversation.ConversationID)
+				chat.ConversationUnreadChangeNotification(req.OperationID, v, req.Conversation.ConversationID, conversation.UpdateUnreadCountTime)
 			}
 		}
 
@@ -198,7 +197,7 @@ func (rpc *rpcConversation) Run() {
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error(),
 			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
-		return
+		panic(utils.Wrap(err, "register conversation module  rpc to etcd err"))
 	}
 	log.NewInfo("0", "RegisterConversationServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
 	err = srv.Serve(listener)

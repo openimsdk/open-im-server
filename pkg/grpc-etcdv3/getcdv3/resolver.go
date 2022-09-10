@@ -139,14 +139,6 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	if config.Config.RpcRegisterName.OpenImAuthName == serviceName {
 		configPortList = config.Config.RpcPort.OpenImAuthPort
 	}
-	//8
-	if config.Config.RpcRegisterName.OpenImMessageCMSName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImMessageCmsPort
-	}
-	//9
-	if config.Config.RpcRegisterName.OpenImAdminCMSName == serviceName {
-		configPortList = config.Config.RpcPort.OpenImAdminCmsPort
-	}
 	//10
 	if config.Config.RpcRegisterName.OpenImOfficeName == serviceName {
 		configPortList = config.Config.RpcPort.OpenImOfficePort
@@ -282,7 +274,7 @@ func GetDefaultGatewayConn4Unique(schema, etcdaddr, operationID string) []*grpc.
 	if len(grpcConns) > 0 {
 		return grpcConns
 	}
-	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) < 0 ", schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+	log.NewWarn(operationID, utils.GetSelfFuncName(), " len(grpcConns) == 0 ", schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
 	grpcConns = GetDefaultGatewayConn4UniqueFromcfg(operationID)
 	log.NewDebug(operationID, utils.GetSelfFuncName(), config.Config.RpcRegisterName.OpenImRelayName, grpcConns)
 	return grpcConns

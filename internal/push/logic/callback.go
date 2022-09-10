@@ -12,7 +12,7 @@ import (
 	http2 "net/http"
 )
 
-func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.MsgData, offlinePushUserIDList *[]string, offlineInfo *commonPb.OfflinePushInfo) cbApi.CommonCallbackResp {
+func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.MsgData, offlinePushUserIDList *[]string) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackOfflinePush.Enable {
 		return callbackResp
@@ -28,6 +28,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 			UserIDList: userIDList,
 		},
 		OfflinePushInfo: msg.OfflinePushInfo,
+		ClientMsgID:     msg.ClientMsgID,
 		SendID:          msg.SendID,
 		GroupID:         msg.GroupID,
 		ContentType:     msg.ContentType,
@@ -52,7 +53,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 			*offlinePushUserIDList = resp.UserIDList
 		}
 		if resp.OfflinePushInfo != nil {
-			*offlineInfo = *resp.OfflinePushInfo
+			msg.OfflinePushInfo = resp.OfflinePushInfo
 		}
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), offlinePushUserIDList, resp.UserIDList)
@@ -75,6 +76,7 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 			UserIDList: userIDList,
 		},
 		OfflinePushInfo: msg.OfflinePushInfo,
+		ClientMsgID:     msg.ClientMsgID,
 		SendID:          msg.SendID,
 		GroupID:         msg.GroupID,
 		ContentType:     msg.ContentType,
@@ -111,6 +113,7 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 		},
 		OfflinePushInfo: msg.OfflinePushInfo,
+		ClientMsgID:     msg.ClientMsgID,
 		SendID:          msg.SendID,
 		GroupID:         groupID,
 		ContentType:     msg.ContentType,

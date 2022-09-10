@@ -112,18 +112,7 @@ services:
       MINIO_ROOT_PASSWORD: key12345
     restart: always
     command: minio server /data --console-address ':9090'
-  #
-  #  dtm:
-  #    image: yedf/dtm
-  #    ports:
-  #      - 36789:36789
-  #      - 36790:36790
-  #    environment:
-  #      STORE_DRIVER: mysql
-  #      STORE_HOST: localhost
-  #      STORE_USER: root
-  #      STORE_PASSWORD: ''
-  #      STORE_PORT: 3306
+
 
   open_im_server:
     image: openim/open_im_server:v2.3.2
@@ -147,3 +136,39 @@ services:
       options:
         max-size: "1g"
         max-file: "2"
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
+      # - ./components/prometheus_data:/prometheus
+    container_name: prometheus
+    ports:
+    - 9091:9091
+    depends_on:
+    - open_im_server
+    command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
+    network_mode: "host" 
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+    # - ./grafana/dashboards/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
+    # - ./grafana/provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+    - ./docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    - ./docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
+    - ./docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
+    container_name: grafana
+    ports:
+    - 10007:10007
+    depends_on:
+    - prometheus
+    network_mode: "host" 
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter
+    container_name: node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    # command: --collector.ENTER-THE-NAME-OF-COLLECTOR

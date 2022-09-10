@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: office
-        image: openim/office:v2.2.0
+        image: openim/office:v2.3.0release
         # imagePullPolicy: Always
         ports:
         - containerPort: 10210
@@ -23,6 +23,9 @@ spec:
           - name: config
             mountPath: /Open-IM-Server/config
             readOnly: true
+        env:
+          - name: CONFIG_NAME
+            value: "/Open-IM-Server"         
       volumes:
         - name: config
           configMap:

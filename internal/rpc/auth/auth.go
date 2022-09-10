@@ -29,43 +29,24 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
 	}
 	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
-	Limited, LimitError := imdb.IsLimitRegisterIp(req.UserInfo.CreateIp)
-	if LimitError != nil {
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: LimitError.Error()}}, nil
-	}
-	if Limited {
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.RegisterLimit, ErrMsg: "Register Limit"}}, nil
-	}
 	err := imdb.UserRegister(user)
 	if err != nil {
-		if err == constant.InvitationMsg {
-			return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.InvitationError, ErrMsg: "邀请码错误"}}, nil
-		}
 		errMsg := req.OperationID + " imdb.UserRegister failed " + err.Error() + user.UserID
 		log.NewError(req.OperationID, errMsg, user)
 		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}})
 	return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}}, nil
 }
 
 func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	_, err := imdb.GetUserByUserID(req.FromUserID)
-	if err != nil {
-		errMsg := req.OperationID + " imdb.GetUserByUserID failed " + err.Error() + req.FromUserID
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	}
-
 	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, int(req.Platform))
 	if err != nil {
 		errMsg := req.OperationID + " token_verify.CreateToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
 		log.NewError(req.OperationID, errMsg)
 		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime})
 	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }
@@ -156,7 +137,8 @@ func (rpc *rpcAuth) Run() {
 	if err != nil {
 		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
 			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
-		return
+		panic(utils.Wrap(err, "register auth module  rpc to etcd err"))
+
 	}
 	log.NewInfo(operationID, "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
 	err = srv.Serve(listener)

@@ -5,6 +5,7 @@ import commonPb "Open_IM/pkg/proto/sdk_ws"
 type CallbackBeforePushReq struct {
 	UserStatusBatchCallbackReq
 	*commonPb.OfflinePushInfo
+	ClientMsgID  string   `json:"clientMsgID"`
 	SendID       string   `json:"sendID"`
 	GroupID      string   `json:"groupID"`
 	ContentType  int32    `json:"contentType"`
@@ -22,6 +23,7 @@ type CallbackBeforePushResp struct {
 type CallbackBeforeSuperGroupOnlinePushReq struct {
 	*commonPb.OfflinePushInfo
 	UserStatusBaseCallback
+	ClientMsgID  string   `json:"clientMsgID"`
 	SendID       string   `json:"sendID"`
 	GroupID      string   `json:"groupID"`
 	ContentType  int32    `json:"contentType"`
