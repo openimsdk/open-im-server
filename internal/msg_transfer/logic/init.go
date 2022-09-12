@@ -4,13 +4,10 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/statistics"
 	"fmt"
-	"net/http"
-	"strconv"
 	"sync"
-
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const OnlineTopicBusy = 1
@@ -60,10 +57,12 @@ func Run(promethuesPort int) {
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
 	go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
 	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
-	if config.Config.Prometheus.Enable {
-		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(":"+strconv.Itoa(promethuesPort), nil)
-	}
+	go func() {
+		err := promePkg.StartPromeSrv(promethuesPort)
+		if err != nil {
+			panic(err)
+		}
+	}()
 }
 func SetOnlineTopicStatus(status int) {
 	w.Lock()

@@ -107,7 +107,7 @@ func UserToken(c *gin.Context) {
 	params := api.UserTokenReq{}
 	if err := c.BindJSON(&params); err != nil {
 		errMsg := " BindJSON failed " + err.Error()
-		log.NewError("0", errMsg)
+		log.NewError(params.OperationID, errMsg)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
 		return
 	}

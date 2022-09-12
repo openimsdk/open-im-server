@@ -3,6 +3,8 @@
 source ./style_info.cfg
 source ./path_info.cfg
 
+list1=$(cat $config_path | grep messageTransferPrometheusPort | awk -F '[:]' '{print $NF}')
+prome_ports=($ports_array)
 
 
 #Check if the service exists
@@ -18,7 +20,7 @@ sleep 1
 
 cd ${msg_transfer_binary_root}
 for ((i = 0; i < ${msg_transfer_service_num}; i++)); do
-      nohup ./${msg_transfer_name}  >>../logs/openIM.log 2>&1 &
+      nohup ./${msg_transfer_name}  -prometheus_port ${prome_ports[$i]} >>../logs/openIM.log 2>&1 &
 done
 
 #Check launched service process

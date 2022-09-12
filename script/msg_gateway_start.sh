@@ -7,13 +7,16 @@ ulimit -n 200000
 
 list1=$(cat $config_path | grep openImMessageGatewayPort | awk -F '[:]' '{print $NF}')
 list2=$(cat $config_path | grep openImWsPort | awk -F '[:]' '{print $NF}')
+list3=$(cat $config_path | grep messageGatewayPrometheusPort | awk -F '[:]' '{print $NF}')
 list_to_string $list1
 rpc_ports=($ports_array)
 list_to_string $list2
 ws_ports=($ports_array)
-if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} ]; then
+list_to_string $list3
+prome_ports=($ports_array)
+if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} -ne ${#prome_ports[@]} ]; then
 
-  echo -e ${RED_PREFIX}"ws_ports does not match push_rpc_ports in quantity!!!"${COLOR_SUFFIX}
+  echo -e ${RED_PREFIX}"ws_ports does not match push_rpc_ports or prome_ports in quantity!!!"${COLOR_SUFFIX}
   exit -1
 
 fi
@@ -28,7 +31,7 @@ fi
 sleep 1
 cd ${msg_gateway_binary_root}
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
-  nohup ./${msg_gateway_name} -rpc_port ${rpc_ports[$i]} -ws_port ${ws_ports[$i]} >>../logs/openIM.log 2>&1 &
+  nohup ./${msg_gateway_name} -rpc_port ${rpc_ports[$i]} -ws_port ${ws_ports[$i]} -prometheus_port ${prome_ports[$i]} >>../logs/openIM.log 2>&1 &
 done
 
 #Check launched service process

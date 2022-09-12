@@ -108,9 +108,9 @@ func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLogi
 	}
 	admin, err := imdb.GetUserByUserID(req.AdminID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "failed", req.AdminID)
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "failed", req.AdminID, err.Error())
 		resp.CommonResp.ErrCode = constant.ErrTokenUnknown.ErrCode
-		resp.CommonResp.ErrMsg = constant.ErrTokenMalformed.ErrMsg
+		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
 	resp.UserName = admin.Nickname

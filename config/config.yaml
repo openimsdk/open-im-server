@@ -752,6 +752,7 @@ demo:
 rtc:
   signalTimeout: 35
 
+# prometheus每个服务监听的端口数量需要和rpc port保持一致
 prometheus:
   enable: false
   userPrometheusPort: [ 20110 ]
@@ -767,4 +768,4 @@ prometheus:
   conversationPrometheusPort: [ 20230 ]
   cachePrometheusPort: [ 20240 ]
   realTimeCommPrometheusPort: [ 21300 ]
-  messageTransferPrometheusPort: [ 21400 ]
+  messageTransferPrometheusPort: [ 21400, 21401, 21402, 21403 ] # 端口数量和 script/path_info.cfg  msg_transfer_service_num保持一致

@@ -6,8 +6,11 @@ import (
 
 	"Open_IM/pkg/statistics"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"sync"
+
+	promePkg "Open_IM/pkg/common/prometheus"
+
+	"github.com/go-playground/validator/v10"
 )
 
 var (
@@ -34,7 +37,13 @@ func Init(rpcPort, wsPort int) {
 	rpcSvr.onInit(rpcPort)
 }
 
-func Run() {
+func Run(promethuesPort int) {
 	go ws.run()
 	go rpcSvr.run()
+	go func() {
+		err := promePkg.StartPromeSrv(promethuesPort)
+		if err != nil {
+			panic(err)
+		}
+	}()
 }

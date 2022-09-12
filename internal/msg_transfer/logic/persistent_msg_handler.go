@@ -23,7 +23,8 @@ import (
 )
 
 var (
-	msgInsertMysqlProcessed prometheus.Counter
+	msgInsertMysqlCounter       prometheus.Counter
+	msgInsertFailedMysqlCounter prometheus.Counter
 )
 
 type PersistentConsumerHandler struct {
@@ -38,11 +39,19 @@ func (pc *PersistentConsumerHandler) Init() {
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql)
 	if config.Config.Prometheus.Enable {
-		msgInsertMysqlProcessed = promauto.NewCounter(prometheus.CounterOpts{
-			Name: "insert_mysql_msg_total",
-			Help: "The total number of msg insert mysql events",
-		})
+		pc.initPrometheus()
 	}
+}
+
+func (pc *PersistentConsumerHandler) initPrometheus() {
+	msgInsertMysqlCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "insert_mysql_msg_total",
+		Help: "The total number of msg insert mysql events",
+	})
+	msgInsertFailedMysqlCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "insert_mysql_failed_msg_total",
+		Help: "The total number of msg insert mysql events",
+	})
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
@@ -76,13 +85,11 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
 			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
 				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
+				msgInsertFailedMysqlCounter.Inc()
 				return
 			}
-			msgInsertMysqlProcessed.Inc()
-			msgInsertMysqlProcessed.Add(1)
 			if config.Config.Prometheus.Enable {
-				log.NewDebug(msgFromMQ.OperationID, utils.GetSelfFuncName(), "inc msgInsertMysqlProcessed", msgInsertMysqlProcessed.Desc())
-				msgInsertMysqlProcessed.Inc()
+				msgInsertMysqlCounter.Inc()
 			}
 		}
 
