@@ -20,7 +20,7 @@ scrape_configs:
       - targets: ['localhost:10006']
         labels:
           group: 'cms-api'
-
+          
 
       - targets: ['localhost:20110']
         labels:

@@ -83,7 +83,12 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
   for j in ${service_ports}; do
     #Start the service in the background
     #    ./${service_filename[$i]} -port $j &
-    nohup ./${service_filename[$i]} -port $j -prometheus_port ${prome_ports[$i]} >>../logs/openIM.log 2>&1 &
+    cmd="./${service_filename[$i]} -port $j"
+    if [$j -eq 0 -o $j -eq 1]; then
+      cmd="./${service_filename[$i]} -port $j -prometheus_port ${prome_ports[$i]}"
+    fi
+    echo $cmd
+    nohup $cmd >>../logs/openIM.log 2>&1 &
     sleep 1
     pid="netstat -ntlp|grep $j |awk '{printf \$7}'|cut -d/ -f1"
     echo -e "${GREEN_PREFIX}${service_filename[$i]} start success,port number:$j pid:$(eval $pid)$COLOR_SUFFIX"
