@@ -79,13 +79,12 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
   portList2=$(cat $config_path | grep ${service_prometheus_port_name[$i]} | awk -F '[:]' '{print $NF}')
   list_to_string $portList2
   prome_ports=($ports_array)
-  echo $prome_ports
   #Start related rpc services based on the number of ports
   # for j in ${service_ports}; do
   for ((j = 0; j < ${#service_ports[*]}; j++)); do
     #Start the service in the background
     #    ./${service_filename[$i]} -port $j &
-    cmd="./${service_filename[$i]} -port ${service_ports[$j]} -prometheus_port ${prome_ports[$j]}"
+    cmd="./${service_filename[$i]} -port ${service_ports[$j]} -prometheus-port ${prome_ports[$j]}"
     if [ $i -eq 0 -o $i -eq 1 ]; then
       cmd="./${service_filename[$i]} -port ${service_ports[$j]}"
     fi
