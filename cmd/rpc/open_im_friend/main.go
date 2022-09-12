@@ -11,7 +11,7 @@ import (
 func main() {
 	defaultPorts := config.Config.RpcPort.OpenImFriendPort
 	rpcPort := flag.Int("port", defaultPorts[0], "get RpcFriendPort from cmd,default 12000 as port")
-	prometheusPort := flag.Int("promethus-port", config.Config.Prometheus.FriendPrometheusPort[0], "friendPrometheusPort default listen port")
+	prometheusPort := flag.Int("prometheus-port", config.Config.Prometheus.FriendPrometheusPort[0], "friendPrometheusPort default listen port")
 	flag.Parse()
 	fmt.Println("start friend rpc server, port: ", *rpcPort)
 	rpcServer := friend.NewFriendServer(*rpcPort)

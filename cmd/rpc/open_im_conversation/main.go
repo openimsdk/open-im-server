@@ -11,7 +11,7 @@ import (
 func main() {
 	defaultPorts := config.Config.RpcPort.OpenImConversationPort
 	rpcPort := flag.Int("port", defaultPorts[0], "RpcConversation default listen port 11300")
-	prometheusPort := flag.Int("promethus-port", config.Config.Prometheus.ConversationPrometheusPort[0], "conversationPrometheusPort default listen port")
+	prometheusPort := flag.Int("prometheus-port", config.Config.Prometheus.ConversationPrometheusPort[0], "conversationPrometheusPort default listen port")
 	flag.Parse()
 	fmt.Println("start conversation rpc server, port: ", *rpcPort)
 	rpcServer := rpcConversation.NewRpcConversationServer(*rpcPort)

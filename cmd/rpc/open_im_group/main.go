@@ -11,7 +11,7 @@ import (
 func main() {
 	defaultPorts := config.Config.RpcPort.OpenImGroupPort
 	rpcPort := flag.Int("port", defaultPorts[0], "get RpcGroupPort from cmd,default 16000 as port")
-	prometheusPort := flag.Int("promethus-port", config.Config.Prometheus.GroupPrometheusPort[0], "groupPrometheusPort default listen port")
+	prometheusPort := flag.Int("prometheus-port", config.Config.Prometheus.GroupPrometheusPort[0], "groupPrometheusPort default listen port")
 	flag.Parse()
 	fmt.Println("start group rpc server, port: ", *rpcPort)
 	rpcServer := group.NewGroupServer(*rpcPort)
