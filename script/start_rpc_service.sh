@@ -84,7 +84,7 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
     #Start the service in the background
     #    ./${service_filename[$i]} -port $j &
     cmd="./${service_filename[$i]} -port $j"
-    if [ $j -eq 0 -o $j -eq 1 ]; then
+    if [ $i -eq 0 -o $i -eq 1 ]; then
       cmd="./${service_filename[$i]} -port $j -prometheus_port ${prome_ports[$i]}"
     fi
     echo $cmd
