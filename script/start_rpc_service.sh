@@ -81,13 +81,13 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
   prome_ports=($ports_array)
   echo $prome_ports
   #Start related rpc services based on the number of ports
-  for j in ${service_ports}; do
+  # for j in ${service_ports}; do
+  for ((j = 0; j < ${#service_ports[*]}; j++)); do
     #Start the service in the background
     #    ./${service_filename[$i]} -port $j &
-    echo $i ${prome_ports} ${prome_ports[$i]}
-    cmd="./${service_filename[$i]} -port $j -prometheus_port ${prome_ports[$i]}"
+    cmd="./${service_filename[$i]} -port ${service_ports[$j]} -prometheus_port ${prome_ports[$j]}"
     if [ $i -eq 0 -o $i -eq 1 ]; then
-      cmd="./${service_filename[$i]} -port $j"
+      cmd="./${service_filename[$i]} -port ${service_ports[$j]}"
     fi
     echo $cmd
     nohup $cmd >>../logs/openIM.log 2>&1 &
