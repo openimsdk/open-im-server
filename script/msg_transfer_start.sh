@@ -2,8 +2,10 @@
 #Include shell font styles and some basic information
 source ./style_info.cfg
 source ./path_info.cfg
+source ./function.sh
 
 list1=$(cat $config_path | grep messageTransferPrometheusPort | awk -F '[:]' '{print $NF}')
+list_to_string $list1
 prome_ports=($ports_array)
 
 
