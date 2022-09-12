@@ -14,7 +14,7 @@ list_to_string $list2
 ws_ports=($ports_array)
 list_to_string $list3
 prome_ports=($ports_array)
-if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} -ne ${#prome_ports[@]} ]; then
+if [ ${#rpc_ports[@]} -ne ${#ws_ports[@]} ]; then
 
   echo -e ${RED_PREFIX}"ws_ports does not match push_rpc_ports or prome_ports in quantity!!!"${COLOR_SUFFIX}
   exit -1
