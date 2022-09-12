@@ -11,7 +11,7 @@ import (
 func main() {
 	defaultPorts := config.Config.RpcPort.OpenImOrganizationPort
 	rpcPort := flag.Int("port", defaultPorts[0], "get RpcOrganizationPort from cmd,default 11200 as port")
-	prometheusPort := flag.Int("prometheus-port", config.Config.Prometheus.OrganizationPrometheusPort[0], "organizationPrometheusPort default listen port")
+	prometheusPort := flag.Int("prometheus_port", config.Config.Prometheus.OrganizationPrometheusPort[0], "organizationPrometheusPort default listen port")
 	flag.Parse()
 	fmt.Println("start organization rpc server, port: ", *rpcPort)
 	rpcServer := organization.NewServer(*rpcPort)

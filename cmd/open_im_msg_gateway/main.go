@@ -21,7 +21,7 @@ func main() {
 	flag.Parse()
 	var wg sync.WaitGroup
 	wg.Add(1)
-	fmt.Println("start rpc/msg_gateway server, port: ", *rpcPort, *wsPort)
+	fmt.Println("start rpc/msg_gateway server, port: ", *rpcPort, *wsPort, *prometheusPort)
 	gate.Init(*rpcPort, *wsPort)
 	gate.Run(*prometheusPort)
 	wg.Wait()

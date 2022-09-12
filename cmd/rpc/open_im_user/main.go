@@ -11,7 +11,7 @@ import (
 func main() {
 	defaultPorts := config.Config.RpcPort.OpenImUserPort
 	rpcPort := flag.Int("port", defaultPorts[0], "rpc listening port")
-	prometheusPort := flag.Int("prometheus-port", config.Config.Prometheus.UserPrometheusPort[0], "userPrometheusPort default listen port")
+	prometheusPort := flag.Int("prometheus_port", config.Config.Prometheus.UserPrometheusPort[0], "userPrometheusPort default listen port")
 	flag.Parse()
 	fmt.Println("start user rpc server, port: ", *rpcPort)
 	rpcServer := user.NewUserServer(*rpcPort)
