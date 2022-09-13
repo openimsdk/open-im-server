@@ -14,6 +14,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/statistics"
 	"fmt"
 )
@@ -46,7 +47,13 @@ func init() {
 	}
 }
 
-func Run() {
+func Run(promethuesPort int) {
 	go rpcServer.run()
 	go pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&pushCh)
+	go func() {
+		err := promePkg.StartPromeSrv(promethuesPort)
+		if err != nil {
+			panic(err)
+		}
+	}()
 }

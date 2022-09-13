@@ -11,6 +11,8 @@ import (
 	"Open_IM/internal/demo/register"
 	"Open_IM/pkg/common/config"
 
+	promePkg "Open_IM/pkg/common/prometheus"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +20,7 @@ func NewGinRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	baseRouter := gin.Default()
 	if config.Config.Prometheus.Enable {
-		baseRouter.GET("/metrics", prometheusHandler())
+		baseRouter.GET("/metrics", promePkg.PrometheusHandler())
 	}
 	router := baseRouter.Group("/cms")
 	router.Use(middleware.CorsHandler())

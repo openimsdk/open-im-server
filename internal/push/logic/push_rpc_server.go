@@ -5,13 +5,14 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	"Open_IM/pkg/proto/push"
+	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"google.golang.org/grpc"
 )
 
 type RPCServer struct {

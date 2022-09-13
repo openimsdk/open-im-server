@@ -13,13 +13,75 @@ scrape_configs:
     - job_name: 'openIM-server'
       metrics_path: /metrics
       static_configs:
+      - targets: ['localhost:10002']
+        labels:
+          group: 'api'
+
       - targets: ['localhost:10006']
         labels:
           group: 'cms-api'
-      - targets: ['localhost:21400']
+          
+
+      - targets: ['localhost:20110']
+        labels:
+          group: 'user'
+
+      - targets: ['localhost:20120']
+        labels:
+          group: 'friend'
+
+      - targets: ['localhost:20130']
+        labels:
+          group: 'message'
+
+      - targets: ['localhost:20140']
+        labels:
+          group: 'msg-gateway'    
+
+      - targets: ['localhost:20150']
+        labels:
+          group: 'group'
+
+      - targets: ['localhost:20160']
+        labels:
+          group: 'auth'
+
+      - targets: ['localhost:20170']
+        labels:
+          group: 'push'
+
+      - targets: ['localhost:20120']
+        labels:
+          group: 'friend'    
+
+      - targets: ['localhost:20200']
+        labels:
+          group: 'admin-cms' 
+      
+      - targets: ['localhost:20120']
+        labels:
+          group: 'office' 
+      
+      - targets: ['localhost:20220']
+        labels:
+          group: 'organization' 
+      
+      - targets: ['localhost:20230']
+        labels:
+          group: 'conversation' 
+      
+      - targets: ['localhost:20240']
+        labels:
+          group: 'cache' 
+      
+      - targets: ['localhost:21400', 'localhost:21401', 'localhost:21402', 'localhost:21403']
         labels:
           group: 'msg-transfer'
+       
+ 
 
+
+      
 
     - job_name: 'node'  
       scrape_interval: 8s

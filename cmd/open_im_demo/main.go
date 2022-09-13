@@ -13,6 +13,8 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 
+	promePkg "Open_IM/pkg/common/prometheus"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,10 +23,11 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
 	gin.DefaultWriter = io.MultiWriter(f)
-
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
-
+	if config.Config.Prometheus.Enable {
+		r.GET("/metrics", promePkg.PrometheusHandler())
+	}
 	authRouterGroup := r.Group("/demo")
 	{
 		authRouterGroup.POST("/code", register.SendVerificationCode)
