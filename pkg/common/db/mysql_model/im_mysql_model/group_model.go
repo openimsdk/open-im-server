@@ -53,11 +53,16 @@ type GroupWithNum struct {
 	MemberCount int `gorm:"column:num"`
 }
 
-func GetGroupsByName(groupName string, pageNumber, showNumber int32) ([]GroupWithNum, error) {
+func GetGroupsByName(groupName string, pageNumber, showNumber int32) ([]GroupWithNum, int64, error) {
 	var groups []GroupWithNum
-	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Select("groups.*, (select count(*) from group_members where group_members.group_id=groups.group_id) as num").
-		Where(" name like ? and status != ?", fmt.Sprintf("%%%s%%", groupName), constant.GroupStatusDismissed).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groups).Error
-	return groups, err
+	var count int64
+	sql := db.DB.MysqlDB.DefaultGormDB().Table("groups").Select("groups.*, (select count(*) from group_members where group_members.group_id=groups.group_id) as num").
+		Where(" name like ? and status != ?", fmt.Sprintf("%%%s%%", groupName), constant.GroupStatusDismissed)
+	if err := sql.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+	err := sql.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groups).Error
+	return groups, count, err
 }
 
 func GetGroups(pageNumber, showNumber int) ([]GroupWithNum, error) {
