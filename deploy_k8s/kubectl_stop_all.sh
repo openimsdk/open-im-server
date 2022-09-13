@@ -10,8 +10,6 @@ service=(
   group
   auth
   admin-cms
-  message-cms
-  statistics
   office
   organization
   conversation
