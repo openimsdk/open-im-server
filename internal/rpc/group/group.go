@@ -1373,6 +1373,7 @@ func (s *groupServer) GetGroups(_ context.Context, req *pbGroup.GetGroupsReq) (*
 			return resp, nil
 		}
 		groupInfo.MemberCount = uint32(memberNum)
+		groupInfo.CreateTime = uint32(groupInfoDB.CreateTime.Unix())
 		resp.CMSGroups = append(resp.CMSGroups, &pbGroup.CMSGroup{GroupInfo: groupInfo, GroupOwnerUserName: groupMember.Nickname, GroupOwnerUserID: groupMember.UserID})
 	} else {
 		groups, count, err := imdb.GetGroupsByName(req.GroupName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
