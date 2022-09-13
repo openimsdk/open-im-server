@@ -33,6 +33,13 @@ func GetGroupMemberUserIDList(groupID string, operationID string) ([]string, err
 
 	CacheGroupMtx.Lock()
 	defer CacheGroupMtx.Unlock()
+
+	if groupHashRemote == 0 {
+		log.Info(operationID, "groupHashRemote == 0  ", groupID)
+		delete(CacheGroupMemberUserIDList, groupID)
+		return []string{}, nil
+	}
+
 	groupInLocalCache, ok := CacheGroupMemberUserIDList[groupID]
 	if ok && groupInLocalCache.MemberListHash == groupHashRemote {
 		log.Debug(operationID, "in local cache ", groupID)
