@@ -46,13 +46,6 @@ func NewUserRegisterCounter() {
 	})
 }
 
-func NewUserRegisterCounter() {
-	UserRegisterCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "user_register",
-		Help: "The number of user register",
-	})
-}
-
 func NewSeqGetSuccessCounter() {
 	SeqGetSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "seq_get_success",
