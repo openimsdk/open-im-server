@@ -394,6 +394,13 @@ func DelJoinedSuperGroupIDListFromCache(userID string) error {
 
 func GetGroupMemberListHashFromCache(groupID string) (uint64, error) {
 	generateHash := func() (string, error) {
+		groupInfo, err := GetGroupInfoFromCache(groupID)
+		if err != nil {
+			return "0", utils.Wrap(err, "GetGroupInfoFromCache failed")
+		}
+		if groupInfo.Status == constant.GroupStatusDismissed {
+			return "0", nil
+		}
 		groupMemberIDList, err := GetGroupMemberIDListFromCache(groupID)
 		if err != nil {
 			return "", utils.Wrap(err, "GetGroupMemberIDListFromCache failed")
@@ -408,6 +415,9 @@ func GetGroupMemberListHashFromCache(groupID string) (uint64, error) {
 		return strconv.Itoa(int(bi.Uint64())), nil
 	}
 	hashCode, err := db.DB.Rc.Fetch(groupMemberListHashCache+groupID, time.Second*30*60, generateHash)
+	if err != nil {
+		return 0, utils.Wrap(err, "fetch failed")
+	}
 	hashCodeUint64, err := strconv.Atoi(hashCode)
 	return uint64(hashCodeUint64), err
 }
