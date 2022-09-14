@@ -41,6 +41,7 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @BasePath /
 func main() {
+	fmt.Println("api start ")
 	log.NewPrivateLog(constant.LogFileName)
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
