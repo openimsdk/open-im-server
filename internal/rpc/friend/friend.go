@@ -6,8 +6,9 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
-	"Open_IM/pkg/common/db/rocks_cache"
+	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -60,7 +61,11 @@ func (s *friendServer) Run() {
 	log.NewInfo("0", "listen ok ", address)
 	defer listener.Close()
 	//grpc server
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		grpcOpts = append(grpcOpts, promePkg.UnaryServerInterceptorProme)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	//User friend related services register to etcd
 	pbFriend.RegisterFriendServer(srv, s)

@@ -8,6 +8,7 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -68,6 +69,10 @@ func (s *groupServer) Run() {
 	var options = []grpc.ServerOption{
 		grpc.MaxRecvMsgSize(recvSize),
 		grpc.MaxSendMsgSize(sendSize),
+	}
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		grpcOpts = append(grpcOpts, promePkg.UnaryServerInterceptorProme)
 	}
 	srv := grpc.NewServer(options...)
 	defer srv.GracefulStop()

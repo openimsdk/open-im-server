@@ -52,6 +52,10 @@ func main() {
 	log.Info("load config: ", config.Config)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if config.Config.Prometheus.Enable {
+		promePkg.NewApiRequestCounter()
+		promePkg.NewApiRequestFailedCounter()
+		promePkg.NewApiRequestSuccessCounter()
+		r.Use(promePkg.PromeTheusMiddleware)
 		r.GET("/metrics", promePkg.PrometheusHandler())
 	}
 	// user routing group, which handles user registration and login services

@@ -126,8 +126,11 @@ func (rpc *rpcAuth) Run() {
 		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
 	}
 	log.NewInfo(operationID, "listen network success, ", address, listener)
-	//grpc server
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		grpcOpts = append(grpcOpts, promePkg.UnaryServerInterceptorProme)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 
 	//service registers with etcd

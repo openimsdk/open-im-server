@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
@@ -12,10 +13,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"github.com/golang/protobuf/proto"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 
 	"github.com/gorilla/websocket"
 	"google.golang.org/grpc"
@@ -52,7 +54,11 @@ func (r *RPCServer) run() {
 		panic("listening err:" + err.Error() + r.rpcRegisterName)
 	}
 	defer listener.Close()
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		grpcOpts = append(grpcOpts, promePkg.UnaryServerInterceptorProme)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	pbRelay.RegisterRelayServer(srv, r)
 

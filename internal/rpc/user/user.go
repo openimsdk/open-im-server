@@ -8,6 +8,7 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbConversation "Open_IM/pkg/proto/conversation"
@@ -61,7 +62,11 @@ func (s *userServer) Run() {
 	log.NewInfo("0", "listen network success, address ", address, listener)
 	defer listener.Close()
 	//grpc server
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		grpcOpts = append(grpcOpts, promePkg.UnaryServerInterceptorProme)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbUser.RegisterUserServer(srv, s)
