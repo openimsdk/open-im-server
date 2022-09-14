@@ -9,10 +9,18 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"google.golang.org/grpc"
+)
+
+var (
+	sendMsgSuccessCounter prometheus.Counter
+	sendMsgFailedCounter  prometheus.Counter
 )
 
 type rpcChat struct {
@@ -44,6 +52,17 @@ func NewRpcChatServer(port int) *rpcChat {
 	//rc.offlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschatOffline.Addr, config.Config.Kafka.Ws2mschatOffline.Topic)
 	rc.delMsgCh = make(chan deleteMsg, 1000)
 	return &rc
+}
+
+func (rpc *rpcChat) initPrometheus() {
+	sendMsgSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "send_msg_success",
+		Help: "The number of send msg success",
+	})
+	sendMsgFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "send_msg_failed",
+		Help: "The number of send msg failed",
+	})
 }
 
 func (rpc *rpcChat) Run() {
@@ -78,6 +97,9 @@ func (rpc *rpcChat) Run() {
 		panic(utils.Wrap(err, "register chat module  rpc to etcd err"))
 	}
 	go rpc.runCh()
+	if config.Config.Prometheus.Enable {
+		rpc.initPrometheus()
+	}
 	err = srv.Serve(listener)
 	if err != nil {
 		log.Error("", "rpc rpcChat failed ", err.Error())

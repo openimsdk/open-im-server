@@ -12,11 +12,9 @@ import (
 )
 
 func init() {
-	//init managers
 	for k, v := range config.Config.Manager.AppManagerUid {
-		user, err := GetUserByUserID(v)
+		_, err := GetUserByUserID(v)
 		if err != nil {
-			fmt.Println("GetUserByUserID failed ", err.Error(), v, user)
 		} else {
 			continue
 		}
@@ -30,9 +28,10 @@ func init() {
 		appMgr.AppMangerLevel = constant.AppAdmin
 		err = UserRegister(appMgr)
 		if err != nil {
-			fmt.Println("AppManager insert error", err.Error(), appMgr, "time: ", appMgr.Birth.Unix())
+			fmt.Println("AppManager insert error ", err.Error(), appMgr)
+		} else {
+			fmt.Println("AppManager insert ", appMgr)
 		}
-
 	}
 }
 

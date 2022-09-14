@@ -18,7 +18,8 @@ import (
 
 func NewGinRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
-	baseRouter := gin.Default()
+	baseRouter := gin.New()
+	baseRouter.Use()
 	if config.Config.Prometheus.Enable {
 		baseRouter.GET("/metrics", promePkg.PrometheusHandler())
 	}

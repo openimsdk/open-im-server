@@ -44,6 +44,7 @@ func (pc *PersistentConsumerHandler) Init() {
 }
 
 func (pc *PersistentConsumerHandler) initPrometheus() {
+	// counter
 	msgInsertMysqlCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "insert_mysql_msg_total",
 		Help: "The total number of msg insert mysql events",
@@ -52,6 +53,17 @@ func (pc *PersistentConsumerHandler) initPrometheus() {
 		Name: "insert_mysql_failed_msg_total",
 		Help: "The total number of msg insert mysql events",
 	})
+
+	// 启动计时器
+	// requestDurations := prometheus.NewHistogram(prometheus.HistogramOpts{
+	// 	Name:    "http_request_duration_seconds",
+	// 	Help:    "A histogram of the HTTP request durations in seconds.",
+	// 	Buckets: []float64{0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10},
+	// })
+	// 开始
+	// timer := prometheus.NewTimer(requestDurations)
+	// 停止
+	// timer.ObserveDuration()
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
@@ -85,7 +97,9 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
 			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
 				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
-				msgInsertFailedMysqlCounter.Inc()
+				if config.Config.Prometheus.Enable {
+					msgInsertFailedMysqlCounter.Inc()
+				}
 				return
 			}
 			if config.Config.Prometheus.Enable {

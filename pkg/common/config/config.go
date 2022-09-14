@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -100,6 +99,8 @@ type config struct {
 		DBMaxOpenConns int      `yaml:"dbMaxOpenConns"`
 		DBMaxIdleConns int      `yaml:"dbMaxIdleConns"`
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
+		LogLevel       int      `yaml:"logLevel"`
+		SlowThreshold  int      `yaml:"slowThreshold"`
 	}
 	Mongo struct {
 		DBUri                string `yaml:"dbUri"`
@@ -545,7 +546,6 @@ type PDefaultTips struct {
 
 func init() {
 	cfgName := os.Getenv("CONFIG_NAME")
-	fmt.Println("GET IM DEFAULT CONFIG PATH :", Root, "ENV PATH:", cfgName)
 	if len(cfgName) != 0 {
 		bytes, err := ioutil.ReadFile(filepath.Join(cfgName, "config", "config.yaml"))
 		if err != nil {
