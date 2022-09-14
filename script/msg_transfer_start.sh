@@ -25,7 +25,7 @@ for ((i = 0; i < ${msg_transfer_service_num}; i++)); do
       prome_port=${prome_ports[$i]}
       cmd="nohup ./${msg_transfer_name}"
       if [ $prome_port != "" ]; then
-        cmd=$cmd+" -prometheus_port $prome_port"
+        cmd="$cmd -prometheus_port $prome_port"
       fi
       $cmd >>../logs/openIM.log 2>&1 &
 done
