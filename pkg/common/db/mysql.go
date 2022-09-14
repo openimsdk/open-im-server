@@ -31,25 +31,26 @@ func initMysqlDB() {
 	var err1 error
 	db, err := gorm.Open(mysql.Open(dsn), nil)
 	if err != nil {
-		fmt.Println("0", "Open failed ", err.Error(), dsn)
+		fmt.Println("Open failed ", err.Error(), dsn)
 	}
 	if err != nil {
 		time.Sleep(time.Duration(30) * time.Second)
 		db, err1 = gorm.Open(mysql.Open(dsn), nil)
 		if err1 != nil {
-			fmt.Println("0", "Open failed ", err1.Error(), dsn)
+			fmt.Println("Open failed ", err1.Error(), dsn)
 			panic(err1.Error())
 		}
 	}
-	fmt.Println("init db", db)
+
 	//Check the database and table during initialization
 	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", config.Config.Mysql.DBDatabaseName)
+	fmt.Println("exec sql: ", sql, " begin")
 	err = db.Exec(sql).Error
 	if err != nil {
-		fmt.Println("0", "Exec failed ", err.Error(), sql)
+		fmt.Println("Exec failed ", err.Error(), sql)
 		panic(err.Error())
 	}
-	fmt.Println(sql)
+	fmt.Println("exec sql: ", sql, " end")
 	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
 
@@ -66,20 +67,20 @@ func initMysqlDB() {
 		Logger: newLogger,
 	})
 	if err != nil {
-		fmt.Println("0", "Open failed ", err.Error(), dsn)
+		fmt.Println("Open failed ", err.Error(), dsn)
 		panic(err.Error())
 	}
-	fmt.Println("init db2", db)
+
 	sqlDB, err := db.DB()
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Println("init sqlDB", sqlDB)
+
 	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.Config.Mysql.DBMaxLifeTime))
 	sqlDB.SetMaxOpenConns(config.Config.Mysql.DBMaxOpenConns)
 	sqlDB.SetMaxIdleConns(config.Config.Mysql.DBMaxIdleConns)
 
-	fmt.Println("open db ok ", dsn)
+	fmt.Println("open mysql ok ", dsn)
 	db.AutoMigrate(
 		&Register{},
 		&Friend{},
