@@ -24,6 +24,6 @@ func main() {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
 	address = config.Config.CmsApi.ListenIP + ":" + strconv.Itoa(*ginPort)
-	fmt.Println("start cms api server, address: ", address)
+	fmt.Println("start cms api server, address: ", address, "\n")
 	router.Run(address)
 }

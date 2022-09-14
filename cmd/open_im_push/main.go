@@ -18,7 +18,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	log.NewPrivateLog(constant.LogFileName)
-	fmt.Println("start push rpc server, port: ", *rpcPort)
+	fmt.Println("start push rpc server, port: ", *rpcPort, "\n")
 	logic.Init(*rpcPort)
 	logic.Run(*prometheusPort)
 	wg.Wait()

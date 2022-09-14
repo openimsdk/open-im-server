@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 	log.NewPrivateLog(constant.LogFileName)
 	logic.Init()
-	fmt.Println("start msg_transfer server")
+	fmt.Println("start msg_transfer server \n")
 	logic.Run(*prometheusPort)
 	wg.Wait()
 }
