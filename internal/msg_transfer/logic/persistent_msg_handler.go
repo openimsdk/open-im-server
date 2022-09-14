@@ -54,12 +54,16 @@ func (pc *PersistentConsumerHandler) initPrometheus() {
 		Help: "The total number of msg insert mysql events",
 	})
 
-	// msgInsertMysqlEvery := prometheus.NewHistogram(prometheus.HistogramOpts{
+	// 启动计时器
+	// requestDurations := prometheus.NewHistogram(prometheus.HistogramOpts{
 	// 	Name:    "http_request_duration_seconds",
 	// 	Help:    "A histogram of the HTTP request durations in seconds.",
-	// 	Buckets: []float64{10, 20, 0.25, 0.5, 1, 2.5, 5, 10},
+	// 	Buckets: []float64{0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10},
 	// })
-
+	// 开始
+	// timer := prometheus.NewTimer(requestDurations)
+	// 停止
+	// timer.ObserveDuration()
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
