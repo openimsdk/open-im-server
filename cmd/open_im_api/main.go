@@ -41,15 +41,14 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @BasePath /
 func main() {
-	fmt.Println("api start ")
+	log.NewPrivateLog(constant.LogFileName)
 	gin.SetMode(gin.ReleaseMode)
 	f, _ := os.Create("../logs/api.log")
 	gin.DefaultWriter = io.MultiWriter(f)
 	//	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
-	fmt.Println("load config: ", config.Config)
-	log.NewPrivateLog(constant.LogFileName)
+	log.Info("load config: ", config.Config)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if config.Config.Prometheus.Enable {
 		r.GET("/metrics", promePkg.PrometheusHandler())
