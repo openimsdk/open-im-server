@@ -9,6 +9,11 @@ var (
 	// user rpc
 	UserLoginCounter    prometheus.Counter
 	UserRegisterCounter prometheus.Counter
+
+	SeqGetSuccessCounter prometheus.Counter
+	SeqGetFailedCounter  prometheus.Counter
+	SeqSetSuccessCounter prometheus.Counter
+	SeqSetFailedCounter  prometheus.Counter
 )
 
 func NewUserLoginCounter() {
@@ -18,9 +23,28 @@ func NewUserLoginCounter() {
 	})
 }
 
-func NewUserRegisterCounter() {
-	UserRegisterCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "user_register",
-		Help: "The number of user register",
+func NewSeqGetSuccessCounter() {
+	SeqGetSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "seq_get_success",
+		Help: "The number of successful get seq",
+	})
+}
+func NewSeqGetFailedCounter() {
+	SeqGetFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "seq_get_failed",
+		Help: "The number of failed get seq",
+	})
+}
+
+func NewSeqSetSuccessCounter() {
+	SeqSetSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "seq_set_success",
+		Help: "The number of successful set seq",
+	})
+}
+func NewSeqSetFailedCounter() {
+	SeqSetFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "seq_set_failed",
+		Help: "The number of failed set seq",
 	})
 }
