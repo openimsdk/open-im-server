@@ -14,7 +14,7 @@ func main() {
 	rpcPort := flag.Int("port", defaultPorts[0], "rpc listening port")
 	prometheusPort := flag.Int("prometheus_port", config.Config.Prometheus.MessagePrometheusPort[0], "msgPrometheusPort default listen port")
 	flag.Parse()
-	fmt.Println("start msg rpc server, port: ", *rpcPort, "version: ", constant.CurrentVersion, "\n")
+	fmt.Println("start msg rpc server, port: ", *rpcPort, "OpenIM version: ", constant.CurrentVersion, "\n")
 	rpcServer := msg.NewRpcChatServer(*rpcPort)
 	go func() {
 		err := promePkg.StartPromeSrv(*prometheusPort)
