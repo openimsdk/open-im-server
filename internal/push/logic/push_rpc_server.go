@@ -45,7 +45,7 @@ func (r *RPCServer) run() {
 	defer listener.Close()
 	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
-		grpcOpts = append(grpcOpts, promePkg.UnaryServerInterceptorProme)
+		grpcOpts = append(grpcOpts, grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme))
 	}
 	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
