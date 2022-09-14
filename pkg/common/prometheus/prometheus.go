@@ -51,12 +51,17 @@ func PromeTheusMiddleware(c *gin.Context) {
 
 func PromeInc(counter prometheus.Counter) {
 	if config.Config.Prometheus.Enable {
-		counter.Inc()
+		if counter != nil {
+			counter.Inc()
+		}
+
 	}
 }
 
 func PromeAdd(counter prometheus.Counter, add int) {
 	if config.Config.Prometheus.Enable {
-		counter.Add(float64(add))
+		if counter != nil {
+			counter.Add(float64(add))
+		}
 	}
 }

@@ -25,13 +25,24 @@ var (
 	GrpcRequestSuccessCounter prometheus.Counter
 	GrpcRequestFailedCounter  prometheus.Counter
 
-	SendMsgCounter prometheus.Counter
+	SendMsgCounter               prometheus.Counter
+	MsgInsertRedisSuccessCounter prometheus.Counter
+	MsgInsertRedisFailedCounter  prometheus.Counter
+
+	MsgInsertMongoSuccessCounter prometheus.Counter
+	MsgInsertMongoFailedCounter  prometheus.Counter
 )
 
 func NewUserLoginCounter() {
 	UserLoginCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "user_login",
 		Help: "The number of user login",
+	})
+}
+func NewUserRegisterCounter() {
+	UserRegisterCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "user_register",
+		Help: "The number of user register",
 	})
 }
 
@@ -114,5 +125,33 @@ func NewSendMsgCount() {
 	SendMsgCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "send_msg",
 		Help: "The number of send msg",
+	})
+}
+
+func NewMsgInsertRedisSuccessCounter() {
+	MsgInsertRedisSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_insert_redis_success",
+		Help: "The number of successful insert msg to redis",
+	})
+}
+
+func NewMsgInsertRedisFailedCounter() {
+	MsgInsertRedisFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_insert_redis_failed",
+		Help: "The number of failed insert msg to redis",
+	})
+}
+
+func NewMsgInsertMongoSuccessCounter() {
+	MsgInsertMongoSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_insert_mongo_success",
+		Help: "The number of successful insert msg to mongo",
+	})
+}
+
+func NewMsgInsertMongoFailedCounter() {
+	MsgInsertMongoFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_insert_mongo_failed",
+		Help: "The number of failed insert msg to mongo",
 	})
 }
