@@ -99,6 +99,8 @@ type config struct {
 		DBMaxOpenConns int      `yaml:"dbMaxOpenConns"`
 		DBMaxIdleConns int      `yaml:"dbMaxIdleConns"`
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
+		LogLevel       int      `yaml:"logLevel"`
+		SlowThreshold  int      `yaml:"slowThreshold"`
 	}
 	Mongo struct {
 		DBUri                string `yaml:"dbUri"`

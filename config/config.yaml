@@ -20,6 +20,8 @@ mysql:
   dbMaxOpenConns: 100
   dbMaxIdleConns: 10
   dbMaxLifeTime: 5
+  logLevel: 1 #1=slient 2=error 3=warn 4=info
+  slowThreshold: 500
 
 mongo:
   dbUri: ""#当dbUri值不为空则直接使用该值

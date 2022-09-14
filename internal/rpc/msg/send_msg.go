@@ -30,7 +30,9 @@ import (
 //When the number of group members is greater than this value，Online users will be sent first，Guaranteed service availability
 const GroupMemberNum = 500
 
-var ExcludeContentType = []int{constant.HasReadReceipt, constant.GroupHasReadReceipt}
+var (
+	ExcludeContentType = []int{constant.HasReadReceipt, constant.GroupHasReadReceipt}
+)
 
 type MsgCallBackReq struct {
 	SendID       string `json:"sendID"`
