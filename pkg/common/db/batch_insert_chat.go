@@ -15,10 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (d *DataBases) BatchDeleteChat2DB(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string) {
-
-}
-
 func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataToMQ, operationID string, currentMaxSeq uint64) error {
 	newTime := getCurrentTimestampByMill()
 	if len(msgList) > GetSingleGocMsgNum() {
@@ -86,10 +82,13 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 				sChat.Msg = msgListToMongo
 				log.NewDebug(operationID, "filter ", seqUid, "list ", msgListToMongo)
 				if _, err = c.InsertOne(ctx, &sChat); err != nil {
+					promePkg.PromeInc(promePkg.MsgInsertMongoFailedCounter)
 					log.NewError(operationID, "InsertOne failed", filter, err.Error(), sChat)
 					return utils.Wrap(err, "")
 				}
+				promePkg.PromeInc(promePkg.MsgInsertMongoSuccessCounter)
 			} else {
+				promePkg.PromeInc(promePkg.MsgInsertMongoFailedCounter)
 				log.Error(operationID, "FindOneAndUpdate failed ", err.Error(), filter)
 				return utils.Wrap(err, "")
 			}
@@ -102,9 +101,11 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 		sChat.Msg = msgListToMongoNext
 		log.NewDebug(operationID, "filter ", seqUidNext, "list ", msgListToMongoNext, "userID: ", userID)
 		if _, err = c.InsertOne(ctx, &sChat); err != nil {
+			promePkg.PromeInc(promePkg.MsgInsertMongoFailedCounter)
 			log.NewError(operationID, "InsertOne failed", filter, err.Error(), sChat)
 			return utils.Wrap(err, "")
 		}
+		promePkg.PromeInc(promePkg.MsgInsertMongoSuccessCounter)
 	}
 	log.Debug(operationID, "batch mgo  cost time ", getCurrentTimestampByMill()-newTime, userID, len(msgList))
 	return nil
@@ -280,9 +281,3 @@ func (d *DataBases) BatchInsertChat2Cache(insertID string, msgList []*pbMsg.MsgD
 //func (d *DataBases)setMessageToCache(msgList []*pbMsg.MsgDataToMQ, uid string) (err error) {
 //
 //}
-
-func (d *DataBases) GetFromCacheAndInsertDB(msgUserIDPrefix string) {
-	//get value from redis
-
-	//batch insert to db
-}

@@ -32,16 +32,18 @@ func (pc *PersistentConsumerHandler) Init() {
 	pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql)
-	pc.initPrometheus()
+
 }
 
-func (pc *PersistentConsumerHandler) initPrometheus() {
+func initPrometheus() {
 	promePkg.NewSeqGetSuccessCounter()
 	promePkg.NewSeqGetFailedCounter()
 	promePkg.NewSeqSetSuccessCounter()
 	promePkg.NewSeqSetFailedCounter()
 	promePkg.NewMsgInsertRedisSuccessCounter()
 	promePkg.NewMsgInsertRedisFailedCounter()
+	promePkg.NewMsgInsertMongoSuccessCounter()
+	promePkg.NewMsgInsertMongoFailedCounter()
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
