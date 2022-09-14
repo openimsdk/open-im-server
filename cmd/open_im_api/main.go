@@ -227,7 +227,7 @@ func main() {
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
-	fmt.Println("start api server, address: \n", address)
+	fmt.Println("start api server, address: ", address, "\n")
 	err := r.Run(address)
 	if err != nil {
 		log.Error("", "api run failed ", address, err.Error())
