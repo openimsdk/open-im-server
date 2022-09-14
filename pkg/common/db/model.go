@@ -77,7 +77,7 @@ func init() {
 			panic(err1.Error())
 		}
 	}
-	fmt.Println("0", utils.GetSelfFuncName(), "mongo driver client init success: ", uri)
+	fmt.Println("mongo driver client init success: ", uri)
 	// mongodb create index
 	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
 		fmt.Println("send_id", "-send_time", "index create failed", err.Error())
@@ -100,7 +100,7 @@ func init() {
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
 		fmt.Println("tag_id", "index create failed", err.Error())
 	}
-	fmt.Println("create index success")
+	fmt.Println("createMongoIndex success")
 	DB.mongoClient = mongoClient
 
 	// redis pool init

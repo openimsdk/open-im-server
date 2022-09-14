@@ -48,7 +48,7 @@ func main() {
 	//	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 	r.Use(utils.CorsHandler())
-	log.Info("load   config: ", config.Config)
+	fmt.Println("load config: ", config.Config)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if config.Config.Prometheus.Enable {
 		r.GET("/metrics", promePkg.PrometheusHandler())
@@ -226,10 +226,10 @@ func main() {
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
-	address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
-	fmt.Println("start api server, address: ", address)
+	fmt.Println("start api server, address: \n", address)
 	err := r.Run(address)
 	if err != nil {
-		log.Error("", "api run failed ", *ginPort, err.Error())
+		log.Error("", "api run failed ", address, err.Error())
+		panic("api start failed " + err.Error())
 	}
 }
