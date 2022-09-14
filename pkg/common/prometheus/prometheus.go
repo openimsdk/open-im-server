@@ -31,3 +31,9 @@ func PromeInc(counter prometheus.Counter) {
 		counter.Inc()
 	}
 }
+
+func PromeAdd(counter prometheus.Counter, add int) {
+	if config.Config.Prometheus.Enable {
+		counter.Add(float64(add))
+	}
+}
