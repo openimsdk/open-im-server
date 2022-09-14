@@ -41,15 +41,16 @@ func initMysqlDB() {
 			panic(err1.Error())
 		}
 	}
-	fmt.Println("init db", db)
+
 	//Check the database and table during initialization
 	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", config.Config.Mysql.DBDatabaseName)
+	fmt.Println("exec sql: ", sql, " begin")
 	err = db.Exec(sql).Error
 	if err != nil {
 		fmt.Println("Exec failed ", err.Error(), sql)
 		panic(err.Error())
 	}
-
+	fmt.Println("exec sql: ", sql, " end")
 	dsn = fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], config.Config.Mysql.DBDatabaseName)
 
