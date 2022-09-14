@@ -205,7 +205,7 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 	return seqMsg, failedSeqList, errResult
 }
 
-func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
+func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) (error, int) {
 	ctx := context.Background()
 	pipe := d.RDB.Pipeline()
 	var failedList []pbChat.MsgDataToMQ
@@ -225,10 +225,10 @@ func (d *DataBases) SetMessageToCache(msgList []*pbChat.MsgDataToMQ, uid string,
 		}
 	}
 	if len(failedList) != 0 {
-		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, operationID))
+		return errors.New(fmt.Sprintf("set msg to cache failed, failed lists: %q,%s", failedList, operationID)), len(failedList)
 	}
 	_, err := pipe.Exec(ctx)
-	return err
+	return err, 0
 }
 func (d *DataBases) DeleteMessageFromCache(msgList []*pbChat.MsgDataToMQ, uid string, operationID string) error {
 	ctx := context.Background()

@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	// user rpc
 	UserLoginCounter    prometheus.Counter
 	UserRegisterCounter prometheus.Counter
 
@@ -14,12 +13,21 @@ var (
 	SeqGetFailedCounter  prometheus.Counter
 	SeqSetSuccessCounter prometheus.Counter
 	SeqSetFailedCounter  prometheus.Counter
+
+	MsgInsertRedisSuccessCounter prometheus.Counter
+	MsgInsertRedisFailedCounter  prometheus.Counter
 )
 
 func NewUserLoginCounter() {
 	UserLoginCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "user_login",
 		Help: "The number of user login",
+	})
+}
+func NewUserRegisterCounter() {
+	UserRegisterCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "user_register",
+		Help: "The number of user register",
 	})
 }
 
@@ -46,5 +54,19 @@ func NewSeqSetFailedCounter() {
 	SeqSetFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "seq_set_failed",
 		Help: "The number of failed set seq",
+	})
+}
+
+func NewMsgInsertRedisSuccessCounter() {
+	MsgInsertRedisSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_insert_redis_success",
+		Help: "The number of successful insert msg to redis",
+	})
+}
+
+func NewMsgInsertRedisFailedCounter() {
+	MsgInsertRedisFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_insert_redis_failed",
+		Help: "The number of failed insert msg to redis",
 	})
 }

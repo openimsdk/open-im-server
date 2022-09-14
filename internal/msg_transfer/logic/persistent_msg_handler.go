@@ -18,13 +18,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-)
-
-var (
-	msgInsertMysqlCounter       prometheus.Counter
-	msgInsertFailedMysqlCounter prometheus.Counter
+	promePkg "Open_IM/pkg/common/prometheus"
 )
 
 type PersistentConsumerHandler struct {
@@ -38,32 +32,16 @@ func (pc *PersistentConsumerHandler) Init() {
 	pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql)
-	if config.Config.Prometheus.Enable {
-		pc.initPrometheus()
-	}
+	pc.initPrometheus()
 }
 
 func (pc *PersistentConsumerHandler) initPrometheus() {
-	// counter
-	msgInsertMysqlCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "insert_mysql_msg_total",
-		Help: "The total number of msg insert mysql events",
-	})
-	msgInsertFailedMysqlCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "insert_mysql_failed_msg_total",
-		Help: "The total number of msg insert mysql events",
-	})
-
-	// 启动计时器
-	// requestDurations := prometheus.NewHistogram(prometheus.HistogramOpts{
-	// 	Name:    "http_request_duration_seconds",
-	// 	Help:    "A histogram of the HTTP request durations in seconds.",
-	// 	Buckets: []float64{0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10},
-	// })
-	// 开始
-	// timer := prometheus.NewTimer(requestDurations)
-	// 停止
-	// timer.ObserveDuration()
+	promePkg.NewSeqGetSuccessCounter()
+	promePkg.NewSeqGetFailedCounter()
+	promePkg.NewSeqSetSuccessCounter()
+	promePkg.NewSeqSetFailedCounter()
+	promePkg.NewMsgInsertRedisSuccessCounter()
+	promePkg.NewMsgInsertRedisFailedCounter()
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
@@ -97,13 +75,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
 			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
 				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
-				if config.Config.Prometheus.Enable {
-					msgInsertFailedMysqlCounter.Inc()
-				}
 				return
-			}
-			if config.Config.Prometheus.Enable {
-				msgInsertMysqlCounter.Inc()
 			}
 		}
 
