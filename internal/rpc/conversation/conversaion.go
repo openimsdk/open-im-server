@@ -148,7 +148,11 @@ func syncPeerUserConversation(conversation *pbConversation.Conversation, operati
 	}
 	err = rocksCache.DelConversationFromCache(conversation.UserID, utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType))
 	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), "DelConversationFromCache failed", err.Error())
+		log.NewError(operationID, utils.GetSelfFuncName(), "DelConversationFromCache failed", err.Error(), conversation.OwnerUserID, conversation.ConversationID)
+	}
+	err = rocksCache.DelConversationFromCache(conversation.OwnerUserID, conversation.ConversationID)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), "DelConversationFromCache failed", err.Error(), conversation.OwnerUserID, conversation.ConversationID)
 	}
 	chat.ConversationSetPrivateNotification(operationID, conversation.OwnerUserID, conversation.UserID, conversation.IsPrivateChat)
 	return nil
