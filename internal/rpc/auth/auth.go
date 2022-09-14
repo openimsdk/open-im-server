@@ -17,28 +17,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-
 	"Open_IM/pkg/common/config"
 
 	"google.golang.org/grpc"
 )
 
-var (
-	userLoginCounter    prometheus.Counter
-	userRegisterCounter prometheus.Counter
-)
-
 func (rpc *rpcAuth) initPrometheus() {
-	userLoginCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "user_login",
-		Help: "The number of user login",
-	})
-	userRegisterCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "user_register",
-		Help: "The number of user register",
-	})
+	promePkg.NewUserLoginCounter()
+	promePkg.NewUserRegisterCounter()
 }
 
 func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq) (*pbAuth.UserRegisterResp, error) {
@@ -55,7 +41,7 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 		log.NewError(req.OperationID, errMsg, user)
 		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
-	promePkg.PromeInc(userRegisterCounter)
+	promePkg.PromeInc(promePkg.UserRegisterCounter)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}})
 	return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}}, nil
 }
@@ -68,7 +54,7 @@ func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbA
 		log.NewError(req.OperationID, errMsg)
 		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
-	promePkg.PromeInc(userLoginCounter)
+	promePkg.PromeInc(promePkg.UserLoginCounter)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime})
 	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }
