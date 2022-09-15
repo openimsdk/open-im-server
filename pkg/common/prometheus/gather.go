@@ -252,7 +252,7 @@ func NewMsgPullFromMongoSuccessCounter() {
 		return
 	}
 	MsgPullFromMongoSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "msg_pull_from_redis_success",
+		Name: "msg_pull_from_mongo_success",
 		Help: "The number of successful pull msg from mongo",
 	})
 }
