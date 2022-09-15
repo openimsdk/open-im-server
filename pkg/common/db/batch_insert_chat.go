@@ -135,7 +135,6 @@ func (d *DataBases) BatchInsertChat2Cache(insertID string, msgList []*pbMsg.MsgD
 		return utils.Wrap(err, ""), 0
 	}
 	promePkg.PromeInc(promePkg.SeqGetSuccessCounter)
-	promePkg.SeqGetSuccessCounter.Inc()
 
 	lastMaxSeq := currentMaxSeq
 	for _, m := range msgList {
