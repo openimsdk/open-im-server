@@ -126,6 +126,8 @@ func (rpc *rpcAuth) Run() {
 		promePkg.NewGrpcRequestCounter()
 		promePkg.NewGrpcRequestFailedCounter()
 		promePkg.NewGrpcRequestSuccessCounter()
+		promePkg.NewUserRegisterCounter()
+		promePkg.NewUserLoginCounter()
 		grpcOpts = append(grpcOpts, grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme))
 	}
 	srv := grpc.NewServer(grpcOpts...)
