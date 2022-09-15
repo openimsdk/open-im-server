@@ -34,6 +34,7 @@ var (
 	SingleChatMsgRecvSuccessCounter         prometheus.Counter
 	GroupChatMsgRecvSuccessCounter          prometheus.Counter
 	WorkSuperGroupChatMsgRecvSuccessCounter prometheus.Counter
+	OnlineUserGauge                         prometheus.Gauge
 
 	//msg-msg
 	SingleChatMsgProcessSuccessCounter         prometheus.Counter
@@ -323,6 +324,16 @@ func NewWorkSuperGroupChatMsgRecvSuccessCounter() {
 	WorkSuperGroupChatMsgRecvSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "work_super_group_chat_msg_recv_success",
 		Help: "The number of work/super group chat msg successful received",
+	})
+}
+
+func NewOnlineUserGauges() {
+	if OnlineUserGauge != nil {
+		return
+	}
+	OnlineUserGauge = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "online_user_num",
+		Help: "The number of online user num",
 	})
 }
 
