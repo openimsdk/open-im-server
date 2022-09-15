@@ -16,7 +16,7 @@ type CommDataResp struct {
 
 type KickGroupMemberReq struct {
 	GroupID          string   `json:"groupID" binding:"required"`
-	KickedUserIDList []string `json:"kickedUserIDList" binding:"required, min=1, max=100"`
+	KickedUserIDList []string `json:"kickedUserIDList" binding:"required"`
 	Reason           string   `json:"reason"`
 	OperationID      string   `json:"operationID" binding:"required"`
 }
@@ -38,7 +38,7 @@ type GetGroupMembersInfoResp struct {
 
 type InviteUserToGroupReq struct {
 	GroupID           string   `json:"groupID" binding:"required"`
-	InvitedUserIDList []string `json:"invitedUserIDList" binding:"required, min=1, max=100"`
+	InvitedUserIDList []string `json:"invitedUserIDList" binding:"required"`
 	Reason            string   `json:"reason"`
 	OperationID       string   `json:"operationID" binding:"required"`
 }
