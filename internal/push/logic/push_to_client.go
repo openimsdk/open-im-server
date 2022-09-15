@@ -21,6 +21,7 @@ import (
 	"context"
 	"strings"
 
+	promePkg "Open_IM/pkg/common/prometheus"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -140,8 +141,10 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		}
 		pushResult, err := offlinePusher.Push(UIDList, title, detailContent, pushMsg.OperationID, opts)
 		if err != nil {
+			promePkg.PromeInc(promePkg.MsgOfflinePushFailedCounter)
 			log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
 		} else {
+			promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
 			log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
 		}
 	}
@@ -261,12 +264,13 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			}
 			pushResult, err := offlinePusher.Push(needOfflinePushUserIDList, title, detailContent, pushMsg.OperationID, opts)
 			if err != nil {
+				promePkg.PromeInc(promePkg.MsgOfflinePushFailedCounter)
 				log.NewError(pushMsg.OperationID, "offline push error", pushMsg.String(), err.Error())
 			} else {
+				promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
 				log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
 			}
 		}
-
 	}
 }
 

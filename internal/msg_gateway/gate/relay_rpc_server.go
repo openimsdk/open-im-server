@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
@@ -29,6 +30,16 @@ type RPCServer struct {
 	platformList    []int
 	pushTerminal    []int
 	target          string
+}
+
+func initPrometheus() {
+	promePkg.NewMsgRecvTotalCounter()
+	promePkg.NewGetNewestSeqTotalCounter()
+	promePkg.NewPullMsgBySeqListTotalCounter()
+	promePkg.NewMsgOnlinePushSuccessCounter()
+	//promePkg.NewSingleChatMsgRecvSuccessCounter()
+	//promePkg.NewGroupChatMsgRecvSuccessCounter()
+	//promePkg.NewWorkSuperGroupChatMsgRecvSuccessCounter()
 }
 
 func (r *RPCServer) onInit(rpcPort int) {
@@ -174,6 +185,7 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *pbRe
 				resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
 				if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
 					tempT.OnlinePush = true
+					promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
 					log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
 					temp := &pbRelay.SingleMsgToUserPlatform{
 						ResultCode:     resultCode,

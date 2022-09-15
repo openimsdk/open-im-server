@@ -8,6 +8,8 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+
+	promePkg "Open_IM/pkg/common/prometheus"
 )
 
 func (rpc *rpcChat) GetMaxAndMinSeq(_ context.Context, in *open_im_sdk.GetMaxAndMinSeqReq) (*open_im_sdk.GetMaxAndMinSeqResp, error) {
@@ -48,57 +50,62 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 	log.NewInfo(in.OperationID, "rpc PullMessageBySeqList is arriving", in.String())
 	resp := new(open_im_sdk.PullMessageBySeqListResp)
 	m := make(map[string]*open_im_sdk.MsgDataList)
-	//msgList, err := commonDB.DB.GetMsgBySeqList(in.UserID, in.SeqList, in.OperationID)
 	redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(in.UserID, in.SeqList, in.OperationID)
 	if err != nil {
 		if err != go_redis.Nil {
+			promePkg.PromeAdd(promePkg.MsgPullFromRedisFailedCounter, len(failedSeqList))
 			log.Error(in.OperationID, "get message from redis exception", err.Error(), failedSeqList)
 		} else {
 			log.Debug(in.OperationID, "get message from redis is nil", failedSeqList)
 		}
 		msgList, err1 := commonDB.DB.GetMsgBySeqListMongo2(in.UserID, failedSeqList, in.OperationID)
 		if err1 != nil {
+			promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
 			log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err.Error())
 			resp.ErrCode = 201
 			resp.ErrMsg = err.Error()
 			return resp, nil
 		} else {
+			promePkg.PromeAdd(promePkg.MsgPullFromMongoSuccessCounter, len(msgList))
 			redisMsgList = append(redisMsgList, msgList...)
 			resp.List = redisMsgList
 		}
 	} else {
+		promePkg.PromeAdd(promePkg.MsgPullFromRedisSuccessCounter, len(redisMsgList))
 		resp.List = redisMsgList
 	}
+
 	for k, v := range in.GroupSeqList {
 		x := new(open_im_sdk.MsgDataList)
 		redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(k, v.SeqList, in.OperationID)
 		if err != nil {
 			if err != go_redis.Nil {
+				promePkg.PromeAdd(promePkg.MsgPullFromRedisFailedCounter, len(failedSeqList))
 				log.Error(in.OperationID, "get message from redis exception", err.Error(), failedSeqList)
 			} else {
 				log.Debug(in.OperationID, "get message from redis is nil", failedSeqList)
 			}
 			msgList, err1 := commonDB.DB.GetSuperGroupMsgBySeqListMongo(k, failedSeqList, in.OperationID)
 			if err1 != nil {
+				promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
 				log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err.Error())
 				resp.ErrCode = 201
 				resp.ErrMsg = err.Error()
 				return resp, nil
 			} else {
+				promePkg.PromeAdd(promePkg.MsgPullFromMongoSuccessCounter, len(msgList))
 				redisMsgList = append(redisMsgList, msgList...)
 				x.MsgDataList = redisMsgList
 				m[k] = x
 			}
 		} else {
+			promePkg.PromeAdd(promePkg.MsgPullFromRedisSuccessCounter, len(redisMsgList))
 			x.MsgDataList = redisMsgList
 			m[k] = x
 		}
 	}
 	resp.GroupMsgDataList = m
-	//respSingleMsgFormat = singleMsgHandleByUser(SingleMsgFormat, in.UserID)
-	//respGroupMsgFormat = groupMsgHandleByUser(GroupMsgFormat)
 	return resp, nil
-
 }
 
 type MsgFormats []*open_im_sdk.MsgData

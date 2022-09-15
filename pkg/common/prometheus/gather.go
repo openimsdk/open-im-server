@@ -9,16 +9,43 @@ var (
 	UserLoginCounter    prometheus.Counter
 	UserRegisterCounter prometheus.Counter
 
+	//seg
 	SeqGetSuccessCounter prometheus.Counter
 	SeqGetFailedCounter  prometheus.Counter
 	SeqSetSuccessCounter prometheus.Counter
 	SeqSetFailedCounter  prometheus.Counter
 
-	MsgInsertRedisSuccessCounter prometheus.Counter
-	MsgInsertRedisFailedCounter  prometheus.Counter
+	//msg-db
+	MsgInsertRedisSuccessCounter   prometheus.Counter
+	MsgInsertRedisFailedCounter    prometheus.Counter
+	MsgInsertMongoSuccessCounter   prometheus.Counter
+	MsgInsertMongoFailedCounter    prometheus.Counter
+	MsgPullFromRedisSuccessCounter prometheus.Counter
+	MsgPullFromRedisFailedCounter  prometheus.Counter
+	MsgPullFromMongoSuccessCounter prometheus.Counter
+	MsgPullFromMongoFailedCounter  prometheus.Counter
 
-	MsgInsertMongoSuccessCounter prometheus.Counter
-	MsgInsertMongoFailedCounter  prometheus.Counter
+	//msg-ws
+	MsgRecvTotalCounter          prometheus.Counter
+	GetNewestSeqTotalCounter     prometheus.Counter
+	PullMsgBySeqListTotalCounter prometheus.Counter
+
+	SingleChatMsgRecvSuccessCounter         prometheus.Counter
+	GroupChatMsgRecvSuccessCounter          prometheus.Counter
+	WorkSuperGroupChatMsgRecvSuccessCounter prometheus.Counter
+
+	//msg-msg
+	SingleChatMsgProcessSuccessCounter         prometheus.Counter
+	SingleChatMsgProcessFailedCounter          prometheus.Counter
+	GroupChatMsgProcessSuccessCounter          prometheus.Counter
+	GroupChatMsgProcessFailedCounter           prometheus.Counter
+	WorkSuperGroupChatMsgProcessSuccessCounter prometheus.Counter
+	WorkSuperGroupChatMsgProcessFailedCounter  prometheus.Counter
+
+	//msg-push
+	MsgOnlinePushSuccessCounter  prometheus.Counter
+	MsgOfflinePushSuccessCounter prometheus.Counter
+	MsgOfflinePushFailedCounter  prometheus.Counter
 )
 
 func NewUserLoginCounter() {
@@ -85,5 +112,135 @@ func NewMsgInsertMongoFailedCounter() {
 	MsgInsertMongoFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "msg_insert_mongo_failed",
 		Help: "The number of failed insert msg to mongo",
+	})
+}
+
+func NewMsgPullFromRedisSuccessCounter() {
+	MsgPullFromRedisSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_pull_from_redis_success",
+		Help: "The number of successful pull msg from redis",
+	})
+}
+
+func NewMsgPullFromRedisFailedCounter() {
+	MsgPullFromRedisFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_pull_from_redis_failed",
+		Help: "The number of failed pull msg from redis",
+	})
+}
+
+func NewMsgPullFromMongoSuccessCounter() {
+	MsgPullFromMongoSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_pull_from_redis_success",
+		Help: "The number of successful pull msg from mongo",
+	})
+}
+
+func NewMsgPullFromMongoFailedCounter() {
+	MsgPullFromMongoFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_pull_from_mongo_failed",
+		Help: "The number of failed pull msg from mongo",
+	})
+}
+
+func NewMsgRecvTotalCounter() {
+	MsgRecvTotalCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_recv_total",
+		Help: "The number of msg received",
+	})
+}
+
+func NewGetNewestSeqTotalCounter() {
+	GetNewestSeqTotalCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "get_newest_seq_total",
+		Help: "the number of get newest seq",
+	})
+}
+func NewPullMsgBySeqListTotalCounter() {
+	PullMsgBySeqListTotalCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "pull_msg_by_seq_list_total",
+		Help: "The number of pull msg by seq list",
+	})
+}
+
+func NewSingleChatMsgRecvSuccessCounter() {
+	SingleChatMsgRecvSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "single_chat_msg_recv_success",
+		Help: "The number of single chat msg successful received ",
+	})
+}
+
+func NewGroupChatMsgRecvSuccessCounter() {
+	GroupChatMsgRecvSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "group_chat_msg_recv_success",
+		Help: "The number of group chat msg successful received",
+	})
+}
+
+func NewWorkSuperGroupChatMsgRecvSuccessCounter() {
+	WorkSuperGroupChatMsgRecvSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "work_super_group_chat_msg_recv_success",
+		Help: "The number of work/super group chat msg successful received",
+	})
+}
+
+func NewSingleChatMsgProcessSuccessCounter() {
+	SingleChatMsgProcessSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "single_chat_msg_process_success",
+		Help: "The number of single chat msg successful processed",
+	})
+}
+
+func NewSingleChatMsgProcessFailedCounter() {
+	SingleChatMsgProcessFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "single_chat_msg_process_failed",
+		Help: "The number of single chat msg failed processed",
+	})
+}
+
+func NewGroupChatMsgProcessSuccessCounter() {
+	GroupChatMsgProcessSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "group_chat_msg_process_success",
+		Help: "The number of group chat msg successful processed",
+	})
+}
+
+func NewGroupChatMsgProcessFailedCounter() {
+	GroupChatMsgProcessFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "group_chat_msg_process_failed",
+		Help: "The number of group chat msg failed processed",
+	})
+}
+
+func NewWorkSuperGroupChatMsgProcessSuccessCounter() {
+	WorkSuperGroupChatMsgProcessSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "work_super_group_chat_msg_process_success",
+		Help: "The number of work/super group chat msg successful processed",
+	})
+}
+func NewWorkSuperGroupChatMsgProcessFailedCounter() {
+	WorkSuperGroupChatMsgProcessFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "work_super_group_chat_msg_process_failed",
+		Help: "The number of work/super group chat msg failed processed",
+	})
+}
+
+func NewMsgOnlinePushSuccessCounter() {
+	MsgOnlinePushSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_online_push_success",
+		Help: "The number of msg successful online pushed",
+	})
+}
+
+func NewMsgOfflinePushSuccessCounter() {
+	MsgOfflinePushSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_offline_push_success",
+		Help: "The number of msg successful offline pushed",
+	})
+}
+func NewMsgOfflinePushFailedCounter() {
+	MsgOfflinePushFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "msg_offline_push_failed",
+		Help: "The number of msg failed offline pushed",
 	})
 }

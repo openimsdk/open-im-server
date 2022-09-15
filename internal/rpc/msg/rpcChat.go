@@ -13,15 +13,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"google.golang.org/grpc"
 )
 
-var (
-	sendMsgSuccessCounter prometheus.Counter
-	sendMsgFailedCounter  prometheus.Counter
-)
+//var (
+//	sendMsgSuccessCounter prometheus.Counter
+//	sendMsgFailedCounter  prometheus.Counter
+//)
 
 type rpcChat struct {
 	rpcPort         int
@@ -55,14 +54,29 @@ func NewRpcChatServer(port int) *rpcChat {
 }
 
 func (rpc *rpcChat) initPrometheus() {
-	sendMsgSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "send_msg_success",
-		Help: "The number of send msg success",
-	})
-	sendMsgFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "send_msg_failed",
-		Help: "The number of send msg failed",
-	})
+	//sendMsgSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+	//	Name: "send_msg_success",
+	//	Help: "The number of send msg success",
+	//})
+	//sendMsgFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+	//	Name: "send_msg_failed",
+	//	Help: "The number of send msg failed",
+	//})
+	promePkg.NewMsgPullFromRedisSuccessCounter()
+	promePkg.NewMsgPullFromRedisFailedCounter()
+	promePkg.NewMsgPullFromMongoSuccessCounter()
+	promePkg.NewMsgPullFromMongoFailedCounter()
+
+	promePkg.NewSingleChatMsgRecvSuccessCounter()
+	promePkg.NewGroupChatMsgRecvSuccessCounter()
+	promePkg.NewWorkSuperGroupChatMsgRecvSuccessCounter()
+
+	promePkg.NewSingleChatMsgProcessSuccessCounter()
+	promePkg.NewSingleChatMsgProcessFailedCounter()
+	promePkg.NewGroupChatMsgProcessSuccessCounter()
+	promePkg.NewGroupChatMsgProcessFailedCounter()
+	promePkg.NewWorkSuperGroupChatMsgProcessSuccessCounter()
+	promePkg.NewWorkSuperGroupChatMsgProcessFailedCounter()
 }
 
 func (rpc *rpcChat) Run() {
@@ -97,9 +111,7 @@ func (rpc *rpcChat) Run() {
 		panic(utils.Wrap(err, "register chat module  rpc to etcd err"))
 	}
 	go rpc.runCh()
-	if config.Config.Prometheus.Enable {
-		rpc.initPrometheus()
-	}
+	rpc.initPrometheus()
 	err = srv.Serve(listener)
 	if err != nil {
 		log.Error("", "rpc rpcChat failed ", err.Error())

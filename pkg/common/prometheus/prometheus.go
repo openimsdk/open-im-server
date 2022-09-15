@@ -31,7 +31,6 @@ func PromeInc(counter prometheus.Counter) {
 		if counter != nil {
 			counter.Inc()
 		}
-
 	}
 }
 
