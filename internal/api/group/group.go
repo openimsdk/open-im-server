@@ -42,10 +42,14 @@ func KickGroupMember(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
-
+	if len(params.KickedUserIDList) > constant.MaxNotificationNum {
+		errMsg := params.OperationID + " too many members " + utils.Int32ToString(int32(len(params.KickedUserIDList)))
+		log.Error(params.OperationID, errMsg)
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": errMsg})
+		return
+	}
 	req := &rpc.KickGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
-
 	var ok bool
 	var errInfo string
 	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
@@ -316,6 +320,12 @@ func InviteUserToGroup(c *gin.Context) {
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	if len(params.InvitedUserIDList) > constant.MaxNotificationNum {
+		errMsg := params.OperationID + " too many members " + utils.Int32ToString(int32(len(params.InvitedUserIDList)))
+		log.Error(params.OperationID, errMsg)
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": errMsg})
 		return
 	}
 	req := &rpc.InviteUserToGroupReq{}
