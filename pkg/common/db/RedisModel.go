@@ -182,7 +182,6 @@ func (d *DataBases) GetMessageListBySeq(userID string, seqList []uint32, operati
 	for _, v := range seqList {
 		//MESSAGE_CACHE:169.254.225.224_reliability1653387820_0_1
 		key := messageCache + userID + "_" + strconv.Itoa(int(v))
-
 		result, err := d.RDB.Get(context.Background(), key).Result()
 		if err != nil {
 			errResult = err
