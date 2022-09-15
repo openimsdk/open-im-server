@@ -6,6 +6,7 @@ import (
 )
 
 var (
+	//auth rpc
 	UserLoginCounter    prometheus.Counter
 	UserRegisterCounter prometheus.Counter
 
@@ -46,6 +47,18 @@ var (
 	MsgOnlinePushSuccessCounter  prometheus.Counter
 	MsgOfflinePushSuccessCounter prometheus.Counter
 	MsgOfflinePushFailedCounter  prometheus.Counter
+	// api
+	ApiRequestCounter        prometheus.Counter
+	ApiRequestSuccessCounter prometheus.Counter
+	ApiRequestFailedCounter  prometheus.Counter
+
+	// grpc
+	GrpcRequestCounter        prometheus.Counter
+	GrpcRequestSuccessCounter prometheus.Counter
+	GrpcRequestFailedCounter  prometheus.Counter
+
+	SendMsgCounter               prometheus.Counter
+
 )
 
 func NewUserLoginCounter() {
@@ -84,6 +97,55 @@ func NewSeqSetFailedCounter() {
 	SeqSetFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "seq_set_failed",
 		Help: "The number of failed set seq",
+	})
+}
+
+func NewApiRequestCounter() {
+	ApiRequestCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "api_request",
+		Help: "The number of api request",
+	})
+}
+
+func NewApiRequestSuccessCounter() {
+	ApiRequestSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "api_request_success",
+		Help: "The number of api request success",
+	})
+}
+
+func NewApiRequestFailedCounter() {
+	ApiRequestFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "api_request_failed",
+		Help: "The number of api request failed",
+	})
+}
+
+func NewGrpcRequestCounter() {
+	GrpcRequestCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "grpc_request",
+		Help: "The number of api request",
+	})
+}
+
+func NewGrpcRequestSuccessCounter() {
+	GrpcRequestSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "grpc_request_success",
+		Help: "The number of grpc request success",
+	})
+}
+
+func NewGrpcRequestFailedCounter() {
+	GrpcRequestFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "grpc_request_failed",
+		Help: "The number of grpc request failed",
+	})
+}
+
+func NewSendMsgCount() {
+	SendMsgCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "send_msg",
+		Help: "The number of send msg",
 	})
 }
 

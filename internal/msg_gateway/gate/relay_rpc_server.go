@@ -13,10 +13,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"github.com/golang/protobuf/proto"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 
 	"github.com/gorilla/websocket"
 	"google.golang.org/grpc"
@@ -63,7 +64,14 @@ func (r *RPCServer) run() {
 		panic("listening err:" + err.Error() + r.rpcRegisterName)
 	}
 	defer listener.Close()
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
+		grpcOpts = append(grpcOpts, grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme))
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	pbRelay.RegisterRelayServer(srv, r)
 

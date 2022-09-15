@@ -164,6 +164,7 @@ services:
     depends_on:
     - prometheus
     network_mode: "host" 
+    # -rw-r-----
 
   node-exporter:
     image: quay.io/prometheus/node-exporter

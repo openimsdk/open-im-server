@@ -4,8 +4,11 @@ import (
 	log "Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"errors"
+
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
+
+	promePkg "Open_IM/pkg/common/prometheus"
 )
 
 type Producer struct {
@@ -57,5 +60,8 @@ func (p *Producer) SendMessage(m proto.Message, key string, operationID string) 
 	}
 	a, b, c := p.producer.SendMessage(kMsg)
 	log.Info(operationID, "ByteEncoder SendMessage end", "key ", kMsg.Key.Length(), kMsg.Value.Length(), p.producer)
+	if c == nil {
+		promePkg.PromeInc(promePkg.SendMsgCounter)
+	}
 	return a, b, utils.Wrap(c, "")
 }
