@@ -157,7 +157,7 @@ services:
     - ./docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
     # - ./docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
     # - ./components/grafana:/var/lib/grafana
-    # - ./docker-compose_cfg/grafana.db:/var/lib/grafana/grafana.db
+    - ./docker-compose_cfg/grafana.db:/var/lib/grafana/grafana.db
     container_name: grafana
     ports:
     - 10007:10007
