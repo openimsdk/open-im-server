@@ -4,6 +4,8 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func IsLimitRegisterIp(RegisterIp string) (bool, error) {
@@ -84,7 +86,7 @@ func InsertIpRecord(userID, createIp string) error {
 
 func UpdateIpReocord(userID, ip string) (err error) {
 	record := &db.UserIpRecord{UserID: userID, LastLoginIp: ip, LastLoginTime: time.Now()}
-	result := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpRecord{}).Where("user_id=?", userID).Updates(record).Updates("login_times = login_times + 1")
+	result := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpRecord{}).Where("user_id=?", userID).Updates(record).Update("login_times", gorm.Expr("login_times+?", 1))
 	if result.Error != nil {
 		return utils.Wrap(result.Error, "")
 	}
