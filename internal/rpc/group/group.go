@@ -68,11 +68,10 @@ func (s *groupServer) Run() {
 	//grpc server
 	recvSize := 1024 * 1024 * constant.GroupRPCRecvSize
 	sendSize := 1024 * 1024 * constant.GroupRPCSendSize
-	var options = []grpc.ServerOption{
+	var grpcOpts = []grpc.ServerOption{
 		grpc.MaxRecvMsgSize(recvSize),
 		grpc.MaxSendMsgSize(sendSize),
 	}
-	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
 		promePkg.NewGrpcRequestCounter()
 		promePkg.NewGrpcRequestFailedCounter()
@@ -83,7 +82,7 @@ func (s *groupServer) Run() {
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)
 	}
-	srv := grpc.NewServer(options...)
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbGroup.RegisterGroupServer(srv, s)
