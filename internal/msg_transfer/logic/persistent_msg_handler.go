@@ -85,11 +85,11 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
 			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
 				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
-				msgInsertFailedMysqlCounter.Inc()
+				// msgInsertFailedMysqlCounter.Inc()
 				return
 			}
 			if config.Config.Prometheus.Enable {
-				msgInsertMysqlCounter.Inc()
+				// msgInsertMysqlCounter.Inc()
 			}
 		}
 
