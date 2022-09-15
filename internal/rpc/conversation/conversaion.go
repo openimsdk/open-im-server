@@ -187,6 +187,9 @@ func (rpc *rpcConversation) Run() {
 	//grpc server
 	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme))
 	}
 	srv := grpc.NewServer(grpcOpts...)

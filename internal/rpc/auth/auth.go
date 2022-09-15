@@ -22,11 +22,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (rpc *rpcAuth) initPrometheus() {
-	promePkg.NewUserLoginCounter()
-	promePkg.NewUserRegisterCounter()
-}
-
 func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq) (*pbAuth.UserRegisterResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	var user db.User
@@ -128,6 +123,9 @@ func (rpc *rpcAuth) Run() {
 	log.NewInfo(operationID, "listen network success, ", address, listener)
 	var grpcOpts []grpc.ServerOption
 	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
 		grpcOpts = append(grpcOpts, grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme))
 	}
 	srv := grpc.NewServer(grpcOpts...)
@@ -152,9 +150,6 @@ func (rpc *rpcAuth) Run() {
 
 	}
 	log.NewInfo(operationID, "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
-	if config.Config.Prometheus.Enable {
-		rpc.initPrometheus()
-	}
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError(operationID, "Serve failed ", err.Error())
