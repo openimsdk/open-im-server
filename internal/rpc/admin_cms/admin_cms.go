@@ -11,6 +11,9 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAdminCMS "Open_IM/pkg/proto/admin_cms"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
+
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
@@ -63,7 +66,11 @@ func (s *adminCMSServer) Run() {
 		promePkg.NewGrpcRequestCounter()
 		promePkg.NewGrpcRequestFailedCounter()
 		promePkg.NewGrpcRequestSuccessCounter()
-		grpcOpts = append(grpcOpts, grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme))
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
 	}
 	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()

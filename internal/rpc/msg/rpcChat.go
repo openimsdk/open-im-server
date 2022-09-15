@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+
 	"google.golang.org/grpc"
 )
 
@@ -72,7 +74,11 @@ func (rpc *rpcChat) Run() {
 		promePkg.NewGrpcRequestCounter()
 		promePkg.NewGrpcRequestFailedCounter()
 		promePkg.NewGrpcRequestSuccessCounter()
-		grpcOpts = append(grpcOpts, grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme))
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
 	}
 	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
