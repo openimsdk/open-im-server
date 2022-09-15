@@ -131,7 +131,7 @@ func (rpc *rpcAuth) Run() {
 		promePkg.NewUserRegisterCounter()
 		promePkg.NewUserLoginCounter()
 		grpcOpts = append(grpcOpts, []grpc.ServerOption{
-			grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
 			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
 			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
 		}...)
