@@ -245,11 +245,11 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	if !flag {
 		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 	}
-	flag, errCode, errMsg, _ = messageVerification(pb)
-	log.Info(pb.OperationID, "messageVerification ", flag, " cost time: ", time.Since(t1))
-	if !flag {
-		return returnMsg(&replay, pb, errCode, errMsg, "", 0)
-	}
+	//flag, errCode, errMsg, _ = messageVerification(pb)
+	//log.Info(pb.OperationID, "messageVerification ", flag, " cost time: ", time.Since(t1))
+	//if !flag {
+	//	return returnMsg(&replay, pb, errCode, errMsg, "", 0)
+	//}
 	t1 = time.Now()
 	rpc.encapsulateMsgData(pb.MsgData)
 	log.Info(pb.OperationID, "encapsulateMsgData ", " cost time: ", time.Since(t1))
@@ -286,6 +286,11 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 			log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
 			promePkg.PromeInc(promePkg.SingleChatMsgProcessFailedCounter)
 			return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
+		}
+		flag, errCode, errMsg, _ = messageVerification(pb)
+		log.Info(pb.OperationID, "messageVerification ", flag, " cost time: ", time.Since(t1))
+		if !flag {
+			return returnMsg(&replay, pb, errCode, errMsg, "", 0)
 		}
 		t1 = time.Now()
 		isSend := modifyMessageByUserMessageReceiveOpt(pb.MsgData.RecvID, pb.MsgData.SendID, constant.SingleChatType, pb)
