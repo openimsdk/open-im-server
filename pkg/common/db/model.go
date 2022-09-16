@@ -76,7 +76,7 @@ func init() {
 				config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, mongodbHosts,
 				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
 		} else {
-			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin&replicaSet=replset",
+			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
 				mongodbHosts, config.Config.Mongo.DBDatabase,
 				config.Config.Mongo.DBMaxPoolSize)
 		}
