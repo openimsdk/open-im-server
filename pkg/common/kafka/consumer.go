@@ -20,10 +20,10 @@ func NewKafkaConsumer(addr []string, topic string) *Consumer {
 	p.Topic = topic
 	p.addr = addr
 	consumerConfig := sarama.NewConfig()
-	if config.Config.Kafka.UserName != "" && config.Config.Kafka.Password != "" {
+	if config.Config.Kafka.SASLUserName != "" && config.Config.Kafka.SASLPassword != "" {
 		consumerConfig.Net.SASL.Enable = true
-		consumerConfig.Net.SASL.User = config.Config.Kafka.UserName
-		consumerConfig.Net.SASL.Password = config.Config.Kafka.Password
+		consumerConfig.Net.SASL.User = config.Config.Kafka.SASLUserName
+		consumerConfig.Net.SASL.Password = config.Config.Kafka.SASLPassword
 	}
 	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {

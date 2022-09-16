@@ -221,9 +221,9 @@ type config struct {
 	}
 
 	Kafka struct {
-		UserName  string `yaml:"userName"`
-		Password  string `yaml:"password"`
-		Ws2mschat struct {
+		SASLUserName string `yaml:"SASLUserName"`
+		SASLPassword string `yaml:"SASLPassword"`
+		Ws2mschat    struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}

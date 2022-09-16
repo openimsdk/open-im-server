@@ -48,8 +48,8 @@ redis:
   enableCluster: false #如果外部redis以集群方式启动，需要打开此开关
 
 kafka:
-  userName: 
-  password:
+  SASLUserName: 
+  SASLPassword:
   ws2mschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat" #用于mongo和mysql保存消息

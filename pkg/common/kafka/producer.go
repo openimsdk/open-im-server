@@ -26,10 +26,10 @@ func NewKafkaProducer(addr []string, topic string) *Producer {
 	p.config.Producer.Return.Errors = true
 	p.config.Producer.RequiredAcks = sarama.WaitForAll        //Set producer Message Reply level 0 1 all
 	p.config.Producer.Partitioner = sarama.NewHashPartitioner //Set the hash-key automatic hash partition. When sending a message, you must specify the key value of the message. If there is no key, the partition will be selected randomly
-	if config.Config.Kafka.UserName != "" && config.Config.Kafka.Password != "" {
+	if config.Config.Kafka.SASLUserName != "" && config.Config.Kafka.SASLPassword != "" {
 		p.config.Net.SASL.Enable = true
-		p.config.Net.SASL.User = config.Config.Kafka.UserName
-		p.config.Net.SASL.Password = config.Config.Kafka.Password
+		p.config.Net.SASL.User = config.Config.Kafka.SASLUserName
+		p.config.Net.SASL.Password = config.Config.Kafka.SASLPassword
 	}
 	p.addr = addr
 	p.topic = topic
