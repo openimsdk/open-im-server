@@ -4,14 +4,17 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"
 	"context"
 	"net"
+
 	"strconv"
 	"strings"
 
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"google.golang.org/grpc"
 )
 
@@ -42,7 +45,18 @@ func (r *RPCServer) run() {
 		panic("listening err:" + err.Error() + r.rpcRegisterName)
 	}
 	defer listener.Close()
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	pbPush.RegisterPushMsgServiceServer(srv, r)
 	rpcRegisterIP := config.Config.RpcRegisterIP

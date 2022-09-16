@@ -3,6 +3,7 @@ package admin
 import (
 	apiStruct "Open_IM/pkg/cms_api_struct"
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAdmin "Open_IM/pkg/proto/admin_cms"
@@ -25,6 +26,7 @@ var (
 )
 
 func init() {
+	log.NewPrivateLog(constant.LogFileName)
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "minio config: ", config.Config.Credential.Minio)
 	var initUrl string

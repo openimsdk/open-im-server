@@ -8,6 +8,7 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -24,6 +25,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
@@ -65,11 +68,21 @@ func (s *groupServer) Run() {
 	//grpc server
 	recvSize := 1024 * 1024 * constant.GroupRPCRecvSize
 	sendSize := 1024 * 1024 * constant.GroupRPCSendSize
-	var options = []grpc.ServerOption{
+	var grpcOpts = []grpc.ServerOption{
 		grpc.MaxRecvMsgSize(recvSize),
 		grpc.MaxSendMsgSize(sendSize),
 	}
-	srv := grpc.NewServer(options...)
+	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbGroup.RegisterGroupServer(srv, s)
@@ -1550,6 +1563,9 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		return &pbGroup.DismissGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}, nil
 	}
 	if err := rocksCache.DelGroupInfoFromCache(req.GroupID); err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+	}
+	if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})

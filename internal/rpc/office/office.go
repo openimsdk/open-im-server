@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
 	pbOffice "Open_IM/pkg/proto/office"
@@ -20,6 +21,8 @@ import (
 	"sync"
 	"time"
 	"unsafe"
+
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
 )
@@ -63,11 +66,21 @@ func (s *officeServer) Run() {
 	//grpc server
 	recvSize := 1024 * 1024 * 30
 	sendSize := 1024 * 1024 * 30
-	var options = []grpc.ServerOption{
+	var grpcOpts = []grpc.ServerOption{
 		grpc.MaxRecvMsgSize(recvSize),
 		grpc.MaxSendMsgSize(sendSize),
 	}
-	srv := grpc.NewServer(options...)
+	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	//Service registers with etcd
 	pbOffice.RegisterOfficeServiceServer(srv, s)

@@ -6,14 +6,23 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
-	"google.golang.org/grpc"
 	"net"
 	"strconv"
 	"strings"
+
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
+
+	"google.golang.org/grpc"
 )
+
+//var (
+//	sendMsgSuccessCounter prometheus.Counter
+//	sendMsgFailedCounter  prometheus.Counter
+//)
 
 type rpcChat struct {
 	rpcPort         int
@@ -46,6 +55,32 @@ func NewRpcChatServer(port int) *rpcChat {
 	return &rc
 }
 
+func (rpc *rpcChat) initPrometheus() {
+	//sendMsgSuccessCounter = promauto.NewCounter(prometheus.CounterOpts{
+	//	Name: "send_msg_success",
+	//	Help: "The number of send msg success",
+	//})
+	//sendMsgFailedCounter = promauto.NewCounter(prometheus.CounterOpts{
+	//	Name: "send_msg_failed",
+	//	Help: "The number of send msg failed",
+	//})
+	promePkg.NewMsgPullFromRedisSuccessCounter()
+	promePkg.NewMsgPullFromRedisFailedCounter()
+	promePkg.NewMsgPullFromMongoSuccessCounter()
+	promePkg.NewMsgPullFromMongoFailedCounter()
+
+	promePkg.NewSingleChatMsgRecvSuccessCounter()
+	promePkg.NewGroupChatMsgRecvSuccessCounter()
+	promePkg.NewWorkSuperGroupChatMsgRecvSuccessCounter()
+
+	promePkg.NewSingleChatMsgProcessSuccessCounter()
+	promePkg.NewSingleChatMsgProcessFailedCounter()
+	promePkg.NewGroupChatMsgProcessSuccessCounter()
+	promePkg.NewGroupChatMsgProcessFailedCounter()
+	promePkg.NewWorkSuperGroupChatMsgProcessSuccessCounter()
+	promePkg.NewWorkSuperGroupChatMsgProcessFailedCounter()
+}
+
 func (rpc *rpcChat) Run() {
 	log.Info("", "rpcChat init...")
 	listenIP := ""
@@ -61,7 +96,18 @@ func (rpc *rpcChat) Run() {
 	}
 	log.Info("", "listen network success, address ", address)
 
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 
 	rpcRegisterIP := config.Config.RpcRegisterIP
@@ -78,6 +124,7 @@ func (rpc *rpcChat) Run() {
 		panic(utils.Wrap(err, "register chat module  rpc to etcd err"))
 	}
 	go rpc.runCh()
+	rpc.initPrometheus()
 	err = srv.Serve(listener)
 	if err != nil {
 		log.Error("", "rpc rpcChat failed ", err.Error())

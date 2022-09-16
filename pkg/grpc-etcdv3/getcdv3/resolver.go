@@ -6,7 +6,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
-
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
 
@@ -39,6 +38,8 @@ var (
 func NewResolver(schema, etcdAddr, serviceName string, operationID string) (*Resolver, error) {
 	etcdCli, err := clientv3.New(clientv3.Config{
 		Endpoints: strings.Split(etcdAddr, ","),
+		Username:  config.Config.Etcd.UserName,
+		Password:  config.Config.Etcd.Password,
 	})
 	if err != nil {
 		log.Error(operationID, "etcd client v3 failed")
@@ -269,8 +270,38 @@ func (r *Resolver) watch(prefix string, addrList []resolver.Address) {
 	}
 }
 
+var Conn4UniqueList []*grpc.ClientConn
+var Conn4UniqueListMtx sync.RWMutex
+var IsUpdateStart bool
+var IsUpdateStartMtx sync.RWMutex
+
 func GetDefaultGatewayConn4Unique(schema, etcdaddr, operationID string) []*grpc.ClientConn {
-	grpcConns := getConn4Unique(schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+	IsUpdateStartMtx.Lock()
+	if IsUpdateStart == false {
+		Conn4UniqueList = getConn4Unique(schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+		go func() {
+			for {
+				select {
+				case <-time.After(time.Second * time.Duration(30)):
+					Conn4UniqueListMtx.Lock()
+					Conn4UniqueList = getConn4Unique(schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+					Conn4UniqueListMtx.Unlock()
+				}
+			}
+		}()
+	}
+	IsUpdateStart = true
+	IsUpdateStartMtx.Unlock()
+
+	Conn4UniqueListMtx.Lock()
+	var clientConnList []*grpc.ClientConn
+	for _, v := range Conn4UniqueList {
+		clientConnList = append(clientConnList, v)
+	}
+	Conn4UniqueListMtx.Unlock()
+
+	//grpcConns := getConn4Unique(schema, etcdaddr, config.Config.RpcRegisterName.OpenImRelayName)
+	grpcConns := clientConnList
 	if len(grpcConns) > 0 {
 		return grpcConns
 	}

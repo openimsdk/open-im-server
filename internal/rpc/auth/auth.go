@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbAuth "Open_IM/pkg/proto/auth"
@@ -15,6 +16,8 @@ import (
 	"net"
 	"strconv"
 	"strings"
+
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"Open_IM/pkg/common/config"
 
@@ -35,6 +38,7 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 		log.NewError(req.OperationID, errMsg, user)
 		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
+	promePkg.PromeInc(promePkg.UserRegisterCounter)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}})
 	return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}}, nil
 }
@@ -47,6 +51,7 @@ func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbA
 		log.NewError(req.OperationID, errMsg)
 		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
 	}
+	promePkg.PromeInc(promePkg.UserLoginCounter)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime})
 	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }
@@ -118,8 +123,20 @@ func (rpc *rpcAuth) Run() {
 		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
 	}
 	log.NewInfo(operationID, "listen network success, ", address, listener)
-	//grpc server
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
+		promePkg.NewUserRegisterCounter()
+		promePkg.NewUserLoginCounter()
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 
 	//service registers with etcd

@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
@@ -90,7 +91,7 @@ func (ws *WServer) readMsg(conn *UserConn) {
 			log.NewInfo("", "this is a  pingMessage")
 		}
 		if err != nil {
-			log.Error("", "WS ReadMsg error ", " userIP", conn.RemoteAddr().String(), "userUid", "platform", "error", err.Error())
+			log.NewWarn("", "WS ReadMsg error ", " userIP", conn.RemoteAddr().String(), "userUid", "platform", "error", err.Error())
 			userCount--
 			ws.delUserConn(conn)
 			return
@@ -313,6 +314,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 	for _, v := range ws.wsUserToConn {
 		count = count + len(v)
 	}
+	promePkg.PromeGaugeInc(promePkg.OnlineUserGauge)
 	log.Debug(operationID, "WS Add operation", "", "wsUser added", ws.wsUserToConn, "connection_uid", uid, "connection_platform", constant.PlatformIDToName(platformID), "online_user_num", len(ws.wsUserToConn), "online_conn_num", count)
 }
 
@@ -352,6 +354,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}
+	promePkg.PromeGaugeDec(promePkg.OnlineUserGauge)
 }
 
 func (ws *WServer) getUserConn(uid string, platform int) *UserConn {

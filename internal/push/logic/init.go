@@ -47,6 +47,11 @@ func init() {
 	}
 }
 
+func initPrometheus() {
+	promePkg.NewMsgOfflinePushSuccessCounter()
+	promePkg.NewMsgOfflinePushFailedCounter()
+}
+
 func Run(promethuesPort int) {
 	go rpcServer.run()
 	go pushCh.pushConsumerGroup.RegisterHandleAndConsumer(&pushCh)

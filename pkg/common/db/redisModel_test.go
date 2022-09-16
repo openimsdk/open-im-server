@@ -71,7 +71,7 @@ func Test_NewSetMessageToCache(t *testing.T) {
 	data.AtUserIDList = []string{"1212", "23232"}
 	msg.MsgData = &data
 	messageList := []*pbChat.MsgDataToMQ{&msg}
-	err := DB.SetMessageToCache(messageList, uid, "cacheTest")
+	err, _ := DB.SetMessageToCache(messageList, uid, "cacheTest")
 	assert.Nil(t, err)
 
 }

@@ -37,6 +37,9 @@ var (
 func Init() {
 	cmdCh = make(chan Cmd2Value, 10000)
 	w = new(sync.Mutex)
+	if config.Config.Prometheus.Enable {
+		initPrometheus()
+	}
 	persistentCH.Init()   // ws2mschat save mysql
 	historyCH.Init(cmdCh) //
 	historyMongoCH.Init()

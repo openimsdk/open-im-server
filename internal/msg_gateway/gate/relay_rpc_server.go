@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
@@ -12,10 +13,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"github.com/golang/protobuf/proto"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"github.com/gorilla/websocket"
 	"google.golang.org/grpc"
@@ -29,6 +32,17 @@ type RPCServer struct {
 	platformList    []int
 	pushTerminal    []int
 	target          string
+}
+
+func initPrometheus() {
+	promePkg.NewMsgRecvTotalCounter()
+	promePkg.NewGetNewestSeqTotalCounter()
+	promePkg.NewPullMsgBySeqListTotalCounter()
+	promePkg.NewMsgOnlinePushSuccessCounter()
+	promePkg.NewOnlineUserGauges()
+	//promePkg.NewSingleChatMsgRecvSuccessCounter()
+	//promePkg.NewGroupChatMsgRecvSuccessCounter()
+	//promePkg.NewWorkSuperGroupChatMsgRecvSuccessCounter()
 }
 
 func (r *RPCServer) onInit(rpcPort int) {
@@ -52,7 +66,18 @@ func (r *RPCServer) run() {
 		panic("listening err:" + err.Error() + r.rpcRegisterName)
 	}
 	defer listener.Close()
-	srv := grpc.NewServer()
+	var grpcOpts []grpc.ServerOption
+	if config.Config.Prometheus.Enable {
+		promePkg.NewGrpcRequestCounter()
+		promePkg.NewGrpcRequestFailedCounter()
+		promePkg.NewGrpcRequestSuccessCounter()
+		grpcOpts = append(grpcOpts, []grpc.ServerOption{
+			// grpc.UnaryInterceptor(promePkg.UnaryServerInterceptorProme),
+			grpc.StreamInterceptor(grpcPrometheus.StreamServerInterceptor),
+			grpc.UnaryInterceptor(grpcPrometheus.UnaryServerInterceptor),
+		}...)
+	}
+	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
 	pbRelay.RegisterRelayServer(srv, r)
 
@@ -174,6 +199,7 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *pbRe
 				resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
 				if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
 					tempT.OnlinePush = true
+					promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
 					log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
 					temp := &pbRelay.SingleMsgToUserPlatform{
 						ResultCode:     resultCode,

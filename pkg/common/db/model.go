@@ -58,15 +58,30 @@ func init() {
 		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
 		uri = config.Config.Mongo.DBUri
 	} else {
+		//mongodb://mongodb1.example.com:27317,mongodb2.example.com:27017/?replicaSet=mySet&authSource=authDB
+		mongodbHosts := ""
+		for i, v := range config.Config.Mongo.DBAddress {
+			if i == len(config.Config.Mongo.DBAddress)-1 {
+				mongodbHosts += v
+			} else {
+				mongodbHosts += v + ","
+			}
+		}
+
 		if config.Config.Mongo.DBPassword != "" && config.Config.Mongo.DBUserName != "" {
-			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin", config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, config.Config.Mongo.DBAddress,
+			// clientOpts := options.Client().ApplyURI("mongodb://localhost:27017,localhost:27018/?replicaSet=replset")
+			//mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[defaultauthdb][?options]]
+			//uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin&replicaSet=replset",
+			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
+				config.Config.Mongo.DBUserName, config.Config.Mongo.DBPassword, mongodbHosts,
 				config.Config.Mongo.DBDatabase, config.Config.Mongo.DBMaxPoolSize)
 		} else {
 			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d&authSource=admin",
-				config.Config.Mongo.DBAddress, config.Config.Mongo.DBDatabase,
+				mongodbHosts, config.Config.Mongo.DBDatabase,
 				config.Config.Mongo.DBMaxPoolSize)
 		}
 	}
+
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		fmt.Println(" mongo.Connect  failed, try ", utils.GetSelfFuncName(), err.Error(), uri)
@@ -77,7 +92,7 @@ func init() {
 			panic(err1.Error())
 		}
 	}
-	fmt.Println("0", utils.GetSelfFuncName(), "mongo driver client init success: ", uri)
+	fmt.Println("mongo driver client init success: ", uri)
 	// mongodb create index
 	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
 		fmt.Println("send_id", "-send_time", "index create failed", err.Error())
@@ -100,7 +115,7 @@ func init() {
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
 		fmt.Println("tag_id", "index create failed", err.Error())
 	}
-	fmt.Println("create index success")
+	fmt.Println("createMongoIndex success")
 	DB.mongoClient = mongoClient
 
 	// redis pool init

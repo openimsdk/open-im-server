@@ -18,13 +18,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-)
-
-var (
-	msgInsertMysqlCounter       prometheus.Counter
-	msgInsertFailedMysqlCounter prometheus.Counter
+	promePkg "Open_IM/pkg/common/prometheus"
 )
 
 type PersistentConsumerHandler struct {
@@ -38,20 +32,18 @@ func (pc *PersistentConsumerHandler) Init() {
 	pc.persistentConsumerGroup = kfk.NewMConsumerGroup(&kfk.MConsumerGroupConfig{KafkaVersion: sarama.V2_0_0_0,
 		OffsetsInitial: sarama.OffsetNewest, IsReturnErr: false}, []string{config.Config.Kafka.Ws2mschat.Topic},
 		config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.ConsumerGroupID.MsgToMySql)
-	if config.Config.Prometheus.Enable {
-		pc.initPrometheus()
-	}
+
 }
 
-func (pc *PersistentConsumerHandler) initPrometheus() {
-	msgInsertMysqlCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "insert_mysql_msg_total",
-		Help: "The total number of msg insert mysql events",
-	})
-	msgInsertFailedMysqlCounter = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "insert_mysql_failed_msg_total",
-		Help: "The total number of msg insert mysql events",
-	})
+func initPrometheus() {
+	promePkg.NewSeqGetSuccessCounter()
+	promePkg.NewSeqGetFailedCounter()
+	promePkg.NewSeqSetSuccessCounter()
+	promePkg.NewSeqSetFailedCounter()
+	promePkg.NewMsgInsertRedisSuccessCounter()
+	promePkg.NewMsgInsertRedisFailedCounter()
+	promePkg.NewMsgInsertMongoSuccessCounter()
+	promePkg.NewMsgInsertMongoFailedCounter()
 }
 
 func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMessage, msgKey string, _ sarama.ConsumerGroupSession) {
@@ -85,11 +77,7 @@ func (pc *PersistentConsumerHandler) handleChatWs2Mysql(cMsg *sarama.ConsumerMes
 			log.NewInfo(msgFromMQ.OperationID, "msg_transfer msg persisting", string(msg))
 			if err = im_mysql_msg_model.InsertMessageToChatLog(msgFromMQ); err != nil {
 				log.NewError(msgFromMQ.OperationID, "Message insert failed", "err", err.Error(), "msg", msgFromMQ.String())
-				// msgInsertFailedMysqlCounter.Inc()
 				return
-			}
-			if config.Config.Prometheus.Enable {
-				// msgInsertMysqlCounter.Inc()
 			}
 		}
 

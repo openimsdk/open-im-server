@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -100,19 +99,21 @@ type config struct {
 		DBMaxOpenConns int      `yaml:"dbMaxOpenConns"`
 		DBMaxIdleConns int      `yaml:"dbMaxIdleConns"`
 		DBMaxLifeTime  int      `yaml:"dbMaxLifeTime"`
+		LogLevel       int      `yaml:"logLevel"`
+		SlowThreshold  int      `yaml:"slowThreshold"`
 	}
 	Mongo struct {
-		DBUri                string `yaml:"dbUri"`
-		DBAddress            string `yaml:"dbAddress"`
-		DBDirect             bool   `yaml:"dbDirect"`
-		DBTimeout            int    `yaml:"dbTimeout"`
-		DBDatabase           string `yaml:"dbDatabase"`
-		DBSource             string `yaml:"dbSource"`
-		DBUserName           string `yaml:"dbUserName"`
-		DBPassword           string `yaml:"dbPassword"`
-		DBMaxPoolSize        int    `yaml:"dbMaxPoolSize"`
-		DBRetainChatRecords  int    `yaml:"dbRetainChatRecords"`
-		ChatRecordsClearTime string `yaml:"chatRecordsClearTime"`
+		DBUri                string   `yaml:"dbUri"`
+		DBAddress            []string `yaml:"dbAddress"`
+		DBDirect             bool     `yaml:"dbDirect"`
+		DBTimeout            int      `yaml:"dbTimeout"`
+		DBDatabase           string   `yaml:"dbDatabase"`
+		DBSource             string   `yaml:"dbSource"`
+		DBUserName           string   `yaml:"dbUserName"`
+		DBPassword           string   `yaml:"dbPassword"`
+		DBMaxPoolSize        int      `yaml:"dbMaxPoolSize"`
+		DBRetainChatRecords  int      `yaml:"dbRetainChatRecords"`
+		ChatRecordsClearTime string   `yaml:"chatRecordsClearTime"`
 	}
 	Redis struct {
 		DBAddress     []string `yaml:"dbAddress"`
@@ -157,6 +158,8 @@ type config struct {
 	Etcd struct {
 		EtcdSchema string   `yaml:"etcdSchema"`
 		EtcdAddr   []string `yaml:"etcdAddr"`
+		UserName   string   `yaml:"userName"`
+		Password   string   `yaml:"password"`
 	}
 	Log struct {
 		StorageLocation       string   `yaml:"storageLocation"`
@@ -205,6 +208,8 @@ type config struct {
 			Enable       bool   `yaml:"enable"`
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
+			ChannelID    string `yaml:"channelID"`
+			ChannelName  string `yaml:"channelName"`
 		}
 		Fcm struct {
 			ServiceAccount string `yaml:"serviceAccount"`
@@ -218,7 +223,9 @@ type config struct {
 	}
 
 	Kafka struct {
-		Ws2mschat struct {
+		SASLUserName string `yaml:"SASLUserName"`
+		SASLPassword string `yaml:"SASLPassword"`
+		Ws2mschat    struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
@@ -545,7 +552,6 @@ type PDefaultTips struct {
 
 func init() {
 	cfgName := os.Getenv("CONFIG_NAME")
-	fmt.Println("GET IM DEFAULT CONFIG PATH :", Root, "ENV PATH:", cfgName)
 	if len(cfgName) != 0 {
 		bytes, err := ioutil.ReadFile(filepath.Join(cfgName, "config", "config.yaml"))
 		if err != nil {

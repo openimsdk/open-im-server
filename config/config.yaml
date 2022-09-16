@@ -7,6 +7,8 @@ serverversion: 2.3.1
 etcd:
   etcdSchema: openim  #默认即可
   etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
+  userName:
+  password:
 
 k8sMod: false #开启k8s模式 使用pod里面环境变量请求services调用服务 而并非etcd
 
@@ -20,10 +22,13 @@ mysql:
   dbMaxOpenConns: 100
   dbMaxIdleConns: 10
   dbMaxLifeTime: 5
+  logLevel: 1 #1=slient 2=error 3=warn 4=info
+  slowThreshold: 500
 
 mongo:
   dbUri: ""#当dbUri值不为空则直接使用该值
-  dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
+  #dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
+  dbAddress: [ 127.0.0.1:37017 ]  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
   dbDirect: false
   dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
@@ -44,6 +49,8 @@ redis:
   enableCluster: false #如果外部redis以集群方式启动，需要打开此开关
 
 kafka:
+  SASLUserName: 
+  SASLPassword:
   ws2mschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ws2ms_chat" #用于mongo和mysql保存消息
@@ -116,7 +123,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     appBucket: app # 存储app的桶
     location: us-east-1
     endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
-    endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以填写
+    endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID: user12345
     secretAccessKey: key12345
@@ -227,6 +234,8 @@ push:
     appKey: ""
     intent: ""
     enable: false
+    channelID: ""
+    channelName: ""
   fcm:  #firebase cloud message 消息推送
     serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
     enable: false

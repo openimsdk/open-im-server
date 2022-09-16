@@ -2,6 +2,7 @@ package main
 
 import (
 	"Open_IM/internal/cms_api"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
@@ -24,6 +25,6 @@ func main() {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
 	address = config.Config.CmsApi.ListenIP + ":" + strconv.Itoa(*ginPort)
-	fmt.Println("start cms api server, address: ", address)
+	fmt.Println("start cms api server, address: ", address, "OpenIM version: ", constant.CurrentVersion, "\n")
 	router.Run(address)
 }

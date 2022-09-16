@@ -65,13 +65,12 @@ func main() {
 	defaultPorts := config.Config.Demo.Port
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10004 as port")
 	flag.Parse()
-	fmt.Println("start demo api server, port: ", *ginPort)
 	address := "0.0.0.0:" + strconv.Itoa(*ginPort)
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
 	address = config.Config.CmsApi.ListenIP + ":" + strconv.Itoa(*ginPort)
-	fmt.Println("start demo api server address: ", address)
+	fmt.Println("start demo api server address: ", address, "OpenIM version: ", constant.CurrentVersion, "\n")
 	go register.OnboardingProcessRoutine()
 	go register.ImportFriendRoutine()
 	err := r.Run(address)
