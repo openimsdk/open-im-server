@@ -45,6 +45,10 @@ func init() {
 	if config.Config.Push.Fcm.Enable {
 		offlinePusher = fcm.NewFcm()
 	}
+
+	if config.Config.Push.Mob.Enable {
+		offlinePusher = mobpush.MobPushClient
+	}
 }
 
 func Run(promethuesPort int) {

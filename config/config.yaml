@@ -230,6 +230,12 @@ push:
   fcm:  #firebase cloud message 消息推送
     serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
     enable: false
+  mob:  #袤博推送
+    appKey: "3377f689a25" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    pushUrl: "https://api.push.mob.com/v3/push/createPush"
+    scheme: "dianzhijiaunilinks://dianzhijia.com?page=rent"
+    appSecret: "77b4e20e94db3a776b87d8693be23e"
+    enable: false
 
 
 

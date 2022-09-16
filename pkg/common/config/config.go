@@ -210,6 +210,13 @@ type config struct {
 			ServiceAccount string `yaml:"serviceAccount"`
 			Enable         bool   `yaml:"enable"`
 		}
+		Mob struct {
+			AppKey    string `yaml:"appKey"`
+			PushUrl   string `yaml:"pushUrl"`
+			Scheme    string `yaml:"scheme"`
+			AppSecret string `yaml:"appSecret"`
+			Enable    bool   `yaml:"enable"`
+		}
 	}
 	Manager struct {
 		AppManagerUid          []string `yaml:"appManagerUid"`
