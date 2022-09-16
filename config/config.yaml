@@ -234,6 +234,8 @@ push:
     appKey: ""
     intent: ""
     enable: false
+    channelID: ""
+    channelName: ""
   fcm:  #firebase cloud message 消息推送
     serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
     enable: false

@@ -88,9 +88,11 @@ type Android struct {
 }
 
 type Notification struct {
-	Title     string `json:"title"`
-	Body      string `json:"body"`
-	ClickType string `json:"click_type"`
+	Title       string `json:"title"`
+	Body        string `json:"body"`
+	ChannelID   string `json:"channelID"`
+	ChannelName string `json:"ChannelName"`
+	ClickType   string `json:"click_type"`
 }
 
 type Options struct {
@@ -135,9 +137,11 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		}{Alias: []string{userIDList[0]}},
 	}
 	pushReq.PushMessage.Notification = Notification{
-		Title:     title,
-		Body:      detailContent,
-		ClickType: "startapp",
+		Title:       title,
+		Body:        detailContent,
+		ClickType:   "startapp",
+		ChannelID:   config.Config.Push.Getui.ChannelID,
+		ChannelName: config.Config.Push.Getui.ChannelName,
 	}
 	pushReq.PushChannel.Ios.Aps.Sound = "default"
 	pushReq.PushChannel.Ios.Aps.Alert = Alert{
