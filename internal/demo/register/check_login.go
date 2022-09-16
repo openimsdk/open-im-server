@@ -48,17 +48,7 @@ func CheckLoginLimit(c *gin.Context) {
 
 	var Limited bool
 	var LimitError error
-	Limited, LimitError = imdb.IsLimitLoginIp(ip)
-	if LimitError != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), LimitError, ip)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": LimitError})
-		return
-	}
-	if Limited {
-		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), Limited, ip, req.UserID)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.LoginLimit, "errMsg": "ip limited Login"})
-		return
-	}
+	// 指定账户指定ip才能登录
 	Limited, LimitError = imdb.IsLimitUserLoginIp(user.UserID, ip)
 	if LimitError != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), LimitError, ip)
@@ -70,6 +60,20 @@ func CheckLoginLimit(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.LoginLimit, "errMsg": "user ip limited Login"})
 		return
 	}
+
+	// 该ip不能登录
+	Limited, LimitError = imdb.IsLimitLoginIp(ip)
+	if LimitError != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), LimitError, ip)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.ErrDB.ErrCode, "errMsg": LimitError})
+		return
+	}
+	if Limited {
+		log.NewInfo(req.OperationID, utils.GetSelfFuncName(), Limited, ip, req.UserID)
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": constant.LoginLimit, "errMsg": "ip limited Login"})
+		return
+	}
+
 	Limited, LimitError = imdb.UserIsBlock(user.UserID)
 	if LimitError != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), LimitError, user.UserID)
