@@ -164,6 +164,8 @@ services:
     depends_on:
     - prometheus
     network_mode: "host" 
+    privileged: true
+    user: root
     # -rw-r-----
 
   node-exporter:

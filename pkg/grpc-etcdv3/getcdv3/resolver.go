@@ -39,6 +39,8 @@ var (
 func NewResolver(schema, etcdAddr, serviceName string, operationID string) (*Resolver, error) {
 	etcdCli, err := clientv3.New(clientv3.Config{
 		Endpoints: strings.Split(etcdAddr, ","),
+		Username:  config.Config.Etcd.UserName,
+		Password:  config.Config.Etcd.Password,
 	})
 	if err != nil {
 		log.Error(operationID, "etcd client v3 failed")

@@ -39,6 +39,7 @@ func initPrometheus() {
 	promePkg.NewGetNewestSeqTotalCounter()
 	promePkg.NewPullMsgBySeqListTotalCounter()
 	promePkg.NewMsgOnlinePushSuccessCounter()
+	promePkg.NewOnlineUserGauges()
 	//promePkg.NewSingleChatMsgRecvSuccessCounter()
 	//promePkg.NewGroupChatMsgRecvSuccessCounter()
 	//promePkg.NewWorkSuperGroupChatMsgRecvSuccessCounter()

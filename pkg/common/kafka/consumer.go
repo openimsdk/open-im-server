@@ -1,8 +1,10 @@
 package kafka
 
 import (
-	"github.com/Shopify/sarama"
+	"Open_IM/pkg/common/config"
 	"sync"
+
+	"github.com/Shopify/sarama"
 )
 
 type Consumer struct {
@@ -17,8 +19,13 @@ func NewKafkaConsumer(addr []string, topic string) *Consumer {
 	p := Consumer{}
 	p.Topic = topic
 	p.addr = addr
-
-	consumer, err := sarama.NewConsumer(p.addr, nil)
+	consumerConfig := sarama.NewConfig()
+	if config.Config.Kafka.UserName != "" && config.Config.Kafka.Password != "" {
+		consumerConfig.Net.SASL.Enable = true
+		consumerConfig.Net.SASL.User = config.Config.Kafka.UserName
+		consumerConfig.Net.SASL.Password = config.Config.Kafka.Password
+	}
+	consumer, err := sarama.NewConsumer(p.addr, consumerConfig)
 	if err != nil {
 		panic(err.Error())
 		return nil

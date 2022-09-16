@@ -64,3 +64,19 @@ func PromeAdd(counter prometheus.Counter, add int) {
 		}
 	}
 }
+
+func PromeGaugeInc(gauges prometheus.Gauge) {
+	if config.Config.Prometheus.Enable {
+		if gauges != nil {
+			gauges.Inc()
+		}
+	}
+}
+
+func PromeGaugeDec(gauges prometheus.Gauge) {
+	if config.Config.Prometheus.Enable {
+		if gauges != nil {
+			gauges.Dec()
+		}
+	}
+}
