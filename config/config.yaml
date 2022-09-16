@@ -8,7 +8,7 @@ etcd:
   etcdSchema: openim  #默认即可
   etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
   userName:
-	password:
+  password:
 
 k8sMod: false #开启k8s模式 使用pod里面环境变量请求services调用服务 而并非etcd
 
@@ -27,13 +27,14 @@ mysql:
 
 mongo:
   dbUri: ""#当dbUri值不为空则直接使用该值
-  dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
+  #dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
+  dbAddress: [ 127.0.0.1:37017 ]  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
   dbDirect: false
   dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
   dbSource: admin
-  dbUserName:  #mongo用户名，建议先不设置
-  dbPassword:  #mongo密码，建议先不设置
+  dbUserName: openIM #mongo用户名，建议先不设置
+  dbPassword: openIM== #mongo密码，建议先不设置
   dbMaxPoolSize: 100
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
   chatRecordsClearTime: "* * * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
@@ -122,7 +123,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     appBucket: app # 存储app的桶
     location: us-east-1
     endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
-    endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以填写
+    endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID: user12345
     secretAccessKey: key12345

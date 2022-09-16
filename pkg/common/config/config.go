@@ -103,17 +103,17 @@ type config struct {
 		SlowThreshold  int      `yaml:"slowThreshold"`
 	}
 	Mongo struct {
-		DBUri                string `yaml:"dbUri"`
-		DBAddress            string `yaml:"dbAddress"`
-		DBDirect             bool   `yaml:"dbDirect"`
-		DBTimeout            int    `yaml:"dbTimeout"`
-		DBDatabase           string `yaml:"dbDatabase"`
-		DBSource             string `yaml:"dbSource"`
-		DBUserName           string `yaml:"dbUserName"`
-		DBPassword           string `yaml:"dbPassword"`
-		DBMaxPoolSize        int    `yaml:"dbMaxPoolSize"`
-		DBRetainChatRecords  int    `yaml:"dbRetainChatRecords"`
-		ChatRecordsClearTime string `yaml:"chatRecordsClearTime"`
+		DBUri                string   `yaml:"dbUri"`
+		DBAddress            []string `yaml:"dbAddress"`
+		DBDirect             bool     `yaml:"dbDirect"`
+		DBTimeout            int      `yaml:"dbTimeout"`
+		DBDatabase           string   `yaml:"dbDatabase"`
+		DBSource             string   `yaml:"dbSource"`
+		DBUserName           string   `yaml:"dbUserName"`
+		DBPassword           string   `yaml:"dbPassword"`
+		DBMaxPoolSize        int      `yaml:"dbMaxPoolSize"`
+		DBRetainChatRecords  int      `yaml:"dbRetainChatRecords"`
+		ChatRecordsClearTime string   `yaml:"chatRecordsClearTime"`
 	}
 	Redis struct {
 		DBAddress     []string `yaml:"dbAddress"`

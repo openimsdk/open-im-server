@@ -91,7 +91,7 @@ func (ws *WServer) readMsg(conn *UserConn) {
 			log.NewInfo("", "this is a  pingMessage")
 		}
 		if err != nil {
-			log.Error("", "WS ReadMsg error ", " userIP", conn.RemoteAddr().String(), "userUid", "platform", "error", err.Error())
+			log.NewWarn("", "WS ReadMsg error ", " userIP", conn.RemoteAddr().String(), "userUid", "platform", "error", err.Error())
 			userCount--
 			ws.delUserConn(conn)
 			return

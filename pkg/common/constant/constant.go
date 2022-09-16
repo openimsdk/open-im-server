@@ -337,4 +337,4 @@ const StatisticsTimeInterval = 60
 
 const MaxNotificationNum = 100
 
-const CurrentVersion = "v2.3.3"
+const CurrentVersion = "v2.3.3-rc0"
