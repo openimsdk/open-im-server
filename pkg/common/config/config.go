@@ -208,6 +208,8 @@ type config struct {
 			Enable       bool   `yaml:"enable"`
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
+			ChannelID    string `yaml:"channelID"`
+			ChannelName  string `yaml:"channelName"`
 		}
 		Fcm struct {
 			ServiceAccount string `yaml:"serviceAccount"`

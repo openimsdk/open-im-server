@@ -26,13 +26,22 @@ func IsLimitLoginIp(LoginIp string) (bool, error) {
 	return count > 0, nil
 }
 
-func IsLimitUserLoginIp(userID string, LoginIp string) (bool, error) {
+func IsLimitUserLoginIp(userID string, loginIp string) (limit bool, err error) {
 	//如果已经存在则放行
 	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("user_ip_limits").Where("ip=? and user_id=?", LoginIp, userID).Count(&count).Error; err != nil {
-		return false, err
+	result := db.DB.MysqlDB.DefaultGormDB().Table("user_ip_limits").Where("user_id=?", userID).Count(&count)
+	if err := result.Error; err != nil {
+		return true, err
 	}
-	return count == 0, nil
+	if count < 1 {
+		return false, nil
+	}
+	result = db.DB.MysqlDB.DefaultGormDB().Table("user_ip_limits").Where("user_id=? and ip = ?", userID, loginIp).Count(&count)
+	if err := result.Error; err != nil {
+		return true, err
+	}
+
+	return count > 0, nil
 }
 
 func QueryIPLimits(ip string) (*db.IpLimit, error) {
