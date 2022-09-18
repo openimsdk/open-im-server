@@ -96,24 +96,31 @@ func init() {
 	// mongodb create index
 	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
 		fmt.Println("send_id", "-send_time", "index create failed", err.Error())
+		panic(err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cChat, true, "uid"); err != nil {
 		fmt.Println("uid", " index create failed", err.Error())
+		panic(err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
 		fmt.Println("-create_time", "work_moment_id", "index create failed", err.Error())
+		panic(err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cWorkMoment, true, "work_moment_id"); err != nil {
 		fmt.Println("work_moment_id", "index create failed", err.Error())
+		panic(err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cWorkMoment, false, "user_id", "-create_time"); err != nil {
 		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
+		panic(err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cTag, false, "user_id", "-create_time"); err != nil {
 		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
+		panic(err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
 		fmt.Println("tag_id", "index create failed", err.Error())
+		panic(err.Error())
 	}
 	fmt.Println("createMongoIndex success")
 	DB.mongoClient = mongoClient
