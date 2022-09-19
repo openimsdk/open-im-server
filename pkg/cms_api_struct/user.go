@@ -67,7 +67,7 @@ type GetBlockUsersResponse struct {
 
 type GetUserIDByEmailAndPhoneNumberRequest struct {
 	OperationID string `json:"operationID" binding:"required"`
-	PhoneNumber string `json:"operationID"`
+	PhoneNumber string `json:"phoneNumber"`
 	Email       string `json:"email"`
 }
 
