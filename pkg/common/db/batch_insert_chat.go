@@ -92,6 +92,8 @@ func (d *DataBases) BatchInsertChat2DB(userID string, msgList []*pbMsg.MsgDataTo
 				log.Error(operationID, "FindOneAndUpdate failed ", err.Error(), filter)
 				return utils.Wrap(err, "")
 			}
+		} else {
+			promePkg.PromeInc(promePkg.MsgInsertMongoSuccessCounter)
 		}
 	}
 	if seqUidNext != "" {
