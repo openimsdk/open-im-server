@@ -116,6 +116,6 @@ type GetUserInOrganizationReq struct {
 
 type GetUserInOrganizationResp struct {
 	CommResp
-	OrganizationUserList []*open_im_sdk.OrganizationUser `json:"organizationUserList"`
+	OrganizationUserList []*open_im_sdk.OrganizationUser `json:"-"`
 	Data                 []map[string]interface{}        `json:"data" swaggerignore:"true"`
 }
