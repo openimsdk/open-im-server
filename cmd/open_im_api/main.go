@@ -214,7 +214,7 @@ func main() {
 
 		organizationGroup.POST("/get_department_member", organization.GetDepartmentMember)
 		organizationGroup.POST("/delete_user_in_department", organization.DeleteUserInDepartment)
-
+		organizationGroup.POST("/get_user_in_organization", organization.GetUserInOrganization)
 	}
 
 	initGroup := r.Group("/init")
