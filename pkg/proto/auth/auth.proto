@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 package pbAuth;
 option go_package = "./auth;pbAuth";
 
