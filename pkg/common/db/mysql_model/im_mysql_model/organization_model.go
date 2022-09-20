@@ -89,6 +89,12 @@ func GetOrganizationUser(userID string) (error, *db.OrganizationUser) {
 	return err, &organizationUser
 }
 
+func GetOrganizationUsers(userIDList []string) ([]*db.OrganizationUser, error) {
+	var organizationUserList []*db.OrganizationUser
+	err := db.DB.MysqlDB.DefaultGormDB().Table("organization_users").Where("user_id in (?)", userIDList).Find(&organizationUserList).Error
+	return organizationUserList, err
+}
+
 func UpdateOrganizationUser(organizationUser *db.OrganizationUser, args map[string]interface{}) error {
 	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 	if err != nil {
