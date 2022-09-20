@@ -552,3 +552,24 @@ func (s *organizationServer) GetDepartmentRelatedGroupIDList(ctx context.Context
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
+
+func (s *organizationServer) GetUserInOrganization(_ context.Context, req *rpc.GetUserInOrganizationReq) (resp *rpc.GetUserInOrganizationResp, err error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp = &rpc.GetUserInOrganizationResp{}
+	organizationUserList, err := imdb.GetOrganizationUsers(req.UserIDList)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
+		resp.ErrCode = constant.ErrDB.ErrCode
+		resp.ErrMsg = err.Error()
+		return resp, nil
+	}
+	for _, v := range organizationUserList {
+		organizationUser := &open_im_sdk.OrganizationUser{}
+		utils.CopyStructFields(organizationUser, v)
+		organizationUser.CreateTime = uint32(v.CreateTime.Unix())
+		organizationUser.Birth = uint32(v.CreateTime.Unix())
+		resp.OrganizationUsers = append(resp.OrganizationUsers, organizationUser)
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}

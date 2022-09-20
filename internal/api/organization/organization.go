@@ -657,3 +657,40 @@ func DeleteUserInDepartment(c *gin.Context) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api return ", apiResp)
 	c.JSON(http.StatusOK, apiResp)
 }
+
+func GetUserInOrganization(c *gin.Context) {
+	req := api.GetUserInOrganizationReq{}
+	if err := c.BindJSON(&req); err != nil {
+		log.NewError(req.OperationID, "BindJSON failed ", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		return
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req)
+	err, _ := token_verify.ParseTokenGetUserID(c.Request.Header.Get("token"), req.OperationID)
+	if err != nil {
+		errMsg := "ParseTokenGetUserID failed " + err.Error() + c.Request.Header.Get("token")
+		log.NewError(req.OperationID, errMsg, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImOrganizationName, req.OperationID)
+	if etcdConn == nil {
+		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	reqPb := &rpc.GetUserInOrganizationReq{OperationID: req.OperationID, UserIDList: req.UserIDList}
+	client := rpc.NewOrganizationClient(etcdConn)
+	respPb, err := client.GetUserInOrganization(context.Background(), reqPb)
+	if err != nil {
+		errMsg := "rpc DeleteUserInDepartment failed " + err.Error() + reqPb.String()
+		log.NewError(req.OperationID, errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+		return
+	}
+	apiResp := api.GetUserInOrganizationResp{CommResp: api.CommResp{ErrCode: respPb.ErrCode, ErrMsg: respPb.ErrMsg}, OrganizationUserList: respPb.OrganizationUsers}
+	apiResp.Data = jsonData.JsonDataList(apiResp.OrganizationUserList)
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "api return ", apiResp)
+	c.JSON(http.StatusOK, apiResp)
+}
