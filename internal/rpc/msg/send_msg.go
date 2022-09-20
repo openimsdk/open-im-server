@@ -535,7 +535,7 @@ func (rpc *rpcChat) sendMsgToKafka(m *pbChat.MsgDataToMQ, key string, status str
 		if m.MsgData.ContentType == constant.SignalingNotification {
 			rpcPushMsg := pbPush.PushMsgReq{OperationID: m.OperationID, MsgData: m.MsgData, PushToUserID: key}
 			grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName, m.OperationID)
-			if grpcConn != nil {
+			if grpcConn == nil {
 				log.Error(rpcPushMsg.OperationID, "rpc dial failed", "push data", rpcPushMsg.String())
 				return errors.New("grpcConn is nil")
 			}
