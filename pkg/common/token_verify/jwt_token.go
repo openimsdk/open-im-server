@@ -6,10 +6,10 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
+	"golang.org/x/oauth2/jwt"
 	"time"
 
 	go_redis "github.com/go-redis/redis/v8"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 //var (
@@ -179,19 +179,6 @@ func ParseTokenGetUserID(token string, operationID string) (error, string) {
 func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 	claims, err = GetClaimFromToken(tokensString)
 	if err != nil {
-		//if errors.Is(err, constant.ErrTokenUnknown) {
-		//	errMsg := "GetClaimFromToken failed ErrTokenUnknown   " + err.Error()
-		//	log.Error(operationID, errMsg)
-		//}
-		//info := err.(constant.ErrInfo)
-		//log.Error(operationID, "detail info , ", info.ErrCode, info.ErrMsg)
-		//
-		//e := errors.Unwrap(err)
-		//if errors.Is(e, constant.ErrTokenUnknown) {
-		//	errMsg := "ParseToken failed ErrTokenUnknown " + e.Error()
-		//	log.Error(operationID, errMsg)
-		//}
-
 		return nil, utils.Wrap(err, "")
 	}
 
