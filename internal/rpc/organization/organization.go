@@ -566,6 +566,8 @@ func (s *organizationServer) GetUserInOrganization(_ context.Context, req *rpc.G
 	for _, v := range organizationUserList {
 		organizationUser := &open_im_sdk.OrganizationUser{}
 		utils.CopyStructFields(organizationUser, v)
+		organizationUser.CreateTime = uint32(v.CreateTime.Unix())
+		organizationUser.Birth = uint32(v.CreateTime.Unix())
 		resp.OrganizationUsers = append(resp.OrganizationUsers, organizationUser)
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
