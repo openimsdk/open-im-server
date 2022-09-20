@@ -680,7 +680,7 @@ func GetUserInOrganization(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
-	reqPb := &rpc.GetUserInOrganizationReq{}
+	reqPb := &rpc.GetUserInOrganizationReq{OperationID: req.OperationID, UserIDList: req.UserIDList}
 	client := rpc.NewOrganizationClient(etcdConn)
 	respPb, err := client.GetUserInOrganization(context.Background(), reqPb)
 	if err != nil {
