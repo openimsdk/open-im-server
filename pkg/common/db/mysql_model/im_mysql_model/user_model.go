@@ -257,6 +257,22 @@ func GetUsersByNameAndID(content string, showNumber, pageNumber int32) ([]db.Use
 	return users, count, err
 }
 
+func GetUserIDsByEmailAndID(phoneNumber, email string) ([]string, error) {
+	db := db.DB.MysqlDB.DefaultGormDB().Table("users")
+	if phoneNumber == "" && email == "" {
+		return nil, nil
+	}
+	if phoneNumber != "" {
+		db = db.Where("phone_number = ? ", phoneNumber)
+	}
+	if email != "" {
+		db = db.Where("email = ? ", email)
+	}
+	var userIDList []string
+	err := db.Pluck("user_id", &userIDList).Error
+	return userIDList, err
+}
+
 func GetUsersCount(userName string) (int32, error) {
 	var count int64
 	if err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error; err != nil {

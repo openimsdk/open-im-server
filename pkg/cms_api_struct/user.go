@@ -64,3 +64,13 @@ type GetBlockUsersResponse struct {
 	ResponsePagination
 	UserNums int32 `json:"userNums"`
 }
+
+type GetUserIDByEmailAndPhoneNumberRequest struct {
+	OperationID string `json:"operationID" binding:"required"`
+	PhoneNumber string `json:"phoneNumber"`
+	Email       string `json:"email"`
+}
+
+type GetUserIDByEmailAndPhoneNumberResponse struct {
+	UserIDList []string `json:"userIDList"`
+}
