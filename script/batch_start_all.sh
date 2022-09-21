@@ -3,6 +3,13 @@
 #fixme The full name of the shell script that needs to be started is placed in the need_to_start_server_shell array
 
 #fixme Put the shell script name here
+dir_name=`dirname $0`
+if [ "${dir_name:0:1}" = "/" ]; then
+  cur_dir="`dirname $0`"
+else
+  cur_dir="`pwd`"/"`dirname $0`"
+fi
+
 need_to_start_server_shell=(
   start_rpc_service.sh
   msg_gateway_start.sh
@@ -12,19 +19,19 @@ need_to_start_server_shell=(
   demo_svr_start.sh
 )
 time=`date +"%Y-%m-%d %H:%M:%S"`
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========server start time:${time}===========">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
-echo "==========================================================">>../logs/openIM.log 2>&1 &
+echo "==========================================================">>$cur_dir/../logs/openIM.log 2>&1 &
+echo "==========================================================">>$cur_dir/../logs/openIM.log 2>&1 &
+echo "==========================================================">>$cur_dir/../logs/openIM.log 2>&1 &
+echo "==========server start time:${time}===========">>$cur_dir/../logs/openIM.log 2>&1 &
+echo "==========================================================">>$cur_dir/../logs/openIM.log 2>&1 &
+echo "==========================================================">>$cur_dir/../logs/openIM.log 2>&1 &
+echo "==========================================================">>$cur_dir/../logs/openIM.log 2>&1 &
 
 build_pid_array=()
 idx=0
 for i in ${need_to_start_server_shell[*]}; do
-  chmod +x $i
-  ./$i &
+  chmod +x $cur_dir/$i
+  $cur_dir/$i &
   build_pid=$!
   echo "build_pid " $build_pid
   build_pid_array[idx]=$build_pid

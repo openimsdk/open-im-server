@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
+dir_name=`dirname $0`
+if [ "${dir_name:0:1}" = "/" ]; then
+  cur_dir="`dirname $0`"
+else
+  cur_dir="`pwd`"/"`dirname $0`"
+fi
 
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+source "$cur_dir/style_info.cfg"
+source "$cur_dir/path_info.cfg"
+source "$cur_dir/function.sh"
 
-bin_dir="../bin"
-logs_dir="../logs"
-sdk_db_dir="../db/sdk/"
+bin_dir="$cur_dir/../bin"
+logs_dir="$cur_dir/../logs"
+sdk_db_dir="$cur_dir/../db/sdk/"
 #Automatically created when there is no bin, logs folder
 if [ ! -d $bin_dir ]; then
   mkdir -p $bin_dir
@@ -19,7 +25,7 @@ if [ ! -d $sdk_db_dir ]; then
 fi
 
 #begin path
-begin_path=$PWD
+begin_path=$cur_dir
 
 
 build_pid_array=()

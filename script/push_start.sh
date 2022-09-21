@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 #Include shell font styles and some basic information
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+dir_name=`dirname $0`
+if [ "${dir_name:0:1}" = "/" ]; then
+  cur_dir="`dirname $0`"
+else
+  cur_dir="`pwd`"/"`dirname $0`"
+fi
+
+source "$cur_dir/style_info.cfg"
+source "$cur_dir/path_info.cfg"
+source "$cur_dir/function.sh"
 
 
 

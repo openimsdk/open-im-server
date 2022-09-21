@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 #Include shell font styles and some basic information
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+dir_name=`dirname $0`
+if [ "${dir_name:0:1}" = "/" ]; then
+  cur_dir="`dirname $0`"
+else
+  cur_dir="`pwd`"/"`dirname $0`"
+fi
+
+source "$cur_dir/style_info.cfg"
+source "$cur_dir/path_info.cfg"
+source "$cur_dir/function.sh"
 switch=$(cat $config_path | grep demoswitch |awk -F '[:]' '{print $NF}')
 if [ ${switch} != "true" ]; then
       echo -e ${YELLOW_PREFIX}" demo service switch is false not start demo "${COLOR_SUFFIX}
@@ -24,7 +31,7 @@ sleep 1
 cd ${demo_server_binary_root}
 
 for ((i = 0; i < ${#api_ports[@]}; i++)); do
-  nohup ./${demo_server_name} -port ${api_ports[$i]} >>../logs/openIM.log 2>&1 &
+  nohup ./${demo_server_name} -port ${api_ports[$i]} >>$cur_dir/../logs/openIM.log 2>&1 &
 done
 
 sleep 3

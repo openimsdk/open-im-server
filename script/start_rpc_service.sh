@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
+dir_name=`dirname $0`
+if [ "${dir_name:0:1}" = "/" ]; then
+  cur_dir="`dirname $0`"
+else
+  cur_dir="`pwd`"/"`dirname $0`"
+fi
 
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+source "$cur_dir/style_info.cfg"
+source "$cur_dir/path_info.cfg"
+source "$cur_dir/function.sh"
 
 #service filename
 service_filename=(
@@ -70,7 +76,7 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
     kill -9 $(eval $pid)
     sleep 0.5
   fi
-  cd ../bin
+  cd "$cur_dir/../bin"
   #Get the rpc port in the configuration file
   portList=$(cat $config_path | grep ${service_port_name[$i]} | awk -F '[:]' '{print $NF}')
   list_to_string ${portList}
@@ -87,7 +93,7 @@ for ((i = 0; i < ${#service_filename[*]}; i++)); do
       cmd="./${service_filename[$i]} -port ${service_ports[$j]}"
     fi
     echo $cmd
-    nohup $cmd >>../logs/openIM.log 2>&1 &
+    nohup $cmd >>$cur_dir/../logs/openIM.log 2>&1 &
     sleep 1
     pid="netstat -ntlp|grep $j |awk '{printf \$7}'|cut -d/ -f1"
     echo -e "${GREEN_PREFIX}${service_filename[$i]} start success,port number:${service_ports[$j]} pid:$(eval $pid)$COLOR_SUFFIX"

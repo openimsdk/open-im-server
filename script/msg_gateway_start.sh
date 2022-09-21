@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 #Include shell font styles and some basic information
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+dir_name=`dirname $0`
+if [ "${dir_name:0:1}" = "/" ]; then
+  cur_dir="`dirname $0`"
+else
+  cur_dir="`pwd`"/"`dirname $0`"
+fi
+
+source "$cur_dir/style_info.cfg"
+source "$cur_dir/path_info.cfg"
+source "$cur_dir/function.sh"
 ulimit -n 200000
 
 list1=$(cat $config_path | grep openImMessageGatewayPort | awk -F '[:]' '{print $NF}')
@@ -31,7 +38,7 @@ fi
 sleep 1
 cd ${msg_gateway_binary_root}
 for ((i = 0; i < ${#ws_ports[@]}; i++)); do
-  nohup ./${msg_gateway_name} -rpc_port ${rpc_ports[$i]} -ws_port ${ws_ports[$i]} -prometheus_port ${prome_ports[$i]} >>../logs/openIM.log 2>&1 &
+  nohup ./${msg_gateway_name} -rpc_port ${rpc_ports[$i]} -ws_port ${ws_ports[$i]} -prometheus_port ${prome_ports[$i]} >>$cur_path/../logs/openIM.log 2>&1 &
 done
 
 #Check launched service process

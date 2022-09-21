@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 #Include shell font styles and some basic information
-source ./style_info.cfg
-source ./path_info.cfg
-source ./function.sh
+dir_name=`dirname $0`
+if [ "${dir_name:0:1}" = "/" ]; then
+  cur_dir="`dirname $0`"
+else
+  cur_dir="`pwd`"/"`dirname $0`"
+fi
+
+source "$cur_dir/style_info.cfg"
+source "$cur_dir/path_info.cfg"
+source "$cur_dir/function.sh"
 
 list1=$(cat $config_path | grep messageTransferPrometheusPort | awk -F '[:]' '{print $NF}')
 list_to_string $list1
@@ -27,7 +34,7 @@ for ((i = 0; i < ${msg_transfer_service_num}; i++)); do
       if [ $prome_port != "" ]; then
         cmd="$cmd -prometheus_port $prome_port"
       fi
-      $cmd >>../logs/openIM.log 2>&1 &
+      $cmd >>$cur_dir/../logs/openIM.log 2>&1 &
 done
 
 #Check launched service process
