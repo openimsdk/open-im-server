@@ -96,6 +96,11 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 			return callbackResp
 		}
 	}
+	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow {
+		if resp.OfflinePushInfo != nil {
+			msg.OfflinePushInfo = resp.OfflinePushInfo
+		}
+	}
 	return callbackResp
 }
 
@@ -133,8 +138,13 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 			return callbackResp
 		}
 	}
-	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow && len(resp.UserIDList) != 0 {
-		*pushToUserList = resp.UserIDList
+	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow {
+		if len(resp.UserIDList) != 0 {
+			*pushToUserList = resp.UserIDList
+		}
+		if resp.OfflinePushInfo != nil {
+			msg.OfflinePushInfo = resp.OfflinePushInfo
+		}
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), pushToUserList, resp.UserIDList)
 	return callbackResp
