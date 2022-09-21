@@ -13,5 +13,5 @@ for ((i = 0; i < ${#all_proto[*]}; i++)); do
 done
 echo "proto file generate success"
 
-find ./ -type f -path "*.pb.go"|xargs sed -i 's/\".\/sdk_ws\"/\"Open_IM\/pkg\/proto\/sdk_ws\"/g'
+#find ./ -type f -path "*.pb.go"|xargs sed -i 's/\".\/sdk_ws\"/\"Open_IM\/pkg\/proto\/sdk_ws\"/g'
 
