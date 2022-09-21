@@ -50,7 +50,7 @@ message ParseTokenReq{
 
 message ParseTokenResp{
     string userID = 1;
-    string operationID = 2;
+    string platform = 2;
     CommonResp commonResp = 3;
     uint32 expireTimeSeconds = 4;
 }
