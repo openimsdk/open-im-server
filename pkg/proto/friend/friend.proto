@@ -167,6 +167,6 @@ service friend{
   rpc setFriendRemark(SetFriendRemarkReq) returns(SetFriendRemarkResp);
   rpc importFriend(ImportFriendReq)  returns(ImportFriendResp);
 
-  rpc CheckFriendFromCache(IsFriendReq) returns(IsFriendResp);
-  rpc CheckBlockFromCache(IsInBlackListReq) returns(IsFriendResp);
+  // rpc CheckFriendFromCache(IsFriendReq) returns(IsFriendResp);
+  // rpc CheckBlockFromCache(IsInBlackListReq) returns(IsFriendResp);
 }
