@@ -8,7 +8,7 @@ for ((i = 0; i < ${#all_proto[*]}; i++)); do
   protoc -I ../../../  -I ./ --go_out=plugins=grpc:. $proto
   echo "protoc --go_out=plugins=grpc:." $proto
 done
-echo "proto file generate success..."
+echo "proto file generate success"
 
 find ./ -type f -path "*.pb.go"|xargs sed -i 's/\".\/sdk_ws\"/\"Open_IM\/pkg\/proto\/sdk_ws\"/g'
 
