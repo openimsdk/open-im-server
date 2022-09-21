@@ -6,10 +6,10 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
-	"golang.org/x/oauth2/jwt"
 	"time"
 
 	go_redis "github.com/go-redis/redis/v8"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 //var (
