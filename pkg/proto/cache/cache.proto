@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./cache;cache";
+option go_package = "Open_IM/pkg/proto/cache;cache";
 package cache;
 
 message CommonResp{

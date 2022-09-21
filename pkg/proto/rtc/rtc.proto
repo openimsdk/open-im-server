@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./rtc;rtc";
+option go_package = "Open_IM/pkg/proto/rtc;rtc";
 package proto;
 
 message CommonResp{

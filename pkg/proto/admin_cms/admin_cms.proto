@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./admin_cms;admin_cms";
+option go_package = "Open_IM/pkg/proto/admin_cms;admin_cms";
 import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 package admin_cms;
 
