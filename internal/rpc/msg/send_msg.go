@@ -933,6 +933,7 @@ func Notification(n *NotificationMsg) {
 		log.NewError(req.OperationID, "SendMsg rpc failed, ", req.String(), reply.ErrCode, reply.ErrMsg)
 	}
 }
+
 func getOnlineAndOfflineUserIDList(memberList []string, m map[string][]string, operationID string) {
 	var onllUserIDList, offlUserIDList []string
 	var wsResult []*pbRelay.GetUsersOnlineStatusResp_SuccessResult

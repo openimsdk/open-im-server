@@ -42,6 +42,18 @@ message ForceLogoutResp {
     CommonResp CommonResp = 1;
 }
 
+message ParseTokenReq{
+    string token = 1;
+    string operationID = 2;
+}
+
+
+message ParseTokenResp{
+    string userID = 1;
+    string operationID = 2;
+    CommonResp commonResp = 3;
+    uint32 expireTimeSeconds = 4;
+}
 
 
 
@@ -50,4 +62,7 @@ service Auth {
     rpc UserRegister(UserRegisterReq) returns(UserRegisterResp);
     rpc UserToken(UserTokenReq) returns(UserTokenResp);
     rpc ForceLogout(ForceLogoutReq) returns(ForceLogoutResp);
+    rpc ParseToken(ParseTokenReq)returns(ParseTokenResp);
 }
+
+
