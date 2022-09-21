@@ -98,7 +98,7 @@ func init() {
 		fmt.Println("send_id", "-send_time", "index create failed", err.Error())
 		panic(err.Error())
 	}
-	if err := createMongoIndex(mongoClient, cChat, true, "uid"); err != nil {
+	if err := createMongoIndex(mongoClient, cChat, false, "uid"); err != nil {
 		fmt.Println("uid", " index create failed", err.Error())
 		panic(err.Error())
 	}
