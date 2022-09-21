@@ -475,6 +475,9 @@ func GetGroupMemberNumFromCache(groupID string) (int64, error) {
 		return strconv.Itoa(int(num)), nil
 	}
 	groupMember, err := db.DB.Rc.Fetch(groupMemberNumCache+groupID, time.Second*30*60, getGroupMemberNum)
+	if err != nil {
+		return 0, utils.Wrap(err, "")
+	}
 	num, err := strconv.Atoi(groupMember)
 	return int64(num), err
 }
