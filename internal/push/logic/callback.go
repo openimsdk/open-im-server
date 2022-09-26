@@ -62,7 +62,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 
 func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.MsgData) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
-	if !config.Config.Callback.CallbackOnlinePush.Enable {
+	if !config.Config.Callback.CallbackOnlinePush.Enable || utils.IsContain(msg.SendID, userIDList) {
 		return callbackResp
 	}
 	req := cbApi.CallbackBeforePushReq{
