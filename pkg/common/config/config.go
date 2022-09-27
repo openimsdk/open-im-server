@@ -511,11 +511,11 @@ type config struct {
 		JoinDepartmentIDList                    []string `yaml:"joinDepartmentIDList"`
 		JoinDepartmentGroups                    bool     `yaml:"joinDepartmentGroups"`
 		OaNotification                          bool     `yaml:"oaNotification"`
-		CreateOrganizationUserAndJoinDepartment bool     `json:"createOrganizationUserAndJoinDepartment"`
+		CreateOrganizationUserAndJoinDepartment bool     `yaml:"createOrganizationUserAndJoinDepartment"`
 	}
 	WorkMoment struct {
 		OnlyFriendCanSee bool `yaml:"onlyFriendCanSee"`
-	}
+	} `yaml:"workMoment"`
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
 	} `yaml:"rtc"`
