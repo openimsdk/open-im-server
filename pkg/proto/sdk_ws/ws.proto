@@ -545,15 +545,15 @@ message SignalResp {
 message InvitationInfo  {
     string inviterUserID = 1;
     repeated string inviteeUserIDList = 2;
-    repeated string busyLineUserIDList = 3;
-    string customData = 4;
-    string  groupID = 5;
-    string roomID = 6;
-    int32 timeout = 7;
-    string mediaType = 8;
-    int32 platformID = 9;
-    int32 sessionType = 10;
-    int32 initiateTime = 11;
+    string customData = 3;
+    string  groupID = 4;
+    string roomID = 5;
+    int32 timeout = 6;
+    string mediaType = 7;
+    int32 platformID = 8;
+    int32 sessionType = 9;
+    int32 initiateTime = 10;
+    repeated string busyLineUserIDList = 11;
 }
 
 message ParticipantMetaData{
