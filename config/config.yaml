@@ -758,6 +758,10 @@ demo:
   joinDepartmentGroups: false # 注册是否加部门群
   oaNotification: false # 注册是否发送OA通知
 
+workMoment:
+  onlyFriendCanSee: false
+
+
 rtc:
   signalTimeout: 35
 

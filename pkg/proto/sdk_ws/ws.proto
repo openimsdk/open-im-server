@@ -534,7 +534,7 @@ message SignalResp {
   oneof payload {
     SignalInviteReply invite = 1;
     SignalInviteInGroupReply inviteInGroup= 2;
-    SignalCancelReply  cancel = 3;
+    SignalCancelReply cancel = 3;
     SignalAcceptReply accept = 4;
     SignalHungUpReply hungUp = 5;
     SignalRejectReply reject = 6;
@@ -573,6 +573,7 @@ message SignalInviteReply {
   string token = 1;
   string roomID = 2;
   string liveURL = 3;
+  repeated string busyLineUserIDList = 4;
 }
 
 message SignalInviteInGroupReq {
@@ -586,6 +587,7 @@ message SignalInviteInGroupReply {
   string token = 1;
   string roomID = 2;
   string liveURL = 3;
+  repeated string busyLineUserIDList = 4;
 }
 
 message SignalCancelReq {
@@ -639,11 +641,12 @@ message SignalRejectReply {
 message SignalGetRoomByGroupIDReq {
   string opUserID = 1;
   string groupID = 2;
+  ParticipantMetaData participant = 3;
 }
 
 message SignalGetRoomByGroupIDReply {
   InvitationInfo invitation = 1;
-  repeated string onConnectingUserIDList = 2;
+  repeated ParticipantMetaData participant = 2;
   string token = 3;
   string roomID = 4;
   string liveURL = 5;

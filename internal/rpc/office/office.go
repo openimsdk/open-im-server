@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -674,7 +675,16 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.GetUserFriendWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
 	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
-	workMoments, err := db.DB.GetUserFriendWorkMoments(req.Pagination.ShowNumber, req.Pagination.PageNumber, req.UserID)
+	var friendIDList []string
+	if config.Config.WorkMoment.OnlyFriendCanSee {
+		friendIDList, err = rocksCache.GetFriendIDListFromCache(req.UserID)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserFriendWorkMoments", err.Error())
+			resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}
+			return resp, nil
+		}
+	}
+	workMoments, err := db.DB.GetUserFriendWorkMoments(req.Pagination.ShowNumber, req.Pagination.PageNumber, req.UserID, friendIDList)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserFriendWorkMoments", err.Error())
 		resp.CommonResp = &pbOffice.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
@@ -684,7 +694,7 @@ func (s *officeServer) GetUserFriendWorkMoments(_ context.Context, req *pbOffice
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", err.Error())
 	}
 	for _, v := range resp.WorkMoments {
-		user, err := imdb.GetUserByUserID(v.UserID)
+		user, err := rocksCache.GetUserInfoFromCache(v.UserID)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
 		}

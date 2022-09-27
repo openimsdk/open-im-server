@@ -142,6 +142,7 @@ message SignalInviteReply {
   string token = 1;
   string roomID = 2;
   string liveURL = 3;
+  repeated string busyLineUserIDList = 4;
 }
 
 message SignalInviteInGroupReq {
@@ -155,6 +156,7 @@ message SignalInviteInGroupReply {
   string token = 1;
   string roomID = 2;
   string liveURL = 3;
+  repeated string busyLineUserIDList = 4;
 }
 
 message SignalCancelReq {
@@ -208,11 +210,12 @@ message SignalRejectReply {
 message SignalGetRoomByGroupIDReq {
   string opUserID = 1;
   string groupID = 2;
+  ParticipantMetaData participant = 3;
 }
 
 message SignalGetRoomByGroupIDReply {
   InvitationInfo invitation = 1;
-  repeated string onConnectingUserIDList = 2;
+  repeated ParticipantMetaData metaData = 2;
   string token = 3;
   string roomID = 4;
   string liveURL = 5;
@@ -229,6 +232,8 @@ message SignalMessageAssembleResp {
  SignalResp signalResp = 3;
  MsgData msgData = 4;
 }
+
+
 
 service RtcService {
  rpc SignalMessageAssemble(SignalMessageAssembleReq) returns(SignalMessageAssembleResp);

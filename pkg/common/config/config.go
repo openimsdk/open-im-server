@@ -513,6 +513,9 @@ type config struct {
 		OaNotification                          bool     `yaml:"oaNotification"`
 		CreateOrganizationUserAndJoinDepartment bool     `json:"createOrganizationUserAndJoinDepartment"`
 	}
+	WorkMoment struct {
+		OnlyFriendCanSee bool `yaml:"onlyFriendCanSee"`
+	}
 	Rtc struct {
 		SignalTimeout string `yaml:"signalTimeout"`
 	} `yaml:"rtc"`
