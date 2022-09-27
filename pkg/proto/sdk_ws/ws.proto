@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/wrappers.proto";
-option go_package = "./sdk_ws;server_api_params";
+import "Open-IM-Server/pkg/proto/sdk_ws/wrappers.proto";
+option go_package = "Open_IM/pkg/proto/sdk_ws;server_api_params";
 package server_api_params;
 
 

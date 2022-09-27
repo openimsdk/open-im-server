@@ -62,7 +62,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 
 func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.MsgData) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
-	if !config.Config.Callback.CallbackOnlinePush.Enable {
+	if !config.Config.Callback.CallbackOnlinePush.Enable || utils.IsContain(msg.SendID, userIDList) {
 		return callbackResp
 	}
 	req := cbApi.CallbackBeforePushReq{
@@ -94,6 +94,11 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 		} else {
 			callbackResp.ActionCode = constant.ActionAllow
 			return callbackResp
+		}
+	}
+	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow {
+		if resp.OfflinePushInfo != nil {
+			msg.OfflinePushInfo = resp.OfflinePushInfo
 		}
 	}
 	return callbackResp
@@ -133,8 +138,13 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 			return callbackResp
 		}
 	}
-	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow && len(resp.UserIDList) != 0 {
-		*pushToUserList = resp.UserIDList
+	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow {
+		if len(resp.UserIDList) != 0 {
+			*pushToUserList = resp.UserIDList
+		}
+		if resp.OfflinePushInfo != nil {
+			msg.OfflinePushInfo = resp.OfflinePushInfo
+		}
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), pushToUserList, resp.UserIDList)
 	return callbackResp
