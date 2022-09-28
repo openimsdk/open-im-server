@@ -19,11 +19,11 @@ type CleanUpMsgResp struct {
 	CommResp
 }
 type DelSuperGroupMsgReq struct {
-	UserID      string   `json:"userID,omitempty" binding:"required"`
-	GroupID     string   `json:"groupID,omitempty" binding:"required"`
+	UserID      string   `json:"userID" binding:"required"`
+	GroupID     string   `json:"groupID" binding:"required"`
 	SeqList     []uint32 `json:"seqList,omitempty"`
 	IsAllDelete bool     `json:"isAllDelete"`
-	OperationID string   `json:"operationID,omitempty" binding:"required"`
+	OperationID string   `json:"operationID" binding:"required"`
 }
 
 type DelSuperGroupMsgResp struct {
