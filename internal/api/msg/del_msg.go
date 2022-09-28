@@ -80,6 +80,7 @@ func DelSuperGroupMsg(c *gin.Context) {
 	)
 	rpcReq := &rpc.DelSuperGroupMsgReq{}
 	if err := c.BindJSON(&req); err != nil {
+		log.NewError("", "args err:", err.Error())
 		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
