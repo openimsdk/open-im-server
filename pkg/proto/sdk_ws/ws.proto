@@ -527,6 +527,8 @@ message SignalReq {
       SignalHungUpReq hungUp = 5;
       SignalRejectReq reject = 6;
       SignalGetRoomByGroupIDReq GetRoomByGroupID = 7;
+
+      SignalOnRoomChangeReq signalOnRoomChangeReq = 8;
   }
 }
 
@@ -653,6 +655,11 @@ message SignalGetRoomByGroupIDReply {
   string liveURL = 5;
 }
 
+message SignalOnRoomChangeReq {
+  InvitationInfo invitation = 1;
+  repeated ParticipantMetaData metaData = 2;
+  string groupID = 3;
+}
 
 message DelMsgListReq{
     string opUserID = 1;

@@ -100,7 +100,9 @@ message SignalReq {
       SignalAcceptReq accept = 4;
       SignalHungUpReq hungUp = 5;
       SignalRejectReq reject = 6;
-      SignalGetRoomByGroupIDReq GetRoomByGroupID = 7;
+      SignalGetRoomByGroupIDReq getRoomByGroupID = 7;
+
+      SignalOnRoomChangeReq signalOnRoomChangeReq = 8;
   }
 }
 
@@ -108,7 +110,7 @@ message SignalResp {
   oneof payload {
     SignalInviteReply invite = 1;
     SignalInviteInGroupReply inviteInGroup= 2;
-    SignalCancelReply  cancel = 3;
+    SignalCancelReply cancel = 3;
     SignalAcceptReply accept = 4;
     SignalHungUpReply hungUp = 5;
     SignalRejectReply reject = 6;
@@ -222,6 +224,12 @@ message SignalGetRoomByGroupIDReply {
   string liveURL = 5;
 }
 
+message SignalOnRoomChangeReq {
+  InvitationInfo invitation = 1;
+  repeated ParticipantMetaData metaData = 2;
+  string groupID = 3;
+}
+
 message SignalMessageAssembleReq {
  SignalReq signalReq = 1;
  string operationID = 2;
@@ -234,8 +242,17 @@ message SignalMessageAssembleResp {
  MsgData msgData = 4;
 }
 
+message SignalGetRoomsReq {
+ string operationID = 1;
+ string roomID = 2;
+}
 
+message SignalGetRoomsResp {
+  CommonResp commonResp = 1;
+  repeated SignalGetRoomByGroupIDReply roomList = 2;
+}
 
 service RtcService {
  rpc SignalMessageAssemble(SignalMessageAssembleReq) returns(SignalMessageAssembleResp);
+ rpc SignalGetRooms(SignalGetRoomsReq) returns(SignalGetRoomsResp);
 }
