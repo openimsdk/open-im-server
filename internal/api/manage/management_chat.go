@@ -508,4 +508,5 @@ type MessageRevoked struct {
 	ClientMsgID     string `mapstructure:"clientMsgID" json:"clientMsgID" validate:"required"`
 	RevokerNickname string `mapstructure:"revokerNickname" json:"revokerNickname"`
 	SessionType     int32  `mapstructure:"sessionType" json:"sessionType" validate:"required"`
+	Seq             uint32 `mapstructure:"seq" json:"seq" validate:"required"`
 }

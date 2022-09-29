@@ -131,7 +131,27 @@ message DelSuperGroupMsgResp{
   int32 errCode = 1;
   string errMsg = 2;
 }
+message GetSuperGroupMsgReq{
+  string operationID = 1;
+  uint32 Seq = 2;
+  string groupID = 3;
 
+}
+message GetSuperGroupMsgResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+  server_api_params.MsgData msgData = 3;
+}
+message GetWriteDiffMsgReq{
+    string operationID = 1;
+    uint32 Seq = 2;
+
+  }
+message GetWriteDiffMsgResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+  server_api_params.MsgData msgData = 3;
+}
 
 
 service msg {
@@ -144,5 +164,7 @@ service msg {
   rpc SetMsgMinSeq(SetMsgMinSeqReq) returns(SetMsgMinSeqResp);
   rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
   rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
+  rpc GetSuperGroupMsg(GetSuperGroupMsgReq) returns(GetSuperGroupMsgResp);
+  rpc GetWriteDiffMsg(GetWriteDiffMsgReq) returns(GetWriteDiffMsgResp);
 
 }

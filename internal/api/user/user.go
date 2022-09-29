@@ -164,7 +164,7 @@ func GetUsersPublicInfo(c *gin.Context) {
 	params := api.GetUsersInfoReq{}
 	if err := c.BindJSON(&params); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": http.StatusBadRequest, "errMsg": err.Error()})
 		return
 	}
 	req := &rpc.GetUserInfoReq{}
@@ -176,7 +176,7 @@ func GetUsersPublicInfo(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusOK, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
