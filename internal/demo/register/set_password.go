@@ -27,7 +27,7 @@ type ParamsSetPassword struct {
 	PhoneNumber      string `json:"phoneNumber"`
 	Password         string `json:"password" binding:"required"`
 	VerificationCode string `json:"verificationCode"`
-	Platform         int32  `json:"platform" binding:"required,min=1,max=9"`
+	Platform         int32  `json:"platform" binding:"required,min=1,max=12"`
 	Ex               string `json:"ex"`
 	FaceURL          string `json:"faceURL"`
 	OperationID      string `json:"operationID" binding:"required"`
