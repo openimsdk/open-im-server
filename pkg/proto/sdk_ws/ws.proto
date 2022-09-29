@@ -657,7 +657,7 @@ message SignalGetRoomByGroupIDReply {
 
 message SignalOnRoomChangeReq {
   InvitationInfo invitation = 1;
-  repeated ParticipantMetaData metaData = 2;
+  repeated ParticipantMetaData participant = 2;
   string groupID = 3;
 }
 
