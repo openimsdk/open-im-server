@@ -167,7 +167,7 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 				log.Error(data.OperationID, "json unmarshal err:", err.Error())
 				return false, 201, err.Error(), nil
 			}
-			log.Debug(data.OperationID, "revoke message is", revokeMessage)
+			log.Debug(data.OperationID, "revoke message is", *revokeMessage)
 			req := pbChat.GetSuperGroupMsgReq{OperationID: data.OperationID, Seq: revokeMessage.Seq, GroupID: data.MsgData.GroupID}
 			resp, err := rpc.GetSuperGroupMsg(context.Background(), &req)
 			if err != nil {
