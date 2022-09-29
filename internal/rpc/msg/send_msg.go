@@ -179,6 +179,7 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 					revokeMessage.SourceMessageSendTime = resp.MsgData.SendTime
 					revokeMessage.SourceMessageSenderNickname = resp.MsgData.SenderNickname
 					revokeMessage.SourceMessageSendID = resp.MsgData.SendID
+					log.Debug(data.OperationID, "new revoke message is ", revokeMessage)
 					data.MsgData.Content = []byte(utils.StructToJsonString(revokeMessage))
 				} else {
 					return false, 201, errors.New("msg err").Error(), nil
