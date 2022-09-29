@@ -23,7 +23,7 @@ type ParamsSetPassword struct {
 	PhoneNumber      string `json:"phoneNumber"`
 	Password         string `json:"password"`
 	VerificationCode string `json:"verificationCode"`
-	Platform         int32  `json:"platform" binding:"required,min=1,max=7"`
+	Platform         int32  `json:"platform" binding:"required,min=1,max=9"`
 	Ex               string `json:"ex"`
 	OperationID      string `json:"operationID" binding:"required"`
 }
