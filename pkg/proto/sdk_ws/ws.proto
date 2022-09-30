@@ -528,7 +528,8 @@ message SignalReq {
       SignalRejectReq reject = 6;
       SignalGetRoomByGroupIDReq GetRoomByGroupID = 7;
 
-      SignalOnRoomChangeReq signalOnRoomChangeReq = 8;
+      SignalOnRoomParticipantConnectedReq signalOnRoomParticipantConnectedReq = 8;
+      SignalOnRoomParticipantDisconnectedReq signalOnRoomParticipantDisconnectedReq = 9;
   }
 }
 
@@ -655,11 +656,18 @@ message SignalGetRoomByGroupIDReply {
   string liveURL = 5;
 }
 
-message SignalOnRoomChangeReq {
+message SignalOnRoomParticipantConnectedReq {
   InvitationInfo invitation = 1;
   repeated ParticipantMetaData participant = 2;
   string groupID = 3;
 }
+
+message SignalOnRoomParticipantDisconnectedReq {
+  InvitationInfo invitation = 1;
+  repeated ParticipantMetaData participant = 2;
+  string groupID = 3;
+}
+
 
 message DelMsgListReq{
     string opUserID = 1;
