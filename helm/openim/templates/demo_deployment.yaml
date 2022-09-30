@@ -41,8 +41,8 @@ spec:
   ports:
     - name: demo
       protocol: TCP
-      port: 10004
-      targetPort: 10004
+      port: {{ .Values.demo.port }}
+      targetPort: {{ .Values.demo.port }}
   selector:
     app: demo    
   type: NodePort   

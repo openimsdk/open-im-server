@@ -41,8 +41,8 @@ spec:
   ports:
     - name: cms-api-port
       protocol: TCP
-      port: 10006
-      targetPort: 10006
+      port: {{ .Values.cms_api.port }}
+      targetPort: {{ .Values.cms_api.port }}
   selector:
     app: cms-api
   type: NodePort  

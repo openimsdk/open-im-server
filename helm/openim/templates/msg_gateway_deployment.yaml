@@ -44,7 +44,7 @@ spec:
   ports:
     - name: msg-gateway-port
       protocol: TCP
-      port: 10001
+      port: {{ .Values.msg_gateway.wsport }}
       targetPort: ws-port
   selector:
     app: msg-gateway

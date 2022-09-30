@@ -47,8 +47,8 @@ spec:
   ports:
     - name: sdk-server-port
       protocol: TCP
-      port: 10003
-      targetPort: 10003
+      port: {{ .Values.sdk_server.port }}
+      targetPort: {{ .Values.sdk_server.port }}
   selector:
     app: sdk-server
   type: NodePort   
