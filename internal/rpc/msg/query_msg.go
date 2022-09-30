@@ -5,11 +5,13 @@ import (
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/proto/msg"
+	"Open_IM/pkg/utils"
 	"context"
 	go_redis "github.com/go-redis/redis/v8"
 )
 
 func (rpc *rpcChat) GetSuperGroupMsg(context context.Context, req *msg.GetSuperGroupMsgReq) (*msg.GetSuperGroupMsgResp, error) {
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), req.String())
 	resp := new(msg.GetSuperGroupMsgResp)
 	redisMsgList, failedSeqList, err := commonDB.DB.GetMessageListBySeq(req.GroupID, []uint32{req.Seq}, req.OperationID)
 	if err != nil {
@@ -40,6 +42,7 @@ func (rpc *rpcChat) GetSuperGroupMsg(context context.Context, req *msg.GetSuperG
 			resp.MsgData = m
 		}
 	}
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), resp.String())
 	return resp, nil
 }
 
