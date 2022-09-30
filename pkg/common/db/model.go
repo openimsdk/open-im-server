@@ -100,7 +100,7 @@ func init() {
 	}
 	if err := createMongoIndex(mongoClient, cChat, false, "uid"); err != nil {
 		fmt.Println("uid", " index create failed", err.Error())
-		panic(err.Error())
+		//panic(err.Error())
 	}
 	if err := createMongoIndex(mongoClient, cWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
 		fmt.Println("-create_time", "work_moment_id", "index create failed", err.Error())
@@ -192,19 +192,11 @@ func createMongoIndex(client *mongo.Client, collection string, isUnique bool, ke
 			keysDoc = keysDoc.Append(key, bsonx.Int32(1))
 		}
 	}
-	var index mongo.IndexModel
-	if utils.IsContain("uid", keys) {
-		name := "uid_new"
-		index = mongo.IndexModel{
-			Keys:    keysDoc,
-			Options: &options.IndexOptions{Name: &name},
-		}
-	} else {
-		index = mongo.IndexModel{
-			Keys: keysDoc,
-		}
-	}
 
+	// 创建索引
+	index := mongo.IndexModel{
+		Keys: keysDoc,
+	}
 	if isUnique == true {
 		index.Options = options.Index().SetUnique(true)
 	}
