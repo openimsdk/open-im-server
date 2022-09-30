@@ -11,6 +11,7 @@ import (
 	fcm "Open_IM/internal/push/fcm"
 	"Open_IM/internal/push/getui"
 	jpush "Open_IM/internal/push/jpush"
+	"Open_IM/internal/push/mobpush"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/kafka"
@@ -44,6 +45,10 @@ func init() {
 
 	if config.Config.Push.Fcm.Enable {
 		offlinePusher = fcm.NewFcm()
+	}
+
+	if config.Config.Push.Mob.Enable {
+		offlinePusher = mobpush.MobPushClient
 	}
 }
 
