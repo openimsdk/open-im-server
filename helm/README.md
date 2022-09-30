@@ -31,5 +31,5 @@ helm upgrade my-openim -f openim/values.yaml -n openim-ns openim
 #### 卸载
 ```
 cd helm
-helm uninstall  my-openim -n openim
+helm uninstall  my-openim -n openim-ns
 ```
