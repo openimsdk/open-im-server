@@ -1,0 +1,76 @@
+# Default values for openim.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+admin_csm:
+  image: openim/admin_cms:v2.3.0release
+  port: 10200
+
+api:
+  image: openim/api:v2.3.0release
+  port: 10002
+
+auth:
+  image: openim/auth:v2.3.0release
+  port: 10160
+
+cache:
+  image: openim/cache:v2.3.0release
+  port: 10240
+
+cms_api:
+  image: openim/cms_api:v2.3.0release
+  port: 10006
+
+
+conversation:
+  image: openim/conversation:v2.3.0release
+  port: 10230
+
+
+demo:
+  image: openim/demo:v2.3.0release
+  port: 10004
+
+friend:
+  image: openim/friend:v2.3.0release
+  port: 10120
+
+group:
+  image: openim/group:v2.3.0release
+  port: 10150
+
+msg:
+  image: openim/msg:v2.3.0release
+  port: 10130
+
+
+msg_gateway:
+  image: openim/msg_gateway:v2.3.0release
+  rpcport: 10140
+  wsport: 10001
+
+msg_transfer:
+  image: openim/msg_transfer:v2.3.0release
+
+office:
+  image: openim/office:v2.3.0release
+  port: 10210
+
+
+organization:
+  image: openim/organization:v2.3.0release
+  port: 10220
+
+push:
+  image: openim/push:v2.3.0release
+  port: 10170
+
+
+sdk_server:
+  image: openim/sdk_server:v2.3.0release
+  port: 10003
+
+user:
+  image: openim/user:v2.3.0release
+  port: 10110

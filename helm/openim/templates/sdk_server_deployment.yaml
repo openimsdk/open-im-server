@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sdk-server-deployment
+spec:
+  selector:
+    matchLabels:
+      app: sdk-server # 选择这个指定标签执行
+  replicas: 1 # 运行pod数量
+  template:
+    metadata:
+      labels:
+        app: sdk-server # 标签
+    spec:
+      containers:
+      - name: sdk-server
+        image: {{ .Values.sdk_server.image }}
+        ports:
+          - containerPort: {{ .Values.sdk_server.port }}
+        volumeMounts:
+          - name: config
+            mountPath: /Open-IM-Server/config
+            readOnly: true
+          - name: local-db
+            mountPath: /db/sdk
+        env:
+          - name: CONFIG_NAME
+            value: "/Open-IM-Server"         
+        command: ["/Open-IM-Server/main"]
+        args: ["-openIM_ws_address", "ws_addr", "-sdk_ws_port", "10001", "-openIM_api_address", "api_address", "-openIM_log_level", "6"]
+      volumes:
+        - name: config
+          configMap:
+            name: openim-config
+        - name: local-db
+          hostPath:
+            path: /db/sdk
+  strategy: #更新策略
+    type: RollingUpdate # 滚动更新
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sdk-server
+spec:
+  ports:
+    - name: sdk-server-port
+      protocol: TCP
+      port: 10003
+      targetPort: 10003
+  selector:
+    app: sdk-server
+  type: NodePort   
+
+    

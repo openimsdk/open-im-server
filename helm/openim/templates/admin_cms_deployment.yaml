@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-cms-deployment
+spec:
+  selector:
+    matchLabels:
+      app: admin-cms # 选择这个指定标签执行
+  replicas: 1 # 运行pod数量
+  template:
+    metadata:
+      labels:
+        app: admin-cms # 标签
+    spec:
+      containers:
+        - name: admin-cms
+          image: {{ .Values.admin_csm.image }}
+          # imagePullPolicy: Always #每次启动都重新拉取镜像
+          ports:
+            - containerPort: {{ .Values.admin_csm.port }}
+          volumeMounts:
+            - name: config
+              mountPath: /Open-IM-Server/config
+              readOnly: true
+          env:
+            - name: CONFIG_NAME
+              value: "/Open-IM-Server"    
+      volumes:
+        - name: config
+          configMap:
+            name: openim-config
+  strategy: #更新策略
+    type: RollingUpdate # 滚动更新
+
