@@ -192,11 +192,19 @@ func createMongoIndex(client *mongo.Client, collection string, isUnique bool, ke
 			keysDoc = keysDoc.Append(key, bsonx.Int32(1))
 		}
 	}
-
-	// 创建索引
-	index := mongo.IndexModel{
-		Keys: keysDoc,
+	var index mongo.IndexModel
+	if utils.IsContain("uid", keys) {
+		name := "uid_new"
+		index = mongo.IndexModel{
+			Keys:    keysDoc,
+			Options: &options.IndexOptions{Name: &name},
+		}
+	} else {
+		index = mongo.IndexModel{
+			Keys: keysDoc,
+		}
 	}
+
 	if isUnique == true {
 		index.Options = options.Index().SetUnique(true)
 	}
