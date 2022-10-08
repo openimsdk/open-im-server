@@ -221,7 +221,7 @@ message SignalGetRoomByGroupIDReq {
 
 message SignalGetRoomByGroupIDReply {
   InvitationInfo invitation = 1;
-  repeated ParticipantMetaData metaData = 2;
+  repeated ParticipantMetaData participant = 2;
   string roomID = 3;
 }
 
