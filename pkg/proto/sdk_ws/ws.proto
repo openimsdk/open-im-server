@@ -526,10 +526,11 @@ message SignalReq {
       SignalAcceptReq accept = 4;
       SignalHungUpReq hungUp = 5;
       SignalRejectReq reject = 6;
-      SignalGetRoomByGroupIDReq GetRoomByGroupID = 7;
+      SignalGetRoomByGroupIDReq getRoomByGroupID = 7;
 
-      SignalOnRoomParticipantConnectedReq signalOnRoomParticipantConnectedReq = 8;
-      SignalOnRoomParticipantDisconnectedReq signalOnRoomParticipantDisconnectedReq = 9;
+      SignalOnRoomParticipantConnectedReq onRoomParticipantConnectedReq = 8;
+      SignalOnRoomParticipantDisconnectedReq onRoomParticipantDisconnectedReq = 9;
+      SignalGetTokenByRoomIDReq getTokenByRoomID = 10;
   }
 }
 
@@ -541,9 +542,11 @@ message SignalResp {
     SignalAcceptReply accept = 4;
     SignalHungUpReply hungUp = 5;
     SignalRejectReply reject = 6;
-    SignalGetRoomByGroupIDReply GetRoomByGroupID = 7;
+    SignalGetRoomByGroupIDReply getRoomByGroupID = 7;
+    SignalGetTokenByRoomIDReply getTokenByRoomID = 8;
   }
 }
+
 
 message InvitationInfo  {
     string inviterUserID = 1;
@@ -650,10 +653,8 @@ message SignalGetRoomByGroupIDReq {
 
 message SignalGetRoomByGroupIDReply {
   InvitationInfo invitation = 1;
-  repeated ParticipantMetaData participant = 2;
-  string token = 3;
-  string roomID = 4;
-  string liveURL = 5;
+  repeated ParticipantMetaData metaData = 2;
+  string roomID = 3;
 }
 
 message SignalOnRoomParticipantConnectedReq {
@@ -666,6 +667,18 @@ message SignalOnRoomParticipantDisconnectedReq {
   InvitationInfo invitation = 1;
   repeated ParticipantMetaData participant = 2;
   string groupID = 3;
+}
+
+message SignalGetTokenByRoomIDReq {
+  string roomID = 1;
+  string opUserID = 2;
+  ParticipantMetaData participant = 3;
+  string operationID = 4;
+}
+
+message SignalGetTokenByRoomIDReply {
+  string token = 1;
+  string liveURL = 2;
 }
 
 
