@@ -7,7 +7,6 @@ import (
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	http2 "Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/utils"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -61,7 +60,7 @@ func Login(c *gin.Context) {
 	if ip == "" {
 		ip = c.ClientIP()
 	}
-	url := fmt.Sprintf("http://%s:%d/auth/user_token", utils.ServerIP, config.Config.Api.GinPort[0])
+	url := fmt.Sprintf("%s/auth/user_token", config.Config.Demo.ImAPIURL)
 	openIMGetUserToken := api.UserTokenReq{}
 	openIMGetUserToken.OperationID = params.OperationID
 	openIMGetUserToken.Platform = params.Platform
