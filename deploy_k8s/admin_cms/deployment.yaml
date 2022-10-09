@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: admin-cms
-          image: openim/admin_cms:v2.3.0release
+          image: openim/admin_cms:v2.3.3
           # imagePullPolicy: Always #每次启动都重新拉取镜像
           ports:
             - containerPort: 10200
