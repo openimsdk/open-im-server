@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./rtc;rtc";
+option go_package = "Open_IM/pkg/proto/rtc;rtc";
 package proto;
 
 message CommonResp{
@@ -100,7 +100,11 @@ message SignalReq {
       SignalAcceptReq accept = 4;
       SignalHungUpReq hungUp = 5;
       SignalRejectReq reject = 6;
-      SignalGetRoomByGroupIDReq GetRoomByGroupID = 7;
+      SignalGetRoomByGroupIDReq getRoomByGroupID = 7;
+
+      SignalOnRoomParticipantConnectedReq onRoomParticipantConnectedReq = 8;
+      SignalOnRoomParticipantDisconnectedReq onRoomParticipantDisconnectedReq = 9;
+      SignalGetTokenByRoomIDReq getTokenByRoomID = 10;
   }
 }
 
@@ -108,11 +112,12 @@ message SignalResp {
   oneof payload {
     SignalInviteReply invite = 1;
     SignalInviteInGroupReply inviteInGroup= 2;
-    SignalCancelReply  cancel = 3;
+    SignalCancelReply cancel = 3;
     SignalAcceptReply accept = 4;
     SignalHungUpReply hungUp = 5;
     SignalRejectReply reject = 6;
-    SignalGetRoomByGroupIDReply GetRoomByGroupID = 7;
+    SignalGetRoomByGroupIDReply getRoomByGroupID = 7;
+    SignalGetTokenByRoomIDReply getTokenByRoomID = 8;
   }
 }
 
@@ -127,6 +132,7 @@ message InvitationInfo  {
     int32 platformID = 8;
     int32 sessionType = 9;
     int32 initiateTime = 10;
+    repeated string busyLineUserIDList = 11;
 }
 
 
@@ -142,6 +148,7 @@ message SignalInviteReply {
   string token = 1;
   string roomID = 2;
   string liveURL = 3;
+  repeated string busyLineUserIDList = 4;
 }
 
 message SignalInviteInGroupReq {
@@ -155,6 +162,7 @@ message SignalInviteInGroupReply {
   string token = 1;
   string roomID = 2;
   string liveURL = 3;
+  repeated string busyLineUserIDList = 4;
 }
 
 message SignalCancelReq {
@@ -208,15 +216,39 @@ message SignalRejectReply {
 message SignalGetRoomByGroupIDReq {
   string opUserID = 1;
   string groupID = 2;
+  ParticipantMetaData participant = 3;
 }
 
 message SignalGetRoomByGroupIDReply {
   InvitationInfo invitation = 1;
-  repeated string onConnectingUserIDList = 2;
-  string token = 3;
-  string roomID = 4;
-  string liveURL = 5;
+  repeated ParticipantMetaData participant = 2;
+  string roomID = 3;
 }
+
+message SignalOnRoomParticipantConnectedReq {
+  InvitationInfo invitation = 1;
+  repeated ParticipantMetaData participant = 2;
+  string groupID = 3;
+}
+
+message SignalOnRoomParticipantDisconnectedReq {
+  InvitationInfo invitation = 1;
+  repeated ParticipantMetaData participant = 2;
+  string groupID = 3;
+}
+
+message SignalGetTokenByRoomIDReq {
+  string roomID = 1;
+  string opUserID = 2;
+  ParticipantMetaData participant = 3;
+  string operationID = 4;
+}
+
+message SignalGetTokenByRoomIDReply {
+  string token = 1;
+  string liveURL = 2;
+}
+
 
 message SignalMessageAssembleReq {
  SignalReq signalReq = 1;
@@ -230,6 +262,17 @@ message SignalMessageAssembleResp {
  MsgData msgData = 4;
 }
 
+message SignalGetRoomsReq {
+ string operationID = 1;
+ string roomID = 2;
+}
+
+message SignalGetRoomsResp {
+  CommonResp commonResp = 1;
+  repeated SignalGetRoomByGroupIDReply roomList = 2;
+}
+
 service RtcService {
  rpc SignalMessageAssemble(SignalMessageAssembleReq) returns(SignalMessageAssembleResp);
+ rpc SignalGetRooms(SignalGetRoomsReq) returns(SignalGetRoomsResp);
 }

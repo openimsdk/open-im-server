@@ -19,12 +19,12 @@ import (
 func NewGinRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	baseRouter := gin.New()
-	baseRouter.Use()
+	baseRouter.Use(gin.Recovery())
+	baseRouter.Use(middleware.CorsHandler())
 	if config.Config.Prometheus.Enable {
 		baseRouter.GET("/metrics", promePkg.PrometheusHandler())
 	}
 	router := baseRouter.Group("/cms")
-	router.Use(middleware.CorsHandler())
 	adminRouterGroup := router.Group("/admin")
 	{
 		adminRouterGroup.POST("/login", admin.AdminLogin)
@@ -62,6 +62,8 @@ func NewGinRouter() *gin.Engine {
 	}
 	userRouterGroup := r2.Group("/user")
 	{
+		userRouterGroup.POST("/get_user_id_by_email_phone", user.GetUserIDByEmailAndPhoneNumber)
+
 		userRouterGroup.POST("/add_user", user.AddUser)
 		userRouterGroup.POST("/unblock_user", user.UnblockUser)
 		userRouterGroup.POST("/block_user", user.BlockUser)

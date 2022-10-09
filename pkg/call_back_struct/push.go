@@ -34,5 +34,6 @@ type CallbackBeforeSuperGroupOnlinePushReq struct {
 
 type CallbackBeforeSuperGroupOnlinePushResp struct {
 	*CommonCallbackResp
-	UserIDList []string `json:"userIDList"`
+	UserIDList      []string                  `json:"userIDList"`
+	OfflinePushInfo *commonPb.OfflinePushInfo `json:"offlinePushInfo"`
 }

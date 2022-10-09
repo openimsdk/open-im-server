@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-option go_package = "./organization;organization";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+option go_package = "Open_IM/pkg/proto/organization;organization";
 package organization;
 
 
@@ -171,6 +171,17 @@ message GetDepartmentRelatedGroupIDListResp {
   repeated string groupIDList = 3;
 }
 
+message GetUserInOrganizationReq{
+  repeated string userIDList = 1;
+  string operationID = 2;
+}
+
+message GetUserInOrganizationResp{
+  int32   errCode = 1;
+  string  errMsg = 2;
+  repeated server_api_params.OrganizationUser organizationUsers = 3;
+}
+
 service organization{
   rpc CreateDepartment(CreateDepartmentReq) returns(CreateDepartmentResp);
   rpc UpdateDepartment(UpdateDepartmentReq) returns(UpdateDepartmentResp);
@@ -189,6 +200,8 @@ service organization{
   rpc UpdateUserInDepartment(UpdateUserInDepartmentReq) returns(UpdateUserInDepartmentResp);
   rpc GetDepartmentMember(GetDepartmentMemberReq) returns(GetDepartmentMemberResp);
   rpc GetDepartmentRelatedGroupIDList(GetDepartmentRelatedGroupIDListReq) returns(GetDepartmentRelatedGroupIDListResp);
+
+  rpc GetUserInOrganization(GetUserInOrganizationReq) returns(GetUserInOrganizationResp);
 }
 
 

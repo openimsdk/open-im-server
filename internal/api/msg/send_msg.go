@@ -80,7 +80,7 @@ func SendMsg(c *gin.Context) {
 	}
 	client := pbChat.NewMsgClient(etcdConn)
 
-	log.Info("", "", "api SendMsg call, api call rpc...")
+	log.Info(params.OperationID, "", "api SendMsg call, api call rpc...")
 
 	reply, err := client.SendMsg(context.Background(), pbData)
 	if err != nil {

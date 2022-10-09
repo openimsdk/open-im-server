@@ -214,7 +214,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 		if oldConnMap, ok := ws.wsUserToConn[uid]; ok { // user->map[platform->conn]
 			if oldConn, ok := oldConnMap[platformID]; ok {
 				log.NewDebug(operationID, uid, platformID, "kick old conn")
-				ws.sendKickMsg(oldConn, newConn)
+				ws.sendKickMsg(oldConn)
 				m, err := db.DB.GetTokenMapByUidPid(uid, constant.PlatformIDToName(platformID))
 				if err != nil && err != go_redis.Nil {
 					log.NewError(operationID, "get token from redis err", err.Error(), uid, constant.PlatformIDToName(platformID))
@@ -263,7 +263,7 @@ func (ws *WServer) MultiTerminalLoginChecker(uid string, platformID int, newConn
 	case constant.WebAndOther:
 	}
 }
-func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
+func (ws *WServer) sendKickMsg(oldConn *UserConn) {
 	mReply := Resp{
 		ReqIdentifier: constant.WSKickOnlineMsg,
 		ErrCode:       constant.ErrTokenInvalid.ErrCode,
@@ -273,12 +273,12 @@ func (ws *WServer) sendKickMsg(oldConn, newConn *UserConn) {
 	enc := gob.NewEncoder(&b)
 	err := enc.Encode(mReply)
 	if err != nil {
-		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "Encode Msg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
+		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "Encode Msg error", oldConn.RemoteAddr().String(), err.Error())
 		return
 	}
 	err = ws.writeMsg(oldConn, websocket.BinaryMessage, b.Bytes())
 	if err != nil {
-		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "sendKickMsg WS WriteMsg error", oldConn.RemoteAddr().String(), newConn.RemoteAddr().String(), err.Error())
+		log.NewError(mReply.OperationID, mReply.ReqIdentifier, mReply.ErrCode, mReply.ErrMsg, "sendKickMsg WS WriteMsg error", oldConn.RemoteAddr().String(), err.Error())
 	}
 }
 

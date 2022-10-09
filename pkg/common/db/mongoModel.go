@@ -970,7 +970,7 @@ func (d *DataBases) GetUserSelfWorkMoments(userID string, showNumber, pageNumber
 	return workMomentList, err
 }
 
-func (d *DataBases) GetUserWorkMoments(opUserID, userID string, showNumber, pageNumber int32) ([]WorkMoment, error) {
+func (d *DataBases) GetUserWorkMoments(opUserID, userID string, showNumber, pageNumber int32, friendIDList []string) ([]WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
@@ -990,23 +990,36 @@ func (d *DataBases) GetUserWorkMoments(opUserID, userID string, showNumber, page
 	return workMomentList, err
 }
 
-func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userID string) ([]WorkMoment, error) {
+func (d *DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, userID string, friendIDList []string) ([]WorkMoment, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cWorkMoment)
 	var workMomentList []WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
-	result, err := c.Find(ctx, bson.D{
+	var filter bson.D
+	permissionFilter := bson.D{
 		{"$or", bson.A{
-			bson.D{{"user_id", userID}}, //self
-			bson.D{
-				{"$or", bson.A{
-					bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {"permission_user_id_list", bson.D{{"$nin", bson.A{userID}}}}},
-					bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {"permission_user_id_list", bson.D{{"$in", bson.A{userID}}}}},
-					bson.D{{"permission", constant.WorkMomentPublic}},
-				}}},
-		},
-		},
-	}, findOpts)
+			bson.D{{"permission", constant.WorkMomentPermissionCantSee}, {"permission_user_id_list", bson.D{{"$nin", bson.A{userID}}}}},
+			bson.D{{"permission", constant.WorkMomentPermissionCanSee}, {"permission_user_id_list", bson.D{{"$in", bson.A{userID}}}}},
+			bson.D{{"permission", constant.WorkMomentPublic}},
+		}}}
+	if config.Config.WorkMoment.OnlyFriendCanSee {
+		filter = bson.D{
+			{"$or", bson.A{
+				bson.D{{"user_id", userID}}, //self
+				bson.D{{"$and", bson.A{permissionFilter, bson.D{{"user_id", bson.D{{"$in", friendIDList}}}}}}},
+			},
+			},
+		}
+	} else {
+		filter = bson.D{
+			{"$or", bson.A{
+				bson.D{{"user_id", userID}}, //self
+				permissionFilter,
+			},
+			},
+		}
+	}
+	result, err := c.Find(ctx, filter, findOpts)
 	if err != nil {
 		return workMomentList, err
 	}

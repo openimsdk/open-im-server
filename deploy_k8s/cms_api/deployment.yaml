@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: cms-api
-        image: openim/cms_api:v2.3.0release
+        image: openim/cms_api:v2.3.3
         imagePullPolicy: Always
         ports:
         - containerPort: 10006

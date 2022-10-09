@@ -651,6 +651,21 @@ func (s *adminCMSServer) GetUserFriends(_ context.Context, req *pbAdminCMS.GetUs
 	return resp, nil
 }
 
+func (s *adminCMSServer) GetUserIDByEmailAndPhoneNumber(_ context.Context, req *pbAdminCMS.GetUserIDByEmailAndPhoneNumberReq) (*pbAdminCMS.GetUserIDByEmailAndPhoneNumberResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbAdminCMS.GetUserIDByEmailAndPhoneNumberResp{CommonResp: &pbAdminCMS.CommonResp{}}
+	userIDList, err := imdb.GetUserIDsByEmailAndID(req.PhoneNumber, req.Email)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.PhoneNumber, req.Email)
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
+		return resp, nil
+	}
+	resp.UserIDList = userIDList
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	return resp, nil
+}
+
 func (s *adminCMSServer) GenerateInvitationCode(_ context.Context, req *pbAdminCMS.GenerateInvitationCodeReq) (*pbAdminCMS.GenerateInvitationCodeResp, error) {
 	return nil, nil
 }

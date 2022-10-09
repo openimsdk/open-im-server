@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-option go_package = "./friend;friend";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+option go_package = "Open_IM/pkg/proto/friend;friend";
 package friend;
 
 message CommonResp{
@@ -167,6 +167,6 @@ service friend{
   rpc setFriendRemark(SetFriendRemarkReq) returns(SetFriendRemarkResp);
   rpc importFriend(ImportFriendReq)  returns(ImportFriendResp);
 
-  rpc CheckFriendFromCache(IsFriendReq) returns(IsFriendResp);
-  rpc CheckBlockFromCache(IsInBlackListReq) returns(IsFriendResp);
+  // rpc CheckFriendFromCache(IsFriendReq) returns(IsFriendResp);
+  // rpc CheckBlockFromCache(IsInBlackListReq) returns(IsFriendResp);
 }

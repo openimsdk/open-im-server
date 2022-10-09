@@ -80,7 +80,8 @@ func DelSuperGroupMsg(c *gin.Context) {
 	)
 	rpcReq := &rpc.DelSuperGroupMsgReq{}
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		log.NewError("", "args err:", err.Error())
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	utils.CopyStructFields(rpcReq, &req)
@@ -91,7 +92,7 @@ func DelSuperGroupMsg(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + rpcReq.OpUserID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusOK, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 	options := make(map[string]bool, 5)

@@ -56,6 +56,19 @@ func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbA
 	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
 }
 
+func (rpc *rpcAuth) ParseToken(_ context.Context, req *pbAuth.ParseTokenReq) (*pbAuth.ParseTokenResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
+	claims, err := token_verify.ParseToken(req.Token, req.OperationID)
+	if err != nil {
+		errMsg := "ParseToken failed " + err.Error() + req.OperationID + " token " + req.Token
+		log.Error(req.OperationID, errMsg, "token:", req.Token)
+		return &pbAuth.ParseTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: 4001, ErrMsg: errMsg}}, nil
+	}
+	resp := pbAuth.ParseTokenResp{CommonResp: &pbAuth.CommonResp{}, UserID: claims.UID, Platform: claims.Platform, ExpireTimeSeconds: uint32(claims.ExpiresAt.Unix())}
+	log.Info(req.OperationID, utils.GetSelfFuncName(), " rpc return ", resp.String())
+	return &resp, nil
+}
+
 func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	if !token_verify.IsManagerUserID(req.OpUserID) {

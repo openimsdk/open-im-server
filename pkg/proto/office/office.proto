@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-option go_package = "./office;office";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+option go_package = "Open_IM/pkg/proto/office;office";
 package office;
 
 message CommonResp{

@@ -1,7 +1,7 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-import "Open_IM/pkg/proto/sdk_ws/wrappers.proto";
-option go_package = "./group;group";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdk_ws/wrappers.proto";
+option go_package = "Open_IM/pkg/proto/group;group";
 package group;
 
 message CommonResp{

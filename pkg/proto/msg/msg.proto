@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
-option go_package = "./msg;msg";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+option go_package = "Open_IM/pkg/proto/msg;msg";
 package msg;
 
 message MsgDataToMQ{
@@ -131,6 +131,29 @@ message DelSuperGroupMsgResp{
   int32 errCode = 1;
   string errMsg = 2;
 }
+message GetSuperGroupMsgReq{
+  string operationID = 1;
+  uint32 Seq = 2;
+  string groupID = 3;
+
+}
+message GetSuperGroupMsgResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+  server_api_params.MsgData msgData = 3;
+}
+message GetWriteDiffMsgReq{
+    string operationID = 1;
+    uint32 Seq = 2;
+
+  }
+message GetWriteDiffMsgResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+  server_api_params.MsgData msgData = 3;
+}
+
+
 service msg {
   rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
   rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);
@@ -141,4 +164,7 @@ service msg {
   rpc SetMsgMinSeq(SetMsgMinSeqReq) returns(SetMsgMinSeqResp);
   rpc SetSendMsgStatus(SetSendMsgStatusReq) returns(SetSendMsgStatusResp);
   rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
+  rpc GetSuperGroupMsg(GetSuperGroupMsgReq) returns(GetSuperGroupMsgResp);
+  rpc GetWriteDiffMsg(GetWriteDiffMsgReq) returns(GetWriteDiffMsgResp);
+
 }

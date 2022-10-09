@@ -1,7 +1,7 @@
 syntax = "proto3";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 package pbAuth;
-option go_package = "./auth;pbAuth";
+option go_package = "Open_IM/pkg/proto/auth;pbAuth";
 
 message CommonResp{
     int32   errCode = 1;
@@ -42,6 +42,18 @@ message ForceLogoutResp {
     CommonResp CommonResp = 1;
 }
 
+message ParseTokenReq{
+    string token = 1;
+    string operationID = 2;
+}
+
+
+message ParseTokenResp{
+    string userID = 1;
+    string platform = 2;
+    CommonResp commonResp = 3;
+    uint32 expireTimeSeconds = 4;
+}
 
 
 
@@ -50,4 +62,7 @@ service Auth {
     rpc UserRegister(UserRegisterReq) returns(UserRegisterResp);
     rpc UserToken(UserTokenReq) returns(UserTokenResp);
     rpc ForceLogout(ForceLogoutReq) returns(ForceLogoutResp);
+    rpc ParseToken(ParseTokenReq)returns(ParseTokenResp);
 }
+
+

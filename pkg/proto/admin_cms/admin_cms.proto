@@ -1,6 +1,6 @@
 syntax = "proto3";
-option go_package = "./admin_cms;admin_cms";
-import "Open_IM/pkg/proto/sdk_ws/ws.proto";
+option go_package = "Open_IM/pkg/proto/admin_cms;admin_cms";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 package admin_cms;
 
 
@@ -313,6 +313,19 @@ message GetUserFriendsResp {
     CommonResp commonResp = 4;
 }
 
+message GetUserIDByEmailAndPhoneNumberReq{
+  string operationID = 1;
+  string email = 2;
+  string phoneNumber = 3;
+}
+
+message GetUserIDByEmailAndPhoneNumberResp{
+  repeated string userIDList = 1;
+  CommonResp  commonResp = 2;
+}
+
+
+
 service adminCMS {
     rpc AdminLogin(AdminLoginReq) returns(AdminLoginResp);
     rpc AddUserRegisterAddFriendIDList(AddUserRegisterAddFriendIDListReq) returns(AddUserRegisterAddFriendIDListResp);
@@ -342,4 +355,6 @@ service adminCMS {
     rpc SetClientInitConfig(SetClientInitConfigReq) returns(SetClientInitConfigResp);
 
     rpc GetUserFriends(GetUserFriendsReq) returns(GetUserFriendsResp);
+
+    rpc GetUserIDByEmailAndPhoneNumber(GetUserIDByEmailAndPhoneNumberReq) returns(GetUserIDByEmailAndPhoneNumberResp);
 }

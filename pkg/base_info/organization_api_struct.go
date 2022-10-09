@@ -108,3 +108,14 @@ type DeleteUserInDepartmentReq struct {
 type DeleteUserInDepartmentResp struct {
 	CommResp
 }
+
+type GetUserInOrganizationReq struct {
+	OperationID string   `json:"operationID" binding:"required"`
+	UserIDList  []string `json:"userIDList" binding:"required"`
+}
+
+type GetUserInOrganizationResp struct {
+	CommResp
+	OrganizationUserList []*open_im_sdk.OrganizationUser `json:"-"`
+	Data                 []map[string]interface{}        `json:"data" swaggerignore:"true"`
+}

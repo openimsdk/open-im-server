@@ -10,6 +10,7 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
+	"github.com/golang/protobuf/proto"
 	"net"
 	"strconv"
 	"strings"
@@ -19,17 +20,15 @@ import (
 	"google.golang.org/grpc"
 )
 
-//var (
-//	sendMsgSuccessCounter prometheus.Counter
-//	sendMsgFailedCounter  prometheus.Counter
-//)
-
+type MessageWriter interface {
+	SendMessage(m proto.Message, key string, operationID string) (int32, int64, error)
+}
 type rpcChat struct {
 	rpcPort         int
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
-	onlineProducer  *kafka.Producer
+	messageWriter   MessageWriter
 	//offlineProducer *kafka.Producer
 	delMsgCh chan deleteMsg
 }
@@ -49,7 +48,7 @@ func NewRpcChatServer(port int) *rpcChat {
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
-	rc.onlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
+	rc.messageWriter = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
 	//rc.offlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschatOffline.Addr, config.Config.Kafka.Ws2mschatOffline.Topic)
 	rc.delMsgCh = make(chan deleteMsg, 1000)
 	return &rc

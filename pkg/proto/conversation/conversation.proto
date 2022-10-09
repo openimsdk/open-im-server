@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./conversation;conversation";
+option go_package = "Open_IM/pkg/proto/conversation;conversation";
 package conversation;
 
 message CommonResp{
