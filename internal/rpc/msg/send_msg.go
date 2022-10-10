@@ -154,12 +154,28 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 			return true, 0, "", nil
 		}
 	case constant.GroupChatType:
-		fallthrough
+		userIDList, err := utils2.GetGroupMemberUserIDList(data.MsgData.GroupID, data.OperationID)
+		if err != nil {
+			errMsg := data.OperationID + err.Error()
+			log.NewError(data.OperationID, errMsg)
+			return false, 201, errMsg, nil
+		}
+		if !token_verify.IsManagerUserID(data.MsgData.SendID) {
+			if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+				return true, 0, "", userIDList
+			}
+			if !utils.IsContain(data.MsgData.SendID, userIDList) {
+				//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
+				return false, 202, "you are not in group", nil
+			}
+		}
+		return true, 0, "", userIDList
 	case constant.SuperGroupChatType:
 		groupInfo, err := rocksCache.GetGroupInfoFromCache(data.MsgData.GroupID)
 		if err != nil {
 			return false, 201, err.Error(), nil
 		}
+
 		if data.MsgData.ContentType == constant.AdvancedRevoke {
 			revokeMessage := new(MessageRevoked)
 			err := utils.JsonStringToStruct(string(data.MsgData.Content), revokeMessage)
@@ -168,14 +184,13 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 				return false, 201, err.Error(), nil
 			}
 			log.Debug(data.OperationID, "revoke message is", *revokeMessage)
-
 			if revokeMessage.RevokerID != revokeMessage.SourceMessageSendID {
 				req := pbChat.GetSuperGroupMsgReq{OperationID: data.OperationID, Seq: revokeMessage.Seq, GroupID: data.MsgData.GroupID}
 				resp, err := rpc.GetSuperGroupMsg(context.Background(), &req)
 				if err != nil {
 					log.Error(data.OperationID, "GetSuperGroupMsgReq err:", err.Error())
 				} else if resp.ErrCode != 0 {
-					log.Error(data.OperationID, "GetSuperGroupMsgReq err:", err.Error())
+					log.Error(data.OperationID, "GetSuperGroupMsgReq err:", resp.ErrCode, resp.ErrMsg)
 				} else {
 					if resp.MsgData != nil && resp.MsgData.ClientMsgID == revokeMessage.ClientMsgID && resp.MsgData.Seq == revokeMessage.Seq {
 						revokeMessage.SourceMessageSendTime = resp.MsgData.SendTime
