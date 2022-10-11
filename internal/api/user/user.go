@@ -388,7 +388,8 @@ func GetSelfUserInfo(c *gin.Context) {
 func GetUsersOnlineStatus(c *gin.Context) {
 	params := api.GetUsersOnlineStatusReq{}
 	if err := c.BindJSON(&params); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	req := &pbRelay.GetUsersOnlineStatusReq{}
@@ -400,7 +401,7 @@ func GetUsersOnlineStatus(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusOK, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
