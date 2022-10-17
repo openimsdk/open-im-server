@@ -29,7 +29,7 @@ spec:
           - name: CONFIG_NAME
             value: "/Open-IM-Server"         
         command: ["/Open-IM-Server/main"]
-        args: ["-openIM_ws_address", "ws_addr", "-sdk_ws_port", "10001", "-openIM_api_address", "api_address", "-openIM_log_level", "6"]
+        args: ["-openIM_ws_address", "ws_addr", "-sdk_ws_port", "10003", "-openIM_api_address", "api_address", "-openIM_log_level", "6"]
       volumes:
         - name: config
           configMap:
