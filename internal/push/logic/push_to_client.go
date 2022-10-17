@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	promePkg "Open_IM/pkg/common/prometheus"
+
 	"github.com/golang/protobuf/proto"
 )
 
@@ -137,6 +138,9 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				title = constant.ContentType2PushContent[constant.Common]
 
 			}
+			// detailContent = title
+		}
+		if detailContent == "" {
 			detailContent = title
 		}
 		pushResult, err := offlinePusher.Push(UIDList, title, detailContent, pushMsg.OperationID, opts)
