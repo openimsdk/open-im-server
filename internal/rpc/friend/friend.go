@@ -142,6 +142,22 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
 		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
+
+	callbackResp := callbackBeforeAddFriend(req)
+	if callbackResp.ErrCode != 0 {
+		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
+	}
+	if callbackResp.ActionCode != constant.ActionAllow {
+		if callbackResp.ErrCode == 0 {
+			callbackResp.ErrCode = 201
+		}
+		log.NewDebug(req.CommID.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
+		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{
+			ErrCode: int32(callbackResp.ErrCode),
+			ErrMsg:  callbackResp.ErrMsg,
+		}}, nil
+	}
+
 	//Cannot add non-existent users
 	if _, err := imdb.GetUserByUserID(req.CommID.ToUserID); err != nil {
 		log.NewError(req.CommID.OperationID, "GetUserByUserID failed ", err.Error(), req.CommID.ToUserID)

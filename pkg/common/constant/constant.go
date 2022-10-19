@@ -207,6 +207,8 @@ const (
 	CallbackOfflinePushCommand          = "callbackOfflinePushCommand"
 	CallbackOnlinePushCommand           = "callbackOnlinePushCommand"
 	CallbackSuperGroupOnlinePushCommand = "callbackSuperGroupOnlinePushCommand"
+	CallbackBeforeAddFriendCommand      = "callbackBeforeAddFriendCommand"
+
 	//callback actionCode
 	ActionAllow     = 0
 	ActionForbidden = 1
