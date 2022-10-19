@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	pbFriend "Open_IM/pkg/proto/friend"
-	"Open_IM/pkg/proto/msg"
+	//"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
 	http2 "net/http"
 )
