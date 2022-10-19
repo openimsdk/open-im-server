@@ -3,7 +3,6 @@ package db
 import (
 	"Open_IM/pkg/common/config"
 	"fmt"
-	"sync"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -12,7 +11,7 @@ import (
 )
 
 type mysqlDB struct {
-	sync.RWMutex
+	//sync.RWMutex
 	db *gorm.DB
 }
 

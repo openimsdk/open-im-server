@@ -17,6 +17,6 @@ func SetClientInitConfig(m map[string]interface{}) error {
 
 func GetClientInitConfig() (db.ClientInitConfig, error) {
 	var config db.ClientInitConfig
-	err := db.DB.MysqlDB.DefaultGormDB().Model((&db.ClientInitConfig{})).First(&config).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.ClientInitConfig{}).First(&config).Error
 	return config, err
 }

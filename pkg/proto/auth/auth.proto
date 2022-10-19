@@ -31,7 +31,6 @@ message UserTokenResp {
 }
 
 
-
 message ForceLogoutReq {
     int32  Platform = 1;
     string FromUserID = 2;
@@ -54,8 +53,6 @@ message ParseTokenResp{
     CommonResp commonResp = 3;
     uint32 expireTimeSeconds = 4;
 }
-
-
 
 
 service Auth {
