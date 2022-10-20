@@ -28,7 +28,7 @@ func callbackUserOnline(operationID, userID string, platformID int, token string
 		Seq: int(time.Now().UnixNano() / 1e6),
 	}
 	callbackUserOnlineResp := &cbApi.CallbackUserOnlineResp{CommonCallbackResp: callbackResp}
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackUserOnlineReq, callbackUserOnlineResp, config.Config.Callback.CallbackUserOnline.CallbackTimeOut); err != nil {
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, constant.CallbackUserOnlineCommand, callbackUserOnlineReq, callbackUserOnlineResp, config.Config.Callback.CallbackUserOnline.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 	}
@@ -53,7 +53,7 @@ func callbackUserOffline(operationID, userID string, platformID int) cbApi.Commo
 		Seq: int(time.Now().UnixNano() / 1e6),
 	}
 	callbackUserOfflineResp := &cbApi.CallbackUserOfflineResp{CommonCallbackResp: callbackResp}
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackOfflineReq, callbackUserOfflineResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, constant.CallbackUserOfflineCommand, callbackOfflineReq, callbackUserOfflineResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 	}
@@ -78,7 +78,7 @@ func callbackUserKickOff(operationID string, userID string, platformID int) cbAp
 		Seq: int(time.Now().UnixNano() / 1e6),
 	}
 	callbackUserKickOffResp := &cbApi.CallbackUserKickOffResp{CommonCallbackResp: callbackResp}
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, callbackUserKickOffReq, callbackUserKickOffResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, constant.CallbackUserKickOffCommand, callbackUserKickOffReq, callbackUserKickOffResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 	}

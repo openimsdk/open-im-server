@@ -30,7 +30,7 @@ func callbackBeforeAddFriend(req *pbFriend.AddFriendReq) cbApi.CommonCallbackRes
 	}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(req.CommID.OperationID, utils.GetSelfFuncName(), commonCallbackReq, *resp)
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, commonCallbackReq, resp, config.Config.Callback.CallbackBeforeAddFriend.CallbackTimeOut); err != nil {
+	if err := http.PostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeAddFriendCommand, commonCallbackReq, resp, config.Config.Callback.CallbackBeforeAddFriend.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		if !config.Config.Callback.CallbackBeforeAddFriend.CallbackFailedContinue {
