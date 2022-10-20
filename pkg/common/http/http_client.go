@@ -7,6 +7,7 @@
 package http
 
 import (
+	"Open_IM/pkg/common/log"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
@@ -59,6 +60,7 @@ func PostReturn(url string, input, output interface{}, timeOut int) error {
 	if err != nil {
 		return err
 	}
+	log.Info("post resp content: ", string(b))
 	if err = json.Unmarshal(b, output); err != nil {
 		return err
 	}
