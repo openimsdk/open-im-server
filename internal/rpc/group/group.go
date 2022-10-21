@@ -116,6 +116,20 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.OwnerUserID)
 		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
+	callbackResp := callbackBeforeCreateGroup(req)
+	if callbackResp.ErrCode != 0 {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
+	}
+	if callbackResp.ActionCode != constant.ActionAllow {
+		if callbackResp.ErrCode == 0 {
+			callbackResp.ErrCode = 201
+		}
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
+		return &pbGroup.CreateGroupResp{
+			ErrCode: int32(callbackResp.ErrCode),
+			ErrMsg:  callbackResp.ErrMsg,
+		}, nil
+	}
 
 	groupId := req.GroupInfo.GroupID
 	if groupId == "" {

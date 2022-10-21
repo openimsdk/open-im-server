@@ -282,7 +282,7 @@ type config struct {
 		CallbackAfterSendSingleMsg         callBackConfig `yaml:"callbackAfterSendSingleMsg"`
 		CallbackBeforeSendGroupMsg         callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
 		CallbackAfterSendGroupMsg          callBackConfig `yaml:"callbackAfterSendGroupMsg"`
-		CallbackWordFilter                 callBackConfig `yaml:"callbackWordFilter"`
+		CallbackMsgModify                  callBackConfig `yaml:"callbackMsgModify"`
 		CallbackUserOnline                 callBackConfig `yaml:"callbackUserOnline"`
 		CallbackUserOffline                callBackConfig `yaml:"callbackUserOffline"`
 		CallbackUserKickOff                callBackConfig `yaml:"callbackUserKickOff"`
@@ -290,6 +290,7 @@ type config struct {
 		CallbackOnlinePush                 callBackConfig `yaml:"callbackOnlinePush"`
 		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`
 		CallbackBeforeAddFriend            callBackConfig `yaml:"callbackBeforeAddFriend"`
+		CallbackBeforeCreateGroup          callBackConfig `yaml:"callbackBeforeCreateGroup"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////

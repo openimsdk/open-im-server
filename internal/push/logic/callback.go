@@ -36,7 +36,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 		AtUserIDList:    msg.AtUserIDList,
 		Content:         callback.GetContent(msg),
 	}
-	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
+	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: callbackResp}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackOfflinePushCommand, req, resp, config.Config.Callback.CallbackOfflinePush.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
@@ -84,7 +84,7 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 		AtUserIDList:    msg.AtUserIDList,
 		Content:         callback.GetContent(msg),
 	}
-	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
+	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: callbackResp}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackOnlinePushCommand, req, resp, config.Config.Callback.CallbackOnlinePush.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
@@ -126,7 +126,7 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 		AtUserIDList:    msg.AtUserIDList,
 		Content:         callback.GetContent(msg),
 	}
-	resp := &cbApi.CallbackBeforeSuperGroupOnlinePushResp{CommonCallbackResp: &callbackResp}
+	resp := &cbApi.CallbackBeforeSuperGroupOnlinePushResp{CommonCallbackResp: callbackResp}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackSuperGroupOnlinePushCommand, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()

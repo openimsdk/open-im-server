@@ -290,17 +290,17 @@ func (rpc *rpcChat) SendMsg(_ context.Context, pb *pbChat.SendMsgReq) (*pbChat.S
 	msgToMQSingle := pbChat.MsgDataToMQ{Token: pb.Token, OperationID: pb.OperationID, MsgData: pb.MsgData}
 	// callback
 	t1 = time.Now()
-	callbackResp := callbackWordFilter(pb)
-	log.Debug(pb.OperationID, "callbackWordFilter ", callbackResp, "cost time: ", time.Since(t1))
+	callbackResp := callbackMsgModify(pb)
+	log.Debug(pb.OperationID, "callbackMsgModify ", callbackResp, "cost time: ", time.Since(t1))
 	if callbackResp.ErrCode != 0 {
-		log.Error(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter resp: ", callbackResp)
+		log.Error(pb.OperationID, utils.GetSelfFuncName(), "callbackMsgModify resp: ", callbackResp)
 	}
 	log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackResp: ", callbackResp)
 	if callbackResp.ActionCode != constant.ActionAllow {
 		if callbackResp.ErrCode == 0 {
 			callbackResp.ErrCode = 201
 		}
-		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackWordFilter result", "end rpc and return", pb.MsgData)
+		log.NewDebug(pb.OperationID, utils.GetSelfFuncName(), "callbackMsgModify result", "end rpc and return", pb.MsgData)
 		return returnMsg(&replay, pb, int32(callbackResp.ErrCode), callbackResp.ErrMsg, "", 0)
 	}
 	switch pb.MsgData.SessionType {

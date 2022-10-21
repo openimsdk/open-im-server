@@ -26,7 +26,7 @@ func callbackBeforeAddFriend(req *pbFriend.AddFriendReq) cbApi.CommonCallbackRes
 		OperationID:     req.CommID.OperationID,
 	}
 	resp := &cbApi.CallbackBeforeAddFriendResp{
-		CommonCallbackResp: &callbackResp,
+		CommonCallbackResp: callbackResp,
 	}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(req.CommID.OperationID, utils.GetSelfFuncName(), commonCallbackReq, *resp)

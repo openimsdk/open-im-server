@@ -1,12 +1,14 @@
 package call_back_struct
 
+import sdk_ws "Open_IM/pkg/proto/sdk_ws"
+
 type CallbackBeforeSendSingleMsgReq struct {
 	CommonCallbackReq
 	RecvID string `json:"recvID"`
 }
 
 type CallbackBeforeSendSingleMsgResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 }
 
 type CallbackAfterSendSingleMsgReq struct {
@@ -15,7 +17,7 @@ type CallbackAfterSendSingleMsgReq struct {
 }
 
 type CallbackAfterSendSingleMsgResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 }
 
 type CallbackBeforeSendGroupMsgReq struct {
@@ -24,7 +26,7 @@ type CallbackBeforeSendGroupMsgReq struct {
 }
 
 type CallbackBeforeSendGroupMsgResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 }
 
 type CallbackAfterSendGroupMsgReq struct {
@@ -33,14 +35,31 @@ type CallbackAfterSendGroupMsgReq struct {
 }
 
 type CallbackAfterSendGroupMsgResp struct {
-	*CommonCallbackResp
+	CommonCallbackResp
 }
 
-type CallbackWordFilterReq struct {
+type CallbackMsgModifyCommandReq struct {
 	CommonCallbackReq
 }
 
-type CallbackWordFilterResp struct {
-	*CommonCallbackResp
-	Content string `json:"content"`
+type CallbackMsgModifyCommandResp struct {
+	CommonCallbackResp
+	Content          *string                 `json:"content"`
+	RecvID           *string                 `json:"recvID"`
+	GroupID          *string                 `json:"groupID"`
+	ClientMsgID      *string                 `json:"clientMsgID"`
+	ServerMsgID      *string                 `json:"serverMsgID"`
+	SenderPlatformID *int32                  `json:"senderPlatformID"`
+	SenderNickname   *string                 `json:"senderNickname"`
+	SenderFaceURL    *string                 `json:"senderFaceURL"`
+	SessionType      *int32                  `json:"sessionType"`
+	MsgFrom          *int32                  `json:"msgFrom"`
+	ContentType      *int32                  `json:"contentType"`
+	Status           *int32                  `json:"status"`
+	Options          *map[string]bool        `json:"options"`
+	OfflinePushInfo  *sdk_ws.OfflinePushInfo `json:"offlinePushInfo"`
+	AtUserIDList     *[]string               `json:"atUserIDList"`
+	MsgDataList      *[]byte                 `json:"msgDataList"`
+	AttachedInfo     *string                 `json:"attachedInfo"`
+	Ex               *string                 `json:"ex"`
 }
