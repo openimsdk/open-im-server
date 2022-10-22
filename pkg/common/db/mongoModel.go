@@ -370,6 +370,9 @@ func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operatio
 			}
 		}
 	}
+	if len(hasSeqList) == 0 {
+		return nil, errors.New("pull message is null")
+	}
 	if len(hasSeqList) != len(seqList) {
 		var diff []uint32
 		diff = utils.Difference(hasSeqList, seqList)
