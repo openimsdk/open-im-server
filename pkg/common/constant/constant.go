@@ -200,7 +200,7 @@ const (
 	CallbackAfterSendSingleMsgCommand   = "callbackAfterSendSingleMsgCommand"
 	CallbackBeforeSendGroupMsgCommand   = "callbackBeforeSendGroupMsgCommand"
 	CallbackAfterSendGroupMsgCommand    = "callbackAfterSendGroupMsgCommand"
-	CallbackWordFilterCommand           = "callbackWordFilterCommand"
+	CallbackMsgModifyCommand            = "callbackMsgModifyCommand"
 	CallbackUserOnlineCommand           = "callbackUserOnlineCommand"
 	CallbackUserOfflineCommand          = "callbackUserOfflineCommand"
 	CallbackUserKickOffCommand          = "callbackUserKickOffCommand"
@@ -208,6 +208,7 @@ const (
 	CallbackOnlinePushCommand           = "callbackOnlinePushCommand"
 	CallbackSuperGroupOnlinePushCommand = "callbackSuperGroupOnlinePushCommand"
 	CallbackBeforeAddFriendCommand      = "callbackBeforeAddFriendCommand"
+	CallbackBeforeCreateGroupCommand    = "callbackBeforeCreateGroup"
 
 	//callback actionCode
 	ActionAllow     = 0

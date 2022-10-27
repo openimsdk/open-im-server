@@ -311,7 +311,7 @@ callback:
   callbackAfterSendGroupMsg:
     enable: false
     callbackTimeOut: 2
-  callbackWordFilter:
+  callbackMsgModify:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true
@@ -337,6 +337,10 @@ callback:
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续离线推送
   callbackBeforeAddFriend:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续
+  callbackBeforeCreateGroup:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续

@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	urlLib "net/url"
 	"time"
 )
 
@@ -34,6 +35,7 @@ func Post(url string, data interface{}, timeOutSecond int) (content []byte, err 
 	if err != nil {
 		return nil, err
 	}
+
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		return nil, err
@@ -54,7 +56,10 @@ func Post(url string, data interface{}, timeOutSecond int) (content []byte, err 
 	return result, nil
 }
 
-func PostReturn(url string, input, output interface{}, timeOut int) error {
+func CallBackPostReturn(url, callbackCommand string, input, output interface{}, timeOut int) error {
+	v := urlLib.Values{}
+	v.Set("callbackCommand", callbackCommand)
+	url = url + "?" + v.Encode()
 	b, err := Post(url, input, timeOut)
 	if err != nil {
 		return err

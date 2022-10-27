@@ -36,8 +36,8 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 		AtUserIDList:    msg.AtUserIDList,
 		Content:         callback.GetContent(msg),
 	}
-	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackOfflinePush.CallbackTimeOut); err != nil {
+	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: callbackResp}
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackOfflinePushCommand, req, resp, config.Config.Callback.CallbackOfflinePush.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		if !config.Config.Callback.CallbackOfflinePush.CallbackFailedContinue {
@@ -84,8 +84,8 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 		AtUserIDList:    msg.AtUserIDList,
 		Content:         callback.GetContent(msg),
 	}
-	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackOnlinePush.CallbackTimeOut); err != nil {
+	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: callbackResp}
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackOnlinePushCommand, req, resp, config.Config.Callback.CallbackOnlinePush.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		if !config.Config.Callback.CallbackOnlinePush.CallbackFailedContinue {
@@ -126,8 +126,8 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 		AtUserIDList:    msg.AtUserIDList,
 		Content:         callback.GetContent(msg),
 	}
-	resp := &cbApi.CallbackBeforeSuperGroupOnlinePushResp{CommonCallbackResp: &callbackResp}
-	if err := http.PostReturn(config.Config.Callback.CallbackUrl, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.CallbackTimeOut); err != nil {
+	resp := &cbApi.CallbackBeforeSuperGroupOnlinePushResp{CommonCallbackResp: callbackResp}
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackSuperGroupOnlinePushCommand, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		if !config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.CallbackFailedContinue {
