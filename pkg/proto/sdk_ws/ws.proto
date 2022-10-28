@@ -75,6 +75,7 @@ message UserInfo{
   uint32 createTime = 9;
   int32 appMangerLevel = 10;
   int32 globalRecvMsgOpt = 11;
+  string birthStr = 12;
 }
 
 message FriendInfo{
@@ -157,6 +158,7 @@ message OrganizationUser  {
     string  email    = 9;
     uint32   createTime = 10;
     string ex      = 11;
+    string birthStr = 12;
 }
 
 message DepartmentMember {
