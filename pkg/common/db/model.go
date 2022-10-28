@@ -125,23 +125,6 @@ func init() {
 	fmt.Println("createMongoIndex success")
 	DB.mongoClient = mongoClient
 
-	// redis pool init
-	//DB.redisPool = &redis.Pool{
-	//	MaxIdle:     config.Config.Redis.DBMaxIdle,
-	//	MaxActive:   config.Config.Redis.DBMaxActive,
-	//	IdleTimeout: time.Duration(config.Config.Redis.DBIdleTimeout) * time.Second,
-	//	Dial: func() (redis.Conn, error) {
-	//		return redis.Dial(
-	//			"tcp",
-	//			config.Config.Redis.DBAddress,
-	//			redis.DialReadTimeout(time.Duration(1000)*time.Millisecond),
-	//			redis.DialWriteTimeout(time.Duration(1000)*time.Millisecond),
-	//			redis.DialConnectTimeout(time.Duration(1000)*time.Millisecond),
-	//			redis.DialDatabase(0),
-	//			redis.DialPassword(config.Config.Redis.DBPassWord),
-	//		)
-	//	},
-	//}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if config.Config.Redis.EnableCluster {
