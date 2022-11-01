@@ -266,13 +266,10 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 	regex := fmt.Sprintf("/^%s/", ID)
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
 	var msgs []UserChat
-	_ = bson.M{"$regex": primitive.Regex{Pattern: regex}}
-	cursor, err := c.Find(ctx, bson.M{"uid": "3729483847:0"}, findOpts)
+	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": primitive.Regex{Pattern: regex}}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	v, err := cursor.Current.Values()
-	log.NewInfo("", "values", v, err)
 	err = cursor.All(context.Background(), &msgs)
 	if err != nil {
 		return nil, utils.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
