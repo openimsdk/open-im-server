@@ -264,21 +264,20 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 	regex := fmt.Sprintf("^%s", ID)
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
-	var msg UserChat
+	var msgs []UserChat
 	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	err = cursor.Decode(&msg)
+	err = cursor.Decode(&msgs)
 	if err != nil {
 		return nil, utils.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
 	}
-	//if len(msgs) > 0 {
-	//	return msgs[0], err
-	//} else {
-	//	return nil, errors.New("get msg list failed")
-	//}
-	return &msg, nil
+	if len(msgs) > 0 {
+		return &msgs[0], err
+	} else {
+		return nil, errors.New("get msg list failed")
+	}
 }
 
 func (d *DataBases) DelMongoMsgs(IDList []string) error {
