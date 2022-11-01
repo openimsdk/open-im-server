@@ -277,7 +277,7 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 	if len(msgs) > 0 {
 		return &msgs[0], err
 	} else {
-		return nil, errors.New("get msg list failed")
+		return nil, nil
 	}
 	//return &msgs, nil
 }
@@ -317,7 +317,7 @@ func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
 	if err != nil {
 		return nil, err
 	}
-	err = cursor.Decode(&userChats)
+	err = cursor.All(ctx, &userChats)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}

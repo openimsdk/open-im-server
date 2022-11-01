@@ -82,6 +82,9 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 		}
 		return getDelMaxSeqByIDList(*delMsgIDList), delMongoMsgs(operationID, delMsgIDList)
 	}
+	if index == 0 && msgs == nil {
+		return 0, nil
+	}
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
