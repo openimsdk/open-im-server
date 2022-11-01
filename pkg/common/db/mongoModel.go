@@ -56,6 +56,8 @@ type GroupMember_x struct {
 	UIDList []string
 }
 
+var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")
+
 func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq uint32, err error) {
 	return 1, nil
 	//var i, NB uint32
@@ -277,7 +279,7 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 	if len(msgs) > 0 {
 		return &msgs[0], err
 	} else {
-		return nil, nil
+		return nil, ErrMsgListNotExist
 	}
 	//return &msgs, nil
 }
