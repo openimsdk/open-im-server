@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/gogo/protobuf/sortkeys"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"math/rand"
@@ -263,10 +262,11 @@ func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID st
 func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
-	regex := fmt.Sprintf("/^%s/", ID)
+	//regex := fmt.Sprintf("/^%s/", ID)
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
 	var msgs []UserChat
-	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": primitive.Regex{Pattern: regex}}}, findOpts)
+	// bson.M{"$regex": primitive.Regex{Pattern: regex}}
+	cursor, err := c.Find(ctx, bson.M{"uid": "3729483847:0"}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
