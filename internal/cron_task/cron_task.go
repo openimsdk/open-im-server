@@ -20,6 +20,7 @@ func StartCronTask() {
 	c := cron.New()
 	fmt.Println("config", config.Config.Mongo.ChatRecordsClearTime)
 	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, func() {
+		// user msg clear
 		operationID := getCronTaskOperationID()
 		log.NewInfo(operationID, "====================== start del cron task ======================")
 		userIDList, err := im_mysql_model.SelectAllUserID()
@@ -37,8 +38,10 @@ func StartCronTask() {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 		}
 
+		// working group msg clear
 		workingGroupIDList, err := im_mysql_model.GetGroupIDListByGroupType(constant.WorkingGroup)
 		if err == nil {
+			log.NewDebug(operationID, utils.GetSelfFuncName(), "workingGroupIDList: ", workingGroupIDList)
 			for _, groupID := range workingGroupIDList {
 				userIDList, err = rocksCache.GetGroupMemberIDListFromCache(groupID)
 				if err != nil {
@@ -55,20 +58,19 @@ func StartCronTask() {
 			}
 		} else {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
-			return
 		}
 
 		log.NewInfo(operationID, "====================== start del cron finished ======================")
 	})
 	if err != nil {
-		fmt.Println("start cron failed", err.Error())
+		fmt.Println("start cron failed", err.Error(), config.Config.Mongo.ChatRecordsClearTime)
 		panic(err)
 	}
 
 	c.Start()
 	fmt.Println("start cron task success")
 	for {
-		time.Sleep(time.Second)
+		time.Sleep(10 * time.Second)
 	}
 }
 
