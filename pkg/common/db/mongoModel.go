@@ -325,7 +325,7 @@ func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
 	}
 	if len(userChats) > 0 {
 		if len(userChats[0].Msg) > 0 {
-			return &userChats[0].Msg[len(userChats[0].Msg)], nil
+			return &userChats[0].Msg[len(userChats[0].Msg)-1], nil
 		}
 		return nil, errors.New("len(userChats[0].Msg) < 0")
 	}
