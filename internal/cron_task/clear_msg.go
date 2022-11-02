@@ -79,7 +79,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 	if err != nil || msgs.UID == "" {
 		if err != nil {
 			if err == db.ErrMsgListNotExist {
-				log.NewDebug(operationID, utils.GetSelfFuncName(), ID, index, err.Error())
+				log.NewDebug(operationID, utils.GetSelfFuncName(), "ID:", ID, "index:", index, err.Error())
 			} else {
 				log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
 			}

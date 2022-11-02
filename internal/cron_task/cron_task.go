@@ -16,9 +16,9 @@ const cronTaskOperationID = "cronTaskOperationID-"
 
 func StartCronTask() {
 	log.NewPrivateLog("cron")
-	log.NewInfo(utils.OperationIDGenerator(), "start cron task")
+	log.NewInfo(utils.OperationIDGenerator(), "start cron task", "cron config", config.Config.Mongo.ChatRecordsClearTime)
 	c := cron.New()
-	fmt.Println("config", config.Config.Mongo.ChatRecordsClearTime)
+	fmt.Println("cron config", config.Config.Mongo.ChatRecordsClearTime)
 	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, func() {
 		// user msg clear
 		operationID := getCronTaskOperationID()
