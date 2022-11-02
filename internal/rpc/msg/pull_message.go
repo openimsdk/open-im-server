@@ -61,9 +61,9 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 		msgList, err1 := commonDB.DB.GetMsgBySeqListMongo2(in.UserID, failedSeqList, in.OperationID)
 		if err1 != nil {
 			promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
-			log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err.Error())
+			log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err1.Error())
 			resp.ErrCode = 201
-			resp.ErrMsg = err.Error()
+			resp.ErrMsg = err1.Error()
 			return resp, nil
 		} else {
 			promePkg.PromeAdd(promePkg.MsgPullFromMongoSuccessCounter, len(msgList))
@@ -88,9 +88,9 @@ func (rpc *rpcChat) PullMessageBySeqList(_ context.Context, in *open_im_sdk.Pull
 			msgList, err1 := commonDB.DB.GetSuperGroupMsgBySeqListMongo(k, failedSeqList, in.OperationID)
 			if err1 != nil {
 				promePkg.PromeAdd(promePkg.MsgPullFromMongoFailedCounter, len(failedSeqList))
-				log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err.Error())
+				log.Error(in.OperationID, "PullMessageBySeqList data error", in.String(), err1.Error())
 				resp.ErrCode = 201
-				resp.ErrMsg = err.Error()
+				resp.ErrMsg = err1.Error()
 				return resp, nil
 			} else {
 				promePkg.PromeAdd(promePkg.MsgPullFromMongoSuccessCounter, len(msgList))
