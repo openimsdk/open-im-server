@@ -268,7 +268,7 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 	regex := fmt.Sprintf("/^%s/", ID)
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
 	var msgs []UserChat
-	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": primitive.Regex{Pattern: regex}}}, findOpts)
+	cursor, err := c.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: regex}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -281,7 +281,6 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 	} else {
 		return nil, ErrMsgListNotExist
 	}
-	//return &msgs, nil
 }
 
 func (d *DataBases) DelMongoMsgs(IDList []string) error {

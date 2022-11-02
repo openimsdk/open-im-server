@@ -78,13 +78,18 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 	msgs, err := db.DB.GetUserMsgListByIndex(ID, index)
 	if err != nil || msgs.UID == "" {
 		if err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
+			if err == db.ErrMsgListNotExist {
+				log.NewDebug(operationID, utils.GetSelfFuncName(), ID, index, err.Error())
+			} else {
+				log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
+			}
 		}
 		return getDelMaxSeqByIDList(*delMsgIDList), delMongoMsgs(operationID, delMsgIDList)
 	}
 	if index == 0 && msgs == nil {
 		return 0, nil
 	}
+	log.NewDebug(operationID, "ID:", ID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
@@ -162,6 +167,8 @@ func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 	}
 	if math.Abs(float64(msgPb.Seq-uint32(maxSeq))) > 10 {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), maxSeq, msgPb.Seq, "redis maxSeq is different with msg.Seq")
+	} else {
+		log.NewInfo(operationID, utils.GetSelfFuncName(), diffusionType, ID, "seq and msg OK", msgPb.Seq, uint32(maxSeq))
 	}
 	return nil
 }
