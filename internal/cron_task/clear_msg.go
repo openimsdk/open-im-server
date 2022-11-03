@@ -166,6 +166,10 @@ func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 	if err != nil {
 		return utils.Wrap(err, "GetNewestMsg failed")
 	}
+	if msg == nil {
+		log.NewInfo(operationID, "msg has del")
+		return nil
+	}
 	msgPb := &server_api_params.MsgData{}
 	err = proto.Unmarshal(msg.Msg, msgPb)
 	if err != nil {

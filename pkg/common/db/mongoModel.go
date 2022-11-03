@@ -305,7 +305,7 @@ func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
 			msg.SendTime = 0
 		}
 	}
-	_, err = c.UpdateOne(ctx, bson.M{"uid": suffixID}, userChat)
+	_, err = c.UpdateOne(ctx, bson.M{"uid": suffixID}, bson.M{"$set": bson.M{"msg": userChat.Msg}})
 	return err
 }
 
@@ -329,7 +329,7 @@ func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
 		}
 		return nil, errors.New("len(userChats[0].Msg) < 0")
 	}
-	return nil, errors.New("len(userChats) < 0")
+	return nil, nil
 }
 
 func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {
