@@ -149,12 +149,12 @@ func getDelMaxSeqByIDList(delMsgIDList [][2]interface{}) uint32 {
 }
 
 func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
-	var maxSeq uint64
+	var seqRedis uint64
 	var err error
 	if diffusionType == constant.WriteDiffusion {
-		maxSeq, err = db.DB.GetUserMaxSeq(ID)
+		seqRedis, err = db.DB.GetUserMaxSeq(ID)
 	} else {
-		maxSeq, err = db.DB.GetGroupMaxSeq(ID)
+		seqRedis, err = db.DB.GetGroupMaxSeq(ID)
 	}
 	if err != nil {
 		if err == goRedis.Nil {
@@ -166,19 +166,19 @@ func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 	if err != nil {
 		return utils.Wrap(err, "GetNewestMsg failed")
 	}
-	if msg == nil {
-		log.NewInfo(operationID, "msg has del")
-		return nil
+	var seqMongo uint32
+	if msg != nil {
+		msgPb := &server_api_params.MsgData{}
+		err = proto.Unmarshal(msg.Msg, msgPb)
+		if err != nil {
+			return utils.Wrap(err, "")
+		}
+		seqMongo = msgPb.Seq
 	}
-	msgPb := &server_api_params.MsgData{}
-	err = proto.Unmarshal(msg.Msg, msgPb)
-	if err != nil {
-		return utils.Wrap(err, "")
-	}
-	if math.Abs(float64(msgPb.Seq-uint32(maxSeq))) > 10 {
-		log.NewWarn(operationID, utils.GetSelfFuncName(), maxSeq, msgPb.Seq, "redis maxSeq is different with msg.Seq > 10")
+	if math.Abs(float64(seqMongo-uint32(seqRedis))) > 10 {
+		log.NewWarn(operationID, utils.GetSelfFuncName(), seqMongo, seqRedis, "redis maxSeq is different with msg.Seq > 10")
 	} else {
-		log.NewInfo(operationID, utils.GetSelfFuncName(), diffusionType, ID, "seq and msg OK", msgPb.Seq, uint32(maxSeq))
+		log.NewInfo(operationID, utils.GetSelfFuncName(), diffusionType, ID, "seq and msg OK", seqMongo, seqRedis)
 	}
 	return nil
 }
