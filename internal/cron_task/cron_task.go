@@ -30,9 +30,9 @@ func StartCronTask() {
 				if err := DeleteMongoMsgAndResetRedisSeq(operationID, userID); err != nil {
 					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), userID)
 				}
-				if err := checkMaxSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
-					log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
-				}
+				//if err := checkMaxSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
+				//	log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
+				//}
 			}
 		} else {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
@@ -52,9 +52,9 @@ func StartCronTask() {
 				if err := ResetUserGroupMinSeq(operationID, groupID, userIDList); err != nil {
 					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userIDList)
 				}
-				if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
-					log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
-				}
+				//if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
+				//	log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
+				//}
 			}
 		} else {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
