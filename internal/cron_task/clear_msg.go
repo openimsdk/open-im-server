@@ -176,7 +176,7 @@ func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 		seqMongo = msgPb.Seq
 	}
 	if math.Abs(float64(seqMongo-uint32(seqRedis))) > 10 {
-		log.NewWarn(operationID, utils.GetSelfFuncName(), seqMongo, seqRedis, "redis maxSeq is different with msg.Seq > 10")
+		log.NewWarn(operationID, utils.GetSelfFuncName(), seqMongo, seqRedis, "redis maxSeq is different with msg.Seq > 10", ID, diffusionType)
 	} else {
 		log.NewInfo(operationID, utils.GetSelfFuncName(), diffusionType, ID, "seq and msg OK", seqMongo, seqRedis)
 	}
