@@ -278,7 +278,7 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 		return nil, utils.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
 	}
 	if len(msgs) > 0 {
-		return &msgs[0], err
+		return &msgs[0], nil
 	} else {
 		return nil, ErrMsgListNotExist
 	}
