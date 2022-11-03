@@ -10,6 +10,8 @@ import (
 	goRedis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 	"math"
+	"strconv"
+	"strings"
 )
 
 const oldestList = 0
@@ -120,11 +122,12 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 					return getDelMaxSeqByIDList(*delMsgIDList) + 1, utils.Wrap(err, "")
 				}
 			}
+			// 递归结束
 			return msgPb.Seq, nil
 		}
 	}
-	// 该列表中消息全部为老消息, 加入删除列表继续递归
-	if len(msgs.Msg) > 0 {
+	// 该列表中消息全部为老消息并且列表满了, 加入删除列表继续递归
+	if msgListIsFull(msgs) {
 		msgPb := &server_api_params.MsgData{}
 		err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, msgPb)
 		if err != nil {
@@ -139,6 +142,19 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 		return seq, utils.Wrap(err, "deleteMongoMsg failed")
 	}
 	return seq, nil
+}
+
+func msgListIsFull(chat *db.UserChat) bool {
+	index, _ := strconv.Atoi(strings.Split(chat.UID, ":")[1])
+	if index == 0 {
+		if len(chat.Msg) >= 4999 {
+			return true
+		}
+	}
+	if len(chat.Msg) >= 5000 {
+		return true
+	}
+	return false
 }
 
 func getDelMaxSeqByIDList(delMsgIDList [][2]interface{}) uint32 {
