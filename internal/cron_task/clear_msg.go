@@ -166,15 +166,16 @@ func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 	if err != nil {
 		return utils.Wrap(err, "GetNewestMsg failed")
 	}
-	var seqMongo uint32
-	if msg != nil {
-		msgPb := &server_api_params.MsgData{}
-		err = proto.Unmarshal(msg.Msg, msgPb)
-		if err != nil {
-			return utils.Wrap(err, "")
-		}
-		seqMongo = msgPb.Seq
+	if msg == nil {
+		return nil
 	}
+	var seqMongo uint32
+	msgPb := &server_api_params.MsgData{}
+	err = proto.Unmarshal(msg.Msg, msgPb)
+	if err != nil {
+		return utils.Wrap(err, "")
+	}
+	seqMongo = msgPb.Seq
 	if math.Abs(float64(seqMongo-uint32(seqRedis))) > 10 {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), seqMongo, seqRedis, "redis maxSeq is different with msg.Seq > 10", ID, diffusionType)
 	} else {
