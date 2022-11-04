@@ -84,7 +84,6 @@ func (d *delMsgRecursionStruct) getSetMinSeq() uint32 {
 // set minSeq 21
 // recursion
 func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMsgRecursionStruct) (uint32, error) {
-	// delMsgIDList [[uid:0, minSeq], [uid:1, minSeq]]
 	// find from oldest list
 	msgs, err := db.DB.GetUserMsgListByIndex(ID, index)
 	if err != nil || msgs.UID == "" {
@@ -106,10 +105,10 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "get msgs: ", msgs.UID)
 	for i, msg := range msgs.Msg {
 		// 找到列表中不需要删除的消息了, 表示为递归到最后一个块
 		if utils.GetCurrentTimestampByMill() < msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) {
+			log.NewDebug(operationID, ID, "find uid", msgs.UID)
 			// 删除块失败 递归结束 返回0
 			if err := delMongoMsgsPhysical(delStruct.delUidList); err != nil {
 				return 0, err
