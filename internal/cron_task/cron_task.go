@@ -38,7 +38,7 @@ func StartCronTask() {
 		} else {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 		}
-
+		return
 		// working group msg clear
 		workingGroupIDList, err := im_mysql_model.GetGroupIDListByGroupType(constant.WorkingGroup)
 		if err == nil {
