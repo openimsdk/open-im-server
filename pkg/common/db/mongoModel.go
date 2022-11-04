@@ -301,7 +301,16 @@ func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
 	}
 	for i, msg := range userChat.Msg {
 		if i <= index {
-			msg.Msg = nil
+			msgPb := &open_im_sdk.MsgData{}
+			if err = proto.Unmarshal(msg.Msg, msgPb); err != nil {
+				continue
+			}
+			newMsgPb := &open_im_sdk.MsgData{Seq: msgPb.Seq}
+			bytes, err := proto.Marshal(newMsgPb)
+			if err != nil {
+				continue
+			}
+			msg.Msg = bytes
 			msg.SendTime = 0
 		}
 	}

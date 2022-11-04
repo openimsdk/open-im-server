@@ -18,15 +18,15 @@ const oldestList = 0
 const newestList = -1
 
 func ResetUserGroupMinSeq(operationID, groupID string, userIDList []string) error {
-	var delMsgIDList [][2]interface{}
-	minSeq, err := deleteMongoMsg(operationID, groupID, oldestList, &delMsgIDList)
+	var delStruct delMsgRecursionStruct
+	minSeq, err := deleteMongoMsg(operationID, groupID, oldestList, &delStruct)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), groupID, "deleteMongoMsg failed")
 	}
 	if minSeq == 0 {
 		return nil
 	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDList:", delMsgIDList, "minSeq", minSeq)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDList:", delStruct, "minSeq", minSeq)
 	for _, userID := range userIDList {
 		userMinSeq, err := db.DB.GetGroupUserMinSeq(groupID, userID)
 		if err != nil && err != goRedis.Nil {
@@ -46,27 +46,23 @@ func ResetUserGroupMinSeq(operationID, groupID string, userIDList []string) erro
 }
 
 func DeleteMongoMsgAndResetRedisSeq(operationID, userID string) error {
-	var delMsgIDList [][2]interface{}
-	minSeq, err := deleteMongoMsg(operationID, userID, oldestList, &delMsgIDList)
+	var delStruct delMsgRecursionStruct
+	minSeq, err := deleteMongoMsg(operationID, userID, oldestList, &delStruct)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
 	if minSeq == 0 {
 		return nil
 	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDMap: ", delMsgIDList, "minSeq", minSeq)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDMap: ", delStruct, "minSeq", minSeq)
 	err = db.DB.SetUserMinSeq(userID, minSeq)
 	return utils.Wrap(err, "")
 }
 
 // del list
-func delMongoMsgsPhysical(delMsgIDList *[][2]interface{}) error {
-	if len(*delMsgIDList) > 0 {
-		var IDList []string
-		for _, v := range *delMsgIDList {
-			IDList = append(IDList, v[0].(string))
-		}
-		err := db.DB.DelMongoMsgs(IDList)
+func delMongoMsgsPhysical(uidList []string) error {
+	if len(uidList) > 0 {
+		err := db.DB.DelMongoMsgs(uidList)
 		if err != nil {
 			return utils.Wrap(err, "DelMongoMsgs failed")
 		}
@@ -74,28 +70,37 @@ func delMongoMsgsPhysical(delMsgIDList *[][2]interface{}) error {
 	return nil
 }
 
+type delMsgRecursionStruct struct {
+	minSeq     uint32
+	delUidList []string
+}
+
+func (d *delMsgRecursionStruct) getSetMinSeq() uint32 {
+	return d.minSeq
+}
+
 // index 0....19(del) 20...69
 // seq 70
 // set minSeq 21
 // recursion
-func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[][2]interface{}) (uint32, error) {
+func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMsgRecursionStruct) (uint32, error) {
 	// delMsgIDList [[uid:0, minSeq], [uid:1, minSeq]]
 	// find from oldest list
 	msgs, err := db.DB.GetUserMsgListByIndex(ID, index)
 	if err != nil || msgs.UID == "" {
 		if err != nil {
 			if err == db.ErrMsgListNotExist {
-				log.NewDebug(operationID, utils.GetSelfFuncName(), "ID:", ID, "index:", index, err.Error())
+				log.NewInfo(operationID, utils.GetSelfFuncName(), "ID:", ID, "index:", index, err.Error())
 			} else {
 				log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
 			}
 		}
 		// 获取报错，或者获取不到了，物理删除并且返回seq
-		err = delMongoMsgsPhysical(delMsgIDList)
+		err = delMongoMsgsPhysical(delStruct.delUidList)
 		if err != nil {
 			return 0, err
 		}
-		return getDelMaxSeqByIDList(*delMsgIDList) + 1, nil
+		return delStruct.getSetMinSeq(), nil
 	}
 	log.NewDebug(operationID, "ID:", ID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
@@ -106,20 +111,20 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 		// 找到列表中不需要删除的消息了, 表示为递归到最后一个块
 		if utils.GetCurrentTimestampByMill() < msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) {
 			// 删除块失败 递归结束 返回0
-			if err := delMongoMsgsPhysical(delMsgIDList); err != nil {
+			if err := delMongoMsgsPhysical(delStruct.delUidList); err != nil {
 				return 0, err
 			}
-			// unMarshall失败 块删除成功 返回块的最大seq+1 设置为最小seq
+			// unMarshall失败 块删除成功  设置为最小seq
 			msgPb := &server_api_params.MsgData{}
 			if err = proto.Unmarshal(msg.Msg, msgPb); err != nil {
-				return getDelMaxSeqByIDList(*delMsgIDList) + 1, utils.Wrap(err, "")
+				return delStruct.getSetMinSeq(), utils.Wrap(err, "")
 			}
-			// 如果不是块中第一个，就把前面比他早插入的全部设置空。
+			// 如果不是块中第一个，就把前面比他早插入的全部设置空 seq字段除外。
 			if i > 0 {
 				err = db.DB.ReplaceMsgToBlankByIndex(msgs.UID, i-1)
 				if err != nil {
 					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), msgs.UID, i)
-					return getDelMaxSeqByIDList(*delMsgIDList) + 1, utils.Wrap(err, "")
+					return delStruct.getSetMinSeq(), utils.Wrap(err, "")
 				}
 			}
 			// 递归结束
@@ -127,17 +132,18 @@ func deleteMongoMsg(operationID string, ID string, index int64, delMsgIDList *[]
 		}
 	}
 	// 该列表中消息全部为老消息并且列表满了, 加入删除列表继续递归
+	lastMsgPb := &server_api_params.MsgData{}
+	err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
+	if err != nil {
+		log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
+		return 0, utils.Wrap(err, "proto.Unmarshal failed")
+	}
+	delStruct.minSeq = lastMsgPb.Seq
 	if msgListIsFull(msgs) {
-		msgPb := &server_api_params.MsgData{}
-		err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, msgPb)
-		if err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
-			return 0, utils.Wrap(err, "proto.Unmarshal failed")
-		}
-		*delMsgIDList = append(*delMsgIDList, [2]interface{}{msgs.UID, msgPb.Seq})
+		delStruct.delUidList = append(delStruct.delUidList, msgs.UID)
 	}
 	//  继续递归 index+1
-	seq, err := deleteMongoMsg(operationID, ID, index+1, delMsgIDList)
+	seq, err := deleteMongoMsg(operationID, ID, index+1, delStruct)
 	if err != nil {
 		return seq, utils.Wrap(err, "deleteMongoMsg failed")
 	}
@@ -155,13 +161,6 @@ func msgListIsFull(chat *db.UserChat) bool {
 		return true
 	}
 	return false
-}
-
-func getDelMaxSeqByIDList(delMsgIDList [][2]interface{}) uint32 {
-	if len(delMsgIDList) == 0 {
-		return 0
-	}
-	return delMsgIDList[len(delMsgIDList)-1][1].(uint32)
 }
 
 func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
