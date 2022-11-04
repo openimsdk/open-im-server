@@ -26,6 +26,7 @@ func StartCronTask() {
 		userIDList, err := im_mysql_model.SelectAllUserID()
 		if err == nil {
 			log.NewDebug(operationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
+			userIDList = []string{"4158779020"}
 			for _, userID := range userIDList {
 				if err := DeleteMongoMsgAndResetRedisSeq(operationID, userID); err != nil {
 					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), userID)
