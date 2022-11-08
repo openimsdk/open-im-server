@@ -410,14 +410,18 @@ func (d *DataBases) GetSendMsgStatus(operationID string) (int, error) {
 	return status, err
 }
 
-func (d *DataBases) SetFcmToken(account string, platformid int, fcmToken string, expireTime int64) (err error) {
-	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+func (d *DataBases) SetFcmToken(account string, platformID int, fcmToken string, expireTime int64) (err error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformID)
 	return d.RDB.Set(context.Background(), key, fcmToken, time.Duration(expireTime)*time.Second).Err()
 }
 
-func (d *DataBases) GetFcmToken(account string, platformid int) (string, error) {
-	key := FcmToken + account + ":" + strconv.Itoa(platformid)
+func (d *DataBases) GetFcmToken(account string, platformID int) (string, error) {
+	key := FcmToken + account + ":" + strconv.Itoa(platformID)
 	return d.RDB.Get(context.Background(), key).Result()
+}
+func (d *DataBases) DelFcmToken(account string, platformID int) error {
+	key := FcmToken + account + ":" + strconv.Itoa(platformID)
+	return d.RDB.Del(context.Background(), key).Err()
 }
 func (d *DataBases) IncrUserBadgeUnreadCountSum(uid string) (int, error) {
 	key := userBadgeUnreadCountSum + uid

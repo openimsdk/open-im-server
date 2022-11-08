@@ -138,12 +138,6 @@ func ManagementSendMsg(c *gin.Context) {
 		data = VideoElem{}
 	case constant.File:
 		data = FileElem{}
-	//case constant.AtText:
-	//	data = AtElem{}
-	//case constant.Merger:
-	//	data =
-	//case constant.Card:
-	//case constant.Location:
 	case constant.Custom:
 		data = CustomElem{}
 	case constant.Revoke:
@@ -161,16 +155,16 @@ func ManagementSendMsg(c *gin.Context) {
 	//case constant.Typing:
 	//case constant.Quote:
 	default:
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 404, "errMsg": "contentType err"})
+		c.JSON(http.StatusOK, gin.H{"errCode": 404, "errMsg": "contentType err"})
 		log.Error(c.PostForm("operationID"), "contentType err", c.PostForm("content"))
 		return
 	}
 	if err := mapstructure.WeakDecode(params.Content, &data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 401, "errMsg": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": 401, "errMsg": err.Error()})
 		log.Error(c.PostForm("operationID"), "content to Data struct  err", err.Error())
 		return
 	} else if err := validate.Struct(data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 403, "errMsg": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": 403, "errMsg": err.Error()})
 		log.Error(c.PostForm("operationID"), "data args validate  err", err.Error())
 		return
 	}
@@ -178,12 +172,13 @@ func ManagementSendMsg(c *gin.Context) {
 	token := c.Request.Header.Get("token")
 	claims, err := token_verify.ParseToken(token, params.OperationID)
 	if err != nil {
-		log.NewError(params.OperationID, "parse token failed", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
+		log.NewError(params.OperationID, "parse token failed", err.Error(), token)
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": "parse token failed", "sendTime": 0, "MsgID": ""})
 		return
 	}
 	if !utils.IsContain(claims.UID, config.Config.Manager.AppManagerUid) {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "not authorized", "sendTime": 0, "MsgID": ""})
+		log.NewError(params.OperationID, "not authorized", token)
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": "not authorized", "sendTime": 0, "MsgID": ""})
 		return
 
 	}
@@ -191,13 +186,13 @@ func ManagementSendMsg(c *gin.Context) {
 	case constant.SingleChatType:
 		if len(params.RecvID) == 0 {
 			log.NewError(params.OperationID, "recvID is a null string")
-			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "recvID is a null string", "sendTime": 0, "MsgID": ""})
+			c.JSON(http.StatusOK, gin.H{"errCode": 405, "errMsg": "recvID is a null string", "sendTime": 0, "MsgID": ""})
 			return
 		}
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		if len(params.GroupID) == 0 {
 			log.NewError(params.OperationID, "groupID is a null string")
-			c.JSON(http.StatusBadRequest, gin.H{"errCode": 405, "errMsg": "groupID is a null string", "sendTime": 0, "MsgID": ""})
+			c.JSON(http.StatusOK, gin.H{"errCode": 405, "errMsg": "groupID is a null string", "sendTime": 0, "MsgID": ""})
 			return
 		}
 

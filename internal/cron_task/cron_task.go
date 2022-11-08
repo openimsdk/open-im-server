@@ -16,29 +16,33 @@ const cronTaskOperationID = "cronTaskOperationID-"
 
 func StartCronTask() {
 	log.NewPrivateLog("cron")
-	log.NewInfo(utils.OperationIDGenerator(), "start cron task")
+	log.NewInfo(utils.OperationIDGenerator(), "start cron task", "cron config", config.Config.Mongo.ChatRecordsClearTime)
 	c := cron.New()
-	fmt.Println("config", config.Config.Mongo.ChatRecordsClearTime)
+	fmt.Println("cron config", config.Config.Mongo.ChatRecordsClearTime)
 	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, func() {
+		// user msg clear
 		operationID := getCronTaskOperationID()
 		log.NewInfo(operationID, "====================== start del cron task ======================")
 		userIDList, err := im_mysql_model.SelectAllUserID()
 		if err == nil {
 			log.NewDebug(operationID, utils.GetSelfFuncName(), "userIDList: ", userIDList)
+			userIDList = []string{"4158779020"}
 			for _, userID := range userIDList {
 				if err := DeleteMongoMsgAndResetRedisSeq(operationID, userID); err != nil {
 					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), userID)
 				}
-				if err := checkMaxSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
-					log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
-				}
+				//if err := checkMaxSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
+				//	log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
+				//}
 			}
 		} else {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 		}
-
+		return
+		// working group msg clear
 		workingGroupIDList, err := im_mysql_model.GetGroupIDListByGroupType(constant.WorkingGroup)
 		if err == nil {
+			log.NewDebug(operationID, utils.GetSelfFuncName(), "workingGroupIDList: ", workingGroupIDList)
 			for _, groupID := range workingGroupIDList {
 				userIDList, err = rocksCache.GetGroupMemberIDListFromCache(groupID)
 				if err != nil {
@@ -49,26 +53,25 @@ func StartCronTask() {
 				if err := ResetUserGroupMinSeq(operationID, groupID, userIDList); err != nil {
 					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userIDList)
 				}
-				if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
-					log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
-				}
+				//if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
+				//	log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
+				//}
 			}
 		} else {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
-			return
 		}
 
 		log.NewInfo(operationID, "====================== start del cron finished ======================")
 	})
 	if err != nil {
-		fmt.Println("start cron failed", err.Error())
+		fmt.Println("start cron failed", err.Error(), config.Config.Mongo.ChatRecordsClearTime)
 		panic(err)
 	}
 
 	c.Start()
 	fmt.Println("start cron task success")
 	for {
-		time.Sleep(time.Second)
+		time.Sleep(10 * time.Second)
 	}
 }
 

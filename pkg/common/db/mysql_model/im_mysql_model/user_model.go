@@ -7,7 +7,6 @@ import (
 	"Open_IM/pkg/utils"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 )
 
@@ -116,10 +115,10 @@ func GetUsers(showNumber, pageNumber int32) ([]db.User, error) {
 	return users, err
 }
 
-func AddUser(userID string, phoneNumber string, name string, email string, gender int32, faceURL string, birth uint32) error {
-	_birth, _err := time.ParseInLocation("2006-01-02", strconv.Itoa(int(birth)), time.Local)
-	if _err != nil {
-		_birth = time.Now()
+func AddUser(userID string, phoneNumber string, name string, email string, gender int32, faceURL string, birth string) error {
+	_birth, err := utils.TimeStringToTime(birth)
+	if err != nil {
+		return err
 	}
 	user := db.User{
 		UserID:      userID,

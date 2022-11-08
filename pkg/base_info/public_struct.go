@@ -17,6 +17,7 @@ type ApiUserInfo struct {
 	CreateTime  int64  `json:"createTime"`
 	LoginLimit  int32  `json:"loginLimit" binding:"omitempty"`
 	Ex          string `json:"ex" binding:"omitempty,max=1024"`
+	BirthStr    string `json:"birthStr" binding:"omitempty"`
 }
 
 //type Conversation struct {

@@ -28,8 +28,13 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	var user db.User
 	utils.CopyStructFields(&user, req.UserInfo)
-	if req.UserInfo.Birth != 0 {
-		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
+	if req.UserInfo.BirthStr != "" {
+		time, err := utils.TimeStringToTime(req.UserInfo.BirthStr)
+		if err != nil {
+			log.NewError(req.OperationID, "TimeStringToTime failed ", err.Error(), req.UserInfo.BirthStr)
+			return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: "TimeStringToTime failed:" + err.Error()}}, nil
+		}
+		user.Birth = time
 	}
 	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
 	err := imdb.UserRegister(user)

@@ -3,6 +3,7 @@ package logic
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
@@ -10,7 +11,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"net"
-
 	"strconv"
 	"strings"
 
@@ -90,4 +90,16 @@ func (r *RPCServer) PushMsg(_ context.Context, pbData *pbPush.PushMsgReq) (*pbPu
 		ResultCode: 0,
 	}, nil
 
+}
+
+func (r *RPCServer) DelUserPushToken(c context.Context, req *pbPush.DelUserPushTokenReq) (*pbPush.DelUserPushTokenResp, error) {
+	var resp pbPush.DelUserPushTokenResp
+	err := db.DB.DelFcmToken(req.UserID, int(req.PlatformID))
+	if err != nil {
+		errMsg := req.OperationID + " " + "SetFcmToken failed " + err.Error()
+		log.NewError(req.OperationID, errMsg)
+		resp.ErrCode = 500
+		resp.ErrMsg = errMsg
+	}
+	return &resp, nil
 }

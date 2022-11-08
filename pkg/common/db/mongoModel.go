@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/gogo/protobuf/sortkeys"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"math/rand"
@@ -54,6 +55,8 @@ type GroupMember_x struct {
 	GroupID string
 	UIDList []string
 }
+
+var ErrMsgListNotExist = errors.New("user not have msg in mongoDB")
 
 func (d *DataBases) GetMinSeqFromMongo(uid string) (MinSeq uint32, err error) {
 	return 1, nil
@@ -265,18 +268,19 @@ func (d *DataBases) GetUserMsgListByIndex(ID string, index int64) (*UserChat, er
 	regex := fmt.Sprintf("^%s", ID)
 	findOpts := options.Find().SetLimit(1).SetSkip(index).SetSort(bson.M{"uid": 1})
 	var msgs []UserChat
-	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
-	if err != nil {
-		return nil, err
-	}
-	err = cursor.Decode(&msgs)
+	//primitive.Regex{Pattern: regex}
+	cursor, err := c.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: regex}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
+	err = cursor.All(context.Background(), &msgs)
+	if err != nil {
+		return nil, utils.Wrap(err, fmt.Sprintf("cursor is %s", cursor.Current.String()))
+	}
 	if len(msgs) > 0 {
-		return &msgs[0], err
+		return &msgs[0], nil
 	} else {
-		return nil, errors.New("get msg list failed")
+		return nil, ErrMsgListNotExist
 	}
 }
 
@@ -297,11 +301,20 @@ func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
 	}
 	for i, msg := range userChat.Msg {
 		if i <= index {
-			msg.Msg = nil
+			msgPb := &open_im_sdk.MsgData{}
+			if err = proto.Unmarshal(msg.Msg, msgPb); err != nil {
+				continue
+			}
+			newMsgPb := &open_im_sdk.MsgData{Seq: msgPb.Seq}
+			bytes, err := proto.Marshal(newMsgPb)
+			if err != nil {
+				continue
+			}
+			msg.Msg = bytes
 			msg.SendTime = 0
 		}
 	}
-	_, err = c.UpdateOne(ctx, bson.M{"uid": suffixID}, userChat)
+	_, err = c.UpdateOne(ctx, bson.M{"uid": suffixID}, bson.M{"$set": bson.M{"msg": userChat.Msg}})
 	return err
 }
 
@@ -315,17 +328,17 @@ func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
 	if err != nil {
 		return nil, err
 	}
-	err = cursor.Decode(&userChats)
+	err = cursor.All(ctx, &userChats)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
 	if len(userChats) > 0 {
 		if len(userChats[0].Msg) > 0 {
-			return &userChats[0].Msg[len(userChats[0].Msg)], nil
+			return &userChats[0].Msg[len(userChats[0].Msg)-1], nil
 		}
 		return nil, errors.New("len(userChats[0].Msg) < 0")
 	}
-	return nil, errors.New("len(userChats) < 0")
+	return nil, nil
 }
 
 func (d *DataBases) GetMsgBySeqListMongo2(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {

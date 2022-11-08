@@ -125,7 +125,6 @@ func syncPeerUserConversation(conversation *pbConversation.Conversation, operati
 
 func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq) (*pbUser.GetUserInfoResp, error) {
 	log.NewInfo(req.OperationID, "GetUserInfo args ", req.String())
-
 	var userInfoList []*sdkws.UserInfo
 	if len(req.UserIDList) > 0 {
 		for _, userID := range req.UserIDList {
@@ -136,7 +135,7 @@ func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq
 				continue
 			}
 			utils.CopyStructFields(&userInfo, user)
-			userInfo.Birth = uint32(user.Birth.Unix())
+			userInfo.BirthStr = utils.TimeToString(user.Birth)
 			userInfoList = append(userInfoList, &userInfo)
 		}
 	} else {
@@ -411,8 +410,14 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	var user db.User
 	utils.CopyStructFields(&user, req.UserInfo)
-	if req.UserInfo.Birth != 0 {
-		user.Birth = utils.UnixSecondToTime(int64(req.UserInfo.Birth))
+
+	if req.UserInfo.BirthStr != "" {
+		time, err := utils.TimeStringToTime(req.UserInfo.BirthStr)
+		if err != nil {
+			log.NewError(req.OperationID, "TimeStringToTime failed ", err.Error(), req.UserInfo.BirthStr)
+			return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: "TimeStringToTime failed:" + err.Error()}}, nil
+		}
+		user.Birth = time
 	}
 
 	err := imdb.UpdateUserInfo(user)
@@ -600,7 +605,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		var user sdkws.UserInfo
 		utils.CopyStructFields(&user, userDB)
 		user.CreateTime = uint32(userDB.CreateTime.Unix())
-		user.Birth = uint32(userDB.Birth.Unix())
+		user.BirthStr = utils.TimeToString(userDB.Birth)
 		resp.UserList = append(resp.UserList, &pbUser.CmsUser{User: &user})
 	}
 
@@ -628,7 +633,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.AddUserResp{CommonResp: &pbUser.CommonResp{}}
-	err := imdb.AddUser(req.UserInfo.UserID, req.UserInfo.PhoneNumber, req.UserInfo.Nickname, req.UserInfo.Email, req.UserInfo.Gender, req.UserInfo.FaceURL, req.UserInfo.Birth)
+	err := imdb.AddUser(req.UserInfo.UserID, req.UserInfo.PhoneNumber, req.UserInfo.Nickname, req.UserInfo.Email, req.UserInfo.Gender, req.UserInfo.FaceURL, req.UserInfo.BirthStr)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error(), req.String())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode

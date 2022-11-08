@@ -29,6 +29,7 @@ import (
 type UserConn struct {
 	*websocket.Conn
 	w            *sync.Mutex
+	platformID   int32
 	PushedMaxSeq uint32
 }
 type WServer struct {
@@ -74,7 +75,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 			log.Error(operationID, "upgrade http conn err", err.Error(), query)
 			return
 		} else {
-			newConn := &UserConn{conn, new(sync.Mutex), 0}
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0}
 			userCount++
 			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
 			go ws.readMsg(newConn)
