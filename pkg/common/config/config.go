@@ -578,7 +578,7 @@ func init() {
 			panic(err.Error())
 		}
 	} else {
-		bytes, err := ioutil.ReadFile(filepath.Join(Root, "config", "config.yaml"))
+		bytes, err := ioutil.ReadFile("../config/config.yaml")
 		if err != nil {
 			panic(err.Error())
 		}
