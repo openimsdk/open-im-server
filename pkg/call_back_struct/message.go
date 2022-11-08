@@ -8,7 +8,7 @@ type CallbackBeforeSendSingleMsgReq struct {
 }
 
 type CallbackBeforeSendSingleMsgResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackAfterSendSingleMsgReq struct {
@@ -17,7 +17,7 @@ type CallbackAfterSendSingleMsgReq struct {
 }
 
 type CallbackAfterSendSingleMsgResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackBeforeSendGroupMsgReq struct {
@@ -26,7 +26,7 @@ type CallbackBeforeSendGroupMsgReq struct {
 }
 
 type CallbackBeforeSendGroupMsgResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackAfterSendGroupMsgReq struct {
@@ -35,7 +35,7 @@ type CallbackAfterSendGroupMsgReq struct {
 }
 
 type CallbackAfterSendGroupMsgResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackMsgModifyCommandReq struct {
@@ -43,7 +43,7 @@ type CallbackMsgModifyCommandReq struct {
 }
 
 type CallbackMsgModifyCommandResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 	Content          *string                 `json:"content"`
 	RecvID           *string                 `json:"recvID"`
 	GroupID          *string                 `json:"groupID"`

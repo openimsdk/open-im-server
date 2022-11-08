@@ -7,7 +7,7 @@ type CallbackUserOnlineReq struct {
 }
 
 type CallbackUserOnlineResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackUserOfflineReq struct {
@@ -16,7 +16,7 @@ type CallbackUserOfflineReq struct {
 }
 
 type CallbackUserOfflineResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }
 
 type CallbackUserKickOffReq struct {
@@ -25,5 +25,5 @@ type CallbackUserKickOffReq struct {
 }
 
 type CallbackUserKickOffResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }

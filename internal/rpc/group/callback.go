@@ -21,7 +21,7 @@ func callbackBeforeCreateGroup(req *pbGroup.CreateGroupReq) cbApi.CommonCallback
 		CallbackCommand: constant.CallbackBeforeCreateGroupCommand,
 	}
 	resp := &cbApi.CallbackBeforeCreateGroupResp{
-		CommonCallbackResp: callbackResp,
+		CommonCallbackResp: &callbackResp,
 	}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(req.OperationID, utils.GetSelfFuncName(), commonCallbackReq, *resp)

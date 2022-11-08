@@ -9,5 +9,5 @@ type CallbackBeforeAddFriendReq struct {
 }
 
 type CallbackBeforeAddFriendResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 }

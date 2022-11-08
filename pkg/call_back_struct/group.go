@@ -10,7 +10,7 @@ type CallbackBeforeCreateGroupReq struct {
 }
 
 type CallbackBeforeCreateGroupResp struct {
-	CommonCallbackResp
+	*CommonCallbackResp
 	GroupID           *string `json:"groupID"`
 	GroupName         *string `json:"groupName"`
 	Notification      *string `json:"notification"`
