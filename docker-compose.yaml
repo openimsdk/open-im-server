@@ -19,7 +19,7 @@ services:
     ports:
       - 37017:27017
     container_name: mongo
-    command: --wiredTigerCacheSizeGB 1
+    command: --wiredTigerCacheSizeGB 1 --auth
     volumes:
       - ${DATA_DIR}/components/mongodb/data/db:/data/db
       - ${DATA_DIR}/components/mongodb/data/logs:/data/logs
@@ -32,6 +32,9 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${USER}
       - MONGO_INITDB_ROOT_PASSWORD=${PASSWORD}
       - MONGO_INITDB_DATABASE=openIM
+      - MONGO_USERNAME=${USER}
+      - MONGO_PASSWORD=${PASSWORD}
+    #
     restart: always
 
   redis:
@@ -112,7 +115,7 @@ services:
 
 
   open_im_server:
-    image: openim/open_im_server:v2.3.2
+    image: openim/open_im_server:v2.3.4
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
