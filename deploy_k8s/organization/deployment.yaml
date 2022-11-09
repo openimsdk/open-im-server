@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: organization
-        image: openim/organization:v2.3.0release
+        image: openim/organization:v2.3.3
         # imagePullPolicy: Always
         ports:
         - containerPort: 10220

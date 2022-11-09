@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: auth
-        image: openim/auth:v2.3.0release
+        image: openim/auth:v2.3.3
         # imagePullPolicy: Always
         ports:
         - containerPort: 10160

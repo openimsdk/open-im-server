@@ -33,8 +33,8 @@ mongo:
   dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
   dbSource: admin
-  dbUserName:  #mongo用户名，建议先不设置
-  dbPassword:  #mongo密码，建议先不设置
+  dbUserName: root #mongo用户名，建议先不设置
+  dbPassword: openIM  #mongo密码，建议先不设置
   dbMaxPoolSize: 100
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
   chatRecordsClearTime: "* * * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
