@@ -1,0 +1,158 @@
+etcd:
+  etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
+
+mysql:
+  dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
+  dbMysqlUserName: root #mysql用户名，建议修改
+  dbMysqlPassword: ${PASSWORD} # mysql密码，建议修改
+
+mongo:
+  dbUri: ""#当dbUri值不为空则直接使用该值
+  #dbAddress: 127.0.0.1:37017  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
+  dbAddress: [ 127.0.0.1:37017 ]  #单机时为mongo地址，使用分片集群时，为mongos地址 默认即可
+  dbUserName: root #mongo用户名，建议先不设置
+  dbPassword: ${PASSWORD}  #mongo密码，建议先不设置
+  dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
+  chatRecordsClearTime: "* * * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
+
+redis:
+  dbAddress: [ 127.0.0.1:16379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
+  dbUserName:
+  dbPassWord: ${PASSWORD} #redis密码 建议修改
+  enableCluster: false #如果外部redis以集群方式启动，需要打开此开关
+
+kafka:
+  SASLUserName:
+  SASLPassword:
+  ws2mschat:
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+  msgtomongo:
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+  ms2pschat:
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+
+credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
+  enable: minio
+  tencent:
+    appID: 1302656840
+    region: ap-chengdu
+    bucket: echat-1302656840
+    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC1
+    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe1
+  minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
+    bucket: openim # 存储内容桶
+    appBucket: app # 存储app的桶
+    location: us-east-1
+    endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
+    endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
+    accessKeyID: ${USER}
+    secretAccessKey: %{PASSWORD}
+    storageTime: 50 #文件在minio中保存的时间
+    isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
+  ali: # ali oss
+    regionID: "oss-cn-beijing"
+    accessKeyID: ""
+    accessKeySecret: ""
+    stsEndpoint: "sts.cn-beijing.aliyun.com"
+    ossEndpoint: "oss-cn-beijing.aliyuncs.com"
+    bucket: "bucket1"
+    finalHost: "http://bucket1.oss-cn-beijing.aliyuncs.com"
+    stsDurationSeconds: 3600
+    OssRoleArn: "acs:ram::xxx:role/xxx"
+  aws:
+    accessKeyID: 1                            #AssumeRole用户关联的accessKeyID
+    accessKeySecret: 2     #AssumeRole用户关联的accessKeySecrect
+    region: ap-southeast-1                                        #分区
+    bucket: ouyang                                                #桶
+    finalHost:  ouyang.s3.ap-southeast-1.amazonaws.com            #对外Host
+    roleArn: arn:aws:iam::192209831083:role/AWS_S3_FOR_OUYANG     #RoleArn
+    externalId: AssumeRoleExtend                                  #角色扩展Id
+    roleSessionName: Required-AWS-ID-OPENIM
+
+## 推送只能开启一个 enable代表开启
+push:
+  enable: getui
+  tpns: #腾讯推送，暂未测试 暂不要使用
+    ios:
+      accessID: 1600018281
+      secretKey: 3cd68a77a95b89e5089a1aca523f318f
+    android:
+      accessID: 111
+      secretKey: 111
+  jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
+    appKey: cf47465a368f24c659608e7e
+    masterSecret: 02204efe3f3832947a236ee5
+    pushUrl: "https://api.jpush.cn/v3/push"
+    pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
+  getui:  #个推推送
+    pushUrl: "https://restapi.getui.com/v2/$appId"
+    masterSecret: ""
+    appKey: ""
+    intent: ""
+    channelID: ""
+    channelName: ""
+  fcm:  #firebase cloud message 消息推送
+    serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+  mob:  #袤博推送
+    appKey: "3377f689a25" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    pushUrl: "https://api.push.mob.com/v3/push/createPush"
+    scheme: "dianzhijiaunilinks://dianzhijia.com?page=rent"
+    appSecret: "77b4e20e94db3a776b87d8693be23e"
+
+secret: tuoyun
+
+
+callback:
+  # callback url 需要自行更换callback url
+  callbackUrl : "http://127.0.0.1:8080/callback"
+  # 开启关闭操作前后回调的配置
+  callbackBeforeSendSingleMsg:
+    enable: false # 回调是否启用
+    callbackTimeOut: 2 # 回调超时时间
+    callbackFailedContinue: true # 回调超时是否继续执行代码
+  callbackAfterSendSingleMsg:
+    enable: false
+    callbackTimeOut: 2
+  callbackBeforeSendGroupMsg:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true
+  callbackAfterSendGroupMsg:
+    enable: false
+    callbackTimeOut: 2
+  callbackMsgModify:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true
+  callbackUserOnline:
+    enable: false
+    callbackTimeOut: 2
+  callbackUserOffline:
+    enable: false
+    callbackTimeOut: 2
+  callbackUserKickOff:
+    enable: false
+    callbackTimeOut: 2
+  callbackOfflinePush:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续离线推送
+  callbackOnlinePush:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续离线推送
+  callbackSuperGroupOnlinePush:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续离线推送
+  callbackBeforeAddFriend:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续
+  callbackBeforeCreateGroup:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继
+
+rtc:
+  signalTimeout: 35
