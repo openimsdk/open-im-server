@@ -112,7 +112,7 @@ services:
 
 
   open_im_server:
-    image: openim/open_im_server:v2.3.2
+    image: openim/open_im_server:v2.3.4
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
