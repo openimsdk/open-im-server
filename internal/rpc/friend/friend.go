@@ -168,7 +168,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 		log.NewError(req.CommID.OperationID, "GetUserByUserID failed ", err.Error(), req.CommID.FromUserID)
 		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
 	}
-
+	log.NewDebug(req.CommID.OperationID, "toUserID", userIDList, "fromUserID", userIDList2)
 	for _, v := range userIDList {
 		if v == req.CommID.FromUserID {
 			for _, v2 := range userIDList2 {
