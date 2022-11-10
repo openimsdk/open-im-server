@@ -177,8 +177,8 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 					break
 				}
 			}
+			break
 		}
-		break
 	}
 
 	//Cannot add non-existent users
