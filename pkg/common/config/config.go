@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -562,28 +563,133 @@ type PDefaultTips struct {
 	Tips string `yaml:"tips"`
 }
 
-func init() {
-	cfgName := os.Getenv("CONFIG_NAME")
+type usualConfig struct {
+	Etcd struct {
+		UserName string `yaml:"userName"`
+		Password string `yaml:"password"`
+	} `yaml:"etcd"`
+	Mysql struct {
+		DBUserName string `yaml:"dbMysqlUserName"`
+		DBPassword string `yaml:"dbMysqlPassword"`
+	} `yaml:"mysql"`
+	Mongo struct {
+		DBUserName string `yaml:"dbUserName"`
+		DBPassword string `yaml:"dbPassword"`
+	} `yaml:"mongo"`
+	Redis struct {
+		DBUserName string `yaml:"dbUserName"`
+		DBPassword string `yaml:"dbPassWord"`
+	} `yaml:"redis"`
+	Kafka struct {
+		SASLUserName string `yaml:"SASLUserName"`
+		SASLPassword string `yaml:"SASLPassword"`
+	} `yaml:"kafka"`
+
+	Credential struct {
+		Minio struct {
+			AccessKeyID     string `yaml:"accessKeyID"`
+			SecretAccessKey string `yaml:"secretAccessKey"`
+		} `yaml:"minio"`
+	} `yaml:"credential"`
+
+	Messageverify struct {
+		FriendVerify bool `yaml:"friendVerify"`
+	}
+
+	Push struct {
+		Getui struct {
+			MasterSecret string `yaml:"masterSecret"`
+			AppKey       string `yaml:"appKey"`
+			Enable       bool   `yaml:"enable"`
+		}
+	}
+}
+
+var UsualConfig usualConfig
+
+func unmarshalConfig(config interface{}, configName string) {
+	var env string
+	if configName == "config.yaml" {
+		env = "CONFIG_NAME"
+	} else if configName == "usualConfig.yaml" {
+		env = "USUAL_CONFIG_NAME"
+	}
+	cfgName := os.Getenv(env)
 	if len(cfgName) != 0 {
-		bytes, err := ioutil.ReadFile(filepath.Join(cfgName, "config", "config.yaml"))
+		bytes, err := ioutil.ReadFile(filepath.Join(cfgName, "config", configName))
 		if err != nil {
-			bytes, err = ioutil.ReadFile(filepath.Join(Root, "config", "config.yaml"))
+			bytes, err = ioutil.ReadFile(filepath.Join(Root, "config", configName))
 			if err != nil {
-				panic(err.Error() + " config: " + filepath.Join(cfgName, "config", "config.yaml"))
+				panic(err.Error() + " config: " + filepath.Join(cfgName, "config", configName))
 			}
 		} else {
 			Root = cfgName
 		}
-		if err = yaml.Unmarshal(bytes, &Config); err != nil {
+		if err = yaml.Unmarshal(bytes, config); err != nil {
 			panic(err.Error())
 		}
 	} else {
-		bytes, err := ioutil.ReadFile("../config/config.yaml")
+		bytes, err := ioutil.ReadFile(fmt.Sprintf("../config/%s", configName))
 		if err != nil {
 			panic(err.Error())
 		}
-		if err = yaml.Unmarshal(bytes, &Config); err != nil {
+		if err = yaml.Unmarshal(bytes, config); err != nil {
 			panic(err.Error())
 		}
 	}
+}
+
+func init() {
+	unmarshalConfig(&Config, "config.yaml")
+	unmarshalConfig(&UsualConfig, "usualConfig.yaml")
+	fmt.Println(UsualConfig)
+	if Config.Etcd.UserName == "" {
+		Config.Etcd.UserName = UsualConfig.Etcd.UserName
+	}
+	if Config.Etcd.Password == "" {
+		Config.Etcd.Password = UsualConfig.Etcd.Password
+	}
+
+	if Config.Mysql.DBUserName == "" {
+		Config.Mysql.DBUserName = UsualConfig.Mysql.DBUserName
+	}
+	if Config.Mysql.DBPassword == "" {
+		Config.Mysql.DBPassword = UsualConfig.Mysql.DBPassword
+	}
+
+	if Config.Redis.DBUserName == "" {
+		Config.Redis.DBUserName = UsualConfig.Redis.DBUserName
+	}
+	if Config.Redis.DBPassWord == "" {
+		Config.Redis.DBPassWord = UsualConfig.Redis.DBPassword
+	}
+
+	if Config.Mongo.DBUserName == "" {
+		Config.Mongo.DBUserName = UsualConfig.Mongo.DBUserName
+	}
+	if Config.Mongo.DBPassword == "" {
+		Config.Mongo.DBPassword = UsualConfig.Mongo.DBPassword
+	}
+
+	if Config.Kafka.SASLUserName == "" {
+		Config.Kafka.SASLUserName = UsualConfig.Kafka.SASLUserName
+	}
+	if Config.Kafka.SASLPassword == "" {
+		Config.Kafka.SASLPassword = UsualConfig.Kafka.SASLPassword
+	}
+
+	if Config.Credential.Minio.AccessKeyID == "" {
+		Config.Credential.Minio.AccessKeyID = UsualConfig.Credential.Minio.AccessKeyID
+	}
+
+	if Config.Credential.Minio.SecretAccessKey == "" {
+		Config.Credential.Minio.SecretAccessKey = UsualConfig.Credential.Minio.SecretAccessKey
+	}
+	Config.MessageVerify.FriendVerify = UsualConfig.Messageverify.FriendVerify
+
+	if Config.Push.Getui.MasterSecret == "" {
+		Config.Push.Getui.MasterSecret = UsualConfig.Push.Getui.MasterSecret
+		Config.Push.Getui.AppKey = UsualConfig.Push.Getui.AppKey
+	}
+	Config.Push.Getui.Enable = UsualConfig.Push.Getui.Enable
 }
