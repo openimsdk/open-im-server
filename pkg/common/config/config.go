@@ -585,6 +585,7 @@ type usualConfig struct {
 		Minio struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
 			SecretAccessKey string `yaml:"secretAccessKey"`
+			Endpoint        string `yaml:"endPoint"`
 		} `yaml:"minio"`
 	} `yaml:"credential"`
 
@@ -677,9 +678,11 @@ func init() {
 	if Config.Credential.Minio.AccessKeyID == "" {
 		Config.Credential.Minio.AccessKeyID = UsualConfig.Credential.Minio.AccessKeyID
 	}
-
 	if Config.Credential.Minio.SecretAccessKey == "" {
 		Config.Credential.Minio.SecretAccessKey = UsualConfig.Credential.Minio.SecretAccessKey
+	}
+	if Config.Credential.Minio.Endpoint == "" {
+		Config.Credential.Minio.Endpoint = UsualConfig.Credential.Minio.Endpoint
 	}
 
 	if Config.MessageVerify.FriendVerify == nil {
@@ -693,4 +696,5 @@ func init() {
 	if Config.Push.Getui.Enable == nil {
 		Config.Push.Getui.Enable = &UsualConfig.Push.Getui.Enable
 	}
+
 }
