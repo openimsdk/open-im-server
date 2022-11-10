@@ -157,29 +157,53 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 			ErrMsg:  callbackResp.ErrMsg,
 		}}, nil
 	}
+	var isSend = true
+	userIDList, err := rocksCache.GetFriendIDListFromCache(req.CommID.ToUserID)
+	if err != nil {
+		log.NewError(req.CommID.OperationID, "GetFriendIDListFromCache failed ", err.Error(), req.CommID.ToUserID)
+		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+	}
+	userIDList2, err := rocksCache.GetFriendIDListFromCache(req.CommID.FromUserID)
+	if err != nil {
+		log.NewError(req.CommID.OperationID, "GetUserByUserID failed ", err.Error(), req.CommID.FromUserID)
+		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+	}
+
+	for _, v := range userIDList {
+		if v == req.CommID.FromUserID {
+			for _, v2 := range userIDList2 {
+				if v2 == req.CommID.ToUserID {
+					isSend = false
+				}
+			}
+		}
+	}
 
 	//Cannot add non-existent users
-	if _, err := imdb.GetUserByUserID(req.CommID.ToUserID); err != nil {
-		log.NewError(req.CommID.OperationID, "GetUserByUserID failed ", err.Error(), req.CommID.ToUserID)
-		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
-	}
 
+	if isSend {
+		if _, err := imdb.GetUserByUserID(req.CommID.ToUserID); err != nil {
+			log.NewError(req.CommID.OperationID, "GetUserByUserID failed ", err.Error(), req.CommID.ToUserID)
+			return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		}
+		friendRequest := db.FriendRequest{
+			HandleResult: 0, ReqMsg: req.ReqMsg, CreateTime: time.Now()}
+		utils.CopyStructFields(&friendRequest, req.CommID)
+		// {openIM001 openIM002 0 test add friend 0001-01-01 00:00:00 +0000 UTC   0001-01-01 00:00:00 +0000 UTC }]
+		log.NewDebug(req.CommID.OperationID, "UpdateFriendApplication args ", friendRequest)
+		//err := imdb.InsertFriendApplication(&friendRequest)
+		err := imdb.InsertFriendApplication(&friendRequest,
+			map[string]interface{}{"handle_result": 0, "req_msg": friendRequest.ReqMsg, "create_time": friendRequest.CreateTime,
+				"handler_user_id": "", "handle_msg": "", "handle_time": utils.UnixSecondToTime(0), "ex": ""})
+		if err != nil {
+			log.NewError(req.CommID.OperationID, "UpdateFriendApplication failed ", err.Error(), friendRequest)
+			return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		}
+
+		chat.FriendApplicationNotification(req)
+	}
 	//Establish a latest relationship in the friend request table
-	friendRequest := db.FriendRequest{
-		HandleResult: 0, ReqMsg: req.ReqMsg, CreateTime: time.Now()}
-	utils.CopyStructFields(&friendRequest, req.CommID)
-	// {openIM001 openIM002 0 test add friend 0001-01-01 00:00:00 +0000 UTC   0001-01-01 00:00:00 +0000 UTC }]
-	log.NewDebug(req.CommID.OperationID, "UpdateFriendApplication args ", friendRequest)
-	//err := imdb.InsertFriendApplication(&friendRequest)
-	err := imdb.InsertFriendApplication(&friendRequest,
-		map[string]interface{}{"handle_result": 0, "req_msg": friendRequest.ReqMsg, "create_time": friendRequest.CreateTime,
-			"handler_user_id": "", "handle_msg": "", "handle_time": utils.UnixSecondToTime(0), "ex": ""})
-	if err != nil {
-		log.NewError(req.CommID.OperationID, "UpdateFriendApplication failed ", err.Error(), friendRequest)
-		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
-	}
 
-	chat.FriendApplicationNotification(req)
 	return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{}}, nil
 }
 
