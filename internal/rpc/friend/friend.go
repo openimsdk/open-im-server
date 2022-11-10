@@ -174,9 +174,11 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 			for _, v2 := range userIDList2 {
 				if v2 == req.CommID.ToUserID {
 					isSend = false
+					break
 				}
 			}
 		}
+		break
 	}
 
 	//Cannot add non-existent users
