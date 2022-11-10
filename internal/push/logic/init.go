@@ -36,7 +36,7 @@ func Init(rpcPort int) {
 func init() {
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
 	statistics.NewStatistics(&successCount, config.Config.ModuleName.PushName, fmt.Sprintf("%d second push to msg_gateway count", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
-	if config.Config.Push.Getui.Enable {
+	if *config.Config.Push.Getui.Enable {
 		offlinePusher = getui.GetuiClient
 	}
 	if config.Config.Push.Jpns.Enable {

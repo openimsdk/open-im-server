@@ -86,10 +86,6 @@ type config struct {
 		} `yaml:"aws"`
 	}
 
-	Dtm struct {
-		ServerURL string `json:"serverURL"`
-	}
-
 	Mysql struct {
 		DBAddress      []string `yaml:"dbMysqlAddress"`
 		DBUserName     string   `yaml:"dbMysqlUserName"`
@@ -206,7 +202,7 @@ type config struct {
 		Getui struct {
 			PushUrl      string `yaml:"pushUrl"`
 			AppKey       string `yaml:"appKey"`
-			Enable       bool   `yaml:"enable"`
+			Enable       *bool  `yaml:"enable"`
 			Intent       string `yaml:"intent"`
 			MasterSecret string `yaml:"masterSecret"`
 			ChannelID    string `yaml:"channelID"`
@@ -269,7 +265,7 @@ type config struct {
 		AccessExpire int64  `yaml:"accessExpire"`
 	}
 	MessageVerify struct {
-		FriendVerify bool `yaml:"friendVerify"`
+		FriendVerify *bool `yaml:"friendVerify"`
 	}
 	IOSPush struct {
 		PushSound  string `yaml:"pushSound"`
@@ -685,11 +681,16 @@ func init() {
 	if Config.Credential.Minio.SecretAccessKey == "" {
 		Config.Credential.Minio.SecretAccessKey = UsualConfig.Credential.Minio.SecretAccessKey
 	}
-	Config.MessageVerify.FriendVerify = UsualConfig.Messageverify.FriendVerify
+
+	if Config.MessageVerify.FriendVerify == nil {
+		Config.MessageVerify.FriendVerify = &UsualConfig.Messageverify.FriendVerify
+	}
 
 	if Config.Push.Getui.MasterSecret == "" {
 		Config.Push.Getui.MasterSecret = UsualConfig.Push.Getui.MasterSecret
 		Config.Push.Getui.AppKey = UsualConfig.Push.Getui.AppKey
 	}
-	Config.Push.Getui.Enable = UsualConfig.Push.Getui.Enable
+	if Config.Push.Getui.Enable == nil {
+		Config.Push.Getui.Enable = &UsualConfig.Push.Getui.Enable
+	}
 }

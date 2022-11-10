@@ -105,7 +105,7 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
 			return true, 0, "", nil
 		}
-		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
+		log.NewDebug(data.OperationID, *config.Config.MessageVerify.FriendVerify)
 		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
 		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
 		if etcdConn == nil {
@@ -127,8 +127,8 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 				}
 			}
 		}
-		log.NewDebug(data.OperationID, config.Config.MessageVerify.FriendVerify)
-		if config.Config.MessageVerify.FriendVerify {
+		log.NewDebug(data.OperationID, *config.Config.MessageVerify.FriendVerify)
+		if *config.Config.MessageVerify.FriendVerify {
 			reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
 			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, data.OperationID)
 			if etcdConn == nil {

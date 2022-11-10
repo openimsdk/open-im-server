@@ -10,12 +10,10 @@ etcd:
   userName:
   password:
 
-k8sMod: false #开启k8s模式 使用pod里面环境变量请求services调用服务 而并非etcd
-
 mysql:
   dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可
-  dbMysqlUserName: root #mysql用户名，建议修改
-  dbMysqlPassword: openIM # mysql密码，建议修改
+  dbMysqlUserName:  #mysql用户名，建议修改
+  dbMysqlPassword:  # mysql密码，建议修改
   dbMysqlDatabaseName: openIM_v2 #默认即可
   dbTableName: eMsg #默认即可
   dbMsgTableNum: 1
@@ -33,8 +31,8 @@ mongo:
   dbTimeout: 60
   dbDatabase: openIM  #mongo db 默认即可
   dbSource: admin
-  dbUserName: root #mongo用户名，建议先不设置
-  dbPassword: openIM  #mongo密码，建议先不设置
+  dbUserName:  #mongo用户名，建议先不设置
+  dbPassword:   #mongo密码，建议先不设置
   dbMaxPoolSize: 100
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
   chatRecordsClearTime: "* * * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
@@ -45,7 +43,7 @@ redis:
   dbMaxActive: 0
   dbIdleTimeout: 120
   dbUserName:     #only redis version 6.0+ need username
-  dbPassWord: openIM #redis密码 建议修改
+  dbPassWord:  #redis密码 建议修改
   enableCluster: false #如果外部redis以集群方式启动，需要打开此开关
 
 kafka:
@@ -125,8 +123,8 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
     endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
-    accessKeyID: user12345
-    secretAccessKey: key12345
+    accessKeyID:
+    secretAccessKey:
     storageTime: 50 #文件在minio中保存的时间
     isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
   ali: # ali oss
@@ -149,8 +147,6 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     externalId: AssumeRoleExtend                                  #角色扩展Id
     roleSessionName: Required-AWS-ID-OPENIM                       #角色SESSION名称
 
-dtm:
-  serverURL: 127.0.0.1:10007
 
 rpcport: #rpc服务端口 默认即可
   openImUserPort: [ 10110 ]
@@ -221,19 +217,19 @@ push:
     android:
       accessID: 111
       secretKey: 111
-    enable: false
+    enable: false # true or false (bool)
   jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
     appKey: cf47465a368f24c659608e7e
     masterSecret: 02204efe3f3832947a236ee5
     pushUrl: "https://api.jpush.cn/v3/push"
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
-    enable: true
+    enable: false # true or false (bool)
   getui:  #个推推送
     pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     intent: ""
-    enable: false
+    enable: # true or false (bool)
     channelID: ""
     channelName: ""
   fcm:  #firebase cloud message 消息推送

@@ -11,7 +11,7 @@ mongo:
   dbPassword: openIM123  #mongo密码，建议先不设置
 
 redis:
-  dbUserName: root
+  dbUserName:
   dbPassWord: openIM123 #redis密码 建议修改
 
 kafka:
@@ -20,8 +20,8 @@ kafka:
 
 credential:
   minio:
-    accessKeyID: user12345
-    secretAccessKey: key12345
+    accessKeyID: root
+    secretAccessKey: openIM123
 
 messageverify:
   friendVerify: false
