@@ -589,17 +589,24 @@ type usualConfig struct {
 		} `yaml:"minio"`
 	} `yaml:"credential"`
 
+	Secret string `yaml:"secret"`
+
+	Tokenpolicy struct {
+		AccessSecret string `yaml:"accessSecret"`
+		AccessExpire int64  `yaml:"accessExpire"`
+	} `yaml:"tokenpolicy"`
+
 	Messageverify struct {
 		FriendVerify bool `yaml:"friendVerify"`
-	}
+	} `yaml:"messageverify"`
 
 	Push struct {
 		Getui struct {
 			MasterSecret string `yaml:"masterSecret"`
 			AppKey       string `yaml:"appKey"`
 			Enable       bool   `yaml:"enable"`
-		}
-	}
+		} `yaml:"getui"`
+	} `yaml:"push"`
 }
 
 var UsualConfig usualConfig
@@ -695,6 +702,17 @@ func init() {
 	}
 	if Config.Push.Getui.Enable == nil {
 		Config.Push.Getui.Enable = &UsualConfig.Push.Getui.Enable
+	}
+
+	if Config.Secret == "" {
+		Config.Secret = UsualConfig.Secret
+	}
+
+	if Config.TokenPolicy.AccessExpire == 0 {
+		Config.TokenPolicy.AccessExpire = UsualConfig.Tokenpolicy.AccessExpire
+	}
+	if Config.TokenPolicy.AccessSecret == "" {
+		Config.TokenPolicy.AccessSecret = UsualConfig.Tokenpolicy.AccessSecret
 	}
 
 }

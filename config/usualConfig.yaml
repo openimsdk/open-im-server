@@ -20,9 +20,15 @@ kafka:
 
 credential:
   minio:
-    endpoint:  #发图片视频文件需要填写
+    endpoint: 127.0.0.1:10005 #发图片视频文件需要填写
     accessKeyID: root
     secretAccessKey: openIM123
+
+secret: tuoyun
+
+tokenpolicy:
+  accessSecret: "open_im_server" #token生成相关，默认即可
+  accessExpire: 90 #token过期时间（天） 默认即可
 
 messageverify:
   friendVerify: false
@@ -32,3 +38,4 @@ push:
     masterSecret: ""
     appKey: ""
     enable: false
+

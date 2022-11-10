@@ -250,7 +250,7 @@ manager:
   secrets: [ "openIM1","openIM2", "openIM333", "openIMAdmin"]
   appSysNotificationName: "系统通知"
 
-secret: tuoyun
+secret:
 # 多端互踢策略
 # 1：多平台登录：Android、iOS、Windows、Mac 每种平台只能一个在线，web端可以多个同时在线
 multiloginpolicy: 1
@@ -268,11 +268,11 @@ singleMessageHasReadReceiptEnable: true
 
 #token config
 tokenpolicy:
-  accessSecret: "open_im_server" #token生成相关，默认即可
+  accessSecret:  #token生成相关，默认即可
   # Token effective time day as a unit
-  accessExpire: 90 #token过期时间（天） 默认即可
+  accessExpire:  #token过期时间（天） 默认即可
 messageverify:
-  friendVerify: false
+  friendVerify:
 
 #  c2c:
 #    callbackBeforeSendMsg:
