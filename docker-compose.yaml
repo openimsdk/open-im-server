@@ -120,6 +120,7 @@ services:
     volumes:
       - ./logs:/Open-IM-Server/logs
       - ./config/config.yaml:/Open-IM-Server/config/config.yaml
+      - ./config/usualConfig.yaml:/Open-IM-Server/config/usualConfig.yaml
       - ${DATA_DIR}/db/sdk:/Open-IM-Server/db/sdk
       - ./script:/Open-IM-Server/script
     restart: always
