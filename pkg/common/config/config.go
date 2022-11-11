@@ -585,7 +585,7 @@ type usualConfig struct {
 		Minio struct {
 			AccessKeyID     string `yaml:"accessKeyID"`
 			SecretAccessKey string `yaml:"secretAccessKey"`
-			Endpoint        string `yaml:"endPoint"`
+			Endpoint        string `yaml:"endpoint"`
 		} `yaml:"minio"`
 	} `yaml:"credential"`
 
