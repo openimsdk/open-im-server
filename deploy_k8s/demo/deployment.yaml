@@ -23,13 +23,21 @@ spec:
           - name: config
             mountPath: /Open-IM-Server/config
             readOnly: true
+          - name: usualConfig
+            mountPath: /Open-IM-Server/config
+            readOnly: true
         env:
           - name: CONFIG_NAME
-            value: "/Open-IM-Server"     
+            value: "/Open-IM-Server"
+          - name: USUAL_CONFIG_NAME
+            value: "/Open-IM-Server"
       volumes:
         - name: config
           configMap:
             name: openim-config
+        - name: usualConfig
+            configMap:
+              name: openim-usualConfig
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 ---
