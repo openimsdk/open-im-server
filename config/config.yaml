@@ -120,7 +120,7 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     bucket: openim # 存储内容桶
     appBucket: app # 存储app的桶
     location: us-east-1
-    endpoint: http://127.0.0.1:10005 #minio外网ip 这个ip是给客户端访问的
+    endpoint:  #minio外网ip 这个ip是给客户端访问的
     endpointInner: http://127.0.0.1:10005 #minio内网地址 如果im server 可以通过内网访问到 minio就可以
     endpointInnerEnable: true #是否启用minio内网地址 启用可以让桶初始化，IM server连接minio走内网地址访问
     accessKeyID:
