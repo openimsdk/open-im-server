@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: cache
-        image: openim/cache:v2.3.3
+        image: openim/cache:v2.3.4
         # imagePullPolicy: Always
         ports:
         - containerPort: 10240

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: group
-        image: openim/group:v2.3.3
+        image: openim/group:v2.3.4
         # imagePullPolicy: Always
         ports:
         - containerPort: 10150

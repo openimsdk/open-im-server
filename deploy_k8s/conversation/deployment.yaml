@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: conversation
-          image: openim/conversation:v2.3.3
+          image: openim/conversation:v2.3.4
           # imagePullPolicy: Always
           ports:
             - containerPort: 10230

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: push
-        image: openim/push:v2.3.3
+        image: openim/push:v2.3.4
         # imagePullPolicy: Always
         ports:
         - containerPort: 10170

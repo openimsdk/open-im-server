@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: msg-gateway
-        image: openim/msg_gateway:v2.3.3
+        image: openim/msg_gateway:v2.3.4
         # imagePullPolicy: Always
         ports:
         - name: rpc-port

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: office
-        image: openim/office:v2.3.3
+        image: openim/office:v2.3.4
         # imagePullPolicy: Always
         ports:
         - containerPort: 10210

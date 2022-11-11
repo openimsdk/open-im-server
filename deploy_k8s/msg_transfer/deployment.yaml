@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: msg-transfer
-        image: openim/msg_transfer:v2.3.3
+        image: openim/msg_transfer:v2.3.4
         # imagePullPolicy: Always
         volumeMounts:
           - name: config
