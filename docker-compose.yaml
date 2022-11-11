@@ -143,8 +143,8 @@ services:
       - ${DATA_DIR}/docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
       # - ${DATA_DIR}/components/prometheus_data:/prometheus
     container_name: prometheus
-    ports:
-    - 9091:9091
+    #    ports:
+    #    - 9091:9091
     depends_on:
     - open_im_server
     command: --web.listen-address=:9091 --config.file="/etc/prometheus/prometheus.yml"
@@ -159,8 +159,8 @@ services:
     - ${DATA_DIR}/docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
     - ${DATA_DIR}/docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
     container_name: grafana
-    ports:
-    - 10007:10007
+    #    ports:
+    #    - 10007:10007
     depends_on:
     - prometheus
     network_mode: "host" 
@@ -171,4 +171,3 @@ services:
     restart: always
     ports:
       - "9100:9100"
-    # command: --collector.ENTER-THE-NAME-OF-COLLECTOR
