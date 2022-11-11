@@ -225,7 +225,7 @@ push:
     pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
     enable: false # true or false (bool)
   getui:  #个推推送
-    pushUrl: "https://restapi.getui.com/v2/$appId"
+    pushUrl: 
     masterSecret: ""
     appKey: ""
     intent: ""

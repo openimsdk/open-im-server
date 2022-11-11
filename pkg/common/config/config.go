@@ -602,6 +602,7 @@ type usualConfig struct {
 
 	Push struct {
 		Getui struct {
+			PushUrl      string `yaml:"pushUrl"`
 			MasterSecret string `yaml:"masterSecret"`
 			AppKey       string `yaml:"appKey"`
 			Enable       bool   `yaml:"enable"`
@@ -698,7 +699,12 @@ func init() {
 
 	if Config.Push.Getui.MasterSecret == "" {
 		Config.Push.Getui.MasterSecret = UsualConfig.Push.Getui.MasterSecret
+	}
+	if Config.Push.Getui.AppKey == "" {
 		Config.Push.Getui.AppKey = UsualConfig.Push.Getui.AppKey
+	}
+	if Config.Push.Getui.PushUrl == "" {
+		Config.Push.Getui.PushUrl = UsualConfig.Push.Getui.PushUrl
 	}
 	if Config.Push.Getui.Enable == nil {
 		Config.Push.Getui.Enable = &UsualConfig.Push.Getui.Enable

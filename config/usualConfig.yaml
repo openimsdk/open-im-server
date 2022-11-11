@@ -35,6 +35,7 @@ messageverify:
 
 push:
   getui:  #个推推送
+    pushUrl: "https://restapi.getui.com/v2/$appId"
     masterSecret: ""
     appKey: ""
     enable: false
