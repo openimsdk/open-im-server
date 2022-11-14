@@ -1,6 +1,8 @@
 package config
 
 import (
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/utils"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -15,6 +17,8 @@ var (
 	// Root folder of this project
 	Root = filepath.Join(filepath.Dir(b), "../../..")
 )
+
+const confName = "openIMConf"
 
 var Config config
 
@@ -157,6 +161,7 @@ type config struct {
 		EtcdAddr   []string `yaml:"etcdAddr"`
 		UserName   string   `yaml:"userName"`
 		Password   string   `yaml:"password"`
+		Secret     string   `yaml:"secret"`
 	}
 	Log struct {
 		StorageLocation       string   `yaml:"storageLocation"`
@@ -563,6 +568,7 @@ type usualConfig struct {
 	Etcd struct {
 		UserName string `yaml:"userName"`
 		Password string `yaml:"password"`
+		Secret   string `yaml:"secret"`
 	} `yaml:"etcd"`
 	Mysql struct {
 		DBUserName string `yaml:"dbMysqlUserName"`
@@ -647,12 +653,14 @@ func unmarshalConfig(config interface{}, configName string) {
 func init() {
 	unmarshalConfig(&Config, "config.yaml")
 	unmarshalConfig(&UsualConfig, "usualConfig.yaml")
-	fmt.Println(UsualConfig)
 	if Config.Etcd.UserName == "" {
 		Config.Etcd.UserName = UsualConfig.Etcd.UserName
 	}
 	if Config.Etcd.Password == "" {
 		Config.Etcd.Password = UsualConfig.Etcd.Password
+	}
+	if Config.Etcd.Secret == "" {
+		Config.Etcd.Secret = UsualConfig.Etcd.Secret
 	}
 
 	if Config.Mysql.DBUserName == "" {
@@ -720,5 +728,17 @@ func init() {
 	if Config.TokenPolicy.AccessSecret == "" {
 		Config.TokenPolicy.AccessSecret = UsualConfig.Tokenpolicy.AccessSecret
 	}
+}
 
+func RegisterConf() {
+	bytes, err := yaml.Marshal(Config)
+	if err != nil {
+		panic(err.Error())
+	}
+	secretMD5 := utils.Md5(Config.Etcd.Secret)
+	confBytes, err := utils.AesEncrypt(bytes, []byte(secretMD5[0:16]))
+	if err != nil {
+		panic(err.Error())
+	}
+	getcdv3.RegisterConf(getcdv3.GetPrefix(Config.Etcd.EtcdSchema, confName), string(confBytes))
 }

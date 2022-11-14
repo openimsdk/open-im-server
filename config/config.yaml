@@ -9,6 +9,7 @@ etcd:
   etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
   userName:
   password:
+  secret:
 
 mysql:
   dbMysqlAddress: [ 127.0.0.1:13306 ] #mysql地址 目前仅支持单机，默认即可

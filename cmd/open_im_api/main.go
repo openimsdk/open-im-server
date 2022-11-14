@@ -222,7 +222,7 @@ func main() {
 		initGroup.POST("/set_client_config", clientInit.SetClientInitConfig)
 		initGroup.POST("/get_client_config", clientInit.GetClientInitConfig)
 	}
-
+	go config.RegisterConf()
 	go apiThird.MinioInit()
 	defaultPorts := config.Config.Api.GinPort
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10002 as port")

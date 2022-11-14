@@ -1,6 +1,7 @@
 package getcdv3
 
 import (
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
@@ -126,4 +127,26 @@ func UnRegisterEtcd() {
 	//delete
 	rEtcd.cancel()
 	rEtcd.cli.Delete(rEtcd.ctx, rEtcd.key)
+}
+
+func RegisterConf(key, conf string) {
+	etcdAddr := strings.Join(config.Config.Etcd.EtcdAddr, ",")
+	cli, err := clientv3.New(clientv3.Config{
+		Endpoints: strings.Split(etcdAddr, ","), DialTimeout: 5 * time.Second})
+
+	if err != nil {
+		panic(err.Error())
+	}
+	//lease
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	resp, err := cli.Grant(ctx, 10)
+	if err != nil {
+		panic(err.Error())
+	}
+	if _, err := cli.Put(ctx, key, conf, clientv3.WithLease(resp.ID)); err != nil {
+		fmt.Println("panic, params: ")
+		panic(err.Error())
+	}
+
 }
