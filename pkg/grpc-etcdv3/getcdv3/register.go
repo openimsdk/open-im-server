@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"gopkg.in/yaml.v3"
 	"net"
 	"strconv"
 	"strings"
@@ -129,7 +130,7 @@ func UnRegisterEtcd() {
 	rEtcd.cli.Delete(rEtcd.ctx, rEtcd.key)
 }
 
-func RegisterConf(key, conf string) {
+func registerConf(key, conf string) {
 	etcdAddr := strings.Join(config.Config.Etcd.EtcdAddr, ",")
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints: strings.Split(etcdAddr, ","), DialTimeout: 5 * time.Second})
@@ -149,4 +150,17 @@ func RegisterConf(key, conf string) {
 		panic(err.Error())
 	}
 
+}
+
+func init() {
+	bytes, err := yaml.Marshal(config.Config)
+	if err != nil {
+		panic(err.Error())
+	}
+	secretMD5 := utils.Md5(config.Config.Etcd.Secret)
+	confBytes, err := utils.AesEncrypt(bytes, []byte(secretMD5[0:16]))
+	if err != nil {
+		panic(err.Error())
+	}
+	registerConf(GetPrefix(config.Config.Etcd.EtcdSchema, config.ConfName), string(confBytes))
 }

@@ -1,8 +1,6 @@
 package config
 
 import (
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
-	"Open_IM/pkg/utils"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -18,7 +16,7 @@ var (
 	Root = filepath.Join(filepath.Dir(b), "../../..")
 )
 
-const confName = "openIMConf"
+const ConfName = "openIMConf"
 
 var Config config
 
@@ -728,17 +726,4 @@ func init() {
 	if Config.TokenPolicy.AccessSecret == "" {
 		Config.TokenPolicy.AccessSecret = UsualConfig.Tokenpolicy.AccessSecret
 	}
-}
-
-func RegisterConf() {
-	bytes, err := yaml.Marshal(Config)
-	if err != nil {
-		panic(err.Error())
-	}
-	secretMD5 := utils.Md5(Config.Etcd.Secret)
-	confBytes, err := utils.AesEncrypt(bytes, []byte(secretMD5[0:16]))
-	if err != nil {
-		panic(err.Error())
-	}
-	getcdv3.RegisterConf(getcdv3.GetPrefix(Config.Etcd.EtcdSchema, confName), string(confBytes))
 }
