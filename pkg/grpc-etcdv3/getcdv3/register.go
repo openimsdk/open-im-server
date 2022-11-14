@@ -152,7 +152,7 @@ func registerConf(key, conf string) {
 
 }
 
-func init() {
+func RegisterConf() {
 	bytes, err := yaml.Marshal(config.Config)
 	if err != nil {
 		panic(err.Error())

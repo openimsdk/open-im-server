@@ -15,6 +15,7 @@ import (
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
@@ -222,7 +223,7 @@ func main() {
 		initGroup.POST("/set_client_config", clientInit.SetClientInitConfig)
 		initGroup.POST("/get_client_config", clientInit.GetClientInitConfig)
 	}
-	go config.RegisterConf()
+	go getcdv3.RegisterConf()
 	go apiThird.MinioInit()
 	defaultPorts := config.Config.Api.GinPort
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10002 as port")
