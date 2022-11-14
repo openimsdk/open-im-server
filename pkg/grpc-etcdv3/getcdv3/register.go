@@ -139,8 +139,7 @@ func registerConf(key, conf string) {
 		panic(err.Error())
 	}
 	//lease
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx, _ := context.WithCancel(context.Background())
 	resp, err := cli.Grant(ctx, 10)
 	if err != nil {
 		panic(err.Error())
@@ -162,5 +161,7 @@ func RegisterConf() {
 	if err != nil {
 		panic(err.Error())
 	}
+	fmt.Println("start register", secretMD5)
 	registerConf(GetPrefix(config.Config.Etcd.EtcdSchema, config.ConfName), string(confBytes))
+	fmt.Println("etcd register conf ok")
 }
