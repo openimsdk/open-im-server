@@ -4,8 +4,8 @@ source ../.env
 echo "user:{$USER}"
 echo "password:{$PASSWORD}"
 
-nameList=(dbMysqlUserName, dbUserName, dbUserName, accessKeyID)
-pwdList=(dbMysqlPassword, dbPassword, dbPassWord, secretAccessKey)
+nameList=(dbMysqlUserName dbUserName dbUserName accessKeyID)
+pwdList=(dbMysqlPassword dbPassword dbPassWord secretAccessKey)
 
 for i in ${nameList[*]}; do
   echo {$i}
