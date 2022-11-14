@@ -1,18 +1,8 @@
 #!/usr/bin/env bash
 
 source ../.env
-echo "user:{$USER}"
-echo "password:{$PASSWORD}"
+echo "your user is:$USER"
+echo "your password is:$PASSWORD"
 
-nameList=(dbMysqlUserName dbUserName dbUserName accessKeyID)
-pwdList=(dbMysqlPassword dbPassword dbPassWord secretAccessKey)
-
-for i in ${nameList[*]}; do
-  echo {$i}
- sed -i 's/{$i}: [a-z]/{$i}: {$USER}/g' ../config/usualConfig.yaml
-done
-
-for i in ${pwdList[*]}; do
-  echo {$i}
- sed -i 's/{$i}: [a-z]/{$i}: {$PASSWORD}/g' ../config/usualConfig.yaml
-done
+sed -i "/^\([[:space:]]*dbMysqlUserName: *\).*/s//\1$USER/;/\([[:space:]]*dbUserName: *\).*/s//\1 $USER/;/\([[:space:]]*accessKeyID: *\).*/s//\1$USER/;" ../config/usualConfig.yaml
+sed -i "/^\([[:space:]]*dbMysqlPassword: *\).*/s//\1$PASSWORD/;/\([[:space:]]*dbPassword: *\).*/s//\1$PASSWORD/;/\([[:space:]]*dbPassWord: *\).*/s//\1$PASSWORD/;/\([[:space:]]*secretAccessKey: *\).*/s//\1$PASSWORD/;" ../config/usualConfig.yaml

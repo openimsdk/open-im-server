@@ -1,7 +1,7 @@
 etcd:
   userName:
   password:
-  secret:  # etcd 配置密钥
+  secret: openIM123 # etcd 配置密钥
 
 mysql:
   dbMysqlUserName: root #mysql用户名，建议修改
