@@ -21,7 +21,7 @@ kafka:
 
 credential:
   minio:
-    endpoint: 127.0.0.1:10005 #发图片视频文件需要填写
+    endpoint: http://127.0.0.1:10005 #发图片视频文件需要填写
     accessKeyID: root
     secretAccessKey: openIM123
 
