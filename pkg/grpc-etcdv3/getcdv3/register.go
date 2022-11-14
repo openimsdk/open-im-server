@@ -139,12 +139,7 @@ func registerConf(key, conf string) {
 		panic(err.Error())
 	}
 	//lease
-	ctx, _ := context.WithCancel(context.Background())
-	resp, err := cli.Grant(ctx, 10)
-	if err != nil {
-		panic(err.Error())
-	}
-	if _, err := cli.Put(ctx, key, conf, clientv3.WithLease(resp.ID)); err != nil {
+	if _, err := cli.Put(context.Background(), key, conf); err != nil {
 		fmt.Println("panic, params: ")
 		panic(err.Error())
 	}
