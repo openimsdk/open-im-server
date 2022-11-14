@@ -162,6 +162,6 @@ func RegisterConf() {
 		panic(err.Error())
 	}
 	fmt.Println("start register", secretMD5, GetPrefix(config.Config.Etcd.EtcdSchema, config.ConfName))
-	registerConf(GetPrefix(config.Config.Etcd.EtcdSchema, config.ConfName), string(confBytes))
+	registerConf(config.ConfName, string(confBytes))
 	fmt.Println("etcd register conf ok")
 }
