@@ -4,16 +4,16 @@ etcd:
   secret: openIM123 # etcd 配置密钥
 
 mysql:
-  dbMysqlUserName: root #mysql用户名，建议修改
-  dbMysqlPassword: openIM123 # mysql密码，建议修改
+  dbMysqlUserName: root #mysql用户名
+  dbMysqlPassword: openIM123 # mysql密码
 
 mongo:
-  dbUserName: root #mongo用户名，建议先不设置
-  dbPassword: openIM123  #mongo密码，建议先不设置
+  dbUserName: root #mongo用户名
+  dbPassword: openIM123  #mongo密码
 
 redis:
   dbUserName:
-  dbPassWord: openIM123 #redis密码 建议修改
+  dbPassWord: openIM123 #redis密码
 
 kafka:
   SASLUserName:
@@ -25,19 +25,19 @@ credential:
     accessKeyID: root
     secretAccessKey: openIM123
 
-secret: tuoyun
+secret: tuoyun #建议修改
 
 tokenpolicy:
-  accessSecret: "open_im_server" #token生成相关，默认即可
+  accessSecret: "open_im_server" #token生成相关 建议修改
   accessExpire: 90 #token过期时间（天） 默认即可
 
 messageverify:
-  friendVerify: false
+  friendVerify: false #发送消息是否验证好友关系 false表示不验证好友关系
 
 push:
-  getui:  #个推推送
+  getui:
     pushUrl: "https://restapi.getui.com/v2/$appId"
-    masterSecret: ""
-    appKey: ""
-    enable: false
+    masterSecret: ""  #需添加
+    appKey: ""  #需添加
+    enable: false  #true启动个推推送
 
