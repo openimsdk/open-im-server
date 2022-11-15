@@ -1,0 +1,61 @@
+#---------------Infrastructure configuration---------------------#
+etcd:
+  etcdSchema: openim  #默认即可
+  etcdAddr: [ 127.0.0.1:2379 ] #单机部署时，默认即可
+  userName:
+  password:
+  secret: openIM123
+
+# 默认管理员账号
+admin:
+  defaultAccount:
+    account: [ "admin1", "admin2" ]
+    defaultPassword: [ "password1", "password2" ]
+    openIMUserID: [ "openIM123456", "openIMAdmin" ]
+    faceURL: [ "", "" ]
+    nickname: [ "admin1", "admin2" ]
+    level: [ 1, 100 ]
+
+
+adminapi:
+  openImAdminApiPort: [ 10009 ] #管理后台api服务端口，默认即可，需要开放此端口或做nginx转发
+  listenIP: 0.0.0.0
+
+chatapi:
+  openImChatApiPort: [ 10008 ] #登录注册，默认即可，需要开放此端口或做nginx转发
+  listenIP: 0.0.0.0
+
+rpcport: # rpc服务端口 默认即可
+  openImAdminPort: [ 30200 ]
+  openImChatPort: [ 30300 ]
+
+
+rpcregistername: #rpc注册服务名，默认即可
+  openImChatName: Chat
+
+
+chat:
+  codeTTL: 300 # 短信验证码有效时间(秒)
+  needInvitationCode: false # 注册是否需要邀请码
+  alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，enable为true则必须修改，阿里云为默认短信验证方式
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+    signName: 托云信息技术
+    verificationCodeTemplateCode: SMS_255305047
+
+oss:
+  tempDir: enterprise-temp # 临时密钥上传的目录
+  dataDir: enterprise-data # 最终存放目录
+  aliyun:
+    endpoint: https://oss-cn-chengdu.aliyuncs.com
+    accessKeyID: ""
+    accessKeySecret: ""
+    bucket: ""
+  tencent:
+    BucketURL: ""
+    serviceURL: https://cos.COS_REGION.myqcloud.com
+    secretID: ""
+    secretKey: ""
+    sessionToken: ""
+    bucket: ""
+  use: ""

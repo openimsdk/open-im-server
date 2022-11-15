@@ -143,6 +143,7 @@ services:
     container_name: open_im_enterprise
     volumes:
       - ./logs:/Open-IM-Enterprise/logs
+      - ./docker-compose_cfg/config.yaml:/Open-IM-Enterprise/config/config.yaml
     restart: always
     depends_on:
       - mysql
@@ -160,7 +161,7 @@ services:
   prometheus:
     image: prom/prometheus
     volumes:
-      - ${DATA_DIR}/docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
+      - ./docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
     container_name: prometheus
     #    ports:
     #    - 9091:9091
@@ -174,9 +175,9 @@ services:
     volumes:
     # - ./grafana/dashboards/dashboard.json:/var/lib/grafana/dashboards/dashboard.json
     # - ./grafana/provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
-    - ${DATA_DIR}/docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
-    - ${DATA_DIR}/docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
-    - ${DATA_DIR}/docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
+    - ./docker-compose_cfg/datasource-compose.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+    - ./docker-compose_cfg/grafana.ini:/etc/grafana/grafana.ini
+    - ./docker-compose_cfg/node-exporter-full_rev1.json:/var/lib/grafana/dashboards/node-exporter-full_rev1.json
     container_name: grafana
     #    ports:
     #    - 10007:10007
