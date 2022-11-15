@@ -8,3 +8,4 @@ sed -i "/^\([[:space:]]*dbMysqlPassword: *\).*/s//\1$PASSWORD/;/\([[:space:]]*db
 
 sed -i "/\([[:space:]]*endpoint: *\).*/s##\1$MINIO_ENDPOINT#;" ../config/usualConfig.yaml
 sed -i "/\([[:space:]]*dbPassWord: *\).*/s//\1$PASSWORD/;" ../config/usualConfig.yaml
+sed -i "/\([[:space:]]*secret: *\).*/s//\1$PASSWORD/;" ../docker-compose_cfg/config.yaml
