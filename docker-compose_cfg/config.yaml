@@ -39,11 +39,13 @@ rpcregistername: #rpc注册服务名，默认即可
 
 chat:
   codeTTL: 300 #短信验证码有效时间(秒)
+  superVerificationCode: 666666 # 超级验证码
   alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
-    signName: 托云信息技术
-    verificationCodeTemplateCode: SMS_2553050471
+    accessKeyId:
+    accessKeySecret:
+    signName:
+    verificationCodeTemplateCode:
+
 
 oss:
   tempDir: enterprise-temp # 临时密钥上传的目录
