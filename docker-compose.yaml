@@ -138,11 +138,29 @@ services:
         max-size: "1g"
         max-file: "2"
 
+  open_im_enterprise:
+    image: openim/open_im_enterprise:v1.0.0
+    container_name: open_im_enterprise
+    volumes:
+      - ./logs:/Open-IM-Enterprise/logs
+    restart: always
+    depends_on:
+      - mysql
+      - mongodb
+      - redis
+      - etcd
+      - minio
+    network_mode: "host"
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+
   prometheus:
     image: prom/prometheus
     volumes:
       - ${DATA_DIR}/docker-compose_cfg/prometheus-compose.yml:/etc/prometheus/prometheus.yml
-      # - ${DATA_DIR}/components/prometheus_data:/prometheus
     container_name: prometheus
     #    ports:
     #    - 9091:9091
