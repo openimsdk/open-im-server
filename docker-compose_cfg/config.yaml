@@ -6,6 +6,9 @@ etcd:
   password:
   secret: openIM123
 
+mysql:
+  dbMysqlDatabaseName: admin_chat # 数据库名字 默认即可
+
 # 默认管理员账号
 admin:
   defaultAccount:
@@ -32,7 +35,6 @@ rpcport: # rpc服务端口 默认即可
 
 rpcregistername: #rpc注册服务名，默认即可
   openImChatName: Chat
-
 
 chat:
   codeTTL: 300 # 短信验证码有效时间(秒)
