@@ -35,15 +35,15 @@ rpcport: # rpc服务端口 默认即可
 
 rpcregistername: #rpc注册服务名，默认即可
   openImChatName: Chat
+  openImAdminCMSName: Admin
 
 chat:
-  codeTTL: 300 # 短信验证码有效时间(秒)
-  needInvitationCode: false # 注册是否需要邀请码
-  alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，enable为true则必须修改，阿里云为默认短信验证方式
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
+  codeTTL: 300 #短信验证码有效时间(秒)
+  alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项
+    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
+    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
     signName: 托云信息技术
-    verificationCodeTemplateCode: SMS_255305047
+    verificationCodeTemplateCode: SMS_2553050471
 
 oss:
   tempDir: enterprise-temp # 临时密钥上传的目录
@@ -60,4 +60,4 @@ oss:
     secretKey: ""
     sessionToken: ""
     bucket: ""
-  use: ""
+  use: "minio"
