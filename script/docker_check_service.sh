@@ -7,5 +7,6 @@ sleep 30
 
 echo "check OpenIM................................"
 ./check_all.sh
-
+chmod +x ./enterprise/*.sh
+./enterprise/check_all.sh
 
