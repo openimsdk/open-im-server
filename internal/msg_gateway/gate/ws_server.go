@@ -135,15 +135,15 @@ func (ws *WServer) writeMsg(conn *UserConn, a int, msg []byte) error {
 	conn.w.Lock()
 	defer conn.w.Unlock()
 	if conn.IsCompress {
-		buff := bytes.NewBuffer(msg)
-		gz := gzip.NewWriter(buff)
-		if _, err := gz.Write(buff.Bytes()); err != nil {
+		var buffer bytes.Buffer
+		gz := gzip.NewWriter(&buffer)
+		if _, err := gz.Write(msg); err != nil {
 			return utils.Wrap(err, "")
 		}
 		if err := gz.Close(); err != nil {
 			return utils.Wrap(err, "")
 		}
-		msg = buff.Bytes()
+		msg = buffer.Bytes()
 	}
 	conn.SetWriteDeadline(time.Now().Add(time.Duration(60) * time.Second))
 	return conn.WriteMessage(a, msg)
