@@ -23,7 +23,7 @@ func SetConversation(conversation db.Conversation) (bool, error) {
 	}
 }
 func SetOneConversation(conversation db.Conversation) error {
-	return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
+	return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(&conversation).Error
 
 }
 
