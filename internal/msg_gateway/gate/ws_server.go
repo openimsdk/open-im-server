@@ -34,6 +34,7 @@ type UserConn struct {
 	platformID   int32
 	PushedMaxSeq uint32
 	IsCompress   bool
+	userID       string
 }
 type WServer struct {
 	wsAddr       string
@@ -82,7 +83,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("compression") == "gzip" {
 				isCompress = true
 			}
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress}
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress, query["sendID"][0]}
 			userCount++
 			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
 			go ws.readMsg(newConn)
@@ -121,6 +122,7 @@ func (ws *WServer) readMsg(conn *UserConn) {
 				log.NewWarn("", "reader close failed")
 			}
 		}
+		log.NewDebug("", "size", utils.ByteSize(uint64(len(msg))))
 		ws.msgParse(conn, msg)
 	}
 }
