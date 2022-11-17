@@ -81,6 +81,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			var isCompress = false
 			if r.Header.Get("compression") == "gzip" {
+				log.NewDebug(operationID, query["sendID"][0], "enable compression")
 				isCompress = true
 			}
 			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress, query["sendID"][0]}
