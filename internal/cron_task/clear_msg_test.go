@@ -7,6 +7,7 @@ import (
 	pbMsg "Open_IM/pkg/proto/msg"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	"os/exec"
 	"testing"
 	"time"
 )
@@ -41,6 +42,17 @@ func getMsgListFake(num int) []*pbMsg.MsgDataToMQ {
 }
 
 func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
+	cmd := exec.Command("/bin/bash", "CONFIG_NAME=../../")
+	_, err := cmd.StdoutPipe()
+	if err != nil {
+		return
+	}
+
+	//执行命令
+	if err := cmd.Start(); err != nil {
+		return
+	}
+
 	operationID := getCronTaskOperationID()
 	testUID1 := "test_del_id1"
 	//testUID2 := "test_del_id2"
@@ -64,7 +76,16 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	//
 	//db.DB.SetUserMaxSeq(testUID1, 9999)
 	//db.DB.BatchInsertChat2DB()
+	cmd = exec.Command("/bin/bash", "unset $CONFIG_NAME")
+	_, err = cmd.StdoutPipe()
+	if err != nil {
+		return
+	}
 
+	//执行命令
+	if err := cmd.Start(); err != nil {
+		return
+	}
 	for _, userID := range testUserIDList {
 		operationID = userID + "-" + operationID
 		if err := DeleteMongoMsgAndResetRedisSeq(operationID, userID); err != nil {
