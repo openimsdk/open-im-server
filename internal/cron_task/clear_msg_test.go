@@ -12,6 +12,19 @@ import (
 	"time"
 )
 
+func init() {
+	cmd := exec.Command("/bin/bash", "CONFIG_NAME=../../")
+	_, err := cmd.StdoutPipe()
+	if err != nil {
+		return
+	}
+
+	//执行命令
+	if err := cmd.Start(); err != nil {
+		return
+	}
+}
+
 func getMsgListFake(num int) []*pbMsg.MsgDataToMQ {
 	var msgList []*pbMsg.MsgDataToMQ
 	for i := 1; i < num; i++ {
@@ -42,16 +55,6 @@ func getMsgListFake(num int) []*pbMsg.MsgDataToMQ {
 }
 
 func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
-	cmd := exec.Command("/bin/bash", "CONFIG_NAME=../../")
-	_, err := cmd.StdoutPipe()
-	if err != nil {
-		return
-	}
-
-	//执行命令
-	if err := cmd.Start(); err != nil {
-		return
-	}
 
 	operationID := getCronTaskOperationID()
 	testUID1 := "test_del_id1"
@@ -62,9 +65,11 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	//testUID6 := "test_del_id6"
 	testUserIDList := []string{testUID1}
 
-	db.DB.SetUserMaxSeq(testUID1, 500)
-	db.DB.BatchInsertChat2DB(testUID1, getMsgListFake(500), testUID1+"-"+operationID, 500)
-
+	err := db.DB.SetUserMaxSeq(testUID1, 500)
+	err = db.DB.BatchInsertChat2DB(testUID1, getMsgListFake(500), testUID1+"-"+operationID, 500)
+	if err != nil {
+		t.Error(err.Error(), testUID1)
+	}
 	//db.DB.SetUserMaxSeq(testUID1, 6000)
 	//db.DB.BatchInsertChat2DB()
 	//
@@ -76,7 +81,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	//
 	//db.DB.SetUserMaxSeq(testUID1, 9999)
 	//db.DB.BatchInsertChat2DB()
-	cmd = exec.Command("/bin/bash", "unset $CONFIG_NAME")
+	cmd := exec.Command("/bin/bash", "unset $CONFIG_NAME")
 	_, err = cmd.StdoutPipe()
 	if err != nil {
 		return
