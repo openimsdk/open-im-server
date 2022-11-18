@@ -106,6 +106,7 @@ func (ws *WServer) readMsg(conn *UserConn) {
 			ws.delUserConn(conn)
 			return
 		}
+		log.NewDebug("", "size", utils.ByteSize(uint64(len(msg))))
 		if conn.IsCompress {
 			buff := bytes.NewBuffer(msg)
 			reader, err := gzip.NewReader(buff)
@@ -123,7 +124,6 @@ func (ws *WServer) readMsg(conn *UserConn) {
 				log.NewWarn("", "reader close failed")
 			}
 		}
-		log.NewDebug("", "size", utils.ByteSize(uint64(len(msg))))
 		ws.msgParse(conn, msg)
 	}
 }
