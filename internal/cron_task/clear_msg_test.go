@@ -37,6 +37,7 @@ func getMsgListFake(num int) []*pbMsg.MsgDataToMQ {
 			},
 		})
 	}
+	return msgList
 }
 
 func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
