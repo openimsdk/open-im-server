@@ -52,6 +52,10 @@ func newUserSendMsgReq(params *api.ManagementSendMsgReq) *pbChat.SendMsgReq {
 		fallthrough
 	case constant.File:
 		fallthrough
+	case constant.CustomNotTriggerConversation:
+		fallthrough
+	case constant.CustomOnlineOnly:
+		fallthrough
 	case constant.AdvancedRevoke:
 		newContent = utils.StructToJsonString(params.Content)
 	case constant.Revoke:
