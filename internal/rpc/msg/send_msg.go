@@ -171,14 +171,12 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 			log.NewError(data.OperationID, errMsg)
 			return false, 201, errMsg, nil
 		}
-		if !token_verify.IsManagerUserID(data.MsgData.SendID) {
-			if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-				return true, 0, "", userIDList
-			}
-			if !utils.IsContain(data.MsgData.SendID, userIDList) {
-				//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
-				return false, 202, "you are not in group", nil
-			}
+		if token_verify.IsManagerUserID(data.MsgData.SendID) {
+			return true, 0, "", userIDList
+		}
+		if !utils.IsContain(data.MsgData.SendID, userIDList) {
+			//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
+			return false, 202, "you are not in group", nil
 		}
 		isMute, err := userIsMuteInGroup(data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
@@ -232,14 +230,12 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 				log.NewError(data.OperationID, errMsg)
 				return false, 201, errMsg, nil
 			}
-			if !token_verify.IsManagerUserID(data.MsgData.SendID) {
-				if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
-					return true, 0, "", userIDList
-				}
-				if !utils.IsContain(data.MsgData.SendID, userIDList) {
-					//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
-					return false, 202, "you are not in group", nil
-				}
+			if token_verify.IsManagerUserID(data.MsgData.SendID) {
+				return true, 0, "", userIDList
+			}
+			if !utils.IsContain(data.MsgData.SendID, userIDList) {
+				//return returnMsg(&replay, pb, 202, "you are not in group", "", 0)
+				return false, 202, "you are not in group", nil
 			}
 			isMute, err := userIsMuteInGroup(data.MsgData.GroupID, data.MsgData.SendID)
 			if err != nil {
