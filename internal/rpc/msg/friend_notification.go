@@ -159,7 +159,7 @@ func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
 }
 
 func UserInfoUpdatedNotification(operationID, userID string, needNotifiedUserID string) {
-	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: userID}
+	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: needNotifiedUserID}
 	commID := pbFriend.CommID{FromUserID: userID, ToUserID: needNotifiedUserID, OpUserID: userID, OperationID: operationID}
 	friendNotification(&commID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
 }
