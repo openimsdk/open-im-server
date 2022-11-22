@@ -1111,10 +1111,13 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		if err := rocksCache.DelJoinedSuperGroupIDListFromCache(req.OpUserID); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.OpUserID)
 		}
+		if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
+		}
 		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.OpUserID)
 	}
-	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}})
-	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{}})
+	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{}}, nil
 }
 
 func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
