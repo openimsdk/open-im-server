@@ -1,12 +1,14 @@
 package call_back_struct
 
 import (
+	"Open_IM/pkg/proto/group"
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 )
 
 type CallbackBeforeCreateGroupReq struct {
 	CallbackCommand string `json:"callbackCommand"`
 	commonPb.GroupInfo
+	InitMemberList []*group.GroupAddMemberInfo `json:"initMemberList"`
 }
 
 type CallbackBeforeCreateGroupResp struct {
@@ -24,4 +26,21 @@ type CallbackBeforeCreateGroupResp struct {
 	NeedVerification  *int32  `json:"needVerification"`
 	LookMemberInfo    *int32  `json:"lookMemberInfo"`
 	ApplyMemberFriend *int32  `json:"applyMemberFriend"`
+}
+
+type CallbackBeforeMemberJoinGroupReq struct {
+	CallbackCommand string `json:"callbackCommand"`
+	GroupID         string `json:"groupID"`
+	UserID          string `json:"userID"`
+	Ex              string `json:"ex"`
+	GroupEx         string `json:"groupEx"`
+}
+
+type CallbackBeforeMemberJoinGroupResp struct {
+	*CommonCallbackResp
+	NickName    *string `json:"nickName"`
+	FaceURL     *string `json:"faceURL"`
+	RoleLevel   *int32  `json:"roleLevel"`
+	MuteEndTime *int64  `json:"muteEndTime"`
+	Ex          *string `json:"ex"`
 }

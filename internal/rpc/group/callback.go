@@ -4,6 +4,7 @@ import (
 	cbApi "Open_IM/pkg/call_back_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	pbGroup "Open_IM/pkg/proto/group"
@@ -19,6 +20,8 @@ func callbackBeforeCreateGroup(req *pbGroup.CreateGroupReq) cbApi.CommonCallback
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), req.String())
 	commonCallbackReq := &cbApi.CallbackBeforeCreateGroupReq{
 		CallbackCommand: constant.CallbackBeforeCreateGroupCommand,
+		GroupInfo:       *req.GroupInfo,
+		InitMemberList:  req.InitMemberList,
 	}
 	resp := &cbApi.CallbackBeforeCreateGroupResp{
 		CommonCallbackResp: &callbackResp,
@@ -41,7 +44,7 @@ func callbackBeforeCreateGroup(req *pbGroup.CreateGroupReq) cbApi.CommonCallback
 			req.GroupInfo.GroupID = *resp.GroupID
 		}
 		if resp.GroupName != nil {
-			req.GroupInfo.GroupName = *resp.GroupID
+			req.GroupInfo.GroupName = *resp.GroupName
 		}
 		if resp.Notification != nil {
 			req.GroupInfo.Notification = *resp.Notification
@@ -68,11 +71,56 @@ func callbackBeforeCreateGroup(req *pbGroup.CreateGroupReq) cbApi.CommonCallback
 			req.GroupInfo.GroupType = *resp.GroupType
 		}
 		if resp.NeedVerification != nil {
-			req.GroupInfo.NeedVerification = *resp.GroupType
+			req.GroupInfo.NeedVerification = *resp.NeedVerification
 		}
 		if resp.LookMemberInfo != nil {
 			req.GroupInfo.LookMemberInfo = *resp.LookMemberInfo
 		}
+	}
+	return callbackResp
+}
+
+func CallbackBeforeMemberJoinGroup(operationID string, groupMember *db.GroupMember, groupEx string) cbApi.CommonCallbackResp {
+	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
+	if !config.Config.Callback.CallbackBeforeMemberJoinGroup.Enable {
+		return callbackResp
+	}
+	log.NewDebug(operationID, "args: ", *groupMember)
+	callbackReq := cbApi.CallbackBeforeMemberJoinGroupReq{
+		CallbackCommand: constant.CallbackBeforeMemberJoinGroupCommand,
+		GroupID:         groupMember.GroupID,
+		UserID:          groupMember.UserID,
+		Ex:              groupMember.Ex,
+		GroupEx:         groupEx,
+	}
+	resp := &cbApi.CallbackBeforeMemberJoinGroupResp{
+		CommonCallbackResp: &callbackResp,
+	}
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeMemberJoinGroupCommand, callbackReq, resp, config.Config.Callback.CallbackBeforeMemberJoinGroup.CallbackTimeOut); err != nil {
+		callbackResp.ErrCode = http2.StatusInternalServerError
+		callbackResp.ErrMsg = err.Error()
+		if !config.Config.Callback.CallbackBeforeMemberJoinGroup.CallbackFailedContinue {
+			callbackResp.ActionCode = constant.ActionForbidden
+			return callbackResp
+		} else {
+			callbackResp.ActionCode = constant.ActionAllow
+			return callbackResp
+		}
+	}
+	if resp.MuteEndTime != nil {
+		groupMember.MuteEndTime = utils.UnixSecondToTime(*resp.MuteEndTime)
+	}
+	if resp.FaceURL != nil {
+		groupMember.FaceURL = *resp.FaceURL
+	}
+	if resp.Ex != nil {
+		groupMember.Ex = *resp.Ex
+	}
+	if resp.NickName != nil {
+		groupMember.Nickname = *resp.NickName
+	}
+	if resp.RoleLevel != nil {
+		groupMember.RoleLevel = *resp.RoleLevel
 	}
 	return callbackResp
 }
