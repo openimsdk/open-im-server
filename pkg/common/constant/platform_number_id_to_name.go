@@ -14,6 +14,7 @@ const (
 	LinuxPlatformID      = 7
 	AndroidPadPlatformID = 8
 	IPadPlatformID       = 9
+	AdminPlatformID      = 10
 
 	//Platform string match to Platform ID
 	IOSPlatformStr        = "IOS"
@@ -25,6 +26,7 @@ const (
 	LinuxPlatformStr      = "Linux"
 	AndroidPadPlatformStr = "APad"
 	IPadPlatformStr       = "IPad"
+	AdminPlatformStr      = "Admin"
 
 	//terminal types
 	TerminalPC     = "PC"
@@ -41,6 +43,7 @@ var PlatformID2Name = map[int]string{
 	LinuxPlatformID:      LinuxPlatformStr,
 	AndroidPadPlatformID: AndroidPadPlatformStr,
 	IPadPlatformID:       IPadPlatformStr,
+	AdminPlatformID:      AdminPlatformStr,
 }
 var PlatformName2ID = map[string]int{
 	IOSPlatformStr:        IOSPlatformID,
@@ -52,6 +55,7 @@ var PlatformName2ID = map[string]int{
 	LinuxPlatformStr:      LinuxPlatformID,
 	AndroidPadPlatformStr: AndroidPadPlatformID,
 	IPadPlatformStr:       IPadPlatformID,
+	AdminPlatformStr:      AdminPlatformID,
 }
 var Platform2class = map[string]string{
 	IOSPlatformStr:     TerminalMobile,
