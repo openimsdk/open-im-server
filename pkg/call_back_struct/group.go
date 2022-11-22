@@ -7,6 +7,7 @@ import (
 
 type CallbackBeforeCreateGroupReq struct {
 	CallbackCommand string `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
 	commonPb.GroupInfo
 	InitMemberList []*group.GroupAddMemberInfo `json:"initMemberList"`
 }
@@ -30,6 +31,7 @@ type CallbackBeforeCreateGroupResp struct {
 
 type CallbackBeforeMemberJoinGroupReq struct {
 	CallbackCommand string `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
 	GroupID         string `json:"groupID"`
 	UserID          string `json:"userID"`
 	Ex              string `json:"ex"`

@@ -20,6 +20,7 @@ func callbackBeforeCreateGroup(req *pbGroup.CreateGroupReq) cbApi.CommonCallback
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), req.String())
 	commonCallbackReq := &cbApi.CallbackBeforeCreateGroupReq{
 		CallbackCommand: constant.CallbackBeforeCreateGroupCommand,
+		OperationID:     req.OperationID,
 		GroupInfo:       *req.GroupInfo,
 		InitMemberList:  req.InitMemberList,
 	}
@@ -88,6 +89,7 @@ func CallbackBeforeMemberJoinGroup(operationID string, groupMember *db.GroupMemb
 	log.NewDebug(operationID, "args: ", *groupMember)
 	callbackReq := cbApi.CallbackBeforeMemberJoinGroupReq{
 		CallbackCommand: constant.CallbackBeforeMemberJoinGroupCommand,
+		OperationID:     operationID,
 		GroupID:         groupMember.GroupID,
 		UserID:          groupMember.UserID,
 		Ex:              groupMember.Ex,
