@@ -78,6 +78,8 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	case constant.FieldUnread:
 		isSyncConversation = false
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"update_unread_count_time": conversation.UpdateUnreadCountTime})
+	case constant.FieldBurnDuration:
+		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"burn_duration": conversation.BurnDuration})
 	}
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "UpdateColumnsConversations error", err.Error())

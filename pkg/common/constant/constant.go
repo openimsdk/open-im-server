@@ -196,19 +196,20 @@ const (
 	VerificationCodeForResetSuffix    = "_forReset"
 
 	//callbackCommand
-	CallbackBeforeSendSingleMsgCommand  = "callbackBeforeSendSingleMsgCommand"
-	CallbackAfterSendSingleMsgCommand   = "callbackAfterSendSingleMsgCommand"
-	CallbackBeforeSendGroupMsgCommand   = "callbackBeforeSendGroupMsgCommand"
-	CallbackAfterSendGroupMsgCommand    = "callbackAfterSendGroupMsgCommand"
-	CallbackMsgModifyCommand            = "callbackMsgModifyCommand"
-	CallbackUserOnlineCommand           = "callbackUserOnlineCommand"
-	CallbackUserOfflineCommand          = "callbackUserOfflineCommand"
-	CallbackUserKickOffCommand          = "callbackUserKickOffCommand"
-	CallbackOfflinePushCommand          = "callbackOfflinePushCommand"
-	CallbackOnlinePushCommand           = "callbackOnlinePushCommand"
-	CallbackSuperGroupOnlinePushCommand = "callbackSuperGroupOnlinePushCommand"
-	CallbackBeforeAddFriendCommand      = "callbackBeforeAddFriendCommand"
-	CallbackBeforeCreateGroupCommand    = "callbackBeforeCreateGroup"
+	CallbackBeforeSendSingleMsgCommand   = "callbackBeforeSendSingleMsgCommand"
+	CallbackAfterSendSingleMsgCommand    = "callbackAfterSendSingleMsgCommand"
+	CallbackBeforeSendGroupMsgCommand    = "callbackBeforeSendGroupMsgCommand"
+	CallbackAfterSendGroupMsgCommand     = "callbackAfterSendGroupMsgCommand"
+	CallbackMsgModifyCommand             = "callbackMsgModifyCommand"
+	CallbackUserOnlineCommand            = "callbackUserOnlineCommand"
+	CallbackUserOfflineCommand           = "callbackUserOfflineCommand"
+	CallbackUserKickOffCommand           = "callbackUserKickOffCommand"
+	CallbackOfflinePushCommand           = "callbackOfflinePushCommand"
+	CallbackOnlinePushCommand            = "callbackOnlinePushCommand"
+	CallbackSuperGroupOnlinePushCommand  = "callbackSuperGroupOnlinePushCommand"
+	CallbackBeforeAddFriendCommand       = "callbackBeforeAddFriendCommand"
+	CallbackBeforeCreateGroupCommand     = "callbackBeforeCreateGroupCommand"
+	CallbackBeforeMemberJoinGroupCommand = "callbackBeforeMemberJoinGroupCommand"
 
 	//callback actionCode
 	ActionAllow     = 0
@@ -275,6 +276,7 @@ const (
 	FieldIsNotInGroup  = 6
 	FieldEx            = 7
 	FieldUnread        = 8
+	FieldBurnDuration  = 9
 )
 
 const (

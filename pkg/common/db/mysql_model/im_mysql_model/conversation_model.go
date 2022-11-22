@@ -11,7 +11,7 @@ func SetConversation(conversation db.Conversation) (bool, error) {
 	newConversation := conversation
 	if db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Find(&newConversation).RowsAffected == 0 {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "not exist in db, create")
-		return isUpdate, db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
+		return isUpdate, db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(&conversation).Error
 		// if exist, then update record
 	} else {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
@@ -23,7 +23,7 @@ func SetConversation(conversation db.Conversation) (bool, error) {
 	}
 }
 func SetOneConversation(conversation db.Conversation) error {
-	return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
+	return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(&conversation).Error
 
 }
 
@@ -31,7 +31,7 @@ func PeerUserSetConversation(conversation db.Conversation) error {
 	newConversation := conversation
 	if db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Find(&newConversation).RowsAffected == 0 {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "not exist in db, create")
-		return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
+		return db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(&conversation).Error
 		// if exist, then update record
 	}
 	log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
@@ -46,7 +46,7 @@ func SetRecvMsgOpt(conversation db.Conversation) (bool, error) {
 	newConversation := conversation
 	if db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Find(&newConversation).RowsAffected == 0 {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "not exist in db, create")
-		return isUpdate, db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(conversation).Error
+		return isUpdate, db.DB.MysqlDB.DefaultGormDB().Model(&db.Conversation{}).Create(&conversation).Error
 		// if exist, then update record
 	} else {
 		log.NewDebug("", utils.GetSelfFuncName(), "conversation", conversation, "exist in db, update")
