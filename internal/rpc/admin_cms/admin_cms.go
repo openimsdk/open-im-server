@@ -133,6 +133,24 @@ func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLogi
 	return resp, nil
 }
 
+func (s *adminCMSServer) GetUserToken(_ context.Context, req *pbAdminCMS.GetUserTokenReq) (*pbAdminCMS.GetUserTokenResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbAdminCMS.GetUserTokenResp{
+		CommonResp: &pbAdminCMS.CommonResp{},
+	}
+	token, expTime, err := token_verify.CreateToken(req.UserID, int(req.PlatformID))
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "generate token failed", "userID: ", req.UserID, req.PlatformID, err.Error())
+		resp.CommonResp.ErrCode = constant.ErrTokenUnknown.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
+		return resp, nil
+	}
+	resp.Token = token
+	resp.ExpTime = expTime
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", resp.String())
+	return resp, nil
+}
+
 func (s *adminCMSServer) AddUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.AddUserRegisterAddFriendIDListReq) (*pbAdminCMS.AddUserRegisterAddFriendIDListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbAdminCMS.AddUserRegisterAddFriendIDListResp{CommonResp: &pbAdminCMS.CommonResp{}}
