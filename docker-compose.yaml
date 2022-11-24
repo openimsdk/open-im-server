@@ -142,7 +142,7 @@ services:
     image: openim/open_im_enterprise:v1.0.0
     container_name: open_im_enterprise
     volumes:
-      - ./logs:/Open-IM-Enterprise/logs
+      - ./logs/open_im_enterprise:/Open-IM-Enterprise/logs
       - ./docker-compose_cfg/config.yaml:/Open-IM-Enterprise/config/config.yaml
     restart: always
     depends_on:
