@@ -221,7 +221,7 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 					return
 				}
 				err = oldConn.Close()
-				delete(oldConnMap, platformID)
+				//delete(oldConnMap, platformID)
 				ws.wsUserToConn[uid] = oldConnMap
 				if len(oldConnMap) == 0 {
 					delete(ws.wsUserToConn, uid)
@@ -363,7 +363,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	operationID := utils.OperationIDGenerator()
 	var uid string
 	var platform int
-	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
+	if oldStringMap, okg := ws.wsConnToUser[conn]; okg {
 		for k, v := range oldStringMap {
 			platform = k
 			uid = v
@@ -383,17 +383,17 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 			log.Debug(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
 		}
 		delete(ws.wsConnToUser, conn)
-
 	}
 	err := conn.Close()
 	if err != nil {
 		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
-	callbackResp := callbackUserOffline(operationID, uid, platform)
+	callbackResp := callbackUserOffline(operationID, conn.userID, platform)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}
 	promePkg.PromeGaugeDec(promePkg.OnlineUserGauge)
+
 }
 
 func (ws *WServer) getUserConn(uid string, platform int) *UserConn {
