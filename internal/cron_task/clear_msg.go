@@ -139,6 +139,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	}
 	delStruct.minSeq = lastMsgPb.Seq
 	if msgListIsFull(msgs) {
+		log.NewDebug(operationID, "msg list is full", msgs.UID)
 		delStruct.delUidList = append(delStruct.delUidList, msgs.UID)
 	}
 	log.NewDebug(operationID, ID, "continue", delStruct)
