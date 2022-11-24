@@ -291,6 +291,7 @@ type config struct {
 		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`
 		CallbackBeforeAddFriend            callBackConfig `yaml:"callbackBeforeAddFriend"`
 		CallbackBeforeCreateGroup          callBackConfig `yaml:"callbackBeforeCreateGroup"`
+		CallbackBeforeMemberJoinGroup      callBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////

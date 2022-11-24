@@ -12,19 +12,6 @@ import (
 	"time"
 )
 
-func init() {
-	cmd := exec.Command("/bin/bash", "CONFIG_NAME=../../")
-	_, err := cmd.StdoutPipe()
-	if err != nil {
-		return
-	}
-
-	//执行命令
-	if err := cmd.Start(); err != nil {
-		return
-	}
-}
-
 func getMsgListFake(num int) []*pbMsg.MsgDataToMQ {
 	var msgList []*pbMsg.MsgDataToMQ
 	for i := 1; i < num; i++ {
