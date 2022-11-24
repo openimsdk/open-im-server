@@ -363,7 +363,8 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	operationID := utils.OperationIDGenerator()
 	var uid string
 	var platform int
-	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
+	var okg bool
+	if oldStringMap, okg := ws.wsConnToUser[conn]; okg {
 		for k, v := range oldStringMap {
 			platform = k
 			uid = v
@@ -389,11 +390,14 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if err != nil {
 		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
-	callbackResp := callbackUserOffline(operationID, uid, platform)
-	if callbackResp.ErrCode != 0 {
-		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+	if okg {
+		callbackResp := callbackUserOffline(operationID, uid, platform)
+		if callbackResp.ErrCode != 0 {
+			log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+		}
+		promePkg.PromeGaugeDec(promePkg.OnlineUserGauge)
 	}
-	promePkg.PromeGaugeDec(promePkg.OnlineUserGauge)
+
 }
 
 func (ws *WServer) getUserConn(uid string, platform int) *UserConn {
