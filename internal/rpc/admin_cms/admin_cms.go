@@ -215,25 +215,26 @@ func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *
 func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatLogsReq) (*pbAdminCMS.GetChatLogsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetChatLogs", req.String())
 	resp := &pbAdminCMS.GetChatLogsResp{CommonResp: &pbAdminCMS.CommonResp{}, Pagination: &server_api_params.ResponsePagination{}}
-	time, err := utils.TimeStringToTime(req.SendTime)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "time string parse error", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrArgs.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
 	chatLog := db.ChatLog{
 		Content:     req.Content,
-		SendTime:    time,
 		ContentType: req.ContentType,
 		SessionType: req.SessionType,
 		RecvID:      req.RecvID,
 		SendID:      req.SendID,
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "chat_log: ", chatLog)
+	if req.SendTime != "" {
+		sendTime, err := utils.TimeStringToTime(req.SendTime)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "time string parse error", err.Error(), req.SendTime)
+			resp.CommonResp.ErrCode = constant.ErrArgs.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		chatLog.SendTime = sendTime
+	}
 	nums, err := imdb.GetChatLogCount(chatLog)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLogCount", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLogCount", err.Error(), chatLog)
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
@@ -241,7 +242,7 @@ func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatL
 	resp.ChatLogsNum = int32(nums)
 	chatLogs, err := imdb.GetChatLog(chatLog, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLog", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLog", err.Error(), chatLog)
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
