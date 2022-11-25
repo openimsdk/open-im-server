@@ -82,20 +82,20 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 ```shell
 git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive 
 cd cmd/Open-IM-SDK-Core
-git checkout mainCopy to clipboardErrorCopied
+git checkout main
 ```
 
 1. Set executable permissions
 
 ```shell
 cd ../../script/
-chmod +x *.shCopy to clipboardErrorCopied
+chmod +x *.sh
 ```
 
 1. build
 
 ```shell
-./batch_build_all_service.shCopy
+./batch_build_all_service.sh
 ```
 
 all services build success
