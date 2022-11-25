@@ -3,65 +3,42 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/utils"
 	"fmt"
 )
 
-func GetChatLog(chatLog db.ChatLog, pageNumber, showNumber int32) ([]db.ChatLog, error) {
-	var chatLogs []db.ChatLog
-	db := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").
-		Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1)))
+func GetChatLog(chatLog *db.ChatLog, pageNumber, showNumber int32, contentTypeList []int32) (int64, []db.ChatLog, error) {
+	mdb := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs")
 	if chatLog.SendTime.Unix() > 0 {
-		db = db.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
+		mdb = mdb.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
 	}
 	if chatLog.Content != "" {
-		db = db.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
+		mdb = mdb.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
 	}
 	if chatLog.SessionType == 1 {
-		db = db.Where("session_type = ?", chatLog.SessionType)
+		mdb = mdb.Where("session_type = ?", chatLog.SessionType)
 	} else if chatLog.SessionType == 2 {
-		db = db.Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
+		mdb = mdb.Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
 	}
 	if chatLog.ContentType != 0 {
-		db = db.Where("content_type = ?", chatLog.ContentType)
+		mdb = mdb.Where("content_type = ?", chatLog.ContentType)
 	}
 	if chatLog.SendID != "" {
-		db = db.Where("send_id = ?", chatLog.SendID)
+		mdb = mdb.Where("send_id = ?", chatLog.SendID)
 	}
 	if chatLog.RecvID != "" {
-		db = db.Where("recv_id = ?", chatLog.RecvID)
+		mdb = mdb.Where("recv_id = ?", chatLog.RecvID)
 	}
-
-	err := db.Find(&chatLogs).Error
-	return chatLogs, err
-}
-
-func GetChatLogCount(chatLog db.ChatLog) (int64, error) {
+	if len(contentTypeList) > 0 {
+		mdb = mdb.Where("content_type in (?)", contentTypeList)
+	}
 	var count int64
-	db := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs")
-	if chatLog.SendTime.Unix() > 0 {
-		log.NewDebug("", utils.GetSelfFuncName(), chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
-		db = db.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
+	if err := mdb.Count(&count).Error; err != nil {
+		return 0, nil, err
 	}
-	if chatLog.Content != "" {
-		db = db.Where(" content like ? ", fmt.Sprintf("%%%s%%", chatLog.Content))
+	var chatLogs []db.ChatLog
+	mdb = mdb.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1)))
+	if err := mdb.Find(&chatLogs).Error; err != nil {
+		return 0, nil, err
 	}
-	if chatLog.SessionType == 1 {
-		db = db.Where("session_type = ?", chatLog.SessionType)
-	} else if chatLog.SessionType == 2 {
-		db = db.Where("session_type in (?)", []int{constant.GroupChatType, constant.SuperGroupChatType})
-	}
-	if chatLog.ContentType != 0 {
-		db = db.Where("content_type = ?", chatLog.ContentType)
-	}
-	if chatLog.SendID != "" {
-		db = db.Where("send_id = ?", chatLog.SendID)
-	}
-	if chatLog.RecvID != "" {
-		db = db.Where("recv_id = ?", chatLog.RecvID)
-	}
-
-	err := db.Count(&count).Error
-	return count, err
+	return count, chatLogs, nil
 }
