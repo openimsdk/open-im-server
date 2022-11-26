@@ -50,6 +50,11 @@ func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq)
 
 func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
+	_, err := imdb.GetUserByUserID(req.FromUserID)
+	if err != nil {
+		log.NewError(req.OperationID, "not this user:", req.FromUserID, req.String())
+		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+	}
 	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, int(req.Platform))
 	if err != nil {
 		errMsg := req.OperationID + " token_verify.CreateToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
