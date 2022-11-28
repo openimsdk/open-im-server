@@ -404,7 +404,6 @@ func (ws *WServer) setUserDeviceBackground(conn *UserConn, m *Req) {
 		req := pData.(*sdk_ws.SetAppBackgroundStatusReq)
 		conn.IsBackground = req.IsBackground
 		log.NewInfo(m.OperationID, "SetUserDeviceBackground", "success", *conn, req.IsBackground)
-		ws.setUserDeviceBackgroundResp(conn, m, 0, "")
 	}
 	ws.setUserDeviceBackgroundResp(conn, m, errCode, errMsg)
 }
