@@ -35,7 +35,9 @@ type UserConn struct {
 	PushedMaxSeq uint32
 	IsCompress   bool
 	userID       string
+	IsBackground bool
 }
+
 type WServer struct {
 	wsAddr       string
 	wsMaxConnNum int
@@ -84,7 +86,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 				log.NewDebug(operationID, query["sendID"][0], "enable compression")
 				isCompress = true
 			}
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress, query["sendID"][0]}
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress, query["sendID"][0], false}
 			userCount++
 			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
 			go ws.readMsg(newConn)

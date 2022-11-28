@@ -65,6 +65,9 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	case constant.WsLogoutMsg:
 		log.NewInfo(m.OperationID, "conn.Close()", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.userLogoutReq(conn, &m)
+	case constant.WsSetBackgroundStatus:
+		log.NewInfo(m.OperationID, "WsSetBackgroundStatus", m.SendID, m.MsgIncr, m.ReqIdentifier)
+		ws.setUserDeviceBackground(conn, &m)
 	default:
 		log.Error(m.OperationID, "ReqIdentifier failed ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 	}
@@ -393,4 +396,27 @@ func SetTokenKicked(userID string, platformID int, operationID string) {
 		log.Error(operationID, "SetTokenMapByUidPid failed ", err.Error(), userID, constant.PlatformIDToName(platformID))
 		return
 	}
+}
+
+func (ws *WServer) setUserDeviceBackground(conn *UserConn, m *Req) {
+	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WsSetBackgroundStatus, m.OperationID)
+	if isPass {
+		req := pData.(*sdk_ws.SetAppBackgroundStatusReq)
+		conn.IsBackground = req.IsBackground
+		log.NewInfo(m.OperationID, "SetUserDeviceBackground", "success", *conn, req.IsBackground)
+		ws.setUserDeviceBackgroundResp(conn, m, 0, "")
+	}
+	ws.setUserDeviceBackgroundResp(conn, m, errCode, errMsg)
+}
+
+func (ws *WServer) setUserDeviceBackgroundResp(conn *UserConn, m *Req, errCode int32, errMsg string) {
+	mReply := Resp{
+		ReqIdentifier: m.ReqIdentifier,
+		MsgIncr:       m.MsgIncr,
+		OperationID:   m.OperationID,
+		ErrCode:       errCode,
+		ErrMsg:        errMsg,
+	}
+	ws.sendMsg(conn, mReply)
+	_ = conn.Close()
 }

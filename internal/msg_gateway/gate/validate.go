@@ -107,6 +107,18 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 
 		}
 		return true, 0, "", data
+	case constant.WsSetBackgroundStatus:
+		data := open_im_sdk.SetAppBackgroundStatusReq{}
+		if err := proto.Unmarshal(m.Data, &data); err != nil {
+			log.Error(operationID, "Decode Data struct  err", err.Error(), r)
+			return false, 203, err.Error(), nil
+		}
+		if err := validate.Struct(data); err != nil {
+			log.Error(operationID, "data args validate  err", err.Error(), r)
+			return false, 204, err.Error(), nil
+
+		}
+		return true, 0, "", data
 	default:
 	}
 	return false, 204, "args err", nil
