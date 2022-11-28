@@ -403,6 +403,17 @@ func (ws *WServer) setUserDeviceBackground(conn *UserConn, m *Req) {
 	if isPass {
 		req := pData.(*sdk_ws.SetAppBackgroundStatusReq)
 		conn.IsBackground = req.IsBackground
+		if req.IsBackground {
+			callbackResp := callbackUserOffline(m.OperationID, conn.userID, int(conn.platformID), true)
+			if callbackResp.ErrCode != 0 {
+				log.NewError(m.OperationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+			}
+		} else {
+			callbackResp := callbackUserOnline(m.OperationID, conn.userID, int(conn.platformID), conn.token, true)
+			if callbackResp.ErrCode != 0 {
+				log.NewError(m.OperationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+			}
+		}
 		log.NewInfo(m.OperationID, "SetUserDeviceBackground", "success", *conn, req.IsBackground)
 	}
 	ws.setUserDeviceBackgroundResp(conn, m, errCode, errMsg)

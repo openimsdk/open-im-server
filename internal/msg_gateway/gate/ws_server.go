@@ -36,6 +36,7 @@ type UserConn struct {
 	IsCompress   bool
 	userID       string
 	IsBackground bool
+	token        string
 }
 
 type WServer struct {
@@ -86,7 +87,7 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 				log.NewDebug(operationID, query["sendID"][0], "enable compression")
 				isCompress = true
 			}
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress, query["sendID"][0], false}
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress, query["sendID"][0], false, query["token"][0]}
 			userCount++
 			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
 			go ws.readMsg(newConn)
@@ -327,7 +328,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token, "ip: ", conn.RemoteAddr().String())
-	callbackResp := callbackUserOnline(operationID, uid, platformID, token)
+	callbackResp := callbackUserOnline(operationID, uid, platformID, token, false)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
 	}
@@ -390,7 +391,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if err != nil {
 		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
-	callbackResp := callbackUserOffline(operationID, conn.userID, platform)
+	callbackResp := callbackUserOffline(operationID, conn.userID, platform, false)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}
