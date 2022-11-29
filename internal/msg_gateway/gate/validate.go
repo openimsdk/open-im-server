@@ -118,7 +118,7 @@ func (ws *WServer) argsValidate(m *Req, r int32, operationID string) (isPass boo
 			return false, 204, err.Error(), nil
 
 		}
-		return true, 0, "", data
+		return true, 0, "", &data
 	default:
 	}
 	return false, 204, "args err", nil
