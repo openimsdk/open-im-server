@@ -487,6 +487,9 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 			if r.Header.Get("compression") == "gzip" {
 				compression = true
 			}
+			if len(query["compression"]) != 0 && query["compression"][0] == "gzip" {
+				compression = true
+			}
 			log.Info(operationID, "Connection Authentication Success", "", "token ", query["token"][0], "userID ", query["sendID"][0], "platformID ", query["platformID"][0], "compression", compression)
 			return true, compression
 		}
