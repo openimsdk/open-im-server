@@ -107,6 +107,17 @@ func userIsMuteInGroup(groupID, userID string) (bool, error) {
 	return false, nil
 }
 
+func groupIsMuted(groupID string) (bool, error) {
+	groupInfo, err := rocksCache.GetGroupInfoFromCache(groupID)
+	if err != nil {
+		return false, utils.Wrap(err, "GetGroupInfoFromCache failed")
+	}
+	if groupInfo.Status == constant.GroupStatusMuted {
+		return true, nil
+	}
+	return false, nil
+}
+
 func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, string, []string) {
 	switch data.MsgData.SessionType {
 	case constant.SingleChatType:
@@ -182,7 +193,15 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 				return false, 202, "you are not in group", nil
 			}
 		}
-		isMute, err := userIsMuteInGroup(data.MsgData.GroupID, data.MsgData.SendID)
+		isMute, err := groupIsMuted(data.MsgData.GroupID)
+		if err != nil {
+			errMsg := data.OperationID + err.Error()
+			return false, 223, errMsg, nil
+		}
+		if isMute {
+			return false, 225, "group id muted", nil
+		}
+		isMute, err = userIsMuteInGroup(data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			errMsg := data.OperationID + err.Error()
 			return false, 223, errMsg, nil
@@ -245,7 +264,15 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 					return false, 202, "you are not in group", nil
 				}
 			}
-			isMute, err := userIsMuteInGroup(data.MsgData.GroupID, data.MsgData.SendID)
+			isMute, err := groupIsMuted(data.MsgData.GroupID)
+			if err != nil {
+				errMsg := data.OperationID + err.Error()
+				return false, 223, errMsg, nil
+			}
+			if isMute {
+				return false, 225, "group id muted", nil
+			}
+			isMute, err = userIsMuteInGroup(data.MsgData.GroupID, data.MsgData.SendID)
 			if err != nil {
 				errMsg := data.OperationID + err.Error()
 				return false, 223, errMsg, nil

@@ -70,7 +70,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 			wsResult = append(wsResult, reply.SinglePushResult...)
 		}
 	}
-	log.NewInfo(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData)
+	log.NewInfo(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData, "isOfflinePush", isOfflinePush)
 	successCount++
 	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
 		// save invitation info for offline push
