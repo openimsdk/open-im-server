@@ -30,11 +30,8 @@ func StartCronTask(userID, workingGroupID string) {
 		fmt.Println("clear msg finished")
 		return
 	}
-	clearFunc := func() {
-		ClearAll()
-	}
 	c := cron.New()
-	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, clearFunc)
+	_, err := c.AddFunc(config.Config.Mongo.ChatRecordsClearTime, ClearAll)
 	if err != nil {
 		fmt.Println("start cron failed", err.Error(), config.Config.Mongo.ChatRecordsClearTime)
 		panic(err)
@@ -53,7 +50,6 @@ func getCronTaskOperationID() string {
 func ClearAll() {
 	operationID := getCronTaskOperationID()
 	log.NewInfo(operationID, "====================== start del cron task ======================")
-	//var userIDList []string
 	var err error
 	userIDList, err := im_mysql_model.SelectAllUserID()
 	if err == nil {
@@ -61,7 +57,6 @@ func ClearAll() {
 	} else {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
-	//return
 	// working group msg clear
 	workingGroupIDList, err := im_mysql_model.GetGroupIDListByGroupType(constant.WorkingGroup)
 	if err == nil {
@@ -82,6 +77,9 @@ func StartClearMsg(operationID string, userIDList []string) {
 		if err := checkMaxSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
 		}
+		if err := CheckUserMinSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
+		}
 	}
 }
 
@@ -99,6 +97,11 @@ func StartClearWorkingGroupMsg(operationID string, workingGroupIDList []string) 
 		}
 		if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
+		}
+		for _, userID := range userIDList {
+			if err := CheckGroupUserMinSeq(operationID, groupID, userID, constant.ReadDiffusion); err != nil {
+				log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
+			}
 		}
 	}
 }

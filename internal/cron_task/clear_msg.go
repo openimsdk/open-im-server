@@ -164,6 +164,21 @@ func msgListIsFull(chat *db.UserChat) bool {
 	return false
 }
 
+func CheckGroupUserMinSeq(operationID, groupID, userID string, diffusionType int) error {
+	return nil
+}
+
+func CheckUserMinSeqWithMongo(operationID, userID string, diffusionType int) error {
+	//var seqRedis uint64
+	//var err error
+	//if diffusionType == constant.WriteDiffusion {
+	//	seqRedis, err = db.DB.GetUserMinSeq(ID)
+	//} else {
+	//	seqRedis, err = db.DB.GetGroupUserMinSeq(ID)
+	//}
+	return nil
+}
+
 func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 	var seqRedis uint64
 	var err error
@@ -185,17 +200,10 @@ func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {
 	if msg == nil {
 		return nil
 	}
-	var seqMongo uint32
-	msgPb := &server_api_params.MsgData{}
-	err = proto.Unmarshal(msg.Msg, msgPb)
-	if err != nil {
-		return utils.Wrap(err, "")
-	}
-	seqMongo = msgPb.Seq
-	if math.Abs(float64(seqMongo-uint32(seqRedis))) > 10 {
-		log.NewWarn(operationID, utils.GetSelfFuncName(), "seqMongo, seqRedis", seqMongo, seqRedis, ID, "redis maxSeq is different with msg.Seq > 10", "status: ", msgPb.Status, msg.SendTime)
+	if math.Abs(float64(msg.Seq-uint32(seqRedis))) > 10 {
+		log.NewWarn(operationID, utils.GetSelfFuncName(), "seqMongo, seqRedis", msg.Seq, seqRedis, ID, "redis maxSeq is different with msg.Seq > 10", "status: ", msg.Status, msg.SendTime)
 	} else {
-		log.NewInfo(operationID, utils.GetSelfFuncName(), "seqMongo, seqRedis", seqMongo, seqRedis, ID, "seq and msg OK", "status:", msgPb.Status, msg.SendTime)
+		log.NewInfo(operationID, utils.GetSelfFuncName(), "seqMongo, seqRedis", msg.Seq, seqRedis, ID, "seq and msg OK", "status:", msg.Status, msg.SendTime)
 	}
 	return nil
 }
