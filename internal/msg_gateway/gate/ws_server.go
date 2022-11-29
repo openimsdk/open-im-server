@@ -76,18 +76,13 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		operationID = utils.OperationIDGenerator()
 	}
 	log.Debug(operationID, utils.GetSelfFuncName(), " args: ", query)
-	if ws.headerCheck(w, r, operationID) {
+	if isPass, compression := ws.headerCheck(w, r, operationID); isPass {
 		conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
 		if err != nil {
 			log.Error(operationID, "upgrade http conn err", err.Error(), query)
 			return
 		} else {
-			var isCompress = false
-			if r.Header.Get("compression") == "gzip" {
-				log.NewDebug(operationID, query["sendID"][0], "enable compression")
-				isCompress = true
-			}
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress, query["sendID"][0], false, query["token"][0]}
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0]}
 			userCount++
 			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
 			go ws.readMsg(newConn)
@@ -435,7 +430,7 @@ func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
 //	}
 //	return "", 0
 //}
-func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) bool {
+func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) (isPass, compression bool) {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
@@ -487,10 +482,16 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 			w.Header().Set("Sec-Websocket-Version", "13")
 			w.Header().Set("ws_err_msg", err.Error())
 			http.Error(w, err.Error(), status)
-			return false
+			return false, false
 		} else {
-			log.Info(operationID, "Connection Authentication Success", "", "token ", query["token"][0], "userID ", query["sendID"][0], "platformID ", query["platformID"][0])
-			return true
+			if r.Header.Get("compression") == "gzip" {
+				compression = true
+			}
+			if len(query["compression"]) != 0 && query["compression"][0] == "gzip" {
+				compression = true
+			}
+			log.Info(operationID, "Connection Authentication Success", "", "token ", query["token"][0], "userID ", query["sendID"][0], "platformID ", query["platformID"][0], "compression", compression)
+			return true, compression
 		}
 	} else {
 		status = int(constant.ErrArgs.ErrCode)
@@ -499,6 +500,6 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 		errMsg := "args err, need token, sendID, platformID"
 		w.Header().Set("ws_err_msg", errMsg)
 		http.Error(w, errMsg, status)
-		return false
+		return false, false
 	}
 }
