@@ -2,9 +2,9 @@ package call_back_struct
 
 type CallbackUserOnlineReq struct {
 	UserStatusCallbackReq
-	Token                        string `json:"token"`
-	Seq                          int    `json:"seq"`
-	IsAppBackgroundStatusChanged bool   `json:"isAppBackgroundStatusChanged"`
+	Token           string `json:"token"`
+	Seq             int    `json:"seq"`
+	IsAppBackground bool   `json:"isAppBackground"`
 }
 
 type CallbackUserOnlineResp struct {
@@ -13,8 +13,7 @@ type CallbackUserOnlineResp struct {
 
 type CallbackUserOfflineReq struct {
 	UserStatusCallbackReq
-	Seq                          int  `json:"seq"`
-	IsAppBackgroundStatusChanged bool `json:"isAppBackgroundStatusChanged"`
+	Seq int `json:"seq"`
 }
 
 type CallbackUserOfflineResp struct {
