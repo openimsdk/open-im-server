@@ -428,5 +428,4 @@ func (ws *WServer) setUserDeviceBackgroundResp(conn *UserConn, m *Req, errCode i
 		ErrMsg:        errMsg,
 	}
 	ws.sendMsg(conn, mReply)
-	_ = conn.Close()
 }
