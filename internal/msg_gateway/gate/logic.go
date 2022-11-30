@@ -15,10 +15,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"github.com/golang/protobuf/proto"
-	"github.com/gorilla/websocket"
 	"runtime"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/gorilla/websocket"
+	"google.golang.org/grpc"
 )
 
 func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
@@ -150,7 +152,8 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 			return
 		}
 		msgClient := pbChat.NewMsgClient(grpcConn)
-		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
+		maxSizeOption := grpc.MaxCallRecvMsgSize(1024 * 1024 * 20)
+		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq, maxSizeOption)
 		if err != nil {
 			log.NewError(rpcReq.OperationID, "pullMsgBySeqListReq err", err.Error())
 			nReply.ErrCode = 200
