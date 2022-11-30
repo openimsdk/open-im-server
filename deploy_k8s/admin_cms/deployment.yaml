@@ -34,10 +34,10 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: openim-config
+            name: config
         - name: usualConfig
           configMap:
-            name: openim-usualConfig
+            name: usual-config
   strategy: #更新策略
     type: RollingUpdate # 滚动更新
 

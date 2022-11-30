@@ -33,7 +33,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: openim-config
+            name: config
         - name: local-db
           hostPath:
             path: /db/sdk
