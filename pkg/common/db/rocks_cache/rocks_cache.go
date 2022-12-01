@@ -8,7 +8,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/big"
 	"sort"
@@ -407,9 +406,6 @@ func GetJoinedSuperGroupListFromCache(userID string) ([]string, error) {
 		userToSuperGroup, err := db.DB.GetSuperGroupByUserID(userID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
-		}
-		if len(userToSuperGroup.GroupIDList) == 0 {
-			return "", errors.New("GroupIDList == 0")
 		}
 		bytes, err := json.Marshal(userToSuperGroup.GroupIDList)
 		if err != nil {

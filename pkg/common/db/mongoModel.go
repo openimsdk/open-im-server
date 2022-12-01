@@ -318,7 +318,7 @@ func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
 	return err
 }
 
-func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
+func (d *DataBases) GetNewestMsg(ID string) (msg *open_im_sdk.MsgData, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 	regex := fmt.Sprintf("^%s", ID)
@@ -334,9 +334,49 @@ func (d *DataBases) GetNewestMsg(ID string) (msg *MsgInfo, err error) {
 	}
 	if len(userChats) > 0 {
 		if len(userChats[0].Msg) > 0 {
-			return &userChats[0].Msg[len(userChats[0].Msg)-1], nil
+			msgPb := &open_im_sdk.MsgData{}
+			err = proto.Unmarshal(userChats[0].Msg[len(userChats[0].Msg)-1].Msg, msgPb)
+			if err != nil {
+				return nil, utils.Wrap(err, "")
+			}
+			return msgPb, nil
 		}
 		return nil, errors.New("len(userChats[0].Msg) < 0")
+	}
+	return nil, nil
+}
+
+func (d *DataBases) GetOldestMsg(ID string) (msg *open_im_sdk.MsgData, err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	regex := fmt.Sprintf("^%s", ID)
+	findOpts := options.Find().SetLimit(1).SetSort(bson.M{"uid": 1})
+	var userChats []UserChat
+	cursor, err := c.Find(ctx, bson.M{"uid": bson.M{"$regex": regex}}, findOpts)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(ctx, &userChats)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	var oldestMsg []byte
+	if len(userChats) > 0 {
+		for _, v := range userChats[0].Msg {
+			if v.SendTime != 0 {
+				oldestMsg = v.Msg
+				break
+			}
+		}
+		if len(oldestMsg) == 0 {
+			oldestMsg = userChats[0].Msg[len(userChats[0].Msg)-1].Msg
+		}
+		msgPb := &open_im_sdk.MsgData{}
+		err = proto.Unmarshal(oldestMsg, msgPb)
+		if err != nil {
+			return nil, utils.Wrap(err, "")
+		}
+		return msgPb, nil
 	}
 	return nil, nil
 }
