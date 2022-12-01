@@ -178,13 +178,13 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		utils.CopyStructFields(&groupMember, us)
 		callbackResp := CallbackBeforeMemberJoinGroup(req.OperationID, &groupMember, groupInfo.Ex)
 		if callbackResp.ErrCode != 0 {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup resp: ", callbackResp)
 		}
 		if callbackResp.ActionCode != constant.ActionAllow {
 			if callbackResp.ErrCode == 0 {
 				callbackResp.ErrCode = 201
 			}
-			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
+			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup result", "end rpc and return", callbackResp)
 			return &pbGroup.CreateGroupResp{
 				ErrCode: int32(callbackResp.ErrCode),
 				ErrMsg:  callbackResp.ErrMsg,

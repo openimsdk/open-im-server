@@ -33,6 +33,8 @@ const (
 	groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
 	conversationCache         = "CONVERSATION_CACHE:"
 	conversationIDListCache   = "CONVERSATION_ID_LIST_CACHE:"
+	extendMsgSetCache         = "EXTEND_MSG_SET_CACHE:"
+	extendMsgCache            = "EXTEND_MSG_CACHE:"
 )
 
 func DelKeys() {
@@ -563,4 +565,64 @@ func GetUserAllConversationList(ownerUserID string) ([]db.Conversation, error) {
 
 func DelConversationFromCache(ownerUserID, conversationID string) error {
 	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationCache+ownerUserID+":"+conversationID), "DelConversationFromCache err")
+}
+
+func GetExtendMsgSetFromCache(ID string, index int32) (*db.ExtendMsgSet, error) {
+	getExtendMsgSet := func() (string, error) {
+		extendMsgSet, err := db.DB.GetExtendMsgSet(ID, index, &db.GetExtendMsgSetOpts{IncludeExtendMsgs: false})
+		if err != nil {
+			return "", utils.Wrap(err, "GetExtendMsgSet failed")
+		}
+		bytes, err := json.Marshal(extendMsgSet)
+		if err != nil {
+			return "", utils.Wrap(err, "Marshal failed")
+		}
+		return string(bytes), nil
+	}
+	extendMsgSetStr, err := db.DB.Rc.Fetch(extendMsgSetCache+db.GetExtendMsgSetID(ID, index), time.Second*30*60, getExtendMsgSet)
+	if err != nil {
+		return nil, utils.Wrap(err, "Fetch failed")
+	}
+	extendMsgSet := &db.ExtendMsgSet{}
+	err = json.Unmarshal([]byte(extendMsgSetStr), extendMsgSet)
+	if err != nil {
+		return nil, utils.Wrap(err, "Unmarshal failed")
+	}
+	return extendMsgSet, nil
+}
+
+func DelExtendMsgSetFromCache(ID string, index int32) error {
+	return utils.Wrap(db.DB.Rc.TagAsDeleted(extendMsgSetCache+db.GetExtendMsgSetID(ID, index)), "DelExtendMsgSetFromCache err")
+}
+
+func GetExtendMsg(ID string, index, extendMsgIndex int32) (*db.ExtendMsg, error) {
+	getExtendMsg := func() (string, error) {
+		extendMsg, err := db.DB.GetExtendMsgList(ID, index, extendMsgIndex, extendMsgIndex+1)
+		if err != nil {
+			return "", utils.Wrap(err, "GetExtendMsgList failed")
+		}
+		if len(extendMsg) == 0 {
+			return "", nil
+		}
+		bytes, err := json.Marshal(extendMsg[0])
+		if err != nil {
+			return "", utils.Wrap(err, "Marshal failed")
+		}
+		return string(bytes), nil
+	}
+
+	extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+db.GetExtendMsgSetID(ID, index)+":"+strconv.Itoa(int(extendMsgIndex)), time.Second*30*60, getExtendMsg)
+	if err != nil {
+		return nil, utils.Wrap(err, "Fetch failed")
+	}
+	extendMsg := &db.ExtendMsg{}
+	err = json.Unmarshal([]byte(extendMsgStr), extendMsg)
+	if err != nil {
+		return nil, utils.Wrap(err, "Unmarshal failed")
+	}
+	return extendMsg, nil
+}
+
+func DelExtendMsg(ID string, index, extendMsgIndex int32) error {
+	return utils.Wrap(db.DB.Rc.TagAsDeleted(extendMsgCache+db.GetExtendMsgSetID(ID, index)+":"+strconv.Itoa(int(extendMsgIndex))), "DelExtendMsg err")
 }

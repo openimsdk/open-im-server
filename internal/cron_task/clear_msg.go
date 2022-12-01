@@ -82,7 +82,7 @@ func (d *delMsgRecursionStruct) getSetMinSeq() uint32 {
 // index 0....19(del) 20...69
 // seq 70
 // set minSeq 21
-// recursion
+// recursion 删除list并且返回设置的最小seq
 func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMsgRecursionStruct) (uint32, error) {
 	// find from oldest list
 	msgs, err := db.DB.GetUserMsgListByIndex(ID, index)
@@ -105,11 +105,13 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
+	var hasMsgDoNotNeedDel bool
 	for i, msg := range msgs.Msg {
 		// 找到列表中不需要删除的消息了, 表示为递归到最后一个块
 		if utils.GetCurrentTimestampByMill() < msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) {
 			log.NewDebug(operationID, ID, "find uid", msgs.UID)
 			// 删除块失败 递归结束 返回0
+			hasMsgDoNotNeedDel = true
 			if err := delMongoMsgsPhysical(delStruct.delUidList); err != nil {
 				return 0, err
 			}
@@ -120,7 +122,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 			}
 			// 如果不是块中第一个，就把前面比他早插入的全部设置空 seq字段除外。
 			if i > 0 {
-				err = db.DB.ReplaceMsgToBlankByIndex(msgs.UID, i-1)
+				delStruct.minSeq, err = db.DB.ReplaceMsgToBlankByIndex(msgs.UID, i-1)
 				if err != nil {
 					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), msgs.UID, i)
 					return delStruct.getSetMinSeq(), utils.Wrap(err, "")
@@ -128,6 +130,10 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 			}
 			// 递归结束
 			return msgPb.Seq, nil
+		} else {
+			if !msgListIsFull(msgs) {
+
+			}
 		}
 	}
 	// 该列表中消息全部为老消息并且列表满了, 加入删除列表继续递归
@@ -141,14 +147,24 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	if msgListIsFull(msgs) {
 		log.NewDebug(operationID, "msg list is full", msgs.UID)
 		delStruct.delUidList = append(delStruct.delUidList, msgs.UID)
+	} else {
+		// 列表没有满且没有不需要被删除的消息 代表他是最新的消息块
+		if !hasMsgDoNotNeedDel {
+			delStruct.minSeq, err = db.DB.ReplaceMsgToBlankByIndex(msgs.UID, len(msgs.Msg)-1)
+			if err != nil {
+				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), msgs.UID, "Index:", len(msgs.Msg)-1)
+				err = delMongoMsgsPhysical(delStruct.delUidList)
+				if err != nil {
+					return delStruct.getSetMinSeq(), err
+				}
+				return delStruct.getSetMinSeq(), nil
+			}
+		}
 	}
-	log.NewDebug(operationID, ID, "continue", delStruct)
+	log.NewDebug(operationID, ID, "continue to", delStruct)
 	//  继续递归 index+1
 	seq, err := deleteMongoMsg(operationID, ID, index+1, delStruct)
-	if err != nil {
-		return seq, utils.Wrap(err, "deleteMongoMsg failed")
-	}
-	return seq, nil
+	return seq, utils.Wrap(err, "deleteMongoMsg failed")
 }
 
 func msgListIsFull(chat *db.UserChat) bool {
@@ -164,18 +180,11 @@ func msgListIsFull(chat *db.UserChat) bool {
 	return false
 }
 
-func CheckGroupUserMinSeq(operationID, groupID, userID string, diffusionType int) error {
+func CheckGroupUserMinSeq(operationID, groupID, userID string) error {
 	return nil
 }
 
-func CheckUserMinSeqWithMongo(operationID, userID string, diffusionType int) error {
-	//var seqRedis uint64
-	//var err error
-	//if diffusionType == constant.WriteDiffusion {
-	//	seqRedis, err = db.DB.GetUserMinSeq(ID)
-	//} else {
-	//	seqRedis, err = db.DB.GetGroupUserMinSeq(ID)
-	//}
+func CheckUserMinSeqWithMongo(operationID, userID string) error {
 	return nil
 }
 

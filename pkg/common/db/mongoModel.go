@@ -291,13 +291,13 @@ func (d *DataBases) DelMongoMsgs(IDList []string) error {
 	return err
 }
 
-func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
+func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) (replaceMaxSeq uint32, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
 	userChat := &UserChat{}
-	err := c.FindOne(ctx, bson.M{"uid": suffixID}).Decode(&userChat)
+	err = c.FindOne(ctx, bson.M{"uid": suffixID}).Decode(&userChat)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	for i, msg := range userChat.Msg {
 		if i <= index {
@@ -312,10 +312,11 @@ func (d *DataBases) ReplaceMsgToBlankByIndex(suffixID string, index int) error {
 			}
 			msg.Msg = bytes
 			msg.SendTime = 0
+			replaceMaxSeq = msgPb.Seq
 		}
 	}
 	_, err = c.UpdateOne(ctx, bson.M{"uid": suffixID}, bson.M{"$set": bson.M{"msg": userChat.Msg}})
-	return err
+	return replaceMaxSeq, err
 }
 
 func (d *DataBases) GetNewestMsg(ID string) (msg *open_im_sdk.MsgData, err error) {

@@ -77,7 +77,7 @@ func StartClearMsg(operationID string, userIDList []string) {
 		if err := checkMaxSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
 		}
-		if err := CheckUserMinSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
+		if err := CheckUserMinSeqWithMongo(operationID, userID); err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
 		}
 	}
@@ -99,7 +99,7 @@ func StartClearWorkingGroupMsg(operationID string, workingGroupIDList []string) 
 			log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
 		}
 		for _, userID := range userIDList {
-			if err := CheckGroupUserMinSeq(operationID, groupID, userID, constant.ReadDiffusion); err != nil {
+			if err := CheckGroupUserMinSeq(operationID, groupID, userID); err != nil {
 				log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
 			}
 		}
