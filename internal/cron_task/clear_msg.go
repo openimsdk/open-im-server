@@ -54,7 +54,7 @@ func DeleteMongoMsgAndResetRedisSeq(operationID, userID string) error {
 	if minSeq == 0 {
 		return nil
 	}
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDMap: ", delStruct, "minSeq", minSeq)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "delMsgIDStruct: ", delStruct, "minSeq", minSeq)
 	err = db.DB.SetUserMinSeq(userID, minSeq)
 	return utils.Wrap(err, "")
 }
