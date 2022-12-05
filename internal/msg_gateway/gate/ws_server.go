@@ -15,6 +15,7 @@ import (
 	"context"
 	"encoding/gob"
 	"io/ioutil"
+	"strconv"
 	"strings"
 
 	go_redis "github.com/go-redis/redis/v8"
@@ -37,6 +38,7 @@ type UserConn struct {
 	userID       string
 	IsBackground bool
 	token        string
+	connID       string
 }
 
 type WServer struct {
@@ -82,9 +84,9 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 			log.Error(operationID, "upgrade http conn err", err.Error(), query)
 			return
 		} else {
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0]}
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0], conn.RemoteAddr().String() + strconv.Itoa(int(utils.GetCurrentTimestampBySecond()))}
 			userCount++
-			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
+			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], newConn.connID, operationID)
 			go ws.readMsg(newConn)
 		}
 	} else {
@@ -319,11 +321,11 @@ func (ws *WServer) sendKickMsg(oldConn *UserConn) {
 	}
 }
 
-func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string, operationID string) {
+func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token string, connID, operationID string) {
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token, "ip: ", conn.RemoteAddr().String())
-	callbackResp := callbackUserOnline(operationID, uid, platformID, token, false)
+	callbackResp := callbackUserOnline(operationID, uid, platformID, token, false, connID)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
 	}
@@ -386,7 +388,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if err != nil {
 		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
-	callbackResp := callbackUserOffline(operationID, conn.userID, platform, false)
+	callbackResp := callbackUserOffline(operationID, conn.userID, platform, false, conn.connID)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}

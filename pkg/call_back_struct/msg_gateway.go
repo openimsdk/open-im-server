@@ -5,6 +5,7 @@ type CallbackUserOnlineReq struct {
 	Token                        string `json:"token"`
 	Seq                          int    `json:"seq"`
 	IsAppBackgroundStatusChanged bool   `json:"isAppBackgroundStatusChanged"`
+	ConnID                       string `json:"connID"`
 }
 
 type CallbackUserOnlineResp struct {
@@ -13,8 +14,9 @@ type CallbackUserOnlineResp struct {
 
 type CallbackUserOfflineReq struct {
 	UserStatusCallbackReq
-	Seq                          int  `json:"seq"`
-	IsAppBackgroundStatusChanged bool `json:"isAppBackgroundStatusChanged"`
+	Seq                          int    `json:"seq"`
+	IsAppBackgroundStatusChanged bool   `json:"isAppBackgroundStatusChanged"`
+	ConnID                       string `json:"connID"`
 }
 
 type CallbackUserOfflineResp struct {

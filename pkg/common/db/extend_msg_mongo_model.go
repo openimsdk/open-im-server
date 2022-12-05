@@ -25,7 +25,7 @@ type ExtendMsgSet struct {
 }
 
 type ReactionExtendMsgSet struct {
-	TypeKey string `bson:"type_key" json:"typeKey"`
+	UserKey string `bson:"user_key" json:"userKey"`
 	Value   string `bson:"value" json:"value"`
 }
 
@@ -82,10 +82,17 @@ func (d *DataBases) InsertExtendMsg(ID string, index int32, msg *ExtendMsg) (msg
 	return set.ExtendMsgNum, err
 }
 
-func (d *DataBases) UpdateOneExtendMsgSet(ID string, index, MsgIndex int32, msg *ExtendMsg, msgSet *ExtendMsgSet) error {
+func (d *DataBases) UpdateOneExtendMsgSet(ID string, index, MsgIndex int32, userIndex string, value string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
 	_, err := c.UpdateOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{})
+	return err
+}
+
+func (d *DataBases) DelOneExtendMsgSetUserKey(ID string, index, MsgIndex int32, userIndex string, userID string) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
+	_, err := c.DeleteOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)})
 	return err
 }
 

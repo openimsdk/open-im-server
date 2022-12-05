@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func callbackUserOnline(operationID, userID string, platformID int, token string, isAppBackgroundStatusChanged bool) cbApi.CommonCallbackResp {
+func callbackUserOnline(operationID, userID string, platformID int, token string, isAppBackgroundStatusChanged bool, connID string) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackUserOnline.Enable {
 		return callbackResp
@@ -27,6 +27,7 @@ func callbackUserOnline(operationID, userID string, platformID int, token string
 		},
 		Seq:                          int(time.Now().UnixNano() / 1e6),
 		IsAppBackgroundStatusChanged: isAppBackgroundStatusChanged,
+		ConnID:                       connID,
 	}
 	callbackUserOnlineResp := &cbApi.CallbackUserOnlineResp{CommonCallbackResp: &callbackResp}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackUserOnlineCommand, callbackUserOnlineReq, callbackUserOnlineResp, config.Config.Callback.CallbackUserOnline.CallbackTimeOut); err != nil {
@@ -36,7 +37,7 @@ func callbackUserOnline(operationID, userID string, platformID int, token string
 	return callbackResp
 }
 
-func callbackUserOffline(operationID, userID string, platformID int, isAppBackgroundStatusChanged bool) cbApi.CommonCallbackResp {
+func callbackUserOffline(operationID, userID string, platformID int, isAppBackgroundStatusChanged bool, connID string) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackUserOffline.Enable {
 		return callbackResp
@@ -53,6 +54,7 @@ func callbackUserOffline(operationID, userID string, platformID int, isAppBackgr
 		},
 		Seq:                          int(time.Now().UnixNano() / 1e6),
 		IsAppBackgroundStatusChanged: isAppBackgroundStatusChanged,
+		ConnID:                       connID,
 	}
 	callbackUserOfflineResp := &cbApi.CallbackUserOfflineResp{CommonCallbackResp: &callbackResp}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackUserOfflineCommand, callbackOfflineReq, callbackUserOfflineResp, config.Config.Callback.CallbackUserOffline.CallbackTimeOut); err != nil {
