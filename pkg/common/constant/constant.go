@@ -341,6 +341,6 @@ const LogFileName = "OpenIM.log"
 
 const StatisticsTimeInterval = 60
 
-const MaxNotificationNum = 100
+const MaxNotificationNum = 500
 
 const CurrentVersion = "v2.3.4-rc0"
