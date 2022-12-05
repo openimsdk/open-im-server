@@ -506,7 +506,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	for _, v := range utils.DifferenceString(haveConUserID, okUserIDList) {
 		reqPb.OperationID = req.OperationID
 		c.OwnerUserID = v
-		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
+		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
 		c.ConversationType = constant.GroupChatType
 		c.GroupID = req.GroupID
 		c.IsNotInGroup = false
@@ -1022,6 +1022,30 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 				log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
 				return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
+			//}
+			var reqPb pbUser.SetConversationReq
+			var c pbConversation.Conversation
+			reqPb.OperationID = req.OperationID
+			c.OwnerUserID = req.OpUserID
+			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
+			c.ConversationType = constant.GroupChatType
+			c.GroupID = req.GroupID
+			c.IsNotInGroup = false
+			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
+			reqPb.Conversation = &c
+			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+			if etcdConn == nil {
+				errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
+				log.NewError(req.OperationID, errMsg)
+				return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: errMsg}}, nil
+			}
+			client := pbUser.NewUserClient(etcdConn)
+			respPb, err := client.SetConversation(context.Background(), &reqPb)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error(), v)
+			} else {
+				log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v)
+			}
 
 			chat.MemberEnterDirectlyNotification(req.GroupID, req.OpUserID, req.OperationID)
 			log.NewInfo(req.OperationID, "JoinGroup rpc return ")
@@ -1045,7 +1069,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	//if err != nil {
 	//	log.NewError(req.OperationID, "GetGroupMemberListByGroupIDAndRoleLevel failed ", err.Error(), req.GroupID, constant.GroupOwner)
 	//	return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
-	//}
+
 	chat.JoinGroupApplicationNotification(req)
 	log.NewInfo(req.OperationID, "JoinGroup rpc return ")
 	return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
