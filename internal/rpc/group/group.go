@@ -583,6 +583,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 			c.ConversationType = constant.GroupChatType
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = false
+			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 		} else {
 			c.OwnerUserID = conversation.OwnerUserID
 			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
@@ -595,7 +596,6 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 			c.GroupAtType = conversation.GroupAtType
 			c.IsNotInGroup = false
 			c.Ex = conversation.Ex
-			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 		}
 		reqPb.Conversation = &c
 		etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName)
