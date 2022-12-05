@@ -125,6 +125,7 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 		SessionType:     msg.SessionType,
 		AtUserIDList:    msg.AtUserIDList,
 		Content:         callback.GetContent(msg),
+		Seq:             msg.Seq,
 	}
 	resp := &cbApi.CallbackBeforeSuperGroupOnlinePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackSuperGroupOnlinePushCommand, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.CallbackTimeOut); err != nil {

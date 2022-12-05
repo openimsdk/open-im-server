@@ -178,13 +178,13 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		utils.CopyStructFields(&groupMember, us)
 		callbackResp := CallbackBeforeMemberJoinGroup(req.OperationID, &groupMember, groupInfo.Ex)
 		if callbackResp.ErrCode != 0 {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup resp: ", callbackResp)
 		}
 		if callbackResp.ActionCode != constant.ActionAllow {
 			if callbackResp.ErrCode == 0 {
 				callbackResp.ErrCode = 201
 			}
-			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
+			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup result", "end rpc and return", callbackResp)
 			return &pbGroup.CreateGroupResp{
 				ErrCode: int32(callbackResp.ErrCode),
 				ErrMsg:  callbackResp.ErrMsg,
@@ -450,66 +450,6 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			}
 			resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
 		}
-		var haveConUserID []string
-		conversations, err := imdb.GetConversationsByConversationIDMultipleOwner(okUserIDList, utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType))
-		if err != nil {
-			log.NewError(req.OperationID, "GetConversationsByConversationIDMultipleOwner failed ", err.Error(), req.GroupID, constant.GroupChatType)
-		}
-		for _, v := range conversations {
-			haveConUserID = append(haveConUserID, v.OwnerUserID)
-		}
-		var reqPb pbUser.SetConversationReq
-		var c pbConversation.Conversation
-		for _, v := range conversations {
-			reqPb.OperationID = req.OperationID
-			c.OwnerUserID = v.OwnerUserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
-			c.RecvMsgOpt = v.RecvMsgOpt
-			c.ConversationType = constant.GroupChatType
-			c.GroupID = req.GroupID
-			c.IsPinned = v.IsPinned
-			c.AttachedInfo = v.AttachedInfo
-			c.IsPrivateChat = v.IsPrivateChat
-			c.GroupAtType = v.GroupAtType
-			c.IsNotInGroup = false
-			c.Ex = v.Ex
-			reqPb.Conversation = &c
-			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
-			if etcdConn == nil {
-				errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-				log.NewError(req.OperationID, errMsg)
-				return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
-			}
-			client := pbUser.NewUserClient(etcdConn)
-			respPb, err := client.SetConversation(context.Background(), &reqPb)
-			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error(), v.OwnerUserID)
-			} else {
-				log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v.OwnerUserID)
-			}
-		}
-		for _, v := range utils.DifferenceString(haveConUserID, okUserIDList) {
-			reqPb.OperationID = req.OperationID
-			c.OwnerUserID = v
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
-			c.ConversationType = constant.GroupChatType
-			c.GroupID = req.GroupID
-			c.IsNotInGroup = false
-			reqPb.Conversation = &c
-			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
-			if etcdConn == nil {
-				errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-				log.NewError(req.OperationID, errMsg)
-				return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
-			}
-			client := pbUser.NewUserClient(etcdConn)
-			respPb, err := client.SetConversation(context.Background(), &reqPb)
-			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error(), v)
-			} else {
-				log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v)
-			}
-		}
 	} else {
 		okUserIDList = req.InvitedUserIDList
 		if err := db.DB.AddUserToSuperGroup(req.GroupID, req.InvitedUserIDList); err != nil {
@@ -517,6 +457,76 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}, nil
 		}
 	}
+
+	// set conversations
+	var haveConUserID []string
+	var sessionType int
+	if groupInfo.GroupType == constant.NormalGroup {
+		sessionType = constant.GroupChatType
+	} else {
+		sessionType = constant.SuperGroupChatType
+	}
+	conversations, err := imdb.GetConversationsByConversationIDMultipleOwner(okUserIDList, utils.GetConversationIDBySessionType(req.GroupID, sessionType))
+	if err != nil {
+		log.NewError(req.OperationID, "GetConversationsByConversationIDMultipleOwner failed ", err.Error(), req.GroupID, sessionType)
+	}
+	for _, v := range conversations {
+		haveConUserID = append(haveConUserID, v.OwnerUserID)
+	}
+	var reqPb pbUser.SetConversationReq
+	var c pbConversation.Conversation
+	for _, v := range conversations {
+		reqPb.OperationID = req.OperationID
+		c.OwnerUserID = v.OwnerUserID
+		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
+		c.RecvMsgOpt = v.RecvMsgOpt
+		c.ConversationType = int32(sessionType)
+		c.GroupID = req.GroupID
+		c.IsPinned = v.IsPinned
+		c.AttachedInfo = v.AttachedInfo
+		c.IsPrivateChat = v.IsPrivateChat
+		c.GroupAtType = v.GroupAtType
+		c.IsNotInGroup = false
+		c.Ex = v.Ex
+		reqPb.Conversation = &c
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+		if etcdConn == nil {
+			errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
+			log.NewError(req.OperationID, errMsg)
+			return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
+		}
+		client := pbUser.NewUserClient(etcdConn)
+		respPb, err := client.SetConversation(context.Background(), &reqPb)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error(), v.OwnerUserID)
+		} else {
+			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v.OwnerUserID)
+		}
+	}
+	for _, v := range utils.DifferenceString(haveConUserID, okUserIDList) {
+		reqPb.OperationID = req.OperationID
+		c.OwnerUserID = v
+		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
+		c.ConversationType = int32(sessionType)
+		c.GroupID = req.GroupID
+		c.IsNotInGroup = false
+		c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
+		reqPb.Conversation = &c
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+		if etcdConn == nil {
+			errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
+			log.NewError(req.OperationID, errMsg)
+			return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}, nil
+		}
+		client := pbUser.NewUserClient(etcdConn)
+		respPb, err := client.SetConversation(context.Background(), &reqPb)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error(), v)
+		} else {
+			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v)
+		}
+	}
+
 	if groupInfo.GroupType != constant.SuperGroup {
 		chat.MemberInvitedNotification(req.OperationID, req.GroupID, req.OpUserID, req.Reason, okUserIDList)
 	} else {
@@ -881,21 +891,28 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 			log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), member)
 			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
+		var sessionType int
+		if groupInfo.GroupType == constant.NormalGroup {
+			sessionType = constant.GroupChatType
+		} else {
+			sessionType = constant.SuperGroupChatType
+		}
 		var reqPb pbUser.SetConversationReq
 		reqPb.OperationID = req.OperationID
 		var c pbConversation.Conversation
-		conversation, err := imdb.GetConversation(req.FromUserID, utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType))
+		conversation, err := imdb.GetConversation(req.FromUserID, utils.GetConversationIDBySessionType(req.GroupID, sessionType))
 		if err != nil {
 			c.OwnerUserID = req.FromUserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
-			c.ConversationType = constant.GroupChatType
+			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
+			c.ConversationType = int32(sessionType)
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = false
+			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 		} else {
 			c.OwnerUserID = conversation.OwnerUserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
+			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
 			c.RecvMsgOpt = conversation.RecvMsgOpt
-			c.ConversationType = constant.GroupChatType
+			c.ConversationType = int32(sessionType)
 			c.GroupID = req.GroupID
 			c.IsPinned = conversation.IsPinned
 			c.AttachedInfo = conversation.AttachedInfo
@@ -1012,6 +1029,37 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 				log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
 				return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
+			//}
+
+			var sessionType int
+			if groupInfo.GroupType == constant.NormalGroup {
+				sessionType = constant.GroupChatType
+			} else {
+				sessionType = constant.SuperGroupChatType
+			}
+			var reqPb pbUser.SetConversationReq
+			var c pbConversation.Conversation
+			reqPb.OperationID = req.OperationID
+			c.OwnerUserID = req.OpUserID
+			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
+			c.ConversationType = int32(sessionType)
+			c.GroupID = req.GroupID
+			c.IsNotInGroup = false
+			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
+			reqPb.Conversation = &c
+			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+			if etcdConn == nil {
+				errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
+				log.NewError(req.OperationID, errMsg)
+				return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: errMsg}}, nil
+			}
+			client := pbUser.NewUserClient(etcdConn)
+			respPb, err := client.SetConversation(context.Background(), &reqPb)
+			if err != nil {
+				log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error())
+			} else {
+				log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String())
+			}
 
 			chat.MemberEnterDirectlyNotification(req.GroupID, req.OpUserID, req.OperationID)
 			log.NewInfo(req.OperationID, "JoinGroup rpc return ")
@@ -1035,7 +1083,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 	//if err != nil {
 	//	log.NewError(req.OperationID, "GetGroupMemberListByGroupIDAndRoleLevel failed ", err.Error(), req.GroupID, constant.GroupOwner)
 	//	return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
-	//}
+
 	chat.JoinGroupApplicationNotification(req)
 	log.NewInfo(req.OperationID, "JoinGroup rpc return ")
 	return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil

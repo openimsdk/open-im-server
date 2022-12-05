@@ -96,12 +96,24 @@ func isMessageHasReadEnabled(pb *pbChat.SendMsgReq) (bool, int32, string) {
 	return true, 0, ""
 }
 
-func userIsMuteInGroup(groupID, userID string) (bool, error) {
+func userIsMuteAndIsAdminInGroup(groupID, userID string) (isMute bool, isAdmin bool, err error) {
 	groupMemberInfo, err := rocksCache.GetGroupMemberInfoFromCache(groupID, userID)
 	if err != nil {
-		return false, utils.Wrap(err, "")
+		return false, false, utils.Wrap(err, "")
 	}
+
 	if groupMemberInfo.MuteEndTime.Unix() >= time.Now().Unix() {
+		return true, groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers, nil
+	}
+	return false, groupMemberInfo.RoleLevel > constant.GroupOrdinaryUsers, nil
+}
+
+func groupIsMuted(groupID string) (bool, error) {
+	groupInfo, err := rocksCache.GetGroupInfoFromCache(groupID)
+	if err != nil {
+		return false, utils.Wrap(err, "GetGroupInfoFromCache failed")
+	}
+	if groupInfo.Status == constant.GroupStatusMuted {
 		return true, nil
 	}
 	return false, nil
@@ -182,13 +194,24 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 				return false, 202, "you are not in group", nil
 			}
 		}
-		isMute, err := userIsMuteInGroup(data.MsgData.GroupID, data.MsgData.SendID)
+		isMute, isAdmin, err := userIsMuteAndIsAdminInGroup(data.MsgData.GroupID, data.MsgData.SendID)
 		if err != nil {
 			errMsg := data.OperationID + err.Error()
 			return false, 223, errMsg, nil
 		}
 		if isMute {
 			return false, 224, "you are muted", nil
+		}
+		if isAdmin {
+			return true, 0, "", userIDList
+		}
+		isMute, err = groupIsMuted(data.MsgData.GroupID)
+		if err != nil {
+			errMsg := data.OperationID + err.Error()
+			return false, 223, errMsg, nil
+		}
+		if isMute {
+			return false, 225, "group id muted", nil
 		}
 		return true, 0, "", userIDList
 	case constant.SuperGroupChatType:
@@ -245,13 +268,24 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 					return false, 202, "you are not in group", nil
 				}
 			}
-			isMute, err := userIsMuteInGroup(data.MsgData.GroupID, data.MsgData.SendID)
+			isMute, isAdmin, err := userIsMuteAndIsAdminInGroup(data.MsgData.GroupID, data.MsgData.SendID)
 			if err != nil {
 				errMsg := data.OperationID + err.Error()
 				return false, 223, errMsg, nil
 			}
 			if isMute {
 				return false, 224, "you are muted", nil
+			}
+			if isAdmin {
+				return true, 0, "", userIDList
+			}
+			isMute, err = groupIsMuted(data.MsgData.GroupID)
+			if err != nil {
+				errMsg := data.OperationID + err.Error()
+				return false, 223, errMsg, nil
+			}
+			if isMute {
+				return false, 225, "group id muted", nil
 			}
 			return true, 0, "", userIDList
 		}

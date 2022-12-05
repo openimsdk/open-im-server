@@ -15,10 +15,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"github.com/golang/protobuf/proto"
-	"github.com/gorilla/websocket"
 	"runtime"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/gorilla/websocket"
+	"google.golang.org/grpc"
 )
 
 func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
@@ -65,6 +67,9 @@ func (ws *WServer) msgParse(conn *UserConn, binaryMsg []byte) {
 	case constant.WsLogoutMsg:
 		log.NewInfo(m.OperationID, "conn.Close()", m.SendID, m.MsgIncr, m.ReqIdentifier)
 		ws.userLogoutReq(conn, &m)
+	case constant.WsSetBackgroundStatus:
+		log.NewInfo(m.OperationID, "WsSetBackgroundStatus", m.SendID, m.MsgIncr, m.ReqIdentifier)
+		ws.setUserDeviceBackground(conn, &m)
 	default:
 		log.Error(m.OperationID, "ReqIdentifier failed ", m.SendID, m.MsgIncr, m.ReqIdentifier)
 	}
@@ -147,7 +152,8 @@ func (ws *WServer) pullMsgBySeqListReq(conn *UserConn, m *Req) {
 			return
 		}
 		msgClient := pbChat.NewMsgClient(grpcConn)
-		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq)
+		maxSizeOption := grpc.MaxCallRecvMsgSize(1024 * 1024 * 20)
+		reply, err := msgClient.PullMessageBySeqList(context.Background(), &rpcReq, maxSizeOption)
 		if err != nil {
 			log.NewError(rpcReq.OperationID, "pullMsgBySeqListReq err", err.Error())
 			nReply.ErrCode = 200
@@ -393,4 +399,37 @@ func SetTokenKicked(userID string, platformID int, operationID string) {
 		log.Error(operationID, "SetTokenMapByUidPid failed ", err.Error(), userID, constant.PlatformIDToName(platformID))
 		return
 	}
+}
+
+func (ws *WServer) setUserDeviceBackground(conn *UserConn, m *Req) {
+	isPass, errCode, errMsg, pData := ws.argsValidate(m, constant.WsSetBackgroundStatus, m.OperationID)
+	if isPass {
+		req := pData.(*sdk_ws.SetAppBackgroundStatusReq)
+		conn.IsBackground = req.IsBackground
+		if !conn.IsBackground {
+			callbackResp := callbackUserOnline(m.OperationID, conn.userID, int(conn.PlatformID), conn.token, true)
+			if callbackResp.ErrCode != 0 {
+				log.NewError(m.OperationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+			}
+		} else {
+			callbackResp := callbackUserOffline(m.OperationID, conn.userID, int(conn.PlatformID), true)
+			if callbackResp.ErrCode != 0 {
+				log.NewError(m.OperationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
+			}
+		}
+
+		log.NewInfo(m.OperationID, "SetUserDeviceBackground", "success", *conn, req.IsBackground)
+	}
+	ws.setUserDeviceBackgroundResp(conn, m, errCode, errMsg)
+}
+
+func (ws *WServer) setUserDeviceBackgroundResp(conn *UserConn, m *Req, errCode int32, errMsg string) {
+	mReply := Resp{
+		ReqIdentifier: m.ReqIdentifier,
+		MsgIncr:       m.MsgIncr,
+		OperationID:   m.OperationID,
+		ErrCode:       errCode,
+		ErrMsg:        errMsg,
+	}
+	ws.sendMsg(conn, mReply)
 }

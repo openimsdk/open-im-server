@@ -31,11 +31,14 @@ import (
 type UserConn struct {
 	*websocket.Conn
 	w            *sync.Mutex
-	platformID   int32
+	PlatformID   int32
 	PushedMaxSeq uint32
 	IsCompress   bool
 	userID       string
+	IsBackground bool
+	token        string
 }
+
 type WServer struct {
 	wsAddr       string
 	wsMaxConnNum int
@@ -73,18 +76,13 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 		operationID = utils.OperationIDGenerator()
 	}
 	log.Debug(operationID, utils.GetSelfFuncName(), " args: ", query)
-	if ws.headerCheck(w, r, operationID) {
+	if isPass, compression := ws.headerCheck(w, r, operationID); isPass {
 		conn, err := ws.wsUpGrader.Upgrade(w, r, nil) //Conn is obtained through the upgraded escalator
 		if err != nil {
 			log.Error(operationID, "upgrade http conn err", err.Error(), query)
 			return
 		} else {
-			var isCompress = false
-			if r.Header.Get("compression") == "gzip" {
-				log.NewDebug(operationID, query["sendID"][0], "enable compression")
-				isCompress = true
-			}
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, isCompress, query["sendID"][0]}
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0]}
 			userCount++
 			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], operationID)
 			go ws.readMsg(newConn)
@@ -221,7 +219,7 @@ func (ws *WServer) MultiTerminalLoginCheckerWithLock(uid string, platformID int,
 					return
 				}
 				err = oldConn.Close()
-				delete(oldConnMap, platformID)
+				//delete(oldConnMap, platformID)
 				ws.wsUserToConn[uid] = oldConnMap
 				if len(oldConnMap) == 0 {
 					delete(ws.wsUserToConn, uid)
@@ -325,7 +323,7 @@ func (ws *WServer) addUserConn(uid string, platformID int, conn *UserConn, token
 	rwLock.Lock()
 	defer rwLock.Unlock()
 	log.Info(operationID, utils.GetSelfFuncName(), " args: ", uid, platformID, conn, token, "ip: ", conn.RemoteAddr().String())
-	callbackResp := callbackUserOnline(operationID, uid, platformID, token)
+	callbackResp := callbackUserOnline(operationID, uid, platformID, token, false)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOnline resp:", callbackResp)
 	}
@@ -363,7 +361,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	operationID := utils.OperationIDGenerator()
 	var uid string
 	var platform int
-	if oldStringMap, ok := ws.wsConnToUser[conn]; ok {
+	if oldStringMap, okg := ws.wsConnToUser[conn]; okg {
 		for k, v := range oldStringMap {
 			platform = k
 			uid = v
@@ -383,17 +381,17 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 			log.Debug(operationID, "WS delete operation", "", "wsUser deleted", ws.wsUserToConn, "disconnection_uid", uid, "disconnection_platform", platform, "online_user_num", len(ws.wsUserToConn))
 		}
 		delete(ws.wsConnToUser, conn)
-
 	}
 	err := conn.Close()
 	if err != nil {
 		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
-	callbackResp := callbackUserOffline(operationID, uid, platform)
+	callbackResp := callbackUserOffline(operationID, conn.userID, platform, false)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}
 	promePkg.PromeGaugeDec(promePkg.OnlineUserGauge)
+
 }
 
 func (ws *WServer) getUserConn(uid string, platform int) *UserConn {
@@ -432,7 +430,7 @@ func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
 //	}
 //	return "", 0
 //}
-func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) bool {
+func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) (isPass, compression bool) {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()
 	if len(query["token"]) != 0 && len(query["sendID"]) != 0 && len(query["platformID"]) != 0 {
@@ -484,10 +482,16 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 			w.Header().Set("Sec-Websocket-Version", "13")
 			w.Header().Set("ws_err_msg", err.Error())
 			http.Error(w, err.Error(), status)
-			return false
+			return false, false
 		} else {
-			log.Info(operationID, "Connection Authentication Success", "", "token ", query["token"][0], "userID ", query["sendID"][0], "platformID ", query["platformID"][0])
-			return true
+			if r.Header.Get("compression") == "gzip" {
+				compression = true
+			}
+			if len(query["compression"]) != 0 && query["compression"][0] == "gzip" {
+				compression = true
+			}
+			log.Info(operationID, "Connection Authentication Success", "", "token ", query["token"][0], "userID ", query["sendID"][0], "platformID ", query["platformID"][0], "compression", compression)
+			return true, compression
 		}
 	} else {
 		status = int(constant.ErrArgs.ErrCode)
@@ -496,6 +500,6 @@ func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operation
 		errMsg := "args err, need token, sendID, platformID"
 		w.Header().Set("ws_err_msg", errMsg)
 		http.Error(w, errMsg, status)
-		return false
+		return false, false
 	}
 }

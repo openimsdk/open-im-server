@@ -10,10 +10,11 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
-	"github.com/golang/protobuf/proto"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
@@ -94,8 +95,12 @@ func (rpc *rpcChat) Run() {
 		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
 	}
 	log.Info("", "listen network success, address ", address)
-
-	var grpcOpts []grpc.ServerOption
+	recvSize := 1024 * 1024 * 30
+	sendSize := 1024 * 1024 * 30
+	var grpcOpts = []grpc.ServerOption{
+		grpc.MaxRecvMsgSize(recvSize),
+		grpc.MaxSendMsgSize(sendSize),
+	}
 	if config.Config.Prometheus.Enable {
 		promePkg.NewGrpcRequestCounter()
 		promePkg.NewGrpcRequestFailedCounter()
