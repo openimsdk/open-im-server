@@ -919,6 +919,7 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 			c.GroupAtType = conversation.GroupAtType
 			c.IsNotInGroup = false
 			c.Ex = conversation.Ex
+			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 		}
 		reqPb.Conversation = &c
 		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
