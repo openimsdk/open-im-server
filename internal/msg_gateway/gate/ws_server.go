@@ -84,7 +84,8 @@ func (ws *WServer) wsHandler(w http.ResponseWriter, r *http.Request) {
 			log.Error(operationID, "upgrade http conn err", err.Error(), query)
 			return
 		} else {
-			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0], conn.RemoteAddr().String() + strconv.Itoa(int(utils.GetCurrentTimestampBySecond()))}
+			conn.add
+			newConn := &UserConn{conn, new(sync.Mutex), utils.StringToInt32(query["platformID"][0]), 0, compression, query["sendID"][0], false, query["token"][0], conn.LocalAddr().String() + conn.RemoteAddr().String() + strconv.Itoa(int(utils.GetCurrentTimestampBySecond()))}
 			userCount++
 			ws.addUserConn(query["sendID"][0], utils.StringToInt(query["platformID"][0]), newConn, query["token"][0], newConn.connID, operationID)
 			go ws.readMsg(newConn)
