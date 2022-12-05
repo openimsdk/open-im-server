@@ -891,21 +891,27 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 			log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), member)
 			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
+		var sessionType int
+		if groupInfo.GroupType == constant.NormalGroup {
+			sessionType = constant.GroupChatType
+		} else {
+			sessionType = constant.SuperGroupChatType
+		}
 		var reqPb pbUser.SetConversationReq
 		reqPb.OperationID = req.OperationID
 		var c pbConversation.Conversation
-		conversation, err := imdb.GetConversation(req.FromUserID, utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType))
+		conversation, err := imdb.GetConversation(req.FromUserID, utils.GetConversationIDBySessionType(req.GroupID, sessionType))
 		if err != nil {
 			c.OwnerUserID = req.FromUserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
-			c.ConversationType = constant.GroupChatType
+			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
+			c.ConversationType = int32(sessionType)
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = false
 		} else {
 			c.OwnerUserID = conversation.OwnerUserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
+			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
 			c.RecvMsgOpt = conversation.RecvMsgOpt
-			c.ConversationType = constant.GroupChatType
+			c.ConversationType = int32(sessionType)
 			c.GroupID = req.GroupID
 			c.IsPinned = conversation.IsPinned
 			c.AttachedInfo = conversation.AttachedInfo
