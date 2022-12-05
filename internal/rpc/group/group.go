@@ -468,7 +468,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	}
 	conversations, err := imdb.GetConversationsByConversationIDMultipleOwner(okUserIDList, utils.GetConversationIDBySessionType(req.GroupID, sessionType))
 	if err != nil {
-		log.NewError(req.OperationID, "GetConversationsByConversationIDMultipleOwner failed ", err.Error(), req.GroupID, constant.GroupChatType)
+		log.NewError(req.OperationID, "GetConversationsByConversationIDMultipleOwner failed ", err.Error(), req.GroupID, sessionType)
 	}
 	for _, v := range conversations {
 		haveConUserID = append(haveConUserID, v.OwnerUserID)
@@ -478,9 +478,9 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	for _, v := range conversations {
 		reqPb.OperationID = req.OperationID
 		c.OwnerUserID = v.OwnerUserID
-		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
+		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
 		c.RecvMsgOpt = v.RecvMsgOpt
-		c.ConversationType = constant.GroupChatType
+		c.ConversationType = int32(sessionType)
 		c.GroupID = req.GroupID
 		c.IsPinned = v.IsPinned
 		c.AttachedInfo = v.AttachedInfo
@@ -507,7 +507,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		reqPb.OperationID = req.OperationID
 		c.OwnerUserID = v
 		c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
-		c.ConversationType = constant.GroupChatType
+		c.ConversationType = int32(sessionType)
 		c.GroupID = req.GroupID
 		c.IsNotInGroup = false
 		c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
@@ -1023,12 +1023,19 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 				return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
 			//}
+
+			var sessionType int
+			if groupInfo.GroupType == constant.NormalGroup {
+				sessionType = constant.GroupChatType
+			} else {
+				sessionType = constant.SuperGroupChatType
+			}
 			var reqPb pbUser.SetConversationReq
 			var c pbConversation.Conversation
 			reqPb.OperationID = req.OperationID
 			c.OwnerUserID = req.OpUserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
-			c.ConversationType = constant.GroupChatType
+			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
+			c.ConversationType = int32(sessionType)
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = false
 			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
