@@ -31,7 +31,7 @@ import (
 type UserConn struct {
 	*websocket.Conn
 	w            *sync.Mutex
-	platformID   int32
+	PlatformID   int32
 	PushedMaxSeq uint32
 	IsCompress   bool
 	userID       string
@@ -386,7 +386,7 @@ func (ws *WServer) delUserConn(conn *UserConn) {
 	if err != nil {
 		log.Error(operationID, " close err", "", "uid", uid, "platform", platform)
 	}
-	callbackResp := callbackUserOffline(operationID, conn.userID, platform)
+	callbackResp := callbackUserOffline(operationID, conn.userID, platform, false)
 	if callbackResp.ErrCode != 0 {
 		log.NewError(operationID, utils.GetSelfFuncName(), "callbackUserOffline failed", callbackResp)
 	}

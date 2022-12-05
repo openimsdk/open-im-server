@@ -73,11 +73,13 @@ func (d *DataBases) GetExtendMsgSet(ID string, index int32, opts *GetExtendMsgSe
 	return &set, err
 }
 
-func (d *DataBases) InsertExtendMsg(ID string, index int32, msg *ExtendMsg) error {
+func (d *DataBases) InsertExtendMsg(ID string, index int32, msg *ExtendMsg) (msgIndex int32, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
-	_, err := c.UpdateOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{"$set": bson.M{"create_time": utils.GetCurrentTimestampBySecond(), "$inc": bson.M{"extend_msg_num": 1}, "$push": bson.M{"extend_msgs": msg}}})
-	return err
+	result := c.FindOneAndUpdate(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{"$set": bson.M{"create_time": utils.GetCurrentTimestampBySecond(), "$inc": bson.M{"extend_msg_num": 1}, "$push": bson.M{"extend_msgs": msg}}})
+	set := &ExtendMsgSet{}
+	err = result.Decode(set)
+	return set.ExtendMsgNum, err
 }
 
 func (d *DataBases) UpdateOneExtendMsgSet(ID string, index, MsgIndex int32, msg *ExtendMsg, msgSet *ExtendMsgSet) error {

@@ -166,5 +166,4 @@ service msg {
   rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
   rpc GetSuperGroupMsg(GetSuperGroupMsgReq) returns(GetSuperGroupMsgResp);
   rpc GetWriteDiffMsg(GetWriteDiffMsgReq) returns(GetWriteDiffMsgResp);
-
 }
