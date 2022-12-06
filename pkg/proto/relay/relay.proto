@@ -55,6 +55,7 @@ message GetUsersOnlineStatusResp{
   message SuccessDetail{
     string platform = 1;
     string status = 2;
+    string connID = 3;
   }
   message FailedDetail{
     string userID = 3;
