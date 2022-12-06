@@ -160,6 +160,7 @@ func (r *RPCServer) GetUsersOnlineStatus(_ context.Context, req *pbRelay.GetUser
 				ps.Platform = constant.PlatformIDToName(platform)
 				ps.Status = constant.OnlineStatus
 				ps.ConnID = userConn.connID
+				ps.IsBackground = userConn.IsBackground
 				temp.Status = constant.OnlineStatus
 				temp.DetailPlatformStatus = append(temp.DetailPlatformStatus, ps)
 			}
