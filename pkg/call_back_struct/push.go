@@ -21,7 +21,7 @@ type CallbackBeforePushResp struct {
 }
 
 type CallbackBeforeSuperGroupOnlinePushReq struct {
-	*commonPb.OfflinePushInfo
+	//*commonPb.OfflinePushInfo
 	UserStatusBaseCallback
 	ClientMsgID  string   `json:"clientMsgID"`
 	SendID       string   `json:"sendID"`

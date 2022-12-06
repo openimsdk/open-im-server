@@ -75,14 +75,14 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 			},
 			UserIDList: userIDList,
 		},
-		OfflinePushInfo: msg.OfflinePushInfo,
-		ClientMsgID:     msg.ClientMsgID,
-		SendID:          msg.SendID,
-		GroupID:         msg.GroupID,
-		ContentType:     msg.ContentType,
-		SessionType:     msg.SessionType,
-		AtUserIDList:    msg.AtUserIDList,
-		Content:         callback.GetContent(msg),
+		//OfflinePushInfo: msg.OfflinePushInfo,
+		ClientMsgID:  msg.ClientMsgID,
+		SendID:       msg.SendID,
+		GroupID:      msg.GroupID,
+		ContentType:  msg.ContentType,
+		SessionType:  msg.SessionType,
+		AtUserIDList: msg.AtUserIDList,
+		Content:      callback.GetContent(msg),
 	}
 	resp := &cbApi.CallbackBeforePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackOnlinePushCommand, req, resp, config.Config.Callback.CallbackOnlinePush.CallbackTimeOut); err != nil {
@@ -97,9 +97,9 @@ func callbackOnlinePush(operationID string, userIDList []string, msg *commonPb.M
 		}
 	}
 	if resp.ErrCode == constant.CallbackHandleSuccess && resp.ActionCode == constant.ActionAllow {
-		if resp.OfflinePushInfo != nil {
-			msg.OfflinePushInfo = resp.OfflinePushInfo
-		}
+		//if resp.OfflinePushInfo != nil {
+		//	msg.OfflinePushInfo = resp.OfflinePushInfo
+		//}
 	}
 	return callbackResp
 }
@@ -117,15 +117,15 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 			PlatformID:      msg.SenderPlatformID,
 			Platform:        constant.PlatformIDToName(int(msg.SenderPlatformID)),
 		},
-		OfflinePushInfo: msg.OfflinePushInfo,
-		ClientMsgID:     msg.ClientMsgID,
-		SendID:          msg.SendID,
-		GroupID:         groupID,
-		ContentType:     msg.ContentType,
-		SessionType:     msg.SessionType,
-		AtUserIDList:    msg.AtUserIDList,
-		Content:         callback.GetContent(msg),
-		Seq:             msg.Seq,
+		//OfflinePushInfo: msg.OfflinePushInfo,
+		ClientMsgID:  msg.ClientMsgID,
+		SendID:       msg.SendID,
+		GroupID:      groupID,
+		ContentType:  msg.ContentType,
+		SessionType:  msg.SessionType,
+		AtUserIDList: msg.AtUserIDList,
+		Content:      callback.GetContent(msg),
+		Seq:          msg.Seq,
 	}
 	resp := &cbApi.CallbackBeforeSuperGroupOnlinePushResp{CommonCallbackResp: &callbackResp}
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackSuperGroupOnlinePushCommand, req, resp, config.Config.Callback.CallbackBeforeSuperGroupOnlinePush.CallbackTimeOut); err != nil {
@@ -143,9 +143,9 @@ func callbackBeforeSuperGroupOnlinePush(operationID string, groupID string, msg 
 		if len(resp.UserIDList) != 0 {
 			*pushToUserList = resp.UserIDList
 		}
-		if resp.OfflinePushInfo != nil {
-			msg.OfflinePushInfo = resp.OfflinePushInfo
-		}
+		//if resp.OfflinePushInfo != nil {
+		//	msg.OfflinePushInfo = resp.OfflinePushInfo
+		//}
 	}
 	log.NewDebug(operationID, utils.GetSelfFuncName(), pushToUserList, resp.UserIDList)
 	return callbackResp
