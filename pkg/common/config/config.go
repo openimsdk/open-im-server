@@ -456,6 +456,12 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"blackDeleted"`
+		FriendInfoUpdated struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"friendInfoUpdated"`
+
 		ConversationOptUpdate struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`

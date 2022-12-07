@@ -665,6 +665,19 @@ notification:
     defaultTips:
       tips: "Remove a blocked user"
 
+  friendInfoUpdated:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "friend info updated"
+      desc: "friend info updated"
+      ext: "friend info updated"
+    defaultTips:
+      tips: "friend info updated"
+
+
   #####################user#########################
   userInfoUpdated:
     conversation:
