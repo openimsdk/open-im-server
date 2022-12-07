@@ -10,15 +10,6 @@ import (
 )
 
 func SuperGroupNotification(operationID, sendID, recvID string) {
-
-	//var tips sdk.TipsComm
-	//var err error
-	//marshaler := jsonpb.Marshaler{
-	//	OrigName:     true,
-	//	EnumsAsInts:  false,
-	//	EmitDefaults: false,
-	//}
-	//tips.JsonDetail, _ = marshaler.MarshalToString(m)
 	n := &NotificationMsg{
 		SendID:      sendID,
 		RecvID:      recvID,
@@ -27,11 +18,6 @@ func SuperGroupNotification(operationID, sendID, recvID string) {
 		SessionType: constant.SingleChatType,
 		OperationID: operationID,
 	}
-	//n.Content, err = proto.Marshal(&tips)
-	//if err != nil {
-	//	log.NewError(operationID, utils.GetSelfFuncName(), "proto.Marshal failed")
-	//	return
-	//}
 	log.NewInfo(operationID, utils.GetSelfFuncName(), string(n.Content))
 	Notification(n)
 }
