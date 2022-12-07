@@ -705,3 +705,27 @@ message SetAppBackgroundStatusResp {
   int32 errCode = 1;
   string errMsg = 2;
 }
+
+message ExtendMsgSet {
+  string ID = 1;
+  repeated ExtendMsg extendMsgs = 2;
+  int32 latestUpdateTime = 3;
+  string attachedInfo = 4;
+  string ex = 5;
+  int32 extendMsgNum = 6;
+  int32 createTime = 7;
+}
+
+message ExtendMsg {
+  repeated ReactionExtendMsgSet content = 1;
+  string clientMsgID = 2;
+  int32 createTime = 3;
+  int32 latestUpdateTime = 4;
+}
+
+message ReactionExtendMsgSet {
+  string userKey = 1;
+  string value = 2;
+  int32 latestUpdateTime = 3;
+}
+

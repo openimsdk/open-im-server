@@ -569,7 +569,7 @@ func DelConversationFromCache(ownerUserID, conversationID string) error {
 
 func GetExtendMsgSetFromCache(ID string, index int32) (*db.ExtendMsgSet, error) {
 	getExtendMsgSet := func() (string, error) {
-		extendMsgSet, err := db.DB.GetExtendMsgSet(ID, index, &db.GetExtendMsgSetOpts{IncludeExtendMsgs: false})
+		extendMsgSet, err := db.DB.GetExtendMsgSet(ID, index, &db.GetExtendMsgSetOpts{ExcludeExtendMsgs: false})
 		if err != nil {
 			return "", utils.Wrap(err, "GetExtendMsgSet failed")
 		}

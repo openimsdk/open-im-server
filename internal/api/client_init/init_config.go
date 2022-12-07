@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 )
 
 func SetClientInitConfig(c *gin.Context) {
@@ -62,11 +61,10 @@ func GetClientInitConfig(c *gin.Context) {
 	}
 	config, err := imdb.GetClientInitConfig()
 	if err != nil {
-		if !gorm.IsRecordNotFoundError(err) {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
-			return
-		}
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		return
+
 	}
 	resp.Data.DiscoverPageURL = config.DiscoverPageURL
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp ", resp)
