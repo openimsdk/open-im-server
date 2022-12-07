@@ -1000,6 +1000,13 @@ func Notification(n *NotificationMsg) {
 		ex = config.Config.Notification.ConversationSetPrivate.OfflinePush.Ext
 		reliabilityLevel = config.Config.Notification.ConversationSetPrivate.Conversation.ReliabilityLevel
 		unReadCount = config.Config.Notification.ConversationSetPrivate.Conversation.UnreadCount
+	case constant.FriendInfoUpdatedNotification:
+		pushSwitch = config.Config.Notification.FriendInfoUpdated.OfflinePush.PushSwitch
+		title = config.Config.Notification.FriendInfoUpdated.OfflinePush.Title
+		desc = config.Config.Notification.FriendInfoUpdated.OfflinePush.Desc
+		ex = config.Config.Notification.FriendInfoUpdated.OfflinePush.Ext
+		reliabilityLevel = config.Config.Notification.FriendInfoUpdated.Conversation.ReliabilityLevel
+		unReadCount = config.Config.Notification.FriendInfoUpdated.Conversation.UnreadCount
 	case constant.DeleteMessageNotification:
 		reliabilityLevel = constant.ReliableNotificationNoMsg
 	case constant.ConversationUnreadNotification, constant.SuperGroupUpdateNotification:
