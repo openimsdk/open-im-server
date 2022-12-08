@@ -16,26 +16,26 @@ import (
 const cExtendMsgSet = "extend_msgs"
 
 type ExtendMsgSet struct {
-	ID               string               `bson:"id" json:"ID"`
+	SourceID         string               `bson:"id" json:"ID"`
+	SessionType      string               `bson:"session_type" json:"sessionType"`
 	ExtendMsgs       map[string]ExtendMsg `bson:"extend_msgs" json:"extendMsgs"`
-	LatestUpdateTime int32                `bson:"latest_update_time" json:"latestUpdateTime"`
-	AttachedInfo     *string              `bson:"attached_info" json:"attachedInfo"`
-	Ex               *string              `bson:"ex" json:"ex"`
 	ExtendMsgNum     int32                `bson:"extend_msg_num" json:"extendMsgNum"`
-	CreateTime       int32                `bson:"create_time" json:"createTime"`
+	CreateTime       int64                `bson:"create_time" json:"createTime"` // this block's create time
+	MaxMsgUpdateTime int64                `bson:"max_msg_update_time"`           // index find msg
 }
 
-type ReactionExtendMsgSet struct {
-	UserKey          string `bson:"user_key" json:"userKey"`
+type KeyValue struct {
+	TypeKey          string `bson:"type_key" json:"typeKey"`
 	Value            string `bson:"value" json:"value"`
-	LatestUpdateTime int32  `bson:"latest_update_time" json:"latestUpdateTime"`
+	LatestUpdateTime int64  `bson:"latest_update_time" json:"latestUpdateTime"`
 }
 
 type ExtendMsg struct {
-	Content          map[string]ReactionExtendMsgSet `bson:"content" json:"content"`
-	ClientMsgID      string                          `bson:"client_msg_id" json:"clientMsgID"`
-	CreateTime       int32                           `bson:"create_time" json:"createTime"`
-	LatestUpdateTime int32                           `bson:"latest_update_time" json:"latestUpdateTime"`
+	ReactionExtensionList map[string]KeyValue `bson:"content" json:"content"`
+	ClientMsgID           string              `bson:"client_msg_id" json:"clientMsgID"`
+	MsgFirstModifyTime    int64               `bson:"create_time" json:"createTime"` // this extendMsg create time
+	AttachedInfo          *string             `bson:"attached_info" json:"attachedInfo"`
+	Ex                    *string             `bson:"ex" json:"ex"`
 }
 
 func GetExtendMsgSetID(ID string, index int32) string {
@@ -106,10 +106,10 @@ func (d *DataBases) InsertExtendMsgAndGetIndex(ID string, index int32, msg *Exte
 func (d *DataBases) InsertOrUpdateReactionExtendMsgSet(ID string, index int32, clientMsgID, userID, value string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
-	reactionExtendMsgSet := ReactionExtendMsgSet{
-		UserKey:          userID,
+	reactionExtendMsgSet := KeyValue{
+		TypeKey:          userID,
 		Value:            value,
-		LatestUpdateTime: int32(utils.GetCurrentTimestampBySecond()),
+		LatestUpdateTime: utils.GetCurrentTimestampBySecond(),
 	}
 	upsert := true
 	opt := &options.UpdateOptions{
@@ -122,7 +122,7 @@ func (d *DataBases) InsertOrUpdateReactionExtendMsgSet(ID string, index int32, c
 func (d *DataBases) DeleteReactionExtendMsgSet(ID string, index int32, clientMsgID, userID string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
-	_, err := c.UpdateOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{"$unset": bson.M{}})
+	_, err := c.UpdateOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{"$unset": bson.M{fmt.Sprintf("extend_msgs.%s.%s", clientMsgID, userID): ""}})
 	return err
 }
 

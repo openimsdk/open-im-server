@@ -707,25 +707,25 @@ message SetAppBackgroundStatusResp {
 }
 
 message ExtendMsgSet {
-  string ID = 1;
-  repeated ExtendMsg extendMsgs = 2;
-  int32 latestUpdateTime = 3;
-  string attachedInfo = 4;
-  string ex = 5;
-  int32 extendMsgNum = 6;
-  int32 createTime = 7;
+  string sourceID = 1;
+  int32 sessionType = 2;
+  map <string, ExtendMsg>extendMsgs = 3;
+  int64 MaxMsgUpdateTime = 4;
+  int32 extendMsgNum = 5;
+  int64 createTime = 6;
 }
 
 message ExtendMsg {
-  repeated ReactionExtendMsgSet content = 1;
+  map <string, KeyValue>reactionExtensionList = 1;
   string clientMsgID = 2;
-  int32 createTime = 3;
-  int32 latestUpdateTime = 4;
+  int64 msgFirstModifyTime = 3;
+  string attachedInfo = 4;
+  string ex = 5;
 }
 
-message ReactionExtendMsgSet {
-  string userKey = 1;
+message KeyValue {
+  string typeKey = 1;
   string value = 2;
-  int32 latestUpdateTime = 3;
+  int64 latestUpdateTime = 3;
 }
 

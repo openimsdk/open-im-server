@@ -154,25 +154,45 @@ message GetWriteDiffMsgResp{
   server_api_params.MsgData msgData = 3;
 }
 
-message ModifyMsgReq {
+message ModifyMessageReactionExtensionsReq {
   string operationID = 1;
-  string ID = 2;
-  int32 Index = 3;
-  int32 msgIndex = 4;
-  string opUserID = 5;
-  string userID = 6;
-  bool isFirstModify = 7;
-  string clientMsgID = 8;
-  google.protobuf.StringValue value = 9;
-  google.protobuf.StringValue ex = 10;
-  google.protobuf.StringValue attachedInfo = 11;
+  string sourceID = 2;
+  string opUserID = 3;
+  int32 sessionType = 4;
+  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
+  string clientMsgID = 6;
+  google.protobuf.StringValue ex = 7;
+  google.protobuf.StringValue attachedInfo = 8;
+  bool isReact = 9;
+  bool isExternalExtensions = 10;
+  int64 msgFirstModifyTime = 11;
 }
 
-message ModifyMsgResp {
+message ModifyMessageReactionExtensionsResp {
   int32 errCode = 1;
   string errMsg = 2;
-  int32 Index = 4;
-  int32 msgIndex = 3;
+  repeated server_api_params.ExtendMsg successList = 3;
+  repeated server_api_params.ExtendMsg failedList = 4;
+}
+
+message OperateMessageListReactionExtensionsReq {
+  string operationID = 1;
+  string opUserID = 2;
+  string sourceID = 3;
+  string sessionType = 4;
+  message MessageReactionKey {
+    string clientMsgID = 1;
+    int64 msgFirstModifyTime = 2;
+    repeated server_api_params.KeyValue reactionExtensionList = 3;
+  }
+  repeated MessageReactionKey messageReactionKeyList = 5;
+}
+
+message OperateMessageListReactionExtensionsResp {
+  int32 errCode = 1;
+  string errMsg = 2;
+  repeated server_api_params.ExtendMsg successList = 3;
+  repeated server_api_params.ExtendMsg failedList = 4;
 }
 
 service msg {
@@ -189,5 +209,8 @@ service msg {
   rpc GetWriteDiffMsg(GetWriteDiffMsgReq) returns(GetWriteDiffMsgResp);
 
   // modify msg
-  rpc ModifyMsg(ModifyMsgReq) returns(ModifyMsgResp);
+  rpc SetMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);
+  rpc GetMessageListReactionExtensions(OperateMessageListReactionExtensionsReq) returns(OperateMessageListReactionExtensionsResp);
+  rpc AddMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);
+  rpc DeleteMessageReactionExtensions(OperateMessageListReactionExtensionsReq) returns(OperateMessageListReactionExtensionsResp);
 }
