@@ -223,7 +223,7 @@ func callbackMsgModify(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
 }
 
 func CallbackBeforeExtendMsgModify() cbApi.CommonCallbackResp {
-	callbackResp := cbApi.CommonCallbackResp{OperationID: msg.OperationID}
+	callbackResp := cbApi.CommonCallbackResp{OperationID: ""}
 
 	return callbackResp
 }
