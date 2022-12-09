@@ -171,8 +171,8 @@ message ModifyMessageReactionExtensionsReq {
 message ModifyMessageReactionExtensionsResp {
   int32 errCode = 1;
   string errMsg = 2;
-  repeated server_api_params.ExtendMsg successList = 3;
-  repeated server_api_params.ExtendMsg failedList = 4;
+  repeated ExtendMsgResp successList = 3;
+  repeated ExtendMsgResp failedList = 4;
 }
 
 message OperateMessageListReactionExtensionsReq {
