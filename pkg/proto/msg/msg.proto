@@ -179,7 +179,7 @@ message OperateMessageListReactionExtensionsReq {
   string operationID = 1;
   string opUserID = 2;
   string sourceID = 3;
-  string sessionType = 4;
+  int32 sessionType = 4;
   message MessageReactionKey {
     string clientMsgID = 1;
     int64 msgFirstModifyTime = 2;
@@ -191,8 +191,14 @@ message OperateMessageListReactionExtensionsReq {
 message OperateMessageListReactionExtensionsResp {
   int32 errCode = 1;
   string errMsg = 2;
-  repeated server_api_params.ExtendMsg successList = 3;
-  repeated server_api_params.ExtendMsg failedList = 4;
+  repeated ExtendMsgResp successList = 3;
+  repeated ExtendMsgResp failedList = 4;
+}
+
+message ExtendMsgResp {
+  server_api_params.ExtendMsg extendMsg = 1;
+  int32 errCode = 2;
+  string errMsg = 3;
 }
 
 service msg {
