@@ -99,10 +99,11 @@ const (
 	SignalingNotification      = 1601
 	SignalingNotificationEnd   = 1649
 
-	SuperGroupNotificationBegin  = 1650
-	SuperGroupUpdateNotification = 1651
-	MsgDeleteNotification        = 1652
-	SuperGroupNotificationEnd    = 1699
+	SuperGroupNotificationBegin         = 1650
+	SuperGroupUpdateNotification        = 1651
+	MsgDeleteNotification               = 1652
+	ReactionMessageModifierNotification = 1653
+	SuperGroupNotificationEnd           = 1699
 
 	ConversationPrivateChatNotification = 1701
 	ConversationUnreadNotification      = 1702
