@@ -345,10 +345,11 @@ callback:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续
-  callbackBeforeExtendMsgModify:
+  callbackSetMessageReactionExtensions:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续
+
 
 notification:
   groupCreated:
