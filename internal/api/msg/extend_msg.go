@@ -57,8 +57,8 @@ func SetMessageReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
-	resp.FailedList = respPb.FailedList
-	resp.SuccessList = respPb.SuccessList
+	resp.Data.FailedList = respPb.FailedList
+	resp.Data.SuccessList = respPb.SuccessList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 
@@ -105,8 +105,8 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
-	resp.FailedList = respPb.FailedList
-	resp.SuccessList = respPb.SuccessList
+	resp.Data.FailedList = respPb.FailedList
+	resp.Data.SuccessList = respPb.SuccessList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -152,8 +152,8 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
-	resp.FailedList = respPb.FailedList
-	resp.SuccessList = respPb.SuccessList
+	resp.Data.FailedList = respPb.FailedList
+	resp.Data.SuccessList = respPb.SuccessList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -199,8 +199,8 @@ func DeleteMessageReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
-	resp.FailedList = respPb.FailedList
-	resp.SuccessList = respPb.SuccessList
+	resp.Data.FailedList = respPb.FailedList
+	resp.Data.SuccessList = respPb.SuccessList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }
