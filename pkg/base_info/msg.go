@@ -69,8 +69,8 @@ type ModifyMessageReactionExtensionsReq struct {
 type ModifyMessageReactionExtensionsResp struct {
 	CommResp
 	Data struct {
-		SuccessList []*sdk_ws.ExtendMsg `json:"successList"`
-		FailedList  []*sdk_ws.ExtendMsg `json:"failedList"`
+		SuccessList []*msg.ExtendMsgResp `json:"successList"`
+		FailedList  []*msg.ExtendMsgResp `json:"failedList"`
 	} `json:"data"`
 }
 
@@ -84,8 +84,8 @@ type OperateMessageListReactionExtensionsReq struct {
 type OperateMessageListReactionExtensionsResp struct {
 	CommResp
 	Data struct {
-		SuccessList []*sdk_ws.ExtendMsg `json:"successList"`
-		FailedList  []*sdk_ws.ExtendMsg `json:"failedList"`
+		SuccessList []*msg.ExtendMsgResp `json:"successList"`
+		FailedList  []*msg.ExtendMsgResp `json:"failedList"`
 	} `json:"data"`
 }
 
