@@ -100,12 +100,10 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(cMsg *sarama.Con
 			}
 		} else if v.MsgData.ContentType == 2301 {
 			var req pbMsg.OperateMessageListReactionExtensionsReq
-			var clientMsgIDList []string
 			for _, v := range req.MessageReactionKeyList {
-				clientMsgIDList = append(clientMsgIDList, v.ClientMsgID)
-			}
-			if err := db.DB.DeleteReactionExtendMsgSet(req.SourceID, req.SessionType, clientMsgIDList, req.OpUserID); err != nil {
-				log.NewError(req.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
+				if err := db.DB.DeleteReactionExtendMsgSet(req.SourceID, req.SessionType, v.ClientMsgID, v.MsgFirstModifyTime, v.ReactionExtensionList); err != nil {
+					log.NewError(req.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
+				}
 			}
 		}
 	}
