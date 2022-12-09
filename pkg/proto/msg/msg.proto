@@ -196,7 +196,21 @@ message OperateMessageListReactionExtensionsResp {
 }
 
 message ExtendMsgResp {
-  server_api_params.ExtendMsg extendMsg = 1;
+  ExtendMsg extendMsg = 1;
+  int32 errCode = 2;
+  string errMsg = 3;
+}
+
+message ExtendMsg {
+  map <string, KeyValueResp>reactionExtensionList = 1;
+  string clientMsgID = 2;
+  int64 msgFirstModifyTime = 3;
+  string attachedInfo = 4;
+  string ex = 5;
+}
+
+message KeyValueResp {
+  server_api_params.KeyValue keyValue = 1;
   int32 errCode = 2;
   string errMsg = 3;
 }

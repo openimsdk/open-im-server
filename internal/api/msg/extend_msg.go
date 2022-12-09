@@ -52,7 +52,7 @@ func SetMessageReactionExtensions(c *gin.Context) {
 	respPb, err := msgClient.SetMessageReactionExtensions(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelMsgList failed", err.Error(), reqPb)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.ErrServer.ErrCode, "errMsg": constant.ErrServer.ErrMsg + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrServer.ErrCode, "errMsg": constant.ErrServer.ErrMsg + err.Error()})
 		return
 	}
 	resp.ErrCode = respPb.ErrCode
@@ -100,7 +100,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 	respPb, err := msgClient.GetMessageListReactionExtensions(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelMsgList failed", err.Error(), reqPb)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.ErrServer.ErrCode, "errMsg": constant.ErrServer.ErrMsg + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrServer.ErrCode, "errMsg": constant.ErrServer.ErrMsg + err.Error()})
 		return
 	}
 	resp.ErrCode = respPb.ErrCode
@@ -147,7 +147,7 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	respPb, err := msgClient.AddMessageReactionExtensions(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelMsgList failed", err.Error(), reqPb)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.ErrServer.ErrCode, "errMsg": constant.ErrServer.ErrMsg + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrServer.ErrCode, "errMsg": constant.ErrServer.ErrMsg + err.Error()})
 		return
 	}
 	resp.ErrCode = respPb.ErrCode
@@ -194,7 +194,7 @@ func DeleteMessageReactionExtensions(c *gin.Context) {
 	respPb, err := msgClient.DeleteMessageReactionExtensions(context.Background(), &reqPb)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "DelMsgList failed", err.Error(), reqPb)
-		c.JSON(http.StatusOK, gin.H{"errCode": constant.ErrServer.ErrCode, "errMsg": constant.ErrServer.ErrMsg + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"errCode": constant.ErrServer.ErrCode, "errMsg": constant.ErrServer.ErrMsg + err.Error()})
 		return
 	}
 	resp.ErrCode = respPb.ErrCode
