@@ -9,5 +9,5 @@ import (
 func ExtendMessageUpdatedNotification(operationID, changedUserID string, needNotifiedUserID string, opUserID string) {
 	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: changedUserID}
 	commID := pbFriend.CommID{FromUserID: opUserID, ToUserID: needNotifiedUserID, OpUserID: opUserID, OperationID: operationID}
-	friendNotification(&commID, constant.FriendInfoUpdatedNotification, &selfInfoUpdatedTips)
+	friendNotification(&commID, constant.ReactionMessageModifierNotification, &selfInfoUpdatedTips)
 }

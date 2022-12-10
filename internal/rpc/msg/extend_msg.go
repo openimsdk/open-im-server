@@ -2,6 +2,7 @@ package msg
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -40,6 +41,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.M
 
 	if !isExists {
 		if !req.IsReact {
+			log.Debug(req.OperationID, "redis handle firstly", req.String())
 			oneExtendMsg.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
 			//redis处理
 			for k, v := range req.ReactionExtensionList {
@@ -76,6 +78,8 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.M
 		}
 
 	} else {
+		log.Debug(req.OperationID, "redis handle secondly", req.String())
+
 		for k, v := range req.ReactionExtensionList {
 			//抢占分布式锁
 			err := lockMessageTypeKey(req.ClientMsgID, k)
