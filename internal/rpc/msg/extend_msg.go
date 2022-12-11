@@ -109,12 +109,19 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.M
 
 		}
 	}
+
 	oneExtendMsg.ReactionExtensionList = oneSuccessReactionExtensionList
 	extendMsgResp.ExtendMsg = &oneExtendMsg
 	failedExtendMsg.ReactionExtensionList = oneFailedReactionExtensionList
 	failedExtendMsgResp.ExtendMsg = &failedExtendMsg
 	rResp.FailedList = append(rResp.FailedList, &failedExtendMsgResp)
 	rResp.SuccessList = append(rResp.FailedList, &extendMsgResp)
+	if !isExists && !req.IsReact {
+		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, true)
+	} else {
+		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false)
+
+	}
 	return &rResp, nil
 
 }

@@ -48,6 +48,8 @@ const (
 	AdvancedRevoke               = 118 //影响前者消息
 	CustomNotTriggerConversation = 119
 	CustomOnlineOnly             = 120
+	ReactionMessageModifier      = 121
+	ReactionMessageDeleter       = 122
 
 	Common             = 200
 	GroupMsg           = 201
@@ -99,11 +101,10 @@ const (
 	SignalingNotification      = 1601
 	SignalingNotificationEnd   = 1649
 
-	SuperGroupNotificationBegin         = 1650
-	SuperGroupUpdateNotification        = 1651
-	MsgDeleteNotification               = 1652
-	ReactionMessageModifierNotification = 1653
-	SuperGroupNotificationEnd           = 1699
+	SuperGroupNotificationBegin  = 1650
+	SuperGroupUpdateNotification = 1651
+	MsgDeleteNotification        = 1652
+	SuperGroupNotificationEnd    = 1699
 
 	ConversationPrivateChatNotification = 1701
 	ConversationUnreadNotification      = 1702

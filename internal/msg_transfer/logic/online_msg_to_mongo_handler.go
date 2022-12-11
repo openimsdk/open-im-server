@@ -61,7 +61,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(cMsg *sarama.Con
 			if unexistSeqList, err := db.DB.DelMsgBySeqList(DeleteMessageTips.UserID, DeleteMessageTips.SeqList, v.OperationID); err != nil {
 				log.NewError(v.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList args: ", DeleteMessageTips.UserID, DeleteMessageTips.SeqList, v.OperationID, err.Error(), unexistSeqList)
 			}
-		} else if v.MsgData.ContentType == constant.ReactionMessageModifierNotification {
+		} else if v.MsgData.ContentType == constant.ReactionMessageModifier {
 			var req pbMsg.ModifyMessageReactionExtensionsReq
 			if req.IsExternalExtensions {
 				log.NewInfo(req.OperationID, "msg:", req.String(), "this is external extensions")
@@ -98,7 +98,7 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(cMsg *sarama.Con
 					log.NewError(req.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
 				}
 			}
-		} else if v.MsgData.ContentType == 2301 {
+		} else if v.MsgData.ContentType == constant.ReactionMessageDeleter {
 			var req pbMsg.OperateMessageListReactionExtensionsReq
 			for _, v := range req.MessageReactionKeyList {
 				if err := db.DB.DeleteReactionExtendMsgSet(req.SourceID, req.SessionType, v.ClientMsgID, v.MsgFirstModifyTime, v.ReactionExtensionList); err != nil {
