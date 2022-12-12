@@ -32,6 +32,24 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 	m.MsgFirstModifyTime = resp.MsgFirstModifyTime
 	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory)
 }
+func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string, sessionType int32,
+	req *msg.DeleteMessageListReactionExtensionsReq, resp *msg.DeleteMessageListReactionExtensionsResp, isHistory bool) {
+	var m base_info.ReactionMessageDeleteNotification
+	m.SourceID = req.SourceID
+	m.OpUserID = req.OpUserID
+	m.SessionType = req.SessionType
+	keyMap := make(map[string]*open_im_sdk.KeyValue)
+	for _, valueResp := range resp.Result {
+		if valueResp.ErrCode == 0 {
+			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
+		}
+	}
+	m.SuccessReactionExtensionList = keyMap
+	m.ClientMsgID = req.ClientMsgID
+	m.MsgFirstModifyTime = req.MsgFirstModifyTime
+
+	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(m), isHistory)
+}
 func messageReactionSender(operationID, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool) {
 	options := make(map[string]bool, 5)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)

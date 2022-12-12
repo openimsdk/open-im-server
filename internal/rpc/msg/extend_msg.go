@@ -34,9 +34,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		if !req.IsReact {
 			log.Debug(req.OperationID, "redis handle firstly", req.String())
 			rResp.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
-			//redis处理
 			for k, v := range req.ReactionExtensionList {
-				//抢占分布式锁
 				err := lockMessageTypeKey(req.ClientMsgID, k)
 				if err != nil {
 					setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
@@ -63,7 +61,6 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		log.Debug(req.OperationID, "redis handle secondly", req.String())
 
 		for k, v := range req.ReactionExtensionList {
-			//抢占分布式锁
 			err := lockMessageTypeKey(req.ClientMsgID, k)
 			if err != nil {
 				setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
@@ -108,8 +105,17 @@ func setKeyResultInfo(r *msg.SetMessageReactionExtensionsResp, errCode int32, er
 	r.Result = append(r.Result, temp)
 	_ = db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
 }
+func setDeleteKeyResultInfo(r *msg.DeleteMessageListReactionExtensionsResp, errCode int32, errMsg, clientMsgID, typeKey string, keyValue *server_api_params.KeyValue) {
+	temp := new(msg.KeyValueResp)
+	temp.KeyValue = keyValue
+	temp.ErrCode = errCode
+	temp.ErrMsg = errMsg
+	r.Result = append(r.Result, temp)
+	_ = db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
+}
 
 func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
 	var rResp msg.GetMessageListReactionExtensionsResp
 	for _, messageValue := range req.MessageReactionKeyList {
 		var oneMessage msg.SingleMessageExtensionResult
@@ -143,6 +149,7 @@ func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *m
 		}
 		rResp.SingleMessageResult = append(rResp.SingleMessageResult, &oneMessage)
 	}
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
 	return &rResp, nil
 
 }
@@ -152,7 +159,56 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.M
 }
 
 func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
-	return
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
+	var rResp msg.DeleteMessageListReactionExtensionsResp
+	isExists, err := db.DB.JudgeMessageReactionEXISTS(req.ClientMsgID, req.SessionType)
+	if err != nil {
+		rResp.ErrCode = 100
+		rResp.ErrMsg = err.Error()
+		for _, value := range req.ReactionExtensionList {
+			temp := new(msg.KeyValueResp)
+			temp.KeyValue = value
+			temp.ErrMsg = err.Error()
+			temp.ErrCode = 100
+			rResp.Result = append(rResp.Result, temp)
+		}
+		return &rResp, nil
+	}
+
+	if isExists {
+		log.Debug(req.OperationID, "redis handle this delete", req.String())
+		for _, v := range req.ReactionExtensionList {
+			err := lockMessageTypeKey(req.ClientMsgID, v.TypeKey)
+			if err != nil {
+				setDeleteKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, v.TypeKey, v)
+				continue
+			}
+
+			redisValue, err := db.DB.GetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, v.TypeKey)
+			if err != nil && err != go_redis.Nil {
+				setDeleteKeyResultInfo(&rResp, 200, err.Error(), req.ClientMsgID, v.TypeKey, v)
+				continue
+			}
+			temp := new(server_api_params.KeyValue)
+			utils.JsonStringToStruct(redisValue, temp)
+			if v.LatestUpdateTime != temp.LatestUpdateTime {
+				setDeleteKeyResultInfo(&rResp, 300, "message have update", req.ClientMsgID, v.TypeKey, temp)
+				continue
+			} else {
+				newErr := db.DB.DeleteOneMessageKey(req.ClientMsgID, req.SessionType, v.TypeKey)
+				if newErr != nil {
+					setDeleteKeyResultInfo(&rResp, 201, newErr.Error(), req.ClientMsgID, v.TypeKey, temp)
+					continue
+				}
+				setDeleteKeyResultInfo(&rResp, 0, "", req.ClientMsgID, v.TypeKey, v)
+			}
+		}
+	} else {
+
+	}
+	ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false)
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
+	return &rResp, nil
 }
 func lockMessageTypeKey(clientMsgID, typeKey string) (err error) {
 	for i := 0; i < 3; i++ {

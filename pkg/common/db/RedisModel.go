@@ -453,6 +453,11 @@ func (d *DataBases) GetOneMessageAllReactionList(clientMsgID string, sessionType
 	return d.RDB.HGetAll(context.Background(), key).Result()
 
 }
+func (d *DataBases) DeleteOneMessageKey(clientMsgID string, sessionType int32, subKey string) error {
+	key := getMessageReactionExPrefix(clientMsgID, sessionType)
+	return d.RDB.HDel(context.Background(), key, subKey).Err()
+
+}
 func (d *DataBases) SetMessageReactionExpire(clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
 	key := getMessageReactionExPrefix(clientMsgID, sessionType)
 	return d.RDB.Expire(context.Background(), key, expiration).Result()
