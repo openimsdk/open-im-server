@@ -69,7 +69,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 	var (
 		req   api.GetMessageListReactionExtensionsReq
 		resp  api.GetMessageListReactionExtensionsResp
-		reqPb rpc.OperateMessageListReactionExtensionsReq
+		reqPb rpc.GetMessageListReactionExtensionsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -106,8 +106,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
-	resp.Data.FailedList = respPb.FailedList
-	resp.Data.SuccessList = respPb.SuccessList
+	resp.Data = respPb.SingleMessageResult
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }
@@ -161,7 +160,7 @@ func DeleteMessageReactionExtensions(c *gin.Context) {
 	var (
 		req   api.DeleteMessageReactionExtensionsReq
 		resp  api.DeleteMessageReactionExtensionsResp
-		reqPb rpc.OperateMessageListReactionExtensionsReq
+		reqPb rpc.DeleteMessageListReactionExtensionsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})

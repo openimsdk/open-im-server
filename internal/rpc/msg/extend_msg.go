@@ -95,7 +95,6 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, true)
 	} else {
 		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false)
-
 	}
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
 	return &rResp, nil
@@ -110,61 +109,41 @@ func setKeyResultInfo(r *msg.SetMessageReactionExtensionsResp, errCode int32, er
 	_ = db.DB.UnLockMessageTypeKey(clientMsgID, typeKey)
 }
 
-func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *msg.OperateMessageListReactionExtensionsReq) (resp *msg.OperateMessageListReactionExtensionsResp, err error) {
-	//for _, messageValue := range req.MessageReactionKeyList {
-	//	isExists, err := db.DB.JudgeMessageReactionEXISTS(messageValue.ClientMsgID,req.SessionType)
-	//	if err != nil {
-	//
-	//	}
-	//	var failedList []*msg.ExtendMsgResp
-	//	var successList []*msg.ExtendMsgResp
-	//	var oneExtendMsg   msg.ExtendMsg
-	//	oneExtendMsg.ClientMsgID = req.ClientMsgID
-	//	oneFailedReactionExtensionList:=make(map[string]*msg.KeyValueResp)
-	//	oneSuccessReactionExtensionList:=make(map[string]*msg.KeyValueResp)
-	//	if !isExists {
-	//		if  !req.IsReact {
-	//			oneExtendMsg.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
-	//			//redis处理
-	//			for k, v := range req.ReactionExtensionList {
-	//				//抢占分布式锁
-	//				err:=lockMessageTypeKey(req.ClientMsgID,k)
-	//				if err != nil {
-	//					setKeyResultInfo(oneFailedReactionExtensionList,100,err.Error(),req.ClientMsgID,k,v)
-	//					continue
-	//				}
-	//				redisValue,err:=db.DB.GetMessageTypeKeyValue(req.ClientMsgID,req.SessionType,k)
-	//				if err != nil&&err!=go_redis.Nil {
-	//					setKeyResultInfo(oneFailedReactionExtensionList,200,err.Error(),req.ClientMsgID,k,v)
-	//					continue
-	//				}
-	//				temp:=new(server_api_params.KeyValue)
-	//				utils.JsonStringToStruct(redisValue,temp)
-	//				if v.LatestUpdateTime != temp.LatestUpdateTime {
-	//					setKeyResultInfo(oneFailedReactionExtensionList,300,"message have update",req.ClientMsgID,k,temp)
-	//					continue
-	//				}else{
-	//					v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-	//					newerr:=db.DB.SetMessageTypeKeyValue(req.ClientMsgID,req.SessionType,k,utils.StructToJsonString(v))
-	//					if newerr != nil {
-	//						setKeyResultInfo(oneFailedReactionExtensionList,201,newerr.Error(),req.ClientMsgID,k,temp)
-	//						continue
-	//					}
-	//					setKeyResultInfo(oneSuccessReactionExtensionList,0,"",req.ClientMsgID,k,v)
-	//				}
-	//
-	//			}
-	//
-	//		}else{
-	//			//mongo处理
-	//		}
-	//
-	//	}else{
-	//
-	//	}
-	//	return
-	//}
-	return
+func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
+	var rResp msg.GetMessageListReactionExtensionsResp
+	for _, messageValue := range req.MessageReactionKeyList {
+		var oneMessage msg.SingleMessageExtensionResult
+		oneMessage.ClientMsgID = messageValue.ClientMsgID
+
+		isExists, err := db.DB.JudgeMessageReactionEXISTS(messageValue.ClientMsgID, req.SessionType)
+		if err != nil {
+			rResp.ErrCode = 100
+			rResp.ErrMsg = err.Error()
+			return &rResp, nil
+		}
+		if isExists {
+			redisValue, err := db.DB.GetOneMessageAllReactionList(messageValue.ClientMsgID, req.SessionType)
+			if err != nil {
+				oneMessage.ErrCode = 100
+				oneMessage.ErrMsg = err.Error()
+				rResp.SingleMessageResult = append(rResp.SingleMessageResult, &oneMessage)
+				continue
+			}
+			keyMap := make(map[string]*server_api_params.KeyValue)
+
+			for k, v := range redisValue {
+				temp := new(server_api_params.KeyValue)
+				utils.JsonStringToStruct(v, temp)
+				keyMap[k] = temp
+			}
+			oneMessage.ReactionExtensionList = keyMap
+
+		} else {
+
+		}
+		rResp.SingleMessageResult = append(rResp.SingleMessageResult, &oneMessage)
+	}
+	return &rResp, nil
 
 }
 
@@ -172,7 +151,7 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.M
 	return
 }
 
-func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *msg.OperateMessageListReactionExtensionsReq) (resp *msg.OperateMessageListReactionExtensionsResp, err error) {
+func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
 	return
 }
 func lockMessageTypeKey(clientMsgID, typeKey string) (err error) {

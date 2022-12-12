@@ -76,10 +76,10 @@ type ModifyMessageReactionExtensionsResp struct {
 }
 
 type OperateMessageListReactionExtensionsReq struct {
-	OperationID            string                                                            `json:"operationID" binding:"required"`
-	SourceID               string                                                            `json:"sourceID"  binding:"required"`
-	SessionType            string                                                            `json:"sessionType" binding:"required"`
-	MessageReactionKeyList []*msg.OperateMessageListReactionExtensionsReq_MessageReactionKey `json:"messageReactionKeyList" binding:"required"`
+	OperationID            string                                                        `json:"operationID" binding:"required"`
+	SourceID               string                                                        `json:"sourceID"  binding:"required"`
+	SessionType            string                                                        `json:"sessionType" binding:"required"`
+	MessageReactionKeyList []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageReactionKeyList" binding:"required"`
 }
 
 type OperateMessageListReactionExtensionsResp struct {
@@ -96,7 +96,10 @@ type SetMessageReactionExtensionsCallbackResp ModifyMessageReactionExtensionsRes
 
 type GetMessageListReactionExtensionsReq OperateMessageListReactionExtensionsReq
 
-type GetMessageListReactionExtensionsResp OperateMessageListReactionExtensionsResp
+type GetMessageListReactionExtensionsResp struct {
+	CommResp
+	Data []*msg.SingleMessageExtensionResult `json:"data"`
+}
 
 type AddMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
 

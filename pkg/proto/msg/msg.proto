@@ -189,6 +189,32 @@ message SetMessageReactionExtensionsResp {
   repeated KeyValueResp result = 6;
 }
 
+
+message GetMessageListReactionExtensionsReq {
+  string operationID = 1;
+  string opUserID = 2;
+  string sourceID = 3;
+  int32 sessionType = 4;
+  message MessageReactionKey {
+    string clientMsgID = 1;
+    int64 msgFirstModifyTime = 2;
+  }
+  repeated MessageReactionKey messageReactionKeyList = 5;
+}
+message GetMessageListReactionExtensionsResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+  repeated SingleMessageExtensionResult  singleMessageResult =3;
+
+}
+message SingleMessageExtensionResult {
+  int32 errCode = 1;
+  string errMsg = 2;
+  map <string,  server_api_params.KeyValue>reactionExtensionList = 3;
+  string clientMsgID = 4;
+}
+
+
 message ModifyMessageReactionExtensionsResp {
   int32 errCode = 1;
   string errMsg = 2;
@@ -196,7 +222,7 @@ message ModifyMessageReactionExtensionsResp {
   repeated ExtendMsgResp failedList = 4;
 }
 
-message OperateMessageListReactionExtensionsReq {
+message DeleteMessageListReactionExtensionsReq {
   string operationID = 1;
   string opUserID = 2;
   string sourceID = 3;
@@ -209,7 +235,7 @@ message OperateMessageListReactionExtensionsReq {
   repeated MessageReactionKey messageReactionKeyList = 5;
 }
 
-message OperateMessageListReactionExtensionsResp {
+message DeleteMessageListReactionExtensionsResp {
   int32 errCode = 1;
   string errMsg = 2;
   repeated ExtendMsgResp successList = 3;
@@ -251,7 +277,7 @@ service msg {
 
   // modify msg
   rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
-  rpc GetMessageListReactionExtensions(OperateMessageListReactionExtensionsReq) returns(OperateMessageListReactionExtensionsResp);
+  rpc GetMessageListReactionExtensions(GetMessageListReactionExtensionsReq) returns(GetMessageListReactionExtensionsResp);
   rpc AddMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);
-  rpc DeleteMessageReactionExtensions(OperateMessageListReactionExtensionsReq) returns(OperateMessageListReactionExtensionsResp);
+  rpc DeleteMessageReactionExtensions(DeleteMessageListReactionExtensionsReq) returns(DeleteMessageListReactionExtensionsResp);
 }
