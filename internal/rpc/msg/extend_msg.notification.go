@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
@@ -14,9 +15,21 @@ import (
 
 func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID string, sessionType int32,
 	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool) {
-	m := make(map[string]interface{})
-	m["rep"] = req
-	m["resp"] = resp
+	var m base_info.ReactionMessageModifierNotification
+	m.SourceID = req.SourceID
+	m.OpUserID = req.OpUserID
+	m.SessionType = req.SessionType
+	keyMap := make(map[string]*open_im_sdk.KeyValue)
+	for _, valueResp := range resp.Result {
+		if valueResp.ErrCode == 0 {
+			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
+		}
+	}
+	m.SuccessReactionExtensionList = keyMap
+	m.ClientMsgID = req.ClientMsgID
+	m.IsReact = resp.IsReact
+	m.IsExternalExtensions = req.IsExternalExtensions
+	m.MsgFirstModifyTime = resp.MsgFirstModifyTime
 	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory)
 }
 func messageReactionSender(operationID, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool) {

@@ -105,3 +105,14 @@ type AddMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
 type DeleteMessageReactionExtensionsReq OperateMessageListReactionExtensionsReq
 
 type DeleteMessageReactionExtensionsResp OperateMessageListReactionExtensionsResp
+
+type ReactionMessageModifierNotification struct {
+	SourceID                     string                      `json:"sourceID"  binding:"required"`
+	OpUserID                     string                      `json:"opUserID"  binding:"required"`
+	SessionType                  int32                       `json:"sessionType" binding:"required"`
+	SuccessReactionExtensionList map[string]*sdk_ws.KeyValue `json:"reactionExtensionList,omitempty" binding:"required"`
+	ClientMsgID                  string                      `json:"clientMsgID" binding:"required"`
+	IsReact                      bool                        `json:"isReact"`
+	IsExternalExtensions         bool                        `json:"isExternalExtensions"`
+	MsgFirstModifyTime           int64                       `json:"msgFirstModifyTime"`
+}
