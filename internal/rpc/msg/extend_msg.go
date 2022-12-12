@@ -50,6 +50,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 				}
 				setKeyResultInfo(&rResp, 0, "", req.ClientMsgID, k, v)
 			}
+			rResp.IsReact = true
 			_, err := db.DB.SetMessageReactionExpire(req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
 			if err != nil {
 				log.Error(req.OperationID, "SetMessageReactionExpire err:", err.Error(), req.String())

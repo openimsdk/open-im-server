@@ -68,7 +68,11 @@ type ModifyMessageReactionExtensionsReq struct {
 
 type ModifyMessageReactionExtensionsResp struct {
 	CommResp
-	Data []*msg.KeyValueResp `json:"data"`
+	Data struct {
+		ResultKeyValue     []*msg.KeyValueResp `json:"result"`
+		MsgFirstModifyTime int64               `json:"msgFirstModifyTime"`
+		IsReact            bool                `json:"isReact"`
+	} `json:"data"`
 }
 
 type OperateMessageListReactionExtensionsReq struct {

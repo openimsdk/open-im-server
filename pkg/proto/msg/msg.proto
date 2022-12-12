@@ -185,7 +185,8 @@ message SetMessageReactionExtensionsResp {
   string errMsg = 2;
   string clientMsgID = 3;
   int64 msgFirstModifyTime = 4;
-  repeated KeyValueResp result = 5;
+  bool isReact = 5;
+  repeated KeyValueResp result = 6;
 }
 
 message ModifyMessageReactionExtensionsResp {
