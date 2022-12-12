@@ -105,9 +105,19 @@ type AddMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
 
 type AddMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
 
-type DeleteMessageReactionExtensionsReq OperateMessageListReactionExtensionsReq
+type DeleteMessageReactionExtensionsReq struct {
+	OperationID           string             `json:"operationID" binding:"required"`
+	SourceID              string             `json:"sourceID" binding:"required"`
+	SessionType           int32              `json:"sessionType" binding:"required"`
+	ClientMsgID           string             `json:"clientMsgID" binding:"required"`
+	MsgFirstModifyTime    int64              `json:"msgFirstModifyTime" binding:"required"`
+	ReactionExtensionList []*sdk_ws.KeyValue `json:"reactionExtensionList" binding:"required"`
+}
 
-type DeleteMessageReactionExtensionsResp OperateMessageListReactionExtensionsResp
+type DeleteMessageReactionExtensionsResp struct {
+	CommResp
+	Data []*msg.KeyValueResp
+}
 
 type ReactionMessageModifierNotification struct {
 	SourceID                     string                      `json:"sourceID"  binding:"required"`

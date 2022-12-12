@@ -227,19 +227,15 @@ message DeleteMessageListReactionExtensionsReq {
   string opUserID = 2;
   string sourceID = 3;
   int32 sessionType = 4;
-  message MessageReactionKey {
-    string clientMsgID = 1;
-    int64 msgFirstModifyTime = 2;
-    repeated server_api_params.KeyValue reactionExtensionList = 3;
-  }
-  repeated MessageReactionKey messageReactionKeyList = 5;
+  string clientMsgID = 5;
+  int64 msgFirstModifyTime = 6;
+  repeated server_api_params.KeyValue reactionExtensionList = 7;
 }
 
 message DeleteMessageListReactionExtensionsResp {
   int32 errCode = 1;
   string errMsg = 2;
-  repeated ExtendMsgResp successList = 3;
-  repeated ExtendMsgResp failedList = 4;
+  repeated KeyValueResp result = 6;
 }
 
 message ExtendMsgResp {

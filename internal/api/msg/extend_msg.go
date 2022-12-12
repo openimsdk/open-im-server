@@ -197,8 +197,7 @@ func DeleteMessageReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
-	resp.Data.FailedList = respPb.FailedList
-	resp.Data.SuccessList = respPb.SuccessList
+	resp.Data = respPb.Result
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }
