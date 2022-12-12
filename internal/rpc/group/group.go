@@ -1822,7 +1822,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	if req.Ex != nil {
 		m["ex"] = req.Ex.Value
 	} else {
-		m["ex"] = ""
+		m["ex"] = nil
 	}
 	err = imdb.UpdateGroupMemberInfoByMap(groupMember, m)
 	if err != nil {
