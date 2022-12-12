@@ -447,6 +447,10 @@ func (d *DataBases) JudgeMessageReactionEXISTS(clientMsgID string, sessionType i
 		return false, err
 	}
 }
+func (d *DataBases) SetMessageReactionExpire(clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
+	key := getMessageReactionExPrefix(clientMsgID, sessionType)
+	return d.RDB.Expire(context.Background(), key, expiration).Result()
+}
 func (d *DataBases) GetMessageTypeKeyValue(clientMsgID string, sessionType int32, typeKey string) (string, error) {
 	key := getMessageReactionExPrefix(clientMsgID, sessionType)
 	result, err := d.RDB.HGet(context.Background(), key, typeKey).Result()

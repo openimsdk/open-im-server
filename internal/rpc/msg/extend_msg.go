@@ -51,28 +51,18 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.M
 					setKeyResultInfo(oneFailedReactionExtensionList, 100, err.Error(), req.ClientMsgID, k, v)
 					continue
 				}
-				redisValue, err := db.DB.GetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k)
-				if err != nil && err != go_redis.Nil {
-					setKeyResultInfo(oneFailedReactionExtensionList, 200, err.Error(), req.ClientMsgID, k, v)
+				v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
+				newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
+				if newerr != nil {
+					setKeyResultInfo(oneFailedReactionExtensionList, 201, newerr.Error(), req.ClientMsgID, k, v)
 					continue
 				}
-				temp := new(server_api_params.KeyValue)
-				utils.JsonStringToStruct(redisValue, temp)
-				if v.LatestUpdateTime != temp.LatestUpdateTime {
-					setKeyResultInfo(oneFailedReactionExtensionList, 300, "message have update", req.ClientMsgID, k, temp)
-					continue
-				} else {
-					v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
-					newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
-					if newerr != nil {
-						setKeyResultInfo(oneFailedReactionExtensionList, 201, newerr.Error(), req.ClientMsgID, k, temp)
-						continue
-					}
-					setKeyResultInfo(oneSuccessReactionExtensionList, 0, "", req.ClientMsgID, k, v)
-				}
-
+				setKeyResultInfo(oneSuccessReactionExtensionList, 0, "", req.ClientMsgID, k, v)
 			}
-
+			_, err := db.DB.SetMessageReactionExpire(req.ClientMsgID, req.SessionType, time.Duration(24*3)*time.Hour)
+			if err != nil {
+				log.Error(req.OperationID, "SetMessageReactionExpire err:", err.Error(), req.String())
+			}
 		} else {
 			//mongo处理
 		}
