@@ -19,7 +19,7 @@ func SetMessageReactionExtensions(c *gin.Context) {
 	var (
 		req   api.SetMessageReactionExtensionsCallbackReq
 		resp  api.SetMessageReactionExtensionsCallbackResp
-		reqPb rpc.ModifyMessageReactionExtensionsReq
+		reqPb rpc.SetMessageReactionExtensionsReq
 	)
 
 	if err := c.BindJSON(&req); err != nil {
@@ -57,8 +57,7 @@ func SetMessageReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
-	resp.Data.FailedList = respPb.FailedList
-	resp.Data.SuccessList = respPb.SuccessList
+	resp.Data = respPb.Result
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 
@@ -152,8 +151,6 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	}
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
-	resp.Data.FailedList = respPb.FailedList
-	resp.Data.SuccessList = respPb.SuccessList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }
