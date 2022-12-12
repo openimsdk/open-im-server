@@ -69,8 +69,8 @@ type ModifyMessageReactionExtensionsReq struct {
 type ModifyMessageReactionExtensionsResp struct {
 	CommResp
 	Data struct {
-		SuccessList []*msg.ExtendMsgResp `json:"successList"`
-		FailedList  []*msg.ExtendMsgResp `json:"failedList"`
+		SuccessList []*msg.ExtendMsgResp `json:"successList,omitempty"`
+		FailedList  []*msg.ExtendMsgResp `json:"failedList,omitempty"`
 	} `json:"data"`
 }
 

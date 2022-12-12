@@ -13,7 +13,7 @@ import (
 )
 
 func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID string, sessionType int32,
-	req *msg.ModifyMessageReactionExtensionsReq, resp *msg.ModifyMessageReactionExtensionsResp, isHistory bool) {
+	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool) {
 	m := make(map[string]interface{})
 	m["rep"] = req
 	m["resp"] = resp

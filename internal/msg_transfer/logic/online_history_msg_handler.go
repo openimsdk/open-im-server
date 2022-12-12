@@ -83,7 +83,6 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 						if !(!isSenderSync && msgChannelValue.aggregationID == v.MsgData.SendID) {
 							notStoragePushMsgList = append(notStoragePushMsgList, v)
 						}
-
 					}
 
 				}
@@ -107,6 +106,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 						singleMsgSuccessCount += uint64(len(storageMsgList))
 						singleMsgSuccessCountMutex.Unlock()
 						och.SendMessageToMongoCH(msgChannelValue.aggregationID, triggerID, storageMsgList, lastSeq)
+
 						for _, v := range storageMsgList {
 							sendMessageToPushMQ(v, msgChannelValue.aggregationID)
 						}
