@@ -236,6 +236,13 @@ message KeyValueResp {
   string errMsg = 3;
 }
 
+message MsgDataToModifyByMQ{
+ string aggregationID = 1;
+ repeated MsgDataToMQ messageList = 2;
+ string triggerID = 3;
+}
+
+
 service msg {
   rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
   rpc PullMessageBySeqList(server_api_params.PullMessageBySeqListReq) returns(server_api_params.PullMessageBySeqListResp);

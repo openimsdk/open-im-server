@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"strings"
@@ -89,30 +90,41 @@ func (d *DataBases) GetAllExtendMsgSet(ID string, opts *GetAllExtendMsgSetOpts) 
 	return sets, nil
 }
 
-type GetExtendMsgSetOpts struct {
-	ExcludeExtendMsgs bool
+func (d *DataBases) GetExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, maxMsgUpdateTime int64, c *mongo.Collection) (*ExtendMsgSet, error) {
+	regex := fmt.Sprintf("^%s", sourceID)
+	var err error
+	findOpts := options.Find().SetLimit(1).SetSkip(0).SetSort(bson.M{"source_id": -1}).SetProjection(bson.M{"extend_msgs": 0})
+	// update newest
+	find := bson.M{"source_id": primitive.Regex{Pattern: regex}, "session_type": sessionType}
+	if maxMsgUpdateTime > 0 {
+		find["max_msg_update_time"] = maxMsgUpdateTime
+	}
+	result, err := c.Find(ctx, find, findOpts)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	var setList []ExtendMsgSet
+	if err := result.All(ctx, &setList); err != nil {
+		return nil, utils.Wrap(err, "")
+	}
+	if len(setList) == 0 {
+		return nil, nil
+	}
+	return &setList[0], nil
 }
 
 // first modify msg
 func (d *DataBases) InsertExtendMsg(sourceID string, sessionType int32, msg *ExtendMsg) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
-	regex := fmt.Sprintf("^%s", sourceID)
-	var err error
-	findOpts := options.Find().SetLimit(1).SetSkip(0).SetSort(bson.M{"source_id": -1}).SetProjection(bson.M{"extend_msgs": 0})
-	// update newest
-	result, err := c.Find(ctx, bson.M{"source_id": primitive.Regex{Pattern: regex}, "session_type": sessionType}, findOpts)
+	set, err := d.GetExtendMsgSet(ctx, sourceID, sessionType, 0, c)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	var setList []ExtendMsgSet
-	if err := result.All(ctx, &setList); err != nil {
-		return utils.Wrap(err, "")
-	}
-	if len(setList) == 0 || setList[0].ExtendMsgNum >= GetExtendMsgMaxNum() {
+	if set == nil || set.ExtendMsgNum >= GetExtendMsgMaxNum() {
 		var index int32
-		if len(setList) > 0 {
-			index = SplitSourceIDAndGetIndex(setList[0].SourceID)
+		if set != nil {
+			index = SplitSourceIDAndGetIndex(set.SourceID)
 		}
 		err = d.CreateExtendMsgSet(&ExtendMsgSet{
 			SourceID:         GetExtendMsgSourceID(sourceID, index),
@@ -123,7 +135,7 @@ func (d *DataBases) InsertExtendMsg(sourceID string, sessionType int32, msg *Ext
 			MaxMsgUpdateTime: msg.MsgFirstModifyTime,
 		})
 	} else {
-		_, err = c.UpdateOne(ctx, bson.M{"source_id": setList[0].SourceID, "session_type": sessionType}, bson.M{"$set": bson.M{"max_msg_update_time": msg.MsgFirstModifyTime, "$inc": bson.M{"extend_msg_num": 1}, fmt.Sprintf("extend_msgs.%s", msg.ClientMsgID): msg}})
+		_, err = c.UpdateOne(ctx, bson.M{"source_id": set.SourceID, "session_type": sessionType}, bson.M{"$set": bson.M{"max_msg_update_time": msg.MsgFirstModifyTime, "$inc": bson.M{"extend_msg_num": 1}, fmt.Sprintf("extend_msgs.%s", msg.ClientMsgID): msg}})
 	}
 	return utils.Wrap(err, "")
 }
@@ -140,47 +152,33 @@ func (d *DataBases) InsertOrUpdateReactionExtendMsgSet(sourceID string, sessionT
 	opt := &options.UpdateOptions{
 		Upsert: &upsert,
 	}
-	findOpts := options.Find().SetLimit(1).SetSkip(0).SetSort(bson.M{"source_id": -1}).SetProjection(bson.M{"extend_msgs": 0})
-	regex := fmt.Sprintf("^%s", sourceID)
-	result, err := c.Find(ctx, bson.M{"source_id": primitive.Regex{Pattern: regex}, "session_type": sessionType, "max_msg_update_time": bson.M{"$lte": msgFirstModifyTime}}, findOpts)
+	set, err := d.GetExtendMsgSet(ctx, sourceID, sessionType, msgFirstModifyTime, c)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	var setList []ExtendMsgSet
-	if err := result.All(ctx, &setList); err != nil {
-		return utils.Wrap(err, "")
+	if set == nil {
+		return errors.New(fmt.Sprintf("sourceID %s has no set", sourceID))
 	}
-	if len(setList) == 0 {
-		return utils.Wrap(errors.New("InsertOrUpdateReactionExtendMsgSet failed, len(setList) == 0"), "")
-	}
-
-	_, err = c.UpdateOne(ctx, bson.M{"source_id": setList[0].SourceID, "session_type": sessionType}, bson.M{"$set": updateBson}, opt)
+	_, err = c.UpdateOne(ctx, bson.M{"source_id": set.SourceID, "session_type": sessionType}, bson.M{"$set": updateBson}, opt)
 	return utils.Wrap(err, "")
 }
 
 // delete TypeKey
-func (d *DataBases) DeleteReactionExtendMsgSet(sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList []*server_api_params.KeyValue) error {
+func (d *DataBases) DeleteReactionExtendMsgSet(sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*server_api_params.KeyValue) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
 	var updateBson = bson.M{}
 	for _, v := range reactionExtensionList {
 		updateBson[fmt.Sprintf("extend_msgs.%s.%s", clientMsgID, v.TypeKey)] = ""
 	}
-
-	findOpts := options.Find().SetLimit(1).SetSkip(0).SetSort(bson.M{"source_id": -1}).SetProjection(bson.M{"extend_msgs": 0})
-	regex := fmt.Sprintf("^%s", sourceID)
-	result, err := c.Find(ctx, bson.M{"source_id": primitive.Regex{Pattern: regex}, "session_type": sessionType, "max_msg_update_time": bson.M{"$lte": msgFirstModifyTime}}, findOpts)
+	set, err := d.GetExtendMsgSet(ctx, sourceID, sessionType, msgFirstModifyTime, c)
 	if err != nil {
 		return utils.Wrap(err, "")
 	}
-	var setList []ExtendMsgSet
-	if err := result.All(ctx, &setList); err != nil {
-		return utils.Wrap(err, "")
+	if set == nil {
+		return errors.New(fmt.Sprintf("sourceID %s has no set", sourceID))
 	}
-	if len(setList) == 0 {
-		return utils.Wrap(errors.New("InsertOrUpdateReactionExtendMsgSet failed, len(setList) == 0"), "")
-	}
-	_, err = c.UpdateOne(ctx, bson.M{"source_id": setList[0].SourceID, "session_type": sessionType}, bson.M{"$unset": updateBson})
+	_, err = c.UpdateOne(ctx, bson.M{"source_id": set.SourceID, "session_type": sessionType}, bson.M{"$unset": updateBson})
 	return err
 }
 
@@ -189,16 +187,19 @@ func (d *DataBases) GetExtendMsg(sourceID string, sessionType int32, clientMsgID
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
 	findOpts := options.Find().SetLimit(1).SetSkip(0).SetSort(bson.M{"source_id": -1}).SetProjection(bson.M{fmt.Sprintf("extend_msgs.%s", clientMsgID): 1})
 	regex := fmt.Sprintf("^%s", sourceID)
-	result, err := c.Find(ctx, bson.M{"source_id": primitive.Regex{Pattern: regex}, "session_type": sessionType, "msgFirstModifyTime": bson.M{"$lte": maxMsgUpdateTime}}, findOpts)
+	result, err := c.Find(ctx, bson.M{"source_id": primitive.Regex{Pattern: regex}, "session_type": sessionType, "max_msg_update_time": bson.M{"$lte": maxMsgUpdateTime}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	var extendMsgList []ExtendMsg
-	if err := result.All(ctx, &extendMsgList); err != nil {
+	var setList []ExtendMsgSet
+	if err := result.All(ctx, &setList); err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	if len(extendMsgList) == 0 {
+	if len(setList) == 0 {
 		return nil, utils.Wrap(errors.New("GetExtendMsg failed, len(setList) == 0"), "")
 	}
-	return &extendMsgList[0], nil
+	if v, ok := setList[0].ExtendMsgs[clientMsgID]; ok {
+		return &v, nil
+	}
+	return nil, errors.New(fmt.Sprintf("cant find client msg id: %s", clientMsgID))
 }

@@ -567,9 +567,9 @@ func DelConversationFromCache(ownerUserID, conversationID string) error {
 	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationCache+ownerUserID+":"+conversationID), "DelConversationFromCache err")
 }
 
-func GetExtendMsg(sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (*db.ExtendMsg, error) {
+func GetExtendMsg(sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (*db.ExtendMsg, error) {
 	getExtendMsg := func() (string, error) {
-		extendMsg, err := db.DB.GetExtendMsg(sourceID, sessionType, clientMsgID, maxMsgUpdateTime)
+		extendMsg, err := db.DB.GetExtendMsg(sourceID, sessionType, clientMsgID, firstModifyTime)
 		if err != nil {
 			return "", utils.Wrap(err, "GetExtendMsgList failed")
 		}

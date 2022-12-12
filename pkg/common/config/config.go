@@ -248,11 +248,16 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
+		MsgToModify struct {
+			Addr  []string `yaml:"addr"`
+			Topic string   `yaml:"topic"`
+		}
 		ConsumerGroupID struct {
-			MsgToRedis string `yaml:"msgToTransfer"`
-			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
-			MsgToPush  string `yaml:"msgToPush"`
+			MsgToRedis  string `yaml:"msgToTransfer"`
+			MsgToMongo  string `yaml:"msgToMongo"`
+			MsgToMySql  string `yaml:"msgToMySql"`
+			MsgToPush   string `yaml:"msgToPush"`
+			MsgToModify string `yaml:"msgToModify"`
 		}
 	}
 	Secret                            string `yaml:"secret"`

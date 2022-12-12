@@ -61,50 +61,6 @@ func (mc *OnlineHistoryMongoConsumerHandler) handleChatWs2Mongo(cMsg *sarama.Con
 			if unexistSeqList, err := db.DB.DelMsgBySeqList(DeleteMessageTips.UserID, DeleteMessageTips.SeqList, v.OperationID); err != nil {
 				log.NewError(v.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList args: ", DeleteMessageTips.UserID, DeleteMessageTips.SeqList, v.OperationID, err.Error(), unexistSeqList)
 			}
-		} else if v.MsgData.ContentType == constant.ReactionMessageModifier {
-			var req pbMsg.ModifyMessageReactionExtensionsReq
-			if req.IsExternalExtensions {
-				log.NewInfo(req.OperationID, "msg:", req.String(), "this is external extensions")
-				continue
-			}
-			if !req.IsReact {
-				// first time to modify
-				var reactionExtensionList = make(map[string]db.KeyValue)
-				for k, v := range req.ReactionExtensionList {
-					reactionExtensionList[k] = db.KeyValue{
-						TypeKey:          v.TypeKey,
-						Value:            v.Value,
-						LatestUpdateTime: v.LatestUpdateTime,
-					}
-				}
-				extendMsg := db.ExtendMsg{
-					ReactionExtensionList: reactionExtensionList,
-					ClientMsgID:           req.ClientMsgID,
-					MsgFirstModifyTime:    req.MsgFirstModifyTime,
-				}
-				if req.AttachedInfo != nil {
-					extendMsg.AttachedInfo = req.AttachedInfo.Value
-				}
-				if req.Ex != nil {
-					extendMsg.Ex = req.Ex.Value
-				}
-				if err := db.DB.InsertExtendMsg(req.SourceID, req.SessionType, &extendMsg); err != nil {
-					log.NewError(req.OperationID, "MsgFirstModify InsertExtendMsg failed", req.SourceID, req.SessionType, extendMsg, err.Error())
-					continue
-				}
-			} else {
-				// is already modify
-				if err := db.DB.InsertOrUpdateReactionExtendMsgSet(req.SourceID, req.SessionType, req.ClientMsgID, req.MsgFirstModifyTime, req.ReactionExtensionList); err != nil {
-					log.NewError(req.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
-				}
-			}
-		} else if v.MsgData.ContentType == constant.ReactionMessageDeleter {
-			var req pbMsg.OperateMessageListReactionExtensionsReq
-			for _, v := range req.MessageReactionKeyList {
-				if err := db.DB.DeleteReactionExtendMsgSet(req.SourceID, req.SessionType, v.ClientMsgID, v.MsgFirstModifyTime, v.ReactionExtensionList); err != nil {
-					log.NewError(req.OperationID, "InsertOrUpdateReactionExtendMsgSet failed")
-				}
-			}
 		}
 	}
 }
