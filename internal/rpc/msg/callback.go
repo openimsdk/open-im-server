@@ -221,3 +221,9 @@ func callbackMsgModify(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
 	log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), string(msg.MsgData.Content))
 	return callbackResp
 }
+
+func CallbackBeforeExtendMsgModify() cbApi.CommonCallbackResp {
+	callbackResp := cbApi.CommonCallbackResp{OperationID: ""}
+
+	return callbackResp
+}

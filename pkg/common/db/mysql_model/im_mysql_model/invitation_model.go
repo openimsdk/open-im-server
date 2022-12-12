@@ -5,8 +5,6 @@ import (
 	"errors"
 	"math/rand"
 	"time"
-
-	"github.com/jinzhu/gorm"
 )
 
 /**
@@ -89,9 +87,6 @@ func GetInvitationCode(code string) (*db.Invitation, error) {
 		InvitationCode: code,
 	}
 	err := db.DB.MysqlDB.DefaultGormDB().Model(invitation).Find(invitation).Error
-	if gorm.IsRecordNotFoundError(err) {
-		return invitation, nil
-	}
 	return invitation, err
 }
 

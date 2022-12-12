@@ -569,7 +569,7 @@ func DelConversationFromCache(ownerUserID, conversationID string) error {
 
 func GetExtendMsgSetFromCache(ID string, index int32) (*db.ExtendMsgSet, error) {
 	getExtendMsgSet := func() (string, error) {
-		extendMsgSet, err := db.DB.GetExtendMsgSet(ID, index, &db.GetExtendMsgSetOpts{IncludeExtendMsgs: false})
+		extendMsgSet, err := db.DB.GetExtendMsgSet(ID, index, &db.GetExtendMsgSetOpts{ExcludeExtendMsgs: false})
 		if err != nil {
 			return "", utils.Wrap(err, "GetExtendMsgSet failed")
 		}
@@ -595,23 +595,20 @@ func DelExtendMsgSetFromCache(ID string, index int32) error {
 	return utils.Wrap(db.DB.Rc.TagAsDeleted(extendMsgSetCache+db.GetExtendMsgSetID(ID, index)), "DelExtendMsgSetFromCache err")
 }
 
-func GetExtendMsg(ID string, index, extendMsgIndex int32) (*db.ExtendMsg, error) {
+func GetExtendMsg(ID string, index int32, clientMsgID string) (*db.ExtendMsg, error) {
 	getExtendMsg := func() (string, error) {
-		extendMsg, err := db.DB.GetExtendMsgList(ID, index, extendMsgIndex, extendMsgIndex+1)
+		extendMsg, err := db.DB.GetExtendMsgList(ID, index, clientMsgID)
 		if err != nil {
 			return "", utils.Wrap(err, "GetExtendMsgList failed")
 		}
-		if len(extendMsg) == 0 {
-			return "", nil
-		}
-		bytes, err := json.Marshal(extendMsg[0])
+		bytes, err := json.Marshal(extendMsg)
 		if err != nil {
 			return "", utils.Wrap(err, "Marshal failed")
 		}
 		return string(bytes), nil
 	}
 
-	extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+db.GetExtendMsgSetID(ID, index)+":"+strconv.Itoa(int(extendMsgIndex)), time.Second*30*60, getExtendMsg)
+	extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+db.GetExtendMsgSetID(ID, index)+":"+clientMsgID, time.Second*30*60, getExtendMsg)
 	if err != nil {
 		return nil, utils.Wrap(err, "Fetch failed")
 	}
@@ -623,6 +620,6 @@ func GetExtendMsg(ID string, index, extendMsgIndex int32) (*db.ExtendMsg, error)
 	return extendMsg, nil
 }
 
-func DelExtendMsg(ID string, index, extendMsgIndex int32) error {
-	return utils.Wrap(db.DB.Rc.TagAsDeleted(extendMsgCache+db.GetExtendMsgSetID(ID, index)+":"+strconv.Itoa(int(extendMsgIndex))), "DelExtendMsg err")
+func DelExtendMsg(ID string, index int32, clientMsgID string) error {
+	return utils.Wrap(db.DB.Rc.TagAsDeleted(extendMsgCache+db.GetExtendMsgSetID(ID, index)+":"+clientMsgID), "DelExtendMsg err")
 }

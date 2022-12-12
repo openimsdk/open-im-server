@@ -6,33 +6,36 @@ import (
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-const cExtendMsgSet = "extend_msg_set"
+const cExtendMsgSet = "extend_msgs"
 
 type ExtendMsgSet struct {
-	ID               string       `bson:"id" json:"ID"`
-	ExtendMsgs       []*ExtendMsg `bson:"extend_msgs" json:"extendMsgs"`
-	LatestUpdateTime int32        `bson:"latest_update_time" json:"latestUpdateTime"`
-	AttachedInfo     *string      `bson:"attached_info" json:"attachedInfo"`
-	Ex               *string      `bson:"ex" json:"ex"`
-	ExtendMsgNum     int32        `bson:"extend_msg_num" json:"extendMsgNum"`
-	CreateTime       int32        `bson:"create_time" json:"createTime"`
+	ID               string               `bson:"id" json:"ID"`
+	ExtendMsgs       map[string]ExtendMsg `bson:"extend_msgs" json:"extendMsgs"`
+	LatestUpdateTime int32                `bson:"latest_update_time" json:"latestUpdateTime"`
+	AttachedInfo     *string              `bson:"attached_info" json:"attachedInfo"`
+	Ex               *string              `bson:"ex" json:"ex"`
+	ExtendMsgNum     int32                `bson:"extend_msg_num" json:"extendMsgNum"`
+	CreateTime       int32                `bson:"create_time" json:"createTime"`
 }
 
 type ReactionExtendMsgSet struct {
-	UserKey string `bson:"user_key" json:"userKey"`
-	Value   string `bson:"value" json:"value"`
+	UserKey          string `bson:"user_key" json:"userKey"`
+	Value            string `bson:"value" json:"value"`
+	LatestUpdateTime int32  `bson:"latest_update_time" json:"latestUpdateTime"`
 }
 
 type ExtendMsg struct {
-	Content     []*ReactionExtendMsgSet `bson:"content" json:"content"`
-	ClientMsgID string                  `bson:"client_msg_id" json:"clientMsgID"`
-	CreateTime  int32                   `bson:"create_time" json:"createTime"`
+	Content          map[string]ReactionExtendMsgSet `bson:"content" json:"content"`
+	ClientMsgID      string                          `bson:"client_msg_id" json:"clientMsgID"`
+	CreateTime       int32                           `bson:"create_time" json:"createTime"`
+	LatestUpdateTime int32                           `bson:"latest_update_time" json:"latestUpdateTime"`
 }
 
 func GetExtendMsgSetID(ID string, index int32) string {
@@ -46,11 +49,22 @@ func (d *DataBases) CreateExtendMsgSet(set *ExtendMsgSet) error {
 	return err
 }
 
-func (d *DataBases) GetAllExtendMsgSet(ID string) (sets []*ExtendMsgSet, err error) {
+type GetAllExtendMsgSetOpts struct {
+	ExcludeExtendMsgs bool
+}
+
+func (d *DataBases) GetAllExtendMsgSet(ID string, opts *GetAllExtendMsgSetOpts) (sets []*ExtendMsgSet, err error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
 	regex := fmt.Sprintf("^%s", ID)
-	cursor, err := c.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: regex}})
+	var findOpts *options.FindOptions
+	if opts != nil {
+		if opts.ExcludeExtendMsgs {
+			findOpts = &options.FindOptions{}
+			findOpts.SetProjection(bson.M{"extend_msgs": 0})
+		}
+	}
+	cursor, err := c.Find(ctx, bson.M{"uid": primitive.Regex{Pattern: regex}}, findOpts)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -62,43 +76,60 @@ func (d *DataBases) GetAllExtendMsgSet(ID string) (sets []*ExtendMsgSet, err err
 }
 
 type GetExtendMsgSetOpts struct {
-	IncludeExtendMsgs bool
+	ExcludeExtendMsgs bool
 }
 
 func (d *DataBases) GetExtendMsgSet(ID string, index int32, opts *GetExtendMsgSetOpts) (*ExtendMsgSet, error) {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
 	var set ExtendMsgSet
-	err := c.FindOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}).Decode(&set)
+	var findOneOpt *options.FindOneOptions
+	if opts != nil {
+		if opts.ExcludeExtendMsgs {
+			findOneOpt = &options.FindOneOptions{}
+			findOneOpt.SetProjection(bson.M{"extend_msgs": 0})
+		}
+	}
+	err := c.FindOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, findOneOpt).Decode(&set)
 	return &set, err
 }
 
-func (d *DataBases) InsertExtendMsg(ID string, index int32, msg *ExtendMsg) (msgIndex int32, err error) {
+// first modify msg
+func (d *DataBases) InsertExtendMsgAndGetIndex(ID string, index int32, msg *ExtendMsg) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
-	result := c.FindOneAndUpdate(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{"$set": bson.M{"create_time": utils.GetCurrentTimestampBySecond(), "$inc": bson.M{"extend_msg_num": 1}, "$push": bson.M{"extend_msgs": msg}}})
-	set := &ExtendMsgSet{}
-	err = result.Decode(set)
-	return set.ExtendMsgNum, err
-}
-
-func (d *DataBases) UpdateOneExtendMsgSet(ID string, index, MsgIndex int32, userIndex string, value string) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
-	_, err := c.UpdateOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{})
+	_, err := c.UpdateOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{"$set": bson.M{"latest_update_time": utils.GetCurrentTimestampBySecond(), "$inc": bson.M{"extend_msg_num": 1}, fmt.Sprintf("extend_msgs.%s", msg.ClientMsgID): msg}})
 	return err
 }
 
-func (d *DataBases) DelOneExtendMsgSetUserKey(ID string, index, MsgIndex int32, userIndex string, userID string) error {
+// insert or update
+func (d *DataBases) InsertOrUpdateReactionExtendMsgSet(ID string, index int32, clientMsgID, userID, value string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
-	_, err := c.DeleteOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)})
+	reactionExtendMsgSet := ReactionExtendMsgSet{
+		UserKey:          userID,
+		Value:            value,
+		LatestUpdateTime: int32(utils.GetCurrentTimestampBySecond()),
+	}
+	upsert := true
+	opt := &options.UpdateOptions{
+		Upsert: &upsert,
+	}
+	_, err := c.UpdateOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{"$set": bson.M{"latest_update_time": utils.GetCurrentTimestampBySecond()}, fmt.Sprintf("extend_msgs.%s.%s", clientMsgID, userID): reactionExtendMsgSet}, opt)
 	return err
 }
 
-func (d *DataBases) GetExtendMsgList(ID string, index, msgStartIndex, msgEndIndex int32) (extendMsgList []*ExtendMsg, err error) {
+func (d *DataBases) DeleteReactionExtendMsgSet(ID string, index int32, clientMsgID, userID string) error {
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
-	err = c.FindOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}).Decode(&extendMsgList)
-	return extendMsgList, err
+	_, err := c.UpdateOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index)}, bson.M{"$unset": bson.M{}})
+	return err
+}
+
+// by index start end
+func (d *DataBases) GetExtendMsgList(ID string, index int32, clientMsgID string) (extendMsg *ExtendMsg, err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cExtendMsgSet)
+	err = c.FindOne(ctx, bson.M{"uid": GetExtendMsgSetID(ID, index), "extend_msgs": bson.M{}}).Decode(&extendMsg)
+	return extendMsg, err
 }

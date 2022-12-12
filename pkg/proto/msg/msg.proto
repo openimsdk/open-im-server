@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
+import "Open-IM-Server/pkg/proto/sdk_ws/wrappers.proto";
 option go_package = "Open_IM/pkg/proto/msg;msg";
 package msg;
 
@@ -153,6 +154,26 @@ message GetWriteDiffMsgResp{
   server_api_params.MsgData msgData = 3;
 }
 
+message ModifyMsgReq {
+  string operationID = 1;
+  string ID = 2;
+  int32 Index = 3;
+  int32 msgIndex = 4;
+  string opUserID = 5;
+  string userID = 6;
+  bool isFirstModify = 7;
+  string clientMsgID = 8;
+  google.protobuf.StringValue value = 9;
+  google.protobuf.StringValue ex = 10;
+  google.protobuf.StringValue attachedInfo = 11;
+}
+
+message ModifyMsgResp {
+  int32 errCode = 1;
+  string errMsg = 2;
+  int32 Index = 4;
+  int32 msgIndex = 3;
+}
 
 service msg {
   rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
@@ -166,4 +187,7 @@ service msg {
   rpc GetSendMsgStatus(GetSendMsgStatusReq) returns(GetSendMsgStatusResp);
   rpc GetSuperGroupMsg(GetSuperGroupMsgReq) returns(GetSuperGroupMsgResp);
   rpc GetWriteDiffMsg(GetWriteDiffMsgReq) returns(GetWriteDiffMsgResp);
+
+  // modify msg
+  rpc ModifyMsg(ModifyMsgReq) returns(ModifyMsgResp);
 }
