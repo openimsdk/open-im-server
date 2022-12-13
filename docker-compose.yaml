@@ -115,7 +115,7 @@ services:
 
 
   open_im_server:
-    image: openim/open_im_server:v2.3.5
+    image: openim/open_im_server:v2.3.6
     container_name: open_im_server
     volumes:
       - ./logs:/Open-IM-Server/logs
