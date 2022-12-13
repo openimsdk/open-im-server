@@ -330,6 +330,7 @@ message GroupApplicationAcceptedTips{
   GroupInfo group = 1;
   GroupMemberFullInfo opUser = 2;
   string  handleMsg = 4;
+  int32 receiverAs = 5; // admin(==1) or applicant(==0)
 }
 
 //	OnApplicationGroupRejected()
@@ -337,6 +338,7 @@ message GroupApplicationRejectedTips{
   GroupInfo group = 1;
   GroupMemberFullInfo opUser = 2;
   string  handleMsg = 4;
+  int32 receiverAs = 5; // admin(==1) or applicant(==0)
 }
 
 //	OnTransferGroupOwner()
