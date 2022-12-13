@@ -6,6 +6,6 @@ func callbackSetMessageReactionExtensions(req *msg.ModifyMessageReactionExtensio
 
 }
 
-func callbackDeleteMessageReactionExtensions(req *msg.OperateMessageListReactionExtensionsReq) {
+func callbackDeleteMessageReactionExtensions(req *msg.DeleteMessageListReactionExtensionsReq) {
 
 }
