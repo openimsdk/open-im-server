@@ -139,7 +139,7 @@ services:
         max-file: "2"
 
   open_im_enterprise:
-    image: openim/open_im_enterprise:v1.0.0
+    image: openim/open_im_enterprise:v1.0.1
     container_name: open_im_enterprise
     volumes:
       - ./logs:/Open-IM-Enterprise/logs
