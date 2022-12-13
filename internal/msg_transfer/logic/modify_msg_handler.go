@@ -9,7 +9,6 @@ import (
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/msg"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
-	"Open_IM/pkg/utils"
 	"encoding/json"
 	"github.com/Shopify/sarama"
 
