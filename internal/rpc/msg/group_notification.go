@@ -435,7 +435,20 @@ func GroupApplicationAcceptedNotification(req *pbGroup.GroupApplicationResponseR
 		log.Error(req.OperationID, "setOpUserInfo failed", req.OpUserID, req.GroupID, GroupApplicationAcceptedTips.OpUser)
 		return
 	}
+
 	groupNotification(constant.GroupApplicationAcceptedNotification, &GroupApplicationAcceptedTips, req.OpUserID, "", req.FromUserID, req.OperationID)
+	adminList, err := imdb.GetOwnerManagerByGroupID(req.GroupID)
+	if err != nil {
+		log.Error(req.OperationID, "GetOwnerManagerByGroupID failed", req.GroupID)
+		return
+	}
+	for _, v := range adminList {
+		if v.UserID == req.OpUserID {
+			continue
+		}
+		GroupApplicationAcceptedTips.ReceiverAs = 1
+		groupNotification(constant.GroupApplicationAcceptedNotification, &GroupApplicationAcceptedTips, req.OpUserID, "", v.UserID, req.OperationID)
+	}
 }
 
 func GroupApplicationRejectedNotification(req *pbGroup.GroupApplicationResponseReq) {
@@ -449,6 +462,18 @@ func GroupApplicationRejectedNotification(req *pbGroup.GroupApplicationResponseR
 		return
 	}
 	groupNotification(constant.GroupApplicationRejectedNotification, &GroupApplicationRejectedTips, req.OpUserID, "", req.FromUserID, req.OperationID)
+	adminList, err := imdb.GetOwnerManagerByGroupID(req.GroupID)
+	if err != nil {
+		log.Error(req.OperationID, "GetOwnerManagerByGroupID failed", req.GroupID)
+		return
+	}
+	for _, v := range adminList {
+		if v.UserID == req.OpUserID {
+			continue
+		}
+		GroupApplicationRejectedTips.ReceiverAs = 1
+		groupNotification(constant.GroupApplicationRejectedNotification, &GroupApplicationRejectedTips, req.OpUserID, "", v.UserID, req.OperationID)
+	}
 }
 
 func GroupOwnerTransferredNotification(req *pbGroup.TransferGroupOwnerReq) {

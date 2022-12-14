@@ -25,6 +25,6 @@ func main() {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
 	address = config.Config.CmsApi.ListenIP + ":" + strconv.Itoa(*ginPort)
-	fmt.Println("start cms api server, address: ", address, "OpenIM version: ", constant.CurrentVersion, "\n")
+	fmt.Println("start cms api server, address: ", address, ", OpenIM version: ", constant.CurrentVersion, "\n")
 	router.Run(address)
 }

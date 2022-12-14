@@ -46,10 +46,10 @@ func key(dbAddress, dbName string) string {
 }
 
 func init() {
-	//log.NewPrivateLog(constant.LogFileName)
 	var mongoClient *mongo.Client
 	var err1 error
-	//mysql init
+	fmt.Println("init mysql redis mongo ")
+
 	initMysqlDB()
 	// mongo init
 	// "mongodb://sysop:moon@localhost/records"
@@ -84,45 +84,34 @@ func init() {
 
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
-		fmt.Println(" mongo.Connect  failed, try ", utils.GetSelfFuncName(), err.Error(), uri)
 		time.Sleep(time.Duration(30) * time.Second)
 		mongoClient, err1 = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 		if err1 != nil {
-			fmt.Println(" mongo.Connect retry failed, panic", err.Error(), uri)
-			panic(err1.Error())
+			panic(err1.Error() + " mongo.Connect failed " + uri)
 		}
 	}
-	fmt.Println("mongo driver client init success: ", uri)
 	// mongodb create index
 	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
-		fmt.Println("send_id", "-send_time", "index create failed", err.Error())
-		panic(err.Error())
+		panic(err.Error() + " index create failed " + cSendLog + " send_id, -send_time")
 	}
 	if err := createMongoIndex(mongoClient, cChat, false, "uid"); err != nil {
-		fmt.Println("uid", " index create failed", err.Error())
-		//panic(err.Error())
+		fmt.Println(err.Error() + " index create failed " + cChat + " uid ")
 	}
 	if err := createMongoIndex(mongoClient, cWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
-		fmt.Println("-create_time", "work_moment_id", "index create failed", err.Error())
-		panic(err.Error())
+		panic(err.Error() + "index create failed " + cWorkMoment + " -create_time, work_moment_id")
 	}
 	if err := createMongoIndex(mongoClient, cWorkMoment, true, "work_moment_id"); err != nil {
-		fmt.Println("work_moment_id", "index create failed", err.Error())
-		panic(err.Error())
+		panic(err.Error() + "index create failed " + cWorkMoment + " work_moment_id ")
 	}
 	if err := createMongoIndex(mongoClient, cWorkMoment, false, "user_id", "-create_time"); err != nil {
-		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
-		panic(err.Error())
+		panic(err.Error() + "index create failed " + cWorkMoment + "user_id, -create_time")
 	}
 	if err := createMongoIndex(mongoClient, cTag, false, "user_id", "-create_time"); err != nil {
-		fmt.Println("user_id", "-create_time", "index create failed", err.Error())
-		panic(err.Error())
+		panic(err.Error() + "index create failed " + cTag + " user_id, -create_time")
 	}
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
-		fmt.Println("tag_id", "index create failed", err.Error())
-		panic(err.Error())
+		panic(err.Error() + "index create failed " + cTag + " tag_id")
 	}
-	fmt.Println("createMongoIndex success")
 	DB.mongoClient = mongoClient
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -136,7 +125,8 @@ func init() {
 		})
 		_, err = DB.RDB.Ping(ctx).Result()
 		if err != nil {
-			panic(err.Error())
+			fmt.Println("redis cluster failed address ", config.Config.Redis.DBAddress)
+			panic(err.Error() + " redis cluster " + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
 		}
 	} else {
 		DB.RDB = go_redis.NewClient(&go_redis.Options{
@@ -148,7 +138,7 @@ func init() {
 		})
 		_, err = DB.RDB.Ping(ctx).Result()
 		if err != nil {
-			panic(err.Error())
+			panic(err.Error() + " redis " + config.Config.Redis.DBAddress[0] + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
 		}
 	}
 	// 强一致性缓存，当一个key被标记删除，其他请求线程会被锁住轮询直到新的key生成，适合各种同步的拉取, 如果弱一致可能导致拉取还是老数据，毫无意义
@@ -158,6 +148,8 @@ func init() {
 	// 弱一致性缓存，当一个key被标记删除，其他请求线程直接返回该key的value，适合高频并且生成很缓存很慢的情况 如大群发消息缓存的缓存
 	DB.WeakRc = rockscache.NewClient(DB.RDB, rockscache.NewDefaultOptions())
 	DB.WeakRc.Options.StrongConsistency = false
+
+	fmt.Println("init mysql redis mongo ok ")
 }
 
 func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {
