@@ -14,7 +14,7 @@ func main() {
 	rpcPort := flag.Int("port", defaultPorts[0], "RpcToken default listen port 10800")
 	prometheusPort := flag.Int("prometheus_port", config.Config.Prometheus.AuthPrometheusPort[0], "authPrometheusPort default listen port")
 	flag.Parse()
-	fmt.Println("start auth rpc server, port: ", *rpcPort, "OpenIM version: ", constant.CurrentVersion, "\n")
+	fmt.Println("start auth rpc server, port: ", *rpcPort, ", OpenIM version: ", constant.CurrentVersion, "\n")
 	rpcServer := rpcAuth.NewRpcAuthServer(*rpcPort)
 	go func() {
 		err := promePkg.StartPromeSrv(*prometheusPort)
