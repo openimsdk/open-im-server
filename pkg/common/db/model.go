@@ -49,7 +49,7 @@ func init() {
 	var mongoClient *mongo.Client
 	var err1 error
 	fmt.Println("init mysql redis mongo ")
-	defer fmt.Println("init mysql redis mongo ok ")
+
 	initMysqlDB()
 	// mongo init
 	// "mongodb://sysop:moon@localhost/records"
@@ -148,6 +148,8 @@ func init() {
 	// 弱一致性缓存，当一个key被标记删除，其他请求线程直接返回该key的value，适合高频并且生成很缓存很慢的情况 如大群发消息缓存的缓存
 	DB.WeakRc = rockscache.NewClient(DB.RDB, rockscache.NewDefaultOptions())
 	DB.WeakRc.Options.StrongConsistency = false
+
+	fmt.Println("init mysql redis mongo ok ")
 }
 
 func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {
