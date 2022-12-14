@@ -1,12 +1,25 @@
 #!/usr/bin/env bash
 source ./style_info.cfg
 
+echo -e "check time synchronize................................"
+t=`curl http://time.akamai.com/?iso -s`
+t1=`date -d $t +%s`
+t2=`date +%s`
+let between=t2-t1
+if [[ $between > 10 ]] || [[ $between < -10 ]]; then
+  echo -e ${RED_PREFIX}"Warning: The difference between the iso time and the server's time is too large: "$between"s" ${COLOR_SUFFIX}
+else
+   echo -e ${GREEN_PREFIX} "ok: Server time is synchronized " ${COLOR_SUFFIX}
+fi
+
+
+
 echo -e "check login user........................................"
 user=`whoami`
 if [ $user == "root" ] ; then
-        echo -e ${GREEN_PREFIX} "ok: login user is root" ${COLOR_SUFFIX}
+  echo -e ${GREEN_PREFIX} "ok: login user is root" ${COLOR_SUFFIX}
 else
-        echo -e ${RED_PREFIX}"Warning: The current user is not root "${COLOR_SUFFIX}
+  echo -e ${RED_PREFIX}"Warning: The current user is not root "${COLOR_SUFFIX}
 fi
 
 
