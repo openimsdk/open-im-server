@@ -648,7 +648,7 @@ func unmarshalConfig(config interface{}, configName string) {
 	} else {
 		bytes, err := ioutil.ReadFile(fmt.Sprintf("../config/%s", configName))
 		if err != nil {
-			panic(err.Error())
+			panic(err.Error() + configName)
 		}
 		if err = yaml.Unmarshal(bytes, config); err != nil {
 			panic(err.Error())
