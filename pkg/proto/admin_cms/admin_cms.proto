@@ -74,7 +74,7 @@ message GetChatLogsReq {
     int32 contentType = 6;
     server_api_params.RequestPagination pagination = 7;
     string operationID = 8;
-
+    string opUserID = 9;
 }
 
 message ChatLog {
