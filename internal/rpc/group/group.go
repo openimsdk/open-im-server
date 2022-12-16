@@ -30,6 +30,7 @@ import (
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 	"gorm.io/gorm"
 )
 
@@ -1765,11 +1766,35 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 		log.Error(req.OperationID, errMsg)
 		return &pbGroup.SetGroupMemberNicknameResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
+	cbReq := &pbGroup.SetGroupMemberInfoReq{
+		GroupID:     req.GroupID,
+		UserID:      req.UserID,
+		OperationID: req.OperationID,
+		OpUserID:    req.OpUserID,
+		Nickname:    &wrapperspb.StringValue{Value: req.Nickname},
+	}
+	callbackResp := CallbackBeforeSetGroupMemberInfo(cbReq)
+	if callbackResp.ErrCode != 0 {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup resp: ", callbackResp)
+	}
+	if callbackResp.ActionCode != constant.ActionAllow {
+		if callbackResp.ErrCode == 0 {
+			callbackResp.ErrCode = 201
+		}
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup result", "end rpc and return", callbackResp)
+		return &pbGroup.SetGroupMemberNicknameResp{
+			CommonResp: &pbGroup.CommonResp{
+				ErrCode: int32(callbackResp.ErrCode),
+				ErrMsg:  callbackResp.ErrMsg,
+			},
+		}, nil
+	}
 
+	nickName := cbReq.Nickname.Value
 	groupMemberInfo := db.GroupMember{}
 	groupMemberInfo.UserID = req.UserID
 	groupMemberInfo.GroupID = req.GroupID
-	if req.Nickname == "" {
+	if nickName == "" {
 		userNickname, err := imdb.GetUserNameByUserID(groupMemberInfo.UserID)
 		if err != nil {
 			errMsg := req.OperationID + " GetUserNameByUserID failed " + err.Error()
@@ -1778,7 +1803,7 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 		}
 		groupMemberInfo.Nickname = userNickname
 	} else {
-		groupMemberInfo.Nickname = req.Nickname
+		groupMemberInfo.Nickname = nickName
 	}
 
 	if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.UserID); err != nil {
@@ -1805,6 +1830,23 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
+	callbackResp := CallbackBeforeSetGroupMemberInfo(req)
+	if callbackResp.ErrCode != 0 {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup resp: ", callbackResp)
+	}
+	if callbackResp.ActionCode != constant.ActionAllow {
+		if callbackResp.ErrCode == 0 {
+			callbackResp.ErrCode = 201
+		}
+		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup result", "end rpc and return", callbackResp)
+		return &pbGroup.SetGroupMemberInfoResp{
+			CommonResp: &pbGroup.CommonResp{
+				ErrCode: int32(callbackResp.ErrCode),
+				ErrMsg:  callbackResp.ErrMsg,
+			},
+		}, nil
+	}
+
 	groupMember := db.GroupMember{
 		GroupID: req.GroupID,
 		UserID:  req.UserID,

@@ -10,6 +10,8 @@ import (
 	pbGroup "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
 	http2 "net/http"
+
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 func callbackBeforeCreateGroup(req *pbGroup.CreateGroupReq) cbApi.CommonCallbackResp {
@@ -123,6 +125,59 @@ func CallbackBeforeMemberJoinGroup(operationID string, groupMember *db.GroupMemb
 	}
 	if resp.RoleLevel != nil {
 		groupMember.RoleLevel = *resp.RoleLevel
+	}
+	return callbackResp
+}
+
+func CallbackBeforeSetGroupMemberInfo(req *pbGroup.SetGroupMemberInfoReq) cbApi.CommonCallbackResp {
+	callbackResp := cbApi.CommonCallbackResp{OperationID: req.OperationID}
+	if !config.Config.Callback.CallbackBeforeSetGroupMemberInfo.Enable {
+		return callbackResp
+	}
+	callbackReq := cbApi.CallbackBeforeSetGroupMemberInfoReq{
+		CallbackCommand: constant.CallbackBeforeSetGroupMemberInfoCommand,
+		OperationID:     req.OperationID,
+		GroupID:         req.GroupID,
+		UserID:          req.UserID,
+	}
+	if req.Nickname != nil {
+		callbackReq.Nickname = req.Nickname.Value
+	}
+	if req.FaceURL != nil {
+		callbackReq.FaceURL = req.FaceURL.Value
+	}
+	if req.RoleLevel != nil {
+		callbackReq.RoleLevel = req.RoleLevel.Value
+	}
+	if req.Ex != nil {
+		callbackReq.Ex = req.Ex.Value
+	}
+	resp := &cbApi.CallbackBeforeSetGroupMemberInfoResp{
+		CommonCallbackResp: &callbackResp,
+	}
+
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSetGroupMemberInfoCommand, callbackReq, resp, config.Config.Callback.CallbackBeforeSetGroupMemberInfo.CallbackTimeOut); err != nil {
+		callbackResp.ErrCode = http2.StatusInternalServerError
+		callbackResp.ErrMsg = err.Error()
+		if !config.Config.Callback.CallbackBeforeSetGroupMemberInfo.CallbackFailedContinue {
+			callbackResp.ActionCode = constant.ActionForbidden
+			return callbackResp
+		} else {
+			callbackResp.ActionCode = constant.ActionAllow
+			return callbackResp
+		}
+	}
+	if resp.FaceURL != nil {
+		req.FaceURL = &wrapperspb.StringValue{Value: *resp.FaceURL}
+	}
+	if resp.Nickname != nil {
+		req.Nickname = &wrapperspb.StringValue{Value: *resp.Nickname}
+	}
+	if resp.RoleLevel != nil {
+		req.RoleLevel = &wrapperspb.Int32Value{Value: *resp.RoleLevel}
+	}
+	if resp.Ex != nil {
+		req.Ex = &wrapperspb.StringValue{Value: *resp.Ex}
 	}
 	return callbackResp
 }

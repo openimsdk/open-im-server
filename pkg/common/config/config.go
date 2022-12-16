@@ -292,7 +292,7 @@ type config struct {
 		CallbackBeforeAddFriend            callBackConfig `yaml:"callbackBeforeAddFriend"`
 		CallbackBeforeCreateGroup          callBackConfig `yaml:"callbackBeforeCreateGroup"`
 		CallbackBeforeMemberJoinGroup      callBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
-		CallbackBeforeExtendMsgModify      callBackConfig `yaml:"callbackBeforeExtendMsgModify"`
+		CallbackBeforeSetGroupMemberInfo   callBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
