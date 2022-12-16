@@ -6,7 +6,6 @@ import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbChat "Open_IM/pkg/proto/msg"
 	push "Open_IM/pkg/proto/push"
@@ -187,16 +186,10 @@ func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullM
 }
 func (ws *WServer) userLogoutReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to userLogoutReq start", m.SendID, m.ReqIdentifier, m.MsgIncr, string(m.Data))
-	claims, err := token_verify.ParseToken(m.Token, m.OperationID)
-	if err != nil {
-		errMsg := "ParseToken failed " + err.Error() + m.OperationID + " token " + m.Token
-		log.Error(m.OperationID, errMsg, "token:", m.Token)
-		ws.userLogoutResp(conn, m)
-		return
-	}
+
 	rpcReq := push.DelUserPushTokenReq{}
 	rpcReq.UserID = m.SendID
-	rpcReq.PlatformID = int32(constant.PlatformNameToID(claims.Platform))
+	rpcReq.PlatformID = conn.PlatformID
 	rpcReq.OperationID = m.OperationID
 	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName, m.OperationID)
 	if grpcConn == nil {
