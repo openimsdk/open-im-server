@@ -36,75 +36,69 @@ By deployment of the Open-IM-Server on the customer's server, developers can int
 
 > Open-IM relies on five open source high-performance components: ETCD, MySQL, MongoDB, Redis, and Kafka. Privatization deployment Before Open-IM-Server, please make sure that the above five components have been installed. If your server does not have the above components, you must first install Missing components. If you have the above components, it is recommended to use them directly. If not, it is recommended to use Docker-compose, no To install dependencies, one-click deployment, faster and more convenient.
 
-#### Source code deployment
+#### Deploy using Docker
 
-1. Install [Go environment](https://golang.org/doc/install). Make sure Go version is at least 1.15.
+1. Install [Go environment](https://golang.org/doc/install). Make sure Go version is at least 1.17
 
-2. Clone the Open-IM project to your server.
+2. Clone the Open-IM project to your server
 
    ```
    git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
    ```
 
-3. Build and start Service.
+3. Deploy
 
-    1. Shell authorization
-
-       ```
-       #cd Open-IM-server/script
-       
-       chmod +x *.sh
-       ```
-
-    2. Execute the build shell
+    1. Modify env
 
        ```
-       ./build_all_service.sh
+       #cd Open-IM-server
+       USER=root  
+       PASSWORD=openIM123    #Password with more than 8 digits, excluding special characters
+       ENDPOINT=http://127.0.0.1:10005 #Replace 127.0.0.1 with Internet IP
+       DATA_DIR=./ 
        ```
 
-    3. Start service
-
+    2. Deploy && Start
+    
        ```
-       ./start_all.sh
+       chmod +x install_im_server.sh;
+       ./install_im_server.sh;
        ```
-
+    
     4. Check service
-
+    
        ```
-       ./check_all.sh
+       cd script;
+       ./docker_check_service.sh./check_all.sh
        ```
-
+       
        ![OpenIMServersonSystempng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-System.png)
 
-#### Docker deployment
+#### Deploy using source code
 
-All images are available at https://hub.docker.com/r/lyt1123/open_im_server
+1. Go 1.17 or above。
+2. Clone
 
-1. [Install Docker](https://docs.docker.com/install/) 1.13 or above.
+```shell
+git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive 
+cd cmd/Open-IM-SDK-Core
+git checkout main
+```
 
-2. [Install Docker Compose](https://docs.docker.com/compose/install/) 1.22 or above.
+1. Set executable permissions
 
-3. Clone the Open-IM project to your server.
+```shell
+cd ../../script/
+chmod +x *.sh
+```
 
-   ```
-   git clone https://github.com/OpenIMSDK/Open-IM-Server.git --recursive
-   ```
+1. build
 
-4. Start docker-compose with one click(Docker automatically pulls all images)
+```shell
+./batch_build_all_service.sh
+```
 
-   ```
-   cd Open-IM-Server
-   docker-compose up -d
-   ```
-
-5. Check service
-
-   ```
-   ./docker_check_service.sh 
-   ./check_all.sh
-   ```
-
-   ![OpenIMServersondockerpng](https://github.com/OpenIMSDK/Open-IM-Server/blob/main/docs/Open-IM-Servers-on-docker.png)
+all services build success
 
 ### CONFIGURATION INSTRUCTIONS
 

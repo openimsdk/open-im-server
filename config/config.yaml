@@ -345,7 +345,7 @@ callback:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续
-  callbackBeforeExtendMsgModify:
+  callbackBeforeSetGroupMemberInfo:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续
