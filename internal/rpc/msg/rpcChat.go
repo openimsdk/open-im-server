@@ -31,7 +31,8 @@ type rpcChat struct {
 	etcdAddr        []string
 	messageWriter   MessageWriter
 	//offlineProducer *kafka.Producer
-	delMsgCh chan deleteMsg
+	delMsgCh       chan deleteMsg
+	dMessageLocker MessageLocker
 }
 
 type deleteMsg struct {
@@ -48,6 +49,7 @@ func NewRpcChatServer(port int) *rpcChat {
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImMsgName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
+		dMessageLocker:  NewLockerMessage(),
 	}
 	rc.messageWriter = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
 	//rc.offlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschatOffline.Addr, config.Config.Kafka.Ws2mschatOffline.Topic)

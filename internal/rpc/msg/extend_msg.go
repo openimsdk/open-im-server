@@ -35,7 +35,7 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 			log.Debug(req.OperationID, "redis handle firstly", req.String())
 			rResp.MsgFirstModifyTime = utils.GetCurrentTimestampByMill()
 			for k, v := range req.ReactionExtensionList {
-				err := lockMessageTypeKey(req.ClientMsgID, k)
+				err := rpc.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
 				if err != nil {
 					setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
 					continue
@@ -54,14 +54,40 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 				log.Error(req.OperationID, "SetMessageReactionExpire err:", err.Error(), req.String())
 			}
 		} else {
-			//mongo处理
+			for k, v := range req.ReactionExtensionList {
+				err := rpc.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
+				if err != nil {
+					setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
+					continue
+				}
+				redisValue, err := db.DB.GetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k)
+				if err != nil && err != go_redis.Nil {
+					setKeyResultInfo(&rResp, 200, err.Error(), req.ClientMsgID, k, v)
+					continue
+				}
+				temp := new(server_api_params.KeyValue)
+				utils.JsonStringToStruct(redisValue, temp)
+				if v.LatestUpdateTime != temp.LatestUpdateTime {
+					setKeyResultInfo(&rResp, 300, "message have update", req.ClientMsgID, k, temp)
+					continue
+				} else {
+					v.LatestUpdateTime = utils.GetCurrentTimestampByMill()
+					newerr := db.DB.SetMessageTypeKeyValue(req.ClientMsgID, req.SessionType, k, utils.StructToJsonString(v))
+					if newerr != nil {
+						setKeyResultInfo(&rResp, 201, newerr.Error(), req.ClientMsgID, k, temp)
+						continue
+					}
+					setKeyResultInfo(&rResp, 0, "", req.ClientMsgID, k, v)
+				}
+
+			}
 		}
 
 	} else {
 		log.Debug(req.OperationID, "redis handle secondly", req.String())
 
 		for k, v := range req.ReactionExtensionList {
-			err := lockMessageTypeKey(req.ClientMsgID, k)
+			err := rpc.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, k)
 			if err != nil {
 				setKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, k, v)
 				continue
@@ -178,7 +204,7 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	if isExists {
 		log.Debug(req.OperationID, "redis handle this delete", req.String())
 		for _, v := range req.ReactionExtensionList {
-			err := lockMessageTypeKey(req.ClientMsgID, v.TypeKey)
+			err := rpc.dMessageLocker.LockMessageTypeKey(req.ClientMsgID, v.TypeKey)
 			if err != nil {
 				setDeleteKeyResultInfo(&rResp, 100, err.Error(), req.ClientMsgID, v.TypeKey, v)
 				continue
@@ -209,17 +235,4 @@ func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *ms
 	ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false)
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", rResp.String())
 	return &rResp, nil
-}
-func lockMessageTypeKey(clientMsgID, typeKey string) (err error) {
-	for i := 0; i < 3; i++ {
-		err = db.DB.LockMessageTypeKey(clientMsgID, typeKey)
-		if err != nil {
-			time.Sleep(time.Millisecond * 100)
-			continue
-		} else {
-			break
-		}
-	}
-	return err
-
 }
