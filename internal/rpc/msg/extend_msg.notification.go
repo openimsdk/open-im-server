@@ -14,7 +14,7 @@ import (
 )
 
 func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID string, sessionType int32,
-	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool) {
+	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var m base_info.ReactionMessageModifierNotification
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
@@ -30,10 +30,10 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 	m.IsReact = resp.IsReact
 	m.IsExternalExtensions = req.IsExternalExtensions
 	m.MsgFirstModifyTime = resp.MsgFirstModifyTime
-	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory)
+	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageModifier, utils.StructToJsonString(m), isHistory, isReactionFromCache)
 }
 func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string, sessionType int32,
-	req *msg.DeleteMessageListReactionExtensionsReq, resp *msg.DeleteMessageListReactionExtensionsResp, isHistory bool) {
+	req *msg.DeleteMessageListReactionExtensionsReq, resp *msg.DeleteMessageListReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
 	var m base_info.ReactionMessageDeleteNotification
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
@@ -48,14 +48,15 @@ func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string
 	m.ClientMsgID = req.ClientMsgID
 	m.MsgFirstModifyTime = req.MsgFirstModifyTime
 
-	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(m), isHistory)
+	messageReactionSender(operationID, sendID, sourceID, sessionType, constant.ReactionMessageDeleter, utils.StructToJsonString(m), isHistory, isReactionFromCache)
 }
-func messageReactionSender(operationID, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool) {
+func messageReactionSender(operationID, sendID string, sourceID string, sessionType, contentType int32, content string, isHistory bool, isReactionFromCache bool) {
 	options := make(map[string]bool, 5)
 	utils.SetSwitchFromOptions(options, constant.IsOfflinePush, false)
 	utils.SetSwitchFromOptions(options, constant.IsConversationUpdate, false)
 	utils.SetSwitchFromOptions(options, constant.IsSenderConversationUpdate, false)
 	utils.SetSwitchFromOptions(options, constant.IsUnreadCount, false)
+	utils.SetSwitchFromOptions(options, constant.IsReactionFromCache, isReactionFromCache)
 	if !isHistory {
 		utils.SetSwitchFromOptions(options, constant.IsHistory, false)
 		utils.SetSwitchFromOptions(options, constant.IsPersistent, false)

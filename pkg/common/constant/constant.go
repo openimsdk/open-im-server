@@ -171,6 +171,7 @@ const (
 	IsNotPrivate               = "notPrivate"
 	IsSenderConversationUpdate = "senderConversationUpdate"
 	IsSenderNotificationPush   = "senderNotificationPush"
+	IsReactionFromCache        = "reactionFromCache"
 
 	//GroupStatus
 	GroupOk              = 0
