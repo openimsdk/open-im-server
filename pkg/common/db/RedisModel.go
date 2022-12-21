@@ -28,6 +28,7 @@ const (
 	uidPidToken                   = "UID_PID_TOKEN_STATUS:"
 	conversationReceiveMessageOpt = "CON_RECV_MSG_OPT:"
 	getuiToken                    = "GETUI_TOKEN"
+	getuiTaskID                   = "GETUI_TASK_ID"
 	messageCache                  = "MESSAGE_CACHE:"
 	SignalCache                   = "SIGNAL_CACHE:"
 	SignalListCache               = "SIGNAL_LIST_CACHE:"
@@ -394,6 +395,15 @@ func (d *DataBases) SetGetuiToken(token string, expireTime int64) error {
 
 func (d *DataBases) GetGetuiToken() (string, error) {
 	result, err := d.RDB.Get(context.Background(), getuiToken).Result()
+	return result, err
+}
+
+func (d *DataBases) SetGetuiTaskID(taskID string, expireTime int64) error {
+	return d.RDB.Set(context.Background(), getuiTaskID, taskID, time.Duration(expireTime)*time.Second).Err()
+}
+
+func (d *DataBases) GetGetuiTaskID() (string, error) {
+	result, err := d.RDB.Get(context.Background(), getuiTaskID).Result()
 	return result, err
 }
 

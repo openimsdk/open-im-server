@@ -26,8 +26,10 @@ var (
 )
 
 const (
-	PushURL = "/push/single/alias"
-	AuthURL = "/auth"
+	PushURL      = "/push/single/alias"
+	AuthURL      = "/auth"
+	TaskURL      = "/push/list/message"
+	BatchPushURL = "/push/list/alias"
 )
 
 func init() {
@@ -53,9 +55,16 @@ type AuthResp struct {
 	Token      string `json:"token"`
 }
 
+type TaskResp struct {
+	TaskID string `json:"taskID"`
+}
+
 type PushReq struct {
 	RequestID string `json:"request_id"`
-	Audience  struct {
+	Settings  struct {
+		TTL int32 `json:"ttl"`
+	} `json:"settings"`
+	Audience struct {
 		Alias []string `json:"alias"`
 	} `json:"audience"`
 	PushMessage struct {
@@ -66,6 +75,8 @@ type PushReq struct {
 		Ios     Ios     `json:"ios"`
 		Android Android `json:"android"`
 	} `json:"push_channel"`
+	IsAsync bool   `json:"is_async"`
+	Taskid  string `json:"taskid"`
 }
 
 type Ios struct {
@@ -121,7 +132,7 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 	token, err := db.DB.GetGetuiToken()
 	log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
 	if err != nil {
-		log.NewError(operationID, utils.OperationIDGenerator(), "GetGetuiToken failed", err.Error())
+		log.NewError(operationID, utils.GetSelfFuncName(), "GetGetuiToken failed", err.Error())
 	}
 	if token == "" || err != nil {
 		token, err = g.getTokenAndSave2Redis(operationID)
@@ -130,12 +141,9 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 			return "", utils.Wrap(err, "")
 		}
 	}
-	pushReq := PushReq{
-		RequestID: utils.OperationIDGenerator(),
-		Audience: struct {
-			Alias []string `json:"alias"`
-		}{Alias: []string{userIDList[0]}},
-	}
+
+	var pushReq PushReq
+	pushResp := PushResp{}
 	pushReq.PushMessage.Notification = Notification{
 		Title:       title,
 		Body:        detailContent,
@@ -143,34 +151,57 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		ChannelID:   config.Config.Push.Getui.ChannelID,
 		ChannelName: config.Config.Push.Getui.ChannelName,
 	}
-	pushReq.PushChannel.Ios.Aps.Sound = "default"
-	pushReq.PushChannel.Ios.Aps.Alert = Alert{
-		Title: title,
-		Body:  title,
+	if len(userIDList) > 1 {
+		taskID, err := db.DB.GetGetuiTaskID()
+		log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), "GetGetuiTaskID failed", err.Error())
+		}
+		if taskID == "" || err != nil {
+			taskID, err = g.GetTaskIDAndSave2Redis(operationID, token, pushReq)
+			if err != nil {
+				log.NewError(operationID, utils.GetSelfFuncName(), "GetTaskIDAndSave2Redis failed", err.Error())
+				return "", utils.Wrap(err, "")
+			}
+		}
+		pushReq.IsAsync = true
+		pushReq.Taskid = taskID
+		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
+	} else {
+		pushReq := PushReq{
+			RequestID: utils.OperationIDGenerator(),
+			Audience: struct {
+				Alias []string `json:"alias"`
+			}{Alias: []string{userIDList[0]}},
+		}
+		pushReq.PushChannel.Ios.Aps.Sound = "default"
+		pushReq.PushChannel.Ios.Aps.Alert = Alert{
+			Title: title,
+			Body:  title,
+		}
+		pushReq.PushChannel.Android.Ups.Notification = Notification{
+			Title:     title,
+			Body:      title,
+			ClickType: "startapp",
+		}
+		pushReq.PushChannel.Android.Ups.Options = Options{
+			HW: struct {
+				DefaultSound bool   `json:"/message/android/notification/default_sound"`
+				ChannelID    string `json:"/message/android/notification/channel_id"`
+				Sound        string `json:"/message/android/notification/sound"`
+				Importance   string `json:"/message/android/notification/importance"`
+			}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
+			XM: struct {
+				ChannelID string `json:"/extra.channel_id"`
+			}{ChannelID: "high_system"},
+			VV: struct {
+				Classification int "json:\"/classification\""
+			}{
+				Classification: 1,
+			},
+		}
+		err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	}
-	pushReq.PushChannel.Android.Ups.Notification = Notification{
-		Title:     title,
-		Body:      title,
-		ClickType: "startapp",
-	}
-	pushReq.PushChannel.Android.Ups.Options = Options{
-		HW: struct {
-			DefaultSound bool   `json:"/message/android/notification/default_sound"`
-			ChannelID    string `json:"/message/android/notification/channel_id"`
-			Sound        string `json:"/message/android/notification/sound"`
-			Importance   string `json:"/message/android/notification/importance"`
-		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
-		XM: struct {
-			ChannelID string `json:"/extra.channel_id"`
-		}{ChannelID: "high_system"},
-		VV: struct {
-			Classification int "json:\"/classification\""
-		}{
-			Classification: 1,
-		},
-	}
-	pushResp := PushResp{}
-	err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	switch err {
 	case TokenExpireError:
 		token, err = g.getTokenAndSave2Redis(operationID)
@@ -207,6 +238,15 @@ func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireT
 	log.NewInfo(operationID, utils.GetSelfFuncName(), "result: ", respAuth)
 	expire, err := strconv.Atoi(respAuth.ExpireTime)
 	return respAuth.Token, int64(expire), err
+}
+
+func (g *Getui) GetTaskID(operationID, token string, pushReq PushReq) (string, error) {
+	respTask := TaskResp{}
+	err := g.request(TaskURL, pushReq, token, &respTask, operationID)
+	if err != nil {
+		return "", utils.Wrap(err, "")
+	}
+	return respTask.TaskID, nil
 }
 
 func (g *Getui) request(url string, content interface{}, token string, returnStruct interface{}, operationID string) error {
@@ -252,6 +292,19 @@ func (g *Getui) getTokenAndSave2Redis(operationID string) (token string, err err
 	}
 	log.NewDebug(operationID, "getui", utils.GetSelfFuncName(), token, expireTime, err)
 	err = db.DB.SetGetuiToken(token, 60*60*23)
+	if err != nil {
+		return "", utils.Wrap(err, "Auth failed")
+	}
+	return token, nil
+}
+
+func (g *Getui) GetTaskIDAndSave2Redis(operationID, token string, pushReq PushReq) (taskID string, err error) {
+	pushReq.Settings.TTL = 1000 * 60 * 60 * 24
+	taskID, err = g.GetTaskID(operationID, token, pushReq)
+	if err != nil {
+		return "", utils.Wrap(err, "GetTaskIDAndSave2Redis failed")
+	}
+	err = db.DB.SetGetuiTaskID(taskID, 60*60*23)
 	if err != nil {
 		return "", utils.Wrap(err, "Auth failed")
 	}
