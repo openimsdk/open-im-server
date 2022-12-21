@@ -106,7 +106,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
-	lastMsgSendTime := msgs.Msg[len(msgs.Msg)-1].SendTime
+	// lastMsgSendTime := msgs.Msg[len(msgs.Msg)-1].SendTime
 
 	var hasMsgDoNotNeedDel bool
 	for i, msg := range msgs.Msg {
