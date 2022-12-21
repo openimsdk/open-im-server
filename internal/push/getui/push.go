@@ -152,18 +152,9 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		ChannelName: config.Config.Push.Getui.ChannelName,
 	}
 	if len(userIDList) > 1 {
-		taskID, err := db.DB.GetGetuiTaskID()
+		taskID, err := g.GetTaskID(operationID, token, pushReq)
 		if err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), "GetGetuiTaskID failed", err.Error())
-		} else {
-			log.NewDebug(operationID, utils.GetSelfFuncName(), "taskID", taskID)
-		}
-		if taskID == "" || err != nil {
-			taskID, err = g.GetTaskIDAndSave2Redis(operationID, token, pushReq)
-			if err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), "GetTaskIDAndSave2Redis failed", err.Error())
-				return "", utils.Wrap(err, "")
-			}
+			return "", utils.Wrap(err, "GetTaskIDAndSave2Redis failed")
 		}
 		var IsAsync = true
 		pushReq.IsAsync = &IsAsync
@@ -176,7 +167,7 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
 	} else {
 		reqID := utils.OperationIDGenerator()
-		pushReq := PushReq{
+		pushReq = PushReq{
 			RequestID: &reqID,
 			Audience: struct {
 				Alias []string `json:"alias"`
