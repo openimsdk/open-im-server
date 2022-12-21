@@ -237,7 +237,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			if err != nil {
 				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
 			}
-			log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), onlineFailedUserIDList, title, detailContent, "opts:", opts)
+			log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), needOfflinePushUserIDList, title, detailContent, "opts:", opts)
 			if title == "" {
 				switch pushMsg.MsgData.ContentType {
 				case constant.Text:
