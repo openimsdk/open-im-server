@@ -168,6 +168,8 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		var IsAsync = true
 		pushReq.IsAsync = &IsAsync
 		pushReq.Taskid = &taskID
+		pushReq.PushMessage.Notification = nil
+		pushReq.PushMessage.Transmission = nil
 		pushReq.Audience = struct {
 			Alias []string `json:"alias"`
 		}{Alias: userIDList}
