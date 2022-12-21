@@ -130,7 +130,7 @@ func newGetuiClient() *Getui {
 
 func (g *Getui) Push(userIDList []string, title, detailContent, operationID string, opts push.PushOpts) (resp string, err error) {
 	token, err := db.DB.GetGetuiToken()
-	log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
+	log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token, userIDList)
 	if err != nil {
 		log.NewError(operationID, utils.GetSelfFuncName(), "GetGetuiToken failed", err.Error())
 	}
@@ -153,7 +153,7 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 	}
 	if len(userIDList) > 1 {
 		taskID, err := db.DB.GetGetuiTaskID()
-		log.NewDebug(operationID, utils.GetSelfFuncName(), "token：", token)
+		log.NewDebug(operationID, utils.GetSelfFuncName(), "taskID", taskID)
 		if err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), "GetGetuiTaskID failed", err.Error())
 		}
