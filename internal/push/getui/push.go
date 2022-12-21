@@ -182,11 +182,13 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 				Alias []string `json:"alias"`
 			}{Alias: []string{userIDList[0]}},
 		}
+		pushReq.PushChannel.Ios = &Ios{}
 		pushReq.PushChannel.Ios.Aps.Sound = "default"
 		pushReq.PushChannel.Ios.Aps.Alert = Alert{
 			Title: title,
 			Body:  title,
 		}
+		pushReq.PushChannel.Android = &Android{}
 		pushReq.PushChannel.Android.Ups.Notification = Notification{
 			Title:     title,
 			Body:      title,
