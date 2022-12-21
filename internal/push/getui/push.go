@@ -168,6 +168,9 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		var IsAsync = true
 		pushReq.IsAsync = &IsAsync
 		pushReq.Taskid = &taskID
+		pushReq.Audience = struct {
+			Alias []string `json:"alias"`
+		}{Alias: userIDList}
 		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
 	} else {
 		reqID := utils.OperationIDGenerator()
