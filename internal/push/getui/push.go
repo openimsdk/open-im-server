@@ -167,12 +167,11 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
 	} else {
 		reqID := utils.OperationIDGenerator()
-		pushReq = PushReq{
-			RequestID: &reqID,
-			Audience: struct {
-				Alias []string `json:"alias"`
-			}{Alias: []string{userIDList[0]}},
-		}
+		pushReq.RequestID = &reqID
+		pushReq.Audience = struct {
+			Alias []string `json:"alias"`
+		}{Alias: []string{userIDList[0]}}
+
 		pushReq.PushChannel.Ios = &Ios{}
 		pushReq.PushChannel.Ios.Aps.Sound = "default"
 		pushReq.PushChannel.Ios.Aps.Alert = Alert{
