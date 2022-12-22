@@ -163,7 +163,7 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		if err != nil {
 			return "", utils.Wrap(err, "GetTaskIDAndSave2Redis failed")
 		}
-		var IsAsync = true
+		var IsAsync = false
 		pushReq.IsAsync = &IsAsync
 		pushReq.Taskid = &taskID
 		pushReq.PushMessage.Notification = nil
