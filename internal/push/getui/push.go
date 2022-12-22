@@ -88,7 +88,8 @@ type PushReq struct {
 }
 
 type Ios struct {
-	Aps struct {
+	NotiType *string `json:"type"`
+	Aps      struct {
 		Sound string `json:"sound"`
 		Alert Alert  `json:"alert"`
 	} `json:"aps"`
@@ -166,8 +167,7 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		var IsAsync = false
 		pushReq.IsAsync = &IsAsync
 		pushReq.Taskid = &taskID
-		pushReq.PushMessage.Notification = nil
-		pushReq.PushMessage.Transmission = nil
+		pushReq.PushMessage = nil
 		pushReq.Audience = &Audience{Alias: userIDList}
 		pushReq.setPushChannel(title, detailContent)
 		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
@@ -176,6 +176,8 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		pushReq.RequestID = &reqID
 		pushReq.Audience = &Audience{Alias: []string{userIDList[0]}}
 		pushReq.setPushChannel(title, detailContent)
+		notify := "notify"
+		pushReq.PushChannel.Ios.NotiType = &notify
 		err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	}
 	switch err {
