@@ -59,24 +59,32 @@ type TaskResp struct {
 	TaskID string `json:"taskID"`
 }
 
+type Settings struct {
+	TTL *int64 `json:"ttl"`
+}
+
+type Audience struct {
+	Alias []string `json:"alias"`
+}
+
+type PushMessage struct {
+	Notification *Notification `json:"notification,omitempty"`
+	Transmission *string       `json:"transmission,omitempty"`
+}
+
+type PushChannel struct {
+	Ios     *Ios     `json:"ios"`
+	Android *Android `json:"android"`
+}
+
 type PushReq struct {
-	RequestID *string `json:"request_id"`
-	Settings  struct {
-		TTL *int64 `json:"ttl"`
-	} `json:"settings"`
-	Audience struct {
-		Alias []string `json:"alias"`
-	} `json:"audience"`
-	PushMessage struct {
-		Notification *Notification `json:"notification,omitempty"`
-		Transmission *string       `json:"transmission,omitempty"`
-	} `json:"push_message"`
-	PushChannel struct {
-		Ios     *Ios     `json:"ios"`
-		Android *Android `json:"android"`
-	} `json:"push_channel"`
-	IsAsync *bool   `json:"is_async"`
-	Taskid  *string `json:"taskid"`
+	RequestID   *string      `json:"request_id"`
+	Settings    *Settings    `json:"settings"`
+	Audience    *Audience    `json:"audience"`
+	PushMessage *PushMessage `json:"push_message"`
+	PushChannel *PushChannel `json:"push_channel"`
+	IsAsync     *bool        `json:"is_async"`
+	Taskid      *string      `json:"taskid"`
 }
 
 type Ios struct {
@@ -142,15 +150,14 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		}
 	}
 
-	var pushReq PushReq
-	pushResp := PushResp{}
-	pushReq.PushMessage.Notification = &Notification{
+	pushReq := PushReq{PushMessage: &PushMessage{Notification: &Notification{
 		Title:       title,
 		Body:        detailContent,
 		ClickType:   "startapp",
 		ChannelID:   config.Config.Push.Getui.ChannelID,
 		ChannelName: config.Config.Push.Getui.ChannelName,
-	}
+	}}}
+	pushResp := PushResp{}
 	if len(userIDList) > 1 {
 		taskID, err := g.GetTaskID(operationID, token, pushReq)
 		if err != nil {
@@ -161,17 +168,12 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		pushReq.Taskid = &taskID
 		pushReq.PushMessage.Notification = nil
 		pushReq.PushMessage.Transmission = nil
-		pushReq.Audience = struct {
-			Alias []string `json:"alias"`
-		}{Alias: userIDList}
+		pushReq.Audience = &Audience{Alias: userIDList}
 		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
 	} else {
 		reqID := utils.OperationIDGenerator()
 		pushReq.RequestID = &reqID
-		pushReq.Audience = struct {
-			Alias []string `json:"alias"`
-		}{Alias: []string{userIDList[0]}}
-
+		pushReq.Audience = &Audience{Alias: []string{userIDList[0]}}
 		pushReq.PushChannel.Ios = &Ios{}
 		pushReq.PushChannel.Ios.Aps.Sound = "default"
 		pushReq.PushChannel.Ios.Aps.Alert = Alert{
@@ -242,6 +244,8 @@ func (g *Getui) Auth(operationID string, timeStamp int64) (token string, expireT
 
 func (g *Getui) GetTaskID(operationID, token string, pushReq PushReq) (string, error) {
 	respTask := TaskResp{}
+	ttl := int64(1000 * 60 * 5)
+	pushReq.Settings = &Settings{TTL: &ttl}
 	err := g.request(TaskURL, pushReq, token, &respTask, operationID)
 	if err != nil {
 		return "", utils.Wrap(err, "")
@@ -300,7 +304,7 @@ func (g *Getui) getTokenAndSave2Redis(operationID string) (token string, err err
 
 func (g *Getui) GetTaskIDAndSave2Redis(operationID, token string, pushReq PushReq) (taskID string, err error) {
 	ttl := int64(1000 * 60 * 60 * 24)
-	pushReq.Settings.TTL = &ttl
+	pushReq.Settings = &Settings{TTL: &ttl}
 	taskID, err = g.GetTaskID(operationID, token, pushReq)
 	if err != nil {
 		return "", utils.Wrap(err, "GetTaskIDAndSave2Redis failed")
