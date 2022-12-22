@@ -7,11 +7,12 @@ import (
 	"Open_IM/pkg/common/log"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
-	goRedis "github.com/go-redis/redis/v8"
-	"github.com/golang/protobuf/proto"
 	"math"
 	"strconv"
 	"strings"
+
+	goRedis "github.com/go-redis/redis/v8"
+	"github.com/golang/protobuf/proto"
 )
 
 const oldestList = 0
@@ -105,6 +106,8 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
+	// lastMsgSendTime := msgs.Msg[len(msgs.Msg)-1].SendTime
+
 	var hasMsgDoNotNeedDel bool
 	for i, msg := range msgs.Msg {
 		// 找到列表中不需要删除的消息了, 表示为递归到最后一个块
@@ -130,20 +133,16 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 			}
 			// 递归结束
 			return msgPb.Seq, nil
-		} else {
-			if !msgListIsFull(msgs) {
-
-			}
 		}
 	}
 	// 该列表中消息全部为老消息并且列表满了, 加入删除列表继续递归
-	lastMsgPb := &server_api_params.MsgData{}
-	err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
-	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
-		return 0, utils.Wrap(err, "proto.Unmarshal failed")
-	}
-	delStruct.minSeq = lastMsgPb.Seq
+	// lastMsgPb := &server_api_params.MsgData{}
+	// err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
+	// if err != nil {
+	// 	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
+	// 	return 0, utils.Wrap(err, "proto.Unmarshal failed")
+	// }
+	// delStruct.minSeq = lastMsgPb.Seq
 	if msgListIsFull(msgs) {
 		log.NewDebug(operationID, "msg list is full", msgs.UID)
 		delStruct.delUidList = append(delStruct.delUidList, msgs.UID)
