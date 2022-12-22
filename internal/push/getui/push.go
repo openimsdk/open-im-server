@@ -167,7 +167,7 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 			return "", utils.Wrap(err, "GetTaskIDAndSave2Redis failed")
 		}
 		pushReq = PushReq{Audience: &Audience{Alias: userIDList}}
-		var IsAsync = false
+		var IsAsync = true
 		pushReq.IsAsync = &IsAsync
 		pushReq.Taskid = &taskID
 		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
