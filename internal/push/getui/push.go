@@ -174,6 +174,7 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		reqID := utils.OperationIDGenerator()
 		pushReq.RequestID = &reqID
 		pushReq.Audience = &Audience{Alias: []string{userIDList[0]}}
+		pushReq.PushChannel = &PushChannel{}
 		pushReq.PushChannel.Ios = &Ios{}
 		pushReq.PushChannel.Ios.Aps.Sound = "default"
 		pushReq.PushChannel.Ios.Aps.Alert = Alert{
