@@ -88,8 +88,9 @@ type PushReq struct {
 }
 
 type Ios struct {
-	NotiType *string `json:"type"`
-	Aps      struct {
+	NotiType  *string `json:"type"`
+	AutoBadge *string `json:"auto_badge"`
+	Aps       struct {
 		Sound string `json:"sound"`
 		Alert Alert  `json:"alert"`
 	} `json:"aps"`
@@ -158,26 +159,22 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		ChannelID:   config.Config.Push.Getui.ChannelID,
 		ChannelName: config.Config.Push.Getui.ChannelName,
 	}}}
+	pushReq.setPushChannel(title, detailContent)
 	pushResp := PushResp{}
 	if len(userIDList) > 1 {
 		taskID, err := g.GetTaskID(operationID, token, pushReq)
 		if err != nil {
 			return "", utils.Wrap(err, "GetTaskIDAndSave2Redis failed")
 		}
+		pushReq = PushReq{Audience: &Audience{Alias: userIDList}}
 		var IsAsync = false
 		pushReq.IsAsync = &IsAsync
 		pushReq.Taskid = &taskID
-		pushReq.PushMessage = nil
-		pushReq.Audience = &Audience{Alias: userIDList}
-		pushReq.setPushChannel(title, detailContent)
 		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
 	} else {
 		reqID := utils.OperationIDGenerator()
 		pushReq.RequestID = &reqID
 		pushReq.Audience = &Audience{Alias: []string{userIDList[0]}}
-		pushReq.setPushChannel(title, detailContent)
-		notify := "notify"
-		pushReq.PushChannel.Ios.NotiType = &notify
 		err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	}
 	switch err {
@@ -267,7 +264,10 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 
 func (pushReq *PushReq) setPushChannel(title string, body string) {
 	pushReq.PushChannel = &PushChannel{}
-	pushReq.PushChannel.Ios = &Ios{}
+	autoBadge := "+1"
+	pushReq.PushChannel.Ios = &Ios{AutoBadge: &autoBadge}
+	notify := "notify"
+	pushReq.PushChannel.Ios.NotiType = &notify
 	pushReq.PushChannel.Ios.Aps.Sound = "default"
 	pushReq.PushChannel.Ios.Aps.Alert = Alert{
 		Title: title,
