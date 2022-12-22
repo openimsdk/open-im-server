@@ -169,40 +169,13 @@ func (g *Getui) Push(userIDList []string, title, detailContent, operationID stri
 		pushReq.PushMessage.Notification = nil
 		pushReq.PushMessage.Transmission = nil
 		pushReq.Audience = &Audience{Alias: userIDList}
+		pushReq.setPushChannel(title, detailContent)
 		err = g.request(BatchPushURL, pushReq, token, &pushResp, operationID)
 	} else {
 		reqID := utils.OperationIDGenerator()
 		pushReq.RequestID = &reqID
 		pushReq.Audience = &Audience{Alias: []string{userIDList[0]}}
-		pushReq.PushChannel = &PushChannel{}
-		pushReq.PushChannel.Ios = &Ios{}
-		pushReq.PushChannel.Ios.Aps.Sound = "default"
-		pushReq.PushChannel.Ios.Aps.Alert = Alert{
-			Title: title,
-			Body:  title,
-		}
-		pushReq.PushChannel.Android = &Android{}
-		pushReq.PushChannel.Android.Ups.Notification = Notification{
-			Title:     title,
-			Body:      title,
-			ClickType: "startapp",
-		}
-		pushReq.PushChannel.Android.Ups.Options = Options{
-			HW: struct {
-				DefaultSound bool   `json:"/message/android/notification/default_sound"`
-				ChannelID    string `json:"/message/android/notification/channel_id"`
-				Sound        string `json:"/message/android/notification/sound"`
-				Importance   string `json:"/message/android/notification/importance"`
-			}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
-			XM: struct {
-				ChannelID string `json:"/extra.channel_id"`
-			}{ChannelID: "high_system"},
-			VV: struct {
-				Classification int "json:\"/classification\""
-			}{
-				Classification: 1,
-			},
-		}
+		pushReq.setPushChannel(title, detailContent)
 		err = g.request(PushURL, pushReq, token, &pushResp, operationID)
 	}
 	switch err {
@@ -288,6 +261,38 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 		return TokenExpireError
 	}
 	return nil
+}
+
+func (pushReq *PushReq) setPushChannel(title string, body string) {
+	pushReq.PushChannel = &PushChannel{}
+	pushReq.PushChannel.Ios = &Ios{}
+	pushReq.PushChannel.Ios.Aps.Sound = "default"
+	pushReq.PushChannel.Ios.Aps.Alert = Alert{
+		Title: title,
+		Body:  body,
+	}
+	pushReq.PushChannel.Android = &Android{}
+	pushReq.PushChannel.Android.Ups.Notification = Notification{
+		Title:     title,
+		Body:      body,
+		ClickType: "startapp",
+	}
+	pushReq.PushChannel.Android.Ups.Options = Options{
+		HW: struct {
+			DefaultSound bool   `json:"/message/android/notification/default_sound"`
+			ChannelID    string `json:"/message/android/notification/channel_id"`
+			Sound        string `json:"/message/android/notification/sound"`
+			Importance   string `json:"/message/android/notification/importance"`
+		}{ChannelID: "RingRing4", Sound: "/raw/ring001", Importance: "NORMAL"},
+		XM: struct {
+			ChannelID string `json:"/extra.channel_id"`
+		}{ChannelID: "high_system"},
+		VV: struct {
+			Classification int "json:\"/classification\""
+		}{
+			Classification: 1,
+		},
+	}
 }
 
 func (g *Getui) getTokenAndSave2Redis(operationID string) (token string, err error) {
