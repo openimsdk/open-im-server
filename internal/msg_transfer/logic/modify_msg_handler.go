@@ -9,6 +9,7 @@ import (
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/msg"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/utils"
 	"encoding/json"
 	"github.com/Shopify/sarama"
 
@@ -54,6 +55,10 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 	}
 	log.Debug(msgFromMQ.TriggerID, "proto.Unmarshal MsgDataToMQ", msgFromMQ.String())
 	for _, msgDataToMQ := range msgFromMQ.MessageList {
+		isReactionFromCache := utils.GetSwitchFromOptions(msgDataToMQ.MsgData.Options, constant.IsReactionFromCache)
+		if !isReactionFromCache {
+			continue
+		}
 		if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageModifier {
 			notification := &base_info.ReactionMessageModifierNotification{}
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
