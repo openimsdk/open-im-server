@@ -62,12 +62,15 @@ kafka:
   ms2pschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ms2ps_chat" #消息push
+  msgtomodify:
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+    topic: "msg_to_modify"
   consumergroupid:
     msgToTransfer: mongo
     msgToMongo: mongo_ex
     msgToMySql: mysql
     msgToPush: push
-
+    msgToModify: modify
 
 
 #---------------Internal service configuration---------------------#
@@ -349,6 +352,11 @@ callback:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续
+  callbackSetMessageReactionExtensions:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续
+
 
 notification:
   groupCreated:

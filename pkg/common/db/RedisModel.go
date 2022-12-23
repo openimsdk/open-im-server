@@ -39,6 +39,7 @@ const (
 	groupMinSeq                   = "GROUP_MIN_SEQ:"
 	sendMsgFailedFlag             = "SEND_MSG_FAILED_FLAG:"
 	userBadgeUnreadCountSum       = "USER_BADGE_UNREAD_COUNT_SUM:"
+	exTypeKeyLocker               = "EX_LOCK:"
 )
 
 func (d *DataBases) JudgeAccountEXISTS(account string) (bool, error) {
@@ -446,4 +447,62 @@ func (d *DataBases) GetUserBadgeUnreadCountSum(uid string) (int, error) {
 	key := userBadgeUnreadCountSum + uid
 	seq, err := d.RDB.Get(context.Background(), key).Result()
 	return utils.StringToInt(seq), err
+}
+func (d *DataBases) JudgeMessageReactionEXISTS(clientMsgID string, sessionType int32) (bool, error) {
+	key := getMessageReactionExPrefix(clientMsgID, sessionType)
+	n, err := d.RDB.Exists(context.Background(), key).Result()
+	if n > 0 {
+		return true, err
+	} else {
+		return false, err
+	}
+}
+
+func (d *DataBases) GetOneMessageAllReactionList(clientMsgID string, sessionType int32) (map[string]string, error) {
+	key := getMessageReactionExPrefix(clientMsgID, sessionType)
+	return d.RDB.HGetAll(context.Background(), key).Result()
+
+}
+func (d *DataBases) DeleteOneMessageKey(clientMsgID string, sessionType int32, subKey string) error {
+	key := getMessageReactionExPrefix(clientMsgID, sessionType)
+	return d.RDB.HDel(context.Background(), key, subKey).Err()
+
+}
+func (d *DataBases) SetMessageReactionExpire(clientMsgID string, sessionType int32, expiration time.Duration) (bool, error) {
+	key := getMessageReactionExPrefix(clientMsgID, sessionType)
+	return d.RDB.Expire(context.Background(), key, expiration).Result()
+}
+func (d *DataBases) GetMessageTypeKeyValue(clientMsgID string, sessionType int32, typeKey string) (string, error) {
+	key := getMessageReactionExPrefix(clientMsgID, sessionType)
+	result, err := d.RDB.HGet(context.Background(), key, typeKey).Result()
+	return result, err
+
+}
+func (d *DataBases) SetMessageTypeKeyValue(clientMsgID string, sessionType int32, typeKey, value string) error {
+	key := getMessageReactionExPrefix(clientMsgID, sessionType)
+	return d.RDB.HSet(context.Background(), key, typeKey, value).Err()
+
+}
+func (d *DataBases) LockMessageTypeKey(clientMsgID string, TypeKey string) error {
+	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
+	return d.RDB.SetNX(context.Background(), key, 1, time.Minute).Err()
+}
+func (d *DataBases) UnLockMessageTypeKey(clientMsgID string, TypeKey string) error {
+	key := exTypeKeyLocker + clientMsgID + "_" + TypeKey
+	return d.RDB.Del(context.Background(), key).Err()
+
+}
+
+func getMessageReactionExPrefix(clientMsgID string, sessionType int32) string {
+	switch sessionType {
+	case constant.SingleChatType:
+		return "EX_SINGLE_" + clientMsgID
+	case constant.GroupChatType:
+		return "EX_GROUP_" + clientMsgID
+	case constant.SuperGroupChatType:
+		return "EX_SUPER_GROUP_" + clientMsgID
+	case constant.NotificationChatType:
+		return "EX_NOTIFICATION" + clientMsgID
+	}
+	return ""
 }

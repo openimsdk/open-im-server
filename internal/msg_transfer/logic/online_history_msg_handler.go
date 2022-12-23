@@ -72,6 +72,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 				storageMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
 				notStoragePushMsgList := make([]*pbMsg.MsgDataToMQ, 0, 80)
 				log.Debug(triggerID, "msg arrived channel", "channel id", channelID, msgList, msgChannelValue.aggregationID, len(msgList))
+				var modifyMsgList []*pbMsg.MsgDataToMQ
 				for _, v := range msgList {
 					log.Debug(triggerID, "msg come to storage center", v.String())
 					isHistory := utils.GetSwitchFromOptions(v.MsgData.Options, constant.IsHistory)
@@ -83,11 +84,15 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 						if !(!isSenderSync && msgChannelValue.aggregationID == v.MsgData.SendID) {
 							notStoragePushMsgList = append(notStoragePushMsgList, v)
 						}
-
 					}
 
+					if v.MsgData.ContentType == constant.ReactionMessageModifier || v.MsgData.ContentType == constant.ReactionMessageDeleter {
+						modifyMsgList = append(modifyMsgList, v)
+					}
 				}
-
+				if len(modifyMsgList) > 0 {
+					sendMessageToModifyMQ(msgChannelValue.aggregationID, triggerID, modifyMsgList)
+				}
 				//switch msgChannelValue.msg.MsgData.SessionType {
 				//case constant.SingleChatType:
 				//case constant.GroupChatType:
@@ -107,6 +112,7 @@ func (och *OnlineHistoryRedisConsumerHandler) Run(channelID int) {
 						singleMsgSuccessCount += uint64(len(storageMsgList))
 						singleMsgSuccessCountMutex.Unlock()
 						och.SendMessageToMongoCH(msgChannelValue.aggregationID, triggerID, storageMsgList, lastSeq)
+
 						for _, v := range storageMsgList {
 							sendMessageToPushMQ(v, msgChannelValue.aggregationID)
 						}
@@ -550,6 +556,17 @@ func sendMessageToPushMQ(message *pbMsg.MsgDataToMQ, pushToUserID string) {
 		log.Error(mqPushMsg.OperationID, "kafka send failed", "send data", message.String(), "pid", pid, "offset", offset, "err", err.Error())
 	}
 	return
+}
+
+func sendMessageToModifyMQ(aggregationID string, triggerID string, messages []*pbMsg.MsgDataToMQ) {
+	if len(messages) > 0 {
+		pid, offset, err := producerToModify.SendMessage(&pbMsg.MsgDataToModifyByMQ{AggregationID: aggregationID, MessageList: messages, TriggerID: triggerID}, aggregationID, triggerID)
+		if err != nil {
+			log.Error(triggerID, "kafka send failed", "send data", len(messages), "pid", pid, "offset", offset, "err", err.Error(), "key", aggregationID)
+		} else {
+			//	log.NewWarn(m.OperationID, "sendMsgToKafka   client msgID ", m.MsgData.ClientMsgID)
+		}
+	}
 }
 
 // String hashes a string to a unique hashcode.
