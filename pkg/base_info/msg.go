@@ -110,6 +110,7 @@ type DeleteMessageReactionExtensionsReq struct {
 	SourceID              string             `json:"sourceID" binding:"required"`
 	SessionType           int32              `json:"sessionType" binding:"required"`
 	ClientMsgID           string             `json:"clientMsgID" binding:"required"`
+	IsExternalExtensions  bool               `json:"isExternalExtensions"`
 	MsgFirstModifyTime    int64              `json:"msgFirstModifyTime" binding:"required"`
 	ReactionExtensionList []*sdk_ws.KeyValue `json:"reactionExtensionList" binding:"required"`
 }

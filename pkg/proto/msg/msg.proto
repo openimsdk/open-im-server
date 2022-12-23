@@ -228,8 +228,9 @@ message DeleteMessageListReactionExtensionsReq {
   string sourceID = 3;
   int32 sessionType = 4;
   string clientMsgID = 5;
-  int64 msgFirstModifyTime = 6;
-  repeated server_api_params.KeyValue reactionExtensionList = 7;
+  bool isExternalExtensions = 6;
+  int64 msgFirstModifyTime = 7;
+  repeated server_api_params.KeyValue reactionExtensionList = 8;
 }
 
 message DeleteMessageListReactionExtensionsResp {

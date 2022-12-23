@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/proto/msg"
@@ -17,6 +18,40 @@ func (rpc *rpcChat) SetMessageReactionExtensions(ctx context.Context, req *msg.S
 	var rResp msg.SetMessageReactionExtensionsResp
 	rResp.ClientMsgID = req.ClientMsgID
 	rResp.MsgFirstModifyTime = req.MsgFirstModifyTime
+	callbackResp := callbackSetMessageReactionExtensions(req)
+	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
+		rResp.ErrCode = int32(callbackResp.ErrCode)
+		rResp.ErrMsg = callbackResp.ErrMsg
+		for _, value := range req.ReactionExtensionList {
+			temp := new(msg.KeyValueResp)
+			temp.KeyValue = value
+			temp.ErrMsg = callbackResp.ErrMsg
+			temp.ErrCode = 100
+			rResp.Result = append(rResp.Result, temp)
+		}
+		return &rResp, nil
+	}
+	//if ExternalExtension
+	if req.IsExternalExtensions {
+		var isHistory bool
+		if req.IsReact {
+			isHistory = false
+		} else {
+			isHistory = true
+		}
+		rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
+		rResp.Result = callbackResp.ResultReactionExtensionList
+		ExtendMessageUpdatedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
+		return &rResp, nil
+	}
+	for _, v := range callbackResp.ResultReactionExtensionList {
+		if v.ErrCode == 0 {
+			req.ReactionExtensionList[v.KeyValue.TypeKey] = v.KeyValue
+		} else {
+			delete(req.ReactionExtensionList, v.KeyValue.TypeKey)
+			rResp.Result = append(rResp.Result, v)
+		}
+	}
 	isExists, err := db.DB.JudgeMessageReactionEXISTS(req.ClientMsgID, req.SessionType)
 	if err != nil {
 		rResp.ErrCode = 100
@@ -243,6 +278,38 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.M
 func (rpc *rpcChat) DeleteMessageReactionExtensions(ctx context.Context, req *msg.DeleteMessageListReactionExtensionsReq) (resp *msg.DeleteMessageListReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
 	var rResp msg.DeleteMessageListReactionExtensionsResp
+	callbackResp := callbackDeleteMessageReactionExtensions(req)
+	if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
+		rResp.ErrCode = int32(callbackResp.ErrCode)
+		rResp.ErrMsg = callbackResp.ErrMsg
+		for _, value := range req.ReactionExtensionList {
+			temp := new(msg.KeyValueResp)
+			temp.KeyValue = value
+			temp.ErrMsg = callbackResp.ErrMsg
+			temp.ErrCode = 100
+			rResp.Result = append(rResp.Result, temp)
+		}
+		return &rResp, nil
+	}
+	//if ExternalExtension
+	if req.IsExternalExtensions {
+		rResp.Result = callbackResp.ResultReactionExtensionList
+		ExtendMessageDeleteNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, false, false)
+		return &rResp, nil
+
+	}
+	for _, v := range callbackResp.ResultReactionExtensionList {
+		if v.ErrCode != 0 {
+			func(req *[]*server_api_params.KeyValue, typeKey string) {
+				for i := 0; i < len(*req); i++ {
+					if (*req)[i].TypeKey == typeKey {
+						*req = append((*req)[:i], (*req)[i+1:]...)
+					}
+				}
+			}(&req.ReactionExtensionList, v.KeyValue.TypeKey)
+			rResp.Result = append(rResp.Result, v)
+		}
+	}
 	isExists, err := db.DB.JudgeMessageReactionEXISTS(req.ClientMsgID, req.SessionType)
 	if err != nil {
 		rResp.ErrCode = 100

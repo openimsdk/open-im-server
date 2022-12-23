@@ -25,6 +25,10 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
 		}
 	}
+	if len(keyMap) == 0 {
+		log.NewWarn(operationID, "all key set failed can not send notification", *req)
+		return
+	}
 	m.SuccessReactionExtensionList = keyMap
 	m.ClientMsgID = req.ClientMsgID
 	m.IsReact = resp.IsReact
@@ -43,6 +47,10 @@ func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string
 		if valueResp.ErrCode == 0 {
 			keyMap[valueResp.KeyValue.TypeKey] = valueResp.KeyValue
 		}
+	}
+	if len(keyMap) == 0 {
+		log.NewWarn(operationID, "all key set failed can not send notification", *req)
+		return
 	}
 	m.SuccessReactionExtensionList = keyMap
 	m.ClientMsgID = req.ClientMsgID
