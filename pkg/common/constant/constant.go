@@ -48,6 +48,8 @@ const (
 	AdvancedRevoke               = 118 //影响前者消息
 	CustomNotTriggerConversation = 119
 	CustomOnlineOnly             = 120
+	ReactionMessageModifier      = 121
+	ReactionMessageDeleter       = 122
 
 	Common             = 200
 	GroupMsg           = 201
@@ -169,6 +171,7 @@ const (
 	IsNotPrivate               = "notPrivate"
 	IsSenderConversationUpdate = "senderConversationUpdate"
 	IsSenderNotificationPush   = "senderNotificationPush"
+	IsReactionFromCache        = "reactionFromCache"
 
 	//GroupStatus
 	GroupOk              = 0
@@ -217,6 +220,8 @@ const (
 	CallbackBeforeCreateGroupCommand        = "callbackBeforeCreateGroupCommand"
 	CallbackBeforeMemberJoinGroupCommand    = "callbackBeforeMemberJoinGroupCommand"
 	CallbackBeforeSetGroupMemberInfoCommand = "CallbackBeforeSetGroupMemberInfoCommand"
+	CallbackBeforeSetMessageReactionExtensionCommand     = "callbackBeforeSetMessageReactionExtensionCommand"
+	CallbackBeforeDeleteMessageReactionExtensionsCommand = "callbackBeforeDeleteMessageReactionExtensionsCommand"
 
 	//callback actionCode
 	ActionAllow     = 0
