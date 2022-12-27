@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
 	"strconv"
@@ -24,7 +25,7 @@ var (
 
 func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *db.UserChat {
 	chat := &db.UserChat{UID: userID + strconv.Itoa(int(index))}
-	for i := startSeq; i <= stopSeq; i++ {
+	for i := startSeq; i < stopSeq; i++ {
 		msg := server_api_params.MsgData{
 			SendID:           "sendID1",
 			RecvID:           "recvID1",
@@ -44,7 +45,12 @@ func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *db.Use
 			Status:           1,
 		}
 		bytes, _ := proto.Marshal(&msg)
-		sendTime := 0
+		var sendTime int64
+		if i <= delSeq {
+			sendTime = 10000
+		} else {
+			sendTime = utils.GetCurrentTimestampByMill()
+		}
 		chat.Msg = append(chat.Msg, db.MsgInfo{SendTime: int64(sendTime), Msg: bytes})
 	}
 	return chat
@@ -52,6 +58,12 @@ func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *db.Use
 
 func SetUserMaxSeq(userID string, seq int) error {
 	return redisClient.Set(context.Background(), "REDIS_USER_INCR_SEQ"+userID, seq, 0).Err()
+}
+
+func GetUserMinSeq(userID string) (uint64, error) {
+	key := "REDIS_USER_MIN_SEQ:" + userID
+	seq, err := redisClient.Get(context.Background(), key).Result()
+	return uint64(utils.StringToInt(seq)), err
 }
 
 func CreateChat(userChat *db.UserChat) error {
@@ -80,25 +92,17 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	err = SetUserMaxSeq(testUID1, 600)
 	userChat := GenUserChat(1, 500, 200, 0, testUID1)
 	err = CreateChat(userChat)
-
 	if err := DeleteMongoMsgAndResetRedisSeq(operationID, testUID1); err != nil {
 		t.Error("checkMaxSeqWithMongo failed", testUID1)
 	}
 	if err := checkMaxSeqWithMongo(operationID, testUID1, constant.WriteDiffusion); err != nil {
 		t.Error("checkMaxSeqWithMongo failed", testUID1)
 	}
+	minSeq, err := GetUserMinSeq(testUID1)
 	if err != nil {
 		t.Error("err is not nil", testUID1, err.Error())
 	}
-	// testWorkingGroupIDList := []string{"test_del_id1", "test_del_id2", "test_del_id3", "test_del_id4", "test_del_id5"}
-	// for _, groupID := range testWorkingGroupIDList {
-	// 	operationID = groupID + "-" + operationID
-	// 	log.NewDebug(operationID, utils.GetSelfFuncName(), "groupID:", groupID, "userIDList:", testUserIDList)
-	// 	if err := ResetUserGroupMinSeq(operationID, groupID, testUserIDList); err != nil {
-	// 		t.Error("checkMaxSeqWithMongo failed", groupID)
-	// 	}
-	// 	if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
-	// 		t.Error("checkMaxSeqWithMongo failed", groupID)
-	// 	}
-	// }
+	if minSeq != 201 {
+		t.Error("is not the same")
+	}
 }

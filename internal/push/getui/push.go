@@ -264,8 +264,8 @@ func (g *Getui) request(url string, content interface{}, token string, returnStr
 
 func (pushReq *PushReq) setPushChannel(title string, body string) {
 	pushReq.PushChannel = &PushChannel{}
-	// autoBadge := "+1"
-	pushReq.PushChannel.Ios = &Ios{}
+	autoBadge := "+1"
+	pushReq.PushChannel.Ios = &Ios{AutoBadge: &autoBadge}
 	notify := "notify"
 	pushReq.PushChannel.Ios.NotiType = &notify
 	pushReq.PushChannel.Ios.Aps.Sound = "default"
