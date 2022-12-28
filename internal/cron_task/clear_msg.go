@@ -100,7 +100,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 		if err != nil {
 			return 0, err
 		}
-		return delStruct.getSetMinSeq() + 1, nil
+		return delStruct.getSetMinSeq(), nil
 	}
 	log.NewDebug(operationID, "ID:", ID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
