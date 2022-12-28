@@ -76,7 +76,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	redisClient = redis.NewClient(&redis.Options{
 		Addr:     "127.0.0.1:16379",
 		Password: "openIM123", // no password set
-		DB:       13,          // use default DB
+		DB:       0,           // use default DB
 	})
 	mongoUri := fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d&authSource=admin",
 		"root", "openIM123", "127.0.0.1:37017",
