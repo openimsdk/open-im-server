@@ -130,13 +130,12 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 				msg.Msg = bytes
 				msg.SendTime = 0
 				hasMarkDelFlag = true
-				log.NewDebug(operationID, ID, msgPb.Seq)
 			} else {
 				if err := delMongoMsgsPhysical(delStruct.delUidList); err != nil {
 					return 0, err
 				}
 				if hasMarkDelFlag {
-					log.NewInfo(operationID, ID, "hasMarkDelFlag", "index:", index, "msgPb:", msgPb, msgs.UID)
+					log.NewInfo(operationID, ID, "hasMarkDelFlag", "index:", index, "msgPb:", msgPb, msgs.UID, msgs.Msg)
 					if err := db.DB.UpdateOneMsgList(msgs); err != nil {
 						return delStruct.getSetMinSeq(), utils.Wrap(err, "")
 					}
