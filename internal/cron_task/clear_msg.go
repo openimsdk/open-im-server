@@ -119,6 +119,9 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	} else {
 		var hasMarkDelFlag bool
 		for index, msg := range msgs.Msg {
+			if msg.SendTime == 0 {
+				continue
+			}
 			msgPb := &server_api_params.MsgData{}
 			err = proto.Unmarshal(msg.Msg, msgPb)
 			if err != nil {

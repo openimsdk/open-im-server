@@ -13,6 +13,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gopkg.in/mgo.v2/bson"
 
 	"testing"
 	"time"
@@ -71,6 +72,11 @@ func CreateChat(userChat *db.UserChat) error {
 	return err
 }
 
+func DelChat(uid string, index int) error {
+	_, err := mongoClient.DeleteOne(context.Background(), bson.M{"uid": uid + ":" + strconv.Itoa(index)})
+	return err
+}
+
 func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	operationID := getCronTaskOperationID()
 	redisClient = redis.NewClient(&redis.Options{
@@ -84,10 +90,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoUri))
 	mongoClient = client.Database("openIM").Collection("msg")
 	testUID1 := "test_del_id1"
-
-	//testUID4 := "test_del_id4"
-	//testUID5 := "test_del_id5"
-	//testUID6 := "test_del_id6"
+	err = DelChat(testUID1, 0)
 	err = SetUserMaxSeq(testUID1, 600)
 	userChat := GenUserChat(1, 600, 200, 0, testUID1)
 	err = CreateChat(userChat)
@@ -106,11 +109,14 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	}
 
 	testUID2 := "test_del_id2"
+	err = DelChat(testUID2, 0)
+	err = DelChat(testUID2, 1)
 	err = SetUserMaxSeq(testUID2, 7000)
 	userChat = GenUserChat(1, 4999, 5000, 0, testUID2)
 	userChat2 := GenUserChat(5000, 7000, 6000, 1, testUID2)
 	err = CreateChat(userChat)
 	err = CreateChat(userChat2)
+
 	if err := DeleteMongoMsgAndResetRedisSeq(operationID, testUID2); err != nil {
 		t.Error("checkMaxSeqWithMongo failed", testUID2)
 	}
@@ -126,6 +132,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	}
 
 	testUID3 := "test_del_id3"
+	err = DelChat(testUID3, 0)
 	err = SetUserMaxSeq(testUID3, 4999)
 	userChat = GenUserChat(1, 4999, 5000, 0, testUID3)
 	err = CreateChat(userChat)
@@ -144,6 +151,9 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	}
 
 	testUID4 := "test_del_id4"
+	err = DelChat(testUID4, 0)
+	err = DelChat(testUID4, 1)
+	err = DelChat(testUID4, 2)
 	err = SetUserMaxSeq(testUID4, 12000)
 	userChat = GenUserChat(1, 4999, 5000, 0, testUID4)
 	userChat2 = GenUserChat(5000, 9999, 10000, 1, testUID4)
@@ -162,6 +172,55 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("err is not nil", testUID4, err.Error())
 	}
 	if minSeq != 11001 {
-		t.Error("test3 is not the same", "minSeq:", minSeq, "targetSeq", 11001)
+		t.Error("test4 is not the same", "minSeq:", minSeq, "targetSeq", 11001)
+	}
+
+	testUID5 := "test_del_id5"
+	err = DelChat(testUID5, 0)
+	err = DelChat(testUID5, 1)
+	err = SetUserMaxSeq(testUID5, 9999)
+	userChat = GenUserChat(1, 4999, 5000, 0, testUID5)
+	userChat2 = GenUserChat(5000, 9999, 10000, 1, testUID5)
+	err = CreateChat(userChat)
+	err = CreateChat(userChat2)
+	if err := DeleteMongoMsgAndResetRedisSeq(operationID, testUID5); err != nil {
+		t.Error("checkMaxSeqWithMongo failed", testUID4)
+	}
+	if err := checkMaxSeqWithMongo(operationID, testUID5, constant.WriteDiffusion); err != nil {
+		t.Error("checkMaxSeqWithMongo failed", testUID5)
+	}
+	minSeq, err = GetUserMinSeq(testUID5)
+	if err != nil {
+		t.Error("err is not nil", testUID5, err.Error())
+	}
+	if minSeq != 10000 {
+		t.Error("test5 is not the same", "minSeq:", minSeq, "targetSeq", 10000)
+	}
+
+	testUID6 := "test_del_id6"
+	err = DelChat(testUID5, 0)
+	err = DelChat(testUID5, 1)
+	err = DelChat(testUID5, 2)
+	err = DelChat(testUID5, 3)
+	userChat = GenUserChat(1, 4999, 5000, 0, testUID6)
+	userChat2 = GenUserChat(5000, 9999, 10000, 1, testUID6)
+	userChat3 = GenUserChat(10000, 14999, 13000, 2, testUID6)
+	userChat4 := GenUserChat(15000, 19999, 0, 3, testUID6)
+	err = CreateChat(userChat)
+	err = CreateChat(userChat2)
+	err = CreateChat(userChat3)
+	err = CreateChat(userChat4)
+	if err := DeleteMongoMsgAndResetRedisSeq(operationID, testUID6); err != nil {
+		t.Error("checkMaxSeqWithMongo failed", testUID6)
+	}
+	if err := checkMaxSeqWithMongo(operationID, testUID6, constant.WriteDiffusion); err != nil {
+		t.Error("checkMaxSeqWithMongo failed", testUID6)
+	}
+	minSeq, err = GetUserMinSeq(testUID6)
+	if err != nil {
+		t.Error("err is not nil", testUID6, err.Error())
+	}
+	if minSeq != 13001 {
+		t.Error("test3 is not the same", "minSeq:", minSeq, "targetSeq", 13001)
 	}
 }
