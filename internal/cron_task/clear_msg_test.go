@@ -128,6 +128,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 	testUID3 := "test_del_id3"
 	err = SetUserMaxSeq(testUID3, 4999)
 	userChat = GenUserChat(1, 4999, 5000, 0, testUID3)
+	err = CreateChat(userChat)
 	if err := DeleteMongoMsgAndResetRedisSeq(operationID, testUID3); err != nil {
 		t.Error("checkMaxSeqWithMongo failed", testUID3)
 	}
@@ -139,6 +140,28 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("err is not nil", testUID3, err.Error())
 	}
 	if minSeq != 5000 {
-		t.Error("test3 is not the same", "minSeq:", minSeq, "targetSeq", 201)
+		t.Error("test3 is not the same", "minSeq:", minSeq, "targetSeq", 5000)
+	}
+
+	testUID4 := "test_del_id4"
+	err = SetUserMaxSeq(testUID4, 12000)
+	userChat = GenUserChat(1, 4999, 5000, 0, testUID4)
+	userChat2 = GenUserChat(5000, 9999, 10000, 1, testUID4)
+	userChat3 := GenUserChat(10000, 12000, 11000, 2, testUID4)
+	err = CreateChat(userChat)
+	err = CreateChat(userChat2)
+	err = CreateChat(userChat3)
+	if err := DeleteMongoMsgAndResetRedisSeq(operationID, testUID4); err != nil {
+		t.Error("checkMaxSeqWithMongo failed", testUID4)
+	}
+	if err := checkMaxSeqWithMongo(operationID, testUID4, constant.WriteDiffusion); err != nil {
+		t.Error("checkMaxSeqWithMongo failed", testUID4)
+	}
+	minSeq, err = GetUserMinSeq(testUID4)
+	if err != nil {
+		t.Error("err is not nil", testUID4, err.Error())
+	}
+	if minSeq != 11001 {
+		t.Error("test3 is not the same", "minSeq:", minSeq, "targetSeq", 11001)
 	}
 }
