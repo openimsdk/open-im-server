@@ -862,6 +862,10 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 			log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.FromUserID)
 			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
+		if imdb.IsExistGroupMember(req.GroupID, req.FromUserID) {
+			log.NewInfo(req.OperationID, "GroupApplicationResponse user in group", req.GroupID, req.FromUserID)
+			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}, nil
+		}
 		member := db.GroupMember{}
 		member.GroupID = req.GroupID
 		member.UserID = req.FromUserID
