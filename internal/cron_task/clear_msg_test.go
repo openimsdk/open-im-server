@@ -122,7 +122,7 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("err is not nil", testUID2, err.Error())
 	}
 	if minSeq != 6001 {
-		t.Error("test2 is not the same", "minSeq:", minSeq, "targetSeq", 201)
+		t.Error("test2 is not the same", "minSeq:", minSeq, "targetSeq", 6001)
 	}
 
 	testUID3 := "test_del_id3"
@@ -139,6 +139,6 @@ func TestDeleteMongoMsgAndResetRedisSeq(t *testing.T) {
 		t.Error("err is not nil", testUID3, err.Error())
 	}
 	if minSeq != 5000 {
-		t.Error("test2 is not the same", "minSeq:", minSeq, "targetSeq", 201)
+		t.Error("test3 is not the same", "minSeq:", minSeq, "targetSeq", 201)
 	}
 }
