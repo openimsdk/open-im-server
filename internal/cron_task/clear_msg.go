@@ -100,13 +100,13 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 		if err != nil {
 			return 0, err
 		}
-		return delStruct.getSetMinSeq() + 1, nil
+		return delStruct.getSetMinSeq(), nil
 	}
 	log.NewDebug(operationID, "ID:", ID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
-	if msgs.Msg[len(msgs.Msg)-1].SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) > utils.GetCurrentTimestampByMill() && msgListIsFull(msgs) {
+	if msgs.Msg[len(msgs.Msg)-1].SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) < utils.GetCurrentTimestampByMill() && msgListIsFull(msgs) {
 		delStruct.delUidList = append(delStruct.delUidList, msgs.UID)
 		lastMsgPb := &server_api_params.MsgData{}
 		err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
@@ -114,7 +114,8 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
 			return 0, utils.Wrap(err, "proto.Unmarshal failed")
 		}
-		delStruct.minSeq = lastMsgPb.Seq
+		delStruct.minSeq = lastMsgPb.Seq + 1
+		log.NewDebug(operationID, utils.GetSelfFuncName(), msgs.UID, "add to delUidList", "minSeq", lastMsgPb.Seq+1)
 	} else {
 		var hasMarkDelFlag bool
 		for index, msg := range msgs.Msg {
@@ -124,7 +125,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
 				return 0, utils.Wrap(err, "proto.Unmarshal failed")
 			}
-			if utils.GetCurrentTimestampByMill() > msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) && msg.SendTime != 0 {
+			if utils.GetCurrentTimestampByMill() > msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) {
 				msgPb.Status = constant.MsgDeleted
 				bytes, _ := proto.Marshal(msgPb)
 				msgs.Msg[index].Msg = bytes
