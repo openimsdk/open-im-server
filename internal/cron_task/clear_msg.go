@@ -140,7 +140,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 						return delStruct.getSetMinSeq(), utils.Wrap(err, "")
 					}
 				}
-				return msgPb.Seq + 1, nil
+				return msgPb.Seq, nil
 			}
 		}
 	}
