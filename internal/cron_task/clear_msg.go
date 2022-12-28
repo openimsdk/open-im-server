@@ -124,18 +124,18 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
 				return 0, utils.Wrap(err, "proto.Unmarshal failed")
 			}
-			if utils.GetCurrentTimestampByMill() > msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) {
+			if utils.GetCurrentTimestampByMill() > msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) && msg.SendTime != 0 {
 				msgPb.Status = constant.MsgDeleted
 				bytes, _ := proto.Marshal(msgPb)
-				msg.Msg = bytes
-				msg.SendTime = 0
+				msgs.Msg[index].Msg = bytes
+				msgs.Msg[index].SendTime = 0
 				hasMarkDelFlag = true
 			} else {
 				if err := delMongoMsgsPhysical(delStruct.delUidList); err != nil {
 					return 0, err
 				}
 				if hasMarkDelFlag {
-					log.NewInfo(operationID, ID, "hasMarkDelFlag", "index:", index, "msgPb:", msgPb, msgs.UID, msgs.Msg[0].SendTime)
+					log.NewInfo(operationID, ID, "hasMarkDelFlag", "index:", index, "msgPb:", msgPb, msgs.UID)
 					if err := db.DB.UpdateOneMsgList(msgs); err != nil {
 						return delStruct.getSetMinSeq(), utils.Wrap(err, "")
 					}
