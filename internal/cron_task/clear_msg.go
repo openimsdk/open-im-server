@@ -117,7 +117,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 		delStruct.minSeq = lastMsgPb.Seq
 	} else {
 		var hasMarkDelFlag bool
-		for _, msg := range msgs.Msg {
+		for index, msg := range msgs.Msg {
 			msgPb := &server_api_params.MsgData{}
 			err = proto.Unmarshal(msg.Msg, msgPb)
 			if err != nil {
@@ -135,6 +135,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 					return 0, err
 				}
 				if hasMarkDelFlag {
+					log.NewInfo(operationID, ID, "hasMarkDelFlag", "index:", index, "msgPb:", msgPb)
 					if err := db.DB.UpdateOneMsgList(msgs); err != nil {
 						return delStruct.getSetMinSeq(), utils.Wrap(err, "")
 					}
