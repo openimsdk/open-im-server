@@ -24,8 +24,8 @@ var (
 )
 
 func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *db.UserChat {
-	chat := &db.UserChat{UID: userID + strconv.Itoa(int(index))}
-	for i := startSeq; i < stopSeq; i++ {
+	chat := &db.UserChat{UID: userID + ":" + strconv.Itoa(int(index))}
+	for i := startSeq; i <= stopSeq; i++ {
 		msg := server_api_params.MsgData{
 			SendID:           "sendID1",
 			RecvID:           "recvID1",
