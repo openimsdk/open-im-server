@@ -115,6 +115,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 			return 0, utils.Wrap(err, "proto.Unmarshal failed")
 		}
 		delStruct.minSeq = lastMsgPb.Seq + 1
+		log.NewDebug(operationID, utils.GetSelfFuncName(), msgs.UID, "add to delUidList", "minSeq", lastMsgPb.Seq+1)
 	} else {
 		var hasMarkDelFlag bool
 		for index, msg := range msgs.Msg {
