@@ -27,7 +27,9 @@ func UpdateGroupRequest(groupRequest db.GroupRequest) error {
 }
 
 func InsertIntoGroupRequest(toInsertInfo db.GroupRequest) error {
-	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)
+	if err := DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID); err != nil {
+		return err
+	}
 	if toInsertInfo.HandledTime.Unix() < 0 {
 		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
 	}
@@ -70,7 +72,7 @@ func GetGroupRequestByGroupID(groupID string) ([]db.GroupRequest, error) {
 	return groupRequestList, nil
 }
 
-//received
+// received
 func GetGroupApplicationList(userID string) ([]db.GroupRequest, error) {
 	var groupRequestList []db.GroupRequest
 	memberList, err := GetGroupMemberListByUserID(userID)

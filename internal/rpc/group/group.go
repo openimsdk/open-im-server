@@ -1000,12 +1000,15 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	log.NewInfo(req.OperationID, "JoinGroup args ", req.String())
+	if imdb.IsExistGroupMember(req.GroupID, req.OpUserID) {
+		log.NewInfo(req.OperationID, "IsExistGroupMember", req.GroupID, req.OpUserID)
+		return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{}}, nil
+	}
 	_, err := imdb.GetUserByUserID(req.OpUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OpUserID)
 		return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", req.GroupID, err)
