@@ -25,6 +25,7 @@ import (
 	"time"
 
 	promePkg "Open_IM/pkg/common/prometheus"
+
 	go_redis "github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/proto"
 )
@@ -125,7 +126,7 @@ func (rpc *rpcChat) messageVerification(data *pbChat.SendMsgReq) (bool, int32, s
 		if utils.IsContain(data.MsgData.SendID, config.Config.Manager.AppManagerUid) {
 			return true, 0, "", nil
 		}
-		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin {
+		if data.MsgData.ContentType <= constant.NotificationEnd && data.MsgData.ContentType >= constant.NotificationBegin && data.MsgData.ContentType != constant.SignalingNotification {
 			return true, 0, "", nil
 		}
 		log.NewDebug(data.OperationID, *config.Config.MessageVerify.FriendVerify)

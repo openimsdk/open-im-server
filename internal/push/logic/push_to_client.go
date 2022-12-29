@@ -79,6 +79,9 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 				return
 			}
 		}
+		if pushMsg.MsgData.ContentType > constant.NotificationBegin && pushMsg.MsgData.ContentType < constant.NotificationEnd && pushMsg.MsgData.ContentType != constant.SignalingNotification {
+			return
+		}
 		if pushMsg.MsgData.ContentType == constant.SignalingNotification {
 			isSend, err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData, pushMsg.PushToUserID)
 			if err != nil {
@@ -198,6 +201,9 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	log.Debug(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData)
 	successCount++
 	if isOfflinePush {
+		if pushMsg.MsgData.ContentType > constant.NotificationBegin && pushMsg.MsgData.ContentType < constant.NotificationEnd && pushMsg.MsgData.ContentType != constant.SignalingNotification {
+			return
+		}
 		var onlineSuccessUserIDList []string
 		onlineSuccessUserIDList = append(onlineSuccessUserIDList, pushMsg.MsgData.SendID)
 		for _, v := range wsResult {
