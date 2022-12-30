@@ -99,3 +99,15 @@ type CallbackDeleteMessageReactionExtResp struct {
 	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
 	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
 }
+type CallbackGetMessageListReactionExtReq struct {
+	OperationID     string                                                        `json:"operationID"`
+	CallbackCommand string                                                        `json:"callbackCommand"`
+	SourceID        string                                                        `json:"sourceID"`
+	OpUserID        string                                                        `json:"opUserID"`
+	SessionType     int32                                                         `json:"sessionType"`
+	MessageKeyList  []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageKeyList"`
+}
+type CallbackGetMessageListReactionExtResp struct {
+	*CommonCallbackResp
+	SingleMessageResult []*msg.SingleMessageExtensionResult `json:"singleMessageResult"`
+}

@@ -218,6 +218,17 @@ func setDeleteKeyResultInfo(r *msg.DeleteMessageListReactionExtensionsResp, errC
 func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *msg.GetMessageListReactionExtensionsReq) (resp *msg.GetMessageListReactionExtensionsResp, err error) {
 	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc args is:", req.String())
 	var rResp msg.GetMessageListReactionExtensionsResp
+	if req.IsExternalExtensions {
+		callbackResp := callbackGetMessageListReactionExtensions(req)
+		if callbackResp.ActionCode != constant.ActionAllow || callbackResp.ErrCode != 0 {
+			rResp.ErrCode = int32(callbackResp.ErrCode)
+			rResp.ErrMsg = callbackResp.ErrMsg
+			return &rResp, nil
+		} else {
+			rResp.SingleMessageResult = callbackResp.SingleMessageResult
+			return &rResp, nil
+		}
+	}
 	for _, messageValue := range req.MessageReactionKeyList {
 		var oneMessage msg.SingleMessageExtensionResult
 		oneMessage.ClientMsgID = messageValue.ClientMsgID

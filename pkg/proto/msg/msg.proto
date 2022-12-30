@@ -195,11 +195,12 @@ message GetMessageListReactionExtensionsReq {
   string opUserID = 2;
   string sourceID = 3;
   int32 sessionType = 4;
+  bool isExternalExtensions = 5;
   message MessageReactionKey {
     string clientMsgID = 1;
     int64 msgFirstModifyTime = 2;
   }
-  repeated MessageReactionKey messageReactionKeyList = 5;
+  repeated MessageReactionKey messageReactionKeyList = 6;
 }
 message GetMessageListReactionExtensionsResp{
   int32 errCode = 1;
