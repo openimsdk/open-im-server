@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	rpc "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -1020,44 +1021,45 @@ func MuteGroupMember(c *gin.Context) {
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/cancel_mute_group_member [post]
 func CancelMuteGroupMember(c *gin.Context) {
+	x := trace_log.NewCtx(c, utils.GetSelfFuncName())
+	defer trace_log.ShowLog(c)
+
 	params := api.CancelMuteGroupMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		trace_log.WriteErrorResponse(c, err)
+		trace_log.SetContextInfo(c, "BindJSON", err)
 		return
 	}
+	constant.SetContextInfo(c, "BindJSON", nil, "params", params)
 	req := &rpc.CancelMuteGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
 
-	var ok bool
-	var errInfo string
-	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-	if !ok {
-		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
-		return
-	}
-
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", req.String())
-
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
-	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
-		return
-	}
-	client := rpc.NewGroupClient(etcdConn)
-	reply, err := client.CancelMuteGroupMember(context.Background(), req)
+	var err error
+	err, req.OpUserID, _ = token_verify.ParseUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", req.String())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		constant.WriteErrorResponse(c, err)
+		constant.SetContextInfo(c, "ParseUserIDFromToken", err)
+		return
+	}
+	constant.SetContextInfo(c, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
+
+	etcdConn, err := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	if err != nil {
+		constant.WriteErrorResponse(c, err)
+		constant.SetContextInfo(c, "GetDefaultConn", err)
 		return
 	}
 
+	client := rpc.NewGroupClient(etcdConn)
+	reply, err := client.CancelMuteGroupMember(x, req)
+	if err != nil {
+		constant.WriteErrorResponse(c, err)
+		constant.SetContextInfo(c, "CancelMuteGroupMember", err)
+		return
+	}
+
+	constant.SetContextInfo(c, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
 	resp := api.CancelMuteGroupMemberResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
 	c.JSON(http.StatusOK, resp)
 }
 

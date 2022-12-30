@@ -110,13 +110,13 @@ func GetClaimFromToken(tokensString string) (*Claims, error) {
 				return nil, utils.Wrap(constant.ErrTokenUnknown, "")
 			}
 		} else {
-			return nil, utils.Wrap(constant.ErrTokenNotValidYet, "")
+			return nil, utils.Wrap(constant.ErrTokenUnknown, "")
 		}
 	} else {
 		if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 			return claims, nil
 		}
-		return nil, utils.Wrap(constant.ErrTokenNotValidYet, "")
+		return nil, utils.Wrap(constant.ErrTokenUnknown, "")
 	}
 }
 
@@ -159,6 +159,16 @@ func GetUserIDFromToken(token string, operationID string) (bool, string, string)
 	return true, claims.UID, ""
 }
 
+func ParseUserIDFromToken(token string, operationID string) (error, string, string) {
+	claims, err := ParseToken(token, operationID)
+	if err != nil {
+		log.Error(operationID, "ParseToken failed, ", err.Error(), token)
+		return err, "", err.Error()
+	}
+	log.Debug(operationID, "token claims.ExpiresAt.Second() ", claims.ExpiresAt.Unix())
+	return nil, claims.UID, ""
+}
+
 func GetUserIDFromTokenExpireTime(token string, operationID string) (bool, string, string, int64) {
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
@@ -184,12 +194,12 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 
 	m, err := commonDB.DB.GetTokenMapByUidPid(claims.UID, claims.Platform)
 	if err != nil {
-		log.NewError(operationID, "get token from redis err", err.Error(), tokensString)
-		return nil, utils.Wrap(constant.ErrTokenInvalid, "get token from redis err")
+		log.NewError(operationID, "get token from redis err", err.Error(), claims.UID, claims.Platform)
+		return nil, utils.Wrap(constant.ErrTokenNotExist, "get token from redis err")
 	}
 	if m == nil {
-		log.NewError(operationID, "get token from redis err, not in redis ", "m is nil", tokensString)
-		return nil, utils.Wrap(constant.ErrTokenInvalid, "get token from redis err")
+		log.NewError(operationID, "get token from redis err, not in redis ", "m is nil ", claims.UID, claims.Platform)
+		return nil, utils.Wrap(constant.ErrTokenNotExist, "get token from redis err")
 	}
 	if v, ok := m[tokensString]; ok {
 		switch v {
@@ -203,8 +213,8 @@ func ParseToken(tokensString, operationID string) (claims *Claims, err error) {
 			return nil, utils.Wrap(constant.ErrTokenUnknown, "")
 		}
 	}
-	log.NewError(operationID, "redis token map not find", constant.ErrTokenUnknown)
-	return nil, utils.Wrap(constant.ErrTokenUnknown, "redis token map not find")
+	log.NewError(operationID, "redis token map not find ", constant.ErrTokenNotExist, tokensString)
+	return nil, utils.Wrap(constant.ErrTokenNotExist, "redis token map not find")
 }
 
 //func MakeTheTokenInvalid(currentClaims *Claims, platformClass string) (bool, error) {
@@ -227,7 +237,7 @@ func ParseRedisInterfaceToken(redisToken interface{}) (*Claims, error) {
 	return GetClaimFromToken(string(redisToken.([]uint8)))
 }
 
-//Validation token, false means failure, true means successful verification
+// Validation token, false means failure, true means successful verification
 func VerifyToken(token, uid string) (bool, error) {
 	claims, err := ParseToken(token, "")
 	if err != nil {

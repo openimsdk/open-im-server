@@ -1,63 +1,51 @@
 package constant
 
-import "errors"
-
-// key = errCode, string = errMsg
 type ErrInfo struct {
 	ErrCode int32
 	ErrMsg  string
 }
 
-var (
-	OK        = ErrInfo{0, ""}
-	ErrServer = ErrInfo{500, "server error"}
+func (e ErrInfo) Error() string {
+	return e.ErrMsg
+}
 
-	ErrParseToken = ErrInfo{700, ParseTokenMsg.Error()}
-
-	ErrTencentCredential = ErrInfo{400, ThirdPartyMsg.Error()}
-
-	ErrTokenExpired             = ErrInfo{701, TokenExpiredMsg.Error()}
-	ErrTokenInvalid             = ErrInfo{702, TokenInvalidMsg.Error()}
-	ErrTokenMalformed           = ErrInfo{703, TokenMalformedMsg.Error()}
-	ErrTokenNotValidYet         = ErrInfo{704, TokenNotValidYetMsg.Error()}
-	ErrTokenUnknown             = ErrInfo{705, TokenUnknownMsg.Error()}
-	ErrTokenKicked              = ErrInfo{706, TokenUserKickedMsg.Error()}
-	ErrTokenDifferentPlatformID = ErrInfo{707, TokenDifferentPlatformIDMsg.Error()}
-	ErrTokenDifferentUserID     = ErrInfo{708, TokenDifferentUserIDMsg.Error()}
-
-	ErrAccess                = ErrInfo{ErrCode: 801, ErrMsg: AccessMsg.Error()}
-	ErrDB                    = ErrInfo{ErrCode: 802, ErrMsg: DBMsg.Error()}
-	ErrArgs                  = ErrInfo{ErrCode: 803, ErrMsg: ArgsMsg.Error()}
-	ErrStatus                = ErrInfo{ErrCode: 804, ErrMsg: StatusMsg.Error()}
-	ErrCallback              = ErrInfo{ErrCode: 809, ErrMsg: CallBackMsg.Error()}
-	ErrSendLimit             = ErrInfo{ErrCode: 810, ErrMsg: "send msg limit, to many request, try again later"}
-	ErrMessageHasReadDisable = ErrInfo{ErrCode: 811, ErrMsg: "message has read disable"}
-	ErrInternal              = ErrInfo{ErrCode: 812, ErrMsg: "internal error"}
-	ErrWsConnNotExist        = ErrInfo{ErrCode: 813, ErrMsg: "ws conn not exist"}
-)
+func (e ErrInfo) Code() int32 {
+	return e.ErrCode
+}
 
 var (
-	ParseTokenMsg               = errors.New("parse token failed")
-	TokenExpiredMsg             = errors.New("token is timed out, please log in again")
-	TokenInvalidMsg             = errors.New("token has been invalidated")
-	TokenNotValidYetMsg         = errors.New("token not active yet")
-	TokenMalformedMsg           = errors.New("that's not even a token")
-	TokenUnknownMsg             = errors.New("couldn't handle this token")
-	TokenUserKickedMsg          = errors.New("user has been kicked")
-	TokenDifferentPlatformIDMsg = errors.New("different platformID")
-	TokenDifferentUserIDMsg     = errors.New("different userID")
-	AccessMsg                   = errors.New("no permission")
-	StatusMsg                   = errors.New("status is abnormal")
-	DBMsg                       = errors.New("db failed")
-	ArgsMsg                     = errors.New("args failed")
-	CallBackMsg                 = errors.New("callback failed")
-	InvitationMsg               = errors.New("invitationCode error")
+	ErrNone           = ErrInfo{0, ""}
+	ErrArgs           = ErrInfo{ArgsError, "ArgsError"}
+	ErrDatabase       = ErrInfo{DatabaseError, "DatabaseError"}
+	ErrInternalServer = ErrInfo{ServerInternalError, "ServerInternalError"}
+	ErrNetwork        = ErrInfo{NetworkError, "NetworkError"}
+	ErrNoPermission   = ErrInfo{NoPermissionError, "NoPermissionError"}
 
-	ThirdPartyMsg = errors.New("third party error")
+	ErrUserIDNotFound  = ErrInfo{UserIDNotFoundError, "UserIDNotFoundError"}
+	ErrGroupIDNotFound = ErrInfo{GroupIDNotFoundError, "GroupIDNotFoundError"}
+
+	ErrRelationshipAlready = ErrInfo{RelationshipAlreadyError, "RelationshipAlreadyError"}
+	ErrNotRelationshipYet  = ErrInfo{NotRelationshipYetError, "NotRelationshipYetError"}
+
+	ErrOnlyOneOwner        = ErrInfo{OnlyOneOwnerError, "OnlyOneOwnerError"}
+	ErrInGroupAlready      = ErrInfo{InGroupAlreadyError, "InGroupAlreadyError"}
+	ErrNotInGroupYet       = ErrInfo{NotInGroupYetError, "NotInGroupYetError"}
+	ErrDismissedAlready    = ErrInfo{DismissedAlreadyError, "DismissedAlreadyError"}
+	ErrOwnerNotAllowedQuit = ErrInfo{OwnerNotAllowedQuitError, "OwnerNotAllowedQuitError"}
+	ErrRegisteredAlready   = ErrInfo{RegisteredAlreadyError, "RegisteredAlreadyError"}
+
+	ErrTokenExpired             = ErrInfo{TokenExpiredError, "TokenExpiredError"}
+	ErrTokenInvalid             = ErrInfo{TokenInvalidError, "TokenInvalidError"}         //
+	ErrTokenMalformed           = ErrInfo{TokenMalformedError, "TokenMalformedError"}     //格式错误
+	ErrTokenNotValidYet         = ErrInfo{TokenNotValidYetError, "TokenNotValidYetError"} //还未生效
+	ErrTokenUnknown             = ErrInfo{TokenUnknownError, "TokenUnknownError"}         //未知错误
+	ErrTokenKicked              = ErrInfo{TokenKickedError, "TokenKickedError"}
+	ErrTokenNotExist            = ErrInfo{TokenNotExistError, "TokenNotExistError"} //在redis中不存在
+	ErrTokenDifferentPlatformID = ErrInfo{TokenDifferentPlatformIDError, "TokenDifferentPlatformIDError"}
+	ErrTokenDifferentUserID     = ErrInfo{TokenDifferentUserIDError, "TokenDifferentUserIDError"}
 )
 
 const (
-	NoError              = 0
 	FormattingError      = 10001
 	HasRegistered        = 10002
 	NotRegistered        = 10003
@@ -72,17 +60,53 @@ const (
 	RegisterLimit        = 10012
 	LoginLimit           = 10013
 	InvitationError      = 10014
-	DatabaseError        = 10002
-	ServerError          = 10004
-	HttpError            = 10005
-	IoError              = 10006
-	IntentionalError     = 10007
 )
 
-func (e ErrInfo) Error() string {
-	return e.ErrMsg
-}
+// 通用错误码
+const (
+	NoError             = 0     //无错误
+	ArgsError           = 90001 //输入参数错误
+	DatabaseError       = 90002 //redis/mysql等db错误
+	ServerInternalError = 90003 //服务器内部错误
+	NetworkError        = 90004 //网络错误
+	NoPermissionError   = 90005 //权限不足
+)
 
-func (e *ErrInfo) Code() int32 {
-	return e.ErrCode
-}
+// 账号错误码
+const (
+	UserIDNotFoundError  = 91001 //UserID不存在 或未注册
+	GroupIDNotFoundError = 91002 //GroupID不存在
+)
+
+// 关系链错误码
+const (
+	RelationshipAlreadyError = 92001 //已经是好友关系（或者黑名单）
+	NotRelationshipYetError  = 92002 //不是好友关系（或者黑名单）
+)
+
+// 群组错误码
+const (
+	OnlyOneOwnerError        = 93001 //只能有一个群主
+	InGroupAlreadyError      = 93003 //已在群组中
+	NotInGroupYetError       = 93004 //不在群组中
+	DismissedAlreadyError    = 93004 //群组已经解散
+	OwnerNotAllowedQuitError = 93004 //群主不能退群
+)
+
+// 用户错误码
+const (
+	RegisteredAlreadyError = 94001 //用户已经注册过了
+)
+
+// token错误码
+const (
+	TokenExpiredError             = 95001
+	TokenInvalidError             = 95002
+	TokenMalformedError           = 95003
+	TokenNotValidYetError         = 95004
+	TokenUnknownError             = 95005
+	TokenKickedError              = 95006
+	TokenDifferentPlatformIDError = 95007
+	TokenDifferentUserIDError     = 95008
+	TokenNotExistError            = 95009
+)

@@ -175,14 +175,14 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	return conn
 }
 
-func GetDefaultConn(schema, etcdaddr, serviceName string, operationID string) *grpc.ClientConn {
+func GetDefaultConn(schema, etcdaddr, serviceName string, operationID string) (*grpc.ClientConn, error) {
 	con := getConn(schema, etcdaddr, serviceName, operationID)
 	if con != nil {
-		return con
+		return con, nil
 	}
 	log.NewWarn(operationID, utils.GetSelfFuncName(), "conn is nil !!!!!", schema, etcdaddr, serviceName, operationID)
 	con = GetConfigConn(serviceName, operationID)
-	return con
+	return con, nil
 }
 
 func (r *Resolver) Build(target resolver.Target, cc resolver.ClientConn, opts resolver.BuildOptions) (resolver.Resolver, error) {
