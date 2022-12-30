@@ -1021,44 +1021,39 @@ func MuteGroupMember(c *gin.Context) {
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/cancel_mute_group_member [post]
 func CancelMuteGroupMember(c *gin.Context) {
-	x := trace_log.NewCtx(c, utils.GetSelfFuncName())
+	nCtx := trace_log.NewCtx(c, utils.GetSelfFuncName())
 	defer trace_log.ShowLog(c)
 
 	params := api.CancelMuteGroupMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
-		trace_log.WriteErrorResponse(c, err)
-		trace_log.SetContextInfo(c, "BindJSON", err)
+		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
 		return
 	}
-	constant.SetContextInfo(c, "BindJSON", nil, "params", params)
+	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", params)
 	req := &rpc.CancelMuteGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
 
 	var err error
-	err, req.OpUserID, _ = token_verify.ParseUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-	if err != nil {
-		constant.WriteErrorResponse(c, err)
-		constant.SetContextInfo(c, "ParseUserIDFromToken", err)
+	if err, req.OpUserID, _ = token_verify.ParseUserIDFromToken(c.Request.Header.Get("token"), req.OperationID); err != nil {
+		trace_log.WriteErrorResponse(nCtx, "ParseUserIDFromToken", err)
 		return
 	}
-	constant.SetContextInfo(c, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
+	trace_log.SetContextInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
 
 	etcdConn, err := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 	if err != nil {
-		constant.WriteErrorResponse(c, err)
-		constant.SetContextInfo(c, "GetDefaultConn", err)
+		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
 		return
 	}
 
 	client := rpc.NewGroupClient(etcdConn)
-	reply, err := client.CancelMuteGroupMember(x, req)
+	reply, err := client.CancelMuteGroupMember(nCtx, req)
 	if err != nil {
-		constant.WriteErrorResponse(c, err)
-		constant.SetContextInfo(c, "CancelMuteGroupMember", err)
+		trace_log.WriteErrorResponse(nCtx, "CancelMuteGroupMember", err)
 		return
 	}
 
-	constant.SetContextInfo(c, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
+	trace_log.SetContextInfo(nCtx, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
 	resp := api.CancelMuteGroupMemberResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 }
