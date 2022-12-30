@@ -365,6 +365,14 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		var resp pbGroup.InviteUserToGroupResp
 		joinReq := pbGroup.JoinGroupReq{}
 		for _, v := range req.InvitedUserIDList {
+			if imdb.IsExistGroupMember(req.GroupID, v) {
+				log.NewError(req.OperationID, "IsExistGroupMember ", req.GroupID, v)
+				var resultNode pbGroup.Id2Result
+				resultNode.Result = -1
+				resultNode.UserID = v
+				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
+				continue
+			}
 			var groupRequest db.GroupRequest
 			groupRequest.UserID = v
 			groupRequest.GroupID = req.GroupID
@@ -452,8 +460,19 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
 		}
 	} else {
-		okUserIDList = req.InvitedUserIDList
-		if err := db.DB.AddUserToSuperGroup(req.GroupID, req.InvitedUserIDList); err != nil {
+		for _, v := range req.InvitedUserIDList {
+			if imdb.IsExistGroupMember(req.GroupID, v) {
+				log.NewError(req.OperationID, "IsExistGroupMember ", req.GroupID, v)
+				var resultNode pbGroup.Id2Result
+				resultNode.Result = -1
+				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
+				continue
+			} else {
+				okUserIDList = append(okUserIDList, v)
+			}
+		}
+		//okUserIDList = req.InvitedUserIDList
+		if err := db.DB.AddUserToSuperGroup(req.GroupID, okUserIDList); err != nil {
 			log.NewError(req.OperationID, "AddUserToSuperGroup failed ", req.GroupID, err)
 			return &pbGroup.InviteUserToGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}, nil
 		}
@@ -862,6 +881,10 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 			log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.FromUserID)
 			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
+		if imdb.IsExistGroupMember(req.GroupID, req.FromUserID) {
+			log.NewInfo(req.OperationID, "GroupApplicationResponse user in group", req.GroupID, req.FromUserID)
+			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}, nil
+		}
 		member := db.GroupMember{}
 		member.GroupID = req.GroupID
 		member.UserID = req.FromUserID
@@ -977,12 +1000,15 @@ func (s *groupServer) GroupApplicationResponse(_ context.Context, req *pbGroup.G
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	log.NewInfo(req.OperationID, "JoinGroup args ", req.String())
+	if imdb.IsExistGroupMember(req.GroupID, req.OpUserID) {
+		log.NewInfo(req.OperationID, "IsExistGroupMember", req.GroupID, req.OpUserID)
+		return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{}}, nil
+	}
 	_, err := imdb.GetUserByUserID(req.OpUserID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OpUserID)
 		return &pbGroup.JoinGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
-
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", req.GroupID, err)

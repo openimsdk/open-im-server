@@ -8,8 +8,9 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"fmt"
-	"github.com/robfig/cron/v3"
 	"time"
+
+	"github.com/robfig/cron/v3"
 )
 
 const cronTaskOperationID = "cronTaskOperationID-"
@@ -57,6 +58,7 @@ func ClearAll() {
 	} else {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
+
 	// working group msg clear
 	workingGroupIDList, err := im_mysql_model.GetGroupIDListByGroupType(constant.WorkingGroup)
 	if err == nil {
@@ -77,9 +79,6 @@ func StartClearMsg(operationID string, userIDList []string) {
 		if err := checkMaxSeqWithMongo(operationID, userID, constant.WriteDiffusion); err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
 		}
-		if err := CheckUserMinSeqWithMongo(operationID, userID); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), userID, err)
-		}
 	}
 }
 
@@ -97,11 +96,6 @@ func StartClearWorkingGroupMsg(operationID string, workingGroupIDList []string) 
 		}
 		if err := checkMaxSeqWithMongo(operationID, groupID, constant.ReadDiffusion); err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
-		}
-		for _, userID := range userIDList {
-			if err := CheckGroupUserMinSeq(operationID, groupID, userID); err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), groupID, err)
-			}
 		}
 	}
 }

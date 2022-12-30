@@ -8,6 +8,8 @@ package kafka
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/Shopify/sarama"
 )
 
@@ -31,6 +33,7 @@ func NewMConsumerGroup(consumerConfig *MConsumerGroupConfig, topics, addrs []str
 	//fmt.Println("init address is ", addrs, "topics is ", topics)
 	consumerGroup, err := sarama.NewConsumerGroup(addrs, groupID, config)
 	if err != nil {
+		fmt.Println("args:", addrs, groupID, config)
 		panic(err.Error())
 	}
 	return &MConsumerGroup{
