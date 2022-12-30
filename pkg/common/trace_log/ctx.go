@@ -7,21 +7,15 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 const TraceLogKey = "trace_log"
 const GinContextKey = "gin_context"
 
-func ToErrInfoWithErr(errCode int32, errMsg string) *ErrInfo {
-	return nil
-}
-
-func getAPIErrorResponse(c *gin.Context, errInfo ErrInfo) {
-
-}
-
 func NewCtx(c *gin.Context, api string) context.Context {
-	req := ApiInfo{ApiName: api}
+	req := ApiInfo{ApiName: api, GinCtx: c}
+	req.OperationID = c.PostForm("operationID")
 	return context.WithValue(c, GinContextKey, req)
 }
 
@@ -32,17 +26,29 @@ func ShowLog(ctx context.Context) {
 		if v.Err != nil {
 			log.Error(v.FuncName, v.Err, v.Args)
 		} else {
-			log.Info(v.FuncName, v.Err, v.Args)
+			log.Info(v.FuncName, v.Args)
 		}
 	}
-
 }
 
-func WriteErrorResponse(c *gin.Context, err error) {
+func WriteErrorResponse(ctx context.Context, funcName string, err error) {
+	SetContextInfo(ctx, funcName, err)
 	e := new(constant.ErrInfo)
-	if errors.As(err, &e) {
-
+	switch {
+	case errors.As(err, &e):
+		ctx.Value(GinContextKey).(ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": e.ErrCode, "errMsg": e.ErrMsg})
+		return
+	default:
+		ctx.Value(GinContextKey).(ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": constant.ErrDefaultOther.ErrCode, "errMsg": constant.ErrDefaultOther.ErrMsg})
+		return
 	}
+}
+
+type ApiInfo struct {
+	ApiName     string
+	OperationID string
+	Funcs       []FuncInfo
+	GinCtx      *gin.Context
 }
 
 type FuncInfo struct {
@@ -51,19 +57,14 @@ type FuncInfo struct {
 	Err      error
 }
 
-type ApiInfo struct {
-	ApiName     string
-	OperationID string
-	Funcs       []FuncInfo
-}
-
 func SetContextInfo(ctx context.Context, funcName string, err error, args ...interface{}) {
-	var req ReqInfo
-	t := ctx.Value("f").([]ReqInfo)
-	argsHandle(args, req.Args)
-	req.FuncName = funcName
-	req.Err = err
-	t = append(t, req)
+	t := ctx.Value(TraceLogKey).(ApiInfo)
+	var funcInfo FuncInfo
+	funcInfo.Args = make(map[string]interface{})
+	argsHandle(args, funcInfo.Args)
+	funcInfo.FuncName = funcName
+	funcInfo.Err = err
+	t.Funcs = append(t.Funcs, funcInfo)
 }
 
 func argsHandle(args []interface{}, fields map[string]interface{}) {

@@ -34,6 +34,8 @@ var (
 	ErrOwnerNotAllowedQuit = ErrInfo{OwnerNotAllowedQuitError, "OwnerNotAllowedQuitError"}
 	ErrRegisteredAlready   = ErrInfo{RegisteredAlreadyError, "RegisteredAlreadyError"}
 
+	ErrDefaultOther = ErrInfo{DefaultOtherError, "DefaultOtherError"}
+
 	ErrTokenExpired             = ErrInfo{TokenExpiredError, "TokenExpiredError"}
 	ErrTokenInvalid             = ErrInfo{TokenInvalidError, "TokenInvalidError"}         //
 	ErrTokenMalformed           = ErrInfo{TokenMalformedError, "TokenMalformedError"}     //格式错误
@@ -70,6 +72,8 @@ const (
 	ServerInternalError = 90003 //服务器内部错误
 	NetworkError        = 90004 //网络错误
 	NoPermissionError   = 90005 //权限不足
+
+	DefaultOtherError = 90006 //其他错误
 )
 
 // 账号错误码
