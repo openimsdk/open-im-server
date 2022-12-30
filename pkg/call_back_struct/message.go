@@ -109,5 +109,5 @@ type CallbackGetMessageListReactionExtReq struct {
 }
 type CallbackGetMessageListReactionExtResp struct {
 	*CommonCallbackResp
-	SingleMessageResult []*msg.SingleMessageExtensionResult `json:"singleMessageResult"`
+	MessageResultList []*msg.SingleMessageExtensionResult `json:"messageResultList"`
 }

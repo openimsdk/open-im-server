@@ -225,7 +225,7 @@ func (rpc *rpcChat) GetMessageListReactionExtensions(ctx context.Context, req *m
 			rResp.ErrMsg = callbackResp.ErrMsg
 			return &rResp, nil
 		} else {
-			rResp.SingleMessageResult = callbackResp.SingleMessageResult
+			rResp.SingleMessageResult = callbackResp.MessageResultList
 			return &rResp, nil
 		}
 	}
