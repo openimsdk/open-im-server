@@ -98,5 +98,6 @@ service relay {
   rpc SuperGroupOnlineBatchPushOneMsg(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
   rpc KickUserOffline(KickUserOfflineReq) returns(KickUserOfflineResp);
   rpc MultiTerminalLoginCheck(MultiTerminalLoginCheckReq) returns(MultiTerminalLoginCheckResp);
+  rpc SuperGroupBackgroundOnlinePush(OnlineBatchPushOneMsgReq) returns(OnlineBatchPushOneMsgResp);
 }
 

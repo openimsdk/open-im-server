@@ -205,10 +205,24 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			return
 		}
 		var onlineSuccessUserIDList []string
+		var WebAndPcBackgroundUserIDList []string
 		onlineSuccessUserIDList = append(onlineSuccessUserIDList, pushMsg.MsgData.SendID)
 		for _, v := range wsResult {
 			if v.OnlinePush && v.UserID != pushMsg.MsgData.SendID {
 				onlineSuccessUserIDList = append(onlineSuccessUserIDList, v.UserID)
+			}
+			if !v.OnlinePush {
+				if len(v.Resp) != 0 {
+					for _, singleResult := range v.Resp {
+						if singleResult.ResultCode == -2 {
+							if constant.PlatformIDToClass(int(singleResult.RecvPlatFormID)) == constant.TerminalPC ||
+								singleResult.RecvPlatFormID == constant.WebPlatformID {
+								WebAndPcBackgroundUserIDList = append(WebAndPcBackgroundUserIDList, v.UserID)
+							}
+						}
+					}
+				}
+
 			}
 		}
 		onlineFailedUserIDList := utils.DifferenceString(onlineSuccessUserIDList, pushToUserIDList)
@@ -280,6 +294,22 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 				promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
 				log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
 			}
+			needBackgroupPushUserID := utils.IntersectString(needOfflinePushUserIDList, WebAndPcBackgroundUserIDList)
+			grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
+			if len(needBackgroupPushUserID) > 0 {
+				//Online push message
+				log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
+				for _, v := range grpcCons {
+					msgClient := pbRelay.NewRelayClient(v)
+					_, err := msgClient.SuperGroupBackgroundOnlinePush(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData,
+						PushToUserIDList: needBackgroupPushUserID})
+					if err != nil {
+						log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
+						continue
+					}
+				}
+			}
+
 		}
 	}
 }
