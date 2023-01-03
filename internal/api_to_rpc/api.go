@@ -7,11 +7,10 @@ import (
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"reflect"
 )
 
-func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn interface{}, rpcFuncName string, tokenFunc func(token string) (string, error)) {
+func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn interface{}, rpcFuncName string, tokenFunc func(token string, operationID string) (string, error)) {
 	nCtx := trace_log.NewCtx(c, rpcFuncName)
 	defer trace_log.ShowLog(nCtx)
 	if err := c.BindJSON(apiReq); err != nil {
@@ -36,7 +35,7 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn in
 	var opUserID string
 	if tokenFunc != nil {
 		var err error
-		opUserID, err = tokenFunc(c.GetHeader("token"))
+		opUserID, err = tokenFunc(c.GetHeader("token"), operationID)
 		if err != nil {
 			trace_log.WriteErrorResponse(nCtx, "TokenFunc", err)
 			return
@@ -85,24 +84,4 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn in
 		}
 	}
 	trace_log.SetSuccess(nCtx, rpcFuncName, apiResp)
-}
-
-func WriteDataJson(c *gin.Context, code int32, msg string, data interface{}) {
-	c.JSON(http.StatusOK, &BaseResp{
-		ErrCode: code,
-		ErrMsg:  msg,
-		Data:    data,
-	})
-}
-
-//func WriteErr(c *gin.Context, err error) {
-//	if cerr, ok := err.(interface{ Code() int32 }); ok {
-//		WriteDataJson(c, cerr.Code(), err.Error(), nil)
-//	} else {
-//		WriteDataJson(c, ErrDefault.ErrCode, err.Error(), nil)
-//	}
-//}
-
-func WriteSuccess(c *gin.Context, msg string, data interface{}) {
-	WriteDataJson(c, 0, msg, data)
 }
