@@ -2,9 +2,9 @@ package common
 
 import (
 	"Open_IM/internal/fault_tolerant"
+	"Open_IM/pkg/common/trace_log"
 	"context"
 	"examination/pkg/api_struct"
-	"examination/pkg/trace_log"
 	utils "github.com/OpenIMSDK/open_utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
