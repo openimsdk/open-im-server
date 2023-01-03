@@ -41,7 +41,7 @@ func WriteErrorResponse(ctx context.Context, funcName string, err error, args ..
 		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": e.ErrCode, "errMsg": e.ErrMsg})
 		return
 	default:
-		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": constant.ErrDefault.ErrCode, "errMsg": constant.ErrDefault.ErrMsg})
+		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": constant.ErrDefaultOther.ErrCode, "errMsg": constant.ErrDefaultOther.ErrMsg})
 		return
 	}
 }
@@ -84,6 +84,6 @@ func argsHandle(args []interface{}, fields map[string]interface{}) {
 	}
 }
 
-func GetApiErr(errCode int32, errMsg string) api_struct.ErrInfo {
-	return api_struct.ErrInfo{ErrCode: errCode, ErrMsg: errMsg}
+func GetApiErr(errCode int32, errMsg string) constant.ErrInfo {
+	return constant.ErrInfo{ErrCode: errCode, ErrMsg: errMsg}
 }
