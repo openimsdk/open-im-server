@@ -3,8 +3,8 @@ package fault_tolerant
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/utils"
+	"github.com/OpenIMSDK/getcdv3"
 	"google.golang.org/grpc"
 	"strings"
 )
@@ -84,12 +84,12 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	return conn
 }
 
-func GetDefaultConn(serviceName string, operationID string) *grpc.ClientConn {
+func GetDefaultConn(serviceName string, operationID string) (*grpc.ClientConn, error) {
 	con := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), serviceName, operationID, config.Config.Etcd.UserName, config.Config.Etcd.Password)
 	if con != nil {
-		return con
+		return con, nil
 	}
 	log.NewWarn(operationID, utils.GetSelfFuncName(), "conn is nil !!!!!", serviceName)
 	con = GetConfigConn(serviceName, operationID)
-	return con
+	return con, nil
 }
