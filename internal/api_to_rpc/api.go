@@ -2,6 +2,7 @@ package common
 
 import (
 	"Open_IM/internal/fault_tolerant"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/trace_log"
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
@@ -71,7 +72,7 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn in
 	errMsgVal := commonResp.FieldByName("ErrMsg").Interface().(string)
 	errCode := errCodeVal.Interface().(int32)
 	if errCode != 0 {
-		trace_log.WriteErrorResponse(nCtx, "RpcErrCode", &api_struct.ErrInfo{
+		trace_log.WriteErrorResponse(nCtx, "RpcErrCode", &constant.ErrInfo{
 			ErrCode: errCode,
 			ErrMsg:  errMsgVal,
 		})
