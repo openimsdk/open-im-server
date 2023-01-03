@@ -388,7 +388,7 @@ message GroupIsExistResp {
 
 message UserIsInGroupReq {
   string groupID = 1;
-  string userIDList = 2;
+  repeated string userIDList = 2;
   string operationID = 3;
 }
 
@@ -430,7 +430,7 @@ service group{
   rpc SetGroupMemberInfo(SetGroupMemberInfoReq) returns (SetGroupMemberInfoResp);
   rpc GetGroupAbstractInfo(GetGroupAbstractInfoReq) returns (GetGroupAbstractInfoResp);
   rpc GroupIsExist(GroupIsExistReq) returns(GroupIsExistResp);
-  rpc UserIsInGroup(UserIsInGroupReq) returns();
+  rpc UserIsInGroup(UserIsInGroupReq) returns(UserIsInGroupResp);
 }
 
 

@@ -74,6 +74,12 @@ func GetGroupMemberIDListByGroupID(groupID string) ([]string, error) {
 	return groupMemberIDList, nil
 }
 
+func GetGroupMemberByUserIDList(groupID string, userIDList []string) ([]*db.GroupMember, error) {
+	var groupMemberList []*db.GroupMember
+	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=? and user_id in (?)", groupID, userIDList).Find(&groupMemberList).Error
+	return groupMemberList, err
+}
+
 func GetGroupMemberListByGroupIDAndRoleLevel(groupID string, roleLevel int32) ([]db.GroupMember, error) {
 	var groupMemberList []db.GroupMember
 	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=? and role_level=?", groupID, roleLevel).Find(&groupMemberList).Error

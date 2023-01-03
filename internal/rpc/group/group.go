@@ -1981,3 +1981,53 @@ func (s *groupServer) DelGroupAndUserCache(operationID, groupID string, userIDLi
 	}
 	return nil
 }
+
+func (s *groupServer) GroupIsExist(c context.Context, req *pbGroup.GroupIsExistReq) (*pbGroup.GroupIsExistResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbGroup.GroupIsExistResp{CommonResp: &pbGroup.CommonResp{}}
+	groups, err := imdb.GetGroupInfoByGroupIDList(req.GroupIDList)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), "args:", req.GroupIDList)
+		resp.CommonResp.ErrMsg = err.Error()
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
+	}
+	var m = make(map[string]bool)
+	for _, groupID := range req.GroupIDList {
+		m[groupID] = false
+		for _, group := range groups {
+			if groupID == group.GroupID {
+				m[groupID] = true
+				break
+			}
+		}
+	}
+	resp.IsExistMap = m
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
+	return resp, nil
+}
+
+func (s *groupServer) UserIsInGroup(c context.Context, req *pbGroup.UserIsInGroupReq) (*pbGroup.UserIsInGroupResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbGroup.UserIsInGroupResp{}
+	groupMemberList, err := imdb.GetGroupMemberByUserIDList(req.GroupID, req.UserIDList)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), "args:", req.GroupID, req.UserIDList)
+		resp.CommonResp.ErrMsg = err.Error()
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		return resp, nil
+	}
+	var m = make(map[string]bool)
+	for _, userID := range req.UserIDList {
+		m[userID] = false
+		for _, user := range groupMemberList {
+			if userID == user.UserID {
+				m[userID] = true
+				break
+			}
+		}
+	}
+	resp.IsExistMap = m
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
+	return resp, nil
+}
