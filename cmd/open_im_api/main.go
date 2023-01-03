@@ -163,6 +163,11 @@ func main() {
 		chatGroup.POST("/batch_send_msg", manage.ManagementBatchSendMsg)
 		chatGroup.POST("/check_msg_is_send_success", manage.CheckMsgIsSendSuccess)
 		chatGroup.POST("/set_msg_min_seq", apiChat.SetMsgMinSeq)
+
+		chatGroup.POST("/set_message_reaction_extensions", apiChat.SetMessageReactionExtensions)
+		chatGroup.POST("/get_message_list_reaction_extensions", apiChat.GetMessageListReactionExtensions)
+		chatGroup.POST("/add_message_reaction_extensions", apiChat.AddMessageReactionExtensions)
+		chatGroup.POST("/delete_message_reaction_extensions", apiChat.DeleteMessageReactionExtensions)
 	}
 	//Conversation
 	conversationGroup := r.Group("/conversation")
@@ -232,7 +237,7 @@ func main() {
 	if config.Config.Api.ListenIP != "" {
 		address = config.Config.Api.ListenIP + ":" + strconv.Itoa(*ginPort)
 	}
-	fmt.Println("start api server, address: ", address, "OpenIM version: ", constant.CurrentVersion, "\n")
+	fmt.Println("start api server, address: ", address, ", OpenIM version: ", constant.CurrentVersion)
 	err := r.Run(address)
 	if err != nil {
 		log.Error("", "api run failed ", address, err.Error())

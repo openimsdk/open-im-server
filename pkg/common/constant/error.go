@@ -33,6 +33,7 @@ var (
 	ErrSendLimit             = ErrInfo{ErrCode: 810, ErrMsg: "send msg limit, to many request, try again later"}
 	ErrMessageHasReadDisable = ErrInfo{ErrCode: 811, ErrMsg: "message has read disable"}
 	ErrInternal              = ErrInfo{ErrCode: 812, ErrMsg: "internal error"}
+	ErrWsConnNotExist        = ErrInfo{ErrCode: 813, ErrMsg: "ws conn not exist"}
 )
 
 var (

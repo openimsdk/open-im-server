@@ -248,11 +248,16 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
+		MsgToModify struct {
+			Addr  []string `yaml:"addr"`
+			Topic string   `yaml:"topic"`
+		}
 		ConsumerGroupID struct {
-			MsgToRedis string `yaml:"msgToTransfer"`
-			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
-			MsgToPush  string `yaml:"msgToPush"`
+			MsgToRedis  string `yaml:"msgToTransfer"`
+			MsgToMongo  string `yaml:"msgToMongo"`
+			MsgToMySql  string `yaml:"msgToMySql"`
+			MsgToPush   string `yaml:"msgToPush"`
+			MsgToModify string `yaml:"msgToModify"`
 		}
 	}
 	Secret                            string `yaml:"secret"`
@@ -291,6 +296,8 @@ type config struct {
 		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`
 		CallbackBeforeAddFriend            callBackConfig `yaml:"callbackBeforeAddFriend"`
 		CallbackBeforeCreateGroup          callBackConfig `yaml:"callbackBeforeCreateGroup"`
+		CallbackBeforeMemberJoinGroup      callBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
+		CallbackBeforeSetGroupMemberInfo   callBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
@@ -455,6 +462,12 @@ type config struct {
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
 			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
 		} `yaml:"blackDeleted"`
+		FriendInfoUpdated struct {
+			Conversation PConversation `yaml:"conversation"`
+			OfflinePush  POfflinePush  `yaml:"offlinePush"`
+			DefaultTips  PDefaultTips  `yaml:"defaultTips"`
+		} `yaml:"friendInfoUpdated"`
+
 		ConversationOptUpdate struct {
 			Conversation PConversation `yaml:"conversation"`
 			OfflinePush  POfflinePush  `yaml:"offlinePush"`
@@ -640,7 +653,7 @@ func unmarshalConfig(config interface{}, configName string) {
 	} else {
 		bytes, err := ioutil.ReadFile(fmt.Sprintf("../config/%s", configName))
 		if err != nil {
-			panic(err.Error())
+			panic(err.Error() + configName)
 		}
 		if err = yaml.Unmarshal(bytes, config); err != nil {
 			panic(err.Error())

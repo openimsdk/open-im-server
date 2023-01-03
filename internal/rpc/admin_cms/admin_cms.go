@@ -133,6 +133,24 @@ func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLogi
 	return resp, nil
 }
 
+func (s *adminCMSServer) GetUserToken(_ context.Context, req *pbAdminCMS.GetUserTokenReq) (*pbAdminCMS.GetUserTokenResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbAdminCMS.GetUserTokenResp{
+		CommonResp: &pbAdminCMS.CommonResp{},
+	}
+	token, expTime, err := token_verify.CreateToken(req.UserID, int(req.PlatformID))
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "generate token failed", "userID: ", req.UserID, req.PlatformID, err.Error())
+		resp.CommonResp.ErrCode = constant.ErrTokenUnknown.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
+		return resp, nil
+	}
+	resp.Token = token
+	resp.ExpTime = expTime
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", resp.String())
+	return resp, nil
+}
+
 func (s *adminCMSServer) AddUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.AddUserRegisterAddFriendIDListReq) (*pbAdminCMS.AddUserRegisterAddFriendIDListResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbAdminCMS.AddUserRegisterAddFriendIDListResp{CommonResp: &pbAdminCMS.CommonResp{}}
@@ -197,37 +215,50 @@ func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *
 func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatLogsReq) (*pbAdminCMS.GetChatLogsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetChatLogs", req.String())
 	resp := &pbAdminCMS.GetChatLogsResp{CommonResp: &pbAdminCMS.CommonResp{}, Pagination: &server_api_params.ResponsePagination{}}
-	time, err := utils.TimeStringToTime(req.SendTime)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "time string parse error", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrArgs.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
 	chatLog := db.ChatLog{
 		Content:     req.Content,
-		SendTime:    time,
 		ContentType: req.ContentType,
 		SessionType: req.SessionType,
 		RecvID:      req.RecvID,
 		SendID:      req.SendID,
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "chat_log: ", chatLog)
-	nums, err := imdb.GetChatLogCount(chatLog)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLogCount", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+	if req.SendTime != "" {
+		sendTime, err := utils.TimeStringToTime(req.SendTime)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "time string parse error", err.Error())
+			resp.CommonResp.ErrCode = constant.ErrArgs.ErrCode
+			resp.CommonResp.ErrMsg = err.Error()
+			return resp, nil
+		}
+		chatLog.SendTime = sendTime
 	}
-	resp.ChatLogsNum = int32(nums)
-	chatLogs, err := imdb.GetChatLog(chatLog, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+
+	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "chat_log: ", chatLog)
+
+	num, chatLogs, err := imdb.GetChatLog(&chatLog, req.Pagination.PageNumber, req.Pagination.ShowNumber, []int32{
+		constant.Text,
+		constant.Picture,
+		constant.Voice,
+		constant.Video,
+		constant.File,
+		constant.AtText,
+		constant.Merger,
+		constant.Card,
+		constant.Location,
+		constant.Custom,
+		constant.Revoke,
+		constant.Quote,
+		constant.AdvancedText,
+		constant.AdvancedRevoke,
+		constant.CustomNotTriggerConversation,
+	})
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetChatLog", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
+	resp.ChatLogsNum = int32(num)
 	for _, chatLog := range chatLogs {
 		pbChatLog := &pbAdminCMS.ChatLog{}
 		utils.CopyStructFields(pbChatLog, chatLog)
@@ -265,7 +296,6 @@ func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatL
 		CurrentPage: req.Pagination.PageNumber,
 		ShowNumber:  req.Pagination.ShowNumber,
 	}
-
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp output: ", resp.String())
 	return resp, nil
 }

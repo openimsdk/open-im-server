@@ -8,7 +8,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math/big"
 	"sort"
@@ -34,6 +33,8 @@ const (
 	groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
 	conversationCache         = "CONVERSATION_CACHE:"
 	conversationIDListCache   = "CONVERSATION_ID_LIST_CACHE:"
+	extendMsgSetCache         = "EXTEND_MSG_SET_CACHE:"
+	extendMsgCache            = "EXTEND_MSG_CACHE:"
 )
 
 func DelKeys() {
@@ -408,9 +409,6 @@ func GetJoinedSuperGroupListFromCache(userID string) ([]string, error) {
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
-		if len(userToSuperGroup.GroupIDList) == 0 {
-			return "", errors.New("GroupIDList == 0")
-		}
 		bytes, err := json.Marshal(userToSuperGroup.GroupIDList)
 		if err != nil {
 			return "", utils.Wrap(err, "")
@@ -567,4 +565,33 @@ func GetUserAllConversationList(ownerUserID string) ([]db.Conversation, error) {
 
 func DelConversationFromCache(ownerUserID, conversationID string) error {
 	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationCache+ownerUserID+":"+conversationID), "DelConversationFromCache err")
+}
+
+func GetExtendMsg(sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (*db.ExtendMsg, error) {
+	getExtendMsg := func() (string, error) {
+		extendMsg, err := db.DB.GetExtendMsg(sourceID, sessionType, clientMsgID, firstModifyTime)
+		if err != nil {
+			return "", utils.Wrap(err, "GetExtendMsgList failed")
+		}
+		bytes, err := json.Marshal(extendMsg)
+		if err != nil {
+			return "", utils.Wrap(err, "Marshal failed")
+		}
+		return string(bytes), nil
+	}
+
+	extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+clientMsgID, time.Second*30*60, getExtendMsg)
+	if err != nil {
+		return nil, utils.Wrap(err, "Fetch failed")
+	}
+	extendMsg := &db.ExtendMsg{}
+	err = json.Unmarshal([]byte(extendMsgStr), extendMsg)
+	if err != nil {
+		return nil, utils.Wrap(err, "Unmarshal failed")
+	}
+	return extendMsg, nil
+}
+
+func DelExtendMsg(ID string, index int32, clientMsgID string) error {
+	return utils.Wrap(db.DB.Rc.TagAsDeleted(extendMsgCache+clientMsgID), "DelExtendMsg err")
 }

@@ -22,7 +22,9 @@ var (
 	persistentCH          PersistentConsumerHandler
 	historyCH             OnlineHistoryRedisConsumerHandler
 	historyMongoCH        OnlineHistoryMongoConsumerHandler
+	modifyCH              ModifyMsgConsumerHandler
 	producer              *kafka.Producer
+	producerToModify      *kafka.Producer
 	producerToMongo       *kafka.Producer
 	cmdCh                 chan Cmd2Value
 	onlineTopicStatus     int
@@ -43,11 +45,13 @@ func Init() {
 	persistentCH.Init()   // ws2mschat save mysql
 	historyCH.Init(cmdCh) //
 	historyMongoCH.Init()
+	modifyCH.Init()
 	onlineTopicStatus = OnlineTopicVacancy
 	//offlineHistoryCH.Init(cmdCh)
 	statistics.NewStatistics(&singleMsgSuccessCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second singleMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	statistics.NewStatistics(&groupMsgCount, config.Config.ModuleName.MsgTransferName, fmt.Sprintf("%d second groupMsgCount insert to mongo", constant.StatisticsTimeInterval), constant.StatisticsTimeInterval)
 	producer = kafka.NewKafkaProducer(config.Config.Kafka.Ms2pschat.Addr, config.Config.Kafka.Ms2pschat.Topic)
+	producerToModify = kafka.NewKafkaProducer(config.Config.Kafka.MsgToModify.Addr, config.Config.Kafka.MsgToModify.Topic)
 	producerToMongo = kafka.NewKafkaProducer(config.Config.Kafka.MsgToMongo.Addr, config.Config.Kafka.MsgToMongo.Topic)
 }
 func Run(promethuesPort int) {
@@ -59,6 +63,7 @@ func Run(promethuesPort int) {
 	}
 	go historyCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyCH)
 	go historyMongoCH.historyConsumerGroup.RegisterHandleAndConsumer(&historyMongoCH)
+	go modifyCH.modifyMsgConsumerGroup.RegisterHandleAndConsumer(&modifyCH)
 	//go offlineHistoryCH.historyConsumerGroup.RegisterHandleAndConsumer(&offlineHistoryCH)
 	go func() {
 		err := promePkg.StartPromeSrv(promethuesPort)

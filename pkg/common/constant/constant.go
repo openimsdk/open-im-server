@@ -17,14 +17,15 @@ const (
 	RefuseFriendFlag      = -1
 
 	//Websocket Protocol
-	WSGetNewestSeq     = 1001
-	WSPullMsgBySeqList = 1002
-	WSSendMsg          = 1003
-	WSSendSignalMsg    = 1004
-	WSPushMsg          = 2001
-	WSKickOnlineMsg    = 2002
-	WsLogoutMsg        = 2003
-	WSDataError        = 3001
+	WSGetNewestSeq        = 1001
+	WSPullMsgBySeqList    = 1002
+	WSSendMsg             = 1003
+	WSSendSignalMsg       = 1004
+	WSPushMsg             = 2001
+	WSKickOnlineMsg       = 2002
+	WsLogoutMsg           = 2003
+	WsSetBackgroundStatus = 2004
+	WSDataError           = 3001
 
 	///ContentType
 	//UserRelated
@@ -47,6 +48,8 @@ const (
 	AdvancedRevoke               = 118 //影响前者消息
 	CustomNotTriggerConversation = 119
 	CustomOnlineOnly             = 120
+	ReactionMessageModifier      = 121
+	ReactionMessageDeleter       = 122
 
 	Common             = 200
 	GroupMsg           = 201
@@ -64,11 +67,12 @@ const (
 	FriendRemarkSetNotification           = 1206 //set_friend_remark?
 	BlackAddedNotification                = 1207 //add_black
 	BlackDeletedNotification              = 1208 //remove_black
+	FriendInfoUpdatedNotification         = 1209
 
 	ConversationOptChangeNotification = 1300 // change conversation opt
 
 	UserNotificationBegin       = 1301
-	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip             = 204
+	UserInfoUpdatedNotification = 1303 //SetSelfInfoTip              = 204
 	UserNotificationEnd         = 1399
 	OANotification              = 1400
 
@@ -109,6 +113,10 @@ const (
 
 	WorkMomentNotificationBegin = 1900
 	WorkMomentNotification      = 1901
+
+	BusinessNotificationBegin = 2000
+	BusinessNotification      = 2001
+	BusinessNotificationEnd   = 2099
 
 	NotificationEnd = 3000
 
@@ -163,6 +171,7 @@ const (
 	IsNotPrivate               = "notPrivate"
 	IsSenderConversationUpdate = "senderConversationUpdate"
 	IsSenderNotificationPush   = "senderNotificationPush"
+	IsReactionFromCache        = "reactionFromCache"
 
 	//GroupStatus
 	GroupOk              = 0
@@ -196,19 +205,24 @@ const (
 	VerificationCodeForResetSuffix    = "_forReset"
 
 	//callbackCommand
-	CallbackBeforeSendSingleMsgCommand  = "callbackBeforeSendSingleMsgCommand"
-	CallbackAfterSendSingleMsgCommand   = "callbackAfterSendSingleMsgCommand"
-	CallbackBeforeSendGroupMsgCommand   = "callbackBeforeSendGroupMsgCommand"
-	CallbackAfterSendGroupMsgCommand    = "callbackAfterSendGroupMsgCommand"
-	CallbackMsgModifyCommand            = "callbackMsgModifyCommand"
-	CallbackUserOnlineCommand           = "callbackUserOnlineCommand"
-	CallbackUserOfflineCommand          = "callbackUserOfflineCommand"
-	CallbackUserKickOffCommand          = "callbackUserKickOffCommand"
-	CallbackOfflinePushCommand          = "callbackOfflinePushCommand"
-	CallbackOnlinePushCommand           = "callbackOnlinePushCommand"
-	CallbackSuperGroupOnlinePushCommand = "callbackSuperGroupOnlinePushCommand"
-	CallbackBeforeAddFriendCommand      = "callbackBeforeAddFriendCommand"
-	CallbackBeforeCreateGroupCommand    = "callbackBeforeCreateGroup"
+	CallbackBeforeSendSingleMsgCommand                   = "callbackBeforeSendSingleMsgCommand"
+	CallbackAfterSendSingleMsgCommand                    = "callbackAfterSendSingleMsgCommand"
+	CallbackBeforeSendGroupMsgCommand                    = "callbackBeforeSendGroupMsgCommand"
+	CallbackAfterSendGroupMsgCommand                     = "callbackAfterSendGroupMsgCommand"
+	CallbackMsgModifyCommand                             = "callbackMsgModifyCommand"
+	CallbackUserOnlineCommand                            = "callbackUserOnlineCommand"
+	CallbackUserOfflineCommand                           = "callbackUserOfflineCommand"
+	CallbackUserKickOffCommand                           = "callbackUserKickOffCommand"
+	CallbackOfflinePushCommand                           = "callbackOfflinePushCommand"
+	CallbackOnlinePushCommand                            = "callbackOnlinePushCommand"
+	CallbackSuperGroupOnlinePushCommand                  = "callbackSuperGroupOnlinePushCommand"
+	CallbackBeforeAddFriendCommand                       = "callbackBeforeAddFriendCommand"
+	CallbackBeforeCreateGroupCommand                     = "callbackBeforeCreateGroupCommand"
+	CallbackBeforeMemberJoinGroupCommand                 = "callbackBeforeMemberJoinGroupCommand"
+	CallbackBeforeSetGroupMemberInfoCommand              = "CallbackBeforeSetGroupMemberInfoCommand"
+	CallbackBeforeSetMessageReactionExtensionCommand     = "callbackBeforeSetMessageReactionExtensionCommand"
+	CallbackBeforeDeleteMessageReactionExtensionsCommand = "callbackBeforeDeleteMessageReactionExtensionsCommand"
+	CallbackGetMessageListReactionExtensionsCommand      = "callbackGetMessageListReactionExtensionsCommand"
 
 	//callback actionCode
 	ActionAllow     = 0
@@ -339,6 +353,6 @@ const LogFileName = "OpenIM.log"
 
 const StatisticsTimeInterval = 60
 
-const MaxNotificationNum = 100
+const MaxNotificationNum = 500
 
 const CurrentVersion = "v2.3.4-rc0"

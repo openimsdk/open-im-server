@@ -7,6 +7,7 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import sdk_ws "Open_IM/pkg/proto/sdk_ws"
+import wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 
 import (
 	context "golang.org/x/net/context"
@@ -37,7 +38,7 @@ func (m *MsgDataToMQ) Reset()         { *m = MsgDataToMQ{} }
 func (m *MsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMQ) ProtoMessage()    {}
 func (*MsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{0}
+	return fileDescriptor_msg_24cf87b309a51053, []int{0}
 }
 func (m *MsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMQ.Unmarshal(m, b)
@@ -90,7 +91,7 @@ func (m *MsgDataToDB) Reset()         { *m = MsgDataToDB{} }
 func (m *MsgDataToDB) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToDB) ProtoMessage()    {}
 func (*MsgDataToDB) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{1}
+	return fileDescriptor_msg_24cf87b309a51053, []int{1}
 }
 func (m *MsgDataToDB) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToDB.Unmarshal(m, b)
@@ -137,7 +138,7 @@ func (m *PushMsgDataToMQ) Reset()         { *m = PushMsgDataToMQ{} }
 func (m *PushMsgDataToMQ) String() string { return proto.CompactTextString(m) }
 func (*PushMsgDataToMQ) ProtoMessage()    {}
 func (*PushMsgDataToMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{2}
+	return fileDescriptor_msg_24cf87b309a51053, []int{2}
 }
 func (m *PushMsgDataToMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PushMsgDataToMQ.Unmarshal(m, b)
@@ -192,7 +193,7 @@ func (m *MsgDataToMongoByMQ) Reset()         { *m = MsgDataToMongoByMQ{} }
 func (m *MsgDataToMongoByMQ) String() string { return proto.CompactTextString(m) }
 func (*MsgDataToMongoByMQ) ProtoMessage()    {}
 func (*MsgDataToMongoByMQ) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{3}
+	return fileDescriptor_msg_24cf87b309a51053, []int{3}
 }
 func (m *MsgDataToMongoByMQ) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MsgDataToMongoByMQ.Unmarshal(m, b)
@@ -272,7 +273,7 @@ func (m *GetMaxAndMinSeqReq) Reset()         { *m = GetMaxAndMinSeqReq{} }
 func (m *GetMaxAndMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqReq) ProtoMessage()    {}
 func (*GetMaxAndMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{4}
+	return fileDescriptor_msg_24cf87b309a51053, []int{4}
 }
 func (m *GetMaxAndMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqReq.Unmarshal(m, b)
@@ -320,7 +321,7 @@ func (m *GetMaxAndMinSeqResp) Reset()         { *m = GetMaxAndMinSeqResp{} }
 func (m *GetMaxAndMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*GetMaxAndMinSeqResp) ProtoMessage()    {}
 func (*GetMaxAndMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{5}
+	return fileDescriptor_msg_24cf87b309a51053, []int{5}
 }
 func (m *GetMaxAndMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetMaxAndMinSeqResp.Unmarshal(m, b)
@@ -381,7 +382,7 @@ func (m *SendMsgReq) Reset()         { *m = SendMsgReq{} }
 func (m *SendMsgReq) String() string { return proto.CompactTextString(m) }
 func (*SendMsgReq) ProtoMessage()    {}
 func (*SendMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{6}
+	return fileDescriptor_msg_24cf87b309a51053, []int{6}
 }
 func (m *SendMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgReq.Unmarshal(m, b)
@@ -437,7 +438,7 @@ func (m *SendMsgResp) Reset()         { *m = SendMsgResp{} }
 func (m *SendMsgResp) String() string { return proto.CompactTextString(m) }
 func (*SendMsgResp) ProtoMessage()    {}
 func (*SendMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{7}
+	return fileDescriptor_msg_24cf87b309a51053, []int{7}
 }
 func (m *SendMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SendMsgResp.Unmarshal(m, b)
@@ -505,7 +506,7 @@ func (m *ClearMsgReq) Reset()         { *m = ClearMsgReq{} }
 func (m *ClearMsgReq) String() string { return proto.CompactTextString(m) }
 func (*ClearMsgReq) ProtoMessage()    {}
 func (*ClearMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{8}
+	return fileDescriptor_msg_24cf87b309a51053, []int{8}
 }
 func (m *ClearMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClearMsgReq.Unmarshal(m, b)
@@ -558,7 +559,7 @@ func (m *ClearMsgResp) Reset()         { *m = ClearMsgResp{} }
 func (m *ClearMsgResp) String() string { return proto.CompactTextString(m) }
 func (*ClearMsgResp) ProtoMessage()    {}
 func (*ClearMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{9}
+	return fileDescriptor_msg_24cf87b309a51053, []int{9}
 }
 func (m *ClearMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClearMsgResp.Unmarshal(m, b)
@@ -607,7 +608,7 @@ func (m *SetMsgMinSeqReq) Reset()         { *m = SetMsgMinSeqReq{} }
 func (m *SetMsgMinSeqReq) String() string { return proto.CompactTextString(m) }
 func (*SetMsgMinSeqReq) ProtoMessage()    {}
 func (*SetMsgMinSeqReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{10}
+	return fileDescriptor_msg_24cf87b309a51053, []int{10}
 }
 func (m *SetMsgMinSeqReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMsgMinSeqReq.Unmarshal(m, b)
@@ -674,7 +675,7 @@ func (m *SetMsgMinSeqResp) Reset()         { *m = SetMsgMinSeqResp{} }
 func (m *SetMsgMinSeqResp) String() string { return proto.CompactTextString(m) }
 func (*SetMsgMinSeqResp) ProtoMessage()    {}
 func (*SetMsgMinSeqResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{11}
+	return fileDescriptor_msg_24cf87b309a51053, []int{11}
 }
 func (m *SetMsgMinSeqResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetMsgMinSeqResp.Unmarshal(m, b)
@@ -720,7 +721,7 @@ func (m *SetSendMsgStatusReq) Reset()         { *m = SetSendMsgStatusReq{} }
 func (m *SetSendMsgStatusReq) String() string { return proto.CompactTextString(m) }
 func (*SetSendMsgStatusReq) ProtoMessage()    {}
 func (*SetSendMsgStatusReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{12}
+	return fileDescriptor_msg_24cf87b309a51053, []int{12}
 }
 func (m *SetSendMsgStatusReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetSendMsgStatusReq.Unmarshal(m, b)
@@ -766,7 +767,7 @@ func (m *SetSendMsgStatusResp) Reset()         { *m = SetSendMsgStatusResp{} }
 func (m *SetSendMsgStatusResp) String() string { return proto.CompactTextString(m) }
 func (*SetSendMsgStatusResp) ProtoMessage()    {}
 func (*SetSendMsgStatusResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{13}
+	return fileDescriptor_msg_24cf87b309a51053, []int{13}
 }
 func (m *SetSendMsgStatusResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetSendMsgStatusResp.Unmarshal(m, b)
@@ -811,7 +812,7 @@ func (m *GetSendMsgStatusReq) Reset()         { *m = GetSendMsgStatusReq{} }
 func (m *GetSendMsgStatusReq) String() string { return proto.CompactTextString(m) }
 func (*GetSendMsgStatusReq) ProtoMessage()    {}
 func (*GetSendMsgStatusReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{14}
+	return fileDescriptor_msg_24cf87b309a51053, []int{14}
 }
 func (m *GetSendMsgStatusReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSendMsgStatusReq.Unmarshal(m, b)
@@ -851,7 +852,7 @@ func (m *GetSendMsgStatusResp) Reset()         { *m = GetSendMsgStatusResp{} }
 func (m *GetSendMsgStatusResp) String() string { return proto.CompactTextString(m) }
 func (*GetSendMsgStatusResp) ProtoMessage()    {}
 func (*GetSendMsgStatusResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{15}
+	return fileDescriptor_msg_24cf87b309a51053, []int{15}
 }
 func (m *GetSendMsgStatusResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSendMsgStatusResp.Unmarshal(m, b)
@@ -906,7 +907,7 @@ func (m *DelSuperGroupMsgReq) Reset()         { *m = DelSuperGroupMsgReq{} }
 func (m *DelSuperGroupMsgReq) String() string { return proto.CompactTextString(m) }
 func (*DelSuperGroupMsgReq) ProtoMessage()    {}
 func (*DelSuperGroupMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{16}
+	return fileDescriptor_msg_24cf87b309a51053, []int{16}
 }
 func (m *DelSuperGroupMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DelSuperGroupMsgReq.Unmarshal(m, b)
@@ -966,7 +967,7 @@ func (m *DelSuperGroupMsgResp) Reset()         { *m = DelSuperGroupMsgResp{} }
 func (m *DelSuperGroupMsgResp) String() string { return proto.CompactTextString(m) }
 func (*DelSuperGroupMsgResp) ProtoMessage()    {}
 func (*DelSuperGroupMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{17}
+	return fileDescriptor_msg_24cf87b309a51053, []int{17}
 }
 func (m *DelSuperGroupMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DelSuperGroupMsgResp.Unmarshal(m, b)
@@ -1013,7 +1014,7 @@ func (m *GetSuperGroupMsgReq) Reset()         { *m = GetSuperGroupMsgReq{} }
 func (m *GetSuperGroupMsgReq) String() string { return proto.CompactTextString(m) }
 func (*GetSuperGroupMsgReq) ProtoMessage()    {}
 func (*GetSuperGroupMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{18}
+	return fileDescriptor_msg_24cf87b309a51053, []int{18}
 }
 func (m *GetSuperGroupMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSuperGroupMsgReq.Unmarshal(m, b)
@@ -1067,7 +1068,7 @@ func (m *GetSuperGroupMsgResp) Reset()         { *m = GetSuperGroupMsgResp{} }
 func (m *GetSuperGroupMsgResp) String() string { return proto.CompactTextString(m) }
 func (*GetSuperGroupMsgResp) ProtoMessage()    {}
 func (*GetSuperGroupMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{19}
+	return fileDescriptor_msg_24cf87b309a51053, []int{19}
 }
 func (m *GetSuperGroupMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSuperGroupMsgResp.Unmarshal(m, b)
@@ -1120,7 +1121,7 @@ func (m *GetWriteDiffMsgReq) Reset()         { *m = GetWriteDiffMsgReq{} }
 func (m *GetWriteDiffMsgReq) String() string { return proto.CompactTextString(m) }
 func (*GetWriteDiffMsgReq) ProtoMessage()    {}
 func (*GetWriteDiffMsgReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{20}
+	return fileDescriptor_msg_24cf87b309a51053, []int{20}
 }
 func (m *GetWriteDiffMsgReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWriteDiffMsgReq.Unmarshal(m, b)
@@ -1167,7 +1168,7 @@ func (m *GetWriteDiffMsgResp) Reset()         { *m = GetWriteDiffMsgResp{} }
 func (m *GetWriteDiffMsgResp) String() string { return proto.CompactTextString(m) }
 func (*GetWriteDiffMsgResp) ProtoMessage()    {}
 func (*GetWriteDiffMsgResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_msg_3f0146015dfd26d9, []int{21}
+	return fileDescriptor_msg_24cf87b309a51053, []int{21}
 }
 func (m *GetWriteDiffMsgResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetWriteDiffMsgResp.Unmarshal(m, b)
@@ -1208,6 +1209,1010 @@ func (m *GetWriteDiffMsgResp) GetMsgData() *sdk_ws.MsgData {
 	return nil
 }
 
+type ModifyMessageReactionExtensionsReq struct {
+	OperationID           string                      `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	SourceID              string                      `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
+	OpUserID              string                      `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
+	SessionType           int32                       `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                      `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	Ex                    *wrapperspb.StringValue     `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
+	AttachedInfo          *wrapperspb.StringValue     `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
+	IsReact               bool                        `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
+	IsExternalExtensions  bool                        `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64                       `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
+	XXX_unrecognized      []byte                      `json:"-"`
+	XXX_sizecache         int32                       `json:"-"`
+}
+
+func (m *ModifyMessageReactionExtensionsReq) Reset()         { *m = ModifyMessageReactionExtensionsReq{} }
+func (m *ModifyMessageReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
+func (*ModifyMessageReactionExtensionsReq) ProtoMessage()    {}
+func (*ModifyMessageReactionExtensionsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{22}
+}
+func (m *ModifyMessageReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ModifyMessageReactionExtensionsReq.Unmarshal(m, b)
+}
+func (m *ModifyMessageReactionExtensionsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ModifyMessageReactionExtensionsReq.Marshal(b, m, deterministic)
+}
+func (dst *ModifyMessageReactionExtensionsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ModifyMessageReactionExtensionsReq.Merge(dst, src)
+}
+func (m *ModifyMessageReactionExtensionsReq) XXX_Size() int {
+	return xxx_messageInfo_ModifyMessageReactionExtensionsReq.Size(m)
+}
+func (m *ModifyMessageReactionExtensionsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_ModifyMessageReactionExtensionsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ModifyMessageReactionExtensionsReq proto.InternalMessageInfo
+
+func (m *ModifyMessageReactionExtensionsReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetSourceID() string {
+	if m != nil {
+		return m.SourceID
+	}
+	return ""
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
+	}
+	return ""
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetSessionType() int32 {
+	if m != nil {
+		return m.SessionType
+	}
+	return 0
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
+	if m != nil {
+		return m.ReactionExtensionList
+	}
+	return nil
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetClientMsgID() string {
+	if m != nil {
+		return m.ClientMsgID
+	}
+	return ""
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetEx() *wrapperspb.StringValue {
+	if m != nil {
+		return m.Ex
+	}
+	return nil
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetAttachedInfo() *wrapperspb.StringValue {
+	if m != nil {
+		return m.AttachedInfo
+	}
+	return nil
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetIsReact() bool {
+	if m != nil {
+		return m.IsReact
+	}
+	return false
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetIsExternalExtensions() bool {
+	if m != nil {
+		return m.IsExternalExtensions
+	}
+	return false
+}
+
+func (m *ModifyMessageReactionExtensionsReq) GetMsgFirstModifyTime() int64 {
+	if m != nil {
+		return m.MsgFirstModifyTime
+	}
+	return 0
+}
+
+type SetMessageReactionExtensionsReq struct {
+	OperationID           string                      `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	SourceID              string                      `protobuf:"bytes,2,opt,name=sourceID" json:"sourceID,omitempty"`
+	OpUserID              string                      `protobuf:"bytes,3,opt,name=opUserID" json:"opUserID,omitempty"`
+	SessionType           int32                       `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,5,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                      `protobuf:"bytes,6,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	Ex                    *wrapperspb.StringValue     `protobuf:"bytes,7,opt,name=ex" json:"ex,omitempty"`
+	AttachedInfo          *wrapperspb.StringValue     `protobuf:"bytes,8,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
+	IsReact               bool                        `protobuf:"varint,9,opt,name=isReact" json:"isReact,omitempty"`
+	IsExternalExtensions  bool                        `protobuf:"varint,10,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64                       `protobuf:"varint,11,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
+	XXX_unrecognized      []byte                      `json:"-"`
+	XXX_sizecache         int32                       `json:"-"`
+}
+
+func (m *SetMessageReactionExtensionsReq) Reset()         { *m = SetMessageReactionExtensionsReq{} }
+func (m *SetMessageReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
+func (*SetMessageReactionExtensionsReq) ProtoMessage()    {}
+func (*SetMessageReactionExtensionsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{23}
+}
+func (m *SetMessageReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetMessageReactionExtensionsReq.Unmarshal(m, b)
+}
+func (m *SetMessageReactionExtensionsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetMessageReactionExtensionsReq.Marshal(b, m, deterministic)
+}
+func (dst *SetMessageReactionExtensionsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetMessageReactionExtensionsReq.Merge(dst, src)
+}
+func (m *SetMessageReactionExtensionsReq) XXX_Size() int {
+	return xxx_messageInfo_SetMessageReactionExtensionsReq.Size(m)
+}
+func (m *SetMessageReactionExtensionsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetMessageReactionExtensionsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetMessageReactionExtensionsReq proto.InternalMessageInfo
+
+func (m *SetMessageReactionExtensionsReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *SetMessageReactionExtensionsReq) GetSourceID() string {
+	if m != nil {
+		return m.SourceID
+	}
+	return ""
+}
+
+func (m *SetMessageReactionExtensionsReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
+	}
+	return ""
+}
+
+func (m *SetMessageReactionExtensionsReq) GetSessionType() int32 {
+	if m != nil {
+		return m.SessionType
+	}
+	return 0
+}
+
+func (m *SetMessageReactionExtensionsReq) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
+	if m != nil {
+		return m.ReactionExtensionList
+	}
+	return nil
+}
+
+func (m *SetMessageReactionExtensionsReq) GetClientMsgID() string {
+	if m != nil {
+		return m.ClientMsgID
+	}
+	return ""
+}
+
+func (m *SetMessageReactionExtensionsReq) GetEx() *wrapperspb.StringValue {
+	if m != nil {
+		return m.Ex
+	}
+	return nil
+}
+
+func (m *SetMessageReactionExtensionsReq) GetAttachedInfo() *wrapperspb.StringValue {
+	if m != nil {
+		return m.AttachedInfo
+	}
+	return nil
+}
+
+func (m *SetMessageReactionExtensionsReq) GetIsReact() bool {
+	if m != nil {
+		return m.IsReact
+	}
+	return false
+}
+
+func (m *SetMessageReactionExtensionsReq) GetIsExternalExtensions() bool {
+	if m != nil {
+		return m.IsExternalExtensions
+	}
+	return false
+}
+
+func (m *SetMessageReactionExtensionsReq) GetMsgFirstModifyTime() int64 {
+	if m != nil {
+		return m.MsgFirstModifyTime
+	}
+	return 0
+}
+
+type SetMessageReactionExtensionsResp struct {
+	ErrCode              int32           `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string          `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	ClientMsgID          string          `protobuf:"bytes,3,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	MsgFirstModifyTime   int64           `protobuf:"varint,4,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	IsReact              bool            `protobuf:"varint,5,opt,name=isReact" json:"isReact,omitempty"`
+	Result               []*KeyValueResp `protobuf:"bytes,6,rep,name=result" json:"result,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *SetMessageReactionExtensionsResp) Reset()         { *m = SetMessageReactionExtensionsResp{} }
+func (m *SetMessageReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
+func (*SetMessageReactionExtensionsResp) ProtoMessage()    {}
+func (*SetMessageReactionExtensionsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{24}
+}
+func (m *SetMessageReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetMessageReactionExtensionsResp.Unmarshal(m, b)
+}
+func (m *SetMessageReactionExtensionsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetMessageReactionExtensionsResp.Marshal(b, m, deterministic)
+}
+func (dst *SetMessageReactionExtensionsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetMessageReactionExtensionsResp.Merge(dst, src)
+}
+func (m *SetMessageReactionExtensionsResp) XXX_Size() int {
+	return xxx_messageInfo_SetMessageReactionExtensionsResp.Size(m)
+}
+func (m *SetMessageReactionExtensionsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetMessageReactionExtensionsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetMessageReactionExtensionsResp proto.InternalMessageInfo
+
+func (m *SetMessageReactionExtensionsResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *SetMessageReactionExtensionsResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *SetMessageReactionExtensionsResp) GetClientMsgID() string {
+	if m != nil {
+		return m.ClientMsgID
+	}
+	return ""
+}
+
+func (m *SetMessageReactionExtensionsResp) GetMsgFirstModifyTime() int64 {
+	if m != nil {
+		return m.MsgFirstModifyTime
+	}
+	return 0
+}
+
+func (m *SetMessageReactionExtensionsResp) GetIsReact() bool {
+	if m != nil {
+		return m.IsReact
+	}
+	return false
+}
+
+func (m *SetMessageReactionExtensionsResp) GetResult() []*KeyValueResp {
+	if m != nil {
+		return m.Result
+	}
+	return nil
+}
+
+type GetMessageListReactionExtensionsReq struct {
+	OperationID            string                                                    `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	OpUserID               string                                                    `protobuf:"bytes,2,opt,name=opUserID" json:"opUserID,omitempty"`
+	SourceID               string                                                    `protobuf:"bytes,3,opt,name=sourceID" json:"sourceID,omitempty"`
+	SessionType            int32                                                     `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	IsExternalExtensions   bool                                                      `protobuf:"varint,5,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MessageReactionKeyList []*GetMessageListReactionExtensionsReq_MessageReactionKey `protobuf:"bytes,6,rep,name=messageReactionKeyList" json:"messageReactionKeyList,omitempty"`
+	XXX_NoUnkeyedLiteral   struct{}                                                  `json:"-"`
+	XXX_unrecognized       []byte                                                    `json:"-"`
+	XXX_sizecache          int32                                                     `json:"-"`
+}
+
+func (m *GetMessageListReactionExtensionsReq) Reset()         { *m = GetMessageListReactionExtensionsReq{} }
+func (m *GetMessageListReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
+func (*GetMessageListReactionExtensionsReq) ProtoMessage()    {}
+func (*GetMessageListReactionExtensionsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{25}
+}
+func (m *GetMessageListReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetMessageListReactionExtensionsReq.Unmarshal(m, b)
+}
+func (m *GetMessageListReactionExtensionsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetMessageListReactionExtensionsReq.Marshal(b, m, deterministic)
+}
+func (dst *GetMessageListReactionExtensionsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetMessageListReactionExtensionsReq.Merge(dst, src)
+}
+func (m *GetMessageListReactionExtensionsReq) XXX_Size() int {
+	return xxx_messageInfo_GetMessageListReactionExtensionsReq.Size(m)
+}
+func (m *GetMessageListReactionExtensionsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetMessageListReactionExtensionsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetMessageListReactionExtensionsReq proto.InternalMessageInfo
+
+func (m *GetMessageListReactionExtensionsReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *GetMessageListReactionExtensionsReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
+	}
+	return ""
+}
+
+func (m *GetMessageListReactionExtensionsReq) GetSourceID() string {
+	if m != nil {
+		return m.SourceID
+	}
+	return ""
+}
+
+func (m *GetMessageListReactionExtensionsReq) GetSessionType() int32 {
+	if m != nil {
+		return m.SessionType
+	}
+	return 0
+}
+
+func (m *GetMessageListReactionExtensionsReq) GetIsExternalExtensions() bool {
+	if m != nil {
+		return m.IsExternalExtensions
+	}
+	return false
+}
+
+func (m *GetMessageListReactionExtensionsReq) GetMessageReactionKeyList() []*GetMessageListReactionExtensionsReq_MessageReactionKey {
+	if m != nil {
+		return m.MessageReactionKeyList
+	}
+	return nil
+}
+
+type GetMessageListReactionExtensionsReq_MessageReactionKey struct {
+	ClientMsgID          string   `protobuf:"bytes,1,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	MsgFirstModifyTime   int64    `protobuf:"varint,2,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) Reset() {
+	*m = GetMessageListReactionExtensionsReq_MessageReactionKey{}
+}
+func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) String() string {
+	return proto.CompactTextString(m)
+}
+func (*GetMessageListReactionExtensionsReq_MessageReactionKey) ProtoMessage() {}
+func (*GetMessageListReactionExtensionsReq_MessageReactionKey) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{25, 0}
+}
+func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetMessageListReactionExtensionsReq_MessageReactionKey.Unmarshal(m, b)
+}
+func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetMessageListReactionExtensionsReq_MessageReactionKey.Marshal(b, m, deterministic)
+}
+func (dst *GetMessageListReactionExtensionsReq_MessageReactionKey) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetMessageListReactionExtensionsReq_MessageReactionKey.Merge(dst, src)
+}
+func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) XXX_Size() int {
+	return xxx_messageInfo_GetMessageListReactionExtensionsReq_MessageReactionKey.Size(m)
+}
+func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetMessageListReactionExtensionsReq_MessageReactionKey.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetMessageListReactionExtensionsReq_MessageReactionKey proto.InternalMessageInfo
+
+func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) GetClientMsgID() string {
+	if m != nil {
+		return m.ClientMsgID
+	}
+	return ""
+}
+
+func (m *GetMessageListReactionExtensionsReq_MessageReactionKey) GetMsgFirstModifyTime() int64 {
+	if m != nil {
+		return m.MsgFirstModifyTime
+	}
+	return 0
+}
+
+type GetMessageListReactionExtensionsResp struct {
+	ErrCode              int32                           `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string                          `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	SingleMessageResult  []*SingleMessageExtensionResult `protobuf:"bytes,3,rep,name=singleMessageResult" json:"singleMessageResult,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                        `json:"-"`
+	XXX_unrecognized     []byte                          `json:"-"`
+	XXX_sizecache        int32                           `json:"-"`
+}
+
+func (m *GetMessageListReactionExtensionsResp) Reset()         { *m = GetMessageListReactionExtensionsResp{} }
+func (m *GetMessageListReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
+func (*GetMessageListReactionExtensionsResp) ProtoMessage()    {}
+func (*GetMessageListReactionExtensionsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{26}
+}
+func (m *GetMessageListReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetMessageListReactionExtensionsResp.Unmarshal(m, b)
+}
+func (m *GetMessageListReactionExtensionsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetMessageListReactionExtensionsResp.Marshal(b, m, deterministic)
+}
+func (dst *GetMessageListReactionExtensionsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetMessageListReactionExtensionsResp.Merge(dst, src)
+}
+func (m *GetMessageListReactionExtensionsResp) XXX_Size() int {
+	return xxx_messageInfo_GetMessageListReactionExtensionsResp.Size(m)
+}
+func (m *GetMessageListReactionExtensionsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetMessageListReactionExtensionsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetMessageListReactionExtensionsResp proto.InternalMessageInfo
+
+func (m *GetMessageListReactionExtensionsResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *GetMessageListReactionExtensionsResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *GetMessageListReactionExtensionsResp) GetSingleMessageResult() []*SingleMessageExtensionResult {
+	if m != nil {
+		return m.SingleMessageResult
+	}
+	return nil
+}
+
+type SingleMessageExtensionResult struct {
+	ErrCode               int32                       `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg                string                      `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	ReactionExtensionList map[string]*sdk_ws.KeyValue `protobuf:"bytes,3,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                      `protobuf:"bytes,4,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                    `json:"-"`
+	XXX_unrecognized      []byte                      `json:"-"`
+	XXX_sizecache         int32                       `json:"-"`
+}
+
+func (m *SingleMessageExtensionResult) Reset()         { *m = SingleMessageExtensionResult{} }
+func (m *SingleMessageExtensionResult) String() string { return proto.CompactTextString(m) }
+func (*SingleMessageExtensionResult) ProtoMessage()    {}
+func (*SingleMessageExtensionResult) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{27}
+}
+func (m *SingleMessageExtensionResult) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SingleMessageExtensionResult.Unmarshal(m, b)
+}
+func (m *SingleMessageExtensionResult) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SingleMessageExtensionResult.Marshal(b, m, deterministic)
+}
+func (dst *SingleMessageExtensionResult) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SingleMessageExtensionResult.Merge(dst, src)
+}
+func (m *SingleMessageExtensionResult) XXX_Size() int {
+	return xxx_messageInfo_SingleMessageExtensionResult.Size(m)
+}
+func (m *SingleMessageExtensionResult) XXX_DiscardUnknown() {
+	xxx_messageInfo_SingleMessageExtensionResult.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SingleMessageExtensionResult proto.InternalMessageInfo
+
+func (m *SingleMessageExtensionResult) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *SingleMessageExtensionResult) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *SingleMessageExtensionResult) GetReactionExtensionList() map[string]*sdk_ws.KeyValue {
+	if m != nil {
+		return m.ReactionExtensionList
+	}
+	return nil
+}
+
+func (m *SingleMessageExtensionResult) GetClientMsgID() string {
+	if m != nil {
+		return m.ClientMsgID
+	}
+	return ""
+}
+
+type ModifyMessageReactionExtensionsResp struct {
+	ErrCode              int32            `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string           `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	SuccessList          []*ExtendMsgResp `protobuf:"bytes,3,rep,name=successList" json:"successList,omitempty"`
+	FailedList           []*ExtendMsgResp `protobuf:"bytes,4,rep,name=failedList" json:"failedList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
+}
+
+func (m *ModifyMessageReactionExtensionsResp) Reset()         { *m = ModifyMessageReactionExtensionsResp{} }
+func (m *ModifyMessageReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
+func (*ModifyMessageReactionExtensionsResp) ProtoMessage()    {}
+func (*ModifyMessageReactionExtensionsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{28}
+}
+func (m *ModifyMessageReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ModifyMessageReactionExtensionsResp.Unmarshal(m, b)
+}
+func (m *ModifyMessageReactionExtensionsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ModifyMessageReactionExtensionsResp.Marshal(b, m, deterministic)
+}
+func (dst *ModifyMessageReactionExtensionsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ModifyMessageReactionExtensionsResp.Merge(dst, src)
+}
+func (m *ModifyMessageReactionExtensionsResp) XXX_Size() int {
+	return xxx_messageInfo_ModifyMessageReactionExtensionsResp.Size(m)
+}
+func (m *ModifyMessageReactionExtensionsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_ModifyMessageReactionExtensionsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ModifyMessageReactionExtensionsResp proto.InternalMessageInfo
+
+func (m *ModifyMessageReactionExtensionsResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *ModifyMessageReactionExtensionsResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *ModifyMessageReactionExtensionsResp) GetSuccessList() []*ExtendMsgResp {
+	if m != nil {
+		return m.SuccessList
+	}
+	return nil
+}
+
+func (m *ModifyMessageReactionExtensionsResp) GetFailedList() []*ExtendMsgResp {
+	if m != nil {
+		return m.FailedList
+	}
+	return nil
+}
+
+type DeleteMessageListReactionExtensionsReq struct {
+	OperationID           string             `protobuf:"bytes,1,opt,name=operationID" json:"operationID,omitempty"`
+	OpUserID              string             `protobuf:"bytes,2,opt,name=opUserID" json:"opUserID,omitempty"`
+	SourceID              string             `protobuf:"bytes,3,opt,name=sourceID" json:"sourceID,omitempty"`
+	SessionType           int32              `protobuf:"varint,4,opt,name=sessionType" json:"sessionType,omitempty"`
+	ClientMsgID           string             `protobuf:"bytes,5,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	IsExternalExtensions  bool               `protobuf:"varint,6,opt,name=isExternalExtensions" json:"isExternalExtensions,omitempty"`
+	MsgFirstModifyTime    int64              `protobuf:"varint,7,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	ReactionExtensionList []*sdk_ws.KeyValue `protobuf:"bytes,8,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}           `json:"-"`
+	XXX_unrecognized      []byte             `json:"-"`
+	XXX_sizecache         int32              `json:"-"`
+}
+
+func (m *DeleteMessageListReactionExtensionsReq) Reset() {
+	*m = DeleteMessageListReactionExtensionsReq{}
+}
+func (m *DeleteMessageListReactionExtensionsReq) String() string { return proto.CompactTextString(m) }
+func (*DeleteMessageListReactionExtensionsReq) ProtoMessage()    {}
+func (*DeleteMessageListReactionExtensionsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{29}
+}
+func (m *DeleteMessageListReactionExtensionsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteMessageListReactionExtensionsReq.Unmarshal(m, b)
+}
+func (m *DeleteMessageListReactionExtensionsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteMessageListReactionExtensionsReq.Marshal(b, m, deterministic)
+}
+func (dst *DeleteMessageListReactionExtensionsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteMessageListReactionExtensionsReq.Merge(dst, src)
+}
+func (m *DeleteMessageListReactionExtensionsReq) XXX_Size() int {
+	return xxx_messageInfo_DeleteMessageListReactionExtensionsReq.Size(m)
+}
+func (m *DeleteMessageListReactionExtensionsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteMessageListReactionExtensionsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteMessageListReactionExtensionsReq proto.InternalMessageInfo
+
+func (m *DeleteMessageListReactionExtensionsReq) GetOperationID() string {
+	if m != nil {
+		return m.OperationID
+	}
+	return ""
+}
+
+func (m *DeleteMessageListReactionExtensionsReq) GetOpUserID() string {
+	if m != nil {
+		return m.OpUserID
+	}
+	return ""
+}
+
+func (m *DeleteMessageListReactionExtensionsReq) GetSourceID() string {
+	if m != nil {
+		return m.SourceID
+	}
+	return ""
+}
+
+func (m *DeleteMessageListReactionExtensionsReq) GetSessionType() int32 {
+	if m != nil {
+		return m.SessionType
+	}
+	return 0
+}
+
+func (m *DeleteMessageListReactionExtensionsReq) GetClientMsgID() string {
+	if m != nil {
+		return m.ClientMsgID
+	}
+	return ""
+}
+
+func (m *DeleteMessageListReactionExtensionsReq) GetIsExternalExtensions() bool {
+	if m != nil {
+		return m.IsExternalExtensions
+	}
+	return false
+}
+
+func (m *DeleteMessageListReactionExtensionsReq) GetMsgFirstModifyTime() int64 {
+	if m != nil {
+		return m.MsgFirstModifyTime
+	}
+	return 0
+}
+
+func (m *DeleteMessageListReactionExtensionsReq) GetReactionExtensionList() []*sdk_ws.KeyValue {
+	if m != nil {
+		return m.ReactionExtensionList
+	}
+	return nil
+}
+
+type DeleteMessageListReactionExtensionsResp struct {
+	ErrCode              int32           `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string          `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
+	Result               []*KeyValueResp `protobuf:"bytes,6,rep,name=result" json:"result,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *DeleteMessageListReactionExtensionsResp) Reset() {
+	*m = DeleteMessageListReactionExtensionsResp{}
+}
+func (m *DeleteMessageListReactionExtensionsResp) String() string { return proto.CompactTextString(m) }
+func (*DeleteMessageListReactionExtensionsResp) ProtoMessage()    {}
+func (*DeleteMessageListReactionExtensionsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{30}
+}
+func (m *DeleteMessageListReactionExtensionsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeleteMessageListReactionExtensionsResp.Unmarshal(m, b)
+}
+func (m *DeleteMessageListReactionExtensionsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeleteMessageListReactionExtensionsResp.Marshal(b, m, deterministic)
+}
+func (dst *DeleteMessageListReactionExtensionsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeleteMessageListReactionExtensionsResp.Merge(dst, src)
+}
+func (m *DeleteMessageListReactionExtensionsResp) XXX_Size() int {
+	return xxx_messageInfo_DeleteMessageListReactionExtensionsResp.Size(m)
+}
+func (m *DeleteMessageListReactionExtensionsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeleteMessageListReactionExtensionsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeleteMessageListReactionExtensionsResp proto.InternalMessageInfo
+
+func (m *DeleteMessageListReactionExtensionsResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *DeleteMessageListReactionExtensionsResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+func (m *DeleteMessageListReactionExtensionsResp) GetResult() []*KeyValueResp {
+	if m != nil {
+		return m.Result
+	}
+	return nil
+}
+
+type ExtendMsgResp struct {
+	ExtendMsg            *ExtendMsg `protobuf:"bytes,1,opt,name=extendMsg" json:"extendMsg,omitempty"`
+	ErrCode              int32      `protobuf:"varint,2,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string     `protobuf:"bytes,3,opt,name=errMsg" json:"errMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
+}
+
+func (m *ExtendMsgResp) Reset()         { *m = ExtendMsgResp{} }
+func (m *ExtendMsgResp) String() string { return proto.CompactTextString(m) }
+func (*ExtendMsgResp) ProtoMessage()    {}
+func (*ExtendMsgResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{31}
+}
+func (m *ExtendMsgResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExtendMsgResp.Unmarshal(m, b)
+}
+func (m *ExtendMsgResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExtendMsgResp.Marshal(b, m, deterministic)
+}
+func (dst *ExtendMsgResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExtendMsgResp.Merge(dst, src)
+}
+func (m *ExtendMsgResp) XXX_Size() int {
+	return xxx_messageInfo_ExtendMsgResp.Size(m)
+}
+func (m *ExtendMsgResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExtendMsgResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExtendMsgResp proto.InternalMessageInfo
+
+func (m *ExtendMsgResp) GetExtendMsg() *ExtendMsg {
+	if m != nil {
+		return m.ExtendMsg
+	}
+	return nil
+}
+
+func (m *ExtendMsgResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *ExtendMsgResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+type ExtendMsg struct {
+	ReactionExtensionList map[string]*KeyValueResp `protobuf:"bytes,1,rep,name=reactionExtensionList" json:"reactionExtensionList,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	ClientMsgID           string                   `protobuf:"bytes,2,opt,name=clientMsgID" json:"clientMsgID,omitempty"`
+	MsgFirstModifyTime    int64                    `protobuf:"varint,3,opt,name=msgFirstModifyTime" json:"msgFirstModifyTime,omitempty"`
+	AttachedInfo          string                   `protobuf:"bytes,4,opt,name=attachedInfo" json:"attachedInfo,omitempty"`
+	Ex                    string                   `protobuf:"bytes,5,opt,name=ex" json:"ex,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{}                 `json:"-"`
+	XXX_unrecognized      []byte                   `json:"-"`
+	XXX_sizecache         int32                    `json:"-"`
+}
+
+func (m *ExtendMsg) Reset()         { *m = ExtendMsg{} }
+func (m *ExtendMsg) String() string { return proto.CompactTextString(m) }
+func (*ExtendMsg) ProtoMessage()    {}
+func (*ExtendMsg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{32}
+}
+func (m *ExtendMsg) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ExtendMsg.Unmarshal(m, b)
+}
+func (m *ExtendMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ExtendMsg.Marshal(b, m, deterministic)
+}
+func (dst *ExtendMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExtendMsg.Merge(dst, src)
+}
+func (m *ExtendMsg) XXX_Size() int {
+	return xxx_messageInfo_ExtendMsg.Size(m)
+}
+func (m *ExtendMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_ExtendMsg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ExtendMsg proto.InternalMessageInfo
+
+func (m *ExtendMsg) GetReactionExtensionList() map[string]*KeyValueResp {
+	if m != nil {
+		return m.ReactionExtensionList
+	}
+	return nil
+}
+
+func (m *ExtendMsg) GetClientMsgID() string {
+	if m != nil {
+		return m.ClientMsgID
+	}
+	return ""
+}
+
+func (m *ExtendMsg) GetMsgFirstModifyTime() int64 {
+	if m != nil {
+		return m.MsgFirstModifyTime
+	}
+	return 0
+}
+
+func (m *ExtendMsg) GetAttachedInfo() string {
+	if m != nil {
+		return m.AttachedInfo
+	}
+	return ""
+}
+
+func (m *ExtendMsg) GetEx() string {
+	if m != nil {
+		return m.Ex
+	}
+	return ""
+}
+
+type KeyValueResp struct {
+	KeyValue             *sdk_ws.KeyValue `protobuf:"bytes,1,opt,name=keyValue" json:"keyValue,omitempty"`
+	ErrCode              int32            `protobuf:"varint,2,opt,name=errCode" json:"errCode,omitempty"`
+	ErrMsg               string           `protobuf:"bytes,3,opt,name=errMsg" json:"errMsg,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
+}
+
+func (m *KeyValueResp) Reset()         { *m = KeyValueResp{} }
+func (m *KeyValueResp) String() string { return proto.CompactTextString(m) }
+func (*KeyValueResp) ProtoMessage()    {}
+func (*KeyValueResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{33}
+}
+func (m *KeyValueResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_KeyValueResp.Unmarshal(m, b)
+}
+func (m *KeyValueResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_KeyValueResp.Marshal(b, m, deterministic)
+}
+func (dst *KeyValueResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_KeyValueResp.Merge(dst, src)
+}
+func (m *KeyValueResp) XXX_Size() int {
+	return xxx_messageInfo_KeyValueResp.Size(m)
+}
+func (m *KeyValueResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_KeyValueResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_KeyValueResp proto.InternalMessageInfo
+
+func (m *KeyValueResp) GetKeyValue() *sdk_ws.KeyValue {
+	if m != nil {
+		return m.KeyValue
+	}
+	return nil
+}
+
+func (m *KeyValueResp) GetErrCode() int32 {
+	if m != nil {
+		return m.ErrCode
+	}
+	return 0
+}
+
+func (m *KeyValueResp) GetErrMsg() string {
+	if m != nil {
+		return m.ErrMsg
+	}
+	return ""
+}
+
+type MsgDataToModifyByMQ struct {
+	AggregationID        string         `protobuf:"bytes,1,opt,name=aggregationID" json:"aggregationID,omitempty"`
+	MessageList          []*MsgDataToMQ `protobuf:"bytes,2,rep,name=messageList" json:"messageList,omitempty"`
+	TriggerID            string         `protobuf:"bytes,3,opt,name=triggerID" json:"triggerID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}       `json:"-"`
+	XXX_unrecognized     []byte         `json:"-"`
+	XXX_sizecache        int32          `json:"-"`
+}
+
+func (m *MsgDataToModifyByMQ) Reset()         { *m = MsgDataToModifyByMQ{} }
+func (m *MsgDataToModifyByMQ) String() string { return proto.CompactTextString(m) }
+func (*MsgDataToModifyByMQ) ProtoMessage()    {}
+func (*MsgDataToModifyByMQ) Descriptor() ([]byte, []int) {
+	return fileDescriptor_msg_24cf87b309a51053, []int{34}
+}
+func (m *MsgDataToModifyByMQ) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MsgDataToModifyByMQ.Unmarshal(m, b)
+}
+func (m *MsgDataToModifyByMQ) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MsgDataToModifyByMQ.Marshal(b, m, deterministic)
+}
+func (dst *MsgDataToModifyByMQ) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgDataToModifyByMQ.Merge(dst, src)
+}
+func (m *MsgDataToModifyByMQ) XXX_Size() int {
+	return xxx_messageInfo_MsgDataToModifyByMQ.Size(m)
+}
+func (m *MsgDataToModifyByMQ) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgDataToModifyByMQ.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgDataToModifyByMQ proto.InternalMessageInfo
+
+func (m *MsgDataToModifyByMQ) GetAggregationID() string {
+	if m != nil {
+		return m.AggregationID
+	}
+	return ""
+}
+
+func (m *MsgDataToModifyByMQ) GetMessageList() []*MsgDataToMQ {
+	if m != nil {
+		return m.MessageList
+	}
+	return nil
+}
+
+func (m *MsgDataToModifyByMQ) GetTriggerID() string {
+	if m != nil {
+		return m.TriggerID
+	}
+	return ""
+}
+
 func init() {
 	proto.RegisterType((*MsgDataToMQ)(nil), "msg.MsgDataToMQ")
 	proto.RegisterType((*MsgDataToDB)(nil), "msg.MsgDataToDB")
@@ -1231,6 +2236,24 @@ func init() {
 	proto.RegisterType((*GetSuperGroupMsgResp)(nil), "msg.GetSuperGroupMsgResp")
 	proto.RegisterType((*GetWriteDiffMsgReq)(nil), "msg.GetWriteDiffMsgReq")
 	proto.RegisterType((*GetWriteDiffMsgResp)(nil), "msg.GetWriteDiffMsgResp")
+	proto.RegisterType((*ModifyMessageReactionExtensionsReq)(nil), "msg.ModifyMessageReactionExtensionsReq")
+	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.ModifyMessageReactionExtensionsReq.ReactionExtensionListEntry")
+	proto.RegisterType((*SetMessageReactionExtensionsReq)(nil), "msg.SetMessageReactionExtensionsReq")
+	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.SetMessageReactionExtensionsReq.ReactionExtensionListEntry")
+	proto.RegisterType((*SetMessageReactionExtensionsResp)(nil), "msg.SetMessageReactionExtensionsResp")
+	proto.RegisterType((*GetMessageListReactionExtensionsReq)(nil), "msg.GetMessageListReactionExtensionsReq")
+	proto.RegisterType((*GetMessageListReactionExtensionsReq_MessageReactionKey)(nil), "msg.GetMessageListReactionExtensionsReq.MessageReactionKey")
+	proto.RegisterType((*GetMessageListReactionExtensionsResp)(nil), "msg.GetMessageListReactionExtensionsResp")
+	proto.RegisterType((*SingleMessageExtensionResult)(nil), "msg.SingleMessageExtensionResult")
+	proto.RegisterMapType((map[string]*sdk_ws.KeyValue)(nil), "msg.SingleMessageExtensionResult.ReactionExtensionListEntry")
+	proto.RegisterType((*ModifyMessageReactionExtensionsResp)(nil), "msg.ModifyMessageReactionExtensionsResp")
+	proto.RegisterType((*DeleteMessageListReactionExtensionsReq)(nil), "msg.DeleteMessageListReactionExtensionsReq")
+	proto.RegisterType((*DeleteMessageListReactionExtensionsResp)(nil), "msg.DeleteMessageListReactionExtensionsResp")
+	proto.RegisterType((*ExtendMsgResp)(nil), "msg.ExtendMsgResp")
+	proto.RegisterType((*ExtendMsg)(nil), "msg.ExtendMsg")
+	proto.RegisterMapType((map[string]*KeyValueResp)(nil), "msg.ExtendMsg.ReactionExtensionListEntry")
+	proto.RegisterType((*KeyValueResp)(nil), "msg.KeyValueResp")
+	proto.RegisterType((*MsgDataToModifyByMQ)(nil), "msg.MsgDataToModifyByMQ")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1255,6 +2278,11 @@ type MsgClient interface {
 	GetSendMsgStatus(ctx context.Context, in *GetSendMsgStatusReq, opts ...grpc.CallOption) (*GetSendMsgStatusResp, error)
 	GetSuperGroupMsg(ctx context.Context, in *GetSuperGroupMsgReq, opts ...grpc.CallOption) (*GetSuperGroupMsgResp, error)
 	GetWriteDiffMsg(ctx context.Context, in *GetWriteDiffMsgReq, opts ...grpc.CallOption) (*GetWriteDiffMsgResp, error)
+	// modify msg
+	SetMessageReactionExtensions(ctx context.Context, in *SetMessageReactionExtensionsReq, opts ...grpc.CallOption) (*SetMessageReactionExtensionsResp, error)
+	GetMessageListReactionExtensions(ctx context.Context, in *GetMessageListReactionExtensionsReq, opts ...grpc.CallOption) (*GetMessageListReactionExtensionsResp, error)
+	AddMessageReactionExtensions(ctx context.Context, in *ModifyMessageReactionExtensionsReq, opts ...grpc.CallOption) (*ModifyMessageReactionExtensionsResp, error)
+	DeleteMessageReactionExtensions(ctx context.Context, in *DeleteMessageListReactionExtensionsReq, opts ...grpc.CallOption) (*DeleteMessageListReactionExtensionsResp, error)
 }
 
 type msgClient struct {
@@ -1364,6 +2392,42 @@ func (c *msgClient) GetWriteDiffMsg(ctx context.Context, in *GetWriteDiffMsgReq,
 	return out, nil
 }
 
+func (c *msgClient) SetMessageReactionExtensions(ctx context.Context, in *SetMessageReactionExtensionsReq, opts ...grpc.CallOption) (*SetMessageReactionExtensionsResp, error) {
+	out := new(SetMessageReactionExtensionsResp)
+	err := grpc.Invoke(ctx, "/msg.msg/SetMessageReactionExtensions", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) GetMessageListReactionExtensions(ctx context.Context, in *GetMessageListReactionExtensionsReq, opts ...grpc.CallOption) (*GetMessageListReactionExtensionsResp, error) {
+	out := new(GetMessageListReactionExtensionsResp)
+	err := grpc.Invoke(ctx, "/msg.msg/GetMessageListReactionExtensions", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) AddMessageReactionExtensions(ctx context.Context, in *ModifyMessageReactionExtensionsReq, opts ...grpc.CallOption) (*ModifyMessageReactionExtensionsResp, error) {
+	out := new(ModifyMessageReactionExtensionsResp)
+	err := grpc.Invoke(ctx, "/msg.msg/AddMessageReactionExtensions", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) DeleteMessageReactionExtensions(ctx context.Context, in *DeleteMessageListReactionExtensionsReq, opts ...grpc.CallOption) (*DeleteMessageListReactionExtensionsResp, error) {
+	out := new(DeleteMessageListReactionExtensionsResp)
+	err := grpc.Invoke(ctx, "/msg.msg/DeleteMessageReactionExtensions", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Msg service
 
 type MsgServer interface {
@@ -1378,6 +2442,11 @@ type MsgServer interface {
 	GetSendMsgStatus(context.Context, *GetSendMsgStatusReq) (*GetSendMsgStatusResp, error)
 	GetSuperGroupMsg(context.Context, *GetSuperGroupMsgReq) (*GetSuperGroupMsgResp, error)
 	GetWriteDiffMsg(context.Context, *GetWriteDiffMsgReq) (*GetWriteDiffMsgResp, error)
+	// modify msg
+	SetMessageReactionExtensions(context.Context, *SetMessageReactionExtensionsReq) (*SetMessageReactionExtensionsResp, error)
+	GetMessageListReactionExtensions(context.Context, *GetMessageListReactionExtensionsReq) (*GetMessageListReactionExtensionsResp, error)
+	AddMessageReactionExtensions(context.Context, *ModifyMessageReactionExtensionsReq) (*ModifyMessageReactionExtensionsResp, error)
+	DeleteMessageReactionExtensions(context.Context, *DeleteMessageListReactionExtensionsReq) (*DeleteMessageListReactionExtensionsResp, error)
 }
 
 func RegisterMsgServer(s *grpc.Server, srv MsgServer) {
@@ -1582,6 +2651,78 @@ func _Msg_GetWriteDiffMsg_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_SetMessageReactionExtensions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetMessageReactionExtensionsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).SetMessageReactionExtensions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/msg.msg/SetMessageReactionExtensions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).SetMessageReactionExtensions(ctx, req.(*SetMessageReactionExtensionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_GetMessageListReactionExtensions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMessageListReactionExtensionsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GetMessageListReactionExtensions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/msg.msg/GetMessageListReactionExtensions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GetMessageListReactionExtensions(ctx, req.(*GetMessageListReactionExtensionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_AddMessageReactionExtensions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ModifyMessageReactionExtensionsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).AddMessageReactionExtensions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/msg.msg/AddMessageReactionExtensions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).AddMessageReactionExtensions(ctx, req.(*ModifyMessageReactionExtensionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_DeleteMessageReactionExtensions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMessageListReactionExtensionsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).DeleteMessageReactionExtensions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/msg.msg/DeleteMessageReactionExtensions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).DeleteMessageReactionExtensions(ctx, req.(*DeleteMessageListReactionExtensionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "msg.msg",
 	HandlerType: (*MsgServer)(nil),
@@ -1630,71 +2771,135 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			MethodName: "GetWriteDiffMsg",
 			Handler:    _Msg_GetWriteDiffMsg_Handler,
 		},
+		{
+			MethodName: "SetMessageReactionExtensions",
+			Handler:    _Msg_SetMessageReactionExtensions_Handler,
+		},
+		{
+			MethodName: "GetMessageListReactionExtensions",
+			Handler:    _Msg_GetMessageListReactionExtensions_Handler,
+		},
+		{
+			MethodName: "AddMessageReactionExtensions",
+			Handler:    _Msg_AddMessageReactionExtensions_Handler,
+		},
+		{
+			MethodName: "DeleteMessageReactionExtensions",
+			Handler:    _Msg_DeleteMessageReactionExtensions_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "msg/msg.proto",
 }
 
-func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_msg_3f0146015dfd26d9) }
+func init() { proto.RegisterFile("msg/msg.proto", fileDescriptor_msg_24cf87b309a51053) }
 
-var fileDescriptor_msg_3f0146015dfd26d9 = []byte{
-	// 928 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0xcf, 0x6f, 0xe3, 0x44,
-	0x14, 0x96, 0xe3, 0x26, 0xdd, 0xbe, 0xb4, 0x6a, 0x98, 0x86, 0xe2, 0x35, 0x1c, 0x82, 0x05, 0x28,
-	0x02, 0xb6, 0x91, 0x0a, 0x12, 0x87, 0xbd, 0x40, 0xd7, 0x2b, 0x6f, 0x25, 0x4c, 0xb7, 0x76, 0x11,
-	0x12, 0x97, 0xae, 0x69, 0x66, 0x67, 0xad, 0xc6, 0xf6, 0xd4, 0xcf, 0xa1, 0xbb, 0x20, 0xb8, 0x71,
-	0xe4, 0x0f, 0xe0, 0xc4, 0x8d, 0x3b, 0xff, 0x21, 0x9a, 0x19, 0x27, 0x19, 0xff, 0x28, 0x2d, 0x61,
-	0xb5, 0xb7, 0xbc, 0x37, 0x6f, 0xbe, 0xf7, 0x7d, 0x6f, 0xde, 0xcc, 0x8b, 0x61, 0x27, 0x41, 0x36,
-	0x49, 0x90, 0x1d, 0xf0, 0x3c, 0x2b, 0x32, 0x62, 0x26, 0xc8, 0xec, 0xf1, 0x09, 0xa7, 0xe9, 0x83,
-	0x63, 0xff, 0x41, 0x48, 0xf3, 0x1f, 0x69, 0x3e, 0xe1, 0x97, 0x6c, 0x22, 0x97, 0x27, 0x38, 0xbd,
-	0x3c, 0xbf, 0xc6, 0xc9, 0x35, 0xaa, 0x70, 0xe7, 0x67, 0xe8, 0xfb, 0xc8, 0xdc, 0xa8, 0x88, 0xce,
-	0x32, 0xff, 0x94, 0x0c, 0xa1, 0x5b, 0x64, 0x97, 0x34, 0xb5, 0x8c, 0x91, 0x31, 0xde, 0x0a, 0x94,
-	0x41, 0x46, 0xd0, 0xcf, 0x38, 0xcd, 0xa3, 0x22, 0xce, 0xd2, 0x63, 0xd7, 0xea, 0xc8, 0x35, 0xdd,
-	0x45, 0x3e, 0x87, 0xcd, 0x44, 0xc1, 0x58, 0xe6, 0xc8, 0x18, 0xf7, 0x0f, 0xed, 0x03, 0x94, 0xa9,
-	0xcf, 0x23, 0x1e, 0x9f, 0xf3, 0x28, 0x8f, 0x12, 0x3c, 0x28, 0x13, 0x05, 0x8b, 0x50, 0x87, 0x6a,
-	0xc9, 0xdd, 0x23, 0x1d, 0xc4, 0xb8, 0x33, 0xc8, 0xed, 0xe4, 0x9c, 0xdf, 0x0d, 0xd8, 0x7d, 0x3a,
-	0xc7, 0x17, 0xba, 0xd0, 0x11, 0xf4, 0x4f, 0xb4, 0x5d, 0x4a, 0xae, 0xee, 0xd2, 0xd9, 0x74, 0xee,
-	0xce, 0xc6, 0x81, 0x6d, 0x3e, 0xc7, 0x17, 0x67, 0xd9, 0xb7, 0x48, 0xf3, 0x63, 0x57, 0x56, 0x63,
-	0x2b, 0xa8, 0xf8, 0x9c, 0xbf, 0x0c, 0x20, 0x2b, 0x2e, 0x59, 0xca, 0xb2, 0xa3, 0x57, 0xfe, 0x29,
-	0xb1, 0x60, 0x73, 0x16, 0x61, 0x11, 0xd2, 0x2b, 0x49, 0x67, 0x23, 0x58, 0x98, 0xe4, 0x03, 0xd8,
-	0x89, 0x18, 0xcb, 0x29, 0xab, 0x8a, 0xac, 0x3a, 0xc9, 0x21, 0xf4, 0x13, 0x8a, 0x18, 0x31, 0xfa,
-	0x75, 0x8c, 0x85, 0x65, 0x8e, 0xcc, 0x71, 0xff, 0x70, 0x70, 0x20, 0x5a, 0x43, 0x53, 0x1e, 0xe8,
-	0x41, 0xe4, 0x3d, 0xd8, 0x2a, 0xf2, 0x98, 0x31, 0xc9, 0x75, 0x43, 0xa2, 0xae, 0x1c, 0xce, 0x37,
-	0x40, 0x3c, 0x5a, 0xf8, 0xd1, 0xcb, 0xaf, 0xd2, 0xa9, 0x1f, 0xa7, 0x21, 0xbd, 0x0a, 0xe8, 0x15,
-	0xd9, 0x87, 0x5e, 0x29, 0x4e, 0x55, 0xad, 0xb4, 0xea, 0x25, 0xed, 0x34, 0x4a, 0xea, 0x5c, 0xc3,
-	0x5e, 0x03, 0x0f, 0xb9, 0x10, 0xfe, 0x38, 0xcf, 0x1f, 0x65, 0x53, 0x2a, 0x11, 0xbb, 0xc1, 0xc2,
-	0x14, 0xa9, 0x1e, 0xe7, 0xb9, 0x8f, 0xac, 0x44, 0x2b, 0x2d, 0xe1, 0xf7, 0xa3, 0x97, 0xa2, 0x52,
-	0xa2, 0xbe, 0x3b, 0x41, 0x69, 0x49, 0xbf, 0xc4, 0x95, 0x5a, 0x84, 0x5f, 0x5a, 0xce, 0x4f, 0x00,
-	0x21, 0x4d, 0xa7, 0x3e, 0x32, 0x21, 0xe0, 0xcd, 0x36, 0xf9, 0x9f, 0x06, 0xf4, 0x97, 0xc9, 0x95,
-	0x5a, 0x5a, 0x55, 0x4b, 0x57, 0x6a, 0x69, 0x45, 0xad, 0xb2, 0x04, 0x33, 0x95, 0xc7, 0x47, 0xb6,
-	0x3c, 0x26, 0xdd, 0x25, 0x22, 0x2e, 0x66, 0x31, 0x4d, 0x0b, 0x15, 0xd1, 0x55, 0x11, 0x9a, 0x8b,
-	0xd8, 0x70, 0x0f, 0x69, 0x3a, 0x3d, 0x8b, 0x13, 0x6a, 0xf5, 0x46, 0xc6, 0xd8, 0x0c, 0x96, 0xb6,
-	0x73, 0x01, 0xfd, 0x47, 0x33, 0x1a, 0xe5, 0x65, 0x79, 0xf6, 0xa1, 0x37, 0xaf, 0x9c, 0xaf, 0xb2,
-	0x04, 0x44, 0xc6, 0xcb, 0x93, 0x57, 0x04, 0x97, 0x76, 0xbd, 0x78, 0x66, 0xf3, 0x12, 0x7e, 0x09,
-	0xdb, 0xab, 0x24, 0xeb, 0x94, 0xc1, 0xf9, 0xc3, 0x80, 0xdd, 0x90, 0x0a, 0x3d, 0x95, 0x5e, 0x6c,
-	0xe5, 0x6a, 0xc1, 0x26, 0xcb, 0xb3, 0x39, 0x5f, 0x52, 0x5d, 0x98, 0x62, 0x47, 0xa2, 0x5a, 0xa4,
-	0x6c, 0x1d, 0x65, 0xd5, 0x15, 0x6c, 0x34, 0x8f, 0x5f, 0xd7, 0xdf, 0xad, 0xea, 0x77, 0x5c, 0x18,
-	0x54, 0xa9, 0xad, 0xa5, 0xf0, 0x04, 0xf6, 0x42, 0x5a, 0x94, 0xcd, 0x12, 0x16, 0x51, 0x31, 0xc7,
-	0xa0, 0x49, 0xcd, 0x68, 0x52, 0xdb, 0x87, 0x1e, 0xca, 0x70, 0x09, 0xd8, 0x0d, 0x4a, 0xcb, 0x79,
-	0x02, 0xc3, 0x26, 0xe0, 0x5a, 0xd4, 0xbe, 0x90, 0x57, 0xf7, 0xbf, 0x53, 0x73, 0x9e, 0xc1, 0xd0,
-	0x7b, 0x2d, 0x14, 0x34, 0x91, 0x66, 0x45, 0xe4, 0x6f, 0x06, 0xec, 0xb9, 0x74, 0x16, 0xce, 0x39,
-	0xcd, 0x3d, 0x71, 0xca, 0x65, 0x1f, 0xeb, 0xe7, 0x65, 0xd4, 0xfa, 0x75, 0xd5, 0x37, 0x9d, 0x9b,
-	0xfa, 0xc6, 0xac, 0xf6, 0xcd, 0xad, 0xfd, 0x21, 0x8a, 0xdd, 0xa4, 0xb1, 0x56, 0xb1, 0x2f, 0x54,
-	0xb1, 0xeb, 0x82, 0x6e, 0xef, 0x83, 0x01, 0x98, 0xa2, 0xb3, 0x3b, 0xb2, 0xb3, 0xc5, 0xcf, 0x9b,
-	0x05, 0x39, 0xbf, 0xaa, 0x83, 0xf9, 0xff, 0x74, 0xd7, 0x7c, 0x17, 0x9f, 0xc8, 0xe1, 0xf2, 0x5d,
-	0x1e, 0x17, 0xd4, 0x8d, 0x9f, 0x3f, 0x5f, 0x5f, 0xa3, 0xf3, 0x8b, 0x2c, 0x57, 0x15, 0xe9, 0xcd,
-	0x09, 0x39, 0xfc, 0xbb, 0x07, 0xe2, 0x4f, 0x17, 0x79, 0x06, 0xbb, 0xb5, 0xe9, 0x46, 0x3e, 0x6c,
-	0xd9, 0xdf, 0x9c, 0xa8, 0xf6, 0x47, 0x77, 0x09, 0x43, 0x4e, 0x32, 0x18, 0x3e, 0x9d, 0xcf, 0x66,
-	0xbe, 0x1a, 0xe0, 0x47, 0xaf, 0x42, 0x7a, 0x25, 0xa7, 0xf8, 0xc7, 0x2d, 0xfb, 0xdb, 0x02, 0x45,
-	0xae, 0x4f, 0xee, 0x1c, 0x8b, 0x9c, 0x7c, 0x0a, 0x9b, 0xe5, 0xcd, 0x25, 0xbb, 0xf2, 0x8f, 0xc4,
-	0x6a, 0x8a, 0xda, 0x83, 0xaa, 0x03, 0x39, 0x39, 0x05, 0x70, 0xe9, 0xcc, 0x47, 0x26, 0x49, 0x8d,
-	0x5a, 0x12, 0xad, 0x96, 0x05, 0xc2, 0xfb, 0xb7, 0x44, 0x20, 0x27, 0x1e, 0x0c, 0xea, 0x77, 0x8a,
-	0x58, 0x32, 0x71, 0xcb, 0x8d, 0xb7, 0xef, 0xdf, 0xb0, 0x82, 0x9c, 0x4c, 0xe0, 0xde, 0x62, 0xfc,
-	0x10, 0xc5, 0x5c, 0x1b, 0x79, 0xf6, 0x5b, 0x35, 0x0f, 0x72, 0xf2, 0x10, 0xb6, 0xf5, 0x17, 0x9d,
-	0x0c, 0x4b, 0xb9, 0x95, 0xf9, 0x63, 0xbf, 0xdd, 0xe2, 0x55, 0xb4, 0xeb, 0xef, 0x6e, 0x49, 0xbb,
-	0xe5, 0x7d, 0x2f, 0x69, 0xb7, 0x3e, 0xd4, 0x1e, 0x0c, 0xbc, 0x76, 0x20, 0xef, 0x46, 0x20, 0xef,
-	0x5f, 0x80, 0x5a, 0x0a, 0xd9, 0xf2, 0xd2, 0x68, 0x40, 0x8d, 0x42, 0xba, 0xb2, 0xcb, 0xf5, 0xcb,
-	0x46, 0xde, 0x59, 0x44, 0xd7, 0x2e, 0xb3, 0x6d, 0xb5, 0x2f, 0x20, 0x3f, 0x7a, 0xf7, 0xfb, 0xfb,
-	0xe2, 0x13, 0xe5, 0xfc, 0xd8, 0xd7, 0xbe, 0x4d, 0x12, 0x64, 0x0f, 0x13, 0x64, 0x3f, 0xf4, 0xa4,
-	0xf9, 0xd9, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x68, 0xc1, 0xb8, 0x4c, 0xda, 0x0c, 0x00, 0x00,
+var fileDescriptor_msg_24cf87b309a51053 = []byte{
+	// 1683 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0x4f, 0x6f, 0xdb, 0x46,
+	0x16, 0x07, 0x49, 0x4b, 0xb6, 0x9f, 0xec, 0xd8, 0x19, 0x3b, 0x5e, 0x85, 0x31, 0x10, 0x85, 0xf9,
+	0xa7, 0x6c, 0x12, 0x19, 0xeb, 0x5d, 0x20, 0x8b, 0xcd, 0x02, 0x9b, 0x38, 0xf2, 0x2a, 0x46, 0x96,
+	0xeb, 0x98, 0xf2, 0x6e, 0x81, 0xf6, 0xe0, 0x30, 0xd2, 0x98, 0x21, 0x2c, 0x91, 0x34, 0x87, 0x8a,
+	0xad, 0xfe, 0xbb, 0xb5, 0x28, 0x50, 0xe4, 0xd0, 0x63, 0x4f, 0xbd, 0xf5, 0xd6, 0x4b, 0xbf, 0x41,
+	0x3f, 0x40, 0xd1, 0x0f, 0xd2, 0xcf, 0x50, 0xa0, 0x98, 0x19, 0x4a, 0x1a, 0xfe, 0x93, 0x68, 0xb9,
+	0x08, 0x52, 0xa0, 0x37, 0xbd, 0x99, 0x37, 0x6f, 0xde, 0xef, 0xbd, 0xdf, 0xbc, 0x19, 0x3e, 0xc1,
+	0x62, 0x97, 0x58, 0x1b, 0x5d, 0x62, 0xd5, 0x3c, 0xdf, 0x0d, 0x5c, 0xa4, 0x74, 0x89, 0xa5, 0x56,
+	0x77, 0x3d, 0xec, 0xdc, 0xdf, 0xd1, 0xef, 0x37, 0xb1, 0xff, 0x1a, 0xfb, 0x1b, 0xde, 0x91, 0xb5,
+	0xc1, 0xa6, 0x37, 0x48, 0xfb, 0xe8, 0xe0, 0x84, 0x6c, 0x9c, 0x10, 0xae, 0xae, 0xd6, 0x26, 0x6a,
+	0xfa, 0xa6, 0xe7, 0x61, 0x3f, 0xd4, 0xd7, 0x3e, 0x82, 0x92, 0x4e, 0xac, 0xba, 0x19, 0x98, 0xfb,
+	0xae, 0xbe, 0x87, 0x56, 0xa1, 0x10, 0xb8, 0x47, 0xd8, 0x29, 0x4b, 0x15, 0xa9, 0x3a, 0x6f, 0x70,
+	0x01, 0x55, 0xa0, 0xe4, 0x7a, 0xd8, 0x37, 0x03, 0xdb, 0x75, 0x76, 0xea, 0x65, 0x99, 0xcd, 0x89,
+	0x43, 0xe8, 0x6f, 0x30, 0xdb, 0xe5, 0x66, 0xca, 0x4a, 0x45, 0xaa, 0x96, 0x36, 0xd5, 0x1a, 0x61,
+	0x0e, 0x1c, 0x98, 0x9e, 0x7d, 0xe0, 0x99, 0xbe, 0xd9, 0x25, 0xb5, 0x70, 0x23, 0x63, 0xa0, 0xaa,
+	0x61, 0x61, 0xf3, 0xfa, 0x96, 0x68, 0x44, 0xca, 0x6d, 0x64, 0xb2, 0x73, 0xda, 0x1b, 0x09, 0x96,
+	0x9e, 0xf7, 0xc8, 0x2b, 0x11, 0x68, 0x05, 0x4a, 0xbb, 0xc2, 0x2a, 0x0e, 0x57, 0x1c, 0x12, 0xbd,
+	0x91, 0xf3, 0x7b, 0xa3, 0xc1, 0x82, 0xd7, 0x23, 0xaf, 0xf6, 0xdd, 0xff, 0x11, 0xec, 0xef, 0xd4,
+	0x59, 0x34, 0xe6, 0x8d, 0xc8, 0x98, 0xf6, 0xad, 0x04, 0x68, 0xe4, 0x8b, 0xeb, 0x58, 0xee, 0x56,
+	0x5f, 0xdf, 0x43, 0x65, 0x98, 0xed, 0x98, 0x24, 0x68, 0xe2, 0x63, 0xe6, 0xce, 0x8c, 0x31, 0x10,
+	0xd1, 0x0d, 0x58, 0x34, 0x2d, 0xcb, 0xc7, 0x56, 0x14, 0x64, 0x74, 0x10, 0x6d, 0x42, 0xa9, 0x8b,
+	0x09, 0x31, 0x2d, 0xfc, 0x1f, 0x9b, 0x04, 0x65, 0xa5, 0xa2, 0x54, 0x4b, 0x9b, 0xcb, 0x35, 0x4a,
+	0x25, 0x01, 0xb9, 0x21, 0x2a, 0xa1, 0x75, 0x98, 0x0f, 0x7c, 0xdb, 0xb2, 0x98, 0xaf, 0x33, 0xcc,
+	0xea, 0x68, 0x40, 0xfb, 0x2f, 0xa0, 0x06, 0x0e, 0x74, 0xf3, 0xf4, 0xb1, 0xd3, 0xd6, 0x6d, 0xa7,
+	0x89, 0x8f, 0x0d, 0x7c, 0x8c, 0xd6, 0xa0, 0x18, 0x82, 0xe3, 0x51, 0x0b, 0xa5, 0x78, 0x48, 0xe5,
+	0x44, 0x48, 0xb5, 0x13, 0x58, 0x49, 0xd8, 0x23, 0x1e, 0x05, 0xbe, 0xed, 0xfb, 0x4f, 0xdc, 0x36,
+	0x66, 0x16, 0x0b, 0xc6, 0x40, 0xa4, 0x5b, 0x6d, 0xfb, 0xbe, 0x4e, 0xac, 0xd0, 0x5a, 0x28, 0xd1,
+	0x71, 0xdd, 0x3c, 0xa5, 0x91, 0xa2, 0xf1, 0x5d, 0x34, 0x42, 0x89, 0x8d, 0x33, 0xbb, 0x0c, 0x0b,
+	0x1d, 0x67, 0x92, 0xf6, 0x21, 0x40, 0x13, 0x3b, 0x6d, 0x9d, 0x58, 0x14, 0xc0, 0xdb, 0x25, 0xf9,
+	0x37, 0x12, 0x94, 0x86, 0x9b, 0x73, 0xb4, 0x38, 0x8a, 0x16, 0x8f, 0xd0, 0xe2, 0x08, 0x5a, 0x2e,
+	0x51, 0xcf, 0xf8, 0x3e, 0x3a, 0xb1, 0x86, 0x69, 0x12, 0x87, 0xa8, 0x46, 0xab, 0x63, 0x63, 0x27,
+	0xe0, 0x1a, 0x05, 0xae, 0x21, 0x0c, 0x21, 0x15, 0xe6, 0x08, 0x76, 0xda, 0xfb, 0x76, 0x17, 0x97,
+	0x8b, 0x15, 0xa9, 0xaa, 0x18, 0x43, 0x59, 0x6b, 0x41, 0xe9, 0x49, 0x07, 0x9b, 0x7e, 0x18, 0x9e,
+	0x35, 0x28, 0xf6, 0x22, 0xf9, 0xe5, 0x12, 0x35, 0xe1, 0x7a, 0x61, 0xe6, 0xb9, 0x83, 0x43, 0x39,
+	0x1e, 0x3c, 0x25, 0x79, 0x08, 0x1f, 0xc1, 0xc2, 0x68, 0x93, 0x69, 0xc2, 0xa0, 0x7d, 0x2d, 0xc1,
+	0x52, 0x13, 0x53, 0x3c, 0x11, 0x2e, 0xa6, 0xfa, 0x5a, 0x86, 0x59, 0xcb, 0x77, 0x7b, 0xde, 0xd0,
+	0xd5, 0x81, 0x48, 0x57, 0x74, 0x39, 0x45, 0x42, 0xea, 0x70, 0x29, 0x8e, 0x60, 0x26, 0x99, 0x7e,
+	0x11, 0x7f, 0x21, 0x8a, 0x5f, 0xab, 0xc3, 0x72, 0xd4, 0xb5, 0xa9, 0x10, 0xee, 0xc2, 0x4a, 0x13,
+	0x07, 0x21, 0x59, 0x9a, 0x81, 0x19, 0xf4, 0x88, 0x91, 0x74, 0x4d, 0x4a, 0xba, 0xb6, 0x06, 0x45,
+	0xc2, 0xd4, 0x99, 0xc1, 0x82, 0x11, 0x4a, 0xda, 0x53, 0x58, 0x4d, 0x1a, 0x9c, 0xca, 0xb5, 0x07,
+	0xec, 0xe8, 0x9e, 0xdd, 0x35, 0xed, 0x05, 0xac, 0x36, 0x7e, 0x13, 0x17, 0x04, 0x90, 0x4a, 0x04,
+	0xe4, 0x67, 0x12, 0xac, 0xd4, 0x71, 0xa7, 0xd9, 0xf3, 0xb0, 0xdf, 0xa0, 0x59, 0x0e, 0x79, 0x2c,
+	0xe6, 0x4b, 0x8a, 0xf1, 0x75, 0xc4, 0x1b, 0x39, 0x8b, 0x37, 0x4a, 0x94, 0x37, 0x13, 0xf9, 0x41,
+	0x83, 0x9d, 0x74, 0x63, 0xaa, 0x60, 0xb7, 0x78, 0xb0, 0xe3, 0x80, 0x26, 0xf3, 0x60, 0x19, 0x14,
+	0xca, 0x6c, 0x99, 0x31, 0x9b, 0xfe, 0xcc, 0x06, 0xa4, 0x7d, 0xca, 0x13, 0x73, 0x7e, 0x77, 0xa7,
+	0xac, 0x8b, 0x4f, 0xd9, 0xe5, 0xf2, 0x9e, 0x6f, 0x07, 0xb8, 0x6e, 0x1f, 0x1e, 0x4e, 0x8f, 0x51,
+	0xfb, 0x84, 0x85, 0x2b, 0x6a, 0xe9, 0x2d, 0x02, 0xf9, 0xaa, 0x00, 0x9a, 0xee, 0xb6, 0xed, 0xc3,
+	0xbe, 0xce, 0x6f, 0x56, 0x03, 0x9b, 0x2d, 0xea, 0xec, 0xf6, 0x69, 0x80, 0x1d, 0x62, 0xbb, 0x4e,
+	0xce, 0x53, 0x4c, 0x6b, 0xb4, 0xdb, 0xf3, 0x5b, 0x78, 0x54, 0x60, 0x07, 0x72, 0x84, 0xcc, 0x4a,
+	0xb2, 0xf8, 0x12, 0x4c, 0xe8, 0x46, 0xfb, 0x7d, 0x0f, 0x33, 0x6a, 0x16, 0x0c, 0x71, 0x08, 0x9d,
+	0xc2, 0x25, 0x3f, 0xee, 0x14, 0x7b, 0x24, 0x14, 0xd8, 0x23, 0x61, 0x8b, 0x3f, 0x12, 0x26, 0x62,
+	0xa8, 0x19, 0x69, 0x46, 0xb6, 0x9d, 0xc0, 0xef, 0x1b, 0xe9, 0x1b, 0xc4, 0x6f, 0xa6, 0x62, 0xf2,
+	0x66, 0xba, 0x07, 0x32, 0x3e, 0x2d, 0xcf, 0xb2, 0x78, 0xaf, 0xd7, 0x2c, 0xd7, 0xb5, 0x3a, 0x98,
+	0x3f, 0x4e, 0x5f, 0xf6, 0x0e, 0x6b, 0xcd, 0xc0, 0xb7, 0x1d, 0xeb, 0xff, 0x66, 0xa7, 0x87, 0x0d,
+	0x19, 0x9f, 0xa2, 0x47, 0xb0, 0x60, 0x06, 0x81, 0xd9, 0x7a, 0x85, 0xdb, 0x3b, 0xce, 0xa1, 0x5b,
+	0x9e, 0xcb, 0xb1, 0x2e, 0xb2, 0x82, 0xd2, 0xc2, 0x26, 0x0c, 0x48, 0x79, 0xbe, 0x22, 0x55, 0xe7,
+	0x8c, 0x81, 0x88, 0x36, 0x61, 0xd5, 0x26, 0xd4, 0x7d, 0xdf, 0x31, 0x3b, 0x23, 0xe0, 0x65, 0x60,
+	0x6a, 0xa9, 0x73, 0xa8, 0x06, 0xa8, 0x4b, 0xac, 0x7f, 0xdb, 0x3e, 0x09, 0x78, 0xfc, 0xd8, 0x0d,
+	0x5b, 0x62, 0x37, 0x6c, 0xca, 0x8c, 0x8a, 0x41, 0xcd, 0x0e, 0x22, 0xe5, 0xf6, 0x11, 0xee, 0x87,
+	0xdc, 0xa0, 0x3f, 0xd1, 0x5f, 0xa0, 0xf0, 0x9a, 0x82, 0x08, 0xdf, 0xa0, 0x57, 0x52, 0x08, 0xf9,
+	0x0c, 0xf7, 0x39, 0x4e, 0xae, 0xf9, 0x0f, 0xf9, 0xef, 0x92, 0xf6, 0x65, 0x01, 0xae, 0xd2, 0x0b,
+	0xe9, 0x5d, 0x25, 0x64, 0x6f, 0x3c, 0x21, 0xff, 0xc5, 0x08, 0x39, 0x01, 0xc0, 0x1f, 0x6c, 0xfc,
+	0xbd, 0xb0, 0xf1, 0x67, 0x09, 0x2a, 0xe3, 0x93, 0x39, 0xed, 0xbb, 0x58, 0xcc, 0xa6, 0x92, 0xcc,
+	0x66, 0x7a, 0x3c, 0x66, 0xb2, 0xe2, 0x21, 0x66, 0xa3, 0x10, 0xcd, 0xc6, 0x1d, 0x28, 0xfa, 0x98,
+	0xf4, 0x3a, 0x41, 0xb9, 0xc8, 0x18, 0x7a, 0x91, 0x31, 0x74, 0x08, 0x16, 0x13, 0xcf, 0x08, 0x15,
+	0xb4, 0xef, 0x15, 0xb8, 0xde, 0x18, 0xa2, 0xa5, 0xe1, 0x3c, 0xc7, 0xf9, 0xcb, 0x7c, 0x71, 0x8b,
+	0x67, 0x53, 0x89, 0x9d, 0xcd, 0xc9, 0xe7, 0x2f, 0x8b, 0x5c, 0x85, 0x31, 0xe4, 0x22, 0xb0, 0xd6,
+	0x8d, 0x66, 0xf0, 0x19, 0xee, 0xb3, 0x43, 0xcb, 0x43, 0xf2, 0x90, 0x85, 0x24, 0x07, 0xf2, 0x9a,
+	0x9e, 0x30, 0x63, 0x64, 0x98, 0x56, 0x0f, 0x01, 0x25, 0xb5, 0xe3, 0x99, 0x97, 0xf2, 0x66, 0x5e,
+	0xce, 0xca, 0xbc, 0xf6, 0x9d, 0x04, 0x37, 0x26, 0xbb, 0x3e, 0x15, 0x4d, 0x9b, 0xb0, 0x42, 0x6c,
+	0xc7, 0xea, 0xe0, 0x21, 0x10, 0xc6, 0x23, 0xfe, 0x7d, 0x7e, 0x8d, 0x57, 0x3a, 0x71, 0x7e, 0xb8,
+	0x21, 0x57, 0x34, 0xd2, 0x56, 0x6b, 0x3f, 0xca, 0xb0, 0x3e, 0x6e, 0xd5, 0x14, 0x7e, 0xfa, 0x59,
+	0x35, 0x99, 0x7b, 0xfa, 0xcf, 0x89, 0x9e, 0x9e, 0xbf, 0x20, 0xcf, 0x24, 0x12, 0xf9, 0xb6, 0x4a,
+	0xd4, 0x0f, 0x12, 0x5c, 0x9f, 0xf8, 0x00, 0x9a, 0xf2, 0x51, 0x59, 0x22, 0xbd, 0x56, 0x0b, 0x13,
+	0x22, 0x04, 0x13, 0xb1, 0x60, 0x32, 0xdb, 0x83, 0xc6, 0x80, 0x21, 0xaa, 0xa1, 0x4d, 0x80, 0x43,
+	0xd3, 0xee, 0xe0, 0x36, 0x5b, 0x34, 0x93, 0xb9, 0x48, 0xd0, 0xd2, 0x7e, 0x91, 0xe1, 0x56, 0x1d,
+	0x77, 0x70, 0x80, 0xdf, 0xe9, 0xda, 0x33, 0xb9, 0x59, 0x91, 0x55, 0x9d, 0x8a, 0x67, 0xbe, 0xfa,
+	0x66, 0x33, 0x4b, 0xfd, 0x5e, 0x16, 0xdb, 0xe7, 0x58, 0xac, 0xc7, 0xf2, 0x26, 0x7d, 0xa5, 0xf6,
+	0xb9, 0x04, 0xb7, 0x73, 0xc5, 0x7f, 0x2a, 0x1e, 0x9d, 0xe1, 0x06, 0x72, 0x61, 0x31, 0xc2, 0x12,
+	0x74, 0x0f, 0xe6, 0xf1, 0x60, 0x20, 0xec, 0xad, 0x5e, 0x88, 0x91, 0x69, 0xa4, 0x20, 0xfa, 0x26,
+	0x67, 0xf9, 0xa6, 0x44, 0x3e, 0x58, 0x7f, 0x92, 0x61, 0x7e, 0x68, 0x0a, 0x1d, 0x64, 0x85, 0x56,
+	0x62, 0x8e, 0xdf, 0x89, 0xee, 0x7c, 0xfe, 0xaa, 0x21, 0xe7, 0x2d, 0xff, 0x4a, 0x26, 0x1b, 0xb4,
+	0xd8, 0x43, 0x8e, 0x17, 0xa2, 0xe8, 0x53, 0xed, 0x02, 0x7b, 0x1a, 0x72, 0xba, 0xca, 0xf8, 0x54,
+	0xfd, 0xe0, 0x8c, 0x95, 0xe9, 0x76, 0xb4, 0x32, 0xa5, 0xe4, 0x4f, 0xa8, 0x47, 0x7d, 0x58, 0x10,
+	0xa7, 0xd0, 0x03, 0x98, 0x3b, 0x0a, 0xe5, 0x30, 0x81, 0x63, 0x19, 0x3a, 0x54, 0x9e, 0x22, 0x99,
+	0x6f, 0x24, 0x58, 0x11, 0xda, 0xd3, 0x34, 0x46, 0xac, 0x3f, 0x9d, 0xe8, 0x42, 0x4b, 0x39, 0xba,
+	0xd0, 0xf2, 0x99, 0xbb, 0xd0, 0x4a, 0xac, 0x0b, 0xbd, 0xf9, 0x05, 0x80, 0xd2, 0x25, 0x16, 0x7a,
+	0x01, 0x4b, 0xb1, 0xee, 0x31, 0xba, 0x99, 0x12, 0x83, 0x64, 0xc7, 0x5a, 0xbd, 0x95, 0x47, 0x8d,
+	0x78, 0xc8, 0x85, 0xd5, 0xe7, 0xbd, 0x4e, 0x27, 0x3c, 0xbd, 0x5b, 0xfd, 0x26, 0x3e, 0x66, 0xfe,
+	0xfd, 0x39, 0x65, 0x7d, 0x9a, 0x22, 0xdd, 0xeb, 0x6e, 0x6e, 0x5d, 0x76, 0x2e, 0x67, 0xc3, 0xce,
+	0x18, 0x5a, 0x0a, 0x3f, 0x79, 0x06, 0x5d, 0x6a, 0x75, 0x39, 0x3a, 0x40, 0x3c, 0xb4, 0x07, 0x50,
+	0xc7, 0x1d, 0x9d, 0x58, 0xfc, 0x10, 0xa4, 0x6c, 0x34, 0x9a, 0xa6, 0x16, 0xae, 0x4d, 0xd0, 0x20,
+	0x1e, 0x6a, 0xc0, 0x72, 0xbc, 0x67, 0x85, 0xca, 0x6c, 0xe3, 0x94, 0x8e, 0x9a, 0x7a, 0x39, 0x63,
+	0x86, 0x78, 0x68, 0x03, 0xe6, 0x06, 0xed, 0x5d, 0xc4, 0x3d, 0x17, 0x5a, 0xca, 0xea, 0xc5, 0xd8,
+	0x08, 0xf1, 0xd0, 0x43, 0x58, 0x10, 0x3b, 0xa6, 0x68, 0x75, 0xf8, 0xc9, 0x27, 0xf4, 0x77, 0xd5,
+	0x4b, 0x29, 0xa3, 0xdc, 0xed, 0x78, 0x5f, 0x33, 0x74, 0x3b, 0xa5, 0x7f, 0x1a, 0xba, 0x9d, 0xda,
+	0x08, 0x6d, 0xc0, 0x72, 0x23, 0xdd, 0x50, 0x23, 0xd3, 0x50, 0x63, 0x8c, 0xa1, 0x94, 0x40, 0xa6,
+	0x74, 0xf2, 0x04, 0x43, 0x89, 0x40, 0xd6, 0x19, 0xcb, 0xc5, 0x66, 0x16, 0xfa, 0xd3, 0x40, 0x3b,
+	0xd6, 0x2c, 0x53, 0xcb, 0xe9, 0x13, 0xc4, 0x43, 0x47, 0xb0, 0x3e, 0xee, 0x83, 0x0b, 0xdd, 0xc8,
+	0xf3, 0x81, 0xad, 0xde, 0xcc, 0xa1, 0x45, 0x3c, 0x74, 0x02, 0x95, 0x49, 0x4f, 0x67, 0x54, 0xcd,
+	0xfb, 0x71, 0xa0, 0xde, 0xc9, 0xa9, 0x49, 0x3c, 0x74, 0x0c, 0xeb, 0x8f, 0xdb, 0xed, 0x6c, 0x94,
+	0xb7, 0x73, 0xf6, 0xb5, 0xd4, 0x6a, 0x3e, 0x45, 0xe2, 0xa1, 0x8f, 0xe1, 0x6a, 0xe4, 0x8a, 0x4f,
+	0xd9, 0xf5, 0xee, 0xe0, 0x94, 0xe4, 0x78, 0x88, 0xa9, 0xf7, 0xf2, 0x2b, 0x13, 0x6f, 0xeb, 0xca,
+	0xfb, 0x97, 0x77, 0x3d, 0xec, 0x1c, 0xec, 0xe8, 0xc2, 0x1f, 0xbb, 0x5d, 0x62, 0x3d, 0xec, 0x12,
+	0xeb, 0x65, 0x91, 0x89, 0x7f, 0xfd, 0x35, 0x00, 0x00, 0xff, 0xff, 0x33, 0xaa, 0x7d, 0xf5, 0x41,
+	0x1e, 0x00, 0x00,
 }

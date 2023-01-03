@@ -10,10 +10,11 @@ import (
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
-	"github.com/golang/protobuf/proto"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/golang/protobuf/proto"
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
@@ -30,7 +31,8 @@ type rpcChat struct {
 	etcdAddr        []string
 	messageWriter   MessageWriter
 	//offlineProducer *kafka.Producer
-	delMsgCh chan deleteMsg
+	delMsgCh       chan deleteMsg
+	dMessageLocker MessageLocker
 }
 
 type deleteMsg struct {
@@ -47,6 +49,7 @@ func NewRpcChatServer(port int) *rpcChat {
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImMsgName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
+		dMessageLocker:  NewLockerMessage(),
 	}
 	rc.messageWriter = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
 	//rc.offlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschatOffline.Addr, config.Config.Kafka.Ws2mschatOffline.Topic)
@@ -94,8 +97,12 @@ func (rpc *rpcChat) Run() {
 		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
 	}
 	log.Info("", "listen network success, address ", address)
-
-	var grpcOpts []grpc.ServerOption
+	recvSize := 1024 * 1024 * 30
+	sendSize := 1024 * 1024 * 30
+	var grpcOpts = []grpc.ServerOption{
+		grpc.MaxRecvMsgSize(recvSize),
+		grpc.MaxSendMsgSize(sendSize),
+	}
 	if config.Config.Prometheus.Enable {
 		promePkg.NewGrpcRequestCounter()
 		promePkg.NewGrpcRequestFailedCounter()

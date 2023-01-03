@@ -36,7 +36,7 @@ mongo:
   dbPassword:   #mongo密码，建议先不设置
   dbMaxPoolSize: 100
   dbRetainChatRecords: 3650 #mongo保存离线消息时间（天），根据需求修改
-  chatRecordsClearTime: "* * * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
+  chatRecordsClearTime: "0 3 * * *" # 每天凌晨3点清除消息，该配置和linux定时任务一样， 清理操作建议设置在用户活跃少的时候 # 0 3 * * *
 
 redis:
   dbAddress: [ 127.0.0.1:16379 ] #redis地址 单机时，填写一个地址即可，使用redis集群时候，填写集群中多个节点地址（主从地址都可以填写，增加容灾能力），默认即可
@@ -62,12 +62,15 @@ kafka:
   ms2pschat:
     addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
     topic: "ms2ps_chat" #消息push
+  msgtomodify:
+    addr: [ 127.0.0.1:9092 ] #kafka配置，默认即可
+    topic: "msg_to_modify"
   consumergroupid:
     msgToTransfer: mongo
     msgToMongo: mongo_ex
     msgToMySql: mysql
     msgToPush: push
-
+    msgToModify: modify
 
 
 #---------------Internal service configuration---------------------#
@@ -341,6 +344,19 @@ callback:
     enable: false
     callbackTimeOut: 2
     callbackFailedContinue: true # 回调超时是否继续
+  callbackBeforeMemberJoinGroup:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续
+  callbackBeforeSetGroupMemberInfo:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续
+  callbackSetMessageReactionExtensions:
+    enable: false
+    callbackTimeOut: 2
+    callbackFailedContinue: true # 回调超时是否继续
+
 
 notification:
   groupCreated:
@@ -660,6 +676,19 @@ notification:
       ext: "Remove a blocked user"
     defaultTips:
       tips: "Remove a blocked user"
+
+  friendInfoUpdated:
+    conversation:
+      reliabilityLevel: 2
+      unreadCount: false
+    offlinePush:
+      switch: true
+      title: "friend info updated"
+      desc: "friend info updated"
+      ext: "friend info updated"
+    defaultTips:
+      tips: "friend info updated"
+
 
   #####################user#########################
   userInfoUpdated:

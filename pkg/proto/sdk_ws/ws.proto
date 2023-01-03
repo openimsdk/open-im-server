@@ -330,6 +330,7 @@ message GroupApplicationAcceptedTips{
   GroupInfo group = 1;
   GroupMemberFullInfo opUser = 2;
   string  handleMsg = 4;
+  int32 receiverAs = 5; // admin(==1) or applicant(==0)
 }
 
 //	OnApplicationGroupRejected()
@@ -337,6 +338,7 @@ message GroupApplicationRejectedTips{
   GroupInfo group = 1;
   GroupMemberFullInfo opUser = 2;
   string  handleMsg = 4;
+  int32 receiverAs = 5; // admin(==1) or applicant(==0)
 }
 
 //	OnTransferGroupOwner()
@@ -695,5 +697,39 @@ message DelMsgListResp{
   int32 errCode = 1;
   string errMsg = 2;
 }
+
+message SetAppBackgroundStatusReq {
+  string userID = 1;
+  bool isBackground = 2;
+}
+
+message SetAppBackgroundStatusResp {
+  int32 errCode = 1;
+  string errMsg = 2;
+}
+
+message ExtendMsgSet {
+  string sourceID = 1;
+  int32 sessionType = 2;
+  map <string, ExtendMsg>extendMsgs = 3;
+  int64 MaxMsgUpdateTime = 4;
+  int32 extendMsgNum = 5;
+  int64 createTime = 6;
+}
+
+message ExtendMsg {
+  map <string, KeyValue>reactionExtensionList = 1;
+  string clientMsgID = 2;
+  int64 msgFirstModifyTime = 3;
+  string attachedInfo = 4;
+  string ex = 5;
+}
+
+message KeyValue {
+  string typeKey = 1;
+  string value = 2;
+  int64 latestUpdateTime = 3;
+}
+
 
 

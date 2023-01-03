@@ -70,7 +70,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 			wsResult = append(wsResult, reply.SinglePushResult...)
 		}
 	}
-	log.NewInfo(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData)
+	log.NewInfo(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData, "isOfflinePush", isOfflinePush)
 	successCount++
 	if isOfflinePush && pushMsg.PushToUserID != pushMsg.MsgData.SendID {
 		// save invitation info for offline push
@@ -78,6 +78,9 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 			if v.OnlinePush {
 				return
 			}
+		}
+		if pushMsg.MsgData.ContentType > constant.NotificationBegin && pushMsg.MsgData.ContentType < constant.NotificationEnd && pushMsg.MsgData.ContentType != constant.SignalingNotification {
+			return
 		}
 		if pushMsg.MsgData.ContentType == constant.SignalingNotification {
 			isSend, err := db.DB.HandleSignalInfo(pushMsg.OperationID, pushMsg.MsgData, pushMsg.PushToUserID)
@@ -198,11 +201,28 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 	log.Debug(pushMsg.OperationID, "push_result", wsResult, "sendData", pushMsg.MsgData)
 	successCount++
 	if isOfflinePush {
+		if pushMsg.MsgData.ContentType > constant.NotificationBegin && pushMsg.MsgData.ContentType < constant.NotificationEnd && pushMsg.MsgData.ContentType != constant.SignalingNotification {
+			return
+		}
 		var onlineSuccessUserIDList []string
+		var WebAndPcBackgroundUserIDList []string
 		onlineSuccessUserIDList = append(onlineSuccessUserIDList, pushMsg.MsgData.SendID)
 		for _, v := range wsResult {
 			if v.OnlinePush && v.UserID != pushMsg.MsgData.SendID {
 				onlineSuccessUserIDList = append(onlineSuccessUserIDList, v.UserID)
+			}
+			if !v.OnlinePush {
+				if len(v.Resp) != 0 {
+					for _, singleResult := range v.Resp {
+						if singleResult.ResultCode == -2 {
+							if constant.PlatformIDToClass(int(singleResult.RecvPlatFormID)) == constant.TerminalPC ||
+								singleResult.RecvPlatFormID == constant.WebPlatformID {
+								WebAndPcBackgroundUserIDList = append(WebAndPcBackgroundUserIDList, v.UserID)
+							}
+						}
+					}
+				}
+
 			}
 		}
 		onlineFailedUserIDList := utils.DifferenceString(onlineSuccessUserIDList, pushToUserIDList)
@@ -237,7 +257,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			if err != nil {
 				log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetOfflinePushOpts failed", pushMsg, err.Error())
 			}
-			log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), onlineFailedUserIDList, title, detailContent, "opts:", opts)
+			log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), needOfflinePushUserIDList, title, detailContent, "opts:", opts)
 			if title == "" {
 				switch pushMsg.MsgData.ContentType {
 				case constant.Text:
@@ -274,6 +294,22 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 				promePkg.PromeInc(promePkg.MsgOfflinePushSuccessCounter)
 				log.NewDebug(pushMsg.OperationID, "offline push return result is ", pushResult, pushMsg.MsgData)
 			}
+			needBackgroupPushUserID := utils.IntersectString(needOfflinePushUserIDList, WebAndPcBackgroundUserIDList)
+			grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), pushMsg.OperationID)
+			if len(needBackgroupPushUserID) > 0 {
+				//Online push message
+				log.Debug(pushMsg.OperationID, "len  grpc", len(grpcCons), "data", pushMsg.String())
+				for _, v := range grpcCons {
+					msgClient := pbRelay.NewRelayClient(v)
+					_, err := msgClient.SuperGroupBackgroundOnlinePush(context.Background(), &pbRelay.OnlineBatchPushOneMsgReq{OperationID: pushMsg.OperationID, MsgData: pushMsg.MsgData,
+						PushToUserIDList: needBackgroupPushUserID})
+					if err != nil {
+						log.NewError("push data to client rpc err", pushMsg.OperationID, "err", err)
+						continue
+					}
+				}
+			}
+
 		}
 	}
 }

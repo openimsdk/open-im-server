@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/utils"
@@ -20,6 +21,11 @@ func JWTAuth() gin.HandlerFunc {
 			c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": errInfo})
 			return
 		} else {
+			if !utils.IsContain(userID, config.Config.Manager.AppManagerUid) {
+				c.Abort()
+				c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": "user is not admin"})
+				return
+			}
 			log.NewInfo("0", utils.GetSelfFuncName(), "failed: ", errInfo)
 		}
 	}
