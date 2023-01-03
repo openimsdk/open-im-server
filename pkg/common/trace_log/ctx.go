@@ -11,35 +11,37 @@ import (
 )
 
 const TraceLogKey = "trace_log"
-const GinContextKey = "gin_context"
 
 func NewCtx(c *gin.Context, api string) context.Context {
-	req := ApiInfo{ApiName: api, GinCtx: c}
-	req.OperationID = c.PostForm("operationID")
-	return context.WithValue(c, GinContextKey, req)
+	req := &ApiInfo{ApiName: api, GinCtx: c, Funcs: &[]FuncInfo{}}
+	return context.WithValue(c, TraceLogKey, req)
+}
+
+func SetOperationID(ctx context.Context, operationID string) {
+	ctx.Value(TraceLogKey).(*ApiInfo).OperationID = operationID
 }
 
 func ShowLog(ctx context.Context) {
-	t := ctx.Value(TraceLogKey).(ApiInfo)
-	log.Info(t.OperationID, "api: ", t.ApiName)
-	for _, v := range t.Funcs {
+	t := ctx.Value(TraceLogKey).(*ApiInfo)
+	log.Info(t.OperationID, "funcs", len(*t.Funcs), "api:", t.ApiName)
+	for _, v := range *t.Funcs {
 		if v.Err != nil {
-			log.Error(v.FuncName, v.Err, v.Args)
+			log.Error(t.OperationID, "func: ", v.FuncName, " args: ", v.Args, v.Err.Error())
 		} else {
-			log.Info(v.FuncName, v.Args)
+			log.Info(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
 		}
 	}
 }
 
-func WriteErrorResponse(ctx context.Context, funcName string, err error) {
-	SetContextInfo(ctx, funcName, err)
+func WriteErrorResponse(ctx context.Context, funcName string, err error, args ...interface{}) {
+	SetContextInfo(ctx, funcName, err, args)
 	e := new(constant.ErrInfo)
 	switch {
 	case errors.As(err, &e):
-		ctx.Value(GinContextKey).(ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": e.ErrCode, "errMsg": e.ErrMsg})
+		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": e.ErrCode, "errMsg": e.ErrMsg})
 		return
 	default:
-		ctx.Value(GinContextKey).(ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": constant.ErrDefaultOther.ErrCode, "errMsg": constant.ErrDefaultOther.ErrMsg})
+		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": constant.ErrDefault.ErrCode, "errMsg": constant.ErrDefault.ErrMsg})
 		return
 	}
 }
@@ -47,7 +49,7 @@ func WriteErrorResponse(ctx context.Context, funcName string, err error) {
 type ApiInfo struct {
 	ApiName     string
 	OperationID string
-	Funcs       []FuncInfo
+	Funcs       *[]FuncInfo
 	GinCtx      *gin.Context
 }
 
@@ -58,21 +60,30 @@ type FuncInfo struct {
 }
 
 func SetContextInfo(ctx context.Context, funcName string, err error, args ...interface{}) {
-	t := ctx.Value(TraceLogKey).(ApiInfo)
+	t := ctx.Value(TraceLogKey).(*ApiInfo)
 	var funcInfo FuncInfo
 	funcInfo.Args = make(map[string]interface{})
 	argsHandle(args, funcInfo.Args)
 	funcInfo.FuncName = funcName
 	funcInfo.Err = err
-	t.Funcs = append(t.Funcs, funcInfo)
+	*t.Funcs = append(*t.Funcs, funcInfo)
+}
+
+func SetSuccess(ctx context.Context, funcName string, data interface{}) {
+	SetContextInfo(ctx, funcName, nil, "data", data)
+	ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": data})
 }
 
 func argsHandle(args []interface{}, fields map[string]interface{}) {
 	for i := 0; i < len(args); i += 2 {
 		if i+1 < len(args) {
-			fields[fmt.Sprintf("%v", args[i])] = args[i+1]
+			fields[fmt.Sprintf("%v", args[i])] = fmt.Sprintf("%+v", args[i+1])
 		} else {
 			fields[fmt.Sprintf("%v", args[i])] = ""
 		}
 	}
+}
+
+func GetApiErr(errCode int32, errMsg string) api_struct.ErrInfo {
+	return api_struct.ErrInfo{ErrCode: errCode, ErrMsg: errMsg}
 }
