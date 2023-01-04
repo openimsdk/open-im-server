@@ -26,11 +26,11 @@ type Group struct {
 	DB                     *gorm.DB  `gorm:"-" json:"-"`
 }
 
-func (*Group) Create(groupList []*Group) error {
+func (tb *Group) Create(groupList []*Group) error {
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Create(&groupList).Error, "")
 }
 
-func (*Group) Delete(groupIDList []string) error {
+func (tb *Group) Delete(groupIDList []string) error {
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDList).Delete(&Group{}).Error, "")
 }
 
