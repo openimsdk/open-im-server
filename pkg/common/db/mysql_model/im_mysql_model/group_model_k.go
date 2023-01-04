@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -25,7 +24,6 @@ type Group struct {
 	ApplyMemberFriend      int32     `gorm:"column:apply_member_friend" json:"applyMemberFriend"`
 	NotificationUpdateTime time.Time `gorm:"column:notification_update_time"`
 	NotificationUserID     string    `gorm:"column:notification_user_id;size:64"`
-	DB                     *gorm.DB  `gorm:"-" json:"-"`
 }
 
 func (*Group) Create(ctx context.Context, groupList []*Group) (err error) {
