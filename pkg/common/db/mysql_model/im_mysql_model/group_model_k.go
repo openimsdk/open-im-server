@@ -7,8 +7,6 @@ import (
 )
 
 type Group struct {
-	//`json:"operationID" binding:"required"`
-	//`protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"` `json:"operationID" binding:"required"`
 	GroupID                string    `gorm:"column:group_id;primary_key;size:64" json:"groupID" binding:"required"`
 	GroupName              string    `gorm:"column:name;size:255" json:"groupName"`
 	Notification           string    `gorm:"column:notification;size:255" json:"notification"`
@@ -30,7 +28,7 @@ func (*Group) Create(groupList []*Group) error {
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Create(&groupList).Error, "")
 }
 
-func (*Group) Delete(groupList []*Group) error {
+func (*Group) Delete(groupIDList []string) error {
 	return nil
 }
 
@@ -38,18 +36,14 @@ func (*Group) Update(groupList []*Group) error {
 	return nil
 }
 
-func (*Group) UpdateByMap(args map[*Group]map[string]interface{}) error {
+func (*Group) UpdateByMap(args map[string]map[string]interface{}) error {
 	return nil
 }
 
-func (*Group) Find(group []*Group) ([]*Group, error) {
+func (*Group) Find(groupIDList []string) ([]*Group, error) {
 	return nil, nil
 }
 
-func (*Group) Take(group *Group) (*Group, error) {
+func (*Group) Take(groupID string) (*Group, error) {
 	return nil, nil
-}
-
-func (*Group) Count(group *Group) (int64, error) {
-	return 0, nil
 }
