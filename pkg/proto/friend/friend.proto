@@ -76,7 +76,7 @@ message AddBlacklistReq{
     CommID CommID = 1;
 }
 message AddBlacklistResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 

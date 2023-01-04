@@ -5,7 +5,11 @@ package server_api_params;
 
 
 ////////////////////////////////base///////////////////////////////
-
+message CommonResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+  string detailErrMsg =3;
+}
 
 message GroupInfo{
   string groupID = 1;

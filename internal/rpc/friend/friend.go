@@ -17,6 +17,8 @@ import (
 	sdkws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
+	"fmt"
 	"net"
 	"strconv"
 	"strings"
@@ -102,15 +104,16 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	log.NewInfo(req.CommID.OperationID, "AddBlacklist args ", req.String())
 	ok := token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID)
 	if !ok {
-		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		err := errors.New("CheckAccess false")
+		log.NewError(req.CommID.OperationID, err.Error(), req.CommID.OpUserID, req.CommID.FromUserID)
+		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(constant.ErrNoPermission, err)}, nil
 	}
 	black := db.Black{OwnerUserID: req.CommID.FromUserID, BlockUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
 
 	err := imdb.InsertInToUserBlackList(black)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "InsertInToUserBlackList failed ", err.Error())
-		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(constant.ErrDatabase, err)}, nil
 	}
 	log.NewInfo(req.CommID.OperationID, "AddBlacklist rpc ok ", req.CommID.FromUserID, req.CommID.ToUserID)
 
@@ -118,21 +121,22 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	if etcdConn == nil {
 		errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.CommID.OperationID, errMsg)
-		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
+		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(constant.ErrInternalServer, err)}, nil
 	}
 	cacheClient := pbCache.NewCacheClient(etcdConn)
 	cacheResp, err := cacheClient.DelBlackIDListFromCache(context.Background(), &pbCache.DelBlackIDListFromCacheReq{UserID: req.CommID.FromUserID, OperationID: req.CommID.OperationID})
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "DelBlackIDListFromCache rpc call failed ", err.Error())
-		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: 500, ErrMsg: "AddBlackUserToCache rpc call failed"}}, nil
+		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(constant.ErrInternalServer, err)}, nil
 	}
 	if cacheResp.CommonResp.ErrCode != 0 {
+		err = errors.New(fmt.Sprintf("call DelBlackIDListFromCache rpc failed code is %d, err is %s, args is %s", cacheResp.CommonResp.ErrCode, cacheResp.CommonResp.ErrMsg, req.CommID.FromUserID))
 		log.NewError(req.CommID.OperationID, "DelBlackIDListFromCache rpc logic call failed ", cacheResp.String())
-		return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}, nil
+		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(constant.ErrInternalServer, err)}, nil
 	}
 
 	chat.BlackAddedNotification(req)
-	return &pbFriend.AddBlacklistResp{CommonResp: &pbFriend.CommonResp{}}, nil
+	return &pbFriend.AddBlacklistResp{CommonResp: &sdkws.CommonResp{}}, nil
 }
 
 func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq) (*pbFriend.AddFriendResp, error) {
