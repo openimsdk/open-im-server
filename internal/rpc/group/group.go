@@ -811,7 +811,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	resp := pbGroup.GetGroupApplicationListResp{}
 	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
 	if err != nil {
-		SetErr(nCtx, "GetRecvGroupApplicationList", err, &resp.ErrCode, &resp.ErrMsg, "userID ", req.FromUserID)
+		SetErr(nCtx, "", err, &resp.ErrCode, &resp.ErrMsg, "userID ", req.FromUserID)
 		return &resp, nil
 	}
 	var errResult error

@@ -75,7 +75,7 @@ func GetRecvGroupApplicationList(userID string) ([]db.GroupRequest, error) {
 	var groupRequestList []db.GroupRequest
 	memberList, err := GetGroupMemberListByUserID(userID)
 	if err != nil {
-		return nil, err
+		return nil, utils.Wrap(err, utils.GetSelfFuncName())
 	}
 	for _, v := range memberList {
 		if v.RoleLevel > constant.GroupOrdinaryUsers {
