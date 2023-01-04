@@ -82,6 +82,8 @@ func SetContextInfo(ctx context.Context, funcName string, err error, args ...int
 	*t.Funcs = append(*t.Funcs, funcInfo)
 	if err != nil {
 		log.NewError(t.OperationID, funcName, "error: ", err, funcInfo.Args)
+	} else {
+		log.NewInfo(t.OperationID, funcName, "args: ", funcInfo.Args)
 	}
 }
 
