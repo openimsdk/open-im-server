@@ -10,6 +10,7 @@ import (
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/trace_log"
 	cp "Open_IM/pkg/common/utils"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"github.com/OpenIMSDK/getcdv3"
@@ -780,7 +781,7 @@ func FillGroupInfoByGroupID(operationID, groupID string, groupInfo *open_im_sdk.
 	}
 	if group.Status == constant.GroupStatusDismissed {
 		log.Debug(operationID, " group constant.GroupStatusDismissed ", group.GroupID)
-		return utils.Wrap(constant.ErrGroupStatusDismissed, "")
+		return utils.Wrap(constant.ErrDismissedAlready, "")
 	}
 	return utils.Wrap(cp.GroupDBCopyOpenIM(groupInfo, group), "")
 }
@@ -795,19 +796,26 @@ func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sd
 	return nil
 }
 
-func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
+func SetErr(ctx context.Context, err error, errCode *int32, errMsg *string) {
+	errInfo := constant.ToAPIErrWithErr(err)
+	*errCode = errInfo.ErrCode
+	*errMsg = errInfo.ErrMsg
+
+}
+
+func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
+	nCtx := trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	trace_log.SetRpcReqInfo(nCtx, utils.GetSelfFuncName(), req.String())
+	defer trace_log.ShowLog(nCtx)
+
 	resp := pbGroup.GetGroupApplicationListResp{}
 	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetRecvGroupApplicationList failed ", err.Error(), req.FromUserID)
-		errInfo := constant.ToAPIErrWithErr(err)
-		resp.ErrCode = errInfo.ErrCode
-		resp.ErrMsg = errInfo.ErrMsg
+		SetErr(nCtx, err, &resp.ErrCode, &resp.ErrMsg)
 		return &resp, nil
 	}
 	var errResult error
-	log.NewDebug(req.OperationID, "GetGroupApplicationList from db ", reply)
+	trace_log.SetContextInfo(nCtx, "GetRecvGroupApplicationList", nil, " FromUserID: ", req.FromUserID, "GroupApplicationList: ", reply)
 
 	for _, v := range reply {
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
@@ -818,7 +826,7 @@ func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.Ge
 			}
 			continue
 		}
-
+		trace_log.SetContextInfo(nCtx, "FillGroupInfoByGroupID ", nil, " groupID: ", v.GroupID, " groupInfo: ", node.GroupInfo)
 		err = FillPublicUserInfoByUserID(req.OperationID, v.UserID, node.UserInfo)
 		if err != nil {
 			errResult = err
@@ -828,11 +836,10 @@ func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.Ge
 		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
 	if errResult != nil && len(resp.GroupRequestList) == 0 {
-		errInfo := constant.ToAPIErrWithErr(errResult)
-		resp.ErrCode = errInfo.ErrCode
-		resp.ErrMsg = errInfo.ErrMsg
+		SetErr(nCtx, err, &resp.ErrCode, &resp.ErrMsg)
+		return &resp, nil
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", resp.String())
+	trace_log.SetRpcRespInfo(nCtx, utils.GetSelfFuncName(), resp.String())
 	return &resp, nil
 }
 
