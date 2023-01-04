@@ -30,7 +30,12 @@ func SetOperationID(ctx context.Context, operationID string) {
 
 func ShowLog(ctx context.Context) {
 	t := ctx.Value(TraceLogKey).(*ApiInfo)
-	log.Info(t.OperationID, "api: ", t.ApiName)
+	if ctx.Value(TraceLogKey).(*ApiInfo).GinCtx != nil {
+		log.Info(t.OperationID, "api: ", t.ApiName)
+	} else {
+		log.Info(t.OperationID, "rpc: ", t.ApiName)
+	}
+
 	for _, v := range *t.Funcs {
 		if v.Err != nil {
 			log.Error(t.OperationID, "func: ", v.FuncName, " args: ", v.Args, v.Err.Error())
