@@ -2,7 +2,9 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
+	"context"
 	"gorm.io/gorm"
 	"time"
 )
@@ -26,27 +28,38 @@ type Group struct {
 	DB                     *gorm.DB  `gorm:"-" json:"-"`
 }
 
-func (*Group) Create(groupList []*Group) error {
-	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Create(&groupList).Error, "")
+func (*Group) Create(ctx context.Context, groupList []*Group) (err error) {
+	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupList", groupList)
+	err = utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Create(&groupList).Error, "")
+	return err
 }
 
-func (*Group) Delete(groupIDList []string) error {
-	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDList).Delete(&Group{}).Error, "")
+func (*Group) Delete(ctx context.Context, groupIDList []string) (err error) {
+	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupIDList", groupIDList)
+	err = utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDList).Delete(&Group{}).Error, "")
+	return err
 }
 
-func (tb *Group) Get(groupIDs []string) ([]*Group, error) {
-	var ms []*Group
-	return ms, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDs).Find(&ms).Error, "")
+func (*Group) UpdateByMap(ctx context.Context, groupID string, args map[string]interface{}) (err error) {
+	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "args", args)
+	err = utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ?", groupID).Updates(args).Error, "")
+	return err
 }
 
-func (tb *Group) Update(groups []*Group) error {
-	return utils.Wrap(utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Updates(groups).Error, ""), "")
+func (*Group) Update(ctx context.Context, groups []*Group) (err error) {
+	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groups", groups)
+	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Updates(&groups).Error, "")
 }
 
-func (*Group) Find(groupIDList []string) ([]*Group, error) {
-	return nil, nil
+func (*Group) Find(ctx context.Context, groupIDList []string) (groupList []*Group, err error) {
+	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupIDList", groupIDList)
+	err = utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDList).Find(&groupList).Error, "")
+	return groupList, err
 }
 
-func (*Group) Take(groupID string) (*Group, error) {
-	return nil, nil
+func (*Group) Take(ctx context.Context, groupID string) (group *Group, err error) {
+	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID)
+	group = &Group{}
+	err = utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ?", groupID).Take(group).Error, "")
+	return group, err
 }

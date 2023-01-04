@@ -8,10 +8,11 @@ import (
 	"time"
 )
 
-func InsertInToUserBlackList(ctx context.Context, black db.Black) error {
-	defer trace_log.SetContextInfo(ctx)
+func InsertInToUserBlackList(ctx context.Context, black db.Black) (err error) {
+	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "black", black)
 	black.CreateTime = time.Now()
-	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Create(black).Error
+	err = db.DB.MysqlDB.DefaultGormDB().Table("blacks").Create(black).Error
+	return err
 }
 
 // type Black struct {
