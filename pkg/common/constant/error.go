@@ -2,8 +2,10 @@ package constant
 
 import (
 	sdkws "Open_IM/pkg/proto/sdk_ws"
+	"context"
 	"encoding/json"
 	"errors"
+
 	"gorm.io/gorm"
 )
 
@@ -82,13 +84,13 @@ func ToAPIErrWithErr(err error) ErrInfo {
 	return ErrDefaultOther
 }
 
-func Error2CommResp(info ErrInfo, detailErr error) *sdkws.CommonResp {
+func Error2CommResp(ctx context.Context, info ErrInfo, detailErrMsg string) *sdkws.CommonResp {
 	err := &sdkws.CommonResp{
 		ErrCode: info.ErrCode,
 		ErrMsg:  info.ErrMsg,
 	}
-	if detailErr != nil {
-		err.DetailErrMsg = detailErr.Error()
+	if detailErrMsg != "" {
+		err.DetailErrMsg = detailErrMsg
 	}
 	return err
 }

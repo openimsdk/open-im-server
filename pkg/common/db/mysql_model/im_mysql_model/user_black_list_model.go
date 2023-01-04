@@ -2,11 +2,14 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
+	"context"
 	"time"
 )
 
-func InsertInToUserBlackList(black db.Black) error {
+func InsertInToUserBlackList(ctx context.Context, black db.Black) error {
+	defer trace_log.SetContextInfo(ctx)
 	black.CreateTime = time.Now()
 	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Create(black).Error
 }
