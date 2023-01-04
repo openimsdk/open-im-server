@@ -34,12 +34,13 @@ func (*Group) Delete(groupIDList []string) error {
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDList).Delete(&Group{}).Error, "")
 }
 
-func (*Group) Update(groupList []*Group) error {
-	return nil
+func (tb *Group) Get(groupIDs []string) ([]*Group, error) {
+	var ms []*Group
+	return ms, utils.Wrap(tb.DB.Where("group_id in (?)", groupIDs).Find(&ms).Error, "")
 }
 
-func (*Group) UpdateByMap(args map[string]map[string]interface{}) error {
-	return nil
+func (tb *Group) Update(groups []*Group) error {
+	return utils.Wrap(utils.Wrap(tb.DB.Updates(groups).Error, ""), "")
 }
 
 func (*Group) Find(groupIDList []string) ([]*Group, error) {
