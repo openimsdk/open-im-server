@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func InsertToFriend(toInsertFollow *db.Friend) error {
+func InsertToFriend(toInsertFollow *Friend) error {
 	toInsertFollow.CreateTime = time.Now()
 	err := db.DB.MysqlDB.DefaultGormDB().Table("friends").Create(toInsertFollow).Error
 	if err != nil {
@@ -15,8 +15,8 @@ func InsertToFriend(toInsertFollow *db.Friend) error {
 	return nil
 }
 
-func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*db.Friend, error) {
-	var friend db.Friend
+func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*Friend, error) {
+	var friend Friend
 	err := db.DB.MysqlDB.DefaultGormDB().Table("friends").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Take(&friend).Error
 	if err != nil {
 		return nil, err
@@ -24,9 +24,9 @@ func GetFriendRelationshipFromFriend(OwnerUserID, FriendUserID string) (*db.Frie
 	return &friend, err
 }
 
-func GetFriendListByUserID(OwnerUserID string) ([]db.Friend, error) {
-	var friends []db.Friend
-	var x db.Friend
+func GetFriendListByUserID(OwnerUserID string) ([]Friend, error) {
+	var friends []Friend
+	var x Friend
 	x.OwnerUserID = OwnerUserID
 	err := db.DB.MysqlDB.DefaultGormDB().Table("friends").Where("owner_user_id=?", OwnerUserID).Find(&friends).Error
 	if err != nil {
@@ -49,11 +49,11 @@ func UpdateFriendComment(OwnerUserID, FriendUserID, Remark string) error {
 }
 
 func DeleteSingleFriendInfo(OwnerUserID, FriendUserID string) error {
-	return db.DB.MysqlDB.DefaultGormDB().Table("friends").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Delete(db.Friend{}).Error
+	return db.DB.MysqlDB.DefaultGormDB().Table("friends").Where("owner_user_id=? and friend_user_id=?", OwnerUserID, FriendUserID).Delete(Friend{}).Error
 }
 
 type FriendUser struct {
-	db.Friend
+	Friend
 	Nickname string `gorm:"column:name;size:255"`
 }
 

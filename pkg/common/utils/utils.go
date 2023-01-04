@@ -1,7 +1,6 @@
 package utils
 
 import (
-	db "Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/token_verify"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -15,13 +14,13 @@ func OperationIDGenerator() string {
 	return strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10)
 }
 
-func FriendOpenIMCopyDB(dst *db.Friend, src *open_im_sdk.FriendInfo) {
+func FriendOpenIMCopyDB(dst *imdb.Friend, src *open_im_sdk.FriendInfo) {
 	utils.CopyStructFields(dst, src)
 	dst.FriendUserID = src.FriendUser.UserID
 	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
 }
 
-func FriendDBCopyOpenIM(dst *open_im_sdk.FriendInfo, src *db.Friend) error {
+func FriendDBCopyOpenIM(dst *open_im_sdk.FriendInfo, src *imdb.Friend) error {
 	utils.CopyStructFields(dst, src)
 	user, err := imdb.GetUserByUserID(src.FriendUserID)
 	if err != nil {
@@ -36,14 +35,13 @@ func FriendDBCopyOpenIM(dst *open_im_sdk.FriendInfo, src *db.Friend) error {
 	return nil
 }
 
-//
-func FriendRequestOpenIMCopyDB(dst *db.FriendRequest, src *open_im_sdk.FriendRequest) {
+func FriendRequestOpenIMCopyDB(dst *imdb.FriendRequest, src *open_im_sdk.FriendRequest) {
 	utils.CopyStructFields(dst, src)
 	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
 	dst.HandleTime = utils.UnixSecondToTime(int64(src.HandleTime))
 }
 
-func FriendRequestDBCopyOpenIM(dst *open_im_sdk.FriendRequest, src *db.FriendRequest) error {
+func FriendRequestDBCopyOpenIM(dst *open_im_sdk.FriendRequest, src *imdb.FriendRequest) error {
 	utils.CopyStructFields(dst, src)
 	user, err := imdb.GetUserByUserID(src.FromUserID)
 	if err != nil {
@@ -64,13 +62,13 @@ func FriendRequestDBCopyOpenIM(dst *open_im_sdk.FriendRequest, src *db.FriendReq
 	return nil
 }
 
-func BlackOpenIMCopyDB(dst *db.Black, src *open_im_sdk.BlackInfo) {
+func BlackOpenIMCopyDB(dst *imdb.Black, src *open_im_sdk.BlackInfo) {
 	utils.CopyStructFields(dst, src)
 	dst.BlockUserID = src.BlackUserInfo.UserID
 	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
 }
 
-func BlackDBCopyOpenIM(dst *open_im_sdk.BlackInfo, src *db.Black) error {
+func BlackDBCopyOpenIM(dst *open_im_sdk.BlackInfo, src *imdb.Black) error {
 	utils.CopyStructFields(dst, src)
 	dst.CreateTime = uint32(src.CreateTime.Unix())
 	user, err := imdb.GetUserByUserID(src.BlockUserID)
@@ -81,11 +79,11 @@ func BlackDBCopyOpenIM(dst *open_im_sdk.BlackInfo, src *db.Black) error {
 	return nil
 }
 
-func GroupOpenIMCopyDB(dst *db.Group, src *open_im_sdk.GroupInfo) {
+func GroupOpenIMCopyDB(dst *imdb.Group, src *open_im_sdk.GroupInfo) {
 	utils.CopyStructFields(dst, src)
 }
 
-func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *db.Group) error {
+func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *imdb.Group) error {
 	utils.CopyStructFields(dst, src)
 	user, err := imdb.GetGroupOwnerInfoByGroupID(src.GroupID)
 	if err != nil {
@@ -106,11 +104,11 @@ func GroupDBCopyOpenIM(dst *open_im_sdk.GroupInfo, src *db.Group) error {
 	return nil
 }
 
-func GroupMemberOpenIMCopyDB(dst *db.GroupMember, src *open_im_sdk.GroupMemberFullInfo) {
+func GroupMemberOpenIMCopyDB(dst *imdb.GroupMember, src *open_im_sdk.GroupMemberFullInfo) {
 	utils.CopyStructFields(dst, src)
 }
 
-func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.GroupMember) error {
+func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *imdb.GroupMember) error {
 	utils.CopyStructFields(dst, src)
 	if token_verify.IsManagerUserID(src.UserID) {
 		u, err := imdb.GetUserByUserID(src.UserID)
@@ -134,29 +132,29 @@ func GroupMemberDBCopyOpenIM(dst *open_im_sdk.GroupMemberFullInfo, src *db.Group
 	return nil
 }
 
-func GroupRequestOpenIMCopyDB(dst *db.GroupRequest, src *open_im_sdk.GroupRequest) {
+func GroupRequestOpenIMCopyDB(dst *imdb.GroupRequest, src *open_im_sdk.GroupRequest) {
 	utils.CopyStructFields(dst, src)
 }
 
-func GroupRequestDBCopyOpenIM(dst *open_im_sdk.GroupRequest, src *db.GroupRequest) {
+func GroupRequestDBCopyOpenIM(dst *open_im_sdk.GroupRequest, src *imdb.GroupRequest) {
 	utils.CopyStructFields(dst, src)
 	dst.ReqTime = uint32(src.ReqTime.Unix())
 	dst.HandleTime = uint32(src.HandledTime.Unix())
 }
 
-func UserOpenIMCopyDB(dst *db.User, src *open_im_sdk.UserInfo) {
+func UserOpenIMCopyDB(dst *imdb.User, src *open_im_sdk.UserInfo) {
 	utils.CopyStructFields(dst, src)
 	dst.Birth, _ = utils.TimeStringToTime(src.BirthStr)
 	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
 }
 
-func UserDBCopyOpenIM(dst *open_im_sdk.UserInfo, src *db.User) {
+func UserDBCopyOpenIM(dst *open_im_sdk.UserInfo, src *imdb.User) {
 	utils.CopyStructFields(dst, src)
 	dst.CreateTime = uint32(src.CreateTime.Unix())
 	//dst.Birth = uint32(src.Birth.Unix())
 	dst.BirthStr = utils.TimeToString(src.Birth)
 }
 
-func UserDBCopyOpenIMPublicUser(dst *open_im_sdk.PublicUserInfo, src *db.User) {
+func UserDBCopyOpenIMPublicUser(dst *open_im_sdk.PublicUserInfo, src *imdb.User) {
 	utils.CopyStructFields(dst, src)
 }

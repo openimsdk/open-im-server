@@ -3,7 +3,6 @@ package register
 import (
 	//api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
@@ -75,7 +74,7 @@ func AddIPLimit(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
-	if err := imdb.InsertOneIntoIpLimits(db.IpLimit{
+	if err := imdb.InsertOneIntoIpLimits(imdb.IpLimit{
 		Ip:            req.IP,
 		LimitRegister: 1,
 		LimitLogin:    1,
@@ -162,8 +161,8 @@ func AddUserIPLimitLogin(c *gin.Context) {
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
-	userIp := db.UserIpLimit{UserID: req.UserID, Ip: req.IP}
-	err := imdb.UpdateUserInfo(db.User{
+	userIp := imdb.UserIpLimit{UserID: req.UserID, Ip: req.IP}
+	err := imdb.UpdateUserInfo(imdb.User{
 		UserID: req.UserID,
 		// LoginLimit: 1,
 	})
@@ -211,7 +210,7 @@ func RemoveUserIPLimitLogin(c *gin.Context) {
 		return
 	}
 	if len(ips) == 0 {
-		err := imdb.UpdateUserInfoByMap(db.User{
+		err := imdb.UpdateUserInfoByMap(imdb.User{
 			UserID: req.UserID,
 		}, map[string]interface{}{"login_limit": 0})
 		if err != nil {

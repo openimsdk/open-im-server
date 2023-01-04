@@ -2,7 +2,6 @@ package auth
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -26,7 +25,7 @@ import (
 
 func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq) (*pbAuth.UserRegisterResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	var user db.User
+	var user imdb.User
 	utils.CopyStructFields(&user, req.UserInfo)
 	if req.UserInfo.BirthStr != "" {
 		time, err := utils.TimeStringToTime(req.UserInfo.BirthStr)

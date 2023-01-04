@@ -2,6 +2,7 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"fmt"
 	"time"
 
@@ -68,80 +69,80 @@ func initMysqlDB() {
 	sqlDB.SetMaxIdleConns(config.Config.Mysql.DBMaxIdleConns)
 
 	db.AutoMigrate(
-		&Register{},
-		&Friend{},
-		&FriendRequest{},
-		&Group{},
-		&GroupMember{},
-		&GroupRequest{},
-		&User{},
-		&Black{}, &ChatLog{}, &Register{}, &Conversation{}, &AppVersion{}, &Department{}, &BlackList{}, &IpLimit{}, &UserIpLimit{}, &Invitation{}, &RegisterAddFriend{},
-		&ClientInitConfig{}, &UserIpRecord{})
+		&im_mysql_model.Register{},
+		&im_mysql_model.Friend{},
+		&im_mysql_model.FriendRequest{},
+		&im_mysql_model.Group{},
+		&im_mysql_model.GroupMember{},
+		&im_mysql_model.GroupRequest{},
+		&im_mysql_model.User{},
+		&im_mysql_model.Black{}, &im_mysql_model.ChatLog{}, &im_mysql_model.Register{}, &im_mysql_model.Conversation{}, &im_mysql_model.AppVersion{}, &im_mysql_model.Department{}, &im_mysql_model.BlackList{}, &im_mysql_model.IpLimit{}, &im_mysql_model.UserIpLimit{}, &im_mysql_model.Invitation{}, &im_mysql_model.RegisterAddFriend{},
+		&im_mysql_model.ClientInitConfig{}, &im_mysql_model.UserIpRecord{})
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 
-	if !db.Migrator().HasTable(&Friend{}) {
-		db.Migrator().CreateTable(&Friend{})
+	if !db.Migrator().HasTable(&im_mysql_model.Friend{}) {
+		db.Migrator().CreateTable(&im_mysql_model.Friend{})
 	}
-	if !db.Migrator().HasTable(&FriendRequest{}) {
-		db.Migrator().CreateTable(&FriendRequest{})
+	if !db.Migrator().HasTable(&im_mysql_model.FriendRequest{}) {
+		db.Migrator().CreateTable(&im_mysql_model.FriendRequest{})
 	}
-	if !db.Migrator().HasTable(&Group{}) {
-		db.Migrator().CreateTable(&Group{})
+	if !db.Migrator().HasTable(&im_mysql_model.Group{}) {
+		db.Migrator().CreateTable(&im_mysql_model.Group{})
 	}
-	if !db.Migrator().HasTable(&GroupMember{}) {
-		db.Migrator().CreateTable(&GroupMember{})
+	if !db.Migrator().HasTable(&im_mysql_model.GroupMember{}) {
+		db.Migrator().CreateTable(&im_mysql_model.GroupMember{})
 	}
-	if !db.Migrator().HasTable(&GroupRequest{}) {
-		db.Migrator().CreateTable(&GroupRequest{})
+	if !db.Migrator().HasTable(&im_mysql_model.GroupRequest{}) {
+		db.Migrator().CreateTable(&im_mysql_model.GroupRequest{})
 	}
-	if !db.Migrator().HasTable(&User{}) {
-		db.Migrator().CreateTable(&User{})
+	if !db.Migrator().HasTable(&im_mysql_model.User{}) {
+		db.Migrator().CreateTable(&im_mysql_model.User{})
 	}
-	if !db.Migrator().HasTable(&Black{}) {
-		db.Migrator().CreateTable(&Black{})
+	if !db.Migrator().HasTable(&im_mysql_model.Black{}) {
+		db.Migrator().CreateTable(&im_mysql_model.Black{})
 	}
-	if !db.Migrator().HasTable(&ChatLog{}) {
-		db.Migrator().CreateTable(&ChatLog{})
+	if !db.Migrator().HasTable(&im_mysql_model.ChatLog{}) {
+		db.Migrator().CreateTable(&im_mysql_model.ChatLog{})
 	}
-	if !db.Migrator().HasTable(&Register{}) {
-		db.Migrator().CreateTable(&Register{})
+	if !db.Migrator().HasTable(&im_mysql_model.Register{}) {
+		db.Migrator().CreateTable(&im_mysql_model.Register{})
 	}
-	if !db.Migrator().HasTable(&Conversation{}) {
-		db.Migrator().CreateTable(&Conversation{})
+	if !db.Migrator().HasTable(&im_mysql_model.Conversation{}) {
+		db.Migrator().CreateTable(&im_mysql_model.Conversation{})
 	}
-	if !db.Migrator().HasTable(&Department{}) {
-		db.Migrator().CreateTable(&Department{})
+	if !db.Migrator().HasTable(&im_mysql_model.Department{}) {
+		db.Migrator().CreateTable(&im_mysql_model.Department{})
 	}
-	if !db.Migrator().HasTable(&OrganizationUser{}) {
-		db.Migrator().CreateTable(&OrganizationUser{})
+	if !db.Migrator().HasTable(&im_mysql_model.OrganizationUser{}) {
+		db.Migrator().CreateTable(&im_mysql_model.OrganizationUser{})
 	}
-	if !db.Migrator().HasTable(&DepartmentMember{}) {
-		db.Migrator().CreateTable(&DepartmentMember{})
+	if !db.Migrator().HasTable(&im_mysql_model.DepartmentMember{}) {
+		db.Migrator().CreateTable(&im_mysql_model.DepartmentMember{})
 	}
-	if !db.Migrator().HasTable(&AppVersion{}) {
-		db.Migrator().CreateTable(&AppVersion{})
+	if !db.Migrator().HasTable(&im_mysql_model.AppVersion{}) {
+		db.Migrator().CreateTable(&im_mysql_model.AppVersion{})
 	}
-	if !db.Migrator().HasTable(&BlackList{}) {
-		db.Migrator().CreateTable(&BlackList{})
+	if !db.Migrator().HasTable(&im_mysql_model.BlackList{}) {
+		db.Migrator().CreateTable(&im_mysql_model.BlackList{})
 	}
-	if !db.Migrator().HasTable(&IpLimit{}) {
-		db.Migrator().CreateTable(&IpLimit{})
+	if !db.Migrator().HasTable(&im_mysql_model.IpLimit{}) {
+		db.Migrator().CreateTable(&im_mysql_model.IpLimit{})
 	}
-	if !db.Migrator().HasTable(&UserIpLimit{}) {
-		db.Migrator().CreateTable(&UserIpLimit{})
+	if !db.Migrator().HasTable(&im_mysql_model.UserIpLimit{}) {
+		db.Migrator().CreateTable(&im_mysql_model.UserIpLimit{})
 	}
-	if !db.Migrator().HasTable(&RegisterAddFriend{}) {
-		db.Migrator().CreateTable(&RegisterAddFriend{})
+	if !db.Migrator().HasTable(&im_mysql_model.RegisterAddFriend{}) {
+		db.Migrator().CreateTable(&im_mysql_model.RegisterAddFriend{})
 	}
-	if !db.Migrator().HasTable(&Invitation{}) {
-		db.Migrator().CreateTable(&Invitation{})
+	if !db.Migrator().HasTable(&im_mysql_model.Invitation{}) {
+		db.Migrator().CreateTable(&im_mysql_model.Invitation{})
 	}
-	if !db.Migrator().HasTable(&ClientInitConfig{}) {
-		db.Migrator().CreateTable(&ClientInitConfig{})
+	if !db.Migrator().HasTable(&im_mysql_model.ClientInitConfig{}) {
+		db.Migrator().CreateTable(&im_mysql_model.ClientInitConfig{})
 	}
-	if !db.Migrator().HasTable(&UserIpRecord{}) {
-		db.Migrator().CreateTable(&UserIpRecord{})
+	if !db.Migrator().HasTable(&im_mysql_model.UserIpRecord{}) {
+		db.Migrator().CreateTable(&im_mysql_model.UserIpRecord{})
 	}
 	DB.MysqlDB.db = db
 }

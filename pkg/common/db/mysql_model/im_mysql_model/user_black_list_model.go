@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func InsertInToUserBlackList(black db.Black) error {
+func InsertInToUserBlackList(black Black) error {
 	black.CreateTime = time.Now()
 	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Create(black).Error
 }
@@ -21,17 +21,17 @@ func InsertInToUserBlackList(black db.Black) error {
 // }
 
 func CheckBlack(ownerUserID, blockUserID string) error {
-	var black db.Black
+	var black Black
 	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
 }
 
 func RemoveBlackList(ownerUserID, blockUserID string) error {
-	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(db.Black{}).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(Black{}).Error
 	return utils.Wrap(err, "RemoveBlackList failed")
 }
 
-func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
-	var blackListUsersInfo []db.Black
+func GetBlackListByUserID(ownerUserID string) ([]Black, error) {
+	var blackListUsersInfo []Black
 	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
 	if err != nil {
 		return nil, err

@@ -184,7 +184,7 @@ func DelGroupMemberIDListFromCache(groupID string) error {
 	return err
 }
 
-func GetUserInfoFromCache(userID string) (*db.User, error) {
+func GetUserInfoFromCache(userID string) (*imdb.User, error) {
 	getUserInfo := func() (string, error) {
 		userInfo, err := imdb.GetUserByUserID(userID)
 		if err != nil {
@@ -200,7 +200,7 @@ func GetUserInfoFromCache(userID string) (*db.User, error) {
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	userInfo := &db.User{}
+	userInfo := &imdb.User{}
 	err = json.Unmarshal([]byte(userInfoStr), userInfo)
 	return userInfo, utils.Wrap(err, "")
 }
@@ -209,7 +209,7 @@ func DelUserInfoFromCache(userID string) error {
 	return db.DB.Rc.TagAsDeleted(userInfoCache + userID)
 }
 
-func GetGroupMemberInfoFromCache(groupID, userID string) (*db.GroupMember, error) {
+func GetGroupMemberInfoFromCache(groupID, userID string) (*imdb.GroupMember, error) {
 	getGroupMemberInfo := func() (string, error) {
 		groupMemberInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
 		if err != nil {
@@ -225,7 +225,7 @@ func GetGroupMemberInfoFromCache(groupID, userID string) (*db.GroupMember, error
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	groupMember := &db.GroupMember{}
+	groupMember := &imdb.GroupMember{}
 	err = json.Unmarshal([]byte(groupMemberInfoStr), groupMember)
 	return groupMember, utils.Wrap(err, "")
 }
@@ -234,7 +234,7 @@ func DelGroupMemberInfoFromCache(groupID, userID string) error {
 	return db.DB.Rc.TagAsDeleted(groupMemberInfoCache + groupID + "-" + userID)
 }
 
-func GetGroupMembersInfoFromCache(count, offset int32, groupID string) ([]*db.GroupMember, error) {
+func GetGroupMembersInfoFromCache(count, offset int32, groupID string) ([]*imdb.GroupMember, error) {
 	groupMemberIDList, err := GetGroupMemberIDListFromCache(groupID)
 	if err != nil {
 		return nil, err
@@ -242,7 +242,7 @@ func GetGroupMembersInfoFromCache(count, offset int32, groupID string) ([]*db.Gr
 	if count < 0 || offset < 0 {
 		return nil, nil
 	}
-	var groupMemberList []*db.GroupMember
+	var groupMemberList []*imdb.GroupMember
 	var start, stop int32
 	start = offset
 	stop = offset + count
@@ -278,7 +278,7 @@ func GetGroupMembersInfoFromCache(count, offset int32, groupID string) ([]*db.Gr
 	return groupMemberList, nil
 }
 
-func GetAllGroupMembersInfoFromCache(groupID string) ([]*db.GroupMember, error) {
+func GetAllGroupMembersInfoFromCache(groupID string) ([]*imdb.GroupMember, error) {
 	getGroupMemberInfo := func() (string, error) {
 		groupMembers, err := imdb.GetGroupMemberListByGroupID(groupID)
 		if err != nil {
@@ -294,7 +294,7 @@ func GetAllGroupMembersInfoFromCache(groupID string) ([]*db.GroupMember, error) 
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	var groupMembers []*db.GroupMember
+	var groupMembers []*imdb.GroupMember
 	err = json.Unmarshal([]byte(groupMembersStr), &groupMembers)
 	return groupMembers, utils.Wrap(err, "")
 }
@@ -303,7 +303,7 @@ func DelAllGroupMembersInfoFromCache(groupID string) error {
 	return db.DB.Rc.TagAsDeleted(groupAllMemberInfoCache + groupID)
 }
 
-func GetGroupInfoFromCache(groupID string) (*db.Group, error) {
+func GetGroupInfoFromCache(groupID string) (*imdb.Group, error) {
 	getGroupInfo := func() (string, error) {
 		groupInfo, err := imdb.GetGroupInfoByGroupID(groupID)
 		if err != nil {
@@ -319,7 +319,7 @@ func GetGroupInfoFromCache(groupID string) (*db.Group, error) {
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	groupInfo := &db.Group{}
+	groupInfo := &imdb.Group{}
 	err = json.Unmarshal([]byte(groupInfoStr), groupInfo)
 	return groupInfo, utils.Wrap(err, "")
 }
@@ -328,7 +328,7 @@ func DelGroupInfoFromCache(groupID string) error {
 	return db.DB.Rc.TagAsDeleted(groupInfoCache + groupID)
 }
 
-func GetAllFriendsInfoFromCache(userID string) ([]*db.Friend, error) {
+func GetAllFriendsInfoFromCache(userID string) ([]*imdb.Friend, error) {
 	getAllFriendInfo := func() (string, error) {
 		friendInfoList, err := imdb.GetFriendListByUserID(userID)
 		if err != nil {
@@ -344,7 +344,7 @@ func GetAllFriendsInfoFromCache(userID string) ([]*db.Friend, error) {
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	var friendInfoList []*db.Friend
+	var friendInfoList []*imdb.Friend
 	err = json.Unmarshal([]byte(allFriendInfoStr), &friendInfoList)
 	return friendInfoList, utils.Wrap(err, "")
 }
@@ -353,7 +353,7 @@ func DelAllFriendsInfoFromCache(userID string) error {
 	return db.DB.Rc.TagAsDeleted(allFriendInfoCache + userID)
 }
 
-func GetAllDepartmentsFromCache() ([]db.Department, error) {
+func GetAllDepartmentsFromCache() ([]imdb.Department, error) {
 	getAllDepartments := func() (string, error) {
 		departmentList, err := imdb.GetSubDepartmentList("-1")
 		if err != nil {
@@ -369,7 +369,7 @@ func GetAllDepartmentsFromCache() ([]db.Department, error) {
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	var allDepartments []db.Department
+	var allDepartments []imdb.Department
 	err = json.Unmarshal([]byte(allDepartmentsStr), &allDepartments)
 	return allDepartments, utils.Wrap(err, "")
 }
@@ -378,7 +378,7 @@ func DelAllDepartmentsFromCache() error {
 	return db.DB.Rc.TagAsDeleted(allDepartmentCache)
 }
 
-func GetAllDepartmentMembersFromCache() ([]db.DepartmentMember, error) {
+func GetAllDepartmentMembersFromCache() ([]imdb.DepartmentMember, error) {
 	getAllDepartmentMembers := func() (string, error) {
 		departmentMembers, err := imdb.GetDepartmentMemberList("-1")
 		if err != nil {
@@ -394,7 +394,7 @@ func GetAllDepartmentMembersFromCache() ([]db.DepartmentMember, error) {
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	var allDepartmentMembers []db.DepartmentMember
+	var allDepartmentMembers []imdb.DepartmentMember
 	err = json.Unmarshal([]byte(allDepartmentMembersStr), &allDepartmentMembers)
 	return allDepartmentMembers, utils.Wrap(err, "")
 }
@@ -510,7 +510,7 @@ func DelUserConversationIDListFromCache(userID string) error {
 	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationIDListCache+userID), "DelUserConversationIDListFromCache err")
 }
 
-func GetConversationFromCache(ownerUserID, conversationID string) (*db.Conversation, error) {
+func GetConversationFromCache(ownerUserID, conversationID string) (*imdb.Conversation, error) {
 	getConversation := func() (string, error) {
 		conversation, err := imdb.GetConversation(ownerUserID, conversationID)
 		if err != nil {
@@ -526,7 +526,7 @@ func GetConversationFromCache(ownerUserID, conversationID string) (*db.Conversat
 	if err != nil {
 		return nil, utils.Wrap(err, "Fetch failed")
 	}
-	conversation := db.Conversation{}
+	conversation := imdb.Conversation{}
 	err = json.Unmarshal([]byte(conversationStr), &conversation)
 	if err != nil {
 		return nil, utils.Wrap(err, "Unmarshal failed")
@@ -534,8 +534,8 @@ func GetConversationFromCache(ownerUserID, conversationID string) (*db.Conversat
 	return &conversation, nil
 }
 
-func GetConversationsFromCache(ownerUserID string, conversationIDList []string) ([]db.Conversation, error) {
-	var conversationList []db.Conversation
+func GetConversationsFromCache(ownerUserID string, conversationIDList []string) ([]imdb.Conversation, error) {
+	var conversationList []imdb.Conversation
 	for _, conversationID := range conversationIDList {
 		conversation, err := GetConversationFromCache(ownerUserID, conversationID)
 		if err != nil {
@@ -546,12 +546,12 @@ func GetConversationsFromCache(ownerUserID string, conversationIDList []string) 
 	return conversationList, nil
 }
 
-func GetUserAllConversationList(ownerUserID string) ([]db.Conversation, error) {
+func GetUserAllConversationList(ownerUserID string) ([]imdb.Conversation, error) {
 	IDList, err := GetUserConversationIDListFromCache(ownerUserID)
 	if err != nil {
 		return nil, err
 	}
-	var conversationList []db.Conversation
+	var conversationList []imdb.Conversation
 	log.NewDebug("", utils.GetSelfFuncName(), IDList)
 	for _, conversationID := range IDList {
 		conversation, err := GetConversationFromCache(ownerUserID, conversationID)

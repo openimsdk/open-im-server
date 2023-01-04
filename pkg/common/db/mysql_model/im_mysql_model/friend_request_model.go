@@ -19,8 +19,8 @@ import (
 //}
 
 // who apply to add me
-func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]db.FriendRequest, error) {
-	var usersInfo []db.FriendRequest
+func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]FriendRequest, error) {
+	var usersInfo []FriendRequest
 	err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Where("to_user_id=?", ToUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
@@ -28,9 +28,9 @@ func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]db.FriendRequ
 	return usersInfo, nil
 }
 
-//I apply to add somebody
-func GetSendFriendApplicationListByUserID(FromUserID string) ([]db.FriendRequest, error) {
-	var usersInfo []db.FriendRequest
+// I apply to add somebody
+func GetSendFriendApplicationListByUserID(FromUserID string) ([]FriendRequest, error) {
+	var usersInfo []FriendRequest
 	err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Where("from_user_id=?", FromUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
@@ -38,9 +38,9 @@ func GetSendFriendApplicationListByUserID(FromUserID string) ([]db.FriendRequest
 	return usersInfo, nil
 }
 
-//FromUserId apply to add ToUserID
-func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*db.FriendRequest, error) {
-	var friendRequest db.FriendRequest
+// FromUserId apply to add ToUserID
+func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*FriendRequest, error) {
+	var friendRequest FriendRequest
 	err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Where("from_user_id=? and to_user_id=?", FromUserID, ToUserID).Take(&friendRequest).Error
 	if err != nil {
 		return nil, err
@@ -48,13 +48,13 @@ func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*db.FriendRe
 	return &friendRequest, nil
 }
 
-func UpdateFriendApplication(friendRequest *db.FriendRequest) error {
+func UpdateFriendApplication(friendRequest *FriendRequest) error {
 	friendRequest.CreateTime = time.Now()
 	return db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Where("from_user_id=? and to_user_id=?",
 		friendRequest.FromUserID, friendRequest.ToUserID).Updates(&friendRequest).Error
 }
 
-func InsertFriendApplication(friendRequest *db.FriendRequest, args map[string]interface{}) error {
+func InsertFriendApplication(friendRequest *FriendRequest, args map[string]interface{}) error {
 	if err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Create(friendRequest).Error; err == nil {
 		return nil
 	}

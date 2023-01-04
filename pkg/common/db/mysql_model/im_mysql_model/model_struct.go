@@ -1,6 +1,9 @@
-package db
+package im_mysql_model
 
-import "time"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type Register struct {
 	Account        string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
@@ -20,17 +23,16 @@ type Invitation struct {
 	Status         int32     `gorm:"column:status"`
 }
 
-//
-//message FriendInfo{
-//string OwnerUserID = 1;
-//string Remark = 2;
-//int64 CreateTime = 3;
-//UserInfo FriendUser = 4;
-//int32 AddSource = 5;
-//string OperatorUserID = 6;
-//string Ex = 7;
-//}
-//open_im_sdk.FriendInfo(FriendUser) != imdb.Friend(FriendUserID)
+// message FriendInfo{
+// string OwnerUserID = 1;
+// string Remark = 2;
+// int64 CreateTime = 3;
+// UserInfo FriendUser = 4;
+// int32 AddSource = 5;
+// string OperatorUserID = 6;
+// string Ex = 7;
+// }
+// open_im_sdk.FriendInfo(FriendUser) != imdb.Friend(FriendUserID)
 type Friend struct {
 	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`
 	FriendUserID   string    `gorm:"column:friend_user_id;primary_key;size:64"`
@@ -41,18 +43,18 @@ type Friend struct {
 	Ex             string    `gorm:"column:ex;size:1024"`
 }
 
-//message FriendRequest{
-//string  FromUserID = 1;
-//string ToUserID = 2;
-//int32 HandleResult = 3;
-//string ReqMsg = 4;
-//int64 CreateTime = 5;
-//string HandlerUserID = 6;
-//string HandleMsg = 7;
-//int64 HandleTime = 8;
-//string Ex = 9;
-//}
-//open_im_sdk.FriendRequest(nickname, farce url ...) != imdb.FriendRequest
+// message FriendRequest{
+// string  FromUserID = 1;
+// string ToUserID = 2;
+// int32 HandleResult = 3;
+// string ReqMsg = 4;
+// int64 CreateTime = 5;
+// string HandlerUserID = 6;
+// string HandleMsg = 7;
+// int64 HandleTime = 8;
+// string Ex = 9;
+// }
+// open_im_sdk.FriendRequest(nickname, farce url ...) != imdb.FriendRequest
 type FriendRequest struct {
 	FromUserID    string    `gorm:"column:from_user_id;primary_key;size:64"`
 	ToUserID      string    `gorm:"column:to_user_id;primary_key;size:64"`
@@ -69,21 +71,22 @@ func (FriendRequest) TableName() string {
 	return "friend_requests"
 }
 
-//message GroupInfo{
-//  string GroupID = 1;
-//  string GroupName = 2;
-//  string Notification = 3;
-//  string Introduction = 4;
-//  string FaceUrl = 5;
-//  string OwnerUserID = 6;
-//  uint32 MemberCount = 8;
-//  int64 CreateTime = 7;
-//  string Ex = 9;
-//  int32 Status = 10;
-//  string CreatorUserID = 11;
-//  int32 GroupType = 12;
-//}
-//  open_im_sdk.GroupInfo (OwnerUserID ,  MemberCount )> imdb.Group
+//	message GroupInfo{
+//	 string GroupID = 1;
+//	 string GroupName = 2;
+//	 string Notification = 3;
+//	 string Introduction = 4;
+//	 string FaceUrl = 5;
+//	 string OwnerUserID = 6;
+//	 uint32 MemberCount = 8;
+//	 int64 CreateTime = 7;
+//	 string Ex = 9;
+//	 int32 Status = 10;
+//	 string CreatorUserID = 11;
+//	 int32 GroupType = 12;
+//	}
+//
+// open_im_sdk.GroupInfo (OwnerUserID ,  MemberCount )> imdb.Group
 type Group struct {
 	//`json:"operationID" binding:"required"`
 	//`protobuf:"bytes,1,opt,name=GroupID" json:"GroupID,omitempty"` `json:"operationID" binding:"required"`
@@ -102,20 +105,21 @@ type Group struct {
 	ApplyMemberFriend      int32     `gorm:"column:apply_member_friend" json:"applyMemberFriend"`
 	NotificationUpdateTime time.Time `gorm:"column:notification_update_time"`
 	NotificationUserID     string    `gorm:"column:notification_user_id;size:64"`
+	DB                     *gorm.DB  `gorm:"-" json:"-"`
 }
 
-//message GroupMemberFullInfo {
-//string GroupID = 1 ;
-//string UserID = 2 ;
-//int32 roleLevel = 3;
-//int64 JoinTime = 4;
-//string NickName = 5;
-//string FaceUrl = 6;
-//int32 JoinSource = 8;
-//string OperatorUserID = 9;
-//string Ex = 10;
-//int32 AppMangerLevel = 7; //if >0
-//}  open_im_sdk.GroupMemberFullInfo(AppMangerLevel) > imdb.GroupMember
+// message GroupMemberFullInfo {
+// string GroupID = 1 ;
+// string UserID = 2 ;
+// int32 roleLevel = 3;
+// int64 JoinTime = 4;
+// string NickName = 5;
+// string FaceUrl = 6;
+// int32 JoinSource = 8;
+// string OperatorUserID = 9;
+// string Ex = 10;
+// int32 AppMangerLevel = 7; //if >0
+// }  open_im_sdk.GroupMemberFullInfo(AppMangerLevel) > imdb.GroupMember
 type GroupMember struct {
 	GroupID        string    `gorm:"column:group_id;primary_key;size:64"`
 	UserID         string    `gorm:"column:user_id;primary_key;size:64"`
@@ -130,17 +134,17 @@ type GroupMember struct {
 	Ex             string    `gorm:"column:ex;size:1024"`
 }
 
-//message GroupRequest{
-//string UserID = 1;
-//string GroupID = 2;
-//string HandleResult = 3;
-//string ReqMsg = 4;
-//string  HandleMsg = 5;
-//int64 ReqTime = 6;
-//string HandleUserID = 7;
-//int64 HandleTime = 8;
-//string Ex = 9;
-//}open_im_sdk.GroupRequest == imdb.GroupRequest
+// message GroupRequest{
+// string UserID = 1;
+// string GroupID = 2;
+// string HandleResult = 3;
+// string ReqMsg = 4;
+// string  HandleMsg = 5;
+// int64 ReqTime = 6;
+// string HandleUserID = 7;
+// int64 HandleTime = 8;
+// string Ex = 9;
+// }open_im_sdk.GroupRequest == imdb.GroupRequest
 type GroupRequest struct {
 	UserID        string    `gorm:"column:user_id;primary_key;size:64"`
 	GroupID       string    `gorm:"column:group_id;primary_key;size:64"`
@@ -155,18 +159,18 @@ type GroupRequest struct {
 	Ex            string    `gorm:"column:ex;size:1024"`
 }
 
-//string UserID = 1;
-//string Nickname = 2;
-//string FaceUrl = 3;
-//int32 Gender = 4;
-//string PhoneNumber = 5;
-//string Birth = 6;
-//string Email = 7;
-//string Ex = 8;
-//string CreateIp = 9;
-//int64 CreateTime = 10;
-//int32 AppMangerLevel = 11;
-//open_im_sdk.User == imdb.User
+// string UserID = 1;
+// string Nickname = 2;
+// string FaceUrl = 3;
+// int32 Gender = 4;
+// string PhoneNumber = 5;
+// string Birth = 6;
+// string Email = 7;
+// string Ex = 8;
+// string CreateIp = 9;
+// int64 CreateTime = 10;
+// int32 AppMangerLevel = 11;
+// open_im_sdk.User == imdb.User
 type User struct {
 	UserID           string    `gorm:"column:user_id;primary_key;size:64"`
 	Nickname         string    `gorm:"column:name;size:255"`
@@ -207,14 +211,14 @@ type UserIpLimit struct {
 	CreateTime time.Time `gorm:"column:create_time"`
 }
 
-//message BlackInfo{
-//string OwnerUserID = 1;
-//int64 CreateTime = 2;
-//PublicUserInfo BlackUserInfo = 4;
-//int32 AddSource = 5;
-//string OperatorUserID = 6;
-//string Ex = 7;
-//}
+// message BlackInfo{
+// string OwnerUserID = 1;
+// int64 CreateTime = 2;
+// PublicUserInfo BlackUserInfo = 4;
+// int32 AddSource = 5;
+// string OperatorUserID = 6;
+// string Ex = 7;
+// }
 // open_im_sdk.BlackInfo(BlackUserInfo) != imdb.Black (BlockUserID)
 type Black struct {
 	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`

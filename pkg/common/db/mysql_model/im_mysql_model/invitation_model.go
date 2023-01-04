@@ -18,7 +18,7 @@ func BatchCreateInvitationCodes(CodeNums int, CodeLen int) ([]string, error) {
 			break
 		}
 		code := CreateRandomString(CodeLen)
-		invitation := new(db.Invitation)
+		invitation := new(Invitation)
 		invitation.CreateTime = time.Now()
 		invitation.InvitationCode = code
 		invitation.LastTime = time.Now()
@@ -40,7 +40,7 @@ func BatchCreateInvitationCodes(CodeNums int, CodeLen int) ([]string, error) {
  * 检查邀请码
  */
 func CheckInvitationCode(code string) error {
-	var invitationCode db.Invitation
+	var invitationCode Invitation
 	err := db.DB.MysqlDB.DefaultGormDB().Table("invitations").Where("invitation_code=?", code).Take(&invitationCode).Error
 	if err != nil {
 		return err
@@ -82,8 +82,8 @@ func FinishInvitationCode(Code string, UserId string) bool {
 	return result.RowsAffected > 0
 }
 
-func GetInvitationCode(code string) (*db.Invitation, error) {
-	invitation := &db.Invitation{
+func GetInvitationCode(code string) (*Invitation, error) {
+	invitation := &Invitation{
 		InvitationCode: code,
 	}
 	err := db.DB.MysqlDB.DefaultGormDB().Model(invitation).Find(invitation).Error
@@ -101,9 +101,9 @@ func CreateRandomString(strlen int) string {
 	return string(result)
 }
 
-func GetInvitationCodes(showNumber, pageNumber, status int32) ([]db.Invitation, int64, error) {
-	var invitationList []db.Invitation
-	db := db.DB.MysqlDB.DefaultGormDB().Model(db.Invitation{}).Where("status=?", status)
+func GetInvitationCodes(showNumber, pageNumber, status int32) ([]Invitation, int64, error) {
+	var invitationList []Invitation
+	db := db.DB.MysqlDB.DefaultGormDB().Model(Invitation{}).Where("status=?", status)
 	var count int64
 	err := db.Count(&count).Error
 	err = db.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).

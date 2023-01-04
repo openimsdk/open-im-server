@@ -9,6 +9,7 @@ package im_mysql_msg_model
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/proto/sdk_ws"
@@ -19,7 +20,7 @@ import (
 )
 
 func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
-	chatLog := new(db.ChatLog)
+	chatLog := new(im_mysql_model.ChatLog)
 	copier.Copy(chatLog, msg.MsgData)
 	switch msg.MsgData.SessionType {
 	case constant.GroupChatType, constant.SuperGroupChatType:

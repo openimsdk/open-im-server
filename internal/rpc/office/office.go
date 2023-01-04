@@ -109,7 +109,7 @@ func (s *officeServer) Run() {
 
 type tagSendStruct struct {
 	operationID      string
-	user             *db.User
+	user             *imdb.User
 	userID           string
 	content          string
 	senderPlatformID int32

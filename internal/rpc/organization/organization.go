@@ -4,7 +4,6 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
@@ -106,7 +105,7 @@ func (s *organizationServer) CreateDepartment(ctx context.Context, req *rpc.Crea
 		return &rpc.CreateDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
-	department := db.Department{}
+	department := imdb.Department{}
 	utils.CopyStructFields(&department, req.DepartmentInfo)
 	if department.DepartmentID == "" {
 		department.DepartmentID = utils.Md5(strconv.FormatInt(time.Now().UnixNano(), 10))
@@ -184,7 +183,7 @@ func (s *organizationServer) UpdateDepartment(ctx context.Context, req *rpc.Upda
 		return &rpc.UpdateDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
-	department := db.Department{}
+	department := imdb.Department{}
 	utils.CopyStructFields(&department, req.DepartmentInfo)
 	log.Debug(req.OperationID, "dst ", department, "src ", req.DepartmentInfo)
 	if err := imdb.UpdateDepartment(&department, nil); err != nil {
@@ -205,7 +204,7 @@ func (s *organizationServer) UpdateDepartment(ctx context.Context, req *rpc.Upda
 
 func (s *organizationServer) GetSubDepartment(ctx context.Context, req *rpc.GetSubDepartmentReq) (*rpc.GetSubDepartmentResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	var departmentList []db.Department
+	var departmentList []imdb.Department
 	var err error
 	if req.DepartmentID == "-1" {
 		departmentList, err = rocksCache.GetAllDepartmentsFromCache()
@@ -301,7 +300,7 @@ func (s *organizationServer) CreateOrganizationUser(ctx context.Context, req *rp
 		log.Error(req.OperationID, errMsg)
 		return &rpc.CreateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
-	organizationUser := db.OrganizationUser{}
+	organizationUser := imdb.OrganizationUser{}
 	utils.CopyStructFields(&organizationUser, req.OrganizationUser)
 	organizationUser.Birth = utils.UnixSecondToTime(int64(req.OrganizationUser.Birth))
 	log.Debug(req.OperationID, "src ", *req.OrganizationUser, "dst ", organizationUser)
@@ -325,7 +324,7 @@ func (s *organizationServer) UpdateOrganizationUser(ctx context.Context, req *rp
 		log.Error(req.OperationID, errMsg)
 		return &rpc.UpdateOrganizationUserResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
-	organizationUser := db.OrganizationUser{}
+	organizationUser := imdb.OrganizationUser{}
 	utils.CopyStructFields(&organizationUser, req.OrganizationUser)
 	if req.OrganizationUser.Birth != 0 {
 		organizationUser.Birth = utils.UnixSecondToTime(int64(req.OrganizationUser.Birth))
@@ -361,7 +360,7 @@ func (s *organizationServer) CreateDepartmentMember(ctx context.Context, req *rp
 		return &rpc.CreateDepartmentMemberResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
 
-	departmentMember := db.DepartmentMember{}
+	departmentMember := imdb.DepartmentMember{}
 	utils.CopyStructFields(&departmentMember, req.DepartmentMember)
 	log.Debug(req.OperationID, "src ", *req.DepartmentMember, "dst ", departmentMember)
 	err = imdb.CreateDepartmentMember(&departmentMember)
@@ -439,7 +438,7 @@ func (s *organizationServer) UpdateUserInDepartment(ctx context.Context, req *rp
 		log.Error(req.OperationID, errMsg)
 		return &rpc.UpdateUserInDepartmentResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}, nil
 	}
-	departmentMember := &db.DepartmentMember{}
+	departmentMember := &imdb.DepartmentMember{}
 	utils.CopyStructFields(departmentMember, req.DepartmentMember)
 	log.Debug(req.OperationID, "dst ", departmentMember, "src ", req.DepartmentMember)
 	err := imdb.UpdateUserInDepartment(departmentMember, nil)
@@ -497,7 +496,7 @@ func (s *organizationServer) DeleteOrganizationUser(ctx context.Context, req *rp
 
 func (s *organizationServer) GetDepartmentMember(ctx context.Context, req *rpc.GetDepartmentMemberReq) (*rpc.GetDepartmentMemberResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	var departmentMemberList []db.DepartmentMember
+	var departmentMemberList []imdb.DepartmentMember
 	var err error
 	if req.DepartmentID == "-1" {
 		departmentMemberList, err = rocksCache.GetAllDepartmentMembersFromCache()

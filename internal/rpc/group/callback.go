@@ -4,7 +4,7 @@ import (
 	cbApi "Open_IM/pkg/call_back_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	pbGroup "Open_IM/pkg/proto/group"
@@ -83,7 +83,7 @@ func callbackBeforeCreateGroup(req *pbGroup.CreateGroupReq) cbApi.CommonCallback
 	return callbackResp
 }
 
-func CallbackBeforeMemberJoinGroup(operationID string, groupMember *db.GroupMember, groupEx string) cbApi.CommonCallbackResp {
+func CallbackBeforeMemberJoinGroup(operationID string, groupMember *im_mysql_model.GroupMember, groupEx string) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackBeforeMemberJoinGroup.Enable {
 		return callbackResp
