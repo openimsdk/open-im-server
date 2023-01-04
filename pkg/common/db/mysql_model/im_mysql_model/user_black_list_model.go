@@ -2,11 +2,14 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
+	"context"
 	"time"
 )
 
-func InsertInToUserBlackList(black Black) error {
+func InsertInToUserBlackList(ctx context.Context, black db.Black) error {
+	defer trace_log.SetContextInfo(ctx)
 	black.CreateTime = time.Now()
 	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Create(black).Error
 }
@@ -21,17 +24,17 @@ func InsertInToUserBlackList(black Black) error {
 // }
 
 func CheckBlack(ownerUserID, blockUserID string) error {
-	var black Black
+	var black db.Black
 	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
 }
 
 func RemoveBlackList(ownerUserID, blockUserID string) error {
-	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(Black{}).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(db.Black{}).Error
 	return utils.Wrap(err, "RemoveBlackList failed")
 }
 
-func GetBlackListByUserID(ownerUserID string) ([]Black, error) {
-	var blackListUsersInfo []Black
+func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
+	var blackListUsersInfo []db.Black
 	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
 	if err != nil {
 		return nil, err

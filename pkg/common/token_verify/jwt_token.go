@@ -6,6 +6,7 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
+	"context"
 	"time"
 
 	go_redis "github.com/go-redis/redis/v8"
@@ -139,7 +140,7 @@ func IsManagerUserID(OpUserID string) bool {
 	}
 }
 
-func CheckAccess(OpUserID string, OwnerUserID string) bool {
+func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool {
 	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
 		return true
 	}
