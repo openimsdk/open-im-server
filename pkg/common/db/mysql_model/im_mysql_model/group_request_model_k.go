@@ -29,12 +29,12 @@ func (*GroupRequest) Delete(groupIDList []string) error {
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDList).Delete(&Group{}).Error, "")
 }
 
-func (tb *GroupRequest) Get(groupIDs []string) ([]*Group, error) {
-	var ms []*Group
-	return ms, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDs).Find(&ms).Error, "")
+func (tb *GroupRequest) Get(groupIDs []string, userIDs []string) ([]*GroupRequest, error) {
+	var ms []*GroupRequest
+	return ms, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?) and user_id in (?)", groupIDs, userIDs).Find(&ms).Error, "")
 }
 
-func (tb *GroupRequest) Update(groups []*Group) error {
+func (tb *GroupRequest) Update(groups []*GroupRequest) error {
 	return utils.Wrap(utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Updates(groups).Error, ""), "")
 }
 

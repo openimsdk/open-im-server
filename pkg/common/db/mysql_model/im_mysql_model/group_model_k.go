@@ -3,7 +3,6 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -23,15 +22,14 @@ type Group struct {
 	ApplyMemberFriend      int32     `gorm:"column:apply_member_friend" json:"applyMemberFriend"`
 	NotificationUpdateTime time.Time `gorm:"column:notification_update_time"`
 	NotificationUserID     string    `gorm:"column:notification_user_id;size:64"`
-	DB                     *gorm.DB  `gorm:"-" json:"-"`
 }
 
-func (tb *Group) Create(groupList []*Group) error {
-	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Create(&groupList).Error, "")
+func (tb *Group) Create(groups []*Group) error {
+	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Create(&groups).Error, "")
 }
 
-func (tb *Group) Delete(groupIDList []string) error {
-	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDList).Delete(&Group{}).Error, "")
+func (tb *Group) Delete(groupIDs []string) error {
+	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDs).Delete(&Group{}).Error, "")
 }
 
 func (tb *Group) Get(groupIDs []string) ([]*Group, error) {
@@ -43,7 +41,7 @@ func (tb *Group) Update(groups []*Group) error {
 	return utils.Wrap(utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Updates(groups).Error, ""), "")
 }
 
-func (*Group) Find(groupIDList []string) ([]*Group, error) {
+func (*Group) Find(groupIDs []string) ([]*Group, error) {
 	return nil, nil
 }
 
