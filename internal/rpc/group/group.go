@@ -99,7 +99,7 @@ func (s *groupServer) Run() {
 		}
 	}
 	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
 	if err != nil {
 		log.NewError("", "RegisterEtcd failed ", err.Error())
 		panic(utils.Wrap(err, "register group module  rpc to etcd err"))
@@ -844,24 +844,26 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 }
 
 func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (*pbGroup.GetGroupsInfoResp, error) {
-	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
+	nCtx := trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	trace_log.SetRpcReqInfo(nCtx, utils.GetSelfFuncName(), req.String())
+	defer trace_log.ShowLog(nCtx)
+
+	resp := pbGroup.GetGroupsInfoResp{}
 	groupsInfoList := make([]*open_im_sdk.GroupInfo, 0)
 	for _, groupID := range req.GroupIDList {
 		groupInfoFromRedis, err := rocksCache.GetGroupInfoFromCache(groupID)
 		if err != nil {
-			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupID)
+			SetErr(nCtx, "", err, &resp.ErrCode, &resp.ErrMsg, "groupID ", groupID)
 			continue
 		}
 		var groupInfo open_im_sdk.GroupInfo
 		cp.GroupDBCopyOpenIM(&groupInfo, groupInfoFromRedis)
-		//groupInfo.NeedVerification
-
 		groupInfo.NeedVerification = groupInfoFromRedis.NeedVerification
 		groupsInfoList = append(groupsInfoList, &groupInfo)
 	}
+	resp.GroupInfoList = groupsInfoList
 
-	resp := pbGroup.GetGroupsInfoResp{GroupInfoList: groupsInfoList}
-	log.NewInfo(req.OperationID, "GetGroupsInfo rpc return  ", resp.String())
+	trace_log.SetRpcRespInfo(nCtx, utils.GetSelfFuncName(), resp.String())
 	return &resp, nil
 }
 

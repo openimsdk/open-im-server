@@ -2,6 +2,7 @@ package constant
 
 import (
 	sdkws "Open_IM/pkg/proto/sdk_ws"
+	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 )
@@ -42,8 +43,8 @@ var (
 	ErrOwnerNotAllowedQuit = ErrInfo{OwnerNotAllowedQuitError, "OwnerNotAllowedQuitError"}
 	ErrRegisteredAlready   = ErrInfo{RegisteredAlreadyError, "RegisteredAlreadyError"}
 
-	ErrDefaultOther = ErrInfo{DefaultOtherError, "DefaultOtherError"}
-
+	ErrDefaultOther             = ErrInfo{DefaultOtherError, "DefaultOtherError"}
+	ErrData                     = ErrInfo{DataError, "DataError"}
 	ErrTokenExpired             = ErrInfo{TokenExpiredError, "TokenExpiredError"}
 	ErrTokenInvalid             = ErrInfo{TokenInvalidError, "TokenInvalidError"}         //
 	ErrTokenMalformed           = ErrInfo{TokenMalformedError, "TokenMalformedError"}     //格式错误
@@ -61,21 +62,22 @@ var (
 //)
 
 func ToAPIErrWithErr(err error) ErrInfo {
-	errTarget := errors.New("")
-	var errInfo ErrInfo
 	switch {
-	case errors.As(err, &errTarget):
-		if errors.Is(errTarget, gorm.ErrRecordNotFound) {
-			return ErrRecordNotFound
-		}
-	case errors.As(err, &errInfo):
-		if errors.Is(errInfo, ErrArgs) {
-			return ErrArgs
-		}
-		if errors.Is(errInfo, ErrDatabase) {
-			return ErrDatabase
-		}
+	case errors.Is(err, gorm.ErrRecordNotFound):
+		return ErrRecordNotFound
+	case errors.Is(err, ErrArgs):
+		return ErrArgs
+	case errors.Is(err, ErrDatabase):
+		return ErrDatabase
+	}
 
+	errTarget := errors.New("")
+	var mErr *json.MarshalerError
+	switch {
+	case errors.As(err, &mErr):
+		return ErrData
+	case errors.As(err, errTarget):
+		return ErrDatabase
 	}
 	return ErrDefaultOther
 }
@@ -118,6 +120,7 @@ const (
 	NoPermissionError   = 90005 //权限不足
 
 	DefaultOtherError = 90006 //其他错误
+	DataError         = 90007 //数据错误
 )
 
 // 账号错误码
