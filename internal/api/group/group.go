@@ -1,6 +1,7 @@
 package group
 
 import (
+	common "Open_IM/internal/api_to_rpc"
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -510,43 +511,8 @@ func GetRecvGroupApplicationList(c *gin.Context) {
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/get_user_req_group_applicationList [post]
 func GetUserReqGroupApplicationList(c *gin.Context) {
-	var params api.GetUserReqGroupApplicationListReq
-	if err := c.BindJSON(&params); err != nil {
-		log.NewError("0", utils.GetSelfFuncName(), err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-		return
-	}
-	req := &rpc.GetUserReqApplicationListReq{}
-	utils.CopyStructFields(req, params)
-	var ok bool
-	var errInfo string
-	ok, req.OpUserID, errInfo = token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-	if !ok {
-		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
-		return
-	}
-	log.NewInfo(req.OperationID, "GetGroupsInfo args ", req.String())
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
-	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
-		return
-	}
-	client := rpc.NewGroupClient(etcdConn)
-	RpcResp, err := client.GetUserReqApplicationList(context.Background(), req)
-	if err != nil {
-		log.NewError(req.OperationID, "GetGroupsInfo failed ", err.Error(), req.String())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call  rpc server failed"})
-		return
-	}
-	log.NewInfo(req.OperationID, RpcResp)
-	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupRequestList: RpcResp.GroupRequestList}
-	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
-	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
-	c.JSON(http.StatusOK, resp)
+	common.ApiToRpc(c, &api.GetUserReqGroupApplicationListReq{}, &api.GetUserRespGroupApplicationResp{},
+		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "GetGroupApplicationList", token_verify.ParseUserIDFromToken)
 }
 
 // @Summary 通过群ID列表获取群信息

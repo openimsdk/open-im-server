@@ -38,6 +38,12 @@ func InsertIntoGroup(groupInfo db.Group) error {
 	return nil
 }
 
+func TakeGroupInfoByGroupID(groupID string) (*db.Group, error) {
+	var groupInfo db.Group
+	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id=?", groupID).Take(&groupInfo).Error
+	return &groupInfo, err
+}
+
 func GetGroupInfoByGroupID(groupID string) (*db.Group, error) {
 	var groupInfo db.Group
 	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id=?", groupID).Take(&groupInfo).Error

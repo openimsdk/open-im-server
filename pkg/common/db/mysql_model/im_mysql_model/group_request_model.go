@@ -70,8 +70,8 @@ func GetGroupRequestByGroupID(groupID string) ([]db.GroupRequest, error) {
 	return groupRequestList, nil
 }
 
-//received
-func GetGroupApplicationList(userID string) ([]db.GroupRequest, error) {
+// received
+func GetRecvGroupApplicationList(userID string) ([]db.GroupRequest, error) {
 	var groupRequestList []db.GroupRequest
 	memberList, err := GetGroupMemberListByUserID(userID)
 	if err != nil {
@@ -81,12 +81,9 @@ func GetGroupApplicationList(userID string) ([]db.GroupRequest, error) {
 		if v.RoleLevel > constant.GroupOrdinaryUsers {
 			list, err := GetGroupRequestByGroupID(v.GroupID)
 			if err != nil {
-				//		fmt.Println("111 GetGroupRequestByGroupID failed ", err.Error())
 				continue
 			}
-			//	fmt.Println("222 GetGroupRequestByGroupID ok ", list)
 			groupRequestList = append(groupRequestList, list...)
-			//	fmt.Println("333 GetGroupRequestByGroupID ok ", groupRequestList)
 		}
 	}
 	return groupRequestList, nil

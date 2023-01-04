@@ -159,14 +159,14 @@ func GetUserIDFromToken(token string, operationID string) (bool, string, string)
 	return true, claims.UID, ""
 }
 
-func ParseUserIDFromToken(token string, operationID string) (error, string) {
+func ParseUserIDFromToken(token string, operationID string) (string, error) {
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
 		log.Error(operationID, "ParseToken failed, ", err.Error(), token)
-		return err, ""
+		return "", err
 	}
 	log.Debug(operationID, "token claims.ExpiresAt.Second() ", claims.ExpiresAt.Unix())
-	return nil, claims.UID
+	return claims.UID, nil
 }
 
 func GetUserIDFromTokenExpireTime(token string, operationID string) (bool, string, string, int64) {

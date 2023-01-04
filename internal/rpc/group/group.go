@@ -11,11 +11,12 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	cp "Open_IM/pkg/common/utils"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	"github.com/OpenIMSDK/getcdv3"
+
 	pbCache "Open_IM/pkg/proto/cache"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbGroup "Open_IM/pkg/proto/group"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -771,40 +772,67 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	return &resp, nil
 }
 
-func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
-	log.NewInfo(req.OperationID, "GetGroupApplicationList args ", req.String())
-	reply, err := imdb.GetGroupApplicationList(req.FromUserID)
+func FillGroupInfoByGroupID(operationID, groupID string, groupInfo *open_im_sdk.GroupInfo) error {
+	group, err := imdb.TakeGroupInfoByGroupID(groupID)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupApplicationList failed ", err.Error(), req.FromUserID)
-		return &pbGroup.GetGroupApplicationListResp{ErrCode: 701, ErrMsg: "GetGroupApplicationList failed"}, nil
+		log.Error(operationID, "TakeGroupInfoByGroupID failed ", err.Error(), groupID)
+		return utils.Wrap(err, "")
 	}
+	if group.Status == constant.GroupStatusDismissed {
+		log.Debug(operationID, " group constant.GroupStatusDismissed ", group.GroupID)
+		return utils.Wrap(constant.ErrGroupStatusDismissed, "")
+	}
+	return utils.Wrap(cp.GroupDBCopyOpenIM(groupInfo, group), "")
+}
 
-	log.NewDebug(req.OperationID, "GetGroupApplicationList reply ", reply)
+func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sdk.PublicUserInfo) error {
+	user, err := imdb.TakeUserByUserID(userID)
+	if err != nil {
+		log.Error(operationID, "TakeUserByUserID failed ", err.Error(), userID)
+		return utils.Wrap(err, "")
+	}
+	cp.UserDBCopyOpenIMPublicUser(userInfo, user)
+	return nil
+}
+
+func (s *groupServer) GetGroupApplicationList(_ context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
 	resp := pbGroup.GetGroupApplicationListResp{}
+	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
+	if err != nil {
+		log.NewError(req.OperationID, "GetRecvGroupApplicationList failed ", err.Error(), req.FromUserID)
+		errInfo := constant.ToAPIErrWithErr(err)
+		resp.ErrCode = errInfo.ErrCode
+		resp.ErrMsg = errInfo.ErrMsg
+		return &resp, nil
+	}
+	var errResult error
+	log.NewDebug(req.OperationID, "GetGroupApplicationList from db ", reply)
+
 	for _, v := range reply {
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
-		group, err := imdb.GetGroupInfoByGroupID(v.GroupID)
+		err := FillGroupInfoByGroupID(req.OperationID, v.GroupID, node.GroupInfo)
 		if err != nil {
-			log.Error(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), v.GroupID)
-			continue
-		}
-		if group.Status == constant.GroupStatusDismissed {
-			log.Debug(req.OperationID, "group constant.GroupStatusDismissed  ", group.GroupID)
-			continue
-		}
-		user, err := imdb.GetUserByUserID(v.UserID)
-		if err != nil {
-			log.Error(req.OperationID, "GetUserByUserID failed ", err.Error(), v.UserID)
+			if !errors.Is(errors.Unwrap(err), constant.ErrDismissedAlready) {
+				errResult = err
+			}
 			continue
 		}
 
+		err = FillPublicUserInfoByUserID(req.OperationID, v.UserID, node.UserInfo)
+		if err != nil {
+			errResult = err
+			continue
+		}
 		cp.GroupRequestDBCopyOpenIM(&node, &v)
-		cp.UserDBCopyOpenIMPublicUser(node.UserInfo, user)
-		cp.GroupDBCopyOpenIM(node.GroupInfo, group)
-		log.NewDebug(req.OperationID, "node ", node, "v ", v)
 		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
-	log.NewInfo(req.OperationID, "GetGroupMembersInfo rpc return ", resp)
+	if errResult != nil && len(resp.GroupRequestList) == 0 {
+		errInfo := constant.ToAPIErrWithErr(errResult)
+		resp.ErrCode = errInfo.ErrCode
+		resp.ErrMsg = errInfo.ErrMsg
+	}
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", resp.String())
 	return &resp, nil
 }
 

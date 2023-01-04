@@ -55,6 +55,15 @@ func GetAllUser() ([]db.User, error) {
 	return userList, err
 }
 
+func TakeUserByUserID(userID string) (*db.User, error) {
+	var user db.User
+	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", userID).Take(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func GetUserByUserID(userID string) (*db.User, error) {
 	var user db.User
 	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where("user_id=?", userID).Take(&user).Error

@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
-	"errors"
 	"fmt"
 	"time"
 )
@@ -49,7 +48,6 @@ func BatchInsertIntoGroupMember(toInsertInfoList []*db.GroupMember) error {
 func GetGroupMemberListByUserID(userID string) ([]db.GroupMember, error) {
 	var groupMemberList []db.GroupMember
 	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("user_id=?", userID).Find(&groupMemberList).Error
-	//err = dbConn.Table("group_members").Where("user_id=?", userID).Take(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
@@ -136,8 +134,7 @@ func GetGroupOwnerInfoByGroupID(groupID string) (*db.GroupMember, error) {
 			return &v, nil
 		}
 	}
-
-	return nil, utils.Wrap(errors.New("no owner"), "")
+	return nil, utils.Wrap(constant.ErrNoGroupOwner, "")
 }
 
 func IsExistGroupMember(groupID, userID string) bool {

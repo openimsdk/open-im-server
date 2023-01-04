@@ -1,5 +1,10 @@
 package constant
 
+import (
+	"errors"
+	"gorm.io/gorm"
+)
+
 type ErrInfo struct {
 	ErrCode int32
 	ErrMsg  string
@@ -24,6 +29,8 @@ var (
 	ErrUserIDNotFound  = ErrInfo{UserIDNotFoundError, "UserIDNotFoundError"}
 	ErrGroupIDNotFound = ErrInfo{GroupIDNotFoundError, "GroupIDNotFoundError"}
 
+	ErrRecordNotFound = ErrInfo{RecordNotFoundError, "RecordNotFoundError"}
+
 	ErrRelationshipAlready = ErrInfo{RelationshipAlreadyError, "RelationshipAlreadyError"}
 	ErrNotRelationshipYet  = ErrInfo{NotRelationshipYetError, "NotRelationshipYetError"}
 
@@ -46,6 +53,28 @@ var (
 	ErrTokenDifferentPlatformID = ErrInfo{TokenDifferentPlatformIDError, "TokenDifferentPlatformIDError"}
 	ErrTokenDifferentUserID     = ErrInfo{TokenDifferentUserIDError, "TokenDifferentUserIDError"}
 )
+
+//var (
+//	ErrGroupStatusDismissed = errors.New("group dismissed")
+//	ErrNoGroupOwner         = errors.New("no group owner")
+//)
+
+func ToAPIErrWithErr(err error) ErrInfo {
+	errTarget := errors.New("")
+	var errInfo ErrInfo
+	switch {
+	case errors.As(err, &errTarget):
+		if errors.Is(errTarget, gorm.ErrRecordNotFound) {
+			return ErrRecordNotFound
+		}
+	case errors.As(err, &errInfo):
+		if errors.Is(errInfo, ErrArgs) {
+			return ErrArgs
+		}
+
+	}
+	return ErrDefaultOther
+}
 
 const (
 	FormattingError      = 10001
@@ -80,6 +109,7 @@ const (
 const (
 	UserIDNotFoundError  = 91001 //UserID不存在 或未注册
 	GroupIDNotFoundError = 91002 //GroupID不存在
+	RecordNotFoundError  = 91002 //记录不存在
 )
 
 // 关系链错误码
