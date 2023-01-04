@@ -136,7 +136,7 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	}
 
 	chat.BlackAddedNotification(req)
-	return &pbFriend.AddBlacklistResp{CommonResp: &sdkws.CommonResp{}}, nil
+	return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(constant.ErrNone, nil)}, nil
 }
 
 func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq) (*pbFriend.AddFriendResp, error) {
