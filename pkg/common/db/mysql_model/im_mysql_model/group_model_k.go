@@ -36,11 +36,11 @@ func (*Group) Delete(groupIDList []string) error {
 
 func (tb *Group) Get(groupIDs []string) ([]*Group, error) {
 	var ms []*Group
-	return ms, utils.Wrap(tb.DB.Where("group_id in (?)", groupIDs).Find(&ms).Error, "")
+	return ms, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDs).Find(&ms).Error, "")
 }
 
 func (tb *Group) Update(groups []*Group) error {
-	return utils.Wrap(utils.Wrap(tb.DB.Updates(groups).Error, ""), "")
+	return utils.Wrap(utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Updates(groups).Error, ""), "")
 }
 
 func (*Group) Find(groupIDList []string) ([]*Group, error) {
