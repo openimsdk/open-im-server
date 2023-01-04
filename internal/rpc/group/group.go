@@ -796,11 +796,11 @@ func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sd
 	return nil
 }
 
-func SetErr(ctx context.Context, err error, errCode *int32, errMsg *string) {
+func SetErr(ctx context.Context, funcName string, err error, errCode *int32, errMsg *string, args ...interface{}) {
 	errInfo := constant.ToAPIErrWithErr(err)
 	*errCode = errInfo.ErrCode
 	*errMsg = errInfo.ErrMsg
-
+	trace_log.SetContextInfo(ctx, funcName, err, args)
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
@@ -811,7 +811,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	resp := pbGroup.GetGroupApplicationListResp{}
 	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
 	if err != nil {
-		SetErr(nCtx, err, &resp.ErrCode, &resp.ErrMsg)
+		SetErr(nCtx, "GetRecvGroupApplicationList", err, &resp.ErrCode, &resp.ErrMsg, "userID ", req.FromUserID)
 		return &resp, nil
 	}
 	var errResult error
@@ -836,7 +836,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
 	if errResult != nil && len(resp.GroupRequestList) == 0 {
-		SetErr(nCtx, err, &resp.ErrCode, &resp.ErrMsg)
+		SetErr(nCtx, "", errResult, &resp.ErrCode, &resp.ErrMsg)
 		return &resp, nil
 	}
 	trace_log.SetRpcRespInfo(nCtx, utils.GetSelfFuncName(), resp.String())
