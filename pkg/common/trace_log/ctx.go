@@ -17,13 +17,25 @@ func NewCtx(c *gin.Context, api string) context.Context {
 	return context.WithValue(c, TraceLogKey, req)
 }
 
+func NewRpcCtx(c context.Context, rpc string, operationID string) context.Context {
+	req := &ApiInfo{ApiName: rpc, Funcs: &[]FuncInfo{}}
+	ctx := context.WithValue(c, TraceLogKey, req)
+	SetOperationID(ctx, operationID)
+	return ctx
+}
+
 func SetOperationID(ctx context.Context, operationID string) {
 	ctx.Value(TraceLogKey).(*ApiInfo).OperationID = operationID
 }
 
 func ShowLog(ctx context.Context) {
 	t := ctx.Value(TraceLogKey).(*ApiInfo)
-	log.Info(t.OperationID, "api: ", t.ApiName)
+	if ctx.Value(TraceLogKey).(*ApiInfo).GinCtx != nil {
+		log.Info(t.OperationID, "api: ", t.ApiName)
+	} else {
+		log.Info(t.OperationID, "rpc: ", t.ApiName)
+	}
+
 	for _, v := range *t.Funcs {
 		if v.Err != nil {
 			log.Error(t.OperationID, "func: ", v.FuncName, " args: ", v.Args, v.Err.Error())
@@ -66,6 +78,28 @@ func SetContextInfo(ctx context.Context, funcName string, err error, args ...int
 	argsHandle(args, funcInfo.Args)
 	funcInfo.FuncName = funcName
 	funcInfo.Err = err
+	*t.Funcs = append(*t.Funcs, funcInfo)
+}
+
+func SetRpcReqInfo(ctx context.Context, funcName string, req string) {
+	t := ctx.Value(TraceLogKey).(*ApiInfo)
+	var funcInfo FuncInfo
+	funcInfo.Args = make(map[string]interface{})
+	var args []interface{}
+	args = append(args, " rpc req ", req)
+	argsHandle(args, funcInfo.Args)
+	funcInfo.FuncName = funcName
+	*t.Funcs = append(*t.Funcs, funcInfo)
+}
+
+func SetRpcRespInfo(ctx context.Context, funcName string, resp string) {
+	t := ctx.Value(TraceLogKey).(*ApiInfo)
+	var funcInfo FuncInfo
+	funcInfo.Args = make(map[string]interface{})
+	var args []interface{}
+	args = append(args, " rpc resp ", resp)
+	argsHandle(args, funcInfo.Args)
+	funcInfo.FuncName = funcName
 	*t.Funcs = append(*t.Funcs, funcInfo)
 }
 

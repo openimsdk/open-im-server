@@ -72,6 +72,9 @@ func ToAPIErrWithErr(err error) ErrInfo {
 		if errors.Is(errInfo, ErrArgs) {
 			return ErrArgs
 		}
+		if errors.Is(errInfo, ErrDatabase) {
+			return ErrDatabase
+		}
 
 	}
 	return ErrDefaultOther
