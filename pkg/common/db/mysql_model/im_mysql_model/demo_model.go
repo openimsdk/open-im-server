@@ -7,19 +7,19 @@ import (
 	_ "gorm.io/gorm"
 )
 
-func GetRegister(account, areaCode, userID string) (*db.Register, error) {
-	var r db.Register
+func GetRegister(account, areaCode, userID string) (*Register, error) {
+	var r Register
 	return &r, db.DB.MysqlDB.DefaultGormDB().Table("registers").Where("user_id = ? and user_id != ? or account = ? or account =? and area_code=?",
 		userID, "", account, account, areaCode).Take(&r).Error
 }
 
-func GetRegisterInfo(userID string) (*db.Register, error) {
-	var r db.Register
+func GetRegisterInfo(userID string) (*Register, error) {
+	var r Register
 	return &r, db.DB.MysqlDB.DefaultGormDB().Table("registers").Where("user_id = ?", userID).Take(&r).Error
 }
 
 func SetPassword(account, password, ex, userID, areaCode, ip string) error {
-	r := db.Register{
+	r := Register{
 		Account:    account,
 		Password:   password,
 		Ex:         ex,
@@ -31,7 +31,7 @@ func SetPassword(account, password, ex, userID, areaCode, ip string) error {
 }
 
 func ResetPassword(account, password string) error {
-	r := db.Register{
+	r := Register{
 		Password: password,
 	}
 	return db.DB.MysqlDB.DefaultGormDB().Table("registers").Where("account = ?", account).Updates(&r).Error
@@ -40,7 +40,7 @@ func ResetPassword(account, password string) error {
 func GetRegisterAddFriendList(showNumber, pageNumber int32) ([]string, error) {
 	var IDList []string
 	var err error
-	model := db.DB.MysqlDB.DefaultGormDB().Model(&db.RegisterAddFriend{})
+	model := db.DB.MysqlDB.DefaultGormDB().Model(&RegisterAddFriend{})
 	if showNumber == 0 {
 		err = model.Pluck("user_id", &IDList).Error
 	} else {
@@ -50,9 +50,9 @@ func GetRegisterAddFriendList(showNumber, pageNumber int32) ([]string, error) {
 }
 
 func AddUserRegisterAddFriendIDList(userIDList ...string) error {
-	var list []db.RegisterAddFriend
+	var list []RegisterAddFriend
 	for _, v := range userIDList {
-		list = append(list, db.RegisterAddFriend{UserID: v})
+		list = append(list, RegisterAddFriend{UserID: v})
 	}
 	result := db.DB.MysqlDB.DefaultGormDB().Create(list)
 	if int(result.RowsAffected) < len(userIDList) {
@@ -63,22 +63,22 @@ func AddUserRegisterAddFriendIDList(userIDList ...string) error {
 }
 
 func ReduceUserRegisterAddFriendIDList(userIDList ...string) error {
-	var list []db.RegisterAddFriend
+	var list []RegisterAddFriend
 	for _, v := range userIDList {
-		list = append(list, db.RegisterAddFriend{UserID: v})
+		list = append(list, RegisterAddFriend{UserID: v})
 	}
 	err := db.DB.MysqlDB.DefaultGormDB().Delete(list).Error
 	return err
 }
 
 func DeleteAllRegisterAddFriendIDList() error {
-	err := db.DB.MysqlDB.DefaultGormDB().Where("1 = 1").Delete(&db.RegisterAddFriend{}).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Where("1 = 1").Delete(&RegisterAddFriend{}).Error
 	return err
 }
 
-func GetUserIPLimit(userID string) (db.UserIpLimit, error) {
-	var limit db.UserIpLimit
+func GetUserIPLimit(userID string) (UserIpLimit, error) {
+	var limit UserIpLimit
 	limit.UserID = userID
-	err := db.DB.MysqlDB.DefaultGormDB().Model(&db.UserIpLimit{}).Take(&limit).Error
+	err := db.DB.MysqlDB.DefaultGormDB().Model(&UserIpLimit{}).Take(&limit).Error
 	return limit, err
 }

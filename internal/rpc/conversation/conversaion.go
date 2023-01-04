@@ -48,7 +48,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 			return resp, nil
 		}
 	}
-	var conversation db.Conversation
+	var conversation imdb.Conversation
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", *req.Conversation, err.Error())
 	}
@@ -132,7 +132,7 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 	return resp, nil
 }
 func syncPeerUserConversation(conversation *pbConversation.Conversation, operationID string) error {
-	peerUserConversation := db.Conversation{
+	peerUserConversation := imdb.Conversation{
 		OwnerUserID:      conversation.UserID,
 		ConversationID:   utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType),
 		ConversationType: constant.SingleChatType,

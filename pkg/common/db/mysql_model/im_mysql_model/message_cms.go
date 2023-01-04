@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func GetChatLog(chatLog *db.ChatLog, pageNumber, showNumber int32, contentTypeList []int32) (int64, []db.ChatLog, error) {
+func GetChatLog(chatLog *ChatLog, pageNumber, showNumber int32, contentTypeList []int32) (int64, []ChatLog, error) {
 	mdb := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs")
 	if chatLog.SendTime.Unix() > 0 {
 		mdb = mdb.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
@@ -35,7 +35,7 @@ func GetChatLog(chatLog *db.ChatLog, pageNumber, showNumber int32, contentTypeLi
 	if err := mdb.Count(&count).Error; err != nil {
 		return 0, nil, err
 	}
-	var chatLogs []db.ChatLog
+	var chatLogs []ChatLog
 	mdb = mdb.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1)))
 	if err := mdb.Find(&chatLogs).Error; err != nil {
 		return 0, nil, err

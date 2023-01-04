@@ -10,8 +10,9 @@ import (
 )
 
 type ErrInfo struct {
-	ErrCode int32
-	ErrMsg  string
+	ErrCode    int32
+	ErrMsg     string
+	WrapErrMsg string
 }
 
 func (e ErrInfo) Error() string {

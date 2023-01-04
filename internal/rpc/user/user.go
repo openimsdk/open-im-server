@@ -100,7 +100,7 @@ func (s *userServer) Run() {
 }
 
 func syncPeerUserConversation(conversation *pbConversation.Conversation, operationID string) error {
-	peerUserConversation := db.Conversation{
+	peerUserConversation := imdb.Conversation{
 		OwnerUserID:      conversation.UserID,
 		ConversationID:   utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType),
 		ConversationType: constant.SingleChatType,
@@ -152,7 +152,7 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 	}
 	resp := &pbUser.BatchSetConversationsResp{}
 	for _, v := range req.Conversations {
-		conversation := db.Conversation{}
+		conversation := imdb.Conversation{}
 		if err := utils.CopyStructFields(&conversation, v); err != nil {
 			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), v.String(), "CopyStructFields failed", err.Error())
 		}
@@ -265,7 +265,7 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 			return resp, nil
 		}
 	}
-	var conversation db.Conversation
+	var conversation imdb.Conversation
 	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", *req.Conversation, err.Error())
 	}
@@ -308,7 +308,7 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOptReq) (*pbUser.SetRecvMsgOptResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbUser.SetRecvMsgOptResp{}
-	var conversation db.Conversation
+	var conversation imdb.Conversation
 	if err := utils.CopyStructFields(&conversation, req); err != nil {
 		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", *req, err.Error())
 	}
@@ -408,7 +408,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 			oldNickname = u.Nickname
 		}
 	}
-	var user db.User
+	var user imdb.User
 	utils.CopyStructFields(&user, req.UserInfo)
 
 	if req.UserInfo.BirthStr != "" {
@@ -465,7 +465,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (*pbUser.SetGlobalRecvMessageOptResp, error) {
 	log.NewInfo(req.OperationID, "SetGlobalRecvMessageOpt args ", req.String())
 
-	var user db.User
+	var user imdb.User
 	user.UserID = req.UserID
 	m := make(map[string]interface{}, 1)
 
@@ -496,7 +496,7 @@ func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string,
 		return
 	}
 	for _, groupID := range joinedGroupIDList {
-		groupMemberInfo := db.GroupMember{UserID: userID, GroupID: groupID, FaceURL: faceURL}
+		groupMemberInfo := imdb.GroupMember{UserID: userID, GroupID: groupID, FaceURL: faceURL}
 		if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
 			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
 			continue
@@ -526,7 +526,7 @@ func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, o
 			continue
 		}
 		if member.Nickname == oldNickname {
-			groupMemberInfo := db.GroupMember{UserID: userID, GroupID: v, Nickname: newNickname}
+			groupMemberInfo := imdb.GroupMember{UserID: userID, GroupID: v, Nickname: newNickname}
 			if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
 				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
 				continue
@@ -545,7 +545,7 @@ func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, o
 
 func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	var usersDB []db.User
+	var usersDB []imdb.User
 	var err error
 	resp := &pbUser.GetUsersResp{CommonResp: &pbUser.CommonResp{}, Pagination: &sdkws.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}}
 	if req.UserID != "" {

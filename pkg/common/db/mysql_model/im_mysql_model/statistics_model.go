@@ -70,7 +70,7 @@ func GetActiveGroups(from, to time.Time, limit int) ([]*activeGroup, error) {
 	var activeGroups []*activeGroup
 	err := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Select("recv_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type in (?)", from, to, []int{constant.GroupChatType, constant.SuperGroupChatType}).Group("recv_id").Limit(limit).Order("message_num DESC").Find(&activeGroups).Error
 	for _, activeGroup := range activeGroups {
-		group := db.Group{
+		group := Group{
 			GroupID: activeGroup.Id,
 		}
 		db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id= ? ", group.GroupID).Find(&group)
@@ -89,7 +89,7 @@ func GetActiveUsers(from, to time.Time, limit int) ([]*activeUser, error) {
 	var activeUsers []*activeUser
 	err := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Select("send_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type = ?", from, to, constant.SingleChatType).Group("send_id").Limit(limit).Order("message_num DESC").Find(&activeUsers).Error
 	for _, activeUser := range activeUsers {
-		user := db.User{
+		user := User{
 			UserID: activeUser.ID,
 		}
 		err = db.DB.MysqlDB.DefaultGormDB().Table("users").Select("user_id, name").Find(&user).Error

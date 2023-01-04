@@ -22,7 +22,7 @@ import (
 //	Ex            string    `gorm:"column:ex"`
 //}
 
-func InsertIntoGroup(groupInfo db.Group) error {
+func InsertIntoGroup(groupInfo Group) error {
 	if groupInfo.GroupName == "" {
 		groupInfo.GroupName = "Group Chat"
 	}
@@ -38,24 +38,24 @@ func InsertIntoGroup(groupInfo db.Group) error {
 	return nil
 }
 
-func TakeGroupInfoByGroupID(groupID string) (*db.Group, error) {
-	var groupInfo db.Group
+func TakeGroupInfoByGroupID(groupID string) (*Group, error) {
+	var groupInfo Group
 	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id=?", groupID).Take(&groupInfo).Error
 	return &groupInfo, err
 }
 
-func GetGroupInfoByGroupID(groupID string) (*db.Group, error) {
-	var groupInfo db.Group
+func GetGroupInfoByGroupID(groupID string) (*Group, error) {
+	var groupInfo Group
 	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id=?", groupID).Take(&groupInfo).Error
 	return &groupInfo, err
 }
 
-func SetGroupInfo(groupInfo db.Group) error {
+func SetGroupInfo(groupInfo Group) error {
 	return db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id=?", groupInfo.GroupID).Updates(&groupInfo).Error
 }
 
 type GroupWithNum struct {
-	db.Group
+	Group
 	MemberCount int `gorm:"column:num"`
 }
 
@@ -81,7 +81,7 @@ func GetGroups(pageNumber, showNumber int) ([]GroupWithNum, error) {
 }
 
 func OperateGroupStatus(groupId string, groupStatus int32) error {
-	group := db.Group{
+	group := Group{
 		GroupID: groupId,
 		Status:  groupStatus,
 	}
@@ -91,7 +91,7 @@ func OperateGroupStatus(groupId string, groupStatus int32) error {
 	return nil
 }
 
-func GetGroupsCountNum(group db.Group) (int32, error) {
+func GetGroupsCountNum(group Group) (int32, error) {
 	var count int64
 	if err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where(" name like ? ", fmt.Sprintf("%%%s%%", group.GroupName)).Count(&count).Error; err != nil {
 		return 0, err

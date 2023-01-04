@@ -3,7 +3,6 @@ package admin_cms
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -215,7 +214,7 @@ func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *
 func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatLogsReq) (*pbAdminCMS.GetChatLogsResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "GetChatLogs", req.String())
 	resp := &pbAdminCMS.GetChatLogsResp{CommonResp: &pbAdminCMS.CommonResp{}, Pagination: &server_api_params.ResponsePagination{}}
-	chatLog := db.ChatLog{
+	chatLog := imdb.ChatLog{
 		Content:     req.Content,
 		ContentType: req.ContentType,
 		SessionType: req.SessionType,
