@@ -3,6 +3,7 @@ package im_mysql_model
 import (
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -22,6 +23,7 @@ type Group struct {
 	ApplyMemberFriend      int32     `gorm:"column:apply_member_friend" json:"applyMemberFriend"`
 	NotificationUpdateTime time.Time `gorm:"column:notification_update_time"`
 	NotificationUserID     string    `gorm:"column:notification_user_id;size:64"`
+	DB                     *gorm.DB  `gorm:"-" json:"-"`
 }
 
 func (*Group) Create(groupList []*Group) error {
@@ -29,7 +31,7 @@ func (*Group) Create(groupList []*Group) error {
 }
 
 func (*Group) Delete(groupIDList []string) error {
-	return nil
+	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id in (?)", groupIDList).Delete(&Group{}).Error, "")
 }
 
 func (*Group) Update(groupList []*Group) error {
