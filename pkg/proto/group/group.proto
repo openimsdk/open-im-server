@@ -48,7 +48,7 @@ message SetGroupInfoReq{
   string OperationID = 3;
 }
 message SetGroupInfoResp{
-    CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -70,7 +70,7 @@ message GetUserReqApplicationListReq{
 }
 
 message GetUserReqApplicationListResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupRequest GroupRequestList = 2;
 }
 
@@ -83,7 +83,7 @@ message TransferGroupOwnerReq {
   string OpUserID = 5; //app manager or group owner
 }
 message TransferGroupOwnerResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 message JoinGroupReq{
@@ -96,7 +96,7 @@ message JoinGroupReq{
 
 }
 message JoinGroupResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -109,7 +109,7 @@ message GroupApplicationResponseReq{
   int32 HandleResult = 6;
 }
 message GroupApplicationResponseResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -120,7 +120,7 @@ message QuitGroupReq{
   string OpUserID = 3;
 }
 message QuitGroupResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -231,7 +231,7 @@ message GetGroupsResp {
     repeated CMSGroup CMSGroups = 1;
     server_api_params.ResponsePagination Pagination = 2;
     int32 GroupNum = 3;
-    CommonResp commonResp = 4;
+  server_api_params.CommonResp commonResp = 4;
 }
 
 message GetGroupMemberReq {
@@ -250,7 +250,7 @@ message GetGroupMembersCMSResp {
    repeated server_api_params.GroupMemberFullInfo members = 1;
    server_api_params.ResponsePagination Pagination = 2;
    int32 MemberNums = 3;
-   CommonResp commonResp = 4;
+  server_api_params.CommonResp commonResp = 4;
 }
 
 message DismissGroupReq{
@@ -260,7 +260,7 @@ message DismissGroupReq{
 }
 
 message DismissGroupResp{
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -273,7 +273,7 @@ message MuteGroupMemberReq{
 }
 
 message MuteGroupMemberResp{
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -286,7 +286,7 @@ message CancelMuteGroupMemberReq{
 }
 
 message CancelMuteGroupMemberResp{
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -297,7 +297,7 @@ message MuteGroupReq{
 }
 
 message MuteGroupResp{
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -309,7 +309,7 @@ message CancelMuteGroupReq{
 }
 
 message CancelMuteGroupResp{
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -323,7 +323,7 @@ message SetGroupMemberNicknameReq{
   string userID = 5;
 }
 message SetGroupMemberNicknameResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 message GetJoinedSuperGroupListReq {
@@ -333,7 +333,7 @@ message GetJoinedSuperGroupListReq {
 }
 
 message GetJoinedSuperGroupListResp {
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupInfo GroupList = 3;
 }
 
@@ -344,7 +344,7 @@ message GetSuperGroupsInfoReq {
 }
 
 message GetSuperGroupsInfoResp {
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupInfo GroupInfoList = 3;
 }
 
@@ -360,7 +360,7 @@ message SetGroupMemberInfoReq{
 }
 
 message SetGroupMemberInfoResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 message GetGroupAbstractInfoReq{
@@ -370,7 +370,7 @@ message GetGroupAbstractInfoReq{
 }
 
 message GetGroupAbstractInfoResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
   int32 groupMemberNumber = 2;
   uint64 groupMemberListHash = 3;
 }
