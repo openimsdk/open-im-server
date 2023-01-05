@@ -817,14 +817,16 @@ func SetErrorForResp(err error, errCode *int32, errMsg *string) {
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "rpc req ", req.String(), "rpc resp ", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	trace_log.SetRpcReqInfo(ctx, utils.GetSelfFuncName(), req.String())
-	defer trace_log.ShowLog(ctx)
 
 	resp := pbGroup.GetGroupApplicationListResp{}
 	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
 	if err != nil {
-		SetErr(ctx, "", err, &resp.ErrCode, &resp.ErrMsg, "userID ", req.FromUserID)
+		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 		return &resp, nil
 	}
 	var errResult error
@@ -849,7 +851,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
 	if errResult != nil && len(resp.GroupRequestList) == 0 {
-		SetErr(ctx, "", errResult, &resp.ErrCode, &resp.ErrMsg)
+		SetErr(ctx, "", errResult, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 		return &resp, nil
 	}
 	trace_log.SetRpcRespInfo(ctx, utils.GetSelfFuncName(), resp.String())
@@ -861,7 +863,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "rpc req ", req.String(), "rpc resp ", resp.String())
 		trace_log.ShowLog(ctx)
 	}()
-	trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 
 	resp = &pbGroup.GetGroupsInfoResp{}
 	groupsInfoList := make([]*open_im_sdk.GroupInfo, 0)
@@ -877,7 +879,6 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		groupsInfoList = append(groupsInfoList, &groupInfo)
 	}
 	resp.GroupInfoList = groupsInfoList
-
 	return resp, nil
 }
 
