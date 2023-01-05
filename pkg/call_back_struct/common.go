@@ -1,5 +1,10 @@
 package call_back_struct
 
+import (
+	"errors"
+	"fmt"
+)
+
 type CommonCallbackReq struct {
 	SendID           string   `json:"sendID"`
 	CallbackCommand  string   `json:"callbackCommand"`
@@ -20,11 +25,27 @@ type CommonCallbackReq struct {
 	Ex               string   `json:"ex"`
 }
 
+type CallbackResp interface {
+	Parse() (IsPass bool, err error)
+}
+
 type CommonCallbackResp struct {
 	ActionCode  int    `json:"actionCode"`
 	ErrCode     int    `json:"errCode"`
 	ErrMsg      string `json:"errMsg"`
 	OperationID string `json:"operationID"`
+}
+
+func (c *CommonCallbackResp) Parse() (isPass bool, err error) {
+	if c.ActionCode != 0 {
+		err = errors.New(fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg))
+		return false, err
+	}
+	if c.ErrCode != 0 {
+		err = errors.New(fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg))
+		return false, err
+	}
+	return true, nil
 }
 
 type UserStatusBaseCallback struct {
