@@ -303,7 +303,7 @@ func DelAllGroupMembersInfoFromCache(groupID string) error {
 	return db.DB.Rc.TagAsDeleted(groupAllMemberInfoCache + groupID)
 }
 
-func GetGroupInfoFromCache(groupID string) (*imdb.Group, error) {
+func GetGroupInfoFromCache(ctx context.Context, groupID string) (*imdb.Group, error) {
 	getGroupInfo := func() (string, error) {
 		groupInfo, err := imdb.GetGroupInfoByGroupID(groupID)
 		if err != nil {

@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
-	"fmt"
 	"time"
 )
 
@@ -20,18 +19,18 @@ import (
 //	Ex string `gorm:"column:ex"`
 //}
 
-func InsertIntoGroupMember(toInsertInfo GroupMember) error {
-	toInsertInfo.JoinTime = time.Now()
-	if toInsertInfo.RoleLevel == 0 {
-		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
-	}
-	toInsertInfo.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Create(toInsertInfo).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
+//func InsertIntoGroupMember(toInsertInfo GroupMember) error {
+//	toInsertInfo.JoinTime = time.Now()
+//	if toInsertInfo.RoleLevel == 0 {
+//		toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
+//	}
+//	toInsertInfo.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
+//	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Create(toInsertInfo).Error
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
 
 func BatchInsertIntoGroupMember(toInsertInfoList []*GroupMember) error {
 	for _, toInsertInfo := range toInsertInfoList {
@@ -124,101 +123,101 @@ func GetGroupMemberNumByGroupID(groupID string) (int64, error) {
 	return number, nil
 }
 
-func GetGroupOwnerInfoByGroupID(groupID string) (*GroupMember, error) {
-	omList, err := GetOwnerManagerByGroupID(groupID)
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range omList {
-		if v.RoleLevel == constant.GroupOwner {
-			return &v, nil
-		}
-	}
-	return nil, utils.Wrap(constant.ErrNoGroupOwner, "")
-}
-
-func IsExistGroupMember(groupID, userID string) bool {
-	var number int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id = ? and user_id = ?", groupID, userID).Count(&number).Error
-	if err != nil {
-		return false
-	}
-	if number != 1 {
-		return false
-	}
-	return true
-}
-
-func GetGroupMemberByGroupID(groupID string, filter int32, begin int32, maxNumber int32) ([]GroupMember, error) {
-	var memberList []GroupMember
-	var err error
-	if filter >= 0 {
-		memberList, err = GetGroupMemberListByGroupIDAndRoleLevel(groupID, filter) //sorted by join time
-	} else {
-		memberList, err = GetGroupMemberListByGroupID(groupID)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	if begin >= int32(len(memberList)) {
-		return nil, nil
-	}
-
-	var end int32
-	if begin+int32(maxNumber) < int32(len(memberList)) {
-		end = begin + maxNumber
-	} else {
-		end = int32(len(memberList))
-	}
-	return memberList[begin:end], nil
-}
-
-func GetJoinedGroupIDListByUserID(userID string) ([]string, error) {
-	memberList, err := GetGroupMemberListByUserID(userID)
-	if err != nil {
-		return nil, err
-	}
-	var groupIDList []string
-	for _, v := range memberList {
-		groupIDList = append(groupIDList, v.GroupID)
-	}
-	return groupIDList, nil
-}
-
-func IsGroupOwnerAdmin(groupID, UserID string) bool {
-	groupMemberList, err := GetOwnerManagerByGroupID(groupID)
-	if err != nil {
-		return false
-	}
-	for _, v := range groupMemberList {
-		if v.UserID == UserID && v.RoleLevel > constant.GroupOrdinaryUsers {
-			return true
-		}
-	}
-	return false
-}
-
-func GetGroupMembersByGroupIdCMS(groupId string, userName string, showNumber, pageNumber int32) ([]GroupMember, error) {
-	var groupMembers []GroupMember
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groupMembers).Error
-	if err != nil {
-		return nil, err
-	}
-	return groupMembers, nil
-}
-
-func GetGroupMembersCount(groupID, userName string) (int64, error) {
-	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupID).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
-		return count, err
-	}
-	return count, nil
-}
-
-func UpdateGroupMemberInfoDefaultZero(groupMemberInfo GroupMember, args map[string]interface{}) error {
-	return db.DB.MysqlDB.DefaultGormDB().Model(groupMemberInfo).Updates(args).Error
-}
+//func GetGroupOwnerInfoByGroupID(groupID string) (*GroupMember, error) {
+//	omList, err := GetOwnerManagerByGroupID(groupID)
+//	if err != nil {
+//		return nil, err
+//	}
+//	for _, v := range omList {
+//		if v.RoleLevel == constant.GroupOwner {
+//			return &v, nil
+//		}
+//	}
+//	return nil, utils.Wrap(constant.ErrNoGroupOwner, "")
+//}
+//
+//func IsExistGroupMember(groupID, userID string) bool {
+//	var number int64
+//	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id = ? and user_id = ?", groupID, userID).Count(&number).Error
+//	if err != nil {
+//		return false
+//	}
+//	if number != 1 {
+//		return false
+//	}
+//	return true
+//}
+//
+//func GetGroupMemberByGroupID(groupID string, filter int32, begin int32, maxNumber int32) ([]GroupMember, error) {
+//	var memberList []GroupMember
+//	var err error
+//	if filter >= 0 {
+//		memberList, err = GetGroupMemberListByGroupIDAndRoleLevel(groupID, filter) //sorted by join time
+//	} else {
+//		memberList, err = GetGroupMemberListByGroupID(groupID)
+//	}
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//	if begin >= int32(len(memberList)) {
+//		return nil, nil
+//	}
+//
+//	var end int32
+//	if begin+int32(maxNumber) < int32(len(memberList)) {
+//		end = begin + maxNumber
+//	} else {
+//		end = int32(len(memberList))
+//	}
+//	return memberList[begin:end], nil
+//}
+//
+//func GetJoinedGroupIDListByUserID(userID string) ([]string, error) {
+//	memberList, err := GetGroupMemberListByUserID(userID)
+//	if err != nil {
+//		return nil, err
+//	}
+//	var groupIDList []string
+//	for _, v := range memberList {
+//		groupIDList = append(groupIDList, v.GroupID)
+//	}
+//	return groupIDList, nil
+//}
+//
+//func IsGroupOwnerAdmin(groupID, UserID string) bool {
+//	groupMemberList, err := GetOwnerManagerByGroupID(groupID)
+//	if err != nil {
+//		return false
+//	}
+//	for _, v := range groupMemberList {
+//		if v.UserID == UserID && v.RoleLevel > constant.GroupOrdinaryUsers {
+//			return true
+//		}
+//	}
+//	return false
+//}
+//
+//func GetGroupMembersByGroupIdCMS(groupId string, userName string, showNumber, pageNumber int32) ([]GroupMember, error) {
+//	var groupMembers []GroupMember
+//	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groupMembers).Error
+//	if err != nil {
+//		return nil, err
+//	}
+//	return groupMembers, nil
+//}
+//
+//func GetGroupMembersCount(groupID, userName string) (int64, error) {
+//	var count int64
+//	if err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupID).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
+//		return count, err
+//	}
+//	return count, nil
+//}
+//
+//func UpdateGroupMemberInfoDefaultZero(groupMemberInfo GroupMember, args map[string]interface{}) error {
+//	return db.DB.MysqlDB.DefaultGormDB().Model(groupMemberInfo).Updates(args).Error
+//}
 
 //
 //func SelectGroupList(groupID string) ([]string, error) {

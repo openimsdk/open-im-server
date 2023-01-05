@@ -70,12 +70,12 @@ func (*GroupRequest) Take(ctx context.Context, groupID string, userID string) (g
 	return groupRequest, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ? and user_id = ? ", groupID, userID).Take(groupRequest).Error, utils.GetSelfFuncName())
 }
 
-func UpdateGroupRequest(groupRequest GroupRequest) error {
-	if groupRequest.HandledTime.Unix() < 0 {
-		groupRequest.HandledTime = utils.UnixSecondToTime(0)
-	}
-	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Updates(&groupRequest).Error
-}
+//func UpdateGroupRequest(groupRequest GroupRequest) error {
+//	if groupRequest.HandledTime.Unix() < 0 {
+//		groupRequest.HandledTime = utils.UnixSecondToTime(0)
+//	}
+//	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Updates(&groupRequest).Error
+//}
 
 func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)

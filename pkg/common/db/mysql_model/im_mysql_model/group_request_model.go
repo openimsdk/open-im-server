@@ -19,12 +19,12 @@ import (
 //	Ex           string    `gorm:"column:ex"`
 //}
 
-func UpdateGroupRequest(groupRequest GroupRequest) error {
-	if groupRequest.HandledTime.Unix() < 0 {
-		groupRequest.HandledTime = utils.UnixSecondToTime(0)
-	}
-	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Updates(&groupRequest).Error
-}
+//func UpdateGroupRequest(groupRequest GroupRequest) error {
+//	if groupRequest.HandledTime.Unix() < 0 {
+//		groupRequest.HandledTime = utils.UnixSecondToTime(0)
+//	}
+//	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Updates(&groupRequest).Error
+//}
 
 func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)
@@ -48,27 +48,27 @@ func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 	return nil
 }
 
-func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*GroupRequest, error) {
-	var groupRequest GroupRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Take(&groupRequest).Error
-	if err != nil {
-		return nil, err
-	}
-	return &groupRequest, nil
-}
+//func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*GroupRequest, error) {
+//	var groupRequest GroupRequest
+//	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Take(&groupRequest).Error
+//	if err != nil {
+//		return nil, err
+//	}
+//	return &groupRequest, nil
+//}
 
-func DelGroupRequestByGroupIDAndUserID(groupID, userID string) error {
-	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(GroupRequest{}).Error
-}
-
-func GetGroupRequestByGroupID(groupID string) ([]GroupRequest, error) {
-	var groupRequestList []GroupRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=?", groupID).Find(&groupRequestList).Error
-	if err != nil {
-		return nil, err
-	}
-	return groupRequestList, nil
-}
+//func DelGroupRequestByGroupIDAndUserID(groupID, userID string) error {
+//	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(GroupRequest{}).Error
+//}
+//
+//func GetGroupRequestByGroupID(groupID string) ([]GroupRequest, error) {
+//	var groupRequestList []GroupRequest
+//	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=?", groupID).Find(&groupRequestList).Error
+//	if err != nil {
+//		return nil, err
+//	}
+//	return groupRequestList, nil
+//}
 
 // received
 func GetRecvGroupApplicationList(userID string) ([]GroupRequest, error) {

@@ -85,6 +85,10 @@ func ToAPIErrWithErr(err error) ErrInfo {
 	return ErrDefaultOther
 }
 
+func ToAPIErrWithErrCode(errCode int32) ErrInfo {
+
+}
+
 func Error2CommResp(ctx context.Context, info ErrInfo, detailErrMsg string) *sdkws.CommonResp {
 	err := &sdkws.CommonResp{
 		ErrCode: info.ErrCode,

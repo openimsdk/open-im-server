@@ -1,6 +1,7 @@
 package group
 
 import (
+	"Open_IM/internal/rpc/fault_tolerant"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -803,6 +804,18 @@ func SetErr(ctx context.Context, funcName string, err error, errCode *int32, err
 	trace_log.SetContextInfo(ctx, funcName, err, args)
 }
 
+func SetErrCodeMsg(ctx context.Context, funcName string, errCodeFrom int32, errMsgFrom string, errCode *int32, errMsg *string, args ...interface{}) {
+	*errCode = errCodeFrom
+	*errMsg = errMsgFrom
+	trace_log.SetContextInfo(ctx, funcName, constant.ToAPIErrWithErrCode(errCodeFrom), args)
+}
+
+func SetErrorForResp(err error, errCode *int32, errMsg *string) {
+	errInfo := constant.ToAPIErrWithErr(err)
+	*errCode = errInfo.ErrCode
+	*errMsg = errInfo.ErrMsg
+}
+
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
 	nCtx := trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	trace_log.SetRpcReqInfo(nCtx, utils.GetSelfFuncName(), req.String())
@@ -867,43 +880,43 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	return &resp, nil
 }
 
-func CheckAppManagerAndGroupAdmin(string) {
-
+func CheckPermission(ctx context.Context, groupID string, userID string) error {
+	return nil
 }
+
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	nCtx := trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	trace_log.SetRpcReqInfo(nCtx, utils.GetSelfFuncName(), req.String())
+	resp := pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}
 	defer trace_log.ShowLog(nCtx)
-	if !token_verify.IsManagerUserID(req.OpUserID) && !imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) {
-		log.NewError(req.OperationID, "IsManagerUserID IsGroupOwnerAdmin false ", req.GroupID, req.OpUserID)
-		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+	if err := CheckPermission(nCtx, req.GroupID, req.OpUserID); err != nil {
+		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		return &resp, nil
 	}
 	groupRequest := imdb.GroupRequest{}
 	utils.CopyStructFields(&groupRequest, req)
 	groupRequest.UserID = req.FromUserID
 	groupRequest.HandleUserID = req.OpUserID
 	groupRequest.HandledTime = time.Now()
-
-	err := imdb.UpdateGroupRequest(groupRequest)
-	if err != nil {
-		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), groupRequest)
-		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+	if err := (&imdb.GroupRequest{}).Update(nCtx, []*imdb.GroupRequest{&groupRequest}); err != nil {
+		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		return &resp, nil
 	}
-	request, err := imdb.GetGroupRequestByGroupIDAndUserID(req.GroupID, req.FromUserID)
+	groupInfo, err := rocksCache.GetGroupInfoFromCache(nCtx, req.GroupID)
 	if err != nil {
-		log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.GroupID, req.FromUserID)
-		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
-	}
-	groupInfo, err := rocksCache.GetGroupInfoFromCache(req.GroupID)
-	if err != nil {
-		log.NewError(req.OperationID, "GetGroupInfoFromCache failed ", err.Error(), req.GroupID, req.FromUserID)
-		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		return &resp, nil
 	}
 	if req.HandleResult == constant.GroupResponseAgree {
 		user, err := imdb.GetUserByUserID(req.FromUserID)
 		if err != nil {
-			log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), req.FromUserID)
-			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			return &resp, nil
+		}
+		request, err := (&imdb.GroupRequest{}).Take(nCtx, req.GroupID, req.FromUserID)
+		if err != nil {
+			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			return &resp, nil
 		}
 		member := imdb.GroupMember{}
 		member.GroupID = req.GroupID
@@ -914,6 +927,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		member.Nickname = user.Nickname
 		member.JoinSource = request.JoinSource
 		member.InviterUserID = request.InviterUserID
+		member.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
 		callbackResp := CallbackBeforeMemberJoinGroup(req.OperationID, &member, groupInfo.Ex)
 		if callbackResp.ErrCode != 0 {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
@@ -930,92 +944,46 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 				},
 			}, nil
 		}
-		err = imdb.InsertIntoGroupMember(member)
+		err = (&imdb.GroupMember{}).Create(nCtx, []*imdb.GroupMember{&member})
 		if err != nil {
-			log.NewError(req.OperationID, "GroupApplicationResponse failed ", err.Error(), member)
-			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
-		}
-		var sessionType int
-		if groupInfo.GroupType == constant.NormalGroup {
-			sessionType = constant.GroupChatType
-		} else {
-			sessionType = constant.SuperGroupChatType
-		}
-		var reqPb pbUser.SetConversationReq
-		reqPb.OperationID = req.OperationID
-		var c pbConversation.Conversation
-		conversation, err := imdb.GetConversation(req.FromUserID, utils.GetConversationIDBySessionType(req.GroupID, sessionType))
-		if err != nil {
-			c.OwnerUserID = req.FromUserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
-			c.ConversationType = int32(sessionType)
-			c.GroupID = req.GroupID
-			c.IsNotInGroup = false
-			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
-		} else {
-			c.OwnerUserID = conversation.OwnerUserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
-			c.RecvMsgOpt = conversation.RecvMsgOpt
-			c.ConversationType = int32(sessionType)
-			c.GroupID = req.GroupID
-			c.IsPinned = conversation.IsPinned
-			c.AttachedInfo = conversation.AttachedInfo
-			c.IsPrivateChat = conversation.IsPrivateChat
-			c.GroupAtType = conversation.GroupAtType
-			c.IsNotInGroup = false
-			c.Ex = conversation.Ex
-		}
-		reqPb.Conversation = &c
-		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
-		if etcdConn == nil {
-			errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-			log.NewError(req.OperationID, errMsg)
-			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
-		}
-		client := pbUser.NewUserClient(etcdConn)
-		respPb, err := client.SetConversation(context.Background(), &reqPb)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error())
-		} else {
-			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String())
+			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			return &resp, nil
 		}
 
-		etcdCacheConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
-		if etcdCacheConn == nil {
-			errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-			log.NewError(req.OperationID, errMsg)
-			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
+		etcdCacheConn, err := fault_tolerant.GetDefaultConn(config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
+		if err != nil {
+			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			return &resp, nil
 		}
 		cacheClient := pbCache.NewCacheClient(etcdCacheConn)
 		cacheResp, err := cacheClient.DelGroupMemberIDListFromCache(context.Background(), &pbCache.DelGroupMemberIDListFromCacheReq{OperationID: req.OperationID, GroupID: req.GroupID})
 		if err != nil {
-			log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc call failed ", err.Error())
-			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+			SetErr(nCtx, "DelGroupMemberIDListFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", req.GroupID)
+			return &resp, nil
 		}
 		if cacheResp.CommonResp.ErrCode != 0 {
-			log.NewError(req.OperationID, "DelGroupMemberIDListFromCache rpc logic call failed ", cacheResp.String())
-			return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+			SetErrCodeMsg(nCtx, "DelGroupMemberIDListFromCache", cacheResp.CommonResp.ErrCode, cacheResp.CommonResp.ErrMsg, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			return &resp, nil
 		}
 		if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
+			trace_log.SetContextInfo(ctx, "DelGroupMemberListHashFromCache", err, "groupID ", req.GroupID)
 		}
 		if err := rocksCache.DelJoinedGroupIDListFromCache(req.FromUserID); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.FromUserID, err.Error())
+			trace_log.SetContextInfo(ctx, "DelJoinedGroupIDListFromCache", err, "userID ", req.FromUserID)
 		}
 		if err := rocksCache.DelGroupMemberNumFromCache(req.GroupID); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+			trace_log.SetContextInfo(ctx, "DelJoinedGroupIDListFromCache", err, "groupID ", req.GroupID)
 		}
 		chat.GroupApplicationAcceptedNotification(req)
 		chat.MemberEnterNotification(req)
 	} else if req.HandleResult == constant.GroupResponseRefuse {
 		chat.GroupApplicationRejectedNotification(req)
 	} else {
-		log.Error(req.OperationID, "HandleResult failed ", req.HandleResult)
-		return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: constant.ErrArgs.ErrMsg}}, nil
+		SetErr(nCtx, "", constant.ErrArgs, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		return &resp, nil
 	}
 
-	log.NewInfo(req.OperationID, "rpc GroupApplicationResponse return ", pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}})
-	return &pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}, nil
+	return &resp, nil
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
