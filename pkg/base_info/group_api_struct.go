@@ -129,8 +129,7 @@ type GetUserReqGroupApplicationListReq struct {
 }
 
 type GetUserRespGroupApplicationResp struct {
-	CommResp
-	GroupRequestList []*open_im_sdk.GroupRequest `json:"-"`
+	GroupRequestList []*open_im_sdk.GroupRequest `json:"data"`
 }
 
 type GetGroupInfoReq struct {
