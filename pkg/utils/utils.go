@@ -36,6 +36,12 @@ func GetSelfFuncName() string {
 	pc, _, _, _ := runtime.Caller(1)
 	return cleanUpFuncName(runtime.FuncForPC(pc).Name())
 }
+
+func GetFuncName(skip int) string {
+	pc, _, _, _ := runtime.Caller(skip + 1)
+	return cleanUpFuncName(runtime.FuncForPC(pc).Name())
+}
+
 func cleanUpFuncName(funcName string) string {
 	end := strings.LastIndex(funcName, ".")
 	if end == -1 {
@@ -44,7 +50,7 @@ func cleanUpFuncName(funcName string) string {
 	return funcName[end+1:]
 }
 
-//Get the intersection of two slices
+// Get the intersection of two slices
 func Intersect(slice1, slice2 []uint32) []uint32 {
 	m := make(map[uint32]bool)
 	n := make([]uint32, 0)
@@ -60,7 +66,7 @@ func Intersect(slice1, slice2 []uint32) []uint32 {
 	return n
 }
 
-//Get the diff of two slices
+// Get the diff of two slices
 func Difference(slice1, slice2 []uint32) []uint32 {
 	m := make(map[uint32]bool)
 	n := make([]uint32, 0)
@@ -82,7 +88,7 @@ func Difference(slice1, slice2 []uint32) []uint32 {
 	return n
 }
 
-//Get the intersection of two slices
+// Get the intersection of two slices
 func IntersectString(slice1, slice2 []string) []string {
 	m := make(map[string]bool)
 	n := make([]string, 0)
@@ -98,7 +104,7 @@ func IntersectString(slice1, slice2 []string) []string {
 	return n
 }
 
-//Get the diff of two slices
+// Get the diff of two slices
 func DifferenceString(slice1, slice2 []string) []string {
 	m := make(map[string]bool)
 	n := make([]string, 0)
