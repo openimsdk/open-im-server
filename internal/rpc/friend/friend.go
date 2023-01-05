@@ -11,7 +11,6 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	cp "Open_IM/pkg/common/utils"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
 	pbFriend "Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
@@ -19,7 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
+	"github.com/OpenIMSDK/getcdv3"
 	"net"
 	"strconv"
 	"strings"
@@ -89,7 +88,7 @@ func (s *friendServer) Run() {
 		}
 	}
 	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
 		panic(utils.Wrap(err, "register friend module  rpc to etcd err"))
@@ -112,7 +111,7 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	if err != nil {
 		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(ctx, constant.ErrDatabase, err.Error())}, nil
 	}
-	etcdConn := getcdv3.GetDefaultConn(ctx, config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+	etcdConn := getcdv3.GetConn(ctx, config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
 	if etcdConn == nil {
 		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(ctx, constant.ErrInternalServer, "conn is nil")}, nil
 	}
