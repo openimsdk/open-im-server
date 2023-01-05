@@ -800,7 +800,7 @@ func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sd
 func SetErr(ctx context.Context, funcName string, err error, errCode *int32, errMsg *string, args ...interface{}) {
 	errInfo := constant.ToAPIErrWithErr(err)
 	*errCode = errInfo.ErrCode
-	*errMsg = errInfo.ErrMsg
+	*errMsg = errInfo.WrapErrMsg
 	trace_log.SetContextInfo(ctx, funcName, err, args)
 }
 
@@ -885,11 +885,10 @@ func CheckPermission(ctx context.Context, groupID string, userID string) error {
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
-	nCtx := trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	trace_log.SetRpcReqInfo(nCtx, utils.GetSelfFuncName(), req.String())
-	defer trace_log.ShowLog(nCtx)
+	trace_log.SetRpcReqInfo(trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID), utils.GetSelfFuncName(), req.String())
+	defer trace_log.ShowLog(ctx)
 	resp := pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}
-	if err := CheckPermission(nCtx, req.GroupID, req.OpUserID); err != nil {
+	if err := CheckPermission(ctx, req.GroupID, req.OpUserID); err != nil {
 		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 		return &resp, nil
 	}
@@ -898,11 +897,11 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	groupRequest.UserID = req.FromUserID
 	groupRequest.HandleUserID = req.OpUserID
 	groupRequest.HandledTime = time.Now()
-	if err := (&imdb.GroupRequest{}).Update(nCtx, []*imdb.GroupRequest{&groupRequest}); err != nil {
+	if err := (&imdb.GroupRequest{}).Update(ctx, []*imdb.GroupRequest{&groupRequest}); err != nil {
 		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 		return &resp, nil
 	}
-	groupInfo, err := rocksCache.GetGroupInfoFromCache(nCtx, req.GroupID)
+	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
 	if err != nil {
 		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 		return &resp, nil
@@ -913,7 +912,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 			return &resp, nil
 		}
-		request, err := (&imdb.GroupRequest{}).Take(nCtx, req.GroupID, req.FromUserID)
+		request, err := (&imdb.GroupRequest{}).Take(ctx, req.GroupID, req.FromUserID)
 		if err != nil {
 			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 			return &resp, nil
@@ -944,7 +943,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 				},
 			}, nil
 		}
-		err = (&imdb.GroupMember{}).Create(nCtx, []*imdb.GroupMember{&member})
+		err = (&imdb.GroupMember{}).Create(ctx, []*imdb.GroupMember{&member})
 		if err != nil {
 			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 			return &resp, nil
@@ -958,11 +957,11 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		cacheClient := pbCache.NewCacheClient(etcdCacheConn)
 		cacheResp, err := cacheClient.DelGroupMemberIDListFromCache(context.Background(), &pbCache.DelGroupMemberIDListFromCacheReq{OperationID: req.OperationID, GroupID: req.GroupID})
 		if err != nil {
-			SetErr(nCtx, "DelGroupMemberIDListFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", req.GroupID)
+			SetErr(ctx, "DelGroupMemberIDListFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", req.GroupID)
 			return &resp, nil
 		}
 		if cacheResp.CommonResp.ErrCode != 0 {
-			SetErrCodeMsg(nCtx, "DelGroupMemberIDListFromCache", cacheResp.CommonResp.ErrCode, cacheResp.CommonResp.ErrMsg, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			SetErrCodeMsg(ctx, "DelGroupMemberIDListFromCache", cacheResp.CommonResp.ErrCode, cacheResp.CommonResp.ErrMsg, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 			return &resp, nil
 		}
 		if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
@@ -979,7 +978,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	} else if req.HandleResult == constant.GroupResponseRefuse {
 		chat.GroupApplicationRejectedNotification(req)
 	} else {
-		SetErr(nCtx, "", constant.ErrArgs, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		SetErr(ctx, "", constant.ErrArgs, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 		return &resp, nil
 	}
 
