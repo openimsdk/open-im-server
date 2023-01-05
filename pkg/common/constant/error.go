@@ -62,6 +62,18 @@ var (
 	ErrTokenDifferentUserID     = ErrInfo{TokenDifferentUserIDError, "TokenDifferentUserIDError", ""}
 )
 
+func NewErrNetwork(err error) error {
+	newErrNetwork := ErrNetwork
+	newErrNetwork.DetailErrMsg = err.Error()
+	return ErrNetwork
+}
+
+func NewErrData(err error) error {
+	newErrData := ErrData
+	newErrData.DetailErrMsg = err.Error()
+	return ErrNetwork
+}
+
 func toDetail(err error, info ErrInfo) ErrInfo {
 	errInfo := info
 	errInfo.DetailErrMsg = err.Error()

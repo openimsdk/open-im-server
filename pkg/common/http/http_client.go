@@ -67,13 +67,13 @@ func CallBackPostReturn(url, callbackCommand string, input interface{}, output c
 		if failedContinue != nil && *failedContinue {
 			return constant.ErrCallbackContinue
 		}
-		return constant.ErrNetwork
+		return constant.NewErrNetwork(err)
 	}
 	if err = json.Unmarshal(b, output); err != nil {
 		if failedContinue != nil && *failedContinue {
 			return constant.ErrCallbackContinue
 		}
-		return constant.ErrData
+		return constant.NewErrData(err)
 	}
 	return output.Parse()
 }
