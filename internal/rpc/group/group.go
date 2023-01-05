@@ -755,14 +755,21 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 	return &resp, nil
 }
 
-func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (*pbGroup.GetGroupMembersInfoResp, error) {
-	log.NewInfo(req.OperationID, "GetGroupMembersInfo args ", req.String())
-	var resp pbGroup.GetGroupMembersInfoResp
+func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (resp *pbGroup.GetGroupMembersInfoResp, err error) {
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "rpc req", req.String(), "rpc resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+
+	resp = &pbGroup.GetGroupMembersInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
 	resp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	for _, userID := range req.MemberList {
 		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, userID)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, userID, err.Error())
+			var errResult error
+
 			continue
 		}
 		var memberNode open_im_sdk.GroupMemberFullInfo
@@ -770,8 +777,9 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 		memberNode.JoinTime = int32(groupMember.JoinTime.Unix())
 		resp.MemberList = append(resp.MemberList, &memberNode)
 	}
-	log.NewInfo(req.OperationID, "GetGroupMembersInfo rpc return ", resp.String())
-	return &resp, nil
+	if
+	SetErr(ctx, "GetGroupMemberInfoFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", req.GroupID)
+	return resp, nil
 }
 
 func FillGroupInfoByGroupID(operationID, groupID string, groupInfo *open_im_sdk.GroupInfo) error {
@@ -816,22 +824,21 @@ func SetErrorForResp(err error, errCode *int32, errMsg *string) {
 	*errMsg = errInfo.ErrMsg
 }
 
-func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
+func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (resp *pbGroup.GetGroupApplicationListResp, err error) {
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "rpc req ", req.String(), "rpc resp ", resp.String())
 		trace_log.ShowLog(ctx)
 	}()
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 
-	resp := pbGroup.GetGroupApplicationListResp{}
+	resp = &pbGroup.GetGroupApplicationListResp{CommonResp: &open_im_sdk.CommonResp{}}
 	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
 	if err != nil {
 		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
-		return &resp, nil
+		return resp, nil
 	}
 	var errResult error
 	trace_log.SetContextInfo(ctx, "GetRecvGroupApplicationList", nil, " FromUserID: ", req.FromUserID, "GroupApplicationList: ", reply)
-
 	for _, v := range reply {
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
 		err := FillGroupInfoByGroupID(req.OperationID, v.GroupID, node.GroupInfo)
@@ -852,10 +859,10 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	}
 	if errResult != nil && len(resp.GroupRequestList) == 0 {
 		SetErr(ctx, "", errResult, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
-		return &resp, nil
+		return resp, nil
 	}
 	trace_log.SetRpcRespInfo(ctx, utils.GetSelfFuncName(), resp.String())
-	return &resp, nil
+	return resp, nil
 }
 
 func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (resp *pbGroup.GetGroupsInfoResp, err error) {
@@ -865,7 +872,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	}()
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 
-	resp = &pbGroup.GetGroupsInfoResp{}
+	resp = &pbGroup.GetGroupsInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
 	groupsInfoList := make([]*open_im_sdk.GroupInfo, 0)
 	for _, groupID := range req.GroupIDList {
 		groupInfoFromRedis, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
@@ -935,22 +942,12 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		member.JoinSource = request.JoinSource
 		member.InviterUserID = request.InviterUserID
 		member.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
-		callbackResp := CallbackBeforeMemberJoinGroup(req.OperationID, &member, groupInfo.Ex)
-		if callbackResp.ErrCode != 0 {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
+		err = CallbackBeforeMemberJoinGroup(ctx, req.OperationID, &member, groupInfo.Ex)
+		if err != nil{
+			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			return &resp, nil
 		}
-		if callbackResp.ActionCode != constant.ActionAllow {
-			if callbackResp.ErrCode == 0 {
-				callbackResp.ErrCode = 201
-			}
-			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
-			return &pbGroup.GroupApplicationResponseResp{
-				CommonResp: &pbGroup.CommonResp{
-					ErrCode: int32(callbackResp.ErrCode),
-					ErrMsg:  callbackResp.ErrMsg,
-				},
-			}, nil
-		}
+
 		err = (&imdb.GroupMember{}).Create(ctx, []*imdb.GroupMember{&member})
 		if err != nil {
 			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
