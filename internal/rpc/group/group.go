@@ -817,18 +817,18 @@ func SetErrorForResp(err error, errCode *int32, errMsg *string) {
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
-	nCtx := trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	trace_log.SetRpcReqInfo(nCtx, utils.GetSelfFuncName(), req.String())
-	defer trace_log.ShowLog(nCtx)
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	trace_log.SetRpcReqInfo(ctx, utils.GetSelfFuncName(), req.String())
+	defer trace_log.ShowLog(ctx)
 
 	resp := pbGroup.GetGroupApplicationListResp{}
 	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
 	if err != nil {
-		SetErr(nCtx, "", err, &resp.ErrCode, &resp.ErrMsg, "userID ", req.FromUserID)
+		SetErr(ctx, "", err, &resp.ErrCode, &resp.ErrMsg, "userID ", req.FromUserID)
 		return &resp, nil
 	}
 	var errResult error
-	trace_log.SetContextInfo(nCtx, "GetRecvGroupApplicationList", nil, " FromUserID: ", req.FromUserID, "GroupApplicationList: ", reply)
+	trace_log.SetContextInfo(ctx, "GetRecvGroupApplicationList", nil, " FromUserID: ", req.FromUserID, "GroupApplicationList: ", reply)
 
 	for _, v := range reply {
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
@@ -839,7 +839,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 			}
 			continue
 		}
-		trace_log.SetContextInfo(nCtx, "FillGroupInfoByGroupID ", nil, " groupID: ", v.GroupID, " groupInfo: ", node.GroupInfo)
+		trace_log.SetContextInfo(ctx, "FillGroupInfoByGroupID ", nil, " groupID: ", v.GroupID, " groupInfo: ", node.GroupInfo)
 		err = FillPublicUserInfoByUserID(req.OperationID, v.UserID, node.UserInfo)
 		if err != nil {
 			errResult = err
@@ -849,24 +849,24 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
 	if errResult != nil && len(resp.GroupRequestList) == 0 {
-		SetErr(nCtx, "", errResult, &resp.ErrCode, &resp.ErrMsg)
+		SetErr(ctx, "", errResult, &resp.ErrCode, &resp.ErrMsg)
 		return &resp, nil
 	}
-	trace_log.SetRpcRespInfo(nCtx, utils.GetSelfFuncName(), resp.String())
+	trace_log.SetRpcRespInfo(ctx, utils.GetSelfFuncName(), resp.String())
 	return &resp, nil
 }
 
 func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (*pbGroup.GetGroupsInfoResp, error) {
-	nCtx := trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	trace_log.SetRpcReqInfo(nCtx, utils.GetSelfFuncName(), req.String())
-	defer trace_log.ShowLog(nCtx)
+	trace_log.SetRpcReqInfo(trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID), utils.GetSelfFuncName(), req.String())
+	defer trace_log.ShowLog(ctx)
 
 	resp := pbGroup.GetGroupsInfoResp{}
 	groupsInfoList := make([]*open_im_sdk.GroupInfo, 0)
 	for _, groupID := range req.GroupIDList {
-		groupInfoFromRedis, err := rocksCache.GetGroupInfoFromCache(groupID)
+		groupInfoFromRedis, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
 		if err != nil {
-			SetErr(nCtx, "", err, &resp.ErrCode, &resp.ErrMsg, "groupID ", groupID)
+			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			SetErr(ctx, "", err, &resp.ErrCode, &resp.ErrMsg, "groupID ", groupID)
 			continue
 		}
 		var groupInfo open_im_sdk.GroupInfo
@@ -876,7 +876,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	}
 	resp.GroupInfoList = groupsInfoList
 
-	trace_log.SetRpcRespInfo(nCtx, utils.GetSelfFuncName(), resp.String())
+	trace_log.SetRpcRespInfo(ctx, utils.GetSelfFuncName(), resp.String())
 	return &resp, nil
 }
 
@@ -885,7 +885,7 @@ func CheckPermission(ctx context.Context, groupID string, userID string) (err er
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID)
 	}()
 	if !token_verify.IsManagerUserID(userID) && !imdb.IsGroupOwnerAdmin(groupID, userID) {
-		return constant.ErrNoPermission
+		return utils.Wrap(constant.ErrNoPermission, utils.GetSelfFuncName())
 	}
 	return nil
 }
