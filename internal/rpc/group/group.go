@@ -887,6 +887,7 @@ func CheckPermission(ctx context.Context, groupID string, userID string) error {
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	nCtx := trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	trace_log.SetRpcReqInfo(nCtx, utils.GetSelfFuncName(), req.String())
+	defer trace_log.ShowLog(nCtx)
 	resp := pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}
 	defer trace_log.ShowLog(nCtx)
 	if err := CheckPermission(nCtx, req.GroupID, req.OpUserID); err != nil {
