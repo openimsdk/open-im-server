@@ -14,12 +14,12 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (isPass bool, err error) {
+func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "req", req, "isPass", isPass, "err", err)
+		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "req", req)
 	}()
 	if !config.Config.Callback.CallbackBeforeCreateGroup.Enable {
-		return true, nil
+		return nil
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), req.String())
 	commonCallbackReq := &cbApi.CallbackBeforeCreateGroupReq{
@@ -34,9 +34,9 @@ func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq)
 	}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(req.OperationID, utils.GetSelfFuncName(), commonCallbackReq, *resp)
-	isPass, err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeCreateGroupCommand, commonCallbackReq,
+	err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeCreateGroupCommand, commonCallbackReq,
 		resp, config.Config.Callback.CallbackBeforeCreateGroup.CallbackTimeOut, &config.Config.Callback.CallbackBeforeCreateGroup.CallbackFailedContinue)
-	if isPass && err == nil {
+	if err == nil {
 		if resp.GroupID != nil {
 			req.GroupInfo.GroupID = *resp.GroupID
 		}
@@ -74,16 +74,16 @@ func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq)
 			req.GroupInfo.LookMemberInfo = *resp.LookMemberInfo
 		}
 	}
-	return isPass, err
+	return err
 }
 
-func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, groupMember *im_mysql_model.GroupMember, groupEx string) (isPass bool, err error) {
+func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, groupMember *im_mysql_model.GroupMember, groupEx string) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, "CallbackBeforeMemberJoinGroup", err, "groupMember", *groupMember, "groupEx", groupEx, "isPass", isPass)
+		trace_log.SetContextInfo(ctx, "CallbackBeforeMemberJoinGroup", err, "groupMember", *groupMember, "groupEx", groupEx)
 	}()
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackBeforeMemberJoinGroup.Enable {
-		return true, nil
+		return nil
 	}
 	log.NewDebug(operationID, "args: ", *groupMember)
 	callbackReq := cbApi.CallbackBeforeMemberJoinGroupReq{
@@ -97,9 +97,9 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, grou
 	resp := &cbApi.CallbackBeforeMemberJoinGroupResp{
 		CommonCallbackResp: &callbackResp,
 	}
-	isPass, err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeMemberJoinGroupCommand, callbackReq,
+	err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeMemberJoinGroupCommand, callbackReq,
 		resp, config.Config.Callback.CallbackBeforeMemberJoinGroup.CallbackTimeOut, &config.Config.Callback.CallbackBeforeMemberJoinGroup.CallbackFailedContinue)
-	if isPass && err == nil {
+	if err == nil {
 		if resp.MuteEndTime != nil {
 			groupMember.MuteEndTime = utils.UnixSecondToTime(*resp.MuteEndTime)
 		}
@@ -116,16 +116,16 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, grou
 			groupMember.RoleLevel = *resp.RoleLevel
 		}
 	}
-	return isPass, err
+	return err
 }
 
-func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (isPass bool, err error) {
+func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (err error) {
 	defer func() {
 		trace_log.SetContextInfo(ctx, "CallbackBeforeSetGroupMemberInfo", err, "req", *req)
 	}()
 	callbackResp := cbApi.CommonCallbackResp{OperationID: req.OperationID}
 	if !config.Config.Callback.CallbackBeforeSetGroupMemberInfo.Enable {
-		return true, nil
+		return nil
 	}
 	callbackReq := cbApi.CallbackBeforeSetGroupMemberInfoReq{
 		CallbackCommand: constant.CallbackBeforeSetGroupMemberInfoCommand,
@@ -148,9 +148,9 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroup
 	resp := &cbApi.CallbackBeforeSetGroupMemberInfoResp{
 		CommonCallbackResp: &callbackResp,
 	}
-	isPass, err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSetGroupMemberInfoCommand, callbackReq,
+	err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSetGroupMemberInfoCommand, callbackReq,
 		resp, config.Config.Callback.CallbackBeforeSetGroupMemberInfo.CallbackTimeOut, &config.Config.Callback.CallbackBeforeSetGroupMemberInfo.CallbackFailedContinue)
-	if isPass && err == nil {
+	if err == nil {
 		if resp.FaceURL != nil {
 			req.FaceURL = &wrapperspb.StringValue{Value: *resp.FaceURL}
 		}
@@ -164,5 +164,5 @@ func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroup
 			req.Ex = &wrapperspb.StringValue{Value: *resp.Ex}
 		}
 	}
-	return isPass, err
+	return err
 }

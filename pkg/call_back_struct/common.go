@@ -1,7 +1,7 @@
 package call_back_struct
 
 import (
-	"errors"
+	"Open_IM/pkg/common/constant"
 	"fmt"
 )
 
@@ -26,26 +26,25 @@ type CommonCallbackReq struct {
 }
 
 type CallbackResp interface {
-	Parse() (IsPass bool, err error)
+	Parse() (err error)
 }
 
 type CommonCallbackResp struct {
 	ActionCode  int    `json:"actionCode"`
-	ErrCode     int    `json:"errCode"`
+	ErrCode     int32  `json:"errCode"`
 	ErrMsg      string `json:"errMsg"`
 	OperationID string `json:"operationID"`
 }
 
-func (c *CommonCallbackResp) Parse() (isPass bool, err error) {
-	if c.ActionCode != 0 {
-		err = errors.New(fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg))
-		return false, err
+func (c *CommonCallbackResp) Parse() (err error) {
+	if c.ActionCode != constant.NoError || c.ErrCode != constant.NoError {
+		newErr := constant.ErrCallback
+		newErr.ErrCode = c.ErrCode
+		newErr.DetailErrMsg = fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg)
+		err = newErr
+		return
 	}
-	if c.ErrCode != 0 {
-		err = errors.New(fmt.Sprintf("callback response error actionCode is %d, errCode is %d, errMsg is %s", c.ActionCode, c.ErrCode, c.ErrMsg))
-		return false, err
-	}
-	return true, nil
+	return
 }
 
 type UserStatusBaseCallback struct {

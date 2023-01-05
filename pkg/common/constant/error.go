@@ -10,9 +10,9 @@ import (
 )
 
 type ErrInfo struct {
-	ErrCode    int32
-	ErrMsg     string
-	WrapErrMsg string
+	ErrCode      int32
+	ErrMsg       string
+	DetailErrMsg string
 }
 
 func (e ErrInfo) Error() string {
@@ -24,13 +24,15 @@ func (e ErrInfo) Code() int32 {
 }
 
 var (
-	ErrNone           = ErrInfo{0, "", ""}
-	ErrRpcConn        = ErrInfo{GRPCConnIsNil, "grpc conn is nil", ""}
-	ErrArgs           = ErrInfo{ArgsError, "ArgsError", ""}
-	ErrDatabase       = ErrInfo{DatabaseError, "DatabaseError", ""}
-	ErrInternalServer = ErrInfo{ServerInternalError, "ServerInternalError", ""}
-	ErrNetwork        = ErrInfo{NetworkError, "NetworkError", ""}
-	ErrNoPermission   = ErrInfo{NoPermissionError, "NoPermissionError", ""}
+	ErrNone             = ErrInfo{0, "", ""}
+	ErrRpcConn          = ErrInfo{GRPCConnIsNil, "grpc conn is nil", ""}
+	ErrArgs             = ErrInfo{ArgsError, "ArgsError", ""}
+	ErrDatabase         = ErrInfo{DatabaseError, "DatabaseError", ""}
+	ErrInternalServer   = ErrInfo{ServerInternalError, "ServerInternalError", ""}
+	ErrNetwork          = ErrInfo{NetworkError, "NetworkError", ""}
+	ErrNoPermission     = ErrInfo{NoPermissionError, "NoPermissionError", ""}
+	ErrCallback         = ErrInfo{ErrMsg: "CallbackError"}
+	ErrCallbackContinue = ErrInfo{ErrMsg: "CallbackContinueError"}
 
 	ErrUserIDNotFound  = ErrInfo{UserIDNotFoundError, "UserIDNotFoundError", ""}
 	ErrGroupIDNotFound = ErrInfo{GroupIDNotFoundError, "GroupIDNotFoundError", ""}
@@ -62,7 +64,7 @@ var (
 
 func toDetail(err error, info ErrInfo) ErrInfo {
 	errInfo := info
-	errInfo.WrapErrMsg = err.Error()
+	errInfo.DetailErrMsg = err.Error()
 	return errInfo
 }
 

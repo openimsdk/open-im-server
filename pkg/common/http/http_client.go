@@ -8,6 +8,7 @@ package http
 
 import (
 	cbApi "Open_IM/pkg/call_back_struct"
+	"Open_IM/pkg/common/constant"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
@@ -57,22 +58,22 @@ func Post(url string, data interface{}, timeOutSecond int) (content []byte, err 
 	return result, nil
 }
 
-func CallBackPostReturn(url, callbackCommand string, input interface{}, output cbApi.CallbackResp, timeOut int, failedContinue *bool) (bool, error) {
+func CallBackPostReturn(url, callbackCommand string, input interface{}, output cbApi.CallbackResp, timeOut int, failedContinue *bool) error {
 	v := urlLib.Values{}
 	v.Set("callbackCommand", callbackCommand)
 	url = url + "?" + v.Encode()
 	b, err := Post(url, input, timeOut)
 	if err != nil {
-		if failedContinue != nil {
-			return *failedContinue, err
+		if failedContinue != nil && *failedContinue {
+			return constant.ErrCallbackContinue
 		}
-		return true, err
+		return constant.ErrNetwork
 	}
 	if err = json.Unmarshal(b, output); err != nil {
-		if failedContinue != nil {
-			return *failedContinue, err
+		if failedContinue != nil && *failedContinue {
+			return constant.ErrCallbackContinue
 		}
-		return true, err
+		return constant.ErrData
 	}
 	return output.Parse()
 }
