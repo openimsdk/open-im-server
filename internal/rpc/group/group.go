@@ -856,17 +856,19 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	return &resp, nil
 }
 
-func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (*pbGroup.GetGroupsInfoResp, error) {
-	trace_log.SetRpcReqInfo(trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID), utils.GetSelfFuncName(), req.String())
-	defer trace_log.ShowLog(ctx)
+func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (resp *pbGroup.GetGroupsInfoResp, err error) {
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "rpc req ", req.String(), "rpc resp ", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 
-	resp := pbGroup.GetGroupsInfoResp{}
+	resp = &pbGroup.GetGroupsInfoResp{}
 	groupsInfoList := make([]*open_im_sdk.GroupInfo, 0)
 	for _, groupID := range req.GroupIDList {
 		groupInfoFromRedis, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
 		if err != nil {
 			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
-			SetErr(ctx, "", err, &resp.ErrCode, &resp.ErrMsg, "groupID ", groupID)
 			continue
 		}
 		var groupInfo open_im_sdk.GroupInfo
@@ -876,8 +878,7 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	}
 	resp.GroupInfoList = groupsInfoList
 
-	trace_log.SetRpcRespInfo(ctx, utils.GetSelfFuncName(), resp.String())
-	return &resp, nil
+	return resp, nil
 }
 
 func CheckPermission(ctx context.Context, groupID string, userID string) (err error) {
