@@ -40,8 +40,7 @@ func (*Group) Delete(ctx context.Context, groupIDList []string) (err error) {
 
 func (*Group) UpdateByMap(ctx context.Context, groupID string, args map[string]interface{}) (err error) {
 	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "args", args)
-	err = utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ?", groupID).Updates(args).Error, "")
-	return err
+	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ?", groupID).Updates(args).Error, "")
 }
 
 func (*Group) Update(ctx context.Context, groups []*Group) (err error) {
