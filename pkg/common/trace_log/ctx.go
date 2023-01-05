@@ -80,11 +80,6 @@ func SetContextInfo(ctx context.Context, funcName string, err error, args ...int
 	funcInfo.FuncName = utils.GetSelfFuncName()
 	funcInfo.Err = err
 	*t.Funcs = append(*t.Funcs, funcInfo)
-	if err != nil {
-		log.NewError(t.OperationID, funcName, "error", err, "args", funcInfo.Args)
-	} else {
-		log.NewInfo(t.OperationID, funcName, "args", funcInfo.Args)
-	}
 }
 
 func SetRpcReqInfo(ctx context.Context, funcName string, req string) {
