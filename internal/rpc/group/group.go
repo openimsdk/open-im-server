@@ -880,14 +880,20 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 	return &resp, nil
 }
 
-func CheckPermission(ctx context.Context, groupID string, userID string) error {
+func CheckPermission(ctx context.Context, groupID string, userID string) (err error) {
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID)
+	}()
+	if !token_verify.IsManagerUserID(userID) && !imdb.IsGroupOwnerAdmin(groupID, userID) {
+		return constant.ErrNoPermission
+	}
 	return nil
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	trace_log.SetRpcReqInfo(trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID), utils.GetSelfFuncName(), req.String())
 	defer trace_log.ShowLog(ctx)
-	resp := pbGroup.GroupApplicationResponseResp{CommonResp: &pbGroup.CommonResp{}}
+	resp := pbGroup.GroupApplicationResponseResp{CommonResp: &open_im_sdk.CommonResp{}}
 	if err := CheckPermission(ctx, req.GroupID, req.OpUserID); err != nil {
 		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 		return &resp, nil
