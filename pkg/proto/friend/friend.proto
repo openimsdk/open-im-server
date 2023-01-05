@@ -3,11 +3,6 @@ import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 option go_package = "Open_IM/pkg/proto/friend;friend";
 package friend;
 
-message CommonResp{
-  int32   errCode = 1;
-  string  errMsg = 2;
-}
-
 message CommID{
   string OpUserID = 1;
   string OperationID = 2;
@@ -20,10 +15,8 @@ message GetFriendsInfoReq{
     CommID CommID = 1;
 }
 message GetFriendInfoResp{
-  int32  ErrCode = 1;
-  string ErrMsg = 2;
-  repeated server_api_params.FriendInfo FriendInfoList = 3;
-//  int32 IsBlack = 4;
+  server_api_params.CommonResp commonResp = 1;
+  repeated server_api_params.FriendInfo FriendInfoList = 2;
 }
 
 
@@ -32,7 +25,7 @@ message AddFriendReq{
   string ReqMsg = 2;
 }
 message AddFriendResp{
-    CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -47,7 +40,7 @@ message UserIDResult{
   int32 Result = 2;
 }
 message ImportFriendResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
   repeated UserIDResult UserIDResultList = 2;
 }
 
@@ -56,9 +49,8 @@ message GetFriendApplyListReq{
   CommID CommID = 1;
 }
 message GetFriendApplyListResp{
-  int32   ErrCode = 1;
-  string  ErrMsg = 2;
-  repeated server_api_params.FriendRequest FriendRequestList = 3;
+  server_api_params.CommonResp commonResp = 1;
+  repeated server_api_params.FriendRequest FriendRequestList = 2;
 }
 
 
@@ -66,9 +58,8 @@ message GetFriendListReq{
     CommID CommID = 1;
 }
 message GetFriendListResp{
-  int32   ErrCode = 1;
-  string  ErrMsg = 2;
-  repeated server_api_params.FriendInfo FriendInfoList = 3;
+  server_api_params.CommonResp commonResp = 1;
+  repeated server_api_params.FriendInfo FriendInfoList = 2;
 }
 
 
@@ -84,16 +75,15 @@ message RemoveBlacklistReq{
   CommID CommID = 1;
 }
 message RemoveBlacklistResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 message GetBlacklistReq{
   CommID CommID = 1;
 }
 message GetBlacklistResp{
-  int32   ErrCode = 1;
-  string  ErrMsg = 2;
-  repeated server_api_params.PublicUserInfo BlackUserInfoList = 3;
+  server_api_params.CommonResp commonResp = 1;
+  repeated server_api_params.PublicUserInfo BlackUserInfoList = 2;
 }
 
 
@@ -101,9 +91,8 @@ message IsFriendReq{
   CommID CommID = 1;
 }
 message IsFriendResp{
-  int32   ErrCode = 1;
-  string  ErrMsg = 2;
-  bool    Response = 3;
+  server_api_params.CommonResp commonResp = 1;
+  bool    Response = 2;
 }
 
 
@@ -111,9 +100,8 @@ message IsInBlackListReq{
   CommID CommID = 1;
 }
 message IsInBlackListResp{
-  int32   ErrCode = 1;
-  string  ErrMsg = 2;
-  bool    Response = 3;
+  server_api_params.CommonResp commonResp = 1;
+  bool    Response = 2;
 }
 
 
@@ -121,7 +109,7 @@ message DeleteFriendReq{
   CommID CommID = 1;
 }
 message DeleteFriendResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 //process
@@ -131,7 +119,7 @@ message AddFriendResponseReq{
   string handleMsg = 3;
 }
 message AddFriendResponseResp{
-  CommonResp CommonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 message SetFriendRemarkReq{
@@ -139,16 +127,15 @@ message SetFriendRemarkReq{
   string Remark = 2;
 }
 message SetFriendRemarkResp{
-  CommonResp CommonResp = 1;
+ server_api_params.CommonResp commonResp = 1;
 }
 
 message GetSelfApplyListReq{
   CommID CommID = 1;
 }
 message GetSelfApplyListResp{
-  int32   ErrCode = 1;
-  string  ErrMsg = 2;
-  repeated server_api_params.FriendRequest FriendRequestList = 3;
+  server_api_params.CommonResp commonResp = 1;
+  repeated server_api_params.FriendRequest FriendRequestList = 2;
 }
 
 service friend{

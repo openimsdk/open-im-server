@@ -24,52 +24,6 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type CommonResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *CommonResp) Reset()         { *m = CommonResp{} }
-func (m *CommonResp) String() string { return proto.CompactTextString(m) }
-func (*CommonResp) ProtoMessage()    {}
-func (*CommonResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{0}
-}
-func (m *CommonResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CommonResp.Unmarshal(m, b)
-}
-func (m *CommonResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CommonResp.Marshal(b, m, deterministic)
-}
-func (dst *CommonResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CommonResp.Merge(dst, src)
-}
-func (m *CommonResp) XXX_Size() int {
-	return xxx_messageInfo_CommonResp.Size(m)
-}
-func (m *CommonResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_CommonResp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CommonResp proto.InternalMessageInfo
-
-func (m *CommonResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *CommonResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
 type CommID struct {
 	OpUserID             string   `protobuf:"bytes,1,opt,name=OpUserID" json:"OpUserID,omitempty"`
 	OperationID          string   `protobuf:"bytes,2,opt,name=OperationID" json:"OperationID,omitempty"`
@@ -84,7 +38,7 @@ func (m *CommID) Reset()         { *m = CommID{} }
 func (m *CommID) String() string { return proto.CompactTextString(m) }
 func (*CommID) ProtoMessage()    {}
 func (*CommID) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{1}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{0}
 }
 func (m *CommID) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CommID.Unmarshal(m, b)
@@ -143,7 +97,7 @@ func (m *GetFriendsInfoReq) Reset()         { *m = GetFriendsInfoReq{} }
 func (m *GetFriendsInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetFriendsInfoReq) ProtoMessage()    {}
 func (*GetFriendsInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{2}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{1}
 }
 func (m *GetFriendsInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendsInfoReq.Unmarshal(m, b)
@@ -171,9 +125,8 @@ func (m *GetFriendsInfoReq) GetCommID() *CommID {
 }
 
 type GetFriendInfoResp struct {
-	ErrCode              int32                `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string               `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	FriendInfoList       []*sdk_ws.FriendInfo `protobuf:"bytes,3,rep,name=FriendInfoList" json:"FriendInfoList,omitempty"`
+	CommonResp           *sdk_ws.CommonResp   `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	FriendInfoList       []*sdk_ws.FriendInfo `protobuf:"bytes,2,rep,name=FriendInfoList" json:"FriendInfoList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -183,7 +136,7 @@ func (m *GetFriendInfoResp) Reset()         { *m = GetFriendInfoResp{} }
 func (m *GetFriendInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetFriendInfoResp) ProtoMessage()    {}
 func (*GetFriendInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{3}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{2}
 }
 func (m *GetFriendInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendInfoResp.Unmarshal(m, b)
@@ -203,18 +156,11 @@ func (m *GetFriendInfoResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetFriendInfoResp proto.InternalMessageInfo
 
-func (m *GetFriendInfoResp) GetErrCode() int32 {
+func (m *GetFriendInfoResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
-}
-
-func (m *GetFriendInfoResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
+	return nil
 }
 
 func (m *GetFriendInfoResp) GetFriendInfoList() []*sdk_ws.FriendInfo {
@@ -236,7 +182,7 @@ func (m *AddFriendReq) Reset()         { *m = AddFriendReq{} }
 func (m *AddFriendReq) String() string { return proto.CompactTextString(m) }
 func (*AddFriendReq) ProtoMessage()    {}
 func (*AddFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{4}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{3}
 }
 func (m *AddFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddFriendReq.Unmarshal(m, b)
@@ -271,17 +217,17 @@ func (m *AddFriendReq) GetReqMsg() string {
 }
 
 type AddFriendResp struct {
-	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=CommonResp" json:"CommonResp,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	CommonResp           *sdk_ws.CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *AddFriendResp) Reset()         { *m = AddFriendResp{} }
 func (m *AddFriendResp) String() string { return proto.CompactTextString(m) }
 func (*AddFriendResp) ProtoMessage()    {}
 func (*AddFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{5}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{4}
 }
 func (m *AddFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddFriendResp.Unmarshal(m, b)
@@ -301,7 +247,7 @@ func (m *AddFriendResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AddFriendResp proto.InternalMessageInfo
 
-func (m *AddFriendResp) GetCommonResp() *CommonResp {
+func (m *AddFriendResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
 		return m.CommonResp
 	}
@@ -322,7 +268,7 @@ func (m *ImportFriendReq) Reset()         { *m = ImportFriendReq{} }
 func (m *ImportFriendReq) String() string { return proto.CompactTextString(m) }
 func (*ImportFriendReq) ProtoMessage()    {}
 func (*ImportFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{6}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{5}
 }
 func (m *ImportFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ImportFriendReq.Unmarshal(m, b)
@@ -382,7 +328,7 @@ func (m *UserIDResult) Reset()         { *m = UserIDResult{} }
 func (m *UserIDResult) String() string { return proto.CompactTextString(m) }
 func (*UserIDResult) ProtoMessage()    {}
 func (*UserIDResult) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{7}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{6}
 }
 func (m *UserIDResult) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserIDResult.Unmarshal(m, b)
@@ -417,18 +363,18 @@ func (m *UserIDResult) GetResult() int32 {
 }
 
 type ImportFriendResp struct {
-	CommonResp           *CommonResp     `protobuf:"bytes,1,opt,name=CommonResp" json:"CommonResp,omitempty"`
-	UserIDResultList     []*UserIDResult `protobuf:"bytes,2,rep,name=UserIDResultList" json:"UserIDResultList,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+	CommonResp           *sdk_ws.CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	UserIDResultList     []*UserIDResult    `protobuf:"bytes,2,rep,name=UserIDResultList" json:"UserIDResultList,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *ImportFriendResp) Reset()         { *m = ImportFriendResp{} }
 func (m *ImportFriendResp) String() string { return proto.CompactTextString(m) }
 func (*ImportFriendResp) ProtoMessage()    {}
 func (*ImportFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{8}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{7}
 }
 func (m *ImportFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ImportFriendResp.Unmarshal(m, b)
@@ -448,7 +394,7 @@ func (m *ImportFriendResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ImportFriendResp proto.InternalMessageInfo
 
-func (m *ImportFriendResp) GetCommonResp() *CommonResp {
+func (m *ImportFriendResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
 		return m.CommonResp
 	}
@@ -473,7 +419,7 @@ func (m *GetFriendApplyListReq) Reset()         { *m = GetFriendApplyListReq{} }
 func (m *GetFriendApplyListReq) String() string { return proto.CompactTextString(m) }
 func (*GetFriendApplyListReq) ProtoMessage()    {}
 func (*GetFriendApplyListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{9}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{8}
 }
 func (m *GetFriendApplyListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendApplyListReq.Unmarshal(m, b)
@@ -501,9 +447,8 @@ func (m *GetFriendApplyListReq) GetCommID() *CommID {
 }
 
 type GetFriendApplyListResp struct {
-	ErrCode              int32                   `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string                  `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	FriendRequestList    []*sdk_ws.FriendRequest `protobuf:"bytes,3,rep,name=FriendRequestList" json:"FriendRequestList,omitempty"`
+	CommonResp           *sdk_ws.CommonResp      `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	FriendRequestList    []*sdk_ws.FriendRequest `protobuf:"bytes,2,rep,name=FriendRequestList" json:"FriendRequestList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
 	XXX_unrecognized     []byte                  `json:"-"`
 	XXX_sizecache        int32                   `json:"-"`
@@ -513,7 +458,7 @@ func (m *GetFriendApplyListResp) Reset()         { *m = GetFriendApplyListResp{}
 func (m *GetFriendApplyListResp) String() string { return proto.CompactTextString(m) }
 func (*GetFriendApplyListResp) ProtoMessage()    {}
 func (*GetFriendApplyListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{10}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{9}
 }
 func (m *GetFriendApplyListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendApplyListResp.Unmarshal(m, b)
@@ -533,18 +478,11 @@ func (m *GetFriendApplyListResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetFriendApplyListResp proto.InternalMessageInfo
 
-func (m *GetFriendApplyListResp) GetErrCode() int32 {
+func (m *GetFriendApplyListResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
-}
-
-func (m *GetFriendApplyListResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
+	return nil
 }
 
 func (m *GetFriendApplyListResp) GetFriendRequestList() []*sdk_ws.FriendRequest {
@@ -565,7 +503,7 @@ func (m *GetFriendListReq) Reset()         { *m = GetFriendListReq{} }
 func (m *GetFriendListReq) String() string { return proto.CompactTextString(m) }
 func (*GetFriendListReq) ProtoMessage()    {}
 func (*GetFriendListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{11}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{10}
 }
 func (m *GetFriendListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendListReq.Unmarshal(m, b)
@@ -593,9 +531,8 @@ func (m *GetFriendListReq) GetCommID() *CommID {
 }
 
 type GetFriendListResp struct {
-	ErrCode              int32                `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string               `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	FriendInfoList       []*sdk_ws.FriendInfo `protobuf:"bytes,3,rep,name=FriendInfoList" json:"FriendInfoList,omitempty"`
+	CommonResp           *sdk_ws.CommonResp   `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	FriendInfoList       []*sdk_ws.FriendInfo `protobuf:"bytes,2,rep,name=FriendInfoList" json:"FriendInfoList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -605,7 +542,7 @@ func (m *GetFriendListResp) Reset()         { *m = GetFriendListResp{} }
 func (m *GetFriendListResp) String() string { return proto.CompactTextString(m) }
 func (*GetFriendListResp) ProtoMessage()    {}
 func (*GetFriendListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{12}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{11}
 }
 func (m *GetFriendListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendListResp.Unmarshal(m, b)
@@ -625,18 +562,11 @@ func (m *GetFriendListResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetFriendListResp proto.InternalMessageInfo
 
-func (m *GetFriendListResp) GetErrCode() int32 {
+func (m *GetFriendListResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
-}
-
-func (m *GetFriendListResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
+	return nil
 }
 
 func (m *GetFriendListResp) GetFriendInfoList() []*sdk_ws.FriendInfo {
@@ -657,7 +587,7 @@ func (m *AddBlacklistReq) Reset()         { *m = AddBlacklistReq{} }
 func (m *AddBlacklistReq) String() string { return proto.CompactTextString(m) }
 func (*AddBlacklistReq) ProtoMessage()    {}
 func (*AddBlacklistReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{13}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{12}
 }
 func (m *AddBlacklistReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddBlacklistReq.Unmarshal(m, b)
@@ -695,7 +625,7 @@ func (m *AddBlacklistResp) Reset()         { *m = AddBlacklistResp{} }
 func (m *AddBlacklistResp) String() string { return proto.CompactTextString(m) }
 func (*AddBlacklistResp) ProtoMessage()    {}
 func (*AddBlacklistResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{14}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{13}
 }
 func (m *AddBlacklistResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddBlacklistResp.Unmarshal(m, b)
@@ -733,7 +663,7 @@ func (m *RemoveBlacklistReq) Reset()         { *m = RemoveBlacklistReq{} }
 func (m *RemoveBlacklistReq) String() string { return proto.CompactTextString(m) }
 func (*RemoveBlacklistReq) ProtoMessage()    {}
 func (*RemoveBlacklistReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{15}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{14}
 }
 func (m *RemoveBlacklistReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveBlacklistReq.Unmarshal(m, b)
@@ -761,17 +691,17 @@ func (m *RemoveBlacklistReq) GetCommID() *CommID {
 }
 
 type RemoveBlacklistResp struct {
-	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=CommonResp" json:"CommonResp,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	CommonResp           *sdk_ws.CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *RemoveBlacklistResp) Reset()         { *m = RemoveBlacklistResp{} }
 func (m *RemoveBlacklistResp) String() string { return proto.CompactTextString(m) }
 func (*RemoveBlacklistResp) ProtoMessage()    {}
 func (*RemoveBlacklistResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{16}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{15}
 }
 func (m *RemoveBlacklistResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveBlacklistResp.Unmarshal(m, b)
@@ -791,7 +721,7 @@ func (m *RemoveBlacklistResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_RemoveBlacklistResp proto.InternalMessageInfo
 
-func (m *RemoveBlacklistResp) GetCommonResp() *CommonResp {
+func (m *RemoveBlacklistResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
 		return m.CommonResp
 	}
@@ -809,7 +739,7 @@ func (m *GetBlacklistReq) Reset()         { *m = GetBlacklistReq{} }
 func (m *GetBlacklistReq) String() string { return proto.CompactTextString(m) }
 func (*GetBlacklistReq) ProtoMessage()    {}
 func (*GetBlacklistReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{17}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{16}
 }
 func (m *GetBlacklistReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetBlacklistReq.Unmarshal(m, b)
@@ -837,9 +767,8 @@ func (m *GetBlacklistReq) GetCommID() *CommID {
 }
 
 type GetBlacklistResp struct {
-	ErrCode              int32                    `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string                   `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	BlackUserInfoList    []*sdk_ws.PublicUserInfo `protobuf:"bytes,3,rep,name=BlackUserInfoList" json:"BlackUserInfoList,omitempty"`
+	CommonResp           *sdk_ws.CommonResp       `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	BlackUserInfoList    []*sdk_ws.PublicUserInfo `protobuf:"bytes,2,rep,name=BlackUserInfoList" json:"BlackUserInfoList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
 	XXX_unrecognized     []byte                   `json:"-"`
 	XXX_sizecache        int32                    `json:"-"`
@@ -849,7 +778,7 @@ func (m *GetBlacklistResp) Reset()         { *m = GetBlacklistResp{} }
 func (m *GetBlacklistResp) String() string { return proto.CompactTextString(m) }
 func (*GetBlacklistResp) ProtoMessage()    {}
 func (*GetBlacklistResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{18}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{17}
 }
 func (m *GetBlacklistResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetBlacklistResp.Unmarshal(m, b)
@@ -869,18 +798,11 @@ func (m *GetBlacklistResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetBlacklistResp proto.InternalMessageInfo
 
-func (m *GetBlacklistResp) GetErrCode() int32 {
+func (m *GetBlacklistResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
-}
-
-func (m *GetBlacklistResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
+	return nil
 }
 
 func (m *GetBlacklistResp) GetBlackUserInfoList() []*sdk_ws.PublicUserInfo {
@@ -901,7 +823,7 @@ func (m *IsFriendReq) Reset()         { *m = IsFriendReq{} }
 func (m *IsFriendReq) String() string { return proto.CompactTextString(m) }
 func (*IsFriendReq) ProtoMessage()    {}
 func (*IsFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{19}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{18}
 }
 func (m *IsFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsFriendReq.Unmarshal(m, b)
@@ -929,19 +851,18 @@ func (m *IsFriendReq) GetCommID() *CommID {
 }
 
 type IsFriendResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	Response             bool     `protobuf:"varint,3,opt,name=Response" json:"Response,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	CommonResp           *sdk_ws.CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	Response             bool               `protobuf:"varint,2,opt,name=Response" json:"Response,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *IsFriendResp) Reset()         { *m = IsFriendResp{} }
 func (m *IsFriendResp) String() string { return proto.CompactTextString(m) }
 func (*IsFriendResp) ProtoMessage()    {}
 func (*IsFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{20}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{19}
 }
 func (m *IsFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsFriendResp.Unmarshal(m, b)
@@ -961,18 +882,11 @@ func (m *IsFriendResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_IsFriendResp proto.InternalMessageInfo
 
-func (m *IsFriendResp) GetErrCode() int32 {
+func (m *IsFriendResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
-}
-
-func (m *IsFriendResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
+	return nil
 }
 
 func (m *IsFriendResp) GetResponse() bool {
@@ -993,7 +907,7 @@ func (m *IsInBlackListReq) Reset()         { *m = IsInBlackListReq{} }
 func (m *IsInBlackListReq) String() string { return proto.CompactTextString(m) }
 func (*IsInBlackListReq) ProtoMessage()    {}
 func (*IsInBlackListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{21}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{20}
 }
 func (m *IsInBlackListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsInBlackListReq.Unmarshal(m, b)
@@ -1021,19 +935,18 @@ func (m *IsInBlackListReq) GetCommID() *CommID {
 }
 
 type IsInBlackListResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	Response             bool     `protobuf:"varint,3,opt,name=Response" json:"Response,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	CommonResp           *sdk_ws.CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	Response             bool               `protobuf:"varint,2,opt,name=Response" json:"Response,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *IsInBlackListResp) Reset()         { *m = IsInBlackListResp{} }
 func (m *IsInBlackListResp) String() string { return proto.CompactTextString(m) }
 func (*IsInBlackListResp) ProtoMessage()    {}
 func (*IsInBlackListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{22}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{21}
 }
 func (m *IsInBlackListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsInBlackListResp.Unmarshal(m, b)
@@ -1053,18 +966,11 @@ func (m *IsInBlackListResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_IsInBlackListResp proto.InternalMessageInfo
 
-func (m *IsInBlackListResp) GetErrCode() int32 {
+func (m *IsInBlackListResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
-}
-
-func (m *IsInBlackListResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
+	return nil
 }
 
 func (m *IsInBlackListResp) GetResponse() bool {
@@ -1085,7 +991,7 @@ func (m *DeleteFriendReq) Reset()         { *m = DeleteFriendReq{} }
 func (m *DeleteFriendReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteFriendReq) ProtoMessage()    {}
 func (*DeleteFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{23}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{22}
 }
 func (m *DeleteFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteFriendReq.Unmarshal(m, b)
@@ -1113,17 +1019,17 @@ func (m *DeleteFriendReq) GetCommID() *CommID {
 }
 
 type DeleteFriendResp struct {
-	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=CommonResp" json:"CommonResp,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	CommonResp           *sdk_ws.CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *DeleteFriendResp) Reset()         { *m = DeleteFriendResp{} }
 func (m *DeleteFriendResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteFriendResp) ProtoMessage()    {}
 func (*DeleteFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{24}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{23}
 }
 func (m *DeleteFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteFriendResp.Unmarshal(m, b)
@@ -1143,7 +1049,7 @@ func (m *DeleteFriendResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_DeleteFriendResp proto.InternalMessageInfo
 
-func (m *DeleteFriendResp) GetCommonResp() *CommonResp {
+func (m *DeleteFriendResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
 		return m.CommonResp
 	}
@@ -1164,7 +1070,7 @@ func (m *AddFriendResponseReq) Reset()         { *m = AddFriendResponseReq{} }
 func (m *AddFriendResponseReq) String() string { return proto.CompactTextString(m) }
 func (*AddFriendResponseReq) ProtoMessage()    {}
 func (*AddFriendResponseReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{25}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{24}
 }
 func (m *AddFriendResponseReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddFriendResponseReq.Unmarshal(m, b)
@@ -1206,17 +1112,17 @@ func (m *AddFriendResponseReq) GetHandleMsg() string {
 }
 
 type AddFriendResponseResp struct {
-	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=CommonResp" json:"CommonResp,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	CommonResp           *sdk_ws.CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *AddFriendResponseResp) Reset()         { *m = AddFriendResponseResp{} }
 func (m *AddFriendResponseResp) String() string { return proto.CompactTextString(m) }
 func (*AddFriendResponseResp) ProtoMessage()    {}
 func (*AddFriendResponseResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{26}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{25}
 }
 func (m *AddFriendResponseResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddFriendResponseResp.Unmarshal(m, b)
@@ -1236,7 +1142,7 @@ func (m *AddFriendResponseResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_AddFriendResponseResp proto.InternalMessageInfo
 
-func (m *AddFriendResponseResp) GetCommonResp() *CommonResp {
+func (m *AddFriendResponseResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
 		return m.CommonResp
 	}
@@ -1255,7 +1161,7 @@ func (m *SetFriendRemarkReq) Reset()         { *m = SetFriendRemarkReq{} }
 func (m *SetFriendRemarkReq) String() string { return proto.CompactTextString(m) }
 func (*SetFriendRemarkReq) ProtoMessage()    {}
 func (*SetFriendRemarkReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{27}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{26}
 }
 func (m *SetFriendRemarkReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetFriendRemarkReq.Unmarshal(m, b)
@@ -1290,17 +1196,17 @@ func (m *SetFriendRemarkReq) GetRemark() string {
 }
 
 type SetFriendRemarkResp struct {
-	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=CommonResp" json:"CommonResp,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	CommonResp           *sdk_ws.CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *SetFriendRemarkResp) Reset()         { *m = SetFriendRemarkResp{} }
 func (m *SetFriendRemarkResp) String() string { return proto.CompactTextString(m) }
 func (*SetFriendRemarkResp) ProtoMessage()    {}
 func (*SetFriendRemarkResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{28}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{27}
 }
 func (m *SetFriendRemarkResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetFriendRemarkResp.Unmarshal(m, b)
@@ -1320,7 +1226,7 @@ func (m *SetFriendRemarkResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetFriendRemarkResp proto.InternalMessageInfo
 
-func (m *SetFriendRemarkResp) GetCommonResp() *CommonResp {
+func (m *SetFriendRemarkResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
 		return m.CommonResp
 	}
@@ -1338,7 +1244,7 @@ func (m *GetSelfApplyListReq) Reset()         { *m = GetSelfApplyListReq{} }
 func (m *GetSelfApplyListReq) String() string { return proto.CompactTextString(m) }
 func (*GetSelfApplyListReq) ProtoMessage()    {}
 func (*GetSelfApplyListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{29}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{28}
 }
 func (m *GetSelfApplyListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSelfApplyListReq.Unmarshal(m, b)
@@ -1366,9 +1272,8 @@ func (m *GetSelfApplyListReq) GetCommID() *CommID {
 }
 
 type GetSelfApplyListResp struct {
-	ErrCode              int32                   `protobuf:"varint,1,opt,name=ErrCode" json:"ErrCode,omitempty"`
-	ErrMsg               string                  `protobuf:"bytes,2,opt,name=ErrMsg" json:"ErrMsg,omitempty"`
-	FriendRequestList    []*sdk_ws.FriendRequest `protobuf:"bytes,3,rep,name=FriendRequestList" json:"FriendRequestList,omitempty"`
+	CommonResp           *sdk_ws.CommonResp      `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
+	FriendRequestList    []*sdk_ws.FriendRequest `protobuf:"bytes,2,rep,name=FriendRequestList" json:"FriendRequestList,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
 	XXX_unrecognized     []byte                  `json:"-"`
 	XXX_sizecache        int32                   `json:"-"`
@@ -1378,7 +1283,7 @@ func (m *GetSelfApplyListResp) Reset()         { *m = GetSelfApplyListResp{} }
 func (m *GetSelfApplyListResp) String() string { return proto.CompactTextString(m) }
 func (*GetSelfApplyListResp) ProtoMessage()    {}
 func (*GetSelfApplyListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_639f80b64f394a2f, []int{30}
+	return fileDescriptor_friend_30fdefc06aa43365, []int{29}
 }
 func (m *GetSelfApplyListResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetSelfApplyListResp.Unmarshal(m, b)
@@ -1398,18 +1303,11 @@ func (m *GetSelfApplyListResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetSelfApplyListResp proto.InternalMessageInfo
 
-func (m *GetSelfApplyListResp) GetErrCode() int32 {
+func (m *GetSelfApplyListResp) GetCommonResp() *sdk_ws.CommonResp {
 	if m != nil {
-		return m.ErrCode
+		return m.CommonResp
 	}
-	return 0
-}
-
-func (m *GetSelfApplyListResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
+	return nil
 }
 
 func (m *GetSelfApplyListResp) GetFriendRequestList() []*sdk_ws.FriendRequest {
@@ -1420,7 +1318,6 @@ func (m *GetSelfApplyListResp) GetFriendRequestList() []*sdk_ws.FriendRequest {
 }
 
 func init() {
-	proto.RegisterType((*CommonResp)(nil), "friend.CommonResp")
 	proto.RegisterType((*CommID)(nil), "friend.CommID")
 	proto.RegisterType((*GetFriendsInfoReq)(nil), "friend.GetFriendsInfoReq")
 	proto.RegisterType((*GetFriendInfoResp)(nil), "friend.GetFriendInfoResp")
@@ -1923,69 +1820,66 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 	Metadata: "friend/friend.proto",
 }
 
-func init() { proto.RegisterFile("friend/friend.proto", fileDescriptor_friend_639f80b64f394a2f) }
+func init() { proto.RegisterFile("friend/friend.proto", fileDescriptor_friend_30fdefc06aa43365) }
 
-var fileDescriptor_friend_639f80b64f394a2f = []byte{
-	// 975 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x57, 0x51, 0x6f, 0xdc, 0x44,
-	0x10, 0x96, 0x9b, 0x26, 0xcd, 0x4d, 0xae, 0xbd, 0xbb, 0x4d, 0x52, 0x0e, 0x37, 0x29, 0xd7, 0x7d,
-	0x40, 0x27, 0xa4, 0xe6, 0xa4, 0xa0, 0x4a, 0x84, 0xd2, 0xc2, 0x35, 0x97, 0x44, 0x06, 0xd2, 0x94,
-	0x4d, 0x79, 0x41, 0x48, 0x91, 0x1b, 0x6f, 0x0e, 0x2b, 0x3e, 0x7b, 0xeb, 0x75, 0x5a, 0xf1, 0x86,
-	0x78, 0xe2, 0x81, 0x57, 0x24, 0x04, 0x0f, 0xfc, 0x55, 0xe4, 0x5d, 0xfb, 0x76, 0xd7, 0xf6, 0x55,
-	0xd8, 0xe4, 0xa1, 0x4f, 0xc9, 0xcc, 0xec, 0x37, 0x37, 0xf3, 0xcd, 0xec, 0xcc, 0x1a, 0xd6, 0x2f,
-	0x62, 0x9f, 0x86, 0xde, 0x48, 0xfe, 0xd9, 0x61, 0x71, 0x94, 0x44, 0x68, 0x45, 0x4a, 0xf6, 0xf0,
-	0x84, 0xd1, 0xf0, 0xa1, 0x73, 0xfc, 0xf0, 0x94, 0xc6, 0x6f, 0x68, 0x3c, 0x62, 0x97, 0xd3, 0x91,
-	0x38, 0x31, 0xe2, 0xde, 0xe5, 0xd9, 0x5b, 0x3e, 0x7a, 0xcb, 0x25, 0x02, 0x3f, 0x05, 0xd8, 0x8f,
-	0x66, 0xb3, 0x28, 0x24, 0x94, 0x33, 0xd4, 0x87, 0x5b, 0x34, 0x8e, 0xf7, 0x23, 0x8f, 0xf6, 0xad,
-	0x81, 0x35, 0x5c, 0x26, 0xb9, 0x88, 0xee, 0xc2, 0x0a, 0x8d, 0xe3, 0x63, 0x3e, 0xed, 0xdf, 0x18,
-	0x58, 0xc3, 0x16, 0xc9, 0x24, 0xfc, 0xab, 0x05, 0x2b, 0xa9, 0x03, 0x67, 0x82, 0x6c, 0x58, 0x3d,
-	0x61, 0xdf, 0x73, 0x1a, 0x3b, 0x13, 0x81, 0x6e, 0x91, 0xb9, 0x8c, 0x06, 0xb0, 0x76, 0xc2, 0x68,
-	0xec, 0x26, 0x7e, 0x14, 0x3a, 0x93, 0xcc, 0x87, 0xae, 0x4a, 0xd1, 0x2f, 0xa3, 0x0c, 0x7d, 0x53,
-	0xa2, 0x73, 0x19, 0xdd, 0x07, 0x38, 0x8c, 0xa3, 0x59, 0x66, 0x5d, 0x16, 0x56, 0x4d, 0x83, 0x1f,
-	0x43, 0xef, 0x88, 0x26, 0x87, 0x22, 0x77, 0xee, 0x84, 0x17, 0x11, 0xa1, 0xaf, 0xd1, 0xc7, 0x79,
-	0x60, 0x22, 0x98, 0xb5, 0xdd, 0x3b, 0x3b, 0x19, 0x55, 0x52, 0x4b, 0x32, 0x2b, 0xfe, 0xdd, 0xd2,
-	0xd0, 0x12, 0x2c, 0x99, 0x38, 0x30, 0x99, 0x38, 0x50, 0x4c, 0x1c, 0x18, 0x4c, 0x48, 0x09, 0x1d,
-	0xc0, 0x1d, 0xe5, 0xe3, 0x5b, 0x9f, 0x27, 0xfd, 0xa5, 0xc1, 0xd2, 0x70, 0x6d, 0x77, 0x7b, 0x87,
-	0x8b, 0x22, 0x9c, 0xb9, 0xcc, 0x3f, 0x63, 0x6e, 0xec, 0xce, 0xf8, 0x8e, 0xf6, 0x63, 0x05, 0x10,
-	0x7e, 0x0e, 0xed, 0xb1, 0xe7, 0x49, 0x65, 0x8d, 0x34, 0xd2, 0xb0, 0x08, 0x7d, 0xad, 0x85, 0x25,
-	0x25, 0xbc, 0x0f, 0xb7, 0x35, 0x7f, 0x9c, 0xa1, 0x5d, 0xbd, 0xe2, 0x99, 0x53, 0xa4, 0x3b, 0x95,
-	0x16, 0xa2, 0x9d, 0xc2, 0x7f, 0x5b, 0xd0, 0x71, 0x66, 0x2c, 0x8a, 0x13, 0x15, 0xd8, 0x27, 0xd0,
-	0x95, 0x82, 0x2c, 0x82, 0xc8, 0xd8, 0x1a, 0x2c, 0x0d, 0x5b, 0xa4, 0xa4, 0xff, 0x0f, 0xe5, 0x37,
-	0x4b, 0xbc, 0x54, 0x2c, 0xb1, 0xd1, 0x5c, 0x37, 0xcd, 0xe6, 0xc2, 0x4f, 0xa1, 0x2d, 0xff, 0x23,
-	0x94, 0x5f, 0x05, 0x49, 0x4a, 0x85, 0xd1, 0x86, 0x99, 0x24, 0x29, 0x4a, 0x4f, 0x88, 0x00, 0x96,
-	0x49, 0x26, 0xe1, 0xdf, 0x2c, 0xe8, 0x9a, 0xd9, 0x35, 0xa3, 0x09, 0x7d, 0x05, 0x5d, 0x3d, 0x10,
-	0x41, 0xc9, 0x0d, 0xd1, 0x04, 0x1b, 0x39, 0x52, 0xb7, 0x93, 0xd2, 0x69, 0xfc, 0x25, 0x6c, 0xce,
-	0x7b, 0x71, 0xcc, 0x58, 0xf0, 0x73, 0xaa, 0xad, 0xd3, 0xcd, 0x7f, 0x59, 0x70, 0xb7, 0xca, 0x43,
-	0xa3, 0x96, 0x7e, 0x0e, 0xbd, 0x79, 0xbd, 0xaf, 0x28, 0x4f, 0xb4, 0xae, 0x1e, 0x2c, 0xec, 0xea,
-	0xec, 0x2c, 0x29, 0x43, 0xf1, 0xe7, 0xd0, 0x9d, 0xc7, 0x56, 0x37, 0x31, 0xe3, 0x9a, 0xfe, 0x8f,
-	0x9c, 0xae, 0xe9, 0x9a, 0xee, 0x41, 0x67, 0xec, 0x79, 0xcf, 0x02, 0xf7, 0xfc, 0x32, 0xa8, 0x99,
-	0xc9, 0x77, 0xd0, 0x35, 0xa1, 0x9c, 0xa1, 0x27, 0x00, 0xe7, 0xc5, 0x6e, 0xab, 0x8a, 0x48, 0x6f,
-	0x3c, 0x05, 0xc0, 0x5f, 0x00, 0x22, 0x74, 0x16, 0xbd, 0xa1, 0x8d, 0x02, 0x72, 0x60, 0xbd, 0x84,
-	0x6e, 0x38, 0x28, 0xf6, 0xa0, 0x73, 0x44, 0x93, 0x46, 0x51, 0xfc, 0x61, 0x89, 0xee, 0x30, 0x63,
-	0xa8, 0x5f, 0xdf, 0x13, 0xe8, 0x09, 0x17, 0xe2, 0x6a, 0x99, 0x25, 0x7e, 0x50, 0x41, 0xe8, 0x8b,
-	0xab, 0x57, 0x81, 0x7f, 0x9e, 0x1f, 0x26, 0x65, 0x2c, 0x7e, 0x04, 0x6b, 0x0e, 0xaf, 0x3d, 0x8f,
-	0xf1, 0x8f, 0xd0, 0x56, 0xb0, 0x46, 0x99, 0xd8, 0xb0, 0x9a, 0x22, 0xa3, 0x90, 0x53, 0x31, 0x10,
-	0x57, 0xc9, 0x5c, 0x4e, 0x6f, 0x92, 0xc3, 0x9d, 0x50, 0x44, 0x5b, 0xf7, 0x26, 0xb9, 0xd0, 0x2b,
-	0x60, 0xaf, 0x3d, 0xbc, 0x3d, 0xe8, 0x4c, 0x68, 0x40, 0x13, 0x5a, 0x9f, 0xb7, 0x43, 0xe8, 0x9a,
-	0xd0, 0x86, 0x9d, 0xf8, 0x8b, 0x05, 0x1b, 0xc6, 0xe2, 0x4b, 0x03, 0xab, 0xb3, 0x50, 0x31, 0xb4,
-	0x7f, 0x72, 0x43, 0x2f, 0xa0, 0xc6, 0xce, 0x30, 0x74, 0x68, 0x0b, 0x5a, 0x52, 0x4e, 0xe9, 0x91,
-	0x4b, 0x4b, 0x29, 0xf0, 0x37, 0xb0, 0x59, 0x11, 0x41, 0xc3, 0x7c, 0x5e, 0x02, 0x3a, 0xa5, 0xf3,
-	0x05, 0x35, 0x73, 0xe3, 0xcb, 0xda, 0xaf, 0x83, 0x14, 0xa4, 0x5e, 0x07, 0xa9, 0x94, 0x5e, 0xfd,
-	0x92, 0xd7, 0x86, 0x01, 0x3e, 0x81, 0xf5, 0x23, 0x9a, 0x9c, 0xd2, 0xe0, 0xa2, 0xd1, 0xe2, 0xfa,
-	0xd3, 0x82, 0x8d, 0x32, 0xfe, 0x7d, 0x58, 0x5b, 0xbb, 0xff, 0xdc, 0x82, 0xec, 0x61, 0x8d, 0x3e,
-	0x83, 0x96, 0x9b, 0x97, 0x14, 0xcd, 0x97, 0xba, 0xfe, 0x60, 0xb3, 0x37, 0x2b, 0xb4, 0x9c, 0xa1,
-	0x53, 0x40, 0xd3, 0xd2, 0x5e, 0x46, 0xdb, 0xf9, 0xe1, 0xca, 0xad, 0x6f, 0xdf, 0x7f, 0x97, 0x99,
-	0x33, 0x74, 0x0c, 0xdd, 0x69, 0x81, 0x33, 0x74, 0x4f, 0xc3, 0x14, 0xab, 0x61, 0x6f, 0x2d, 0x36,
-	0x72, 0x86, 0x26, 0x70, 0x7b, 0xaa, 0xaf, 0x58, 0xd4, 0x2f, 0xfd, 0x7e, 0xee, 0xe8, 0xc3, 0x05,
-	0x16, 0xce, 0xd0, 0x18, 0xda, 0xae, 0xb6, 0xdf, 0xd0, 0x07, 0x1a, 0x21, 0xfa, 0x66, 0xb0, 0xfb,
-	0xd5, 0x06, 0xce, 0xd0, 0xd7, 0xd0, 0x89, 0xcd, 0x8d, 0x84, 0xec, 0xfc, 0x70, 0x79, 0xd1, 0xd9,
-	0xf7, 0x16, 0xda, 0x38, 0x43, 0x8f, 0x60, 0xd5, 0xcf, 0x06, 0x31, 0x5a, 0xcf, 0x0f, 0x6a, 0x13,
-	0xdd, 0xde, 0x28, 0x2b, 0x25, 0x17, 0xbe, 0x3e, 0x25, 0x15, 0x17, 0xc5, 0xc1, 0xab, 0xb8, 0x28,
-	0x8f, 0xd5, 0x31, 0xb4, 0xa7, 0xda, 0x4e, 0x53, 0x5c, 0x14, 0xb6, 0xa4, 0xdd, 0xaf, 0x36, 0x48,
-	0x17, 0x9e, 0x36, 0x10, 0x95, 0x8b, 0xc2, 0x84, 0x55, 0x2e, 0x4a, 0xf3, 0xf3, 0x05, 0xf4, 0xdc,
-	0xe2, 0x20, 0x42, 0x5b, 0x95, 0x7d, 0x9a, 0x4d, 0x49, 0x7b, 0xfb, 0x1d, 0x56, 0x59, 0x20, 0x6e,
-	0xce, 0x0d, 0x55, 0xa0, 0xf2, 0x98, 0x52, 0x05, 0xaa, 0x1a, 0x36, 0x63, 0x68, 0xfb, 0xda, 0xeb,
-	0x5b, 0x25, 0x58, 0xf8, 0xe2, 0x50, 0x09, 0x16, 0x1f, 0xeb, 0xcf, 0x1e, 0xfc, 0xf0, 0x51, 0xfa,
-	0xc5, 0x7b, 0xe6, 0x1c, 0x6b, 0x9f, 0xba, 0xf2, 0xf0, 0x63, 0xf9, 0xe7, 0xd5, 0x8a, 0x50, 0x7e,
-	0xfa, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x85, 0x0c, 0x56, 0x27, 0x38, 0x0f, 0x00, 0x00,
+var fileDescriptor_friend_30fdefc06aa43365 = []byte{
+	// 914 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x57, 0x5b, 0x4f, 0x3b, 0x45,
+	0x14, 0xcf, 0x72, 0xa9, 0xed, 0xa1, 0xd0, 0x76, 0x5a, 0xb0, 0x2e, 0x17, 0xcb, 0x3e, 0x18, 0x62,
+	0x02, 0x4d, 0x30, 0x24, 0x22, 0xa2, 0x16, 0x2b, 0x64, 0x8d, 0xa5, 0xb0, 0x45, 0x1f, 0x7c, 0x69,
+	0x16, 0x76, 0xa8, 0x9b, 0xee, 0x65, 0xd8, 0x59, 0x20, 0xbe, 0x19, 0xbf, 0x82, 0x4f, 0xc6, 0x07,
+	0x13, 0x13, 0xe3, 0xd7, 0x34, 0xbb, 0xb3, 0xdb, 0x9d, 0xbd, 0x94, 0xb8, 0x2c, 0x26, 0xff, 0xa7,
+	0xed, 0xb9, 0xfc, 0x4e, 0xcf, 0x6d, 0xce, 0x99, 0x81, 0xe6, 0xbd, 0xa3, 0x63, 0x4b, 0xeb, 0xb2,
+	0xcf, 0x01, 0x71, 0x6c, 0xd7, 0x46, 0x25, 0x46, 0x89, 0x7b, 0x43, 0x82, 0xad, 0x7d, 0x79, 0xb0,
+	0x3f, 0xc2, 0xce, 0x13, 0x76, 0xba, 0x64, 0x3a, 0xe9, 0xfa, 0x1a, 0x5d, 0xaa, 0x4d, 0xc7, 0xcf,
+	0xb4, 0xfb, 0x4c, 0x19, 0x42, 0xfa, 0x55, 0x80, 0xd2, 0xd7, 0xb6, 0x69, 0xca, 0x7d, 0x24, 0x42,
+	0x79, 0x48, 0xbe, 0xa7, 0xd8, 0x91, 0xfb, 0x6d, 0xa1, 0x23, 0xec, 0x55, 0x94, 0x19, 0x8d, 0x3a,
+	0xb0, 0x32, 0x24, 0xd8, 0x51, 0x5d, 0xdd, 0xb6, 0xe4, 0x7e, 0x7b, 0xc1, 0x17, 0xf3, 0x2c, 0x0f,
+	0x7d, 0x63, 0x07, 0xe8, 0x25, 0x86, 0x0e, 0x69, 0xb4, 0x03, 0x70, 0xee, 0xd8, 0x66, 0x20, 0x5d,
+	0xf6, 0xa5, 0x1c, 0x47, 0x3a, 0x81, 0xc6, 0x05, 0x76, 0xcf, 0x7d, 0xdf, 0xa9, 0x6c, 0xdd, 0xdb,
+	0x0a, 0x7e, 0x40, 0x1f, 0x85, 0x8e, 0xf9, 0xce, 0xac, 0x1c, 0xae, 0x1d, 0x04, 0xa1, 0x32, 0xae,
+	0x12, 0x48, 0xa5, 0xdf, 0x05, 0x0e, 0xcd, 0xc0, 0x94, 0xa0, 0x53, 0x80, 0x3b, 0xdb, 0x34, 0x6d,
+	0xcb, 0xa3, 0x02, 0x0b, 0xdb, 0x07, 0xd4, 0x4f, 0xc7, 0x58, 0x25, 0xfa, 0x98, 0xa8, 0x8e, 0x6a,
+	0x52, 0xdf, 0x18, 0x53, 0x52, 0x38, 0x00, 0xfa, 0x06, 0xd6, 0x22, 0x83, 0xdf, 0xe9, 0xd4, 0x6d,
+	0x2f, 0x74, 0x16, 0xe7, 0x98, 0xe0, 0xfe, 0x39, 0x01, 0x92, 0x2e, 0xa1, 0xda, 0xd3, 0x34, 0xc6,
+	0xcc, 0x11, 0x13, 0xda, 0x80, 0x92, 0x82, 0x1f, 0x06, 0x74, 0x12, 0x64, 0x3a, 0xa0, 0xa4, 0x4b,
+	0x58, 0xe5, 0xec, 0x15, 0x0e, 0x53, 0xfa, 0x43, 0x80, 0x9a, 0x6c, 0x12, 0xdb, 0x71, 0x23, 0x1f,
+	0x3f, 0x86, 0x3a, 0x23, 0x58, 0x71, 0xfc, 0xe0, 0x85, 0xce, 0xe2, 0x5e, 0x45, 0x49, 0xf1, 0xff,
+	0x43, 0x5b, 0xc4, 0x4b, 0xbf, 0x98, 0x2c, 0x7d, 0xac, 0xe9, 0x96, 0xe2, 0x4d, 0x27, 0x7d, 0x01,
+	0x55, 0xf6, 0x4b, 0xc1, 0xf4, 0xd1, 0x70, 0xbd, 0xac, 0xc4, 0xda, 0x33, 0xa0, 0x58, 0xb6, 0x3c,
+	0x0d, 0xdf, 0x81, 0x65, 0x25, 0xa0, 0xa4, 0xdf, 0x04, 0xa8, 0xc7, 0xa3, 0x2b, 0xde, 0x18, 0x5f,
+	0x41, 0x9d, 0xf7, 0x89, 0x6b, 0x8d, 0x56, 0x58, 0x4b, 0x5e, 0xae, 0xa4, 0xb4, 0xa5, 0x2f, 0x61,
+	0x7d, 0xd6, 0xae, 0x3d, 0x42, 0x8c, 0x9f, 0x3d, 0x6e, 0x9e, 0x86, 0xff, 0x47, 0x80, 0x8d, 0x2c,
+	0x0b, 0xc5, 0x83, 0xbb, 0x84, 0xc6, 0xac, 0x0f, 0x1e, 0x31, 0xe5, 0xa3, 0xeb, 0xcc, 0x6d, 0xfc,
+	0x40, 0x57, 0x49, 0x43, 0xa5, 0xcf, 0xa0, 0x3e, 0x73, 0x34, 0x6f, 0x94, 0xb1, 0x63, 0xfd, 0x56,
+	0x01, 0xbe, 0xd1, 0xb1, 0x3e, 0x86, 0x5a, 0x4f, 0xd3, 0xce, 0x0c, 0xf5, 0x6e, 0x6a, 0xe4, 0x0c,
+	0xeb, 0x1a, 0xea, 0x71, 0x68, 0xf1, 0x43, 0xfc, 0x39, 0x20, 0x05, 0x9b, 0xf6, 0x13, 0x7e, 0x95,
+	0x43, 0x37, 0xd0, 0x4c, 0xa1, 0x8b, 0xfb, 0x74, 0x0c, 0xb5, 0x0b, 0xec, 0xbe, 0xca, 0xa1, 0xbf,
+	0x04, 0xbf, 0x6b, 0xde, 0xd2, 0x1d, 0x34, 0x84, 0x86, 0x6f, 0xcf, 0x3f, 0x8c, 0xf1, 0xd2, 0xef,
+	0x66, 0x58, 0xb9, 0x7a, 0xbc, 0x35, 0xf4, 0xbb, 0x50, 0x59, 0x49, 0x63, 0xa5, 0x23, 0x58, 0x91,
+	0x69, 0xee, 0xb9, 0x2e, 0xe9, 0x50, 0x8d, 0x60, 0xc5, 0xc3, 0x12, 0xa1, 0xec, 0x7d, 0x6d, 0x8b,
+	0x62, 0x7f, 0xf4, 0x95, 0x95, 0x19, 0xed, 0x9d, 0x3d, 0x99, 0xca, 0x96, 0xef, 0x7a, 0xde, 0xb3,
+	0x67, 0x41, 0x23, 0x81, 0xfd, 0x7f, 0x7d, 0x3d, 0x86, 0x5a, 0x1f, 0x1b, 0xd8, 0xc5, 0xf9, 0x33,
+	0x7a, 0x0d, 0xf5, 0x38, 0xb4, 0x78, 0xef, 0xfe, 0x22, 0x40, 0x2b, 0xb6, 0x65, 0x3d, 0x1f, 0xf3,
+	0x6c, 0x6f, 0x09, 0xaa, 0x3f, 0xa9, 0x96, 0x66, 0xe0, 0xd8, 0x56, 0x8a, 0xf1, 0xd0, 0x16, 0x54,
+	0x18, 0xed, 0x2d, 0x79, 0xb6, 0x16, 0x23, 0x86, 0xf4, 0x03, 0xac, 0x67, 0x78, 0x50, 0x3c, 0xb4,
+	0x1b, 0x40, 0x23, 0x3c, 0xdb, 0x86, 0xa6, 0xea, 0x4c, 0x73, 0xdf, 0x4a, 0x3c, 0x50, 0x74, 0x2b,
+	0xf1, 0x28, 0x6f, 0x84, 0xa4, 0xac, 0x16, 0xf7, 0xf5, 0x14, 0x9a, 0x17, 0xd8, 0x1d, 0x61, 0xe3,
+	0xfe, 0x55, 0x5b, 0xf2, 0x6f, 0x01, 0x5a, 0x69, 0xfc, 0x3b, 0xb7, 0x23, 0x0f, 0xff, 0x7c, 0x0f,
+	0x82, 0x5b, 0x3b, 0xfa, 0x14, 0x2a, 0x6a, 0x58, 0x75, 0x34, 0xbb, 0x4e, 0xf0, 0x17, 0x48, 0x71,
+	0x3d, 0x83, 0x4b, 0x09, 0x1a, 0x01, 0x9a, 0xa4, 0x6e, 0x04, 0x68, 0x3b, 0x54, 0xce, 0xbc, 0x6f,
+	0x88, 0x3b, 0x2f, 0x89, 0x29, 0x41, 0x03, 0xa8, 0x4f, 0x12, 0x09, 0x44, 0x9b, 0x1c, 0x26, 0x59,
+	0x1a, 0x71, 0x6b, 0xbe, 0x90, 0x12, 0xd4, 0x87, 0xd5, 0x09, 0xbf, 0xcf, 0x51, 0x3b, 0xf5, 0xff,
+	0xa1, 0xa1, 0x0f, 0xe6, 0x48, 0x28, 0x41, 0x3d, 0xa8, 0xaa, 0xdc, 0xfe, 0x44, 0xef, 0x73, 0x09,
+	0xe1, 0xd7, 0x8d, 0xd8, 0xce, 0x16, 0x50, 0x82, 0xbe, 0x85, 0x9a, 0x13, 0xdf, 0x78, 0x48, 0x0c,
+	0x95, 0xd3, 0x8b, 0x54, 0xdc, 0x9c, 0x2b, 0xa3, 0x04, 0x1d, 0x41, 0x59, 0x0f, 0x06, 0x3a, 0x6a,
+	0x86, 0x8a, 0xdc, 0x66, 0x10, 0x5b, 0x69, 0x26, 0xcb, 0x85, 0xce, 0x0f, 0xd8, 0x28, 0x17, 0xc9,
+	0x99, 0x1d, 0xe5, 0x22, 0x3d, 0x91, 0x7b, 0x50, 0x9d, 0x70, 0x8b, 0x32, 0xca, 0x45, 0x62, 0xf5,
+	0x8a, 0xed, 0x6c, 0x01, 0x33, 0xa1, 0x71, 0xe3, 0x33, 0x32, 0x91, 0x98, 0xc7, 0x91, 0x89, 0xd4,
+	0xb4, 0xbd, 0x82, 0x86, 0x9a, 0x9c, 0x55, 0x68, 0x2b, 0xb3, 0x4f, 0x83, 0x41, 0x2a, 0x6e, 0xbf,
+	0x20, 0x65, 0x05, 0xa2, 0xf1, 0x79, 0x12, 0x15, 0x28, 0x3d, 0xbe, 0xa2, 0x02, 0x65, 0x0d, 0xa1,
+	0x1e, 0x54, 0x75, 0xee, 0x09, 0x10, 0x05, 0x98, 0x78, 0xf6, 0x44, 0x01, 0x26, 0x5f, 0x0c, 0x67,
+	0xbb, 0x3f, 0x7e, 0xe8, 0x3d, 0xa7, 0xc7, 0xf2, 0x80, 0x7b, 0x47, 0x33, 0xe5, 0x13, 0xf6, 0xb9,
+	0x2d, 0xf9, 0xcc, 0x4f, 0xfe, 0x0d, 0x00, 0x00, 0xff, 0xff, 0x64, 0x15, 0xbf, 0x17, 0x95, 0x0f,
+	0x00, 0x00,
 }

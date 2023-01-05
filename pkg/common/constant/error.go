@@ -25,6 +25,7 @@ func (e ErrInfo) Code() int32 {
 
 var (
 	ErrNone           = ErrInfo{0, ""}
+	ErrRpcConn        = ErrInfo{}
 	ErrArgs           = ErrInfo{ArgsError, "ArgsError"}
 	ErrDatabase       = ErrInfo{DatabaseError, "DatabaseError"}
 	ErrInternalServer = ErrInfo{ServerInternalError, "ServerInternalError"}
@@ -125,6 +126,7 @@ const (
 	ServerInternalError = 90003 //服务器内部错误
 	NetworkError        = 90004 //网络错误
 	NoPermissionError   = 90005 //权限不足
+	GRPCConnIsNil       = 90006 //grpc连接空
 
 	DefaultOtherError = 90006 //其他错误
 	DataError         = 90007 //数据错误
