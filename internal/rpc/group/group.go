@@ -119,7 +119,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	resp = &pbGroup.CreateGroupResp{CommonResp: &open_im_sdk.CommonResp{}, GroupInfo: &open_im_sdk.GroupInfo{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "req", req, "resp", resp)
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
 		trace_log.ShowLog(ctx)
 	}()
 
