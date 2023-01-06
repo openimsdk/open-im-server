@@ -31,6 +31,7 @@ var (
 	ErrInternalServer   = ErrInfo{ServerInternalError, "ServerInternalError", ""}
 	ErrNetwork          = ErrInfo{NetworkError, "NetworkError", ""}
 	ErrNoPermission     = ErrInfo{NoPermissionError, "NoPermissionError", ""}
+	ErrIdentity         = ErrInfo{IdentityError, "IdentityError", ""}
 	ErrCallback         = ErrInfo{ErrMsg: "CallbackError"}
 	ErrCallbackContinue = ErrInfo{ErrMsg: "CallbackContinueError"}
 
@@ -141,6 +142,8 @@ const (
 
 	DefaultOtherError = 90006 //其他错误
 	DataError         = 90007 //数据错误
+
+	IdentityError = 90008 // 身份错误 非管理员token，且token中userID与请求userID不一致
 )
 
 // 账号错误码
