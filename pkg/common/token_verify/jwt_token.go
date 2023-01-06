@@ -162,7 +162,7 @@ func CheckAccessV2(ctx context.Context, OpUserID string, OwnerUserID string) (er
 	if OpUserID == OwnerUserID {
 		return nil
 	}
-	return utils.Wrap(constant.ErrData, open_utils.GetSelfFuncName())
+	return utils.Wrap(constant.ErrIdentity, open_utils.GetSelfFuncName())
 }
 
 func GetUserIDFromToken(token string, operationID string) (bool, string, string) {
