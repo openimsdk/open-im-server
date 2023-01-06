@@ -212,13 +212,13 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 		group, err := rocksCache.GetGroupInfoFromCache(ctx, groupId)
 		if err != nil {
-			SetErr(ctx, "GetGroupInfoFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", groupId)
+			SetErrorForResp(err, resp.CommonResp)
 			return
 		}
 		utils.CopyStructFields(resp.GroupInfo, group)
 		memberCount, err := rocksCache.GetGroupMemberNumFromCache(groupId)
 		if err != nil {
-			SetErr(ctx, "GetGroupMemberNumFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", groupId)
+			SetErrorForResp(err, resp.CommonResp)
 			return
 		}
 		resp.GroupInfo.MemberCount = uint32(memberCount)
@@ -232,7 +232,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			okUserIDList = append(okUserIDList, v.UserID)
 		}
 		if err := db.DB.CreateSuperGroup(groupId, okUserIDList, len(okUserIDList)); err != nil {
-			SetErr(ctx, "CreateSuperGroup", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", groupId, "userIDList", okUserIDList)
+			SetErrorForResp(err, resp.CommonResp)
 			return
 		}
 	}
