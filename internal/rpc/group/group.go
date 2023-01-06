@@ -124,11 +124,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}()
 
 	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.OwnerUserID); err != nil {
-		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		SetErrorForResp(err, resp.CommonResp)
 		return
 	}
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
-		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		SetErrorForResp(err, resp.CommonResp)
 		return
 	}
 	groupId := req.GroupInfo.GroupID
@@ -148,7 +148,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupInfo.NotificationUpdateTime = utils.UnixSecondToTime(0)
 	}
 	if err := (*imdb.Group)(nil).Create(ctx, []*imdb.Group{&groupInfo}); err != nil {
-		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		SetErrorForResp(err, resp.CommonResp)
 		return
 	}
 	groupMember := imdb.GroupMember{}
@@ -173,11 +173,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		groupMember = imdb.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID, JoinSource: constant.JoinByInvitation, InviterUserID: req.OpUserID}
 		utils.CopyStructFields(&groupMember, us)
 		if err := CallbackBeforeMemberJoinGroup(ctx, req.OperationID, &groupMember, groupInfo.Ex); err != nil {
-			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			SetErrorForResp(err, resp.CommonResp)
 			return
 		}
 		if err := (*imdb.GroupMember)(nil).Create(ctx, []*imdb.GroupMember{&groupMember}); err != nil {
-			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			SetErrorForResp(err, resp.CommonResp)
 			return
 		}
 	}
@@ -200,14 +200,14 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			groupMember.InviterUserID = req.OpUserID
 			utils.CopyStructFields(&groupMember, us)
 			if err := CallbackBeforeMemberJoinGroup(ctx, req.OperationID, &groupMember, groupInfo.Ex); err != nil {
-				SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+				SetErrorForResp(err, resp.CommonResp)
 				return
 			}
 			groupMembers = append(groupMembers, &groupMember)
 			okUserIDList = append(okUserIDList, user.UserID)
 		}
 		if err := (*imdb.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
-			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			SetErrorForResp(err, resp.CommonResp)
 			return
 		}
 		group, err := rocksCache.GetGroupInfoFromCache(ctx, groupId)
