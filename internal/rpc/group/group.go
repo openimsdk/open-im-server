@@ -115,27 +115,21 @@ func (s *groupServer) Run() {
 	log.NewInfo("", "group rpc success")
 }
 
-func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
-	log.NewInfo(req.OperationID, "CreateGroup, args ", req.String())
-	if !token_verify.CheckAccess(req.OpUserID, req.OwnerUserID) {
-		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.OwnerUserID)
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (resp *pbGroup.CreateGroupResp, _ error) {
+	resp = &pbGroup.CreateGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "req", req, "resp", resp)
+	defer trace_log.ShowLog(ctx)
+	if !token_verify.CheckAccess(ctx, req.OpUserID, req.OwnerUserID) {
+		SetErr(ctx, "CheckAccess", constant.ErrAccess, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		return
 	}
-	callbackResp := callbackBeforeCreateGroup(req)
-	if callbackResp.ErrCode != 0 {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
+	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
+		//trace_log.SetContextInfo(ctx, "callbackBeforeCreateGroup", err, "req", req)
+		SetErr(ctx, "CallbackBeforeMemberJoinGroup", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "userID", req.OwnerUserID)
+		return
+		//log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
 	}
-	if callbackResp.ActionCode != constant.ActionAllow {
-		if callbackResp.ErrCode == 0 {
-			callbackResp.ErrCode = 201
-		}
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
-		return &pbGroup.CreateGroupResp{
-			ErrCode: int32(callbackResp.ErrCode),
-			ErrMsg:  callbackResp.ErrMsg,
-		}, nil
-	}
-
 	groupId := req.GroupInfo.GroupID
 	if groupId == "" {
 		groupId = utils.Md5(req.OperationID + strconv.FormatInt(time.Now().UnixNano(), 10))
@@ -152,13 +146,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if groupInfo.NotificationUpdateTime.Unix() < 0 {
 		groupInfo.NotificationUpdateTime = utils.UnixSecondToTime(0)
 	}
-	err := imdb.InsertIntoGroup(groupInfo)
-	if err != nil {
-		log.NewError(req.OperationID, "InsertIntoGroup failed, ", err.Error(), groupInfo)
-		return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+	if err := (*imdb.Group)(nil).Create(ctx, []*imdb.Group{&groupInfo}); err != nil {
+		SetErr(ctx, "Create", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		return
 	}
-	var okUserIDList []string
-	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
 	groupMember := imdb.GroupMember{}
 	us := &imdb.User{}
 	if req.OwnerUserID != "" {
@@ -168,90 +159,68 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 		userIDList = append(userIDList, req.OwnerUserID)
 		if err := s.DelGroupAndUserCache(req.OperationID, "", userIDList); err != nil {
-			log.NewError(req.OperationID, "DelGroupAndUserCache failed, ", err.Error(), userIDList)
-			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}, nil
+			SetErr(ctx, "DelGroupAndUserCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+			return
 		}
-
+		var err error
 		us, err = imdb.GetUserByUserID(req.OwnerUserID)
 		if err != nil {
-			log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.OwnerUserID)
-			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+			SetErr(ctx, "GetUserByUserID", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "userID", req.OwnerUserID)
+			return
 		}
 		//to group member
 		groupMember = imdb.GroupMember{GroupID: groupId, RoleLevel: constant.GroupOwner, OperatorUserID: req.OpUserID, JoinSource: constant.JoinByInvitation, InviterUserID: req.OpUserID}
 		utils.CopyStructFields(&groupMember, us)
-		callbackResp := CallbackBeforeMemberJoinGroup(req.OperationID, &groupMember, groupInfo.Ex)
-		if callbackResp.ErrCode != 0 {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup resp: ", callbackResp)
+		if err := CallbackBeforeMemberJoinGroup(ctx, req.OperationID, &groupMember, groupInfo.Ex); err != nil {
+			SetErr(ctx, "CallbackBeforeMemberJoinGroup", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "userID", req.OwnerUserID)
+			return
 		}
-		if callbackResp.ActionCode != constant.ActionAllow {
-			if callbackResp.ErrCode == 0 {
-				callbackResp.ErrCode = 201
-			}
-			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CallbackBeforeMemberJoinGroup result", "end rpc and return", callbackResp)
-			return &pbGroup.CreateGroupResp{
-				ErrCode: int32(callbackResp.ErrCode),
-				ErrMsg:  callbackResp.ErrMsg,
-			}, nil
-		}
-
-		err = imdb.InsertIntoGroupMember(groupMember)
-		if err != nil {
-			log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
-			return &pbGroup.CreateGroupResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		if err := (*imdb.GroupMember)(nil).Create(ctx, []*imdb.GroupMember{&groupMember}); err != nil {
+			SetErr(ctx, "Create", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "userID", req.OwnerUserID, "args", groupMember)
+			return
 		}
 	}
-
+	var okUserIDList []string
 	if req.GroupInfo.GroupType != constant.SuperGroup {
 		//to group member
+		var groupMembers []*imdb.GroupMember
 		for _, user := range req.InitMemberList {
 			us, err := rocksCache.GetUserInfoFromCache(user.UserID)
 			if err != nil {
-				log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), user.UserID)
+				trace_log.SetContextInfo(ctx, "GetUserInfoFromCache", err, "userID", user.UserID)
 				continue
 			}
 			if user.RoleLevel == constant.GroupOwner {
-				log.NewError(req.OperationID, "only one owner, failed ", user)
+				trace_log.SetContextInfo(ctx, "GetUserInfoFromCache", nil, "userID", user.UserID, "msg", "only one owner, failed ")
 				continue
 			}
 			groupMember.RoleLevel = user.RoleLevel
 			groupMember.JoinSource = constant.JoinByInvitation
 			groupMember.InviterUserID = req.OpUserID
 			utils.CopyStructFields(&groupMember, us)
-			callbackResp := CallbackBeforeMemberJoinGroup(req.OperationID, &groupMember, groupInfo.Ex)
-			if callbackResp.ErrCode != 0 {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg resp: ", callbackResp)
+			if err := CallbackBeforeMemberJoinGroup(ctx, req.OperationID, &groupMember, groupInfo.Ex); err != nil {
+				SetErr(ctx, "CallbackBeforeMemberJoinGroup", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupMember", groupMember, "groupEx", groupInfo.Ex)
+				return
 			}
-			if callbackResp.ActionCode != constant.ActionAllow {
-				if callbackResp.ErrCode == 0 {
-					callbackResp.ErrCode = 201
-				}
-				log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
-				continue
-			}
-			err = imdb.InsertIntoGroupMember(groupMember)
-			if err != nil {
-				log.NewError(req.OperationID, "InsertIntoGroupMember failed ", err.Error(), groupMember)
-				continue
-			}
+			groupMembers = append(groupMembers, &groupMember)
 			okUserIDList = append(okUserIDList, user.UserID)
 		}
-		group, err := rocksCache.GetGroupInfoFromCache(groupId)
+		if err := (*imdb.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
+			SetErr(ctx, "Create", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupMembers", groupMembers)
+			return
+		}
+		group, err := rocksCache.GetGroupInfoFromCache(ctx, groupId)
 		if err != nil {
-			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupId)
-			resp.ErrCode = constant.ErrDB.ErrCode
-			resp.ErrMsg = err.Error()
-			return resp, nil
+			SetErr(ctx, "GetGroupInfoFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", groupId)
+			return
 		}
 		utils.CopyStructFields(resp.GroupInfo, group)
 		memberCount, err := rocksCache.GetGroupMemberNumFromCache(groupId)
-		resp.GroupInfo.MemberCount = uint32(memberCount)
 		if err != nil {
-			log.NewError(req.OperationID, "GetGroupMemberNumByGroupID failed ", err.Error(), groupId)
-			resp.ErrCode = constant.ErrDB.ErrCode
-			resp.ErrMsg = err.Error()
-			return resp, nil
+			SetErr(ctx, "GetGroupMemberNumFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", groupId)
+			return
 		}
+		resp.GroupInfo.MemberCount = uint32(memberCount)
 		if req.OwnerUserID != "" {
 			resp.GroupInfo.OwnerUserID = req.OwnerUserID
 			okUserIDList = append(okUserIDList, req.OwnerUserID)
@@ -262,21 +231,19 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			okUserIDList = append(okUserIDList, v.UserID)
 		}
 		if err := db.DB.CreateSuperGroup(groupId, okUserIDList, len(okUserIDList)); err != nil {
-			log.NewError(req.OperationID, "GetGroupMemberNumByGroupID failed ", err.Error(), groupId)
-			resp.ErrCode = constant.ErrDB.ErrCode
-			resp.ErrMsg = err.Error() + ": CreateSuperGroup failed"
-			return resp, nil
+			SetErr(ctx, "CreateSuperGroup", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", groupId, "userIDList", okUserIDList)
+			return
 		}
 	}
 
 	if len(okUserIDList) != 0 {
-		log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
 		if req.GroupInfo.GroupType != constant.SuperGroup {
 			chat.GroupCreatedNotification(req.OperationID, req.OpUserID, groupId, okUserIDList)
 		} else {
 			for _, userID := range okUserIDList {
 				if err := rocksCache.DelJoinedSuperGroupIDListFromCache(userID); err != nil {
-					log.NewWarn(req.OperationID, utils.GetSelfFuncName(), userID, err.Error())
+					trace_log.SetContextInfo(ctx, "DelJoinedSuperGroupIDListFromCache", err, "userID", userID)
+					//log.NewWarn(req.OperationID, utils.GetSelfFuncName(), userID, err.Error())
 				}
 			}
 			go func() {
@@ -285,10 +252,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				}
 			}()
 		}
-		return resp, nil
+		return
 	} else {
-		log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
-		return resp, nil
+		//log.NewInfo(req.OperationID, "rpc CreateGroup return ", resp.String())
+		return
 	}
 }
 
@@ -298,6 +265,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.FromUserID)
 		return &pbGroup.GetJoinedGroupListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
+	utils.GetFuncName(1)
 
 	joinedGroupList, err := rocksCache.GetJoinedGroupIDListFromCache(req.FromUserID)
 	if err != nil {
@@ -943,7 +911,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		member.InviterUserID = request.InviterUserID
 		member.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
 		err = CallbackBeforeMemberJoinGroup(ctx, req.OperationID, &member, groupInfo.Ex)
-		if err != nil{
+		if err != nil {
 			SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 			return &resp, nil
 		}
