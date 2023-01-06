@@ -115,10 +115,10 @@ func (s *groupServer) Run() {
 	log.NewInfo("", "group rpc success")
 }
 
-func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (resp *pbGroup.CreateGroupResp, err error) {
+func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (resp *pbGroup.CreateGroupResp, _ error) {
 	resp = &pbGroup.CreateGroupResp{CommonResp: &open_im_sdk.CommonResp{}, GroupInfo: &open_im_sdk.GroupInfo{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "req", req.String(), "resp", resp.String())
+	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "req", req.String(), "resp", resp.String())
 	defer trace_log.ShowLog(ctx)
 
 	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.OwnerUserID); err != nil {
