@@ -3,7 +3,6 @@ package trace_log
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
@@ -77,7 +76,7 @@ func SetContextInfo(ctx context.Context, funcName string, err error, args ...int
 	var funcInfo FuncInfo
 	funcInfo.Args = make(map[string]interface{})
 	argsHandle(args, funcInfo.Args)
-	funcInfo.FuncName = utils.GetSelfFuncName()
+	funcInfo.FuncName = funcName
 	funcInfo.Err = err
 	*t.Funcs = append(*t.Funcs, funcInfo)
 }

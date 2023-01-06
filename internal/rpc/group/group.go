@@ -115,11 +115,12 @@ func (s *groupServer) Run() {
 	log.NewInfo("", "group rpc success")
 }
 
-func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (resp *pbGroup.CreateGroupResp, _ error) {
+func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (resp *pbGroup.CreateGroupResp, err error) {
 	resp = &pbGroup.CreateGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "req", req, "resp", resp)
+	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "req", req.String(), "resp", resp.String())
 	defer trace_log.ShowLog(ctx)
+
 	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.OwnerUserID); err != nil {
 		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
 		return
@@ -791,11 +792,9 @@ func SetErrorForResp(err error, errCode *int32, errMsg *string) {
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (resp *pbGroup.GetGroupApplicationListResp, err error) {
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "rpc req ", req.String(), "rpc resp ", resp.String())
+	trace_log.ShowLog(ctx)
 
 	resp = &pbGroup.GetGroupApplicationListResp{CommonResp: &open_im_sdk.CommonResp{}}
 	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
