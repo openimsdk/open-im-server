@@ -787,10 +787,11 @@ func SetErrCodeMsg(ctx context.Context, funcName string, errCodeFrom int32, errM
 	trace_log.SetContextInfo(ctx, funcName, constant.ToAPIErrWithErrCode(errCodeFrom), args)
 }
 
-func SetErrorForResp(err error, errCode *int32, errMsg *string) {
+func SetErrorForResp(err error, commonResp *open_im_sdk.CommonResp) {
 	errInfo := constant.ToAPIErrWithErr(err)
-	*errCode = errInfo.ErrCode
-	*errMsg = errInfo.ErrMsg
+	commonResp.ErrCode = errInfo.ErrCode
+	commonResp.ErrMsg = errInfo.ErrMsg
+	commonResp.DetailErrMsg = err.Error()
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (resp *pbGroup.GetGroupApplicationListResp, err error) {
