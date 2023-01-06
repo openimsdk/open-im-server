@@ -242,10 +242,12 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (resp *pbGroup.GetJoinedGroupListResp, _ error) {
 	resp = &pbGroup.GetJoinedGroupListResp{CommonResp: &open_im_sdk.CommonResp{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "req", req, "resp", resp)
-	defer trace_log.ShowLog(ctx)
+	GetJoinedGroupList	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
 	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.FromUserID); err != nil {
-		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		SetErrorForResp(err, resp.CommonResp)
 		return
 	}
 	joinedGroupList, err := rocksCache.GetJoinedGroupIDListFromCache(req.FromUserID)
@@ -266,7 +268,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err2.Error(), v)
 			continue
 		}
-		group, err := rocksCache.GetGroupInfoFromCache(v)
+		group, err := rocksCache.GetGroupInfoFromCache(ctx, v)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), v)
 			continue
@@ -291,7 +293,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		log.NewDebug(req.OperationID, "joinedGroup ", groupNode)
 	}
 	log.NewInfo(req.OperationID, "GetJoinedGroupList rpc return ", resp.String())
-	return &resp, nil
+	return resp, nil
 }
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.InviteUserToGroupReq) (*pbGroup.InviteUserToGroupResp, error) {
