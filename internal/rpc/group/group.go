@@ -477,7 +477,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	} else {
 		for _, v := range req.InvitedUserIDList {
 			if err := rocksCache.DelJoinedSuperGroupIDListFromCache(v); err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
+				trace_log.SetContextInfo(ctx, "DelJoinedSuperGroupIDListFromCache", err, "userID", v)
 			}
 		}
 		for _, v := range req.InvitedUserIDList {
@@ -487,23 +487,23 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	return
 }
 
-func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGroupAllMemberReq) (*pbGroup.GetGroupAllMemberResp, error) {
-	log.NewInfo(req.OperationID, "GetGroupAllMember, args ", req.String())
-	var resp pbGroup.GetGroupAllMemberResp
+func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGroupAllMemberReq) (resp *pbGroup.GetGroupAllMemberResp, err error) {
+	resp = &pbGroup.GetGroupAllMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-		resp.ErrCode = constant.ErrDB.ErrCode
-		resp.ErrMsg = constant.ErrDB.ErrMsg
-		return &resp, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 	if groupInfo.GroupType != constant.SuperGroup {
 		memberList, err := rocksCache.GetGroupMembersInfoFromCache(req.Count, req.Offset, req.GroupID)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-			resp.ErrCode = constant.ErrDB.ErrCode
-			resp.ErrMsg = constant.ErrDB.ErrMsg
-			return &resp, nil
+			SetErrorForResp(err, resp.CommonResp)
+			return
 		}
 		for _, v := range memberList {
 			var node open_im_sdk.GroupMemberFullInfo
@@ -511,19 +511,20 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 			resp.MemberList = append(resp.MemberList, &node)
 		}
 	}
-	log.NewInfo(req.OperationID, "GetGroupAllMember rpc return ", len(resp.MemberList))
-	return &resp, nil
+	return
 }
 
-func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (*pbGroup.GetGroupMemberListResp, error) {
-	log.NewInfo(req.OperationID, "GetGroupMemberList args ", req.String())
-	var resp pbGroup.GetGroupMemberListResp
+func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (resp *pbGroup.GetGroupMemberListResp, err error) {
+	resp = &pbGroup.GetGroupMemberListResp{CommonResp: &open_im_sdk.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
 	memberList, err := imdb.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
 	if err != nil {
-		resp.ErrCode = constant.ErrDB.ErrCode
-		resp.ErrMsg = constant.ErrDB.ErrMsg
-		log.NewError(req.OperationID, "GetGroupMemberByGroupId failed,", req.GroupID, req.Filter, req.NextSeq, 30)
-		return &resp, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 
 	for _, v := range memberList {
@@ -537,9 +538,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	} else {
 		resp.NextSeq = req.NextSeq + int32(len(memberList))
 	}
-	resp.ErrCode = 0
-	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp.String())
-	return &resp, nil
+	return
 }
 
 func (s *groupServer) getGroupUserLevel(groupID, userID string) (int, error) {
@@ -562,28 +561,34 @@ func (s *groupServer) getGroupUserLevel(groupID, userID string) (int, error) {
 	return opFlag, nil
 }
 
-func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (*pbGroup.KickGroupMemberResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	groupInfo, err := rocksCache.GetGroupInfoFromCache(req.GroupID)
+func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (resp *pbGroup.KickGroupMemberResp, _ error) {
+	resp = &pbGroup.KickGroupMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupInfoByGroupID", req.GroupID, err.Error())
-		return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 	var okUserIDList []string
-	var resp pbGroup.KickGroupMemberResp
 	if groupInfo.GroupType != constant.SuperGroup {
 		opFlag := 0
 		if !token_verify.IsManagerUserID(req.OpUserID) {
 			opInfo, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, req.OpUserID)
 			if err != nil {
-				errMsg := req.OperationID + " GetGroupMemberInfoByGroupIDAndUserID  failed " + err.Error() + req.GroupID + req.OpUserID
-				log.Error(req.OperationID, errMsg)
-				return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+				SetErrorForResp(err, resp.CommonResp)
+				return
 			}
 			if opInfo.RoleLevel == constant.GroupOrdinaryUsers {
-				errMsg := req.OperationID + " opInfo.RoleLevel == constant.GroupOrdinaryUsers " + opInfo.UserID + opInfo.GroupID
-				log.Error(req.OperationID, errMsg)
-				return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+				// TODO
+				//errMsg := req.OperationID + " opInfo.RoleLevel == constant.GroupOrdinaryUsers " + opInfo.UserID + opInfo.GroupID
+				//log.Error(req.OperationID, errMsg)
+				//return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}, nil
+				SetErrorForResp(err, resp.CommonResp)
+				return
 			} else if opInfo.RoleLevel == constant.GroupOwner {
 				opFlag = 2 //owner
 			} else {
@@ -595,39 +600,41 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 
 		//op is group owner?
 		if len(req.KickedUserIDList) == 0 {
-			log.NewError(req.OperationID, "failed, kick list 0")
-			return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: constant.ErrArgs.ErrMsg}, nil
+			//log.NewError(req.OperationID, "failed, kick list 0")
+			//return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: constant.ErrArgs.ErrMsg}, nil
+			SetErrorForResp(constant.ErrArgs, resp.CommonResp)
+			return
 		}
 		if err := s.DelGroupAndUserCache(req.OperationID, req.GroupID, req.KickedUserIDList); err != nil {
-			log.NewError(req.OperationID, "DelGroupAndUserCache failed", err.Error())
-			return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}, nil
+			SetErrorForResp(err, resp.CommonResp)
+			return
 		}
 		//remove
 		for _, v := range req.KickedUserIDList {
 			kickedInfo, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, v)
 			if err != nil {
-				log.NewError(req.OperationID, " GetGroupMemberInfoByGroupIDAndUserID failed ", req.GroupID, v, err.Error())
 				resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: -1})
+				trace_log.SetContextInfo(ctx, "GetGroupMemberInfoFromCache", err, "groupID", req.GroupID, "userID", v)
 				continue
 			}
 
 			if kickedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-				log.Error(req.OperationID, "is constant.GroupAdmin, can't kicked ", v)
 				resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: -1})
+				trace_log.SetContextInfo(ctx, "", nil, "msg", "is constant.GroupAdmin, can't kicked", "groupID", req.GroupID, "userID", v)
 				continue
 			}
 			if kickedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
-				log.NewDebug(req.OperationID, "is constant.GroupOwner, can't kicked ", v)
 				resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: -1})
+				trace_log.SetContextInfo(ctx, "", nil, "msg", "is constant.GroupOwner, can't kicked", "groupID", req.GroupID, "userID", v)
 				continue
 			}
 
 			err = imdb.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, v)
+			trace_log.SetContextInfo(ctx, "RemoveGroupMember", err, "groupID", req.GroupID, "userID", v)
 			if err != nil {
 				log.NewError(req.OperationID, "RemoveGroupMember failed ", err.Error(), req.GroupID, v)
 				resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: -1})
 			} else {
-				log.NewDebug(req.OperationID, "kicked ", v)
 				resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: 0})
 				okUserIDList = append(okUserIDList, v)
 			}
@@ -642,44 +649,34 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = true
 			reqPb.Conversation = &c
-			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
-			if etcdConn == nil {
-				errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-				log.NewError(req.OperationID, errMsg)
-				resp.ErrCode = constant.ErrInternal.ErrCode
-				resp.ErrMsg = errMsg
-				return &resp, nil
+			etcdConn, err := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImUserName, req.OperationID)
+			if err != nil {
+				SetErrorForResp(err, resp.CommonResp)
+				return
 			}
 			client := pbUser.NewUserClient(etcdConn)
 			respPb, err := client.SetConversation(context.Background(), &reqPb)
-			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation rpc failed, ", reqPb.String(), err.Error(), v)
-			} else {
-				log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "SetConversation success", respPb.String(), v)
-			}
+			trace_log.SetContextInfo(ctx, "SetConversation", err, "req", &reqPb, "resp", respPb)
 		}
 	} else {
 		okUserIDList = req.KickedUserIDList
 		if err := db.DB.RemoverUserFromSuperGroup(req.GroupID, okUserIDList); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, req.KickedUserIDList, err.Error())
-			resp.ErrCode = constant.ErrDB.ErrCode
-			resp.ErrMsg = constant.ErrDB.ErrMsg
-			return &resp, nil
+			SetErrorForResp(err, resp.CommonResp)
+			return
 		}
 	}
 
 	if groupInfo.GroupType != constant.SuperGroup {
 		for _, userID := range okUserIDList {
 			if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, userID); err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+				trace_log.SetContextInfo(ctx, "DelGroupMemberInfoFromCache", err, "groupID", req.GroupID, "userID", userID)
 			}
 		}
 		chat.MemberKickedNotification(req, okUserIDList)
 	} else {
 		for _, userID := range okUserIDList {
-			err = rocksCache.DelJoinedSuperGroupIDListFromCache(userID)
-			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
+			if err = rocksCache.DelJoinedSuperGroupIDListFromCache(userID); err != nil {
+				trace_log.SetContextInfo(ctx, "DelGroupMemberInfoFromCache", err, "userID", userID)
 			}
 		}
 		go func() {
@@ -689,9 +686,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}()
 
 	}
-
-	log.NewInfo(req.OperationID, "GetGroupMemberList rpc return ", resp.String())
-	return &resp, nil
+	return
 }
 
 func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (resp *pbGroup.GetGroupMembersInfoResp, err error) {
