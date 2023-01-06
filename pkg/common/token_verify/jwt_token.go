@@ -150,6 +150,16 @@ func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool 
 	return false
 }
 
+func CheckAccessV2(ctx context.Context, OpUserID string, OwnerUserID string) error {
+	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
+		return nil
+	}
+	if OpUserID == OwnerUserID {
+		return nil
+	}
+	return utils.Wrap(constant.ErrData, "")
+}
+
 func GetUserIDFromToken(token string, operationID string) (bool, string, string) {
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
