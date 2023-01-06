@@ -205,6 +205,18 @@ func GetUserInfoFromCache(userID string) (*imdb.User, error) {
 	return userInfo, utils.Wrap(err, "")
 }
 
+func GetUserInfoFromCacheBatch(userIDs []string) ([]*imdb.User, error) {
+	var users []*imdb.User
+	for _, userID := range userIDs {
+		user, err := GetUserInfoFromCache(userID)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}
+
 func DelUserInfoFromCache(userID string) error {
 	return db.DB.Rc.TagAsDeleted(userInfoCache + userID)
 }

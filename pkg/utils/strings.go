@@ -37,7 +37,7 @@ func Uint32ToString(i uint32) string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-//judge a string whether in the  string list
+// judge a string whether in the  string list
 func IsContain(target string, List []string) bool {
 	for _, element := range List {
 
@@ -80,7 +80,7 @@ func StructToJsonBytes(param interface{}) []byte {
 	return dataType
 }
 
-//The incoming parameter must be a pointer
+// The incoming parameter must be a pointer
 func JsonStringToStruct(s string, args interface{}) error {
 	err := json.Unmarshal([]byte(s), args)
 	return err
@@ -120,4 +120,15 @@ func RemoveDuplicateElement(idList []string) []string {
 		}
 	}
 	return result
+}
+
+func IsRepeatStringSlice(arr []string) bool {
+	t := make(map[string]struct{})
+	for _, s := range arr {
+		if _, ok := t[s]; ok {
+			return true
+		}
+		t[s] = struct{}{}
+	}
+	return false
 }
