@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
 	"time"
@@ -150,7 +151,10 @@ func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool 
 	return false
 }
 
-func CheckAccessV2(ctx context.Context, OpUserID string, OwnerUserID string) error {
+func CheckAccessV2(ctx context.Context, OpUserID string, OwnerUserID string) (err error) {
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "OpUserID", OpUserID, "OwnerUserID", OwnerUserID)
+	}()
 	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
 		return nil
 	}
