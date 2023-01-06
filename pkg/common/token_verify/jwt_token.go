@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/open_utils"
 	"time"
 
 	go_redis "github.com/go-redis/redis/v8"
@@ -161,7 +162,7 @@ func CheckAccessV2(ctx context.Context, OpUserID string, OwnerUserID string) (er
 	if OpUserID == OwnerUserID {
 		return nil
 	}
-	return utils.Wrap(constant.ErrData, "")
+	return utils.Wrap(constant.ErrData, open_utils.GetSelfFuncName())
 }
 
 func GetUserIDFromToken(token string, operationID string) (bool, string, string) {
