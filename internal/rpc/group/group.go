@@ -116,7 +116,7 @@ func (s *groupServer) Run() {
 }
 
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (resp *pbGroup.CreateGroupResp, err error) {
-	resp = &pbGroup.CreateGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp = &pbGroup.CreateGroupResp{CommonResp: &open_im_sdk.CommonResp{}, GroupInfo: &open_im_sdk.GroupInfo{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "req", req.String(), "resp", resp.String())
 	defer trace_log.ShowLog(ctx)
@@ -258,21 +258,21 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	}
 }
 
-func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
-	log.NewInfo(req.OperationID, "GetJoinedGroupList, args ", req.String())
-	if !token_verify.CheckAccess(req.OpUserID, req.FromUserID) {
-		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.FromUserID)
-		return &pbGroup.GetJoinedGroupListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (resp *pbGroup.GetJoinedGroupListResp,_ error) {
+	resp = &pbGroup.GetJoinedGroupListResp{CommonResp: &open_im_sdk.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "req", req, "resp", resp)
+	defer trace_log.ShowLog(ctx)
+	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.FromUserID);err != nil {
+		SetErrorForResp(err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg)
+		return
 	}
-	utils.GetFuncName(1)
-
 	joinedGroupList, err := rocksCache.GetJoinedGroupIDListFromCache(req.FromUserID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetJoinedGroupIDListFromCache failed", err.Error(), req.FromUserID)
-		return &pbGroup.GetJoinedGroupListResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		SetErr(ctx, "GetJoinedGroupIDListFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "userID", req.FromUserID)
+		return
 	}
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "joinedGroupList: ", joinedGroupList)
-	var resp pbGroup.GetJoinedGroupListResp
 	for _, v := range joinedGroupList {
 		var groupNode open_im_sdk.GroupInfo
 		num, err := rocksCache.GetGroupMemberNumFromCache(v)
