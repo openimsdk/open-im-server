@@ -146,6 +146,7 @@ message GetGroupMembersInfoReq {
   repeated string memberList = 2;
   string OpUserID = 3;  //No verification permission
   string OperationID = 4;
+  bool noCache = 5;
 }
 
 message GetGroupMembersInfoResp {

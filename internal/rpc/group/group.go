@@ -776,7 +776,15 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	var resp pbGroup.GetGroupMembersInfoResp
 	resp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	for _, userID := range req.MemberList {
-		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, userID)
+		var (
+			groupMember *db.GroupMember
+			err         error
+		)
+		if req.NoCache {
+			groupMember, err = imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, userID)
+		} else {
+			groupMember, err = rocksCache.GetGroupMemberInfoFromCache(req.GroupID, userID)
+		}
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, userID, err.Error())
 			continue

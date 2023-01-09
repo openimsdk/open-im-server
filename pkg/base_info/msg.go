@@ -80,6 +80,7 @@ type OperateMessageListReactionExtensionsReq struct {
 	SourceID               string                                                        `json:"sourceID"  binding:"required"`
 	SessionType            string                                                        `json:"sessionType" binding:"required"`
 	IsExternalExtensions   bool                                                          `json:"isExternalExtensions"`
+	TypeKeyList            []string                                                      `json:"typeKeyList"`
 	MessageReactionKeyList []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageReactionKeyList" binding:"required"`
 }
 
@@ -91,20 +92,18 @@ type OperateMessageListReactionExtensionsResp struct {
 	} `json:"data"`
 }
 
-type SetMessageReactionExtensionsCallbackReq ModifyMessageReactionExtensionsReq
+type SetMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
 
-type SetMessageReactionExtensionsCallbackResp ModifyMessageReactionExtensionsResp
+type SetMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
+type AddMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
 
+type AddMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
 type GetMessageListReactionExtensionsReq OperateMessageListReactionExtensionsReq
 
 type GetMessageListReactionExtensionsResp struct {
 	CommResp
 	Data []*msg.SingleMessageExtensionResult `json:"data"`
 }
-
-type AddMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
-
-type AddMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
 
 type DeleteMessageReactionExtensionsReq struct {
 	OperationID           string             `json:"operationID" binding:"required"`
@@ -122,6 +121,7 @@ type DeleteMessageReactionExtensionsResp struct {
 }
 
 type ReactionMessageModifierNotification struct {
+	Operation                    int                         `json:"operation" binding:"required"`
 	SourceID                     string                      `json:"sourceID"  binding:"required"`
 	OpUserID                     string                      `json:"opUserID"  binding:"required"`
 	SessionType                  int32                       `json:"sessionType" binding:"required"`
