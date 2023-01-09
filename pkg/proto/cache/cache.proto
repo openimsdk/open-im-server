@@ -1,11 +1,8 @@
 syntax = "proto3";
+import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 option go_package = "Open_IM/pkg/proto/cache;cache";
 package cache;
 
-message CommonResp{
-  int32  errCode = 1;
-  string errMsg = 2;
-}
 
 message GetFriendIDListFromCacheReq {
   string userID = 1;
@@ -14,7 +11,7 @@ message GetFriendIDListFromCacheReq {
 
 message GetFriendIDListFromCacheResp {
   repeated string userIDList = 1;
-  CommonResp commonResp = 2;
+  server_api_params.CommonResp commonResp = 2;
 }
 
 message DelFriendIDListFromCacheReq {
@@ -23,7 +20,7 @@ message DelFriendIDListFromCacheReq {
 }
 
 message DelFriendIDListFromCacheResp {
-   CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 message GetBlackIDListFromCacheReq {
@@ -33,7 +30,7 @@ message GetBlackIDListFromCacheReq {
 
 message GetBlackIDListFromCacheResp {
   repeated string userIDList = 1;
-  CommonResp commonResp = 2;
+  server_api_params.CommonResp commonResp = 2;
 }
 
 message DelBlackIDListFromCacheReq {
@@ -42,7 +39,7 @@ message DelBlackIDListFromCacheReq {
 }
 
 message DelBlackIDListFromCacheResp {
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
 }
 
 message GetGroupMemberIDListFromCacheReq {
@@ -51,7 +48,7 @@ message GetGroupMemberIDListFromCacheReq {
 }
 
 message GetGroupMemberIDListFromCacheResp {
-  CommonResp commonResp = 1;
+  server_api_params.CommonResp commonResp = 1;
   repeated string userIDList = 2;
 }
 
@@ -61,7 +58,7 @@ message DelGroupMemberIDListFromCacheReq {
 }
 
 message DelGroupMemberIDListFromCacheResp {
-  CommonResp commonResp = 1;
+ server_api_params.CommonResp commonResp = 1;
 }
 
 service cache{

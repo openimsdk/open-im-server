@@ -111,7 +111,7 @@ func SetErrorForResp(err error, commonResp *sdkws.CommonResp) {
 	commonResp.DetailErrMsg = err.Error()
 }
 
-func CommonResp2Err(resp sdkws.CommonResp) error {
+func CommonResp2Err(resp *sdkws.CommonResp) error {
 	if resp.ErrCode != NoError {
 		return errors.New(fmt.Sprintf("call rpc error, errCode is %d, errMsg is %s, detailErrMsg is %s", resp.ErrCode, resp.ErrMsg, resp.DetailErrMsg))
 	}
