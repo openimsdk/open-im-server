@@ -259,7 +259,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		var groupNode open_im_sdk.GroupInfo
 		num, err := rocksCache.GetGroupMemberNumFromCache(groupID)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), groupID)
+			trace_log.SetContextInfo(ctx, "GetGroupMemberNumFromCache", err, "groupID", groupID)
 			continue
 		}
 		owner, err := (*imdb.GroupMember)(nil).TakeOwnerInfo(ctx, groupID)
@@ -277,7 +277,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 			continue
 		}
 		if group.Status == constant.GroupStatusDismissed {
-			trace_log.SetContextInfo(ctx, "GetGroupInfoFromCache", err, "groupID", groupID)
+			trace_log.SetContextInfo(ctx, "group.Status == constant.GroupStatusDismissed", nil, "groupID", groupID)
 			continue
 		}
 		utils.CopyStructFields(&groupNode, group)
@@ -698,9 +698,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	for _, userID := range req.MemberList {
 		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(req.GroupID, userID)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, userID, err.Error())
-			var errResult error
-
+			trace_log.SetContextInfo(ctx, "GetGroupMemberInfoFromCache", err, "groupID", req.GroupID, "userID", userID)
 			continue
 		}
 		var memberNode open_im_sdk.GroupMemberFullInfo
@@ -708,9 +706,8 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 		memberNode.JoinTime = int32(groupMember.JoinTime.Unix())
 		resp.MemberList = append(resp.MemberList, &memberNode)
 	}
-	if
 	SetErr(ctx, "GetGroupMemberInfoFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "groupID", req.GroupID)
-	return resp, nil
+	return
 }
 
 func FillGroupInfoByGroupID(operationID, groupID string, groupInfo *open_im_sdk.GroupInfo) error {
@@ -1788,7 +1785,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	} else {
 		m["ex"] = nil
 	}
-	if err := imdb.UpdateGroupMemberInfoByMap(groupMember, m);err != nil {
+	if err := imdb.UpdateGroupMemberInfoByMap(groupMember, m); err != nil {
 		SetErrorForResp(err, resp.CommonResp)
 		return
 	}
@@ -1807,7 +1804,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	return
 }
 
-func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (resp *pbGroup.GetGroupAbstractInfoResp,_ error) {
+func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (resp *pbGroup.GetGroupAbstractInfoResp, _ error) {
 	resp = &pbGroup.GetGroupAbstractInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
