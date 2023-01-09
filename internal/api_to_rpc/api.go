@@ -4,6 +4,7 @@ import (
 	"Open_IM/internal/fault_tolerant"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/trace_log"
+	utils2 "Open_IM/pkg/utils"
 	"context"
 	utils "github.com/OpenIMSDK/open_utils"
 	"github.com/gin-gonic/gin"
@@ -20,10 +21,8 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn in
 	reqValue := reflect.ValueOf(apiReq).Elem()
 	operationID := reqValue.FieldByName("OperationID").String()
 	trace_log.SetOperationID(nCtx, operationID)
-
 	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", apiReq)
-
-	etcdConn, err := fault_tolerant.GetDefaultConn(rpcName, operationID)
+	etcdConn, err := utils2.GetConn(c, rpcName)
 	if err != nil {
 		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
 		return
