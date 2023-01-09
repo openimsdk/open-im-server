@@ -1442,7 +1442,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 	return
 }
 
-func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (resp *pbGroup.DismissGroupResp,_ error) {
+func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (resp *pbGroup.DismissGroupResp, _ error) {
 	resp = &pbGroup.DismissGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
@@ -1519,7 +1519,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 //  rpc MuteGroup(MuteGroupReq) returns(MuteGroupResp);
 //  rpc CancelMuteGroup(CancelMuteGroupReq) returns(CancelMuteGroupResp);
 
-func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (resp *pbGroup.MuteGroupMemberResp,_ error) {
+func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (resp *pbGroup.MuteGroupMemberResp, _ error) {
 	resp = &pbGroup.MuteGroupMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
@@ -1546,11 +1546,11 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 		return
 	}
 	if mutedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
-		SetErrorForResp(err, resp.CommonResp)
+		SetErrorForResp(constant.ErrArgs, resp.CommonResp)
 		return
 	}
 	if mutedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-		SetErrorForResp(err, resp.CommonResp)
+		SetErrorForResp(constant.ErrArgs, resp.CommonResp)
 		return
 	}
 
@@ -1569,53 +1569,54 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	return
 }
 
-func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (*pbGroup.CancelMuteGroupMemberResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
+func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (resp *pbGroup.CancelMuteGroupMemberResp, _ error) {
+	resp = &pbGroup.CancelMuteGroupMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
 
 	opFlag, err := s.getGroupUserLevel(req.GroupID, req.OpUserID)
 	if err != nil {
-		errMsg := req.OperationID + " getGroupUserLevel failed " + req.GroupID + req.OpUserID + err.Error()
-		log.Error(req.OperationID, errMsg)
-		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 	if opFlag == 0 {
-		errMsg := req.OperationID + "opFlag == 0  " + req.GroupID + req.OpUserID
-		log.Error(req.OperationID, errMsg)
-		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
+		SetErrorForResp(constant.ErrAccess, resp.CommonResp)
+		return
 	}
 
 	mutedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
 	if err != nil {
-		errMsg := req.OperationID + " GetGroupMemberInfoByGroupIDAndUserID failed " + req.GroupID + req.UserID + err.Error()
-		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 	if mutedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
-		errMsg := req.OperationID + " mutedInfo.RoleLevel == constant.GroupOwner " + req.GroupID + req.UserID
-		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 	if mutedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-		errMsg := req.OperationID + " mutedInfo.RoleLevel == constant.GroupAdmin " + req.GroupID + req.UserID
-		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 	if err := rocksCache.DelGroupMemberInfoFromCache(req.GroupID, req.UserID); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
-		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 
 	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
 	groupMemberInfo.MuteEndTime = time.Unix(0, 0)
 	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
-		log.Error(req.OperationID, "UpdateGroupMemberInfo failed ", err.Error(), groupMemberInfo)
-		return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		SetErrorForResp(err, resp.CommonResp)
+		return
 	}
-
 	chat.GroupMemberCancelMutedNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return ", pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""})
-	return &pbGroup.CancelMuteGroupMemberResp{CommonResp: &pbGroup.CommonResp{ErrCode: 0, ErrMsg: ""}}, nil
+	return
 }
 
-func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) (*pbGroup.MuteGroupResp, error) {
+func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) (resp *pbGroup.MuteGroupResp, _ error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc args ", req.String())
 
 	opFlag, err := s.getGroupUserLevel(req.GroupID, req.OpUserID)
