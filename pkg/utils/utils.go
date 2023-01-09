@@ -137,12 +137,17 @@ func RemoveRepeatedStringInList(slc []string) []string {
 }
 
 func Pb2String(pb proto.Message) (string, error) {
-	marshaler := jsonpb.Marshaler{
-		OrigName:     true,
-		EnumsAsInts:  false,
-		EmitDefaults: false,
+	//marshaler := jsonpb.Marshaler{
+	//	OrigName:     true,
+	//	EnumsAsInts:  false,
+	//	EmitDefaults: false,
+	//}
+	//return marshaler.MarshalToString(pb)
+	bytes, err := proto.Marshal(pb)
+	if err != nil {
+		return "", err
 	}
-	return marshaler.MarshalToString(pb)
+	return string(bytes), nil
 }
 
 func String2Pb(s string, pb proto.Message) error {
