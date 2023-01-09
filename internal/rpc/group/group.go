@@ -146,7 +146,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		SetErrorForResp(constant.ErrArgs, resp.CommonResp)
 		return
 	}
-	users, err := rocksCache.GetUserInfoFromCacheBatch(userIDs)
+	users, err := rocksCache.GetUserInfoFromCacheBatch(ctx, userIDs)
 	if err != nil {
 		SetErrorForResp(err, resp.CommonResp)
 		return
@@ -250,7 +250,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		SetErrorForResp(err, resp.CommonResp)
 		return
 	}
-	joinedGroupList, err := rocksCache.GetJoinedGroupIDListFromCache(req.FromUserID)
+	joinedGroupList, err := rocksCache.GetJoinedGroupIDListFromCache(ctx, req.FromUserID)
 	if err != nil {
 		SetErr(ctx, "GetJoinedGroupIDListFromCache", err, &resp.CommonResp.ErrCode, &resp.CommonResp.ErrMsg, "userID", req.FromUserID)
 		return
@@ -258,7 +258,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "joinedGroupList: ", joinedGroupList)
 	for _, v := range joinedGroupList {
 		var groupNode open_im_sdk.GroupInfo
-		num, err := rocksCache.GetGroupMemberNumFromCache(v)
+		num, err := rocksCache.GetGroupMemberNumFromCache(ctx, v)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), v)
 			continue
@@ -1831,7 +1831,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	return resp, nil
 }
 
-func (s *groupServer) GetGroupAbstractInfo(c context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
+func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp := &pbGroup.GetGroupAbstractInfoResp{CommonResp: &pbGroup.CommonResp{}}
 	hashCode, err := rocksCache.GetGroupMemberListHashFromCache(req.GroupID)
@@ -1842,7 +1842,7 @@ func (s *groupServer) GetGroupAbstractInfo(c context.Context, req *pbGroup.GetGr
 		return resp, nil
 	}
 	resp.GroupMemberListHash = hashCode
-	num, err := rocksCache.GetGroupMemberNumFromCache(req.GroupID)
+	num, err := rocksCache.GetGroupMemberNumFromCache(ctx, req.GroupID)
 	if err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberNumByGroupID failed", req.GroupID, err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
