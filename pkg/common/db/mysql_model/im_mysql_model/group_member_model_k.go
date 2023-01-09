@@ -82,6 +82,15 @@ func (*GroupMember) Take(ctx context.Context, groupID string, userID string) (gr
 	return groupMember, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
 }
 
+func (*GroupMember) TakeOwnerInfo(ctx context.Context, groupID string) (groupMember *GroupMember, err error) {
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMember", *groupMember)
+	}()
+	groupMember = &GroupMember{}
+	err = db.DB.MysqlDB.DefaultGormDB().Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error
+	return groupMember, utils.Wrap(err, "")
+}
+
 func InsertIntoGroupMember(toInsertInfo GroupMember) error {
 	toInsertInfo.JoinTime = time.Now()
 	if toInsertInfo.RoleLevel == 0 {
