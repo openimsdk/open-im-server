@@ -123,7 +123,10 @@ func GetBlackListFromCache(ctx context.Context, userID string) (blackIDList []st
 	return blackIDList, utils.Wrap(err, "")
 }
 
-func DelBlackIDListFromCache(userID string) error {
+func DelBlackIDListFromCache(ctx context.Context, userID string) (err error) {
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "ctx", ctx)
+	}()
 	return db.DB.Rc.TagAsDeleted(blackListCache + userID)
 }
 
@@ -150,7 +153,10 @@ func GetJoinedGroupIDListFromCache(ctx context.Context, userID string) (joinedGr
 	return joinedGroupList, utils.Wrap(err, "")
 }
 
-func DelJoinedGroupIDListFromCache(userID string) error {
+func DelJoinedGroupIDListFromCache(ctx context.Context, userID string) (err error) {
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "userID", userID)
+	}()
 	return db.DB.Rc.TagAsDeleted(joinedGroupListCache + userID)
 }
 
