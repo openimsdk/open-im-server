@@ -38,33 +38,33 @@ type GroupMember struct {
 
 func (*GroupMember) Create(ctx context.Context, groupMemberList []*GroupMember) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupMemberList", groupMemberList)
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)
 	}()
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Create(&groupMemberList).Error, "")
 }
 
 func (*GroupMember) Delete(ctx context.Context, groupMembers []*GroupMember) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupMembers", groupMembers)
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
 	}()
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Delete(groupMembers).Error, "")
 }
 
 func (*GroupMember) UpdateByMap(ctx context.Context, groupID string, userID string, args map[string]interface{}) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID, "args", args)
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
 	}()
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Model(&GroupMember{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
 }
 
 func (*GroupMember) Update(ctx context.Context, groupMembers []*GroupMember) (err error) {
-	defer func() { trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupMembers", groupMembers) }()
+	defer func() { trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
 	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Updates(&groupMembers).Error, "")
 }
 
 func (*GroupMember) Find(ctx context.Context, groupMembers []*GroupMember) (groupList []*GroupMember, err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupMembers", groupMembers, "groupList", groupList)
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers, "groupList", groupList)
 	}()
 	var where [][]interface{}
 	for _, groupMember := range groupMembers {
@@ -76,7 +76,7 @@ func (*GroupMember) Find(ctx context.Context, groupMembers []*GroupMember) (grou
 
 func (*GroupMember) Take(ctx context.Context, groupID string, userID string) (groupMember *GroupMember, err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
 	return groupMember, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
