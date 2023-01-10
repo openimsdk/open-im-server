@@ -6,10 +6,12 @@ import (
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/common/trace_log"
 	pbCache "Open_IM/pkg/proto/cache"
+	sdkws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"github.com/OpenIMSDK/getcdv3"
 	"net"
 	"strconv"
 	"strings"
@@ -75,7 +77,7 @@ func (s *cacheServer) Run() {
 		}
 	}
 	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		panic(utils.Wrap(err, "register cache module  rpc to etcd err"))
@@ -89,91 +91,97 @@ func (s *cacheServer) Run() {
 	log.NewInfo("0", "message cms rpc success")
 }
 
-func (s *cacheServer) GetFriendIDListFromCache(_ context.Context, req *pbCache.GetFriendIDListFromCacheReq) (resp *pbCache.GetFriendIDListFromCacheResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.GetFriendIDListFromCacheResp{CommonResp: &pbCache.CommonResp{}}
-	friendIDList, err := rocksCache.GetFriendIDListFromCache(req.UserID)
+func (s *cacheServer) GetFriendIDListFromCache(ctx context.Context, req *pbCache.GetFriendIDListFromCacheReq) (resp *pbCache.GetFriendIDListFromCacheResp, err error) {
+	resp = &pbCache.GetFriendIDListFromCacheResp{CommonResp: &sdkws.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	friendIDList, err := rocksCache.GetFriendIDListFromCache(ctx, req.UserID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetFriendIDListFromCache", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
-		return resp, nil
+		constant.SetErrorForResp(err, resp.CommonResp)
+		return
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), friendIDList)
 	resp.UserIDList = friendIDList
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
+	return
 }
 
 // this is for dtm call
-func (s *cacheServer) DelFriendIDListFromCache(_ context.Context, req *pbCache.DelFriendIDListFromCacheReq) (resp *pbCache.DelFriendIDListFromCacheResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.DelFriendIDListFromCacheResp{CommonResp: &pbCache.CommonResp{}}
-	if err := rocksCache.DelFriendIDListFromCache(req.UserID); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "args: ", req.UserID, err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+func (s *cacheServer) DelFriendIDListFromCache(ctx context.Context, req *pbCache.DelFriendIDListFromCacheReq) (resp *pbCache.DelFriendIDListFromCacheResp, err error) {
+	resp = &pbCache.DelFriendIDListFromCacheResp{CommonResp: &sdkws.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	if err := rocksCache.DelFriendIDListFromCache(ctx, req.UserID); err != nil {
+		constant.SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", resp.String())
-	return resp, nil
+	return
 }
 
-func (s *cacheServer) GetBlackIDListFromCache(_ context.Context, req *pbCache.GetBlackIDListFromCacheReq) (resp *pbCache.GetBlackIDListFromCacheResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.GetBlackIDListFromCacheResp{CommonResp: &pbCache.CommonResp{}}
-	blackUserIDList, err := rocksCache.GetBlackListFromCache(req.UserID)
+func (s *cacheServer) GetBlackIDListFromCache(ctx context.Context, req *pbCache.GetBlackIDListFromCacheReq) (resp *pbCache.GetBlackIDListFromCacheResp, err error) {
+	resp = &pbCache.GetBlackIDListFromCacheResp{CommonResp: &sdkws.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	blackUserIDList, err := rocksCache.GetBlackListFromCache(ctx, req.UserID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddFriendToCache failed", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
-		return resp, nil
+		constant.SetErrorForResp(err, resp.CommonResp)
+		return
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), blackUserIDList)
 	resp.UserIDList = blackUserIDList
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
+	return
 }
 
-func (s *cacheServer) DelBlackIDListFromCache(_ context.Context, req *pbCache.DelBlackIDListFromCacheReq) (resp *pbCache.DelBlackIDListFromCacheResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.DelBlackIDListFromCacheResp{CommonResp: &pbCache.CommonResp{}}
-	if err := rocksCache.DelBlackIDListFromCache(req.UserID); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "args: ", req.UserID, err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+func (s *cacheServer) DelBlackIDListFromCache(ctx context.Context, req *pbCache.DelBlackIDListFromCacheReq) (resp *pbCache.DelBlackIDListFromCacheResp, err error) {
+	resp = &pbCache.DelBlackIDListFromCacheResp{CommonResp: &sdkws.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	if err := rocksCache.DelBlackIDListFromCache(ctx, req.UserID); err != nil {
+		constant.SetErrorForResp(err, resp.CommonResp)
+		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", resp.String())
 	return resp, nil
 }
 
-func (s *cacheServer) GetGroupMemberIDListFromCache(_ context.Context, req *pbCache.GetGroupMemberIDListFromCacheReq) (resp *pbCache.GetGroupMemberIDListFromCacheResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+func (s *cacheServer) GetGroupMemberIDListFromCache(ctx context.Context, req *pbCache.GetGroupMemberIDListFromCacheReq) (resp *pbCache.GetGroupMemberIDListFromCacheResp, err error) {
 	resp = &pbCache.GetGroupMemberIDListFromCacheResp{
-		CommonResp: &pbCache.CommonResp{},
+		CommonResp: &sdkws.CommonResp{},
 	}
-	userIDList, err := rocksCache.GetGroupMemberIDListFromCache(req.GroupID)
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	userIDList, err := rocksCache.GetGroupMemberIDListFromCache(ctx, req.GroupID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupMemberIDListFromCache failed", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		constant.SetErrorForResp(err, resp.CommonResp)
 		return resp, nil
 	}
 	resp.UserIDList = userIDList
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
-func (s *cacheServer) DelGroupMemberIDListFromCache(_ context.Context, req *pbCache.DelGroupMemberIDListFromCacheReq) (resp *pbCache.DelGroupMemberIDListFromCacheResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbCache.DelGroupMemberIDListFromCacheResp{CommonResp: &pbCache.CommonResp{}}
-	if err := rocksCache.DelGroupMemberIDListFromCache(req.GroupID); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "args: ", req.GroupID, err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
+func (s *cacheServer) DelGroupMemberIDListFromCache(ctx context.Context, req *pbCache.DelGroupMemberIDListFromCacheReq) (resp *pbCache.DelGroupMemberIDListFromCacheResp, err error) {
+	resp = &pbCache.DelGroupMemberIDListFromCacheResp{CommonResp: &sdkws.CommonResp{}}
+	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
+	defer func() {
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
+		trace_log.ShowLog(ctx)
+	}()
+	if err := rocksCache.DelGroupMemberIDListFromCache(ctx, req.GroupID); err != nil {
+		constant.SetErrorForResp(err, resp.CommonResp)
 		return resp, nil
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", resp.String())
 	return resp, nil
 }

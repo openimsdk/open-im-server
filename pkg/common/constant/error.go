@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -49,6 +50,7 @@ var (
 	ErrDismissedAlready    = ErrInfo{DismissedAlreadyError, "DismissedAlreadyError", ""}
 	ErrOwnerNotAllowedQuit = ErrInfo{OwnerNotAllowedQuitError, "OwnerNotAllowedQuitError", ""}
 	ErrRegisteredAlready   = ErrInfo{RegisteredAlreadyError, "RegisteredAlreadyError", ""}
+	ErrGroupTypeNotSupport = ErrInfo{GroupTypeNotSupport, "", ""}
 
 	ErrDefaultOther             = ErrInfo{DefaultOtherError, "DefaultOtherError", ""}
 	ErrData                     = ErrInfo{DataError, "DataError", ""}
@@ -100,6 +102,20 @@ func ToAPIErrWithErr(err error) ErrInfo {
 		return ErrDatabase
 	}
 	return ErrDefaultOther
+}
+
+func SetErrorForResp(err error, commonResp *sdkws.CommonResp) {
+	errInfo := ToAPIErrWithErr(err)
+	commonResp.ErrCode = errInfo.ErrCode
+	commonResp.ErrMsg = errInfo.ErrMsg
+	commonResp.DetailErrMsg = err.Error()
+}
+
+func CommonResp2Err(resp *sdkws.CommonResp) error {
+	if resp.ErrCode != NoError {
+		return errors.New(fmt.Sprintf("call rpc error, errCode is %d, errMsg is %s, detailErrMsg is %s", resp.ErrCode, resp.ErrMsg, resp.DetailErrMsg))
+	}
+	return nil
 }
 
 func Error2CommResp(ctx context.Context, info ErrInfo, detailErrMsg string) *sdkws.CommonResp {
@@ -166,6 +182,7 @@ const (
 	NotInGroupYetError       = 93004 //不在群组中
 	DismissedAlreadyError    = 93004 //群组已经解散
 	OwnerNotAllowedQuitError = 93004 //群主不能退群
+	GroupTypeNotSupport      = 93005
 )
 
 // 用户错误码

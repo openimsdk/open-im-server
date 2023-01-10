@@ -28,6 +28,10 @@ func SetOperationID(ctx context.Context, operationID string) {
 	ctx.Value(TraceLogKey).(*ApiInfo).OperationID = operationID
 }
 
+func GetOperationID(ctx context.Context) string {
+	return ctx.Value(TraceLogKey).(*ApiInfo).OperationID
+}
+
 func ShowLog(ctx context.Context) {
 	t := ctx.Value(TraceLogKey).(*ApiInfo)
 	if ctx.Value(TraceLogKey).(*ApiInfo).GinCtx != nil {
