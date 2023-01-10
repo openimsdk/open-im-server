@@ -15,7 +15,9 @@ import (
 	cp "Open_IM/pkg/common/utils"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"github.com/OpenIMSDK/getcdv3"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"path"
 	"runtime/debug"
 
@@ -75,10 +77,18 @@ func UnaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.Una
 	trace_log.SetContextInfo(ctx, funcName, err, "rpc req", req.(interface{ String() string }).String())
 	resp, err = handler(ctx, req)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.(interface {
-			GetCommonResp() *open_im_sdk.CommonResp
-		}).GetCommonResp())
-		err = nil
+		errInfo := constant.ToAPIErrWithErr(err)
+		var code codes.Code
+		if errInfo.ErrCode == 0 {
+			code = codes.Unknown
+		} else {
+			code = codes.Code(errInfo.ErrCode)
+		}
+		sta, err := status.New(code, errInfo.ErrMsg).WithDetails(wrapperspb.String(errInfo.DetailErrMsg))
+		if err != nil {
+			return nil, err
+		}
+		return nil, sta.Err()
 	}
 	trace_log.SetContextInfo(ctx, funcName, err, "rpc resp", resp.(interface{ String() string }).String())
 	return
@@ -147,9 +157,9 @@ func (s *groupServer) Run() {
 }
 
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
-	resp := &pbGroup.CreateGroupResp{CommonResp: &open_im_sdk.CommonResp{}, GroupInfo: &open_im_sdk.GroupInfo{}}
+	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
 	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.OwnerUserID); err != nil {
-		return resp, err
+		return nil, err
 	}
 	var groupOwnerNum int
 	var userIDs []string
@@ -164,27 +174,27 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		userIDs = append(userIDs, req.OwnerUserID)
 	}
 	if groupOwnerNum != 1 {
-		return resp, utils.Wrap(constant.ErrArgs, "")
+		return nil, utils.Wrap(constant.ErrArgs, "")
 	}
 	if utils.IsRepeatStringSlice(userIDs) {
-		return resp, utils.Wrap(constant.ErrArgs, "")
+		return nil, utils.Wrap(constant.ErrArgs, "")
 	}
 	users, err := rocksCache.GetUserInfoFromCacheBatch(ctx, userIDs)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
 	if len(users) != len(userIDs) {
-		return resp, utils.Wrap(constant.ErrArgs, "")
+		return nil, utils.Wrap(constant.ErrArgs, "")
 	}
 	userMap := make(map[string]*imdb.User)
 	for i, user := range users {
 		userMap[user.UserID] = users[i]
 	}
 	if err := s.DelGroupAndUserCache(ctx, "", userIDs); err != nil {
-		return resp, err
+		return nil, err
 	}
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
-		return resp, err
+		return nil, err
 	}
 	groupId := req.GroupInfo.GroupID
 	if groupId == "" {
@@ -215,24 +225,24 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		}
 		if req.OwnerUserID == "" {
 			if err := joinGroup(req.OwnerUserID, constant.GroupOwner); err != nil {
-				return resp, err
+				return nil, err
 			}
 		}
 		for _, info := range req.InitMemberList {
 			if err := joinGroup(info.UserID, info.RoleLevel); err != nil {
-				return resp, err
+				return nil, err
 			}
 		}
 		if err := (*imdb.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
-			return resp, err
+			return nil, err
 		}
 	} else {
 		if err := db.DB.CreateSuperGroup(groupId, userIDs, len(userIDs)); err != nil {
-			return resp, err
+			return nil, err
 		}
 	}
 	if err := (*imdb.Group)(nil).Create(ctx, []*imdb.Group{&groupInfo}); err != nil {
-		return resp, err
+		return nil, err
 	}
 	utils.CopyStructFields(resp.GroupInfo, groupInfo)
 	resp.GroupInfo.MemberCount = uint32(len(userIDs))
