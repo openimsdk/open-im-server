@@ -374,7 +374,7 @@ func (d *DataBases) DelMsgFromCache(uid string, seqList []uint32, operationID st
 			continue
 		}
 		var msg pbCommon.MsgData
-		if err := utils.String2Pb(result, &msg); err != nil {
+		if err := jsonpb.UnmarshalString(result, &msg); err != nil {
 			log2.Error(operationID, utils.GetSelfFuncName(), "String2Pb failed", msg, result, key, err.Error())
 			continue
 		}
