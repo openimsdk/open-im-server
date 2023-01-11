@@ -15,6 +15,7 @@ import (
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/middleware"
 	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
@@ -49,6 +50,7 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(utils.CorsHandler())
+	r.Use(middleware.GinParseOperationID)
 	log.Info("load config: ", config.Config)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if config.Config.Prometheus.Enable {
