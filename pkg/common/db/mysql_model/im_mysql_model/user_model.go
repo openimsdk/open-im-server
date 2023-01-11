@@ -1,7 +1,6 @@
 package im_mysql_model
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/utils"
 	"errors"
@@ -35,30 +34,6 @@ type User struct {
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 
 	status int32 `gorm:"column:status"`
-}
-
-func init() {
-	for k, v := range config.Config.Manager.AppManagerUid {
-		_, err := GetUserByUserID(v)
-		if err != nil {
-		} else {
-			continue
-		}
-		var appMgr User
-		appMgr.UserID = v
-		if k == 0 {
-			appMgr.Nickname = config.Config.Manager.AppSysNotificationName
-		} else {
-			appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
-		}
-		appMgr.AppMangerLevel = constant.AppAdmin
-		err = UserRegister(appMgr)
-		if err != nil {
-			fmt.Println("AppManager insert error ", err.Error(), appMgr)
-		} else {
-			fmt.Println("AppManager insert ", appMgr)
-		}
-	}
 }
 
 func UserRegister(user User) error {

@@ -2,7 +2,9 @@ package db
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	"Open_IM/pkg/utils"
 	"fmt"
 	"time"
 
@@ -157,7 +159,31 @@ func initMysqlDB() {
 	im_mysql_model.FriendRequestDB = db.Table("friend_requests")
 	im_mysql_model.GroupRequestDB = db.Table("group_requests")
 	im_mysql_model.AppDB = db.Table("app_db")
+	InitManager()
+}
 
+func InitManager() {
+	for k, v := range config.Config.Manager.AppManagerUid {
+		_, err := im_mysql_model.GetUserByUserID(v)
+		if err != nil {
+		} else {
+			continue
+		}
+		var appMgr im_mysql_model.User
+		appMgr.UserID = v
+		if k == 0 {
+			appMgr.Nickname = config.Config.Manager.AppSysNotificationName
+		} else {
+			appMgr.Nickname = "AppManager" + utils.IntToString(k+1)
+		}
+		appMgr.AppMangerLevel = constant.AppAdmin
+		err = im_mysql_model.UserRegister(appMgr)
+		if err != nil {
+			fmt.Println("AppManager insert error ", err.Error(), appMgr)
+		} else {
+			fmt.Println("AppManager insert ", appMgr)
+		}
+	}
 }
 
 func (m *mysqlDB) DefaultGormDB() *gorm.DB {
