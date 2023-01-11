@@ -14,6 +14,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/trace_log"
 	cp "Open_IM/pkg/common/utils"
+	"Open_IM/pkg/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbGroup "Open_IM/pkg/proto/group"
@@ -22,7 +23,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/getcdv3"
 	"math/big"
 	"net"
 	"strconv"
@@ -524,7 +524,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = true
 			reqPb.Conversation = &c
-			etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
 			if err != nil {
 				return nil, err
 			}
@@ -787,7 +787,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			c.IsNotInGroup = false
 			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 			reqPb.Conversation = &c
-			etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
 			if err != nil {
 				return nil, err
 			}
@@ -946,7 +946,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if req.GroupInfoForSet.Notification != "" {
 		//get group member user id
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: req.OperationID, GroupID: req.GroupInfoForSet.GroupID}
-		etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
 		if err != nil {
 			return nil, err
 		}
@@ -970,7 +970,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		conversationReq.FieldType = constant.FieldGroupAtType
 		conversation.GroupAtType = constant.GroupNotification
 		conversationReq.UserIDList = cacheResp.UserIDList
-		nEtcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
+		nEtcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
 		if err != nil {
 			return nil, err
 		}
@@ -1159,7 +1159,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = true
 			reqPb.Conversation = &c
-			etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
 			client := pbUser.NewUserClient(etcdConn)
 			respPb, err := client.SetConversation(context.Background(), &reqPb)
 			trace_log.SetContextInfo(ctx, "SetConversation", err, "req", &reqPb, "resp", respPb)
@@ -1429,7 +1429,7 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 func (s *groupServer) DelGroupAndUserCache(ctx context.Context, groupID string, userIDList []string) error {
 	operationID := trace_log.GetOperationID(ctx)
 	if groupID != "" {
-		etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
 		if err != nil {
 			return err
 		}
