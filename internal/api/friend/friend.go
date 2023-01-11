@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/friend"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -336,7 +337,7 @@ func GetBlacklist(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetBlackListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp := api.GetBlackListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	for _, v := range RpcResp.BlackUserInfoList {
 		black := open_im_sdk.PublicUserInfo{}
 		utils.CopyStructFields(&black, v)
@@ -503,7 +504,7 @@ func IsFriend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call add friend rpc server failed"})
 		return
 	}
-	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp := api.IsFriendResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	resp.Response.Friend = RpcResp.Response
 
 	log.NewInfo(req.CommID.OperationID, "IsFriend api return ", resp)
@@ -559,7 +560,7 @@ func GetFriendList(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendInfoList: RpcResp.FriendInfoList}
+	resp := api.GetFriendListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, FriendInfoList: RpcResp.FriendInfoList}
 	resp.Data = jsonData.JsonDataList(resp.FriendInfoList)
 	log.NewInfo(req.CommID.OperationID, "GetFriendList api return ", resp)
 	c.JSON(http.StatusOK, resp)
@@ -616,7 +617,7 @@ func GetFriendApplyList(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
+	resp := api.GetFriendApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
 	resp.Data = jsonData.JsonDataList(resp.FriendRequestList)
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList api return ", resp)
 	c.JSON(http.StatusOK, resp)
@@ -670,7 +671,7 @@ func GetSelfFriendApplyList(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": "call get self apply list rpc server failed"})
 		return
 	}
-	resp := api.GetSelfApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
+	resp := api.GetSelfApplyListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, FriendRequestList: RpcResp.FriendRequestList}
 	resp.Data = jsonData.JsonDataList(resp.FriendRequestList)
 	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList api return ", resp)
 	c.JSON(http.StatusOK, resp)

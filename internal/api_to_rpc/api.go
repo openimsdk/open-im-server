@@ -2,7 +2,7 @@ package common
 
 import (
 	"Open_IM/pkg/common/trace_log"
-	utils2 "Open_IM/pkg/utils"
+	"Open_IM/pkg/getcdv3"
 	utils "github.com/OpenIMSDK/open_utils"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/metadata"
@@ -19,7 +19,7 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn in
 	}
 	trace_log.SetOperationID(nCtx, operationID)
 	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", apiReq)
-	etcdConn, err := utils2.GetConn(c, rpcName)
+	etcdConn, err := getcdv3.GetConn(c, rpcName)
 	if err != nil {
 		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
 		return

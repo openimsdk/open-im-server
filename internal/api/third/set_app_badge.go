@@ -31,7 +31,7 @@ func SetAppBadge(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": errMsg})
 		return
 	}
-	if !token_verify.CheckAccess(opUserID, req.FromUserID) {
+	if !token_verify.CheckAccess(c, opUserID, req.FromUserID) {
 		log.NewError(req.OperationID, "CheckAccess false ", opUserID, req.FromUserID)
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": "no permission"})
 	}

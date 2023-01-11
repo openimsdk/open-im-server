@@ -214,3 +214,10 @@ const (
 const (
 	MessageHasReadDisable = 96001
 )
+
+// temp
+
+var (
+	ErrServer            = ErrInfo{500, "server error", ""}
+	ErrTencentCredential = ErrInfo{400, "ErrTencentCredential", ""}
+)
