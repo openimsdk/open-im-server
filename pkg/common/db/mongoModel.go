@@ -94,7 +94,7 @@ func (d *DataBases) GetMinSeqFromMongo2(uid string) (MinSeq uint32, err error) {
 }
 
 // deleteMsgByLogic
-func (d *DataBases) DelMsgBySeqList(userID string, seqList []uint32, operationID string) (totalUnexistSeqList []uint32, err error) {
+func (d *DataBases) DelMsgBySeqList(userID string, seqList []uint32, operationID string) (totalUnExistSeqList []uint32, err error) {
 	log.Debug(operationID, utils.GetSelfFuncName(), "args ", userID, seqList)
 	sortkeys.Uint32s(seqList)
 	suffixUserID2SubSeqList := func(uid string, seqList []uint32) map[string][]uint32 {
@@ -123,11 +123,11 @@ func (d *DataBases) DelMsgBySeqList(userID string, seqList []uint32, operationID
 				return
 			}
 			lock.Lock()
-			totalUnexistSeqList = append(totalUnexistSeqList, unexistSeqList...)
+			totalUnExistSeqList = append(totalUnExistSeqList, unexistSeqList...)
 			lock.Unlock()
 		}(k, v, operationID)
 	}
-	return totalUnexistSeqList, err
+	return totalUnExistSeqList, err
 }
 
 func (d *DataBases) DelMsgBySeqListInOneDoc(suffixUserID string, seqList []uint32, operationID string) ([]uint32, error) {

@@ -146,7 +146,8 @@ func Pb2String(pb proto.Message) (string, error) {
 }
 
 func String2Pb(s string, pb proto.Message) error {
-	return proto.Unmarshal([]byte(s), pb)
+	err := jsonpb.UnmarshalString(s, pb)
+	return err
 }
 
 func Map2Pb(m map[string]string) (pb proto.Message, err error) {

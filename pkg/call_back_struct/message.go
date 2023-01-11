@@ -105,9 +105,28 @@ type CallbackGetMessageListReactionExtReq struct {
 	SourceID        string                                                        `json:"sourceID"`
 	OpUserID        string                                                        `json:"opUserID"`
 	SessionType     int32                                                         `json:"sessionType"`
+	TypeKeyList     []string                                                      `json:"typeKeyList"`
 	MessageKeyList  []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageKeyList"`
 }
 type CallbackGetMessageListReactionExtResp struct {
 	*CommonCallbackResp
 	MessageResultList []*msg.SingleMessageExtensionResult `json:"messageResultList"`
+}
+
+type CallbackAddMessageReactionExtReq struct {
+	OperationID           string                      `json:"operationID"`
+	CallbackCommand       string                      `json:"callbackCommand"`
+	SourceID              string                      `json:"sourceID"`
+	OpUserID              string                      `json:"opUserID"`
+	SessionType           int32                       `json:"sessionType"`
+	ReactionExtensionList map[string]*sdk_ws.KeyValue `json:"reactionExtensionList"`
+	ClientMsgID           string                      `json:"clientMsgID"`
+	IsReact               bool                        `json:"isReact"`
+	IsExternalExtensions  bool                        `json:"isExternalExtensions"`
+	MsgFirstModifyTime    int64                       `json:"msgFirstModifyTime"`
+}
+type CallbackAddMessageReactionExtResp struct {
+	*CommonCallbackResp
+	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
+	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
 }

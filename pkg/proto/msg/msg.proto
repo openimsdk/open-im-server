@@ -188,6 +188,27 @@ message SetMessageReactionExtensionsResp {
   bool isReact = 5;
   repeated KeyValueResp result = 6;
 }
+message AddMessageReactionExtensionsReq {
+  string operationID = 1;
+  string sourceID = 2;
+  string opUserID = 3;
+  int32 sessionType = 4;
+  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
+  string clientMsgID = 6;
+  google.protobuf.StringValue ex = 7;
+  google.protobuf.StringValue attachedInfo = 8;
+  bool isReact = 9;
+  bool isExternalExtensions = 10;
+  int64 msgFirstModifyTime = 11;
+}
+message AddMessageReactionExtensionsResp {
+  int32 errCode = 1;
+  string errMsg = 2;
+  string clientMsgID = 3;
+  int64 msgFirstModifyTime = 4;
+  bool isReact = 5;
+  repeated KeyValueResp result = 6;
+}
 
 
 message GetMessageListReactionExtensionsReq {
@@ -200,7 +221,8 @@ message GetMessageListReactionExtensionsReq {
     string clientMsgID = 1;
     int64 msgFirstModifyTime = 2;
   }
-  repeated MessageReactionKey messageReactionKeyList = 6;
+  repeated  string  typeKeyList = 6;
+  repeated MessageReactionKey messageReactionKeyList = 7;
 }
 message GetMessageListReactionExtensionsResp{
   int32 errCode = 1;
@@ -283,6 +305,6 @@ service msg {
   // modify msg
   rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
   rpc GetMessageListReactionExtensions(GetMessageListReactionExtensionsReq) returns(GetMessageListReactionExtensionsResp);
-  rpc AddMessageReactionExtensions(ModifyMessageReactionExtensionsReq) returns(ModifyMessageReactionExtensionsResp);
+  rpc AddMessageReactionExtensions(AddMessageReactionExtensionsReq) returns(AddMessageReactionExtensionsResp);
   rpc DeleteMessageReactionExtensions(DeleteMessageListReactionExtensionsReq) returns(DeleteMessageListReactionExtensionsResp);
 }
