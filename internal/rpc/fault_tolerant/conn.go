@@ -3,6 +3,7 @@ package fault_tolerant
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/middleware"
 	"Open_IM/pkg/utils"
 	"github.com/OpenIMSDK/getcdv3"
 	"google.golang.org/grpc"
@@ -75,7 +76,7 @@ func GetConfigConn(serviceName string, operationID string) *grpc.ClientConn {
 	}
 	target := rpcRegisterIP + ":" + utils.Int32ToString(int32(configPortList[0]))
 	log.Info(operationID, "rpcRegisterIP ", rpcRegisterIP, " port ", configPortList, " grpc target: ", target, " serviceName: ", serviceName)
-	conn, err := grpc.Dial(target, grpc.WithInsecure())
+	conn, err := grpc.Dial(target, grpc.WithInsecure(), grpc.WithUnaryInterceptor(middleware.RpcClientInterceptor))
 	if err != nil {
 		log.Error(operationID, "grpc.Dail failed ", err.Error())
 		return nil
