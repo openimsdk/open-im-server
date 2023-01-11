@@ -743,6 +743,27 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			resp.ErrMsg = constant.ErrDB.ErrMsg
 			return &resp, nil
 		}
+		reqPb := pbConversation.ModifyConversationFieldReq{Conversation: &pbConversation.Conversation{}}
+		reqPb.OperationID = req.OperationID
+		reqPb.UserIDList = okUserIDList
+		reqPb.FieldType = constant.FieldUnread
+		reqPb.Conversation.GroupID = req.GroupID
+		reqPb.Conversation.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.SuperGroupChatType)
+		reqPb.Conversation.ConversationType = int32(constant.SuperGroupChatType)
+		reqPb.Conversation.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
+		etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, req.OperationID)
+		if etcdConn == nil {
+			errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
+			log.NewError(req.OperationID, errMsg)
+		}
+		client := pbConversation.NewConversationClient(etcdConn)
+		respPb, err := client.ModifyConversationField(context.Background(), &reqPb)
+		if err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), "ModifyConversationField rpc failed, ", reqPb.String(), err.Error())
+		} else {
+			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "ModifyConversationField success", respPb.String())
+		}
+
 	}
 
 	if groupInfo.GroupType != constant.SuperGroup {
