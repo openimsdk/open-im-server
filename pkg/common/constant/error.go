@@ -51,6 +51,7 @@ var (
 	ErrOwnerNotAllowedQuit = ErrInfo{OwnerNotAllowedQuitError, "OwnerNotAllowedQuitError", ""}
 	ErrRegisteredAlready   = ErrInfo{RegisteredAlreadyError, "RegisteredAlreadyError", ""}
 	ErrGroupTypeNotSupport = ErrInfo{GroupTypeNotSupport, "", ""}
+	ErrGroupNoOwner        = ErrInfo{GroupNoOwner, "ErrGroupNoOwner", ""}
 
 	ErrDefaultOther             = ErrInfo{DefaultOtherError, "DefaultOtherError", ""}
 	ErrData                     = ErrInfo{DataError, "DataError", ""}
@@ -65,6 +66,9 @@ var (
 	ErrTokenDifferentUserID     = ErrInfo{TokenDifferentUserIDError, "TokenDifferentUserIDError", ""}
 
 	ErrMessageHasReadDisable = ErrInfo{MessageHasReadDisable, "MessageHasReadDisable", ""}
+
+	ErrDB        = ErrDatabase
+	ErrSendLimit = ErrInternalServer
 )
 
 func NewErrNetwork(err error) error {
@@ -185,6 +189,7 @@ const (
 	DismissedAlreadyError    = 93004 //群组已经解散
 	OwnerNotAllowedQuitError = 93004 //群主不能退群
 	GroupTypeNotSupport      = 93005
+	GroupNoOwner             = 93006
 )
 
 // 用户错误码

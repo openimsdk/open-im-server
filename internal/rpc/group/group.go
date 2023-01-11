@@ -13,8 +13,8 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/trace_log"
 	cp "Open_IM/pkg/common/utils"
+	"Open_IM/pkg/getcdv3"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
-	"github.com/OpenIMSDK/getcdv3"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -567,21 +567,14 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 
 func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGroupAllMemberReq) (resp *pbGroup.GetGroupAllMemberResp, err error) {
 	resp = &pbGroup.GetGroupAllMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), nil, "req", req.String(), "resp", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if groupInfo.GroupType != constant.SuperGroup {
 		memberList, err := rocksCache.GetGroupMembersInfoFromCache(ctx, req.Count, req.Offset, req.GroupID)
 		if err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 		for _, v := range memberList {
 			var node open_im_sdk.GroupMemberFullInfo
@@ -589,7 +582,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 			resp.MemberList = append(resp.MemberList, &node)
 		}
 	}
-	return
+	return resp, nil
 }
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (resp *pbGroup.GetGroupMemberListResp, err error) {
@@ -723,7 +716,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = true
 			reqPb.Conversation = &c
-			etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
 			if err != nil {
 				constant.SetErrorForResp(err, resp.CommonResp)
 				return
@@ -774,8 +767,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	for _, userID := range req.MemberList {
 		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, userID)
 		if err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return resp, nil
 		}
 		var memberNode open_im_sdk.GroupMemberFullInfo
 		utils.CopyStructFields(&memberNode, groupMember)
@@ -1027,7 +1019,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			c.IsNotInGroup = false
 			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
 			reqPb.Conversation = &c
-			etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
 			if err != nil {
 				constant.SetErrorForResp(err, resp.CommonResp)
 				return
@@ -1167,8 +1159,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		m := make(map[string]interface{})
 		m["need_verification"] = req.GroupInfoForSet.NeedVerification.Value
 		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 	}
 	if req.GroupInfoForSet.LookMemberInfo != nil {
@@ -1176,8 +1167,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		m := make(map[string]interface{})
 		m["look_member_info"] = req.GroupInfoForSet.LookMemberInfo.Value
 		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 	}
 	if req.GroupInfoForSet.ApplyMemberFriend != nil {
@@ -1185,8 +1175,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		m := make(map[string]interface{})
 		m["apply_member_friend"] = req.GroupInfoForSet.ApplyMemberFriend.Value
 		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
-			constant.SetErrorForResp(constant.ErrIdentity, resp.CommonResp)
-			return
+			return nil, err
 		}
 	}
 	//only administrators can set group information
@@ -1197,13 +1186,11 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		groupInfo.NotificationUpdateTime = time.Now()
 	}
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupInfoForSet.GroupID); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	err = imdb.SetGroupInfo(groupInfo)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if changedType != 0 {
 		chat.GroupInfoSetNotification(req.OperationID, req.OpUserID, req.GroupInfoForSet.GroupID, groupName, notification, introduction, faceURL, req.GroupInfoForSet.NeedVerification)
@@ -1211,10 +1198,10 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if req.GroupInfoForSet.Notification != "" {
 		//get group member user id
 		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: req.OperationID, GroupID: req.GroupInfoForSet.GroupID}
-		etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
 		if err != nil {
 			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return+
 		}
 		client := pbCache.NewCacheClient(etcdConn)
 		cacheResp, err := client.GetGroupMemberIDListFromCache(ctx, getGroupMemberIDListFromCacheReq)
@@ -1238,7 +1225,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		conversationReq.FieldType = constant.FieldGroupAtType
 		conversation.GroupAtType = constant.GroupNotification
 		conversationReq.UserIDList = cacheResp.UserIDList
-		nEtcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
+		nEtcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
 		if err != nil {
 			constant.SetErrorForResp(err, resp.CommonResp)
 			return
@@ -1269,31 +1256,26 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 	}
 
 	if req.OldOwnerUserID == req.NewOwnerUserID {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	err = rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.NewOwnerUserID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	err = rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.OldOwnerUserID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 
 	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.OldOwnerUserID, RoleLevel: constant.GroupOrdinaryUsers}
 	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	groupMemberInfo = imdb.GroupMember{GroupID: req.GroupID, UserID: req.NewOwnerUserID, RoleLevel: constant.GroupOwner}
 	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	chat.GroupOwnerTransferredNotification(req)
 	return
@@ -1305,32 +1287,24 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 		Groups:     []*pbGroup.CMSGroup{},
 		Pagination: &open_im_sdk.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber},
 	}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	if req.GroupID != "" {
 		groupInfoDB, err := imdb.GetGroupInfoByGroupID(req.GroupID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return resp, nil
 			}
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 		resp.GroupNum = 1
 		groupInfo := &open_im_sdk.GroupInfo{}
 		utils.CopyStructFields(groupInfo, groupInfoDB)
 		groupMember, err := imdb.GetGroupOwnerInfoByGroupID(req.GroupID)
 		if err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 		memberNum, err := imdb.GetGroupMembersCount(req.GroupID, "")
 		if err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 		groupInfo.MemberCount = uint32(memberNum)
 		groupInfo.CreateTime = uint32(groupInfoDB.CreateTime.Unix())
@@ -1355,25 +1329,18 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 		}
 		resp.GroupNum = int32(count)
 	}
-	return
+	return resp, nil
 }
 
 func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGroupMembersCMSReq) (resp *pbGroup.GetGroupMembersCMSResp, _ error) {
 	resp = &pbGroup.GetGroupMembersCMSResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	groupMembers, err := imdb.GetGroupMembersByGroupIdCMS(req.GroupID, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	groupMembersCount, err := imdb.GetGroupMembersCount(req.GroupID, req.UserName)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	log.NewInfo(req.OperationID, groupMembersCount)
 	resp.MemberNums = int32(groupMembersCount)
@@ -1388,20 +1355,14 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 		CurrentPage: req.Pagination.PageNumber,
 		ShowNumber:  req.Pagination.ShowNumber,
 	}
-	return
+	return resp, nil
 }
 
 func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGroup.GetUserReqApplicationListReq) (resp *pbGroup.GetUserReqApplicationListResp, _ error) {
 	resp = &pbGroup.GetUserReqApplicationListResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	groupRequests, err := imdb.GetUserReqGroupByUserID(req.UserID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	for _, groupReq := range groupRequests {
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
@@ -1420,39 +1381,29 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 		cp.GroupDBCopyOpenIM(node.GroupInfo, group)
 		resp.GroupRequestList = append(resp.GroupRequestList, &node)
 	}
-	return
+	return resp, nil
 }
 
-func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (resp *pbGroup.DismissGroupResp, _ error) {
+func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (resp *pbGroup.DismissGroupResp, err error) {
 	resp = &pbGroup.DismissGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	if !token_verify.IsManagerUserID(req.OpUserID) && !imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) {
-		constant.SetErrorForResp(constant.ErrIdentity, resp.CommonResp)
-		return
+		return nil, utils.Wrap(constant.ErrNoPermission, "")
 	}
 
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if err := s.DelGroupAndUserCache(ctx, req.GroupID, nil); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 
-	err := imdb.OperateGroupStatus(req.GroupID, constant.GroupStatusDismissed)
+	err = imdb.OperateGroupStatus(req.GroupID, constant.GroupStatusDismissed)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	groupInfo, err := imdb.GetGroupInfoByGroupID(req.GroupID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if groupInfo.GroupType != constant.SuperGroup {
 		memberList, err := imdb.GetGroupMemberListByGroupID(req.GroupID)
@@ -1470,28 +1421,26 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			c.GroupID = req.GroupID
 			c.IsNotInGroup = true
 			reqPb.Conversation = &c
-			etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
+			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
 			client := pbUser.NewUserClient(etcdConn)
 			respPb, err := client.SetConversation(context.Background(), &reqPb)
 			trace_log.SetContextInfo(ctx, "SetConversation", err, "req", &reqPb, "resp", respPb)
 		}
 		err = imdb.DeleteGroupMemberByGroupID(req.GroupID)
 		if err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 		chat.GroupDismissedNotification(req)
 	} else {
 		err = db.DB.DeleteSuperGroup(req.GroupID)
 		if err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 	}
-	return
+	return resp, nil
 }
 
-func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (resp *pbGroup.MuteGroupMemberResp, _ error) {
+func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (resp *pbGroup.MuteGroupMemberResp, err error) {
 	resp = &pbGroup.MuteGroupMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
@@ -1500,108 +1449,79 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	}()
 	opFlag, err := s.getGroupUserLevel(req.GroupID, req.OpUserID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return  nil, err
 	}
 	if opFlag == 0 {
-		constant.SetErrorForResp(constant.ErrNoPermission, resp.CommonResp)
-		return
+		return nil, utils.Wrap(constant.ErrNoPermission, "")
 	}
 
 	mutedInfo, err := rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if mutedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
 		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if mutedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 
 	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
 	groupMemberInfo.MuteEndTime = time.Unix(int64(time.Now().Second())+int64(req.MutedSeconds), time.Now().UnixNano())
 	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	chat.GroupMemberMutedNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID, req.MutedSeconds)
-	return
+	return resp, nil
 }
 
-func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (resp *pbGroup.CancelMuteGroupMemberResp, _ error) {
+func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (resp *pbGroup.CancelMuteGroupMemberResp, err error) {
 	resp = &pbGroup.CancelMuteGroupMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
-
 	opFlag, err := s.getGroupUserLevel(req.GroupID, req.OpUserID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return  nil, err
 	}
 	if opFlag == 0 {
-		constant.SetErrorForResp(constant.ErrNoPermission, resp.CommonResp)
-		return
+		return  nil, utils.Wrap(constant.ErrNoPermission, "")
 	}
-
 	mutedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if mutedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if mutedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 
 	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
 	groupMemberInfo.MuteEndTime = time.Unix(0, 0)
 	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	chat.GroupMemberCancelMutedNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
-	return
+	return resp, nil
 }
 
-func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) (resp *pbGroup.MuteGroupResp, _ error) {
+func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) (resp *pbGroup.MuteGroupResp, err error) {
 	resp = &pbGroup.MuteGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	opFlag, err := s.getGroupUserLevel(req.GroupID, req.OpUserID)
 	if err != nil {
 		constant.SetErrorForResp(err, resp.CommonResp)
 		return
 	}
 	if opFlag == 0 {
-		//errMsg := req.OperationID + "opFlag == 0  " + req.GroupID + req.OpUserID
-		//log.Error(req.OperationID, errMsg)
-		//return &pbGroup.MuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-		constant.SetErrorForResp(constant.ErrNoPermission, resp.CommonResp)
-		return
+		return nil, utils.Wrap(constant.ErrNoPermission, "")
 	}
 
 	//mutedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
@@ -1618,35 +1538,28 @@ func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) 
 	//	return &pbGroup.MuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
 	//}
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 
 	err = imdb.OperateGroupStatus(req.GroupID, constant.GroupStatusMuted)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 
 	chat.GroupMutedNotification(req.OperationID, req.OpUserID, req.GroupID)
-	return
+	return resp, nil
 }
 
-func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMuteGroupReq) (resp *pbGroup.CancelMuteGroupResp, _ error) {
+func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMuteGroupReq) (resp *pbGroup.CancelMuteGroupResp, err error) {
 	resp = &pbGroup.CancelMuteGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	opFlag, err := s.getGroupUserLevel(req.GroupID, req.OpUserID)
 	if err != nil {
 		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if opFlag == 0 {
 		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	//mutedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.)
 	//if err != nil {
@@ -1663,28 +1576,20 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	//}
 	log.Debug(req.OperationID, "UpdateGroupInfoDefaultZero ", req.GroupID, map[string]interface{}{"status": constant.GroupOk})
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	err = imdb.UpdateGroupInfoDefaultZero(req.GroupID, map[string]interface{}{"status": constant.GroupOk})
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	chat.GroupCancelMutedNotification(req.OperationID, req.OpUserID, req.GroupID)
-	return
+	return resp, nil
 }
 
-func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.SetGroupMemberNicknameReq) (resp *pbGroup.SetGroupMemberNicknameResp, _ error) {
+func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.SetGroupMemberNicknameReq) (resp *pbGroup.SetGroupMemberNicknameResp, err error) {
 	resp = &pbGroup.SetGroupMemberNicknameResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	if req.OpUserID != req.UserID && !token_verify.IsManagerUserID(req.OpUserID) {
-		constant.SetErrorForResp(constant.ErrIdentity, resp.CommonResp)
-		return
+		return nil, utils.Wrap(constant.ErrNoPermission, "")
 	}
 	cbReq := &pbGroup.SetGroupMemberInfoReq{
 		GroupID:     req.GroupID,
@@ -1694,8 +1599,7 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 		Nickname:    &wrapperspb.StringValue{Value: req.Nickname},
 	}
 	if err := CallbackBeforeSetGroupMemberInfo(ctx, cbReq); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	nickName := cbReq.Nickname.Value
 	groupMemberInfo := imdb.GroupMember{}
@@ -1704,8 +1608,7 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 	if nickName == "" {
 		userNickname, err := imdb.GetUserNameByUserID(groupMemberInfo.UserID)
 		if err != nil {
-			constant.SetErrorForResp(err, resp.CommonResp)
-			return
+			return nil, err
 		}
 		groupMemberInfo.Nickname = userNickname
 	} else {
@@ -1713,32 +1616,23 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 	}
 
 	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 
 	if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
-	return
+	return resp, nil
 }
 
-func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (resp *pbGroup.SetGroupMemberInfoResp, _ error) {
+func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (resp *pbGroup.SetGroupMemberInfoResp, err error) {
 	resp = &pbGroup.SetGroupMemberInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if err := CallbackBeforeSetGroupMemberInfo(ctx, req); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	groupMember := imdb.GroupMember{
 		GroupID: req.GroupID,
@@ -1760,8 +1654,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		m["ex"] = nil
 	}
 	if err := imdb.UpdateGroupMemberInfoByMap(groupMember, m); err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	if req.RoleLevel != nil {
 		switch req.RoleLevel.Value {
@@ -1775,26 +1668,19 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	} else {
 		chat.GroupMemberInfoSetNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID)
 	}
-	return
+	return resp, nil
 }
 
-func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (resp *pbGroup.GetGroupAbstractInfoResp, _ error) {
+func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (resp *pbGroup.GetGroupAbstractInfoResp, err error) {
 	resp = &pbGroup.GetGroupAbstractInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
-	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
-	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
-		trace_log.ShowLog(ctx)
-	}()
 	hashCode, err := rocksCache.GetGroupMemberListHashFromCache(ctx, req.GroupID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	resp.GroupMemberListHash = hashCode
 	num, err := rocksCache.GetGroupMemberNumFromCache(ctx, req.GroupID)
 	if err != nil {
-		constant.SetErrorForResp(err, resp.CommonResp)
-		return
+		return nil, err
 	}
 	resp.GroupMemberNumber = int32(num)
 	return resp, nil
@@ -1803,7 +1689,7 @@ func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.Get
 func (s *groupServer) DelGroupAndUserCache(ctx context.Context, groupID string, userIDList []string) error {
 	operationID := trace_log.GetOperationID(ctx)
 	if groupID != "" {
-		etcdConn, err := utils.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
 		if err != nil {
 			return err
 		}

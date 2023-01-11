@@ -2,61 +2,60 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	"time"
 )
 
 func GetActiveUserNum(from, to time.Time) (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Select("count(distinct(send_id))").Where("send_time >= ? and send_time <= ?", from, to).Count(&num).Error
+	err := ChatLogDB.Table("chat_logs").Select("count(distinct(send_id))").Where("send_time >= ? and send_time <= ?", from, to).Count(&num).Error
 	return int32(num), err
 }
 
 func GetIncreaseUserNum(from, to time.Time) (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where("create_time >= ? and create_time <= ?", from, to).Count(&num).Error
+	err := UserDB.Where("create_time >= ? and create_time <= ?", from, to).Count(&num).Error
 	return int32(num), err
 }
 
 func GetTotalUserNum() (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Count(&num).Error
+	err := UserDB.Count(&num).Error
 	return int32(num), err
 }
 
 func GetTotalUserNumByDate(to time.Time) (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("users").Where("create_time <= ?", to).Count(&num).Error
+	err := UserDB.Where("create_time <= ?", to).Count(&num).Error
 	return int32(num), err
 }
 
 func GetPrivateMessageNum(from, to time.Time) (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Where("send_time >= ? and send_time <= ? and session_type = ?", from, to, 1).Count(&num).Error
+	err := ChatLogDB.Where("send_time >= ? and send_time <= ? and session_type = ?", from, to, 1).Count(&num).Error
 	return int32(num), err
 }
 
 func GetGroupMessageNum(from, to time.Time) (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Where("send_time >= ? and send_time <= ? and session_type = ?", from, to, 2).Count(&num).Error
+	err := ChatLogDB.Where("send_time >= ? and send_time <= ? and session_type = ?", from, to, 2).Count(&num).Error
 	return int32(num), err
 }
 
 func GetIncreaseGroupNum(from, to time.Time) (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("create_time >= ? and create_time <= ?", from, to).Count(&num).Error
+	err := GroupDB.Where("create_time >= ? and create_time <= ?", from, to).Count(&num).Error
 	return int32(num), err
 }
 
 func GetTotalGroupNum() (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Count(&num).Error
+	err := GroupDB.Count(&num).Error
 	return int32(num), err
 }
 
 func GetGroupNum(to time.Time) (int32, error) {
 	var num int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("create_time <= ?", to).Count(&num).Error
+	err := GroupDB.Where("create_time <= ?", to).Count(&num).Error
 	return int32(num), err
 }
 
@@ -68,12 +67,12 @@ type activeGroup struct {
 
 func GetActiveGroups(from, to time.Time, limit int) ([]*activeGroup, error) {
 	var activeGroups []*activeGroup
-	err := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Select("recv_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type in (?)", from, to, []int{constant.GroupChatType, constant.SuperGroupChatType}).Group("recv_id").Limit(limit).Order("message_num DESC").Find(&activeGroups).Error
+	err := ChatLogDB.Select("recv_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type in (?)", from, to, []int{constant.GroupChatType, constant.SuperGroupChatType}).Group("recv_id").Limit(limit).Order("message_num DESC").Find(&activeGroups).Error
 	for _, activeGroup := range activeGroups {
 		group := Group{
 			GroupID: activeGroup.Id,
 		}
-		db.DB.MysqlDB.DefaultGormDB().Table("groups").Where("group_id= ? ", group.GroupID).Find(&group)
+		GroupDB.Where("group_id= ? ", group.GroupID).Find(&group)
 		activeGroup.Name = group.GroupName
 	}
 	return activeGroups, err
@@ -87,12 +86,12 @@ type activeUser struct {
 
 func GetActiveUsers(from, to time.Time, limit int) ([]*activeUser, error) {
 	var activeUsers []*activeUser
-	err := db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Select("send_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type = ?", from, to, constant.SingleChatType).Group("send_id").Limit(limit).Order("message_num DESC").Find(&activeUsers).Error
+	err := ChatLogDB.Select("send_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type = ?", from, to, constant.SingleChatType).Group("send_id").Limit(limit).Order("message_num DESC").Find(&activeUsers).Error
 	for _, activeUser := range activeUsers {
 		user := User{
 			UserID: activeUser.ID,
 		}
-		err = db.DB.MysqlDB.DefaultGormDB().Table("users").Select("user_id, name").Find(&user).Error
+		err = UserDB.Select("user_id, name").Find(&user).Error
 		if err != nil {
 			continue
 		}

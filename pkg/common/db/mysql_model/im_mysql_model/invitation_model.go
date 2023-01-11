@@ -1,11 +1,21 @@
 package im_mysql_model
 
 import (
-	"Open_IM/pkg/common/db"
 	"errors"
+	"gorm.io/gorm"
 	"math/rand"
 	"time"
 )
+
+var InvitationDB *gorm.DB
+
+type Invitation struct {
+	InvitationCode string    `gorm:"column:invitation_code;primary_key;type:varchar(32)"`
+	CreateTime     time.Time `gorm:"column:create_time"`
+	UserID         string    `gorm:"column:user_id;index:userID"`
+	LastTime       time.Time `gorm:"column:last_time"`
+	Status         int32     `gorm:"column:status"`
+}
 
 /**
  * 批量生成邀请码
@@ -24,7 +34,7 @@ func BatchCreateInvitationCodes(CodeNums int, CodeLen int) ([]string, error) {
 		invitation.LastTime = time.Now()
 		invitation.Status = 0
 		invitation.UserID = ""
-		result := db.DB.MysqlDB.DefaultGormDB().Table("invitations").Create(&invitation)
+		result := InvitationDB.Table("invitations").Create(&invitation)
 		if result.Error != nil {
 			continue
 		}
@@ -41,7 +51,7 @@ func BatchCreateInvitationCodes(CodeNums int, CodeLen int) ([]string, error) {
  */
 func CheckInvitationCode(code string) error {
 	var invitationCode Invitation
-	err := db.DB.MysqlDB.DefaultGormDB().Table("invitations").Where("invitation_code=?", code).Take(&invitationCode).Error
+	err := InvitationDB.Table("invitations").Where("invitation_code=?", code).Take(&invitationCode).Error
 	if err != nil {
 		return err
 	}
@@ -62,7 +72,7 @@ func TryLockInvitationCode(Code string, UserID string) bool {
 	Data["user_id"] = UserID
 	Data["status"] = 1
 	Data["last_time"] = time.Now()
-	result := db.DB.MysqlDB.DefaultGormDB().Table("invitations").Where("invitation_code=? and user_id=? and status=?", Code, "", 0).Updates(Data)
+	result := InvitationDB.Table("invitations").Where("invitation_code=? and user_id=? and status=?", Code, "", 0).Updates(Data)
 	if result.Error != nil {
 		return false
 	}
@@ -75,7 +85,7 @@ func TryLockInvitationCode(Code string, UserID string) bool {
 func FinishInvitationCode(Code string, UserId string) bool {
 	Data := make(map[string]interface{}, 0)
 	Data["status"] = 2
-	result := db.DB.MysqlDB.DefaultGormDB().Table("invitations").Where("invitation_code=? and user_id=? and status=?", Code, UserId, 1).Updates(Data)
+	result := InvitationDB.Table("invitations").Where("invitation_code=? and user_id=? and status=?", Code, UserId, 1).Updates(Data)
 	if result.Error != nil {
 		return false
 	}
@@ -86,7 +96,7 @@ func GetInvitationCode(code string) (*Invitation, error) {
 	invitation := &Invitation{
 		InvitationCode: code,
 	}
-	err := db.DB.MysqlDB.DefaultGormDB().Model(invitation).Find(invitation).Error
+	err := InvitationDB.Model(invitation).Find(invitation).Error
 	return invitation, err
 }
 
@@ -103,7 +113,7 @@ func CreateRandomString(strlen int) string {
 
 func GetInvitationCodes(showNumber, pageNumber, status int32) ([]Invitation, int64, error) {
 	var invitationList []Invitation
-	db := db.DB.MysqlDB.DefaultGormDB().Model(Invitation{}).Where("status=?", status)
+	db := InvitationDB.Model(Invitation{}).Where("status=?", status)
 	var count int64
 	err := db.Count(&count).Error
 	err = db.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).

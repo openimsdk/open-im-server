@@ -1,42 +1,44 @@
 package im_mysql_model
 
 import (
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
+	"gorm.io/gorm"
 	"time"
 )
 
-func InsertInToUserBlackList(ctx context.Context, black db.Black) (err error) {
+var BlackDB *gorm.DB
+
+type Black struct {
+	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`
+	BlockUserID    string    `gorm:"column:block_user_id;primary_key;size:64"`
+	CreateTime     time.Time `gorm:"column:create_time"`
+	AddSource      int32     `gorm:"column:add_source"`
+	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
+	Ex             string    `gorm:"column:ex;size:1024"`
+}
+
+func InsertInToUserBlackList(ctx context.Context, black Black) (err error) {
 	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "black", black)
 	black.CreateTime = time.Now()
-	err = db.DB.MysqlDB.DefaultGormDB().Table("blacks").Create(black).Error
+	err = BlackDB.Create(black).Error
 	return err
 }
 
-// type Black struct {
-// 	OwnerUserID    string    `gorm:"column:owner_user_id;primaryKey;"`
-// 	BlockUserID    string    `gorm:"column:block_user_id;primaryKey;"`
-// 	CreateTime     time.Time `gorm:"column:create_time"`
-// 	AddSource      int32     `gorm:"column:add_source"`
-// 	OperatorUserID int32     `gorm:"column:operator_user_id"`
-// 	Ex             string    `gorm:"column:ex"`
-// }
-
 func CheckBlack(ownerUserID, blockUserID string) error {
-	var black db.Black
-	return db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
+	var black Black
+	return BlackDB.Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
 }
 
 func RemoveBlackList(ownerUserID, blockUserID string) error {
-	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(db.Black{}).Error
+	err := BlackDB.Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(Black{}).Error
 	return utils.Wrap(err, "RemoveBlackList failed")
 }
 
-func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
-	var blackListUsersInfo []db.Black
-	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
+func GetBlackListByUserID(ownerUserID string) ([]Black, error) {
+	var blackListUsersInfo []Black
+	err := BlackDB.Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +47,7 @@ func GetBlackListByUserID(ownerUserID string) ([]db.Black, error) {
 
 func GetBlackIDListByUserID(ownerUserID string) ([]string, error) {
 	var blackIDList []string
-	err := db.DB.MysqlDB.DefaultGormDB().Table("blacks").Where("owner_user_id=?", ownerUserID).Pluck("block_user_id", &blackIDList).Error
+	err := BlackDB.Where("owner_user_id=?", ownerUserID).Pluck("block_user_id", &blackIDList).Error
 	if err != nil {
 		return nil, err
 	}

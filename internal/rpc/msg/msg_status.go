@@ -16,7 +16,7 @@ func (rpc *rpcChat) SetSendMsgStatus(_ context.Context, req *pbMsg.SetSendMsgSta
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), req.String())
 	if err := db.DB.SetSendMsgStatus(req.Status, req.OperationID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		resp.ErrCode = constant.ErrDB.ErrCode
+		resp.ErrCode = constant.ErrDatabase.ErrCode
 		resp.ErrMsg = err.Error()
 		return resp, nil
 	}

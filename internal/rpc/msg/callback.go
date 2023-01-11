@@ -51,7 +51,8 @@ func callbackBeforeSendSingleMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackRes
 	}
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSendSingleMsgCommand, req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackTimeOut); err != nil {
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSendSingleMsgCommand,
+		req, resp, config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackTimeOut, &config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		if !config.Config.Callback.CallbackBeforeSendSingleMsg.CallbackFailedContinue {
@@ -79,7 +80,8 @@ func callbackAfterSendSingleMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp
 	}
 	resp := &cbApi.CallbackAfterSendSingleMsgResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackAfterSendSingleMsgCommand, req, resp, config.Config.Callback.CallbackAfterSendSingleMsg.CallbackTimeOut); err != nil {
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackAfterSendSingleMsgCommand,
+		req, resp, config.Config.Callback.CallbackAfterSendSingleMsg.CallbackTimeOut, &config.Config.Callback.CallbackAfterSendSingleMsg.CallbackFailedContinue); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		return callbackResp
@@ -101,7 +103,8 @@ func callbackBeforeSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp
 	}
 	resp := &cbApi.CallbackBeforeSendGroupMsgResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSendGroupMsgCommand, req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackTimeOut); err != nil {
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSendGroupMsgCommand,
+		req, resp, config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackTimeOut, &config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		if !config.Config.Callback.CallbackBeforeSendGroupMsg.CallbackFailedContinue {
@@ -129,7 +132,8 @@ func callbackAfterSendGroupMsg(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp 
 	}
 	resp := &cbApi.CallbackAfterSendGroupMsgResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackAfterSendGroupMsgCommand, req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut); err != nil {
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackAfterSendGroupMsgCommand, req, resp,
+		config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut, nil); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		return callbackResp
@@ -150,7 +154,8 @@ func callbackMsgModify(msg *pbChat.SendMsgReq) cbApi.CommonCallbackResp {
 	}
 	resp := &cbApi.CallbackMsgModifyCommandResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(msg.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackMsgModifyCommand, req, resp, config.Config.Callback.CallbackMsgModify.CallbackTimeOut); err != nil {
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackMsgModifyCommand, req, resp,
+		config.Config.Callback.CallbackMsgModify.CallbackTimeOut, &config.Config.Callback.CallbackMsgModify.CallbackFailedContinue); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 		if !config.Config.Callback.CallbackMsgModify.CallbackFailedContinue {

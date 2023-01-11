@@ -1,21 +1,31 @@
 package im_mysql_model
 
 import (
-	"Open_IM/pkg/common/db"
 	"errors"
-
-	_ "gorm.io/gorm"
+	"gorm.io/gorm"
 )
+
+var RegisterDB *gorm.DB
+
+type Register struct {
+	Account        string `gorm:"column:account;primary_key;type:char(255)" json:"account"`
+	Password       string `gorm:"column:password;type:varchar(255)" json:"password"`
+	Ex             string `gorm:"column:ex;size:1024" json:"ex"`
+	UserID         string `gorm:"column:user_id;type:varchar(255)" json:"userID"`
+	AreaCode       string `gorm:"column:area_code;type:varchar(255)"`
+	InvitationCode string `gorm:"column:invitation_code;type:varchar(255)"`
+	RegisterIP     string `gorm:"column:register_ip;type:varchar(255)"`
+}
 
 func GetRegister(account, areaCode, userID string) (*Register, error) {
 	var r Register
-	return &r, db.DB.MysqlDB.DefaultGormDB().Table("registers").Where("user_id = ? and user_id != ? or account = ? or account =? and area_code=?",
+	return &r, RegisterDB.Table("registers").Where("user_id = ? and user_id != ? or account = ? or account =? and area_code=?",
 		userID, "", account, account, areaCode).Take(&r).Error
 }
 
 func GetRegisterInfo(userID string) (*Register, error) {
 	var r Register
-	return &r, db.DB.MysqlDB.DefaultGormDB().Table("registers").Where("user_id = ?", userID).Take(&r).Error
+	return &r, RegisterDB.Table("registers").Where("user_id = ?", userID).Take(&r).Error
 }
 
 func SetPassword(account, password, ex, userID, areaCode, ip string) error {
@@ -27,20 +37,20 @@ func SetPassword(account, password, ex, userID, areaCode, ip string) error {
 		RegisterIP: ip,
 		AreaCode:   areaCode,
 	}
-	return db.DB.MysqlDB.DefaultGormDB().Table("registers").Create(&r).Error
+	return RegisterDB.Table("registers").Create(&r).Error
 }
 
 func ResetPassword(account, password string) error {
 	r := Register{
 		Password: password,
 	}
-	return db.DB.MysqlDB.DefaultGormDB().Table("registers").Where("account = ?", account).Updates(&r).Error
+	return RegisterDB.Table("registers").Where("account = ?", account).Updates(&r).Error
 }
 
 func GetRegisterAddFriendList(showNumber, pageNumber int32) ([]string, error) {
 	var IDList []string
 	var err error
-	model := db.DB.MysqlDB.DefaultGormDB().Model(&RegisterAddFriend{})
+	model := RegisterDB.Model(&RegisterAddFriend{})
 	if showNumber == 0 {
 		err = model.Pluck("user_id", &IDList).Error
 	} else {
@@ -54,7 +64,7 @@ func AddUserRegisterAddFriendIDList(userIDList ...string) error {
 	for _, v := range userIDList {
 		list = append(list, RegisterAddFriend{UserID: v})
 	}
-	result := db.DB.MysqlDB.DefaultGormDB().Create(list)
+	result := RegisterDB.Create(list)
 	if int(result.RowsAffected) < len(userIDList) {
 		return errors.New("some line insert failed")
 	}
@@ -67,18 +77,18 @@ func ReduceUserRegisterAddFriendIDList(userIDList ...string) error {
 	for _, v := range userIDList {
 		list = append(list, RegisterAddFriend{UserID: v})
 	}
-	err := db.DB.MysqlDB.DefaultGormDB().Delete(list).Error
+	err := RegisterDB.Delete(list).Error
 	return err
 }
 
 func DeleteAllRegisterAddFriendIDList() error {
-	err := db.DB.MysqlDB.DefaultGormDB().Where("1 = 1").Delete(&RegisterAddFriend{}).Error
+	err := RegisterDB.Where("1 = 1").Delete(&RegisterAddFriend{}).Error
 	return err
 }
 
 func GetUserIPLimit(userID string) (UserIpLimit, error) {
 	var limit UserIpLimit
 	limit.UserID = userID
-	err := db.DB.MysqlDB.DefaultGormDB().Model(&UserIpLimit{}).Take(&limit).Error
+	err := RegisterDB.Model(&UserIpLimit{}).Take(&limit).Error
 	return limit, err
 }

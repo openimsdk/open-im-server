@@ -2,12 +2,14 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
+	"gorm.io/gorm"
 	"time"
 )
+
+var GroupRequestDB *gorm.DB
 
 type GroupRequest struct {
 	UserID        string    `gorm:"column:user_id;primary_key;size:64"`
@@ -27,28 +29,28 @@ func (*GroupRequest) Create(ctx context.Context, groupRequests []*GroupRequest) 
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupRequests", groupRequests)
 	}()
-	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Create(&groupRequests).Error, utils.GetSelfFuncName())
+	return utils.Wrap(GroupRequestDB.Create(&groupRequests).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) Delete(ctx context.Context, groupRequests []*GroupRequest) (err error) {
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupRequests", groupRequests)
 	}()
-	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Delete(&groupRequests).Error, utils.GetSelfFuncName())
+	return utils.Wrap(GroupRequestDB.Delete(&groupRequests).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) UpdateByMap(ctx context.Context, groupID string, userID string, args map[string]interface{}) (err error) {
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID, "args", args)
 	}()
-	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ? and user_id = ? ", groupID, userID).Updates(args).Error, utils.GetSelfFuncName())
+	return utils.Wrap(GroupRequestDB.Where("group_id = ? and user_id = ? ", groupID, userID).Updates(args).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) Update(ctx context.Context, groupRequests []*GroupRequest) (err error) {
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupRequests", groupRequests)
 	}()
-	return utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Updates(&groupRequests).Error, utils.GetSelfFuncName())
+	return utils.Wrap(GroupRequestDB.Updates(&groupRequests).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) Find(ctx context.Context, groupRequests []*GroupRequest) (resultGroupRequests []*GroupRequest, err error) {
@@ -59,7 +61,7 @@ func (*GroupRequest) Find(ctx context.Context, groupRequests []*GroupRequest) (r
 	for _, groupMember := range groupRequests {
 		where = append(where, []interface{}{groupMember.GroupID, groupMember.UserID})
 	}
-	return resultGroupRequests, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("(group_id, user_id) in ?", where).Find(&resultGroupRequests).Error, utils.GetSelfFuncName())
+	return resultGroupRequests, utils.Wrap(GroupRequestDB.Where("(group_id, user_id) in ?", where).Find(&resultGroupRequests).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) Take(ctx context.Context, groupID string, userID string) (groupRequest *GroupRequest, err error) {
@@ -67,7 +69,7 @@ func (*GroupRequest) Take(ctx context.Context, groupID string, userID string) (g
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID, "groupRequest", *groupRequest)
 	}()
-	return groupRequest, utils.Wrap(db.DB.MysqlDB.DefaultGormDB().Where("group_id = ? and user_id = ? ", groupID, userID).Take(groupRequest).Error, utils.GetSelfFuncName())
+	return groupRequest, utils.Wrap(GroupRequestDB.Where("group_id = ? and user_id = ? ", groupID, userID).Take(groupRequest).Error, utils.GetSelfFuncName())
 }
 
 //func UpdateGroupRequest(groupRequest GroupRequest) error {
@@ -82,7 +84,7 @@ func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 	if toInsertInfo.HandledTime.Unix() < 0 {
 		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
 	}
-	u := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", toInsertInfo.GroupID, toInsertInfo.UserID).Updates(&toInsertInfo)
+	u := GroupRequestDB.Table("group_requests").Where("group_id=? and user_id=?", toInsertInfo.GroupID, toInsertInfo.UserID).Updates(&toInsertInfo)
 	if u.RowsAffected != 0 {
 		return nil
 	}
@@ -92,7 +94,7 @@ func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
 	}
 
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Create(&toInsertInfo).Error
+	err := GroupRequestDB.Create(&toInsertInfo).Error
 	if err != nil {
 		return err
 	}
@@ -101,7 +103,7 @@ func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 
 func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*GroupRequest, error) {
 	var groupRequest GroupRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Take(&groupRequest).Error
+	err := GroupRequestDB.Where("user_id=? and group_id=?", userID, groupID).Take(&groupRequest).Error
 	if err != nil {
 		return nil, err
 	}
@@ -109,12 +111,12 @@ func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*GroupRequest, e
 }
 
 func DelGroupRequestByGroupIDAndUserID(groupID, userID string) error {
-	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(GroupRequest{}).Error
+	return GroupRequestDB.Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(GroupRequest{}).Error
 }
 
 func GetGroupRequestByGroupID(groupID string) ([]GroupRequest, error) {
 	var groupRequestList []GroupRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=?", groupID).Find(&groupRequestList).Error
+	err := GroupRequestDB.Table("group_requests").Where("group_id=?", groupID).Find(&groupRequestList).Error
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +144,7 @@ func GetRecvGroupApplicationList(userID string) ([]GroupRequest, error) {
 
 func GetUserReqGroupByUserID(userID string) ([]GroupRequest, error) {
 	var groupRequestList []GroupRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
+	err := GroupRequestDB.Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
 	return groupRequestList, err
 }
 

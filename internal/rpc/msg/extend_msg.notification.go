@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -87,7 +88,7 @@ func messageReactionSender(operationID, sendID string, sourceID string, sessionT
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		pbData.MsgData.GroupID = sourceID
 	}
-	etcdConn, err := utils.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	etcdConn, err := getcdv3.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		return
 	}

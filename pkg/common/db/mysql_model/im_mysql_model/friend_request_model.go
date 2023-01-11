@@ -1,27 +1,33 @@
 package im_mysql_model
 
 import (
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
+	"gorm.io/gorm"
 	"time"
 )
 
-//type FriendRequest struct {
-//	FromUserID    string    `gorm:"column:from_user_id;primaryKey;"`
-//	ToUserID      string    `gorm:"column:to_user_id;primaryKey;"`
-//	HandleResult  int32     `gorm:"column:handle_result"`
-//	ReqMessage    string    `gorm:"column:req_message"`
-//	CreateTime    time.Time `gorm:"column:create_time"`
-//	HandlerUserID string    `gorm:"column:handler_user_id"`
-//	HandleMsg     string    `gorm:"column:handle_msg"`
-//	HandleTime    time.Time `gorm:"column:handle_time"`
-//	Ex            string    `gorm:"column:ex"`
-//}
+var FriendRequestDB *gorm.DB
+
+type FriendRequest struct {
+	FromUserID    string    `gorm:"column:from_user_id;primary_key;size:64"`
+	ToUserID      string    `gorm:"column:to_user_id;primary_key;size:64"`
+	HandleResult  int32     `gorm:"column:handle_result"`
+	ReqMsg        string    `gorm:"column:req_msg;size:255"`
+	CreateTime    time.Time `gorm:"column:create_time"`
+	HandlerUserID string    `gorm:"column:handler_user_id;size:64"`
+	HandleMsg     string    `gorm:"column:handle_msg;size:255"`
+	HandleTime    time.Time `gorm:"column:handle_time"`
+	Ex            string    `gorm:"column:ex;size:1024"`
+}
+
+func (FriendRequest) TableName() string {
+	return "friend_requests"
+}
 
 // who apply to add me
 func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]FriendRequest, error) {
 	var usersInfo []FriendRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Where("to_user_id=?", ToUserID).Find(&usersInfo).Error
+	err := FriendRequestDB.Table("friend_requests").Where("to_user_id=?", ToUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +37,7 @@ func GetReceivedFriendsApplicationListByUserID(ToUserID string) ([]FriendRequest
 // I apply to add somebody
 func GetSendFriendApplicationListByUserID(FromUserID string) ([]FriendRequest, error) {
 	var usersInfo []FriendRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Where("from_user_id=?", FromUserID).Find(&usersInfo).Error
+	err := FriendRequestDB.Table("friend_requests").Where("from_user_id=?", FromUserID).Find(&usersInfo).Error
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +47,7 @@ func GetSendFriendApplicationListByUserID(FromUserID string) ([]FriendRequest, e
 // FromUserId apply to add ToUserID
 func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*FriendRequest, error) {
 	var friendRequest FriendRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Where("from_user_id=? and to_user_id=?", FromUserID, ToUserID).Take(&friendRequest).Error
+	err := FriendRequestDB.Table("friend_requests").Where("from_user_id=? and to_user_id=?", FromUserID, ToUserID).Take(&friendRequest).Error
 	if err != nil {
 		return nil, err
 	}
@@ -50,12 +56,12 @@ func GetFriendApplicationByBothUserID(FromUserID, ToUserID string) (*FriendReque
 
 func UpdateFriendApplication(friendRequest *FriendRequest) error {
 	friendRequest.CreateTime = time.Now()
-	return db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Where("from_user_id=? and to_user_id=?",
+	return FriendRequestDB.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
 		friendRequest.FromUserID, friendRequest.ToUserID).Updates(&friendRequest).Error
 }
 
 func InsertFriendApplication(friendRequest *FriendRequest, args map[string]interface{}) error {
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Create(friendRequest).Error; err == nil {
+	if err := FriendRequestDB.Table("friend_requests").Create(friendRequest).Error; err == nil {
 		return nil
 	}
 
@@ -67,7 +73,7 @@ func InsertFriendApplication(friendRequest *FriendRequest, args map[string]inter
 
 	friendRequest.CreateTime = time.Now()
 	args["create_time"] = friendRequest.CreateTime
-	u := db.DB.MysqlDB.DefaultGormDB().Model(friendRequest).Updates(args)
+	u := FriendRequestDB.Model(friendRequest).Updates(args)
 	//u := dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
 	// friendRequest.FromUserID, friendRequest.ToUserID).Update(&friendRequest)
 	//u := dbConn.Table("friend_requests").Where("from_user_id=? and to_user_id=?",
@@ -82,7 +88,7 @@ func InsertFriendApplication(friendRequest *FriendRequest, args map[string]inter
 	if friendRequest.HandleTime.Unix() < 0 {
 		friendRequest.HandleTime = utils.UnixSecondToTime(0)
 	}
-	err := db.DB.MysqlDB.DefaultGormDB().Table("friend_requests").Create(friendRequest).Error
+	err := FriendRequestDB.Table("friend_requests").Create(friendRequest).Error
 	if err != nil {
 		return err
 	}

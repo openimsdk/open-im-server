@@ -1,12 +1,5 @@
 package im_mysql_model
 
-import (
-	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
-	"Open_IM/pkg/utils"
-	"time"
-)
-
 //type GroupRequest struct {
 //	UserID       string    `gorm:"column:user_id;primaryKey;"`
 //	GroupID      string    `gorm:"column:group_id;primaryKey;"`
@@ -26,27 +19,27 @@ import (
 //	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Updates(&groupRequest).Error
 //}
 
-func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
-	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)
-	if toInsertInfo.HandledTime.Unix() < 0 {
-		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
-	}
-	u := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", toInsertInfo.GroupID, toInsertInfo.UserID).Updates(&toInsertInfo)
-	if u.RowsAffected != 0 {
-		return nil
-	}
-
-	toInsertInfo.ReqTime = time.Now()
-	if toInsertInfo.HandledTime.Unix() < 0 {
-		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
-	}
-
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Create(&toInsertInfo).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
+//func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
+//	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)
+//	if toInsertInfo.HandledTime.Unix() < 0 {
+//		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
+//	}
+//	u := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", toInsertInfo.GroupID, toInsertInfo.UserID).Updates(&toInsertInfo)
+//	if u.RowsAffected != 0 {
+//		return nil
+//	}
+//
+//	toInsertInfo.ReqTime = time.Now()
+//	if toInsertInfo.HandledTime.Unix() < 0 {
+//		toInsertInfo.HandledTime = utils.UnixSecondToTime(0)
+//	}
+//
+//	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Create(&toInsertInfo).Error
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
 
 //func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*GroupRequest, error) {
 //	var groupRequest GroupRequest
@@ -71,29 +64,29 @@ func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 //}
 
 // received
-func GetRecvGroupApplicationList(userID string) ([]GroupRequest, error) {
-	var groupRequestList []GroupRequest
-	memberList, err := GetGroupMemberListByUserID(userID)
-	if err != nil {
-		return nil, utils.Wrap(err, utils.GetSelfFuncName())
-	}
-	for _, v := range memberList {
-		if v.RoleLevel > constant.GroupOrdinaryUsers {
-			list, err := GetGroupRequestByGroupID(v.GroupID)
-			if err != nil {
-				continue
-			}
-			groupRequestList = append(groupRequestList, list...)
-		}
-	}
-	return groupRequestList, nil
-}
-
-func GetUserReqGroupByUserID(userID string) ([]GroupRequest, error) {
-	var groupRequestList []GroupRequest
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
-	return groupRequestList, err
-}
+//func GetRecvGroupApplicationList(userID string) ([]GroupRequest, error) {
+//	var groupRequestList []GroupRequest
+//	memberList, err := GetGroupMemberListByUserID(userID)
+//	if err != nil {
+//		return nil, utils.Wrap(err, utils.GetSelfFuncName())
+//	}
+//	for _, v := range memberList {
+//		if v.RoleLevel > constant.GroupOrdinaryUsers {
+//			list, err := GetGroupRequestByGroupID(v.GroupID)
+//			if err != nil {
+//				continue
+//			}
+//			groupRequestList = append(groupRequestList, list...)
+//		}
+//	}
+//	return groupRequestList, nil
+//}
+//
+//func GetUserReqGroupByUserID(userID string) ([]GroupRequest, error) {
+//	var groupRequestList []GroupRequest
+//	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
+//	return groupRequestList, err
+//}
 
 //
 //func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.CommonResp, error) {

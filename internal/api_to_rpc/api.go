@@ -1,7 +1,6 @@
 package common
 
 import (
-	"Open_IM/internal/fault_tolerant"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/trace_log"
 	utils2 "Open_IM/pkg/utils"

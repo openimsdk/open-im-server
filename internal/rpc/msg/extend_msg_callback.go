@@ -28,7 +28,8 @@ func callbackSetMessageReactionExtensions(setReq *msg.SetMessageReactionExtensio
 	}
 	resp := &cbApi.CallbackBeforeSetMessageReactionExtResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSetMessageReactionExtensionCommand, req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut); err != nil {
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeSetMessageReactionExtensionCommand,
+		req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut, nil); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 	}
@@ -52,7 +53,8 @@ func callbackDeleteMessageReactionExtensions(setReq *msg.DeleteMessageListReacti
 	}
 	resp := &cbApi.CallbackDeleteMessageReactionExtResp{CommonCallbackResp: &callbackResp}
 	defer log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), req, *resp)
-	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeDeleteMessageReactionExtensionsCommand, req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut); err != nil {
+	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeDeleteMessageReactionExtensionsCommand,
+		req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut, nil); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
 	}

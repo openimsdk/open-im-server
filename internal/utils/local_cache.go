@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/config"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
 	"Open_IM/pkg/utils"
 	"context"
@@ -59,7 +60,7 @@ func GetGroupMemberUserIDListHashFromRemote(ctx context.Context, groupID string)
 
 func GetGroupMemberUserIDListFromRemote(groupID string, operationID string) ([]string, error) {
 	getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: operationID, GroupID: groupID}
-	etcdConn, err := utils.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImCacheName)
+	etcdConn, err := getcdv3.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImCacheName)
 	if err != nil {
 		return nil, err
 	}

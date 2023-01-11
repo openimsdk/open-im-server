@@ -1,29 +1,30 @@
 package im_mysql_model
 
 import (
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/utils"
 	"gorm.io/gorm"
 	"time"
 )
 
+var OrgDB *gorm.DB
+
 func CreateDepartment(department *Department) error {
 	department.CreateTime = time.Now()
-	return db.DB.MysqlDB.DefaultGormDB().Table("departments").Create(department).Error
+	return OrgDB.Table("departments").Create(department).Error
 }
 
 func GetDepartment(departmentID string) (*Department, error) {
 	var department Department
-	err := db.DB.MysqlDB.DefaultGormDB().Table("departments").Where("department_id=?", departmentID).Find(&department).Error
+	err := OrgDB.Table("departments").Where("department_id=?", departmentID).Find(&department).Error
 	return &department, err
 }
 
 func UpdateDepartment(department *Department, args map[string]interface{}) error {
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("departments").Where("department_id=?", department.DepartmentID).Updates(department).Error; err != nil {
+	if err := OrgDB.Table("departments").Where("department_id=?", department.DepartmentID).Updates(department).Error; err != nil {
 		return err
 	}
 	if args != nil {
-		return db.DB.MysqlDB.DefaultGormDB().Table("departments").Where("department_id=?", department.DepartmentID).Updates(args).Error
+		return OrgDB.Table("departments").Where("department_id=?", department.DepartmentID).Updates(args).Error
 	}
 	return nil
 }
@@ -32,9 +33,9 @@ func GetSubDepartmentList(departmentID string) ([]Department, error) {
 	var departmentList []Department
 	var err error
 	if departmentID == "-1" {
-		err = db.DB.MysqlDB.DefaultGormDB().Table("departments").Find(&departmentList).Error
+		err = OrgDB.Table("departments").Find(&departmentList).Error
 	} else {
-		err = db.DB.MysqlDB.DefaultGormDB().Table("departments").Where("parent_id=?", departmentID).Find(&departmentList).Error
+		err = OrgDB.Table("departments").Where("parent_id=?", departmentID).Find(&departmentList).Error
 	}
 
 	return departmentList, err
@@ -42,10 +43,10 @@ func GetSubDepartmentList(departmentID string) ([]Department, error) {
 
 func DeleteDepartment(departmentID string) error {
 	var err error
-	if err = db.DB.MysqlDB.DefaultGormDB().Table("departments").Where("department_id=?", departmentID).Delete(Department{}).Error; err != nil {
+	if err = OrgDB.Table("departments").Where("department_id=?", departmentID).Delete(Department{}).Error; err != nil {
 		return err
 	}
-	if err = db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("department_id=?", departmentID).Delete(DepartmentMember{}).Error; err != nil {
+	if err = OrgDB.Table("department_members").Where("department_id=?", departmentID).Delete(DepartmentMember{}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -53,72 +54,72 @@ func DeleteDepartment(departmentID string) error {
 
 func CreateOrganizationUser(organizationUser *OrganizationUser) error {
 	organizationUser.CreateTime = time.Now()
-	return db.DB.MysqlDB.DefaultGormDB().Table("organization_users").Create(organizationUser).Error
+	return OrgDB.Table("organization_users").Create(organizationUser).Error
 }
 
 func GetOrganizationUser(userID string) (error, *OrganizationUser) {
 	organizationUser := OrganizationUser{}
-	err := db.DB.MysqlDB.DefaultGormDB().Table("organization_users").Where("user_id=?", userID).Take(&organizationUser).Error
+	err := OrgDB.Table("organization_users").Where("user_id=?", userID).Take(&organizationUser).Error
 	return err, &organizationUser
 }
 
 func GetOrganizationUsers(userIDList []string) ([]*OrganizationUser, error) {
 	var organizationUserList []*OrganizationUser
-	err := db.DB.MysqlDB.DefaultGormDB().Table("organization_users").Where("user_id in (?)", userIDList).Find(&organizationUserList).Error
+	err := OrgDB.Table("organization_users").Where("user_id in (?)", userIDList).Find(&organizationUserList).Error
 	return organizationUserList, err
 }
 
 func UpdateOrganizationUser(organizationUser *OrganizationUser, args map[string]interface{}) error {
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("organization_users").Where("user_id=?", organizationUser.UserID).Updates(organizationUser).Error; err != nil {
+	if err := OrgDB.Table("organization_users").Where("user_id=?", organizationUser.UserID).Updates(organizationUser).Error; err != nil {
 		return err
 	}
 	if args != nil {
-		return db.DB.MysqlDB.DefaultGormDB().Table("organization_users").Where("user_id=?", organizationUser.UserID).Updates(args).Error
+		return OrgDB.Table("organization_users").Where("user_id=?", organizationUser.UserID).Updates(args).Error
 	}
 	return nil
 }
 
 func CreateDepartmentMember(departmentMember *DepartmentMember) error {
 	departmentMember.CreateTime = time.Now()
-	return db.DB.MysqlDB.DefaultGormDB().Table("department_members").Create(departmentMember).Error
+	return OrgDB.Table("department_members").Create(departmentMember).Error
 }
 
 func GetUserInDepartment(userID string) (error, []DepartmentMember) {
 	var departmentMemberList []DepartmentMember
-	err := db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("user_id=?", userID).Find(&departmentMemberList).Error
+	err := OrgDB.Where("user_id=?", userID).Find(&departmentMemberList).Error
 	return err, departmentMemberList
 }
 
 func UpdateUserInDepartment(departmentMember *DepartmentMember, args map[string]interface{}) error {
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("department_id=? AND user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
+	if err := OrgDB.Where("department_id=? AND user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
 		Updates(departmentMember).Error; err != nil {
 		return err
 	}
 	if args != nil {
-		return db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("department_id=? AND user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
+		return OrgDB.Where("department_id=? AND user_id=?", departmentMember.DepartmentID, departmentMember.UserID).
 			Updates(args).Error
 	}
 	return nil
 }
 
 func DeleteUserInDepartment(departmentID, userID string) error {
-	return db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("department_id=? AND user_id=?", departmentID, userID).Delete(DepartmentMember{}).Error
+	return OrgDB.Table("department_members").Where("department_id=? AND user_id=?", departmentID, userID).Delete(DepartmentMember{}).Error
 }
 
 func DeleteUserInAllDepartment(userID string) error {
-	return db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("user_id=?", userID).Delete(DepartmentMember{}).Error
+	return OrgDB.Table("department_members").Where("user_id=?", userID).Delete(DepartmentMember{}).Error
 }
 
 func DeleteOrganizationUser(OrganizationUserID string) error {
 	if err := DeleteUserInAllDepartment(OrganizationUserID); err != nil {
 		return err
 	}
-	return db.DB.MysqlDB.DefaultGormDB().Table("organization_users").Where("user_id=?", OrganizationUserID).Delete(OrganizationUser{}).Error
+	return OrgDB.Table("organization_users").Where("user_id=?", OrganizationUserID).Delete(OrganizationUser{}).Error
 }
 
 func GetDepartmentMemberUserIDList(departmentID string) (error, []string) {
 	var departmentMemberList []DepartmentMember
-	err := db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("department_id=?", departmentID).Take(&departmentMemberList).Error
+	err := OrgDB.Table("department_members").Where("department_id=?", departmentID).Take(&departmentMemberList).Error
 	if err != nil {
 		return err, nil
 	}
@@ -133,9 +134,9 @@ func GetDepartmentMemberList(departmentID string) ([]DepartmentMember, error) {
 	var departmentMemberList []DepartmentMember
 	var err error
 	if departmentID == "-1" {
-		err = db.DB.MysqlDB.DefaultGormDB().Table("department_members").Find(&departmentMemberList).Error
+		err = OrgDB.Table("department_members").Find(&departmentMemberList).Error
 	} else {
-		err = db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("department_id=?", departmentID).Find(&departmentMemberList).Error
+		err = OrgDB.Table("department_members").Where("department_id=?", departmentID).Find(&departmentMemberList).Error
 	}
 
 	if err != nil {
@@ -147,12 +148,12 @@ func GetDepartmentMemberList(departmentID string) ([]DepartmentMember, error) {
 func GetAllOrganizationUserID() (error, []string) {
 	var OrganizationUser OrganizationUser
 	var result []string
-	return db.DB.MysqlDB.DefaultGormDB().Model(&OrganizationUser).Pluck("user_id", &result).Error, result
+	return OrgDB.Model(&OrganizationUser).Pluck("user_id", &result).Error, result
 }
 
 func GetDepartmentMemberNum(departmentID string) (error, uint32) {
 	var number int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("department_members").Where("department_id=?", departmentID).Count(&number).Error
+	err := OrgDB.Table("department_members").Where("department_id=?", departmentID).Count(&number).Error
 	if err != nil {
 		return utils.Wrap(err, ""), 0
 	}
@@ -162,7 +163,7 @@ func GetDepartmentMemberNum(departmentID string) (error, uint32) {
 
 func GetSubDepartmentNum(departmentID string) (error, uint32) {
 	var number int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("departments").Where("parent_id=?", departmentID).Count(&number).Error
+	err := OrgDB.Table("departments").Where("parent_id=?", departmentID).Count(&number).Error
 	if err != nil {
 		return utils.Wrap(err, ""), 0
 	}
@@ -171,12 +172,12 @@ func GetSubDepartmentNum(departmentID string) (error, uint32) {
 
 func SetDepartmentRelatedGroupID(groupID, departmentID string) error {
 	department := &Department{RelatedGroupID: groupID}
-	return db.DB.MysqlDB.DefaultGormDB().Model(&department).Where("department_id=?", departmentID).Updates(department).Error
+	return OrgDB.Model(&department).Where("department_id=?", departmentID).Updates(department).Error
 }
 
 func GetDepartmentRelatedGroupIDList(departmentIDList []string) ([]string, error) {
 	var groupIDList []string
-	err := db.DB.MysqlDB.DefaultGormDB().Table("departments").Where("department_id IN (?) ", departmentIDList).Pluck("related_group_id", &groupIDList).Error
+	err := OrgDB.Table("departments").Where("department_id IN (?) ", departmentIDList).Pluck("related_group_id", &groupIDList).Error
 	return groupIDList, err
 }
 
@@ -184,7 +185,7 @@ func getDepartmentParent(departmentID string, dbConn *gorm.DB) (*Department, err
 	var department Department
 	var parentDepartment Department
 	//var parentID string
-	err := db.DB.MysqlDB.DefaultGormDB().Model(&department).Where("department_id=?", departmentID).Select("parent_id").First(&department).Error
+	err := OrgDB.Model(&department).Where("department_id=?", departmentID).Select("parent_id").First(&department).Error
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -210,7 +211,7 @@ func GetDepartmentParent(departmentID string, dbConn *gorm.DB, parentIDList *[]s
 }
 
 func GetDepartmentParentIDList(departmentID string) ([]string, error) {
-	dbConn := db.DB.MysqlDB.DefaultGormDB()
+	dbConn := OrgDB
 	var parentIDList []string
 	err := GetDepartmentParent(departmentID, dbConn, &parentIDList)
 	return parentIDList, err
@@ -218,6 +219,6 @@ func GetDepartmentParentIDList(departmentID string) ([]string, error) {
 
 func GetRandomDepartmentID() (string, error) {
 	department := &Department{}
-	err := db.DB.MysqlDB.DefaultGormDB().Model(department).Order("RAND()").Where("related_group_id != ? AND department_id != ? AND department_type = ?", "", "0", 1).First(department).Error
+	err := OrgDB.Model(department).Order("RAND()").Where("related_group_id != ? AND department_id != ? AND department_type = ?", "", "0", 1).First(department).Error
 	return department.DepartmentID, err
 }

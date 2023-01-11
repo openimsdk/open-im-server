@@ -2,7 +2,6 @@ package im_mysql_model
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
@@ -10,18 +9,6 @@ import (
 	"gorm.io/gorm"
 	"time"
 )
-
-//type GroupMember struct {
-//	GroupID            string    `gorm:"column:group_id;primaryKey;"`
-//	UserID             string    `gorm:"column:user_id;primaryKey;"`
-//	NickName           string    `gorm:"column:nickname"`
-//	FaceUrl            string    `gorm:"user_group_face_url"`
-//	RoleLevel int32     `gorm:"column:role_level"`
-//	JoinTime           time.Time `gorm:"column:join_time"`
-//	JoinSource int32 `gorm:"column:join_source"`
-//	OperatorUserID  string `gorm:"column:operator_user_id"`
-//	Ex string `gorm:"column:ex"`
-//}
 
 var GroupMemberDB *gorm.DB
 
@@ -44,26 +31,26 @@ func (g *GroupMember) Create(ctx context.Context, groupMemberList []*GroupMember
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)
 	}()
-	return utils.Wrap(g.DB.Create(&groupMemberList).Error, "")
+	return utils.Wrap(GroupMemberDB.Create(&groupMemberList).Error, "")
 }
 
 func (g *GroupMember) Delete(ctx context.Context, groupMembers []*GroupMember) (err error) {
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
 	}()
-	return utils.Wrap(g.DB.Delete(groupMembers).Error, "")
+	return utils.Wrap(GroupMemberDB.Delete(groupMembers).Error, "")
 }
 
 func (g *GroupMember) UpdateByMap(ctx context.Context, groupID string, userID string, args map[string]interface{}) (err error) {
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
 	}()
-	return utils.Wrap(g.DB.Model(&GroupMember{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
+	return utils.Wrap(GroupMemberDB.Model(&GroupMember{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
 }
 
 func (g *GroupMember) Update(ctx context.Context, groupMembers []*GroupMember) (err error) {
 	defer func() { trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
-	return utils.Wrap(g.DB.Updates(&groupMembers).Error, "")
+	return utils.Wrap(GroupMemberDB.Updates(&groupMembers).Error, "")
 }
 
 func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember) (groupList []*GroupMember, err error) {
@@ -74,7 +61,7 @@ func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember) (gr
 	for _, groupMember := range groupMembers {
 		where = append(where, []interface{}{groupMember.GroupID, groupMember.UserID})
 	}
-	err = utils.Wrap(g.DB.Where("(group_id, user_id) in ?", where).Find(&groupList).Error, "")
+	err = utils.Wrap(GroupMemberDB.Where("(group_id, user_id) in ?", where).Find(&groupList).Error, "")
 	return groupList, err
 }
 
@@ -83,7 +70,7 @@ func (g *GroupMember) Take(ctx context.Context, groupID string, userID string) (
 		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
-	return groupMember, utils.Wrap(g.DB.Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
+	return groupMember, utils.Wrap(GroupMemberDB.Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
 }
 
 func (g *GroupMember) TakeOwnerInfo(ctx context.Context, groupID string) (groupMember *GroupMember, err error) {
@@ -91,7 +78,7 @@ func (g *GroupMember) TakeOwnerInfo(ctx context.Context, groupID string) (groupM
 		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
-	err = g.DB.Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error
+	err = GroupMemberDB.Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error
 	return groupMember, utils.Wrap(err, "")
 }
 
@@ -183,7 +170,7 @@ func UpdateGroupMemberInfoByMap(groupMemberInfo GroupMember, m map[string]interf
 
 func GetOwnerManagerByGroupID(groupID string) ([]GroupMember, error) {
 	var groupMemberList []GroupMember
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=? and role_level>?", groupID, constant.GroupOrdinaryUsers).Find(&groupMemberList).Error
+	err := GroupMemberDB.Table("group_members").Where("group_id=? and role_level>?", groupID, constant.GroupOrdinaryUsers).Find(&groupMemberList).Error
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +179,7 @@ func GetOwnerManagerByGroupID(groupID string) ([]GroupMember, error) {
 
 func GetGroupMemberNumByGroupID(groupID string) (int64, error) {
 	var number int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupID).Count(&number).Error
+	err := GroupMemberDB.Table("group_members").Where("group_id=?", groupID).Count(&number).Error
 	if err != nil {
 		return 0, utils.Wrap(err, "")
 	}
@@ -209,12 +196,12 @@ func GetGroupOwnerInfoByGroupID(groupID string) (*GroupMember, error) {
 			return &v, nil
 		}
 	}
-	return nil, utils.Wrap(constant.ErrNoGroupOwner, "")
+	return nil, utils.Wrap(constant.ErrGroupNoOwner, "")
 }
 
 func IsExistGroupMember(groupID, userID string) bool {
 	var number int64
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id = ? and user_id = ?", groupID, userID).Count(&number).Error
+	err := GroupMemberDB.Table("group_members").Where("group_id = ? and user_id = ?", groupID, userID).Count(&number).Error
 	if err != nil {
 		return false
 	}
@@ -276,7 +263,7 @@ func IsGroupOwnerAdmin(groupID, UserID string) bool {
 
 func GetGroupMembersByGroupIdCMS(groupId string, userName string, showNumber, pageNumber int32) ([]GroupMember, error) {
 	var groupMembers []GroupMember
-	err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groupMembers).Error
+	err := GroupMemberDB.Table("group_members").Where("group_id=?", groupId).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&groupMembers).Error
 	if err != nil {
 		return nil, err
 	}
@@ -285,33 +272,12 @@ func GetGroupMembersByGroupIdCMS(groupId string, userName string, showNumber, pa
 
 func GetGroupMembersCount(groupID, userName string) (int64, error) {
 	var count int64
-	if err := db.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("group_id=?", groupID).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
+	if err := GroupMemberDB.Table("group_members").Where("group_id=?", groupID).Where(fmt.Sprintf(" nickname like '%%%s%%' ", userName)).Count(&count).Error; err != nil {
 		return count, err
 	}
 	return count, nil
 }
 
 func UpdateGroupMemberInfoDefaultZero(groupMemberInfo GroupMember, args map[string]interface{}) error {
-	return db.DB.MysqlDB.DefaultGormDB().Model(groupMemberInfo).Updates(args).Error
+	return GroupMemberDB.Model(groupMemberInfo).Updates(args).Error
 }
-
-//
-//func SelectGroupList(groupID string) ([]string, error) {
-//	var groupUserID string
-//	var groupList []string
-//	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
-//	if err != nil {
-//		return groupList, err
-//	}
-//
-//	rows, err := dbConn.Model(&GroupMember{}).Where("group_id = ?", groupID).Select("user_id").Rows()
-//	if err != nil {
-//		return groupList, err
-//	}
-//	defer rows.Close()
-//	for rows.Next() {
-//		rows.Scan(&groupUserID)
-//		groupList = append(groupList, groupUserID)
-//	}
-//	return groupList, nil
-//}
