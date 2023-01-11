@@ -33,6 +33,7 @@ func GinParseOperationID(c *gin.Context) {
 			}
 			c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))
 			operationID = req.OperationID
+			c.Request.Header.Set("operationID", operationID)
 		}
 		c.Set("operationID", operationID)
 		c.Next()
