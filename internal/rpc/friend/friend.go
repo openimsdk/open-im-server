@@ -4,7 +4,6 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
@@ -106,12 +105,12 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	if !ok {
 		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(ctx, constant.ErrNoPermission, "accress")}, nil
 	}
-	black := db.Black{OwnerUserID: req.CommID.FromUserID, BlockUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
+	black := imdb.Black{OwnerUserID: req.CommID.FromUserID, BlockUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
 	err := imdb.InsertInToUserBlackList(ctx, black)
 	if err != nil {
 		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(ctx, constant.ErrDatabase, err.Error())}, nil
 	}
-	etcdConn := getcdv3.GetConn(ctx, config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID, config.Config.Etcd.UserName, config.Config.Etcd.Password)
 	if etcdConn == nil {
 		return &pbFriend.AddBlacklistResp{CommonResp: constant.Error2CommResp(ctx, constant.ErrInternalServer, "conn is nil")}, nil
 	}
@@ -130,10 +129,10 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 
 func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq) (*pbFriend.AddFriendResp, error) {
 	log.NewInfo(req.CommID.OperationID, "AddFriend args ", req.String())
-	ok := token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID)
+	ok := token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID)
 	if !ok {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		return &pbFriend.AddFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
 	callbackResp := callbackBeforeAddFriend(req)
@@ -145,21 +144,21 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 			callbackResp.ErrCode = 201
 		}
 		log.NewDebug(req.CommID.OperationID, utils.GetSelfFuncName(), "callbackBeforeSendSingleMsg result", "end rpc and return", callbackResp)
-		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{
+		return &pbFriend.AddFriendResp{CommonResp: &sdkws.CommonResp{
 			ErrCode: int32(callbackResp.ErrCode),
 			ErrMsg:  callbackResp.ErrMsg,
 		}}, nil
 	}
 	var isSend = true
-	userIDList, err := rocksCache.GetFriendIDListFromCache(req.CommID.ToUserID)
+	userIDList, err := rocksCache.GetFriendIDListFromCache(ctx, req.CommID.ToUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetFriendIDListFromCache failed ", err.Error(), req.CommID.ToUserID)
-		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+		return &pbFriend.AddFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
 	}
-	userIDList2, err := rocksCache.GetFriendIDListFromCache(req.CommID.FromUserID)
+	userIDList2, err := rocksCache.GetFriendIDListFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetUserByUserID failed ", err.Error(), req.CommID.FromUserID)
-		return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
+		return &pbFriend.AddFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
 	}
 	log.NewDebug(req.CommID.OperationID, "toUserID", userIDList, "fromUserID", userIDList2)
 	for _, v := range userIDList {
@@ -179,9 +178,9 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	if isSend {
 		if _, err := imdb.GetUserByUserID(req.CommID.ToUserID); err != nil {
 			log.NewError(req.CommID.OperationID, "GetUserByUserID failed ", err.Error(), req.CommID.ToUserID)
-			return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+			return &pbFriend.AddFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
-		friendRequest := db.FriendRequest{
+		friendRequest := imdb.FriendRequest{
 			HandleResult: 0, ReqMsg: req.ReqMsg, CreateTime: time.Now()}
 		utils.CopyStructFields(&friendRequest, req.CommID)
 		// {openIM001 openIM002 0 test add friend 0001-01-01 00:00:00 +0000 UTC   0001-01-01 00:00:00 +0000 UTC }]
@@ -192,20 +191,20 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 				"handler_user_id": "", "handle_msg": "", "handle_time": utils.UnixSecondToTime(0), "ex": ""})
 		if err != nil {
 			log.NewError(req.CommID.OperationID, "UpdateFriendApplication failed ", err.Error(), friendRequest)
-			return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+			return &pbFriend.AddFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 		}
 
 		chat.FriendApplicationNotification(req)
 	}
 	//Establish a latest relationship in the friend request table
 
-	return &pbFriend.AddFriendResp{CommonResp: &pbFriend.CommonResp{}}, nil
+	return &pbFriend.AddFriendResp{CommonResp: &sdkws.CommonResp{}}, nil
 }
 
 func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.ImportFriendResp, error) {
 	log.NewInfo(req.OperationID, "ImportFriend args ", req.String())
-	resp := pbFriend.ImportFriendResp{CommonResp: &pbFriend.CommonResp{}}
-	var c pbFriend.CommonResp
+	resp := pbFriend.ImportFriendResp{CommonResp: &sdkws.CommonResp{}}
+	var c sdkws.CommonResp
 
 	if !utils.IsContain(req.OpUserID, config.Config.Manager.AppManagerUid) {
 		log.NewError(req.OperationID, "not authorized", req.OpUserID, config.Config.Manager.AppManagerUid)
@@ -236,14 +235,14 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		} else {
 			if _, err := imdb.GetFriendRelationshipFromFriend(req.FromUserID, v); err != nil {
 				//Establish two single friendship
-				toInsertFollow := db.Friend{OwnerUserID: req.FromUserID, FriendUserID: v}
+				toInsertFollow := imdb.Friend{OwnerUserID: req.FromUserID, FriendUserID: v}
 				err1 := imdb.InsertToFriend(&toInsertFollow)
 				if err1 != nil {
 					log.NewError(req.OperationID, "InsertToFriend failed ", err1.Error(), toInsertFollow)
 					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
 					continue
 				}
-				toInsertFollow = db.Friend{OwnerUserID: v, FriendUserID: req.FromUserID}
+				toInsertFollow = imdb.Friend{OwnerUserID: v, FriendUserID: req.FromUserID}
 				err2 := imdb.InsertToFriend(&toInsertFollow)
 				if err2 != nil {
 					log.NewError(req.OperationID, "InsertToFriend failed ", err2.Error(), toInsertFollow)
@@ -282,7 +281,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		resp.CommonResp.ErrMsg = cacheResp.CommonResp.ErrMsg
 		return &resp, nil
 	}
-	if err := rocksCache.DelAllFriendsInfoFromCache(req.FromUserID); err != nil {
+	if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.FromUserID); err != nil {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.FromUserID)
 	}
 
@@ -299,7 +298,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 				return &resp, nil
 			}
 		}
-		if err := rocksCache.DelAllFriendsInfoFromCache(userID); err != nil {
+		if err := rocksCache.DelAllFriendsInfoFromCache(ctx, userID); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userID)
 		}
 	}
@@ -309,12 +308,12 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	return &resp, nil
 }
 
-//process Friend application
+// process Friend application
 func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddFriendResponseReq) (*pbFriend.AddFriendResponseResp, error) {
 	log.NewInfo(req.CommID.OperationID, "AddFriendResponse args ", req.String())
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
 	//Check there application before agreeing or refuse to a friend's application
@@ -322,7 +321,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	friendRequest, err := imdb.GetFriendApplicationByBothUserID(req.CommID.ToUserID, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetFriendApplicationByBothUserID failed ", err.Error(), req.CommID.ToUserID, req.CommID.FromUserID)
-		return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	friendRequest.HandleResult = req.HandleResult
 	friendRequest.HandleTime = time.Now()
@@ -332,7 +331,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	err = imdb.UpdateFriendApplication(friendRequest)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "UpdateFriendApplication failed ", err.Error(), friendRequest)
-		return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
 	//Change the status of the friend request form
@@ -344,11 +343,11 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 			log.NewWarn(req.CommID.OperationID, "GetFriendRelationshipFromFriend exist", req.CommID.FromUserID, req.CommID.ToUserID)
 		} else {
 			//Establish two single friendship
-			toInsertFollow := db.Friend{OwnerUserID: req.CommID.FromUserID, FriendUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
+			toInsertFollow := imdb.Friend{OwnerUserID: req.CommID.FromUserID, FriendUserID: req.CommID.ToUserID, OperatorUserID: req.CommID.OpUserID}
 			err = imdb.InsertToFriend(&toInsertFollow)
 			if err != nil {
 				log.NewError(req.CommID.OperationID, "InsertToFriend failed ", err.Error(), toInsertFollow)
-				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+				return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
 			isInsert = 1
 		}
@@ -357,48 +356,48 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 		if err == nil {
 			log.NewWarn(req.CommID.OperationID, "GetFriendRelationshipFromFriend exist", req.CommID.ToUserID, req.CommID.FromUserID)
 		} else {
-			toInsertFollow := db.Friend{OwnerUserID: req.CommID.ToUserID, FriendUserID: req.CommID.FromUserID, OperatorUserID: req.CommID.OpUserID}
+			toInsertFollow := imdb.Friend{OwnerUserID: req.CommID.ToUserID, FriendUserID: req.CommID.FromUserID, OperatorUserID: req.CommID.OpUserID}
 			err = imdb.InsertToFriend(&toInsertFollow)
 			if err != nil {
 				log.NewError(req.CommID.OperationID, "InsertToFriend failed ", err.Error(), toInsertFollow)
-				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+				return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 			}
 			isInsert = 1
 		}
 		// cache rpc
 		if isInsert == 1 {
 			delFriendIDListFromCacheReq := &pbCache.DelFriendIDListFromCacheReq{OperationID: req.CommID.OperationID}
-			etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+			etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID, config.Config.Etcd.UserName, config.Config.Etcd.Password)
 			if etcdConn == nil {
 				errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 				log.NewError(req.CommID.OperationID, errMsg)
-				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
+				return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
 			}
 			client := pbCache.NewCacheClient(etcdConn)
 			delFriendIDListFromCacheReq.UserID = req.CommID.ToUserID
 			respPb, err := client.DelFriendIDListFromCache(context.Background(), delFriendIDListFromCacheReq)
 			if err != nil {
 				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "DelFriendIDListFromCache failed", err.Error())
-				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: constant.ErrServer.ErrMsg}}, nil
+				return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: constant.ErrServer.ErrMsg}}, nil
 			}
 			if respPb.CommonResp.ErrCode != 0 {
 				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "DelFriendIDListFromCache failed", respPb.CommonResp.String())
-				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: respPb.CommonResp.ErrCode, ErrMsg: respPb.CommonResp.ErrMsg}}, nil
+				return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: respPb.CommonResp.ErrCode, ErrMsg: respPb.CommonResp.ErrMsg}}, nil
 			}
 			delFriendIDListFromCacheReq.UserID = req.CommID.FromUserID
 			respPb, err = client.DelFriendIDListFromCache(context.Background(), delFriendIDListFromCacheReq)
 			if err != nil {
 				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "DelFriendIDListFromCache failed", err.Error())
-				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: constant.ErrServer.ErrMsg}}, nil
+				return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: constant.ErrServer.ErrMsg}}, nil
 			}
 			if respPb.CommonResp.ErrCode != 0 {
 				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "DelFriendIDListFromCache failed", respPb.CommonResp.String())
-				return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{ErrCode: respPb.CommonResp.ErrCode, ErrMsg: respPb.CommonResp.ErrMsg}}, nil
+				return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{ErrCode: respPb.CommonResp.ErrCode, ErrMsg: respPb.CommonResp.ErrMsg}}, nil
 			}
-			if err := rocksCache.DelAllFriendsInfoFromCache(req.CommID.ToUserID); err != nil {
+			if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.CommID.ToUserID); err != nil {
 				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.ToUserID)
 			}
-			if err := rocksCache.DelAllFriendsInfoFromCache(req.CommID.FromUserID); err != nil {
+			if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.CommID.FromUserID); err != nil {
 				log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
 			}
 			chat.FriendAddedNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID)
@@ -414,20 +413,20 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	}
 
 	log.NewInfo(req.CommID.OperationID, "rpc AddFriendResponse ok")
-	return &pbFriend.AddFriendResponseResp{CommonResp: &pbFriend.CommonResp{}}, nil
+	return &pbFriend.AddFriendResponseResp{CommonResp: &sdkws.CommonResp{}}, nil
 }
 
 func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFriendReq) (*pbFriend.DeleteFriendResp, error) {
 	log.NewInfo(req.CommID.OperationID, "DeleteFriend args ", req.String())
 	//Parse token, to find current user information
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		return &pbFriend.DeleteFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	err := imdb.DeleteSingleFriendInfo(req.CommID.FromUserID, req.CommID.ToUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "DeleteSingleFriendInfo failed", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
-		return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		return &pbFriend.DeleteFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	log.NewInfo(req.CommID.OperationID, "DeleteFriend rpc ok")
 
@@ -435,37 +434,37 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 	if etcdConn == nil {
 		errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.CommID.OperationID, errMsg)
-		return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
+		return &pbFriend.DeleteFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
 	}
 	client := pbCache.NewCacheClient(etcdConn)
 	respPb, err := client.DelFriendIDListFromCache(context.Background(), &pbCache.DelFriendIDListFromCacheReq{OperationID: req.CommID.OperationID, UserID: req.CommID.FromUserID})
 	if err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "DelFriendIDListFromCache rpc failed", err.Error())
-		return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: constant.ErrServer.ErrMsg}}, nil
+		return &pbFriend.DeleteFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrServer.ErrCode, ErrMsg: constant.ErrServer.ErrMsg}}, nil
 	}
 	if respPb.CommonResp.ErrCode != 0 {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "DelFriendIDListFromCache failed", respPb.CommonResp.String())
-		return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{ErrCode: respPb.CommonResp.ErrCode, ErrMsg: respPb.CommonResp.ErrMsg}}, nil
+		return &pbFriend.DeleteFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: respPb.CommonResp.ErrCode, ErrMsg: respPb.CommonResp.ErrMsg}}, nil
 	}
-	if err := rocksCache.DelAllFriendsInfoFromCache(req.CommID.FromUserID); err != nil {
+	if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.CommID.FromUserID); err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
 	}
-	if err := rocksCache.DelAllFriendsInfoFromCache(req.CommID.ToUserID); err != nil {
+	if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.CommID.ToUserID); err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
 	}
 	chat.FriendDeletedNotification(req)
-	return &pbFriend.DeleteFriendResp{CommonResp: &pbFriend.CommonResp{}}, nil
+	return &pbFriend.DeleteFriendResp{CommonResp: &sdkws.CommonResp{}}, nil
 }
 
 func (s *friendServer) GetBlacklist(ctx context.Context, req *pbFriend.GetBlacklistReq) (*pbFriend.GetBlacklistResp, error) {
 	log.NewInfo(req.CommID.OperationID, "GetBlacklist args ", req.String())
 
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
 		return &pbFriend.GetBlacklistResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
 
-	blackIDList, err := rocksCache.GetBlackListFromCache(req.CommID.FromUserID)
+	blackIDList, err := rocksCache.GetBlackListFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetBlackListByUID failed ", err.Error(), req.CommID.FromUserID)
 		return &pbFriend.GetBlacklistResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
@@ -475,7 +474,7 @@ func (s *friendServer) GetBlacklist(ctx context.Context, req *pbFriend.GetBlackl
 		userInfoList []*sdkws.PublicUserInfo
 	)
 	for _, userID := range blackIDList {
-		user, err := rocksCache.GetUserInfoFromCache(userID)
+		user, err := rocksCache.GetUserInfoFromCache(ctx, userID)
 		if err != nil {
 			log.NewError(req.CommID.OperationID, "GetUserByUserID failed ", err.Error(), userID)
 			continue
@@ -491,69 +490,69 @@ func (s *friendServer) GetBlacklist(ctx context.Context, req *pbFriend.GetBlackl
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFriendRemarkReq) (*pbFriend.SetFriendRemarkResp, error) {
 	log.NewInfo(req.CommID.OperationID, "SetFriendComment args ", req.String())
 	//Parse token, to find current user information
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.SetFriendRemarkResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		return &pbFriend.SetFriendRemarkResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
 	err := imdb.UpdateFriendComment(req.CommID.FromUserID, req.CommID.ToUserID, req.Remark)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "UpdateFriendComment failed ", req.CommID.FromUserID, req.CommID.ToUserID, req.Remark, err.Error())
-		return &pbFriend.SetFriendRemarkResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		return &pbFriend.SetFriendRemarkResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc SetFriendComment ok")
-	err = rocksCache.DelAllFriendsInfoFromCache(req.CommID.FromUserID)
+	err = rocksCache.DelAllFriendsInfoFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "DelAllFriendInfoFromCache failed ", req.CommID.FromUserID, err.Error())
-		return &pbFriend.SetFriendRemarkResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		return &pbFriend.SetFriendRemarkResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 	chat.FriendRemarkSetNotification(req.CommID.OperationID, req.CommID.OpUserID, req.CommID.FromUserID, req.CommID.ToUserID)
-	return &pbFriend.SetFriendRemarkResp{CommonResp: &pbFriend.CommonResp{}}, nil
+	return &pbFriend.SetFriendRemarkResp{CommonResp: &sdkws.CommonResp{}}, nil
 }
 
 func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.RemoveBlacklistReq) (*pbFriend.RemoveBlacklistResp, error) {
 	log.NewInfo(req.CommID.OperationID, "RemoveBlacklist args ", req.String())
 	//Parse token, to find current user information
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		return &pbFriend.RemoveBlacklistResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	err := imdb.RemoveBlackList(req.CommID.FromUserID, req.CommID.ToUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "RemoveBlackList failed", err.Error(), req.CommID.FromUserID, req.CommID.ToUserID)
-		return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+		return &pbFriend.RemoveBlacklistResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 
 	}
 	log.NewInfo(req.CommID.OperationID, "rpc RemoveBlacklist ok ")
 
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID, config.Config.Etcd.UserName, config.Config.Etcd.Password)
 	if etcdConn == nil {
 		errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.CommID.OperationID, errMsg)
-		return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
+		return &pbFriend.RemoveBlacklistResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
 	}
 
 	cacheClient := pbCache.NewCacheClient(etcdConn)
 	cacheResp, err := cacheClient.DelBlackIDListFromCache(context.Background(), &pbCache.DelBlackIDListFromCacheReq{UserID: req.CommID.FromUserID, OperationID: req.CommID.OperationID})
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "DelBlackIDListFromCache rpc call failed ", err.Error())
-		return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: 500, ErrMsg: "ReduceBlackUserFromCache rpc call failed"}}, nil
+		return &pbFriend.RemoveBlacklistResp{CommonResp: &sdkws.CommonResp{ErrCode: 500, ErrMsg: "ReduceBlackUserFromCache rpc call failed"}}, nil
 	}
 	if cacheResp.CommonResp.ErrCode != 0 {
 		log.NewError(req.CommID.OperationID, "DelBlackIDListFromCache rpc logic call failed ", cacheResp.CommonResp.String())
-		return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}, nil
+		return &pbFriend.RemoveBlacklistResp{CommonResp: &sdkws.CommonResp{ErrCode: cacheResp.CommonResp.ErrCode, ErrMsg: cacheResp.CommonResp.ErrMsg}}, nil
 	}
 	chat.BlackDeletedNotification(req)
-	return &pbFriend.RemoveBlacklistResp{CommonResp: &pbFriend.CommonResp{}}, nil
+	return &pbFriend.RemoveBlacklistResp{CommonResp: &sdkws.CommonResp{}}, nil
 }
 
 func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlackListReq) (*pbFriend.IsInBlackListResp, error) {
 	log.NewInfo("IsInBlackList args ", req.String())
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
 		return &pbFriend.IsInBlackListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
-	blackIDList, err := rocksCache.GetBlackListFromCache(req.CommID.FromUserID)
+	blackIDList, err := rocksCache.GetBlackListFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
 		return &pbFriend.IsInBlackListResp{ErrMsg: err.Error(), ErrCode: constant.ErrDB.ErrCode}, nil
@@ -568,11 +567,11 @@ func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlac
 
 func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) (*pbFriend.IsFriendResp, error) {
 	log.NewInfo(req.CommID.OperationID, req.String())
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
 		return &pbFriend.IsFriendResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
-	friendIDList, err := rocksCache.GetFriendIDListFromCache(req.CommID.FromUserID)
+	friendIDList, err := rocksCache.GetFriendIDListFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
 		return &pbFriend.IsFriendResp{ErrMsg: err.Error(), ErrCode: constant.ErrDB.ErrCode}, nil
@@ -587,11 +586,11 @@ func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) 
 
 func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFriendListReq) (*pbFriend.GetFriendListResp, error) {
 	log.NewInfo("GetFriendList args ", req.String())
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
 		return &pbFriend.GetFriendListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
-	friendList, err := rocksCache.GetAllFriendsInfoFromCache(req.CommID.FromUserID)
+	friendList, err := rocksCache.GetAllFriendsInfoFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "GetFriendIDListFromCache failed", err.Error(), req.CommID.FromUserID)
 		return &pbFriend.GetFriendListResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
@@ -608,11 +607,11 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 	return &pbFriend.GetFriendListResp{FriendInfoList: userInfoList}, nil
 }
 
-//received
+// received
 func (s *friendServer) GetFriendApplyList(ctx context.Context, req *pbFriend.GetFriendApplyListReq) (*pbFriend.GetFriendApplyListResp, error) {
 	log.NewInfo(req.CommID.OperationID, "GetFriendApplyList args ", req.String())
 	//Parse token, to find current user information
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
 		return &pbFriend.GetFriendApplyListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
@@ -656,7 +655,7 @@ func (s *friendServer) GetSelfApplyList(ctx context.Context, req *pbFriend.GetSe
 	log.NewInfo(req.CommID.OperationID, "GetSelfApplyList args ", req.String())
 
 	//Parse token, to find current user information
-	if !token_verify.CheckAccess(req.CommID.OpUserID, req.CommID.FromUserID) {
+	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
 		return &pbFriend.GetSelfApplyListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
 	}
