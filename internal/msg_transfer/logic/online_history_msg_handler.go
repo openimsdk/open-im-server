@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/db"
 	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/getcdv3"
 	pbMsg "Open_IM/pkg/proto/msg"
 	pbPush "Open_IM/pkg/proto/push"
 	"Open_IM/pkg/utils"

@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/getcdv3"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"bytes"
@@ -422,19 +422,19 @@ func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
 	return nil
 }
 
-//func (ws *WServer) getUserUid(conn *UserConn) (uid string, platform int) {
-//	rwLock.RLock()
-//	defer rwLock.RUnlock()
+//	func (ws *WServer) getUserUid(conn *UserConn) (uid string, platform int) {
+//		rwLock.RLock()
+//		defer rwLock.RUnlock()
 //
-//	if stringMap, ok := ws.wsConnToUser[conn]; ok {
-//		for k, v := range stringMap {
-//			platform = k
-//			uid = v
+//		if stringMap, ok := ws.wsConnToUser[conn]; ok {
+//			for k, v := range stringMap {
+//				platform = k
+//				uid = v
+//			}
+//			return uid, platform
 //		}
-//		return uid, platform
+//		return "", 0
 //	}
-//	return "", 0
-//}
 func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) (isPass, compression bool) {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()

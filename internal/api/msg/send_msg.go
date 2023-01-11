@@ -7,7 +7,7 @@ import (
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"context"
 
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/getcdv3"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"

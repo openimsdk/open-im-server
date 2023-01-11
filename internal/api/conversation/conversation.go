@@ -4,7 +4,7 @@ import (
 	api "Open_IM/pkg/base_info"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/getcdv3"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
@@ -312,17 +312,17 @@ func SetRecvMsgOpt(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-//Deprecated
+// Deprecated
 func SetReceiveMessageOpt(c *gin.Context) {
 
 }
 
-//Deprecated
+// Deprecated
 func GetReceiveMessageOpt(c *gin.Context) {
 
 }
 
-//Deprecated
+// Deprecated
 func GetAllConversationMessageOpt(c *gin.Context) {
 
 }

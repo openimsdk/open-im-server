@@ -4,7 +4,7 @@ import (
 	"Open_IM/pkg/cms_api_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/getcdv3"
 	pbAdminCms "Open_IM/pkg/proto/admin_cms"
 	commonPb "Open_IM/pkg/proto/sdk_ws"
 	pb "Open_IM/pkg/proto/user"

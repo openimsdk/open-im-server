@@ -6,7 +6,7 @@ import (
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
+	"Open_IM/pkg/getcdv3"
 	pbAuth "Open_IM/pkg/proto/auth"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
