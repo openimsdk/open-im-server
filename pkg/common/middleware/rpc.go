@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
@@ -12,15 +11,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 	"path"
-	"runtime/debug"
 )
 
 func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.NewError("", info.FullMethod, "panic", r, "stack", string(debug.Stack()))
-		}
-	}()
 	funcName := path.Base(info.FullMethod)
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
