@@ -1260,6 +1260,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 		req  api.GetGroupAbstractInfoReq
 		resp api.GetGroupAbstractInfoResp
 	)
+	nCtx := trace_log.NewCtx(c, utils.GetSelfFuncName())
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError("0", "BindJSON failed ", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -1289,8 +1290,9 @@ func GetGroupAbstractInfo(c *gin.Context) {
 	})
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", respPb.String())
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		//log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
+		//c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+		trace_log.WriteErrorResponse(nCtx, "GetGroupAbstractInfo", utils.Wrap(err, ""))
 		return
 	}
 	resp.ErrMsg = respPb.CommonResp.ErrMsg
