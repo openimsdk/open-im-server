@@ -62,9 +62,9 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 }
 
 func RpcClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
-	if cc == nil {
-		return utils.Wrap(constant.ErrRpcConn, "")
-	}
+	//if cc == nil {
+	//	return utils.Wrap(constant.ErrRpcConn, "")
+	//}
 	operationID, ok := ctx.Value("operationID").(string)
 	if !ok {
 		return utils.Wrap(constant.ErrArgs, "ctx missing operationID")
