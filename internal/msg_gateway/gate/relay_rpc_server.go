@@ -376,7 +376,7 @@ func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOffl
 		oldConnMap := ws.getUserAllCons(v)
 		if conn, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
 			log.NewWarn(req.OperationID, "send kick msg, close connection ", req.PlatformID, v)
-			ws.sendKickMsg(conn)
+			ws.sendKickMsg(conn, req.OperationID)
 			conn.Close()
 		}
 	}
