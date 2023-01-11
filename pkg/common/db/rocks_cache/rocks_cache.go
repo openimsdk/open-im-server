@@ -367,7 +367,7 @@ func GetGroupInfoFromCache(ctx context.Context, groupID string) (groupInfo *imdb
 		return string(bytes), nil
 	}
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupInfo", *groupInfo)
+		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupInfo", groupInfo)
 	}()
 	groupInfoStr, err := db.DB.Rc.Fetch(groupInfoCache+groupID, time.Second*30*60, getGroupInfo)
 	if err != nil {
