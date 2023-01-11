@@ -259,7 +259,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		}
 	}
 
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.OperationID, config.Config.Etcd.UserName, config.Config.Etcd.Password))
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
@@ -430,7 +430,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 	}
 	log.NewInfo(req.CommID.OperationID, "DeleteFriend rpc ok")
 
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID)
+	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImCacheName, req.CommID.OperationID,config.Config.Etcd.UserName, config.Config.Etcd.Password)
 	if etcdConn == nil {
 		errMsg := req.CommID.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.CommID.OperationID, errMsg)
@@ -461,13 +461,13 @@ func (s *friendServer) GetBlacklist(ctx context.Context, req *pbFriend.GetBlackl
 
 	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.GetBlacklistResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &pbFriend.GetBlacklistResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 
 	blackIDList, err := rocksCache.GetBlackListFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetBlackListByUID failed ", err.Error(), req.CommID.FromUserID)
-		return &pbFriend.GetBlacklistResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		return &pbFriend.GetBlacklistResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
 	var (
@@ -550,12 +550,12 @@ func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlac
 	log.NewInfo("IsInBlackList args ", req.String())
 	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.IsInBlackListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &pbFriend.IsInBlackListResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	blackIDList, err := rocksCache.GetBlackListFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
-		return &pbFriend.IsInBlackListResp{ErrMsg: err.Error(), ErrCode: constant.ErrDB.ErrCode}, nil
+		return &pbFriend.IsInBlackListResp{CommonResp: &sdkws.CommonResp{ErrMsg: err.Error(), ErrCode: constant.ErrDB.ErrCode}}, nil
 	}
 	var isInBlacklist bool
 	if utils.IsContain(req.CommID.ToUserID, blackIDList) {
@@ -569,12 +569,12 @@ func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) 
 	log.NewInfo(req.CommID.OperationID, req.String())
 	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.IsFriendResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &pbFriend.IsFriendResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	friendIDList, err := rocksCache.GetFriendIDListFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), err.Error(), req.CommID.FromUserID)
-		return &pbFriend.IsFriendResp{ErrMsg: err.Error(), ErrCode: constant.ErrDB.ErrCode}, nil
+		return &pbFriend.IsFriendResp{CommonResp: &sdkws.CommonResp{ErrMsg: err.Error(), ErrCode: constant.ErrDB.ErrCode}}, nil
 	}
 	var isFriend bool
 	if utils.IsContain(req.CommID.ToUserID, friendIDList) {
@@ -588,12 +588,12 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 	log.NewInfo("GetFriendList args ", req.String())
 	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.GetFriendListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &pbFriend.GetFriendListResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	friendList, err := rocksCache.GetAllFriendsInfoFromCache(ctx, req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, utils.GetSelfFuncName(), "GetFriendIDListFromCache failed", err.Error(), req.CommID.FromUserID)
-		return &pbFriend.GetFriendListResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		return &pbFriend.GetFriendListResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
 	var userInfoList []*sdkws.FriendInfo
@@ -613,13 +613,13 @@ func (s *friendServer) GetFriendApplyList(ctx context.Context, req *pbFriend.Get
 	//Parse token, to find current user information
 	if !token_verify.CheckAccess(ctx, req.CommID.OpUserID, req.CommID.FromUserID) {
 		log.NewError(req.CommID.OperationID, "CheckAccess false ", req.CommID.OpUserID, req.CommID.FromUserID)
-		return &pbFriend.GetFriendApplyListResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}, nil
+		return &pbFriend.GetFriendApplyListResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
 	}
 	//	Find the  current user friend applications received
 	ApplyUsersInfo, err := imdb.GetReceivedFriendsApplicationListByUserID(req.CommID.FromUserID)
 	if err != nil {
 		log.NewError(req.CommID.OperationID, "GetReceivedFriendsApplicationListByUserID ", err.Error(), req.CommID.FromUserID)
-		return &pbFriend.GetFriendApplyListResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}, nil
+		return &pbFriend.GetFriendApplyListResp{CommonResp: &sdkws.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
 	}
 
 	var appleUserList []*sdkws.FriendRequest
