@@ -223,7 +223,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 }
 
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
-	resp := &pbGroup.GetJoinedGroupListResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetJoinedGroupListResp{}
 
 	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.FromUserID); err != nil {
 		return nil, err
@@ -271,7 +271,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 }
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.InviteUserToGroupReq) (*pbGroup.InviteUserToGroupResp, error) {
-	resp := &pbGroup.InviteUserToGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.InviteUserToGroupResp{}
 
 	if !imdb.IsExistGroupMember(req.GroupID, req.OpUserID) && !token_verify.IsManagerUserID(req.OpUserID) {
 		constant.SetErrorForResp(constant.ErrIdentity, resp.CommonResp)
@@ -386,7 +386,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 }
 
 func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGroupAllMemberReq) (*pbGroup.GetGroupAllMemberResp, error) {
-	resp := &pbGroup.GetGroupAllMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetGroupAllMemberResp{}
 
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
 	if err != nil {
@@ -407,7 +407,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 }
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (*pbGroup.GetGroupMemberListResp, error) {
-	resp := &pbGroup.GetGroupMemberListResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetGroupMemberListResp{}
 
 	memberList, err := imdb.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
 	if err != nil {
@@ -449,7 +449,7 @@ func (s *groupServer) getGroupUserLevel(groupID, userID string) (int, error) {
 }
 
 func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (*pbGroup.KickGroupMemberResp, error) {
-	resp := &pbGroup.KickGroupMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.KickGroupMemberResp{}
 
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
 	if err != nil {
@@ -563,7 +563,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 }
 
 func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (*pbGroup.GetGroupMembersInfoResp, error) {
-	resp := &pbGroup.GetGroupMembersInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetGroupMembersInfoResp{}
 	resp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
 	for _, userID := range req.MemberList {
 		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, userID)
@@ -602,7 +602,7 @@ func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sd
 }
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
-	resp := &pbGroup.GetGroupApplicationListResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetGroupApplicationListResp{}
 	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
 	if err != nil {
 		return nil, err
@@ -635,7 +635,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 }
 
 func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (*pbGroup.GetGroupsInfoResp, error) {
-	resp := &pbGroup.GetGroupsInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetGroupsInfoResp{}
 	groupsInfoList := make([]*open_im_sdk.GroupInfo, 0)
 	for _, groupID := range req.GroupIDList {
 		groupInfoFromRedis, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
@@ -663,7 +663,7 @@ func CheckPermission(ctx context.Context, groupID string, userID string) (err er
 }
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
-	resp := &pbGroup.GroupApplicationResponseResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GroupApplicationResponseResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -741,7 +741,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 }
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
-	resp := &pbGroup.JoinGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.JoinGroupResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -823,7 +823,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 }
 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) (*pbGroup.QuitGroupResp, error) {
-	resp := &pbGroup.QuitGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.QuitGroupResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -879,7 +879,7 @@ func hasAccess(req *pbGroup.SetGroupInfoReq) bool {
 }
 
 func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInfoReq) (*pbGroup.SetGroupInfoResp, error) {
-	resp := &pbGroup.SetGroupInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.SetGroupInfoResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -998,7 +998,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 }
 
 func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.TransferGroupOwnerReq) (*pbGroup.TransferGroupOwnerResp, error) {
-	resp := &pbGroup.TransferGroupOwnerResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.TransferGroupOwnerResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -1041,7 +1041,6 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 
 func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) (*pbGroup.GetGroupsResp, error) {
 	resp := &pbGroup.GetGroupsResp{
-		CommonResp: &open_im_sdk.CommonResp{},
 		Groups:     []*pbGroup.CMSGroup{},
 		Pagination: &open_im_sdk.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber},
 	}
@@ -1096,7 +1095,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 }
 
 func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGroupMembersCMSReq) (*pbGroup.GetGroupMembersCMSResp, error) {
-	resp := &pbGroup.GetGroupMembersCMSResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetGroupMembersCMSResp{}
 	groupMembers, err := imdb.GetGroupMembersByGroupIdCMS(req.GroupID, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		return nil, err
@@ -1122,7 +1121,7 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 }
 
 func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGroup.GetUserReqApplicationListReq) (*pbGroup.GetUserReqApplicationListResp, error) {
-	resp := &pbGroup.GetUserReqApplicationListResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetUserReqApplicationListResp{}
 	groupRequests, err := imdb.GetUserReqGroupByUserID(req.UserID)
 	if err != nil {
 		return nil, err
@@ -1148,7 +1147,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 }
 
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
-	resp := &pbGroup.DismissGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.DismissGroupResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -1209,7 +1208,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 }
 
 func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (*pbGroup.MuteGroupMemberResp, error) {
-	resp := &pbGroup.MuteGroupMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.MuteGroupMemberResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -1248,7 +1247,7 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 }
 
 func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (*pbGroup.CancelMuteGroupMemberResp, error) {
-	resp := &pbGroup.CancelMuteGroupMemberResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.CancelMuteGroupMemberResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -1288,7 +1287,7 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 }
 
 func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) (*pbGroup.MuteGroupResp, error) {
-	resp := &pbGroup.MuteGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.MuteGroupResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -1332,7 +1331,7 @@ func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) 
 }
 
 func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMuteGroupReq) (*pbGroup.CancelMuteGroupResp, error) {
-	resp := &pbGroup.CancelMuteGroupResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.CancelMuteGroupResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -1371,7 +1370,7 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 }
 
 func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.SetGroupMemberNicknameReq) (*pbGroup.SetGroupMemberNicknameResp, error) {
-	resp := &pbGroup.SetGroupMemberNicknameResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.SetGroupMemberNicknameResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -1416,7 +1415,7 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 }
 
 func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (*pbGroup.SetGroupMemberInfoResp, error) {
-	resp := &pbGroup.SetGroupMemberInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.SetGroupMemberInfoResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
@@ -1466,7 +1465,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 }
 
 func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
-	resp := &pbGroup.GetGroupAbstractInfoResp{CommonResp: &open_im_sdk.CommonResp{}}
+	resp := &pbGroup.GetGroupAbstractInfoResp{}
 	ctx = trace_log.NewRpcCtx(ctx, utils.GetSelfFuncName(), req.OperationID)
 	defer func() {
 		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), nil, "rpc req ", req.String(), "rpc resp ", resp.String())
