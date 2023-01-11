@@ -11,7 +11,7 @@ import (
 )
 
 func GetDefaultConn(arg1, arg2, arg3, arg4 string) *grpc.ClientConn {
-	return nil
+	return getcdv3.GetConn(arg1, arg2, arg3, arg4, config.Config.Etcd.UserName, config.Config.Etcd.Password)
 }
 
 func GetConn(ctx context.Context, serviceName string) (conn *grpc.ClientConn, err error) {
