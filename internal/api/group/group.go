@@ -12,6 +12,7 @@ import (
 	rpc "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
 	"context"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
@@ -1280,7 +1281,8 @@ func GetGroupAbstractInfo(c *gin.Context) {
 		return
 	}
 	client := rpc.NewGroupClient(etcdConn)
-	respPb, err := client.GetGroupAbstractInfo(context.Background(), &rpc.GetGroupAbstractInfoReq{
+	md := metadata.Pairs("operationID", req.OperationID, "opUserID", opUserID)
+	respPb, err := client.GetGroupAbstractInfo(metadata.NewOutgoingContext(c, md), &rpc.GetGroupAbstractInfoReq{
 		GroupID:     req.GroupID,
 		OpUserID:    opUserID,
 		OperationID: req.OperationID,
