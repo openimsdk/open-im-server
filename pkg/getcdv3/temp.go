@@ -8,7 +8,6 @@ import (
 	"github.com/OpenIMSDK/getcdv3"
 	"google.golang.org/grpc"
 	"strings"
-	"sync"
 )
 
 func GetDefaultConn(arg1, arg2, arg3, arg4 string) *grpc.ClientConn {
@@ -34,8 +33,3 @@ func GetDefaultGatewayConn4Unique(schema, addr, operationID string) []*grpc.Clie
 func RegisterEtcd(schema, etcdAddr, myHost string, myPort int, serviceName string, ttl int, operationID string) error {
 	return getcdv3.RegisterEtcd(schema, etcdAddr, myHost, myPort, serviceName, ttl, operationID)
 }
-
-var Conn4UniqueList []*grpc.ClientConn
-var Conn4UniqueListMtx sync.RWMutex
-var IsUpdateStart bool
-var IsUpdateStartMtx sync.RWMutex

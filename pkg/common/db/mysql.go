@@ -143,6 +143,20 @@ func initMysqlDB() {
 	if !db.Migrator().HasTable(&im_mysql_model.UserIpRecord{}) {
 		db.Migrator().CreateTable(&im_mysql_model.UserIpRecord{})
 	}
+
+	im_mysql_model.GroupDB = db.Table("groups")
+	im_mysql_model.GroupMemberDB = db.Table("group_members")
+	im_mysql_model.UserDB = db.Table("users")
+	im_mysql_model.ChatLogDB = db.Table("chat_logs")
+	im_mysql_model.BlackListDB = db.Table("black_lists")
+	im_mysql_model.BlackDB = db.Table("blacks")
+	im_mysql_model.AppDB = db.Table("app_version")
+	im_mysql_model.BlackDB = db.Table("blacks")
+	im_mysql_model.ConversationDB = db.Table("conversations")
+	im_mysql_model.FriendDB = db.Table("friends")
+	im_mysql_model.FriendRequestDB = db.Table("friend_requests")
+	im_mysql_model.GroupRequestDB = db.Table("group_requests")
+	im_mysql_model.AppDB = db.Table("app_db")
 	DB.MysqlDB.db = db
 }
 
