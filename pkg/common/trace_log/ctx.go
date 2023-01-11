@@ -164,5 +164,6 @@ func argsHandle(args []interface{}, fields map[string]interface{}) {
 }
 
 func GetApiErr(errCode int32, errMsg string) constant.ErrInfo {
+
 	return constant.ErrInfo{ErrCode: errCode, ErrMsg: errMsg}
 }
