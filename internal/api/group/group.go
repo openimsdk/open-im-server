@@ -8,11 +8,10 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/group"
-	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/OpenIMSDK/getcdv3"
 
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
@@ -64,7 +63,7 @@ func KickGroupMember(c *gin.Context) {
 
 	log.NewInfo(req.OperationID, "KickGroupMember args ", req.String())
 
-	etcdConn := getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
@@ -80,8 +79,8 @@ func KickGroupMember(c *gin.Context) {
 	}
 
 	var memberListResp api.KickGroupMemberResp
-	memberListResp.ErrMsg = RpcResp.ErrMsg
-	memberListResp.ErrCode = RpcResp.ErrCode
+	memberListResp.ErrMsg = RpcResp.CommonResp.ErrMsg
+	memberListResp.ErrCode = RpcResp.CommonResp.ErrCode
 	for _, v := range RpcResp.Id2ResultList {
 		memberListResp.UserIDResultList = append(memberListResp.UserIDResultList, &api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
@@ -143,7 +142,7 @@ func GetGroupMembersInfo(c *gin.Context) {
 		return
 	}
 
-	memberListResp := api.GetGroupMembersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
+	memberListResp := api.GetGroupMembersInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, MemberList: RpcResp.MemberList}
 	memberListResp.Data = jsonData.JsonDataList(RpcResp.MemberList)
 	log.NewInfo(req.OperationID, "GetGroupMembersInfo api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
@@ -187,7 +186,7 @@ func GetGroupMemberList(c *gin.Context) {
 		return
 	}
 
-	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
+	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, MemberList: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
 	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
 
 	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
@@ -244,7 +243,7 @@ func GetGroupAllMemberList(c *gin.Context) {
 		return
 	}
 
-	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, MemberList: RpcResp.MemberList}
+	memberListResp := api.GetGroupAllMemberResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, MemberList: RpcResp.MemberList}
 	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
 	log.NewInfo(req.OperationID, "GetGroupAllMember api return ", len(memberListResp.MemberList))
 	c.JSON(http.StatusOK, memberListResp)
@@ -299,7 +298,7 @@ func GetJoinedGroupList(c *gin.Context) {
 		return
 	}
 
-	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
+	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
 	GroupListResp.Data = jsonData.JsonDataList(GroupListResp.GroupInfoList)
 	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
 	c.JSON(http.StatusOK, GroupListResp)
@@ -360,7 +359,7 @@ func InviteUserToGroup(c *gin.Context) {
 		return
 	}
 
-	resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}}
+	resp := api.InviteUserToGroupResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}}
 	for _, v := range RpcResp.Id2ResultList {
 		resp.UserIDResultList = append(resp.UserIDResultList, &api.UserIDResult{UserID: v.UserID, Result: v.Result})
 	}
@@ -497,7 +496,7 @@ func GetRecvGroupApplicationList(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: reply.ErrCode, ErrMsg: reply.ErrMsg}, GroupRequestList: reply.GroupRequestList}
+	resp := api.GetGroupApplicationListResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}, GroupRequestList: reply.GroupRequestList}
 	resp.Data = jsonData.JsonDataList(resp.GroupRequestList)
 	log.NewInfo(req.OperationID, "GetGroupApplicationList api return ", resp)
 	c.JSON(http.StatusOK, resp)
@@ -568,7 +567,7 @@ func GetGroupsInfo(c *gin.Context) {
 		return
 	}
 
-	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.ErrCode, ErrMsg: RpcResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
+	resp := api.GetGroupInfoResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupInfoList: RpcResp.GroupInfoList}
 	resp.Data = jsonData.JsonDataList(resp.GroupInfoList)
 	log.NewInfo(req.OperationID, "GetGroupsInfo api return ", resp)
 	c.JSON(http.StatusOK, resp)
@@ -1010,18 +1009,14 @@ func CancelMuteGroupMember(c *gin.Context) {
 	req := &rpc.CancelMuteGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
 
-	var err error
-	if err, req.OpUserID, _ = token_verify.ParseUserIDFromToken(c.Request.Header.Get("token"), req.OperationID); err != nil {
-		trace_log.WriteErrorResponse(nCtx, "ParseUserIDFromToken", err)
-		return
-	}
+	//var err error
+	//if err, req.OpUserID, _ = token_verify.ParseUserIDFromToken(c.Request.Header.Get("token"), req.OperationID); err != nil {
+	//	trace_log.WriteErrorResponse(nCtx, "ParseUserIDFromToken", err)
+	//	return
+	//}
 	trace_log.SetContextInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
 
-	etcdConn, err := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
-	if err != nil {
-		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
-		return
-	}
+	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.CancelMuteGroupMember(nCtx, req)

@@ -7,9 +7,9 @@ import (
 	"Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	"Open_IM/pkg/utils"
+	"github.com/OpenIMSDK/getcdv3"
 	"net"
 	"strconv"
 	"strings"
@@ -124,7 +124,7 @@ func (rpc *rpcChat) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10, "")
 	if err != nil {
 		log.Error("", "register rpcChat to etcd failed ", err.Error())
 		panic(utils.Wrap(err, "register chat module  rpc to etcd err"))

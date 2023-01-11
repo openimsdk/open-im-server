@@ -69,15 +69,14 @@ func initMysqlDB() {
 	sqlDB.SetMaxIdleConns(config.Config.Mysql.DBMaxIdleConns)
 
 	db.AutoMigrate(
-		&im_mysql_model.Register{},
 		&im_mysql_model.Friend{},
 		&im_mysql_model.FriendRequest{},
 		&im_mysql_model.Group{},
 		&im_mysql_model.GroupMember{},
 		&im_mysql_model.GroupRequest{},
 		&im_mysql_model.User{},
-		&im_mysql_model.Black{}, &im_mysql_model.ChatLog{}, &im_mysql_model.Register{}, &im_mysql_model.Conversation{}, &im_mysql_model.AppVersion{}, &im_mysql_model.Department{}, &im_mysql_model.BlackList{}, &im_mysql_model.IpLimit{}, &im_mysql_model.UserIpLimit{}, &im_mysql_model.Invitation{}, &im_mysql_model.RegisterAddFriend{},
-		&im_mysql_model.ClientInitConfig{}, &im_mysql_model.UserIpRecord{})
+		&im_mysql_model.Black{}, &im_mysql_model.ChatLog{}, &im_mysql_model.Conversation{}, &im_mysql_model.AppVersion{}, &im_mysql_model.BlackList{},
+	)
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
 

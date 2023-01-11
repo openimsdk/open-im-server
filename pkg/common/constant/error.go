@@ -63,6 +63,8 @@ var (
 	ErrTokenNotExist            = ErrInfo{TokenNotExistError, "TokenNotExistError", ""} //在redis中不存在
 	ErrTokenDifferentPlatformID = ErrInfo{TokenDifferentPlatformIDError, "TokenDifferentPlatformIDError", ""}
 	ErrTokenDifferentUserID     = ErrInfo{TokenDifferentUserIDError, "TokenDifferentUserIDError", ""}
+
+	ErrMessageHasReadDisable = ErrInfo{MessageHasReadDisable, "MessageHasReadDisable", ""}
 )
 
 func NewErrNetwork(err error) error {
@@ -201,4 +203,9 @@ const (
 	TokenDifferentPlatformIDError = 95007
 	TokenDifferentUserIDError     = 95008
 	TokenNotExistError            = 95009
+)
+
+// 消息错误码
+const (
+	MessageHasReadDisable = 96001
 )

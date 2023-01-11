@@ -5,8 +5,11 @@ import (
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
+	"gorm.io/gorm"
 	"time"
 )
+
+var FriendDB *gorm.DB
 
 type Friend struct {
 	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`

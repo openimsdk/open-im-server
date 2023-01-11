@@ -5,12 +5,10 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	"Open_IM/pkg/proto/msg"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"strings"
 )
 
 func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID string, sessionType int32,
@@ -89,10 +87,8 @@ func messageReactionSender(operationID, sendID string, sourceID string, sessionT
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		pbData.MsgData.GroupID = sourceID
 	}
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, operationID)
-	if etcdConn == nil {
-		errMsg := operationID + "getcdv3.GetDefaultConn == nil"
-		log.NewError(operationID, errMsg)
+	etcdConn, err := utils.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	if err != nil {
 		return
 	}
 	client := msg.NewMsgClient(etcdConn)
@@ -102,5 +98,4 @@ func messageReactionSender(operationID, sendID string, sourceID string, sessionT
 	} else if reply.ErrCode != 0 {
 		log.NewError(operationID, "SendMsg rpc failed, ", pbData.String(), reply.ErrCode, reply.ErrMsg)
 	}
-
 }
