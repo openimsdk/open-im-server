@@ -211,6 +211,18 @@ func IsExistGroupMember(groupID, userID string) bool {
 	return true
 }
 
+func CheckIsExistGroupMember(ctx context.Context, groupID, userID string) error {
+	var number int64
+	err := GroupMemberDB.Table("group_members").Where("group_id = ? and user_id = ?", groupID, userID).Count(&number).Error
+	if err != nil {
+		return constant.ErrDB.Wrap()
+	}
+	if number != 1 {
+		return constant.ErrData.Wrap()
+	}
+	return nil
+}
+
 func GetGroupMemberByGroupID(groupID string, filter int32, begin int32, maxNumber int32) ([]GroupMember, error) {
 	var memberList []GroupMember
 	var err error

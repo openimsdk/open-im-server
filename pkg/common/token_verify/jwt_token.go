@@ -143,11 +143,11 @@ func IsManagerUserID(OpUserID string) bool {
 	}
 }
 
-func CheckManagerUserID(ctx context.Context) error {
-	if utils.IsContain(tools.OpUserID(ctx), config.Config.Manager.AppManagerUid) {
+func CheckManagerUserID(ctx context.Context, userID string) error {
+	if utils.IsContain(userID, config.Config.Manager.AppManagerUid) {
 		return nil
 	}
-	return constant.ErrIdentity.Wrap(utils.GetSelfFuncName())
+	return constant.ErrNoPermission.Wrap()
 }
 
 func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool {
@@ -184,7 +184,7 @@ func CheckAccessV3(ctx context.Context, OwnerUserID string) (err error) {
 	if opUserID == OwnerUserID {
 		return nil
 	}
-	return utils.Wrap(constant.ErrIdentity, open_utils.GetSelfFuncName())
+	return constant.ErrIdentity.Wrap(utils.GetSelfFuncName())
 }
 
 func GetUserIDFromToken(token string, operationID string) (bool, string, string) {

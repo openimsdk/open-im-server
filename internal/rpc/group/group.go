@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/common/trace_log"
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/getcdv3"
@@ -270,10 +271,11 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.InviteUserToGroupReq) (*pbGroup.InviteUserToGroupResp, error) {
 	resp := &pbGroup.InviteUserToGroupResp{}
-
-	if !imdb.IsExistGroupMember(req.GroupID, req.OpUserID) && !token_verify.IsManagerUserID(req.OpUserID) {
-		constant.SetErrorForResp(constant.ErrIdentity, resp.CommonResp)
-		return nil, utils.Wrap(constant.ErrIdentity, "")
+	opUserID := tools.OpUserID(ctx)
+	if err := token_verify.CheckManagerUserID(ctx, opUserID); err != nil {
+		if err := imdb.CheckIsExistGroupMember(ctx, req.GroupID, opUserID); err != nil {
+			return nil, err
+		}
 	}
 	groupInfo, err := (*imdb.Group)(nil).Take(ctx, req.GroupID)
 	if err != nil {
