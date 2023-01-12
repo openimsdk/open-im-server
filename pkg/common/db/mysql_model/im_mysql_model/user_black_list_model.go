@@ -20,7 +20,7 @@ type Black struct {
 }
 
 func InsertInToUserBlackList(ctx context.Context, black Black) (err error) {
-	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "black", black)
+	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "black", black)
 	black.CreateTime = time.Now()
 	err = BlackDB.Create(black).Error
 	return err

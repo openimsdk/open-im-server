@@ -29,33 +29,33 @@ type GroupMember struct {
 
 func (g *GroupMember) Create(ctx context.Context, groupMemberList []*GroupMember) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)
 	}()
 	return utils.Wrap(GroupMemberDB.Create(&groupMemberList).Error, "")
 }
 
 func (g *GroupMember) Delete(ctx context.Context, groupMembers []*GroupMember) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
 	}()
 	return utils.Wrap(GroupMemberDB.Delete(groupMembers).Error, "")
 }
 
 func (g *GroupMember) UpdateByMap(ctx context.Context, groupID string, userID string, args map[string]interface{}) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
 	}()
 	return utils.Wrap(GroupMemberDB.Model(&GroupMember{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
 }
 
 func (g *GroupMember) Update(ctx context.Context, groupMembers []*GroupMember) (err error) {
-	defer func() { trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
+	defer func() { trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
 	return utils.Wrap(GroupMemberDB.Updates(&groupMembers).Error, "")
 }
 
 func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember) (groupList []*GroupMember, err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers, "groupList", groupList)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers, "groupList", groupList)
 	}()
 	var where [][]interface{}
 	for _, groupMember := range groupMembers {
@@ -67,7 +67,7 @@ func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember) (gr
 
 func (g *GroupMember) Take(ctx context.Context, groupID string, userID string) (groupMember *GroupMember, err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
 	return groupMember, utils.Wrap(GroupMemberDB.Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
@@ -75,7 +75,7 @@ func (g *GroupMember) Take(ctx context.Context, groupID string, userID string) (
 
 func (g *GroupMember) TakeOwnerInfo(ctx context.Context, groupID string) (groupMember *GroupMember, err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMember", *groupMember)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
 	err = GroupMemberDB.Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error

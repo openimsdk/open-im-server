@@ -1,6 +1,7 @@
 package common
 
 import (
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/getcdv3"
 	utils2 "Open_IM/pkg/utils"
@@ -11,16 +12,16 @@ import (
 	"reflect"
 )
 
-func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string, tokenFunc func(token string, operationID string) (string, error)) {
+func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string) {
 	logFuncName := fmt.Sprintf("[ApiToRpc: %s]%s", utils2.GetFuncName(1), rpcFuncName)
 	operationID := c.GetHeader("operationID")
 	nCtx := trace_log.NewCtx1(c, rpcFuncName, operationID)
-	defer trace_log.ShowLog(nCtx)
+	defer log.ShowLog(nCtx)
 	if err := c.BindJSON(apiReq); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
 		return
 	}
-	trace_log.SetContextInfo(nCtx, logFuncName, nil, "apiReq", apiReq)
+	trace_log.SetCtxInfo(nCtx, logFuncName, nil, "apiReq", apiReq)
 	etcdConn, err := getcdv3.GetConn(nCtx, rpcName)
 	if err != nil {
 		trace_log.WriteErrorResponse(nCtx, "GetConn", err)
@@ -30,23 +31,12 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		reflect.ValueOf(etcdConn),
 	})[0].MethodByName(rpcFuncName) // rpc func
 	rpcReqPtr := reflect.New(rpc.Type().In(1).Elem()) // *req参数
-	var opUserID string
-	if tokenFunc != nil {
-		var err error
-		opUserID, err = tokenFunc(c.GetHeader("token"), operationID)
-		if err != nil {
-			trace_log.WriteErrorResponse(nCtx, "TokenFunc", err)
-			return
-		}
-	}
 	if err := utils.CopyStructFields(rpcReqPtr.Interface(), apiReq); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "CopyStructFields_RpcReq", err)
 		return
 	}
-	trace_log.SetContextInfo(nCtx, logFuncName, nil, "opUserID", opUserID, "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
-	//md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
+	trace_log.SetCtxInfo(nCtx, logFuncName, nil, "opUserID", c.GetString("opUserID"), "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
 	respArr := rpc.Call([]reflect.Value{
-		//reflect.ValueOf(metadata.NewOutgoingContext(c, md)), // context.Context
 		reflect.ValueOf(context.Context(c)), // context.Context
 		rpcReqPtr,                           // rpc apiReq
 	}) // respArr => (apiResp, error)
@@ -56,10 +46,10 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		return
 	}
 	rpcResp := respArr[0].Elem()
-	trace_log.SetContextInfo(nCtx, rpcFuncName, nil, "callRpcResp", rpcString(rpcResp.Interface()))
+	trace_log.SetCtxInfo(nCtx, rpcFuncName, nil, "callRpcResp", rpcString(rpcResp.Interface()))
 	if apiResp != nil {
 		if err := utils.CopyStructFields(apiResp, rpcResp.Interface()); err != nil {
-			trace_log.SetContextInfo(nCtx, "CopyStructFields_RpcResp", err, "apiResp", fmt.Sprintf("%T", apiResp), "rpcResp", fmt.Sprintf("%T", rpcResp.Interface()))
+			trace_log.SetCtxInfo(nCtx, "CopyStructFields_RpcResp", err, "apiResp", fmt.Sprintf("%T", apiResp), "rpcResp", fmt.Sprintf("%T", rpcResp.Interface()))
 		}
 	}
 	trace_log.SetSuccess(nCtx, rpcFuncName, apiResp)
@@ -82,7 +72,7 @@ func rpcString(v interface{}) string {
 //	reqValue := reflect.ValueOf(apiReq).Elem()
 //	operationID := reqValue.FieldByName("OperationID").String()
 //	trace_log.SetOperationID(nCtx, operationID)
-//	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", apiReq)
+//	trace_log.SetCtxInfo(nCtx, "BindJSON", nil, "params", apiReq)
 //	etcdConn, err := utils2.GetConn(c, rpcName)
 //	if err != nil {
 //		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
@@ -125,7 +115,7 @@ func rpcString(v interface{}) string {
 //		return
 //	}
 //	rpcResp := respArr[0].Elem()
-//	trace_log.SetContextInfo(nCtx, rpcFuncName, nil, "rpc req", rpcReqPtr.Interface(), "resp", rpcResp.Interface())
+//	trace_log.SetCtxInfo(nCtx, rpcFuncName, nil, "rpc req", rpcReqPtr.Interface(), "resp", rpcResp.Interface())
 //	commonResp := rpcResp.FieldByName("CommonResp").Elem()
 //	errCodeVal := commonResp.FieldByName("ErrCode")
 //	errMsgVal := commonResp.FieldByName("ErrMsg").Interface().(string)

@@ -445,7 +445,7 @@ func InviteUserToGroup(c *gin.Context) {
 
 func NewCreateGroup(c *gin.Context) {
 	common.ApiToRpc(c, &api.CreateGroupReq{}, &api.CreateGroupResp{},
-		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "CreateGroup", token_verify.ParseUserIDFromToken)
+		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "CreateGroup")
 }
 
 // @Summary 获取用户收到的加群信息列表
@@ -515,7 +515,7 @@ func GetRecvGroupApplicationList(c *gin.Context) {
 // @Router /group/get_user_req_group_applicationList [post]
 func GetUserReqGroupApplicationList(c *gin.Context) {
 	common.ApiToRpc(c, &api.GetUserReqGroupApplicationListReq{}, &api.GetUserRespGroupApplicationResp{},
-		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "GetGroupApplicationList", token_verify.ParseUserIDFromToken)
+		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "GetGroupApplicationList")
 }
 
 // @Summary 通过群ID列表获取群信息
@@ -803,7 +803,7 @@ func QuitGroup(c *gin.Context) {
 
 func NewSetGroupInfo(c *gin.Context) {
 	common.ApiToRpc(c, &api.SetGroupInfoReq{}, &api.SetGroupInfoResp{},
-		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "SetGroupInfo", token_verify.ParseUserIDFromToken)
+		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "SetGroupInfo")
 }
 
 func argsHandle(params *api.SetGroupInfoReq, req *rpc.SetGroupInfoReq) {
@@ -997,14 +997,14 @@ func MuteGroupMember(c *gin.Context) {
 // @Router /group/cancel_mute_group_member [post]
 func CancelMuteGroupMember(c *gin.Context) {
 	nCtx := trace_log.NewCtx(c, utils.GetSelfFuncName())
-	defer trace_log.ShowLog(c)
+	defer log.ShowLog(c)
 
 	params := api.CancelMuteGroupMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
 		return
 	}
-	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", params)
+	trace_log.SetCtxInfo(nCtx, "BindJSON", nil, "params", params)
 	req := &rpc.CancelMuteGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
 
@@ -1013,7 +1013,7 @@ func CancelMuteGroupMember(c *gin.Context) {
 	//	trace_log.WriteErrorResponse(nCtx, "ParseUserIDFromToken", err)
 	//	return
 	//}
-	trace_log.SetContextInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
+	trace_log.SetCtxInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
 
 	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 
@@ -1024,7 +1024,7 @@ func CancelMuteGroupMember(c *gin.Context) {
 		return
 	}
 
-	trace_log.SetContextInfo(nCtx, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
+	trace_log.SetCtxInfo(nCtx, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
 	resp := api.CancelMuteGroupMemberResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 }
@@ -1263,7 +1263,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 		GroupMemberListHash uint64 `json:"groupMemberListHash"`
 	}
 	//common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName(), token_verify.ParseUserIDFromToken)
-	common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName(), nil)
+	common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName())
 
 	//var (
 	//req api.GetGroupAbstractInfoReq
