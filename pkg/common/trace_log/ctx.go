@@ -179,7 +179,7 @@ func SetContextInfo(ctx context.Context, funcName string, logLevel logrus.Level,
 	funcInfo.FuncName = funcName
 	funcInfo.Err = err
 	funcInfo.LogLevel = logLevel
-	_, file, line, _ := runtime.Caller(2)
+	_, file, line, _ := runtime.Caller(3)
 	i := strings.SplitAfter(file, "/")
 	if len(i) > 3 {
 		file = i[len(i)-3] + i[len(i)-2] + i[len(i)-1] + ":" + utils.IntToString(line)
