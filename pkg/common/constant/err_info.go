@@ -78,7 +78,7 @@ func CommonResp2Err(resp *sdkws.CommonResp) error {
 	return nil
 }
 
-func Error2CommResp(ctx context.Context, info ErrInfo, detailErrMsg string) *sdkws.CommonResp {
+func Error2CommResp(ctx context.Context, info *ErrInfo, detailErrMsg string) *sdkws.CommonResp {
 	err := &sdkws.CommonResp{
 		ErrCode: info.ErrCode,
 		ErrMsg:  info.ErrMsg,
