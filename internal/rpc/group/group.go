@@ -115,20 +115,9 @@ func (s *groupServer) Run() {
 	log.NewInfo("", "group rpc success")
 }
 
-func OperationID(ctx context.Context) string {
-	s, _ := ctx.Value("operationID").(string)
-	return s
-}
-
-func OpUserID(ctx context.Context) string {
-	s, _ := ctx.Value("opUserID").(string)
-	return s
-}
-
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
-
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
-	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.OwnerUserID); err != nil {
+	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	var groupOwnerNum int
@@ -236,7 +225,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
 	resp := &pbGroup.GetJoinedGroupListResp{}
 
-	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.FromUserID); err != nil {
+	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	joinedGroupList, err := rocksCache.GetJoinedGroupIDListFromCache(ctx, req.FromUserID)
@@ -741,7 +730,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		chat.GroupApplicationRejectedNotification(req)
 	} else {
 		//return nil, utils.Wrap(constant.ErrArgs, "")
-		return nil, constant.ErrArgs.Warp()
+		return nil, constant.ErrArgs.Wrap()
 	}
 	return resp, nil
 }
