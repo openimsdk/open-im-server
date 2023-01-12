@@ -23,6 +23,14 @@ func (e *ErrInfo) Code() int32 {
 	return e.ErrCode
 }
 
+func (e *ErrInfo) Msg(msg string) *ErrInfo {
+	return &ErrInfo{
+		ErrCode:      e.ErrCode,
+		ErrMsg:       msg,
+		DetailErrMsg: e.DetailErrMsg,
+	}
+}
+
 func (e *ErrInfo) Warp() error {
 	return errors.WithStack(e)
 }
