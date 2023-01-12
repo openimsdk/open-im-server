@@ -34,9 +34,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		operationID = opts[0]
 	}
 	var opUserID string
-	if opts := md.Get("opUserID"); len(opts) != 1 {
-		return nil, status.New(codes.InvalidArgument, "opUserID error").Err()
-	} else {
+	if opts := md.Get("opUserID"); len(opts) == 1 {
 		opUserID = opts[0]
 	}
 	ctx = trace_log.NewRpcCtx(ctx, funcName, operationID)
