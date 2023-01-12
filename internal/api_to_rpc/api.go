@@ -3,6 +3,8 @@ package common
 import (
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/getcdv3"
+	utils2 "Open_IM/pkg/utils"
+	"fmt"
 	utils "github.com/OpenIMSDK/open_utils"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/metadata"
@@ -10,15 +12,15 @@ import (
 )
 
 func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string, tokenFunc func(token string, operationID string) (string, error)) {
+	logFuncName := fmt.Sprintf("[ApiToRpc: %s]%s", utils2.GetFuncName(1), rpcFuncName)
 	operationID := c.GetHeader("operationID")
 	nCtx := trace_log.NewCtx1(c, rpcFuncName, operationID)
-	//trace_log.SetOperationID(nCtx, operationID)
 	defer trace_log.ShowLog(nCtx)
 	if err := c.BindJSON(apiReq); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
 		return
 	}
-	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", apiReq)
+	trace_log.SetContextInfo(nCtx, logFuncName, nil, "apiReq", apiReq)
 	etcdConn, err := getcdv3.GetConn(nCtx, rpcName)
 	if err != nil {
 		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
@@ -41,6 +43,7 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		trace_log.WriteErrorResponse(nCtx, "CopyStructFields_RpcReq", err)
 		return
 	}
+	trace_log.SetContextInfo(nCtx, logFuncName, nil, "opUserID", opUserID, "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
 	md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
 	respArr := rpc.Call([]reflect.Value{
 		reflect.ValueOf(metadata.NewOutgoingContext(c, md)), // context.Context
@@ -48,18 +51,24 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 	}) // respArr => (apiResp, error)
 	if !respArr[1].IsNil() { // rpc err != nil
 		err := respArr[1].Interface().(error)
-		trace_log.WriteErrorResponse(nCtx, rpcFuncName, err, "rpc req", rpcReqPtr.Interface())
+		trace_log.WriteErrorResponse(nCtx, rpcFuncName, err, "callRpcResp", "error")
 		return
 	}
 	rpcResp := respArr[0].Elem()
-	trace_log.SetContextInfo(nCtx, rpcFuncName, nil, "rpc req", rpcReqPtr.Interface(), "resp", rpcResp.Interface())
+	trace_log.SetContextInfo(nCtx, rpcFuncName, nil, "callRpcResp", rpcString(rpcResp.Interface()))
 	if apiResp != nil {
 		if err := utils.CopyStructFields(apiResp, rpcResp.Interface()); err != nil {
-			trace_log.WriteErrorResponse(nCtx, "CopyStructFields_RpcResp", err)
-			return
+			trace_log.SetContextInfo(nCtx, "CopyStructFields_RpcResp", err, "apiResp", fmt.Sprintf("%T", apiResp), "rpcResp", fmt.Sprintf("%T", rpcResp.Interface()))
 		}
 	}
 	trace_log.SetSuccess(nCtx, rpcFuncName, apiResp)
+}
+
+func rpcString(v interface{}) string {
+	if s, ok := v.(interface{ String() string }); ok {
+		return s.String()
+	}
+	return fmt.Sprintf("%+v", v)
 }
 
 //func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn interface{}, rpcFuncName string, tokenFunc func(token string, operationID string) (string, error)) {

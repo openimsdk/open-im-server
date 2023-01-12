@@ -77,7 +77,7 @@ func WriteErrorResponse(ctx context.Context, funcName string, err error, args ..
 		for _, s := range s.Details() {
 			details = append(details, fmt.Sprintf("%+v", s))
 		}
-		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": s.Code(), "errMsg": s.String(), "errDtl": strings.Join(details, "\n")})
+		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": s.Code(), "errMsg": s.Message(), "errDtl": strings.Join(details, "\n")})
 		return
 	}
 }
