@@ -9,7 +9,7 @@ import (
 	"reflect"
 )
 
-func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn interface{}, rpcFuncName string, tokenFunc func(token string, operationID string) (string, error)) {
+func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string, tokenFunc func(token string, operationID string) (string, error)) {
 	operationID := c.GetHeader("operationID")
 	nCtx := trace_log.NewCtx(c, rpcFuncName)
 	defer trace_log.ShowLog(nCtx)
@@ -24,7 +24,7 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, fn in
 		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
 		return
 	}
-	rpc := reflect.ValueOf(fn).Call([]reflect.Value{
+	rpc := reflect.ValueOf(rpcClientFunc).Call([]reflect.Value{
 		reflect.ValueOf(etcdConn),
 	})[0].MethodByName(rpcFuncName) // rpc func
 	rpcReqPtr := reflect.New(rpc.Type().In(1).Elem()) // *req参数

@@ -12,8 +12,6 @@ import (
 	rpc "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
 	"context"
-	"google.golang.org/grpc/metadata"
-
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/grpc"
 
@@ -1256,48 +1254,58 @@ func SetGroupMemberInfo(c *gin.Context) {
 }
 
 func GetGroupAbstractInfo(c *gin.Context) {
-	var (
-		req  api.GetGroupAbstractInfoReq
-		resp api.GetGroupAbstractInfoResp
-	)
-	nCtx := trace_log.NewCtx(c, utils.GetSelfFuncName())
-	if err := c.BindJSON(&req); err != nil {
-		log.NewError("0", "BindJSON failed ", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
-		return
+	type GetGroupAbstractInfoReq struct {
+		//OperationID string `json:"operationID"`
+		GroupID string `json:"groupID"`
 	}
-	ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
-	if !ok {
-		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
-		return
+	type GetGroupAbstractInfoResp struct {
+		GroupMemberNumber   int32  `json:"groupMemberNumber"`
+		GroupMemberListHash uint64 `json:"groupMemberListHash"`
 	}
+	common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName(), token_verify.ParseUserIDFromToken)
 
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
-	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
-		return
-	}
-	client := rpc.NewGroupClient(etcdConn)
-	md := metadata.Pairs("operationID", req.OperationID, "opUserID", opUserID)
-	respPb, err := client.GetGroupAbstractInfo(metadata.NewOutgoingContext(c, md), &rpc.GetGroupAbstractInfoReq{
-		GroupID:     req.GroupID,
-		OpUserID:    opUserID,
-		OperationID: req.OperationID,
-	})
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", respPb.String())
-	if err != nil {
-		//log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
-		//c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
-		trace_log.WriteErrorResponse(nCtx, "GetGroupAbstractInfo", utils.Wrap(err, ""))
-		return
-	}
-	resp.GroupMemberNumber = respPb.GroupMemberNumber
-	resp.GroupMemberListHash = respPb.GroupMemberListHash
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
-	c.JSON(http.StatusOK, resp)
-	return
+	//var (
+	//req api.GetGroupAbstractInfoReq
+	//resp api.GetGroupAbstractInfoResp
+	//)
+	//nCtx := trace_log.NewCtx(c, utils.GetSelfFuncName())
+	//if err := c.BindJSON(&req); err != nil {
+	//	log.NewError("0", "BindJSON failed ", err.Error())
+	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+	//	return
+	//}
+	//ok, opUserID, errInfo := token_verify.GetUserIDFromToken(c.Request.Header.Get("token"), req.OperationID)
+	//if !ok {
+	//	errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
+	//	log.NewError(req.OperationID, errMsg)
+	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+	//	return
+	//}
+	//
+	//etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
+	//if etcdConn == nil {
+	//	errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
+	//	log.NewError(req.OperationID, errMsg)
+	//	c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": errMsg})
+	//	return
+	//}
+	//client := rpc.NewGroupClient(etcdConn)
+	//md := metadata.Pairs("operationID", req.OperationID, "opUserID", opUserID)
+	//respPb, err := client.GetGroupAbstractInfo(metadata.NewOutgoingContext(c, md), &rpc.GetGroupAbstractInfoReq{
+	//	GroupID:     req.GroupID,
+	//	OpUserID:    opUserID,
+	//	OperationID: req.OperationID,
+	//})
+	//log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api args ", respPb.String())
+	//if err != nil {
+	//	//log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
+	//	//c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
+	//	trace_log.WriteErrorResponse(nCtx, "GetGroupAbstractInfo", utils.Wrap(err, ""))
+	//	return
+	//}
+	//resp.GroupMemberNumber = respPb.GroupMemberNumber
+	//resp.GroupMemberListHash = respPb.GroupMemberListHash
+	//log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " api return ", resp)
+	//c.JSON(http.StatusOK, resp)
+	//return
 }
