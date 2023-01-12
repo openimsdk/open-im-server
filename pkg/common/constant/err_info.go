@@ -2,6 +2,7 @@ package constant
 
 import (
 	sdkws "Open_IM/pkg/proto/sdk_ws"
+	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
 	"errors"
@@ -21,6 +22,14 @@ func (e *ErrInfo) Error() string {
 
 func (e *ErrInfo) Code() int32 {
 	return e.ErrCode
+}
+
+func (e *ErrInfo) Warp() error {
+	return utils.Wrap(e, "")
+}
+
+func (e *ErrInfo) WarpMessage(msg string) error {
+	return utils.Wrap(e, msg)
 }
 
 func NewErrNetwork(err error) error {

@@ -740,7 +740,8 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	} else if req.HandleResult == constant.GroupResponseRefuse {
 		chat.GroupApplicationRejectedNotification(req)
 	} else {
-		return nil, utils.Wrap(constant.ErrArgs, "")
+		//return nil, utils.Wrap(constant.ErrArgs, "")
+		return nil, constant.ErrArgs.Warp()
 	}
 	return resp, nil
 }
