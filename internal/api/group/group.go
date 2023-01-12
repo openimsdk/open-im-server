@@ -1262,7 +1262,8 @@ func GetGroupAbstractInfo(c *gin.Context) {
 		GroupMemberNumber   int32  `json:"groupMemberNumber"`
 		GroupMemberListHash uint64 `json:"groupMemberListHash"`
 	}
-	common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName(), token_verify.ParseUserIDFromToken)
+	//common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName(), token_verify.ParseUserIDFromToken)
+	common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName(), nil)
 
 	//var (
 	//req api.GetGroupAbstractInfoReq

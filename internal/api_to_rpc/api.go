@@ -5,10 +5,10 @@ import (
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/getcdv3"
 	utils2 "Open_IM/pkg/utils"
+	"context"
 	"fmt"
 	utils "github.com/OpenIMSDK/open_utils"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc/metadata"
 	"reflect"
 )
 
@@ -45,10 +45,11 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		return
 	}
 	trace_log.SetCtxInfo(nCtx, logFuncName, nil, "opUserID", opUserID, "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
-	md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
+	//md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
 	respArr := rpc.Call([]reflect.Value{
-		reflect.ValueOf(metadata.NewOutgoingContext(c, md)), // context.Context
-		rpcReqPtr, // rpc apiReq
+		//reflect.ValueOf(metadata.NewOutgoingContext(c, md)), // context.Context
+		reflect.ValueOf(context.Context(c)), // context.Context
+		rpcReqPtr,                           // rpc apiReq
 	}) // respArr => (apiResp, error)
 	if !respArr[1].IsNil() { // rpc err != nil
 		err := respArr[1].Interface().(error)

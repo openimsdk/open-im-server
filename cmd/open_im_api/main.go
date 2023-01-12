@@ -16,6 +16,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
+	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
@@ -97,6 +98,16 @@ func main() {
 	}
 	//group related routing group
 	groupRouterGroup := r.Group("/group")
+	groupRouterGroup.Use(func(c *gin.Context) {
+		userID, err := token_verify.ParseUserIDFromToken(c.GetHeader("token"), c.GetString("operationID"))
+		if err != nil {
+			c.String(400, err.Error())
+			c.Abort()
+			return
+		}
+		c.Set("opUserID", userID)
+		c.Next()
+	})
 	{
 		groupRouterGroup.POST("/create_group", group.NewCreateGroup)                                //1
 		groupRouterGroup.POST("/set_group_info", group.NewSetGroupInfo)                             //1
