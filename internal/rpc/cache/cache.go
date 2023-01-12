@@ -105,7 +105,6 @@ func (s *cacheServer) DelFriendIDListFromCache(ctx context.Context, req *pbCache
 	if err := rocksCache.DelFriendIDListFromCache(ctx, req.UserID); err != nil {
 		return
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", resp.String())
 	return
 }
 
