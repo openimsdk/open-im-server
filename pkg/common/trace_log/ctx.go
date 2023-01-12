@@ -73,7 +73,7 @@ func WriteErrorResponse(ctx context.Context, funcName string, err error, args ..
 		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": t.ErrCode, "errMsg": t.ErrMsg, "errDtl": t.DetailErrMsg})
 		return
 	default:
-		s, ok := status.FromError(err)
+		s, ok := status.FromError(e)
 		if !ok {
 			ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": constant.ErrDefaultOther.ErrCode, "errMsg": err.Error(), "errDtl": fmt.Sprintf("%+v", err)})
 			return

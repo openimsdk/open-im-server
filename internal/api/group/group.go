@@ -445,7 +445,7 @@ func InviteUserToGroup(c *gin.Context) {
 
 func NewCreateGroup(c *gin.Context) {
 	common.ApiToRpc(c, &api.CreateGroupReq{}, &api.CreateGroupResp{},
-		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "CreateGroup", token_verify.ParseUserIDFromToken)
+		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "CreateGroup")
 }
 
 // @Summary 获取用户收到的加群信息列表
@@ -515,7 +515,7 @@ func GetRecvGroupApplicationList(c *gin.Context) {
 // @Router /group/get_user_req_group_applicationList [post]
 func GetUserReqGroupApplicationList(c *gin.Context) {
 	common.ApiToRpc(c, &api.GetUserReqGroupApplicationListReq{}, &api.GetUserRespGroupApplicationResp{},
-		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "GetGroupApplicationList", token_verify.ParseUserIDFromToken)
+		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "GetGroupApplicationList")
 }
 
 // @Summary 通过群ID列表获取群信息
@@ -803,7 +803,7 @@ func QuitGroup(c *gin.Context) {
 
 func NewSetGroupInfo(c *gin.Context) {
 	common.ApiToRpc(c, &api.SetGroupInfoReq{}, &api.SetGroupInfoResp{},
-		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "SetGroupInfo", token_verify.ParseUserIDFromToken)
+		config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, "SetGroupInfo")
 }
 
 func argsHandle(params *api.SetGroupInfoReq, req *rpc.SetGroupInfoReq) {
@@ -1263,7 +1263,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 		GroupMemberListHash uint64 `json:"groupMemberListHash"`
 	}
 	//common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName(), token_verify.ParseUserIDFromToken)
-	common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName(), nil)
+	common.ApiToRpc(c, &api.GetGroupAbstractInfoReq{}, &GetGroupAbstractInfoResp{}, config.Config.RpcRegisterName.OpenImGroupName, rpc.NewGroupClient, utils.GetSelfFuncName())
 
 	//var (
 	//req api.GetGroupAbstractInfoReq
