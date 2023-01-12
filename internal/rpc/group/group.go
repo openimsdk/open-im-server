@@ -144,17 +144,17 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		userIDs = append(userIDs, req.OwnerUserID)
 	}
 	if groupOwnerNum != 1 {
-		return nil, utils.Wrap(constant.ErrArgs, "")
+		return nil, utils.Wrap(&constant.ErrArgs, "")
 	}
 	if utils.IsRepeatStringSlice(userIDs) {
-		return nil, utils.Wrap(constant.ErrArgs, "")
+		return nil, utils.Wrap(&constant.ErrArgs, "")
 	}
 	users, err := rocksCache.GetUserInfoFromCacheBatch(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
 	if len(users) != len(userIDs) {
-		return nil, utils.Wrap(constant.ErrArgs, "")
+		return nil, utils.Wrap(&constant.ErrArgs, "")
 	}
 	userMap := make(map[string]*imdb.User)
 	for i, user := range users {
@@ -283,15 +283,15 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	resp := &pbGroup.InviteUserToGroupResp{}
 
 	if !imdb.IsExistGroupMember(req.GroupID, req.OpUserID) && !token_verify.IsManagerUserID(req.OpUserID) {
-		constant.SetErrorForResp(constant.ErrIdentity, resp.CommonResp)
-		return nil, utils.Wrap(constant.ErrIdentity, "")
+		constant.SetErrorForResp(&constant.ErrIdentity, resp.CommonResp)
+		return nil, utils.Wrap(&constant.ErrIdentity, "")
 	}
 	groupInfo, err := (*imdb.Group)(nil).Take(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
 	if groupInfo.Status == constant.GroupStatusDismissed {
-		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
+		return nil, utils.Wrap(&constant.ErrDismissedAlready, "")
 	}
 	if groupInfo.NeedVerification == constant.AllNeedVerification &&
 		!imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) && !token_verify.IsManagerUserID(req.OpUserID) {
@@ -474,7 +474,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				return nil, err
 			}
 			if opInfo.RoleLevel == constant.GroupOrdinaryUsers {
-				return nil, utils.Wrap(constant.ErrNoPermission, "")
+				return nil, utils.Wrap(&constant.ErrNoPermission, "")
 			} else if opInfo.RoleLevel == constant.GroupOwner {
 				opFlag = 2 //owner
 			} else {
@@ -488,7 +488,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		if len(req.KickedUserIDList) == 0 {
 			//log.NewError(req.OperationID, "failed, kick list 0")
 			//return &pbGroup.KickGroupMemberResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: constant.ErrArgs.ErrMsg}, nil
-			return nil, utils.Wrap(constant.ErrArgs, "")
+			return nil, utils.Wrap(&constant.ErrArgs, "")
 		}
 		if err := s.DelGroupAndUserCache(ctx, req.GroupID, req.KickedUserIDList); err != nil {
 			return nil, err
@@ -595,7 +595,7 @@ func FillGroupInfoByGroupID(operationID, groupID string, groupInfo *open_im_sdk.
 	}
 	if group.Status == constant.GroupStatusDismissed {
 		log.Debug(operationID, " group constant.GroupStatusDismissed ", group.GroupID)
-		return utils.Wrap(constant.ErrDismissedAlready, "")
+		return utils.Wrap(&constant.ErrDismissedAlready, "")
 	}
 	return utils.Wrap(cp.GroupDBCopyOpenIM(groupInfo, group), "")
 }
@@ -622,7 +622,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
 		err := FillGroupInfoByGroupID(req.OperationID, v.GroupID, node.GroupInfo)
 		if err != nil {
-			if !errors.Is(errors.Unwrap(err), constant.ErrDismissedAlready) {
+			if !errors.Is(errors.Unwrap(err), &constant.ErrDismissedAlready) {
 				errResult = err
 			}
 			continue
@@ -666,7 +666,7 @@ func CheckPermission(ctx context.Context, groupID string, userID string) (err er
 		trace_log.SetCtxInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID)
 	}()
 	if !token_verify.IsManagerUserID(userID) && !imdb.IsGroupOwnerAdmin(groupID, userID) {
-		return utils.Wrap(constant.ErrNoPermission, utils.GetSelfFuncName())
+		return utils.Wrap(&constant.ErrNoPermission, utils.GetSelfFuncName())
 	}
 	return nil
 }
@@ -740,7 +740,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	} else if req.HandleResult == constant.GroupResponseRefuse {
 		chat.GroupApplicationRejectedNotification(req)
 	} else {
-		return nil, utils.Wrap(constant.ErrArgs, "")
+		return nil, utils.Wrap(&constant.ErrArgs, "")
 	}
 	return resp, nil
 }
@@ -756,8 +756,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		return nil, err
 	}
 	if groupInfo.Status == constant.GroupStatusDismissed {
-		constant.SetErrorForResp(constant.ErrDismissedAlready, resp.CommonResp)
-		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
+		constant.SetErrorForResp(&constant.ErrDismissedAlready, resp.CommonResp)
+		return nil, utils.Wrap(&constant.ErrDismissedAlready, "")
 	}
 
 	if groupInfo.NeedVerification == constant.Directly {
@@ -806,7 +806,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			chat.MemberEnterDirectlyNotification(req.GroupID, req.OpUserID, req.OperationID)
 			return resp, nil
 		} else {
-			constant.SetErrorForResp(constant.ErrGroupTypeNotSupport, resp.CommonResp)
+			constant.SetErrorForResp(&constant.ErrGroupTypeNotSupport, resp.CommonResp)
 			return resp, nil
 		}
 	}
@@ -879,14 +879,14 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	resp := &pbGroup.SetGroupInfoResp{}
 
 	if !hasAccess(req) {
-		return nil, utils.Wrap(constant.ErrIdentity, "")
+		return nil, utils.Wrap(&constant.ErrIdentity, "")
 	}
 	group, err := imdb.GetGroupInfoByGroupID(req.GroupInfoForSet.GroupID)
 	if err != nil {
 		return nil, err
 	}
 	if group.Status == constant.GroupStatusDismissed {
-		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
+		return nil, utils.Wrap(&constant.ErrDismissedAlready, "")
 	}
 
 	var changedType int32
@@ -998,7 +998,7 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 		return nil, err
 	}
 	if groupInfo.Status == constant.GroupStatusDismissed {
-		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
+		return nil, utils.Wrap(&constant.ErrDismissedAlready, "")
 	}
 
 	if req.OldOwnerUserID == req.NewOwnerUserID {
@@ -1134,7 +1134,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 	resp := &pbGroup.DismissGroupResp{}
 
 	if !token_verify.IsManagerUserID(req.OpUserID) && !imdb.IsGroupOwnerAdmin(req.GroupID, req.OpUserID) {
-		return nil, utils.Wrap(constant.ErrIdentity, "")
+		return nil, utils.Wrap(&constant.ErrIdentity, "")
 	}
 
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
@@ -1268,7 +1268,7 @@ func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) 
 		//errMsg := req.OperationID + "opFlag == 0  " + req.GroupID + req.OpUserID
 		//log.Error(req.OperationID, errMsg)
 		//return &pbGroup.MuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-		return nil, utils.Wrap(constant.ErrNoPermission, "")
+		return nil, utils.Wrap(&constant.ErrNoPermission, "")
 	}
 
 	//mutedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
@@ -1336,7 +1336,7 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 	resp := &pbGroup.SetGroupMemberNicknameResp{}
 
 	if req.OpUserID != req.UserID && !token_verify.IsManagerUserID(req.OpUserID) {
-		return nil, utils.Wrap(constant.ErrIdentity, "")
+		return nil, utils.Wrap(&constant.ErrIdentity, "")
 	}
 	cbReq := &pbGroup.SetGroupMemberInfoReq{
 		GroupID:     req.GroupID,
