@@ -131,7 +131,7 @@ func (a Args) String() string {
 			s += "{"
 			hasElement = true
 		}
-		s += fmt.Sprintf("%s:%d", k, v)
+		s += fmt.Sprintf("%s:%v", k, v)
 	}
 	if hasElement {
 		s += "}"
