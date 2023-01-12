@@ -24,11 +24,11 @@ func (e *ErrInfo) Code() int32 {
 }
 
 func NewErrNetwork(err error) error {
-	return toDetail(err, &ErrNetwork)
+	return toDetail(err, ErrNetwork)
 }
 
 func NewErrData(err error) error {
-	return toDetail(err, &ErrData)
+	return toDetail(err, ErrData)
 }
 
 func toDetail(err error, info *ErrInfo) *ErrInfo {
@@ -44,15 +44,15 @@ func ToAPIErrWithErr(err error) *ErrInfo {
 	switch {
 	case errors.As(err, &errComm):
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return toDetail(err, &ErrRecordNotFound)
+			return toDetail(err, ErrRecordNotFound)
 		}
-		return toDetail(err, &ErrData)
+		return toDetail(err, ErrData)
 	case errors.As(err, &marshalErr):
-		return toDetail(err, &ErrData)
+		return toDetail(err, ErrData)
 	case errors.As(err, &errInfo):
 		return toDetail(err, errInfo)
 	}
-	return toDetail(err, &ErrDefaultOther)
+	return toDetail(err, ErrDefaultOther)
 }
 
 func SetErrorForResp(err error, commonResp *sdkws.CommonResp) {
