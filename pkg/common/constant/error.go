@@ -16,98 +16,90 @@ type ErrInfo struct {
 	DetailErrMsg string
 }
 
-func (e ErrInfo) Error() string {
+func (e *ErrInfo) Error() string {
 	return e.ErrMsg
 }
 
-func (e ErrInfo) Code() int32 {
+func (e *ErrInfo) Code() int32 {
 	return e.ErrCode
 }
 
 var (
-	ErrNone             = ErrInfo{0, "", ""}
-	ErrRpcConn          = ErrInfo{GRPCConnIsNil, "grpc conn is nil", ""}
-	ErrArgs             = ErrInfo{ArgsError, "ArgsError", ""}
-	ErrDatabase         = ErrInfo{DatabaseError, "DatabaseError", ""}
-	ErrInternalServer   = ErrInfo{ServerInternalError, "ServerInternalError", ""}
-	ErrNetwork          = ErrInfo{NetworkError, "NetworkError", ""}
-	ErrNoPermission     = ErrInfo{NoPermissionError, "NoPermissionError", ""}
-	ErrIdentity         = ErrInfo{IdentityError, "IdentityError", ""}
-	ErrCallback         = ErrInfo{ErrMsg: "CallbackError"}
-	ErrCallbackContinue = ErrInfo{ErrMsg: "CallbackContinueError"}
+	ErrNone             = &ErrInfo{0, "", ""}
+	ErrArgs             = &ErrInfo{ArgsError, "ArgsError", ""}
+	ErrDatabase         = &ErrInfo{DatabaseError, "DatabaseError", ""}
+	ErrInternalServer   = &ErrInfo{ServerInternalError, "ServerInternalError", ""}
+	ErrNetwork          = &ErrInfo{NetworkError, "NetworkError", ""}
+	ErrNoPermission     = &ErrInfo{NoPermissionError, "NoPermissionError", ""}
+	ErrIdentity         = &ErrInfo{IdentityError, "IdentityError", ""}
+	ErrCallback         = &ErrInfo{ErrMsg: "CallbackError"}
+	ErrCallbackContinue = &ErrInfo{ErrMsg: "CallbackContinueError"}
 
-	ErrUserIDNotFound  = ErrInfo{UserIDNotFoundError, "UserIDNotFoundError", ""}
-	ErrGroupIDNotFound = ErrInfo{GroupIDNotFoundError, "GroupIDNotFoundError", ""}
+	ErrUserIDNotFound  = &ErrInfo{UserIDNotFoundError, "UserIDNotFoundError", ""}
+	ErrGroupIDNotFound = &ErrInfo{GroupIDNotFoundError, "GroupIDNotFoundError", ""}
 
-	ErrRecordNotFound = ErrInfo{RecordNotFoundError, "RecordNotFoundError", ""}
+	ErrRecordNotFound = &ErrInfo{RecordNotFoundError, "RecordNotFoundError", ""}
 
-	ErrRelationshipAlready = ErrInfo{RelationshipAlreadyError, "RelationshipAlreadyError", ""}
-	ErrNotRelationshipYet  = ErrInfo{NotRelationshipYetError, "NotRelationshipYetError", ""}
+	ErrRelationshipAlready = &ErrInfo{RelationshipAlreadyError, "RelationshipAlreadyError", ""}
+	ErrNotRelationshipYet  = &ErrInfo{NotRelationshipYetError, "NotRelationshipYetError", ""}
 
-	ErrOnlyOneOwner        = ErrInfo{OnlyOneOwnerError, "OnlyOneOwnerError", ""}
-	ErrInGroupAlready      = ErrInfo{InGroupAlreadyError, "InGroupAlreadyError", ""}
-	ErrNotInGroupYet       = ErrInfo{NotInGroupYetError, "NotInGroupYetError", ""}
-	ErrDismissedAlready    = ErrInfo{DismissedAlreadyError, "DismissedAlreadyError", ""}
-	ErrOwnerNotAllowedQuit = ErrInfo{OwnerNotAllowedQuitError, "OwnerNotAllowedQuitError", ""}
-	ErrRegisteredAlready   = ErrInfo{RegisteredAlreadyError, "RegisteredAlreadyError", ""}
-	ErrGroupTypeNotSupport = ErrInfo{GroupTypeNotSupport, "", ""}
-	ErrGroupNoOwner        = ErrInfo{GroupNoOwner, "ErrGroupNoOwner", ""}
+	ErrOnlyOneOwner        = &ErrInfo{OnlyOneOwnerError, "OnlyOneOwnerError", ""}
+	ErrInGroupAlready      = &ErrInfo{InGroupAlreadyError, "InGroupAlreadyError", ""}
+	ErrNotInGroupYet       = &ErrInfo{NotInGroupYetError, "NotInGroupYetError", ""}
+	ErrDismissedAlready    = &ErrInfo{DismissedAlreadyError, "DismissedAlreadyError", ""}
+	ErrOwnerNotAllowedQuit = &ErrInfo{OwnerNotAllowedQuitError, "OwnerNotAllowedQuitError", ""}
+	ErrRegisteredAlready   = &ErrInfo{RegisteredAlreadyError, "RegisteredAlreadyError", ""}
+	ErrGroupTypeNotSupport = &ErrInfo{GroupTypeNotSupport, "", ""}
+	ErrGroupNoOwner        = &ErrInfo{GroupNoOwner, "ErrGroupNoOwner", ""}
 
-	ErrDefaultOther             = ErrInfo{DefaultOtherError, "DefaultOtherError", ""}
-	ErrData                     = ErrInfo{DataError, "DataError", ""}
-	ErrTokenExpired             = ErrInfo{TokenExpiredError, "TokenExpiredError", ""}
-	ErrTokenInvalid             = ErrInfo{TokenInvalidError, "TokenInvalidError", ""}         //
-	ErrTokenMalformed           = ErrInfo{TokenMalformedError, "TokenMalformedError", ""}     //格式错误
-	ErrTokenNotValidYet         = ErrInfo{TokenNotValidYetError, "TokenNotValidYetError", ""} //还未生效
-	ErrTokenUnknown             = ErrInfo{TokenUnknownError, "TokenUnknownError", ""}         //未知错误
-	ErrTokenKicked              = ErrInfo{TokenKickedError, "TokenKickedError", ""}
-	ErrTokenNotExist            = ErrInfo{TokenNotExistError, "TokenNotExistError", ""} //在redis中不存在
-	ErrTokenDifferentPlatformID = ErrInfo{TokenDifferentPlatformIDError, "TokenDifferentPlatformIDError", ""}
-	ErrTokenDifferentUserID     = ErrInfo{TokenDifferentUserIDError, "TokenDifferentUserIDError", ""}
+	ErrDefaultOther             = &ErrInfo{DefaultOtherError, "DefaultOtherError", ""}
+	ErrData                     = &ErrInfo{DataError, "DataError", ""}
+	ErrTokenExpired             = &ErrInfo{TokenExpiredError, "TokenExpiredError", ""}
+	ErrTokenInvalid             = &ErrInfo{TokenInvalidError, "TokenInvalidError", ""}         //
+	ErrTokenMalformed           = &ErrInfo{TokenMalformedError, "TokenMalformedError", ""}     //格式错误
+	ErrTokenNotValidYet         = &ErrInfo{TokenNotValidYetError, "TokenNotValidYetError", ""} //还未生效
+	ErrTokenUnknown             = &ErrInfo{TokenUnknownError, "TokenUnknownError", ""}         //未知错误
+	ErrTokenKicked              = &ErrInfo{TokenKickedError, "TokenKickedError", ""}
+	ErrTokenNotExist            = &ErrInfo{TokenNotExistError, "TokenNotExistError", ""} //在redis中不存在
+	ErrTokenDifferentPlatformID = &ErrInfo{TokenDifferentPlatformIDError, "TokenDifferentPlatformIDError", ""}
+	ErrTokenDifferentUserID     = &ErrInfo{TokenDifferentUserIDError, "TokenDifferentUserIDError", ""}
 
-	ErrMessageHasReadDisable = ErrInfo{MessageHasReadDisable, "MessageHasReadDisable", ""}
+	ErrMessageHasReadDisable = &ErrInfo{MessageHasReadDisable, "MessageHasReadDisable", ""}
 
 	ErrDB        = ErrDatabase
 	ErrSendLimit = ErrInternalServer
 )
 
 func NewErrNetwork(err error) error {
-	newErrNetwork := ErrNetwork
-	newErrNetwork.DetailErrMsg = err.Error()
-	return ErrNetwork
+	return toDetail(err, ErrNetwork)
 }
 
 func NewErrData(err error) error {
-	newErrData := ErrData
-	newErrData.DetailErrMsg = err.Error()
-	return ErrNetwork
+	return toDetail(err, ErrData)
 }
 
-func toDetail(err error, info ErrInfo) ErrInfo {
-	errInfo := info
+func toDetail(err error, info *ErrInfo) *ErrInfo {
+	errInfo := *info
 	errInfo.DetailErrMsg = err.Error()
-	return errInfo
+	return &errInfo
 }
 
-func ToAPIErrWithErr(err error) ErrInfo {
+func ToAPIErrWithErr(err error) *ErrInfo {
+	errComm := errors.New("")
+	var marshalErr *json.MarshalerError
+	errInfo := &ErrInfo{}
 	switch {
-	case errors.Is(err, gorm.ErrRecordNotFound):
-		return toDetail(err, ErrRecordNotFound)
-	case errors.Is(err, ErrArgs):
-		return toDetail(err, ErrArgs)
-	case errors.Is(err, ErrDatabase):
-		return ErrDatabase
+	case errors.As(err, &errComm):
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return toDetail(err, ErrRecordNotFound)
+		}
+		return toDetail(err, ErrData)
+	case errors.As(err, &marshalErr):
+		return toDetail(err, ErrData)
+	case errors.As(err, &errInfo):
+		return toDetail(err, errInfo)
 	}
-
-	errTarget := errors.New("")
-	var mErr *json.MarshalerError
-	switch {
-	case errors.As(err, &mErr):
-		return ErrData
-	case errors.As(err, errTarget):
-		return ErrDatabase
-	}
-	return ErrDefaultOther
+	return toDetail(err, ErrDefaultOther)
 }
 
 func SetErrorForResp(err error, commonResp *sdkws.CommonResp) {

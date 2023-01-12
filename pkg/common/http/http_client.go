@@ -31,7 +31,7 @@ func Get(url string) (response []byte, err error) {
 	return body, nil
 }
 
-//application/json; charset=utf-8
+// application/json; charset=utf-8
 func Post(url string, data interface{}, timeOutSecond int) (content []byte, err error) {
 	jsonStr, err := json.Marshal(data)
 	if err != nil {
@@ -65,13 +65,13 @@ func CallBackPostReturn(url, callbackCommand string, input interface{}, output c
 	b, err := Post(url, input, timeOut)
 	if err != nil {
 		if failedContinue != nil && *failedContinue {
-			return constant.ErrCallbackContinue
+			return &constant.ErrCallbackContinue
 		}
 		return constant.NewErrNetwork(err)
 	}
 	if err = json.Unmarshal(b, output); err != nil {
 		if failedContinue != nil && *failedContinue {
-			return constant.ErrCallbackContinue
+			return &constant.ErrCallbackContinue
 		}
 		return constant.NewErrData(err)
 	}

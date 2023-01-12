@@ -115,7 +115,18 @@ func (s *groupServer) Run() {
 	log.NewInfo("", "group rpc success")
 }
 
+func OperationID(ctx context.Context) string {
+	s, _ := ctx.Value("operationID").(string)
+	return s
+}
+
+func OpUserID(ctx context.Context) string {
+	s, _ := ctx.Value("opUserID").(string)
+	return s
+}
+
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
+
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
 	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.OwnerUserID); err != nil {
 		return nil, err
