@@ -3,8 +3,11 @@ package log
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/utils"
 	"bufio"
 	"context"
+	"runtime"
+	"strings"
 
 	//"bufio"
 	"fmt"
@@ -252,6 +255,15 @@ func ShowLog(ctx context.Context) {
 		}).Infoln("rpc: ", t.ApiName)
 	}
 	for _, v := range *t.Funcs {
+		if v.File == "" {
+			_, file, line, _ := runtime.Caller(1)
+			var s string
+			i := strings.SplitAfter(file, "/")
+			if len(i) > 3 {
+				s = i[len(i)-3] + i[len(i)-2] + i[len(i)-1] + ":" + utils.IntToString(line)
+			}
+			v.File = s
+		}
 		if v.Err != nil {
 			ctxLogger.WithFields(logrus.Fields{
 				"OperationID": OperationID,

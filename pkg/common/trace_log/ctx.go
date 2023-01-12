@@ -185,7 +185,6 @@ func SetContextInfo(ctx context.Context, funcName string, logLevel logrus.Level,
 	if len(i) > 3 {
 		s = i[len(i)-3] + i[len(i)-2] + i[len(i)-1] + ":" + utils.IntToString(line)
 	}
-	fmt.Println(funcInfo.FuncName, "file", s, file)
 	funcInfo.File = s
 	*t.Funcs = append(*t.Funcs, funcInfo)
 }
