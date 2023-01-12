@@ -102,9 +102,11 @@ func main() {
 		userID, err := token_verify.ParseUserIDFromToken(c.GetHeader("token"), c.MustGet("operationID").(string))
 		if err != nil {
 			c.String(400, err.Error())
+			c.Abort()
 			return
 		}
 		c.Set("opUserID", userID)
+		c.Next()
 	})
 	{
 		groupRouterGroup.POST("/create_group", group.NewCreateGroup)                                //1
