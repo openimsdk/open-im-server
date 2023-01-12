@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type ErrInfo struct {
@@ -23,20 +24,8 @@ func (e *ErrInfo) Code() int32 {
 	return e.ErrCode
 }
 
-func (e *ErrInfo) Msg(msg string) *ErrInfo {
-	return &ErrInfo{
-		ErrCode:      e.ErrCode,
-		ErrMsg:       msg,
-		DetailErrMsg: e.DetailErrMsg,
-	}
-}
-
-func (e *ErrInfo) Warp() error {
-	return errors.WithStack(e)
-}
-
-func (e *ErrInfo) WarpMessage(msg string) error {
-	return errors.WithMessage(e, "")
+func (e *ErrInfo) Wrap(msg ...string) error {
+	return errors.Wrap(e, strings.Join(msg, "--"))
 }
 
 func NewErrNetwork(err error) error {

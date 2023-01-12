@@ -12,6 +12,7 @@ import (
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/common/trace_log"
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/getcdv3"
@@ -115,20 +116,9 @@ func (s *groupServer) Run() {
 	log.NewInfo("", "group rpc success")
 }
 
-func OperationID(ctx context.Context) string {
-	s, _ := ctx.Value("operationID").(string)
-	return s
-}
-
-func OpUserID(ctx context.Context) string {
-	s, _ := ctx.Value("opUserID").(string)
-	return s
-}
-
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
-
 	resp := &pbGroup.CreateGroupResp{GroupInfo: &open_im_sdk.GroupInfo{}}
-	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.OwnerUserID); err != nil {
+	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	var groupOwnerNum int
@@ -236,7 +226,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
 	resp := &pbGroup.GetJoinedGroupListResp{}
 
-	if err := token_verify.CheckAccessV2(ctx, req.OpUserID, req.FromUserID); err != nil {
+	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	joinedGroupList, err := rocksCache.GetJoinedGroupIDListFromCache(ctx, req.FromUserID)
@@ -281,10 +271,11 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.InviteUserToGroupReq) (*pbGroup.InviteUserToGroupResp, error) {
 	resp := &pbGroup.InviteUserToGroupResp{}
-
-	if !imdb.IsExistGroupMember(req.GroupID, req.OpUserID) && !token_verify.IsManagerUserID(req.OpUserID) {
-		constant.SetErrorForResp(constant.ErrIdentity, resp.CommonResp)
-		return nil, utils.Wrap(constant.ErrIdentity, "")
+	opUserID := tools.OpUserID(ctx)
+	if err := token_verify.CheckManagerUserID(ctx, opUserID); err != nil {
+		if err := imdb.CheckIsExistGroupMember(ctx, req.GroupID, opUserID); err != nil {
+			return nil, err
+		}
 	}
 	groupInfo, err := (*imdb.Group)(nil).Take(ctx, req.GroupID)
 	if err != nil {
@@ -741,7 +732,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		chat.GroupApplicationRejectedNotification(req)
 	} else {
 		//return nil, utils.Wrap(constant.ErrArgs, "")
-		return nil, constant.ErrArgs.Warp()
+		return nil, constant.ErrArgs.Wrap()
 	}
 	return resp, nil
 }

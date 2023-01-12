@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
@@ -142,6 +143,13 @@ func IsManagerUserID(OpUserID string) bool {
 	}
 }
 
+func CheckManagerUserID(ctx context.Context, userID string) error {
+	if utils.IsContain(userID, config.Config.Manager.AppManagerUid) {
+		return nil
+	}
+	return constant.ErrNoPermission.Wrap()
+}
+
 func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool {
 	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
 		return true
@@ -163,6 +171,20 @@ func CheckAccessV2(ctx context.Context, OpUserID string, OwnerUserID string) (er
 		return nil
 	}
 	return utils.Wrap(constant.ErrIdentity, open_utils.GetSelfFuncName())
+}
+
+func CheckAccessV3(ctx context.Context, OwnerUserID string) (err error) {
+	opUserID := tools.OpUserID(ctx)
+	defer func() {
+		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", opUserID, "OwnerUserID", OwnerUserID)
+	}()
+	if utils.IsContain(opUserID, config.Config.Manager.AppManagerUid) {
+		return nil
+	}
+	if opUserID == OwnerUserID {
+		return nil
+	}
+	return constant.ErrIdentity.Wrap(utils.GetSelfFuncName())
 }
 
 func GetUserIDFromToken(token string, operationID string) (bool, string, string) {
