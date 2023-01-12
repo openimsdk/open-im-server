@@ -32,6 +32,7 @@ func init() {
 
 func NewPrivateLog(moduleName string) {
 	logger = loggerInit(moduleName)
+	ctxLogger = loggerInit(moduleName)
 }
 
 func ctxLoggerInit(moduleName string) *Logger {
@@ -43,13 +44,17 @@ func ctxLoggerInit(moduleName string) *Logger {
 	}
 	writer := bufio.NewWriter(src)
 	ctxLogger.SetOutput(writer)
-	ctxLogger.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat:  "2006-01-02 15:04:05.000",
-		DataKey:          "args",
-		FieldMap:         nil,
-		CallerPrettyfier: nil,
-		PrettyPrint:      false,
+	ctxLogger.SetFormatter(&nested.Formatter{
+		TimestampFormat: "2006-01-02 15:04:05.000",
+		HideKeys:        false,
+		FieldsOrder:     []string{"PID", "FilePath", "OperationID"},
 	})
+	if config.Config.Log.ElasticSearchSwitch {
+		ctxLogger.AddHook(newEsHook(moduleName))
+	}
+	//Log file segmentation hook
+	hook := NewLfsHook(time.Duration(config.Config.Log.RotationTime)*time.Hour, config.Config.Log.RemainRotationCount, moduleName)
+	ctxLogger.AddHook(hook)
 	return &Logger{
 		ctxLogger,
 		os.Getpid(),
