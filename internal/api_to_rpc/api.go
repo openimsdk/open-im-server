@@ -11,13 +11,13 @@ import (
 
 func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string, tokenFunc func(token string, operationID string) (string, error)) {
 	operationID := c.GetHeader("operationID")
-	nCtx := trace_log.NewCtx(c, rpcFuncName)
+	nCtx := trace_log.NewCtx1(c, rpcFuncName, operationID)
+	//trace_log.SetOperationID(nCtx, operationID)
 	defer trace_log.ShowLog(nCtx)
 	if err := c.BindJSON(apiReq); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
 		return
 	}
-	trace_log.SetOperationID(nCtx, operationID)
 	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", apiReq)
 	etcdConn, err := getcdv3.GetConn(c, rpcName)
 	if err != nil {
