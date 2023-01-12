@@ -40,11 +40,11 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		opUserID = opts[0]
 	}
 	ctx = trace_log.NewRpcCtx(ctx, funcName, operationID)
-	defer trace_log.ShowLog(ctx)
-	trace_log.SetContextInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", rpcString(req))
+	defer log.ShowLog(ctx)
+	trace_log.SetCtxInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err != nil {
-		trace_log.SetContextInfo(ctx, funcName, err)
+		trace_log.SetCtxInfo(ctx, funcName, err)
 		errInfo := constant.ToAPIErrWithErr(err)
 		var code codes.Code
 		if errInfo.ErrCode == 0 {
@@ -58,7 +58,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		}
 		return nil, sta.Err()
 	}
-	trace_log.SetContextInfo(ctx, funcName, nil, "rpcResp", rpcString(resp))
+	trace_log.SetCtxInfo(ctx, funcName, nil, "rpcResp", rpcString(resp))
 	return
 }
 

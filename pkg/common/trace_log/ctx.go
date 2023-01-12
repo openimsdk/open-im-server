@@ -3,8 +3,11 @@ package trace_log
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
+	"Open_IM/pkg/utils"
 	"context"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/status"
+	"runtime"
 	"strings"
 
 	//"errors"
@@ -47,18 +50,24 @@ func ShowLog(ctx context.Context) {
 	} else {
 		log.Info(t.OperationID, "rpc: ", t.ApiName)
 	}
-
 	for _, v := range *t.Funcs {
 		if v.Err != nil {
 			log.Error(t.OperationID, "func: ", v.FuncName, " args: ", v.Args, v.Err.Error())
 		} else {
-			log.Info(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
+			switch v.LogLevel {
+			case logrus.InfoLevel:
+				log.Info(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
+			case logrus.DebugLevel:
+				log.Debug(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
+			case logrus.WarnLevel:
+				log.Debug(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
+			}
 		}
 	}
 }
 
 func WriteErrorResponse(ctx context.Context, funcName string, err error, args ...interface{}) {
-	SetContextInfo(ctx, funcName, err, args)
+	SetCtxInfo(ctx, funcName, err, args)
 	e := Unwrap(err)
 	switch t := e.(type) {
 	case *constant.ErrInfo:
@@ -83,7 +92,7 @@ func WriteErrorResponse(ctx context.Context, funcName string, err error, args ..
 }
 
 //func WriteErrorResponse(ctx context.Context, funcName string, err error, args ...interface{}) {
-//	SetContextInfo(ctx, funcName, err, args)
+//	SetCtxInfo(ctx, funcName, err, args)
 //	e := new(constant.ErrInfo)
 //	switch {
 //	case errors.As(err, &e):
@@ -119,6 +128,8 @@ type FuncInfo struct {
 	FuncName string
 	Args     Args
 	Err      error
+	LogLevel logrus.Level
+	File     string
 }
 
 type Args map[string]interface{}
@@ -139,13 +150,32 @@ func (a Args) String() string {
 	return s
 }
 
-func SetContextInfo(ctx context.Context, funcName string, err error, args ...interface{}) {
+func SetCtxDebug(ctx context.Context, funcName string, err error, args ...interface{}) {
+	SetContextInfo(ctx, funcName, logrus.DebugLevel, err, args)
+}
+
+func SetCtxInfo(ctx context.Context, funcName string, err error, args ...interface{}) {
+	SetContextInfo(ctx, funcName, logrus.InfoLevel, err, args)
+}
+
+func SetCtxWarn(ctx context.Context, funcName string, err error, args ...interface{}) {
+	SetContextInfo(ctx, funcName, logrus.WarnLevel, err, args)
+}
+
+func SetContextInfo(ctx context.Context, funcName string, logLevel logrus.Level, err error, args ...interface{}) {
 	t := ctx.Value(TraceLogKey).(*ApiInfo)
 	var funcInfo FuncInfo
 	funcInfo.Args = make(map[string]interface{})
 	argsHandle(args, funcInfo.Args)
 	funcInfo.FuncName = funcName
 	funcInfo.Err = err
+	funcInfo.LogLevel = logLevel
+	_, file, line, _ := runtime.Caller(2)
+	i := strings.SplitAfter(file, "/")
+	if len(i) > 3 {
+		file = i[len(i)-3] + i[len(i)-2] + i[len(i)-1] + ":" + utils.IntToString(line)
+	}
+	funcInfo.File = file
 	*t.Funcs = append(*t.Funcs, funcInfo)
 }
 
@@ -172,7 +202,7 @@ func SetRpcRespInfo(ctx context.Context, funcName string, resp string) {
 }
 
 func SetSuccess(ctx context.Context, funcName string, data interface{}) {
-	SetContextInfo(ctx, funcName, nil, "data", data)
+	SetCtxInfo(ctx, funcName, nil, "data", data)
 	ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "errDtl": "", "data": data})
 }
 
@@ -184,9 +214,4 @@ func argsHandle(args []interface{}, fields map[string]interface{}) {
 			fields[fmt.Sprintf("%v", args[i])] = ""
 		}
 	}
-}
-
-func GetApiErr(errCode int32, errMsg string) constant.ErrInfo {
-
-	return constant.ErrInfo{ErrCode: errCode, ErrMsg: errMsg}
 }

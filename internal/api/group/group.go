@@ -997,14 +997,14 @@ func MuteGroupMember(c *gin.Context) {
 // @Router /group/cancel_mute_group_member [post]
 func CancelMuteGroupMember(c *gin.Context) {
 	nCtx := trace_log.NewCtx(c, utils.GetSelfFuncName())
-	defer trace_log.ShowLog(c)
+	defer log.ShowLog(c)
 
 	params := api.CancelMuteGroupMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
 		return
 	}
-	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", params)
+	trace_log.SetCtxInfo(nCtx, "BindJSON", nil, "params", params)
 	req := &rpc.CancelMuteGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
 
@@ -1013,7 +1013,7 @@ func CancelMuteGroupMember(c *gin.Context) {
 	//	trace_log.WriteErrorResponse(nCtx, "ParseUserIDFromToken", err)
 	//	return
 	//}
-	trace_log.SetContextInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
+	trace_log.SetCtxInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
 
 	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 
@@ -1024,7 +1024,7 @@ func CancelMuteGroupMember(c *gin.Context) {
 		return
 	}
 
-	trace_log.SetContextInfo(nCtx, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
+	trace_log.SetCtxInfo(nCtx, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
 	resp := api.CancelMuteGroupMemberResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 }

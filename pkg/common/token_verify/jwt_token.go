@@ -154,7 +154,7 @@ func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool 
 
 func CheckAccessV2(ctx context.Context, OpUserID string, OwnerUserID string) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetFuncName(1), err, "OpUserID", OpUserID, "OwnerUserID", OwnerUserID)
+		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", OpUserID, "OwnerUserID", OwnerUserID)
 	}()
 	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
 		return nil

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/getcdv3"
 	utils2 "Open_IM/pkg/utils"
@@ -15,12 +16,12 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 	logFuncName := fmt.Sprintf("[ApiToRpc: %s]%s", utils2.GetFuncName(1), rpcFuncName)
 	operationID := c.GetHeader("operationID")
 	nCtx := trace_log.NewCtx1(c, rpcFuncName, operationID)
-	defer trace_log.ShowLog(nCtx)
+	defer log.ShowLog(nCtx)
 	if err := c.BindJSON(apiReq); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
 		return
 	}
-	trace_log.SetContextInfo(nCtx, logFuncName, nil, "apiReq", apiReq)
+	trace_log.SetCtxInfo(nCtx, logFuncName, nil, "apiReq", apiReq)
 	etcdConn, err := getcdv3.GetConn(nCtx, rpcName)
 	if err != nil {
 		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
@@ -43,7 +44,7 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		trace_log.WriteErrorResponse(nCtx, "CopyStructFields_RpcReq", err)
 		return
 	}
-	trace_log.SetContextInfo(nCtx, logFuncName, nil, "opUserID", opUserID, "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
+	trace_log.SetCtxInfo(nCtx, logFuncName, nil, "opUserID", opUserID, "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
 	md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
 	respArr := rpc.Call([]reflect.Value{
 		reflect.ValueOf(metadata.NewOutgoingContext(c, md)), // context.Context
@@ -55,10 +56,10 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		return
 	}
 	rpcResp := respArr[0].Elem()
-	trace_log.SetContextInfo(nCtx, rpcFuncName, nil, "callRpcResp", rpcString(rpcResp.Interface()))
+	trace_log.SetCtxInfo(nCtx, rpcFuncName, nil, "callRpcResp", rpcString(rpcResp.Interface()))
 	if apiResp != nil {
 		if err := utils.CopyStructFields(apiResp, rpcResp.Interface()); err != nil {
-			trace_log.SetContextInfo(nCtx, "CopyStructFields_RpcResp", err, "apiResp", fmt.Sprintf("%T", apiResp), "rpcResp", fmt.Sprintf("%T", rpcResp.Interface()))
+			trace_log.SetCtxInfo(nCtx, "CopyStructFields_RpcResp", err, "apiResp", fmt.Sprintf("%T", apiResp), "rpcResp", fmt.Sprintf("%T", rpcResp.Interface()))
 		}
 	}
 	trace_log.SetSuccess(nCtx, rpcFuncName, apiResp)
@@ -81,7 +82,7 @@ func rpcString(v interface{}) string {
 //	reqValue := reflect.ValueOf(apiReq).Elem()
 //	operationID := reqValue.FieldByName("OperationID").String()
 //	trace_log.SetOperationID(nCtx, operationID)
-//	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", apiReq)
+//	trace_log.SetCtxInfo(nCtx, "BindJSON", nil, "params", apiReq)
 //	etcdConn, err := utils2.GetConn(c, rpcName)
 //	if err != nil {
 //		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
@@ -124,7 +125,7 @@ func rpcString(v interface{}) string {
 //		return
 //	}
 //	rpcResp := respArr[0].Elem()
-//	trace_log.SetContextInfo(nCtx, rpcFuncName, nil, "rpc req", rpcReqPtr.Interface(), "resp", rpcResp.Interface())
+//	trace_log.SetCtxInfo(nCtx, rpcFuncName, nil, "rpc req", rpcReqPtr.Interface(), "resp", rpcResp.Interface())
 //	commonResp := rpcResp.FieldByName("CommonResp").Elem()
 //	errCodeVal := commonResp.FieldByName("ErrCode")
 //	errMsgVal := commonResp.FieldByName("ErrMsg").Interface().(string)
