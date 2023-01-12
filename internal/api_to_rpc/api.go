@@ -11,9 +11,9 @@ import (
 	"reflect"
 )
 
-func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string, tokenFunc func(token string, operationID string) (string, error)) {
+func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string) {
 	logFuncName := fmt.Sprintf("[ApiToRpc: %s]%s", utils2.GetFuncName(1), rpcFuncName)
-	operationID := c.GetHeader("operationID")
+	operationID := c.GetString("operationID")
 	nCtx := trace_log.NewCtx1(c, rpcFuncName, operationID)
 	defer trace_log.ShowLog(nCtx)
 	if err := c.BindJSON(apiReq); err != nil {
@@ -30,20 +30,11 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		reflect.ValueOf(etcdConn),
 	})[0].MethodByName(rpcFuncName) // rpc func
 	rpcReqPtr := reflect.New(rpc.Type().In(1).Elem()) // *req参数
-	var opUserID string
-	if tokenFunc != nil {
-		var err error
-		opUserID, err = tokenFunc(c.GetHeader("token"), operationID)
-		if err != nil {
-			trace_log.WriteErrorResponse(nCtx, "TokenFunc", err)
-			return
-		}
-	}
 	if err := utils.CopyStructFields(rpcReqPtr.Interface(), apiReq); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "CopyStructFields_RpcReq", err)
 		return
 	}
-	trace_log.SetContextInfo(nCtx, logFuncName, nil, "opUserID", opUserID, "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
+	trace_log.SetContextInfo(nCtx, logFuncName, nil, "opUserID", "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
 	//md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
 	respArr := rpc.Call([]reflect.Value{
 		//reflect.ValueOf(metadata.NewOutgoingContext(c, md)), // context.Context
