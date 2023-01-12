@@ -13,57 +13,42 @@ message GroupAddMemberInfo{
 message CreateGroupReq{
   repeated GroupAddMemberInfo initMemberList = 1;
   server_api_params.GroupInfo groupInfo = 2;
-  string operationID = 3;
-  string opUserID = 4;  //app manager or group owner
   string ownerUserID = 5; //owner
 
 
 }
 message CreateGroupResp{
-  server_api_params.CommonResp commonResp = 1;
   server_api_params.GroupInfo groupInfo = 3;
 }
 
 
 message GetGroupsInfoReq{
   repeated string groupIDList = 1;
-  string operationID = 2;
-  string opUserID = 3; //No verification permission
 }
 message GetGroupsInfoResp{
-  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupInfo groupInfoList = 3;
 }
 
 
 message SetGroupInfoReq{
   server_api_params.GroupInfoForSet groupInfoForSet = 1;
-  string opUserID = 2; //app manager or group owner
-  string operationID = 3;
 }
 message SetGroupInfoResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
 message GetGroupApplicationListReq {
-  string opUserID = 1; //app manager or group owner(manager)
-  string operationID = 2;
   string fromUserID = 3; //owner or manager
 }
 message GetGroupApplicationListResp {
-  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupRequest groupRequestList = 3;
 }
 
 message GetUserReqApplicationListReq{
   string userID = 1;
-  string opUserID = 2;
-  string operationID = 3;
 }
 
 message GetUserReqApplicationListResp{
-  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupRequest groupRequestList = 2;
 }
 
@@ -72,62 +57,49 @@ message TransferGroupOwnerReq {
   string groupID = 1;
   string oldOwnerUserID = 2;
   string newOwnerUserID = 3;
-  string operationID = 4;
-  string opUserID = 5; //app manager or group owner
 }
 message TransferGroupOwnerResp{
-  server_api_params.CommonResp commonResp = 1;
+
 }
 
 message JoinGroupReq{
   string groupID = 1;
   string reqMessage = 2;
-  string opUserID = 3;
-  string operationID = 4;
   int32 joinSource = 5;
   string inviterUserID = 6;
 
 }
 message JoinGroupResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
 message GroupApplicationResponseReq{
-  string operationID = 1;
-  string opUserID = 2;
   string groupID = 3;
   string fromUserID = 4;  //
   string handledMsg = 5;
   int32 handleResult = 6;
 }
 message GroupApplicationResponseResp{
-  server_api_params.CommonResp commonResp = 1;
+
 }
 
 
 
 message QuitGroupReq{
   string groupID = 1;
-  string operationID = 2;
-  string opUserID = 3;
 }
 message QuitGroupResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
 
 message GetGroupMemberListReq {
   string groupID = 1;
-  string opUserID = 2;  //No verification permission
-  string operationID = 3;
   int32 filter = 4;
   int32 nextSeq = 5;
 }
 
 message GetGroupMemberListResp {
-  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupMemberFullInfo memberList = 3;
   int32 nextSeq = 4;
 }
@@ -136,12 +108,9 @@ message GetGroupMemberListResp {
 message GetGroupMembersInfoReq {
   string groupID = 1;
   repeated string memberList = 2;
-  string opUserID = 3;  //No verification permission
-  string operationID = 4;
 }
 
 message GetGroupMembersInfoResp {
-  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupMemberFullInfo memberList = 3;
 }
 
@@ -149,8 +118,6 @@ message KickGroupMemberReq {
   string groupID = 1;
   repeated string kickedUserIDList = 2;
   string reason = 3;
-  string operationID = 5;
-  string opUserID = 6;  //app manger or group manager
 }
 
 message Id2Result {
@@ -159,44 +126,34 @@ message Id2Result {
 }
 
 message KickGroupMemberResp {
-  server_api_params.CommonResp commonResp = 1;
   repeated Id2Result id2ResultList = 3;
 }
 
 
 message GetJoinedGroupListReq {
   string fromUserID = 1;
-  string operationID = 2;
-  string opUserID = 3; //app manager or FromUserID
 }
 message GetJoinedGroupListResp{
-  server_api_params.CommonResp commonResp = 1;
   repeated  server_api_params.GroupInfo groupList = 3;
 }
 
 
 message InviteUserToGroupReq {
-  string operationID = 2;
   string groupID = 3;
   string reason = 4;
   repeated string invitedUserIDList = 5;
-  string opUserID = 6; //group member or app manager
 }
 message InviteUserToGroupResp {
-  server_api_params.CommonResp commonResp = 1;
   repeated  Id2Result id2ResultList = 3; // 0 ok, -1 error
 }
 
 
 message GetGroupAllMemberReq {
   string groupID = 1;
-  string opUserID = 2; //No verification permission
-  string operationID = 3;
   int32 offset = 4;
   int32 count = 5;
 }
 message GetGroupAllMemberResp {
-  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupMemberFullInfo memberList = 3;
 }
 
@@ -211,92 +168,72 @@ message GetGroupsReq {
     server_api_params.RequestPagination pagination = 1;
     string groupName = 2;
     string groupID = 3;
-    string operationID = 4;
 }
 
 message GetGroupsResp {
     repeated CMSGroup groups = 1;
     server_api_params.ResponsePagination pagination = 2;
     int32 GroupNum = 3;
-  server_api_params.CommonResp commonResp = 4;
 }
 
 message GetGroupMemberReq {
     string groupID = 1;
-    string operationID = 2;
 }
 
 message GetGroupMembersCMSReq {
    string groupID = 1;
    string userName = 2;
    server_api_params.RequestPagination pagination = 3;
-   string operationID = 4;
 }
 
 message GetGroupMembersCMSResp {
    repeated server_api_params.GroupMemberFullInfo members = 1;
    server_api_params.ResponsePagination pagination = 2;
    int32 memberNums = 3;
-  server_api_params.CommonResp commonResp = 4;
 }
 
 message DismissGroupReq{
-  string opUserID = 1; //group  or app manager
-  string operationID = 2;
   string groupID = 3;
 }
 
 message DismissGroupResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
 message MuteGroupMemberReq{
-  string opUserID = 1; //group  or app manager
-  string operationID = 2;
   string groupID = 3;
   string userID = 4;
   uint32 mutedSeconds = 5;
 }
 
 message MuteGroupMemberResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
 
 message CancelMuteGroupMemberReq{
-  string opUserID = 1; //group  or app manager
-  string operationID = 2;
   string groupID = 3;
   string userID = 4;
 }
 
 message CancelMuteGroupMemberResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
 message MuteGroupReq{
-  string opUserID = 1; //group  or app manager
-  string operationID = 2;
   string groupID = 3;
 }
 
 message MuteGroupResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
 
 message CancelMuteGroupReq{
-  string opUserID = 1; //group  or app manager
-  string operationID = 2;
   string groupID = 3;
 }
 
 message CancelMuteGroupResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -305,41 +242,31 @@ message CancelMuteGroupResp{
 message SetGroupMemberNicknameReq{
   string groupID = 1;
   string nickname = 2;
-  string opUserID = 3;
-  string operationID = 4;
   string userID = 5;
 }
 message SetGroupMemberNicknameResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 message GetJoinedSuperGroupListReq {
-  string operationID = 1;
   string userID = 2;
-  string opUserID = 3;
 }
 
 message GetJoinedSuperGroupListResp {
-  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupInfo groupList = 3;
 }
 
 message GetSuperGroupsInfoReq {
   repeated string groupIDList = 1;
-  string operationID = 2;
-  string opUserID = 3; //No verification permission
+
 }
 
 message GetSuperGroupsInfoResp {
-  server_api_params.CommonResp commonResp = 1;
   repeated server_api_params.GroupInfo groupInfoList = 3;
 }
 
 message SetGroupMemberInfoReq{
   string groupID = 1;
   string userID = 2;
-  string opUserID = 3;
-  string operationID = 4;
   google.protobuf.StringValue nickname = 5;
   google.protobuf.StringValue faceURL = 6;
   google.protobuf.Int32Value roleLevel = 7;
@@ -347,17 +274,15 @@ message SetGroupMemberInfoReq{
 }
 
 message SetGroupMemberInfoResp{
-  server_api_params.CommonResp commonResp = 1;
+
 }
 
 message GetGroupAbstractInfoReq{
   string groupID = 1;
-  string opUserID = 2; 
-  string operationID = 3;
+
 }
 
 message GetGroupAbstractInfoResp{
-  server_api_params.CommonResp commonResp = 1;
   int32 groupMemberNumber = 2;
   uint64 groupMemberListHash = 3;
 }
