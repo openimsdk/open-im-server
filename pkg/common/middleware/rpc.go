@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-	"path"
 	"runtime/debug"
 )
 
@@ -23,7 +22,8 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			log.NewError(operationID, info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r, "stack:", string(debug.Stack()))
 		}
 	}()
-	funcName := path.Base(info.FullMethod)
+	//funcName := path.Base(info.FullMethod)
+	funcName := info.FullMethod
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
