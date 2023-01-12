@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"context"
-	"encoding/json"
 	"google.golang.org/grpc/status"
 	"strings"
 
@@ -123,11 +122,6 @@ type FuncInfo struct {
 }
 
 type Args map[string]interface{}
-
-func (a Args) String() string {
-	bytes, _ := json.Marshal(a)
-	return string(bytes)
-}
 
 func SetContextInfo(ctx context.Context, funcName string, err error, args ...interface{}) {
 	t := ctx.Value(TraceLogKey).(*ApiInfo)
