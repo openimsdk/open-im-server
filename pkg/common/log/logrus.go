@@ -256,7 +256,7 @@ func ShowLog(ctx context.Context) {
 	for _, v := range *t.Funcs {
 		if v.Err != nil {
 			ctxLogger.WithFields(logrus.Fields{
-				"Type":        ctxLogger.Type,
+				"Type":        v.File,
 				"OperationID": OperationID,
 				"PID":         ctxLogger.Pid,
 				"FilePath":    v.File,
@@ -265,21 +265,21 @@ func ShowLog(ctx context.Context) {
 			switch v.LogLevel {
 			case logrus.InfoLevel:
 				ctxLogger.WithFields(logrus.Fields{
-					"Type":        ctxLogger.Type,
+					"Type":        v.File,
 					"OperationID": OperationID,
 					"PID":         ctxLogger.Pid,
 					"FilePath":    v.File,
 				}).Infoln("func: ", v.FuncName, " args: ", v.Args)
 			case logrus.DebugLevel:
 				ctxLogger.WithFields(logrus.Fields{
-					"Type":        ctxLogger.Type,
+					"Type":        v.File,
 					"OperationID": OperationID,
 					"PID":         ctxLogger.Pid,
 					"FilePath":    v.File,
 				}).Debugln("func: ", v.FuncName, " args: ", v.Args)
 			case logrus.WarnLevel:
 				ctxLogger.WithFields(logrus.Fields{
-					"Type":        ctxLogger.Type,
+					"Type":        v.File,
 					"OperationID": OperationID,
 					"PID":         ctxLogger.Pid,
 					"FilePath":    v.File,
