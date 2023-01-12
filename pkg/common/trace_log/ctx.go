@@ -2,7 +2,6 @@ package trace_log
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/utils"
 	"context"
 	"github.com/sirupsen/logrus"
@@ -43,28 +42,28 @@ func GetOperationID(ctx context.Context) string {
 	return ctx.Value(TraceLogKey).(*ApiInfo).OperationID
 }
 
-func ShowLog(ctx context.Context) {
-	t := ctx.Value(TraceLogKey).(*ApiInfo)
-	if ctx.Value(TraceLogKey).(*ApiInfo).GinCtx != nil {
-		log.Info(t.OperationID, "api: ", t.ApiName)
-	} else {
-		log.Info(t.OperationID, "rpc: ", t.ApiName)
-	}
-	for _, v := range *t.Funcs {
-		if v.Err != nil {
-			log.Error(t.OperationID, "func: ", v.FuncName, " args: ", v.Args, v.Err.Error())
-		} else {
-			switch v.LogLevel {
-			case logrus.InfoLevel:
-				log.Info(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
-			case logrus.DebugLevel:
-				log.Debug(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
-			case logrus.WarnLevel:
-				log.Debug(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
-			}
-		}
-	}
-}
+//func ShowLog(ctx context.Context) {
+//	t := ctx.Value(TraceLogKey).(*ApiInfo)
+//	if ctx.Value(TraceLogKey).(*ApiInfo).GinCtx != nil {
+//		log.Info(t.OperationID, "api: ", t.ApiName)
+//	} else {
+//		log.Info(t.OperationID, "rpc: ", t.ApiName)
+//	}
+//	for _, v := range *t.Funcs {
+//		if v.Err != nil {
+//			log.Error(t.OperationID, "func: ", v.FuncName, " args: ", v.Args, v.Err.Error())
+//		} else {
+//			switch v.LogLevel {
+//			case logrus.InfoLevel:
+//				log.Info(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
+//			case logrus.DebugLevel:
+//				log.Debug(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
+//			case logrus.WarnLevel:
+//				log.Debug(t.OperationID, "func: ", v.FuncName, " args: ", v.Args)
+//			}
+//		}
+//	}
+//}
 
 func WriteErrorResponse(ctx context.Context, funcName string, err error, args ...interface{}) {
 	SetCtxInfo(ctx, funcName, err, args)
