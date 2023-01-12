@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
 	"google.golang.org/grpc"
@@ -66,19 +67,18 @@ func rpcString(v interface{}) string {
 	return fmt.Sprintf("%+v", v)
 }
 
-//func RpcClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
-//	//if cc == nil {
-//	//	return utils.Wrap(constant.ErrRpcConn, "")
-//	//}
-//	operationID, ok := ctx.Value("operationID").(string)
-//	if !ok {
-//		return utils.Wrap(constant.ErrArgs, "ctx missing operationID")
-//	}
-//	opUserID, ok := ctx.Value("opUserID").(string)
-//	if !ok {
-//		return utils.Wrap(constant.ErrArgs, "ctx missing opUserID")
-//	}
-//	md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
-//	return invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
-//}
-//
+func RpcClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) (err error) {
+	//if cc == nil {
+	//	return utils.Wrap(constant.ErrRpcConn, "")
+	//}
+	operationID, ok := ctx.Value("operationID").(string)
+	if !ok {
+		return utils.Wrap(constant.ErrArgs, "ctx missing operationID")
+	}
+	opUserID, ok := ctx.Value("opUserID").(string)
+	if !ok {
+		return utils.Wrap(constant.ErrArgs, "ctx missing opUserID")
+	}
+	md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
+	return invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
+}
