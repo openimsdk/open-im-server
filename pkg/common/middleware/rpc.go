@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-	"path"
 	"runtime/debug"
 )
 
@@ -23,7 +22,8 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 			log.NewError(operationID, info.FullMethod, "type:", fmt.Sprintf("%T", r), "panic:", r, "stack:", string(debug.Stack()))
 		}
 	}()
-	funcName := path.Base(info.FullMethod)
+	//funcName := path.Base(info.FullMethod)
+	funcName := info.FullMethod
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.New(codes.InvalidArgument, "missing metadata").Err()
@@ -41,7 +41,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	}
 	ctx = trace_log.NewRpcCtx(ctx, funcName, operationID)
 	defer trace_log.ShowLog(ctx)
-	trace_log.SetContextInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", req.(interface{ String() string }).String())
+	trace_log.SetContextInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err != nil {
 		trace_log.SetContextInfo(ctx, funcName, err)
@@ -58,7 +58,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		}
 		return nil, sta.Err()
 	}
-	trace_log.SetContextInfo(ctx, funcName, nil, "rpcResp", resp.(interface{ String() string }).String())
+	trace_log.SetContextInfo(ctx, funcName, nil, "rpcResp", rpcString(resp))
 	return
 }
 
@@ -76,4 +76,11 @@ func RpcClientInterceptor(ctx context.Context, method string, req, reply interfa
 	}
 	md := metadata.Pairs("operationID", operationID, "opUserID", opUserID)
 	return invoker(metadata.NewOutgoingContext(ctx, md), method, req, reply, cc, opts...)
+}
+
+func rpcString(v interface{}) string {
+	if s, ok := v.(interface{ String() string }); ok {
+		return s.String()
+	}
+	return fmt.Sprintf("%+v", v)
 }
