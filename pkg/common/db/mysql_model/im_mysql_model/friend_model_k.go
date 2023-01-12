@@ -22,7 +22,7 @@ type Friend struct {
 
 func (*Friend) Create(ctx context.Context, friends []*Friend) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "friends", friends)
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
 	}()
 	err = utils.Wrap(FriendDB.Create(&friends).Error, "")
 	return err
@@ -30,7 +30,7 @@ func (*Friend) Create(ctx context.Context, friends []*Friend) (err error) {
 
 func (*Friend) Delete(ctx context.Context, ownerUserID string, friendUserIDs []string) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserIDs", friendUserIDs)
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserIDs", friendUserIDs)
 	}()
 	err = utils.Wrap(FriendDB.Where("owner_user_id = ? and friend_user_id in (?)", ownerUserID, friendUserIDs).Delete(&Friend{}).Error, "")
 	return err
@@ -38,21 +38,21 @@ func (*Friend) Delete(ctx context.Context, ownerUserID string, friendUserIDs []s
 
 func (*Friend) UpdateByMap(ctx context.Context, ownerUserID string, args map[string]interface{}) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "args", args)
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "args", args)
 	}()
 	return utils.Wrap(FriendDB.Where("owner_user_id = ?", ownerUserID).Updates(args).Error, "")
 }
 
 func (*Friend) Update(ctx context.Context, friends []*Friend) (err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "friends", friends)
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
 	}()
 	return utils.Wrap(FriendDB.Updates(&friends).Error, "")
 }
 
 func (*Friend) Find(ctx context.Context, ownerUserID string) (friends []*Friend, err error) {
 	defer func() {
-		trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friends", friends)
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friends", friends)
 	}()
 	err = utils.Wrap(FriendDB.Where("owner_user_id = ?", ownerUserID).Find(&friends).Error, "")
 	return friends, err
@@ -60,7 +60,7 @@ func (*Friend) Find(ctx context.Context, ownerUserID string) (friends []*Friend,
 
 func (*Friend) Take(ctx context.Context, ownerUserID, friendUserID string) (group *Group, err error) {
 	group = &Group{}
-	defer trace_log.SetContextInfo(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "group", *group)
+	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "group", *group)
 	err = utils.Wrap(FriendDB.Where("owner_user_id = ? and friend_user_id", ownerUserID, friendUserID).Take(group).Error, "")
 	return group, err
 }
