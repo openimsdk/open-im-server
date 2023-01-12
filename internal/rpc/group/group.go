@@ -727,7 +727,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 			return nil, err
 		}
 		if cacheResp.CommonResp.ErrCode != 0 {
-			return nil, utils.Wrap(constant.ErrInfo{
+			return nil, utils.Wrap(&constant.ErrInfo{
 				ErrCode: cacheResp.CommonResp.ErrCode,
 				ErrMsg:  cacheResp.CommonResp.ErrMsg,
 			}, "")
