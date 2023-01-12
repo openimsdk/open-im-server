@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"context"
+	"encoding/json"
 	"google.golang.org/grpc/status"
 	"strings"
 
@@ -117,8 +118,15 @@ type ApiInfo struct {
 
 type FuncInfo struct {
 	FuncName string
-	Args     map[string]interface{}
+	Args     Args
 	Err      error
+}
+
+type Args map[string]interface{}
+
+func (a *Args) String() string {
+	bytes, _ := json.Marshal(a)
+	return string(bytes)
 }
 
 func SetContextInfo(ctx context.Context, funcName string, err error, args ...interface{}) {
@@ -155,7 +163,7 @@ func SetRpcRespInfo(ctx context.Context, funcName string, resp string) {
 
 func SetSuccess(ctx context.Context, funcName string, data interface{}) {
 	SetContextInfo(ctx, funcName, nil, "data", data)
-	ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "data": data})
+	ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": 0, "errMsg": "", "errDtl": "", "data": data})
 }
 
 func argsHandle(args []interface{}, fields map[string]interface{}) {
