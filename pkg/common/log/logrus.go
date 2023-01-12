@@ -22,7 +22,8 @@ var ctxLogger *Logger
 
 type Logger struct {
 	*logrus.Logger
-	Pid int
+	Pid  int
+	Type string
 }
 
 func init() {
@@ -58,6 +59,7 @@ func ctxLoggerInit(moduleName string) *Logger {
 	return &Logger{
 		ctxLogger,
 		os.Getpid(),
+		"ctxLogger",
 	}
 }
 
@@ -95,6 +97,7 @@ func loggerInit(moduleName string) *Logger {
 	return &Logger{
 		logger,
 		os.Getpid(),
+		"",
 	}
 }
 func NewLfsHook(rotationTime time.Duration, maxRemainNum uint, moduleName string) logrus.Hook {
@@ -239,11 +242,13 @@ func ShowLog(ctx context.Context) {
 	OperationID := trace_log.GetOperationID(ctx)
 	if ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo).GinCtx != nil {
 		ctxLogger.WithFields(logrus.Fields{
+			"Type":        ctxLogger.Type,
 			"OperationID": OperationID,
 			"PID":         ctxLogger.Pid,
 		}).Infoln("api: ", t.ApiName)
 	} else {
 		ctxLogger.WithFields(logrus.Fields{
+			"Type":        ctxLogger.Type,
 			"OperationID": OperationID,
 			"PID":         ctxLogger.Pid,
 		}).Infoln("rpc: ", t.ApiName)
@@ -251,6 +256,7 @@ func ShowLog(ctx context.Context) {
 	for _, v := range *t.Funcs {
 		if v.Err != nil {
 			ctxLogger.WithFields(logrus.Fields{
+				"Type":        ctxLogger.Type,
 				"OperationID": OperationID,
 				"PID":         ctxLogger.Pid,
 				"FilePath":    v.File,
@@ -259,18 +265,21 @@ func ShowLog(ctx context.Context) {
 			switch v.LogLevel {
 			case logrus.InfoLevel:
 				ctxLogger.WithFields(logrus.Fields{
+					"Type":        ctxLogger.Type,
 					"OperationID": OperationID,
 					"PID":         ctxLogger.Pid,
 					"FilePath":    v.File,
 				}).Infoln("func: ", v.FuncName, " args: ", v.Args)
 			case logrus.DebugLevel:
 				ctxLogger.WithFields(logrus.Fields{
+					"Type":        ctxLogger.Type,
 					"OperationID": OperationID,
 					"PID":         ctxLogger.Pid,
 					"FilePath":    v.File,
 				}).Debugln("func: ", v.FuncName, " args: ", v.Args)
 			case logrus.WarnLevel:
 				ctxLogger.WithFields(logrus.Fields{
+					"Type":        ctxLogger.Type,
 					"OperationID": OperationID,
 					"PID":         ctxLogger.Pid,
 					"FilePath":    v.File,
