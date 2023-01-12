@@ -239,17 +239,17 @@ func NewWarn(OperationID string, args ...interface{}) {
 func ShowLog(ctx context.Context) {
 	t := ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo)
 	OperationID := trace_log.GetOperationID(ctx)
-	if ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo).GinCtx != nil {
-		ctxLogger.WithFields(logrus.Fields{
-			"OperationID": OperationID,
-			"PID":         ctxLogger.Pid,
-		}).Infoln("api: ", t.ApiName)
-	} else {
-		ctxLogger.WithFields(logrus.Fields{
-			"OperationID": OperationID,
-			"PID":         ctxLogger.Pid,
-		}).Infoln("rpc: ", t.ApiName)
-	}
+	//if ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo).GinCtx != nil {
+	//	ctxLogger.WithFields(logrus.Fields{
+	//		"OperationID": OperationID,
+	//		"PID":         ctxLogger.Pid,
+	//	}).Infoln("api: ", t.ApiName)
+	//} else {
+	//	ctxLogger.WithFields(logrus.Fields{
+	//		"OperationID": OperationID,
+	//		"PID":         ctxLogger.Pid,
+	//	}).Infoln("rpc: ", t.ApiName)
+	//}
 	for _, v := range *t.Funcs {
 
 		if v.Err != nil {
