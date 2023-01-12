@@ -123,6 +123,22 @@ type FuncInfo struct {
 
 type Args map[string]interface{}
 
+func (a Args) String() string {
+	var s string
+	var hasElement bool
+	for k, v := range a {
+		if !hasElement {
+			s += "{"
+			hasElement = true
+		}
+		s += fmt.Sprintf("%s:%d", k, v)
+	}
+	if hasElement {
+		s += "}"
+	}
+	return s
+}
+
 func SetContextInfo(ctx context.Context, funcName string, err error, args ...interface{}) {
 	t := ctx.Value(TraceLogKey).(*ApiInfo)
 	var funcInfo FuncInfo
