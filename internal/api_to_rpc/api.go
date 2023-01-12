@@ -19,7 +19,7 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		return
 	}
 	trace_log.SetContextInfo(nCtx, "BindJSON", nil, "params", apiReq)
-	etcdConn, err := getcdv3.GetConn(c, rpcName)
+	etcdConn, err := getcdv3.GetConn(nCtx, rpcName)
 	if err != nil {
 		trace_log.WriteErrorResponse(nCtx, "GetDefaultConn", err)
 		return
