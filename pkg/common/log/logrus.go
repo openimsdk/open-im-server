@@ -33,7 +33,7 @@ func init() {
 
 func NewPrivateLog(moduleName string) {
 	logger = loggerInit(moduleName)
-	ctxLogger = loggerInit(moduleName)
+	ctxLogger = ctxLoggerInit(moduleName)
 }
 
 func ctxLoggerInit(moduleName string) *Logger {
