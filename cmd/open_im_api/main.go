@@ -99,7 +99,7 @@ func main() {
 	//group related routing group
 	groupRouterGroup := r.Group("/group")
 	groupRouterGroup.Use(func(c *gin.Context) {
-		userID, err := token_verify.ParseUserIDFromToken(c.GetHeader("token"), c.MustGet("operationID").(string))
+		userID, err := token_verify.ParseUserIDFromToken(c.GetHeader("token"), c.GetString("operationID"))
 		if err != nil {
 			c.String(400, err.Error())
 			c.Abort()
