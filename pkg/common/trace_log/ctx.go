@@ -124,7 +124,7 @@ type FuncInfo struct {
 
 type Args map[string]interface{}
 
-func (a *Args) String() string {
+func (a Args) String() string {
 	bytes, _ := json.Marshal(a)
 	return string(bytes)
 }
