@@ -21,7 +21,7 @@ func GetConn(ctx context.Context, serviceName string) (conn *grpc.ClientConn, er
 	conn = getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","),
 		serviceName, trace_log.GetOperationID(ctx), config.Config.Etcd.UserName, config.Config.Etcd.Password)
 	if conn == nil {
-		return nil, &constant.ErrInternalServer
+		return nil, constant.ErrInternalServer
 	}
 	return conn, nil
 }
