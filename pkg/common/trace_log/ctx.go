@@ -70,12 +70,14 @@ func WriteErrorResponse(ctx context.Context, funcName string, err error, args ..
 	e := Unwrap(err)
 	switch t := e.(type) {
 	case *constant.ErrInfo:
-		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": t.ErrCode, "errMsg": t.ErrMsg, "errDtl": t.DetailErrMsg})
+		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, baseResp{ErrCode: t.ErrCode, ErrMsg: t.ErrMsg, ErrDtl: t.DetailErrMsg})
+		//ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": t.ErrCode, "errMsg": t.ErrMsg, "errDtl": t.DetailErrMsg})
 		return
 	default:
 		s, ok := status.FromError(e)
 		if !ok {
-			ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": constant.ErrDefaultOther.ErrCode, "errMsg": err.Error(), "errDtl": fmt.Sprintf("%+v", err)})
+			ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, &baseResp{ErrCode: constant.ErrDefaultOther.ErrCode, ErrMsg: err.Error(), ErrDtl: fmt.Sprintf("%+v", err)})
+			//ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": constant.ErrDefaultOther.ErrCode, "errMsg": err.Error(), "errDtl": fmt.Sprintf("%+v", err)})
 			return
 		}
 		var details []string
@@ -85,9 +87,17 @@ func WriteErrorResponse(ctx context.Context, funcName string, err error, args ..
 		for _, s := range s.Details() {
 			details = append(details, fmt.Sprintf("%+v", s))
 		}
-		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": s.Code(), "errMsg": s.Message(), "errDtl": strings.Join(details, "\n")})
+		ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, &baseResp{ErrCode: int32(s.Code()), ErrMsg: s.Message(), ErrDtl: strings.Join(details, "\n")})
+		//ctx.Value(TraceLogKey).(*ApiInfo).GinCtx.JSON(http.StatusOK, gin.H{"errCode": s.Code(), "errMsg": s.Message(), "errDtl": strings.Join(details, "\n")})
 		return
 	}
+}
+
+type baseResp struct {
+	ErrCode int32       `json:"errCode"`
+	ErrMsg  string      `json:"errMsg"`
+	ErrDtl  string      `json:"errDtl"`
+	Data    interface{} `json:"data"`
 }
 
 //func WriteErrorResponse(ctx context.Context, funcName string, err error, args ...interface{}) {
