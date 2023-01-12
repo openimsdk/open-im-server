@@ -2,11 +2,10 @@ package constant
 
 import (
 	sdkws "Open_IM/pkg/proto/sdk_ws"
-	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
@@ -25,11 +24,11 @@ func (e *ErrInfo) Code() int32 {
 }
 
 func (e *ErrInfo) Warp() error {
-	return utils.Wrap(e, "")
+	return errors.WithStack(e)
 }
 
 func (e *ErrInfo) WarpMessage(msg string) error {
-	return utils.Wrap(e, msg)
+	return errors.WithMessage(e, "")
 }
 
 func NewErrNetwork(err error) error {
