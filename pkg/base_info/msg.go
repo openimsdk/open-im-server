@@ -78,7 +78,7 @@ type ModifyMessageReactionExtensionsResp struct {
 type OperateMessageListReactionExtensionsReq struct {
 	OperationID            string                                                        `json:"operationID" binding:"required"`
 	SourceID               string                                                        `json:"sourceID"  binding:"required"`
-	SessionType            string                                                        `json:"sessionType" binding:"required"`
+	SessionType            int32                                                         `json:"sessionType" binding:"required"`
 	IsExternalExtensions   bool                                                          `json:"isExternalExtensions"`
 	TypeKeyList            []string                                                      `json:"typeKeyList"`
 	MessageReactionKeyList []*msg.GetMessageListReactionExtensionsReq_MessageReactionKey `json:"messageReactionKeyList" binding:"required"`
@@ -95,6 +95,7 @@ type OperateMessageListReactionExtensionsResp struct {
 type SetMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
 
 type SetMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp
+
 type AddMessageReactionExtensionsReq ModifyMessageReactionExtensionsReq
 
 type AddMessageReactionExtensionsResp ModifyMessageReactionExtensionsResp

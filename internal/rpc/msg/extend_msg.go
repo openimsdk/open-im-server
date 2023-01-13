@@ -300,18 +300,19 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.A
 		}
 		return &rResp, nil
 	}
-	if !req.IsExternalExtensions {
-		rResp.ErrCode = 200
-		rResp.ErrMsg = "only extenalextensions message can be used"
-		for _, value := range req.ReactionExtensionList {
-			temp := new(msg.KeyValueResp)
-			temp.KeyValue = value
-			temp.ErrMsg = callbackResp.ErrMsg
-			temp.ErrCode = 100
-			rResp.Result = append(rResp.Result, temp)
-		}
-		return &rResp, nil
-	}
+
+	//if !req.IsExternalExtensions {
+	//	rResp.ErrCode = 200
+	//	rResp.ErrMsg = "only extenalextensions message can be used"
+	//	for _, value := range req.ReactionExtensionList {
+	//		temp := new(msg.KeyValueResp)
+	//		temp.KeyValue = value
+	//		temp.ErrMsg = callbackResp.ErrMsg
+	//		temp.ErrCode = 100
+	//		rResp.Result = append(rResp.Result, temp)
+	//	}
+	//	return &rResp, nil
+	//}
 	//if ExternalExtension
 	var isHistory bool
 	if req.IsReact {
@@ -321,6 +322,7 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.A
 	}
 	rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
 	rResp.Result = callbackResp.ResultReactionExtensionList
+	rResp.IsReact = callbackResp.IsReact
 	ExtendMessageAddedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
 	return &rResp, nil
 }

@@ -128,5 +128,6 @@ type CallbackAddMessageReactionExtReq struct {
 type CallbackAddMessageReactionExtResp struct {
 	*CommonCallbackResp
 	ResultReactionExtensionList []*msg.KeyValueResp `json:"resultReactionExtensionList"`
+	IsReact                     bool                `json:"isReact"`
 	MsgFirstModifyTime          int64               `json:"msgFirstModifyTime"`
 }
