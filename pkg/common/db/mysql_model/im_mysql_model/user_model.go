@@ -5,8 +5,20 @@ import (
 	"Open_IM/pkg/utils"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"time"
 )
+
+var (
+	BlackListDB *gorm.DB
+	UserDB      *gorm.DB
+)
+
+type BlackList struct {
+	UserId           string    `gorm:"column:uid"`
+	BeginDisableTime time.Time `gorm:"column:begin_disable_time"`
+	EndDisableTime   time.Time `gorm:"column:end_disable_time"`
+}
 
 func UserRegister(user User) error {
 	user.CreateTime = time.Now()
