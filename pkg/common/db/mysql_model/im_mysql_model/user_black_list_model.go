@@ -19,6 +19,60 @@ type Black struct {
 	Ex             string    `gorm:"column:ex;size:1024"`
 }
 
+func (*Black) Create(ctx context.Context, blacks []*Black) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
+	}()
+	return utils.Wrap(BlackDB.Create(&blacks).Error, "")
+}
+
+func (*Black) Delete(ctx context.Context, blacks []*Black) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
+	}()
+	return utils.Wrap(GroupMemberDB.Delete(blacks).Error, "")
+}
+
+func (*Black) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blockUserID", blockUserID, "args", args)
+	}()
+	return utils.Wrap(BlackDB.Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error, "")
+}
+
+func (*Black) Update(ctx context.Context, blacks []*Black) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
+	}()
+	return utils.Wrap(BlackDB.Updates(&blacks).Error, "")
+}
+
+func (*Black) Find(ctx context.Context, blacks []Black) (blackList []*Black, err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks, "blackList", blackList)
+	}()
+	var where [][]interface{}
+	for _, black := range blacks {
+		where = append(where, []interface{}{black.OwnerUserID, black.BlockUserID})
+	}
+	return blackList, utils.Wrap(GroupMemberDB.Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error, "")
+}
+
+func (*Black) Take(ctx context.Context, blackID string) (black *Black, err error) {
+	black = &Black{}
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blackID", blackID, "black", *black)
+	}()
+	return black, utils.Wrap(BlackDB.Where("black_id = ?", blackID).Take(black).Error, "")
+}
+
+func (*Black) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*Black, err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blackList", blackList)
+	}()
+	return blackList, utils.Wrap(GroupMemberDB.Where("owner_user_id = ?", ownerUserID).Find(&blackList).Error, "")
+}
+
 func InsertInToUserBlackList(ctx context.Context, black Black) (err error) {
 	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "black", black)
 	black.CreateTime = time.Now()
