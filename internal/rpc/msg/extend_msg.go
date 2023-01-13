@@ -300,6 +300,7 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.A
 		}
 		return &rResp, nil
 	}
+
 	//if !req.IsExternalExtensions {
 	//	rResp.ErrCode = 200
 	//	rResp.ErrMsg = "only extenalextensions message can be used"
@@ -321,6 +322,7 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.A
 	}
 	rResp.MsgFirstModifyTime = callbackResp.MsgFirstModifyTime
 	rResp.Result = callbackResp.ResultReactionExtensionList
+	rResp.IsReact = callbackResp.IsReact
 	ExtendMessageAddedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
 	return &rResp, nil
 }
