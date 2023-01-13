@@ -20,10 +20,10 @@ const ConfName = "openIMConf"
 
 var Config config
 
-type callBackConfig struct {
-	Enable                 bool `yaml:"enable"`
-	CallbackTimeOut        int  `yaml:"callbackTimeOut"`
-	CallbackFailedContinue bool `yaml:"callbackFailedContinue"`
+type CallBackConfig struct {
+	Enable                 bool  `yaml:"enable"`
+	CallbackTimeOut        int   `yaml:"callbackTimeOut"`
+	CallbackFailedContinue *bool `yaml:"callbackFailedContinue"`
 }
 
 type config struct {
@@ -283,21 +283,21 @@ type config struct {
 
 	Callback struct {
 		CallbackUrl                        string         `yaml:"callbackUrl"`
-		CallbackBeforeSendSingleMsg        callBackConfig `yaml:"callbackBeforeSendSingleMsg"`
-		CallbackAfterSendSingleMsg         callBackConfig `yaml:"callbackAfterSendSingleMsg"`
-		CallbackBeforeSendGroupMsg         callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
-		CallbackAfterSendGroupMsg          callBackConfig `yaml:"callbackAfterSendGroupMsg"`
-		CallbackMsgModify                  callBackConfig `yaml:"callbackMsgModify"`
-		CallbackUserOnline                 callBackConfig `yaml:"callbackUserOnline"`
-		CallbackUserOffline                callBackConfig `yaml:"callbackUserOffline"`
-		CallbackUserKickOff                callBackConfig `yaml:"callbackUserKickOff"`
-		CallbackOfflinePush                callBackConfig `yaml:"callbackOfflinePush"`
-		CallbackOnlinePush                 callBackConfig `yaml:"callbackOnlinePush"`
-		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`
-		CallbackBeforeAddFriend            callBackConfig `yaml:"callbackBeforeAddFriend"`
-		CallbackBeforeCreateGroup          callBackConfig `yaml:"callbackBeforeCreateGroup"`
-		CallbackBeforeMemberJoinGroup      callBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
-		CallbackBeforeSetGroupMemberInfo   callBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
+		CallbackBeforeSendSingleMsg        CallBackConfig `yaml:"callbackBeforeSendSingleMsg"`
+		CallbackAfterSendSingleMsg         CallBackConfig `yaml:"callbackAfterSendSingleMsg"`
+		CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"callbackBeforeSendGroupMsg"`
+		CallbackAfterSendGroupMsg          CallBackConfig `yaml:"callbackAfterSendGroupMsg"`
+		CallbackMsgModify                  CallBackConfig `yaml:"callbackMsgModify"`
+		CallbackUserOnline                 CallBackConfig `yaml:"callbackUserOnline"`
+		CallbackUserOffline                CallBackConfig `yaml:"callbackUserOffline"`
+		CallbackUserKickOff                CallBackConfig `yaml:"callbackUserKickOff"`
+		CallbackOfflinePush                CallBackConfig `yaml:"callbackOfflinePush"`
+		CallbackOnlinePush                 CallBackConfig `yaml:"callbackOnlinePush"`
+		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"callbackSuperGroupOnlinePush"`
+		CallbackBeforeAddFriend            CallBackConfig `yaml:"callbackBeforeAddFriend"`
+		CallbackBeforeCreateGroup          CallBackConfig `yaml:"callbackBeforeCreateGroup"`
+		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
+		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
@@ -640,8 +640,8 @@ func unmarshalConfig(config interface{}, configPath string) {
 }
 
 func initConfig(config interface{}, configName, configPath string) {
-	var env string
 	if configPath == "" {
+		var env string
 		if configName == "config.yaml" {
 			env = "CONFIG_NAME"
 		} else if configName == "usualConfig.yaml" {
@@ -649,32 +649,17 @@ func initConfig(config interface{}, configName, configPath string) {
 		}
 		cfgName := os.Getenv(env)
 		if len(cfgName) != 0 {
-			bytes, err := ioutil.ReadFile(filepath.Join(cfgName, "config", configName))
-			if err != nil {
-				bytes, err = ioutil.ReadFile(filepath.Join(Root, "config", configName))
-				if err != nil {
-					panic(err.Error() + " config: " + filepath.Join(cfgName, "config", configName))
-				}
+			configPath = filepath.Join(cfgName, "config", configName)
+			_, err := os.Stat(configPath)
+			if os.IsNotExist(err) {
+				configPath = filepath.Join(Root, "config", configName)
 			} else {
 				Root = cfgName
 			}
-			if err = yaml.Unmarshal(bytes, config); err != nil {
-				panic(err.Error())
-			}
-			return
 		} else {
-			bytes, err := ioutil.ReadFile(fmt.Sprintf("../config/%s", configName))
-			if err != nil {
-				panic(err.Error() + configName)
-			}
-			if err = yaml.Unmarshal(bytes, config); err != nil {
-				panic(err.Error())
-			}
+			configPath = fmt.Sprintf("../config/%s", configName)
 		}
-	} else {
-
 	}
-
 	unmarshalConfig(config, configPath)
 }
 
@@ -745,11 +730,9 @@ func InitConfig(configPath string) {
 	if Config.Push.Getui.Enable == nil {
 		Config.Push.Getui.Enable = &UsualConfig.Push.Getui.Enable
 	}
-
 	if Config.Secret == "" {
 		Config.Secret = UsualConfig.Secret
 	}
-
 	if Config.TokenPolicy.AccessExpire == 0 {
 		Config.TokenPolicy.AccessExpire = UsualConfig.Tokenpolicy.AccessExpire
 	}
@@ -759,81 +742,5 @@ func InitConfig(configPath string) {
 }
 
 func init() {
-	initConfig(&Config, "config.yaml", "")
-	initConfig(&UsualConfig, "usualConfig.yaml", "")
-	if Config.Etcd.UserName == "" {
-		Config.Etcd.UserName = UsualConfig.Etcd.UserName
-	}
-	if Config.Etcd.Password == "" {
-		Config.Etcd.Password = UsualConfig.Etcd.Password
-	}
-	if Config.Etcd.Secret == "" {
-		Config.Etcd.Secret = UsualConfig.Etcd.Secret
-	}
-
-	if Config.Mysql.DBUserName == "" {
-		Config.Mysql.DBUserName = UsualConfig.Mysql.DBUserName
-	}
-	if Config.Mysql.DBPassword == "" {
-		Config.Mysql.DBPassword = UsualConfig.Mysql.DBPassword
-	}
-
-	if Config.Redis.DBUserName == "" {
-		Config.Redis.DBUserName = UsualConfig.Redis.DBUserName
-	}
-	if Config.Redis.DBPassWord == "" {
-		Config.Redis.DBPassWord = UsualConfig.Redis.DBPassword
-	}
-
-	if Config.Mongo.DBUserName == "" {
-		Config.Mongo.DBUserName = UsualConfig.Mongo.DBUserName
-	}
-	if Config.Mongo.DBPassword == "" {
-		Config.Mongo.DBPassword = UsualConfig.Mongo.DBPassword
-	}
-
-	if Config.Kafka.SASLUserName == "" {
-		Config.Kafka.SASLUserName = UsualConfig.Kafka.SASLUserName
-	}
-	if Config.Kafka.SASLPassword == "" {
-		Config.Kafka.SASLPassword = UsualConfig.Kafka.SASLPassword
-	}
-
-	if Config.Credential.Minio.AccessKeyID == "" {
-		Config.Credential.Minio.AccessKeyID = UsualConfig.Credential.Minio.AccessKeyID
-	}
-	if Config.Credential.Minio.SecretAccessKey == "" {
-		Config.Credential.Minio.SecretAccessKey = UsualConfig.Credential.Minio.SecretAccessKey
-	}
-	if Config.Credential.Minio.Endpoint == "" {
-		Config.Credential.Minio.Endpoint = UsualConfig.Credential.Minio.Endpoint
-	}
-
-	if Config.MessageVerify.FriendVerify == nil {
-		Config.MessageVerify.FriendVerify = &UsualConfig.Messageverify.FriendVerify
-	}
-
-	if Config.Push.Getui.MasterSecret == "" {
-		Config.Push.Getui.MasterSecret = UsualConfig.Push.Getui.MasterSecret
-	}
-	if Config.Push.Getui.AppKey == "" {
-		Config.Push.Getui.AppKey = UsualConfig.Push.Getui.AppKey
-	}
-	if Config.Push.Getui.PushUrl == "" {
-		Config.Push.Getui.PushUrl = UsualConfig.Push.Getui.PushUrl
-	}
-	if Config.Push.Getui.Enable == nil {
-		Config.Push.Getui.Enable = &UsualConfig.Push.Getui.Enable
-	}
-
-	if Config.Secret == "" {
-		Config.Secret = UsualConfig.Secret
-	}
-
-	if Config.TokenPolicy.AccessExpire == 0 {
-		Config.TokenPolicy.AccessExpire = UsualConfig.Tokenpolicy.AccessExpire
-	}
-	if Config.TokenPolicy.AccessSecret == "" {
-		Config.TokenPolicy.AccessSecret = UsualConfig.Tokenpolicy.AccessSecret
-	}
+	InitConfig("")
 }

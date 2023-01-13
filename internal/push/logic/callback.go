@@ -40,7 +40,7 @@ func callbackOfflinePush(operationID string, userIDList []string, msg *commonPb.
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackOfflinePushCommand, req, resp, config.Config.Callback.CallbackOfflinePush.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
-		if !config.Config.Callback.CallbackOfflinePush.CallbackFailedContinue {
+		if !*config.Config.Callback.CallbackOfflinePush.CallbackFailedContinue {
 			callbackResp.ActionCode = constant.ActionForbidden
 			return callbackResp
 		} else {
