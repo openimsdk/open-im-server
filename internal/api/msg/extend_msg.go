@@ -72,7 +72,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 		reqPb rpc.GetMessageListReactionExtensionsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
+		c.JSON(http.StatusOK, gin.H{"errCode": 400, "errMsg": err.Error()})
 		return
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req:", req)
@@ -86,7 +86,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 	if !ok {
 		errMsg := req.OperationID + " " + "GetUserIDFromToken failed " + errInfo + " token:" + c.Request.Header.Get("token")
 		log.NewError(req.OperationID, errMsg)
-		c.JSON(http.StatusBadRequest, gin.H{"errCode": 500, "errMsg": errMsg})
+		c.JSON(http.StatusOK, gin.H{"errCode": 500, "errMsg": errMsg})
 		return
 	}
 
