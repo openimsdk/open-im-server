@@ -46,7 +46,7 @@ message GetGroupApplicationListResp {
 
 message GetUserReqApplicationListReq{
   string userID = 1;
-  server_api_params.RequestPagination pagination = 1;
+  server_api_params.RequestPagination pagination = 2;
 }
 
 message GetUserReqApplicationListResp{
@@ -97,7 +97,7 @@ message QuitGroupResp{
 message GetGroupMemberListReq {
   string groupID = 1;
   int32 filter = 4;
-  server_api_params.RequestPagination pagination = 1;
+  server_api_params.RequestPagination pagination = 2;
 }
 
 message GetGroupMemberListResp {
