@@ -9,7 +9,6 @@ import (
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
-	"github.com/OpenIMSDK/open_utils"
 	"time"
 
 	go_redis "github.com/go-redis/redis/v8"
@@ -158,19 +157,6 @@ func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool 
 		return true
 	}
 	return false
-}
-
-func CheckAccessV2(ctx context.Context, OpUserID string, OwnerUserID string) (err error) {
-	defer func() {
-		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", OpUserID, "OwnerUserID", OwnerUserID)
-	}()
-	if utils.IsContain(OpUserID, config.Config.Manager.AppManagerUid) {
-		return nil
-	}
-	if OpUserID == OwnerUserID {
-		return nil
-	}
-	return utils.Wrap(constant.ErrIdentity, open_utils.GetSelfFuncName())
 }
 
 func CheckAccessV3(ctx context.Context, OwnerUserID string) (err error) {

@@ -132,3 +132,7 @@ func IsRepeatStringSlice(arr []string) bool {
 	}
 	return false
 }
+
+func IsRepeatID(args ...interface{}) bool {
+	return false
+}
