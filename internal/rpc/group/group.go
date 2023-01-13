@@ -664,12 +664,8 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 	if err := CheckPermission(ctx, req.GroupID, tools.OpUserID(ctx)); err != nil {
 		return nil, err
 	}
-	groupRequest := imdb.GroupRequest{}
-	utils.CopyStructFields(&groupRequest, req)
-	groupRequest.UserID = req.FromUserID
-	groupRequest.HandleUserID = tools.OpUserID(ctx)
-	groupRequest.HandledTime = time.Now()
-	if err := (&imdb.GroupRequest{}).Update(ctx, []*imdb.GroupRequest{&groupRequest}); err != nil {
+	groupRequest := getDBGroupRequest(ctx, req)
+	if err := (&imdb.GroupRequest{}).Update(ctx, []*imdb.GroupRequest{groupRequest}); err != nil {
 		return nil, err
 	}
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
