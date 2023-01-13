@@ -61,6 +61,17 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 				resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
 				return resp, nil
 			}
+			if req.Conversation.ConversationType == constant.SuperGroupChatType {
+				if req.Conversation.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
+					if err = db.DB.SetSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
+						log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+					}
+				} else {
+					if err = db.DB.ReduceSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
+						log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+					}
+				}
+			}
 		}
 		err = imdb.UpdateColumnsConversations(haveUserID, req.Conversation.ConversationID, map[string]interface{}{"recv_msg_opt": conversation.RecvMsgOpt})
 	case constant.FieldGroupAtType:
