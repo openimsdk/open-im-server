@@ -58,9 +58,9 @@ func (*Friend) Find(ctx context.Context, ownerUserID string) (friends []*Friend,
 	return friends, err
 }
 
-func (*Friend) Take(ctx context.Context, ownerUserID, friendUserID string) (group *Group, err error) {
-	group = &Group{}
-	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "group", *group)
-	err = utils.Wrap(FriendDB.Where("owner_user_id = ? and friend_user_id", ownerUserID, friendUserID).Take(group).Error, "")
-	return group, err
+func (*Friend) Take(ctx context.Context, ownerUserID, friendUserID string) (friend *Friend, err error) {
+	friend = &Friend{}
+	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "group", *friend)
+	err = utils.Wrap(FriendDB.Where("owner_user_id = ? and friend_user_id", ownerUserID, friendUserID).Take(friend).Error, "")
+	return friend, err
 }
