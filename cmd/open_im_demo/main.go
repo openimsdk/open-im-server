@@ -35,7 +35,6 @@ func main() {
 		authRouterGroup.POST("/password", register.SetPassword)
 		authRouterGroup.POST("/login", register.Login)
 		authRouterGroup.POST("/reset_password", register.ResetPassword)
-		authRouterGroup.POST("/check_login", register.CheckLoginLimit)
 	}
 	demoRouterGroup := r.Group("/auth")
 	{
@@ -44,24 +43,8 @@ func main() {
 		demoRouterGroup.POST("/password", register.SetPassword)
 		demoRouterGroup.POST("/login", register.Login)
 		demoRouterGroup.POST("/reset_password", register.ResetPassword)
-		demoRouterGroup.POST("/check_login", register.CheckLoginLimit)
 	}
 
-	//deprecated
-	cmsRouterGroup := r.Group("/cms_admin")
-	{
-		cmsRouterGroup.POST("/generate_invitation_code", register.GenerateInvitationCode)
-		cmsRouterGroup.POST("/query_invitation_code", register.QueryInvitationCode)
-		cmsRouterGroup.POST("/get_invitation_codes", register.GetInvitationCodes)
-
-		cmsRouterGroup.POST("/query_user_ip_limit_login", register.QueryUserIDLimitLogin)
-		cmsRouterGroup.POST("/add_user_ip_limit_login", register.AddUserIPLimitLogin)
-		cmsRouterGroup.POST("/remove_user_ip_limit_login", register.RemoveUserIPLimitLogin)
-
-		cmsRouterGroup.POST("/query_ip_register", register.QueryIPRegister)
-		cmsRouterGroup.POST("/add_ip_limit", register.AddIPLimit)
-		cmsRouterGroup.POST("/remove_ip_Limit", register.RemoveIPLimit)
-	}
 	defaultPorts := config.Config.Demo.Port
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10004 as port")
 	flag.Parse()
@@ -71,7 +54,6 @@ func main() {
 	}
 	address = config.Config.CmsApi.ListenIP + ":" + strconv.Itoa(*ginPort)
 	fmt.Println("start demo api server address: ", address, ", OpenIM version: ", constant.CurrentVersion, "\n")
-	go register.OnboardingProcessRoutine()
 	go register.ImportFriendRoutine()
 	err := r.Run(address)
 	if err != nil {

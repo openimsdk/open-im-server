@@ -1,4 +1,4 @@
-package call_back_struct
+package callback_struct
 
 type CallbackBeforeAddFriendReq struct {
 	CallbackCommand string `json:"callbackCommand"`

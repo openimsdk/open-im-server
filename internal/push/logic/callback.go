@@ -1,7 +1,7 @@
 package logic
 
 import (
-	cbApi "Open_IM/pkg/call_back_struct"
+	cbApi "Open_IM/pkg/callback_struct"
 	"Open_IM/pkg/common/callback"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
