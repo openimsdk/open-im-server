@@ -6,21 +6,6 @@ import (
 	"reflect"
 )
 
-func CopyAny(from, to interface{}) {
-	t := reflect.ValueOf(to)
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-	if !t.CanSet() {
-		return
-	}
-	f := reflect.ValueOf(from)
-	if isBaseNil(f) {
-		return
-	}
-	copyAny(f, t)
-}
-
 func setBaseValue(from, to reflect.Value) {
 	if isBaseNil(from) {
 		return
@@ -40,12 +25,30 @@ func setBaseValue(from, to reflect.Value) {
 	to.Set(v)
 }
 
+func CopyAny(from, to interface{}) {
+	t := reflect.ValueOf(to)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if !t.CanSet() {
+		return
+	}
+	f := reflect.ValueOf(from)
+	if isBaseNil(f) {
+		return
+	}
+	copyAny(f, t)
+}
+
 func copyAny(from, to reflect.Value) {
 	if !to.CanSet() {
 		return
 	}
 	if isBaseNil(from) {
 		return
+	}
+	if isBaseNil(to) {
+		to.Set(getBaseZeroValue(to.Type()))
 	}
 	btfrom := baseType(from.Type())
 	btto := baseType(to.Type())
@@ -116,6 +119,15 @@ func baseType(t reflect.Type) reflect.Type {
 		t = t.Elem()
 	}
 	return t
+}
+
+func baseLayer(t reflect.Type) int {
+	var layer int
+	for t.Kind() == reflect.Ptr {
+		layer++
+		t = t.Elem()
+	}
+	return layer
 }
 
 func typeEq(t1, t2 reflect.Type) bool {
