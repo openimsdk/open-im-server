@@ -519,10 +519,6 @@ message RequestPagination {
   int32 showNumber = 2;
 }
 
-message ResponsePagination {
-  int32 CurrentPage = 5;
-  int32 ShowNumber = 6;
-}
 
 
 ///////////////////signal//////////////
