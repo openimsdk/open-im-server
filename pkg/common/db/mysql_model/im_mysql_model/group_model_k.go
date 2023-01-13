@@ -57,12 +57,12 @@ func (*Group) Update(ctx context.Context, groups []*Group) (err error) {
 	return utils.Wrap(GroupDB.Updates(&groups).Error, "")
 }
 
-func (*Group) Find(ctx context.Context, groupIDs []string) (groupList []*Group, err error) {
+func (*Group) Find(ctx context.Context, groupIDs []string) (groups []*Group, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDList", groupIDs, "groupList", groupList)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs, "groups", groups)
 	}()
-	err = utils.Wrap(GroupDB.Where("group_id in (?)", groupIDs).Find(&groupList).Error, "")
-	return groupList, err
+	err = utils.Wrap(GroupDB.Where("group_id in (?)", groupIDs).Find(&groups).Error, "")
+	return groups, err
 }
 
 func (*Group) Take(ctx context.Context, groupID string) (group *Group, err error) {

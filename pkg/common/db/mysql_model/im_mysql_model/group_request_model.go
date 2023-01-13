@@ -1,24 +1,13 @@
 package im_mysql_model
 
-//type GroupRequest struct {
-//	UserID       string    `gorm:"column:user_id;primaryKey;"`
-//	GroupID      string    `gorm:"column:group_id;primaryKey;"`
-//	HandleResult int32    `gorm:"column:handle_result"`
-//	ReqMsg       string    `gorm:"column:req_msg"`
-//	HandledMsg   string    `gorm:"column:handled_msg"`
-//	ReqTime      time.Time `gorm:"column:req_time"`
-//	HandleUserID string    `gorm:"column:handle_user_id"`
-//	HandledTime  time.Time `gorm:"column:handle_time"`
-//	Ex           string    `gorm:"column:ex"`
-//}
-
+//
 //func UpdateGroupRequest(groupRequest GroupRequest) error {
 //	if groupRequest.HandledTime.Unix() < 0 {
 //		groupRequest.HandledTime = utils.UnixSecondToTime(0)
 //	}
 //	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupRequest.GroupID, groupRequest.UserID).Updates(&groupRequest).Error
 //}
-
+//
 //func InsertIntoGroupRequest(toInsertInfo GroupRequest) error {
 //	DelGroupRequestByGroupIDAndUserID(toInsertInfo.GroupID, toInsertInfo.UserID)
 //	if toInsertInfo.HandledTime.Unix() < 0 {
@@ -40,7 +29,7 @@ package im_mysql_model
 //	}
 //	return nil
 //}
-
+//
 //func GetGroupRequestByGroupIDAndUserID(groupID, userID string) (*GroupRequest, error) {
 //	var groupRequest GroupRequest
 //	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=? and group_id=?", userID, groupID).Take(&groupRequest).Error
@@ -49,7 +38,7 @@ package im_mysql_model
 //	}
 //	return &groupRequest, nil
 //}
-
+//
 //func DelGroupRequestByGroupIDAndUserID(groupID, userID string) error {
 //	return db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("group_id=? and user_id=?", groupID, userID).Delete(GroupRequest{}).Error
 //}
@@ -62,8 +51,8 @@ package im_mysql_model
 //	}
 //	return groupRequestList, nil
 //}
-
-// received
+//
+//received
 //func GetRecvGroupApplicationList(userID string) ([]GroupRequest, error) {
 //	var groupRequestList []GroupRequest
 //	memberList, err := GetGroupMemberListByUserID(userID)
@@ -87,7 +76,7 @@ package im_mysql_model
 //	err := db.DB.MysqlDB.DefaultGormDB().Table("group_requests").Where("user_id=?", userID).Find(&groupRequestList).Error
 //	return groupRequestList, err
 //}
-
+//
 //
 //func GroupApplicationResponse(pb *group.GroupApplicationResponseReq) (*group.CommonResp, error) {
 //
@@ -149,7 +138,7 @@ package im_mysql_model
 //
 //	return &group.GroupApplicationResponseResp{}, nil
 //}
-
+//
 //func FindGroupBeInvitedRequestInfoByUidAndGroupID(groupId, uid string) (*GroupRequest, error) {
 //	dbConn, err := db.DB.MysqlDB.DefaultGormDB()
 //	if err != nil {
@@ -163,7 +152,7 @@ package im_mysql_model
 //	return &beInvitedRequestUserInfo, nil
 //
 //}
-
+//
 //func InsertGroupRequest(groupId, fromUser, fromUserNickName, fromUserFaceUrl, toUser, requestMsg, handledMsg string, handleStatus int) error {
 //	return nil
 //}
