@@ -27,8 +27,6 @@ const (
 	groupMemberInfoCache      = "GROUP_MEMBER_INFO_CACHE:"
 	groupAllMemberInfoCache   = "GROUP_ALL_MEMBER_INFO_CACHE:"
 	allFriendInfoCache        = "ALL_FRIEND_INFO_CACHE:"
-	allDepartmentCache        = "ALL_DEPARTMENT_CACHE:"
-	allDepartmentMemberCache  = "ALL_DEPARTMENT_MEMBER_CACHE:"
 	joinedSuperGroupListCache = "JOINED_SUPER_GROUP_LIST_CACHE:"
 	groupMemberListHashCache  = "GROUP_MEMBER_LIST_HASH_CACHE:"
 	groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
@@ -39,7 +37,7 @@ const (
 )
 
 func DelKeys() {
-	fmt.Println("init to del old keys")
+	fmt.Println("cache init to del old keys")
 	for _, key := range []string{groupCache, friendRelationCache, blackListCache, userInfoCache, groupInfoCache, groupOwnerIDCache, joinedGroupListCache,
 		groupMemberInfoCache, groupAllMemberInfoCache, allFriendInfoCache} {
 		fName := utils.GetSelfFuncName()
@@ -100,27 +98,27 @@ func DelFriendIDListFromCache(ctx context.Context, userID string) (err error) {
 	return db.DB.Rc.TagAsDeleted(friendRelationCache + userID)
 }
 
-func GetBlackListFromCache(ctx context.Context, userID string) (blackIDList []string, err error) {
+func GetBlackListFromCache(ctx context.Context, userID string) (blackIDs []string, err error) {
 	getBlackIDList := func() (string, error) {
-		blackIDList, err := imdb.GetBlackIDListByUserID(userID)
+		blackIDs, err := imdb.GetBlackIDListByUserID(userID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
-		bytes, err := json.Marshal(blackIDList)
+		bytes, err := json.Marshal(blackIDs)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
 		return string(bytes), nil
 	}
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "blackIDList", blackIDList)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "blackIDList", blackIDs)
 	}()
 	blackIDListStr, err := db.DB.Rc.Fetch(blackListCache+userID, time.Second*30*60, getBlackIDList)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	err = json.Unmarshal([]byte(blackIDListStr), &blackIDList)
-	return blackIDList, utils.Wrap(err, "")
+	err = json.Unmarshal([]byte(blackIDListStr), &blackIDs)
+	return blackIDs, utils.Wrap(err, "")
 }
 
 func DelBlackIDListFromCache(ctx context.Context, userID string) (err error) {
@@ -413,56 +411,6 @@ func DelAllFriendsInfoFromCache(ctx context.Context, userID string) (err error) 
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
 	}()
 	return db.DB.Rc.TagAsDeleted(allFriendInfoCache + userID)
-}
-
-func GetAllDepartmentsFromCache() ([]imdb.Department, error) {
-	getAllDepartments := func() (string, error) {
-		departmentList, err := imdb.GetSubDepartmentList("-1")
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		bytes, err := json.Marshal(departmentList)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bytes), nil
-	}
-	allDepartmentsStr, err := db.DB.Rc.Fetch(allDepartmentCache, time.Second*30*60, getAllDepartments)
-	if err != nil {
-		return nil, utils.Wrap(err, "")
-	}
-	var allDepartments []imdb.Department
-	err = json.Unmarshal([]byte(allDepartmentsStr), &allDepartments)
-	return allDepartments, utils.Wrap(err, "")
-}
-
-func DelAllDepartmentsFromCache() error {
-	return db.DB.Rc.TagAsDeleted(allDepartmentCache)
-}
-
-func GetAllDepartmentMembersFromCache() ([]imdb.DepartmentMember, error) {
-	getAllDepartmentMembers := func() (string, error) {
-		departmentMembers, err := imdb.GetDepartmentMemberList("-1")
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		bytes, err := json.Marshal(departmentMembers)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bytes), nil
-	}
-	allDepartmentMembersStr, err := db.DB.Rc.Fetch(allDepartmentMemberCache, time.Second*30*60, getAllDepartmentMembers)
-	if err != nil {
-		return nil, utils.Wrap(err, "")
-	}
-	var allDepartmentMembers []imdb.DepartmentMember
-	err = json.Unmarshal([]byte(allDepartmentMembersStr), &allDepartmentMembers)
-	return allDepartmentMembers, utils.Wrap(err, "")
-}
-
-func DelAllDepartmentMembersFromCache() error {
-	return db.DB.Rc.TagAsDeleted(allDepartmentMemberCache)
 }
 
 func GetJoinedSuperGroupListFromCache(ctx context.Context, userID string) (joinedSuperGroupIDs []string, err error) {

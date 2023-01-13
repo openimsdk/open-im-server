@@ -37,7 +37,6 @@ func initMysqlDB() {
 			panic(err1.Error() + " open failed " + dsn)
 		}
 	}
-
 	sql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s default charset utf8 COLLATE utf8_general_ci;", config.Config.Mysql.DBDatabaseName)
 	err = db.Exec(sql).Error
 	if err != nil {
@@ -112,39 +111,7 @@ func initMysqlDB() {
 	if !db.Migrator().HasTable(&im_mysql_model.Conversation{}) {
 		db.Migrator().CreateTable(&im_mysql_model.Conversation{})
 	}
-	if !db.Migrator().HasTable(&im_mysql_model.Department{}) {
-		db.Migrator().CreateTable(&im_mysql_model.Department{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.OrganizationUser{}) {
-		db.Migrator().CreateTable(&im_mysql_model.OrganizationUser{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.DepartmentMember{}) {
-		db.Migrator().CreateTable(&im_mysql_model.DepartmentMember{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.AppVersion{}) {
-		db.Migrator().CreateTable(&im_mysql_model.AppVersion{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.BlackList{}) {
-		db.Migrator().CreateTable(&im_mysql_model.BlackList{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.IpLimit{}) {
-		db.Migrator().CreateTable(&im_mysql_model.IpLimit{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.UserIpLimit{}) {
-		db.Migrator().CreateTable(&im_mysql_model.UserIpLimit{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.RegisterAddFriend{}) {
-		db.Migrator().CreateTable(&im_mysql_model.RegisterAddFriend{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.Invitation{}) {
-		db.Migrator().CreateTable(&im_mysql_model.Invitation{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.ClientInitConfig{}) {
-		db.Migrator().CreateTable(&im_mysql_model.ClientInitConfig{})
-	}
-	if !db.Migrator().HasTable(&im_mysql_model.UserIpRecord{}) {
-		db.Migrator().CreateTable(&im_mysql_model.UserIpRecord{})
-	}
+
 	DB.MysqlDB.db = db
 	im_mysql_model.GroupDB = db.Table("groups")
 	im_mysql_model.GroupMemberDB = db.Table("group_members")
@@ -158,7 +125,6 @@ func initMysqlDB() {
 	im_mysql_model.FriendDB = db.Table("friends")
 	im_mysql_model.FriendRequestDB = db.Table("friend_requests")
 	im_mysql_model.GroupRequestDB = db.Table("group_requests")
-	im_mysql_model.AppDB = db.Table("app_db")
 	InitManager()
 }
 

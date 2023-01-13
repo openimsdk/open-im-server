@@ -1,7 +1,7 @@
 package group
 
 import (
-	cbApi "Open_IM/pkg/call_back_struct"
+	cbApi "Open_IM/pkg/callback_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
@@ -35,7 +35,7 @@ func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq)
 	//utils.CopyStructFields(req, msg.MsgData)
 	defer log.NewDebug(req.OperationID, utils.GetSelfFuncName(), commonCallbackReq, *resp)
 	err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeCreateGroupCommand, commonCallbackReq,
-		resp, config.Config.Callback.CallbackBeforeCreateGroup.CallbackTimeOut, &config.Config.Callback.CallbackBeforeCreateGroup.CallbackFailedContinue)
+		resp, config.Config.Callback.CallbackBeforeCreateGroup)
 	if err == nil {
 		if resp.GroupID != nil {
 			req.GroupInfo.GroupID = *resp.GroupID
@@ -98,7 +98,7 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, grou
 		CommonCallbackResp: &callbackResp,
 	}
 	err = http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackBeforeMemberJoinGroupCommand, callbackReq,
-		resp, config.Config.Callback.CallbackBeforeMemberJoinGroup.CallbackTimeOut, &config.Config.Callback.CallbackBeforeMemberJoinGroup.CallbackFailedContinue)
+		resp, config.Config.Callback.CallbackBeforeMemberJoinGroup)
 	if err == nil {
 		if resp.MuteEndTime != nil {
 			groupMember.MuteEndTime = utils.UnixSecondToTime(*resp.MuteEndTime)

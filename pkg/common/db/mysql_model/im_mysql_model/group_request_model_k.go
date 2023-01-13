@@ -24,6 +24,10 @@ type GroupRequest struct {
 	Ex            string    `gorm:"column:ex;size:1024"`
 }
 
+func (GroupRequest) TableName() string {
+	return "friend_requests"
+}
+
 func (*GroupRequest) Create(ctx context.Context, groupRequests []*GroupRequest) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests)

@@ -1,7 +1,7 @@
 package friend
 
 import (
-	cbApi "Open_IM/pkg/call_back_struct"
+	cbApi "Open_IM/pkg/callback_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/http"
@@ -11,6 +11,17 @@ import (
 	"Open_IM/pkg/utils"
 	http2 "net/http"
 )
+
+func callbackBeforeAddFriendV1(req *pbFriend.AddFriendReq) error {
+	resp := callbackBeforeAddFriend(req)
+	if resp.ErrCode != 0 {
+		return (&constant.ErrInfo{
+			ErrCode: resp.ErrCode,
+			ErrMsg:  resp.ErrMsg,
+		}).Wrap()
+	}
+	return nil
+}
 
 func callbackBeforeAddFriend(req *pbFriend.AddFriendReq) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: req.CommID.OperationID}

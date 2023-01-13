@@ -1,4 +1,4 @@
-package call_back_struct
+package callback_struct
 
 import (
 	"Open_IM/pkg/proto/group"

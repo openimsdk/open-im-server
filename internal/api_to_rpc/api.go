@@ -7,7 +7,6 @@ import (
 	utils2 "Open_IM/pkg/utils"
 	"context"
 	"fmt"
-	utils "github.com/OpenIMSDK/open_utils"
 	"github.com/gin-gonic/gin"
 	"reflect"
 )
@@ -31,10 +30,11 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		reflect.ValueOf(etcdConn),
 	})[0].MethodByName(rpcFuncName) // rpc func
 	rpcReqPtr := reflect.New(rpc.Type().In(1).Elem()) // *req参数
-	if err := utils.CopyStructFields(rpcReqPtr.Interface(), apiReq); err != nil {
-		trace_log.WriteErrorResponse(nCtx, "CopyStructFields_RpcReq", err)
-		return
-	}
+	//if err := utils.CopyStructFields(rpcReqPtr.Interface(), apiReq); err != nil {
+	//	trace_log.WriteErrorResponse(nCtx, "CopyStructFields_RpcReq", err)
+	//	return
+	//}
+	CopyAny(apiReq, rpcReqPtr.Interface())
 	trace_log.SetCtxInfo(nCtx, logFuncName, nil, "opUserID", c.GetString("opUserID"), "callRpcReq", rpcString(rpcReqPtr.Elem().Interface()))
 	respArr := rpc.Call([]reflect.Value{
 		reflect.ValueOf(context.Context(c)), // context.Context
@@ -48,9 +48,10 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 	rpcResp := respArr[0].Elem()
 	trace_log.SetCtxInfo(nCtx, rpcFuncName, nil, "callRpcResp", rpcString(rpcResp.Interface()))
 	if apiResp != nil {
-		if err := utils.CopyStructFields(apiResp, rpcResp.Interface()); err != nil {
-			trace_log.SetCtxInfo(nCtx, "CopyStructFields_RpcResp", err, "apiResp", fmt.Sprintf("%T", apiResp), "rpcResp", fmt.Sprintf("%T", rpcResp.Interface()))
-		}
+		//if err := utils.CopyStructFields(apiResp, rpcResp.Interface()); err != nil {
+		//	trace_log.SetCtxInfo(nCtx, "CopyStructFields_RpcResp", err, "apiResp", fmt.Sprintf("%T", apiResp), "rpcResp", fmt.Sprintf("%T", rpcResp.Interface()))
+		//}
+		CopyAny(rpcResp.Interface(), apiResp)
 	}
 	trace_log.SetSuccess(nCtx, rpcFuncName, apiResp)
 }

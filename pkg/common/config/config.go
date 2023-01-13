@@ -20,10 +20,10 @@ const ConfName = "openIMConf"
 
 var Config config
 
-type callBackConfig struct {
-	Enable                 bool `yaml:"enable"`
-	CallbackTimeOut        int  `yaml:"callbackTimeOut"`
-	CallbackFailedContinue bool `yaml:"callbackFailedContinue"`
+type CallBackConfig struct {
+	Enable                 bool  `yaml:"enable"`
+	CallbackTimeOut        int   `yaml:"callbackTimeOut"`
+	CallbackFailedContinue *bool `yaml:"callbackFailedContinue"`
 }
 
 type config struct {
@@ -283,21 +283,21 @@ type config struct {
 
 	Callback struct {
 		CallbackUrl                        string         `yaml:"callbackUrl"`
-		CallbackBeforeSendSingleMsg        callBackConfig `yaml:"callbackBeforeSendSingleMsg"`
-		CallbackAfterSendSingleMsg         callBackConfig `yaml:"callbackAfterSendSingleMsg"`
-		CallbackBeforeSendGroupMsg         callBackConfig `yaml:"callbackBeforeSendGroupMsg"`
-		CallbackAfterSendGroupMsg          callBackConfig `yaml:"callbackAfterSendGroupMsg"`
-		CallbackMsgModify                  callBackConfig `yaml:"callbackMsgModify"`
-		CallbackUserOnline                 callBackConfig `yaml:"callbackUserOnline"`
-		CallbackUserOffline                callBackConfig `yaml:"callbackUserOffline"`
-		CallbackUserKickOff                callBackConfig `yaml:"callbackUserKickOff"`
-		CallbackOfflinePush                callBackConfig `yaml:"callbackOfflinePush"`
-		CallbackOnlinePush                 callBackConfig `yaml:"callbackOnlinePush"`
-		CallbackBeforeSuperGroupOnlinePush callBackConfig `yaml:"callbackSuperGroupOnlinePush"`
-		CallbackBeforeAddFriend            callBackConfig `yaml:"callbackBeforeAddFriend"`
-		CallbackBeforeCreateGroup          callBackConfig `yaml:"callbackBeforeCreateGroup"`
-		CallbackBeforeMemberJoinGroup      callBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
-		CallbackBeforeSetGroupMemberInfo   callBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
+		CallbackBeforeSendSingleMsg        CallBackConfig `yaml:"callbackBeforeSendSingleMsg"`
+		CallbackAfterSendSingleMsg         CallBackConfig `yaml:"callbackAfterSendSingleMsg"`
+		CallbackBeforeSendGroupMsg         CallBackConfig `yaml:"callbackBeforeSendGroupMsg"`
+		CallbackAfterSendGroupMsg          CallBackConfig `yaml:"callbackAfterSendGroupMsg"`
+		CallbackMsgModify                  CallBackConfig `yaml:"callbackMsgModify"`
+		CallbackUserOnline                 CallBackConfig `yaml:"callbackUserOnline"`
+		CallbackUserOffline                CallBackConfig `yaml:"callbackUserOffline"`
+		CallbackUserKickOff                CallBackConfig `yaml:"callbackUserKickOff"`
+		CallbackOfflinePush                CallBackConfig `yaml:"callbackOfflinePush"`
+		CallbackOnlinePush                 CallBackConfig `yaml:"callbackOnlinePush"`
+		CallbackBeforeSuperGroupOnlinePush CallBackConfig `yaml:"callbackSuperGroupOnlinePush"`
+		CallbackBeforeAddFriend            CallBackConfig `yaml:"callbackBeforeAddFriend"`
+		CallbackBeforeCreateGroup          CallBackConfig `yaml:"callbackBeforeCreateGroup"`
+		CallbackBeforeMemberJoinGroup      CallBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
+		CallbackBeforeSetGroupMemberInfo   CallBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
@@ -629,41 +629,43 @@ type usualConfig struct {
 
 var UsualConfig usualConfig
 
-func unmarshalConfig(config interface{}, configName string) {
-	var env string
-	if configName == "config.yaml" {
-		env = "CONFIG_NAME"
-	} else if configName == "usualConfig.yaml" {
-		env = "USUAL_CONFIG_NAME"
+func unmarshalConfig(config interface{}, configPath string) {
+	bytes, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		panic(err.Error() + configPath)
 	}
-	cfgName := os.Getenv(env)
-	if len(cfgName) != 0 {
-		bytes, err := ioutil.ReadFile(filepath.Join(cfgName, "config", configName))
-		if err != nil {
-			bytes, err = ioutil.ReadFile(filepath.Join(Root, "config", configName))
-			if err != nil {
-				panic(err.Error() + " config: " + filepath.Join(cfgName, "config", configName))
-			}
-		} else {
-			Root = cfgName
-		}
-		if err = yaml.Unmarshal(bytes, config); err != nil {
-			panic(err.Error())
-		}
-	} else {
-		bytes, err := ioutil.ReadFile(fmt.Sprintf("../config/%s", configName))
-		if err != nil {
-			panic(err.Error() + configName)
-		}
-		if err = yaml.Unmarshal(bytes, config); err != nil {
-			panic(err.Error())
-		}
+	if err = yaml.Unmarshal(bytes, config); err != nil {
+		panic(err.Error())
 	}
 }
 
-func init() {
-	unmarshalConfig(&Config, "config.yaml")
-	unmarshalConfig(&UsualConfig, "usualConfig.yaml")
+func initConfig(config interface{}, configName, configPath string) {
+	if configPath == "" {
+		var env string
+		if configName == "config.yaml" {
+			env = "CONFIG_NAME"
+		} else if configName == "usualConfig.yaml" {
+			env = "USUAL_CONFIG_NAME"
+		}
+		cfgName := os.Getenv(env)
+		if len(cfgName) != 0 {
+			configPath = filepath.Join(cfgName, "config", configName)
+			_, err := os.Stat(configPath)
+			if os.IsNotExist(err) {
+				configPath = filepath.Join(Root, "config", configName)
+			} else {
+				Root = cfgName
+			}
+		} else {
+			configPath = fmt.Sprintf("../config/%s", configName)
+		}
+	}
+	unmarshalConfig(config, configPath)
+}
+
+func InitConfig(configPath string) {
+	initConfig(&Config, "config.yaml", configPath)
+	initConfig(&UsualConfig, "usualConfig.yaml", configPath)
 	if Config.Etcd.UserName == "" {
 		Config.Etcd.UserName = UsualConfig.Etcd.UserName
 	}
@@ -728,15 +730,17 @@ func init() {
 	if Config.Push.Getui.Enable == nil {
 		Config.Push.Getui.Enable = &UsualConfig.Push.Getui.Enable
 	}
-
 	if Config.Secret == "" {
 		Config.Secret = UsualConfig.Secret
 	}
-
 	if Config.TokenPolicy.AccessExpire == 0 {
 		Config.TokenPolicy.AccessExpire = UsualConfig.Tokenpolicy.AccessExpire
 	}
 	if Config.TokenPolicy.AccessSecret == "" {
 		Config.TokenPolicy.AccessSecret = UsualConfig.Tokenpolicy.AccessSecret
 	}
+}
+
+func init() {
+	InitConfig("")
 }

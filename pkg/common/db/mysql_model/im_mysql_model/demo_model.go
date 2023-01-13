@@ -1,7 +1,6 @@
 package im_mysql_model
 
 import (
-	"errors"
 	"gorm.io/gorm"
 )
 
@@ -23,11 +22,6 @@ func GetRegister(account, areaCode, userID string) (*Register, error) {
 		userID, "", account, account, areaCode).Take(&r).Error
 }
 
-func GetRegisterInfo(userID string) (*Register, error) {
-	var r Register
-	return &r, RegisterDB.Table("registers").Where("user_id = ?", userID).Take(&r).Error
-}
-
 func SetPassword(account, password, ex, userID, areaCode, ip string) error {
 	r := Register{
 		Account:    account,
@@ -45,50 +39,4 @@ func ResetPassword(account, password string) error {
 		Password: password,
 	}
 	return RegisterDB.Table("registers").Where("account = ?", account).Updates(&r).Error
-}
-
-func GetRegisterAddFriendList(showNumber, pageNumber int32) ([]string, error) {
-	var IDList []string
-	var err error
-	model := RegisterDB.Model(&RegisterAddFriend{})
-	if showNumber == 0 {
-		err = model.Pluck("user_id", &IDList).Error
-	} else {
-		err = model.Limit(int(showNumber)).Offset(int(showNumber*(pageNumber-1))).Pluck("user_id", &IDList).Error
-	}
-	return IDList, err
-}
-
-func AddUserRegisterAddFriendIDList(userIDList ...string) error {
-	var list []RegisterAddFriend
-	for _, v := range userIDList {
-		list = append(list, RegisterAddFriend{UserID: v})
-	}
-	result := RegisterDB.Create(list)
-	if int(result.RowsAffected) < len(userIDList) {
-		return errors.New("some line insert failed")
-	}
-	err := result.Error
-	return err
-}
-
-func ReduceUserRegisterAddFriendIDList(userIDList ...string) error {
-	var list []RegisterAddFriend
-	for _, v := range userIDList {
-		list = append(list, RegisterAddFriend{UserID: v})
-	}
-	err := RegisterDB.Delete(list).Error
-	return err
-}
-
-func DeleteAllRegisterAddFriendIDList() error {
-	err := RegisterDB.Where("1 = 1").Delete(&RegisterAddFriend{}).Error
-	return err
-}
-
-func GetUserIPLimit(userID string) (UserIpLimit, error) {
-	var limit UserIpLimit
-	limit.UserID = userID
-	err := RegisterDB.Model(&UserIpLimit{}).Take(&limit).Error
-	return limit, err
 }
