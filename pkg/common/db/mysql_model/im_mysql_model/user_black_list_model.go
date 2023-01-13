@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-var BlackDB *gorm.DB
-
 type Black struct {
 	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`
 	BlockUserID    string    `gorm:"column:block_user_id;primary_key;size:64"`
@@ -17,37 +15,42 @@ type Black struct {
 	AddSource      int32     `gorm:"column:add_source"`
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
 	Ex             string    `gorm:"column:ex;size:1024"`
+	db             *gorm.DB  `gorm:"-"`
 }
 
-func (*Black) Create(ctx context.Context, blacks []*Black) (err error) {
+func NewBlack(db *gorm.DB) *Black {
+	return &Black{db: db}
+}
+
+func (b *Black) Create(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
-	return utils.Wrap(BlackDB.Create(&blacks).Error, "")
+	return utils.Wrap(b.db.Create(&blacks).Error, "")
 }
 
-func (*Black) Delete(ctx context.Context, blacks []*Black) (err error) {
+func (b *Black) Delete(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
 	return utils.Wrap(GroupMemberDB.Delete(blacks).Error, "")
 }
 
-func (*Black) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error) {
+func (b *Black) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blockUserID", blockUserID, "args", args)
 	}()
-	return utils.Wrap(BlackDB.Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error, "")
+	return utils.Wrap(b.db.Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error, "")
 }
 
-func (*Black) Update(ctx context.Context, blacks []*Black) (err error) {
+func (b *Black) Update(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
-	return utils.Wrap(BlackDB.Updates(&blacks).Error, "")
+	return utils.Wrap(b.db.Updates(&blacks).Error, "")
 }
 
-func (*Black) Find(ctx context.Context, blacks []Black) (blackList []*Black, err error) {
+func (b *Black) Find(ctx context.Context, blacks []Black) (blackList []*Black, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks, "blackList", blackList)
 	}()
@@ -58,15 +61,15 @@ func (*Black) Find(ctx context.Context, blacks []Black) (blackList []*Black, err
 	return blackList, utils.Wrap(GroupMemberDB.Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error, "")
 }
 
-func (*Black) Take(ctx context.Context, blackID string) (black *Black, err error) {
+func (b *Black) Take(ctx context.Context, blackID string) (black *Black, err error) {
 	black = &Black{}
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blackID", blackID, "black", *black)
 	}()
-	return black, utils.Wrap(BlackDB.Where("black_id = ?", blackID).Take(black).Error, "")
+	return black, utils.Wrap(b.db.Where("black_id = ?", blackID).Take(black).Error, "")
 }
 
-func (*Black) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*Black, err error) {
+func (b *Black) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*Black, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blackList", blackList)
 	}()
@@ -101,7 +104,7 @@ func GetBlackListByUserID(ownerUserID string) ([]Black, error) {
 
 func GetBlackIDListByUserID(ownerUserID string) ([]string, error) {
 	var blackIDList []string
-	err := BlackDB.Where("owner_user_id=?", ownerUserID).Pluck("block_user_id", &blackIDList).Error
+	err := b.db.Where("owner_user_id=?", ownerUserID).Pluck("block_user_id", &blackIDList).Error
 	if err != nil {
 		return nil, err
 	}

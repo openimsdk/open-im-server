@@ -12,6 +12,17 @@ import (
 	http2 "net/http"
 )
 
+func callbackBeforeAddFriendV1(req *pbFriend.AddFriendReq) error {
+	resp := callbackBeforeAddFriend(req)
+	if resp.ErrCode != 0 {
+		return (&constant.ErrInfo{
+			ErrCode: resp.ErrCode,
+			ErrMsg:  resp.ErrMsg,
+		}).Wrap()
+	}
+	return nil
+}
+
 func callbackBeforeAddFriend(req *pbFriend.AddFriendReq) cbApi.CommonCallbackResp {
 	callbackResp := cbApi.CommonCallbackResp{OperationID: req.CommID.OperationID}
 	if !config.Config.Callback.CallbackBeforeAddFriend.Enable {

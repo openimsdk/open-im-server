@@ -1,7 +1,9 @@
 package im_mysql_model
 
 import (
+	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
+	"context"
 	"gorm.io/gorm"
 	"time"
 )
@@ -18,10 +20,56 @@ type FriendRequest struct {
 	HandleMsg     string    `gorm:"column:handle_msg;size:255"`
 	HandleTime    time.Time `gorm:"column:handle_time"`
 	Ex            string    `gorm:"column:ex;size:1024"`
+	db            *gorm.DB  `gorm:"-"`
 }
 
-func (FriendRequest) TableName() string {
-	return "friend_requests"
+func NewFriendRequest(db *gorm.DB) *FriendRequest {
+	return &FriendRequest{db: db}
+}
+
+func (f *FriendRequest) Create(ctx context.Context, friends []*FriendRequest) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
+	}()
+	err = utils.Wrap(f.db.Create(&friends).Error, "")
+	return err
+}
+
+func (f *FriendRequest) Delete(ctx context.Context, fromUserID, toUserID string) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID)
+	}()
+	err = utils.Wrap(f.db.Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Delete(&FriendRequest{}).Error, "")
+	return err
+}
+
+func (f *FriendRequest) UpdateByMap(ctx context.Context, ownerUserID string, args map[string]interface{}) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "args", args)
+	}()
+	return utils.Wrap(f.db.Where("owner_user_id = ?", ownerUserID).Updates(args).Error, "")
+}
+
+func (f *FriendRequest) Update(ctx context.Context, friends []*FriendRequest) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
+	}()
+	return utils.Wrap(f.db.Updates(&friends).Error, "")
+}
+
+func (f *FriendRequest) Find(ctx context.Context, ownerUserID string) (friends []*FriendRequest, err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friends", friends)
+	}()
+	err = utils.Wrap(f.db.Where("owner_user_id = ?", ownerUserID).Find(&friends).Error, "")
+	return friends, err
+}
+
+func (f *FriendRequest) Take(ctx context.Context, ownerUserID, friendUserID string) (friend *FriendRequest, err error) {
+	friend = &FriendRequest{}
+	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "group", *friend)
+	err = utils.Wrap(f.db.Where("owner_user_id = ? and friend_user_id", ownerUserID, friendUserID).Take(friend).Error, "")
+	return friend, err
 }
 
 // who apply to add me
