@@ -7,7 +7,10 @@ import (
 )
 
 func CopyAny(from, to interface{}) {
-	t := reflect.ValueOf(to).Elem()
+	t := reflect.ValueOf(to)
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
 	if !t.CanSet() {
 		return
 	}
