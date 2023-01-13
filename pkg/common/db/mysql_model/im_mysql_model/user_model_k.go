@@ -56,10 +56,11 @@ func (*User) Find(ctx context.Context, userIDs []string) (users []*User, err err
 	return users, err
 }
 
-func (*User) Take(ctx context.Context, userIDs []string) (users []*User, err error) {
+func (*User) Take(ctx context.Context, userID string) (user *User, err error) {
+	user = &User{}
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "user", *user)
 	}()
-	err = utils.Wrap(userDB.Where("user_id in (?)", userIDs).Take(&users).Error, "")
-	return users, err
+	err = utils.Wrap(userDB.Where("user_id = ?", userID).Take(&user).Error, "")
+	return user, err
 }
