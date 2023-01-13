@@ -16,6 +16,14 @@ type ErrInfo struct {
 	DetailErrMsg string
 }
 
+func NewErrInfo(code int32, msg, detail string) *ErrInfo {
+	return &ErrInfo{
+		ErrCode:      code,
+		ErrMsg:       msg,
+		DetailErrMsg: detail,
+	}
+}
+
 func (e *ErrInfo) Error() string {
 	return "errMsg: " + e.ErrMsg + " detail errMsg: " + e.DetailErrMsg
 }

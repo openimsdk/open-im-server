@@ -10,6 +10,7 @@ import (
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tools"
 	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
@@ -177,57 +178,54 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 }
 
 func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.ImportFriendResp, error) {
-	resp := pbFriend.ImportFriendResp{CommonResp: &sdkws.CommonResp{}}
-	var c sdkws.CommonResp
-	if !utils.IsContain(req.OpUserID, config.Config.Manager.AppManagerUid) {
-		log.NewError(req.OperationID, "not authorized", req.OpUserID, config.Config.Manager.AppManagerUid)
-		c.ErrCode = constant.ErrNoPermission.ErrCode
-		c.ErrMsg = constant.ErrNoPermission.ErrMsg
-		for _, v := range req.FriendUserIDList {
-			resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
-		}
-		resp.CommonResp = &c
-		return &resp, nil
+	resp := &pbFriend.ImportFriendResp{}
+	//var c sdkws.CommonResp
+	if !utils.IsContain(tools.OpUserID(ctx), config.Config.Manager.AppManagerUid) {
+		//log.NewError(req.OperationID, "not authorized", req.OpUserID, config.Config.Manager.AppManagerUid)
+		//c.ErrCode = constant.ErrNoPermission.ErrCode
+		//c.ErrMsg = constant.ErrNoPermission.ErrMsg
+		//for _, userID := range req.FriendUserIDList {
+		//	resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: userID, Result: -1})
+		//}
+		return nil, constant.ErrNoPermission.Wrap()
 	}
-	if _, err := imdb.GetUserByUserID(req.FromUserID); err != nil {
-		log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.FromUserID)
-		c.ErrCode = constant.ErrDB.ErrCode
-		c.ErrMsg = "this user not exists,cant not add friend"
-		for _, v := range req.FriendUserIDList {
-			resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
-		}
-		resp.CommonResp = &c
-		return &resp, nil
+	if _, err := GetUserInfo(ctx, req.FromUserID); err != nil {
+		//log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), req.FromUserID)
+		//c.ErrCode = constant.ErrDB.ErrCode
+		//c.ErrMsg = "this user not exists,cant not add friend"
+		//for _, userID := range req.FriendUserIDList {
+		//	resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: userID, Result: -1})
+		//}
+		//resp.CommonResp = &c
+		return nil, err
 	}
 
-	for _, v := range req.FriendUserIDList {
-		log.NewDebug(req.OperationID, "FriendUserIDList ", v)
-		if _, fErr := imdb.GetUserByUserID(v); fErr != nil {
-			log.NewError(req.OperationID, "GetUserByUserID failed ", fErr.Error(), v)
-			resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
+	for _, userID := range req.FriendUserIDList {
+		if _, fErr := GetUserInfo(ctx, userID); fErr != nil {
+			resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: userID, Result: -1})
 		} else {
-			if _, err := imdb.GetFriendRelationshipFromFriend(req.FromUserID, v); err != nil {
+			if _, err := imdb.GetFriendRelationshipFromFriend(req.FromUserID, userID); err != nil {
 				//Establish two single friendship
-				toInsertFollow := imdb.Friend{OwnerUserID: req.FromUserID, FriendUserID: v}
+				toInsertFollow := imdb.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID}
 				err1 := imdb.InsertToFriend(&toInsertFollow)
 				if err1 != nil {
 					log.NewError(req.OperationID, "InsertToFriend failed ", err1.Error(), toInsertFollow)
-					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
+					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: userID, Result: -1})
 					continue
 				}
-				toInsertFollow = imdb.Friend{OwnerUserID: v, FriendUserID: req.FromUserID}
+				toInsertFollow = imdb.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID}
 				err2 := imdb.InsertToFriend(&toInsertFollow)
 				if err2 != nil {
 					log.NewError(req.OperationID, "InsertToFriend failed ", err2.Error(), toInsertFollow)
-					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: -1})
+					resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: userID, Result: -1})
 					continue
 				}
-				resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: 0})
+				resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: userID, Result: 0})
 				log.NewDebug(req.OperationID, "UserIDResultList ", resp.UserIDResultList)
-				chat.FriendAddedNotification(req.OperationID, req.OpUserID, req.FromUserID, v)
+				chat.FriendAddedNotification(req.OperationID, req.OpUserID, req.FromUserID, userID)
 			} else {
-				log.NewWarn(req.OperationID, "GetFriendRelationshipFromFriend ok", req.FromUserID, v)
-				resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: v, Result: 0})
+				log.NewWarn(req.OperationID, "GetFriendRelationshipFromFriend ok", req.FromUserID, userID)
+				resp.UserIDResultList = append(resp.UserIDResultList, &pbFriend.UserIDResult{UserID: userID, Result: 0})
 			}
 		}
 	}
