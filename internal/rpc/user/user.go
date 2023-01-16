@@ -264,17 +264,17 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}
 			return resp, nil
 		}
-		if req.Conversation.ConversationType == constant.SuperGroupChatType {
-			if req.Conversation.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
-				if err = db.DB.SetSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
-					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
-				}
-			} else {
-				if err = db.DB.ReduceSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
-					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
-				}
-			}
-		}
+		//if req.Conversation.ConversationType == constant.SuperGroupChatType {
+		//	if req.Conversation.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
+		//		if err = db.DB.SetSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
+		//			log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+		//		}
+		//	} else {
+		//		if err = db.DB.ReduceSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
+		//			log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+		//		}
+		//	}
+		//}
 	}
 
 	var conversation db.Conversation
