@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/mongo"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
@@ -296,7 +297,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 		}
 	}
 
-	var tagSendLogs db.TagSendLog
+	var tagSendLogs mongo.TagSendLog
 	var wg sync.WaitGroup
 	wg.Add(len(successUserIDList))
 	var lock sync.Mutex
@@ -309,7 +310,7 @@ func (s *officeServer) SendMsg2Tag(_ context.Context, req *pbOffice.SendMsg2TagR
 				return
 			}
 			lock.Lock()
-			tagSendLogs.UserList = append(tagSendLogs.UserList, db.TagUser{
+			tagSendLogs.UserList = append(tagSendLogs.UserList, mongo.TagUser{
 				UserID:   userID,
 				UserName: userName,
 			})
@@ -388,10 +389,10 @@ func (s *officeServer) GetUserTagByID(_ context.Context, req *pbOffice.GetUserTa
 func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.CreateOneWorkMomentReq) (resp *pbOffice.CreateOneWorkMomentResp, err error) {
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.CreateOneWorkMomentResp{CommonResp: &pbOffice.CommonResp{}}
-	workMoment := db.WorkMoment{
-		Comments:           []*db.Comment{},
-		LikeUserList:       []*db.WorkMomentUser{},
-		PermissionUserList: []*db.WorkMomentUser{},
+	workMoment := mongo.WorkMoment{
+		Comments:           []*mongo.Comment{},
+		LikeUserList:       []*mongo.WorkMomentUser{},
+		PermissionUserList: []*mongo.WorkMomentUser{},
 	}
 	createUser, err := imdb.GetUserByUserID(req.WorkMoment.UserID)
 	if err != nil {
@@ -405,14 +406,14 @@ func (s *officeServer) CreateOneWorkMoment(_ context.Context, req *pbOffice.Crea
 	workMoment.UserName = createUser.Nickname
 	workMoment.FaceURL = createUser.FaceURL
 	workMoment.PermissionUserIDList = s.getPermissionUserIDList(req.OperationID, req.WorkMoment.PermissionGroupList, req.WorkMoment.PermissionUserList)
-	workMoment.PermissionUserList = []*db.WorkMomentUser{}
+	workMoment.PermissionUserList = []*mongo.WorkMomentUser{}
 	for _, userID := range workMoment.PermissionUserIDList {
 		userName, err := imdb.GetUserNameByUserID(userID)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUserNameByUserID failed", err.Error())
 			continue
 		}
-		workMoment.PermissionUserList = append(workMoment.PermissionUserList, &db.WorkMomentUser{
+		workMoment.PermissionUserList = append(workMoment.PermissionUserList, &mongo.WorkMomentUser{
 			UserID:   userID,
 			UserName: userName,
 		})
@@ -502,7 +503,7 @@ func (s *officeServer) DeleteOneWorkMoment(_ context.Context, req *pbOffice.Dele
 	return resp, nil
 }
 
-func isUserCanSeeWorkMoment(userID string, workMoment db.WorkMoment) bool {
+func isUserCanSeeWorkMoment(userID string, workMoment mongo.WorkMoment) bool {
 	if userID != workMoment.UserID {
 		switch workMoment.Permission {
 		case constant.WorkMomentPublic:
@@ -569,7 +570,7 @@ func (s *officeServer) CommentOneWorkMoment(_ context.Context, req *pbOffice.Com
 			return resp, nil
 		}
 	}
-	comment := &db.Comment{
+	comment := &mongo.Comment{
 		UserID:        req.UserID,
 		UserName:      commentUser.Nickname,
 		ReplyUserID:   req.ReplyUserID,
@@ -643,7 +644,7 @@ func (s *officeServer) GetUserWorkMoments(_ context.Context, req *pbOffice.GetUs
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
 	resp = &pbOffice.GetUserWorkMomentsResp{CommonResp: &pbOffice.CommonResp{}, WorkMoments: []*pbOffice.WorkMoment{}}
 	resp.Pagination = &pbCommon.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}
-	var workMoments []db.WorkMoment
+	var workMoments []mongo.WorkMoment
 	if req.UserID == req.OpUserID {
 		workMoments, err = db.DB.GetUserSelfWorkMoments(req.UserID, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	} else {

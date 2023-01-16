@@ -2,7 +2,7 @@ package cronTask
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
+	mongo2 "Open_IM/pkg/common/db/mongo"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"context"
 	"fmt"
@@ -22,8 +22,8 @@ var (
 	mongoClient *mongo.Collection
 )
 
-func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *db.UserChat {
-	chat := &db.UserChat{UID: userID + strconv.Itoa(int(index))}
+func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *mongo2.UserChat {
+	chat := &mongo2.UserChat{UID: userID + strconv.Itoa(int(index))}
 	for i := startSeq; i <= stopSeq; i++ {
 		msg := server_api_params.MsgData{
 			SendID:           "sendID1",
@@ -45,7 +45,7 @@ func GenUserChat(startSeq, stopSeq, delSeq, index uint32, userID string) *db.Use
 		}
 		bytes, _ := proto.Marshal(&msg)
 		sendTime := 0
-		chat.Msg = append(chat.Msg, db.MsgInfo{SendTime: int64(sendTime), Msg: bytes})
+		chat.Msg = append(chat.Msg, mongo2.MsgInfo{SendTime: int64(sendTime), Msg: bytes})
 	}
 	return chat
 }
@@ -54,7 +54,7 @@ func SetUserMaxSeq(userID string, seq int) error {
 	return redisClient.Set(context.Background(), "REDIS_USER_INCR_SEQ"+userID, seq, 0).Err()
 }
 
-func CreateChat(userChat *db.UserChat) error {
+func CreateChat(userChat *mongo2.UserChat) error {
 	_, err := mongoClient.InsertOne(context.Background(), userChat)
 	return err
 }

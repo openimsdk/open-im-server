@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/mongo"
 	kfk "Open_IM/pkg/common/kafka"
 	"Open_IM/pkg/common/log"
 	pbMsg "Open_IM/pkg/proto/msg"
@@ -70,14 +71,14 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 			}
 			if !notification.IsReact {
 				// first time to modify
-				var reactionExtensionList = make(map[string]db.KeyValue)
-				extendMsg := db.ExtendMsg{
+				var reactionExtensionList = make(map[string]mongo.KeyValue)
+				extendMsg := mongo.ExtendMsg{
 					ReactionExtensionList: reactionExtensionList,
 					ClientMsgID:           notification.ClientMsgID,
 					MsgFirstModifyTime:    notification.MsgFirstModifyTime,
 				}
 				for _, v := range notification.SuccessReactionExtensionList {
-					reactionExtensionList[v.TypeKey] = db.KeyValue{
+					reactionExtensionList[v.TypeKey] = mongo.KeyValue{
 						TypeKey:          v.TypeKey,
 						Value:            v.Value,
 						LatestUpdateTime: v.LatestUpdateTime,
