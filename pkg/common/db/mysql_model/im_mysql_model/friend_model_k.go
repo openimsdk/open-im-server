@@ -68,7 +68,7 @@ func (f *Friend) Find(ctx context.Context, ownerUserID string) (friends []*Frien
 
 func (f *Friend) Take(ctx context.Context, ownerUserID, friendUserID string) (friend *Friend, err error) {
 	friend = &Friend{}
-	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "group", *friend)
+	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "friend", friend)
 	return friend, utils.Wrap(f.db.Where("owner_user_id = ? and friend_user_id", ownerUserID, friendUserID).Take(friend).Error, "")
 }
 
