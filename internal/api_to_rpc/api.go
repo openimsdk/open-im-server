@@ -1,23 +1,19 @@
 package common
 
 import (
-	api "Open_IM/pkg/base_info"
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/getcdv3"
-	rpc "Open_IM/pkg/proto/friend"
 	utils2 "Open_IM/pkg/utils"
 	"context"
 	"fmt"
-	utils "github.com/OpenIMSDK/open_utils"
 	"github.com/gin-gonic/gin"
 	"reflect"
 )
 
-func a(c *gin.Context) {
-	ApiToRpc(c, &api.AddBlacklistReq{}, &api.AddBlacklistResp{}, config.Config.RpcRegisterName.OpenImFriendName, rpc.NewFriendClient, utils.GetSelfFuncName())
-}
+//func a(c *gin.Context) {
+//	ApiToRpc(c, &api.AddBlacklistReq{}, &api.AddBlacklistResp{}, config.Config.RpcRegisterName.OpenImFriendName, rpc.NewFriendClient, utils.GetSelfFuncName())
+//}
 
 func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string) {
 	logFuncName := fmt.Sprintf("[ApiToRpc: %s]%s", utils2.GetFuncName(1), rpcFuncName)
