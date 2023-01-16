@@ -154,8 +154,8 @@ func AddMessageReactionExtensions(c *gin.Context) {
 	resp.ErrCode = respPb.ErrCode
 	resp.ErrMsg = respPb.ErrMsg
 	resp.Data.ResultKeyValue = respPb.Result
-	resp.Data.MsgFirstModifyTime = reqPb.MsgFirstModifyTime
-	resp.Data.IsReact = reqPb.IsReact
+	resp.Data.MsgFirstModifyTime = respPb.MsgFirstModifyTime
+	resp.Data.IsReact = respPb.IsReact
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp)
 	c.JSON(http.StatusOK, resp)
 }
