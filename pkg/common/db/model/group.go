@@ -70,6 +70,7 @@ func (g *GroupModel) Delete(ctx context.Context, groupIDs []string) error {
 		tx.Rollback()
 		return err
 	}
+	tx.Commit()
 	return nil
 }
 
