@@ -94,7 +94,7 @@ func callbackAddMessageReactionExtensions(setReq *msg.AddMessageReactionExtensio
 		MsgFirstModifyTime:    setReq.MsgFirstModifyTime,
 	}
 	resp := &cbApi.CallbackAddMessageReactionExtResp{CommonCallbackResp: &callbackResp}
-	defer log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), req, *resp, resp.IsReact, resp.MsgFirstModifyTime)
+	defer log.NewDebug(setReq.OperationID, utils.GetSelfFuncName(), req, *resp, *resp.CommonCallbackResp, resp.IsReact, resp.MsgFirstModifyTime)
 	if err := http.CallBackPostReturn(config.Config.Callback.CallbackUrl, constant.CallbackAddMessageListReactionExtensionsCommand, req, resp, config.Config.Callback.CallbackAfterSendGroupMsg.CallbackTimeOut); err != nil {
 		callbackResp.ErrCode = http2.StatusInternalServerError
 		callbackResp.ErrMsg = err.Error()
