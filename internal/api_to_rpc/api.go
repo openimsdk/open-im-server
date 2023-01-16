@@ -13,8 +13,7 @@ import (
 
 func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcClientFunc interface{}, rpcFuncName string) {
 	logFuncName := fmt.Sprintf("[ApiToRpc: %s]%s", utils2.GetFuncName(1), rpcFuncName)
-	operationID := c.GetHeader("operationID")
-	nCtx := trace_log.NewCtx1(c, rpcFuncName, operationID)
+	nCtx := trace_log.NewCtx1(c, rpcFuncName)
 	defer log.ShowLog(nCtx)
 	if err := c.BindJSON(apiReq); err != nil {
 		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
