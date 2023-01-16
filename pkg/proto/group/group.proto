@@ -5,14 +5,11 @@ option go_package = "Open_IM/pkg/proto/group;group";
 package group;
 
 
-message GroupAddMemberInfo{
-  string userID = 1;
-  int32 roleLevel = 2;
-}
 
 message CreateGroupReq{
-  repeated GroupAddMemberInfo initMemberList = 1;
+  repeated string initMemberList = 1;
   server_api_params.GroupInfo groupInfo = 2;
+  repeated string adminUserIDs = 3;
   string ownerUserID = 5; //owner
 }
 message CreateGroupResp{

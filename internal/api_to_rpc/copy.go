@@ -6,25 +6,6 @@ import (
 	"reflect"
 )
 
-func setBaseValue(from, to reflect.Value) {
-	if isBaseNil(from) {
-		return
-	}
-	var l int
-	t := to.Type()
-	for t.Kind() == reflect.Ptr {
-		l++
-		t = t.Elem()
-	}
-	v := baseValue(from)
-	for i := 0; i < l; i++ {
-		t := reflect.New(v.Type())
-		t.Elem().Set(v)
-		v = t
-	}
-	to.Set(v)
-}
-
 func CopyAny(from, to interface{}) {
 	t := reflect.ValueOf(to)
 	if t.Kind() == reflect.Ptr {
@@ -50,31 +31,35 @@ func copyAny(from, to reflect.Value) {
 	if isBaseNil(to) {
 		to.Set(getBaseZeroValue(to.Type()))
 	}
-	btfrom := baseType(from.Type())
-	btto := baseType(to.Type())
-	if typeEq(btfrom, btto) {
+	btFrom := baseType(from.Type())
+	btTo := baseType(to.Type())
+	if btTo.Kind() == reflect.Interface || typeEq(btFrom, btTo) {
 		setBaseValue(from, to)
 		return
 	}
-	if _, ok := wrapType[btto.String()]; ok { // string -> wrapperspb.StringValue
-		val := reflect.New(btto).Elem()
+	if _, ok := wrapType[btTo.String()]; ok { // string -> wrapperspb.StringValue
+		val := reflect.New(btTo).Elem()
 		copyAny(from, val.FieldByName("Value"))
 		setBaseValue(val, to)
 		return
 	}
-	if _, ok := wrapType[btfrom.String()]; ok { // wrapperspb.StringValue -> string
+	if _, ok := wrapType[btFrom.String()]; ok { // wrapperspb.StringValue -> string
 		copyAny(baseValue(from).FieldByName("Value"), to)
 		return
 	}
-	if btfrom.Kind() == reflect.Struct && btto.Kind() == reflect.Struct {
+	if btFrom.Kind() == reflect.Struct && btTo.Kind() == reflect.Struct {
 		copyStruct(baseValue(from), baseValue(to))
 		return
 	}
-	if btfrom.Kind() == reflect.Slice && btto.Kind() == reflect.Slice {
+	if btFrom.Kind() == reflect.Slice && btTo.Kind() == reflect.Slice {
 		copySlice(baseValue(from), baseValue(to))
 		return
 	}
-	if btto.Kind() == reflect.String {
+	if btFrom.Kind() == reflect.Map && btTo.Kind() == reflect.Map {
+		copyMap(baseValue(from), baseValue(to))
+		return
+	}
+	if btTo.Kind() == reflect.String {
 		if isBaseNil(to) {
 			to.Set(getBaseZeroValue(baseType(to.Type())))
 		}
@@ -84,6 +69,26 @@ func copyAny(from, to reflect.Value) {
 	if toNumber(from, to) {
 		return
 	}
+
+}
+
+func setBaseValue(from, to reflect.Value) {
+	if isBaseNil(from) {
+		return
+	}
+	var l int
+	t := to.Type()
+	for t.Kind() == reflect.Ptr {
+		l++
+		t = t.Elem()
+	}
+	v := baseValue(from)
+	for i := 0; i < l; i++ {
+		t := reflect.New(v.Type())
+		t.Elem().Set(v)
+		v = t
+	}
+	to.Set(v)
 }
 
 func getBaseZeroValue(t reflect.Type) reflect.Value {
@@ -119,15 +124,6 @@ func baseType(t reflect.Type) reflect.Type {
 		t = t.Elem()
 	}
 	return t
-}
-
-func baseLayer(t reflect.Type) int {
-	var layer int
-	for t.Kind() == reflect.Ptr {
-		layer++
-		t = t.Elem()
-	}
-	return layer
 }
 
 func typeEq(t1, t2 reflect.Type) bool {
@@ -174,59 +170,72 @@ func copySlice(from, to reflect.Value) {
 	to.Set(temp)
 }
 
+func copyMap(from, to reflect.Value) {
+	// todo copy map
+}
+
 func toString(value reflect.Value) string {
 	if value.Kind() == reflect.Slice {
 		switch value.Type().String() {
-		case "[]uint8":
+		case "[]uint8": // []byte -> []uint8
 			return string(value.Interface().([]uint8))
-		case "[]int32":
+		case "[]int32": // []rune -> []int32
 			return string(value.Interface().([]int32))
 		}
 	}
 	return fmt.Sprint(value.Interface())
 }
 
-func toNumber(from1, to1 reflect.Value) bool {
-	if isBaseNil(to1) {
-		to1.Set(getBaseZeroValue(to1.Type()))
+func toNumber(from, to reflect.Value) bool {
+	initTo := func() {
+		if isBaseNil(to) {
+			to.Set(getBaseZeroValue(to.Type()))
+		}
 	}
-	from := baseValue(from1)
-	to := baseValue(to1)
-	switch from.Kind() {
+	switch baseValue(from).Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		switch to.Kind() {
+		switch baseValue(to).Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			to.SetInt(from.Int())
+			initTo()
+			baseValue(to).SetInt(baseValue(from).Int())
 			return true
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			to.SetUint(uint64(from.Int()))
+			initTo()
+			baseValue(to).SetUint(uint64(baseValue(from).Int()))
 			return true
 		case reflect.Float64, reflect.Float32:
-			to.SetFloat(float64(from.Int()))
+			initTo()
+			baseValue(to).SetFloat(float64(baseValue(from).Int()))
 			return true
 		}
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		switch to.Kind() {
+		switch baseValue(to).Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			to.SetInt(int64(from.Uint()))
+			initTo()
+			baseValue(to).SetInt(int64(baseValue(from).Uint()))
 			return true
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			to.SetInt(int64(from.Uint()))
+			initTo()
+			baseValue(to).SetInt(int64(baseValue(from).Uint()))
 			return true
 		case reflect.Float64, reflect.Float32:
-			to.SetFloat(float64(from.Uint()))
+			initTo()
+			baseValue(to).SetFloat(float64(baseValue(from).Uint()))
 			return true
 		}
 	case reflect.Float64, reflect.Float32:
-		switch to.Kind() {
+		switch baseValue(to).Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			to.SetInt(int64(from.Float()))
+			initTo()
+			baseValue(to).SetInt(int64(baseValue(from).Float()))
 			return true
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			to.SetUint(uint64(from.Float()))
+			initTo()
+			baseValue(to).SetUint(uint64(baseValue(from).Float()))
 			return true
 		case reflect.Float64, reflect.Float32:
-			to.SetFloat(from.Float())
+			initTo()
+			baseValue(to).SetFloat(baseValue(from).Float())
 			return true
 		}
 	}

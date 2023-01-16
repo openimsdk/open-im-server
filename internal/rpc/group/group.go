@@ -24,7 +24,6 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
-	"math/big"
 	"net"
 	"strconv"
 	"strings"
@@ -121,48 +120,36 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	var groupOwnerNum int
+	if req.OwnerUserID == "" {
+		return nil, constant.ErrArgs.Wrap("no group owner")
+	}
 	var userIDs []string
-	for _, info := range req.InitMemberList {
-		if info.RoleLevel == constant.GroupOwner {
-			groupOwnerNum++
-		}
-		userIDs = append(userIDs, info.UserID)
+	for _, ordinaryUserID := range req.InitMemberList {
+		userIDs = append(userIDs, ordinaryUserID)
 	}
-	if req.OwnerUserID != "" {
-		groupOwnerNum++
-		userIDs = append(userIDs, req.OwnerUserID)
+	userIDs = append(userIDs, req.OwnerUserID)
+	for _, adminUserID := range req.AdminUserIDs {
+		userIDs = append(userIDs, adminUserID)
 	}
-	if groupOwnerNum != 1 {
-		return nil, constant.ErrArgs.Wrap("groupOwnerNum != 1")
-	}
-	if utils.IsRepeatStringSlice(userIDs) {
+	if utils.IsRepeatID(userIDs) {
 		return nil, constant.ErrArgs.Wrap("group member is repeated")
 	}
-	users, err := rocksCache.GetUserInfoFromCacheBatch(ctx, userIDs)
+
+	users, err := getUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	if len(users) != len(userIDs) {
-		return nil, constant.ErrDatabase.Wrap("len(users from cache) != len(userIDs)")
-	}
-	userMap := make(map[string]*imdb.User)
+
+	userMap := make(map[string]*open_im_sdk.UserInfo)
 	for i, user := range users {
 		userMap[user.UserID] = users[i]
 	}
-	if err := s.DelGroupAndUserCache(ctx, "", userIDs); err != nil {
-		return nil, err
-	}
+
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
-	groupId := req.GroupInfo.GroupID
-	if groupId == "" {
-		groupId = utils.Md5(tools.OperationID(ctx) + strconv.FormatInt(time.Now().UnixNano(), 10))
-		bi := big.NewInt(0)
-		bi.SetString(groupId[0:8], 16)
-		groupId = bi.String()
-	}
+	groupId := genGroupID(ctx, req.GroupInfo.GroupID)
+
 	groupInfo := imdb.Group{}
 	utils.CopyStructFields(&groupInfo, req.GroupInfo)
 	groupInfo.CreatorUserID = tools.OpUserID(ctx)
@@ -171,7 +158,9 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if groupInfo.NotificationUpdateTime.Unix() < 0 {
 		groupInfo.NotificationUpdateTime = utils.UnixSecondToTime(0)
 	}
+
 	if req.GroupInfo.GroupType != constant.SuperGroup {
+
 		var groupMembers []*imdb.GroupMember
 		joinGroup := func(userID string, roleLevel int32) error {
 			groupMember := &imdb.GroupMember{GroupID: groupId, RoleLevel: roleLevel, OperatorUserID: tools.OpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tools.OpUserID(ctx)}
@@ -193,9 +182,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				return nil, err
 			}
 		}
+
 		if err := (*imdb.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
 			return nil, err
 		}
+
 	} else {
 		if err := db.DB.CreateSuperGroup(groupId, userIDs, len(userIDs)); err != nil {
 			return nil, err
@@ -673,30 +664,15 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, err
 	}
 	if req.HandleResult == constant.GroupResponseAgree {
-		user, err := imdb.GetUserByUserID(req.FromUserID)
+		member, err := getDBGroupMember(ctx, req.GroupID, req.FromUserID)
 		if err != nil {
 			return nil, err
 		}
-		request, err := (&imdb.GroupRequest{}).Take(ctx, req.GroupID, req.FromUserID)
+		err = CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), member, groupInfo.Ex)
 		if err != nil {
 			return nil, err
 		}
-		member := imdb.GroupMember{}
-		member.GroupID = req.GroupID
-		member.UserID = req.FromUserID
-		member.RoleLevel = constant.GroupOrdinaryUsers
-		member.OperatorUserID = tools.OpUserID(ctx)
-		member.FaceURL = user.FaceURL
-		member.Nickname = user.Nickname
-		member.JoinSource = request.JoinSource
-		member.InviterUserID = request.InviterUserID
-		member.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
-		err = CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), &member, groupInfo.Ex)
-		if err != nil {
-			return nil, err
-		}
-
-		err = (&imdb.GroupMember{}).Create(ctx, []*imdb.GroupMember{&member})
+		err = (&imdb.GroupMember{}).Create(ctx, []*imdb.GroupMember{member})
 		if err != nil {
 			return nil, err
 		}

@@ -65,11 +65,25 @@ func (f *FriendRequest) Find(ctx context.Context, ownerUserID string) (friends [
 	return friends, err
 }
 
-func (f *FriendRequest) Take(ctx context.Context, ownerUserID, friendUserID string) (friend *FriendRequest, err error) {
+func (f *FriendRequest) Take(ctx context.Context, fromUserID, toUserID string) (friend *FriendRequest, err error) {
 	friend = &FriendRequest{}
-	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "group", *friend)
-	err = utils.Wrap(f.db.Where("owner_user_id = ? and friend_user_id", ownerUserID, friendUserID).Take(friend).Error, "")
+	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID, "friend", friend)
+	err = utils.Wrap(f.db.Where("from_user_id = ? and to_user_id", fromUserID, toUserID).Take(friend).Error, "")
 	return friend, err
+}
+
+func (f *FriendRequest) FindToUserID(ctx context.Context, toUserID string) (friends []*FriendRequest, err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "toUserID", toUserID, "friends", friends)
+	}()
+	return friends, utils.Wrap(f.db.Where("to_user_id = ?", toUserID).Find(&friends).Error, "")
+}
+
+func (f *FriendRequest) FindFromUserID(ctx context.Context, fromUserID string) (friends []*FriendRequest, err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "friends", friends)
+	}()
+	return friends, utils.Wrap(f.db.Where("from_user_id = ?", fromUserID).Find(&friends).Error, "")
 }
 
 // who apply to add me

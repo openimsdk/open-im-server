@@ -22,8 +22,8 @@ func NewCtx(c *gin.Context, api string) context.Context {
 	return context.WithValue(c, TraceLogKey, req)
 }
 
-func NewCtx1(c *gin.Context, api, operationID string) context.Context {
-	req := &ApiInfo{ApiName: api, GinCtx: c, OperationID: operationID, Funcs: &[]FuncInfo{}}
+func NewCtx1(c *gin.Context, api string) context.Context {
+	req := &ApiInfo{ApiName: api, GinCtx: c, OperationID: c.GetHeader("operationID"), Funcs: &[]FuncInfo{}}
 	return context.WithValue(c, TraceLogKey, req)
 }
 
