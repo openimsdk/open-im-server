@@ -256,7 +256,7 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 				} else {
 					log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), notNotificationUserIDList)
 				}
-				needOfflinePushUserIDList = utils.RemoveFromSlice(needOfflinePushUserIDList, notNotificationUserIDList)
+				needOfflinePushUserIDList = utils.RemoveFromSlice(notNotificationUserIDList, needOfflinePushUserIDList)
 				log.NewDebug(pushMsg.OperationID, utils.GetSelfFuncName(), needOfflinePushUserIDList)
 
 			}
