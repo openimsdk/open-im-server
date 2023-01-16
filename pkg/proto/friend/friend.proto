@@ -3,26 +3,19 @@ import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 option go_package = "Open_IM/pkg/proto/friend;friend";
 package friend;
 
-message CommID{
-  string OpUserID = 1;
-  string OperationID = 2;
-  string ToUserID = 4;
-  string FromUserID = 5;
-}
-
-
 message GetFriendsInfoReq{
-    CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message GetFriendInfoResp{
-  server_api_params.CommonResp commonResp = 1;
-  repeated server_api_params.FriendInfo FriendInfoList = 2;
+  repeated server_api_params.FriendInfo FriendInfoList = 1;
 }
 
 
 message AddFriendReq{
-  CommID CommID = 1;
-  string ReqMsg = 2;
+  string ToUserID = 1;
+  string FromUserID = 2;
+  string ReqMsg = 3;
 }
 message AddFriendResp{
   server_api_params.CommonResp commonResp = 1;
@@ -31,115 +24,112 @@ message AddFriendResp{
 
 message ImportFriendReq{
   repeated string FriendUserIDList = 1;
-  string  OperationID = 2;
-  string FromUserID = 3;
-  string OpUserID = 4;
+  string FromUserID = 2;
 }
-message UserIDResult{
-  string UserID = 1;
-  int32 Result = 2;
-}
+
 message ImportFriendResp{
-  server_api_params.CommonResp commonResp = 1;
-  repeated UserIDResult UserIDResultList = 2;
 }
 
 
 message GetFriendApplyListReq{
-  CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message GetFriendApplyListResp{
-  server_api_params.CommonResp commonResp = 1;
-  repeated server_api_params.FriendRequest FriendRequestList = 2;
+  repeated server_api_params.FriendRequest FriendRequestList = 1;
 }
 
 
 message GetFriendListReq{
-    CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message GetFriendListResp{
-  server_api_params.CommonResp commonResp = 1;
-  repeated server_api_params.FriendInfo FriendInfoList = 2;
+  repeated server_api_params.FriendInfo FriendInfoList = 1;
 }
 
 
 message AddBlacklistReq{
-    CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message AddBlacklistResp{
-  server_api_params.CommonResp commonResp = 1;
+
 }
 
 
 message RemoveBlacklistReq{
-  CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message RemoveBlacklistResp{
-  server_api_params.CommonResp commonResp = 1;
+
 }
 
 message GetBlacklistReq{
-  CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message GetBlacklistResp{
-  server_api_params.CommonResp commonResp = 1;
-  repeated server_api_params.PublicUserInfo BlackUserInfoList = 2;
+  repeated server_api_params.PublicUserInfo BlackUserInfoList = 1;
 }
 
 
 message IsFriendReq{
-  CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message IsFriendResp{
-  server_api_params.CommonResp commonResp = 1;
-  bool    Response = 2;
+  bool    Response = 1;
 }
 
 
 message IsInBlackListReq{
-  CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message IsInBlackListResp{
-  server_api_params.CommonResp commonResp = 1;
-  bool    Response = 2;
+  bool    Response = 1;
 }
 
 
 message DeleteFriendReq{
-  CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message DeleteFriendResp{
-  server_api_params.CommonResp commonResp = 1;
+
 }
 
 //process
 message AddFriendResponseReq{
-  CommID CommID = 1;
-  int32  handleResult = 2;
-  string handleMsg = 3;
+  string ToUserID = 1;
+  string FromUserID = 2;
+  int32  handleResult = 3;
+  string handleMsg = 4;
 }
 message AddFriendResponseResp{
-  server_api_params.CommonResp commonResp = 1;
+
 }
 
 message SetFriendRemarkReq{
-  CommID CommID = 1;
-  string Remark = 2;
+  string ToUserID = 1;
+  string FromUserID = 2;
+  string Remark = 3;
 }
 message SetFriendRemarkResp{
- server_api_params.CommonResp commonResp = 1;
+
 }
 
 message GetSelfApplyListReq{
-  CommID CommID = 1;
+  string ToUserID = 1;
+  string FromUserID = 2;
 }
 message GetSelfApplyListResp{
-  server_api_params.CommonResp commonResp = 1;
-  repeated server_api_params.FriendRequest FriendRequestList = 2;
+  repeated server_api_params.FriendRequest FriendRequestList = 1;
 }
 
 service friend{
- // rpc getFriendsInfo(GetFriendsInfoReq) returns(GetFriendInfoResp);
   rpc addFriend(AddFriendReq) returns(AddFriendResp);
   rpc getFriendApplyList(GetFriendApplyListReq) returns(GetFriendApplyListResp);
   rpc getSelfApplyList(GetSelfApplyListReq) returns(GetSelfApplyListResp);
@@ -153,7 +143,4 @@ service friend{
   rpc addFriendResponse(AddFriendResponseReq) returns(AddFriendResponseResp);
   rpc setFriendRemark(SetFriendRemarkReq) returns(SetFriendRemarkResp);
   rpc importFriend(ImportFriendReq)  returns(ImportFriendResp);
-
-  // rpc CheckFriendFromCache(IsFriendReq) returns(IsFriendResp);
-  // rpc CheckBlockFromCache(IsInBlackListReq) returns(IsFriendResp);
 }
