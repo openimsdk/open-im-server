@@ -67,8 +67,7 @@ message RemoveBlacklistResp{
 }
 
 message GetBlacklistReq{
-  string ToUserID = 1;
-  string FromUserID = 2;
+  string FromUserID = 1;
 }
 message GetBlacklistResp{
   repeated server_api_params.PublicUserInfo BlackUserInfoList = 1;

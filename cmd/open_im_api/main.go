@@ -3,14 +3,12 @@ package main
 import (
 	_ "Open_IM/cmd/open_im_api/docs"
 	apiAuth "Open_IM/internal/api/auth"
-	clientInit "Open_IM/internal/api/client_init"
 	"Open_IM/internal/api/conversation"
 	"Open_IM/internal/api/friend"
 	"Open_IM/internal/api/group"
 	"Open_IM/internal/api/manage"
 	apiChat "Open_IM/internal/api/msg"
 	"Open_IM/internal/api/office"
-	"Open_IM/internal/api/organization"
 	apiThird "Open_IM/internal/api/third"
 	"Open_IM/internal/api/user"
 	"Open_IM/pkg/common/config"
@@ -81,17 +79,17 @@ func main() {
 	friendRouterGroup := r.Group("/friend")
 	{
 		//	friendRouterGroup.POST("/get_friends_info", friend.GetFriendsInfo)
-		friendRouterGroup.POST("/add_friend", friend.AddFriend)                              //1
-		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)                        //1
-		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList)          //1
-		friendRouterGroup.POST("/get_self_friend_apply_list", friend.GetSelfFriendApplyList) //1
-		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)                     //1
-		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)             //1
-		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)                 //1
+		friendRouterGroup.POST("/add_friend", friend.AddFriend)                        //1
+		friendRouterGroup.POST("/delete_friend", friend.DeleteFriend)                  //1
+		friendRouterGroup.POST("/get_friend_apply_list", friend.GetFriendApplyList)    //1
+		friendRouterGroup.POST("/get_self_friend_apply_list", friend.GetSelfApplyList) //1
+		friendRouterGroup.POST("/get_friend_list", friend.GetFriendList)               //1
+		friendRouterGroup.POST("/add_friend_response", friend.AddFriendResponse)       //1
+		friendRouterGroup.POST("/set_friend_remark", friend.SetFriendRemark)           //1
 
-		friendRouterGroup.POST("/add_black", friend.AddBlack)          //1
-		friendRouterGroup.POST("/get_black_list", friend.GetBlacklist) //1
-		friendRouterGroup.POST("/remove_black", friend.RemoveBlack)    //1
+		friendRouterGroup.POST("/add_black", friend.AddBlack)           //1
+		friendRouterGroup.POST("/get_black_list", friend.GetBlacklist)  //1
+		friendRouterGroup.POST("/remove_black", friend.RemoveBlacklist) //1
 
 		friendRouterGroup.POST("/import_friend", friend.ImportFriend) //1
 		friendRouterGroup.POST("/is_friend", friend.IsFriend)         //1
