@@ -119,6 +119,22 @@ func DifferenceString(slice1, slice2 []string) []string {
 	}
 	return n
 }
+
+func RemoveFromSlice(slice1, slice2 []string) []string {
+	for _, v1 := range slice1 {
+		for i2, v2 := range slice2 {
+			if v2 == v1 {
+				if i2 != len(slice2)-1 {
+					slice2 = append(slice2[:i2], slice2[i2+1:]...)
+				} else {
+					slice2 = append(slice2[:i2])
+				}
+			}
+		}
+	}
+	return slice2
+}
+
 func OperationIDGenerator() string {
 	return strconv.FormatInt(time.Now().UnixNano()+int64(rand.Uint32()), 10)
 }

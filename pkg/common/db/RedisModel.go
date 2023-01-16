@@ -168,17 +168,17 @@ func (d *DataBases) GetSingleConversationRecvMsgOpt(userID, conversationID strin
 	return utils.StringToInt(result), err
 }
 
-func (d *DataBases) SetSuperGroupUserNotRecvOfflineMsgOpt(groupID, userID string) error {
+func (d *DataBases) SetSuperGroupUserReceiveNotNotifyMessage(groupID, userID string) error {
 	key := superGroupUserNotRecvOfflineMsgOptTemp + groupID
 	return d.RDB.SAdd(context.Background(), key, userID).Err()
 }
 
-func (d *DataBases) ReduceSuperGroupUserNotRecvOfflineMsgOpt(groupID, userID string) error {
+func (d *DataBases) SetSuperGroupUserReceiveNotifyMessage(groupID, userID string) error {
 	key := superGroupUserNotRecvOfflineMsgOptTemp + groupID
 	return d.RDB.SRem(context.Background(), key, userID).Err()
 }
 
-func (d *DataBases) GetSuperGroupUserNotRecvOfflineMsgIDList(groupID string) ([]string, error) {
+func (d *DataBases) GetSuperGroupUserReceiveNotNotifyMessageIDList(groupID string) ([]string, error) {
 	key := superGroupUserNotRecvOfflineMsgOptTemp + groupID
 	userIDs, _ := d.RDB.SMembers(context.Background(), key).Result()
 	return userIDs, nil
