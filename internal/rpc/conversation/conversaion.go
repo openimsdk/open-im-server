@@ -63,12 +63,16 @@ func (rpc *rpcConversation) ModifyConversationField(c context.Context, req *pbCo
 			}
 			if req.Conversation.ConversationType == constant.SuperGroupChatType {
 				if req.Conversation.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
-					if err = db.DB.SetSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
+					if err = db.DB.SetSuperGroupUserReceiveNotNotifyMessage(req.Conversation.GroupID, v); err != nil {
 						log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+						resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+						return resp, nil
 					}
 				} else {
-					if err = db.DB.ReduceSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
+					if err = db.DB.SetSuperGroupUserReceiveNotifyMessage(req.Conversation.GroupID, v); err != nil {
 						log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+						resp.CommonResp = &pbConversation.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+						return resp, nil
 					}
 				}
 			}

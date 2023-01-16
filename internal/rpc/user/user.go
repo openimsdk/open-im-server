@@ -163,6 +163,22 @@ func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.Batc
 			return resp, nil
 		}
 
+		if v.ConversationType == constant.SuperGroupChatType {
+			if v.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
+				if err := db.DB.SetSuperGroupUserReceiveNotNotifyMessage(v.GroupID, v.OwnerUserID); err != nil {
+					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), v.GroupID, v.OwnerUserID)
+					resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}
+					return resp, nil
+				}
+			} else {
+				if err := db.DB.SetSuperGroupUserReceiveNotifyMessage(v.GroupID, v.OwnerUserID); err != nil {
+					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), v.GroupID, err.Error())
+					resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}
+					return resp, nil
+				}
+			}
+		}
+
 		isUpdate, err := imdb.SetConversation(conversation)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
@@ -266,12 +282,16 @@ func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConvers
 		}
 		if req.Conversation.ConversationType == constant.SuperGroupChatType {
 			if req.Conversation.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
-				if err = db.DB.SetSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
-					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+				if err = db.DB.SetSuperGroupUserReceiveNotNotifyMessage(req.Conversation.GroupID, req.Conversation.OwnerUserID); err != nil {
+					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, req.Conversation.OwnerUserID)
+					resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}
+					return resp, nil
 				}
 			} else {
-				if err = db.DB.ReduceSuperGroupUserNotRecvOfflineMsgOpt(req.Conversation.GroupID, v); err != nil {
-					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, v)
+				if err = db.DB.SetSuperGroupUserReceiveNotifyMessage(req.Conversation.GroupID, req.Conversation.OwnerUserID); err != nil {
+					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), req.Conversation.GroupID, err.Error())
+					resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}
+					return resp, nil
 				}
 			}
 		}
@@ -341,12 +361,16 @@ func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOp
 		case "super_group":
 			conversation.GroupID = stringList[1]
 			if req.RecvMsgOpt == constant.ReceiveNotNotifyMessage {
-				if err := db.DB.SetSuperGroupUserNotRecvOfflineMsgOpt(conversation.GroupID, req.OwnerUserID); err != nil {
+				if err := db.DB.SetSuperGroupUserReceiveNotNotifyMessage(conversation.GroupID, req.OwnerUserID); err != nil {
 					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), conversation.GroupID, req.OwnerUserID)
+					resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+					return resp, nil
 				}
 			} else {
-				if err := db.DB.ReduceSuperGroupUserNotRecvOfflineMsgOpt(conversation.GroupID, req.OwnerUserID); err != nil {
+				if err := db.DB.SetSuperGroupUserReceiveNotifyMessage(conversation.GroupID, req.OwnerUserID); err != nil {
 					log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error(), conversation.GroupID, req.OwnerUserID)
+					resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
+					return resp, nil
 				}
 			}
 		}

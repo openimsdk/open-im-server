@@ -249,7 +249,13 @@ func MsgToSuperGroupUser(pushMsg *pbPush.PushMsgReq) {
 			} else {
 				needOfflinePushUserIDList = onlineFailedUserIDList
 			}
-
+			if pushMsg.MsgData.ContentType != constant.SignalingNotification {
+				notNotificationUserIDList, err := db.DB.GetSuperGroupUserReceiveNotNotifyMessageIDList(pushMsg.MsgData.GroupID)
+				if err != nil {
+					log.NewError(pushMsg.OperationID, utils.GetSelfFuncName(), "GetSuperGroupUserReceiveNotNotifyMessageIDList failed", pushMsg.MsgData.GroupID)
+				}
+				needOfflinePushUserIDList = utils.RemoveFromSlice(needOfflinePushUserIDList, notNotificationUserIDList)
+			}
 			if offlinePusher == nil {
 				return
 			}
