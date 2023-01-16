@@ -79,7 +79,7 @@ message UserInfo{
   uint32 createTime = 9;
   int32 appMangerLevel = 10;
   int32 globalRecvMsgOpt = 11;
-  string birthStr = 12;
+  int64 birthday = 13;
 }
 
 message FriendInfo{
