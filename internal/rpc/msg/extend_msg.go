@@ -324,6 +324,7 @@ func (rpc *rpcChat) AddMessageReactionExtensions(ctx context.Context, req *msg.A
 	rResp.Result = callbackResp.ResultReactionExtensionList
 	rResp.IsReact = callbackResp.IsReact
 	ExtendMessageAddedNotification(req.OperationID, req.OpUserID, req.SourceID, req.SessionType, req, &rResp, isHistory, false)
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "rpc return is:", resp.String())
 	return &rResp, nil
 }
 
