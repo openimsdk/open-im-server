@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func initMysqlDB(model interface{}) *gorm.DB {
+func connectToDB() *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], "mysql")
 	var db *gorm.DB
@@ -51,8 +51,13 @@ func initMysqlDB(model interface{}) *gorm.DB {
 	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.Config.Mysql.DBMaxLifeTime))
 	sqlDB.SetMaxOpenConns(config.Config.Mysql.DBMaxOpenConns)
 	sqlDB.SetMaxIdleConns(config.Config.Mysql.DBMaxIdleConns)
-	//models := []interface{}{&Friend{}, &FriendRequest{}, &Group{}, &GroupMember{}, &GroupRequest{},
-	//	&User{}, &Black{}, &ChatLog{}, &Conversation{}, &AppVersion{}}
+	return db
+}
+
+//models := []interface{}{&Friend{}, &FriendRequest{}, &Group{}, &GroupMember{}, &GroupRequest{},
+//	&User{}, &Black{}, &ChatLog{}, &Conversation{}, &AppVersion{}}
+
+func initModel(db *gorm.DB, model interface{}) *gorm.DB {
 	db.AutoMigrate(model)
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
@@ -64,4 +69,11 @@ type Writer struct{}
 
 func (w Writer) Printf(format string, args ...interface{}) {
 	fmt.Printf(format, args...)
+}
+
+func getDBConn(db *gorm.DB, tx ...*gorm.DB) *gorm.DB {
+	if len(tx) > 0 {
+		return tx[0]
+	}
+	return db
 }
