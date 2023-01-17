@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func connectToDB() *gorm.DB {
+func ConnectToDB() *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], "mysql")
 	var db *gorm.DB
@@ -46,7 +46,7 @@ func connectToDB() *gorm.DB {
 	}
 	sqlDB, err := db.DB()
 	if err != nil {
-		panic(err.Error() + " db.DB() failed ")
+		panic(err.Error() + " DB.DB() failed ")
 	}
 	sqlDB.SetConnMaxLifetime(time.Second * time.Duration(config.Config.Mysql.DBMaxLifeTime))
 	sqlDB.SetMaxOpenConns(config.Config.Mysql.DBMaxOpenConns)
@@ -57,7 +57,7 @@ func connectToDB() *gorm.DB {
 //models := []interface{}{&Friend{}, &FriendRequest{}, &Group{}, &GroupMember{}, &GroupRequest{},
 //	&User{}, &Black{}, &ChatLog{}, &Conversation{}, &AppVersion{}}
 
-func initModel(db *gorm.DB, model interface{}) *gorm.DB {
+func InitModel(db *gorm.DB, model interface{}) *gorm.DB {
 	db.AutoMigrate(model)
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")
