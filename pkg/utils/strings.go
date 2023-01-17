@@ -122,7 +122,7 @@ func RemoveDuplicateElement(idList []string) []string {
 	return result
 }
 
-func IsRepeatStringSlice(arr []string) bool {
+func IsDuplicateStringSlice(arr []string) bool {
 	t := make(map[string]struct{})
 	for _, s := range arr {
 		if _, ok := t[s]; ok {
@@ -133,6 +133,6 @@ func IsRepeatStringSlice(arr []string) bool {
 	return false
 }
 
-func IsRepeatID(args ...interface{}) bool {
+func IsDuplicateID(args ...interface{}) bool {
 	return false
 }

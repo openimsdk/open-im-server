@@ -120,7 +120,7 @@ type PBGroup struct {
 	*sdk.GroupInfo
 }
 
-func (pb *PBGroup) convert() (*imdb.Group, error) {
+func (pb *PBGroup) Convert() (*imdb.Group, error) {
 	dst := &imdb.Group{}
 	utils.CopyStructFields(dst, pb)
 	return dst, nil

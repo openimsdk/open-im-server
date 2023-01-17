@@ -6,15 +6,15 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
-	rocksCache "Open_IM/pkg/common/db/rocks_cache"
+	imdb "Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/common/trace_log"
-	cp "Open_IM/pkg/common/utils"
+
+	cp "Open_IM/internal/utils"
 	"Open_IM/pkg/getcdv3"
 	pbCache "Open_IM/pkg/proto/cache"
 	pbConversation "Open_IM/pkg/proto/conversation"
@@ -131,39 +131,26 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	for _, adminUserID := range req.AdminUserIDs {
 		userIDs = append(userIDs, adminUserID)
 	}
-	if utils.IsRepeatID(userIDs) {
+	if utils.IsDuplicateID(userIDs) {
 		return nil, constant.ErrArgs.Wrap("group member is repeated")
 	}
-
 	users, err := getUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-
 	userMap := make(map[string]*open_im_sdk.UserInfo)
 	for i, user := range users {
 		userMap[user.UserID] = users[i]
 	}
-
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
-	groupId := genGroupID(ctx, req.GroupInfo.GroupID)
-
-	groupInfo := imdb.Group{}
-	utils.CopyStructFields(&groupInfo, req.GroupInfo)
-	groupInfo.CreatorUserID = tools.OpUserID(ctx)
-	groupInfo.GroupID = groupId
-	groupInfo.CreateTime = time.Now()
-	if groupInfo.NotificationUpdateTime.Unix() < 0 {
-		groupInfo.NotificationUpdateTime = utils.UnixSecondToTime(0)
-	}
-
+	groupInfo, err := (&cp.PBGroup{req.GroupInfo}).Convert()
+	groupInfo.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
 	if req.GroupInfo.GroupType != constant.SuperGroup {
-
 		var groupMembers []*imdb.GroupMember
 		joinGroup := func(userID string, roleLevel int32) error {
-			groupMember := &imdb.GroupMember{GroupID: groupId, RoleLevel: roleLevel, OperatorUserID: tools.OpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tools.OpUserID(ctx)}
+			groupMember := &imdb.GroupMember{GroupID: groupInfo.GroupID, RoleLevel: roleLevel, OperatorUserID: tools.OpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tools.OpUserID(ctx)}
 			user := userMap[userID]
 			utils.CopyStructFields(&groupMember, user)
 			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), groupMember, groupInfo.Ex); err != nil {
