@@ -41,6 +41,8 @@ type groupServer struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
+	               imdb.GroupInterface
+
 }
 
 func NewGroupServer(port int) *groupServer {
