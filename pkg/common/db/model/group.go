@@ -32,6 +32,8 @@ func NewGroupModel(db mysql.GroupModelInterface, rdb redis.UniversalClient, mdb 
 		DisableCacheRead:  false,
 		StrongConsistency: true,
 	})
+	sg := mdb.Database().Collection()
+	sg.Find()
 	groupModel.mongo = mongoDB.NewMongoClient(mdb)
 	return &groupModel
 }
@@ -59,4 +61,21 @@ func (g *GroupModel) Delete(ctx context.Context, groupIDs []string) error {
 
 func (g *GroupModel) Take(ctx context.Context, groupID string) (group *mysql.Group, err error) {
 	return g.cache.GetGroupInfoFromCache(ctx, groupID)
+}
+
+func (g *GroupModel) Update(ctx context.Context, groups []*mysql.Group) error {
+	err := g.db.DB.Transaction(func(tx *gorm.DB) error {
+		if err := g.db.Update(ctx, groups, tx); err != nil {
+			return err
+		}
+		var groupIDs []string
+		for _, group := range groups {
+			groupIDs = append(groupIDs, group.GroupID)
+		}
+		if err := g.cache.DelGroupsInfoFromCache(ctx, groupIDs); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
 }

@@ -22,11 +22,7 @@ type GroupCache struct {
 }
 
 func NewGroupCache(rdb redis.UniversalClient, db mysql.GroupModelInterface, opts rockscache.Options) *GroupCache {
-	rcClient := &rockscache.Client{
-		Options: rockscache.Options{},
-	}
-	redisClient := NewRedisClient(rdb)
-	return &GroupCache{rcClient: rcClient, expireTime: GroupExpireTime, db: db, redisClient: redisClient}
+	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: GroupExpireTime, db: db, redisClient: NewRedisClient(rdb)}
 }
 
 func (g *GroupCache) getRedisClient() *RedisClient {
