@@ -16,6 +16,7 @@ type GroupModelInterface interface {
 	Update(ctx context.Context, groups []*Group) (err error)
 	Find(ctx context.Context, groupIDs []string) (groups []*Group, err error)
 	Take(ctx context.Context, groupID string) (group *Group, err error)
+	DeleteTx(ctx context.Context, groupIDs []string) error
 
 	//mongo
 }
@@ -89,4 +90,7 @@ func (*Group) Take(ctx context.Context, groupID string) (group *Group, err error
 	}()
 	err = utils.Wrap(GroupDB.Where("group_id = ?", groupID).Take(group).Error, "")
 	return group, err
+}
+func (*Group) DeleteTx(ctx context.Context, groupIDs []string) error {
+	return nil
 }
