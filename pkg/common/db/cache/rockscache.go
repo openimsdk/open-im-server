@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
+	"gorm.io/gorm"
 	"math/big"
 	"sort"
 	"strconv"
@@ -18,11 +19,11 @@ import (
 )
 
 const (
-	userInfoCache             = "USER_INFO_CACHE:"
-	friendRelationCache       = "FRIEND_RELATION_CACHE:"
-	blackListCache            = "BLACK_LIST_CACHE:"
-	groupCache                = "GROUP_CACHE:"
-	groupInfoCache            = "GROUP_INFO_CACHE:"
+	userInfoCache       = "USER_INFO_CACHE:"
+	friendRelationCache = "FRIEND_RELATION_CACHE:"
+	blackListCache      = "BLACK_LIST_CACHE:"
+	groupCache          = "GROUP_CACHE:"
+	//groupInfoCache            = "GROUP_INFO_CACHE:"
 	groupOwnerIDCache         = "GROUP_OWNER_ID:"
 	joinedGroupListCache      = "JOINED_GROUP_LIST_CACHE:"
 	groupMemberInfoCache      = "GROUP_MEMBER_INFO_CACHE:"
@@ -38,19 +39,10 @@ const (
 )
 
 const scanCount = 3000
-
-type RcClient struct {
-	rdb        redis.UniversalClient
-	Cache      *rockscache.Client
-	ExpireTime time.Duration
-}
-
-func NewRcClient(rdb redis.UniversalClient, expireTime time.Duration, opts rockscache.Options) *RcClient {
-	return &RcClient{Cache: rockscache.NewClient(rdb, opts), ExpireTime: expireTime}
-}
+const RandomExpireAdjustment = 0.2
 
 func (rc *RcClient) DelKeys() {
-	for _, key := range []string{groupCache, friendRelationCache, blackListCache, userInfoCache, groupInfoCache, groupOwnerIDCache, joinedGroupListCache,
+	for _, key := range []string{groupCache, friendRelationCache, blackListCache, userInfoCache, groupInfoCacheKey, groupOwnerIDCache, joinedGroupListCache,
 		groupMemberInfoCache, groupAllMemberInfoCache, allFriendInfoCache} {
 		fName := utils.GetSelfFuncName()
 		var cursor uint64
@@ -80,7 +72,7 @@ func (rc *RcClient) DelKeys() {
 	}
 }
 
-func (rc *RcClient) GetFriendIDListFromCache(ctx context.Context, userID string) (friendIDList []string, err error) {
+func (rc *Client) GetFriendIDListFromCache(ctx context.Context, userID string) (friendIDList []string, err error) {
 	getFriendIDList := func() (string, error) {
 		friendIDList, err := mysql.GetFriendIDListByUserID(userID)
 		if err != nil {
@@ -364,36 +356,36 @@ func DelAllGroupMembersInfoFromCache(ctx context.Context, groupID string) (err e
 	return db.DB.Rc.TagAsDeleted(groupAllMemberInfoCache + groupID)
 }
 
-func GetGroupInfoFromCache(ctx context.Context, groupID string) (groupInfo *mysql.Group, err error) {
-	getGroupInfo := func() (string, error) {
-		groupInfo, err := mysql.GetGroupInfoByGroupID(groupID)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		bytes, err := json.Marshal(groupInfo)
-		if err != nil {
-			return "", utils.Wrap(err, "")
-		}
-		return string(bytes), nil
-	}
-	groupInfo = &mysql.Group{}
-	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupInfo", groupInfo)
-	}()
-	groupInfoStr, err := db.DB.Rc.Fetch(groupInfoCache+groupID, time.Second*30*60, getGroupInfo)
-	if err != nil {
-		return nil, utils.Wrap(err, "")
-	}
-	err = json.Unmarshal([]byte(groupInfoStr), groupInfo)
-	return groupInfo, utils.Wrap(err, "")
-}
-
-func DelGroupInfoFromCache(ctx context.Context, groupID string) (err error) {
-	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
-	}()
-	return db.DB.Rc.TagAsDeleted(groupInfoCache + groupID)
-}
+//func GetGroupInfoFromCache(ctx context.Context, groupID string) (groupInfo *mysql.Group, err error) {
+//	getGroupInfo := func() (string, error) {
+//		groupInfo, err := mysql.GetGroupInfoByGroupID(groupID)
+//		if err != nil {
+//			return "", utils.Wrap(err, "")
+//		}
+//		bytes, err := json.Marshal(groupInfo)
+//		if err != nil {
+//			return "", utils.Wrap(err, "")
+//		}
+//		return string(bytes), nil
+//	}
+//	groupInfo = &mysql.Group{}
+//	defer func() {
+//		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupInfo", groupInfo)
+//	}()
+//	groupInfoStr, err := db.DB.Rc.Fetch(groupInfoCache+groupID, time.Second*30*60, getGroupInfo)
+//	if err != nil {
+//		return nil, utils.Wrap(err, "")
+//	}
+//	err = json.Unmarshal([]byte(groupInfoStr), groupInfo)
+//	return groupInfo, utils.Wrap(err, "")
+//}
+//
+//func DelGroupInfoFromCache(ctx context.Context, groupID string) (err error) {
+//	defer func() {
+//		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
+//	}()
+//	return db.DB.Rc.TagAsDeleted(groupInfoCache + groupID)
+//}
 
 func GetAllFriendsInfoFromCache(ctx context.Context, userID string) (friends []*mysql.Friend, err error) {
 	getAllFriendInfo := func() (string, error) {

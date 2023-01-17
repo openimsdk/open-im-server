@@ -42,9 +42,10 @@ const (
 	exTypeKeyLocker               = "EX_LOCK:"
 )
 
-func InitRedis(ctx context.Context) go_redis.UniversalClient {
+func InitRedis() go_redis.UniversalClient {
 	var rdb go_redis.UniversalClient
 	var err error
+	ctx := context.Background()
 	if config.Config.Redis.EnableCluster {
 		rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
 			Addrs:    config.Config.Redis.DBAddress,
@@ -73,12 +74,12 @@ func InitRedis(ctx context.Context) go_redis.UniversalClient {
 	return rdb
 }
 
-func NewRedisClient(rdb go_redis.UniversalClient) *RedisClient {
-	return &RedisClient{rdb: rdb}
-}
-
 type RedisClient struct {
 	rdb go_redis.UniversalClient
+}
+
+func NewRedisClient(rdb go_redis.UniversalClient) *RedisClient {
+	return &RedisClient{rdb: rdb}
 }
 
 func (r *RedisClient) JudgeAccountEXISTS(account string) (bool, error) {

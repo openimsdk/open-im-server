@@ -29,7 +29,8 @@ type Group struct {
 
 func NewGroupDB() *Group {
 	var group Group
-	group.DB = initMysqlDB(&group)
+	db := ConnectToDB()
+	db = InitModel(db, &group)
 	return &group
 }
 
@@ -41,11 +42,11 @@ func (*Group) Create(ctx context.Context, groups []*Group) (err error) {
 	return err
 }
 
-func (*Group) Delete(ctx context.Context, groupIDs []string) (err error) {
+func (g *Group) Delete(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs)
 	}()
-	return utils.Wrap(GroupDB.Where("group_id in (?)", groupIDs).Delete(&Group{}).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx...).Where("group_id in (?)", groupIDs).Delete(&Group{}).Error, "")
 }
 
 func (*Group) UpdateByMap(ctx context.Context, groupID string, args map[string]interface{}) (err error) {

@@ -13,7 +13,17 @@ import (
 	"time"
 )
 
-func InitMongoClient() *mongo.Client {
+type Client struct {
+	mongo *mongo.Client
+}
+
+func NewMongoClient() *Client {
+	var client Client
+	client.mongo = initMongo()
+	return &client
+}
+
+func initMongo() *mongo.Client {
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	if config.Config.Mongo.DBUri != "" {
 		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
