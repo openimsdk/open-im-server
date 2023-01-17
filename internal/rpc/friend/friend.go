@@ -4,7 +4,6 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	rocksCache "Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/model"
 	"Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/log"
@@ -173,8 +172,8 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 
 func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.ImportFriendResp, error) {
 	resp := &pbFriend.ImportFriendResp{}
-	if !utils.IsContain(tools.OpUserID(ctx), config.Config.Manager.AppManagerUid) {
-		return nil, constant.ErrNoPermission.Wrap()
+	if err := token_verify.CheckAdmin(ctx); err != nil {
+		return nil, err
 	}
 	if _, err := GetUserInfo(ctx, req.FromUserID); err != nil {
 		return nil, err
@@ -315,11 +314,11 @@ func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlac
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	blackIDList, err := rocksCache.GetBlackListFromCache(ctx, req.FromUserID)
+	exist, err := s.blackModel.IsExist(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
 		return nil, err
 	}
-	resp.Response = utils.IsContain(req.ToUserID, blackIDList)
+	resp.Response = exist
 	return resp, nil
 }
 

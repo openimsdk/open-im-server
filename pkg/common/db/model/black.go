@@ -4,6 +4,8 @@ import (
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/mysql"
 	"context"
+	"errors"
+	"gorm.io/gorm"
 )
 
 type BlackModel struct {
@@ -31,10 +33,20 @@ func (b *BlackModel) Find(ctx context.Context, blacks []*mysql.Black) (blackList
 	return b.db.Find(ctx, blacks)
 }
 
-func (b *BlackModel) Take(ctx context.Context, blackID string) (black *mysql.Black, err error) {
-	return b.db.Take(ctx, blackID)
+func (b *BlackModel) Take(ctx context.Context, ownerUserID, blockUserID string) (black *mysql.Black, err error) {
+	return b.db.Take(ctx, ownerUserID, blockUserID)
 }
 
 func (b *BlackModel) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*mysql.Black, err error) {
 	return b.db.FindByOwnerUserID(ctx, ownerUserID)
+}
+
+func (b *BlackModel) IsExist(ctx context.Context, ownerUserID, blockUserID string) (bool, error) {
+	if _, err := b.Take(ctx, ownerUserID, blockUserID); err == nil {
+		return true, nil
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else {
+		return false, err
+	}
 }
