@@ -2,7 +2,7 @@ package group
 
 import (
 	"Open_IM/pkg/common/constant"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	imdb "Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/tools"
 	pbGroup "Open_IM/pkg/proto/group"
 	sdk "Open_IM/pkg/proto/sdk_ws"

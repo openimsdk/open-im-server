@@ -1,4 +1,4 @@
-package mongo
+package mongoDB
 
 import (
 	"Open_IM/pkg/common/config"
@@ -13,7 +13,15 @@ import (
 	"time"
 )
 
-func InitMongoClient() *mongo.Client {
+type Client struct {
+	mongo *mongo.Client
+}
+
+func NewMongoClient(mdb *mongo.Client) *Client {
+	return &Client{mongo: mdb}
+}
+
+func initMongo() *mongo.Client {
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	if config.Config.Mongo.DBUri != "" {
 		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
@@ -50,6 +58,14 @@ func InitMongoClient() *mongo.Client {
 			panic(err.Error() + " mongo.Connect failed " + uri)
 		}
 	}
+	return mongoClient
+}
+
+func GetCollection(mongoClient *mongo.Client) {
+
+}
+
+func CreateAllIndex(mongoClient *mongo.Client) {
 	// mongodb create index
 	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
 		panic(err.Error() + " index create failed " + cSendLog + " send_id, -send_time")
@@ -72,7 +88,6 @@ func InitMongoClient() *mongo.Client {
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
 		panic(err.Error() + "index create failed " + cTag + " tag_id")
 	}
-	return mongoClient
 }
 
 func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {

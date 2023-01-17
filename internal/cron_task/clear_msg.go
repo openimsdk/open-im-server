@@ -90,7 +90,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	msgs, err := db.DB.GetUserMsgListByIndex(ID, index)
 	if err != nil || msgs.UID == "" {
 		if err != nil {
-			if err == mongo.ErrMsgListNotExist {
+			if err == mongoDB.ErrMsgListNotExist {
 				log.NewInfo(operationID, utils.GetSelfFuncName(), "ID:", ID, "index:", index, err.Error())
 			} else {
 				log.NewError(operationID, utils.GetSelfFuncName(), "GetUserMsgListByIndex failed", err.Error(), index, ID)
@@ -104,7 +104,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 		return delStruct.getSetMinSeq() + 1, nil
 	}
 	log.NewDebug(operationID, "ID:", ID, "index:", index, "uid:", msgs.UID, "len:", len(msgs.Msg))
-	if len(msgs.Msg) > mongo.GetSingleGocMsgNum() {
+	if len(msgs.Msg) > mongoDB.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
 	if msgs.Msg[len(msgs.Msg)-1].SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) > utils.GetCurrentTimestampByMill() && msgListIsFull(msgs) {
@@ -150,7 +150,7 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	return seq, utils.Wrap(err, "deleteMongoMsg failed")
 }
 
-func msgListIsFull(chat *mongo.UserChat) bool {
+func msgListIsFull(chat *mongoDB.UserChat) bool {
 	index, _ := strconv.Atoi(strings.Split(chat.UID, ":")[1])
 	if index == 0 {
 		if len(chat.Msg) >= 4999 {

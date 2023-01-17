@@ -15,14 +15,22 @@ const GroupExpireTime = time.Second * 60 * 60 * 12
 const groupInfoCacheKey = "GROUP_INFO_CACHE:"
 
 type GroupCache struct {
-	Client     *Client
-	db         *mysql.Group
-	expireTime time.Duration
+	db          mysql.GroupModelInterface
+	expireTime  time.Duration
+	redisClient *RedisClient
+	rcClient    *rockscache.Client
 }
 
-func NewGroupRc(rdb redis.UniversalClient, db *mysql.Group, opts rockscache.Options) GroupCache {
-	rcClient := newClient(rdb, opts)
-	return GroupCache{Client: rcClient, expireTime: GroupExpireTime}
+func NewGroupCache(rdb redis.UniversalClient, db mysql.GroupModelInterface, opts rockscache.Options) *GroupCache {
+	rcClient := &rockscache.Client{
+		Options: rockscache.Options{},
+	}
+	redisClient := NewRedisClient(rdb)
+	return &GroupCache{rcClient: rcClient, expireTime: GroupExpireTime, db: db, redisClient: redisClient}
+}
+
+func (g *GroupCache) getRedisClient() *RedisClient {
+	return g.redisClient
 }
 
 func (g *GroupCache) GetGroupsInfoFromCache(ctx context.Context, groupIDs []string) (groups []*mysql.Group, err error) {
@@ -52,7 +60,7 @@ func (g *GroupCache) GetGroupInfoFromCache(ctx context.Context, groupID string) 
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", *group)
 	}()
-	groupStr, err := g.Client.rcClient.Fetch(g.getGroupInfoCacheKey(groupID), g.expireTime, getGroup)
+	groupStr, err := g.rcClient.Fetch(g.getGroupInfoCacheKey(groupID), g.expireTime, getGroup)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
@@ -64,7 +72,16 @@ func (g *GroupCache) DelGroupInfoFromCache(ctx context.Context, groupID string) 
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
 	}()
-	return g.Client.rcClient.TagAsDeleted(g.getGroupInfoCacheKey(groupID))
+	return g.rcClient.TagAsDeleted(g.getGroupInfoCacheKey(groupID))
+}
+
+func (g *GroupCache) DelGroupsInfoFromCache(ctx context.Context, groupIDs []string) error {
+	for _, groupID := range groupIDs {
+		if err := g.DelGroupInfoFromCache(ctx, groupID); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (g *GroupCache) getGroupInfoCacheKey(groupID string) string {

@@ -1,4 +1,4 @@
-package mongo
+package mongoDB
 
 import (
 	"Open_IM/pkg/common/config"
@@ -1091,8 +1091,7 @@ func (d *db.DataBases) GetUserFriendWorkMoments(showNumber, pageNumber int32, us
 }
 
 type SuperGroup struct {
-	GroupID string `bson:"group_id" json:"groupID"`
-	//MemberNumCount int      `bson:"member_num_count"`
+	GroupID      string   `bson:"group_id" json:"groupID"`
 	MemberIDList []string `bson:"member_id_list" json:"memberIDList"`
 }
 

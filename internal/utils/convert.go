@@ -1,7 +1,7 @@
 package utils
 
 import (
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	imdb "Open_IM/pkg/common/db/mysql"
 	sdk "Open_IM/pkg/proto/sdk_ws"
 	utils2 "Open_IM/pkg/utils"
 	utils "github.com/OpenIMSDK/open_utils"
@@ -120,7 +120,7 @@ type PBGroup struct {
 	*sdk.GroupInfo
 }
 
-func (pb *PBGroup) convert() (*imdb.Group, error) {
+func (pb *PBGroup) Convert() (*imdb.Group, error) {
 	dst := &imdb.Group{}
 	utils.CopyStructFields(dst, pb)
 	return dst, nil
@@ -207,44 +207,31 @@ func (db *DBGroupRequest) convert() (*sdk.GroupRequest, error) {
 }
 
 type DBUser struct {
-	*imdb
+	*imdb.User
 }
 
 type PBUser struct {
 	*sdk.UserInfo
 }
 
-func (pb *PBUser) convert() (*DBUser, error) {
-	dst := &DBUser{}
+func (pb *PBUser) convert() (*imdb.User, error) {
+	dst := &imdb.User{}
 	utils.CopyStructFields(dst, pb)
-
-	utils.CopyStructFields(dst, src)
-	dst.Birth, _ = utils.TimeStringToTime(src.BirthStr)
-	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
-
+	dst.Birth = utils.UnixSecondToTime(pb.Birthday)
+	dst.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
 	return dst, nil
 }
-func (db *DBUser) convert() (*PBUser, error) {
-	dst := &sdk.GroupRequest{}
+
+func (db *DBUser) convert() (*sdk.UserInfo, error) {
+	dst := &sdk.UserInfo{}
 	utils.CopyStructFields(dst, db)
-	dst.ReqTime = uint32(db.ReqTime.Unix())
-	dst.HandleTime = uint32(db.HandledTime.Unix())
+	dst.CreateTime = uint32(db.CreateTime.Unix())
+	dst.Birthday = db.Birth.Unix()
 	return dst, nil
 }
 
-func UserOpenIMCopyDB(dst *imdb.User, src *sdk.UserInfo) {
-	utils.CopyStructFields(dst, src)
-	dst.Birth, _ = utils.TimeStringToTime(src.BirthStr)
-	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
-}
-
-func UserDBCopyOpenIM(dst *open_im_sdk.UserInfo, src *imdb.User) {
-	utils.CopyStructFields(dst, src)
-	dst.CreateTime = uint32(src.CreateTime.Unix())
-	//dst.Birth = uint32(src.Birth.Unix())
-	dst.BirthStr = utils2.TimeToString(src.Birth)
-}
-
-func UserDBCopyOpenIMPublicUser(dst *open_im_sdk.PublicUserInfo, src *imdb.User) {
-	utils.CopyStructFields(dst, src)
+func (db *DBUser) convertPublic() (*sdk.PublicUserInfo, error) {
+	dst := &sdk.PublicUserInfo{}
+	utils.CopyStructFields(dst, db)
+	return dst, nil
 }
