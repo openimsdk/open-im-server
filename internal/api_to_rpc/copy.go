@@ -7,18 +7,7 @@ import (
 )
 
 func CopyAny(from, to interface{}) {
-	t := reflect.ValueOf(to)
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-	if !t.CanSet() {
-		return
-	}
-	f := reflect.ValueOf(from)
-	if isBaseNil(f) {
-		return
-	}
-	copyAny(f, t)
+	copyAny(reflect.ValueOf(from), reflect.Indirect(reflect.ValueOf(to)))
 }
 
 func copyAny(from, to reflect.Value) {
@@ -97,13 +86,19 @@ func getBaseZeroValue(t reflect.Type) reflect.Value {
 		l++
 		t = t.Elem()
 	}
-	v := reflect.Zero(t)
-	for i := 0; i < l; i++ {
-		t := reflect.New(v.Type())
-		t.Elem().Set(v)
-		v = t
+	v := reflect.New(t)
+	if l == 0 {
+		v = v.Elem()
+	} else {
+		for i := 1; i < l; i++ {
+			t := reflect.New(v.Type())
+			t.Elem().Set(v)
+			v = t
+		}
 	}
-	return v
+	r := reflect.New(v.Type()).Elem()
+	r.Set(v)
+	return r
 }
 
 func isBaseNil(v reflect.Value) bool {
@@ -163,15 +158,35 @@ func copySlice(from, to reflect.Value) {
 	temp := reflect.MakeSlice(to.Type(), 0, size)
 	elemTo := to.Type().Elem()
 	for i := 0; i < size; i++ {
-		itemTo := getBaseZeroValue(elemTo)
-		copyAny(from.Index(i), itemTo)
+		var itemTo reflect.Value
+		if item := from.Index(i); isBaseNil(item) {
+			itemTo = reflect.Zero(elemTo)
+		} else {
+			itemTo = getBaseZeroValue(elemTo)
+			copyAny(from.Index(i), itemTo)
+		}
 		temp = reflect.Append(temp, itemTo)
 	}
 	to.Set(temp)
 }
 
 func copyMap(from, to reflect.Value) {
-	// todo copy map
+	to.Set(reflect.MakeMap(to.Type()))
+	toTypeKey := to.Type().Key()
+	toTypeVal := to.Type().Elem()
+	for r := from.MapRange(); r.Next(); {
+		key := getBaseZeroValue(toTypeKey)
+		copyAny(r.Key(), key)
+		var val reflect.Value
+		fVal := r.Value()
+		if isBaseNil(fVal) {
+			val = reflect.Zero(toTypeVal)
+		} else {
+			val = getBaseZeroValue(toTypeVal)
+			copyAny(fVal, val)
+		}
+		to.SetMapIndex(key, val)
+	}
 }
 
 func toString(value reflect.Value) string {

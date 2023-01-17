@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-var userDB *gorm.DB
-
 type User struct {
 	UserID           string    `gorm:"column:user_id;primary_key;size:64"`
 	Nickname         string    `gorm:"column:name;size:255"`
@@ -23,44 +21,51 @@ type User struct {
 	AppMangerLevel   int32     `gorm:"column:app_manger_level"`
 	GlobalRecvMsgOpt int32     `gorm:"column:global_recv_msg_opt"`
 
-	status int32 `gorm:"column:status"`
+	status int32    `gorm:"column:status"`
+	DB     *gorm.DB `gorm:"-" json:"-"`
 }
 
-func (*User) Create(ctx context.Context, users []*User) (err error) {
+func NewUserDB() *User {
+	var user User
+	user.DB = initMysqlDB(&user)
+	return &user
+}
+
+func (u *User) Create(ctx context.Context, users []*User) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
-	err = utils.Wrap(userDB.Create(&users).Error, "")
+	err = utils.Wrap(u.DB.Create(&users).Error, "")
 	return err
 }
 
-func (*User) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
+func (u *User) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "args", args)
 	}()
-	return utils.Wrap(userDB.Where("user_id = ?", userID).Updates(args).Error, "")
+	return utils.Wrap(u.DB.Where("user_id = ?", userID).Updates(args).Error, "")
 }
 
-func (*User) Update(ctx context.Context, users []*User) (err error) {
+func (u *User) Update(ctx context.Context, users []*User) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
-	return utils.Wrap(userDB.Updates(&users).Error, "")
+	return utils.Wrap(u.DB.Updates(&users).Error, "")
 }
 
-func (*User) Find(ctx context.Context, userIDs []string) (users []*User, err error) {
+func (u *User) Find(ctx context.Context, userIDs []string) (users []*User, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
 	}()
-	err = utils.Wrap(userDB.Where("user_id in (?)", userIDs).Find(&users).Error, "")
+	err = utils.Wrap(u.DB.Where("user_id in (?)", userIDs).Find(&users).Error, "")
 	return users, err
 }
 
-func (*User) Take(ctx context.Context, userID string) (user *User, err error) {
+func (u *User) Take(ctx context.Context, userID string) (user *User, err error) {
 	user = &User{}
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "user", *user)
 	}()
-	err = utils.Wrap(userDB.Where("user_id = ?", userID).Take(&user).Error, "")
+	err = utils.Wrap(u.DB.Where("user_id = ?", userID).Take(&user).Error, "")
 	return user, err
 }
