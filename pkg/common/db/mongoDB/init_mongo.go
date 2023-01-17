@@ -58,6 +58,10 @@ func initMongo() *mongo.Client {
 			panic(err.Error() + " mongo.Connect failed " + uri)
 		}
 	}
+	return mongoClient
+}
+
+func CreateAllIndex(mongoClient *mongo.Client) {
 	// mongodb create index
 	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
 		panic(err.Error() + " index create failed " + cSendLog + " send_id, -send_time")
@@ -80,7 +84,6 @@ func initMongo() *mongo.Client {
 	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
 		panic(err.Error() + "index create failed " + cTag + " tag_id")
 	}
-	return mongoClient
 }
 
 func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {
