@@ -5,7 +5,7 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
+	"Open_IM/pkg/common/db/model"
 	imdb "Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
@@ -159,17 +159,22 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			groupMembers = append(groupMembers, groupMember)
 			return nil
 		}
-		if req.OwnerUserID == "" {
-			if err := joinGroup(req.OwnerUserID, constant.GroupOwner); err != nil {
-				return nil, err
-			}
-		}
-		for _, info := range req.InitMemberList {
-			if err := joinGroup(info.UserID, info.RoleLevel); err != nil {
-				return nil, err
-			}
+
+		if err := joinGroup(req.OwnerUserID, constant.GroupOwner); err != nil {
+			return nil, err
 		}
 
+		for _, info := range req.InitMemberList {
+			if err := joinGroup(info, constant.GroupOrdinaryUsers); err != nil {
+				return nil, err
+			}
+		}
+		for _, info := range req.AdminUserIDs {
+			if err := joinGroup(info, constant.GroupAdmin); err != nil {
+				return nil, err
+			}
+		}
+		if err := model.
 		if err := (*imdb.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
 			return nil, err
 		}
