@@ -25,6 +25,12 @@ type User struct {
 	DB     *gorm.DB `gorm:"-" json:"-"`
 }
 
+func NewUserDB() *User {
+	var user User
+	user.DB = initMysqlDB(&user)
+	return &user
+}
+
 func (u *User) Create(ctx context.Context, users []*User) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
