@@ -52,7 +52,7 @@ func (b *Black) Update(ctx context.Context, blacks []*Black) (err error) {
 	return utils.Wrap(b.DB.Updates(&blacks).Error, "")
 }
 
-func (b *Black) Find(ctx context.Context, blacks []Black) (blackList []*Black, err error) {
+func (b *Black) Find(ctx context.Context, blacks []*Black) (blackList []*Black, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks, "blackList", blackList)
 	}()
