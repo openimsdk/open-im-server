@@ -608,7 +608,7 @@ func DelConversationFromCache(ctx context.Context, ownerUserID, conversationID s
 	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationCache+ownerUserID+":"+conversationID), "DelConversationFromCache err")
 }
 
-func GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *mongo.ExtendMsg, err error) {
+func GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, firstModifyTime int64) (extendMsg *mongoDB.ExtendMsg, err error) {
 	getExtendMsg := func() (string, error) {
 		extendMsg, err := db.DB.GetExtendMsg(sourceID, sessionType, clientMsgID, firstModifyTime)
 		if err != nil {
@@ -628,7 +628,7 @@ func GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clien
 	if err != nil {
 		return nil, utils.Wrap(err, "Fetch failed")
 	}
-	extendMsg = &mongo.ExtendMsg{}
+	extendMsg = &mongoDB.ExtendMsg{}
 	err = json.Unmarshal([]byte(extendMsgStr), extendMsg)
 	return extendMsg, utils.Wrap(err, "Unmarshal failed")
 }

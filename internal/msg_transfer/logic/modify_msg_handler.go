@@ -71,14 +71,14 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 			}
 			if !notification.IsReact {
 				// first time to modify
-				var reactionExtensionList = make(map[string]mongo.KeyValue)
-				extendMsg := mongo.ExtendMsg{
+				var reactionExtensionList = make(map[string]mongoDB.KeyValue)
+				extendMsg := mongoDB.ExtendMsg{
 					ReactionExtensionList: reactionExtensionList,
 					ClientMsgID:           notification.ClientMsgID,
 					MsgFirstModifyTime:    notification.MsgFirstModifyTime,
 				}
 				for _, v := range notification.SuccessReactionExtensionList {
-					reactionExtensionList[v.TypeKey] = mongo.KeyValue{
+					reactionExtensionList[v.TypeKey] = mongoDB.KeyValue{
 						TypeKey:          v.TypeKey,
 						Value:            v.Value,
 						LatestUpdateTime: v.LatestUpdateTime,

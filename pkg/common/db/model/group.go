@@ -2,13 +2,13 @@ package model
 
 import (
 	"Open_IM/pkg/common/db/cache"
-	"Open_IM/pkg/common/db/mongo"
+	"Open_IM/pkg/common/db/mongoDB"
 	"Open_IM/pkg/common/db/mysql"
-	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
-	"encoding/json"
 	"github.com/dtm-labs/rockscache"
+	"github.com/go-redis/redis/v8"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	//"time"
 )
@@ -16,17 +16,17 @@ import (
 type GroupModel struct {
 	db    *mysql.Group
 	cache *cache.GroupCache
-	mongo *mongo.Client
+	mongo *mongoDB.Client
 }
 
-func NewGroupModel() *GroupModel {
+func NewGroupModel(db *mysql.Group, rdb redis.UniversalClient, mdb *mongo.Client) *GroupModel {
 	var groupModel GroupModel
-	groupModel.db = mysql.NewGroupDB()
-	groupModel.cache = cache.NewGroupCache(cache.InitRedis(), groupModel.db, rockscache.Options{
+	groupModel.db = db
+	groupModel.cache = cache.NewGroupCache(rdb, db, rockscache.Options{
 		DisableCacheRead:  false,
 		StrongConsistency: true,
 	})
-	groupModel.mongo = mongo.NewMongoClient()
+	groupModel.mongo = mongoDB.NewMongoClient(mdb)
 	return &groupModel
 }
 

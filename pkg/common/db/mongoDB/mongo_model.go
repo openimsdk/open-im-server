@@ -1,4 +1,4 @@
-package mongo
+package mongoDB
 
 import (
 	"Open_IM/pkg/common/config"

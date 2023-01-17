@@ -1,4 +1,4 @@
-package mongo
+package mongoDB
 
 import (
 	"Open_IM/pkg/common/config"
@@ -17,10 +17,8 @@ type Client struct {
 	mongo *mongo.Client
 }
 
-func NewMongoClient() *Client {
-	var client Client
-	client.mongo = initMongo()
-	return &client
+func NewMongoClient(mdb *mongo.Client) *Client {
+	return &Client{mongo: mdb}
 }
 
 func initMongo() *mongo.Client {
