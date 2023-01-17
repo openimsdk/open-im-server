@@ -173,6 +173,13 @@ func CheckAccessV3(ctx context.Context, OwnerUserID string) (err error) {
 	return constant.ErrIdentity.Wrap(utils.GetSelfFuncName())
 }
 
+func CheckAdmin(ctx context.Context) error {
+	if utils.IsContain(tools.OpUserID(ctx), config.Config.Manager.AppManagerUid) {
+		return nil
+	}
+	return constant.ErrIdentity.Wrap()
+}
+
 func GetUserIDFromToken(token string, operationID string) (bool, string, string) {
 	claims, err := ParseToken(token, operationID)
 	if err != nil {
