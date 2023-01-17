@@ -39,7 +39,16 @@ func (g *GroupModel) Create(ctx context.Context, groups []*mysql.Group) error {
 }
 
 func (g *GroupModel) Delete(ctx context.Context, groupIDs []string) error {
-	return g.cache.DelGroupsInfoFromCache(ctx, groupIDs)
+	err := g.db.DB.Transaction(func(tx *gorm.DB) error {
+		if err := g.db.Delete(ctx, groupIDs, tx); err != nil {
+			return err
+		}
+		if err := g.cache.DelGroupsInfoFromCache(ctx, groupIDs); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
 }
 
 func (g *GroupModel) Take(ctx context.Context, groupID string) (group *mysql.Group, err error) {
