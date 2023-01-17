@@ -15,13 +15,13 @@ const GroupExpireTime = time.Second * 60 * 60 * 12
 const groupInfoCacheKey = "GROUP_INFO_CACHE:"
 
 type GroupCache struct {
-	db          *mysql.Group
+	db          mysql.GroupModelInterface
 	expireTime  time.Duration
 	redisClient *RedisClient
 	rcClient    *rockscache.Client
 }
 
-func NewGroupCache(rdb redis.UniversalClient, db *mysql.Group, opts rockscache.Options) *GroupCache {
+func NewGroupCache(rdb redis.UniversalClient, db mysql.GroupModelInterface, opts rockscache.Options) *GroupCache {
 	rcClient := &rockscache.Client{
 		Options: rockscache.Options{},
 	}

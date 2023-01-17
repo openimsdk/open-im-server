@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+type GroupModelInterface interface {
+	Create(ctx context.Context, groups []*Group) (err error)
+	Delete(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (err error)
+	UpdateByMap(ctx context.Context, groupID string, args map[string]interface{}) (err error)
+	Update(ctx context.Context, groups []*Group) (err error)
+	Find(ctx context.Context, groupIDs []string) (groups []*Group, err error)
+	Take(ctx context.Context, groupID string) (group *Group, err error)
+}
 type Group struct {
 	GroupID                string    `gorm:"column:group_id;primary_key;size:64" json:"groupID" binding:"required"`
 	GroupName              string    `gorm:"column:name;size:255" json:"groupName"`

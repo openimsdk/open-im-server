@@ -4,7 +4,6 @@ import (
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/mongoDB"
 	"Open_IM/pkg/common/db/mysql"
-	"Open_IM/pkg/utils"
 	"context"
 	"github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
@@ -13,13 +12,20 @@ import (
 	//"time"
 )
 
+type GroupInterface interface {
+	Find(ctx context.Context, groupIDs []string) (groups []*mysql.Group, err error)
+	Create(ctx context.Context, groups []*mysql.Group) error
+	Delete(ctx context.Context, groupIDs []string) error
+	Take(ctx context.Context, groupID string) (group *mysql.Group, err error)
+}
+
 type GroupModel struct {
-	db    *mysql.Group
+	db    mysql.GroupModelInterface
 	cache *cache.GroupCache
 	mongo *mongoDB.Client
 }
 
-func NewGroupModel(db *mysql.Group, rdb redis.UniversalClient, mdb *mongo.Client) *GroupModel {
+func NewGroupModel(db mysql.GroupModelInterface, rdb redis.UniversalClient, mdb *mongo.Client) *GroupModel {
 	var groupModel GroupModel
 	groupModel.db = db
 	groupModel.cache = cache.NewGroupCache(rdb, db, rockscache.Options{
