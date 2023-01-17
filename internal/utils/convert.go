@@ -206,7 +206,33 @@ func (db *DBGroupRequest) convert() (*sdk.GroupRequest, error) {
 	return dst, nil
 }
 
-func UserOpenIMCopyDB(dst *imdb.User, src *open_im_sdk.UserInfo) {
+type DBUser struct {
+	*imdb
+}
+
+type PBUser struct {
+	*sdk.UserInfo
+}
+
+func (pb *PBUser) convert() (*DBUser, error) {
+	dst := &DBUser{}
+	utils.CopyStructFields(dst, pb)
+
+	utils.CopyStructFields(dst, src)
+	dst.Birth, _ = utils.TimeStringToTime(src.BirthStr)
+	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
+
+	return dst, nil
+}
+func (db *DBUser) convert() (*PBUser, error) {
+	dst := &sdk.GroupRequest{}
+	utils.CopyStructFields(dst, db)
+	dst.ReqTime = uint32(db.ReqTime.Unix())
+	dst.HandleTime = uint32(db.HandledTime.Unix())
+	return dst, nil
+}
+
+func UserOpenIMCopyDB(dst *imdb.User, src *sdk.UserInfo) {
 	utils.CopyStructFields(dst, src)
 	dst.Birth, _ = utils.TimeStringToTime(src.BirthStr)
 	dst.CreateTime = utils.UnixSecondToTime(int64(src.CreateTime))
