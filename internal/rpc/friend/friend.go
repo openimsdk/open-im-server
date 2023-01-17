@@ -4,9 +4,7 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
-	rocksCache "Open_IM/pkg/common/db/rocks_cache"
+	"Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -37,26 +35,27 @@ type friendServer struct {
 	rpcRegisterName    string
 	etcdSchema         string
 	etcdAddr           []string
-	friendModel        *imdb.Friend
-	friendRequestModel *imdb.FriendRequest
-	blackModel         *imdb.Black
+	friendModel        *mysql.Friend
+	friendRequestModel *mysql.FriendRequest
+	blackModel         *mysql.Black
 }
 
 func NewFriendServer(port int) *friendServer {
 	log.NewPrivateLog(constant.LogFileName)
-	DB := db.DB.MysqlDB.DefaultGormDB()
 	return &friendServer{
-		rpcPort:            port,
-		rpcRegisterName:    config.Config.RpcRegisterName.OpenImFriendName,
-		etcdSchema:         config.Config.Etcd.EtcdSchema,
-		etcdAddr:           config.Config.Etcd.EtcdAddr,
-		friendModel:        imdb.NewFriend(DB),
-		friendRequestModel: imdb.NewFriendRequest(DB),
-		blackModel:         imdb.NewBlack(DB),
+		rpcPort:         port,
+		rpcRegisterName: config.Config.RpcRegisterName.OpenImFriendName,
+		etcdSchema:      config.Config.Etcd.EtcdSchema,
+		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
 }
 
 func (s *friendServer) Run() {
+	db := mysql.ConnectToDB()
+	s.friendModel = mysql.NewFriend(db)
+	s.friendRequestModel = mysql.NewFriendRequest(db)
+	s.blackModel = mysql.NewBlack(db)
+
 	log.NewInfo("0", "friendServer run...")
 
 	listenIP := ""

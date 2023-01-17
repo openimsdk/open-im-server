@@ -57,7 +57,7 @@ func ConnectToDB() *gorm.DB {
 //models := []interface{}{&Friend{}, &FriendRequest{}, &Group{}, &GroupMember{}, &GroupRequest{},
 //	&User{}, &Black{}, &ChatLog{}, &Conversation{}, &AppVersion{}}
 
-func InitModel(db *gorm.DB, model interface{}) *gorm.DB {
+func initModel(db *gorm.DB, model interface{}) *gorm.DB {
 	db.AutoMigrate(model)
 	db.Set("gorm:table_options", "CHARSET=utf8")
 	db.Set("gorm:table_options", "collation=utf8_unicode_ci")

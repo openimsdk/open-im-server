@@ -57,18 +57,18 @@ package mysql
 //}
 //
 //func GetUserFriendsCMS(ownerUserID, friendUserName string, pageNumber, showNumber int32) (friendUserList []*FriendUser, count int64, err error) {
-//	db := FriendDB.Table("friends").
+//	DB := FriendDB.Table("friends").
 //		Select("friends.*, users.name").
 //		Where("friends.owner_user_id=?", ownerUserID).Limit(int(showNumber)).
 //		Joins("left join users on friends.friend_user_id = users.user_id").
 //		Offset(int(showNumber * (pageNumber - 1)))
 //	if friendUserName != "" {
-//		db = db.Where("users.name like ?", fmt.Sprintf("%%%s%%", friendUserName))
+//		DB = DB.Where("users.name like ?", fmt.Sprintf("%%%s%%", friendUserName))
 //	}
-//	if err = db.Count(&count).Error; err != nil {
+//	if err = DB.Count(&count).Error; err != nil {
 //		return
 //	}
-//	err = db.Find(&friendUserList).Error
+//	err = DB.Find(&friendUserList).Error
 //	return
 //}
 //

@@ -15,18 +15,20 @@ type Black struct {
 	AddSource      int32     `gorm:"column:add_source"`
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
 	Ex             string    `gorm:"column:ex;size:1024"`
-	db             *gorm.DB  `gorm:"-"`
+	DB             *gorm.DB  `gorm:"-"`
 }
 
 func NewBlack(db *gorm.DB) *Black {
-	return &Black{db: db}
+	var black Black
+	black.DB = initModel(db, &black)
+	return &black
 }
 
 func (b *Black) Create(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
-	return utils.Wrap(b.db.Create(&blacks).Error, "")
+	return utils.Wrap(b.DB.Create(&blacks).Error, "")
 }
 
 func (b *Black) Delete(ctx context.Context, blacks []*Black) (err error) {
@@ -40,14 +42,14 @@ func (b *Black) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blockUserID", blockUserID, "args", args)
 	}()
-	return utils.Wrap(b.db.Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error, "")
+	return utils.Wrap(b.DB.Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error, "")
 }
 
 func (b *Black) Update(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
-	return utils.Wrap(b.db.Updates(&blacks).Error, "")
+	return utils.Wrap(b.DB.Updates(&blacks).Error, "")
 }
 
 func (b *Black) Find(ctx context.Context, blacks []Black) (blackList []*Black, err error) {
@@ -66,7 +68,7 @@ func (b *Black) Take(ctx context.Context, blackID string) (black *Black, err err
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blackID", blackID, "black", *black)
 	}()
-	return black, utils.Wrap(b.db.Where("black_id = ?", blackID).Take(black).Error, "")
+	return black, utils.Wrap(b.DB.Where("black_id = ?", blackID).Take(black).Error, "")
 }
 
 func (b *Black) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*Black, err error) {
