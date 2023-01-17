@@ -2,50 +2,34 @@ package model
 
 import (
 	"Open_IM/pkg/common/db/cache"
+	"Open_IM/pkg/common/db/mongo"
 	"Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"github.com/dtm-labs/rockscache"
+	//"github.com/dtm-labs/rockscache"
 	"gorm.io/gorm"
-	"time"
+	//"time"
 )
 
 type GroupModel struct {
-	strongRc *cache.RcClient
-	weakRc   *cache.RcClient
 	db       *mysql.Group
-	rdb      *cache.RedisClient
+	cache    *cache.GroupCache
+	mongo 	 *mongo.Client
 }
 
-const GroupExpireTime = time.Second * 300 * 60
-const RandomExpireAdjustment = 0.2
 
-//cache key
-const groupInfoCache = "GROUP_INFO_CACHE:"
-
-func NewGroupModel(ctx context.Context) {
+func NewGroupModel() {
 	var groupModel GroupModel
-	redisClient := cache.InitRedis(ctx)
+	redisClient := cache.InitRedis()
 	rdb := cache.NewRedisClient(redisClient)
-	groupModel.rdb = rdb
 	groupModel.db = mysql.NewGroupDB()
-	groupModel.strongRc = cache.NewRcClient(redisClient, GroupExpireTime, rockscache.Options{
-		RandomExpireAdjustment: RandomExpireAdjustment,
-		DisableCacheRead:       false,
-		DisableCacheDelete:     false,
-		StrongConsistency:      true,
-	})
-	groupModel.weakRc = cache.NewRcClient(redisClient, GroupExpireTime, rockscache.Options{
-		RandomExpireAdjustment: RandomExpireAdjustment,
-		DisableCacheRead:       false,
-		DisableCacheDelete:     false,
-		StrongConsistency:      false,
-	})
+	//mgo := mongo.In()
 }
 
 func (g *GroupModel) Find(ctx context.Context, groupIDs []string) (groups []*mysql.Group, err error) {
+	g.cache.Client.
 	for _, groupID := range groupIDs {
 		group, err := g.getGroupInfoFromCache(ctx, groupID)
 		if err != nil {
@@ -61,21 +45,16 @@ func (g *GroupModel) Create(ctx context.Context, groups []*mysql.Group) error {
 }
 
 func (g *GroupModel) Delete(ctx context.Context, groupIDs []string) error {
-	tx := g.db.DB.Begin()
-	if err := g.db.Delete(ctx, groupIDs); err != nil {
-		tx.Commit()
-		return err
-	}
-	if err := g.deleteGroupsInCache(ctx, groupIDs); err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
-}
-
-func (g *GroupModel) getGroupCacheKey(groupID string) string {
-	return groupInfoCache + groupID
+	err := g.db.DB.Transaction(func(tx *gorm.DB) error {
+		if err := g.db.Delete(ctx, groupIDs, tx); err != nil {
+			return err
+		}
+		if err := g.deleteGroupsInCache(ctx, groupIDs); err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
 }
 
 func (g *GroupModel) deleteGroupsInCache(ctx context.Context, groupIDs []string) error {
