@@ -32,8 +32,6 @@ func NewGroupModel(db mysql.GroupModelInterface, rdb redis.UniversalClient, mdb 
 		DisableCacheRead:  false,
 		StrongConsistency: true,
 	})
-	sg := mdb.Database().Collection()
-	sg.Find()
 	groupModel.mongo = mongoDB.NewMongoClient(mdb)
 	return &groupModel
 }
