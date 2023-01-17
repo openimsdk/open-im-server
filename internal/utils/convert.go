@@ -41,7 +41,7 @@ func (db *DBFriend) convert() (*sdk.FriendInfo, error) {
 	return pbFriend, nil
 }
 
-func (pb *PBFriend) convert() (*imdb.Friend, error) {
+func (pb *PBFriend) Convert() (*imdb.Friend, error) {
 	dbFriend := &imdb.Friend{}
 	utils2.CopyStructFields(dbFriend, pb)
 	dbFriend.FriendUserID = pb.FriendUser.UserID
@@ -57,14 +57,14 @@ type PBFriendRequest struct {
 	*sdk.FriendRequest
 }
 
-func (pb *PBFriendRequest) convert() (*imdb.FriendRequest, error) {
+func (pb *PBFriendRequest) Convert() (*imdb.FriendRequest, error) {
 	dbFriendRequest := &imdb.FriendRequest{}
 	utils.CopyStructFields(dbFriendRequest, pb)
 	dbFriendRequest.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
 	dbFriendRequest.HandleTime = utils.UnixSecondToTime(int64(pb.HandleTime))
 	return dbFriendRequest, nil
 }
-func (db *DBFriendRequest) convert() (*sdk.FriendRequest, error) {
+func (db *DBFriendRequest) Convert() (*sdk.FriendRequest, error) {
 	pbFriendRequest := &sdk.FriendRequest{}
 	utils.CopyStructFields(pbFriendRequest, db)
 	user, err := getUsersInfo([]string{db.FromUserID})
@@ -94,13 +94,13 @@ type PBBlack struct {
 	*sdk.BlackInfo
 }
 
-func (pb *PBBlack) convert() (*imdb.Black, error) {
+func (pb *PBBlack) Convert() (*imdb.Black, error) {
 	dbBlack := &imdb.Black{}
 	dbBlack.BlockUserID = pb.BlackUserInfo.UserID
 	dbBlack.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
 	return dbBlack, nil
 }
-func (db *DBBlack) convert() (*sdk.BlackInfo, error) {
+func (db *DBBlack) Convert() (*sdk.BlackInfo, error) {
 	pbBlack := &sdk.BlackInfo{}
 	utils.CopyStructFields(pbBlack, db)
 	pbBlack.CreateTime = uint32(db.CreateTime.Unix())
@@ -125,7 +125,7 @@ func (pb *PBGroup) Convert() (*imdb.Group, error) {
 	utils.CopyStructFields(dst, pb)
 	return dst, nil
 }
-func (db *DBGroup) convert() (*sdk.GroupInfo, error) {
+func (db *DBGroup) Convert() (*sdk.GroupInfo, error) {
 	dst := &sdk.GroupInfo{}
 	utils.CopyStructFields(dst, db)
 	user, err := getGroupOwnerInfo(db.GroupID)
@@ -155,14 +155,14 @@ type PBGroupMember struct {
 	*sdk.GroupMemberFullInfo
 }
 
-func (pb *PBGroupMember) convert() (*imdb.GroupMember, error) {
+func (pb *PBGroupMember) Convert() (*imdb.GroupMember, error) {
 	dst := &imdb.GroupMember{}
 	utils.CopyStructFields(dst, pb)
 	dst.JoinTime = utils.UnixSecondToTime(int64(pb.JoinTime))
 	dst.MuteEndTime = utils.UnixSecondToTime(int64(pb.MuteEndTime))
 	return dst, nil
 }
-func (db *DBGroupMember) convert() (*sdk.GroupMemberFullInfo, error) {
+func (db *DBGroupMember) Convert() (*sdk.GroupMemberFullInfo, error) {
 	dst := &sdk.GroupMemberFullInfo{}
 	utils.CopyStructFields(dst, db)
 
@@ -191,14 +191,14 @@ type PBGroupRequest struct {
 	*sdk.GroupRequest
 }
 
-func (pb *PBGroupRequest) convert() (*imdb.GroupRequest, error) {
+func (pb *PBGroupRequest) Convert() (*imdb.GroupRequest, error) {
 	dst := &imdb.GroupRequest{}
 	utils.CopyStructFields(dst, pb)
 	dst.ReqTime = utils.UnixSecondToTime(int64(pb.ReqTime))
 	dst.HandledTime = utils.UnixSecondToTime(int64(pb.HandleTime))
 	return dst, nil
 }
-func (db *DBGroupRequest) convert() (*sdk.GroupRequest, error) {
+func (db *DBGroupRequest) Convert() (*sdk.GroupRequest, error) {
 	dst := &sdk.GroupRequest{}
 	utils.CopyStructFields(dst, db)
 	dst.ReqTime = uint32(db.ReqTime.Unix())
@@ -214,7 +214,7 @@ type PBUser struct {
 	*sdk.UserInfo
 }
 
-func (pb *PBUser) convert() (*imdb.User, error) {
+func (pb *PBUser) Convert() (*imdb.User, error) {
 	dst := &imdb.User{}
 	utils.CopyStructFields(dst, pb)
 	dst.Birth = utils.UnixSecondToTime(pb.Birthday)
@@ -222,7 +222,7 @@ func (pb *PBUser) convert() (*imdb.User, error) {
 	return dst, nil
 }
 
-func (db *DBUser) convert() (*sdk.UserInfo, error) {
+func (db *DBUser) Convert() (*sdk.UserInfo, error) {
 	dst := &sdk.UserInfo{}
 	utils.CopyStructFields(dst, db)
 	dst.CreateTime = uint32(db.CreateTime.Unix())
@@ -230,7 +230,7 @@ func (db *DBUser) convert() (*sdk.UserInfo, error) {
 	return dst, nil
 }
 
-func (db *DBUser) convertPublic() (*sdk.PublicUserInfo, error) {
+func (db *DBUser) ConvertPublic() (*sdk.PublicUserInfo, error) {
 	dst := &sdk.PublicUserInfo{}
 	utils.CopyStructFields(dst, db)
 	return dst, nil

@@ -16,6 +16,7 @@ type GroupModelInterface interface {
 	Find(ctx context.Context, groupIDs []string) (groups []*Group, err error)
 	Take(ctx context.Context, groupID string) (group *Group, err error)
 }
+
 type Group struct {
 	GroupID                string    `gorm:"column:group_id;primary_key;size:64" json:"groupID" binding:"required"`
 	GroupName              string    `gorm:"column:name;size:255" json:"groupName"`
