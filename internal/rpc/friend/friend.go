@@ -4,6 +4,7 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/model"
 	"Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
@@ -11,9 +12,7 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/common/trace_log"
-	cp "Open_IM/pkg/common/utils"
 	"Open_IM/pkg/getcdv3"
-	pbCache "Open_IM/pkg/proto/cache"
 	pbFriend "Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -35,9 +34,9 @@ type friendServer struct {
 	rpcRegisterName    string
 	etcdSchema         string
 	etcdAddr           []string
-	friendModel        *mysql.Friend
-	friendRequestModel *mysql.FriendRequest
-	blackModel         *mysql.Black
+	friendModel        *model.FriendModel
+	friendRequestModel *model.FriendRequestModel
+	blackModel         *model.BlackModel
 }
 
 func NewFriendServer(port int) *friendServer {
@@ -52,9 +51,9 @@ func NewFriendServer(port int) *friendServer {
 
 func (s *friendServer) Run() {
 	db := mysql.ConnectToDB()
-	s.friendModel = mysql.NewFriend(db)
-	s.friendRequestModel = mysql.NewFriendRequest(db)
-	s.blackModel = mysql.NewBlack(db)
+	//s.friendModel = mysql.NewFriend(db)
+	//s.friendRequestModel = mysql.NewFriendRequest(db)
+	//s.blackModel = mysql.NewBlack(db)
 
 	log.NewInfo("0", "friendServer run...")
 
@@ -115,16 +114,8 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	black := imdb.Black{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}
-	if err := s.blackModel.Create(ctx, []*imdb.Black{&black}); err != nil {
-		return nil, err
-	}
-	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
-	if err != nil {
-		return nil, err
-	}
-	_, err = pbCache.NewCacheClient(etcdConn).DelBlackIDListFromCache(ctx, &pbCache.DelBlackIDListFromCacheReq{UserID: req.FromUserID})
-	if err != nil {
+	black := mysql.Black{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}
+	if err := s.blackModel.Create(ctx, []*mysql.Black{&black}); err != nil {
 		return nil, err
 	}
 	chat.BlackAddedNotification(req)
@@ -139,19 +130,19 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	if err := callbackBeforeAddFriendV1(req); err != nil {
 		return nil, err
 	}
-	userIDList, err := rocksCache.GetFriendIDListFromCache(ctx, req.ToUserID)
+	friends1, err := s.friendModel.FindOwnerUserID(ctx, req.ToUserID)
 	if err != nil {
 		return nil, err
 	}
-	userIDList2, err := rocksCache.GetFriendIDListFromCache(ctx, req.FromUserID)
+	friends2, err := s.friendModel.FindOwnerUserID(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
 	var isSend = true
-	for _, v := range userIDList {
-		if v == req.FromUserID {
-			for _, v2 := range userIDList2 {
-				if v2 == req.ToUserID {
+	for _, v1 := range friends1 {
+		if v1.FriendUserID == req.FromUserID {
+			for _, v2 := range friends2 {
+				if v2.FriendUserID == req.ToUserID {
 					isSend = false
 					break
 				}
@@ -159,21 +150,19 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 			break
 		}
 	}
-
 	//Cannot add non-existent users
-
 	if isSend {
 		if _, err := GetUserInfo(ctx, req.ToUserID); err != nil {
 			return nil, err
 		}
-		friendRequest := imdb.FriendRequest{
+		friendRequest := mysql.FriendRequest{
 			FromUserID:   req.FromUserID,
 			ToUserID:     req.ToUserID,
 			HandleResult: 0,
 			ReqMsg:       req.ReqMsg,
 			CreateTime:   time.Now(),
 		}
-		if err := s.friendRequestModel.Create(ctx, []*imdb.FriendRequest{&friendRequest}); err != nil {
+		if err := s.friendRequestModel.Create(ctx, []*mysql.FriendRequest{&friendRequest}); err != nil {
 			return nil, err
 		}
 		chat.FriendApplicationNotification(req)
@@ -183,13 +172,15 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 
 func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.ImportFriendResp, error) {
 	resp := &pbFriend.ImportFriendResp{}
-	if !utils.IsContain(tools.OpUserID(ctx), config.Config.Manager.AppManagerUid) {
-		return nil, constant.ErrNoPermission.Wrap()
+	if err := token_verify.CheckAdmin(ctx); err != nil {
+		return nil, err
 	}
 	if _, err := GetUserInfo(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	for _, userID := range req.FriendUserIDList {
+
+	var friends []*mysql.Friend
+	for _, userID := range utils.RemoveDuplicateElement(req.FriendUserIDList) {
 		if _, err := GetUserInfo(ctx, userID); err != nil {
 			return nil, err
 		}
@@ -197,40 +188,22 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		if err != nil {
 			return nil, err
 		}
-		var friends []*imdb.Friend
 		switch len(fs) {
 		case 1:
 			if fs[0].OwnerUserID == req.FromUserID {
-				friends = append(friends, &imdb.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID})
+				friends = append(friends, &mysql.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID})
 			} else {
-				friends = append(friends, &imdb.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
+				friends = append(friends, &mysql.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
 			}
 		case 0:
-			friends = append(friends, &imdb.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID}, &imdb.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
+			friends = append(friends, &mysql.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID}, &mysql.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
 		default:
 			continue
 		}
+	}
+	if len(friends) > 0 {
 		if err := s.friendModel.Create(ctx, friends); err != nil {
 			return nil, err
-		}
-	}
-	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
-	if err != nil {
-		return nil, err
-	}
-	cacheClient := pbCache.NewCacheClient(etcdConn)
-	if _, err := cacheClient.DelFriendIDListFromCache(ctx, &pbCache.DelFriendIDListFromCacheReq{UserID: req.FromUserID}); err != nil {
-		return nil, err
-	}
-	if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.FromUserID); err != nil {
-		trace_log.SetCtxInfo(ctx, "DelAllFriendsInfoFromCache", err, "userID", req.FromUserID)
-	}
-	for _, userID := range req.FriendUserIDList {
-		if _, err = cacheClient.DelFriendIDListFromCache(ctx, &pbCache.DelFriendIDListFromCacheReq{UserID: userID}); err != nil {
-			return nil, err
-		}
-		if err := rocksCache.DelAllFriendsInfoFromCache(ctx, userID); err != nil {
-			trace_log.SetCtxInfo(ctx, "DelAllFriendsInfoFromCache", err, "userID", userID)
 		}
 	}
 	return resp, nil
@@ -250,46 +223,22 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	friendRequest.HandleTime = time.Now()
 	friendRequest.HandleMsg = req.HandleMsg
 	friendRequest.HandlerUserID = tools.OpUserID(ctx)
-	err = imdb.UpdateFriendApplication(friendRequest)
+	err = mysql.UpdateFriendApplication(friendRequest)
 	if err != nil {
 		return nil, err
 	}
 
 	//Change the status of the friend request form
 	if req.HandleResult == constant.FriendFlag {
-		var isInsert bool
 		//Establish friendship after find friend relationship not exists
 		_, err := s.friendModel.Take(ctx, req.FromUserID, req.ToUserID)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if err := s.friendModel.Create(ctx, []*imdb.Friend{{OwnerUserID: req.FromUserID, FriendUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}}); err != nil {
+			if err := s.friendModel.Create(ctx, []*mysql.Friend{{OwnerUserID: req.FromUserID, FriendUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}}); err != nil {
 				return nil, err
-			}
-			isInsert = true
-		} else if err != nil {
-			return nil, err
-		}
-
-		// cache rpc
-		if isInsert {
-			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
-			if err != nil {
-				return nil, err
-			}
-			client := pbCache.NewCacheClient(etcdConn)
-
-			if _, err := client.DelFriendIDListFromCache(context.Background(), &pbCache.DelFriendIDListFromCacheReq{UserID: req.ToUserID}); err != nil {
-				return nil, err
-			}
-			if _, err := client.DelFriendIDListFromCache(context.Background(), &pbCache.DelFriendIDListFromCacheReq{UserID: req.FromUserID}); err != nil {
-				return nil, err
-			}
-			if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.ToUserID); err != nil {
-				trace_log.SetCtxInfo(ctx, "DelAllFriendsInfoFromCache", err, "userID", req.ToUserID)
-			}
-			if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.FromUserID); err != nil {
-				trace_log.SetCtxInfo(ctx, "DelAllFriendsInfoFromCache", err, "userID", req.FromUserID)
 			}
 			chat.FriendAddedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.FromUserID, req.ToUserID)
+		} else if err != nil {
+			return nil, err
 		}
 	}
 
@@ -311,20 +260,6 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 	if err := s.friendModel.Delete(ctx, req.FromUserID, req.ToUserID); err != nil {
 		return nil, err
 	}
-	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
-	if err != nil {
-		return nil, err
-	}
-	_, err = pbCache.NewCacheClient(etcdConn).DelFriendIDListFromCache(context.Background(), &pbCache.DelFriendIDListFromCacheReq{UserID: req.FromUserID})
-	if err != nil {
-		return nil, err
-	}
-	if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.FromUserID); err != nil {
-		trace_log.SetCtxInfo(ctx, "DelAllFriendsInfoFromCache", err, "DelAllFriendsInfoFromCache", req.FromUserID)
-	}
-	if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.ToUserID); err != nil {
-		trace_log.SetCtxInfo(ctx, "DelAllFriendsInfoFromCache", err, "DelAllFriendsInfoFromCache", req.ToUserID)
-	}
 	chat.FriendDeletedNotification(req)
 	return resp, nil
 }
@@ -334,19 +269,17 @@ func (s *friendServer) GetBlacklist(ctx context.Context, req *pbFriend.GetBlackl
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	blackIDList, err := rocksCache.GetBlackListFromCache(ctx, req.FromUserID)
+	blacks, err := s.blackModel.FindByOwnerUserID(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
-	for _, userID := range blackIDList {
-		user, err := rocksCache.GetUserInfoFromCache(ctx, userID)
-		if err != nil {
-			trace_log.SetCtxInfo(ctx, "GetUserInfoFromCache", err, "userID", userID)
-			continue
-		}
-		var blackUserInfo sdkws.PublicUserInfo
-		utils.CopyStructFields(&blackUserInfo, user)
-		resp.BlackUserInfoList = append(resp.BlackUserInfoList, &blackUserInfo)
+	blackIDList := make([]string, 0, len(blacks))
+	for _, black := range blacks {
+		blackIDList = append(blackIDList, black.BlockUserID)
+	}
+	resp.BlackUserInfoList, err = GetPublicUserInfoBatch(ctx, blackIDList)
+	if err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
@@ -359,9 +292,6 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 	if err := s.friendModel.UpdateRemark(ctx, req.FromUserID, req.ToUserID, req.Remark); err != nil {
 		return nil, err
 	}
-	if err := rocksCache.DelAllFriendsInfoFromCache(ctx, req.FromUserID); err != nil {
-		return nil, err
-	}
 	chat.FriendRemarkSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.FromUserID, req.ToUserID)
 	return resp, nil
 }
@@ -372,15 +302,7 @@ func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.Remove
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	if err := s.blackModel.Delete(ctx, []*imdb.Black{{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID}}); err != nil {
-		return nil, err
-	}
-	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
-	if err != nil {
-		return nil, err
-	}
-	_, err = pbCache.NewCacheClient(etcdConn).DelBlackIDListFromCache(context.Background(), &pbCache.DelBlackIDListFromCacheReq{UserID: req.FromUserID})
-	if err != nil {
+	if err := s.blackModel.Delete(ctx, []*mysql.Black{{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID}}); err != nil {
 		return nil, err
 	}
 	chat.BlackDeletedNotification(req)
@@ -392,11 +314,11 @@ func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlac
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	blackIDList, err := rocksCache.GetBlackListFromCache(ctx, req.FromUserID)
+	exist, err := s.blackModel.IsExist(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
 		return nil, err
 	}
-	resp.Response = utils.IsContain(req.ToUserID, blackIDList)
+	resp.Response = exist
 	return resp, nil
 }
 
@@ -405,11 +327,11 @@ func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) 
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	friendIDList, err := rocksCache.GetFriendIDListFromCache(ctx, req.FromUserID)
+	exist, err := s.friendModel.IsExist(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
 		return nil, err
 	}
-	resp.Response = utils.IsContain(req.ToUserID, friendIDList)
+	resp.Response = exist
 	return resp, nil
 }
 
@@ -418,15 +340,26 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	friendList, err := rocksCache.GetAllFriendsInfoFromCache(ctx, req.FromUserID)
+	friends, err := s.friendModel.FindOwnerUserID(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
-	var userInfoList []*sdkws.FriendInfo
-	for _, friendUser := range friendList {
-		friendUserInfo := sdkws.FriendInfo{FriendUser: &sdkws.UserInfo{}}
-		cp.FriendDBCopyOpenIM(&friendUserInfo, friendUser)
-		userInfoList = append(userInfoList, &friendUserInfo)
+	userIDList := make([]string, 0, len(friends))
+	for _, f := range friends {
+		userIDList = append(userIDList, f.FriendUserID)
+	}
+	users, err := GetUserInfoList(ctx, userIDList)
+	if err != nil {
+		return nil, err
+	}
+	userMap := make(map[string]*sdkws.UserInfo)
+	for i, user := range users {
+		userMap[user.UserID] = users[i]
+	}
+	for _, friendUser := range friends {
+		friendUserInfo := sdkws.FriendInfo{FriendUser: userMap[friendUser.FriendUserID]}
+		utils.CopyStructFields(&friendUserInfo, friendUser)
+		resp.FriendInfoList = append(resp.FriendInfoList, &friendUserInfo)
 	}
 	return resp, nil
 }
@@ -439,13 +372,28 @@ func (s *friendServer) GetFriendApplyList(ctx context.Context, req *pbFriend.Get
 		return nil, err
 	}
 	//	Find the  current user friend applications received
-	applyUsersInfo, err := s.friendRequestModel.FindToUserID(ctx, req.FromUserID)
+	friendRequests, err := s.friendRequestModel.FindToUserID(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
-	for _, applyUserInfo := range applyUsersInfo {
+	userIDList := make([]string, 0, len(friendRequests))
+	for _, f := range friendRequests {
+		userIDList = append(userIDList, f.FromUserID)
+	}
+	users, err := GetPublicUserInfoBatch(ctx, userIDList)
+	if err != nil {
+		return nil, err
+	}
+	userMap := make(map[string]*sdkws.PublicUserInfo)
+	for i, user := range users {
+		userMap[user.UserID] = users[i]
+	}
+	for _, friendRequest := range friendRequests {
 		var userInfo sdkws.FriendRequest
-		cp.FriendRequestDBCopyOpenIM(&userInfo, applyUserInfo)
+		if u, ok := userMap[friendRequest.FromUserID]; ok {
+			utils.CopyStructFields(&userInfo, u)
+		}
+		utils.CopyStructFields(&userInfo, friendRequest)
 		resp.FriendRequestList = append(resp.FriendRequestList, &userInfo)
 	}
 	return resp, nil
@@ -458,13 +406,28 @@ func (s *friendServer) GetSelfApplyList(ctx context.Context, req *pbFriend.GetSe
 		return nil, err
 	}
 	//	Find the self add other userinfo
-	usersInfo, err := s.friendRequestModel.FindFromUserID(ctx, req.FromUserID)
+	friendRequests, err := s.friendRequestModel.FindFromUserID(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
-	for _, selfApplyOtherUserInfo := range usersInfo {
-		var userInfo sdkws.FriendRequest // pbFriend.ApplyUserInfo
-		cp.FriendRequestDBCopyOpenIM(&userInfo, selfApplyOtherUserInfo)
+	userIDList := make([]string, 0, len(friendRequests))
+	for _, f := range friendRequests {
+		userIDList = append(userIDList, f.ToUserID)
+	}
+	users, err := GetPublicUserInfoBatch(ctx, userIDList)
+	if err != nil {
+		return nil, err
+	}
+	userMap := make(map[string]*sdkws.PublicUserInfo)
+	for i, user := range users {
+		userMap[user.UserID] = users[i]
+	}
+	for _, friendRequest := range friendRequests {
+		var userInfo sdkws.FriendRequest
+		if u, ok := userMap[friendRequest.ToUserID]; ok {
+			utils.CopyStructFields(&userInfo, u)
+		}
+		utils.CopyStructFields(&userInfo, friendRequest)
 		resp.FriendRequestList = append(resp.FriendRequestList, &userInfo)
 	}
 	return resp, nil

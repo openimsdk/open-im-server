@@ -33,16 +33,14 @@ func (f *FriendRequest) Create(ctx context.Context, friends []*FriendRequest) (e
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
 	}()
-	err = utils.Wrap(f.DB.Create(&friends).Error, "")
-	return err
+	return utils.Wrap(f.DB.Create(&friends).Error, "")
 }
 
 func (f *FriendRequest) Delete(ctx context.Context, fromUserID, toUserID string) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID)
 	}()
-	err = utils.Wrap(f.DB.Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Delete(&FriendRequest{}).Error, "")
-	return err
+	return utils.Wrap(f.DB.Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Delete(&FriendRequest{}).Error, "")
 }
 
 func (f *FriendRequest) UpdateByMap(ctx context.Context, ownerUserID string, args map[string]interface{}) (err error) {
@@ -63,15 +61,13 @@ func (f *FriendRequest) Find(ctx context.Context, ownerUserID string) (friends [
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friends", friends)
 	}()
-	err = utils.Wrap(f.DB.Where("owner_user_id = ?", ownerUserID).Find(&friends).Error, "")
-	return friends, err
+	return friends, utils.Wrap(f.DB.Where("owner_user_id = ?", ownerUserID).Find(&friends).Error, "")
 }
 
 func (f *FriendRequest) Take(ctx context.Context, fromUserID, toUserID string) (friend *FriendRequest, err error) {
 	friend = &FriendRequest{}
 	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID, "friend", friend)
-	err = utils.Wrap(f.DB.Where("from_user_id = ? and to_user_id", fromUserID, toUserID).Take(friend).Error, "")
-	return friend, err
+	return friend, utils.Wrap(f.DB.Where("from_user_id = ? and to_user_id", fromUserID, toUserID).Take(friend).Error, "")
 }
 
 func (f *FriendRequest) FindToUserID(ctx context.Context, toUserID string) (friends []*FriendRequest, err error) {

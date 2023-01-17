@@ -9,12 +9,15 @@ import (
 )
 
 type GroupModelInterface interface {
+	//mysql
 	Create(ctx context.Context, groups []*Group) (err error)
 	Delete(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (err error)
 	UpdateByMap(ctx context.Context, groupID string, args map[string]interface{}) (err error)
 	Update(ctx context.Context, groups []*Group) (err error)
 	Find(ctx context.Context, groupIDs []string) (groups []*Group, err error)
 	Take(ctx context.Context, groupID string) (group *Group, err error)
+
+	//mongo
 }
 
 type Group struct {
@@ -65,11 +68,11 @@ func (*Group) UpdateByMap(ctx context.Context, groupID string, args map[string]i
 	return utils.Wrap(GroupDB.Where("group_id = ?", groupID).Updates(args).Error, "")
 }
 
-func (*Group) Update(ctx context.Context, groups []*Group) (err error) {
+func (g *Group) Update(ctx context.Context, groups []*Group, tx ...*gorm.DB) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groups", groups)
 	}()
-	return utils.Wrap(GroupDB.Updates(&groups).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx...).Updates(&groups).Error, "")
 }
 
 func (*Group) Find(ctx context.Context, groupIDs []string) (groups []*Group, err error) {

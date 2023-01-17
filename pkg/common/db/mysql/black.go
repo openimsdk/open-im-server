@@ -52,7 +52,7 @@ func (b *Black) Update(ctx context.Context, blacks []*Black) (err error) {
 	return utils.Wrap(b.DB.Updates(&blacks).Error, "")
 }
 
-func (b *Black) Find(ctx context.Context, blacks []Black) (blackList []*Black, err error) {
+func (b *Black) Find(ctx context.Context, blacks []*Black) (blackList []*Black, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks, "blackList", blackList)
 	}()
@@ -63,12 +63,12 @@ func (b *Black) Find(ctx context.Context, blacks []Black) (blackList []*Black, e
 	return blackList, utils.Wrap(GroupMemberDB.Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error, "")
 }
 
-func (b *Black) Take(ctx context.Context, blackID string) (black *Black, err error) {
+func (b *Black) Take(ctx context.Context, ownerUserID, blockUserID string) (black *Black, err error) {
 	black = &Black{}
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blackID", blackID, "black", *black)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blockUserID", blockUserID, "black", *black)
 	}()
-	return black, utils.Wrap(b.DB.Where("black_id = ?", blackID).Take(black).Error, "")
+	return black, utils.Wrap(b.DB.Where("owner_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Take(black).Error, "")
 }
 
 func (b *Black) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*Black, err error) {
