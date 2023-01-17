@@ -14,11 +14,10 @@ import (
 )
 
 type GroupModel struct {
-	db       *mysql.Group
-	cache    *cache.GroupCache
-	mongo 	 *mongo.Client
+	db    *mysql.Group
+	cache *cache.GroupCache
+	mongo *mongo.Client
 }
-
 
 func NewGroupModel() {
 	var groupModel GroupModel
@@ -29,7 +28,6 @@ func NewGroupModel() {
 }
 
 func (g *GroupModel) Find(ctx context.Context, groupIDs []string) (groups []*mysql.Group, err error) {
-	g.cache.Client.
 	for _, groupID := range groupIDs {
 		group, err := g.getGroupInfoFromCache(ctx, groupID)
 		if err != nil {
