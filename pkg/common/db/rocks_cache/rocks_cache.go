@@ -578,7 +578,6 @@ func GetExtendMsg(sourceID string, sessionType int32, clientMsgID string, firstM
 		}
 		return string(bytes), nil
 	}
-
 	extendMsgStr, err := db.DB.Rc.Fetch(extendMsgCache+clientMsgID, time.Second*30*60, getExtendMsg)
 	if err != nil {
 		return nil, utils.Wrap(err, "Fetch failed")

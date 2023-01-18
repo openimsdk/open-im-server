@@ -743,6 +743,12 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			resp.ErrMsg = constant.ErrDB.ErrMsg
 			return &resp, nil
 		}
+		if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
+		}
+		if err := rocksCache.DelGroupMemberIDListFromCache(req.GroupID); err != nil {
+			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.GroupID)
+		}
 		reqPb := pbConversation.ModifyConversationFieldReq{Conversation: &pbConversation.Conversation{}}
 		reqPb.OperationID = req.OperationID
 		reqPb.UserIDList = okUserIDList
