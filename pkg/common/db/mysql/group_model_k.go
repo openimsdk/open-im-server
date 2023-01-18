@@ -16,7 +16,6 @@ type GroupModelInterface interface {
 	Update(ctx context.Context, groups []*Group) (err error)
 	Find(ctx context.Context, groupIDs []string) (groups []*Group, err error)
 	Take(ctx context.Context, groupID string) (group *Group, err error)
-	DeleteTx(ctx context.Context, groupIDs []string) error
 
 	//mongo
 }

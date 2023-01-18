@@ -24,6 +24,15 @@ type GroupModel struct {
 	cache *cache.GroupCache
 	mongo *mongoDB.Client
 }
+type DataBase interface {
+	Find(ctx context.Context, groupIDs []string) (groups []*mysql.Group, err error)
+	Create(ctx context.Context, groups []*mysql.Group) error
+	Delete(ctx context.Context, groupIDs []string) error
+	Take(ctx context.Context, groupID string) (group *mysql.Group, err error)
+	DeleteTx(ctx context.Context, groupIDs []string) error
+}
+type Database struct {
+}
 
 func NewGroupModel(db mysql.GroupModelInterface, rdb redis.UniversalClient, mdb *mongo.Client) *GroupModel {
 	var groupModel GroupModel
@@ -32,8 +41,6 @@ func NewGroupModel(db mysql.GroupModelInterface, rdb redis.UniversalClient, mdb 
 		DisableCacheRead:  false,
 		StrongConsistency: true,
 	})
-	sg := mdb.Database().Collection()
-	sg.Find()
 	groupModel.mongo = mongoDB.NewMongoClient(mdb)
 	return &groupModel
 }
