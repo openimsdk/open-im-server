@@ -16,9 +16,11 @@ type GroupModelInterface interface {
 	Update(ctx context.Context, groups []*Group) (err error)
 	Find(ctx context.Context, groupIDs []string) (groups []*Group, err error)
 	Take(ctx context.Context, groupID string) (group *Group, err error)
+	DeleteTx(ctx context.Context, groupIDs []string) error
 
 	//mongo
 }
+
 type Group struct {
 	GroupID                string    `gorm:"column:group_id;primary_key;size:64" json:"groupID" binding:"required"`
 	GroupName              string    `gorm:"column:name;size:255" json:"groupName"`
@@ -89,4 +91,7 @@ func (*Group) Take(ctx context.Context, groupID string) (group *Group, err error
 	}()
 	err = utils.Wrap(GroupDB.Where("group_id = ?", groupID).Take(group).Error, "")
 	return group, err
+}
+func (*Group) DeleteTx(ctx context.Context, groupIDs []string) error {
+	return nil
 }
