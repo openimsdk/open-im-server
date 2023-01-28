@@ -5,9 +5,10 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
-	"Open_IM/pkg/common/db/model"
-	imdb "Open_IM/pkg/common/db/mysql"
+	imdb "Open_IM/pkg/common/db/relation"
+	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -67,8 +68,7 @@ func NewGroupServer(port int) *groupServer {
 	}
 	//redis
 	//mongo
-	g.group = model.NewGroupController(groupModel)
-
+	g.GroupInterface = controller.NewGroupController(groupModel.DB, cache.InitRedis(), unrelation.InitMongo())
 	return &g
 }
 
