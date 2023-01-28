@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"Open_IM/pkg/common/db/mysql"
+	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
@@ -15,13 +15,13 @@ const GroupExpireTime = time.Second * 60 * 60 * 12
 const groupInfoCacheKey = "GROUP_INFO_CACHE:"
 
 type GroupCache struct {
-	db          mysql.GroupModelInterface
+	db          *relation.Group
 	expireTime  time.Duration
 	redisClient *RedisClient
 	rcClient    *rockscache.Client
 }
 
-func NewGroupCache(rdb redis.UniversalClient, db mysql.GroupModelInterface, opts rockscache.Options) *GroupCache {
+func NewGroupCache(rdb redis.UniversalClient, db *relation.Group, opts rockscache.Options) *GroupCache {
 	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: GroupExpireTime, db: db, redisClient: NewRedisClient(rdb)}
 }
 
@@ -29,7 +29,7 @@ func (g *GroupCache) getRedisClient() *RedisClient {
 	return g.redisClient
 }
 
-func (g *GroupCache) GetGroupsInfoFromCache(ctx context.Context, groupIDs []string) (groups []*mysql.Group, err error) {
+func (g *GroupCache) GetGroupsInfoFromCache(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
 	for _, groupID := range groupIDs {
 		group, err := g.GetGroupInfoFromCache(ctx, groupID)
 		if err != nil {
@@ -40,7 +40,7 @@ func (g *GroupCache) GetGroupsInfoFromCache(ctx context.Context, groupIDs []stri
 	return groups, nil
 }
 
-func (g *GroupCache) GetGroupInfoFromCache(ctx context.Context, groupID string) (group *mysql.Group, err error) {
+func (g *GroupCache) GetGroupInfoFromCache(ctx context.Context, groupID string) (group *relation.Group, err error) {
 	getGroup := func() (string, error) {
 		groupInfo, err := g.db.Take(ctx, groupID)
 		if err != nil {
@@ -52,7 +52,7 @@ func (g *GroupCache) GetGroupInfoFromCache(ctx context.Context, groupID string) 
 		}
 		return string(bytes), nil
 	}
-	group = &mysql.Group{}
+	group = &relation.Group{}
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", *group)
 	}()

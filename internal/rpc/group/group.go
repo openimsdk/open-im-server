@@ -176,7 +176,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				return nil, err
 			}
 		}
-		if err := model.
+		if err := controller.
 		if err := (*imdb.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
 			return nil, err
 		}

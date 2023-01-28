@@ -34,9 +34,9 @@ type friendServer struct {
 	rpcRegisterName    string
 	etcdSchema         string
 	etcdAddr           []string
-	friendModel        *model.FriendModel
-	friendRequestModel *model.FriendRequestModel
-	blackModel         *model.BlackModel
+	friendModel        *controller.FriendModel
+	friendRequestModel *controller.FriendRequestModel
+	blackModel         *controller.BlackModel
 }
 
 func NewFriendServer(port int) *friendServer {
@@ -50,7 +50,7 @@ func NewFriendServer(port int) *friendServer {
 }
 
 func (s *friendServer) Run() {
-	db := mysql.ConnectToDB()
+	db := relation.ConnectToDB()
 	//s.friendModel = mysql.NewFriend(db)
 	//s.friendRequestModel = mysql.NewFriendRequest(db)
 	//s.blackModel = mysql.NewBlack(db)
@@ -114,8 +114,8 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	black := mysql.Black{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}
-	if err := s.blackModel.Create(ctx, []*mysql.Black{&black}); err != nil {
+	black := relation.Black{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}
+	if err := s.blackModel.Create(ctx, []*relation.Black{&black}); err != nil {
 		return nil, err
 	}
 	chat.BlackAddedNotification(req)
@@ -155,14 +155,14 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 		if _, err := GetUserInfo(ctx, req.ToUserID); err != nil {
 			return nil, err
 		}
-		friendRequest := mysql.FriendRequest{
+		friendRequest := relation.FriendRequest{
 			FromUserID:   req.FromUserID,
 			ToUserID:     req.ToUserID,
 			HandleResult: 0,
 			ReqMsg:       req.ReqMsg,
 			CreateTime:   time.Now(),
 		}
-		if err := s.friendRequestModel.Create(ctx, []*mysql.FriendRequest{&friendRequest}); err != nil {
+		if err := s.friendRequestModel.Create(ctx, []*relation.FriendRequest{&friendRequest}); err != nil {
 			return nil, err
 		}
 		chat.FriendApplicationNotification(req)
@@ -179,7 +179,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		return nil, err
 	}
 
-	var friends []*mysql.Friend
+	var friends []*relation.Friend
 	for _, userID := range utils.RemoveDuplicateElement(req.FriendUserIDList) {
 		if _, err := GetUserInfo(ctx, userID); err != nil {
 			return nil, err
@@ -191,12 +191,12 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 		switch len(fs) {
 		case 1:
 			if fs[0].OwnerUserID == req.FromUserID {
-				friends = append(friends, &mysql.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID})
+				friends = append(friends, &relation.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID})
 			} else {
-				friends = append(friends, &mysql.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
+				friends = append(friends, &relation.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
 			}
 		case 0:
-			friends = append(friends, &mysql.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID}, &mysql.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
+			friends = append(friends, &relation.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID}, &relation.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
 		default:
 			continue
 		}
@@ -223,7 +223,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	friendRequest.HandleTime = time.Now()
 	friendRequest.HandleMsg = req.HandleMsg
 	friendRequest.HandlerUserID = tools.OpUserID(ctx)
-	err = mysql.UpdateFriendApplication(friendRequest)
+	err = relation.UpdateFriendApplication(friendRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +233,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 		//Establish friendship after find friend relationship not exists
 		_, err := s.friendModel.Take(ctx, req.FromUserID, req.ToUserID)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if err := s.friendModel.Create(ctx, []*mysql.Friend{{OwnerUserID: req.FromUserID, FriendUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}}); err != nil {
+			if err := s.friendModel.Create(ctx, []*relation.Friend{{OwnerUserID: req.FromUserID, FriendUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}}); err != nil {
 				return nil, err
 			}
 			chat.FriendAddedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.FromUserID, req.ToUserID)
@@ -302,7 +302,7 @@ func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.Remove
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	if err := s.blackModel.Delete(ctx, []*mysql.Black{{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID}}); err != nil {
+	if err := s.blackModel.Delete(ctx, []*relation.Black{{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID}}); err != nil {
 		return nil, err
 	}
 	chat.BlackDeletedNotification(req)

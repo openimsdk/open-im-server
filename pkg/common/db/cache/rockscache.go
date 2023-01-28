@@ -74,7 +74,7 @@ func (rc *RcClient) DelKeys() {
 
 func (rc *Client) GetFriendIDListFromCache(ctx context.Context, userID string) (friendIDList []string, err error) {
 	getFriendIDList := func() (string, error) {
-		friendIDList, err := mysql.GetFriendIDListByUserID(userID)
+		friendIDList, err := relation.GetFriendIDListByUserID(userID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -104,7 +104,7 @@ func DelFriendIDListFromCache(ctx context.Context, userID string) (err error) {
 
 func GetBlackListFromCache(ctx context.Context, userID string) (blackIDs []string, err error) {
 	getBlackIDList := func() (string, error) {
-		blackIDs, err := mysql.GetBlackIDListByUserID(userID)
+		blackIDs, err := relation.GetBlackIDListByUserID(userID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -134,7 +134,7 @@ func DelBlackIDListFromCache(ctx context.Context, userID string) (err error) {
 
 func GetJoinedGroupIDListFromCache(ctx context.Context, userID string) (joinedGroupList []string, err error) {
 	getJoinedGroupIDList := func() (string, error) {
-		joinedGroupList, err := mysql.GetJoinedGroupIDListByUserID(userID)
+		joinedGroupList, err := relation.GetJoinedGroupIDListByUserID(userID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -176,7 +176,7 @@ func GetGroupMemberIDListFromCache(ctx context.Context, groupID string) (groupMe
 			}
 			groupMemberIDList = superGroup.MemberIDList
 		} else {
-			groupMemberIDList, err = mysql.GetGroupMemberIDListByGroupID(groupID)
+			groupMemberIDList, err = relation.GetGroupMemberIDListByGroupID(groupID)
 			if err != nil {
 				return "", utils.Wrap(err, "")
 			}
@@ -205,9 +205,9 @@ func DelGroupMemberIDListFromCache(ctx context.Context, groupID string) (err err
 	return db.DB.Rc.TagAsDeleted(groupCache + groupID)
 }
 
-func GetUserInfoFromCache(ctx context.Context, userID string) (userInfo *mysql.User, err error) {
+func GetUserInfoFromCache(ctx context.Context, userID string) (userInfo *relation.User, err error) {
 	getUserInfo := func() (string, error) {
-		userInfo, err := mysql.GetUserByUserID(userID)
+		userInfo, err := relation.GetUserByUserID(userID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -224,13 +224,13 @@ func GetUserInfoFromCache(ctx context.Context, userID string) (userInfo *mysql.U
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	userInfo = &mysql.User{}
+	userInfo = &relation.User{}
 	err = json.Unmarshal([]byte(userInfoStr), userInfo)
 	return userInfo, utils.Wrap(err, "")
 }
 
-func GetUserInfoFromCacheBatch(ctx context.Context, userIDs []string) ([]*mysql.User, error) {
-	var users []*mysql.User
+func GetUserInfoFromCacheBatch(ctx context.Context, userIDs []string) ([]*relation.User, error) {
+	var users []*relation.User
 	for _, userID := range userIDs {
 		user, err := GetUserInfoFromCache(ctx, userID)
 		if err != nil {
@@ -248,9 +248,9 @@ func DelUserInfoFromCache(ctx context.Context, userID string) (err error) {
 	return db.DB.Rc.TagAsDeleted(userInfoCache + userID)
 }
 
-func GetGroupMemberInfoFromCache(ctx context.Context, groupID, userID string) (groupMember *mysql.GroupMember, err error) {
+func GetGroupMemberInfoFromCache(ctx context.Context, groupID, userID string) (groupMember *relation.GroupMember, err error) {
 	getGroupMemberInfo := func() (string, error) {
-		groupMemberInfo, err := mysql.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
+		groupMemberInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -267,7 +267,7 @@ func GetGroupMemberInfoFromCache(ctx context.Context, groupID, userID string) (g
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
-	groupMember = &mysql.GroupMember{}
+	groupMember = &relation.GroupMember{}
 	err = json.Unmarshal([]byte(groupMemberInfoStr), groupMember)
 	return groupMember, utils.Wrap(err, "")
 }
@@ -279,7 +279,7 @@ func DelGroupMemberInfoFromCache(ctx context.Context, groupID, userID string) (e
 	return db.DB.Rc.TagAsDeleted(groupMemberInfoCache + groupID + "-" + userID)
 }
 
-func GetGroupMembersInfoFromCache(ctx context.Context, count, offset int32, groupID string) (groupMembers []*mysql.GroupMember, err error) {
+func GetGroupMembersInfoFromCache(ctx context.Context, count, offset int32, groupID string) (groupMembers []*relation.GroupMember, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "count", count, "offset", offset, "groupID", groupID, "groupMember", groupMembers)
 	}()
@@ -290,7 +290,7 @@ func GetGroupMembersInfoFromCache(ctx context.Context, count, offset int32, grou
 	if count < 0 || offset < 0 {
 		return nil, nil
 	}
-	var groupMemberList []*mysql.GroupMember
+	var groupMemberList []*relation.GroupMember
 	var start, stop int32
 	start = offset
 	stop = offset + count
@@ -326,12 +326,12 @@ func GetGroupMembersInfoFromCache(ctx context.Context, count, offset int32, grou
 	return groupMemberList, nil
 }
 
-func GetAllGroupMembersInfoFromCache(ctx context.Context, groupID string) (groupMembers []*mysql.GroupMember, err error) {
+func GetAllGroupMembersInfoFromCache(ctx context.Context, groupID string) (groupMembers []*relation.GroupMember, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMembers", groupMembers)
 	}()
 	getGroupMemberInfo := func() (string, error) {
-		groupMembers, err := mysql.GetGroupMemberListByGroupID(groupID)
+		groupMembers, err := relation.GetGroupMemberListByGroupID(groupID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -387,9 +387,9 @@ func DelAllGroupMembersInfoFromCache(ctx context.Context, groupID string) (err e
 //	return db.DB.Rc.TagAsDeleted(groupInfoCache + groupID)
 //}
 
-func GetAllFriendsInfoFromCache(ctx context.Context, userID string) (friends []*mysql.Friend, err error) {
+func GetAllFriendsInfoFromCache(ctx context.Context, userID string) (friends []*relation.Friend, err error) {
 	getAllFriendInfo := func() (string, error) {
-		friendInfoList, err := mysql.GetFriendListByUserID(userID)
+		friendInfoList, err := relation.GetFriendListByUserID(userID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -489,7 +489,7 @@ func DelGroupMemberListHashFromCache(ctx context.Context, groupID string) (err e
 
 func GetGroupMemberNumFromCache(ctx context.Context, groupID string) (num int, err error) {
 	getGroupMemberNum := func() (string, error) {
-		num, err := mysql.GetGroupMemberNumByGroupID(groupID)
+		num, err := relation.GetGroupMemberNumByGroupID(groupID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -514,7 +514,7 @@ func DelGroupMemberNumFromCache(ctx context.Context, groupID string) (err error)
 
 func GetUserConversationIDListFromCache(ctx context.Context, userID string) (conversationIDs []string, err error) {
 	getConversationIDList := func() (string, error) {
-		conversationIDList, err := mysql.GetConversationIDListByUserID(userID)
+		conversationIDList, err := relation.GetConversationIDListByUserID(userID)
 		if err != nil {
 			return "", utils.Wrap(err, "getConversationIDList failed")
 		}
@@ -543,9 +543,9 @@ func DelUserConversationIDListFromCache(ctx context.Context, userID string) (err
 	return utils.Wrap(db.DB.Rc.TagAsDeleted(conversationIDListCache+userID), "DelUserConversationIDListFromCache err")
 }
 
-func GetConversationFromCache(ctx context.Context, ownerUserID, conversationID string) (conversation *mysql.Conversation, err error) {
+func GetConversationFromCache(ctx context.Context, ownerUserID, conversationID string) (conversation *relation.Conversation, err error) {
 	getConversation := func() (string, error) {
-		conversation, err := mysql.GetConversation(ownerUserID, conversationID)
+		conversation, err := relation.GetConversation(ownerUserID, conversationID)
 		if err != nil {
 			return "", utils.Wrap(err, "get failed")
 		}
@@ -562,12 +562,12 @@ func GetConversationFromCache(ctx context.Context, ownerUserID, conversationID s
 	if err != nil {
 		return nil, utils.Wrap(err, "Fetch failed")
 	}
-	conversation = &mysql.Conversation{}
+	conversation = &relation.Conversation{}
 	err = json.Unmarshal([]byte(conversationStr), &conversation)
 	return conversation, utils.Wrap(err, "Unmarshal failed")
 }
 
-func GetConversationsFromCache(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []mysql.Conversation, err error) {
+func GetConversationsFromCache(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []relation.Conversation, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs, "conversations", conversations)
 	}()
@@ -581,7 +581,7 @@ func GetConversationsFromCache(ctx context.Context, ownerUserID string, conversa
 	return conversations, nil
 }
 
-func GetUserAllConversationList(ctx context.Context, ownerUserID string) (conversations []mysql.Conversation, err error) {
+func GetUserAllConversationList(ctx context.Context, ownerUserID string) (conversations []relation.Conversation, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversations", conversations)
 	}()
@@ -589,7 +589,7 @@ func GetUserAllConversationList(ctx context.Context, ownerUserID string) (conver
 	if err != nil {
 		return nil, err
 	}
-	var conversationList []mysql.Conversation
+	var conversationList []relation.Conversation
 	log.NewDebug("", utils.GetSelfFuncName(), IDList)
 	for _, conversationID := range IDList {
 		conversation, err := GetConversationFromCache(ctx, ownerUserID, conversationID)
