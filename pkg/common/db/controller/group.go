@@ -32,31 +32,31 @@ func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Dat
 }
 
 func (g *GroupController) FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
-	return g.database.Find(ctx, groupIDs)
+	return g.database.FindGroupsByID(ctx, groupIDs)
 }
 
 func (g *GroupController) CreateGroup(ctx context.Context, groups []*relation.Group) error {
-	return g.database.Create(ctx, groups)
+	return g.database.CreateGroup(ctx, groups)
 }
 
 func (g *GroupController) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
-	return g.database.Delete(ctx, groupIDs)
+	return g.database.DeleteGroupByIDs(ctx, groupIDs)
 }
 
 func (g *GroupController) TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error) {
-	return g.database.Take(ctx, groupID)
+	return g.database.TakeGroupByID(ctx, groupID)
 }
 
 func (g *GroupController) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
-	return g.database.GetSuperGroup(ctx, groupID)
+	return g.database.GetSuperGroupByID(ctx, groupID)
 }
 
 type DataBase interface {
-	Find(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error)
-	Create(ctx context.Context, groups []*relation.Group) error
-	Delete(ctx context.Context, groupIDs []string) error
-	Take(ctx context.Context, groupID string) (group *relation.Group, err error)
-	GetSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
+	FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error)
+	CreateGroup(ctx context.Context, groups []*relation.Group) error
+	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
+	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
+	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
 }
 
 type GroupDataBase struct {
@@ -80,15 +80,15 @@ func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Datab
 	return database
 }
 
-func (g *GroupDataBase) Find(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
+func (g *GroupDataBase) FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
 	return g.cache.GetGroupsInfoFromCache(ctx, groupIDs)
 }
 
-func (g *GroupDataBase) Create(ctx context.Context, groups []*relation.Group) error {
+func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation.Group) error {
 	return g.sqlDB.Create(ctx, groups)
 }
 
-func (g *GroupDataBase) Delete(ctx context.Context, groupIDs []string) error {
+func (g *GroupDataBase) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
 	return g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
 		if err := g.sqlDB.Delete(ctx, groupIDs, tx); err != nil {
 			return err
@@ -100,7 +100,7 @@ func (g *GroupDataBase) Delete(ctx context.Context, groupIDs []string) error {
 	})
 }
 
-func (g *GroupDataBase) Take(ctx context.Context, groupID string) (group *relation.Group, err error) {
+func (g *GroupDataBase) TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error) {
 	return g.cache.GetGroupInfoFromCache(ctx, groupID)
 }
 
@@ -120,6 +120,6 @@ func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) er
 	})
 }
 
-func (g *GroupDataBase) GetSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
+func (g *GroupDataBase) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
 	return g.mongoDB.GetSuperGroup(ctx, groupID)
 }
