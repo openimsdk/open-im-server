@@ -36,14 +36,14 @@ type MySqlDatabase struct {
 }
 
 func (m *MySqlDatabase) Delete(ctx context.Context, groupIDs []string) error {
-	panic("implement me")
+	return m.Delete(ctx, groupIDs)
 }
 
 func NewMySqlDatabase(db mysql.GroupModelInterface) DataBase {
 	return &MySqlDatabase{db}
 }
 func (m *MySqlDatabase) DeleteTx(ctx context.Context, groupIDs []string) error {
-	return nil
+	return m.Delete(ctx, groupIDs)
 }
 
 func NewGroupController(groupModel mysql.GroupModelInterface, rdb redis.UniversalClient, mdb *mongo.Client) *GroupController {
