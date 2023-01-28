@@ -89,7 +89,7 @@ func (g *GroupDataBase) Create(ctx context.Context, groups []*relation.Group) er
 }
 
 func (g *GroupDataBase) Delete(ctx context.Context, groupIDs []string) error {
-	err := g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
+	return g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
 		if err := g.sqlDB.Delete(ctx, groupIDs, tx); err != nil {
 			return err
 		}
@@ -98,7 +98,6 @@ func (g *GroupDataBase) Delete(ctx context.Context, groupIDs []string) error {
 		}
 		return nil
 	})
-	return err
 }
 
 func (g *GroupDataBase) Take(ctx context.Context, groupID string) (group *relation.Group, err error) {
@@ -106,7 +105,7 @@ func (g *GroupDataBase) Take(ctx context.Context, groupID string) (group *relati
 }
 
 func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) error {
-	err := g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
+	return g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
 		if err := g.sqlDB.Update(ctx, groups, tx); err != nil {
 			return err
 		}
@@ -119,7 +118,6 @@ func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) er
 		}
 		return nil
 	})
-	return err
 }
 
 func (g *GroupDataBase) GetSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {

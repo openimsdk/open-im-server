@@ -62,10 +62,6 @@ func initMongo() *mongo.Database {
 	return mongoClient.Database(config.Config.Mongo.DBDatabase)
 }
 
-func GetCollection(mongoClient *mongo.Client) {
-
-}
-
 func CreateAllIndex(mongoClient *mongo.Client) {
 	// mongodb create index
 	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {

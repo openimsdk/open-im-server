@@ -1,15 +1,12 @@
 package unrelation
 
 import (
-	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/utils"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readconcern"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/session"
-	"time"
 )
 
 const (
@@ -66,7 +63,7 @@ func (db *SuperGroupMgo) CreateSuperGroup(ctx context.Context, groupID string, i
 				return err
 			}
 		}
-		return sCtx.CommitTransaction(context.Background())
+		return sCtx.CommitTransaction(ctx)
 	})
 }
 
@@ -95,70 +92,51 @@ func (db *SuperGroupMgo) AddUserToSuperGroup(ctx context.Context, groupID string
 				return utils.Wrap(err, "transaction failed")
 			}
 		}
-		return sCtx.CommitTransaction(context.Background())
+		return sCtx.CommitTransaction(ctx)
 	})
 }
 
-func (d *SuperGroupMgo) RemoverUserFromSuperGroup(groupID string, userIDList []string) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
-	session, err := d.mongoClient.StartSession()
-	if err != nil {
-		return utils.Wrap(err, "start session failed")
-	}
-	defer session.EndSession(ctx)
-	sCtx := mongo.NewSessionContext(ctx, session)
-	_, err = c.UpdateOne(ctx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
-	if err != nil {
-		_ = session.AbortTransaction(ctx)
-		return utils.Wrap(err, "transaction failed")
-	}
-	err = d.RemoveGroupFromUser(ctx, sCtx, groupID, userIDList)
-	if err != nil {
-		_ = session.AbortTransaction(ctx)
-		return utils.Wrap(err, "transaction failed")
-	}
-	_ = session.CommitTransaction(ctx)
-	return err
+func (db *SuperGroupMgo) RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDList []string) error {
+	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
+	return db.mgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
+		_, err := db.superGroupCollection.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
+		if err != nil {
+			_ = sCtx.AbortTransaction(ctx)
+			return err
+		}
+		err = db.RemoveGroupFromUser(sCtx, groupID, userIDList)
+		if err != nil {
+			_ = sCtx.AbortTransaction(ctx)
+			return err
+		}
+		return sCtx.CommitTransaction(ctx)
+	})
 }
 
-func (d *SuperGroupMgo) GetSuperGroupByUserID(userID string) (UserToSuperGroup, error) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
+func (db *SuperGroupMgo) GetSuperGroupByUserID(ctx context.Context, userID string) (*UserToSuperGroup, error) {
 	var user UserToSuperGroup
-	_ = c.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
-	return user, nil
+	_ = db.userToSuperGroupCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+	return &user, nil
 }
 
-func (d *SuperGroupMgo) DeleteSuperGroup(groupID string) error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
-	session, err := d.mongoClient.StartSession()
-	if err != nil {
-		return utils.Wrap(err, "start session failed")
-	}
-	defer session.EndSession(ctx)
-	sCtx := mongo.NewSessionContext(ctx, session)
-	superGroup := &SuperGroup{}
-	result := c.FindOneAndDelete(sCtx, bson.M{"group_id": groupID})
-	err = result.Decode(superGroup)
-	if err != nil {
-		session.AbortTransaction(ctx)
-		return utils.Wrap(err, "transaction failed")
-	}
-	if err = d.RemoveGroupFromUser(ctx, sCtx, groupID, superGroup.MemberIDList); err != nil {
-		session.AbortTransaction(ctx)
-		return utils.Wrap(err, "transaction failed")
-	}
-	session.CommitTransaction(ctx)
-	return nil
+func (db *SuperGroupMgo) DeleteSuperGroup(ctx context.Context, groupID string) error {
+	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
+	return db.mgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
+		superGroup := &SuperGroup{}
+		_, err := db.superGroupCollection.DeleteOne(sCtx, bson.M{"group_id": groupID})
+		if err != nil {
+			_ = sCtx.AbortTransaction(ctx)
+			return err
+		}
+		if err = db.RemoveGroupFromUser(sCtx, groupID, superGroup.MemberIDList); err != nil {
+			_ = sCtx.AbortTransaction(ctx)
+			return err
+		}
+		return sCtx.CommitTransaction(ctx)
+	})
 }
 
-func (d *SuperGroupMgo) RemoveGroupFromUser(ctx, sCtx context.Context, groupID string, userIDList []string) error {
-	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cUserToSuperGroup)
-	_, err := c.UpdateOne(sCtx, bson.M{"user_id": bson.M{"$in": userIDList}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
-	if err != nil {
-		return utils.Wrap(err, "UpdateOne transaction failed")
-	}
+func (db *SuperGroupMgo) RemoveGroupFromUser(sCtx context.Context, groupID string, userIDList []string) error {
+	_, err := db.userToSuperGroupCollection.UpdateOne(sCtx, bson.M{"user_id": bson.M{"$in": userIDList}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
 	return err
 }
