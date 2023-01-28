@@ -29,7 +29,7 @@ type Group struct {
 
 func NewGroupDB(db *gorm.DB) *Group {
 	var group Group
-	group.DB = db.Model(&Group{})
+	group.DB = db
 	return &group
 }
 
@@ -45,7 +45,7 @@ func (g *Group) Delete(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs)
 	}()
-	return utils.Wrap(getDBConn(g.DB, tx...).Where("group_id in (?)", groupIDs).Delete(&Group{}).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Where("group_id in (?)", groupIDs).Delete(&Group{}).Error, "")
 }
 
 func (g *Group) UpdateByMap(ctx context.Context, groupID string, args map[string]interface{}) (err error) {
