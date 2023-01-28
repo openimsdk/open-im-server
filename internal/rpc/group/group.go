@@ -5,6 +5,7 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/model"
 	imdb "Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/log"
@@ -41,17 +42,34 @@ type groupServer struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
-	imdb.GroupInterface
+	controller.GroupInterface
 }
 
 func NewGroupServer(port int) *groupServer {
 	log.NewPrivateLog(constant.LogFileName)
-	return &groupServer{
+	g := groupServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImGroupName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
+	//mysql init
+	var mysql imdb.Mysql
+	var groupModel imdb.Group
+	err := mysql.InitConn().AutoMigrateModel(&groupModel)
+	if err != nil {
+		panic("db init err:" + err.Error())
+	}
+	if mysql.GormConn() != nil {
+		groupModel.DB = mysql.GormConn()
+	} else {
+		panic("db init err:" + "conn is nil")
+	}
+	//redis
+	//mongo
+	g.group = model.NewGroupController(groupModel)
+
+	return &g
 }
 
 func (s *groupServer) Run() {
@@ -69,6 +87,7 @@ func (s *groupServer) Run() {
 		panic("listening err:" + err.Error() + s.rpcRegisterName)
 	}
 	log.NewInfo("", "listen network success, ", address, listener)
+
 	defer listener.Close()
 	//grpc server
 	recvSize := 1024 * 1024 * constant.GroupRPCRecvSize
