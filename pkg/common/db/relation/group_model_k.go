@@ -29,7 +29,7 @@ type Group struct {
 
 func NewGroupDB(db *gorm.DB) *Group {
 	var group Group
-	group.DB = db
+	group.DB = db.Model(&Group{})
 	return &group
 }
 

@@ -2,7 +2,7 @@ package group
 
 import (
 	"Open_IM/pkg/common/constant"
-	imdb "Open_IM/pkg/common/db/mysql"
+	relation "Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/tools"
 	pbGroup "Open_IM/pkg/proto/group"
 	sdk "Open_IM/pkg/proto/sdk_ws"
@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-func getDBGroupRequest(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (dbGroupRequest *imdb.GroupRequest) {
-	dbGroupRequest = &imdb.GroupRequest{}
+func getDBGroupRequest(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (dbGroupRequest *relation.GroupRequest) {
+	dbGroupRequest = &relation.GroupRequest{}
 	utils.CopyStructFields(&dbGroupRequest, req)
 	dbGroupRequest.UserID = req.FromUserID
 	dbGroupRequest.HandleUserID = tools.OpUserID(ctx)
@@ -22,10 +22,10 @@ func getDBGroupRequest(ctx context.Context, req *pbGroup.GroupApplicationRespons
 	return dbGroupRequest
 }
 
-func getDBGroupMember(ctx context.Context, groupID, userID string) (dbGroupMember *imdb.GroupMember, err error) {
-	dbGroupMember = &imdb.GroupMember{}
+func getDBGroupMember(ctx context.Context, groupID, userID string) (dbGroupMember *relation.GroupMember, err error) {
+	dbGroupMember = &relation.GroupMember{}
 
-	member := imdb.GroupMember{}
+	member := relation.GroupMember{}
 	member.GroupID = groupID
 	member.UserID = userID
 	member.RoleLevel = constant.GroupOrdinaryUsers

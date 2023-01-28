@@ -13,15 +13,11 @@ import (
 	"time"
 )
 
-type Client struct {
-	mongo *mongo.Client
+type Mongo struct {
+	DB *mongo.Database
 }
 
-func NewMongoClient(mdb *mongo.Client) *Client {
-	return &Client{mongo: mdb}
-}
-
-func InitMongo() *mongo.Database {
+func (m *Mongo) InitMongo() {
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
 	if config.Config.Mongo.DBUri != "" {
 		// example: mongodb://$user:$password@mongo1.mongo:27017,mongo2.mongo:27017,mongo3.mongo:27017/$DBDatabase/?replicaSet=rs0&readPreference=secondary&authSource=admin&maxPoolSize=$DBMaxPoolSize
@@ -58,39 +54,51 @@ func InitMongo() *mongo.Database {
 			panic(err.Error() + " mongo.Connect failed " + uri)
 		}
 	}
-
-	return mongoClient.Database(config.Config.Mongo.DBDatabase)
+	m.DB = mongoClient.Database(config.Config.Mongo.DBDatabase)
 }
 
-func CreateAllIndex(mongoClient *mongo.Client) {
-	// mongodb create index
-	if err := createMongoIndex(mongoClient, cSendLog, false, "send_id", "-send_time"); err != nil {
+func (m *Mongo) CreateTagIndex() {
+	if err := m.createMongoIndex(cSendLog, false, "send_id", "-send_time"); err != nil {
 		panic(err.Error() + " index create failed " + cSendLog + " send_id, -send_time")
 	}
-	if err := createMongoIndex(mongoClient, cChat, false, "uid"); err != nil {
-		fmt.Println(err.Error() + " index create failed " + cChat + " uid, please create index by yourself in field uid")
-	}
-	if err := createMongoIndex(mongoClient, cWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
-		panic(err.Error() + "index create failed " + cWorkMoment + " -create_time, work_moment_id")
-	}
-	if err := createMongoIndex(mongoClient, cWorkMoment, true, "work_moment_id"); err != nil {
-		panic(err.Error() + "index create failed " + cWorkMoment + " work_moment_id ")
-	}
-	if err := createMongoIndex(mongoClient, cWorkMoment, false, "user_id", "-create_time"); err != nil {
-		panic(err.Error() + "index create failed " + cWorkMoment + "user_id, -create_time")
-	}
-	if err := createMongoIndex(mongoClient, cTag, false, "user_id", "-create_time"); err != nil {
+	if err := m.createMongoIndex(cTag, false, "user_id", "-create_time"); err != nil {
 		panic(err.Error() + "index create failed " + cTag + " user_id, -create_time")
 	}
-	if err := createMongoIndex(mongoClient, cTag, true, "tag_id"); err != nil {
+	if err := m.createMongoIndex(cTag, true, "tag_id"); err != nil {
 		panic(err.Error() + "index create failed " + cTag + " tag_id")
 	}
 }
 
-func createMongoIndex(client *mongo.Client, collection string, isUnique bool, keys ...string) error {
-	db := client.Database(config.Config.Mongo.DBDatabase).Collection(collection)
-	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
+func (m *Mongo) CreateMsgIndex() {
+	if err := m.createMongoIndex(cChat, false, "uid"); err != nil {
+		fmt.Println(err.Error() + " index create failed " + cChat + " uid, please create index by yourself in field uid")
+	}
+}
 
+func (m *Mongo) CreateSuperGroupIndex() {
+	if err := m.createMongoIndex(cSuperGroup, true, "group_id"); err != nil {
+		panic(err.Error() + "index create failed " + cTag + " group_id")
+	}
+	if err := m.createMongoIndex(cUserToSuperGroup, true, "user_id"); err != nil {
+		panic(err.Error() + "index create failed " + cTag + "user_id")
+	}
+}
+
+func (m *Mongo) CreateWorkMomentIndex() {
+	if err := m.createMongoIndex(cWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
+		panic(err.Error() + "index create failed " + cWorkMoment + " -create_time, work_moment_id")
+	}
+	if err := m.createMongoIndex(cWorkMoment, true, "work_moment_id"); err != nil {
+		panic(err.Error() + "index create failed " + cWorkMoment + " work_moment_id ")
+	}
+	if err := m.createMongoIndex(cWorkMoment, false, "user_id", "-create_time"); err != nil {
+		panic(err.Error() + "index create failed " + cWorkMoment + "user_id, -create_time")
+	}
+}
+
+func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
+	db := m.DB.Collection(collection)
+	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	indexView := db.Indexes()
 	keysDoc := bsonx.Doc{}
 

@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
-	imdb "Open_IM/pkg/common/db/relation"
+	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
@@ -55,8 +55,9 @@ func NewGroupServer(port int) *groupServer {
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
 	//mysql init
-	var mysql imdb.Mysql
-	var groupModel imdb.Group
+	var mysql relation.Mysql
+	var mongo unrelation.Mongo
+	var groupModel relation.Group
 	err := mysql.InitConn().AutoMigrateModel(&groupModel)
 	if err != nil {
 		panic("db init err:" + err.Error())
@@ -66,9 +67,9 @@ func NewGroupServer(port int) *groupServer {
 	} else {
 		panic("db init err:" + "conn is nil")
 	}
-	//redis
-	//mongo
-	g.GroupInterface = controller.NewGroupController(groupModel.DB, cache.InitRedis(), unrelation.InitMongo())
+	mongo.InitMongo()
+	mongo.CreateSuperGroupIndex()
+	g.GroupInterface = controller.NewGroupController(groupModel.DB, cache.InitRedis(), mongo.DB)
 	return &g
 }
 
@@ -168,9 +169,9 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	groupInfo, err := (&cp.PBGroup{req.GroupInfo}).Convert()
 	groupInfo.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
 	if req.GroupInfo.GroupType != constant.SuperGroup {
-		var groupMembers []*imdb.GroupMember
+		var groupMembers []*relation.GroupMember
 		joinGroup := func(userID string, roleLevel int32) error {
-			groupMember := &imdb.GroupMember{GroupID: groupInfo.GroupID, RoleLevel: roleLevel, OperatorUserID: tools.OpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tools.OpUserID(ctx)}
+			groupMember := &relation.GroupMember{GroupID: groupInfo.GroupID, RoleLevel: roleLevel, OperatorUserID: tools.OpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tools.OpUserID(ctx)}
 			user := userMap[userID]
 			utils.CopyStructFields(&groupMember, user)
 			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), groupMember, groupInfo.Ex); err != nil {
@@ -194,7 +195,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				return nil, err
 			}
 		}
-		if err := (*imdb.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
+		if err := (*relation.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
 			return nil, err
 		}
 
@@ -203,7 +204,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			return nil, err
 		}
 	}
-	if err := (*imdb.Group)(nil).Create(ctx, []*imdb.Group{&groupInfo}); err != nil {
+	if err := (*relation.Group)(nil).Create(ctx, []*relation.Group{&groupInfo}); err != nil {
 		return nil, err
 	}
 	utils.CopyStructFields(resp.GroupInfo, groupInfo)
@@ -242,8 +243,8 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 			log.NewError(tools.OperationID(ctx), utils.GetSelfFuncName(), err.Error(), groupID)
 			continue
 		}
-		owner, err := (*imdb.GroupMember)(nil).TakeOwnerInfo(ctx, groupID)
-		//owner, err2 := imdb.GetGroupOwnerInfoByGroupID(groupID)
+		owner, err := (*relation.GroupMember)(nil).TakeOwnerInfo(ctx, groupID)
+		//owner, err2 := relation.GetGroupOwnerInfoByGroupID(groupID)
 		if err != nil {
 			continue
 		}
@@ -275,11 +276,11 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	resp := &pbGroup.InviteUserToGroupResp{}
 	opUserID := tools.OpUserID(ctx)
 	if err := token_verify.CheckManagerUserID(ctx, opUserID); err != nil {
-		if err := imdb.CheckIsExistGroupMember(ctx, req.GroupID, opUserID); err != nil {
+		if err := relation.CheckIsExistGroupMember(ctx, req.GroupID, opUserID); err != nil {
 			return nil, err
 		}
 	}
-	groupInfo, err := (*imdb.Group)(nil).Take(ctx, req.GroupID)
+	groupInfo, err := (*relation.Group)(nil).Take(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -287,15 +288,15 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
 	}
 	if groupInfo.NeedVerification == constant.AllNeedVerification &&
-		!imdb.IsGroupOwnerAdmin(req.GroupID, tools.OpUserID(ctx)) && !token_verify.IsManagerUserID(tools.OpUserID(ctx)) {
+		!relation.IsGroupOwnerAdmin(req.GroupID, tools.OpUserID(ctx)) && !token_verify.IsManagerUserID(tools.OpUserID(ctx)) {
 		joinReq := pbGroup.JoinGroupReq{}
 		for _, v := range req.InvitedUserIDList {
-			var groupRequest imdb.GroupRequest
+			var groupRequest relation.GroupRequest
 			groupRequest.UserID = v
 			groupRequest.GroupID = req.GroupID
 			groupRequest.JoinSource = constant.JoinByInvitation
 			groupRequest.InviterUserID = tools.OpUserID(ctx)
-			err = imdb.InsertIntoGroupRequest(groupRequest)
+			err = relation.InsertIntoGroupRequest(groupRequest)
 			if err != nil {
 				var resultNode pbGroup.Id2Result
 				resultNode.Result = -1
@@ -325,7 +326,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			var resultNode pbGroup.Id2Result
 			resultNode.UserID = v
 			resultNode.Result = 0
-			toUserInfo, err := imdb.GetUserByUserID(v)
+			toUserInfo, err := relation.GetUserByUserID(v)
 			if err != nil {
 				trace_log.SetCtxInfo(ctx, "GetUserByUserID", err, "userID", v)
 				resultNode.Result = -1
@@ -333,13 +334,13 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 				continue
 			}
 
-			if imdb.IsExistGroupMember(req.GroupID, v) {
+			if relation.IsExistGroupMember(req.GroupID, v) {
 				trace_log.SetCtxInfo(ctx, "IsExistGroupMember", err, "groupID", req.GroupID, "userID", v)
 				resultNode.Result = -1
 				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
 				continue
 			}
-			var toInsertInfo imdb.GroupMember
+			var toInsertInfo relation.GroupMember
 			utils.CopyStructFields(&toInsertInfo, toUserInfo)
 			toInsertInfo.GroupID = req.GroupID
 			toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
@@ -349,7 +350,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), &toInsertInfo, groupInfo.Ex); err != nil {
 				return nil, err
 			}
-			err = imdb.InsertIntoGroupMember(toInsertInfo)
+			err = relation.InsertIntoGroupMember(toInsertInfo)
 			if err != nil {
 				trace_log.SetCtxInfo(ctx, "InsertIntoGroupMember", err, "args", toInsertInfo)
 				resultNode.Result = -1
@@ -409,7 +410,7 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (*pbGroup.GetGroupMemberListResp, error) {
 	resp := &pbGroup.GetGroupMemberListResp{}
 
-	memberList, err := imdb.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
+	memberList, err := relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
 	if err != nil {
 		return nil, err
 	}
@@ -431,7 +432,7 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 func (s *groupServer) getGroupUserLevel(groupID, userID string) (int, error) {
 	opFlag := 0
 	if !token_verify.IsManagerUserID(userID) {
-		opInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
+		opInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
 		if err != nil {
 			return opFlag, utils.Wrap(err, "")
 		}
@@ -503,7 +504,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 				continue
 			}
 
-			err = imdb.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, v)
+			err = relation.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, v)
 			trace_log.SetCtxInfo(ctx, "RemoveGroupMember", err, "groupID", req.GroupID, "userID", v)
 			if err != nil {
 				log.NewError(tools.OperationID(ctx), "RemoveGroupMember failed ", err.Error(), req.GroupID, v)
@@ -578,7 +579,7 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 }
 
 func FillGroupInfoByGroupID(operationID, groupID string, groupInfo *open_im_sdk.GroupInfo) error {
-	group, err := imdb.TakeGroupInfoByGroupID(groupID)
+	group, err := relation.TakeGroupInfoByGroupID(groupID)
 	if err != nil {
 		log.Error(operationID, "TakeGroupInfoByGroupID failed ", err.Error(), groupID)
 		return utils.Wrap(err, "")
@@ -591,7 +592,7 @@ func FillGroupInfoByGroupID(operationID, groupID string, groupInfo *open_im_sdk.
 }
 
 func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sdk.PublicUserInfo) error {
-	user, err := imdb.TakeUserByUserID(userID)
+	user, err := relation.TakeUserByUserID(userID)
 	if err != nil {
 		log.Error(operationID, "TakeUserByUserID failed ", err.Error(), userID)
 		return utils.Wrap(err, "")
@@ -602,7 +603,7 @@ func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sd
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
 	resp := &pbGroup.GetGroupApplicationListResp{}
-	reply, err := imdb.GetRecvGroupApplicationList(req.FromUserID)
+	reply, err := relation.GetRecvGroupApplicationList(req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -654,7 +655,7 @@ func CheckPermission(ctx context.Context, groupID string, userID string) (err er
 	defer func() {
 		trace_log.SetCtxInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID)
 	}()
-	if !token_verify.IsManagerUserID(userID) && !imdb.IsGroupOwnerAdmin(groupID, userID) {
+	if !token_verify.IsManagerUserID(userID) && !relation.IsGroupOwnerAdmin(groupID, userID) {
 		return utils.Wrap(constant.ErrNoPermission, utils.GetSelfFuncName())
 	}
 	return nil
@@ -667,7 +668,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		return nil, err
 	}
 	groupRequest := getDBGroupRequest(ctx, req)
-	if err := (&imdb.GroupRequest{}).Update(ctx, []*imdb.GroupRequest{groupRequest}); err != nil {
+	if err := (&relation.GroupRequest{}).Update(ctx, []*relation.GroupRequest{groupRequest}); err != nil {
 		return nil, err
 	}
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
@@ -683,7 +684,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		if err != nil {
 			return nil, err
 		}
-		err = (&imdb.GroupMember{}).Create(ctx, []*imdb.GroupMember{member})
+		err = (&relation.GroupMember{}).Create(ctx, []*relation.GroupMember{member})
 		if err != nil {
 			return nil, err
 		}
@@ -719,7 +720,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	resp := &pbGroup.JoinGroupResp{}
 
-	if _, err := imdb.GetUserByUserID(tools.OpUserID(ctx)); err != nil {
+	if _, err := relation.GetUserByUserID(tools.OpUserID(ctx)); err != nil {
 		return nil, err
 	}
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
@@ -732,12 +733,12 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 
 	if groupInfo.NeedVerification == constant.Directly {
 		if groupInfo.GroupType != constant.SuperGroup {
-			us, err := imdb.GetUserByUserID(tools.OpUserID(ctx))
+			us, err := relation.GetUserByUserID(tools.OpUserID(ctx))
 			if err != nil {
 				return nil, err
 			}
 			//to group member
-			groupMember := imdb.GroupMember{GroupID: req.GroupID, RoleLevel: constant.GroupOrdinaryUsers, OperatorUserID: tools.OpUserID(ctx)}
+			groupMember := relation.GroupMember{GroupID: req.GroupID, RoleLevel: constant.GroupOrdinaryUsers, OperatorUserID: tools.OpUserID(ctx)}
 			utils.CopyStructFields(&groupMember, us)
 			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), &groupMember, groupInfo.Ex); err != nil {
 				return nil, err
@@ -745,7 +746,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			if err := s.DelGroupAndUserCache(ctx, req.GroupID, []string{tools.OpUserID(ctx)}); err != nil {
 				return nil, err
 			}
-			err = imdb.InsertIntoGroupMember(groupMember)
+			err = relation.InsertIntoGroupMember(groupMember)
 			if err != nil {
 				return nil, err
 			}
@@ -780,12 +781,12 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			return resp, nil
 		}
 	}
-	var groupRequest imdb.GroupRequest
+	var groupRequest relation.GroupRequest
 	groupRequest.UserID = tools.OpUserID(ctx)
 	groupRequest.ReqMsg = req.ReqMessage
 	groupRequest.GroupID = req.GroupID
 	groupRequest.JoinSource = req.JoinSource
-	err = imdb.InsertIntoGroupRequest(groupRequest)
+	err = relation.InsertIntoGroupRequest(groupRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -796,7 +797,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) (*pbGroup.QuitGroupResp, error) {
 	resp := &pbGroup.QuitGroupResp{}
 
-	groupInfo, err := imdb.GetGroupInfoByGroupID(req.GroupID)
+	groupInfo, err := relation.GetGroupInfoByGroupID(req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -808,7 +809,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		if err := s.DelGroupAndUserCache(ctx, req.GroupID, []string{tools.OpUserID(ctx)}); err != nil {
 			return nil, err
 		}
-		err = imdb.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, tools.OpUserID(ctx))
+		err = relation.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, tools.OpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
@@ -836,7 +837,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if !hasAccess(req) {
 		return nil, utils.Wrap(constant.ErrIdentity, "")
 	}
-	group, err := imdb.GetGroupInfoByGroupID(req.GroupInfoForSet.GroupID)
+	group, err := relation.GetGroupInfoByGroupID(req.GroupInfoForSet.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -870,7 +871,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		changedType = changedType | (1 << 4)
 		m := make(map[string]interface{})
 		m["need_verification"] = req.GroupInfoForSet.NeedVerification.Value
-		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
+		if err := relation.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
 			return nil, err
 		}
 	}
@@ -878,7 +879,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		changedType = changedType | (1 << 5)
 		m := make(map[string]interface{})
 		m["look_member_info"] = req.GroupInfoForSet.LookMemberInfo.Value
-		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
+		if err := relation.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
 			return nil, err
 		}
 	}
@@ -886,12 +887,12 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		changedType = changedType | (1 << 6)
 		m := make(map[string]interface{})
 		m["apply_member_friend"] = req.GroupInfoForSet.ApplyMemberFriend.Value
-		if err := imdb.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
+		if err := relation.UpdateGroupInfoDefaultZero(req.GroupInfoForSet.GroupID, m); err != nil {
 			return nil, err
 		}
 	}
 	//only administrators can set group information
-	var groupInfo imdb.Group
+	var groupInfo relation.Group
 	utils.CopyStructFields(&groupInfo, req.GroupInfoForSet)
 	if req.GroupInfoForSet.Notification != "" {
 		groupInfo.NotificationUserID = tools.OpUserID(ctx)
@@ -900,7 +901,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupInfoForSet.GroupID); err != nil {
 		return nil, err
 	}
-	err = imdb.SetGroupInfo(groupInfo)
+	err = relation.SetGroupInfo(groupInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -948,7 +949,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.TransferGroupOwnerReq) (*pbGroup.TransferGroupOwnerResp, error) {
 	resp := &pbGroup.TransferGroupOwnerResp{}
 
-	groupInfo, err := imdb.GetGroupInfoByGroupID(req.GroupID)
+	groupInfo, err := relation.GetGroupInfoByGroupID(req.GroupID)
 	if err != nil {
 		return nil, err
 	}
@@ -968,13 +969,13 @@ func (s *groupServer) TransferGroupOwner(ctx context.Context, req *pbGroup.Trans
 		return nil, err
 	}
 
-	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.OldOwnerUserID, RoleLevel: constant.GroupOrdinaryUsers}
-	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
+	groupMemberInfo := relation.GroupMember{GroupID: req.GroupID, UserID: req.OldOwnerUserID, RoleLevel: constant.GroupOrdinaryUsers}
+	err = relation.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
 		return nil, err
 	}
-	groupMemberInfo = imdb.GroupMember{GroupID: req.GroupID, UserID: req.NewOwnerUserID, RoleLevel: constant.GroupOwner}
-	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
+	groupMemberInfo = relation.GroupMember{GroupID: req.GroupID, UserID: req.NewOwnerUserID, RoleLevel: constant.GroupOwner}
+	err = relation.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -989,7 +990,7 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 	}
 
 	if req.GroupID != "" {
-		groupInfoDB, err := imdb.GetGroupInfoByGroupID(req.GroupID)
+		groupInfoDB, err := relation.GetGroupInfoByGroupID(req.GroupID)
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return resp, nil
@@ -999,11 +1000,11 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 		resp.GroupNum = 1
 		groupInfo := &open_im_sdk.GroupInfo{}
 		utils.CopyStructFields(groupInfo, groupInfoDB)
-		groupMember, err := imdb.GetGroupOwnerInfoByGroupID(req.GroupID)
+		groupMember, err := relation.GetGroupOwnerInfoByGroupID(req.GroupID)
 		if err != nil {
 			return nil, err
 		}
-		memberNum, err := imdb.GetGroupMembersCount(req.GroupID, "")
+		memberNum, err := relation.GetGroupMembersCount(req.GroupID, "")
 		if err != nil {
 			return nil, err
 		}
@@ -1011,14 +1012,14 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 		groupInfo.CreateTime = uint32(groupInfoDB.CreateTime.Unix())
 		resp.Groups = append(resp.Groups, &pbGroup.CMSGroup{GroupInfo: groupInfo, GroupOwnerUserName: groupMember.Nickname, GroupOwnerUserID: groupMember.UserID})
 	} else {
-		groups, count, err := imdb.GetGroupsByName(req.GroupName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+		groups, count, err := relation.GetGroupsByName(req.GroupName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 		if err != nil {
 			trace_log.SetCtxInfo(ctx, "GetGroupsByName", err, "GroupName", req.GroupName, "PageNumber", req.Pagination.PageNumber, "ShowNumber", req.Pagination.ShowNumber)
 		}
 		for _, v := range groups {
 			group := &pbGroup.CMSGroup{GroupInfo: &open_im_sdk.GroupInfo{}}
 			utils.CopyStructFields(group.GroupInfo, v)
-			groupMember, err := imdb.GetGroupOwnerInfoByGroupID(v.GroupID)
+			groupMember, err := relation.GetGroupOwnerInfoByGroupID(v.GroupID)
 			if err != nil {
 				trace_log.SetCtxInfo(ctx, "GetGroupOwnerInfoByGroupID", err, "GroupID", v.GroupID)
 				continue
@@ -1035,11 +1036,11 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 
 func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGroupMembersCMSReq) (*pbGroup.GetGroupMembersCMSResp, error) {
 	resp := &pbGroup.GetGroupMembersCMSResp{}
-	groupMembers, err := imdb.GetGroupMembersByGroupIdCMS(req.GroupID, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	groupMembers, err := relation.GetGroupMembersByGroupIdCMS(req.GroupID, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
 		return nil, err
 	}
-	groupMembersCount, err := imdb.GetGroupMembersCount(req.GroupID, req.UserName)
+	groupMembersCount, err := relation.GetGroupMembersCount(req.GroupID, req.UserName)
 	if err != nil {
 		return nil, err
 	}
@@ -1061,18 +1062,18 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 
 func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGroup.GetUserReqApplicationListReq) (*pbGroup.GetUserReqApplicationListResp, error) {
 	resp := &pbGroup.GetUserReqApplicationListResp{}
-	groupRequests, err := imdb.GetUserReqGroupByUserID(req.UserID)
+	groupRequests, err := relation.GetUserReqGroupByUserID(req.UserID)
 	if err != nil {
 		return nil, err
 	}
 	for _, groupReq := range groupRequests {
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
-		group, err := imdb.GetGroupInfoByGroupID(groupReq.GroupID)
+		group, err := relation.GetGroupInfoByGroupID(groupReq.GroupID)
 		if err != nil {
 			trace_log.SetCtxInfo(ctx, "GetGroupInfoByGroupID", err, "GroupID", groupReq.GroupID)
 			continue
 		}
-		user, err := imdb.GetUserByUserID(groupReq.UserID)
+		user, err := relation.GetUserByUserID(groupReq.UserID)
 		if err != nil {
 			trace_log.SetCtxInfo(ctx, "GetUserByUserID", err, "UserID", groupReq.UserID)
 			continue
@@ -1088,7 +1089,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
 	resp := &pbGroup.DismissGroupResp{}
 
-	if !token_verify.IsManagerUserID(tools.OpUserID(ctx)) && !imdb.IsGroupOwnerAdmin(req.GroupID, tools.OpUserID(ctx)) {
+	if !token_verify.IsManagerUserID(tools.OpUserID(ctx)) && !relation.IsGroupOwnerAdmin(req.GroupID, tools.OpUserID(ctx)) {
 		return nil, utils.Wrap(constant.ErrIdentity, "")
 	}
 
@@ -1099,16 +1100,16 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		return nil, err
 	}
 
-	err := imdb.OperateGroupStatus(req.GroupID, constant.GroupStatusDismissed)
+	err := relation.OperateGroupStatus(req.GroupID, constant.GroupStatusDismissed)
 	if err != nil {
 		return nil, err
 	}
-	groupInfo, err := imdb.GetGroupInfoByGroupID(req.GroupID)
+	groupInfo, err := relation.GetGroupInfoByGroupID(req.GroupID)
 	if err != nil {
 		return nil, err
 	}
 	if groupInfo.GroupType != constant.SuperGroup {
-		memberList, err := imdb.GetGroupMemberListByGroupID(req.GroupID)
+		memberList, err := relation.GetGroupMemberListByGroupID(req.GroupID)
 		if err != nil {
 			trace_log.SetCtxInfo(ctx, "GetGroupMemberListByGroupID", err, "groupID", req.GroupID)
 		}
@@ -1128,7 +1129,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 			respPb, err := client.SetConversation(context.Background(), &reqPb)
 			trace_log.SetCtxInfo(ctx, "SetConversation", err, "req", &reqPb, "resp", respPb)
 		}
-		err = imdb.DeleteGroupMemberByGroupID(req.GroupID)
+		err = relation.DeleteGroupMemberByGroupID(req.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -1167,9 +1168,9 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
 		return nil, err
 	}
-	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
+	groupMemberInfo := relation.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
 	groupMemberInfo.MuteEndTime = time.Unix(int64(time.Now().Second())+int64(req.MutedSeconds), time.Now().UnixNano())
-	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
+	err = relation.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -1188,7 +1189,7 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 		return nil, err
 	}
 
-	mutedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
+	mutedInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -1202,9 +1203,9 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 		return nil, err
 	}
 
-	groupMemberInfo := imdb.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
+	groupMemberInfo := relation.GroupMember{GroupID: req.GroupID, UserID: req.UserID}
 	groupMemberInfo.MuteEndTime = time.Unix(0, 0)
-	err = imdb.UpdateGroupMemberInfo(groupMemberInfo)
+	err = relation.UpdateGroupMemberInfo(groupMemberInfo)
 	if err != nil {
 		return nil, err
 	}
@@ -1226,7 +1227,7 @@ func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) 
 		return nil, utils.Wrap(constant.ErrNoPermission, "")
 	}
 
-	//mutedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
+	//mutedInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
 	//if err != nil {
 	//	errMsg := req.OperationID + " GetGroupMemberInfoByGroupIDAndUserID failed " + req.GroupID + req.OpUserID + err.Error()
 	//	return &pbGroup.MuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
@@ -1243,7 +1244,7 @@ func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) 
 		return nil, err
 	}
 
-	err = imdb.OperateGroupStatus(req.GroupID, constant.GroupStatusMuted)
+	err = relation.OperateGroupStatus(req.GroupID, constant.GroupStatusMuted)
 	if err != nil {
 		return nil, err
 	}
@@ -1262,7 +1263,7 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	if opFlag == 0 {
 		return nil, err
 	}
-	//mutedInfo, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.)
+	//mutedInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.)
 	//if err != nil {
 	//	errMsg := req.OperationID + " GetGroupMemberInfoByGroupIDAndUserID failed " + req.GroupID + req.OpUserID + err.Error()
 	//	return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
@@ -1279,7 +1280,7 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
 		return nil, err
 	}
-	err = imdb.UpdateGroupInfoDefaultZero(req.GroupID, map[string]interface{}{"status": constant.GroupOk})
+	err = relation.UpdateGroupInfoDefaultZero(req.GroupID, map[string]interface{}{"status": constant.GroupOk})
 	if err != nil {
 		return nil, err
 	}
@@ -1302,11 +1303,11 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 		return nil, err
 	}
 	nickName := cbReq.Nickname.Value
-	groupMemberInfo := imdb.GroupMember{}
+	groupMemberInfo := relation.GroupMember{}
 	groupMemberInfo.UserID = req.UserID
 	groupMemberInfo.GroupID = req.GroupID
 	if nickName == "" {
-		userNickname, err := imdb.GetUserNameByUserID(groupMemberInfo.UserID)
+		userNickname, err := relation.GetUserNameByUserID(groupMemberInfo.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -1319,7 +1320,7 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 		return nil, err
 	}
 
-	if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
+	if err := relation.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
 		return nil, err
 	}
 	chat.GroupMemberInfoSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID, req.UserID)
@@ -1335,7 +1336,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	if err := CallbackBeforeSetGroupMemberInfo(ctx, req); err != nil {
 		return nil, err
 	}
-	groupMember := imdb.GroupMember{
+	groupMember := relation.GroupMember{
 		GroupID: req.GroupID,
 		UserID:  req.UserID,
 	}
@@ -1354,7 +1355,7 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 	} else {
 		m["ex"] = nil
 	}
-	if err := imdb.UpdateGroupMemberInfoByMap(groupMember, m); err != nil {
+	if err := relation.UpdateGroupMemberInfoByMap(groupMember, m); err != nil {
 		return nil, err
 	}
 	if req.RoleLevel != nil {
