@@ -166,9 +166,12 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
-	groupInfo, err := (&cp.PBGroup{req.GroupInfo}).Convert()
+	groupInfo := (&cp.PBGroup{GroupInfo: req.GroupInfo}).Convert()
 	groupInfo.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
 	if req.GroupInfo.GroupType != constant.SuperGroup {
+		if err := s.GroupInterface.CreateGroup(ctx, []*relation.Group{groupInfo}); err != nil {
+			return nil, err
+		}
 		var groupMembers []*relation.GroupMember
 		joinGroup := func(userID string, roleLevel int32) error {
 			groupMember := &relation.GroupMember{GroupID: groupInfo.GroupID, RoleLevel: roleLevel, OperatorUserID: tools.OpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tools.OpUserID(ctx)}
@@ -195,22 +198,16 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				return nil, err
 			}
 		}
-		if err := (*relation.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
-			return nil, err
-		}
-
 	} else {
-		if err := db.DB.CreateSuperGroup(groupId, userIDs, len(userIDs)); err != nil {
+		if err := s.GroupInterface.CreateSuperGroup(ctx, groupInfo.GroupID, userIDs, len(userIDs)); err != nil {
 			return nil, err
 		}
 	}
-	if err := (*relation.Group)(nil).Create(ctx, []*relation.Group{&groupInfo}); err != nil {
-		return nil, err
-	}
+
 	utils.CopyStructFields(resp.GroupInfo, groupInfo)
 	resp.GroupInfo.MemberCount = uint32(len(userIDs))
 	if req.GroupInfo.GroupType != constant.SuperGroup {
-		chat.GroupCreatedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), groupId, userIDs)
+		chat.GroupCreatedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), groupInfo.GroupID, userIDs)
 	} else {
 		for _, userID := range userIDs {
 			if err := rocksCache.DelJoinedSuperGroupIDListFromCache(ctx, userID); err != nil {

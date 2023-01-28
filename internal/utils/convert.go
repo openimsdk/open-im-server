@@ -1,7 +1,7 @@
 package utils
 
 import (
-	imdb "Open_IM/pkg/common/db/mysql"
+	"Open_IM/pkg/common/db/relation"
 	sdk "Open_IM/pkg/proto/sdk_ws"
 	utils2 "Open_IM/pkg/utils"
 	utils "github.com/OpenIMSDK/open_utils"
@@ -20,7 +20,7 @@ func getNumberOfGroupMember(groupID string) (int32, error) {
 }
 
 type DBFriend struct {
-	*imdb.Friend
+	*relation.Friend
 }
 
 type PBFriend struct {
@@ -41,8 +41,8 @@ func (db *DBFriend) convert() (*sdk.FriendInfo, error) {
 	return pbFriend, nil
 }
 
-func (pb *PBFriend) Convert() (*imdb.Friend, error) {
-	dbFriend := &imdb.Friend{}
+func (pb *PBFriend) Convert() (*relation.Friend, error) {
+	dbFriend := &relation.Friend{}
 	utils2.CopyStructFields(dbFriend, pb)
 	dbFriend.FriendUserID = pb.FriendUser.UserID
 	dbFriend.CreateTime = utils2.UnixSecondToTime(int64(pb.CreateTime))
@@ -50,15 +50,15 @@ func (pb *PBFriend) Convert() (*imdb.Friend, error) {
 }
 
 type DBFriendRequest struct {
-	*imdb.FriendRequest
+	*relation.FriendRequest
 }
 
 type PBFriendRequest struct {
 	*sdk.FriendRequest
 }
 
-func (pb *PBFriendRequest) Convert() (*imdb.FriendRequest, error) {
-	dbFriendRequest := &imdb.FriendRequest{}
+func (pb *PBFriendRequest) Convert() (*relation.FriendRequest, error) {
+	dbFriendRequest := &relation.FriendRequest{}
 	utils.CopyStructFields(dbFriendRequest, pb)
 	dbFriendRequest.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
 	dbFriendRequest.HandleTime = utils.UnixSecondToTime(int64(pb.HandleTime))
@@ -87,15 +87,15 @@ func (db *DBFriendRequest) Convert() (*sdk.FriendRequest, error) {
 }
 
 type DBBlack struct {
-	*imdb.Black
+	*relation.Black
 }
 
 type PBBlack struct {
 	*sdk.BlackInfo
 }
 
-func (pb *PBBlack) Convert() (*imdb.Black, error) {
-	dbBlack := &imdb.Black{}
+func (pb *PBBlack) Convert() (*relation.Black, error) {
+	dbBlack := &relation.Black{}
 	dbBlack.BlockUserID = pb.BlackUserInfo.UserID
 	dbBlack.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
 	return dbBlack, nil
@@ -113,17 +113,17 @@ func (db *DBBlack) Convert() (*sdk.BlackInfo, error) {
 }
 
 type DBGroup struct {
-	*imdb.Group
+	*relation.Group
 }
 
 type PBGroup struct {
 	*sdk.GroupInfo
 }
 
-func (pb *PBGroup) Convert() (*imdb.Group, error) {
-	dst := &imdb.Group{}
-	utils.CopyStructFields(dst, pb)
-	return dst, nil
+func (pb *PBGroup) Convert() *relation.Group {
+	dst := &relation.Group{}
+	_ = utils.CopyStructFields(dst, pb)
+	return dst
 }
 func (db *DBGroup) Convert() (*sdk.GroupInfo, error) {
 	dst := &sdk.GroupInfo{}
@@ -148,15 +148,15 @@ func (db *DBGroup) Convert() (*sdk.GroupInfo, error) {
 }
 
 type DBGroupMember struct {
-	*imdb.GroupMember
+	*relation.GroupMember
 }
 
 type PBGroupMember struct {
 	*sdk.GroupMemberFullInfo
 }
 
-func (pb *PBGroupMember) Convert() (*imdb.GroupMember, error) {
-	dst := &imdb.GroupMember{}
+func (pb *PBGroupMember) Convert() (*relation.GroupMember, error) {
+	dst := &relation.GroupMember{}
 	utils.CopyStructFields(dst, pb)
 	dst.JoinTime = utils.UnixSecondToTime(int64(pb.JoinTime))
 	dst.MuteEndTime = utils.UnixSecondToTime(int64(pb.MuteEndTime))
@@ -184,15 +184,15 @@ func (db *DBGroupMember) Convert() (*sdk.GroupMemberFullInfo, error) {
 }
 
 type DBGroupRequest struct {
-	*imdb.GroupRequest
+	*relation.GroupRequest
 }
 
 type PBGroupRequest struct {
 	*sdk.GroupRequest
 }
 
-func (pb *PBGroupRequest) Convert() (*imdb.GroupRequest, error) {
-	dst := &imdb.GroupRequest{}
+func (pb *PBGroupRequest) Convert() (*relation.GroupRequest, error) {
+	dst := &relation.GroupRequest{}
 	utils.CopyStructFields(dst, pb)
 	dst.ReqTime = utils.UnixSecondToTime(int64(pb.ReqTime))
 	dst.HandledTime = utils.UnixSecondToTime(int64(pb.HandleTime))
@@ -207,15 +207,15 @@ func (db *DBGroupRequest) Convert() (*sdk.GroupRequest, error) {
 }
 
 type DBUser struct {
-	*imdb.User
+	*relation.User
 }
 
 type PBUser struct {
 	*sdk.UserInfo
 }
 
-func (pb *PBUser) Convert() (*imdb.User, error) {
-	dst := &imdb.User{}
+func (pb *PBUser) Convert() (*relation.User, error) {
+	dst := &relation.User{}
 	utils.CopyStructFields(dst, pb)
 	dst.Birth = utils.UnixSecondToTime(pb.Birthday)
 	dst.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))

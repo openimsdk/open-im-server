@@ -19,6 +19,7 @@ type GroupInterface interface {
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
 
 	//mongo
+	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
 }
 
@@ -51,12 +52,17 @@ func (g *GroupController) GetSuperGroupByID(ctx context.Context, groupID string)
 	return g.database.GetSuperGroup(ctx, groupID)
 }
 
+func (g *GroupController) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error {
+	return g.database.CreateSuperGroup(ctx, groupID, initMemberIDList, memberNumCount)
+}
+
 type DataBase interface {
 	Find(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error)
 	Create(ctx context.Context, groups []*relation.Group) error
 	Delete(ctx context.Context, groupIDs []string) error
 	Take(ctx context.Context, groupID string) (group *relation.Group, err error)
 	GetSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
+	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error
 }
 
 type GroupDataBase struct {
@@ -118,6 +124,10 @@ func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) er
 		}
 		return nil
 	})
+}
+
+func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error {
+	g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDList, memberNumCount)
 }
 
 func (g *GroupDataBase) GetSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
