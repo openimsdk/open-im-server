@@ -33,11 +33,11 @@ func NewGroupDB(db *gorm.DB) *Group {
 	return &group
 }
 
-func (g *Group) Create(ctx context.Context, groups []*Group) (err error) {
+func (g *Group) Create(ctx context.Context, groups []*Group, tx ...*gorm.DB) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groups", groups)
 	}()
-	err = utils.Wrap(g.DB.Create(&groups).Error, "")
+	err = utils.Wrap(getDBConn(g.DB, tx).Create(&groups).Error, "")
 	return err
 }
 
@@ -48,11 +48,11 @@ func (g *Group) Delete(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (
 	return utils.Wrap(getDBConn(g.DB, tx).Where("group_id in (?)", groupIDs).Delete(&Group{}).Error, "")
 }
 
-func (g *Group) UpdateByMap(ctx context.Context, groupID string, args map[string]interface{}) (err error) {
+func (g *Group) UpdateByMap(ctx context.Context, groupID string, args map[string]interface{}, tx ...*gorm.DB) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "args", args)
 	}()
-	return utils.Wrap(g.DB.Where("group_id = ?", groupID).Updates(args).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ?", groupID).Model(g).Updates(args).Error, "")
 }
 
 func (g *Group) Update(ctx context.Context, groups []*Group, tx ...*gorm.DB) (err error) {
@@ -62,22 +62,23 @@ func (g *Group) Update(ctx context.Context, groups []*Group, tx ...*gorm.DB) (er
 	return utils.Wrap(getDBConn(g.DB, tx).Updates(&groups).Error, "")
 }
 
-func (g *Group) Find(ctx context.Context, groupIDs []string) (groups []*Group, err error) {
+func (g *Group) Find(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (groups []*Group, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs, "groups", groups)
 	}()
-	err = utils.Wrap(g.DB.Where("group_id in (?)", groupIDs).Find(&groups).Error, "")
+	err = utils.Wrap(getDBConn(g.DB, tx).Where("group_id in (?)", groupIDs).Find(&groups).Error, "")
 	return groups, err
 }
 
-func (g *Group) Take(ctx context.Context, groupID string) (group *Group, err error) {
+func (g *Group) Take(ctx context.Context, groupID string, tx ...*gorm.DB) (group *Group, err error) {
 	group = &Group{}
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", *group)
 	}()
-	err = utils.Wrap(g.DB.Where("group_id = ?", groupID).Take(group).Error, "")
+	err = utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ?", groupID).Take(group).Error, "")
 	return group, err
 }
-func (g *Group) DeleteTx(ctx context.Context, groupIDs []string) error {
-	return nil
-}
+
+//func (g *Group) DeleteTx(ctx context.Context, groupIDs []string) error {
+//	return nil
+//}
