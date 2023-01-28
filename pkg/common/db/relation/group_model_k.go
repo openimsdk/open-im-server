@@ -59,7 +59,7 @@ func (g *Group) Update(ctx context.Context, groups []*Group, tx ...*gorm.DB) (er
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groups", groups)
 	}()
-	return utils.Wrap(getDBConn(g.DB, tx...).Updates(&groups).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Updates(&groups).Error, "")
 }
 
 func (g *Group) Find(ctx context.Context, groupIDs []string) (groups []*Group, err error) {
