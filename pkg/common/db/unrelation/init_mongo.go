@@ -45,7 +45,7 @@ func (m *Mongo) InitMongo() {
 				config.Config.Mongo.DBMaxPoolSize)
 		}
 	}
-	log.Println("start to init mongoDB:", uri)
+	log.Println(utils.GetFuncName(1), "start to init mongoDB:", uri)
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		time.Sleep(time.Duration(30) * time.Second)

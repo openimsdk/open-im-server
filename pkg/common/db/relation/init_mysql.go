@@ -21,6 +21,7 @@ func (m *Mysql) GormConn() *gorm.DB {
 func (m *Mysql) SetGormConn(gormConn *gorm.DB) {
 	m.gormConn = gormConn
 }
+
 func (m *Mysql) InitConn() *Mysql {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local",
 		config.Config.Mysql.DBUserName, config.Config.Mysql.DBPassword, config.Config.Mysql.DBAddress[0], "mysql")

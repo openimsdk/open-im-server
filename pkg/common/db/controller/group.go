@@ -62,7 +62,7 @@ type DataBase interface {
 type GroupDataBase struct {
 	sqlDB   *relation.Group
 	cache   *cache.GroupCache
-	mongoDB *unrelation.SuperGroupMgo
+	mongoDB *unrelation.SuperGroupMgoDB
 }
 
 func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Database) DataBase {
