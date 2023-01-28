@@ -41,8 +41,7 @@ type groupServer struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
-	               imdb.GroupInterface
-
+	imdb.GroupInterface
 }
 
 func NewGroupServer(port int) *groupServer {
@@ -176,7 +175,6 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 				return nil, err
 			}
 		}
-		if err := controller.
 		if err := (*imdb.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
 			return nil, err
 		}
