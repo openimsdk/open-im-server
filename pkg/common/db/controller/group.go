@@ -18,10 +18,17 @@ type GroupInterface interface {
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
 	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error)
+	GetGroupMemberList(ctx context.Context, groupID string) ([]*relation.GroupMember, error)
 	GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
 	GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
+
+	CreateGroupMember(ctx context.Context, groupMember []*relation.GroupMember) error
+
+	CreateGroupRequest(ctx context.Context, requests []*relation.GroupRequest) error
+
 	//mongo
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
+	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
 }
 
