@@ -14,48 +14,6 @@ message AdminLoginResp {
     string faceURL = 3;
 }
 
-message GetUserTokenReq {
-  string operationID = 1;
-  string userID = 2;
-  int32 platformID = 3;
-}
-
-message GetUserTokenResp {
-  CommonResp commonResp = 1;
-  string token = 2;
-  int64 expTime = 3;
-}
-
-message AddUserRegisterAddFriendIDListReq {
-    string operationID = 1;
-    repeated string userIDList = 2;
-}
-
-message AddUserRegisterAddFriendIDListResp {
-    CommonResp commonResp = 1;
-}
-
-message ReduceUserRegisterAddFriendIDListReq {
-    string operationID = 1;
-    int32 operation = 2;
-    repeated string userIDList = 3;
-}
-
-message ReduceUserRegisterAddFriendIDListResp {
-    CommonResp commonResp = 1;
-}
-
-message GetUserRegisterAddFriendIDListReq {
-    string operationID = 1;
-    server_api_params.RequestPagination pagination = 2;
-}
-
-message GetUserRegisterAddFriendIDListResp {
-   repeated server_api_params.UserInfo userInfoList = 1;
-    server_api_params.ResponsePagination pagination = 2;
-    CommonResp commonResp = 3;
-}
-
 message GetChatLogsReq {
     string content = 1;
     string sendID = 2;
@@ -64,8 +22,6 @@ message GetChatLogsReq {
     int32 sessionType = 5;
     int32 contentType = 6;
     server_api_params.RequestPagination pagination = 7;
-    string operationID = 8;
-    string opUserID = 9;
 }
 
 message ChatLog {
@@ -91,9 +47,7 @@ message ChatLog {
 
 message GetChatLogsResp {
     repeated ChatLog chatLogs = 1;
-    server_api_params.ResponsePagination pagination = 2;
-    int32 chatLogsNum = 3;
-    CommonResp commonResp = 4;
+    int32 chatLogsNum = 2;
 }
 
 
@@ -104,7 +58,6 @@ message StatisticsReq {
 
 message GetActiveUserReq{
     StatisticsReq statisticsReq = 1;
-    string operationID = 2;
 }
 
 message UserResp{
@@ -115,24 +68,20 @@ message UserResp{
 
 message GetActiveUserResp {
     repeated UserResp Users = 1;
-    CommonResp commonResp = 2;
 }
 
 message GetActiveGroupReq{
     StatisticsReq statisticsReq = 1;
-    string operationID = 2;
 }
 
 message GroupResp {
     string GroupName = 1;
-    string GroupId = 2;
+    string GroupID = 2;
     int32 MessageNum = 3;
-    CommonResp commonResp = 4;
 }
 
 message GetActiveGroupResp {
     repeated GroupResp Groups = 1;
-    CommonResp commonResp = 2;
 }
 
 message DateNumList {
@@ -181,124 +130,8 @@ message GetUserStatisticsResp {
     repeated DateNumList IncreaseUserNumList = 4;
     repeated DateNumList ActiveUserNumList = 5;
     repeated DateNumList TotalUserNumList = 6;
-    CommonResp commonResp = 7;
 }
 
-message GenerateInvitationCodeReq {
-    string operationID = 1;
-    int32 codeLen = 2;
-    int32 codeNum = 3;
-}
-
-message GenerateInvitationCodeResp {
-    CommonResp commonResp = 1;
-}
-
-message GetInvitationCodesReq {
-    string operationID = 1;
-    string code = 2;
-    int32 status = 3;
-    server_api_params.RequestPagination pagination = 4;
-}
-
-message invitationCode {
-    string invitationCode = 1;
-    int32 createTime = 2;
-    int32 lastTime = 3;
-    string userID = 4;
-    int32 status = 5; 
-}
-
-message GetInvitationCodesResp {
-    repeated invitationCode invitationCodes = 1;
-    server_api_params.ResponsePagination Pagination = 2;
-    CommonResp commonResp = 3;
-}
-
-message QueryIPRegisterReq {
-    string operationID = 1;
-    string IP = 2;
-}
-
-message QueryIPRegisterResp {
-    string IP = 1;
-	int32 RegisterNum = 2;
-	int32 Status = 3;
-	repeated string userIDList = 4;
-    CommonResp commonResp = 5;
-}
-
-message AddIPLimitReq {
-    string operationID = 1;
-    string IP = 2;
-    int32 limitTime = 3;
-} 
-
-message AddIPLimitResp {
-    CommonResp commonResp = 1;
-}
-
-message RemoveIPLimitReq {
-    string operationID = 1;
-    string IP = 2;
-}
-
-message RemoveIPLimitResp {
-    CommonResp commonResp = 1;
-}
-
-message QueryUserIDIPLimitLoginReq {
-    string operationID = 1;
-    string userID = 2;
-}
-
-message UserIPLimit {
-    string userID = 1;
-    string IP = 2;
-    int32 createTime = 3;
-}
-
-message QueryUserIDIPLimitLoginResp {
-    repeated UserIPLimit UserIPLimits = 1;
-    CommonResp commonResp = 2;
-}
-
-message AddUserIPLimitLoginReq {
-    string userID = 1;
-    string operationID = 2;
-    string IP = 3;
-}
-
-message AddUserIPLimitLoginResp {
-    CommonResp commonResp = 1;
-}
-
-message RemoveUserIPLimitReq {
-    string userID = 1;
-    string operationID = 2;
-    string IP = 3;
-}
-
-message RemoveUserIPLimitResp {
-    CommonResp commonResp = 1;
-}
-
-message GetClientInitConfigReq {
-   string operationID = 1;
-}
-
-message GetClientInitConfigResp {
-    CommonResp commonResp = 1;
-}
-
-message SetClientInitConfigReq {
-    string operationID = 1;
-    string discoverPageURL = 2;
-}
-
-message SetClientInitConfigResp {
-    CommonResp commonResp = 1;
-}
 
 message GetUserFriendsReq {
     string operationID = 1;
@@ -308,59 +141,39 @@ message GetUserFriendsReq {
     server_api_params.RequestPagination pagination = 5;
 }
 
-
 message GetUserFriendsResp {
-    server_api_params.ResponsePagination pagination = 1;
     repeated server_api_params.FriendInfo friendInfoList = 2;
     int32 friendNums = 3;
-    CommonResp commonResp = 4;
 }
 
 message GetUserIDByEmailAndPhoneNumberReq{
-  string operationID = 1;
   string email = 2;
   string phoneNumber = 3;
 }
 
 message GetUserIDByEmailAndPhoneNumberResp{
   repeated string userIDList = 1;
-  CommonResp  commonResp = 2;
 }
 
+message GetUserTokenReq {
+  string userID = 1;
+  int32 platformID = 2;
+}
 
+message GetUserTokenResp {
+  string token = 1;
+  int64 expTime = 2;
+}
 
 service adminCMS {
     rpc AdminLogin(AdminLoginReq) returns(AdminLoginResp);
-
-    rpc AddUserRegisterAddFriendIDList(AddUserRegisterAddFriendIDListReq) returns(AddUserRegisterAddFriendIDListResp);
-    rpc ReduceUserRegisterAddFriendIDList(ReduceUserRegisterAddFriendIDListReq) returns(ReduceUserRegisterAddFriendIDListResp);
-    rpc GetUserRegisterAddFriendIDList(GetUserRegisterAddFriendIDListReq) returns(GetUserRegisterAddFriendIDListResp);
-
-
     rpc GetChatLogs(GetChatLogsReq) returns(GetChatLogsResp);
-
     rpc GetActiveUser(GetActiveUserReq) returns(GetActiveUserResp);
     rpc GetActiveGroup(GetActiveGroupReq) returns(GetActiveGroupResp);
     rpc GetMessageStatistics(GetMessageStatisticsReq) returns(GetMessageStatisticsResp);
     rpc GetGroupStatistics(GetGroupStatisticsReq) returns(GetGroupStatisticsResp);
     rpc GetUserStatistics(GetUserStatisticsReq) returns(GetUserStatisticsResp);
-
-    rpc GenerateInvitationCode(GenerateInvitationCodeReq) returns(GenerateInvitationCodeResp);
-    rpc GetInvitationCodes(GetInvitationCodesReq) returns(GetInvitationCodesResp);
-
-    rpc QueryIPRegister(QueryIPRegisterReq) returns(QueryIPRegisterResp);
-    rpc AddIPLimit(AddIPLimitReq) returns(AddIPLimitResp);
-    rpc RemoveIPLimit(RemoveIPLimitReq) returns(RemoveIPLimitResp);
-    rpc QueryUserIDIPLimitLogin(QueryUserIDIPLimitLoginReq) returns(QueryUserIDIPLimitLoginResp);
-    rpc AddUserIPLimitLogin(AddUserIPLimitLoginReq) returns(AddUserIPLimitLoginResp);
-    rpc RemoveUserIPLimit(RemoveUserIPLimitReq) returns(RemoveUserIPLimitResp);
-
-    rpc GetClientInitConfig(GetClientInitConfigReq) returns(GetClientInitConfigResp);
-    rpc SetClientInitConfig(SetClientInitConfigReq) returns(SetClientInitConfigResp);
-
     rpc GetUserFriends(GetUserFriendsReq) returns(GetUserFriendsResp);
-
     rpc GetUserIDByEmailAndPhoneNumber(GetUserIDByEmailAndPhoneNumberReq) returns(GetUserIDByEmailAndPhoneNumberResp);
-
     rpc GetUserToken(GetUserTokenReq) returns(GetUserTokenResp);
 }

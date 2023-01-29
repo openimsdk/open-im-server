@@ -5,11 +5,6 @@ package server_api_params;
 
 
 ////////////////////////////////base///////////////////////////////
-message CommonResp{
-  int32 errCode = 1;
-  string errMsg = 2;
-  string detailErrMsg =3;
-}
 
 message GroupInfo{
   string groupID = 1;
@@ -132,69 +127,6 @@ message FriendRequest{
   uint32 handleTime = 14;
   string ex = 15;
 }
-
-///////////////////////////////////organization/////////////////////////////////////
-
-message Department {
-  string departmentID = 1;
-  string faceURL = 2;
-  string name = 3;
-  string parentID = 4;
-  int32 order = 5;
-  int32 departmentType = 6;
-  uint32 createTime = 7;
-  uint32 subDepartmentNum = 8;
-  uint32 memberNum = 9;
-  string ex        = 10;
-}
-
-
-
-message OrganizationUser  {
-    string userID      = 1;
-    string  nickname    = 2;
-    string   englishName = 3;
-    string  faceURL    = 4;
-    int32   gender     = 5;
-    string   mobile      = 6;
-    string telephone   = 7;
-    uint32 birth     = 8;
-    string  email    = 9;
-    uint32   createTime = 10;
-    string ex      = 11;
-    string birthStr = 12;
-}
-
-message DepartmentMember {
-      string userID = 1;
-      string departmentID = 2;
-      int32 order = 3;
-      string position = 4;
-      int32 leader = 5;
-      int32 status = 6;
-      string ex     = 7;
-}
-
-
-message  UserDepartmentMember {
-  OrganizationUser organizationUser = 1;
-  DepartmentMember departmentMember = 2;
-}
-
-
-message  UserInDepartment {
-  OrganizationUser organizationUser = 1;
-  repeated DepartmentMember departmentMemberList = 2;
-}
-
-
-
-
-
-///////////////////////////////////organization end//////////////////////////////////
-
-
-
 
 
 
