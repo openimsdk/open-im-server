@@ -147,15 +147,15 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 		return nil, constant.ErrArgs.Wrap("no group owner")
 	}
 	var userIDs []string
-	for _, ordinaryUserID := range req.InitMemberList {
-		userIDs = append(userIDs, ordinaryUserID)
+	for _, userID := range req.InitMemberList {
+		userIDs = append(userIDs, userID)
+	}
+	for _, userID := range req.AdminUserIDs {
+		userIDs = append(userIDs, userID)
 	}
 	userIDs = append(userIDs, req.OwnerUserID)
-	for _, adminUserID := range req.AdminUserIDs {
-		userIDs = append(userIDs, adminUserID)
-	}
 	if utils.IsDuplicateID(userIDs) {
-		return nil, constant.ErrArgs.Wrap("group member is repeated")
+		return nil, constant.ErrArgs.Wrap("group member repeated")
 	}
 	users, err := getUsersInfo(ctx, userIDs)
 	if err != nil {
@@ -165,68 +165,61 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	for i, user := range users {
 		userMap[user.UserID] = users[i]
 	}
+	for _, userID := range userIDs {
+		if userMap[userID] == nil {
+			return nil, constant.ErrUserIDNotFound.Wrap(userID)
+		}
+	}
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
-	var groupInfo relation.Group
-	utils.CopyStructFields(&groupInfo, req.GroupInfo)
-
-	groupInfo, err := (&cp.PBGroup{req.GroupInfo}).Convert()
-	groupInfo.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
-	if req.GroupInfo.GroupType != constant.SuperGroup {
-		var groupMembers []*relation.GroupMember
+	var group relation.Group
+	var groupMembers []*relation.GroupMember
+	utils.CopyStructFields(&group, req.GroupInfo)
+	group.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
+	if req.GroupInfo.GroupType == constant.SuperGroup {
+		if err := s.GroupInterface.CreateSuperGroup(ctx, group.GroupID, userIDs); err != nil {
+			return nil, err
+		}
+	} else {
+		opUserID := tools.OpUserID(ctx)
 		joinGroup := func(userID string, roleLevel int32) error {
-			groupMember := &relation.GroupMember{GroupID: groupInfo.GroupID, RoleLevel: roleLevel, OperatorUserID: tools.OpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tools.OpUserID(ctx)}
 			user := userMap[userID]
+			groupMember := &relation.GroupMember{GroupID: group.GroupID, RoleLevel: roleLevel, OperatorUserID: opUserID, JoinSource: constant.JoinByInvitation, InviterUserID: opUserID}
 			utils.CopyStructFields(&groupMember, user)
-			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), groupMember, groupInfo.Ex); err != nil {
+			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), groupMember, group.Ex); err != nil {
 				return err
 			}
 			groupMembers = append(groupMembers, groupMember)
 			return nil
 		}
-
 		if err := joinGroup(req.OwnerUserID, constant.GroupOwner); err != nil {
 			return nil, err
 		}
-
-		for _, info := range req.InitMemberList {
-			if err := joinGroup(info, constant.GroupOrdinaryUsers); err != nil {
+		for _, userID := range req.AdminUserIDs {
+			if err := joinGroup(userID, constant.GroupAdmin); err != nil {
 				return nil, err
 			}
 		}
-		for _, info := range req.AdminUserIDs {
-			if err := joinGroup(info, constant.GroupAdmin); err != nil {
+		for _, userID := range req.InitMemberList {
+			if err := joinGroup(userID, constant.GroupOrdinaryUsers); err != nil {
 				return nil, err
 			}
-		}
-		if err := (*relation.GroupMember)(nil).Create(ctx, groupMembers); err != nil {
-			return nil, err
-		}
-
-	} else {
-		if err := db.DB.CreateSuperGroup(groupId, userIDs, len(userIDs)); err != nil {
-			return nil, err
 		}
 	}
-	if err := (*relation.Group)(nil).Create(ctx, []*relation.Group{&groupInfo}); err != nil {
+	if err := s.GroupInterface.CreateGroup(ctx, []*relation.Group{&group}, groupMembers); err != nil {
 		return nil, err
 	}
-	utils.CopyStructFields(resp.GroupInfo, groupInfo)
+	utils.CopyStructFields(resp.GroupInfo, group)
 	resp.GroupInfo.MemberCount = uint32(len(userIDs))
-	if req.GroupInfo.GroupType != constant.SuperGroup {
-		chat.GroupCreatedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), groupId, userIDs)
-	} else {
-		for _, userID := range userIDs {
-			if err := rocksCache.DelJoinedSuperGroupIDListFromCache(ctx, userID); err != nil {
-				trace_log.SetCtxInfo(ctx, "DelJoinedSuperGroupIDListFromCache", err, "userID", userID)
-			}
-		}
+	if req.GroupInfo.GroupType == constant.SuperGroup {
 		go func() {
-			for _, v := range userIDs {
-				chat.SuperGroupNotification(tools.OperationID(ctx), v, v)
+			for _, userID := range userIDs {
+				chat.SuperGroupNotification(tools.OperationID(ctx), userID, userID)
 			}
 		}()
+	} else {
+		chat.GroupCreatedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), group.GroupID, userIDs)
 	}
 	return resp, nil
 }
