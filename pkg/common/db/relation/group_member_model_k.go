@@ -27,6 +27,12 @@ type GroupMember struct {
 	DB             *gorm.DB
 }
 
+func NewGroupMemberDB(db *gorm.DB) *GroupMember {
+	return &GroupMember{
+		DB: db,
+	}
+}
+
 func (g *GroupMember) Create(ctx context.Context, groupMemberList []*GroupMember) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)

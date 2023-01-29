@@ -22,6 +22,13 @@ type GroupRequest struct {
 	JoinSource    int32     `gorm:"column:join_source"`
 	InviterUserID string    `gorm:"column:inviter_user_id;size:64"`
 	Ex            string    `gorm:"column:ex;size:1024"`
+	DB            *gorm.DB
+}
+
+func NewGroupRequest(db *gorm.DB) *GroupRequest {
+	return &GroupRequest{
+		DB: db,
+	}
 }
 
 func (GroupRequest) TableName() string {

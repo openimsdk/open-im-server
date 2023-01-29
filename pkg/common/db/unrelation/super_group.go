@@ -34,7 +34,7 @@ func NewSuperGroupMgoDB(mgoDB *mongo.Database) *SuperGroupMgoDB {
 	return &SuperGroupMgoDB{mgoDB: mgoDB, superGroupCollection: mgoDB.Collection(cSuperGroup), userToSuperGroupCollection: mgoDB.Collection(cUserToSuperGroup)}
 }
 
-func (db *SuperGroupMgoDB) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error {
+func (db *SuperGroupMgoDB) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int, cacheFunc func(ctx context.Context, userIDs []string) error) error {
 	//ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
 	//c := db.mgoDB.Database(config.Config.Mongo.DBDatabase).Collection(cSuperGroup)
 	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
@@ -59,6 +59,12 @@ func (db *SuperGroupMgoDB) CreateSuperGroup(ctx context.Context, groupID string,
 		for _, userID := range initMemberIDList {
 			_, err = db.userToSuperGroupCollection.UpdateOne(sCtx, bson.M{"user_id": userID}, bson.M{"$addToSet": bson.M{"group_id_list": groupID}}, opts)
 			if err != nil {
+				_ = sCtx.AbortTransaction(ctx)
+				return err
+			}
+		}
+		if cacheFunc != nil {
+			if err = cacheFunc(ctx, initMemberIDList); err != nil {
 				_ = sCtx.AbortTransaction(ctx)
 				return err
 			}

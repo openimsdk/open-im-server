@@ -28,9 +28,7 @@ type Group struct {
 }
 
 func NewGroupDB(db *gorm.DB) *Group {
-	var group Group
-	group.DB = db.Model(&Group{})
-	return &group
+	return &Group{DB: db}
 }
 
 func (g *Group) Create(ctx context.Context, groups []*Group) (err error) {

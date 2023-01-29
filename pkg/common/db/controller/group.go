@@ -6,7 +6,6 @@ import (
 	"Open_IM/pkg/common/db/unrelation"
 	"context"
 	"github.com/dtm-labs/rockscache"
-	_ "github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
@@ -66,16 +65,23 @@ type DataBase interface {
 }
 
 type GroupDataBase struct {
-	sqlDB   *relation.Group
+	groupDB        *relation.Group
+	groupMemberDB  *relation.GroupMember
+	groupRequestDB *relation.GroupRequest
+
 	cache   *cache.GroupCache
 	mongoDB *unrelation.SuperGroupMgoDB
 }
 
 func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Database) DataBase {
-	sqlDB := relation.NewGroupDB(db)
+	groupDB := relation.NewGroupDB(db)
+	groupMemberDB := relation.NewGroupMemberDB(db)
+	groupRequestDB := relation.NewGroupRequest(db)
 	database := &GroupDataBase{
-		sqlDB: sqlDB,
-		cache: cache.NewGroupCache(rdb, sqlDB, rockscache.Options{
+		groupDB:        groupDB,
+		groupMemberDB:  groupMemberDB,
+		groupRequestDB: groupRequestDB,
+		cache: cache.NewGroupCache(rdb, groupDB, groupMemberDB, groupRequestDB, rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,
 			DisableCacheDelete:     false,
@@ -87,19 +93,19 @@ func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Datab
 }
 
 func (g *GroupDataBase) Find(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
-	return g.cache.GetGroupsInfoFromCache(ctx, groupIDs)
+	return g.cache.GetGroupsInfo(ctx, groupIDs)
 }
 
 func (g *GroupDataBase) Create(ctx context.Context, groups []*relation.Group) error {
-	return g.sqlDB.Create(ctx, groups)
+	return g.groupDB.Create(ctx, groups)
 }
 
 func (g *GroupDataBase) Delete(ctx context.Context, groupIDs []string) error {
-	return g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
-		if err := g.sqlDB.Delete(ctx, groupIDs, tx); err != nil {
+	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupDB.Delete(ctx, groupIDs, tx); err != nil {
 			return err
 		}
-		if err := g.cache.DelGroupsInfoFromCache(ctx, groupIDs); err != nil {
+		if err := g.cache.DelGroupsInfo(ctx, groupIDs); err != nil {
 			return err
 		}
 		return nil
@@ -107,19 +113,19 @@ func (g *GroupDataBase) Delete(ctx context.Context, groupIDs []string) error {
 }
 
 func (g *GroupDataBase) Take(ctx context.Context, groupID string) (group *relation.Group, err error) {
-	return g.cache.GetGroupInfoFromCache(ctx, groupID)
+	return g.cache.GetGroupInfo(ctx, groupID)
 }
 
 func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) error {
-	return g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
-		if err := g.sqlDB.Update(ctx, groups, tx); err != nil {
+	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupDB.Update(ctx, groups, tx); err != nil {
 			return err
 		}
 		var groupIDs []string
 		for _, group := range groups {
 			groupIDs = append(groupIDs, group.GroupID)
 		}
-		if err := g.cache.DelGroupsInfoFromCache(ctx, groupIDs); err != nil {
+		if err := g.cache.DelGroupsInfo(ctx, groupIDs); err != nil {
 			return err
 		}
 		return nil
@@ -127,7 +133,7 @@ func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) er
 }
 
 func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error {
-	g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDList, memberNumCount)
+	return g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDList, memberNumCount, g.cache.DelJoinedSuperGroupIDs)
 }
 
 func (g *GroupDataBase) GetSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
