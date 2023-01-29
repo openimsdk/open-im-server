@@ -159,15 +159,15 @@ func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool 
 	return false
 }
 
-func CheckAccessV3(ctx context.Context, OwnerUserID string) (err error) {
+func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	opUserID := tools.OpUserID(ctx)
 	defer func() {
-		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", opUserID, "OwnerUserID", OwnerUserID)
+		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", opUserID, "ownerUserID", ownerUserID)
 	}()
 	if utils.IsContain(opUserID, config.Config.Manager.AppManagerUid) {
 		return nil
 	}
-	if opUserID == OwnerUserID {
+	if opUserID == ownerUserID {
 		return nil
 	}
 	return constant.ErrIdentity.Wrap(utils.GetSelfFuncName())

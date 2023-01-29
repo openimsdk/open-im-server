@@ -118,13 +118,8 @@ message KickGroupMemberReq {
   string reason = 3;
 }
 
-message Id2Result {
-  string userID = 1;
-  int32 result = 2; //0 ok; -1 error
-}
-
 message KickGroupMemberResp {
-  repeated Id2Result id2ResultList = 3;
+
 }
 
 
@@ -144,7 +139,7 @@ message InviteUserToGroupReq {
   repeated string invitedUserIDList = 5;
 }
 message InviteUserToGroupResp {
-  repeated  Id2Result id2ResultList = 3; // 0 ok, -1 error
+
 }
 
 

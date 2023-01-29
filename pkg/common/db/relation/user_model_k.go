@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/utils"
 	"context"
+	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -68,4 +69,12 @@ func (u *User) Take(ctx context.Context, userID string) (user *User, err error) 
 	}()
 	err = utils.Wrap(u.DB.Where("user_id = ?", userID).Take(&user).Error, "")
 	return user, err
+}
+
+func (u *User) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*User, err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users)
+	}()
+	err = u.DB.Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
+	return users, utils.Wrap(err, "")
 }
