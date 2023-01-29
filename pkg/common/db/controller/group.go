@@ -17,7 +17,9 @@ type GroupInterface interface {
 	CreateGroup(ctx context.Context, groups []*relation.Group, groupMember []*relation.GroupMember) error
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
-
+	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error)
+	GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
+	GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
 	//mongo
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
@@ -56,10 +58,16 @@ func (g *GroupController) CreateSuperGroup(ctx context.Context, groupID string, 
 	return g.database.CreateSuperGroup(ctx, groupID, initMemberIDList)
 }
 
+func (g *GroupController) GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error) {
+	return g.database.GetJoinedGroupList(ctx, userID)
+}
+
 type DataBase interface {
 	FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error)
 	CreateGroup(ctx context.Context, groups []*relation.Group, groupMember []*relation.GroupMember) error
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
+	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error)
+
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
@@ -144,6 +152,11 @@ func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) er
 		}
 		return nil
 	})
+}
+
+func (g *GroupDataBase) GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error) {
+
+	return nil, nil
 }
 
 func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {

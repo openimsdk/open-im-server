@@ -18,7 +18,6 @@ import (
 
 	cp "Open_IM/internal/utils"
 	"Open_IM/pkg/getcdv3"
-	pbCache "Open_IM/pkg/proto/cache"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -226,47 +225,41 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 
 func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJoinedGroupListReq) (*pbGroup.GetJoinedGroupListResp, error) {
 	resp := &pbGroup.GetJoinedGroupListResp{}
-
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	joinedGroupList, err := rocksCache.GetJoinedGroupIDListFromCache(ctx, req.FromUserID)
+	groups, err := s.GroupInterface.GetJoinedGroupList(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
-	for _, groupID := range joinedGroupList {
+	if len(groups) == 0 {
+		return resp, nil
+	}
+	var groupIDs []string
+	for _, group := range groups {
+		groupIDs = append(groupIDs, group.GroupID)
+	}
+	groupMemberNum, err := s.GroupInterface.GetGroupMemberNum(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groupOwnerUserID, err := s.GroupInterface.GetGroupOwnerUserID(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	for _, group := range groups {
+		if group.Status == constant.GroupStatusDismissed || group.GroupType == constant.SuperGroup {
+			continue
+		}
 		var groupNode open_im_sdk.GroupInfo
-		num, err := rocksCache.GetGroupMemberNumFromCache(ctx, groupID)
-		if err != nil {
-			log.NewError(tools.OperationID(ctx), utils.GetSelfFuncName(), err.Error(), groupID)
-			continue
-		}
-		owner, err := (*relation.GroupMember)(nil).TakeOwnerInfo(ctx, groupID)
-		//owner, err2 := relation.GetGroupOwnerInfoByGroupID(groupID)
-		if err != nil {
-			continue
-		}
-		group, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
-		if err != nil {
-			continue
-		}
-		if group.GroupType == constant.SuperGroup {
-			continue
-		}
-		if group.Status == constant.GroupStatusDismissed {
-			continue
-		}
 		utils.CopyStructFields(&groupNode, group)
-		groupNode.CreateTime = uint32(group.CreateTime.Unix())
-		groupNode.NotificationUpdateTime = uint32(group.NotificationUpdateTime.Unix())
-		if group.NotificationUpdateTime.Unix() < 0 {
-			groupNode.NotificationUpdateTime = 0
-		}
-
-		groupNode.MemberCount = uint32(num)
-		groupNode.OwnerUserID = owner.UserID
+		groupNode.MemberCount = uint32(groupMemberNum[group.GroupID])
+		groupNode.OwnerUserID = groupOwnerUserID[group.GroupID]
+		groupNode.CreateTime = group.CreateTime.UnixMilli()
+		groupNode.NotificationUpdateTime = group.NotificationUpdateTime.UnixMilli()
 		resp.GroupList = append(resp.GroupList, &groupNode)
 	}
+	resp.Total = int32(len(resp.GroupList))
 	return resp, nil
 }
 

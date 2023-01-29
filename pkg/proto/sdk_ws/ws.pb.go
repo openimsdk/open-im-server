@@ -81,7 +81,7 @@ type GroupInfo struct {
 	Introduction           string   `protobuf:"bytes,4,opt,name=introduction" json:"introduction,omitempty"`
 	FaceURL                string   `protobuf:"bytes,5,opt,name=faceURL" json:"faceURL,omitempty"`
 	OwnerUserID            string   `protobuf:"bytes,6,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
-	CreateTime             uint32   `protobuf:"varint,7,opt,name=createTime" json:"createTime,omitempty"`
+	CreateTime             int64    `protobuf:"varint,7,opt,name=createTime" json:"createTime,omitempty"`
 	MemberCount            uint32   `protobuf:"varint,8,opt,name=memberCount" json:"memberCount,omitempty"`
 	Ex                     string   `protobuf:"bytes,9,opt,name=ex" json:"ex,omitempty"`
 	Status                 int32    `protobuf:"varint,10,opt,name=status" json:"status,omitempty"`
@@ -90,7 +90,7 @@ type GroupInfo struct {
 	NeedVerification       int32    `protobuf:"varint,13,opt,name=needVerification" json:"needVerification,omitempty"`
 	LookMemberInfo         int32    `protobuf:"varint,14,opt,name=lookMemberInfo" json:"lookMemberInfo,omitempty"`
 	ApplyMemberFriend      int32    `protobuf:"varint,15,opt,name=applyMemberFriend" json:"applyMemberFriend,omitempty"`
-	NotificationUpdateTime uint32   `protobuf:"varint,16,opt,name=notificationUpdateTime" json:"notificationUpdateTime,omitempty"`
+	NotificationUpdateTime int64    `protobuf:"varint,16,opt,name=notificationUpdateTime" json:"notificationUpdateTime,omitempty"`
 	NotificationUserID     string   `protobuf:"bytes,17,opt,name=notificationUserID" json:"notificationUserID,omitempty"`
 	XXX_NoUnkeyedLiteral   struct{} `json:"-"`
 	XXX_unrecognized       []byte   `json:"-"`
