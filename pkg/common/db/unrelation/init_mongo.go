@@ -14,7 +14,7 @@ import (
 )
 
 type Mongo struct {
-	DB *mongo.Database
+	DB *mongo.Client
 }
 
 func (m *Mongo) InitMongo() {
@@ -54,7 +54,7 @@ func (m *Mongo) InitMongo() {
 			panic(err.Error() + " mongo.Connect failed " + uri)
 		}
 	}
-	m.DB = mongoClient.Database(config.Config.Mongo.DBDatabase)
+	m.DB = mongoClient
 }
 
 func (m *Mongo) CreateTagIndex() {

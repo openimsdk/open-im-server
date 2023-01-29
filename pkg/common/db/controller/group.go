@@ -27,7 +27,7 @@ type GroupController struct {
 	database DataBase
 }
 
-func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Database) GroupInterface {
+func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Client) GroupInterface {
 	groupController := &GroupController{database: newGroupDatabase(db, rdb, mgoDB)}
 	return groupController
 }
@@ -69,19 +69,22 @@ type GroupDataBase struct {
 	groupDB        *relation.Group
 	groupMemberDB  *relation.GroupMember
 	groupRequestDB *relation.GroupRequest
+	db             *gorm.DB
 
 	cache   *cache.GroupCache
 	mongoDB *unrelation.SuperGroupMgoDB
 }
 
-func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Database) DataBase {
+func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Client) DataBase {
 	groupDB := relation.NewGroupDB(db)
 	groupMemberDB := relation.NewGroupMemberDB(db)
 	groupRequestDB := relation.NewGroupRequest(db)
+	newDB := db
 	database := &GroupDataBase{
 		groupDB:        groupDB,
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
+		db:             newDB,
 		cache: cache.NewGroupCache(rdb, groupDB, groupMemberDB, groupRequestDB, rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,
@@ -118,7 +121,7 @@ func (g *GroupDataBase) TakeGroupByID(ctx context.Context, groupID string) (grou
 }
 
 func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) error {
-	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
 		if err := g.groupDB.Update(ctx, groups, tx); err != nil {
 			return err
 		}
@@ -134,7 +137,22 @@ func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) er
 }
 
 func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error {
-	return g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDList, memberNumCount, g.cache.DelJoinedSuperGroupIDs)
+	sess, err := g.mongoDB.MgoClient.StartSession()
+	if err != nil {
+		return err
+	}
+	defer sess.EndSession(ctx)
+	sCtx := mongo.NewSessionContext(ctx, sess)
+	if err = g.mongoDB.CreateSuperGroup(sCtx, groupID, initMemberIDList, memberNumCount); err != nil {
+		_ = sess.AbortTransaction(ctx)
+		return err
+	}
+
+	if err = g.cache.DelJoinedSuperGroupIDs(ctx, initMemberIDList); err != nil {
+		_ = sess.AbortTransaction(ctx)
+		return err
+	}
+	return sess.CommitTransaction(ctx)
 }
 
 func (g *GroupDataBase) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
