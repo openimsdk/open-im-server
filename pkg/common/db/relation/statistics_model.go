@@ -46,7 +46,7 @@ func (s *Statistics) GetTotalUserNumByDate(to time.Time) (num int64, err error) 
 	return num, err
 }
 
-func (s *Statistics) GetPrivateMessageNum(from, to time.Time) (num int64, err error) {
+func (s *Statistics) GetSingleChatMessageNum(from, to time.Time) (num int64, err error) {
 	err = s.getChatLogModel().Where("send_time >= ? and send_time <= ? and session_type = ?", from, to, constant.SingleChatType).Count(&num).Error
 	return num, err
 }
@@ -71,18 +71,18 @@ func (s *Statistics) GetGroupNum(to time.Time) (num int64, err error) {
 	return num, err
 }
 
-type activeGroup struct {
+type ActiveGroup struct {
 	Name       string
-	Id         string `gorm:"column:recv_id"`
+	ID         string `gorm:"column:recv_id"`
 	MessageNum int    `gorm:"column:message_num"`
 }
 
-func (s *Statistics) GetActiveGroups(from, to time.Time, limit int) ([]*activeGroup, error) {
-	var activeGroups []*activeGroup
+func (s *Statistics) GetActiveGroups(from, to time.Time, limit int) ([]*ActiveGroup, error) {
+	var activeGroups []*ActiveGroup
 	err := s.getChatLogModel().Select("recv_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type in (?)", from, to, []int{constant.GroupChatType, constant.SuperGroupChatType}).Group("recv_id").Limit(limit).Order("message_num DESC").Find(&activeGroups).Error
 	for _, activeGroup := range activeGroups {
 		group := Group{
-			GroupID: activeGroup.Id,
+			GroupID: activeGroup.ID,
 		}
 		s.getGroupModel().Where("group_id= ? ", group.GroupID).Find(&group)
 		activeGroup.Name = group.GroupName
@@ -90,13 +90,13 @@ func (s *Statistics) GetActiveGroups(from, to time.Time, limit int) ([]*activeGr
 	return activeGroups, err
 }
 
-type activeUser struct {
+type ActiveUser struct {
 	Name       string
 	ID         string `gorm:"column:send_id"`
 	MessageNum int    `gorm:"column:message_num"`
 }
 
-func (s *Statistics) GetActiveUsers(from, to time.Time, limit int) (activeUsers []*activeUser, err error) {
+func (s *Statistics) GetActiveUsers(from, to time.Time, limit int) (activeUsers []*ActiveUser, err error) {
 	err = s.getChatLogModel().Select("send_id, count(*) as message_num").Where("send_time >= ? and send_time <= ? and session_type in (?)", from, to, []int{constant.SingleChatType, constant.GroupChatType, constant.SuperGroupChatType}).Group("send_id").Limit(limit).Order("message_num DESC").Find(&activeUsers).Error
 	for _, activeUser := range activeUsers {
 		user := User{

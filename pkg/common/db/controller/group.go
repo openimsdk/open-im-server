@@ -26,7 +26,7 @@ type GroupInterface interface {
 }
 
 type GroupController struct {
-	database DataBase
+	database GroupDataBaseInterface
 }
 
 func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Client) GroupInterface {
@@ -58,16 +58,10 @@ func (g *GroupController) CreateSuperGroup(ctx context.Context, groupID string, 
 	return g.database.CreateSuperGroup(ctx, groupID, initMemberIDList)
 }
 
-func (g *GroupController) GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error) {
-	return g.database.GetJoinedGroupList(ctx, userID)
-}
-
-type DataBase interface {
+type GroupDataBaseInterface interface {
 	FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error)
 	CreateGroup(ctx context.Context, groups []*relation.Group, groupMember []*relation.GroupMember) error
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
-	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error)
-
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
@@ -83,7 +77,7 @@ type GroupDataBase struct {
 	mongoDB *unrelation.SuperGroupMgoDB
 }
 
-func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Client) DataBase {
+func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Client) GroupDataBaseInterface {
 	groupDB := relation.NewGroupDB(db)
 	groupMemberDB := relation.NewGroupMemberDB(db)
 	groupRequestDB := relation.NewGroupRequest(db)

@@ -92,7 +92,6 @@ message DateNumList {
 
 message GetMessageStatisticsReq {
     StatisticsReq StatisticsReq = 1;
-    string OperationID = 2;
 }
 
 
@@ -101,12 +100,10 @@ message GetMessageStatisticsResp {
     int32 GroupMessageNum = 2;
     repeated DateNumList PrivateMessageNumList = 3;
     repeated DateNumList GroupMessageNumList = 4;
-    CommonResp commonResp = 5;
 }
 
 message GetGroupStatisticsReq {
     StatisticsReq StatisticsReq = 1;
-    string OperationID = 2;
 }
 
 
@@ -115,7 +112,6 @@ message GetGroupStatisticsResp {
     int32 TotalGroupNum = 2;
     repeated DateNumList IncreaseGroupNumList = 3;
     repeated DateNumList TotalGroupNumList = 4;
-    CommonResp commonResp = 5;
 }
 
 message GetUserStatisticsReq {
