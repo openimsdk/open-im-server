@@ -124,55 +124,6 @@ message GetUsersResp{
   repeated server_api_params.UserInfo users = 2;
 }
 
-message AddUserReq{
-  server_api_params.UserInfo userInfo = 1;
-  string operationID = 2;
-}
-
-message AddUserResp{
-}
-
-
-message BlockUserReq{
-  string userID = 1;
-  string endDisableTime = 2;
-  string operationID = 3;
-  string opUserID = 4;
-}
-
-message BlockUserResp{
-  CommonResp  CommonResp = 1;
-}
-
-message UnBlockUserReq{
-  string userID = 1;
-  string operationID = 2;
-  string opUserID = 3;
-}
-
-message UnBlockUserResp{
-  CommonResp  CommonResp = 1;
-}
-
-message GetBlockUsersReq{
-  server_api_params.RequestPagination pagination = 1;
-  string operationID = 2;
-  string userID = 3;
-  int32 totalBlockUserNum = 4;
-}
-
-message BlockUser {
-  server_api_params.UserInfo UserInfo = 1;
-  string BeginDisableTime = 2;
-  string EndDisableTime = 3;
-}
-
-message GetBlockUsersResp{
-  repeated BlockUser BlockUsers = 2;
-  server_api_params.ResponsePagination Pagination = 3;
-  int32 UserNums = 4;
-}
-
 
 service user {
   //获取指定的用户信息 全字段

@@ -5,11 +5,6 @@ package server_api_params;
 
 
 ////////////////////////////////base///////////////////////////////
-message CommonResp{
-  int32 errCode = 1;
-  string errMsg = 2;
-  string detailErrMsg =3;
-}
 
 message GroupInfo{
   string groupID = 1;
@@ -562,7 +557,7 @@ message InvitationInfo  {
     string mediaType = 7;
     int32 platformID = 8;
     int32 sessionType = 9;
-  int64 initiateTime = 10;
+  int32 initiateTime = 10;
     repeated string busyLineUserIDList = 11;
 }
 
