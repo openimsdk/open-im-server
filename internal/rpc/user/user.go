@@ -4,9 +4,8 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
-	rocksCache "Open_IM/pkg/common/db/rocks_cache"
+	"Open_IM/pkg/common/db/controller"
+	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
@@ -24,6 +23,7 @@ import (
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
+	utils2 "Open_IM/internal/utils"
 	"google.golang.org/grpc"
 	"gorm.io/gorm"
 )
@@ -33,16 +33,31 @@ type userServer struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
+	controller.UserInterface
 }
 
 func NewUserServer(port int) *userServer {
 	log.NewPrivateLog(constant.LogFileName)
-	return &userServer{
+	u := userServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImUserName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
+	//mysql init
+	var mysql relation.Mysql
+	var model relation.User
+	err := mysql.InitConn().AutoMigrateModel(&model)
+	if err != nil {
+		panic("db init err:" + err.Error())
+	}
+	if mysql.GormConn() != nil {
+		model.DB = mysql.GormConn()
+	} else {
+		panic("db init err:" + "conn is nil")
+	}
+	u.UserInterface = controller.NewUserController(model.DB)
+	return &u
 }
 
 func (s *userServer) Run() {
@@ -124,25 +139,19 @@ func syncPeerUserConversation(conversation *pbConversation.Conversation, operati
 }
 
 func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq) (*pbUser.GetUserInfoResp, error) {
-	log.NewInfo(req.OperationID, "GetUserInfo args ", req.String())
-	var userInfoList []*sdkws.UserInfo
-	if len(req.UserIDList) > 0 {
-		for _, userID := range req.UserIDList {
-			var userInfo sdkws.UserInfo
-			user, err := rocksCache.GetUserInfoFromCache(userID)
-			if err != nil {
-				log.NewError(req.OperationID, "GetUserByUserID failed ", err.Error(), userID)
-				continue
-			}
-			utils.CopyStructFields(&userInfo, user)
-			userInfo.BirthStr = utils.TimeToString(user.Birth)
-			userInfoList = append(userInfoList, &userInfo)
-		}
-	} else {
-		return &pbUser.GetUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: constant.ErrArgs.ErrMsg}}, nil
+	resp := &pbUser.GetUserInfoResp{}
+	users, err := s.Find(ctx, req.UserIDList)
+	if err != nil {
+		return nil, err
 	}
-	log.NewInfo(req.OperationID, "GetUserInfo rpc return ", pbUser.GetUserInfoResp{CommonResp: &pbUser.CommonResp{}, UserInfoList: userInfoList})
-	return &pbUser.GetUserInfoResp{CommonResp: &pbUser.CommonResp{}, UserInfoList: userInfoList}, nil
+	for _, v := range users {
+		n, err := utils2.NewDBUser(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		resp.UserInfoList = append(resp.UserInfoList, n)
+	}
+	return resp, nil
 }
 
 func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.BatchSetConversationsReq) (*pbUser.BatchSetConversationsResp, error) {
@@ -395,41 +404,32 @@ func (s *userServer) AccountCheck(_ context.Context, req *pbUser.AccountCheckReq
 }
 
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (*pbUser.UpdateUserInfoResp, error) {
-	log.NewInfo(req.OperationID, "UpdateUserInfo args ", req.String())
-	if !token_verify.CheckAccess(req.OpUserID, req.UserInfo.UserID) {
-		log.NewError(req.OperationID, "CheckAccess false ", req.OpUserID, req.UserInfo.UserID)
-		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
+	resp := pbUser.UpdateUserInfoResp{}
+	err := token_verify.CheckAccessV3(ctx, req.UserInfo.UserID)
+	if err != nil {
+		return nil, err
 	}
 
 	oldNickname := ""
 	if req.UserInfo.Nickname != "" {
-		u, err := imdb.GetUserByUserID(req.UserInfo.UserID)
-		if err == nil {
-			oldNickname = u.Nickname
-		}
-	}
-	var user imdb.User
-	utils.CopyStructFields(&user, req.UserInfo)
-
-	if req.UserInfo.BirthStr != "" {
-		time, err := utils.TimeStringToTime(req.UserInfo.BirthStr)
+		u, err := s.Take(ctx, req.UserInfo.UserID)
 		if err != nil {
-			log.NewError(req.OperationID, "TimeStringToTime failed ", err.Error(), req.UserInfo.BirthStr)
-			return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: "TimeStringToTime failed:" + err.Error()}}, nil
+			return nil, err
 		}
-		user.Birth = time
+		oldNickname = u.Nickname
 	}
 
-	err := imdb.UpdateUserInfo(user)
+	user, err := utils2.NewPBUser(req.UserInfo).Convert()
 	if err != nil {
-		log.NewError(req.OperationID, "UpdateUserInfo failed ", err.Error(), user)
-		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		return nil, err
 	}
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImFriendName, req.OperationID)
-	if etcdConn == nil {
-		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
-		log.NewError(req.OperationID, errMsg)
-		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrInternal.ErrCode, ErrMsg: errMsg}}, nil
+	err = s.Update(ctx, []*relation.User{user})
+	if err != nil {
+		return nil, err
+	}
+	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
+	if err != nil {
+		return nil, err
 	}
 
 	client := pbFriend.NewFriendClient(etcdConn)
@@ -642,86 +642,5 @@ func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUs
 		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
-	return resp, nil
-}
-
-func (s *userServer) BlockUser(ctx context.Context, req *pbUser.BlockUserReq) (*pbUser.BlockUserResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.BlockUserResp{CommonResp: &pbUser.CommonResp{}}
-	err := imdb.BlockUser(req.UserID, req.EndDisableTime)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "BlockUser", err.Error(), req.UserID, req.EndDisableTime)
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
-}
-
-func (s *userServer) UnBlockUser(ctx context.Context, req *pbUser.UnBlockUserReq) (*pbUser.UnBlockUserResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.UnBlockUserResp{CommonResp: &pbUser.CommonResp{}}
-	err := imdb.UnBlockUser(req.UserID)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "unBlockUser", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
-}
-
-func (s *userServer) GetBlockUsers(ctx context.Context, req *pbUser.GetBlockUsersReq) (resp *pbUser.GetBlockUsersResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbUser.GetBlockUsersResp{CommonResp: &pbUser.CommonResp{}, Pagination: &sdkws.ResponsePagination{ShowNumber: req.Pagination.ShowNumber, CurrentPage: req.Pagination.PageNumber}}
-	var blockUsers []imdb.BlockUserInfo
-	if req.UserID != "" {
-		blockUser, err := imdb.GetBlockUserByID(req.UserID)
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return resp, nil
-			}
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserID)
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-		blockUsers = append(blockUsers, blockUser)
-		resp.UserNums = 1
-	} else {
-		blockUsers, err = imdb.GetBlockUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
-		if err != nil {
-			log.Error(req.OperationID, utils.GetSelfFuncName(), "GetBlockUsers", err.Error(), req.Pagination.ShowNumber, req.Pagination.PageNumber)
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-
-		nums, err := imdb.GetBlockUsersNumCount()
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetBlockUsersNumCount failed", err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-		resp.UserNums = nums
-	}
-	for _, v := range blockUsers {
-		resp.BlockUsers = append(resp.BlockUsers, &pbUser.BlockUser{
-			UserInfo: &sdkws.UserInfo{
-				FaceURL:     v.User.FaceURL,
-				Nickname:    v.User.Nickname,
-				UserID:      v.User.UserID,
-				PhoneNumber: v.User.PhoneNumber,
-				Email:       v.User.Email,
-				Gender:      v.User.Gender,
-			},
-			BeginDisableTime: (v.BeginDisableTime).String(),
-			EndDisableTime:   (v.EndDisableTime).String(),
-		})
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp)
 	return resp, nil
 }

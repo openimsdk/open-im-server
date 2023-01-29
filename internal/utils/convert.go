@@ -1,7 +1,7 @@
 package utils
 
 import (
-	imdb "Open_IM/pkg/common/db/mysql"
+	imdb "Open_IM/pkg/common/db/relation"
 	sdk "Open_IM/pkg/proto/sdk_ws"
 	utils2 "Open_IM/pkg/utils"
 	utils "github.com/OpenIMSDK/open_utils"
@@ -210,8 +210,16 @@ type DBUser struct {
 	*imdb.User
 }
 
+func NewDBUser(user *imdb.User) *DBUser {
+	return &DBUser{User: user}
+}
+
 type PBUser struct {
 	*sdk.UserInfo
+}
+
+func NewPBUser(userInfo *sdk.UserInfo) *PBUser {
+	return &PBUser{UserInfo: userInfo}
 }
 
 func (pb *PBUser) Convert() (*imdb.User, error) {
