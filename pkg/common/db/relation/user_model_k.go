@@ -71,10 +71,37 @@ func (u *User) Take(ctx context.Context, userID string) (user *User, err error) 
 	return user, err
 }
 
-func (u *User) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*User, err error) {
+func (u *User) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*User, count int64, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users)
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
 	}()
-	err = u.DB.Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
-	return users, utils.Wrap(err, "")
+	err = u.DB.Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * pageNumber)).Find(&users).Error
+	if err != nil {
+		return nil, 0, utils.Wrap(err, "")
+	}
+	return users, count, utils.Wrap(u.DB.Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error, "")
+}
+
+func (u *User) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*User, count int64, err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "content", content, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
+	}()
+	db := u.DB.Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
+	if err := db.Count(&count).Error; err != nil {
+		return nil, 0, utils.Wrap(err, "")
+	}
+	err = utils.Wrap(db.Limit(int(showNumber)).Offset(int(showNumber*pageNumber)).Find(&users).Error, "")
+	return
+}
+
+func (u *User) Get(ctx context.Context, showNumber, pageNumber int32) (users []*User, count int64, err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
+	}()
+	err = u.DB.Model(u).Count(&count).Error
+	if err != nil {
+		return nil, 0, utils.Wrap(err, "")
+	}
+	err = utils.Wrap(u.DB.Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&users).Error, "")
+	return
 }

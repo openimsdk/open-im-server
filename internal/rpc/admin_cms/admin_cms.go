@@ -3,7 +3,6 @@ package admin_cms
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
@@ -300,32 +299,23 @@ func (s *adminCMSServer) GetChatLogs(_ context.Context, req *pbAdminCMS.GetChatL
 }
 
 func (s *adminCMSServer) GetActiveGroup(_ context.Context, req *pbAdminCMS.GetActiveGroupReq) (*pbAdminCMS.GetActiveGroupResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req", req.String())
-	resp := &pbAdminCMS.GetActiveGroupResp{CommonResp: &pbAdminCMS.CommonResp{}}
+	resp := &pbAdminCMS.GetActiveGroupResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "ParseTimeFromTo failed", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+		return resp, err
 	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "time: ", fromTime, toTime)
 	activeGroups, err := imdb.GetActiveGroups(fromTime, toTime, 12)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetActiveGroups failed", err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+		return resp, err
 	}
 	for _, activeGroup := range activeGroups {
 		resp.Groups = append(resp.Groups,
 			&pbAdminCMS.GroupResp{
 				GroupName:  activeGroup.Name,
-				GroupId:    activeGroup.Id,
+				GroupID:    activeGroup.Id,
 				MessageNum: int32(activeGroup.MessageNum),
 			})
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), resp.String())
 	return resp, nil
 }
 
@@ -516,9 +506,9 @@ func (s *adminCMSServer) GetMessageStatistics(_ context.Context, req *pbAdminCMS
 		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
 	}
-	privateMessageNum, err := imdb.GetPrivateMessageNum(fromTime, toTime.Add(time.Hour*24))
+	privateMessageNum, err := imdb.GetSingleChatMessageNum(fromTime, toTime.Add(time.Hour*24))
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetPrivateMessageNum failed", err.Error())
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSingleChatMessageNum failed", err.Error())
 		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
 		resp.CommonResp.ErrMsg = err.Error()
 		return resp, nil
@@ -542,7 +532,7 @@ func (s *adminCMSServer) GetMessageStatistics(_ context.Context, req *pbAdminCMS
 		go func(wg *sync.WaitGroup, index int, v [2]time.Time) {
 			defer wg.Done()
 
-			num, err := imdb.GetPrivateMessageNum(v[0], v[1])
+			num, err := imdb.GetSingleChatMessageNum(v[0], v[1])
 			if err != nil {
 				log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetIncreaseGroupNum", v, err.Error())
 			}

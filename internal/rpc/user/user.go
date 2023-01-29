@@ -13,11 +13,9 @@ import (
 	"Open_IM/pkg/getcdv3"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbFriend "Open_IM/pkg/proto/friend"
-	sdkws "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	"errors"
 	"net"
 	"strconv"
 	"strings"
@@ -26,7 +24,6 @@ import (
 
 	utils2 "Open_IM/internal/utils"
 	"google.golang.org/grpc"
-	"gorm.io/gorm"
 )
 
 type userServer struct {
@@ -559,74 +556,48 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	}
 
 	if req.UserName != "" {
-		usersDB, err = imdb.GetUserByName(req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		usersDB, total, err := s.GetByName(ctx, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
-			return resp, nil
+			return nil, err
 		}
-		resp.TotalNums, err = imdb.GetUsersCount(req.UserName)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserName, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
+		resp.Total = int32(total)
+		for _, v := range usersDB {
+			u1, err := utils2.NewDBUser(v).Convert()
+			if err != nil {
+				return nil, err
+			}
+			resp.Users = append(resp.Users, u1)
 		}
-
+		return &resp, nil
 	} else if req.Content != "" {
-		var count int64
-		usersDB, count, err = imdb.GetUsersByNameAndID(req.Content, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		usersDB, total, err := s.GetByNameAndID(ctx, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
+			return nil, err
 		}
-		resp.TotalNums = int32(count)
+		resp.Total = int32(total)
+		for _, v := range usersDB {
+			u1, err := utils2.NewDBUser(v).Convert()
+			if err != nil {
+				return nil, err
+			}
+			resp.Users = append(resp.Users, u1)
+		}
+		return &resp, nil
 	}
 
-	else {
-		usersDB, err = imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-		resp.TotalNums, err = imdb.GetTotalUserNum()
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-	}
-	for _, userDB := range usersDB {
-		var user sdkws.UserInfo
-		utils.CopyStructFields(&user, userDB)
-		user.CreateTime = uint32(userDB.CreateTime.Unix())
-		user.BirthStr = utils.TimeToString(userDB.Birth)
-		resp.UserList = append(resp.UserList, &pbUser.CmsUser{User: &user})
-	}
-
-	var userIDList []string
-	for _, v := range resp.UserList {
-		userIDList = append(userIDList, v.User.UserID)
-	}
-	isBlockUser, err := imdb.UsersIsBlock(userIDList)
+	usersDB, total, err := s.Get(ctx, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userIDList)
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+		return nil, err
 	}
 
-	for _, v := range resp.UserList {
-		if utils.IsContain(v.User.UserID, isBlockUser) {
-			v.IsBlock = true
+	resp.Total = int32(total)
+
+	for _, userDB := range usersDB {
+		u, err := utils2.NewDBUser(userDB).Convert()
+		if err != nil {
+			return nil, err
 		}
+		resp.Users = append(resp.Users, u)
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
+	return &resp, nil
 }
