@@ -60,16 +60,21 @@ type DataBase interface {
 }
 
 type GroupDataBase struct {
-	sqlDB   *relation.Group
-	cache   *cache.GroupCache
-	mongoDB *unrelation.SuperGroupMgoDB
+	groupDB       *relation.Group
+	groupMemberDB *relation.GroupMember
+	cache         *cache.GroupCache
+	db            *gorm.DB
+	mongoDB       *unrelation.SuperGroupMgoDB
 }
 
 func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Database) DataBase {
-	sqlDB := relation.NewGroupDB(db)
+	group := relation.NewGroupDB(db)
+	groupMember := relation.NewGroupMemberDB(db)
 	database := &GroupDataBase{
-		sqlDB: sqlDB,
-		cache: cache.NewGroupCache(rdb, sqlDB, rockscache.Options{
+		groupDB:       group,
+		groupMemberDB: groupMember,
+		db:            db,
+		cache: cache.NewGroupCache(rdb, group, rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,
 			DisableCacheDelete:     false,
@@ -85,12 +90,12 @@ func (g *GroupDataBase) FindGroupsByID(ctx context.Context, groupIDs []string) (
 }
 
 func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation.Group) error {
-	return g.sqlDB.Create(ctx, groups)
+	return g.groupDB.Create(ctx, groups)
 }
 
 func (g *GroupDataBase) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
-	return g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
-		if err := g.sqlDB.Delete(ctx, groupIDs, tx); err != nil {
+	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupDB.Delete(ctx, groupIDs, tx); err != nil {
 			return err
 		}
 		if err := g.cache.DelGroupsInfoFromCache(ctx, groupIDs); err != nil {
@@ -105,8 +110,8 @@ func (g *GroupDataBase) TakeGroupByID(ctx context.Context, groupID string) (grou
 }
 
 func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) error {
-	return g.sqlDB.DB.Transaction(func(tx *gorm.DB) error {
-		if err := g.sqlDB.Update(ctx, groups, tx); err != nil {
+	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupDB.Update(ctx, groups, tx); err != nil {
 			return err
 		}
 		var groupIDs []string
@@ -122,4 +127,16 @@ func (g *GroupDataBase) Update(ctx context.Context, groups []*relation.Group) er
 
 func (g *GroupDataBase) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
 	return g.mongoDB.GetSuperGroup(ctx, groupID)
+}
+
+func (g *GroupDataBase) CreateGroupAndMember(ctx context.Context, groups []*relation.Group, groupMember []*relation.GroupMember) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupDB.Create(ctx, groups, tx); err != nil {
+			return err
+		}
+		if err := g.groupMemberDB.Create(ctx, groupMember, tx); err != nil {
+			return err
+		}
+		return nil
+	})
 }

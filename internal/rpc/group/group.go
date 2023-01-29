@@ -166,6 +166,9 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
+	var groupInfo relation.Group
+	utils.CopyStructFields(&groupInfo, req.GroupInfo)
+
 	groupInfo, err := (&cp.PBGroup{req.GroupInfo}).Convert()
 	groupInfo.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
 	if req.GroupInfo.GroupType != constant.SuperGroup {
