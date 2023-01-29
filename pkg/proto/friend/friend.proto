@@ -68,7 +68,7 @@ message RemoveBlacklistResp{
 
 message GetBlacklistReq{
   string userID = 1;
-  server_api_params.RequestPagination pagination = 1;
+  server_api_params.RequestPagination pagination = 2;
 }
 message GetBlacklistResp{
   repeated server_api_params.PublicUserInfo BlackUserInfoList = 1;
@@ -120,7 +120,7 @@ message SetFriendRemarkResp{
 }
 
 message GetFromFriendApplyListReq{
-  string userID = 2;
+  string userID = 1;
   server_api_params.RequestPagination pagination = 2;
 }
 message GetFromFriendApplyListResp{
