@@ -281,7 +281,7 @@ func (pb *PBUser) Convert() (*relation.User, error) {
 func (db *DBUser) Convert() (*sdk.UserInfo, error) {
 	dst := &sdk.UserInfo{}
 	utils.CopyStructFields(dst, db)
-	dst.CreateTime = uint32(db.CreateTime.Unix())
+	dst.CreateTime = db.CreateTime.Unix()
 	dst.Birthday = db.Birth.Unix()
 	return dst, nil
 }
