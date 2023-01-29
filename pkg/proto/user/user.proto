@@ -132,28 +132,6 @@ message AddUserReq{
 message AddUserResp{
 }
 
-
-message BlockUserReq{
-  string userID = 1;
-  string endDisableTime = 2;
-  string operationID = 3;
-  string opUserID = 4;
-}
-
-message BlockUserResp{
-  CommonResp  CommonResp = 1;
-}
-
-message UnBlockUserReq{
-  string userID = 1;
-  string operationID = 2;
-  string opUserID = 3;
-}
-
-message UnBlockUserResp{
-  CommonResp  CommonResp = 1;
-}
-
 message GetBlockUsersReq{
   server_api_params.RequestPagination pagination = 1;
   string operationID = 2;
