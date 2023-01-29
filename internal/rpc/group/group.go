@@ -388,12 +388,10 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (*pbGroup.GetGroupMemberListResp, error) {
 	resp := &pbGroup.GetGroupMemberListResp{}
-
-	memberList, err := relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
+	memberList, err := s.GroupInterface.GetGroupMemberFilterList(ctx, req.GroupID, req.Filter, req.NextSeq, 30)
 	if err != nil {
 		return nil, err
 	}
-
 	for _, v := range memberList {
 		var node open_im_sdk.GroupMemberFullInfo
 		utils.CopyStructFields(&node, &v)
@@ -543,15 +541,14 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 
 func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (*pbGroup.GetGroupMembersInfoResp, error) {
 	resp := &pbGroup.GetGroupMembersInfoResp{}
-	resp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
-	for _, userID := range req.MemberList {
-		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, userID)
-		if err != nil {
-			return nil, err
-		}
+	members, err := s.GroupInterface.GetGroupMemberListByUserID(ctx, req.GroupID, req.MemberList)
+	if err != nil {
+		return nil, err
+	}
+	for _, member := range members {
 		var memberNode open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(&memberNode, groupMember)
-		memberNode.JoinTime = int32(groupMember.JoinTime.Unix())
+		utils.CopyStructFields(&memberNode, member)
+		memberNode.JoinTime = member.JoinTime.UnixMilli()
 		resp.MemberList = append(resp.MemberList, &memberNode)
 	}
 	return resp, nil
