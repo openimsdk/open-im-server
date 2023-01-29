@@ -138,9 +138,9 @@ func syncPeerUserConversation(conversation *pbConversation.Conversation, operati
 	return nil
 }
 
-func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq) (*pbUser.GetUserInfoResp, error) {
-	resp := &pbUser.GetUserInfoResp{}
-	users, err := s.Find(ctx, req.UserIDList)
+func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoReq) (*pbUser.GetUsersInfoResp, error) {
+	resp := &pbUser.GetUsersInfoResp{}
+	users, err := s.Find(ctx, req.UserIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (s *userServer) GetUserInfo(ctx context.Context, req *pbUser.GetUserInfoReq
 		if err != nil {
 			return nil, err
 		}
-		resp.UserInfoList = append(resp.UserInfoList, n)
+		resp.UsersInfo = append(resp.UsersInfo, n)
 	}
 	return resp, nil
 }

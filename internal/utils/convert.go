@@ -23,8 +23,16 @@ type DBFriend struct {
 	*relation.Friend
 }
 
+func NewDBFriend(friend *relation.Friend) *DBFriend {
+	return &DBFriend{Friend: friend}
+}
+
 type PBFriend struct {
 	*sdk.FriendInfo
+}
+
+func NewPBFriend(friendInfo *sdk.FriendInfo) *PBFriend {
+	return &PBFriend{FriendInfo: friendInfo}
 }
 
 func (db *DBFriend) convert() (*sdk.FriendInfo, error) {
@@ -53,8 +61,16 @@ type DBFriendRequest struct {
 	*relation.FriendRequest
 }
 
+func NewDBFriendRequest(friendRequest *relation.FriendRequest) *DBFriendRequest {
+	return &DBFriendRequest{FriendRequest: friendRequest}
+}
+
 type PBFriendRequest struct {
 	*sdk.FriendRequest
+}
+
+func NewPBFriendRequest(friendRequest *sdk.FriendRequest) *PBFriendRequest {
+	return &PBFriendRequest{FriendRequest: friendRequest}
 }
 
 func (pb *PBFriendRequest) Convert() (*relation.FriendRequest, error) {
@@ -90,8 +106,16 @@ type DBBlack struct {
 	*relation.Black
 }
 
+func NewDBBlack(black *relation.Black) *DBBlack {
+	return &DBBlack{Black: black}
+}
+
 type PBBlack struct {
 	*sdk.BlackInfo
+}
+
+func NewPBBlack(blackInfo *sdk.BlackInfo) *PBBlack {
+	return &PBBlack{BlackInfo: blackInfo}
 }
 
 func (pb *PBBlack) Convert() (*relation.Black, error) {
@@ -116,8 +140,16 @@ type DBGroup struct {
 	*relation.Group
 }
 
+func NewDBGroup(group *relation.Group) *DBGroup {
+	return &DBGroup{Group: group}
+}
+
 type PBGroup struct {
 	*sdk.GroupInfo
+}
+
+func NewPBGroup(groupInfo *sdk.GroupInfo) *PBGroup {
+	return &PBGroup{GroupInfo: groupInfo}
 }
 
 func (pb *PBGroup) Convert() *relation.Group {
@@ -151,8 +183,16 @@ type DBGroupMember struct {
 	*relation.GroupMember
 }
 
+func NewDBGroupMember(groupMember *relation.GroupMember) *DBGroupMember {
+	return &DBGroupMember{GroupMember: groupMember}
+}
+
 type PBGroupMember struct {
 	*sdk.GroupMemberFullInfo
+}
+
+func NewPBGroupMember(groupMemberFullInfo *sdk.GroupMemberFullInfo) *PBGroupMember {
+	return &PBGroupMember{GroupMemberFullInfo: groupMemberFullInfo}
 }
 
 func (pb *PBGroupMember) Convert() (*relation.GroupMember, error) {
@@ -187,8 +227,16 @@ type DBGroupRequest struct {
 	*relation.GroupRequest
 }
 
+func NewDBGroupRequest(groupRequest *relation.GroupRequest) *DBGroupRequest {
+	return &DBGroupRequest{GroupRequest: groupRequest}
+}
+
 type PBGroupRequest struct {
 	*sdk.GroupRequest
+}
+
+func NewPBGroupRequest(groupRequest *sdk.GroupRequest) *PBGroupRequest {
+	return &PBGroupRequest{GroupRequest: groupRequest}
 }
 
 func (pb *PBGroupRequest) Convert() (*relation.GroupRequest, error) {
@@ -210,8 +258,16 @@ type DBUser struct {
 	*relation.User
 }
 
+func NewDBUser(user *relation.User) *DBUser {
+	return &DBUser{User: user}
+}
+
 type PBUser struct {
 	*sdk.UserInfo
+}
+
+func NewPBUser(userInfo *sdk.UserInfo) *PBUser {
+	return &PBUser{UserInfo: userInfo}
 }
 
 func (pb *PBUser) Convert() (*relation.User, error) {
