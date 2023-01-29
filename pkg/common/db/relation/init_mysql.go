@@ -87,7 +87,7 @@ func (w Writer) Printf(format string, args ...interface{}) {
 	fmt.Printf(format, args...)
 }
 
-func getDBConn(db *gorm.DB, tx ...*gorm.DB) *gorm.DB {
+func getDBConn(db *gorm.DB, tx []*gorm.DB) *gorm.DB {
 	if len(tx) > 0 {
 		return tx[0]
 	}

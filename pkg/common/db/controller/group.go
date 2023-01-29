@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/db/unrelation"
 	"context"
 	"github.com/dtm-labs/rockscache"
+	_ "github.com/dtm-labs/rockscache"
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
@@ -32,23 +33,23 @@ func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Dat
 }
 
 func (g *GroupController) FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
-	return g.database.Find(ctx, groupIDs)
+	return g.database.FindGroupsByID(ctx, groupIDs)
 }
 
 func (g *GroupController) CreateGroup(ctx context.Context, groups []*relation.Group) error {
-	return g.database.Create(ctx, groups)
+	return g.database.CreateGroup(ctx, groups)
 }
 
 func (g *GroupController) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
-	return g.database.Delete(ctx, groupIDs)
+	return g.database.DeleteGroupByIDs(ctx, groupIDs)
 }
 
 func (g *GroupController) TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error) {
-	return g.database.Take(ctx, groupID)
+	return g.database.TakeGroupByID(ctx, groupID)
 }
 
 func (g *GroupController) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
-	return g.database.GetSuperGroup(ctx, groupID)
+	return g.database.GetSuperGroupByID(ctx, groupID)
 }
 
 func (g *GroupController) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error {
@@ -56,11 +57,11 @@ func (g *GroupController) CreateSuperGroup(ctx context.Context, groupID string, 
 }
 
 type DataBase interface {
-	Find(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error)
-	Create(ctx context.Context, groups []*relation.Group) error
-	Delete(ctx context.Context, groupIDs []string) error
-	Take(ctx context.Context, groupID string) (group *relation.Group, err error)
-	GetSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
+	FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error)
+	CreateGroup(ctx context.Context, groups []*relation.Group) error
+	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
+	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
+	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string, memberNumCount int) error
 }
 
@@ -92,15 +93,15 @@ func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Datab
 	return database
 }
 
-func (g *GroupDataBase) Find(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
+func (g *GroupDataBase) FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
 	return g.cache.GetGroupsInfo(ctx, groupIDs)
 }
 
-func (g *GroupDataBase) Create(ctx context.Context, groups []*relation.Group) error {
+func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation.Group) error {
 	return g.groupDB.Create(ctx, groups)
 }
 
-func (g *GroupDataBase) Delete(ctx context.Context, groupIDs []string) error {
+func (g *GroupDataBase) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
 	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
 		if err := g.groupDB.Delete(ctx, groupIDs, tx); err != nil {
 			return err
@@ -112,7 +113,7 @@ func (g *GroupDataBase) Delete(ctx context.Context, groupIDs []string) error {
 	})
 }
 
-func (g *GroupDataBase) Take(ctx context.Context, groupID string) (group *relation.Group, err error) {
+func (g *GroupDataBase) TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error) {
 	return g.cache.GetGroupInfo(ctx, groupID)
 }
 
@@ -136,6 +137,6 @@ func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, in
 	return g.mongoDB.CreateSuperGroup(ctx, groupID, initMemberIDList, memberNumCount, g.cache.DelJoinedSuperGroupIDs)
 }
 
-func (g *GroupDataBase) GetSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
+func (g *GroupDataBase) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
 	return g.mongoDB.GetSuperGroup(ctx, groupID)
 }
