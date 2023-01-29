@@ -18,15 +18,71 @@ type GroupInterface interface {
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
 	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error)
+	GetGroupMemberList(ctx context.Context, groupID string) ([]*relation.GroupMember, error)
+	GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation.GroupMember, error)
+	GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation.GroupMember, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
 	GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
 	GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
+
+	CreateGroupMember(ctx context.Context, groupMember []*relation.GroupMember) error
+
+	CreateGroupRequest(ctx context.Context, requests []*relation.GroupRequest) error
+
 	//mongo
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
+	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
 }
 
+var _ GroupInterface = (*GroupController)(nil)
+
 type GroupController struct {
 	database GroupDataBaseInterface
+}
+
+func (g *GroupController) GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) GetGroupMemberList(ctx context.Context, groupID string) ([]*relation.GroupMember, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation.GroupMember, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation.GroupMember, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) CreateGroupMember(ctx context.Context, groupMember []*relation.GroupMember) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) CreateGroupRequest(ctx context.Context, requests []*relation.GroupRequest) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Client) GroupInterface {

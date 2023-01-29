@@ -5,7 +5,7 @@ import (
 	relation "Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/tools"
 	pbGroup "Open_IM/pkg/proto/group"
-	sdk "Open_IM/pkg/proto/sdk_ws"
+	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
 	"math/big"
@@ -40,8 +40,20 @@ func getDBGroupMember(ctx context.Context, groupID, userID string) (dbGroupMembe
 	return dbGroupMember, nil
 }
 
-func getUsersInfo(ctx context.Context, userIDs []string) ([]*sdk.UserInfo, error) {
+func getUsersInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.UserInfo, error) {
 	return nil, nil
+}
+
+func getUserMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.UserInfo, error) {
+	users, err := getUsersInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	userMap := make(map[string]*sdk_ws.UserInfo)
+	for i, user := range users {
+		userMap[user.UserID] = users[i]
+	}
+	return userMap, nil
 }
 
 func genGroupID(ctx context.Context, groupID string) string {

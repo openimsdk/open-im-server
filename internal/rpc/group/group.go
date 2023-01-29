@@ -25,12 +25,11 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"errors"
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"net"
 	"strconv"
 	"strings"
 	"time"
-
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -259,139 +258,128 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		groupNode.NotificationUpdateTime = group.NotificationUpdateTime.UnixMilli()
 		resp.GroupList = append(resp.GroupList, &groupNode)
 	}
-	resp.Total = uint32(len(resp.GroupList))
+	resp.Total = int32(len(resp.GroupList))
 	return resp, nil
 }
 
 func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.InviteUserToGroupReq) (*pbGroup.InviteUserToGroupResp, error) {
 	resp := &pbGroup.InviteUserToGroupResp{}
-	opUserID := tools.OpUserID(ctx)
-	if err := token_verify.CheckManagerUserID(ctx, opUserID); err != nil {
-		if err := relation.CheckIsExistGroupMember(ctx, req.GroupID, opUserID); err != nil {
-			return nil, err
-		}
+	if len(req.InvitedUserIDList) == 0 {
+		return nil, constant.ErrArgs.Wrap("user empty")
 	}
-	groupInfo, err := (*relation.Group)(nil).Take(ctx, req.GroupID)
+	if utils.IsDuplicateID(req.InvitedUserIDList) {
+		return nil, constant.ErrArgs.Wrap("userID duplicate")
+	}
+	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	if groupInfo.Status == constant.GroupStatusDismissed {
-		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
+	if group.Status == constant.GroupStatusDismissed {
+		return nil, constant.ErrDismissedAlready.Wrap()
 	}
-	if groupInfo.NeedVerification == constant.AllNeedVerification &&
-		!relation.IsGroupOwnerAdmin(req.GroupID, tools.OpUserID(ctx)) && !token_verify.IsManagerUserID(tools.OpUserID(ctx)) {
-		joinReq := pbGroup.JoinGroupReq{}
-		for _, v := range req.InvitedUserIDList {
-			var groupRequest relation.GroupRequest
-			groupRequest.UserID = v
-			groupRequest.GroupID = req.GroupID
-			groupRequest.JoinSource = constant.JoinByInvitation
-			groupRequest.InviterUserID = tools.OpUserID(ctx)
-			err = relation.InsertIntoGroupRequest(groupRequest)
-			if err != nil {
-				var resultNode pbGroup.Id2Result
-				resultNode.Result = -1
-				resultNode.UserID = v
-				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
-				continue
-			} else {
-				var resultNode pbGroup.Id2Result
-				resultNode.Result = 0
-				resultNode.UserID = v
-				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
-				joinReq.GroupID = req.GroupID
-				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
-				chat.JoinGroupApplicationNotification(ctx, &joinReq)
-			}
-		}
-		return resp, nil
-	}
-	if err := s.DelGroupAndUserCache(ctx, req.GroupID, req.InvitedUserIDList); err != nil {
+	members, err := s.GroupInterface.GetGroupMemberList(ctx, group.GroupID)
+	if err != nil {
 		return nil, err
 	}
-	//from User:  invite: applicant
-	//to user:  invite: invited
-	var okUserIDList []string
-	if groupInfo.GroupType != constant.SuperGroup {
-		for _, v := range req.InvitedUserIDList {
-			var resultNode pbGroup.Id2Result
-			resultNode.UserID = v
-			resultNode.Result = 0
-			toUserInfo, err := relation.GetUserByUserID(v)
-			if err != nil {
-				trace_log.SetCtxInfo(ctx, "GetUserByUserID", err, "userID", v)
-				resultNode.Result = -1
-				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
-				continue
-			}
-
-			if relation.IsExistGroupMember(req.GroupID, v) {
-				trace_log.SetCtxInfo(ctx, "IsExistGroupMember", err, "groupID", req.GroupID, "userID", v)
-				resultNode.Result = -1
-				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
-				continue
-			}
-			var toInsertInfo relation.GroupMember
-			utils.CopyStructFields(&toInsertInfo, toUserInfo)
-			toInsertInfo.GroupID = req.GroupID
-			toInsertInfo.RoleLevel = constant.GroupOrdinaryUsers
-			toInsertInfo.OperatorUserID = tools.OpUserID(ctx)
-			toInsertInfo.InviterUserID = tools.OpUserID(ctx)
-			toInsertInfo.JoinSource = constant.JoinByInvitation
-			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), &toInsertInfo, groupInfo.Ex); err != nil {
-				return nil, err
-			}
-			err = relation.InsertIntoGroupMember(toInsertInfo)
-			if err != nil {
-				trace_log.SetCtxInfo(ctx, "InsertIntoGroupMember", err, "args", toInsertInfo)
-				resultNode.Result = -1
-				resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
-				continue
-			}
-			okUserIDList = append(okUserIDList, v)
-			err = db.DB.AddGroupMember(req.GroupID, toUserInfo.UserID)
-			if err != nil {
-				trace_log.SetCtxInfo(ctx, "AddGroupMember", err, "groupID", req.GroupID, "userID", toUserInfo.UserID)
-			}
-			resp.Id2ResultList = append(resp.Id2ResultList, &resultNode)
-		}
-	} else {
-		okUserIDList = req.InvitedUserIDList
-		if err := db.DB.AddUserToSuperGroup(req.GroupID, req.InvitedUserIDList); err != nil {
-			return nil, err
+	memberMap := make(map[string]*relation.GroupMember)
+	for i, member := range members {
+		memberMap[member.GroupID] = members[i]
+	}
+	for _, userID := range req.InvitedUserIDList {
+		if _, ok := memberMap[userID]; ok {
+			return nil, constant.ErrArgs.Wrap("user in group " + userID)
 		}
 	}
-
-	if groupInfo.GroupType != constant.SuperGroup {
-		chat.MemberInvitedNotification(tools.OperationID(ctx), req.GroupID, tools.OpUserID(ctx), req.Reason, okUserIDList)
-	} else {
-		for _, userID := range req.InvitedUserIDList {
-			if err := rocksCache.DelJoinedSuperGroupIDListFromCache(ctx, userID); err != nil {
-				trace_log.SetCtxInfo(ctx, "DelJoinedSuperGroupIDListFromCache", err, "userID", userID)
+	userMap, err := getUserMap(ctx, req.InvitedUserIDList)
+	if err != nil {
+		return nil, err
+	}
+	for _, userID := range req.InvitedUserIDList {
+		if _, ok := userMap[userID]; !ok {
+			return nil, constant.ErrUserIDNotFound.Wrap(userID)
+		}
+	}
+	if group.NeedVerification == constant.AllNeedVerification {
+		if !token_verify.IsAppManagerUid(ctx) {
+			opUserID := tools.OpUserID(ctx)
+			member, ok := memberMap[opUserID]
+			if ok {
+				return nil, constant.ErrNoPermission.Wrap("not in group")
+			}
+			if !(member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin) {
+				var requests []*relation.GroupRequest
+				for _, userID := range req.InvitedUserIDList {
+					requests = append(requests, &relation.GroupRequest{
+						UserID:        userID,
+						GroupID:       req.GroupID,
+						JoinSource:    constant.JoinByInvitation,
+						InviterUserID: opUserID,
+					})
+				}
+				if err := s.GroupInterface.CreateGroupRequest(ctx, requests); err != nil {
+					return nil, err
+				}
+				for _, request := range requests {
+					chat.JoinGroupApplicationNotification(ctx, &pbGroup.JoinGroupReq{
+						GroupID:       request.GroupID,
+						ReqMessage:    request.ReqMsg,
+						JoinSource:    request.JoinSource,
+						InviterUserID: request.InviterUserID,
+					})
+				}
+				return resp, nil
 			}
 		}
-		for _, v := range req.InvitedUserIDList {
-			chat.SuperGroupNotification(tools.OperationID(ctx), v, v)
+	}
+	if group.GroupType == constant.SuperGroup {
+		if err := s.GroupInterface.AddUserToSuperGroup(ctx, req.GroupID, req.InvitedUserIDList); err != nil {
+			return nil, err
 		}
+		for _, userID := range req.InvitedUserIDList {
+			chat.SuperGroupNotification(tools.OperationID(ctx), userID, userID)
+		}
+	} else {
+		var groupMembers []*relation.GroupMember
+		for _, userID := range req.InvitedUserIDList {
+			user := userMap[userID]
+			var member relation.GroupMember
+			utils.CopyStructFields(&member, user)
+			member.GroupID = req.GroupID
+			member.RoleLevel = constant.GroupOrdinaryUsers
+			member.OperatorUserID = tools.OpUserID(ctx)
+			member.InviterUserID = tools.OpUserID(ctx)
+			member.JoinSource = constant.JoinByInvitation
+			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), &member, group.Ex); err != nil {
+				return nil, err
+			}
+			groupMembers = append(groupMembers, &member)
+		}
+		if err := s.GroupInterface.CreateGroupMember(ctx, groupMembers); err != nil {
+			return nil, err
+		}
+		chat.MemberInvitedNotification(tools.OperationID(ctx), req.GroupID, tools.OpUserID(ctx), req.Reason, req.InvitedUserIDList)
 	}
 	return resp, nil
 }
 
 func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGroupAllMemberReq) (*pbGroup.GetGroupAllMemberResp, error) {
 	resp := &pbGroup.GetGroupAllMemberResp{}
-
-	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
+	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	if groupInfo.GroupType != constant.SuperGroup {
-		memberList, err := rocksCache.GetGroupMembersInfoFromCache(ctx, req.Count, req.Offset, req.GroupID)
+	if group.GroupType != constant.SuperGroup {
+		members, err := s.GroupInterface.GetGroupMemberList(ctx, req.GroupID)
 		if err != nil {
 			return nil, err
 		}
-		for _, v := range memberList {
+		var userIDs []string
+		for _, member := range members {
+			userIDs = append(userIDs, member.UserID)
+		}
+		for _, member := range members {
 			var node open_im_sdk.GroupMemberFullInfo
-			cp.GroupMemberDBCopyOpenIM(&node, v)
+			utils.CopyStructFields(&node, member)
 			resp.MemberList = append(resp.MemberList, &node)
 		}
 	}
@@ -400,12 +388,10 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 
 func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGroupMemberListReq) (*pbGroup.GetGroupMemberListResp, error) {
 	resp := &pbGroup.GetGroupMemberListResp{}
-
-	memberList, err := relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
+	memberList, err := s.GroupInterface.GetGroupMemberFilterList(ctx, req.GroupID, req.Filter, req.NextSeq, 30)
 	if err != nil {
 		return nil, err
 	}
-
 	for _, v := range memberList {
 		var node open_im_sdk.GroupMemberFullInfo
 		utils.CopyStructFields(&node, &v)
@@ -555,15 +541,14 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 
 func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetGroupMembersInfoReq) (*pbGroup.GetGroupMembersInfoResp, error) {
 	resp := &pbGroup.GetGroupMembersInfoResp{}
-	resp.MemberList = []*open_im_sdk.GroupMemberFullInfo{}
-	for _, userID := range req.MemberList {
-		groupMember, err := rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, userID)
-		if err != nil {
-			return nil, err
-		}
+	members, err := s.GroupInterface.GetGroupMemberListByUserID(ctx, req.GroupID, req.MemberList)
+	if err != nil {
+		return nil, err
+	}
+	for _, member := range members {
 		var memberNode open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(&memberNode, groupMember)
-		memberNode.JoinTime = int32(groupMember.JoinTime.Unix())
+		utils.CopyStructFields(&memberNode, member)
+		memberNode.JoinTime = member.JoinTime.UnixMilli()
 		resp.MemberList = append(resp.MemberList, &memberNode)
 	}
 	return resp, nil

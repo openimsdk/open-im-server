@@ -10,10 +10,10 @@ message CreateGroupReq{
   repeated string initMemberList = 1;
   server_api_params.GroupInfo groupInfo = 2;
   repeated string adminUserIDs = 3;
-  string ownerUserID = 5; //owner
+  string ownerUserID = 4; //owner
 }
 message CreateGroupResp{
-  server_api_params.GroupInfo groupInfo = 3;
+  server_api_params.GroupInfo groupInfo = 1;
 }
 
 
@@ -21,7 +21,7 @@ message GetGroupsInfoReq{
   repeated string groupIDList = 1;
 }
 message GetGroupsInfoResp{
-  repeated server_api_params.GroupInfo groupInfoList = 3;
+  repeated server_api_params.GroupInfo groupInfoList = 1;
 }
 
 
@@ -34,11 +34,11 @@ message SetGroupInfoResp{
 
 message GetGroupApplicationListReq {
   server_api_params.RequestPagination pagination = 1;
-  string fromUserID = 3; //owner or admin
+  string fromUserID = 2; //owner or admin
 }
 message GetGroupApplicationListResp {
   int32 total = 1;
-  repeated server_api_params.GroupRequest groupRequestList = 3;
+  repeated server_api_params.GroupRequest groupRequestList = 2;
 }
 
 message GetUserReqApplicationListReq{
@@ -64,18 +64,18 @@ message TransferGroupOwnerResp{
 message JoinGroupReq{
   string groupID = 1;
   string reqMessage = 2;
-  int32 joinSource = 5;
-  string inviterUserID = 6;
+  int32 joinSource = 3;
+  string inviterUserID = 4;
 }
 message JoinGroupResp{
 }
 
 
 message GroupApplicationResponseReq{
-  string groupID = 3;
-  string fromUserID = 4;  //
-  string handledMsg = 5;
-  int32 handleResult = 6;
+  string groupID = 1;
+  string fromUserID = 2;  //
+  string handledMsg = 3;
+  int32 handleResult = 4;
 }
 message GroupApplicationResponseResp{
 
@@ -93,13 +93,15 @@ message QuitGroupResp{
 
 message GetGroupMemberListReq {
   string groupID = 1;
-  int32 filter = 4;
-  server_api_params.RequestPagination pagination = 2;
+  int32 filter = 2;
+  int32 nextSeq = 3;
+  server_api_params.RequestPagination pagination = 4;
 }
 
 message GetGroupMemberListResp {
   int32 total = 1;
-  repeated server_api_params.GroupMemberFullInfo memberList = 3;
+  repeated server_api_params.GroupMemberFullInfo memberList = 2;
+  int32 nextSeq = 3;
 }
 
 
@@ -109,7 +111,7 @@ message GetGroupMembersInfoReq {
 }
 
 message GetGroupMembersInfoResp {
-  repeated server_api_params.GroupMemberFullInfo memberList = 3;
+  repeated server_api_params.GroupMemberFullInfo memberList = 1;
 }
 
 message KickGroupMemberReq {
@@ -129,14 +131,14 @@ message GetJoinedGroupListReq {
 }
 message GetJoinedGroupListResp{
   int32 total = 1;
-  repeated  server_api_params.GroupInfo groupList = 3;
+  repeated  server_api_params.GroupInfo groupList = 2;
 }
 
 
 message InviteUserToGroupReq {
-  string groupID = 3;
-  string reason = 4;
-  repeated string invitedUserIDList = 5;
+  string groupID = 1;
+  string reason = 2;
+  repeated string invitedUserIDList = 3;
 }
 message InviteUserToGroupResp {
 
@@ -145,11 +147,11 @@ message InviteUserToGroupResp {
 
 message GetGroupAllMemberReq {
   string groupID = 1;
-  int32 offset = 4;
-  int32 count = 5;
+  int32 offset = 2;
+  int32 count = 3;
 }
 message GetGroupAllMemberResp {
-  repeated server_api_params.GroupMemberFullInfo memberList = 3;
+  repeated server_api_params.GroupMemberFullInfo memberList = 1;
 }
 
 message CMSGroup {
@@ -167,7 +169,7 @@ message GetGroupsReq {
 
 message GetGroupsResp {
     repeated CMSGroup groups = 1;
-    int32 GroupNum = 3;
+    int32 GroupNum = 2;
 }
 
 message GetGroupMemberReq {
@@ -187,7 +189,7 @@ message GetGroupMembersCMSResp {
 }
 
 message DismissGroupReq{
-  string groupID = 3;
+  string groupID = 1;
 }
 
 message DismissGroupResp{
@@ -195,9 +197,9 @@ message DismissGroupResp{
 
 
 message MuteGroupMemberReq{
-  string groupID = 3;
-  string userID = 4;
-  uint32 mutedSeconds = 5;
+  string groupID = 1;
+  string userID = 2;
+  uint32 mutedSeconds = 3;
 }
 
 message MuteGroupMemberResp{
@@ -206,8 +208,8 @@ message MuteGroupMemberResp{
 
 
 message CancelMuteGroupMemberReq{
-  string groupID = 3;
-  string userID = 4;
+  string groupID = 1;
+  string userID = 2;
 }
 
 message CancelMuteGroupMemberResp{
@@ -215,7 +217,7 @@ message CancelMuteGroupMemberResp{
 
 
 message MuteGroupReq{
-  string groupID = 3;
+  string groupID = 1;
 }
 
 message MuteGroupResp{
@@ -224,7 +226,7 @@ message MuteGroupResp{
 
 
 message CancelMuteGroupReq{
-  string groupID = 3;
+  string groupID = 1;
 }
 
 message CancelMuteGroupResp{
@@ -236,7 +238,7 @@ message CancelMuteGroupResp{
 message SetGroupMemberNicknameReq{
   string groupID = 1;
   string nickname = 2;
-  string userID = 5;
+  string userID = 3;
 }
 message SetGroupMemberNicknameResp{
 }
@@ -248,7 +250,7 @@ message GetJoinedSuperGroupListReq {
 
 message GetJoinedSuperGroupListResp {
   int32 total = 1;
-  repeated server_api_params.GroupInfo groupList = 3;
+  repeated server_api_params.GroupInfo groupList = 2;
 }
 
 message GetSuperGroupsInfoReq {
@@ -256,16 +258,16 @@ message GetSuperGroupsInfoReq {
 }
 
 message GetSuperGroupsInfoResp {
-  repeated server_api_params.GroupInfo groupInfoList = 3;
+  repeated server_api_params.GroupInfo groupInfoList = 1;
 }
 
 message SetGroupMemberInfoReq{
   string groupID = 1;
   string userID = 2;
-  google.protobuf.StringValue nickname = 5;
-  google.protobuf.StringValue faceURL = 6;
-  google.protobuf.Int32Value roleLevel = 7;
-  google.protobuf.StringValue ex = 8;
+  google.protobuf.StringValue nickname = 3;
+  google.protobuf.StringValue faceURL = 4;
+  google.protobuf.Int32Value roleLevel = 5;
+  google.protobuf.StringValue ex = 6;
 }
 
 message SetGroupMemberInfoResp{
