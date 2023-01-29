@@ -9,6 +9,7 @@ import (
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/getcdv3"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbFriend "Open_IM/pkg/proto/friend"
@@ -136,22 +137,6 @@ func syncPeerUserConversation(conversation *pbConversation.Conversation, operati
 	}
 	chat.ConversationSetPrivateNotification(operationID, conversation.OwnerUserID, conversation.UserID, conversation.IsPrivateChat)
 	return nil
-}
-
-func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoReq) (*pbUser.GetUsersInfoResp, error) {
-	resp := &pbUser.GetUsersInfoResp{}
-	users, err := s.Find(ctx, req.UserIDs)
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range users {
-		n, err := utils2.NewDBUser(v).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.UsersInfo = append(resp.UsersInfo, n)
-	}
-	return resp, nil
 }
 
 func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.BatchSetConversationsReq) (*pbUser.BatchSetConversationsResp, error) {
@@ -373,34 +358,87 @@ func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq
 	}
 }
 
-func (s *userServer) AccountCheck(_ context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
-	log.NewInfo(req.OperationID, "AccountCheck args ", req.String())
-	if !token_verify.IsManagerUserID(req.OpUserID) {
-		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
-		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
-	}
-	uidList, err := imdb.SelectSomeUserID(req.CheckUserIDList)
-	log.NewDebug(req.OperationID, "from db uid list is:", uidList)
+func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string, operationID string, opUserID string) {
+	joinedGroupIDList, err := rocksCache.GetJoinedGroupIDListFromCache(userID)
 	if err != nil {
-		log.NewError(req.OperationID, "SelectSomeUserID failed ", err.Error(), req.CheckUserIDList)
-		return &pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
-	} else {
-		var r []*pbUser.AccountCheckResp_SingleUserStatus
-		for _, v := range req.CheckUserIDList {
-			temp := new(pbUser.AccountCheckResp_SingleUserStatus)
-			temp.UserID = v
-			if utils.IsContain(v, uidList) {
-				temp.AccountStatus = constant.Registered
-			} else {
-				temp.AccountStatus = constant.UnRegistered
-			}
-			r = append(r, temp)
-		}
-		resp := pbUser.AccountCheckResp{CommonResp: &pbUser.CommonResp{ErrCode: 0, ErrMsg: ""}, ResultList: r}
-		log.NewInfo(req.OperationID, "AccountCheck rpc return ", resp.String())
-		return &resp, nil
+		log.NewWarn(operationID, "GetJoinedGroupIDListByUserID failed ", userID, err.Error())
+		return
 	}
+	for _, groupID := range joinedGroupIDList {
+		groupMemberInfo := imdb.GroupMember{UserID: userID, GroupID: groupID, FaceURL: faceURL}
+		if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
+			continue
+		}
+		//if err := rocksCache.DelAllGroupMembersInfoFromCache(groupID); err != nil {
+		//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
+		//	continue
+		//}
+		if err := rocksCache.DelGroupMemberInfoFromCache(groupID, userID); err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userID)
+			continue
+		}
+		chat.GroupMemberInfoSetNotification(operationID, opUserID, groupID, userID)
+	}
+}
 
+func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, oldNickname string, operationID string, opUserID string) {
+	joinedGroupIDList, err := imdb.GetJoinedGroupIDListByUserID(userID)
+	if err != nil {
+		log.NewWarn(operationID, "GetJoinedGroupIDListByUserID failed ", userID, err.Error())
+		return
+	}
+	for _, v := range joinedGroupIDList {
+		member, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(v, userID)
+		if err != nil {
+			log.NewWarn(operationID, "GetGroupMemberInfoByGroupIDAndUserID failed ", err.Error(), v, userID)
+			continue
+		}
+		if member.Nickname == oldNickname {
+			groupMemberInfo := imdb.GroupMember{UserID: userID, GroupID: v, Nickname: newNickname}
+			if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
+				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
+				continue
+			}
+			//if err := rocksCache.DelAllGroupMembersInfoFromCache(v); err != nil {
+			//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
+			//	continue
+			//}
+			if err := rocksCache.DelGroupMemberInfoFromCache(v, userID); err != nil {
+				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
+			}
+			chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
+		}
+	}
+}
+
+func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
+	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
+	resp := &pbUser.AddUserResp{CommonResp: &pbUser.CommonResp{}}
+	err := imdb.AddUser(req.UserInfo.UserID, req.UserInfo.PhoneNumber, req.UserInfo.Nickname, req.UserInfo.Email, req.UserInfo.Gender, req.UserInfo.FaceURL, req.UserInfo.BirthStr)
+	if err != nil {
+		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error(), req.String())
+		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
+		resp.CommonResp.ErrMsg = err.Error()
+		return resp, nil
+	}
+	return resp, nil
+}
+
+func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoReq) (*pbUser.GetUsersInfoResp, error) {
+	resp := &pbUser.GetUsersInfoResp{}
+	users, err := s.Find(ctx, req.UserIDs)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range users {
+		n, err := utils2.NewDBUser(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		resp.UsersInfo = append(resp.UsersInfo, n)
+	}
+	return resp, nil
 }
 
 func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserInfoReq) (*pbUser.UpdateUserInfoResp, error) {
@@ -462,106 +500,65 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
 }
+
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (*pbUser.SetGlobalRecvMessageOptResp, error) {
-	log.NewInfo(req.OperationID, "SetGlobalRecvMessageOpt args ", req.String())
-
-	var user imdb.User
-	user.UserID = req.UserID
+	resp := pbUser.SetGlobalRecvMessageOptResp{}
 	m := make(map[string]interface{}, 1)
-
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), req.GlobalRecvMsgOpt, "set GlobalRecvMsgOpt")
 	m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt
-	err := db.DB.SetUserGlobalMsgRecvOpt(user.UserID, req.GlobalRecvMsgOpt)
+	err := s.UpdateByMap(ctx, req.UserID, m)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetGlobalRecvMessageOpt failed ", err.Error(), user)
-		return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
+		return nil, err
 	}
-	err = imdb.UpdateUserInfoByMap(user, m)
-	if err != nil {
-		log.NewError(req.OperationID, "SetGlobalRecvMessageOpt failed ", err.Error(), user)
-		return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
-	}
-	if err := rocksCache.DelUserInfoFromCache(user.UserID); err != nil {
-		log.NewError(req.OperationID, "DelUserInfoFromCache failed ", err.Error(), req.String())
-		return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
-	}
-	chat.UserInfoUpdatedNotification(req.OperationID, req.UserID, req.UserID)
-	return &pbUser.SetGlobalRecvMessageOptResp{CommonResp: &pbUser.CommonResp{}}, nil
+	chat.UserInfoUpdatedNotification(tools.OperationID(ctx), req.UserID, req.UserID)
+	return &resp, nil
 }
 
-func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string, operationID string, opUserID string) {
-	joinedGroupIDList, err := rocksCache.GetJoinedGroupIDListFromCache(userID)
+func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
+	resp := pbUser.AccountCheckResp{}
+	err := token_verify.CheckManagerUserID(ctx, tools.OpUserID(ctx))
 	if err != nil {
-		log.NewWarn(operationID, "GetJoinedGroupIDListByUserID failed ", userID, err.Error())
-		return
+		return nil, err
 	}
-	for _, groupID := range joinedGroupIDList {
-		groupMemberInfo := imdb.GroupMember{UserID: userID, GroupID: groupID, FaceURL: faceURL}
-		if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
-			continue
-		}
-		//if err := rocksCache.DelAllGroupMembersInfoFromCache(groupID); err != nil {
-		//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
-		//	continue
-		//}
-		if err := rocksCache.DelGroupMemberInfoFromCache(groupID, userID); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userID)
-			continue
-		}
-		chat.GroupMemberInfoSetNotification(operationID, opUserID, groupID, userID)
-	}
-}
-
-func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, oldNickname string, operationID string, opUserID string) {
-	joinedGroupIDList, err := imdb.GetJoinedGroupIDListByUserID(userID)
+	user, err := s.Find(ctx, req.CheckUserIDs)
 	if err != nil {
-		log.NewWarn(operationID, "GetJoinedGroupIDListByUserID failed ", userID, err.Error())
-		return
+		return nil, err
 	}
-	for _, v := range joinedGroupIDList {
-		member, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(v, userID)
-		if err != nil {
-			log.NewWarn(operationID, "GetGroupMemberInfoByGroupIDAndUserID failed ", err.Error(), v, userID)
-			continue
-		}
-		if member.Nickname == oldNickname {
-			groupMemberInfo := imdb.GroupMember{UserID: userID, GroupID: v, Nickname: newNickname}
-			if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
-				continue
-			}
-			//if err := rocksCache.DelAllGroupMembersInfoFromCache(v); err != nil {
-			//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
-			//	continue
-			//}
-			if err := rocksCache.DelGroupMemberInfoFromCache(v, userID); err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
-			}
-			chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
-		}
+	uidList := make([]string, 0)
+	for _, v := range user {
+		uidList = append(uidList, v.UserID)
 	}
+	var r []*pbUser.AccountCheckResp_SingleUserStatus
+	for _, v := range req.CheckUserIDs {
+		temp := new(pbUser.AccountCheckResp_SingleUserStatus)
+		temp.UserID = v
+		if utils.IsContain(v, uidList) {
+			temp.AccountStatus = constant.Registered
+		} else {
+			temp.AccountStatus = constant.UnRegistered
+		}
+		r = append(r, temp)
+	}
+	return &resp, nil
 }
 
 func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	var usersDB []imdb.User
+	resp := pbUser.GetUsersResp{}
 	var err error
-	resp := &pbUser.GetUsersResp{CommonResp: &pbUser.CommonResp{}, Pagination: &sdkws.ResponsePagination{CurrentPage: req.Pagination.PageNumber, ShowNumber: req.Pagination.ShowNumber}}
 	if req.UserID != "" {
-		userDB, err := imdb.GetUserByUserID(req.UserID)
+		u, err := s.Take(ctx, req.UserID)
 		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return resp, nil
-			}
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserID, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
-			return resp, nil
+			return nil, err
 		}
-		usersDB = append(usersDB, *userDB)
-		resp.TotalNums = 1
-	} else if req.UserName != "" {
+		resp.Total = 1
+		u1, err := utils2.NewDBUser(u).Convert()
+		if err != nil {
+			return nil, err
+		}
+		resp.Users = append(resp.Users, u1)
+		return &resp, nil
+	}
+
+	if req.UserName != "" {
 		usersDB, err = imdb.GetUserByName(req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
@@ -587,7 +584,9 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			return resp, nil
 		}
 		resp.TotalNums = int32(count)
-	} else {
+	}
+
+	else {
 		usersDB, err = imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
 		if err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
@@ -629,18 +628,5 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		}
 	}
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
-}
-
-func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.AddUserResp{CommonResp: &pbUser.CommonResp{}}
-	err := imdb.AddUser(req.UserInfo.UserID, req.UserInfo.PhoneNumber, req.UserInfo.Nickname, req.UserInfo.Email, req.UserInfo.Gender, req.UserInfo.FaceURL, req.UserInfo.BirthStr)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error(), req.String())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
 	return resp, nil
 }

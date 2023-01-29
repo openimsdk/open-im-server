@@ -11,6 +11,8 @@ type UserInterface interface {
 	Create(ctx context.Context, users []*relation.User) error
 	Take(ctx context.Context, userID string) (user *relation.User, err error)
 	Update(ctx context.Context, users []*relation.User) (err error)
+	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
+	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, err error)
 }
 
 type UserController struct {
@@ -29,6 +31,12 @@ func (u *UserController) Take(ctx context.Context, userID string) (user *relatio
 func (u *UserController) Update(ctx context.Context, users []*relation.User) (err error) {
 	return u.database.Update(ctx, users)
 }
+func (u *UserController) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
+	return u.database.UpdateByMap(ctx, userID, args)
+}
+func (u *UserController) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, err error) {
+	return u.database.GetByName(ctx, userName, showNumber, pageNumber)
+}
 
 func NewUserController(db *gorm.DB) UserInterface {
 	controller := &UserController{database: newUserDatabase(db)}
@@ -40,6 +48,8 @@ type UserDatabaseInterface interface {
 	Create(ctx context.Context, users []*relation.User) error
 	Take(ctx context.Context, userID string) (user *relation.User, err error)
 	Update(ctx context.Context, users []*relation.User) (err error)
+	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
+	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, err error)
 }
 
 type UserDatabase struct {
@@ -66,4 +76,10 @@ func (u *UserDatabase) Take(ctx context.Context, userID string) (user *relation.
 }
 func (u *UserDatabase) Update(ctx context.Context, users []*relation.User) (err error) {
 	return u.sqlDB.Update(ctx, users)
+}
+func (u *UserDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
+	return u.sqlDB.UpdateByMap(ctx, userID, args)
+}
+func (u *UserDatabase) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, err error) {
+	return u.sqlDB.GetByName(ctx, userName, showNumber, pageNumber)
 }
