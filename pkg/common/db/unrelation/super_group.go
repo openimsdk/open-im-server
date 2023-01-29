@@ -37,7 +37,7 @@ func NewSuperGroupMgoDB(mgoClient *mongo.Client) *SuperGroupMgoDB {
 	return &SuperGroupMgoDB{MgoDB: mgoDB, MgoClient: mgoClient, superGroupCollection: mgoDB.Collection(cSuperGroup), userToSuperGroupCollection: mgoDB.Collection(cUserToSuperGroup)}
 }
 
-func (db *SuperGroupMgoDB) CreateSuperGroup(sCtx mongo.SessionContext, groupID string, initMemberIDList []string, memberNumCount int) error {
+func (db *SuperGroupMgoDB) CreateSuperGroup(sCtx mongo.SessionContext, groupID string, initMemberIDList []string) error {
 	superGroup := SuperGroup{
 		GroupID:      groupID,
 		MemberIDList: initMemberIDList,
