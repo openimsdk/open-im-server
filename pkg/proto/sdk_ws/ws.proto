@@ -18,7 +18,7 @@ message GroupInfo{
   string introduction = 4;
   string faceURL = 5;
   string ownerUserID = 6;
-  uint32 createTime = 7;
+  int64 createTime = 7;
   uint32 memberCount = 8;
   string ex = 9;
   int32 status = 10;
@@ -27,7 +27,7 @@ message GroupInfo{
   int32 needVerification = 13;
   int32 lookMemberInfo =14;
   int32 applyMemberFriend = 15;
-  uint32 notificationUpdateTime = 16;
+  int64 notificationUpdateTime = 16;
   string notificationUserID = 17;
 }
 
@@ -48,14 +48,14 @@ message GroupMemberFullInfo {
   string groupID = 1 ;
   string userID = 2 ;
   int32 roleLevel = 3;
-  int32 joinTime = 4;
+  int64 joinTime = 4;
   string nickname = 5;
   string faceURL = 6;
   int32 appMangerLevel = 7; //if >0
   int32 joinSource = 8;
   string operatorUserID = 9;
   string ex = 10;
-  uint32 muteEndTime = 11;
+  int64 muteEndTime = 11;
   string inviterUserID = 12;
 }
 
@@ -76,7 +76,7 @@ message UserInfo{
   uint32 birth = 6;
   string email = 7;
   string ex = 8;
-  uint32 createTime = 9;
+  int64 createTime = 9;
   int32 appMangerLevel = 10;
   int32 globalRecvMsgOpt = 11;
   int64 birthday = 13;
@@ -85,7 +85,7 @@ message UserInfo{
 message FriendInfo{
   string ownerUserID = 1;
   string remark = 2;
-  uint32 createTime = 3;
+  int64 createTime = 3;
   UserInfo friendUser = 4;
   int32 addSource = 5;
   string operatorUserID = 6;
@@ -94,7 +94,7 @@ message FriendInfo{
 
 message BlackInfo{
   string ownerUserID = 1;
-  uint32 createTime = 2;
+  int64 createTime = 2;
   PublicUserInfo blackUserInfo = 3;
   int32 addSource = 4;
   string operatorUserID = 5;
@@ -107,9 +107,9 @@ message GroupRequest{
   int32 handleResult = 3;
   string reqMsg = 4;
   string  handleMsg = 5;
-  uint32 reqTime = 6;
+  int64 reqTime = 6;
   string handleUserID = 7;
-  uint32 handleTime = 8;
+  int64 handleTime = 8;
   string ex = 9;
   int32 joinSource = 10;
   string inviterUserID = 11;
@@ -126,10 +126,10 @@ message FriendRequest{
   int32 toGender = 8;
   int32 handleResult = 9;
   string reqMsg = 10;
-  uint32 createTime = 11;
+  int64 createTime = 11;
   string handlerUserID = 12;
   string handleMsg = 13;
-  uint32 handleTime = 14;
+  int64 handleTime = 14;
   string ex = 15;
 }
 
@@ -142,7 +142,7 @@ message Department {
   string parentID = 4;
   int32 order = 5;
   int32 departmentType = 6;
-  uint32 createTime = 7;
+  int64 createTime = 7;
   uint32 subDepartmentNum = 8;
   uint32 memberNum = 9;
   string ex        = 10;
@@ -160,7 +160,7 @@ message OrganizationUser  {
     string telephone   = 7;
     uint32 birth     = 8;
     string  email    = 9;
-    uint32   createTime = 10;
+  int64   createTime = 10;
     string ex      = 11;
     string birthStr = 12;
 }
@@ -562,7 +562,7 @@ message InvitationInfo  {
     string mediaType = 7;
     int32 platformID = 8;
     int32 sessionType = 9;
-    int32 initiateTime = 10;
+  int64 initiateTime = 10;
     repeated string busyLineUserIDList = 11;
 }
 

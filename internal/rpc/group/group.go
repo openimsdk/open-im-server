@@ -259,7 +259,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		groupNode.NotificationUpdateTime = group.NotificationUpdateTime.UnixMilli()
 		resp.GroupList = append(resp.GroupList, &groupNode)
 	}
-	resp.Total = int32(len(resp.GroupList))
+	resp.Total = uint32(len(resp.GroupList))
 	return resp, nil
 }
 
