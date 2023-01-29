@@ -101,6 +101,7 @@ message GetGroupMemberListReq {
 message GetGroupMemberListResp {
   int32 total = 1;
   repeated server_api_params.GroupMemberFullInfo memberList = 2;
+  int32 nextSeq = 3;
 }
 
 
