@@ -9,11 +9,6 @@ import (
 	"time"
 )
 
-var (
-	BlackListDB *gorm.DB
-	UserDB      *gorm.DB
-)
-
 func InitManager() {
 	for k, v := range config.Config.Manager.AppManagerUid {
 		_, err := GetUserByUserID(v)
