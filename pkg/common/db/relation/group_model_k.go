@@ -37,8 +37,7 @@ func (g *Group) Create(ctx context.Context, groups []*Group, tx ...*gorm.DB) (er
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groups", groups)
 	}()
-	err = utils.Wrap(getDBConn(g.DB, tx).Create(&groups).Error, "")
-	return err
+	return utils.Wrap(getDBConn(g.DB, tx).Create(&groups).Error, "")
 }
 
 func (g *Group) Delete(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (err error) {
@@ -66,8 +65,7 @@ func (g *Group) Find(ctx context.Context, groupIDs []string, tx ...*gorm.DB) (gr
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupIDs", groupIDs, "groups", groups)
 	}()
-	err = utils.Wrap(getDBConn(g.DB, tx).Where("group_id in (?)", groupIDs).Find(&groups).Error, "")
-	return groups, err
+	return groups, utils.Wrap(getDBConn(g.DB, tx).Where("group_id in (?)", groupIDs).Find(&groups).Error, "")
 }
 
 func (g *Group) Take(ctx context.Context, groupID string, tx ...*gorm.DB) (group *Group, err error) {
@@ -75,8 +73,7 @@ func (g *Group) Take(ctx context.Context, groupID string, tx ...*gorm.DB) (group
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", *group)
 	}()
-	err = utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ?", groupID).Take(group).Error, "")
-	return group, err
+	return group, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ?", groupID).Take(group).Error, "")
 }
 
 //func (g *Group) DeleteTx(ctx context.Context, groupIDs []string) error {
