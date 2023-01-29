@@ -18,7 +18,6 @@ message AddFriendReq{
   string ReqMsg = 3;
 }
 message AddFriendResp{
-  server_api_params.CommonResp commonResp = 1;
 }
 
 
@@ -33,7 +32,6 @@ message ImportFriendResp{
 
 message GetFriendApplyListReq{
   string ToUserID = 1;
-  string FromUserID = 2;
 }
 message GetFriendApplyListResp{
   repeated server_api_params.FriendRequest FriendRequestList = 1;
@@ -129,17 +127,30 @@ message GetSelfApplyListResp{
 }
 
 service friend{
+  //申请加好友
   rpc addFriend(AddFriendReq) returns(AddFriendResp);
+  //获取收到的好友申请列表
   rpc getFriendApplyList(GetFriendApplyListReq) returns(GetFriendApplyListResp);
+  //获取主动发出去的好友申请列表
   rpc getSelfApplyList(GetSelfApplyListReq) returns(GetSelfApplyListResp);
+  //获取好友列表
   rpc getFriendList(GetFriendListReq) returns(GetFriendListResp);
+  //添加黑名单
   rpc addBlacklist(AddBlacklistReq) returns(AddBlacklistResp);
+  //移除黑名单
   rpc removeBlacklist(RemoveBlacklistReq) returns(RemoveBlacklistResp);
+  //判断是否好友关系
   rpc isFriend(IsFriendReq) returns(IsFriendResp);
+  //判断是否在黑名单中
   rpc isInBlackList(IsInBlackListReq) returns(IsInBlackListResp);
+  //获取黑名单列表
   rpc getBlacklist(GetBlacklistReq) returns(GetBlacklistResp);
+  //删除好友
   rpc deleteFriend(DeleteFriendReq) returns(DeleteFriendResp);
+  //对好友申请响应（同意或拒绝）
   rpc addFriendResponse(AddFriendResponseReq) returns(AddFriendResponseResp);
+  //设置好友备注
   rpc setFriendRemark(SetFriendRemarkReq) returns(SetFriendRemarkResp);
+  //导入好友关系
   rpc importFriend(ImportFriendReq)  returns(ImportFriendResp);
 }
