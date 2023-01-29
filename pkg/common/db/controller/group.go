@@ -158,3 +158,15 @@ func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, in
 func (g *GroupDataBase) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
 	return g.mongoDB.GetSuperGroup(ctx, groupID)
 }
+
+func (g *GroupDataBase) CreateGroupAndMember(ctx context.Context, groups []*relation.Group, groupMember []*relation.GroupMember) error {
+	return g.db.Transaction(func(tx *gorm.DB) error {
+		if err := g.groupDB.Create(ctx, groups, tx); err != nil {
+			return err
+		}
+		if err := g.groupMemberDB.Create(ctx, groupMember, tx); err != nil {
+			return err
+		}
+		return nil
+	})
+}
