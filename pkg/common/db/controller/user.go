@@ -12,7 +12,9 @@ type UserInterface interface {
 	Take(ctx context.Context, userID string) (user *relation.User, err error)
 	Update(ctx context.Context, users []*relation.User) (err error)
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
-	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, err error)
+	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
+	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
+	Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
 }
 
 type UserController struct {
@@ -34,10 +36,15 @@ func (u *UserController) Update(ctx context.Context, users []*relation.User) (er
 func (u *UserController) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
 	return u.database.UpdateByMap(ctx, userID, args)
 }
-func (u *UserController) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, err error) {
+func (u *UserController) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error) {
 	return u.database.GetByName(ctx, userName, showNumber, pageNumber)
 }
-
+func (u *UserController) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error) {
+	return u.database.GetByNameAndID(ctx, content, showNumber, pageNumber)
+}
+func (u *UserController) Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.User, count int64, err error) {
+	return u.database.Get(ctx, showNumber, pageNumber)
+}
 func NewUserController(db *gorm.DB) UserInterface {
 	controller := &UserController{database: newUserDatabase(db)}
 	return controller
@@ -49,7 +56,9 @@ type UserDatabaseInterface interface {
 	Take(ctx context.Context, userID string) (user *relation.User, err error)
 	Update(ctx context.Context, users []*relation.User) (err error)
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
-	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, err error)
+	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
+	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
+	Get(ctx context.Context, showNumber, pageNumber int32) (users []*User, count int64, err error)
 }
 
 type UserDatabase struct {
@@ -80,6 +89,12 @@ func (u *UserDatabase) Update(ctx context.Context, users []*relation.User) (err 
 func (u *UserDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
 	return u.sqlDB.UpdateByMap(ctx, userID, args)
 }
-func (u *UserDatabase) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, err error) {
+func (u *UserDatabase) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error) {
 	return u.sqlDB.GetByName(ctx, userName, showNumber, pageNumber)
+}
+func (u *UserDatabase) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error) {
+	return u.sqlDB.GetByNameAndID(ctx, content, showNumber, pageNumber)
+}
+func (u *UserDatabase) Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.User, count int64, err error) {
+	return u.sqlDB.Get(ctx, showNumber, pageNumber)
 }
