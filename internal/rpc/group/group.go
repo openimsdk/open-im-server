@@ -69,7 +69,7 @@ func NewGroupServer(port int) *groupServer {
 	}
 	mongo.InitMongo()
 	mongo.CreateSuperGroupIndex()
-	g.GroupInterface = controller.NewGroupController(groupModel.DB, cache.InitRedis(), mongo.DB)
+	g.GroupInterface = controller.NewGroupController(groupModel.DB, cache.InitRedis(), mongo.GetClient())
 	return &g
 }
 
