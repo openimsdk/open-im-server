@@ -2,7 +2,7 @@ package controller
 
 import (
 	"Open_IM/pkg/common/db/cache"
-	"Open_IM/pkg/common/db/mysql"
+	"Open_IM/pkg/common/db/relation"
 	"context"
 	"errors"
 	"gorm.io/gorm"

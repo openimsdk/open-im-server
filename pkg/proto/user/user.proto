@@ -4,66 +4,48 @@ import "Open-IM-Server/pkg/proto/conversation/conversation.proto";
 option go_package = "Open_IM/pkg/proto/user;user";
 package user;
 
-message CommonResp{
-  int32  errCode = 1;
-  string errMsg = 2;
-}
 
 
 
 message GetAllUserIDReq{
-  string opUserID = 1;
-  string operationID = 2;
+  server_api_params.RequestPagination pagination = 1;
 }
 message GetAllUserIDResp{
-  CommonResp  CommonResp = 1;
+  int32 total = 1;
   repeated string UserIDList = 2;
 }
 
 
 message AccountCheckReq{
-  repeated string CheckUserIDList = 1;
-  string OpUserID = 2;
-  string OperationID = 3;
-
+  repeated string checkUserIDs = 1;
 }
 message AccountCheckResp{
-  CommonResp  commonResp = 1;
   message SingleUserStatus {
     string userID = 1;
     string accountStatus = 2;
   }
-  repeated SingleUserStatus ResultList = 2;
+  repeated SingleUserStatus results = 1;
 }
 
 
-message GetUserInfoReq{
-  repeated string userIDList = 1;
-  string OpUserID = 2;
-  string OperationID = 3;
+message GetUsersInfoReq{
+  repeated string userIDs = 1;
 }
-message GetUserInfoResp{
-  CommonResp  commonResp = 1;
-  repeated server_api_params.UserInfo UserInfoList = 3;
+message GetUsersInfoResp{
+  repeated server_api_params.UserInfo usersInfo = 1;
 }
-
-
 
 message UpdateUserInfoReq{
-  server_api_params.UserInfo UserInfo = 1;
-  string OpUserID = 2;
-  string  operationID = 3;
+  server_api_params.UserInfo userInfo = 1;
 }
 message UpdateUserInfoResp{
-  CommonResp  commonResp = 1;
 }
+
 message SetGlobalRecvMessageOptReq{
   string userID = 1;
-  string  operationID = 2;
   int32 globalRecvMsgOpt = 3;
 }
 message SetGlobalRecvMessageOptResp{
-  CommonResp  commonResp = 1;
 }
 
 message SetConversationReq{
@@ -73,7 +55,7 @@ message SetConversationReq{
 }
 
 message SetConversationResp{
-  CommonResp  commonResp = 1;
+
 }
 
 message SetRecvMsgOptReq {
@@ -85,7 +67,7 @@ message SetRecvMsgOptReq {
 }
 
 message SetRecvMsgOptResp {
-  CommonResp  commonResp = 1;
+
 }
 
 message GetConversationReq{
@@ -95,7 +77,6 @@ message GetConversationReq{
 }
 
 message GetConversationResp{
-  CommonResp  commonResp = 1;
   conversation.Conversation Conversation = 2;
 }
 
@@ -106,7 +87,6 @@ message GetConversationsReq{
 }
 
 message GetConversationsResp{
-  CommonResp  commonResp = 1;
   repeated conversation.Conversation Conversations = 2;
 }
 
@@ -116,7 +96,6 @@ message GetAllConversationsReq{
 }
 
 message GetAllConversationsResp{
-  CommonResp  commonResp = 1;
   repeated conversation.Conversation Conversations = 2;
 }
 
@@ -128,30 +107,21 @@ message BatchSetConversationsReq{
 }
 
 message BatchSetConversationsResp{
-  CommonResp  commonResp = 1;
   repeated string Success = 2;
   repeated string Failed = 3;
 }
 
 
 message GetUsersReq {
-  string operationID = 1;
   server_api_params.RequestPagination pagination = 2;
   string userName = 3;
   string userID = 4;
   string content = 5;
 }
 
-message CmsUser {
-  server_api_params.UserInfo user = 1;
-  bool isBlock = 2;
-}
-
 message GetUsersResp{
-  CommonResp  commonResp = 1;
-  repeated CmsUser userList = 2;
-  server_api_params.ResponsePagination Pagination = 3;
-  int32 totalNums = 4;
+  int32 total = 1;
+  repeated server_api_params.UserInfo users = 2;
 }
 
 message AddUserReq{
@@ -160,29 +130,6 @@ message AddUserReq{
 }
 
 message AddUserResp{
-  CommonResp  CommonResp = 1;
-}
-
-
-message BlockUserReq{
-  string userID = 1;
-  string endDisableTime = 2;
-  string operationID = 3;
-  string opUserID = 4;
-}
-
-message BlockUserResp{
-  CommonResp  CommonResp = 1;
-}
-
-message UnBlockUserReq{
-  string userID = 1;
-  string operationID = 2;
-  string opUserID = 3;
-}
-
-message UnBlockUserResp{
-  CommonResp  CommonResp = 1;
 }
 
 message GetBlockUsersReq{
@@ -199,7 +146,6 @@ message BlockUser {
 }
 
 message GetBlockUsersResp{
-  CommonResp  CommonResp = 1;
   repeated BlockUser BlockUsers = 2;
   server_api_params.ResponsePagination Pagination = 3;
   int32 UserNums = 4;
@@ -207,26 +153,15 @@ message GetBlockUsersResp{
 
 
 service user {
-  rpc GetUserInfo(GetUserInfoReq) returns(GetUserInfoResp);
+  //获取指定的用户信息 全字段
+  rpc GetUsersInfo(GetUsersInfoReq) returns(GetUsersInfoResp);
+  //更新用户信息
   rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
+  //设置用户消息接收选项
   rpc SetGlobalRecvMessageOpt(SetGlobalRecvMessageOptReq) returns(SetGlobalRecvMessageOptResp);
-  rpc GetAllUserID(GetAllUserIDReq)returns(GetAllUserIDResp);
-
+  //检查userID是否存在
   rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
-  rpc GetConversation(GetConversationReq)returns(GetConversationResp);
-  rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
-  rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
-  rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
-  rpc SetConversation(SetConversationReq)returns(SetConversationResp);
-  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
-
-  
+  //翻页（或指定userID，昵称）拉取用户信息 全字段
   rpc GetUsers(GetUsersReq) returns (GetUsersResp);
-  
-  rpc AddUser(AddUserReq) returns (AddUserResp);
-
-  rpc BlockUser(BlockUserReq) returns (BlockUserResp);
-  rpc UnBlockUser(UnBlockUserReq) returns (UnBlockUserResp);
-  rpc GetBlockUsers(GetBlockUsersReq) returns (GetBlockUsersResp);
 }
 
