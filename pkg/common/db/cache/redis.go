@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"time"
 
-	go_redis "github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis/v8"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
@@ -42,12 +42,16 @@ const (
 	exTypeKeyLocker               = "EX_LOCK:"
 )
 
-func InitRedis() go_redis.UniversalClient {
-	var rdb go_redis.UniversalClient
+type RedisClient struct {
+	rdb redis.UniversalClient
+}
+
+func (r *RedisClient) InitRedis() {
+	var rdb redis.UniversalClient
 	var err error
 	ctx := context.Background()
 	if config.Config.Redis.EnableCluster {
-		rdb = go_redis.NewClusterClient(&go_redis.ClusterOptions{
+		rdb = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:    config.Config.Redis.DBAddress,
 			Username: config.Config.Redis.DBUserName,
 			Password: config.Config.Redis.DBPassWord, // no password set
@@ -59,7 +63,7 @@ func InitRedis() go_redis.UniversalClient {
 			panic(err.Error() + " redis cluster " + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
 		}
 	} else {
-		rdb = go_redis.NewClient(&go_redis.Options{
+		rdb = redis.NewClient(&redis.Options{
 			Addr:     config.Config.Redis.DBAddress[0],
 			Username: config.Config.Redis.DBUserName,
 			Password: config.Config.Redis.DBPassWord, // no password set
@@ -71,14 +75,14 @@ func InitRedis() go_redis.UniversalClient {
 			panic(err.Error() + " redis " + config.Config.Redis.DBAddress[0] + config.Config.Redis.DBUserName + config.Config.Redis.DBPassWord)
 		}
 	}
-	return rdb
+	r.rdb = rdb
 }
 
-type RedisClient struct {
-	rdb go_redis.UniversalClient
+func (r *RedisClient) GetClient() redis.UniversalClient {
+	return r.rdb
 }
 
-func NewRedisClient(rdb go_redis.UniversalClient) *RedisClient {
+func NewRedisClient(rdb redis.UniversalClient) *RedisClient {
 	return &RedisClient{rdb: rdb}
 }
 
@@ -213,7 +217,7 @@ func (r *RedisClient) GetUserGlobalMsgRecvOpt(userID string) (int, error) {
 	key := conversationReceiveMessageOpt + userID
 	result, err := r.rdb.HGet(context.Background(), key, GlobalMsgRecvOpt).Result()
 	if err != nil {
-		if err == go_redis.Nil {
+		if err == redis.Nil {
 			return 0, nil
 		} else {
 			return 0, err
@@ -289,7 +293,7 @@ func (r *RedisClient) CleanUpOneUserAllMsgFromRedis(userID string, operationID s
 	key := messageCache + userID + "_" + "*"
 	vals, err := r.rdb.Keys(ctx, key).Result()
 	log2.Debug(operationID, "vals: ", vals)
-	if err == go_redis.Nil {
+	if err == redis.Nil {
 		return nil
 	}
 	if err != nil {
@@ -407,7 +411,7 @@ func (r *RedisClient) DelMsgFromCache(uid string, seqList []uint32, operationID 
 		key := messageCache + uid + "_" + strconv.Itoa(int(seq))
 		result, err := r.rdb.Get(context.Background(), key).Result()
 		if err != nil {
-			if err == go_redis.Nil {
+			if err == redis.Nil {
 				log2.NewDebug(operationID, utils.GetSelfFuncName(), err.Error(), "redis nil")
 			} else {
 				log2.NewError(operationID, utils.GetSelfFuncName(), err.Error(), key)

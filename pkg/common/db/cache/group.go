@@ -15,23 +15,25 @@ const GroupExpireTime = time.Second * 60 * 60 * 12
 const groupInfoCacheKey = "GROUP_INFO_CACHE:"
 
 type GroupCache struct {
-	db          *relation.Group
-	expireTime  time.Duration
-	redisClient *RedisClient
-	rcClient    *rockscache.Client
+	group        *relation.Group
+	groupMember  *relation.GroupMember
+	groupRequest *relation.GroupRequest
+	expireTime   time.Duration
+	redisClient  *RedisClient
+	rcClient     *rockscache.Client
 }
 
-func NewGroupCache(rdb redis.UniversalClient, db *relation.Group, opts rockscache.Options) *GroupCache {
-	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: GroupExpireTime, db: db, redisClient: NewRedisClient(rdb)}
+func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.Group, groupMemberDB *relation.GroupMember, groupRequestDB *relation.GroupRequest, opts rockscache.Options) *GroupCache {
+	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: GroupExpireTime, group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb)}
 }
 
 func (g *GroupCache) getRedisClient() *RedisClient {
 	return g.redisClient
 }
 
-func (g *GroupCache) GetGroupsInfoFromCache(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
+func (g *GroupCache) GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
 	for _, groupID := range groupIDs {
-		group, err := g.GetGroupInfoFromCache(ctx, groupID)
+		group, err := g.GetGroupInfo(ctx, groupID)
 		if err != nil {
 			return nil, err
 		}
@@ -40,9 +42,9 @@ func (g *GroupCache) GetGroupsInfoFromCache(ctx context.Context, groupIDs []stri
 	return groups, nil
 }
 
-func (g *GroupCache) GetGroupInfoFromCache(ctx context.Context, groupID string) (group *relation.Group, err error) {
+func (g *GroupCache) GetGroupInfo(ctx context.Context, groupID string) (group *relation.Group, err error) {
 	getGroup := func() (string, error) {
-		groupInfo, err := g.db.Take(ctx, groupID)
+		groupInfo, err := g.group.Take(ctx, groupID)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
@@ -64,16 +66,16 @@ func (g *GroupCache) GetGroupInfoFromCache(ctx context.Context, groupID string) 
 	return group, utils.Wrap(err, "")
 }
 
-func (g *GroupCache) DelGroupInfoFromCache(ctx context.Context, groupID string) (err error) {
+func (g *GroupCache) DelGroupInfo(ctx context.Context, groupID string) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
 	}()
 	return g.rcClient.TagAsDeleted(g.getGroupInfoCacheKey(groupID))
 }
 
-func (g *GroupCache) DelGroupsInfoFromCache(ctx context.Context, groupIDs []string) error {
+func (g *GroupCache) DelGroupsInfo(ctx context.Context, groupIDs []string) error {
 	for _, groupID := range groupIDs {
-		if err := g.DelGroupInfoFromCache(ctx, groupID); err != nil {
+		if err := g.DelGroupInfo(ctx, groupID); err != nil {
 			return err
 		}
 	}
@@ -82,4 +84,19 @@ func (g *GroupCache) DelGroupsInfoFromCache(ctx context.Context, groupIDs []stri
 
 func (g *GroupCache) getGroupInfoCacheKey(groupID string) string {
 	return groupInfoCacheKey + groupID
+}
+
+func (g *GroupCache) DelJoinedSuperGroupIDs(ctx context.Context, userIDs []string) (err error) {
+	for _, userID := range userIDs {
+		if err := g.rcClient.TagAsDeleted(joinedSuperGroupListCache + userID); err != nil {
+			return err
+		}
+	}
+}
+
+func (g *GroupCache) DelJoinedSuperGroupID(ctx context.Context, userID string) (err error) {
+	defer func() {
+		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
+	}()
+	return g.rcClient.TagAsDeleted(joinedSuperGroupListCache + userID)
 }

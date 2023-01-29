@@ -3,24 +3,15 @@ option go_package = "Open_IM/pkg/proto/admin_cms;admin_cms";
 import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 package admin_cms;
 
-
-message CommonResp {
-  int32  errCode = 1;
-  string errMsg = 2;
-}
-
 message AdminLoginReq  {
-    string operationID = 1;
     string adminID = 2;
     string secret = 3;
 }
- 
 
 message AdminLoginResp {
     string token = 1;
     string userName = 2;
     string faceURL = 3;
-    CommonResp commonResp = 4;
 }
 
 message GetUserTokenReq {

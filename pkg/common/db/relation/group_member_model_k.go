@@ -24,36 +24,40 @@ type GroupMember struct {
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
 	MuteEndTime    time.Time `gorm:"column:mute_end_time"`
 	Ex             string    `gorm:"column:ex;size:1024"`
-	DB             *gorm.DB
+	DB             *gorm.DB  `gorm:"-" json:"-"`
 }
 
-func (g *GroupMember) Create(ctx context.Context, groupMemberList []*GroupMember) (err error) {
+func NewGroupMemberDB(db *gorm.DB) *GroupMember {
+	return &GroupMember{DB: db}
+}
+
+func (g *GroupMember) Create(ctx context.Context, groupMemberList []*GroupMember, tx ...*gorm.DB) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)
 	}()
-	return utils.Wrap(GroupMemberDB.Create(&groupMemberList).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Create(&groupMemberList).Error, "")
 }
 
-func (g *GroupMember) Delete(ctx context.Context, groupMembers []*GroupMember) (err error) {
+func (g *GroupMember) Delete(ctx context.Context, groupMembers []*GroupMember, tx ...*gorm.DB) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
 	}()
-	return utils.Wrap(GroupMemberDB.Delete(groupMembers).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Delete(groupMembers).Error, "")
 }
 
-func (g *GroupMember) UpdateByMap(ctx context.Context, groupID string, userID string, args map[string]interface{}) (err error) {
+func (g *GroupMember) UpdateByMap(ctx context.Context, groupID string, userID string, args map[string]interface{}, tx ...*gorm.DB) (err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
 	}()
-	return utils.Wrap(GroupMemberDB.Model(&GroupMember{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Model(&GroupMember{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
 }
 
-func (g *GroupMember) Update(ctx context.Context, groupMembers []*GroupMember) (err error) {
+func (g *GroupMember) Update(ctx context.Context, groupMembers []*GroupMember, tx ...*gorm.DB) (err error) {
 	defer func() { trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
-	return utils.Wrap(GroupMemberDB.Updates(&groupMembers).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Updates(&groupMembers).Error, "")
 }
 
-func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember) (groupList []*GroupMember, err error) {
+func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember, tx ...*gorm.DB) (groupList []*GroupMember, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers, "groupList", groupList)
 	}()
@@ -61,25 +65,23 @@ func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember) (gr
 	for _, groupMember := range groupMembers {
 		where = append(where, []interface{}{groupMember.GroupID, groupMember.UserID})
 	}
-	err = utils.Wrap(GroupMemberDB.Where("(group_id, user_id) in ?", where).Find(&groupList).Error, "")
-	return groupList, err
+	return groupList, utils.Wrap(getDBConn(g.DB, tx).Where("(group_id, user_id) in ?", where).Find(&groupList).Error, "")
 }
 
-func (g *GroupMember) Take(ctx context.Context, groupID string, userID string) (groupMember *GroupMember, err error) {
+func (g *GroupMember) Take(ctx context.Context, groupID string, userID string, tx ...*gorm.DB) (groupMember *GroupMember, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
-	return groupMember, utils.Wrap(GroupMemberDB.Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
+	return groupMember, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
 }
 
-func (g *GroupMember) TakeOwnerInfo(ctx context.Context, groupID string) (groupMember *GroupMember, err error) {
+func (g *GroupMember) TakeOwnerInfo(ctx context.Context, groupID string, tx ...*gorm.DB) (groupMember *GroupMember, err error) {
 	defer func() {
 		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
-	err = GroupMemberDB.Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error
-	return groupMember, utils.Wrap(err, "")
+	return groupMember, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error, "")
 }
 
 func InsertIntoGroupMember(toInsertInfo GroupMember) error {

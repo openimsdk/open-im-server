@@ -8,13 +8,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"
-	"log"
 	"strings"
 	"time"
 )
 
 type Mongo struct {
-	DB *mongo.Database
+	DB *mongo.Client
 }
 
 func (m *Mongo) InitMongo() {
@@ -45,7 +44,7 @@ func (m *Mongo) InitMongo() {
 				config.Config.Mongo.DBMaxPoolSize)
 		}
 	}
-	log.Println(utils.GetFuncName(1), "start to init mongoDB:", uri)
+	fmt.Println(utils.GetFuncName(1), "start to init mongoDB:", uri)
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		time.Sleep(time.Duration(30) * time.Second)
@@ -54,7 +53,11 @@ func (m *Mongo) InitMongo() {
 			panic(err.Error() + " mongo.Connect failed " + uri)
 		}
 	}
-	m.DB = mongoClient.Database(config.Config.Mongo.DBDatabase)
+	m.DB = mongoClient
+}
+
+func (m *Mongo) GetClient() *mongo.Client {
+	return m.DB
 }
 
 func (m *Mongo) CreateTagIndex() {
@@ -97,7 +100,7 @@ func (m *Mongo) CreateWorkMomentIndex() {
 }
 
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
-	db := m.DB.Collection(collection)
+	db := m.DB.Database(config.Config.Mongo.DBDatabase).Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	indexView := db.Indexes()
 	keysDoc := bsonx.Doc{}

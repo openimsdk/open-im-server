@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-var ChatLogDB *gorm.DB
-
 type ChatLog struct {
 	ServerMsgID      string    `gorm:"column:server_msg_id;primary_key;type:char(64)" json:"serverMsgID"`
 	ClientMsgID      string    `gorm:"column:client_msg_id;type:char(64)" json:"clientMsgID"`
@@ -32,6 +30,7 @@ type ChatLog struct {
 	SendTime         time.Time `gorm:"column:send_time;index:sendTime;index:content_type,priority:1;index:session_type,priority:1;index:recv_id,priority:1;index:send_id,priority:1" json:"sendTime"`
 	CreateTime       time.Time `gorm:"column:create_time" json:"createTime"`
 	Ex               string    `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+	DB               *gorm.DB
 }
 
 func (ChatLog) TableName() string {
