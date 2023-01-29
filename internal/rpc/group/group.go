@@ -58,6 +58,7 @@ func NewGroupServer(port int) *groupServer {
 	var mysql relation.Mysql
 	var mongo unrelation.Mongo
 	var groupModel relation.Group
+	var redis cache.RedisClient
 	err := mysql.InitConn().AutoMigrateModel(&groupModel)
 	if err != nil {
 		panic("db init err:" + err.Error())
@@ -68,8 +69,9 @@ func NewGroupServer(port int) *groupServer {
 		panic("db init err:" + "conn is nil")
 	}
 	mongo.InitMongo()
+	redis.InitRedis()
 	mongo.CreateSuperGroupIndex()
-	g.GroupInterface = controller.NewGroupController(groupModel.DB, cache.InitRedis(), mongo.GetClient())
+	g.GroupInterface = controller.NewGroupController(groupModel.DB, redis.GetClient(), mongo.GetClient())
 	return &g
 }
 
