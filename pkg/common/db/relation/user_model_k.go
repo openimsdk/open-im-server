@@ -25,9 +25,9 @@ type User struct {
 	DB     *gorm.DB `gorm:"-" json:"-"`
 }
 
-func NewUserDB() *User {
+func NewUserDB(db *gorm.DB) *User {
 	var user User
-	user.DB = initMysqlDB(&user)
+	user.DB = db
 	return &user
 }
 
