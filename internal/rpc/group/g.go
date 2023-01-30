@@ -3,7 +3,6 @@ package group
 import (
 	"Open_IM/pkg/common/constant"
 	relation "Open_IM/pkg/common/db/mysql"
-	"Open_IM/pkg/common/tools"
 	pbGroup "Open_IM/pkg/proto/group"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -17,7 +16,7 @@ func getDBGroupRequest(ctx context.Context, req *pbGroup.GroupApplicationRespons
 	dbGroupRequest = &relation.GroupRequest{}
 	utils.CopyStructFields(&dbGroupRequest, req)
 	dbGroupRequest.UserID = req.FromUserID
-	dbGroupRequest.HandleUserID = tools.OpUserID(ctx)
+	dbGroupRequest.HandleUserID = utils.OpUserID(ctx)
 	dbGroupRequest.HandledTime = time.Now()
 	return dbGroupRequest
 }
@@ -29,7 +28,7 @@ func getDBGroupMember(ctx context.Context, groupID, userID string) (dbGroupMembe
 	member.GroupID = groupID
 	member.UserID = userID
 	member.RoleLevel = constant.GroupOrdinaryUsers
-	member.OperatorUserID = tools.OpUserID(ctx)
+	member.OperatorUserID = utils.OpUserID(ctx)
 
 	member.FaceURL = user.FaceURL
 	member.Nickname = user.Nickname
@@ -60,7 +59,7 @@ func genGroupID(ctx context.Context, groupID string) string {
 	if groupID != "" {
 		return groupID
 	}
-	groupID = utils.Md5(tools.OperationID(ctx) + strconv.FormatInt(time.Now().UnixNano(), 10))
+	groupID = utils.Md5(utils.OperationID(ctx) + strconv.FormatInt(time.Now().UnixNano(), 10))
 	bi := big.NewInt(0)
 	bi.SetString(groupID[0:8], 16)
 	groupID = bi.String()

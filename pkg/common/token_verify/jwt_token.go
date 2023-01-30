@@ -5,7 +5,6 @@ import (
 	"Open_IM/pkg/common/constant"
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -160,7 +159,7 @@ func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool 
 }
 
 func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
-	opUserID := tools.OpUserID(ctx)
+	opUserID := utils.OpUserID(ctx)
 	defer func() {
 		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", opUserID, "ownerUserID", ownerUserID)
 	}()
@@ -174,11 +173,11 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 }
 
 func IsAppManagerUid(ctx context.Context) bool {
-	return utils.IsContain(tools.OpUserID(ctx), config.Config.Manager.AppManagerUid)
+	return utils.IsContain(utils.OpUserID(ctx), config.Config.Manager.AppManagerUid)
 }
 
 func CheckAdmin(ctx context.Context) error {
-	if utils.IsContain(tools.OpUserID(ctx), config.Config.Manager.AppManagerUid) {
+	if utils.IsContain(utils.OpUserID(ctx), config.Config.Manager.AppManagerUid) {
 		return nil
 	}
 	return constant.ErrIdentity.Wrap()

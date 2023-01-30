@@ -19,6 +19,11 @@ type Friend struct {
 	DB             *gorm.DB  `gorm:"-"`
 }
 
+type FriendUser struct {
+	Friend
+	Nickname string `gorm:"column:name;size:255"`
+}
+
 func NewFriendDB(db *gorm.DB) *Friend {
 	var friend Friend
 	friend.DB = initModel(db, friend)

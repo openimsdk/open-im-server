@@ -17,8 +17,8 @@ import (
 
 func GetMessagesStatistics(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetMessageStatisticsRequest
-		resp  cms_api_struct.GetMessageStatisticsResponse
+		req   cms_struct.GetMessageStatisticsRequest
+		resp  cms_struct.GetMessageStatisticsResponse
 		reqPb admin.GetMessageStatisticsReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
@@ -73,8 +73,8 @@ func GetMessagesStatistics(c *gin.Context) {
 
 func GetUserStatistics(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetUserStatisticsRequest
-		resp  cms_api_struct.GetUserStatisticsResponse
+		req   cms_struct.GetUserStatisticsRequest
+		resp  cms_struct.GetUserStatisticsResponse
 		reqPb admin.GetUserStatisticsReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
@@ -138,8 +138,8 @@ func GetUserStatistics(c *gin.Context) {
 
 func GetGroupStatistics(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetGroupStatisticsRequest
-		resp  cms_api_struct.GetGroupStatisticsResponse
+		req   cms_struct.GetGroupStatisticsRequest
+		resp  cms_struct.GetGroupStatisticsResponse
 		reqPb admin.GetGroupStatisticsReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
@@ -197,8 +197,8 @@ func GetGroupStatistics(c *gin.Context) {
 
 func GetActiveUser(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetActiveUserRequest
-		resp  cms_api_struct.GetActiveUserResponse
+		req   cms_struct.GetActiveUserRequest
+		resp  cms_struct.GetActiveUserResponse
 		reqPb admin.GetActiveUserReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}
@@ -233,8 +233,8 @@ func GetActiveUser(c *gin.Context) {
 
 func GetActiveGroup(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetActiveGroupRequest
-		resp  cms_api_struct.GetActiveGroupResponse
+		req   cms_struct.GetActiveGroupRequest
+		resp  cms_struct.GetActiveGroupResponse
 		reqPb admin.GetActiveGroupReq
 	)
 	reqPb.StatisticsReq = &admin.StatisticsReq{}

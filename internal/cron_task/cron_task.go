@@ -44,13 +44,16 @@ func StartCronTask(userID, workingGroupID string) {
 	}
 }
 
+type CronTask struct {
+}
+
 func getCronTaskOperationID() string {
 	return cronTaskOperationID + utils.OperationIDGenerator()
 }
 
 func ClearAll() {
 	operationID := getCronTaskOperationID()
-	log.NewInfo(operationID, "====================== start del cron task ======================")
+	log.NewInfo(operationID, "========================= start del cron task =========================")
 	var err error
 	userIDList, err := im_mysql_model.SelectAllUserID()
 	if err == nil {
@@ -67,7 +70,7 @@ func ClearAll() {
 		log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
 	}
 
-	log.NewInfo(operationID, "====================== start del cron finished ======================")
+	log.NewInfo(operationID, "========================= start del cron finished =========================")
 }
 
 func StartClearMsg(operationID string, userIDList []string) {

@@ -6,7 +6,6 @@ import (
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/common/tools"
 	utils2 "Open_IM/pkg/common/utils"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -389,23 +388,23 @@ func JoinGroupApplicationNotification(ctx context.Context, req *pbGroup.JoinGrou
 	JoinGroupApplicationTips := open_im_sdk.JoinGroupApplicationTips{Group: &open_im_sdk.GroupInfo{}, Applicant: &open_im_sdk.PublicUserInfo{}}
 	err := setGroupInfo(req.GroupID, JoinGroupApplicationTips.Group)
 	if err != nil {
-		log.Error(tools.OperationID(ctx), "setGroupInfo failed ", err.Error(), req.GroupID)
+		log.Error(utils.OperationID(ctx), "setGroupInfo failed ", err.Error(), req.GroupID)
 		return
 	}
-	if err = setPublicUserInfo(tools.OpUserID(ctx), JoinGroupApplicationTips.Applicant); err != nil {
-		log.Error(tools.OperationID(ctx), "setPublicUserInfo failed ", err.Error(), tools.OpUserID(ctx))
+	if err = setPublicUserInfo(utils.OpUserID(ctx), JoinGroupApplicationTips.Applicant); err != nil {
+		log.Error(utils.OperationID(ctx), "setPublicUserInfo failed ", err.Error(), utils.OpUserID(ctx))
 		return
 	}
 	JoinGroupApplicationTips.ReqMsg = req.ReqMessage
 
 	managerList, err := imdb.GetOwnerManagerByGroupID(req.GroupID)
 	if err != nil {
-		log.NewError(tools.OperationID(ctx), "GetOwnerManagerByGroupId failed ", err.Error(), req.GroupID)
+		log.NewError(utils.OperationID(ctx), "GetOwnerManagerByGroupId failed ", err.Error(), req.GroupID)
 		return
 	}
 	for _, v := range managerList {
-		groupNotification(constant.JoinGroupApplicationNotification, &JoinGroupApplicationTips, tools.OpUserID(ctx), "", v.UserID, tools.OperationID(ctx))
-		log.NewInfo(tools.OperationID(ctx), "Notification ", v)
+		groupNotification(constant.JoinGroupApplicationNotification, &JoinGroupApplicationTips, utils.OpUserID(ctx), "", v.UserID, utils.OperationID(ctx))
+		log.NewInfo(utils.OperationID(ctx), "Notification ", v)
 	}
 }
 

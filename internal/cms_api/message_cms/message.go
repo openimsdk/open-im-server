@@ -17,8 +17,8 @@ import (
 
 func GetChatLogs(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetChatLogsReq
-		resp  cms_api_struct.GetChatLogsResp
+		req   cms_struct.GetChatLogsReq
+		resp  cms_struct.GetChatLogsResp
 		reqPb pbAdminCMS.GetChatLogsReq
 	)
 	if err := c.Bind(&req); err != nil {
@@ -47,7 +47,7 @@ func GetChatLogs(c *gin.Context) {
 		return
 	}
 	for _, v := range respPb.ChatLogs {
-		chatLog := cms_api_struct.ChatLog{}
+		chatLog := cms_struct.ChatLog{}
 		utils.CopyStructFields(&chatLog, v)
 		resp.ChatLogs = append(resp.ChatLogs, &chatLog)
 	}

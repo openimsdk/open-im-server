@@ -158,13 +158,15 @@ func (g *GroupDataBase) FindGroupsByID(ctx context.Context, groupIDs []string) (
 	return g.cache.GetGroupsInfo(ctx, groupIDs)
 }
 
-func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation.Group, groupMember []*relation.GroupMember) error {
+func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation.Group, groupMembers []*relation.GroupMember) error {
 	return g.db.Transaction(func(tx *gorm.DB) error {
-		if err := g.groupDB.Create(ctx, groups, tx); err != nil {
-			return err
+		if len(groups) > 0 {
+			if err := g.groupDB.Create(ctx, groups, tx); err != nil {
+				return err
+			}
 		}
-		if len(groupMember) > 0 {
-			if err := g.groupMemberDB.Create(ctx, groupMember, tx); err != nil {
+		if len(groupMembers) > 0 {
+			if err := g.groupMemberDB.Create(ctx, groupMembers, tx); err != nil {
 				return err
 			}
 		}

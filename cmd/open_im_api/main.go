@@ -15,6 +15,7 @@ import (
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/getcdv3"
 	"Open_IM/pkg/utils"
 	"flag"
 	"fmt"
@@ -213,7 +214,7 @@ func main() {
 	}
 	//
 
-	go utils.RegisterConf()
+	go getcdv3.RegisterConf()
 	go apiThird.MinioInit()
 	defaultPorts := config.Config.Api.GinPort
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10002 as port")

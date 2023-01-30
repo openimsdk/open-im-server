@@ -1,7 +1,6 @@
 package msg
 
 import (
-	utils2 "Open_IM/internal/utils"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
@@ -177,7 +176,7 @@ func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMs
 			return true, 0, "", nil
 		}
 	case constant.GroupChatType:
-		userIDList, err := utils2.GetGroupMemberUserIDList(ctx, data.MsgData.GroupID, data.OperationID)
+		userIDList, err := utils.GetGroupMemberUserIDList(ctx, data.MsgData.GroupID, data.OperationID)
 		if err != nil {
 			errMsg := data.OperationID + err.Error()
 			log.NewError(data.OperationID, errMsg)
@@ -251,7 +250,7 @@ func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMs
 		if groupInfo.GroupType == constant.SuperGroup {
 			return true, 0, "", nil
 		} else {
-			userIDList, err := utils2.GetGroupMemberUserIDList(ctx, data.MsgData.GroupID, data.OperationID)
+			userIDList, err := utils.GetGroupMemberUserIDList(ctx, data.MsgData.GroupID, data.OperationID)
 			if err != nil {
 				errMsg := data.OperationID + err.Error()
 				log.NewError(data.OperationID, errMsg)
