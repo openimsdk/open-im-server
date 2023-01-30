@@ -1,7 +1,8 @@
-package utils
+package getcdv3
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
 	"github.com/OpenIMSDK/getcdv3"
@@ -32,8 +33,8 @@ func RegisterConf() {
 	if err != nil {
 		panic(err.Error())
 	}
-	secretMD5 := Md5(config.Config.Etcd.Secret)
-	confBytes, err := AesEncrypt(bytes, []byte(secretMD5[0:16]))
+	secretMD5 := utils.Md5(config.Config.Etcd.Secret)
+	confBytes, err := utils.AesEncrypt(bytes, []byte(secretMD5[0:16]))
 	if err != nil {
 		panic(err.Error())
 	}
