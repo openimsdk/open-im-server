@@ -25,13 +25,13 @@ func getFromToUserNickname(fromUserID, toUserID string) (string, string, error) 
 	return from.Nickname, to.Nickname, nil
 }
 
-func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Message) {
-	log.Info(commID.OperationID, utils.GetSelfFuncName(), "args: ", commID, contentType)
+func friendNotification(operationID, fromUserID, toUserID string, contentType int32, m proto.Message) {
+	log.Info(operationID, utils.GetSelfFuncName(), "args: ", commID, contentType)
 	var err error
 	var tips open_im_sdk.TipsComm
 	tips.Detail, err = proto.Marshal(m)
 	if err != nil {
-		log.Error(commID.OperationID, "Marshal failed ", err.Error(), m.String())
+		log.Error(operationID, "Marshal failed ", err.Error(), m.String())
 		return
 	}
 
@@ -43,9 +43,9 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 
 	tips.JsonDetail, _ = marshaler.MarshalToString(m)
 
-	fromUserNickname, toUserNickname, err := getFromToUserNickname(commID.FromUserID, commID.ToUserID)
+	fromUserNickname, toUserNickname, err := getFromToUserNickname(fromUserID, toUserID)
 	if err != nil {
-		log.Error(commID.OperationID, "getFromToUserNickname failed ", err.Error(), commID.FromUserID, commID.ToUserID)
+		log.Error(operationID, "getFromToUserNickname failed ", err.Error(), fromUserID, toUserID)
 		return
 	}
 	cn := config.Config.Notification
@@ -71,20 +71,20 @@ func friendNotification(commID *pbFriend.CommID, contentType int32, m proto.Mess
 	case constant.FriendInfoUpdatedNotification:
 		tips.DefaultTips = cn.FriendInfoUpdated.DefaultTips.Tips + toUserNickname
 	default:
-		log.Error(commID.OperationID, "contentType failed ", contentType)
+		log.Error(operationID, "contentType failed ", contentType)
 		return
 	}
 
 	var n NotificationMsg
-	n.SendID = commID.FromUserID
-	n.RecvID = commID.ToUserID
+	n.SendID = fromUserID
+	n.RecvID = toUserID
 	n.ContentType = contentType
 	n.SessionType = constant.SingleChatType
 	n.MsgFrom = constant.SysMsgType
-	n.OperationID = commID.OperationID
+	n.OperationID = operationID
 	n.Content, err = proto.Marshal(&tips)
 	if err != nil {
-		log.Error(commID.OperationID, "Marshal failed ", err.Error(), tips.String())
+		log.Error(operationID, "Marshal failed ", err.Error(), tips.String())
 		return
 	}
 	Notification(&n)
@@ -160,7 +160,7 @@ func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
 	friendNotification(req.CommID, constant.BlackDeletedNotification, &blackDeletedTips)
 }
 
-//send to myself
+// send to myself
 func UserInfoUpdatedNotification(operationID, opUserID string, changedUserID string) {
 	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: changedUserID}
 	commID := pbFriend.CommID{FromUserID: opUserID, ToUserID: changedUserID, OpUserID: opUserID, OperationID: operationID}
@@ -169,6 +169,5 @@ func UserInfoUpdatedNotification(operationID, opUserID string, changedUserID str
 
 func FriendInfoUpdatedNotification(operationID, changedUserID string, needNotifiedUserID string, opUserID string) {
 	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: changedUserID}
-	commID := pbFriend.CommID{FromUserID: opUserID, ToUserID: needNotifiedUserID, OpUserID: opUserID, OperationID: operationID}
-	friendNotification(&commID, constant.FriendInfoUpdatedNotification, &selfInfoUpdatedTips)
+	friendNotification(operationID, opUserID, needNotifiedUserID, constant.FriendInfoUpdatedNotification, &selfInfoUpdatedTips)
 }

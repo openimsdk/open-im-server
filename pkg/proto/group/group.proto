@@ -18,10 +18,10 @@ message CreateGroupResp{
 
 
 message GetGroupsInfoReq{
-  repeated string groupIDList = 1;
+  repeated string groupIDs = 1;
 }
 message GetGroupsInfoResp{
-  repeated server_api_params.GroupInfo groupInfoList = 1;
+  repeated server_api_params.GroupInfo groupInfos = 1;
 }
 
 
@@ -38,7 +38,7 @@ message GetGroupApplicationListReq {
 }
 message GetGroupApplicationListResp {
   int32 total = 1;
-  repeated server_api_params.GroupRequest groupRequestList = 2;
+  repeated server_api_params.GroupRequest groupRequests = 2;
 }
 
 message GetUserReqApplicationListReq{
@@ -48,7 +48,7 @@ message GetUserReqApplicationListReq{
 
 message GetUserReqApplicationListResp{
   int32 total = 1;
-  repeated server_api_params.GroupRequest groupRequestList = 2;
+  repeated server_api_params.GroupRequest groupRequests = 2;
 }
 
 
@@ -94,14 +94,12 @@ message QuitGroupResp{
 message GetGroupMemberListReq {
   string groupID = 1;
   int32 filter = 2;
-  int32 nextSeq = 3;
   server_api_params.RequestPagination pagination = 4;
 }
 
 message GetGroupMemberListResp {
   int32 total = 1;
-  repeated server_api_params.GroupMemberFullInfo memberList = 2;
-  int32 nextSeq = 3;
+  repeated server_api_params.GroupMemberFullInfo members = 2;
 }
 
 
@@ -111,7 +109,7 @@ message GetGroupMembersInfoReq {
 }
 
 message GetGroupMembersInfoResp {
-  repeated server_api_params.GroupMemberFullInfo memberList = 1;
+  repeated server_api_params.GroupMemberFullInfo members = 1;
 }
 
 message KickGroupMemberReq {
@@ -131,14 +129,14 @@ message GetJoinedGroupListReq {
 }
 message GetJoinedGroupListResp{
   int32 total = 1;
-  repeated  server_api_params.GroupInfo groupList = 2;
+  repeated  server_api_params.GroupInfo groups = 2;
 }
 
 
 message InviteUserToGroupReq {
   string groupID = 1;
   string reason = 2;
-  repeated string invitedUserIDList = 3;
+  repeated string invitedUserIDs = 3;
 }
 message InviteUserToGroupResp {
 
@@ -147,11 +145,10 @@ message InviteUserToGroupResp {
 
 message GetGroupAllMemberReq {
   string groupID = 1;
-  int32 offset = 2;
-  int32 count = 3;
+  server_api_params.RequestPagination pagination = 2;
 }
 message GetGroupAllMemberResp {
-  repeated server_api_params.GroupMemberFullInfo memberList = 1;
+  repeated server_api_params.GroupMemberFullInfo members = 1;
 }
 
 message CMSGroup {
@@ -250,15 +247,15 @@ message GetJoinedSuperGroupListReq {
 
 message GetJoinedSuperGroupListResp {
   int32 total = 1;
-  repeated server_api_params.GroupInfo groupList = 2;
+  repeated server_api_params.GroupInfo groups = 2;
 }
 
 message GetSuperGroupsInfoReq {
-  repeated string groupIDList = 1;
+  repeated string groupIDs = 1;
 }
 
 message GetSuperGroupsInfoResp {
-  repeated server_api_params.GroupInfo groupInfoList = 1;
+  repeated server_api_params.GroupInfo groupInfos = 1;
 }
 
 message SetGroupMemberInfoReq{
@@ -288,6 +285,13 @@ message GetGroupAbstractInfoResp{
   repeated GroupAbstractInfo groupAbstractInfos = 1;
 }
 
+message getUserInGroupMembersReq {
+  string userID = 1;
+  repeated string groupIDs = 2;
+}
+message getUserInGroupMembersResp{
+  repeated server_api_params.GroupMemberFullInfo members = 1;
+}
 
 service group{
   //创建群
@@ -319,30 +323,32 @@ service group{
   //邀请某些人进群
   rpc inviteUserToGroup(InviteUserToGroupReq) returns (InviteUserToGroupResp);
 
-  rpc GetGroups(GetGroupsReq) returns(GetGroupsResp);
-  rpc GetGroupMembersCMS(GetGroupMembersCMSReq) returns(GetGroupMembersCMSResp);
+  rpc getGroups(GetGroupsReq) returns(GetGroupsResp);
+  rpc getGroupMembersCMS(GetGroupMembersCMSReq) returns(GetGroupMembersCMSResp);
 
   //解散群
-  rpc DismissGroup(DismissGroupReq) returns(DismissGroupResp);
+  rpc dismissGroup(DismissGroupReq) returns(DismissGroupResp);
   //对某个群成员禁言
-  rpc MuteGroupMember(MuteGroupMemberReq) returns(MuteGroupMemberResp);
+  rpc muteGroupMember(MuteGroupMemberReq) returns(MuteGroupMemberResp);
   //对某个群成员取消禁言
-  rpc CancelMuteGroupMember(CancelMuteGroupMemberReq) returns(CancelMuteGroupMemberResp);
+  rpc cancelMuteGroupMember(CancelMuteGroupMemberReq) returns(CancelMuteGroupMemberResp);
   //对某个群禁言
-  rpc MuteGroup(MuteGroupReq) returns(MuteGroupResp);
+  rpc muteGroup(MuteGroupReq) returns(MuteGroupResp);
   //对某个群取消禁言
-  rpc CancelMuteGroup(CancelMuteGroupReq) returns(CancelMuteGroupResp);
+  rpc cancelMuteGroup(CancelMuteGroupReq) returns(CancelMuteGroupResp);
 
   //获取某个用户加入的超级群
-  rpc GetJoinedSuperGroupList(GetJoinedSuperGroupListReq) returns (GetJoinedSuperGroupListResp);
+  rpc getJoinedSuperGroupList(GetJoinedSuperGroupListReq) returns (GetJoinedSuperGroupListResp);
   //获取指定的超级群信息
-  rpc GetSuperGroupsInfo(GetSuperGroupsInfoReq) returns (GetSuperGroupsInfoResp);
+  rpc getSuperGroupsInfo(GetSuperGroupsInfoReq) returns (GetSuperGroupsInfoResp);
   //设置群成员昵称
-  rpc SetGroupMemberNickname(SetGroupMemberNicknameReq) returns (SetGroupMemberNicknameResp);
+  rpc setGroupMemberNickname(SetGroupMemberNicknameReq) returns (SetGroupMemberNicknameResp);
   //设置群成员信息
-  rpc SetGroupMemberInfo(SetGroupMemberInfoReq) returns (SetGroupMemberInfoResp);
+  rpc setGroupMemberInfo(SetGroupMemberInfoReq) returns (SetGroupMemberInfoResp);
   //获取群信息hash值
-  rpc GetGroupAbstractInfo(GetGroupAbstractInfoReq) returns (GetGroupAbstractInfoResp);
+  rpc getGroupAbstractInfo(GetGroupAbstractInfoReq) returns (GetGroupAbstractInfoResp);
+  //获取某个用户在指定群中的信息
+  rpc getUserInGroupMembers(getUserInGroupMembersReq) returns (getUserInGroupMembersResp);
 }
 
 
