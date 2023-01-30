@@ -19,7 +19,7 @@ type Friend struct {
 	DB             *gorm.DB  `gorm:"-"`
 }
 
-func NewFriend(db *gorm.DB) *Friend {
+func NewFriendDB(db *gorm.DB) *Friend {
 	var friend Friend
 	friend.DB = initModel(db, friend)
 	return &friend
