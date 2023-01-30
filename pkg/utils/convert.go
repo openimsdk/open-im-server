@@ -41,18 +41,18 @@ func (db *DBFriend) convert() (*sdk.FriendInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	utils2.CopyStructFields(pbFriend.FriendUser, user[0])
-	pbFriend.CreateTime = uint32(db.CreateTime.Unix())
+	CopyStructFields(pbFriend.FriendUser, user[0])
+	pbFriend.CreateTime = db.CreateTime.Unix()
 
-	pbFriend.FriendUser.CreateTime = uint32(db.CreateTime.Unix())
+	pbFriend.FriendUser.CreateTime = db.CreateTime.Unix()
 	return pbFriend, nil
 }
 
 func (pb *PBFriend) Convert() (*relation.Friend, error) {
 	dbFriend := &relation.Friend{}
-	utils2.CopyStructFields(dbFriend, pb)
+	CopyStructFields(dbFriend, pb)
 	dbFriend.FriendUserID = pb.FriendUser.UserID
-	dbFriend.CreateTime = utils2.UnixSecondToTime(int64(pb.CreateTime))
+	dbFriend.CreateTime = UnixSecondToTime(pb.CreateTime)
 	return dbFriend, nil
 }
 
@@ -96,8 +96,8 @@ func (db *DBFriendRequest) Convert() (*sdk.FriendRequest, error) {
 	pbFriendRequest.ToNickname = user[0].Nickname
 	pbFriendRequest.ToFaceURL = user[0].FaceURL
 	pbFriendRequest.ToGender = user[0].Gender
-	pbFriendRequest.CreateTime = uint32(db.CreateTime.Unix())
-	pbFriendRequest.HandleTime = uint32(db.HandleTime.Unix())
+	pbFriendRequest.CreateTime = db.CreateTime.Unix()
+	pbFriendRequest.HandleTime = db.HandleTime.Unix()
 	return pbFriendRequest, nil
 }
 
@@ -170,8 +170,8 @@ func (db *DBGroup) Convert() (*sdk.GroupInfo, error) {
 		return nil, err
 	}
 	dst.MemberCount = uint32(memberCount)
-	dst.CreateTime = uint32(db.CreateTime.Unix())
-	dst.NotificationUpdateTime = uint32(db.NotificationUpdateTime.Unix())
+	dst.CreateTime = db.CreateTime.Unix()
+	dst.NotificationUpdateTime = db.NotificationUpdateTime.Unix()
 	if db.NotificationUpdateTime.Unix() < 0 {
 		dst.NotificationUpdateTime = 0
 	}
@@ -211,12 +211,12 @@ func (db *DBGroupMember) Convert() (*sdk.GroupMemberFullInfo, error) {
 	}
 	dst.AppMangerLevel = user[0].AppMangerLevel
 
-	dst.JoinTime = int32(db.JoinTime.Unix())
+	dst.JoinTime = db.JoinTime.Unix()
 	if db.JoinTime.Unix() < 0 {
 		dst.JoinTime = 0
 	}
-	dst.MuteEndTime = uint32(db.MuteEndTime.Unix())
-	if dst.MuteEndTime < uint32(time.Now().Unix()) {
+	dst.MuteEndTime = db.MuteEndTime.Unix()
+	if dst.MuteEndTime < time.Now().Unix() {
 		dst.MuteEndTime = 0
 	}
 	return dst, nil

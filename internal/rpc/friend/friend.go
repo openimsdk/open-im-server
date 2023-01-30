@@ -160,13 +160,13 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	if err := token_verify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := GetUsersInfo(ctx, []string{req.FromUserID}); err != nil {
+	if _, err := GetUsersInfo(ctx, []string{req.OwnerUserID}); err != nil {
 		return nil, err
 	}
 
 	var friends []*relation.Friend
-	for _, userID := range utils.RemoveDuplicateElement(req.FriendUserIDList) {
-		friends = append(friends, &relation.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID, AddSource: constant.BecomeFriendByImport, OperatorUserID: tools.OpUserID(ctx)})
+	for _, userID := range utils.RemoveDuplicateElement(req.FriendUserIDs) {
+		friends = append(friends, &relation.Friend{OwnerUserID: userID, FriendUserID: req.OwnerUserID, AddSource: constant.BecomeFriendByImport, OperatorUserID: tools.OpUserID(ctx)})
 	}
 	if len(friends) > 0 {
 		if err := s.FriendInterface.BecomeFriend(ctx, friends); err != nil {
