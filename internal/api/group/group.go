@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/getcdv3"
 	rpc "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
@@ -1010,7 +1010,7 @@ func CancelMuteGroupMember(c *gin.Context) {
 
 	//var err error
 	//if err, req.OpUserID, _ = token_verify.ParseUserIDFromToken(c.Request.Header.Get("token"), req.OperationID); err != nil {
-	//	trace_log.WriteErrorResponse(nCtx, "ParseUserIDFromToken", err)
+	//	tracelog.WriteErrorResponse(nCtx, "ParseUserIDFromToken", err)
 	//	return
 	//}
 	tracelog.SetCtxInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
@@ -1269,7 +1269,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 	//req api.GetGroupAbstractInfoReq
 	//resp api.GetGroupAbstractInfoResp
 	//)
-	//nCtx := trace_log.NewCtx(c, utils.GetSelfFuncName())
+	//nCtx := tracelog.NewCtx(c, utils.GetSelfFuncName())
 	//if err := c.BindJSON(&req); err != nil {
 	//	log.NewError("0", "BindJSON failed ", err.Error())
 	//	c.JSON(http.StatusBadRequest, gin.H{"errCode": 400, "errMsg": err.Error()})
@@ -1301,7 +1301,7 @@ func GetGroupAbstractInfo(c *gin.Context) {
 	//if err != nil {
 	//	//log.NewError(req.OperationID, utils.GetSelfFuncName(), " failed ", err.Error())
 	//	//c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
-	//	trace_log.WriteErrorResponse(nCtx, "GetGroupAbstractInfo", utils.Wrap(err, ""))
+	//	tracelog.WriteErrorResponse(nCtx, "GetGroupAbstractInfo", utils.Wrap(err, ""))
 	//	return
 	//}
 	//resp.GroupMemberNumber = respPb.GroupMemberNumber

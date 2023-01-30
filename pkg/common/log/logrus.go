@@ -2,7 +2,7 @@ package log
 
 import (
 	"Open_IM/pkg/common/config"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"bufio"
 	"context"
 	//"bufio"
@@ -239,7 +239,7 @@ func NewWarn(OperationID string, args ...interface{}) {
 func ShowLog(ctx context.Context) {
 	t := ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo)
 	OperationID := tracelog.GetOperationID(ctx)
-	//if ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo).GinCtx != nil {
+	//if ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo).GinCtx != nil {
 	//	ctxLogger.WithFields(logrus.Fields{
 	//		"OperationID": OperationID,
 	//		"PID":         ctxLogger.Pid,

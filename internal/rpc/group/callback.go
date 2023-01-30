@@ -7,7 +7,7 @@ import (
 	relation "Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	pbGroup "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
 	"context"

@@ -3,7 +3,6 @@ package getcdv3
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/trace_log"
 	"Open_IM/pkg/common/tracelog"
 	"context"
 	"github.com/OpenIMSDK/getcdv3"

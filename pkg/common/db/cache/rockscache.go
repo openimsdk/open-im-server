@@ -5,7 +5,7 @@ import (
 	"Open_IM/pkg/common/db/mongo"
 	"Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
@@ -370,7 +370,7 @@ func DelAllGroupMembersInfoFromCache(ctx context.Context, groupID string) (err e
 //	}
 //	groupInfo = &mysql.Group{}
 //	defer func() {
-//		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupInfo", groupInfo)
+//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupInfo", groupInfo)
 //	}()
 //	groupInfoStr, err := db.DB.Rc.Fetch(groupInfoCache+groupID, time.Second*30*60, getGroupInfo)
 //	if err != nil {
@@ -382,7 +382,7 @@ func DelAllGroupMembersInfoFromCache(ctx context.Context, groupID string) (err e
 //
 //func DelGroupInfoFromCache(ctx context.Context, groupID string) (err error) {
 //	defer func() {
-//		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
+//		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
 //	}()
 //	return db.DB.Rc.TagAsDeleted(groupInfoCache + groupID)
 //}

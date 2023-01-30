@@ -1,7 +1,7 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
@@ -73,7 +73,7 @@ func (u *User) Take(ctx context.Context, userID string) (user *User, err error) 
 
 func (u *User) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*User, count int64, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
 	}()
 	err = u.DB.Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * pageNumber)).Find(&users).Error
 	if err != nil {
@@ -96,7 +96,7 @@ func (u *User) GetByNameAndID(ctx context.Context, content string, showNumber, p
 
 func (u *User) Get(ctx context.Context, showNumber, pageNumber int32) (users []*User, count int64, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
 	}()
 	err = u.DB.Model(u).Count(&count).Error
 	if err != nil {

@@ -2,7 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
