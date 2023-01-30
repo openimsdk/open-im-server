@@ -25,8 +25,8 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type GetFriendsInfoReq struct {
-	FromUserID           string   `protobuf:"bytes,1,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	ToUserIDs            []string `protobuf:"bytes,2,rep,name=toUserIDs" json:"toUserIDs,omitempty"`
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	FriendUserIDs        []string `protobuf:"bytes,2,rep,name=friendUserIDs" json:"friendUserIDs,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -36,7 +36,7 @@ func (m *GetFriendsInfoReq) Reset()         { *m = GetFriendsInfoReq{} }
 func (m *GetFriendsInfoReq) String() string { return proto.CompactTextString(m) }
 func (*GetFriendsInfoReq) ProtoMessage()    {}
 func (*GetFriendsInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{0}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{0}
 }
 func (m *GetFriendsInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendsInfoReq.Unmarshal(m, b)
@@ -56,16 +56,16 @@ func (m *GetFriendsInfoReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GetFriendsInfoReq proto.InternalMessageInfo
 
-func (m *GetFriendsInfoReq) GetFromUserID() string {
+func (m *GetFriendsInfoReq) GetOwnerUserID() string {
 	if m != nil {
-		return m.FromUserID
+		return m.OwnerUserID
 	}
 	return ""
 }
 
-func (m *GetFriendsInfoReq) GetToUserIDs() []string {
+func (m *GetFriendsInfoReq) GetFriendUserIDs() []string {
 	if m != nil {
-		return m.ToUserIDs
+		return m.FriendUserIDs
 	}
 	return nil
 }
@@ -81,7 +81,7 @@ func (m *GetFriendsInfoResp) Reset()         { *m = GetFriendsInfoResp{} }
 func (m *GetFriendsInfoResp) String() string { return proto.CompactTextString(m) }
 func (*GetFriendsInfoResp) ProtoMessage()    {}
 func (*GetFriendsInfoResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{1}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{1}
 }
 func (m *GetFriendsInfoResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GetFriendsInfoResp.Unmarshal(m, b)
@@ -122,7 +122,7 @@ func (m *AddFriendReq) Reset()         { *m = AddFriendReq{} }
 func (m *AddFriendReq) String() string { return proto.CompactTextString(m) }
 func (*AddFriendReq) ProtoMessage()    {}
 func (*AddFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{2}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{2}
 }
 func (m *AddFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddFriendReq.Unmarshal(m, b)
@@ -180,7 +180,7 @@ func (m *AddFriendResp) Reset()         { *m = AddFriendResp{} }
 func (m *AddFriendResp) String() string { return proto.CompactTextString(m) }
 func (*AddFriendResp) ProtoMessage()    {}
 func (*AddFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{3}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{3}
 }
 func (m *AddFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddFriendResp.Unmarshal(m, b)
@@ -201,8 +201,8 @@ func (m *AddFriendResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_AddFriendResp proto.InternalMessageInfo
 
 type ImportFriendReq struct {
-	FriendUserIDList     []string `protobuf:"bytes,1,rep,name=FriendUserIDList" json:"FriendUserIDList,omitempty"`
-	FromUserID           string   `protobuf:"bytes,2,opt,name=FromUserID" json:"FromUserID,omitempty"`
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	FriendUserIDs        []string `protobuf:"bytes,2,rep,name=friendUserIDs" json:"friendUserIDs,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -212,7 +212,7 @@ func (m *ImportFriendReq) Reset()         { *m = ImportFriendReq{} }
 func (m *ImportFriendReq) String() string { return proto.CompactTextString(m) }
 func (*ImportFriendReq) ProtoMessage()    {}
 func (*ImportFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{4}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{4}
 }
 func (m *ImportFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ImportFriendReq.Unmarshal(m, b)
@@ -232,18 +232,18 @@ func (m *ImportFriendReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ImportFriendReq proto.InternalMessageInfo
 
-func (m *ImportFriendReq) GetFriendUserIDList() []string {
+func (m *ImportFriendReq) GetOwnerUserID() string {
 	if m != nil {
-		return m.FriendUserIDList
-	}
-	return nil
-}
-
-func (m *ImportFriendReq) GetFromUserID() string {
-	if m != nil {
-		return m.FromUserID
+		return m.OwnerUserID
 	}
 	return ""
+}
+
+func (m *ImportFriendReq) GetFriendUserIDs() []string {
+	if m != nil {
+		return m.FriendUserIDs
+	}
+	return nil
 }
 
 type ImportFriendResp struct {
@@ -256,7 +256,7 @@ func (m *ImportFriendResp) Reset()         { *m = ImportFriendResp{} }
 func (m *ImportFriendResp) String() string { return proto.CompactTextString(m) }
 func (*ImportFriendResp) ProtoMessage()    {}
 func (*ImportFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{5}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{5}
 }
 func (m *ImportFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ImportFriendResp.Unmarshal(m, b)
@@ -276,7 +276,7 @@ func (m *ImportFriendResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ImportFriendResp proto.InternalMessageInfo
 
-type GetToFriendApplyListReq struct {
+type GetToFriendsApplyReq struct {
 	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
 	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
@@ -284,91 +284,91 @@ type GetToFriendApplyListReq struct {
 	XXX_sizecache        int32                     `json:"-"`
 }
 
-func (m *GetToFriendApplyListReq) Reset()         { *m = GetToFriendApplyListReq{} }
-func (m *GetToFriendApplyListReq) String() string { return proto.CompactTextString(m) }
-func (*GetToFriendApplyListReq) ProtoMessage()    {}
-func (*GetToFriendApplyListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{6}
+func (m *GetToFriendsApplyReq) Reset()         { *m = GetToFriendsApplyReq{} }
+func (m *GetToFriendsApplyReq) String() string { return proto.CompactTextString(m) }
+func (*GetToFriendsApplyReq) ProtoMessage()    {}
+func (*GetToFriendsApplyReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{6}
 }
-func (m *GetToFriendApplyListReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetToFriendApplyListReq.Unmarshal(m, b)
+func (m *GetToFriendsApplyReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetToFriendsApplyReq.Unmarshal(m, b)
 }
-func (m *GetToFriendApplyListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetToFriendApplyListReq.Marshal(b, m, deterministic)
+func (m *GetToFriendsApplyReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetToFriendsApplyReq.Marshal(b, m, deterministic)
 }
-func (dst *GetToFriendApplyListReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetToFriendApplyListReq.Merge(dst, src)
+func (dst *GetToFriendsApplyReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetToFriendsApplyReq.Merge(dst, src)
 }
-func (m *GetToFriendApplyListReq) XXX_Size() int {
-	return xxx_messageInfo_GetToFriendApplyListReq.Size(m)
+func (m *GetToFriendsApplyReq) XXX_Size() int {
+	return xxx_messageInfo_GetToFriendsApplyReq.Size(m)
 }
-func (m *GetToFriendApplyListReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetToFriendApplyListReq.DiscardUnknown(m)
+func (m *GetToFriendsApplyReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetToFriendsApplyReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetToFriendApplyListReq proto.InternalMessageInfo
+var xxx_messageInfo_GetToFriendsApplyReq proto.InternalMessageInfo
 
-func (m *GetToFriendApplyListReq) GetUserID() string {
+func (m *GetToFriendsApplyReq) GetUserID() string {
 	if m != nil {
 		return m.UserID
 	}
 	return ""
 }
 
-func (m *GetToFriendApplyListReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetToFriendsApplyReq) GetPagination() *sdk_ws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
 	return nil
 }
 
-type GetToFriendApplyListResp struct {
-	FriendRequestList    []*sdk_ws.FriendRequest `protobuf:"bytes,1,rep,name=FriendRequestList" json:"FriendRequestList,omitempty"`
+type GetToFriendsApplyResp struct {
+	FriendRequests       []*sdk_ws.FriendRequest `protobuf:"bytes,1,rep,name=FriendRequests" json:"FriendRequests,omitempty"`
 	Total                int32                   `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
 	XXX_unrecognized     []byte                  `json:"-"`
 	XXX_sizecache        int32                   `json:"-"`
 }
 
-func (m *GetToFriendApplyListResp) Reset()         { *m = GetToFriendApplyListResp{} }
-func (m *GetToFriendApplyListResp) String() string { return proto.CompactTextString(m) }
-func (*GetToFriendApplyListResp) ProtoMessage()    {}
-func (*GetToFriendApplyListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{7}
+func (m *GetToFriendsApplyResp) Reset()         { *m = GetToFriendsApplyResp{} }
+func (m *GetToFriendsApplyResp) String() string { return proto.CompactTextString(m) }
+func (*GetToFriendsApplyResp) ProtoMessage()    {}
+func (*GetToFriendsApplyResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{7}
 }
-func (m *GetToFriendApplyListResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetToFriendApplyListResp.Unmarshal(m, b)
+func (m *GetToFriendsApplyResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetToFriendsApplyResp.Unmarshal(m, b)
 }
-func (m *GetToFriendApplyListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetToFriendApplyListResp.Marshal(b, m, deterministic)
+func (m *GetToFriendsApplyResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetToFriendsApplyResp.Marshal(b, m, deterministic)
 }
-func (dst *GetToFriendApplyListResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetToFriendApplyListResp.Merge(dst, src)
+func (dst *GetToFriendsApplyResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetToFriendsApplyResp.Merge(dst, src)
 }
-func (m *GetToFriendApplyListResp) XXX_Size() int {
-	return xxx_messageInfo_GetToFriendApplyListResp.Size(m)
+func (m *GetToFriendsApplyResp) XXX_Size() int {
+	return xxx_messageInfo_GetToFriendsApplyResp.Size(m)
 }
-func (m *GetToFriendApplyListResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetToFriendApplyListResp.DiscardUnknown(m)
+func (m *GetToFriendsApplyResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetToFriendsApplyResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetToFriendApplyListResp proto.InternalMessageInfo
+var xxx_messageInfo_GetToFriendsApplyResp proto.InternalMessageInfo
 
-func (m *GetToFriendApplyListResp) GetFriendRequestList() []*sdk_ws.FriendRequest {
+func (m *GetToFriendsApplyResp) GetFriendRequests() []*sdk_ws.FriendRequest {
 	if m != nil {
-		return m.FriendRequestList
+		return m.FriendRequests
 	}
 	return nil
 }
 
-func (m *GetToFriendApplyListResp) GetTotal() int32 {
+func (m *GetToFriendsApplyResp) GetTotal() int32 {
 	if m != nil {
 		return m.Total
 	}
 	return 0
 }
 
-type GetFriendListReq struct {
+type GetFriendsReq struct {
 	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,1,opt,name=pagination" json:"pagination,omitempty"`
 	UserID               string                    `protobuf:"bytes,2,opt,name=userID" json:"userID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
@@ -376,243 +376,243 @@ type GetFriendListReq struct {
 	XXX_sizecache        int32                     `json:"-"`
 }
 
-func (m *GetFriendListReq) Reset()         { *m = GetFriendListReq{} }
-func (m *GetFriendListReq) String() string { return proto.CompactTextString(m) }
-func (*GetFriendListReq) ProtoMessage()    {}
-func (*GetFriendListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{8}
+func (m *GetFriendsReq) Reset()         { *m = GetFriendsReq{} }
+func (m *GetFriendsReq) String() string { return proto.CompactTextString(m) }
+func (*GetFriendsReq) ProtoMessage()    {}
+func (*GetFriendsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{8}
 }
-func (m *GetFriendListReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetFriendListReq.Unmarshal(m, b)
+func (m *GetFriendsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFriendsReq.Unmarshal(m, b)
 }
-func (m *GetFriendListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetFriendListReq.Marshal(b, m, deterministic)
+func (m *GetFriendsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFriendsReq.Marshal(b, m, deterministic)
 }
-func (dst *GetFriendListReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetFriendListReq.Merge(dst, src)
+func (dst *GetFriendsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFriendsReq.Merge(dst, src)
 }
-func (m *GetFriendListReq) XXX_Size() int {
-	return xxx_messageInfo_GetFriendListReq.Size(m)
+func (m *GetFriendsReq) XXX_Size() int {
+	return xxx_messageInfo_GetFriendsReq.Size(m)
 }
-func (m *GetFriendListReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetFriendListReq.DiscardUnknown(m)
+func (m *GetFriendsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFriendsReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetFriendListReq proto.InternalMessageInfo
+var xxx_messageInfo_GetFriendsReq proto.InternalMessageInfo
 
-func (m *GetFriendListReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetFriendsReq) GetPagination() *sdk_ws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
 	return nil
 }
 
-func (m *GetFriendListReq) GetUserID() string {
+func (m *GetFriendsReq) GetUserID() string {
 	if m != nil {
 		return m.UserID
 	}
 	return ""
 }
 
-type GetFriendListResp struct {
-	FriendInfoList       []*sdk_ws.FriendInfo `protobuf:"bytes,1,rep,name=FriendInfoList" json:"FriendInfoList,omitempty"`
+type GetFriendsResp struct {
+	FriendsInfo          []*sdk_ws.FriendInfo `protobuf:"bytes,1,rep,name=FriendsInfo" json:"FriendsInfo,omitempty"`
 	Total                int32                `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
 }
 
-func (m *GetFriendListResp) Reset()         { *m = GetFriendListResp{} }
-func (m *GetFriendListResp) String() string { return proto.CompactTextString(m) }
-func (*GetFriendListResp) ProtoMessage()    {}
-func (*GetFriendListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{9}
+func (m *GetFriendsResp) Reset()         { *m = GetFriendsResp{} }
+func (m *GetFriendsResp) String() string { return proto.CompactTextString(m) }
+func (*GetFriendsResp) ProtoMessage()    {}
+func (*GetFriendsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{9}
 }
-func (m *GetFriendListResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetFriendListResp.Unmarshal(m, b)
+func (m *GetFriendsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFriendsResp.Unmarshal(m, b)
 }
-func (m *GetFriendListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetFriendListResp.Marshal(b, m, deterministic)
+func (m *GetFriendsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFriendsResp.Marshal(b, m, deterministic)
 }
-func (dst *GetFriendListResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetFriendListResp.Merge(dst, src)
+func (dst *GetFriendsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFriendsResp.Merge(dst, src)
 }
-func (m *GetFriendListResp) XXX_Size() int {
-	return xxx_messageInfo_GetFriendListResp.Size(m)
+func (m *GetFriendsResp) XXX_Size() int {
+	return xxx_messageInfo_GetFriendsResp.Size(m)
 }
-func (m *GetFriendListResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetFriendListResp.DiscardUnknown(m)
+func (m *GetFriendsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFriendsResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetFriendListResp proto.InternalMessageInfo
+var xxx_messageInfo_GetFriendsResp proto.InternalMessageInfo
 
-func (m *GetFriendListResp) GetFriendInfoList() []*sdk_ws.FriendInfo {
+func (m *GetFriendsResp) GetFriendsInfo() []*sdk_ws.FriendInfo {
 	if m != nil {
-		return m.FriendInfoList
+		return m.FriendsInfo
 	}
 	return nil
 }
 
-func (m *GetFriendListResp) GetTotal() int32 {
+func (m *GetFriendsResp) GetTotal() int32 {
 	if m != nil {
 		return m.Total
 	}
 	return 0
 }
 
-type AddBlacklistReq struct {
-	FromUserID           string   `protobuf:"bytes,1,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	ToUserID             string   `protobuf:"bytes,2,opt,name=toUserID" json:"toUserID,omitempty"`
+type AddBlackReq struct {
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	BlackUserID          string   `protobuf:"bytes,2,opt,name=blackUserID" json:"blackUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *AddBlacklistReq) Reset()         { *m = AddBlacklistReq{} }
-func (m *AddBlacklistReq) String() string { return proto.CompactTextString(m) }
-func (*AddBlacklistReq) ProtoMessage()    {}
-func (*AddBlacklistReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{10}
+func (m *AddBlackReq) Reset()         { *m = AddBlackReq{} }
+func (m *AddBlackReq) String() string { return proto.CompactTextString(m) }
+func (*AddBlackReq) ProtoMessage()    {}
+func (*AddBlackReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{10}
 }
-func (m *AddBlacklistReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AddBlacklistReq.Unmarshal(m, b)
+func (m *AddBlackReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddBlackReq.Unmarshal(m, b)
 }
-func (m *AddBlacklistReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AddBlacklistReq.Marshal(b, m, deterministic)
+func (m *AddBlackReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddBlackReq.Marshal(b, m, deterministic)
 }
-func (dst *AddBlacklistReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddBlacklistReq.Merge(dst, src)
+func (dst *AddBlackReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddBlackReq.Merge(dst, src)
 }
-func (m *AddBlacklistReq) XXX_Size() int {
-	return xxx_messageInfo_AddBlacklistReq.Size(m)
+func (m *AddBlackReq) XXX_Size() int {
+	return xxx_messageInfo_AddBlackReq.Size(m)
 }
-func (m *AddBlacklistReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddBlacklistReq.DiscardUnknown(m)
+func (m *AddBlackReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddBlackReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddBlacklistReq proto.InternalMessageInfo
+var xxx_messageInfo_AddBlackReq proto.InternalMessageInfo
 
-func (m *AddBlacklistReq) GetFromUserID() string {
+func (m *AddBlackReq) GetOwnerUserID() string {
 	if m != nil {
-		return m.FromUserID
+		return m.OwnerUserID
 	}
 	return ""
 }
 
-func (m *AddBlacklistReq) GetToUserID() string {
+func (m *AddBlackReq) GetBlackUserID() string {
 	if m != nil {
-		return m.ToUserID
+		return m.BlackUserID
 	}
 	return ""
 }
 
-type AddBlacklistResp struct {
+type AddBlackResp struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *AddBlacklistResp) Reset()         { *m = AddBlacklistResp{} }
-func (m *AddBlacklistResp) String() string { return proto.CompactTextString(m) }
-func (*AddBlacklistResp) ProtoMessage()    {}
-func (*AddBlacklistResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{11}
+func (m *AddBlackResp) Reset()         { *m = AddBlackResp{} }
+func (m *AddBlackResp) String() string { return proto.CompactTextString(m) }
+func (*AddBlackResp) ProtoMessage()    {}
+func (*AddBlackResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{11}
 }
-func (m *AddBlacklistResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_AddBlacklistResp.Unmarshal(m, b)
+func (m *AddBlackResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddBlackResp.Unmarshal(m, b)
 }
-func (m *AddBlacklistResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_AddBlacklistResp.Marshal(b, m, deterministic)
+func (m *AddBlackResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddBlackResp.Marshal(b, m, deterministic)
 }
-func (dst *AddBlacklistResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddBlacklistResp.Merge(dst, src)
+func (dst *AddBlackResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddBlackResp.Merge(dst, src)
 }
-func (m *AddBlacklistResp) XXX_Size() int {
-	return xxx_messageInfo_AddBlacklistResp.Size(m)
+func (m *AddBlackResp) XXX_Size() int {
+	return xxx_messageInfo_AddBlackResp.Size(m)
 }
-func (m *AddBlacklistResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_AddBlacklistResp.DiscardUnknown(m)
+func (m *AddBlackResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddBlackResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_AddBlacklistResp proto.InternalMessageInfo
+var xxx_messageInfo_AddBlackResp proto.InternalMessageInfo
 
-type RemoveBlacklistReq struct {
-	FromUserID           string   `protobuf:"bytes,1,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	ToUserID             string   `protobuf:"bytes,2,opt,name=toUserID" json:"toUserID,omitempty"`
+type RemoveBlackReq struct {
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	BlackUserID          string   `protobuf:"bytes,2,opt,name=blackUserID" json:"blackUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RemoveBlacklistReq) Reset()         { *m = RemoveBlacklistReq{} }
-func (m *RemoveBlacklistReq) String() string { return proto.CompactTextString(m) }
-func (*RemoveBlacklistReq) ProtoMessage()    {}
-func (*RemoveBlacklistReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{12}
+func (m *RemoveBlackReq) Reset()         { *m = RemoveBlackReq{} }
+func (m *RemoveBlackReq) String() string { return proto.CompactTextString(m) }
+func (*RemoveBlackReq) ProtoMessage()    {}
+func (*RemoveBlackReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{12}
 }
-func (m *RemoveBlacklistReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_RemoveBlacklistReq.Unmarshal(m, b)
+func (m *RemoveBlackReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveBlackReq.Unmarshal(m, b)
 }
-func (m *RemoveBlacklistReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_RemoveBlacklistReq.Marshal(b, m, deterministic)
+func (m *RemoveBlackReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveBlackReq.Marshal(b, m, deterministic)
 }
-func (dst *RemoveBlacklistReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveBlacklistReq.Merge(dst, src)
+func (dst *RemoveBlackReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveBlackReq.Merge(dst, src)
 }
-func (m *RemoveBlacklistReq) XXX_Size() int {
-	return xxx_messageInfo_RemoveBlacklistReq.Size(m)
+func (m *RemoveBlackReq) XXX_Size() int {
+	return xxx_messageInfo_RemoveBlackReq.Size(m)
 }
-func (m *RemoveBlacklistReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_RemoveBlacklistReq.DiscardUnknown(m)
+func (m *RemoveBlackReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveBlackReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_RemoveBlacklistReq proto.InternalMessageInfo
+var xxx_messageInfo_RemoveBlackReq proto.InternalMessageInfo
 
-func (m *RemoveBlacklistReq) GetFromUserID() string {
+func (m *RemoveBlackReq) GetOwnerUserID() string {
 	if m != nil {
-		return m.FromUserID
+		return m.OwnerUserID
 	}
 	return ""
 }
 
-func (m *RemoveBlacklistReq) GetToUserID() string {
+func (m *RemoveBlackReq) GetBlackUserID() string {
 	if m != nil {
-		return m.ToUserID
+		return m.BlackUserID
 	}
 	return ""
 }
 
-type RemoveBlacklistResp struct {
+type RemoveBlackReqResp struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *RemoveBlacklistResp) Reset()         { *m = RemoveBlacklistResp{} }
-func (m *RemoveBlacklistResp) String() string { return proto.CompactTextString(m) }
-func (*RemoveBlacklistResp) ProtoMessage()    {}
-func (*RemoveBlacklistResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{13}
+func (m *RemoveBlackReqResp) Reset()         { *m = RemoveBlackReqResp{} }
+func (m *RemoveBlackReqResp) String() string { return proto.CompactTextString(m) }
+func (*RemoveBlackReqResp) ProtoMessage()    {}
+func (*RemoveBlackReqResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{13}
 }
-func (m *RemoveBlacklistResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_RemoveBlacklistResp.Unmarshal(m, b)
+func (m *RemoveBlackReqResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveBlackReqResp.Unmarshal(m, b)
 }
-func (m *RemoveBlacklistResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_RemoveBlacklistResp.Marshal(b, m, deterministic)
+func (m *RemoveBlackReqResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveBlackReqResp.Marshal(b, m, deterministic)
 }
-func (dst *RemoveBlacklistResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveBlacklistResp.Merge(dst, src)
+func (dst *RemoveBlackReqResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveBlackReqResp.Merge(dst, src)
 }
-func (m *RemoveBlacklistResp) XXX_Size() int {
-	return xxx_messageInfo_RemoveBlacklistResp.Size(m)
+func (m *RemoveBlackReqResp) XXX_Size() int {
+	return xxx_messageInfo_RemoveBlackReqResp.Size(m)
 }
-func (m *RemoveBlacklistResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_RemoveBlacklistResp.DiscardUnknown(m)
+func (m *RemoveBlackReqResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveBlackReqResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_RemoveBlacklistResp proto.InternalMessageInfo
+var xxx_messageInfo_RemoveBlackReqResp proto.InternalMessageInfo
 
-type GetBlacklistReq struct {
+type GetBlacksReq struct {
 	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
 	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
@@ -620,45 +620,45 @@ type GetBlacklistReq struct {
 	XXX_sizecache        int32                     `json:"-"`
 }
 
-func (m *GetBlacklistReq) Reset()         { *m = GetBlacklistReq{} }
-func (m *GetBlacklistReq) String() string { return proto.CompactTextString(m) }
-func (*GetBlacklistReq) ProtoMessage()    {}
-func (*GetBlacklistReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{14}
+func (m *GetBlacksReq) Reset()         { *m = GetBlacksReq{} }
+func (m *GetBlacksReq) String() string { return proto.CompactTextString(m) }
+func (*GetBlacksReq) ProtoMessage()    {}
+func (*GetBlacksReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{14}
 }
-func (m *GetBlacklistReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetBlacklistReq.Unmarshal(m, b)
+func (m *GetBlacksReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetBlacksReq.Unmarshal(m, b)
 }
-func (m *GetBlacklistReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetBlacklistReq.Marshal(b, m, deterministic)
+func (m *GetBlacksReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetBlacksReq.Marshal(b, m, deterministic)
 }
-func (dst *GetBlacklistReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetBlacklistReq.Merge(dst, src)
+func (dst *GetBlacksReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetBlacksReq.Merge(dst, src)
 }
-func (m *GetBlacklistReq) XXX_Size() int {
-	return xxx_messageInfo_GetBlacklistReq.Size(m)
+func (m *GetBlacksReq) XXX_Size() int {
+	return xxx_messageInfo_GetBlacksReq.Size(m)
 }
-func (m *GetBlacklistReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetBlacklistReq.DiscardUnknown(m)
+func (m *GetBlacksReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetBlacksReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetBlacklistReq proto.InternalMessageInfo
+var xxx_messageInfo_GetBlacksReq proto.InternalMessageInfo
 
-func (m *GetBlacklistReq) GetUserID() string {
+func (m *GetBlacksReq) GetUserID() string {
 	if m != nil {
 		return m.UserID
 	}
 	return ""
 }
 
-func (m *GetBlacklistReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetBlacksReq) GetPagination() *sdk_ws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
 	return nil
 }
 
-type GetBlacklistResp struct {
+type GetBlacksResp struct {
 	BlackUserInfoList    []*sdk_ws.PublicUserInfo `protobuf:"bytes,1,rep,name=BlackUserInfoList" json:"BlackUserInfoList,omitempty"`
 	Total                int32                    `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                 `json:"-"`
@@ -666,38 +666,38 @@ type GetBlacklistResp struct {
 	XXX_sizecache        int32                    `json:"-"`
 }
 
-func (m *GetBlacklistResp) Reset()         { *m = GetBlacklistResp{} }
-func (m *GetBlacklistResp) String() string { return proto.CompactTextString(m) }
-func (*GetBlacklistResp) ProtoMessage()    {}
-func (*GetBlacklistResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{15}
+func (m *GetBlacksResp) Reset()         { *m = GetBlacksResp{} }
+func (m *GetBlacksResp) String() string { return proto.CompactTextString(m) }
+func (*GetBlacksResp) ProtoMessage()    {}
+func (*GetBlacksResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{15}
 }
-func (m *GetBlacklistResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetBlacklistResp.Unmarshal(m, b)
+func (m *GetBlacksResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetBlacksResp.Unmarshal(m, b)
 }
-func (m *GetBlacklistResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetBlacklistResp.Marshal(b, m, deterministic)
+func (m *GetBlacksResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetBlacksResp.Marshal(b, m, deterministic)
 }
-func (dst *GetBlacklistResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetBlacklistResp.Merge(dst, src)
+func (dst *GetBlacksResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetBlacksResp.Merge(dst, src)
 }
-func (m *GetBlacklistResp) XXX_Size() int {
-	return xxx_messageInfo_GetBlacklistResp.Size(m)
+func (m *GetBlacksResp) XXX_Size() int {
+	return xxx_messageInfo_GetBlacksResp.Size(m)
 }
-func (m *GetBlacklistResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetBlacklistResp.DiscardUnknown(m)
+func (m *GetBlacksResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetBlacksResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetBlacklistResp proto.InternalMessageInfo
+var xxx_messageInfo_GetBlacksResp proto.InternalMessageInfo
 
-func (m *GetBlacklistResp) GetBlackUserInfoList() []*sdk_ws.PublicUserInfo {
+func (m *GetBlacksResp) GetBlackUserInfoList() []*sdk_ws.PublicUserInfo {
 	if m != nil {
 		return m.BlackUserInfoList
 	}
 	return nil
 }
 
-func (m *GetBlacklistResp) GetTotal() int32 {
+func (m *GetBlacksResp) GetTotal() int32 {
 	if m != nil {
 		return m.Total
 	}
@@ -705,8 +705,8 @@ func (m *GetBlacklistResp) GetTotal() int32 {
 }
 
 type IsFriendReq struct {
-	FromUserID           string   `protobuf:"bytes,1,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	ToUserID             string   `protobuf:"bytes,2,opt,name=toUserID" json:"toUserID,omitempty"`
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	FriendUserID         string   `protobuf:"bytes,2,opt,name=friendUserID" json:"friendUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -716,7 +716,7 @@ func (m *IsFriendReq) Reset()         { *m = IsFriendReq{} }
 func (m *IsFriendReq) String() string { return proto.CompactTextString(m) }
 func (*IsFriendReq) ProtoMessage()    {}
 func (*IsFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{16}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{16}
 }
 func (m *IsFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsFriendReq.Unmarshal(m, b)
@@ -736,22 +736,22 @@ func (m *IsFriendReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_IsFriendReq proto.InternalMessageInfo
 
-func (m *IsFriendReq) GetFromUserID() string {
+func (m *IsFriendReq) GetOwnerUserID() string {
 	if m != nil {
-		return m.FromUserID
+		return m.OwnerUserID
 	}
 	return ""
 }
 
-func (m *IsFriendReq) GetToUserID() string {
+func (m *IsFriendReq) GetFriendUserID() string {
 	if m != nil {
-		return m.ToUserID
+		return m.FriendUserID
 	}
 	return ""
 }
 
 type IsFriendResp struct {
-	Response             bool     `protobuf:"varint,1,opt,name=Response" json:"Response,omitempty"`
+	Response             bool     `protobuf:"varint,1,opt,name=response" json:"response,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -761,7 +761,7 @@ func (m *IsFriendResp) Reset()         { *m = IsFriendResp{} }
 func (m *IsFriendResp) String() string { return proto.CompactTextString(m) }
 func (*IsFriendResp) ProtoMessage()    {}
 func (*IsFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{17}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{17}
 }
 func (m *IsFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_IsFriendResp.Unmarshal(m, b)
@@ -788,84 +788,84 @@ func (m *IsFriendResp) GetResponse() bool {
 	return false
 }
 
-type IsInBlackListReq struct {
-	FromUserID           string   `protobuf:"bytes,1,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	ToUserID             string   `protobuf:"bytes,2,opt,name=toUserID" json:"toUserID,omitempty"`
+type IsBlackReq struct {
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	BlackUserID          string   `protobuf:"bytes,2,opt,name=blackUserID" json:"blackUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *IsInBlackListReq) Reset()         { *m = IsInBlackListReq{} }
-func (m *IsInBlackListReq) String() string { return proto.CompactTextString(m) }
-func (*IsInBlackListReq) ProtoMessage()    {}
-func (*IsInBlackListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{18}
+func (m *IsBlackReq) Reset()         { *m = IsBlackReq{} }
+func (m *IsBlackReq) String() string { return proto.CompactTextString(m) }
+func (*IsBlackReq) ProtoMessage()    {}
+func (*IsBlackReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{18}
 }
-func (m *IsInBlackListReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_IsInBlackListReq.Unmarshal(m, b)
+func (m *IsBlackReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IsBlackReq.Unmarshal(m, b)
 }
-func (m *IsInBlackListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_IsInBlackListReq.Marshal(b, m, deterministic)
+func (m *IsBlackReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IsBlackReq.Marshal(b, m, deterministic)
 }
-func (dst *IsInBlackListReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_IsInBlackListReq.Merge(dst, src)
+func (dst *IsBlackReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IsBlackReq.Merge(dst, src)
 }
-func (m *IsInBlackListReq) XXX_Size() int {
-	return xxx_messageInfo_IsInBlackListReq.Size(m)
+func (m *IsBlackReq) XXX_Size() int {
+	return xxx_messageInfo_IsBlackReq.Size(m)
 }
-func (m *IsInBlackListReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_IsInBlackListReq.DiscardUnknown(m)
+func (m *IsBlackReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_IsBlackReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_IsInBlackListReq proto.InternalMessageInfo
+var xxx_messageInfo_IsBlackReq proto.InternalMessageInfo
 
-func (m *IsInBlackListReq) GetFromUserID() string {
+func (m *IsBlackReq) GetOwnerUserID() string {
 	if m != nil {
-		return m.FromUserID
+		return m.OwnerUserID
 	}
 	return ""
 }
 
-func (m *IsInBlackListReq) GetToUserID() string {
+func (m *IsBlackReq) GetBlackUserID() string {
 	if m != nil {
-		return m.ToUserID
+		return m.BlackUserID
 	}
 	return ""
 }
 
-type IsInBlackListResp struct {
-	Response             bool     `protobuf:"varint,1,opt,name=Response" json:"Response,omitempty"`
+type IsBlackResp struct {
+	Response             bool     `protobuf:"varint,1,opt,name=response" json:"response,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *IsInBlackListResp) Reset()         { *m = IsInBlackListResp{} }
-func (m *IsInBlackListResp) String() string { return proto.CompactTextString(m) }
-func (*IsInBlackListResp) ProtoMessage()    {}
-func (*IsInBlackListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{19}
+func (m *IsBlackResp) Reset()         { *m = IsBlackResp{} }
+func (m *IsBlackResp) String() string { return proto.CompactTextString(m) }
+func (*IsBlackResp) ProtoMessage()    {}
+func (*IsBlackResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{19}
 }
-func (m *IsInBlackListResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_IsInBlackListResp.Unmarshal(m, b)
+func (m *IsBlackResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_IsBlackResp.Unmarshal(m, b)
 }
-func (m *IsInBlackListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_IsInBlackListResp.Marshal(b, m, deterministic)
+func (m *IsBlackResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_IsBlackResp.Marshal(b, m, deterministic)
 }
-func (dst *IsInBlackListResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_IsInBlackListResp.Merge(dst, src)
+func (dst *IsBlackResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IsBlackResp.Merge(dst, src)
 }
-func (m *IsInBlackListResp) XXX_Size() int {
-	return xxx_messageInfo_IsInBlackListResp.Size(m)
+func (m *IsBlackResp) XXX_Size() int {
+	return xxx_messageInfo_IsBlackResp.Size(m)
 }
-func (m *IsInBlackListResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_IsInBlackListResp.DiscardUnknown(m)
+func (m *IsBlackResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_IsBlackResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_IsInBlackListResp proto.InternalMessageInfo
+var xxx_messageInfo_IsBlackResp proto.InternalMessageInfo
 
-func (m *IsInBlackListResp) GetResponse() bool {
+func (m *IsBlackResp) GetResponse() bool {
 	if m != nil {
 		return m.Response
 	}
@@ -873,8 +873,8 @@ func (m *IsInBlackListResp) GetResponse() bool {
 }
 
 type DeleteFriendReq struct {
-	FromUserID           string   `protobuf:"bytes,1,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	ToUserID             string   `protobuf:"bytes,2,opt,name=toUserID" json:"toUserID,omitempty"`
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	FriendUserID         string   `protobuf:"bytes,2,opt,name=friendUserID" json:"friendUserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -884,7 +884,7 @@ func (m *DeleteFriendReq) Reset()         { *m = DeleteFriendReq{} }
 func (m *DeleteFriendReq) String() string { return proto.CompactTextString(m) }
 func (*DeleteFriendReq) ProtoMessage()    {}
 func (*DeleteFriendReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{20}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{20}
 }
 func (m *DeleteFriendReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteFriendReq.Unmarshal(m, b)
@@ -904,16 +904,16 @@ func (m *DeleteFriendReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_DeleteFriendReq proto.InternalMessageInfo
 
-func (m *DeleteFriendReq) GetFromUserID() string {
+func (m *DeleteFriendReq) GetOwnerUserID() string {
 	if m != nil {
-		return m.FromUserID
+		return m.OwnerUserID
 	}
 	return ""
 }
 
-func (m *DeleteFriendReq) GetToUserID() string {
+func (m *DeleteFriendReq) GetFriendUserID() string {
 	if m != nil {
-		return m.ToUserID
+		return m.FriendUserID
 	}
 	return ""
 }
@@ -928,7 +928,7 @@ func (m *DeleteFriendResp) Reset()         { *m = DeleteFriendResp{} }
 func (m *DeleteFriendResp) String() string { return proto.CompactTextString(m) }
 func (*DeleteFriendResp) ProtoMessage()    {}
 func (*DeleteFriendResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{21}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{21}
 }
 func (m *DeleteFriendResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeleteFriendResp.Unmarshal(m, b)
@@ -949,7 +949,7 @@ func (m *DeleteFriendResp) XXX_DiscardUnknown() {
 var xxx_messageInfo_DeleteFriendResp proto.InternalMessageInfo
 
 // process
-type FriendApplyResponseReq struct {
+type RespondFriendApplyReq struct {
 	FromUserID           string   `protobuf:"bytes,1,opt,name=fromUserID" json:"fromUserID,omitempty"`
 	ToUserID             string   `protobuf:"bytes,2,opt,name=toUserID" json:"toUserID,omitempty"`
 	HandleResult         int32    `protobuf:"varint,3,opt,name=handleResult" json:"handleResult,omitempty"`
@@ -959,91 +959,91 @@ type FriendApplyResponseReq struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *FriendApplyResponseReq) Reset()         { *m = FriendApplyResponseReq{} }
-func (m *FriendApplyResponseReq) String() string { return proto.CompactTextString(m) }
-func (*FriendApplyResponseReq) ProtoMessage()    {}
-func (*FriendApplyResponseReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{22}
+func (m *RespondFriendApplyReq) Reset()         { *m = RespondFriendApplyReq{} }
+func (m *RespondFriendApplyReq) String() string { return proto.CompactTextString(m) }
+func (*RespondFriendApplyReq) ProtoMessage()    {}
+func (*RespondFriendApplyReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{22}
 }
-func (m *FriendApplyResponseReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_FriendApplyResponseReq.Unmarshal(m, b)
+func (m *RespondFriendApplyReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RespondFriendApplyReq.Unmarshal(m, b)
 }
-func (m *FriendApplyResponseReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_FriendApplyResponseReq.Marshal(b, m, deterministic)
+func (m *RespondFriendApplyReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RespondFriendApplyReq.Marshal(b, m, deterministic)
 }
-func (dst *FriendApplyResponseReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_FriendApplyResponseReq.Merge(dst, src)
+func (dst *RespondFriendApplyReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RespondFriendApplyReq.Merge(dst, src)
 }
-func (m *FriendApplyResponseReq) XXX_Size() int {
-	return xxx_messageInfo_FriendApplyResponseReq.Size(m)
+func (m *RespondFriendApplyReq) XXX_Size() int {
+	return xxx_messageInfo_RespondFriendApplyReq.Size(m)
 }
-func (m *FriendApplyResponseReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_FriendApplyResponseReq.DiscardUnknown(m)
+func (m *RespondFriendApplyReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_RespondFriendApplyReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_FriendApplyResponseReq proto.InternalMessageInfo
+var xxx_messageInfo_RespondFriendApplyReq proto.InternalMessageInfo
 
-func (m *FriendApplyResponseReq) GetFromUserID() string {
+func (m *RespondFriendApplyReq) GetFromUserID() string {
 	if m != nil {
 		return m.FromUserID
 	}
 	return ""
 }
 
-func (m *FriendApplyResponseReq) GetToUserID() string {
+func (m *RespondFriendApplyReq) GetToUserID() string {
 	if m != nil {
 		return m.ToUserID
 	}
 	return ""
 }
 
-func (m *FriendApplyResponseReq) GetHandleResult() int32 {
+func (m *RespondFriendApplyReq) GetHandleResult() int32 {
 	if m != nil {
 		return m.HandleResult
 	}
 	return 0
 }
 
-func (m *FriendApplyResponseReq) GetHandleMsg() string {
+func (m *RespondFriendApplyReq) GetHandleMsg() string {
 	if m != nil {
 		return m.HandleMsg
 	}
 	return ""
 }
 
-type FriendApplyResponseResp struct {
+type RespondFriendApplyResp struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *FriendApplyResponseResp) Reset()         { *m = FriendApplyResponseResp{} }
-func (m *FriendApplyResponseResp) String() string { return proto.CompactTextString(m) }
-func (*FriendApplyResponseResp) ProtoMessage()    {}
-func (*FriendApplyResponseResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{23}
+func (m *RespondFriendApplyResp) Reset()         { *m = RespondFriendApplyResp{} }
+func (m *RespondFriendApplyResp) String() string { return proto.CompactTextString(m) }
+func (*RespondFriendApplyResp) ProtoMessage()    {}
+func (*RespondFriendApplyResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{23}
 }
-func (m *FriendApplyResponseResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_FriendApplyResponseResp.Unmarshal(m, b)
+func (m *RespondFriendApplyResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RespondFriendApplyResp.Unmarshal(m, b)
 }
-func (m *FriendApplyResponseResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_FriendApplyResponseResp.Marshal(b, m, deterministic)
+func (m *RespondFriendApplyResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RespondFriendApplyResp.Marshal(b, m, deterministic)
 }
-func (dst *FriendApplyResponseResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_FriendApplyResponseResp.Merge(dst, src)
+func (dst *RespondFriendApplyResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RespondFriendApplyResp.Merge(dst, src)
 }
-func (m *FriendApplyResponseResp) XXX_Size() int {
-	return xxx_messageInfo_FriendApplyResponseResp.Size(m)
+func (m *RespondFriendApplyResp) XXX_Size() int {
+	return xxx_messageInfo_RespondFriendApplyResp.Size(m)
 }
-func (m *FriendApplyResponseResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_FriendApplyResponseResp.DiscardUnknown(m)
+func (m *RespondFriendApplyResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_RespondFriendApplyResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_FriendApplyResponseResp proto.InternalMessageInfo
+var xxx_messageInfo_RespondFriendApplyResp proto.InternalMessageInfo
 
 type SetFriendRemarkReq struct {
-	FromUserID           string   `protobuf:"bytes,1,opt,name=fromUserID" json:"fromUserID,omitempty"`
-	ToUserID             string   `protobuf:"bytes,2,opt,name=toUserID" json:"toUserID,omitempty"`
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
+	FriendUserID         string   `protobuf:"bytes,2,opt,name=friendUserID" json:"friendUserID,omitempty"`
 	Remark               string   `protobuf:"bytes,3,opt,name=remark" json:"remark,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1054,7 +1054,7 @@ func (m *SetFriendRemarkReq) Reset()         { *m = SetFriendRemarkReq{} }
 func (m *SetFriendRemarkReq) String() string { return proto.CompactTextString(m) }
 func (*SetFriendRemarkReq) ProtoMessage()    {}
 func (*SetFriendRemarkReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{24}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{24}
 }
 func (m *SetFriendRemarkReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetFriendRemarkReq.Unmarshal(m, b)
@@ -1074,16 +1074,16 @@ func (m *SetFriendRemarkReq) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetFriendRemarkReq proto.InternalMessageInfo
 
-func (m *SetFriendRemarkReq) GetFromUserID() string {
+func (m *SetFriendRemarkReq) GetOwnerUserID() string {
 	if m != nil {
-		return m.FromUserID
+		return m.OwnerUserID
 	}
 	return ""
 }
 
-func (m *SetFriendRemarkReq) GetToUserID() string {
+func (m *SetFriendRemarkReq) GetFriendUserID() string {
 	if m != nil {
-		return m.ToUserID
+		return m.FriendUserID
 	}
 	return ""
 }
@@ -1105,7 +1105,7 @@ func (m *SetFriendRemarkResp) Reset()         { *m = SetFriendRemarkResp{} }
 func (m *SetFriendRemarkResp) String() string { return proto.CompactTextString(m) }
 func (*SetFriendRemarkResp) ProtoMessage()    {}
 func (*SetFriendRemarkResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{25}
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{25}
 }
 func (m *SetFriendRemarkResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SetFriendRemarkResp.Unmarshal(m, b)
@@ -1125,7 +1125,7 @@ func (m *SetFriendRemarkResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SetFriendRemarkResp proto.InternalMessageInfo
 
-type GetFromFriendApplyListReq struct {
+type GetFromFriendsApplyReq struct {
 	UserID               string                    `protobuf:"bytes,1,opt,name=userID" json:"userID,omitempty"`
 	Pagination           *sdk_ws.RequestPagination `protobuf:"bytes,2,opt,name=pagination" json:"pagination,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                  `json:"-"`
@@ -1133,84 +1133,84 @@ type GetFromFriendApplyListReq struct {
 	XXX_sizecache        int32                     `json:"-"`
 }
 
-func (m *GetFromFriendApplyListReq) Reset()         { *m = GetFromFriendApplyListReq{} }
-func (m *GetFromFriendApplyListReq) String() string { return proto.CompactTextString(m) }
-func (*GetFromFriendApplyListReq) ProtoMessage()    {}
-func (*GetFromFriendApplyListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{26}
+func (m *GetFromFriendsApplyReq) Reset()         { *m = GetFromFriendsApplyReq{} }
+func (m *GetFromFriendsApplyReq) String() string { return proto.CompactTextString(m) }
+func (*GetFromFriendsApplyReq) ProtoMessage()    {}
+func (*GetFromFriendsApplyReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{26}
 }
-func (m *GetFromFriendApplyListReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetFromFriendApplyListReq.Unmarshal(m, b)
+func (m *GetFromFriendsApplyReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFromFriendsApplyReq.Unmarshal(m, b)
 }
-func (m *GetFromFriendApplyListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetFromFriendApplyListReq.Marshal(b, m, deterministic)
+func (m *GetFromFriendsApplyReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFromFriendsApplyReq.Marshal(b, m, deterministic)
 }
-func (dst *GetFromFriendApplyListReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetFromFriendApplyListReq.Merge(dst, src)
+func (dst *GetFromFriendsApplyReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFromFriendsApplyReq.Merge(dst, src)
 }
-func (m *GetFromFriendApplyListReq) XXX_Size() int {
-	return xxx_messageInfo_GetFromFriendApplyListReq.Size(m)
+func (m *GetFromFriendsApplyReq) XXX_Size() int {
+	return xxx_messageInfo_GetFromFriendsApplyReq.Size(m)
 }
-func (m *GetFromFriendApplyListReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetFromFriendApplyListReq.DiscardUnknown(m)
+func (m *GetFromFriendsApplyReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFromFriendsApplyReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetFromFriendApplyListReq proto.InternalMessageInfo
+var xxx_messageInfo_GetFromFriendsApplyReq proto.InternalMessageInfo
 
-func (m *GetFromFriendApplyListReq) GetUserID() string {
+func (m *GetFromFriendsApplyReq) GetUserID() string {
 	if m != nil {
 		return m.UserID
 	}
 	return ""
 }
 
-func (m *GetFromFriendApplyListReq) GetPagination() *sdk_ws.RequestPagination {
+func (m *GetFromFriendsApplyReq) GetPagination() *sdk_ws.RequestPagination {
 	if m != nil {
 		return m.Pagination
 	}
 	return nil
 }
 
-type GetFromFriendApplyListResp struct {
-	FriendRequestList    []*sdk_ws.FriendRequest `protobuf:"bytes,1,rep,name=friendRequestList" json:"friendRequestList,omitempty"`
+type GetFromFriendsApplyResp struct {
+	FriendRequests       []*sdk_ws.FriendRequest `protobuf:"bytes,1,rep,name=friendRequests" json:"friendRequests,omitempty"`
 	Total                int32                   `protobuf:"varint,2,opt,name=total" json:"total,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
 	XXX_unrecognized     []byte                  `json:"-"`
 	XXX_sizecache        int32                   `json:"-"`
 }
 
-func (m *GetFromFriendApplyListResp) Reset()         { *m = GetFromFriendApplyListResp{} }
-func (m *GetFromFriendApplyListResp) String() string { return proto.CompactTextString(m) }
-func (*GetFromFriendApplyListResp) ProtoMessage()    {}
-func (*GetFromFriendApplyListResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_friend_49d6bb15bb9f3775, []int{27}
+func (m *GetFromFriendsApplyResp) Reset()         { *m = GetFromFriendsApplyResp{} }
+func (m *GetFromFriendsApplyResp) String() string { return proto.CompactTextString(m) }
+func (*GetFromFriendsApplyResp) ProtoMessage()    {}
+func (*GetFromFriendsApplyResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_friend_fcfb8eb4800a740c, []int{27}
 }
-func (m *GetFromFriendApplyListResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_GetFromFriendApplyListResp.Unmarshal(m, b)
+func (m *GetFromFriendsApplyResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetFromFriendsApplyResp.Unmarshal(m, b)
 }
-func (m *GetFromFriendApplyListResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_GetFromFriendApplyListResp.Marshal(b, m, deterministic)
+func (m *GetFromFriendsApplyResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetFromFriendsApplyResp.Marshal(b, m, deterministic)
 }
-func (dst *GetFromFriendApplyListResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GetFromFriendApplyListResp.Merge(dst, src)
+func (dst *GetFromFriendsApplyResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetFromFriendsApplyResp.Merge(dst, src)
 }
-func (m *GetFromFriendApplyListResp) XXX_Size() int {
-	return xxx_messageInfo_GetFromFriendApplyListResp.Size(m)
+func (m *GetFromFriendsApplyResp) XXX_Size() int {
+	return xxx_messageInfo_GetFromFriendsApplyResp.Size(m)
 }
-func (m *GetFromFriendApplyListResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_GetFromFriendApplyListResp.DiscardUnknown(m)
+func (m *GetFromFriendsApplyResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetFromFriendsApplyResp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GetFromFriendApplyListResp proto.InternalMessageInfo
+var xxx_messageInfo_GetFromFriendsApplyResp proto.InternalMessageInfo
 
-func (m *GetFromFriendApplyListResp) GetFriendRequestList() []*sdk_ws.FriendRequest {
+func (m *GetFromFriendsApplyResp) GetFriendRequests() []*sdk_ws.FriendRequest {
 	if m != nil {
-		return m.FriendRequestList
+		return m.FriendRequests
 	}
 	return nil
 }
 
-func (m *GetFromFriendApplyListResp) GetTotal() int32 {
+func (m *GetFromFriendsApplyResp) GetTotal() int32 {
 	if m != nil {
 		return m.Total
 	}
@@ -1218,34 +1218,34 @@ func (m *GetFromFriendApplyListResp) GetTotal() int32 {
 }
 
 func init() {
-	proto.RegisterType((*GetFriendsInfoReq)(nil), "friend.GetFriendsInfoReq")
-	proto.RegisterType((*GetFriendsInfoResp)(nil), "friend.GetFriendsInfoResp")
-	proto.RegisterType((*AddFriendReq)(nil), "friend.AddFriendReq")
-	proto.RegisterType((*AddFriendResp)(nil), "friend.AddFriendResp")
-	proto.RegisterType((*ImportFriendReq)(nil), "friend.ImportFriendReq")
-	proto.RegisterType((*ImportFriendResp)(nil), "friend.ImportFriendResp")
-	proto.RegisterType((*GetToFriendApplyListReq)(nil), "friend.GetToFriendApplyListReq")
-	proto.RegisterType((*GetToFriendApplyListResp)(nil), "friend.GetToFriendApplyListResp")
-	proto.RegisterType((*GetFriendListReq)(nil), "friend.GetFriendListReq")
-	proto.RegisterType((*GetFriendListResp)(nil), "friend.GetFriendListResp")
-	proto.RegisterType((*AddBlacklistReq)(nil), "friend.AddBlacklistReq")
-	proto.RegisterType((*AddBlacklistResp)(nil), "friend.AddBlacklistResp")
-	proto.RegisterType((*RemoveBlacklistReq)(nil), "friend.RemoveBlacklistReq")
-	proto.RegisterType((*RemoveBlacklistResp)(nil), "friend.RemoveBlacklistResp")
-	proto.RegisterType((*GetBlacklistReq)(nil), "friend.GetBlacklistReq")
-	proto.RegisterType((*GetBlacklistResp)(nil), "friend.GetBlacklistResp")
-	proto.RegisterType((*IsFriendReq)(nil), "friend.IsFriendReq")
-	proto.RegisterType((*IsFriendResp)(nil), "friend.IsFriendResp")
-	proto.RegisterType((*IsInBlackListReq)(nil), "friend.IsInBlackListReq")
-	proto.RegisterType((*IsInBlackListResp)(nil), "friend.IsInBlackListResp")
-	proto.RegisterType((*DeleteFriendReq)(nil), "friend.DeleteFriendReq")
-	proto.RegisterType((*DeleteFriendResp)(nil), "friend.DeleteFriendResp")
-	proto.RegisterType((*FriendApplyResponseReq)(nil), "friend.FriendApplyResponseReq")
-	proto.RegisterType((*FriendApplyResponseResp)(nil), "friend.FriendApplyResponseResp")
-	proto.RegisterType((*SetFriendRemarkReq)(nil), "friend.SetFriendRemarkReq")
-	proto.RegisterType((*SetFriendRemarkResp)(nil), "friend.SetFriendRemarkResp")
-	proto.RegisterType((*GetFromFriendApplyListReq)(nil), "friend.GetFromFriendApplyListReq")
-	proto.RegisterType((*GetFromFriendApplyListResp)(nil), "friend.GetFromFriendApplyListResp")
+	proto.RegisterType((*GetFriendsInfoReq)(nil), "friend.getFriendsInfoReq")
+	proto.RegisterType((*GetFriendsInfoResp)(nil), "friend.getFriendsInfoResp")
+	proto.RegisterType((*AddFriendReq)(nil), "friend.addFriendReq")
+	proto.RegisterType((*AddFriendResp)(nil), "friend.addFriendResp")
+	proto.RegisterType((*ImportFriendReq)(nil), "friend.importFriendReq")
+	proto.RegisterType((*ImportFriendResp)(nil), "friend.importFriendResp")
+	proto.RegisterType((*GetToFriendsApplyReq)(nil), "friend.getToFriendsApplyReq")
+	proto.RegisterType((*GetToFriendsApplyResp)(nil), "friend.getToFriendsApplyResp")
+	proto.RegisterType((*GetFriendsReq)(nil), "friend.getFriendsReq")
+	proto.RegisterType((*GetFriendsResp)(nil), "friend.getFriendsResp")
+	proto.RegisterType((*AddBlackReq)(nil), "friend.addBlackReq")
+	proto.RegisterType((*AddBlackResp)(nil), "friend.addBlackResp")
+	proto.RegisterType((*RemoveBlackReq)(nil), "friend.removeBlackReq")
+	proto.RegisterType((*RemoveBlackReqResp)(nil), "friend.removeBlackReqResp")
+	proto.RegisterType((*GetBlacksReq)(nil), "friend.getBlacksReq")
+	proto.RegisterType((*GetBlacksResp)(nil), "friend.getBlacksResp")
+	proto.RegisterType((*IsFriendReq)(nil), "friend.isFriendReq")
+	proto.RegisterType((*IsFriendResp)(nil), "friend.isFriendResp")
+	proto.RegisterType((*IsBlackReq)(nil), "friend.isBlackReq")
+	proto.RegisterType((*IsBlackResp)(nil), "friend.isBlackResp")
+	proto.RegisterType((*DeleteFriendReq)(nil), "friend.deleteFriendReq")
+	proto.RegisterType((*DeleteFriendResp)(nil), "friend.deleteFriendResp")
+	proto.RegisterType((*RespondFriendApplyReq)(nil), "friend.respondFriendApplyReq")
+	proto.RegisterType((*RespondFriendApplyResp)(nil), "friend.respondFriendApplyResp")
+	proto.RegisterType((*SetFriendRemarkReq)(nil), "friend.setFriendRemarkReq")
+	proto.RegisterType((*SetFriendRemarkResp)(nil), "friend.setFriendRemarkResp")
+	proto.RegisterType((*GetFromFriendsApplyReq)(nil), "friend.getFromFriendsApplyReq")
+	proto.RegisterType((*GetFromFriendsApplyResp)(nil), "friend.getFromFriendsApplyResp")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1262,29 +1262,29 @@ type FriendClient interface {
 	// 申请加好友
 	AddFriend(ctx context.Context, in *AddFriendReq, opts ...grpc.CallOption) (*AddFriendResp, error)
 	// 获取收到的好友申请列表
-	GetToFriendApplyList(ctx context.Context, in *GetToFriendApplyListReq, opts ...grpc.CallOption) (*GetToFriendApplyListResp, error)
+	GetToFriendsApply(ctx context.Context, in *GetToFriendsApplyReq, opts ...grpc.CallOption) (*GetToFriendsApplyResp, error)
 	// 获取主动发出去的好友申请列表
-	GetFromFriendApplyList(ctx context.Context, in *GetFromFriendApplyListReq, opts ...grpc.CallOption) (*GetFromFriendApplyListResp, error)
+	GetFromFriendsApply(ctx context.Context, in *GetFromFriendsApplyReq, opts ...grpc.CallOption) (*GetFromFriendsApplyResp, error)
 	// 获取好友列表
-	GetFriendList(ctx context.Context, in *GetFriendListReq, opts ...grpc.CallOption) (*GetFriendListResp, error)
+	GetFriends(ctx context.Context, in *GetFriendsReq, opts ...grpc.CallOption) (*GetFriendsResp, error)
 	// 添加黑名单
-	AddBlacklist(ctx context.Context, in *AddBlacklistReq, opts ...grpc.CallOption) (*AddBlacklistResp, error)
+	AddBlack(ctx context.Context, in *AddBlackReq, opts ...grpc.CallOption) (*AddBlackResp, error)
 	// 移除黑名单
-	RemoveBlacklist(ctx context.Context, in *RemoveBlacklistReq, opts ...grpc.CallOption) (*RemoveBlacklistResp, error)
+	RemoveBlack(ctx context.Context, in *RemoveBlackReq, opts ...grpc.CallOption) (*RemoveBlackReqResp, error)
 	// 判断是否好友关系
 	IsFriend(ctx context.Context, in *IsFriendReq, opts ...grpc.CallOption) (*IsFriendResp, error)
 	// 判断是否在黑名单中
-	IsInBlackList(ctx context.Context, in *IsInBlackListReq, opts ...grpc.CallOption) (*IsInBlackListResp, error)
+	IsBlack(ctx context.Context, in *IsBlackReq, opts ...grpc.CallOption) (*IsBlackResp, error)
 	// 获取黑名单列表
-	GetBlacklist(ctx context.Context, in *GetBlacklistReq, opts ...grpc.CallOption) (*GetBlacklistResp, error)
+	GetBlacks(ctx context.Context, in *GetBlacksReq, opts ...grpc.CallOption) (*GetBlacksResp, error)
 	// 删除好友
 	DeleteFriend(ctx context.Context, in *DeleteFriendReq, opts ...grpc.CallOption) (*DeleteFriendResp, error)
 	// 对好友申请响应（同意或拒绝）
-	FriendApplyResponse(ctx context.Context, in *FriendApplyResponseReq, opts ...grpc.CallOption) (*FriendApplyResponseResp, error)
+	RespondFriendApply(ctx context.Context, in *RespondFriendApplyReq, opts ...grpc.CallOption) (*RespondFriendApplyResp, error)
 	// 设置好友备注
 	SetFriendRemark(ctx context.Context, in *SetFriendRemarkReq, opts ...grpc.CallOption) (*SetFriendRemarkResp, error)
 	// 导入好友关系
-	ImportFriend(ctx context.Context, in *ImportFriendReq, opts ...grpc.CallOption) (*ImportFriendResp, error)
+	ImportFriends(ctx context.Context, in *ImportFriendReq, opts ...grpc.CallOption) (*ImportFriendResp, error)
 	// 获取指定好友信息
 	GetFriendsInfo(ctx context.Context, in *GetFriendsInfoReq, opts ...grpc.CallOption) (*GetFriendsInfoResp, error)
 }
@@ -1306,45 +1306,45 @@ func (c *friendClient) AddFriend(ctx context.Context, in *AddFriendReq, opts ...
 	return out, nil
 }
 
-func (c *friendClient) GetToFriendApplyList(ctx context.Context, in *GetToFriendApplyListReq, opts ...grpc.CallOption) (*GetToFriendApplyListResp, error) {
-	out := new(GetToFriendApplyListResp)
-	err := grpc.Invoke(ctx, "/friend.friend/getToFriendApplyList", in, out, c.cc, opts...)
+func (c *friendClient) GetToFriendsApply(ctx context.Context, in *GetToFriendsApplyReq, opts ...grpc.CallOption) (*GetToFriendsApplyResp, error) {
+	out := new(GetToFriendsApplyResp)
+	err := grpc.Invoke(ctx, "/friend.friend/getToFriendsApply", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *friendClient) GetFromFriendApplyList(ctx context.Context, in *GetFromFriendApplyListReq, opts ...grpc.CallOption) (*GetFromFriendApplyListResp, error) {
-	out := new(GetFromFriendApplyListResp)
-	err := grpc.Invoke(ctx, "/friend.friend/getFromFriendApplyList", in, out, c.cc, opts...)
+func (c *friendClient) GetFromFriendsApply(ctx context.Context, in *GetFromFriendsApplyReq, opts ...grpc.CallOption) (*GetFromFriendsApplyResp, error) {
+	out := new(GetFromFriendsApplyResp)
+	err := grpc.Invoke(ctx, "/friend.friend/getFromFriendsApply", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *friendClient) GetFriendList(ctx context.Context, in *GetFriendListReq, opts ...grpc.CallOption) (*GetFriendListResp, error) {
-	out := new(GetFriendListResp)
-	err := grpc.Invoke(ctx, "/friend.friend/getFriendList", in, out, c.cc, opts...)
+func (c *friendClient) GetFriends(ctx context.Context, in *GetFriendsReq, opts ...grpc.CallOption) (*GetFriendsResp, error) {
+	out := new(GetFriendsResp)
+	err := grpc.Invoke(ctx, "/friend.friend/getFriends", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *friendClient) AddBlacklist(ctx context.Context, in *AddBlacklistReq, opts ...grpc.CallOption) (*AddBlacklistResp, error) {
-	out := new(AddBlacklistResp)
-	err := grpc.Invoke(ctx, "/friend.friend/addBlacklist", in, out, c.cc, opts...)
+func (c *friendClient) AddBlack(ctx context.Context, in *AddBlackReq, opts ...grpc.CallOption) (*AddBlackResp, error) {
+	out := new(AddBlackResp)
+	err := grpc.Invoke(ctx, "/friend.friend/addBlack", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *friendClient) RemoveBlacklist(ctx context.Context, in *RemoveBlacklistReq, opts ...grpc.CallOption) (*RemoveBlacklistResp, error) {
-	out := new(RemoveBlacklistResp)
-	err := grpc.Invoke(ctx, "/friend.friend/removeBlacklist", in, out, c.cc, opts...)
+func (c *friendClient) RemoveBlack(ctx context.Context, in *RemoveBlackReq, opts ...grpc.CallOption) (*RemoveBlackReqResp, error) {
+	out := new(RemoveBlackReqResp)
+	err := grpc.Invoke(ctx, "/friend.friend/removeBlack", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1360,18 +1360,18 @@ func (c *friendClient) IsFriend(ctx context.Context, in *IsFriendReq, opts ...gr
 	return out, nil
 }
 
-func (c *friendClient) IsInBlackList(ctx context.Context, in *IsInBlackListReq, opts ...grpc.CallOption) (*IsInBlackListResp, error) {
-	out := new(IsInBlackListResp)
-	err := grpc.Invoke(ctx, "/friend.friend/isInBlackList", in, out, c.cc, opts...)
+func (c *friendClient) IsBlack(ctx context.Context, in *IsBlackReq, opts ...grpc.CallOption) (*IsBlackResp, error) {
+	out := new(IsBlackResp)
+	err := grpc.Invoke(ctx, "/friend.friend/isBlack", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *friendClient) GetBlacklist(ctx context.Context, in *GetBlacklistReq, opts ...grpc.CallOption) (*GetBlacklistResp, error) {
-	out := new(GetBlacklistResp)
-	err := grpc.Invoke(ctx, "/friend.friend/getBlacklist", in, out, c.cc, opts...)
+func (c *friendClient) GetBlacks(ctx context.Context, in *GetBlacksReq, opts ...grpc.CallOption) (*GetBlacksResp, error) {
+	out := new(GetBlacksResp)
+	err := grpc.Invoke(ctx, "/friend.friend/getBlacks", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1387,9 +1387,9 @@ func (c *friendClient) DeleteFriend(ctx context.Context, in *DeleteFriendReq, op
 	return out, nil
 }
 
-func (c *friendClient) FriendApplyResponse(ctx context.Context, in *FriendApplyResponseReq, opts ...grpc.CallOption) (*FriendApplyResponseResp, error) {
-	out := new(FriendApplyResponseResp)
-	err := grpc.Invoke(ctx, "/friend.friend/friendApplyResponse", in, out, c.cc, opts...)
+func (c *friendClient) RespondFriendApply(ctx context.Context, in *RespondFriendApplyReq, opts ...grpc.CallOption) (*RespondFriendApplyResp, error) {
+	out := new(RespondFriendApplyResp)
+	err := grpc.Invoke(ctx, "/friend.friend/respondFriendApply", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1405,9 +1405,9 @@ func (c *friendClient) SetFriendRemark(ctx context.Context, in *SetFriendRemarkR
 	return out, nil
 }
 
-func (c *friendClient) ImportFriend(ctx context.Context, in *ImportFriendReq, opts ...grpc.CallOption) (*ImportFriendResp, error) {
+func (c *friendClient) ImportFriends(ctx context.Context, in *ImportFriendReq, opts ...grpc.CallOption) (*ImportFriendResp, error) {
 	out := new(ImportFriendResp)
-	err := grpc.Invoke(ctx, "/friend.friend/importFriend", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/friend.friend/importFriends", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1429,29 +1429,29 @@ type FriendServer interface {
 	// 申请加好友
 	AddFriend(context.Context, *AddFriendReq) (*AddFriendResp, error)
 	// 获取收到的好友申请列表
-	GetToFriendApplyList(context.Context, *GetToFriendApplyListReq) (*GetToFriendApplyListResp, error)
+	GetToFriendsApply(context.Context, *GetToFriendsApplyReq) (*GetToFriendsApplyResp, error)
 	// 获取主动发出去的好友申请列表
-	GetFromFriendApplyList(context.Context, *GetFromFriendApplyListReq) (*GetFromFriendApplyListResp, error)
+	GetFromFriendsApply(context.Context, *GetFromFriendsApplyReq) (*GetFromFriendsApplyResp, error)
 	// 获取好友列表
-	GetFriendList(context.Context, *GetFriendListReq) (*GetFriendListResp, error)
+	GetFriends(context.Context, *GetFriendsReq) (*GetFriendsResp, error)
 	// 添加黑名单
-	AddBlacklist(context.Context, *AddBlacklistReq) (*AddBlacklistResp, error)
+	AddBlack(context.Context, *AddBlackReq) (*AddBlackResp, error)
 	// 移除黑名单
-	RemoveBlacklist(context.Context, *RemoveBlacklistReq) (*RemoveBlacklistResp, error)
+	RemoveBlack(context.Context, *RemoveBlackReq) (*RemoveBlackReqResp, error)
 	// 判断是否好友关系
 	IsFriend(context.Context, *IsFriendReq) (*IsFriendResp, error)
 	// 判断是否在黑名单中
-	IsInBlackList(context.Context, *IsInBlackListReq) (*IsInBlackListResp, error)
+	IsBlack(context.Context, *IsBlackReq) (*IsBlackResp, error)
 	// 获取黑名单列表
-	GetBlacklist(context.Context, *GetBlacklistReq) (*GetBlacklistResp, error)
+	GetBlacks(context.Context, *GetBlacksReq) (*GetBlacksResp, error)
 	// 删除好友
 	DeleteFriend(context.Context, *DeleteFriendReq) (*DeleteFriendResp, error)
 	// 对好友申请响应（同意或拒绝）
-	FriendApplyResponse(context.Context, *FriendApplyResponseReq) (*FriendApplyResponseResp, error)
+	RespondFriendApply(context.Context, *RespondFriendApplyReq) (*RespondFriendApplyResp, error)
 	// 设置好友备注
 	SetFriendRemark(context.Context, *SetFriendRemarkReq) (*SetFriendRemarkResp, error)
 	// 导入好友关系
-	ImportFriend(context.Context, *ImportFriendReq) (*ImportFriendResp, error)
+	ImportFriends(context.Context, *ImportFriendReq) (*ImportFriendResp, error)
 	// 获取指定好友信息
 	GetFriendsInfo(context.Context, *GetFriendsInfoReq) (*GetFriendsInfoResp, error)
 }
@@ -1478,92 +1478,92 @@ func _Friend_AddFriend_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_GetToFriendApplyList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetToFriendApplyListReq)
+func _Friend_GetToFriendsApply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetToFriendsApplyReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).GetToFriendApplyList(ctx, in)
+		return srv.(FriendServer).GetToFriendsApply(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/GetToFriendApplyList",
+		FullMethod: "/friend.friend/GetToFriendsApply",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).GetToFriendApplyList(ctx, req.(*GetToFriendApplyListReq))
+		return srv.(FriendServer).GetToFriendsApply(ctx, req.(*GetToFriendsApplyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_GetFromFriendApplyList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetFromFriendApplyListReq)
+func _Friend_GetFromFriendsApply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFromFriendsApplyReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).GetFromFriendApplyList(ctx, in)
+		return srv.(FriendServer).GetFromFriendsApply(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/GetFromFriendApplyList",
+		FullMethod: "/friend.friend/GetFromFriendsApply",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).GetFromFriendApplyList(ctx, req.(*GetFromFriendApplyListReq))
+		return srv.(FriendServer).GetFromFriendsApply(ctx, req.(*GetFromFriendsApplyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_GetFriendList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetFriendListReq)
+func _Friend_GetFriends_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFriendsReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).GetFriendList(ctx, in)
+		return srv.(FriendServer).GetFriends(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/GetFriendList",
+		FullMethod: "/friend.friend/GetFriends",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).GetFriendList(ctx, req.(*GetFriendListReq))
+		return srv.(FriendServer).GetFriends(ctx, req.(*GetFriendsReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_AddBlacklist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddBlacklistReq)
+func _Friend_AddBlack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddBlackReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).AddBlacklist(ctx, in)
+		return srv.(FriendServer).AddBlack(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/AddBlacklist",
+		FullMethod: "/friend.friend/AddBlack",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).AddBlacklist(ctx, req.(*AddBlacklistReq))
+		return srv.(FriendServer).AddBlack(ctx, req.(*AddBlackReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_RemoveBlacklist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveBlacklistReq)
+func _Friend_RemoveBlack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveBlackReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).RemoveBlacklist(ctx, in)
+		return srv.(FriendServer).RemoveBlack(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/RemoveBlacklist",
+		FullMethod: "/friend.friend/RemoveBlack",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).RemoveBlacklist(ctx, req.(*RemoveBlacklistReq))
+		return srv.(FriendServer).RemoveBlack(ctx, req.(*RemoveBlackReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1586,38 +1586,38 @@ func _Friend_IsFriend_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_IsInBlackList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(IsInBlackListReq)
+func _Friend_IsBlack_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsBlackReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).IsInBlackList(ctx, in)
+		return srv.(FriendServer).IsBlack(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/IsInBlackList",
+		FullMethod: "/friend.friend/IsBlack",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).IsInBlackList(ctx, req.(*IsInBlackListReq))
+		return srv.(FriendServer).IsBlack(ctx, req.(*IsBlackReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_GetBlacklist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetBlacklistReq)
+func _Friend_GetBlacks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBlacksReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).GetBlacklist(ctx, in)
+		return srv.(FriendServer).GetBlacks(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/GetBlacklist",
+		FullMethod: "/friend.friend/GetBlacks",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).GetBlacklist(ctx, req.(*GetBlacklistReq))
+		return srv.(FriendServer).GetBlacks(ctx, req.(*GetBlacksReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1640,20 +1640,20 @@ func _Friend_DeleteFriend_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_FriendApplyResponse_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FriendApplyResponseReq)
+func _Friend_RespondFriendApply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RespondFriendApplyReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).FriendApplyResponse(ctx, in)
+		return srv.(FriendServer).RespondFriendApply(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/FriendApplyResponse",
+		FullMethod: "/friend.friend/RespondFriendApply",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).FriendApplyResponse(ctx, req.(*FriendApplyResponseReq))
+		return srv.(FriendServer).RespondFriendApply(ctx, req.(*RespondFriendApplyReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1676,20 +1676,20 @@ func _Friend_SetFriendRemark_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Friend_ImportFriend_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Friend_ImportFriends_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ImportFriendReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FriendServer).ImportFriend(ctx, in)
+		return srv.(FriendServer).ImportFriends(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/friend.friend/ImportFriend",
+		FullMethod: "/friend.friend/ImportFriends",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FriendServer).ImportFriend(ctx, req.(*ImportFriendReq))
+		return srv.(FriendServer).ImportFriends(ctx, req.(*ImportFriendReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1721,52 +1721,52 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Friend_AddFriend_Handler,
 		},
 		{
-			MethodName: "getToFriendApplyList",
-			Handler:    _Friend_GetToFriendApplyList_Handler,
+			MethodName: "getToFriendsApply",
+			Handler:    _Friend_GetToFriendsApply_Handler,
 		},
 		{
-			MethodName: "getFromFriendApplyList",
-			Handler:    _Friend_GetFromFriendApplyList_Handler,
+			MethodName: "getFromFriendsApply",
+			Handler:    _Friend_GetFromFriendsApply_Handler,
 		},
 		{
-			MethodName: "getFriendList",
-			Handler:    _Friend_GetFriendList_Handler,
+			MethodName: "getFriends",
+			Handler:    _Friend_GetFriends_Handler,
 		},
 		{
-			MethodName: "addBlacklist",
-			Handler:    _Friend_AddBlacklist_Handler,
+			MethodName: "addBlack",
+			Handler:    _Friend_AddBlack_Handler,
 		},
 		{
-			MethodName: "removeBlacklist",
-			Handler:    _Friend_RemoveBlacklist_Handler,
+			MethodName: "removeBlack",
+			Handler:    _Friend_RemoveBlack_Handler,
 		},
 		{
 			MethodName: "isFriend",
 			Handler:    _Friend_IsFriend_Handler,
 		},
 		{
-			MethodName: "isInBlackList",
-			Handler:    _Friend_IsInBlackList_Handler,
+			MethodName: "isBlack",
+			Handler:    _Friend_IsBlack_Handler,
 		},
 		{
-			MethodName: "getBlacklist",
-			Handler:    _Friend_GetBlacklist_Handler,
+			MethodName: "getBlacks",
+			Handler:    _Friend_GetBlacks_Handler,
 		},
 		{
 			MethodName: "deleteFriend",
 			Handler:    _Friend_DeleteFriend_Handler,
 		},
 		{
-			MethodName: "friendApplyResponse",
-			Handler:    _Friend_FriendApplyResponse_Handler,
+			MethodName: "respondFriendApply",
+			Handler:    _Friend_RespondFriendApply_Handler,
 		},
 		{
 			MethodName: "setFriendRemark",
 			Handler:    _Friend_SetFriendRemark_Handler,
 		},
 		{
-			MethodName: "importFriend",
-			Handler:    _Friend_ImportFriend_Handler,
+			MethodName: "importFriends",
+			Handler:    _Friend_ImportFriends_Handler,
 		},
 		{
 			MethodName: "getFriendsInfo",
@@ -1777,65 +1777,66 @@ var _Friend_serviceDesc = grpc.ServiceDesc{
 	Metadata: "friend/friend.proto",
 }
 
-func init() { proto.RegisterFile("friend/friend.proto", fileDescriptor_friend_49d6bb15bb9f3775) }
+func init() { proto.RegisterFile("friend/friend.proto", fileDescriptor_friend_fcfb8eb4800a740c) }
 
-var fileDescriptor_friend_49d6bb15bb9f3775 = []byte{
-	// 909 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0x5f, 0x6f, 0xdb, 0x36,
-	0x10, 0x87, 0x9d, 0x25, 0x88, 0x2f, 0x6e, 0xec, 0x5c, 0xd2, 0x44, 0xd1, 0xb6, 0xc6, 0x21, 0xf6,
-	0x10, 0x14, 0x68, 0x0c, 0x64, 0x18, 0x30, 0x60, 0x4f, 0x2e, 0xb2, 0x06, 0x1a, 0xea, 0x36, 0x53,
-	0xb7, 0x01, 0xdb, 0x30, 0x18, 0x6a, 0x4d, 0xbb, 0x42, 0x64, 0x89, 0xd1, 0x29, 0x4d, 0xf3, 0x36,
-	0xec, 0x61, 0x1f, 0x61, 0x9f, 0x77, 0x10, 0x69, 0x89, 0xd4, 0xbf, 0xb6, 0x68, 0xbd, 0x3d, 0xc9,
-	0x3c, 0xde, 0xff, 0xa3, 0x7f, 0x3f, 0x12, 0x76, 0x67, 0xb1, 0xcf, 0xc3, 0xe9, 0x50, 0x7d, 0x4e,
-	0x45, 0x1c, 0x25, 0x11, 0x6e, 0xa8, 0x95, 0x7d, 0xf2, 0x5c, 0xf0, 0xf0, 0x91, 0x33, 0x7e, 0xf4,
-	0x82, 0xc7, 0x6f, 0x78, 0x3c, 0x14, 0x57, 0xf3, 0xa1, 0xd4, 0x18, 0xd2, 0xf4, 0x6a, 0x72, 0x4b,
-	0xc3, 0x5b, 0x52, 0x16, 0xec, 0x47, 0xd8, 0xb9, 0xe0, 0xc9, 0x13, 0x69, 0x46, 0x4e, 0x38, 0x8b,
-	0x5c, 0x7e, 0x8d, 0x0f, 0x00, 0x66, 0x71, 0xb4, 0xf8, 0x99, 0x78, 0xec, 0x9c, 0x5b, 0xad, 0x41,
-	0xeb, 0xa4, 0xe3, 0x1a, 0x12, 0xfc, 0x02, 0x3a, 0x49, 0xa4, 0x7e, 0x93, 0xd5, 0x1e, 0xac, 0x9d,
-	0x74, 0x5c, 0x2d, 0x60, 0xbf, 0x03, 0x96, 0x5d, 0x92, 0xc0, 0xef, 0x61, 0x5b, 0x89, 0x52, 0xc9,
-	0x53, 0x9f, 0x12, 0xab, 0x35, 0x58, 0x3b, 0xd9, 0x3a, 0xfb, 0xf2, 0x94, 0x64, 0x8e, 0x13, 0x4f,
-	0xf8, 0x13, 0xe1, 0xc5, 0xde, 0x82, 0x4e, 0xb5, 0xa2, 0x5b, 0x32, 0x62, 0x31, 0x74, 0x47, 0xd3,
-	0xa9, 0x12, 0x7e, 0x48, 0xaa, 0x36, 0x6c, 0x66, 0x99, 0x59, 0x6d, 0xb9, 0x9b, 0xaf, 0x71, 0x1f,
-	0x36, 0x62, 0x7e, 0x3d, 0xa6, 0xb9, 0xb5, 0x26, 0x77, 0x96, 0x2b, 0xdc, 0x86, 0x36, 0x7f, 0x6b,
-	0x7d, 0x26, 0x65, 0x6d, 0xfe, 0x96, 0xf5, 0xe0, 0x9e, 0x11, 0x93, 0x04, 0xfb, 0x03, 0x7a, 0xce,
-	0x42, 0x44, 0x71, 0xa2, 0xf3, 0x78, 0x08, 0x7d, 0xb5, 0x50, 0xbe, 0xf3, 0x02, 0x3b, 0x6e, 0x45,
-	0x9e, 0xe6, 0xfc, 0x44, 0xe7, 0xac, 0xb2, 0x32, 0x24, 0x0c, 0xa1, 0x5f, 0x74, 0x4f, 0x82, 0xdd,
-	0xc2, 0xc1, 0x05, 0x4f, 0x7e, 0x8a, 0x94, 0x68, 0x24, 0x44, 0x70, 0x97, 0xfa, 0x4a, 0x43, 0xef,
-	0xc3, 0xc6, 0x8d, 0x59, 0xfe, 0x72, 0x85, 0xe7, 0x00, 0xc2, 0x9b, 0xfb, 0xa1, 0x97, 0xf8, 0x51,
-	0x28, 0xc3, 0x6c, 0x9d, 0x7d, 0x55, 0xd3, 0x6d, 0x97, 0x5f, 0xdf, 0x70, 0x4a, 0x2e, 0x73, 0x5d,
-	0xd7, 0xb0, 0x63, 0x7f, 0xb6, 0xc0, 0xaa, 0x8f, 0x4c, 0x02, 0x9f, 0xc1, 0x4e, 0xde, 0x82, 0xd4,
-	0x87, 0x31, 0xd7, 0x41, 0xe3, 0x5c, 0x97, 0xba, 0x6e, 0xd5, 0x14, 0xf7, 0x60, 0x3d, 0x89, 0x12,
-	0x2f, 0x90, 0xd9, 0xae, 0xbb, 0x6a, 0xc1, 0x04, 0xf4, 0xf3, 0x03, 0x95, 0x15, 0x5d, 0x2c, 0xae,
-	0xf5, 0x71, 0xc5, 0x19, 0xad, 0x6b, 0x9b, 0xad, 0x63, 0xc2, 0xf8, 0x57, 0xe4, 0xc5, 0xae, 0xe6,
-	0x04, 0x37, 0xd4, 0x38, 0x86, 0xde, 0x68, 0x3a, 0x7d, 0x1c, 0x78, 0xaf, 0xae, 0x82, 0x65, 0x89,
-	0x9f, 0x70, 0xb4, 0xd3, 0x23, 0x54, 0x74, 0x47, 0x82, 0x5d, 0x02, 0xba, 0x7c, 0x11, 0xbd, 0xe1,
-	0x2b, 0x8b, 0x72, 0x1f, 0x76, 0x2b, 0x1e, 0x49, 0xb0, 0x08, 0x7a, 0x17, 0x3c, 0x29, 0x44, 0xf9,
-	0x6f, 0xcf, 0xe8, 0x9d, 0x3c, 0x20, 0x85, 0x24, 0xf0, 0x39, 0xec, 0x48, 0x81, 0x4c, 0xb5, 0x38,
-	0xb0, 0xe3, 0x9a, 0x00, 0x97, 0x37, 0x2f, 0x03, 0xff, 0x55, 0xa6, 0xec, 0x56, 0x6d, 0x1b, 0xe6,
-	0xe6, 0xc0, 0x96, 0x43, 0x2b, 0x81, 0x23, 0xf6, 0x10, 0xba, 0xda, 0x15, 0x89, 0x54, 0x37, 0xfd,
-	0x46, 0x21, 0x71, 0xe9, 0x69, 0xd3, 0xcd, 0xd7, 0xec, 0x19, 0xf4, 0x1d, 0x72, 0x42, 0x99, 0xe5,
-	0xd3, 0x15, 0x4c, 0x72, 0x08, 0x3b, 0x25, 0x7f, 0xef, 0x49, 0x60, 0x0c, 0xbd, 0x73, 0x1e, 0xf0,
-	0x84, 0xaf, 0xa6, 0x76, 0x84, 0x7e, 0xd1, 0x1d, 0x09, 0xf6, 0x4f, 0x0b, 0xf6, 0x0d, 0xd0, 0xc9,
-	0x42, 0x7f, 0x2a, 0xea, 0x33, 0xe8, 0xbe, 0xf6, 0xc2, 0x69, 0xc0, 0x5d, 0x4e, 0x37, 0x41, 0x22,
-	0xb1, 0x7f, 0xdd, 0x2d, 0xc8, 0x52, 0x82, 0x53, 0xeb, 0x94, 0x1c, 0x14, 0x11, 0x68, 0x01, 0x3b,
-	0x84, 0x83, 0xda, 0xbc, 0x48, 0xb0, 0xd7, 0x80, 0x2f, 0x78, 0x8e, 0xdb, 0x0b, 0x2f, 0xbe, 0x5a,
-	0x09, 0x49, 0xa5, 0x8e, 0x34, 0x49, 0xa5, 0xab, 0xf4, 0xbf, 0x57, 0x89, 0x44, 0x82, 0xdd, 0xc1,
-	0xa1, 0x44, 0xae, 0x68, 0xf1, 0xbf, 0x33, 0xc5, 0x5f, 0x2d, 0xb0, 0x9b, 0x62, 0x2b, 0xae, 0x98,
-	0x7d, 0x3c, 0x57, 0xcc, 0x3e, 0x8c, 0x2b, 0xce, 0xfe, 0xde, 0x84, 0xe5, 0x25, 0x08, 0xbf, 0x85,
-	0x8e, 0x97, 0xd1, 0x36, 0xee, 0x9d, 0x2e, 0x2f, 0x4a, 0xe6, 0xed, 0xc1, 0xbe, 0x5f, 0x23, 0x25,
-	0x81, 0xbf, 0xc2, 0xde, 0xbc, 0x86, 0xf2, 0xf0, 0x28, 0x53, 0x6f, 0xa0, 0x62, 0x7b, 0xf0, 0x6e,
-	0x05, 0x12, 0x38, 0x81, 0xfd, 0x79, 0x6d, 0x8f, 0xf0, 0xd8, 0xb0, 0xad, 0x9f, 0x9f, 0xcd, 0xde,
-	0xa7, 0x42, 0x02, 0xcf, 0xe1, 0xde, 0xdc, 0xa4, 0x2e, 0xb4, 0x0a, 0x46, 0x06, 0x87, 0xda, 0x87,
-	0x0d, 0x3b, 0x24, 0x70, 0x04, 0x5d, 0xcf, 0xe0, 0x0f, 0x3c, 0x30, 0x1a, 0x65, 0x02, 0xbb, 0x6d,
-	0xd5, 0x6f, 0x90, 0xc0, 0x1f, 0xa0, 0x17, 0x17, 0xc9, 0x01, 0xed, 0x4c, 0xb9, 0xca, 0x43, 0xf6,
-	0xe7, 0x8d, 0x7b, 0x24, 0xf0, 0x1b, 0xd8, 0xf4, 0x97, 0xd0, 0x88, 0xbb, 0x99, 0xa2, 0x81, 0xbb,
-	0xf6, 0x5e, 0x55, 0xa8, 0x7a, 0xe1, 0x9b, 0xa8, 0xa6, 0x7b, 0x51, 0x06, 0x4f, 0xdd, 0x8b, 0x2a,
-	0x0c, 0x8e, 0xa0, 0x3b, 0x37, 0xd8, 0x45, 0xf7, 0xa2, 0x44, 0x72, 0xb6, 0x55, 0xbf, 0xa1, 0x5c,
-	0x4c, 0x0d, 0x78, 0xd3, 0x2e, 0x4a, 0x18, 0xaa, 0x5d, 0x94, 0xd1, 0x10, 0x7f, 0xc9, 0x6e, 0xfc,
-	0x05, 0xd0, 0xc1, 0x07, 0x99, 0x41, 0x3d, 0x52, 0xda, 0x47, 0xef, 0xdc, 0x57, 0x63, 0xa2, 0x22,
-	0x8e, 0xe8, 0x31, 0x55, 0xa1, 0x4c, 0x8f, 0xa9, 0x06, 0x7c, 0xd2, 0x32, 0x7d, 0xe3, 0xe2, 0xaa,
-	0xcb, 0x2c, 0xdd, 0x96, 0x75, 0x99, 0xe5, 0x7b, 0x2e, 0x5e, 0xc0, 0xf6, 0xbc, 0xf0, 0x78, 0xc0,
-	0xea, 0x29, 0xcd, 0xde, 0x29, 0xb6, 0xdd, 0xb4, 0x45, 0xe2, 0xf1, 0xf1, 0x6f, 0x47, 0xe9, 0x23,
-	0x68, 0xe2, 0x8c, 0x8d, 0xd7, 0x8f, 0x52, 0xff, 0x4e, 0x7d, 0x5e, 0x6e, 0x48, 0xe1, 0xd7, 0xff,
-	0x06, 0x00, 0x00, 0xff, 0xff, 0x3c, 0x16, 0xac, 0xa2, 0x4b, 0x0d, 0x00, 0x00,
+var fileDescriptor_friend_fcfb8eb4800a740c = []byte{
+	// 917 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x57, 0xdb, 0x6e, 0xdb, 0x46,
+	0x10, 0x85, 0xe4, 0xda, 0xb1, 0x87, 0xb2, 0x9c, 0x8c, 0x2e, 0x51, 0xd9, 0xd8, 0x51, 0x16, 0x79,
+	0x70, 0x0b, 0x44, 0x02, 0x54, 0x14, 0x28, 0x90, 0x87, 0x22, 0x42, 0x7a, 0x51, 0x51, 0x23, 0x2a,
+	0x9d, 0xb6, 0x68, 0xf3, 0x20, 0xd0, 0xe1, 0x4a, 0x25, 0x44, 0x91, 0x6b, 0x0e, 0x25, 0x25, 0x1f,
+	0xd2, 0x8f, 0xe9, 0xdf, 0x15, 0x5c, 0xde, 0x96, 0x14, 0x25, 0xb8, 0xa9, 0x9a, 0x27, 0x62, 0xcf,
+	0xce, 0x65, 0x67, 0x76, 0x78, 0x66, 0x16, 0x1a, 0x53, 0xdf, 0xe6, 0xae, 0xd5, 0x8f, 0x3e, 0x3d,
+	0xe1, 0x7b, 0x81, 0x87, 0x47, 0xd1, 0x4a, 0xbf, 0x7c, 0x25, 0xb8, 0xfb, 0x6c, 0x74, 0xf5, 0xec,
+	0x9a, 0xfb, 0x2b, 0xee, 0xf7, 0xc5, 0x7c, 0xd6, 0x97, 0x12, 0x7d, 0xb2, 0xe6, 0x93, 0x35, 0xf5,
+	0xd7, 0x14, 0x69, 0xb0, 0x37, 0xf0, 0x60, 0xc6, 0x83, 0xef, 0xa4, 0x1a, 0x8d, 0xdc, 0xa9, 0x67,
+	0xf0, 0x5b, 0xec, 0x82, 0xe6, 0xad, 0x5d, 0xee, 0xff, 0x42, 0xdc, 0x1f, 0xbd, 0xec, 0x54, 0xba,
+	0x95, 0xcb, 0x13, 0x43, 0x85, 0xf0, 0x29, 0x9c, 0x46, 0xae, 0xa2, 0x35, 0x75, 0xaa, 0xdd, 0x83,
+	0xcb, 0x13, 0x23, 0x0f, 0xb2, 0x37, 0x80, 0x45, 0xe3, 0x24, 0xf0, 0x5b, 0xa8, 0x47, 0x50, 0x88,
+	0xfc, 0x64, 0x53, 0xd0, 0xa9, 0x74, 0x0f, 0x2e, 0xb5, 0xc1, 0x79, 0x8f, 0xe4, 0x69, 0x27, 0xa6,
+	0xb0, 0x27, 0xc2, 0xf4, 0xcd, 0x05, 0xf5, 0x32, 0x41, 0xa3, 0xa0, 0xc4, 0x7c, 0xa8, 0x99, 0x96,
+	0x15, 0x81, 0xe1, 0xa1, 0x2f, 0x00, 0xa6, 0xbe, 0xb7, 0xc8, 0x9d, 0x59, 0x41, 0x50, 0x87, 0xe3,
+	0xc0, 0x8b, 0x77, 0xab, 0x72, 0x37, 0x5d, 0x63, 0x1b, 0x8e, 0x7c, 0x7e, 0x7b, 0x45, 0xb3, 0xce,
+	0x81, 0xdc, 0x89, 0x57, 0x58, 0x87, 0x2a, 0x7f, 0xd7, 0xf9, 0x44, 0x62, 0x55, 0xfe, 0x8e, 0x9d,
+	0xc1, 0xa9, 0xe2, 0x93, 0x04, 0xfb, 0x1d, 0xce, 0xec, 0x85, 0xf0, 0xfc, 0x20, 0x3b, 0xc7, 0xbe,
+	0x92, 0x87, 0x70, 0x3f, 0x6f, 0x9a, 0x04, 0x0b, 0xa0, 0x39, 0xe3, 0xc1, 0x6b, 0x2f, 0x4e, 0xe9,
+	0x0b, 0x21, 0x9c, 0xf7, 0xa1, 0xcf, 0x36, 0x1c, 0x2d, 0x55, 0x77, 0xf1, 0x0a, 0x5f, 0x02, 0x08,
+	0x73, 0x66, 0xbb, 0x66, 0x60, 0x7b, 0xae, 0x8c, 0x5a, 0x1b, 0x3c, 0x2d, 0x49, 0xb3, 0xc1, 0x6f,
+	0x97, 0x9c, 0x82, 0x71, 0x2a, 0x6b, 0x28, 0x7a, 0x6c, 0x0d, 0xad, 0x12, 0xaf, 0x24, 0xf0, 0x87,
+	0xe4, 0x26, 0x63, 0x7d, 0x8a, 0x6f, 0xb2, 0xbb, 0xf5, 0x26, 0x63, 0x41, 0xa3, 0xa0, 0x87, 0x4d,
+	0x38, 0x0c, 0xbc, 0xc0, 0x74, 0xe4, 0x19, 0x0f, 0x8d, 0x68, 0xc1, 0x16, 0x70, 0x9a, 0xd5, 0x4f,
+	0x18, 0x67, 0x3e, 0x9e, 0xca, 0x87, 0xc5, 0xa3, 0x64, 0xab, 0xaa, 0x66, 0x8b, 0xcd, 0xa0, 0xae,
+	0xba, 0x23, 0x81, 0xdf, 0x80, 0xa6, 0x54, 0xef, 0xdd, 0xea, 0x54, 0xd5, 0xd8, 0x12, 0xd7, 0xcf,
+	0xa0, 0x99, 0x96, 0x35, 0x74, 0xcc, 0xb7, 0xf3, 0xbb, 0x55, 0x4c, 0x17, 0xb4, 0x9b, 0x50, 0x3a,
+	0x57, 0xbe, 0x2a, 0xc4, 0xea, 0xf2, 0x6f, 0x88, 0x4d, 0x92, 0x60, 0xaf, 0xa1, 0xee, 0xf3, 0x85,
+	0xb7, 0xe2, 0x7b, 0xf5, 0xd2, 0x04, 0xcc, 0x5b, 0x95, 0xbe, 0x1c, 0xa8, 0xcd, 0x78, 0x20, 0x21,
+	0xfa, 0xff, 0xab, 0x71, 0x25, 0x8b, 0x22, 0xf1, 0x46, 0x02, 0x5f, 0xc1, 0x83, 0x61, 0x7a, 0xc6,
+	0x3c, 0xa5, 0x3c, 0x29, 0xb1, 0x3e, 0x5e, 0xde, 0x38, 0xf6, 0xdb, 0x44, 0xd8, 0xd8, 0xd4, 0xdd,
+	0x72, 0x69, 0xd7, 0xa0, 0xd9, 0xf4, 0x6f, 0x7e, 0x73, 0x06, 0x35, 0xf5, 0x8f, 0x8e, 0xf3, 0x99,
+	0xc3, 0xd8, 0x17, 0x50, 0xcb, 0x8c, 0x92, 0x08, 0x49, 0xca, 0xe7, 0x24, 0x3c, 0x97, 0xb8, 0x34,
+	0x79, 0x6c, 0xa4, 0x6b, 0x36, 0x06, 0xb0, 0x69, 0xaf, 0xd7, 0xf9, 0x79, 0x18, 0x52, 0x5a, 0x33,
+	0x3b, 0x9d, 0xff, 0x06, 0x67, 0x16, 0x77, 0x78, 0xc0, 0xf7, 0x9d, 0x01, 0x84, 0xfb, 0x79, 0xc3,
+	0x24, 0xd8, 0x5f, 0x15, 0x68, 0x45, 0x9e, 0x63, 0xae, 0x4d, 0x89, 0xee, 0xbf, 0x90, 0x3c, 0x83,
+	0xda, 0x9f, 0xa6, 0x6b, 0x39, 0xdc, 0xe0, 0xb4, 0x74, 0x02, 0x49, 0xf5, 0x87, 0x46, 0x0e, 0xc3,
+	0x47, 0x70, 0x12, 0xad, 0xc3, 0x5e, 0x10, 0xf1, 0x7e, 0x06, 0xb0, 0x0e, 0xb4, 0xcb, 0x8e, 0x45,
+	0x82, 0xf9, 0x80, 0xc4, 0x53, 0xa6, 0x5e, 0x98, 0xfe, 0x7c, 0x6f, 0x19, 0x8a, 0x9a, 0x53, 0x68,
+	0x32, 0x6b, 0x4e, 0xe1, 0x8a, 0xb5, 0xa0, 0xb1, 0xe1, 0x93, 0x04, 0x5b, 0x41, 0x5b, 0xb2, 0x98,
+	0xb7, 0xf8, 0xb8, 0x5d, 0xe2, 0x3d, 0x3c, 0x2c, 0xf5, 0x1b, 0xf5, 0x89, 0xe9, 0x07, 0xf6, 0x89,
+	0xe9, 0x1d, 0xfa, 0xc4, 0xe0, 0xef, 0x7b, 0x10, 0x4f, 0x3e, 0xf8, 0x35, 0x9c, 0xa4, 0x1d, 0x1a,
+	0x9b, 0xbd, 0x78, 0x3a, 0x52, 0x07, 0x05, 0xbd, 0x55, 0x82, 0x92, 0xc0, 0xb1, 0x9c, 0x84, 0xf2,
+	0x5d, 0x0e, 0x1f, 0x25, 0xb2, 0x65, 0x6d, 0x57, 0x3f, 0xdf, 0xb1, 0x4b, 0x02, 0x7f, 0x85, 0x46,
+	0x49, 0x46, 0xf0, 0x42, 0xd1, 0x2a, 0xb9, 0x26, 0xfd, 0xf1, 0xce, 0x7d, 0x12, 0xf8, 0x1c, 0x20,
+	0xeb, 0x53, 0xd8, 0xca, 0x89, 0x27, 0xad, 0x52, 0x6f, 0x97, 0xc1, 0x24, 0xf0, 0x2b, 0x38, 0x4e,
+	0x1a, 0x05, 0x36, 0x94, 0x4c, 0x24, 0xc4, 0xa2, 0x37, 0x37, 0x41, 0x12, 0xf8, 0x02, 0x34, 0x85,
+	0xf9, 0x31, 0xb5, 0x9e, 0x6f, 0x07, 0xba, 0x5e, 0x8e, 0x27, 0x9e, 0x13, 0xae, 0xcb, 0x3c, 0x2b,
+	0x94, 0x9a, 0x79, 0xce, 0x51, 0xe2, 0x00, 0xee, 0xc5, 0x24, 0x85, 0x98, 0x09, 0xa4, 0x1e, 0x1b,
+	0x1b, 0x18, 0x89, 0xb0, 0x0a, 0xd2, 0x1e, 0x91, 0x55, 0x81, 0xda, 0xa4, 0xf4, 0x56, 0x09, 0x2a,
+	0xe3, 0xac, 0xa9, 0x74, 0x84, 0x0f, 0x13, 0xb1, 0x02, 0xfb, 0xe9, 0x9d, 0xf2, 0x0d, 0x12, 0x78,
+	0x1d, 0x36, 0xc9, 0x22, 0x4b, 0xe0, 0x79, 0x96, 0x99, 0x12, 0x62, 0xd3, 0x2f, 0x76, 0x6d, 0x93,
+	0xc0, 0x1f, 0xe1, 0xac, 0xf0, 0xb3, 0x63, 0x9a, 0xeb, 0x4d, 0xe6, 0xd1, 0x3f, 0xdb, 0xba, 0x47,
+	0x02, 0x87, 0x70, 0xaa, 0x4e, 0x96, 0x94, 0x05, 0x59, 0x98, 0x65, 0xb3, 0x20, 0x8b, 0x93, 0x28,
+	0x7e, 0xaf, 0xce, 0x4a, 0x72, 0xd4, 0xf9, 0x74, 0xb3, 0xe0, 0xe2, 0xf7, 0x44, 0x56, 0x15, 0x9b,
+	0xaf, 0x81, 0xe1, 0x93, 0x3f, 0x1e, 0x87, 0x8f, 0x95, 0xc9, 0xe8, 0x4a, 0x79, 0xa5, 0x44, 0xe2,
+	0xcf, 0xa3, 0xcf, 0xcd, 0x91, 0x04, 0xbf, 0xfc, 0x27, 0x00, 0x00, 0xff, 0xff, 0x05, 0x4c, 0x24,
+	0x27, 0xf3, 0x0c, 0x00, 0x00,
 }

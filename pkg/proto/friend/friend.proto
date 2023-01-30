@@ -8,7 +8,7 @@ message getFriendsInfoReq{
   repeated string friendUserIDs = 2;
 }
 message getFriendsInfoResp{
-  repeated server_api_params.FriendInfo FriendInfoList = 1;
+  repeated server_api_params.FriendInfo friendsInfo = 1;
 }
 
 
@@ -72,7 +72,7 @@ message getBlacksReq{
   server_api_params.RequestPagination pagination = 2;
 }
 message getBlacksResp{
-  repeated server_api_params.PublicUserInfo BlackUserInfoList = 1;
+  repeated server_api_params.PublicUserInfo blackUsersInfo= 1;
   int32 total = 2;
 }
 
