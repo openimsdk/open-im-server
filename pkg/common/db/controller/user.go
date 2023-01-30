@@ -45,7 +45,7 @@ func (u *UserController) GetByNameAndID(ctx context.Context, content string, sho
 func (u *UserController) Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.User, count int64, err error) {
 	return u.database.Get(ctx, showNumber, pageNumber)
 }
-func NewUserController(db *gorm.DB) UserInterface {
+func NewUserController(db *gorm.DB) *UserController {
 	controller := &UserController{database: newUserDatabase(db)}
 	return controller
 }
@@ -58,14 +58,14 @@ type UserDatabaseInterface interface {
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
 	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
 	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
-	Get(ctx context.Context, showNumber, pageNumber int32) (users []*User, count int64, err error)
+	Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
 }
 
 type UserDatabase struct {
 	sqlDB *relation.User
 }
 
-func newUserDatabase(db *gorm.DB) UserDatabaseInterface {
+func newUserDatabase(db *gorm.DB) *UserDatabase {
 	sqlDB := relation.NewUserDB(db)
 	database := &UserDatabase{
 		sqlDB: sqlDB,

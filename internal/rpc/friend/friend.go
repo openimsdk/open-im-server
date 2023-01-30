@@ -4,8 +4,9 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/model"
-	"Open_IM/pkg/common/db/mysql"
+	"Open_IM/pkg/common/db/controller"
+
+	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -30,31 +31,38 @@ import (
 )
 
 type friendServer struct {
-	rpcPort            int
-	rpcRegisterName    string
-	etcdSchema         string
-	etcdAddr           []string
-	friendModel        *controller.FriendModel
-	friendRequestModel *controller.FriendRequestModel
-	blackModel         *controller.BlackModel
+	rpcPort         int
+	rpcRegisterName string
+	etcdSchema      string
+	etcdAddr        []string
+	controller.FriendInterface
 }
 
 func NewFriendServer(port int) *friendServer {
 	log.NewPrivateLog(constant.LogFileName)
-	return &friendServer{
+	f := friendServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImFriendName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
+	//mysql init
+	var mysql relation.Mysql
+	var model relation.Friend
+	err := mysql.InitConn().AutoMigrateModel(&model)
+	if err != nil {
+		panic("db init err:" + err.Error())
+	}
+	if mysql.GormConn() != nil {
+		model.DB = mysql.GormConn()
+	} else {
+		panic("db init err:" + "conn is nil")
+	}
+	f.FriendInterface = controller.NewFriendController(model.DB)
+	return &f
 }
 
 func (s *friendServer) Run() {
-	db := relation.ConnectToDB()
-	//s.friendModel = mysql.NewFriend(db)
-	//s.friendRequestModel = mysql.NewFriendRequest(db)
-	//s.blackModel = mysql.NewBlack(db)
-
 	log.NewInfo("0", "friendServer run...")
 
 	listenIP := ""
