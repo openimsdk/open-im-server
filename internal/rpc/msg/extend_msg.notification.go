@@ -1,7 +1,7 @@
 package msg
 
 import (
-	"Open_IM/pkg/base_info"
+	"Open_IM/pkg/api_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
@@ -14,7 +14,7 @@ import (
 
 func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID string, sessionType int32,
 	req *msg.SetMessageReactionExtensionsReq, resp *msg.SetMessageReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
-	var m base_info.ReactionMessageModifierNotification
+	var m api_struct.ReactionMessageModifierNotification
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
 	m.SessionType = req.SessionType
@@ -37,7 +37,7 @@ func ExtendMessageUpdatedNotification(operationID, sendID string, sourceID strin
 }
 func ExtendMessageDeleteNotification(operationID, sendID string, sourceID string, sessionType int32,
 	req *msg.DeleteMessageListReactionExtensionsReq, resp *msg.DeleteMessageListReactionExtensionsResp, isHistory bool, isReactionFromCache bool) {
-	var m base_info.ReactionMessageDeleteNotification
+	var m api_struct.ReactionMessageDeleteNotification
 	m.SourceID = req.SourceID
 	m.OpUserID = req.OpUserID
 	m.SessionType = req.SessionType

@@ -9,7 +9,6 @@ import (
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	pbGroup "Open_IM/pkg/proto/group"
@@ -23,7 +22,6 @@ import (
 
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
-	utils2 "Open_IM/internal/utils"
 	"google.golang.org/grpc"
 )
 
@@ -173,7 +171,7 @@ func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoR
 		return nil, err
 	}
 	for _, v := range users {
-		n, err := utils2.NewDBUser(v).Convert()
+		n, err := utils.NewDBUser(v).Convert()
 		if err != nil {
 			return nil, err
 		}
@@ -196,7 +194,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		}
 		oldNickname = u.Nickname
 	}
-	user, err := utils2.NewPBUser(req.UserInfo).Convert()
+	user, err := utils.NewPBUser(req.UserInfo).Convert()
 	if err != nil {
 		return nil, err
 	}
@@ -216,16 +214,16 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	go func() {
 		for _, v := range rpcResp.FriendInfoList {
-			chat.FriendInfoUpdatedNotification(tools.OperationID(ctx), req.UserInfo.UserID, v.FriendUser.UserID, tools.OpUserID(ctx))
+			chat.FriendInfoUpdatedNotification(utils.OperationID(ctx), req.UserInfo.UserID, v.FriendUser.UserID, utils.OpUserID(ctx))
 		}
 	}()
 
-	chat.UserInfoUpdatedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.UserInfo.UserID)
+	chat.UserInfoUpdatedNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.UserInfo.UserID)
 	if req.UserInfo.FaceURL != "" {
-		s.SyncJoinedGroupMemberFaceURL(ctx, req.UserInfo.UserID, req.UserInfo.FaceURL, tools.OperationID(ctx), tools.OpUserID(ctx))
+		s.SyncJoinedGroupMemberFaceURL(ctx, req.UserInfo.UserID, req.UserInfo.FaceURL, utils.OperationID(ctx), utils.OpUserID(ctx))
 	}
 	if req.UserInfo.Nickname != "" {
-		s.SyncJoinedGroupMemberNickname(ctx, req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, tools.OperationID(ctx), tools.OpUserID(ctx))
+		s.SyncJoinedGroupMemberNickname(ctx, req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, utils.OperationID(ctx), utils.OpUserID(ctx))
 	}
 	return &resp, nil
 }
@@ -238,13 +236,13 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.Se
 	if err != nil {
 		return nil, err
 	}
-	chat.UserInfoUpdatedNotification(tools.OperationID(ctx), req.UserID, req.UserID)
+	chat.UserInfoUpdatedNotification(utils.OperationID(ctx), req.UserID, req.UserID)
 	return &resp, nil
 }
 
 func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
 	resp := pbUser.AccountCheckResp{}
-	err := token_verify.CheckManagerUserID(ctx, tools.OpUserID(ctx))
+	err := token_verify.CheckManagerUserID(ctx, utils.OpUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -279,7 +277,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			return nil, err
 		}
 		resp.Total = 1
-		u1, err := utils2.NewDBUser(u).Convert()
+		u1, err := utils.NewDBUser(u).Convert()
 		if err != nil {
 			return nil, err
 		}
@@ -294,7 +292,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		}
 		resp.Total = int32(total)
 		for _, v := range usersDB {
-			u1, err := utils2.NewDBUser(v).Convert()
+			u1, err := utils.NewDBUser(v).Convert()
 			if err != nil {
 				return nil, err
 			}
@@ -308,7 +306,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		}
 		resp.Total = int32(total)
 		for _, v := range usersDB {
-			u1, err := utils2.NewDBUser(v).Convert()
+			u1, err := utils.NewDBUser(v).Convert()
 			if err != nil {
 				return nil, err
 			}
@@ -325,7 +323,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	resp.Total = int32(total)
 
 	for _, userDB := range usersDB {
-		u, err := utils2.NewDBUser(userDB).Convert()
+		u, err := utils.NewDBUser(userDB).Convert()
 		if err != nil {
 			return nil, err
 		}

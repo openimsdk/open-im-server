@@ -2,7 +2,7 @@ package friend
 
 import (
 	common "Open_IM/internal/api_to_rpc"
-	api "Open_IM/pkg/base_info"
+	api "Open_IM/pkg/api_struct"
 	"Open_IM/pkg/common/config"
 	rpc "Open_IM/pkg/proto/friend"
 	"github.com/gin-gonic/gin"

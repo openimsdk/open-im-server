@@ -17,8 +17,8 @@ import (
 
 func GetUserFriends(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetFriendsReq
-		resp  cms_api_struct.GetFriendsResp
+		req   cms_struct.GetFriendsReq
+		resp  cms_struct.GetFriendsResp
 		reqPb pbAdmin.GetUserFriendsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -49,7 +49,7 @@ func GetUserFriends(c *gin.Context) {
 		return
 	}
 	for _, v := range respPb.FriendInfoList {
-		friend := &cms_api_struct.FriendInfo{}
+		friend := &cms_struct.FriendInfo{}
 		utils.CopyStructFields(friend, v)
 		friend.Nickname = v.FriendUser.Nickname
 		friend.UserID = v.FriendUser.UserID

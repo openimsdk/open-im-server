@@ -1,7 +1,7 @@
 package clientInit
 
 import (
-	api "Open_IM/pkg/base_info"
+	api "Open_IM/pkg/api_struct"
 	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/token_verify"

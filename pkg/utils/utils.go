@@ -8,6 +8,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/pkg/errors"
 	"math/rand"
+	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
@@ -166,6 +167,7 @@ func Map2Pb(m map[string]string) (pb proto.Message, err error) {
 	}
 	return pb, nil
 }
+
 func Pb2Map(pb proto.Message) (map[string]interface{}, error) {
 	_buffer := bytes.Buffer{}
 	jsonbMarshaller := &jsonpb.Marshaler{
@@ -178,4 +180,45 @@ func Pb2Map(pb proto.Message) (map[string]interface{}, error) {
 	var out map[string]interface{}
 	err := json.Unmarshal(jsonCnt, &out)
 	return out, err
+}
+
+func JsonDataList(resp interface{}) []map[string]interface{} {
+	var list []proto.Message
+	if reflect.TypeOf(resp).Kind() == reflect.Slice {
+		s := reflect.ValueOf(resp)
+		for i := 0; i < s.Len(); i++ {
+			ele := s.Index(i)
+			list = append(list, ele.Interface().(proto.Message))
+		}
+	}
+
+	result := make([]map[string]interface{}, 0)
+	for _, v := range list {
+		m := ProtoToMap(v, false)
+		result = append(result, m)
+	}
+	return result
+}
+
+func JsonDataOne(pb proto.Message) map[string]interface{} {
+	return ProtoToMap(pb, false)
+}
+
+func ProtoToMap(pb proto.Message, idFix bool) map[string]interface{} {
+	marshaler := jsonpb.Marshaler{
+		OrigName:     true,
+		EnumsAsInts:  false,
+		EmitDefaults: false,
+	}
+
+	s, _ := marshaler.MarshalToString(pb)
+	out := make(map[string]interface{})
+	json.Unmarshal([]byte(s), &out)
+	if idFix {
+		if _, ok := out["id"]; ok {
+			out["_id"] = out["id"]
+			delete(out, "id")
+		}
+	}
+	return out
 }

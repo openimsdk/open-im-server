@@ -8,7 +8,6 @@ import (
 	"Open_IM/internal/cms_api/middleware"
 	"Open_IM/internal/cms_api/statistics"
 	"Open_IM/internal/cms_api/user"
-	"Open_IM/internal/demo/register"
 	"Open_IM/pkg/common/config"
 
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -30,22 +29,6 @@ func NewGinRouter() *gin.Engine {
 		adminRouterGroup.POST("/login", admin.AdminLogin)
 		adminRouterGroup.Use(middleware.JWTAuth())
 		adminRouterGroup.POST("/get_user_token", admin.GetUserToken)
-
-		adminRouterGroup.POST("/add_user_register_add_friend_id", admin.AddUserRegisterAddFriendIDList)
-		adminRouterGroup.POST("/reduce_user_register_reduce_friend_id", admin.ReduceUserRegisterAddFriendIDList)
-		adminRouterGroup.POST("/get_user_register_reduce_friend_id_list", admin.GetUserRegisterAddFriendIDList)
-
-		adminRouterGroup.POST("/generate_invitation_code", register.GenerateInvitationCode)
-		adminRouterGroup.POST("/query_invitation_code", register.QueryInvitationCode)
-		adminRouterGroup.POST("/get_invitation_codes", register.GetInvitationCodes)
-
-		adminRouterGroup.POST("/query_user_ip_limit_login", register.QueryUserIDLimitLogin)
-		adminRouterGroup.POST("/add_user_ip_limit_login", register.AddUserIPLimitLogin)
-		adminRouterGroup.POST("/remove_user_ip_limit_login", register.RemoveUserIPLimitLogin)
-
-		adminRouterGroup.POST("/query_ip_register", register.QueryIPRegister)
-		adminRouterGroup.POST("/add_ip_limit", register.AddIPLimit)
-		adminRouterGroup.POST("/remove_ip_Limit", register.RemoveIPLimit)
 	}
 	r2 := router.Group("")
 	r2.Use(middleware.JWTAuth())

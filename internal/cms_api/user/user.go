@@ -18,7 +18,7 @@ import (
 
 func AddUser(c *gin.Context) {
 	var (
-		req   cms_api_struct.AddUserRequest
+		req   cms_struct.AddUserRequest
 		reqPb pb.AddUserReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -48,7 +48,7 @@ func AddUser(c *gin.Context) {
 
 func BlockUser(c *gin.Context) {
 	var (
-		req   cms_api_struct.BlockUserRequest
+		req   cms_struct.BlockUserRequest
 		reqPb pb.BlockUserReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -78,8 +78,8 @@ func BlockUser(c *gin.Context) {
 
 func UnblockUser(c *gin.Context) {
 	var (
-		req   cms_api_struct.UnblockUserRequest
-		resp  cms_api_struct.UnBlockUserResponse
+		req   cms_struct.UnblockUserRequest
+		resp  cms_struct.UnBlockUserResponse
 		reqPb pb.UnBlockUserReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -110,8 +110,8 @@ func UnblockUser(c *gin.Context) {
 
 func GetBlockUsers(c *gin.Context) {
 	var (
-		req    cms_api_struct.GetBlockUsersRequest
-		resp   cms_api_struct.GetBlockUsersResponse
+		req    cms_struct.GetBlockUsersRequest
+		resp   cms_struct.GetBlockUsersResponse
 		reqPb  pb.GetBlockUsersReq
 		respPb *pb.GetBlockUsersResp
 	)
@@ -140,8 +140,8 @@ func GetBlockUsers(c *gin.Context) {
 		return
 	}
 	for _, v := range respPb.BlockUsers {
-		resp.BlockUsers = append(resp.BlockUsers, cms_api_struct.BlockUser{
-			UserResponse: cms_api_struct.UserResponse{
+		resp.BlockUsers = append(resp.BlockUsers, cms_struct.BlockUser{
+			UserResponse: cms_struct.UserResponse{
 				UserID:      v.UserInfo.UserID,
 				FaceURL:     v.UserInfo.FaceURL,
 				Nickname:    v.UserInfo.Nickname,
@@ -162,8 +162,8 @@ func GetBlockUsers(c *gin.Context) {
 
 func GetUserIDByEmailAndPhoneNumber(c *gin.Context) {
 	var (
-		req    cms_api_struct.GetUserIDByEmailAndPhoneNumberRequest
-		resp   cms_api_struct.GetUserIDByEmailAndPhoneNumberResponse
+		req    cms_struct.GetUserIDByEmailAndPhoneNumberRequest
+		resp   cms_struct.GetUserIDByEmailAndPhoneNumberResponse
 		reqPb  pbAdminCms.GetUserIDByEmailAndPhoneNumberReq
 		respPb *pbAdminCms.GetUserIDByEmailAndPhoneNumberResp
 	)

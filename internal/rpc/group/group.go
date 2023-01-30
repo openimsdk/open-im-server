@@ -13,7 +13,6 @@ import (
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/common/tracelog"
 
 	cp "Open_IM/internal/utils"
@@ -180,12 +179,12 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			return nil, err
 		}
 	} else {
-		opUserID := tools.OpUserID(ctx)
+		opUserID := utils.OpUserID(ctx)
 		joinGroup := func(userID string, roleLevel int32) error {
 			user := userMap[userID]
 			groupMember := &relation.GroupMember{GroupID: group.GroupID, RoleLevel: roleLevel, OperatorUserID: opUserID, JoinSource: constant.JoinByInvitation, InviterUserID: opUserID}
 			utils.CopyStructFields(&groupMember, user)
-			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), groupMember, group.Ex); err != nil {
+			if err := CallbackBeforeMemberJoinGroup(ctx, utils.OperationID(ctx), groupMember, group.Ex); err != nil {
 				return err
 			}
 			groupMembers = append(groupMembers, groupMember)
@@ -213,11 +212,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if req.GroupInfo.GroupType == constant.SuperGroup {
 		go func() {
 			for _, userID := range userIDs {
-				chat.SuperGroupNotification(tools.OperationID(ctx), userID, userID)
+				chat.SuperGroupNotification(utils.OperationID(ctx), userID, userID)
 			}
 		}()
 	} else {
-		chat.GroupCreatedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), group.GroupID, userIDs)
+		chat.GroupCreatedNotification(utils.OperationID(ctx), utils.OpUserID(ctx), group.GroupID, userIDs)
 	}
 	return resp, nil
 }
@@ -301,7 +300,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	}
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !token_verify.IsAppManagerUid(ctx) {
-			opUserID := tools.OpUserID(ctx)
+			opUserID := utils.OpUserID(ctx)
 			member, ok := memberMap[opUserID]
 			if ok {
 				return nil, constant.ErrNoPermission.Wrap("not in group")
@@ -336,7 +335,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			return nil, err
 		}
 		for _, userID := range req.InvitedUserIDList {
-			chat.SuperGroupNotification(tools.OperationID(ctx), userID, userID)
+			chat.SuperGroupNotification(utils.OperationID(ctx), userID, userID)
 		}
 	} else {
 		var groupMembers []*relation.GroupMember
@@ -346,10 +345,10 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			utils.CopyStructFields(&member, user)
 			member.GroupID = req.GroupID
 			member.RoleLevel = constant.GroupOrdinaryUsers
-			member.OperatorUserID = tools.OpUserID(ctx)
-			member.InviterUserID = tools.OpUserID(ctx)
+			member.OperatorUserID = utils.OpUserID(ctx)
+			member.InviterUserID = utils.OpUserID(ctx)
 			member.JoinSource = constant.JoinByInvitation
-			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), &member, group.Ex); err != nil {
+			if err := CallbackBeforeMemberJoinGroup(ctx, utils.OperationID(ctx), &member, group.Ex); err != nil {
 				return nil, err
 			}
 			groupMembers = append(groupMembers, &member)
@@ -357,7 +356,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		if err := s.GroupInterface.CreateGroupMember(ctx, groupMembers); err != nil {
 			return nil, err
 		}
-		chat.MemberInvitedNotification(tools.OperationID(ctx), req.GroupID, tools.OpUserID(ctx), req.Reason, req.InvitedUserIDList)
+		chat.MemberInvitedNotification(utils.OperationID(ctx), req.GroupID, utils.OpUserID(ctx), req.Reason, req.InvitedUserIDList)
 	}
 	return resp, nil
 }
@@ -436,8 +435,8 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 	var okUserIDList []string
 	if groupInfo.GroupType != constant.SuperGroup {
 		opFlag := 0
-		if !token_verify.IsManagerUserID(tools.OpUserID(ctx)) {
-			opInfo, err := rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, tools.OpUserID(ctx))
+		if !token_verify.IsManagerUserID(utils.OpUserID(ctx)) {
+			opInfo, err := rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, utils.OpUserID(ctx))
 			if err != nil {
 				return nil, err
 			}
@@ -484,7 +483,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 			err = relation.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, v)
 			tracelog.SetCtxInfo(ctx, "RemoveGroupMember", err, "groupID", req.GroupID, "userID", v)
 			if err != nil {
-				log.NewError(tools.OperationID(ctx), "RemoveGroupMember failed ", err.Error(), req.GroupID, v)
+				log.NewError(utils.OperationID(ctx), "RemoveGroupMember failed ", err.Error(), req.GroupID, v)
 				resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: -1})
 			} else {
 				resp.Id2ResultList = append(resp.Id2ResultList, &pbGroup.Id2Result{UserID: v, Result: 0})
@@ -494,7 +493,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		var reqPb pbUser.SetConversationReq
 		var c pbConversation.Conversation
 		for _, v := range okUserIDList {
-			reqPb.OperationID = tools.OperationID(ctx)
+			reqPb.OperationID = utils.OperationID(ctx)
 			c.OwnerUserID = v
 			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
 			c.ConversationType = constant.GroupChatType
@@ -531,7 +530,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		go func() {
 			for _, v := range req.KickedUserIDList {
-				chat.SuperGroupNotification(tools.OperationID(ctx), v, v)
+				chat.SuperGroupNotification(utils.OperationID(ctx), v, v)
 			}
 		}()
 
@@ -587,7 +586,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	tracelog.SetCtxInfo(ctx, "GetRecvGroupApplicationList", nil, " FromUserID: ", req.FromUserID, "GroupApplicationList: ", reply)
 	for _, v := range reply {
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
-		err := FillGroupInfoByGroupID(tools.OperationID(ctx), v.GroupID, node.GroupInfo)
+		err := FillGroupInfoByGroupID(utils.OperationID(ctx), v.GroupID, node.GroupInfo)
 		if err != nil {
 			if !errors.Is(errors.Unwrap(err), constant.ErrDismissedAlready) {
 				errResult = err
@@ -595,7 +594,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 			continue
 		}
 		tracelog.SetCtxInfo(ctx, "FillGroupInfoByGroupID ", nil, " groupID: ", v.GroupID, " groupInfo: ", node.GroupInfo)
-		err = FillPublicUserInfoByUserID(tools.OperationID(ctx), v.UserID, node.UserInfo)
+		err = FillPublicUserInfoByUserID(utils.OperationID(ctx), v.UserID, node.UserInfo)
 		if err != nil {
 			errResult = err
 			continue
@@ -640,7 +639,7 @@ func CheckPermission(ctx context.Context, groupID string, userID string) (err er
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	resp := &pbGroup.GroupApplicationResponseResp{}
 
-	if err := CheckPermission(ctx, req.GroupID, tools.OpUserID(ctx)); err != nil {
+	if err := CheckPermission(ctx, req.GroupID, utils.OpUserID(ctx)); err != nil {
 		return nil, err
 	}
 	groupRequest := getDBGroupRequest(ctx, req)
@@ -656,7 +655,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		if err != nil {
 			return nil, err
 		}
-		err = CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), member, groupInfo.Ex)
+		err = CallbackBeforeMemberJoinGroup(ctx, utils.OperationID(ctx), member, groupInfo.Ex)
 		if err != nil {
 			return nil, err
 		}
@@ -664,12 +663,12 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 		if err != nil {
 			return nil, err
 		}
-		etcdCacheConn, err := fault_tolerant.GetDefaultConn(config.Config.RpcRegisterName.OpenImCacheName, tools.OperationID(ctx))
+		etcdCacheConn, err := fault_tolerant.GetDefaultConn(config.Config.RpcRegisterName.OpenImCacheName, utils.OperationID(ctx))
 		if err != nil {
 			return nil, err
 		}
 		cacheClient := pbCache.NewCacheClient(etcdCacheConn)
-		cacheResp, err := cacheClient.DelGroupMemberIDListFromCache(context.Background(), &pbCache.DelGroupMemberIDListFromCacheReq{OperationID: tools.OperationID(ctx), GroupID: req.GroupID})
+		cacheResp, err := cacheClient.DelGroupMemberIDListFromCache(context.Background(), &pbCache.DelGroupMemberIDListFromCacheReq{OperationID: utils.OperationID(ctx), GroupID: req.GroupID})
 		if err != nil {
 			return nil, err
 		}
@@ -696,7 +695,7 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	resp := &pbGroup.JoinGroupResp{}
 
-	if _, err := relation.GetUserByUserID(tools.OpUserID(ctx)); err != nil {
+	if _, err := relation.GetUserByUserID(utils.OpUserID(ctx)); err != nil {
 		return nil, err
 	}
 	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
@@ -709,17 +708,17 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 
 	if groupInfo.NeedVerification == constant.Directly {
 		if groupInfo.GroupType != constant.SuperGroup {
-			us, err := relation.GetUserByUserID(tools.OpUserID(ctx))
+			us, err := relation.GetUserByUserID(utils.OpUserID(ctx))
 			if err != nil {
 				return nil, err
 			}
 			//to group member
-			groupMember := relation.GroupMember{GroupID: req.GroupID, RoleLevel: constant.GroupOrdinaryUsers, OperatorUserID: tools.OpUserID(ctx)}
+			groupMember := relation.GroupMember{GroupID: req.GroupID, RoleLevel: constant.GroupOrdinaryUsers, OperatorUserID: utils.OpUserID(ctx)}
 			utils.CopyStructFields(&groupMember, us)
-			if err := CallbackBeforeMemberJoinGroup(ctx, tools.OperationID(ctx), &groupMember, groupInfo.Ex); err != nil {
+			if err := CallbackBeforeMemberJoinGroup(ctx, utils.OperationID(ctx), &groupMember, groupInfo.Ex); err != nil {
 				return nil, err
 			}
-			if err := s.DelGroupAndUserCache(ctx, req.GroupID, []string{tools.OpUserID(ctx)}); err != nil {
+			if err := s.DelGroupAndUserCache(ctx, req.GroupID, []string{utils.OpUserID(ctx)}); err != nil {
 				return nil, err
 			}
 			err = relation.InsertIntoGroupMember(groupMember)
@@ -735,8 +734,8 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			}
 			var reqPb pbUser.SetConversationReq
 			var c pbConversation.Conversation
-			reqPb.OperationID = tools.OperationID(ctx)
-			c.OwnerUserID = tools.OpUserID(ctx)
+			reqPb.OperationID = utils.OperationID(ctx)
+			c.OwnerUserID = utils.OpUserID(ctx)
 			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
 			c.ConversationType = int32(sessionType)
 			c.GroupID = req.GroupID
@@ -750,7 +749,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 			client := pbUser.NewUserClient(etcdConn)
 			respPb, err := client.SetConversation(context.Background(), &reqPb)
 			tracelog.SetCtxInfo(ctx, "SetConversation", err, "req", reqPb, "resp", respPb)
-			chat.MemberEnterDirectlyNotification(req.GroupID, tools.OpUserID(ctx), tools.OperationID(ctx))
+			chat.MemberEnterDirectlyNotification(req.GroupID, utils.OpUserID(ctx), utils.OperationID(ctx))
 			return resp, nil
 		} else {
 			constant.SetErrorForResp(constant.ErrGroupTypeNotSupport, resp.CommonResp)
@@ -758,7 +757,7 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		}
 	}
 	var groupRequest relation.GroupRequest
-	groupRequest.UserID = tools.OpUserID(ctx)
+	groupRequest.UserID = utils.OpUserID(ctx)
 	groupRequest.ReqMsg = req.ReqMessage
 	groupRequest.GroupID = req.GroupID
 	groupRequest.JoinSource = req.JoinSource
@@ -778,31 +777,31 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		return nil, err
 	}
 	if groupInfo.GroupType != constant.SuperGroup {
-		_, err = rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, tools.OpUserID(ctx))
+		_, err = rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, utils.OpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
-		if err := s.DelGroupAndUserCache(ctx, req.GroupID, []string{tools.OpUserID(ctx)}); err != nil {
+		if err := s.DelGroupAndUserCache(ctx, req.GroupID, []string{utils.OpUserID(ctx)}); err != nil {
 			return nil, err
 		}
-		err = relation.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, tools.OpUserID(ctx))
+		err = relation.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, utils.OpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		okUserIDList := []string{tools.OpUserID(ctx)}
+		okUserIDList := []string{utils.OpUserID(ctx)}
 		if err := db.DB.RemoverUserFromSuperGroup(req.GroupID, okUserIDList); err != nil {
 			return nil, err
 		}
 	}
 
 	if groupInfo.GroupType != constant.SuperGroup {
-		_ = rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, tools.OpUserID(ctx))
+		_ = rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, utils.OpUserID(ctx))
 		chat.MemberQuitNotification(req)
 	} else {
-		_ = rocksCache.DelJoinedSuperGroupIDListFromCache(ctx, tools.OpUserID(ctx))
+		_ = rocksCache.DelJoinedSuperGroupIDListFromCache(ctx, utils.OpUserID(ctx))
 		_ = rocksCache.DelGroupMemberListHashFromCache(ctx, req.GroupID)
-		chat.SuperGroupNotification(tools.OperationID(ctx), tools.OpUserID(ctx), tools.OpUserID(ctx))
+		chat.SuperGroupNotification(utils.OperationID(ctx), utils.OpUserID(ctx), utils.OpUserID(ctx))
 	}
 	return resp, nil
 }
@@ -871,7 +870,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	var groupInfo relation.Group
 	utils.CopyStructFields(&groupInfo, req.GroupInfoForSet)
 	if req.GroupInfoForSet.Notification != "" {
-		groupInfo.NotificationUserID = tools.OpUserID(ctx)
+		groupInfo.NotificationUserID = utils.OpUserID(ctx)
 		groupInfo.NotificationUpdateTime = time.Now()
 	}
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupInfoForSet.GroupID); err != nil {
@@ -882,11 +881,11 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		return nil, err
 	}
 	if changedType != 0 {
-		chat.GroupInfoSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupInfoForSet.GroupID, groupName, notification, introduction, faceURL, req.GroupInfoForSet.NeedVerification)
+		chat.GroupInfoSetNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupInfoForSet.GroupID, groupName, notification, introduction, faceURL, req.GroupInfoForSet.NeedVerification)
 	}
 	if req.GroupInfoForSet.Notification != "" {
 		//get group member user id
-		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: tools.OperationID(ctx), GroupID: req.GroupInfoForSet.GroupID}
+		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: utils.OperationID(ctx), GroupID: req.GroupInfoForSet.GroupID}
 		etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
 		if err != nil {
 			return nil, err
@@ -901,13 +900,13 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		}
 		var conversationReq pbConversation.ModifyConversationFieldReq
 		conversation := pbConversation.Conversation{
-			OwnerUserID:      tools.OpUserID(ctx),
+			OwnerUserID:      utils.OpUserID(ctx),
 			ConversationID:   utils.GetConversationIDBySessionType(req.GroupInfoForSet.GroupID, constant.GroupChatType),
 			ConversationType: constant.GroupChatType,
 			GroupID:          req.GroupInfoForSet.GroupID,
 		}
 		conversationReq.Conversation = &conversation
-		conversationReq.OperationID = tools.OperationID(ctx)
+		conversationReq.OperationID = utils.OperationID(ctx)
 		conversationReq.FieldType = constant.FieldGroupAtType
 		conversation.GroupAtType = constant.GroupNotification
 		conversationReq.UserIDList = cacheResp.UserIDList
@@ -1020,7 +1019,7 @@ func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGr
 	if err != nil {
 		return nil, err
 	}
-	log.NewInfo(tools.OperationID(ctx), groupMembersCount)
+	log.NewInfo(utils.OperationID(ctx), groupMembersCount)
 	resp.MemberNums = int32(groupMembersCount)
 	for _, groupMember := range groupMembers {
 		member := open_im_sdk.GroupMemberFullInfo{}
@@ -1065,7 +1064,7 @@ func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGrou
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
 	resp := &pbGroup.DismissGroupResp{}
 
-	if !token_verify.IsManagerUserID(tools.OpUserID(ctx)) && !relation.IsGroupOwnerAdmin(req.GroupID, tools.OpUserID(ctx)) {
+	if !token_verify.IsManagerUserID(utils.OpUserID(ctx)) && !relation.IsGroupOwnerAdmin(req.GroupID, utils.OpUserID(ctx)) {
 		return nil, utils.Wrap(constant.ErrIdentity, "")
 	}
 
@@ -1093,7 +1092,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 		var reqPb pbUser.SetConversationReq
 		var c pbConversation.Conversation
 		for _, v := range memberList {
-			reqPb.OperationID = tools.OperationID(ctx)
+			reqPb.OperationID = utils.OperationID(ctx)
 			c.OwnerUserID = v.UserID
 			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
 			c.ConversationType = constant.GroupChatType
@@ -1122,7 +1121,7 @@ func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGrou
 func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (*pbGroup.MuteGroupMemberResp, error) {
 	resp := &pbGroup.MuteGroupMemberResp{}
 
-	opFlag, err := s.getGroupUserLevel(req.GroupID, tools.OpUserID(ctx))
+	opFlag, err := s.getGroupUserLevel(req.GroupID, utils.OpUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -1150,14 +1149,14 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 	if err != nil {
 		return nil, err
 	}
-	chat.GroupMemberMutedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID, req.UserID, req.MutedSeconds)
+	chat.GroupMemberMutedNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupID, req.UserID, req.MutedSeconds)
 	return resp, nil
 }
 
 func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (*pbGroup.CancelMuteGroupMemberResp, error) {
 	resp := &pbGroup.CancelMuteGroupMemberResp{}
 
-	opFlag, err := s.getGroupUserLevel(req.GroupID, tools.OpUserID(ctx))
+	opFlag, err := s.getGroupUserLevel(req.GroupID, utils.OpUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -1185,14 +1184,14 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 	if err != nil {
 		return nil, err
 	}
-	chat.GroupMemberCancelMutedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID, req.UserID)
+	chat.GroupMemberCancelMutedNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupID, req.UserID)
 	return resp, nil
 }
 
 func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) (*pbGroup.MuteGroupResp, error) {
 	resp := &pbGroup.MuteGroupResp{}
 
-	opFlag, err := s.getGroupUserLevel(req.GroupID, tools.OpUserID(ctx))
+	opFlag, err := s.getGroupUserLevel(req.GroupID, utils.OpUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -1225,14 +1224,14 @@ func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) 
 		return nil, err
 	}
 
-	chat.GroupMutedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID)
+	chat.GroupMutedNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupID)
 	return resp, nil
 }
 
 func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMuteGroupReq) (*pbGroup.CancelMuteGroupResp, error) {
 	resp := &pbGroup.CancelMuteGroupResp{}
 
-	opFlag, err := s.getGroupUserLevel(req.GroupID, tools.OpUserID(ctx))
+	opFlag, err := s.getGroupUserLevel(req.GroupID, utils.OpUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -1252,7 +1251,7 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	//	errMsg := req.OperationID + " mutedInfo.RoleLevel == constant.GroupAdmin " + req.GroupID + req.OpUserID + err.Error()
 	//	return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
 	//}
-	log.Debug(tools.OperationID(ctx), "UpdateGroupInfoDefaultZero ", req.GroupID, map[string]interface{}{"status": constant.GroupOk})
+	log.Debug(utils.OperationID(ctx), "UpdateGroupInfoDefaultZero ", req.GroupID, map[string]interface{}{"status": constant.GroupOk})
 	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
 		return nil, err
 	}
@@ -1260,14 +1259,14 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 	if err != nil {
 		return nil, err
 	}
-	chat.GroupCancelMutedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID)
+	chat.GroupCancelMutedNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupID)
 	return resp, nil
 }
 
 func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.SetGroupMemberNicknameReq) (*pbGroup.SetGroupMemberNicknameResp, error) {
 	resp := &pbGroup.SetGroupMemberNicknameResp{}
 
-	if tools.OpUserID(ctx) != req.UserID && !token_verify.IsManagerUserID(tools.OpUserID(ctx)) {
+	if utils.OpUserID(ctx) != req.UserID && !token_verify.IsManagerUserID(utils.OpUserID(ctx)) {
 		return nil, utils.Wrap(constant.ErrIdentity, "")
 	}
 	cbReq := &pbGroup.SetGroupMemberInfoReq{
@@ -1299,7 +1298,7 @@ func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.S
 	if err := relation.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
 		return nil, err
 	}
-	chat.GroupMemberInfoSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID, req.UserID)
+	chat.GroupMemberInfoSetNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupID, req.UserID)
 	return resp, nil
 }
 
@@ -1338,13 +1337,13 @@ func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGr
 		switch req.RoleLevel.Value {
 		case constant.GroupOrdinaryUsers:
 			//msg.GroupMemberRoleLevelChangeNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID, constant.GroupMemberSetToOrdinaryUserNotification)
-			chat.GroupMemberInfoSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID, req.UserID)
+			chat.GroupMemberInfoSetNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupID, req.UserID)
 		case constant.GroupAdmin, constant.GroupOwner:
 			//msg.GroupMemberRoleLevelChangeNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID, constant.GroupMemberSetToAdminNotification)
-			chat.GroupMemberInfoSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID, req.UserID)
+			chat.GroupMemberInfoSetNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupID, req.UserID)
 		}
 	} else {
-		chat.GroupMemberInfoSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.GroupID, req.UserID)
+		chat.GroupMemberInfoSetNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.GroupID, req.UserID)
 	}
 	return resp, nil
 }

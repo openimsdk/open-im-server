@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"Open_IM/pkg/base_info"
+	"Open_IM/pkg/api_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
@@ -61,7 +61,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 			continue
 		}
 		if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageModifier {
-			notification := &base_info.ReactionMessageModifierNotification{}
+			notification := &api_struct.ReactionMessageModifierNotification{}
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
 				continue
 			}
@@ -104,7 +104,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 				}
 			}
 		} else if msgDataToMQ.MsgData.ContentType == constant.ReactionMessageDeleter {
-			notification := &base_info.ReactionMessageDeleteNotification{}
+			notification := &api_struct.ReactionMessageDeleteNotification{}
 			if err := json.Unmarshal(msgDataToMQ.MsgData.Content, notification); err != nil {
 				continue
 			}
@@ -116,7 +116,7 @@ func (mmc *ModifyMsgConsumerHandler) ModifyMsg(cMsg *sarama.ConsumerMessage, msg
 
 }
 
-func UnMarshallSetReactionMsgContent(content []byte) (notification *base_info.ReactionMessageModifierNotification, err error) {
+func UnMarshallSetReactionMsgContent(content []byte) (notification *api_struct.ReactionMessageModifierNotification, err error) {
 
 	return notification, nil
 }

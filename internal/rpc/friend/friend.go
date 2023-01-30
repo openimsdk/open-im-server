@@ -4,13 +4,10 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/model"
-	"Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
@@ -114,7 +111,7 @@ func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlackl
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	black := relation.Black{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}
+	black := relation.Black{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID, OperatorUserID: utils.OpUserID(ctx)}
 	if err := s.blackModel.Create(ctx, []*relation.Black{&black}); err != nil {
 		return nil, err
 	}
@@ -222,7 +219,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	friendRequest.HandleResult = req.HandleResult
 	friendRequest.HandleTime = time.Now()
 	friendRequest.HandleMsg = req.HandleMsg
-	friendRequest.HandlerUserID = tools.OpUserID(ctx)
+	friendRequest.HandlerUserID = utils.OpUserID(ctx)
 	err = relation.UpdateFriendApplication(friendRequest)
 	if err != nil {
 		return nil, err
@@ -233,10 +230,10 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 		//Establish friendship after find friend relationship not exists
 		_, err := s.friendModel.Take(ctx, req.FromUserID, req.ToUserID)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if err := s.friendModel.Create(ctx, []*relation.Friend{{OwnerUserID: req.FromUserID, FriendUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}}); err != nil {
+			if err := s.friendModel.Create(ctx, []*relation.Friend{{OwnerUserID: req.FromUserID, FriendUserID: req.ToUserID, OperatorUserID: utils.OpUserID(ctx)}}); err != nil {
 				return nil, err
 			}
-			chat.FriendAddedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.FromUserID, req.ToUserID)
+			chat.FriendAddedNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.FromUserID, req.ToUserID)
 		} else if err != nil {
 			return nil, err
 		}
@@ -292,7 +289,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 	if err := s.friendModel.UpdateRemark(ctx, req.FromUserID, req.ToUserID, req.Remark); err != nil {
 		return nil, err
 	}
-	chat.FriendRemarkSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.FromUserID, req.ToUserID)
+	chat.FriendRemarkSetNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.FromUserID, req.ToUserID)
 	return resp, nil
 }
 

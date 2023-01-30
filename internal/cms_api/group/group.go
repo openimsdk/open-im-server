@@ -18,8 +18,8 @@ import (
 
 func GetGroups(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetGroupsRequest
-		resp  cms_api_struct.GetGroupsResponse
+		req   cms_struct.GetGroupsRequest
+		resp  cms_struct.GetGroupsResponse
 		reqPb pbGroup.GetGroupsReq
 	)
 	if err := c.BindJSON(&req); err != nil {
@@ -48,7 +48,7 @@ func GetGroups(c *gin.Context) {
 		return
 	}
 	for _, v := range respPb.CMSGroups {
-		groupResp := cms_api_struct.GroupResponse{}
+		groupResp := cms_struct.GroupResponse{}
 		utils.CopyStructFields(&groupResp, v.GroupInfo)
 		groupResp.GroupOwnerName = v.GroupOwnerUserName
 		groupResp.GroupOwnerID = v.GroupOwnerUserID
@@ -63,9 +63,9 @@ func GetGroups(c *gin.Context) {
 
 func GetGroupMembers(c *gin.Context) {
 	var (
-		req   cms_api_struct.GetGroupMembersRequest
+		req   cms_struct.GetGroupMembersRequest
 		reqPb pbGroup.GetGroupMembersCMSReq
-		resp  cms_api_struct.GetGroupMembersResponse
+		resp  cms_struct.GetGroupMembersResponse
 	)
 	if err := c.BindJSON(&req); err != nil {
 		log.NewError(reqPb.OperationID, utils.GetSelfFuncName(), "BindJSON failed ", err.Error())
@@ -94,13 +94,13 @@ func GetGroupMembers(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
-	resp.ResponsePagination = cms_api_struct.ResponsePagination{
+	resp.ResponsePagination = cms_struct.ResponsePagination{
 		CurrentPage: int(respPb.Pagination.CurrentPage),
 		ShowNumber:  int(respPb.Pagination.ShowNumber),
 	}
 	resp.MemberNums = int(respPb.MemberNums)
 	for _, groupMember := range respPb.Members {
-		memberResp := cms_api_struct.GroupMemberResponse{}
+		memberResp := cms_struct.GroupMemberResponse{}
 		utils.CopyStructFields(&memberResp, groupMember)
 		resp.GroupMembers = append(resp.GroupMembers, memberResp)
 	}

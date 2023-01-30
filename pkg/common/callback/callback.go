@@ -10,11 +10,6 @@ func GetContent(msg *server_api_params.MsgData) string {
 	if msg.ContentType >= constant.NotificationBegin && msg.ContentType <= constant.NotificationEnd {
 		var tips server_api_params.TipsComm
 		_ = proto.Unmarshal(msg.Content, &tips)
-		//marshaler := jsonpb.Marshaler{
-		//	OrigName:     true,
-		//	EnumsAsInts:  false,
-		//	EmitDefaults: false,
-		//}
 		content := tips.JsonDetail
 		return content
 	} else {
