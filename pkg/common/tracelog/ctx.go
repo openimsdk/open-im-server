@@ -1,4 +1,4 @@
-package trace_log
+package tracelog
 
 import (
 	"Open_IM/pkg/common/constant"
@@ -15,7 +15,7 @@ import (
 	"net/http"
 )
 
-const TraceLogKey = "trace_log"
+const TraceLogKey = "tracelog"
 
 func NewCtx(c *gin.Context, api string) context.Context {
 	req := &ApiInfo{ApiName: api, GinCtx: c, Funcs: &[]FuncInfo{}}

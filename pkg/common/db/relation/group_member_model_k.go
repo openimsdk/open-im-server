@@ -2,7 +2,7 @@ package relation
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
@@ -33,33 +33,33 @@ func NewGroupMemberDB(db *gorm.DB) *GroupMember {
 
 func (g *GroupMember) Create(ctx context.Context, groupMemberList []*GroupMember, tx ...*gorm.DB) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)
 	}()
 	return utils.Wrap(getDBConn(g.DB, tx).Create(&groupMemberList).Error, "")
 }
 
 func (g *GroupMember) Delete(ctx context.Context, groupMembers []*GroupMember, tx ...*gorm.DB) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
 	}()
 	return utils.Wrap(getDBConn(g.DB, tx).Delete(groupMembers).Error, "")
 }
 
 func (g *GroupMember) UpdateByMap(ctx context.Context, groupID string, userID string, args map[string]interface{}, tx ...*gorm.DB) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
 	}()
 	return utils.Wrap(getDBConn(g.DB, tx).Model(&GroupMember{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
 }
 
 func (g *GroupMember) Update(ctx context.Context, groupMembers []*GroupMember, tx ...*gorm.DB) (err error) {
-	defer func() { trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
+	defer func() { tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
 	return utils.Wrap(getDBConn(g.DB, tx).Updates(&groupMembers).Error, "")
 }
 
 func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember, tx ...*gorm.DB) (groupList []*GroupMember, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers, "groupList", groupList)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers, "groupList", groupList)
 	}()
 	var where [][]interface{}
 	for _, groupMember := range groupMembers {
@@ -70,7 +70,7 @@ func (g *GroupMember) Find(ctx context.Context, groupMembers []*GroupMember, tx 
 
 func (g *GroupMember) Take(ctx context.Context, groupID string, userID string, tx ...*gorm.DB) (groupMember *GroupMember, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
 	return groupMember, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
@@ -78,7 +78,7 @@ func (g *GroupMember) Take(ctx context.Context, groupID string, userID string, t
 
 func (g *GroupMember) TakeOwnerInfo(ctx context.Context, groupID string, tx ...*gorm.DB) (groupMember *GroupMember, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMember", *groupMember)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMember", *groupMember)
 	}()
 	groupMember = &GroupMember{}
 	return groupMember, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error, "")

@@ -1,7 +1,7 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"gorm.io/gorm"
@@ -26,35 +26,35 @@ func NewBlack(db *gorm.DB) *Black {
 
 func (b *Black) Create(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
 	return utils.Wrap(b.DB.Create(&blacks).Error, "")
 }
 
 func (b *Black) Delete(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
 	return utils.Wrap(GroupMemberDB.Delete(blacks).Error, "")
 }
 
 func (b *Black) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blockUserID", blockUserID, "args", args)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blockUserID", blockUserID, "args", args)
 	}()
 	return utils.Wrap(b.DB.Where("block_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Updates(args).Error, "")
 }
 
 func (b *Black) Update(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
 	return utils.Wrap(b.DB.Updates(&blacks).Error, "")
 }
 
 func (b *Black) Find(ctx context.Context, blacks []*Black) (blackList []*Black, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks, "blackList", blackList)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks, "blackList", blackList)
 	}()
 	var where [][]interface{}
 	for _, black := range blacks {
@@ -66,20 +66,20 @@ func (b *Black) Find(ctx context.Context, blacks []*Black) (blackList []*Black, 
 func (b *Black) Take(ctx context.Context, ownerUserID, blockUserID string) (black *Black, err error) {
 	black = &Black{}
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blockUserID", blockUserID, "black", *black)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blockUserID", blockUserID, "black", *black)
 	}()
 	return black, utils.Wrap(b.DB.Where("owner_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Take(black).Error, "")
 }
 
 func (b *Black) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*Black, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blackList", blackList)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blackList", blackList)
 	}()
 	return blackList, utils.Wrap(GroupMemberDB.Where("owner_user_id = ?", ownerUserID).Find(&blackList).Error, "")
 }
 
 func InsertInToUserBlackList(ctx context.Context, black Black) (err error) {
-	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "black", black)
+	defer tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "black", black)
 	black.CreateTime = time.Now()
 	err = BlackDB.Create(black).Error
 	return err

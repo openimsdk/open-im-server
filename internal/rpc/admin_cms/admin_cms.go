@@ -3,9 +3,11 @@ package admin_cms
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/getcdv3"
 	pbAdminCMS "Open_IM/pkg/proto/admin_cms"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
@@ -26,10 +28,13 @@ import (
 )
 
 type adminCMSServer struct {
-	rpcPort         int
-	rpcRegisterName string
-	etcdSchema      string
-	etcdAddr        []string
+	rpcPort           int
+	rpcRegisterName   string
+	etcdSchema        string
+	etcdAddr          []string
+	adminCMSInterface controller.AdminCMSInterface
+	groupInterface    controller.GroupInterface
+	userInterface     controller.UserInterface
 }
 
 func NewAdminCMSServer(port int) *adminCMSServer {
@@ -82,7 +87,7 @@ func (s *adminCMSServer) Run() {
 		}
 	}
 	log.NewInfo("", "rpcRegisterIP ", rpcRegisterIP)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		panic(utils.Wrap(err, "register admin module  rpc to etcd err"))
@@ -95,35 +100,27 @@ func (s *adminCMSServer) Run() {
 	log.NewInfo("0", "message cms rpc success")
 }
 
-func (s *adminCMSServer) AdminLogin(_ context.Context, req *pbAdminCMS.AdminLoginReq) (*pbAdminCMS.AdminLoginResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbAdminCMS.AdminLoginResp{CommonResp: &pbAdminCMS.CommonResp{}}
+func (s *adminCMSServer) AdminLogin(ctx context.Context, req *pbAdminCMS.AdminLoginReq) (*pbAdminCMS.AdminLoginResp, error) {
+	resp := &pbAdminCMS.AdminLoginResp{}
 	for i, adminID := range config.Config.Manager.AppManagerUid {
 		if adminID == req.AdminID && config.Config.Manager.Secrets[i] == req.Secret {
-			token, expTime, err := token_verify.CreateToken(adminID, constant.SingleChatType)
+			token, expTime, err := token_verify.CreateToken(adminID, constant.LinuxPlatformID)
 			if err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "generate token failed", "adminID: ", adminID, err.Error())
-				resp.CommonResp.ErrCode = constant.ErrTokenUnknown.ErrCode
-				resp.CommonResp.ErrMsg = err.Error()
-				return resp, nil
+				log.NewError(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "generate token failed", "adminID: ", adminID, err.Error())
+				return nil, err
 			}
-			log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "generate token success", "token: ", token, "expTime:", expTime)
+			log.NewInfo(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "generate token success", "token: ", token, "expTime:", expTime)
 			resp.Token = token
 			break
 		}
 	}
 	if resp.Token == "" {
 		log.NewError(req.OperationID, utils.GetSelfFuncName(), "failed")
-		resp.CommonResp.ErrCode = constant.ErrTokenUnknown.ErrCode
-		resp.CommonResp.ErrMsg = constant.ErrTokenMalformed.ErrMsg
-		return resp, nil
+		return nil, constant.ErrInternalServer
 	}
-	admin, err := imdb.GetUserByUserID(req.AdminID)
+	admin, err := s.userInterface.Take(ctx, req.AdminID)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "failed", req.AdminID, err.Error())
-		resp.CommonResp.ErrCode = constant.ErrTokenUnknown.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+		return nil, err
 	}
 	resp.UserName = admin.Nickname
 	resp.FaceURL = admin.FaceURL
@@ -146,67 +143,6 @@ func (s *adminCMSServer) GetUserToken(_ context.Context, req *pbAdminCMS.GetUser
 	resp.Token = token
 	resp.ExpTime = expTime
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", resp.String())
-	return resp, nil
-}
-
-func (s *adminCMSServer) AddUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.AddUserRegisterAddFriendIDListReq) (*pbAdminCMS.AddUserRegisterAddFriendIDListResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbAdminCMS.AddUserRegisterAddFriendIDListResp{CommonResp: &pbAdminCMS.CommonResp{}}
-	if err := imdb.AddUserRegisterAddFriendIDList(req.UserIDList...); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
-	return resp, nil
-}
-
-func (s *adminCMSServer) ReduceUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.ReduceUserRegisterAddFriendIDListReq) (*pbAdminCMS.ReduceUserRegisterAddFriendIDListResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbAdminCMS.ReduceUserRegisterAddFriendIDListResp{CommonResp: &pbAdminCMS.CommonResp{}}
-	if req.Operation == 0 {
-		if err := imdb.ReduceUserRegisterAddFriendIDList(req.UserIDList...); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-	} else {
-		if err := imdb.DeleteAllRegisterAddFriendIDList(); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.UserIDList)
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
-	return resp, nil
-}
-
-func (s *adminCMSServer) GetUserRegisterAddFriendIDList(_ context.Context, req *pbAdminCMS.GetUserRegisterAddFriendIDListReq) (*pbAdminCMS.GetUserRegisterAddFriendIDListResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbAdminCMS.GetUserRegisterAddFriendIDListResp{CommonResp: &pbAdminCMS.CommonResp{}}
-	userIDList, err := imdb.GetRegisterAddFriendList(req.Pagination.ShowNumber, req.Pagination.PageNumber)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
-	userList, err := imdb.GetUsersByUserIDList(userIDList)
-	if err != nil {
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
-	}
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), userList, userIDList)
-	resp.Pagination = &server_api_params.ResponsePagination{
-		CurrentPage: req.Pagination.PageNumber,
-		ShowNumber:  req.Pagination.ShowNumber,
-	}
-	utils.CopyStructFields(&resp.UserInfoList, userList)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", req.String())
 	return resp, nil
 }
 
@@ -302,17 +238,17 @@ func (s *adminCMSServer) GetActiveGroup(_ context.Context, req *pbAdminCMS.GetAc
 	resp := &pbAdminCMS.GetActiveGroupResp{}
 	fromTime, toTime, err := ParseTimeFromTo(req.StatisticsReq.From, req.StatisticsReq.To)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
-	activeGroups, err := imdb.GetActiveGroups(fromTime, toTime, 12)
+	activeGroups, err := s.adminCMSInterface.GetActiveGroups(fromTime, toTime, 12)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
 	for _, activeGroup := range activeGroups {
 		resp.Groups = append(resp.Groups,
 			&pbAdminCMS.GroupResp{
 				GroupName:  activeGroup.Name,
-				GroupID:    activeGroup.Id,
+				GroupID:    activeGroup.ID,
 				MessageNum: int32(activeGroup.MessageNum),
 			})
 	}
@@ -683,44 +619,4 @@ func (s *adminCMSServer) GetUserIDByEmailAndPhoneNumber(_ context.Context, req *
 	resp.UserIDList = userIDList
 	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
-}
-
-func (s *adminCMSServer) GenerateInvitationCode(_ context.Context, req *pbAdminCMS.GenerateInvitationCodeReq) (*pbAdminCMS.GenerateInvitationCodeResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) GetInvitationCodes(_ context.Context, req *pbAdminCMS.GetInvitationCodesReq) (*pbAdminCMS.GetInvitationCodesResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) QueryIPRegister(_ context.Context, req *pbAdminCMS.QueryIPRegisterReq) (*pbAdminCMS.QueryIPRegisterResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) AddIPLimit(_ context.Context, req *pbAdminCMS.AddIPLimitReq) (*pbAdminCMS.AddIPLimitResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) RemoveIPLimit(_ context.Context, req *pbAdminCMS.RemoveIPLimitReq) (*pbAdminCMS.RemoveIPLimitResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) QueryUserIDIPLimitLogin(_ context.Context, req *pbAdminCMS.QueryUserIDIPLimitLoginReq) (*pbAdminCMS.QueryUserIDIPLimitLoginResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) AddUserIPLimitLogin(_ context.Context, req *pbAdminCMS.AddUserIPLimitLoginReq) (*pbAdminCMS.AddUserIPLimitLoginResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) RemoveUserIPLimit(_ context.Context, req *pbAdminCMS.RemoveUserIPLimitReq) (*pbAdminCMS.RemoveUserIPLimitResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) GetClientInitConfig(_ context.Context, req *pbAdminCMS.GetClientInitConfigReq) (*pbAdminCMS.GetClientInitConfigResp, error) {
-	return nil, nil
-}
-
-func (s *adminCMSServer) SetClientInitConfig(_ context.Context, req *pbAdminCMS.SetClientInitConfigReq) (*pbAdminCMS.SetClientInitConfigResp, error) {
-	return nil, nil
 }

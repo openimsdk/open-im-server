@@ -1,7 +1,7 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"gorm.io/gorm"
@@ -31,55 +31,55 @@ func NewFriendRequest(db *gorm.DB) *FriendRequest {
 
 func (f *FriendRequest) Create(ctx context.Context, friends []*FriendRequest) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
 	}()
 	return utils.Wrap(f.DB.Create(&friends).Error, "")
 }
 
 func (f *FriendRequest) Delete(ctx context.Context, fromUserID, toUserID string) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID)
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID)
 	}()
 	return utils.Wrap(f.DB.Where("from_user_id = ? and to_user_id = ?", fromUserID, toUserID).Delete(&FriendRequest{}).Error, "")
 }
 
 func (f *FriendRequest) UpdateByMap(ctx context.Context, ownerUserID string, args map[string]interface{}) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "args", args)
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "args", args)
 	}()
 	return utils.Wrap(f.DB.Where("owner_user_id = ?", ownerUserID).Updates(args).Error, "")
 }
 
 func (f *FriendRequest) Update(ctx context.Context, friends []*FriendRequest) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
 	}()
 	return utils.Wrap(f.DB.Updates(&friends).Error, "")
 }
 
 func (f *FriendRequest) Find(ctx context.Context, ownerUserID string) (friends []*FriendRequest, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friends", friends)
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friends", friends)
 	}()
 	return friends, utils.Wrap(f.DB.Where("owner_user_id = ?", ownerUserID).Find(&friends).Error, "")
 }
 
 func (f *FriendRequest) Take(ctx context.Context, fromUserID, toUserID string) (friend *FriendRequest, err error) {
 	friend = &FriendRequest{}
-	defer trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID, "friend", friend)
+	defer tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "toUserID", toUserID, "friend", friend)
 	return friend, utils.Wrap(f.DB.Where("from_user_id = ? and to_user_id", fromUserID, toUserID).Take(friend).Error, "")
 }
 
 func (f *FriendRequest) FindToUserID(ctx context.Context, toUserID string) (friends []*FriendRequest, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "toUserID", toUserID, "friends", friends)
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "toUserID", toUserID, "friends", friends)
 	}()
 	return friends, utils.Wrap(f.DB.Where("to_user_id = ?", toUserID).Find(&friends).Error, "")
 }
 
 func (f *FriendRequest) FindFromUserID(ctx context.Context, fromUserID string) (friends []*FriendRequest, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "friends", friends)
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "fromUserID", fromUserID, "friends", friends)
 	}()
 	return friends, utils.Wrap(f.DB.Where("from_user_id = ?", fromUserID).Find(&friends).Error, "")
 }

@@ -6,7 +6,7 @@ import (
 	commonDB "Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tools"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"time"
@@ -162,7 +162,7 @@ func CheckAccess(ctx context.Context, OpUserID string, OwnerUserID string) bool 
 func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	opUserID := tools.OpUserID(ctx)
 	defer func() {
-		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", opUserID, "ownerUserID", ownerUserID)
+		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "OpUserID", opUserID, "ownerUserID", ownerUserID)
 	}()
 	if utils.IsContain(opUserID, config.Config.Manager.AppManagerUid) {
 		return nil

@@ -3,7 +3,7 @@ package getcdv3
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"context"
 	"github.com/OpenIMSDK/getcdv3"
 	"google.golang.org/grpc"
@@ -16,10 +16,10 @@ func GetDefaultConn(arg1, arg2, arg3, arg4 string) *grpc.ClientConn {
 
 func GetConn(ctx context.Context, serviceName string) (conn *grpc.ClientConn, err error) {
 	defer func() {
-		trace_log.SetCtxInfo(ctx, "GetConn", err, "serviceName", serviceName)
+		tracelog.SetCtxInfo(ctx, "GetConn", err, "serviceName", serviceName)
 	}()
 	conn = getcdv3.GetConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","),
-		serviceName, trace_log.GetOperationID(ctx), config.Config.Etcd.UserName, config.Config.Etcd.Password)
+		serviceName, tracelog.GetOperationID(ctx), config.Config.Etcd.UserName, config.Config.Etcd.Password)
 	if conn == nil {
 		return nil, constant.ErrInternalServer
 	}

@@ -2,7 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
@@ -56,7 +56,7 @@ func (g *GroupCache) GetGroupInfo(ctx context.Context, groupID string) (group *r
 	}
 	group = &relation.Group{}
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", *group)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", *group)
 	}()
 	groupStr, err := g.rcClient.Fetch(g.getGroupInfoCacheKey(groupID), g.expireTime, getGroup)
 	if err != nil {
@@ -68,7 +68,7 @@ func (g *GroupCache) GetGroupInfo(ctx context.Context, groupID string) (group *r
 
 func (g *GroupCache) DelGroupInfo(ctx context.Context, groupID string) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
 	}()
 	return g.rcClient.TagAsDeleted(g.getGroupInfoCacheKey(groupID))
 }
@@ -96,7 +96,7 @@ func (g *GroupCache) DelJoinedSuperGroupIDs(ctx context.Context, userIDs []strin
 
 func (g *GroupCache) DelJoinedSuperGroupID(ctx context.Context, userID string) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
 	}()
 	return g.rcClient.TagAsDeleted(joinedSuperGroupListCache + userID)
 }

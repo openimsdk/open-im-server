@@ -3,7 +3,7 @@ package middleware
 import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
@@ -37,12 +37,12 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 	if opts := md.Get("opUserID"); len(opts) == 1 {
 		opUserID = opts[0]
 	}
-	ctx = trace_log.NewRpcCtx(ctx, funcName, operationID)
+	ctx = tracelog.NewRpcCtx(ctx, funcName, operationID)
 	defer log.ShowLog(ctx)
-	trace_log.SetCtxInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", rpcString(req))
+	tracelog.SetCtxInfo(ctx, funcName, err, "opUserID", opUserID, "rpcReq", rpcString(req))
 	resp, err = handler(ctx, req)
 	if err != nil {
-		trace_log.SetCtxInfo(ctx, funcName, err)
+		tracelog.SetCtxInfo(ctx, funcName, err)
 		errInfo := constant.ToAPIErrWithErr(err)
 		var code codes.Code
 		if errInfo.ErrCode == 0 {
@@ -56,7 +56,7 @@ func RpcServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 		}
 		return nil, sta.Err()
 	}
-	trace_log.SetCtxInfo(ctx, funcName, nil, "rpcResp", rpcString(resp))
+	tracelog.SetCtxInfo(ctx, funcName, nil, "rpcResp", rpcString(resp))
 	return
 }
 

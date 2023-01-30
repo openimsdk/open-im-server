@@ -12,7 +12,7 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tools"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
@@ -255,7 +255,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	} else if req.HandleResult == constant.FriendResponseRefuse {
 		chat.FriendApplicationRejectedNotification(req)
 	} else {
-		trace_log.SetCtxInfo(ctx, utils.GetSelfFuncName(), nil, "handleResult", req.HandleResult)
+		tracelog.SetCtxInfo(ctx, utils.GetSelfFuncName(), nil, "handleResult", req.HandleResult)
 	}
 	return resp, nil
 }

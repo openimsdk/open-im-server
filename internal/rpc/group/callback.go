@@ -7,7 +7,7 @@ import (
 	relation "Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
-	"Open_IM/pkg/common/trace_log"
+	"Open_IM/pkg/common/tracelog"
 	pbGroup "Open_IM/pkg/proto/group"
 	"Open_IM/pkg/utils"
 	"context"
@@ -16,7 +16,7 @@ import (
 
 func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (err error) {
 	defer func() {
-		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "req", req)
+		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "req", req)
 	}()
 	if !config.Config.Callback.CallbackBeforeCreateGroup.Enable {
 		return nil
@@ -79,7 +79,7 @@ func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq)
 
 func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, groupMember *relation.GroupMember, groupEx string) (err error) {
 	defer func() {
-		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "groupMember", *groupMember, "groupEx", groupEx)
+		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "groupMember", *groupMember, "groupEx", groupEx)
 	}()
 	callbackResp := cbApi.CommonCallbackResp{OperationID: operationID}
 	if !config.Config.Callback.CallbackBeforeMemberJoinGroup.Enable {
@@ -121,7 +121,7 @@ func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, grou
 
 func CallbackBeforeSetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (err error) {
 	defer func() {
-		trace_log.SetCtxInfo(ctx, utils.GetFuncName(1), err, "req", *req)
+		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "req", *req)
 	}()
 	callbackResp := cbApi.CommonCallbackResp{OperationID: req.OperationID}
 	if !config.Config.Callback.CallbackBeforeSetGroupMemberInfo.Enable {
