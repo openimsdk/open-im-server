@@ -48,11 +48,6 @@ func NewGinRouter() *gin.Engine {
 	userRouterGroup := r2.Group("/user")
 	{
 		userRouterGroup.POST("/get_user_id_by_email_phone", user.GetUserIDByEmailAndPhoneNumber)
-
-		userRouterGroup.POST("/add_user", user.AddUser)
-		userRouterGroup.POST("/unblock_user", user.UnblockUser)
-		userRouterGroup.POST("/block_user", user.BlockUser)
-		userRouterGroup.POST("/get_block_users", user.GetBlockUsers)
 	}
 	messageCMSRouterGroup := r2.Group("/message")
 	{

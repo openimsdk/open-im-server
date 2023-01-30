@@ -122,7 +122,7 @@ definitions:
       videoUUID:
         type: string
     type: object
-  base_info.AccountCheckReq:
+  api_struct.AccountCheckReq:
     properties:
       checkUserIDList:
         items:
@@ -135,7 +135,7 @@ definitions:
     - checkUserIDList
     - operationID
     type: object
-  base_info.AccountCheckResp:
+  api_struct.AccountCheckResp:
     properties:
       data:
         items:
@@ -146,7 +146,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.AddBlacklistReq:
+  api_struct.AddBlacklistReq:
     properties:
       fromUserID:
         type: string
@@ -159,14 +159,14 @@ definitions:
     - operationID
     - toUserID
     type: object
-  base_info.AddBlacklistResp:
+  api_struct.AddBlacklistResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.AddFriendReq:
+  api_struct.AddFriendReq:
     properties:
       fromUserID:
         type: string
@@ -181,14 +181,14 @@ definitions:
     - operationID
     - toUserID
     type: object
-  base_info.AddFriendResp:
+  api_struct.AddFriendResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.AddFriendResponseReq:
+  api_struct.AddFriendResponseReq:
     properties:
       flag:
         enum:
@@ -210,14 +210,14 @@ definitions:
     - operationID
     - toUserID
     type: object
-  base_info.AddFriendResponseResp:
+  api_struct.AddFriendResponseResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.ApplicationGroupResponseReq:
+  api_struct.ApplicationGroupResponseReq:
     properties:
       fromUserID:
         description: application from FromUserID
@@ -239,14 +239,14 @@ definitions:
     - handleResult
     - operationID
     type: object
-  base_info.ApplicationGroupResponseResp:
+  api_struct.ApplicationGroupResponseResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.CancelMuteGroupMemberReq:
+  api_struct.CancelMuteGroupMemberReq:
     properties:
       groupID:
         type: string
@@ -259,14 +259,14 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.CancelMuteGroupMemberResp:
+  api_struct.CancelMuteGroupMemberResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.CancelMuteGroupReq:
+  api_struct.CancelMuteGroupReq:
     properties:
       groupID:
         type: string
@@ -276,14 +276,14 @@ definitions:
     - groupID
     - operationID
     type: object
-  base_info.CancelMuteGroupResp:
+  api_struct.CancelMuteGroupResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.CleanUpMsgReq:
+  api_struct.CleanUpMsgReq:
     properties:
       operationID:
         type: string
@@ -293,14 +293,14 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.CleanUpMsgResp:
+  api_struct.CleanUpMsgResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.Comment:
+  api_struct.Comment:
     properties:
       content:
         type: string
@@ -317,7 +317,7 @@ definitions:
       userName:
         type: string
     type: object
-  base_info.CommentOneWorkMomentReq:
+  api_struct.CommentOneWorkMomentReq:
     properties:
       content:
         type: string
@@ -332,7 +332,7 @@ definitions:
     - operationID
     - workMomentID
     type: object
-  base_info.CommentOneWorkMomentResp:
+  api_struct.CommentOneWorkMomentResp:
     properties:
       data:
         type: object
@@ -341,7 +341,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.Conversation:
+  api_struct.Conversation:
     properties:
       attachedInfo:
         type: string
@@ -380,7 +380,7 @@ definitions:
     - conversationType
     - ownerUserID
     type: object
-  base_info.CreateDepartmentMemberReq:
+  api_struct.CreateDepartmentMemberReq:
     properties:
       departmentID:
         type: string
@@ -401,14 +401,14 @@ definitions:
     required:
     - operationID
     type: object
-  base_info.CreateDepartmentMemberResp:
+  api_struct.CreateDepartmentMemberResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.CreateDepartmentReq:
+  api_struct.CreateDepartmentReq:
     properties:
       createTime:
         type: integer
@@ -435,14 +435,14 @@ definitions:
     required:
     - operationID
     type: object
-  base_info.CreateDepartmentResp:
+  api_struct.CreateDepartmentResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.CreateGroupReq:
+  api_struct.CreateGroupReq:
     properties:
       ex:
         type: string
@@ -458,7 +458,7 @@ definitions:
         type: string
       memberList:
         items:
-          $ref: '#/definitions/base_info.GroupAddMemberInfo'
+          $ref: '#/definitions/api_struct.GroupAddMemberInfo'
         type: array
       notification:
         type: string
@@ -469,21 +469,21 @@ definitions:
     required:
     - operationID
     type: object
-  base_info.CreateGroupResp:
+  api_struct.CreateGroupResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.CreateOneWorkMomentReq:
+  api_struct.CreateOneWorkMomentReq:
     properties:
       operationID:
         type: string
       workMoment:
         $ref: '#/definitions/office.WorkMoment'
     type: object
-  base_info.CreateOneWorkMomentResp:
+  api_struct.CreateOneWorkMomentResp:
     properties:
       data:
         type: object
@@ -492,7 +492,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.CreateOrganizationUserReq:
+  api_struct.CreateOrganizationUserReq:
     properties:
       birth:
         type: integer
@@ -521,14 +521,14 @@ definitions:
     required:
     - operationID
     type: object
-  base_info.CreateOrganizationUserResp:
+  api_struct.CreateOrganizationUserResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.CreateTagReq:
+  api_struct.CreateTagReq:
     properties:
       operationID:
         type: string
@@ -545,14 +545,14 @@ definitions:
     - tagName
     - userIDList
     type: object
-  base_info.CreateTagResp:
+  api_struct.CreateTagResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.DelMsgReq:
+  api_struct.DelMsgReq:
     properties:
       operationID:
         type: string
@@ -567,14 +567,14 @@ definitions:
     - seqList
     - userID
     type: object
-  base_info.DelMsgResp:
+  api_struct.DelMsgResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.DeleteCommentReq:
+  api_struct.DeleteCommentReq:
     properties:
       contentID:
         type: string
@@ -587,7 +587,7 @@ definitions:
     - operationID
     - workMomentID
     type: object
-  base_info.DeleteCommentResp:
+  api_struct.DeleteCommentResp:
     properties:
       data:
         type: object
@@ -596,7 +596,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.DeleteDepartmentReq:
+  api_struct.DeleteDepartmentReq:
     properties:
       departmentID:
         type: string
@@ -606,14 +606,14 @@ definitions:
     - departmentID
     - operationID
     type: object
-  base_info.DeleteDepartmentResp:
+  api_struct.DeleteDepartmentResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.DeleteFriendReq:
+  api_struct.DeleteFriendReq:
     properties:
       fromUserID:
         type: string
@@ -626,14 +626,14 @@ definitions:
     - operationID
     - toUserID
     type: object
-  base_info.DeleteFriendResp:
+  api_struct.DeleteFriendResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.DeleteOneWorkMomentReq:
+  api_struct.DeleteOneWorkMomentReq:
     properties:
       operationID:
         type: string
@@ -643,7 +643,7 @@ definitions:
     - operationID
     - workMomentID
     type: object
-  base_info.DeleteOneWorkMomentResp:
+  api_struct.DeleteOneWorkMomentResp:
     properties:
       data:
         type: object
@@ -652,7 +652,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.DeleteOrganizationUserReq:
+  api_struct.DeleteOrganizationUserReq:
     properties:
       operationID:
         type: string
@@ -662,14 +662,14 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.DeleteOrganizationUserResp:
+  api_struct.DeleteOrganizationUserResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.DeleteTagReq:
+  api_struct.DeleteTagReq:
     properties:
       operationID:
         type: string
@@ -679,14 +679,14 @@ definitions:
     - operationID
     - tagID
     type: object
-  base_info.DeleteTagResp:
+  api_struct.DeleteTagResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.DeleteUserInDepartmentReq:
+  api_struct.DeleteUserInDepartmentReq:
     properties:
       departmentID:
         type: string
@@ -699,14 +699,14 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.DeleteUserInDepartmentResp:
+  api_struct.DeleteUserInDepartmentResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.DismissGroupReq:
+  api_struct.DismissGroupReq:
     properties:
       groupID:
         type: string
@@ -716,19 +716,19 @@ definitions:
     - groupID
     - operationID
     type: object
-  base_info.DismissGroupResp:
+  api_struct.DismissGroupResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.ExpireTime:
+  api_struct.ExpireTime:
     properties:
       expireTimeSeconds:
         type: integer
     type: object
-  base_info.ForceLogoutReq:
+  api_struct.ForceLogoutReq:
     properties:
       fromUserID:
         maxLength: 64
@@ -745,14 +745,14 @@ definitions:
     - operationID
     - platform
     type: object
-  base_info.ForceLogoutResp:
+  api_struct.ForceLogoutResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetAllConversationsReq:
+  api_struct.GetAllConversationsReq:
     properties:
       operationID:
         type: string
@@ -762,25 +762,25 @@ definitions:
     - operationID
     - ownerUserID
     type: object
-  base_info.GetAllConversationsResp:
+  api_struct.GetAllConversationsResp:
     properties:
       data:
         items:
-          $ref: '#/definitions/base_info.Conversation'
+          $ref: '#/definitions/api_struct.Conversation'
         type: array
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetAllUsersUidReq:
+  api_struct.GetAllUsersUidReq:
     properties:
       operationID:
         type: string
     required:
     - operationID
     type: object
-  base_info.GetAllUsersUidResp:
+  api_struct.GetAllUsersUidResp:
     properties:
       data:
         items:
@@ -791,7 +791,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.GetBlackListReq:
+  api_struct.GetBlackListReq:
     properties:
       fromUserID:
         type: string
@@ -801,14 +801,14 @@ definitions:
     - fromUserID
     - operationID
     type: object
-  base_info.GetBlackListResp:
+  api_struct.GetBlackListResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetConversationReq:
+  api_struct.GetConversationReq:
     properties:
       conversationID:
         type: string
@@ -821,16 +821,16 @@ definitions:
     - operationID
     - ownerUserID
     type: object
-  base_info.GetConversationResp:
+  api_struct.GetConversationResp:
     properties:
       data:
-        $ref: '#/definitions/base_info.Conversation'
+        $ref: '#/definitions/api_struct.Conversation'
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetConversationsReq:
+  api_struct.GetConversationsReq:
     properties:
       conversationIDs:
         items:
@@ -845,18 +845,18 @@ definitions:
     - operationID
     - ownerUserID
     type: object
-  base_info.GetConversationsResp:
+  api_struct.GetConversationsResp:
     properties:
       data:
         items:
-          $ref: '#/definitions/base_info.Conversation'
+          $ref: '#/definitions/api_struct.Conversation'
         type: array
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetDepartmentMemberReq:
+  api_struct.GetDepartmentMemberReq:
     properties:
       departmentID:
         type: string
@@ -866,14 +866,14 @@ definitions:
     - departmentID
     - operationID
     type: object
-  base_info.GetDepartmentMemberResp:
+  api_struct.GetDepartmentMemberResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetFriendApplyListReq:
+  api_struct.GetFriendApplyListReq:
     properties:
       fromUserID:
         type: string
@@ -883,14 +883,14 @@ definitions:
     - fromUserID
     - operationID
     type: object
-  base_info.GetFriendApplyListResp:
+  api_struct.GetFriendApplyListResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetFriendListReq:
+  api_struct.GetFriendListReq:
     properties:
       fromUserID:
         type: string
@@ -900,14 +900,14 @@ definitions:
     - fromUserID
     - operationID
     type: object
-  base_info.GetFriendListResp:
+  api_struct.GetFriendListResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetGroupAllMemberReq:
+  api_struct.GetGroupAllMemberReq:
     properties:
       count:
         type: integer
@@ -923,14 +923,14 @@ definitions:
     - offset
     - operationID
     type: object
-  base_info.GetGroupAllMemberResp:
+  api_struct.GetGroupAllMemberResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetGroupApplicationListReq:
+  api_struct.GetGroupApplicationListReq:
     properties:
       fromUserID:
         description: 作为管理员或群主收到的 进群申请
@@ -941,14 +941,14 @@ definitions:
     - fromUserID
     - operationID
     type: object
-  base_info.GetGroupApplicationListResp:
+  api_struct.GetGroupApplicationListResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetGroupInfoReq:
+  api_struct.GetGroupInfoReq:
     properties:
       groupIDList:
         items:
@@ -960,14 +960,14 @@ definitions:
     - groupIDList
     - operationID
     type: object
-  base_info.GetGroupInfoResp:
+  api_struct.GetGroupInfoResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetGroupMembersInfoReq:
+  api_struct.GetGroupMembersInfoReq:
     properties:
       groupID:
         type: string
@@ -982,14 +982,14 @@ definitions:
     - memberList
     - operationID
     type: object
-  base_info.GetGroupMembersInfoResp:
+  api_struct.GetGroupMembersInfoResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetJoinedGroupListReq:
+  api_struct.GetJoinedGroupListReq:
     properties:
       fromUserID:
         type: string
@@ -999,14 +999,14 @@ definitions:
     - fromUserID
     - operationID
     type: object
-  base_info.GetJoinedGroupListResp:
+  api_struct.GetJoinedGroupListResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetSelfApplyListReq:
+  api_struct.GetSelfApplyListReq:
     properties:
       fromUserID:
         type: string
@@ -1016,14 +1016,14 @@ definitions:
     - fromUserID
     - operationID
     type: object
-  base_info.GetSelfApplyListResp:
+  api_struct.GetSelfApplyListResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetSelfUserInfoReq:
+  api_struct.GetSelfUserInfoReq:
     properties:
       operationID:
         type: string
@@ -1033,14 +1033,14 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.GetSelfUserInfoResp:
+  api_struct.GetSelfUserInfoResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetSubDepartmentReq:
+  api_struct.GetSubDepartmentReq:
     properties:
       departmentID:
         type: string
@@ -1050,14 +1050,14 @@ definitions:
     - departmentID
     - operationID
     type: object
-  base_info.GetSubDepartmentResp:
+  api_struct.GetSubDepartmentResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetTagSendLogsReq:
+  api_struct.GetTagSendLogsReq:
     properties:
       operationID:
         type: string
@@ -1070,7 +1070,7 @@ definitions:
     - pageNumber
     - showNumber
     type: object
-  base_info.GetTagSendLogsResp:
+  api_struct.GetTagSendLogsResp:
     properties:
       data:
         properties:
@@ -1088,7 +1088,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.GetUserFriendWorkMomentsReq:
+  api_struct.GetUserFriendWorkMomentsReq:
     properties:
       operationID:
         type: string
@@ -1101,7 +1101,7 @@ definitions:
     - pageNumber
     - showNumber
     type: object
-  base_info.GetUserFriendWorkMomentsResp:
+  api_struct.GetUserFriendWorkMomentsResp:
     properties:
       data:
         properties:
@@ -1111,7 +1111,7 @@ definitions:
             type: integer
           workMoments:
             items:
-              $ref: '#/definitions/base_info.WorkMoment'
+              $ref: '#/definitions/api_struct.WorkMoment'
             type: array
         type: object
       errCode:
@@ -1119,7 +1119,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.GetUserInDepartmentReq:
+  api_struct.GetUserInDepartmentReq:
     properties:
       operationID:
         type: string
@@ -1129,14 +1129,14 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.GetUserInDepartmentResp:
+  api_struct.GetUserInDepartmentResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetUserReqGroupApplicationListReq:
+  api_struct.GetUserReqGroupApplicationListReq:
     properties:
       operationID:
         type: string
@@ -1146,7 +1146,7 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.GetUserTagByIDReq:
+  api_struct.GetUserTagByIDReq:
     properties:
       operationID:
         type: string
@@ -1156,7 +1156,7 @@ definitions:
     - operationID
     - tagID
     type: object
-  base_info.GetUserTagByIDResp:
+  api_struct.GetUserTagByIDResp:
     properties:
       data:
         properties:
@@ -1168,14 +1168,14 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.GetUserTagsReq:
+  api_struct.GetUserTagsReq:
     properties:
       operationID:
         type: string
     required:
     - operationID
     type: object
-  base_info.GetUserTagsResp:
+  api_struct.GetUserTagsResp:
     properties:
       data:
         properties:
@@ -1189,7 +1189,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.GetUserWorkMomentsReq:
+  api_struct.GetUserWorkMomentsReq:
     properties:
       operationID:
         type: string
@@ -1204,7 +1204,7 @@ definitions:
     - pageNumber
     - showNumber
     type: object
-  base_info.GetUserWorkMomentsResp:
+  api_struct.GetUserWorkMomentsResp:
     properties:
       data:
         properties:
@@ -1214,7 +1214,7 @@ definitions:
             type: integer
           workMoments:
             items:
-              $ref: '#/definitions/base_info.WorkMoment'
+              $ref: '#/definitions/api_struct.WorkMoment'
             type: array
         type: object
       errCode:
@@ -1222,7 +1222,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.GetUsersInfoReq:
+  api_struct.GetUsersInfoReq:
     properties:
       operationID:
         type: string
@@ -1234,14 +1234,14 @@ definitions:
     - operationID
     - userIDList
     type: object
-  base_info.GetUsersInfoResp:
+  api_struct.GetUsersInfoResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GetUsersOnlineStatusReq:
+  api_struct.GetUsersOnlineStatusReq:
     properties:
       operationID:
         type: string
@@ -1254,7 +1254,7 @@ definitions:
     - operationID
     - userIDList
     type: object
-  base_info.GetUsersOnlineStatusResp:
+  api_struct.GetUsersOnlineStatusResp:
     properties:
       data:
         items:
@@ -1265,7 +1265,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.GetWorkMomentByIDReq:
+  api_struct.GetWorkMomentByIDReq:
     properties:
       operationID:
         type: string
@@ -1275,19 +1275,19 @@ definitions:
     - operationID
     - workMomentID
     type: object
-  base_info.GetWorkMomentByIDResp:
+  api_struct.GetWorkMomentByIDResp:
     properties:
       data:
         properties:
           workMoment:
-            $ref: '#/definitions/base_info.WorkMoment'
+            $ref: '#/definitions/api_struct.WorkMoment'
         type: object
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.GroupAddMemberInfo:
+  api_struct.GroupAddMemberInfo:
     properties:
       roleLevel:
         enum:
@@ -1300,7 +1300,7 @@ definitions:
     - roleLevel
     - userID
     type: object
-  base_info.ImportFriendReq:
+  api_struct.ImportFriendReq:
     properties:
       friendUserIDList:
         items:
@@ -1315,18 +1315,18 @@ definitions:
     - fromUserID
     - operationID
     type: object
-  base_info.ImportFriendResp:
+  api_struct.ImportFriendResp:
     properties:
       data:
         items:
-          $ref: '#/definitions/base_info.UserIDResult'
+          $ref: '#/definitions/api_struct.UserIDResult'
         type: array
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.InviteUserToGroupReq:
+  api_struct.InviteUserToGroupReq:
     properties:
       groupID:
         type: string
@@ -1343,18 +1343,18 @@ definitions:
     - invitedUserIDList
     - operationID
     type: object
-  base_info.InviteUserToGroupResp:
+  api_struct.InviteUserToGroupResp:
     properties:
       data:
         items:
-          $ref: '#/definitions/base_info.UserIDResult'
+          $ref: '#/definitions/api_struct.UserIDResult'
         type: array
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.IsFriendReq:
+  api_struct.IsFriendReq:
     properties:
       fromUserID:
         type: string
@@ -1367,16 +1367,16 @@ definitions:
     - operationID
     - toUserID
     type: object
-  base_info.IsFriendResp:
+  api_struct.IsFriendResp:
     properties:
       data:
-        $ref: '#/definitions/base_info.Response'
+        $ref: '#/definitions/api_struct.Response'
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.JoinGroupReq:
+  api_struct.JoinGroupReq:
     properties:
       groupID:
         type: string
@@ -1392,14 +1392,14 @@ definitions:
     - groupID
     - operationID
     type: object
-  base_info.JoinGroupResp:
+  api_struct.JoinGroupResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.KickGroupMemberReq:
+  api_struct.KickGroupMemberReq:
     properties:
       groupID:
         type: string
@@ -1416,18 +1416,18 @@ definitions:
     - kickedUserIDList
     - operationID
     type: object
-  base_info.KickGroupMemberResp:
+  api_struct.KickGroupMemberResp:
     properties:
       data:
         items:
-          $ref: '#/definitions/base_info.UserIDResult'
+          $ref: '#/definitions/api_struct.UserIDResult'
         type: array
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.LikeOneWorkMomentReq:
+  api_struct.LikeOneWorkMomentReq:
     properties:
       operationID:
         type: string
@@ -1437,7 +1437,7 @@ definitions:
     - operationID
     - workMomentID
     type: object
-  base_info.LikeOneWorkMomentResp:
+  api_struct.LikeOneWorkMomentResp:
     properties:
       data:
         type: object
@@ -1446,7 +1446,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.ManagementBatchSendMsgReq:
+  api_struct.ManagementBatchSendMsgReq:
     properties:
       businessOperationID:
         type: string
@@ -1482,7 +1482,7 @@ definitions:
     - sendID
     - sessionType
     type: object
-  base_info.ManagementSendMsgReq:
+  api_struct.ManagementSendMsgReq:
     properties:
       businessOperationID:
         type: string
@@ -1516,7 +1516,7 @@ definitions:
     - sendID
     - sessionType
     type: object
-  base_info.ManagementSendMsgResp:
+  api_struct.ManagementSendMsgResp:
     properties:
       data:
         $ref: '#/definitions/server_api_params.UserSendMsgResp'
@@ -1525,7 +1525,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.MinioUploadFileResp:
+  api_struct.MinioUploadFileResp:
     properties:
       data:
         properties:
@@ -1543,7 +1543,7 @@ definitions:
       errMsg:
         type: string
     type: object
-  base_info.MuteGroupMemberReq:
+  api_struct.MuteGroupMemberReq:
     properties:
       groupID:
         type: string
@@ -1559,7 +1559,7 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.MuteGroupReq:
+  api_struct.MuteGroupReq:
     properties:
       groupID:
         type: string
@@ -1569,28 +1569,28 @@ definitions:
     - groupID
     - operationID
     type: object
-  base_info.MuteGroupResp:
+  api_struct.MuteGroupResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.ParseTokenReq:
+  api_struct.ParseTokenReq:
     properties:
       operationID:
         type: string
     required:
     - operationID
     type: object
-  base_info.ParseTokenResp:
+  api_struct.ParseTokenResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.QuitGroupReq:
+  api_struct.QuitGroupReq:
     properties:
       groupID:
         type: string
@@ -1600,14 +1600,14 @@ definitions:
     - groupID
     - operationID
     type: object
-  base_info.QuitGroupResp:
+  api_struct.QuitGroupResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.RemoveBlackListReq:
+  api_struct.RemoveBlackListReq:
     properties:
       fromUserID:
         type: string
@@ -1620,19 +1620,19 @@ definitions:
     - operationID
     - toUserID
     type: object
-  base_info.RemoveBlackListResp:
+  api_struct.RemoveBlackListResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.Response:
+  api_struct.Response:
     properties:
       isFriend:
         type: boolean
     type: object
-  base_info.SendMsg2TagReq:
+  api_struct.SendMsg2TagReq:
     properties:
       content:
         type: string
@@ -1657,14 +1657,14 @@ definitions:
     - operationID
     - senderPlatformID
     type: object
-  base_info.SendMsg2TagResp:
+  api_struct.SendMsg2TagResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.SetFriendRemarkReq:
+  api_struct.SetFriendRemarkReq:
     properties:
       fromUserID:
         type: string
@@ -1679,14 +1679,14 @@ definitions:
     - operationID
     - toUserID
     type: object
-  base_info.SetFriendRemarkResp:
+  api_struct.SetFriendRemarkResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.SetGlobalRecvMessageOptReq:
+  api_struct.SetGlobalRecvMessageOptReq:
     properties:
       globalRecvMsgOpt:
         enum:
@@ -1699,14 +1699,14 @@ definitions:
     required:
     - operationID
     type: object
-  base_info.SetGlobalRecvMessageOptResp:
+  api_struct.SetGlobalRecvMessageOptResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.SetGroupInfoReq:
+  api_struct.SetGroupInfoReq:
     properties:
       applyMemberFriend:
         type: integer
@@ -1732,14 +1732,14 @@ definitions:
     - groupID
     - operationID
     type: object
-  base_info.SetGroupInfoResp:
+  api_struct.SetGroupInfoResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.SetGroupMemberInfoReq:
+  api_struct.SetGroupMemberInfoReq:
     properties:
       ex:
         type: string
@@ -1762,14 +1762,14 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.SetGroupMemberInfoResp:
+  api_struct.SetGroupMemberInfoResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.SetTagReq:
+  api_struct.SetTagReq:
     properties:
       increaseUserIDList:
         items:
@@ -1789,14 +1789,14 @@ definitions:
     - operationID
     - tagID
     type: object
-  base_info.SetTagResp:
+  api_struct.SetTagResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.Swagger400Resp:
+  api_struct.Swagger400Resp:
     properties:
       errCode:
         example: 400
@@ -1805,7 +1805,7 @@ definitions:
         example: err msg
         type: string
     type: object
-  base_info.Swagger500Resp:
+  api_struct.Swagger500Resp:
     properties:
       errCode:
         example: 500
@@ -1814,7 +1814,7 @@ definitions:
         example: err msg
         type: string
     type: object
-  base_info.TransferGroupOwnerReq:
+  api_struct.TransferGroupOwnerReq:
     properties:
       groupID:
         type: string
@@ -1830,14 +1830,14 @@ definitions:
     - oldOwnerUserID
     - operationID
     type: object
-  base_info.TransferGroupOwnerResp:
+  api_struct.TransferGroupOwnerResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.UpdateDepartmentReq:
+  api_struct.UpdateDepartmentReq:
     properties:
       createTime:
         type: integer
@@ -1865,14 +1865,14 @@ definitions:
     - departmentID
     - operationID
     type: object
-  base_info.UpdateDepartmentResp:
+  api_struct.UpdateDepartmentResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.UpdateOrganizationUserReq:
+  api_struct.UpdateOrganizationUserReq:
     properties:
       birth:
         type: integer
@@ -1901,14 +1901,14 @@ definitions:
     required:
     - operationID
     type: object
-  base_info.UpdateOrganizationUserResp:
+  api_struct.UpdateOrganizationUserResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.UpdateSelfUserInfoReq:
+  api_struct.UpdateSelfUserInfoReq:
     properties:
       birth:
         type: integer
@@ -1944,7 +1944,7 @@ definitions:
     - operationID
     - userID
     type: object
-  base_info.UpdateUserInDepartmentReq:
+  api_struct.UpdateUserInDepartmentReq:
     properties:
       departmentID:
         type: string
@@ -1965,28 +1965,28 @@ definitions:
     required:
     - operationID
     type: object
-  base_info.UpdateUserInDepartmentResp:
+  api_struct.UpdateUserInDepartmentResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.UpdateUserInfoResp:
+  api_struct.UpdateUserInfoResp:
     properties:
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.UserIDResult:
+  api_struct.UserIDResult:
     properties:
       result:
         type: integer
       userID:
         type: string
     type: object
-  base_info.UserRegisterReq:
+  api_struct.UserRegisterReq:
     properties:
       birth:
         type: integer
@@ -2031,16 +2031,16 @@ definitions:
     - secret
     - userID
     type: object
-  base_info.UserRegisterResp:
+  api_struct.UserRegisterResp:
     properties:
       data:
-        $ref: '#/definitions/base_info.UserTokenInfo'
+        $ref: '#/definitions/api_struct.UserTokenInfo'
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.UserTokenInfo:
+  api_struct.UserTokenInfo:
     properties:
       expiredTime:
         type: integer
@@ -2049,7 +2049,7 @@ definitions:
       userID:
         type: string
     type: object
-  base_info.UserTokenReq:
+  api_struct.UserTokenReq:
     properties:
       operationID:
         type: string
@@ -2070,24 +2070,24 @@ definitions:
     - secret
     - userID
     type: object
-  base_info.UserTokenResp:
+  api_struct.UserTokenResp:
     properties:
       data:
-        $ref: '#/definitions/base_info.UserTokenInfo'
+        $ref: '#/definitions/api_struct.UserTokenInfo'
       errCode:
         type: integer
       errMsg:
         type: string
     type: object
-  base_info.WorkMoment:
+  api_struct.WorkMoment:
     properties:
       atUsers:
         items:
-          $ref: '#/definitions/base_info.WorkMomentUser'
+          $ref: '#/definitions/api_struct.WorkMomentUser'
         type: array
       comments:
         items:
-          $ref: '#/definitions/base_info.Comment'
+          $ref: '#/definitions/api_struct.Comment'
         type: array
       content:
         type: string
@@ -2097,13 +2097,13 @@ definitions:
         type: string
       likeUsers:
         items:
-          $ref: '#/definitions/base_info.WorkMomentUser'
+          $ref: '#/definitions/api_struct.WorkMomentUser'
         type: array
       permission:
         type: integer
       permissionUsers:
         items:
-          $ref: '#/definitions/base_info.WorkMomentUser'
+          $ref: '#/definitions/api_struct.WorkMomentUser'
         type: array
       userID:
         type: string
@@ -2112,7 +2112,7 @@ definitions:
       workMomentID:
         type: string
     type: object
-  base_info.WorkMomentUser:
+  api_struct.WorkMomentUser:
     properties:
       userID:
         type: string
@@ -2671,22 +2671,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.ForceLogoutReq'
+          $ref: '#/definitions/api_struct.ForceLogoutReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.ForceLogoutResp'
+            $ref: '#/definitions/api_struct.ForceLogoutResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 强制登出
       tags:
       - 鉴权认证
@@ -2707,7 +2707,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.ParseTokenReq'
+          $ref: '#/definitions/api_struct.ParseTokenReq'
       produces:
       - application/json
       responses:
@@ -2715,19 +2715,19 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.ParseTokenResp'
+            - $ref: '#/definitions/api_struct.ParseTokenResp'
             - properties:
                 Data:
-                  $ref: '#/definitions/base_info.ExpireTime'
+                  $ref: '#/definitions/api_struct.ExpireTime'
               type: object
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 解析当前用户token
       tags:
       - 鉴权认证
@@ -2744,22 +2744,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.UserRegisterReq'
+          $ref: '#/definitions/api_struct.UserRegisterReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.UserRegisterResp'
+            $ref: '#/definitions/api_struct.UserRegisterResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 用户注册
       tags:
       - 鉴权认证
@@ -2775,22 +2775,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.UserTokenReq'
+          $ref: '#/definitions/api_struct.UserTokenReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.UserTokenResp'
+            $ref: '#/definitions/api_struct.UserTokenResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 用户登录
       tags:
       - 鉴权认证
@@ -2811,22 +2811,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.AddBlacklistReq'
+          $ref: '#/definitions/api_struct.AddBlacklistReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.AddBlacklistResp'
+            $ref: '#/definitions/api_struct.AddBlacklistResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 添加黑名单
       tags:
       - 好友相关
@@ -2847,22 +2847,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.AddFriendReq'
+          $ref: '#/definitions/api_struct.AddFriendReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.AddFriendResp'
+            $ref: '#/definitions/api_struct.AddFriendResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 添加好友
       tags:
       - 好友相关
@@ -2884,22 +2884,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.AddFriendResponseReq'
+          $ref: '#/definitions/api_struct.AddFriendResponseReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.AddFriendResponseResp'
+            $ref: '#/definitions/api_struct.AddFriendResponseResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 同意/拒绝好友请求
       tags:
       - 好友相关
@@ -2920,22 +2920,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DeleteFriendReq'
+          $ref: '#/definitions/api_struct.DeleteFriendReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DeleteFriendResp'
+            $ref: '#/definitions/api_struct.DeleteFriendResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 删除好友
       tags:
       - 好友相关
@@ -2956,7 +2956,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetBlackListReq'
+          $ref: '#/definitions/api_struct.GetBlackListReq'
       produces:
       - application/json
       responses:
@@ -2964,7 +2964,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetBlackListResp'
+            - $ref: '#/definitions/api_struct.GetBlackListResp'
             - properties:
                 data:
                   items:
@@ -2974,11 +2974,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
       summary: 获取黑名单列表
       tags:
       - 好友相关
@@ -2999,7 +2999,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetFriendApplyListReq'
+          $ref: '#/definitions/api_struct.GetFriendApplyListReq'
       produces:
       - application/json
       responses:
@@ -3007,7 +3007,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetFriendApplyListResp'
+            - $ref: '#/definitions/api_struct.GetFriendApplyListResp'
             - properties:
                 data:
                   items:
@@ -3017,11 +3017,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
       summary: 获取好友申请列表
       tags:
       - 好友相关
@@ -3042,7 +3042,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetFriendListReq'
+          $ref: '#/definitions/api_struct.GetFriendListReq'
       produces:
       - application/json
       responses:
@@ -3050,7 +3050,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetFriendListResp'
+            - $ref: '#/definitions/api_struct.GetFriendListResp'
             - properties:
                 data:
                   items:
@@ -3060,11 +3060,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取用户的好友列表
       tags:
       - 好友相关
@@ -3085,7 +3085,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetSelfApplyListReq'
+          $ref: '#/definitions/api_struct.GetSelfApplyListReq'
       produces:
       - application/json
       responses:
@@ -3093,7 +3093,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetSelfApplyListResp'
+            - $ref: '#/definitions/api_struct.GetSelfApplyListResp'
             - properties:
                 data:
                   items:
@@ -3103,11 +3103,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取自己的好友申请列表
       tags:
       - 好友相关
@@ -3128,22 +3128,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.ImportFriendReq'
+          $ref: '#/definitions/api_struct.ImportFriendReq'
       produces:
       - application/json
       responses:
         "0":
           description: data列表中对象的result-1为添加该用户失败<br>0为成功
           schema:
-            $ref: '#/definitions/base_info.ImportFriendResp'
+            $ref: '#/definitions/api_struct.ImportFriendResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 批量加好友
       tags:
       - 好友相关
@@ -3164,22 +3164,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.IsFriendReq'
+          $ref: '#/definitions/api_struct.IsFriendReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.IsFriendResp'
+            $ref: '#/definitions/api_struct.IsFriendResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 检查用户之间是否为好友
       tags:
       - 好友相关
@@ -3200,22 +3200,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.RemoveBlackListReq'
+          $ref: '#/definitions/api_struct.RemoveBlackListReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.RemoveBlackListResp'
+            $ref: '#/definitions/api_struct.RemoveBlackListResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 把用户移除黑名单
       tags:
       - 好友相关
@@ -3236,22 +3236,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.SetFriendRemarkReq'
+          $ref: '#/definitions/api_struct.SetFriendRemarkReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.SetFriendRemarkResp'
+            $ref: '#/definitions/api_struct.SetFriendRemarkResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 设置好友备注
       tags:
       - 好友相关
@@ -3272,22 +3272,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CancelMuteGroupReq'
+          $ref: '#/definitions/api_struct.CancelMuteGroupReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.CancelMuteGroupResp'
+            $ref: '#/definitions/api_struct.CancelMuteGroupResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 取消禁言群组
       tags:
       - 群组相关
@@ -3308,22 +3308,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CancelMuteGroupMemberReq'
+          $ref: '#/definitions/api_struct.CancelMuteGroupMemberReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.CancelMuteGroupMemberResp'
+            $ref: '#/definitions/api_struct.CancelMuteGroupMemberResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 取消禁言群成员
       tags:
       - 群组相关
@@ -3346,7 +3346,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CreateGroupReq'
+          $ref: '#/definitions/api_struct.CreateGroupReq'
       produces:
       - application/json
       responses:
@@ -3354,7 +3354,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.CreateGroupResp'
+            - $ref: '#/definitions/api_struct.CreateGroupResp'
             - properties:
                 data:
                   $ref: '#/definitions/server_api_params.GroupInfo'
@@ -3362,11 +3362,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 创建群组
       tags:
       - 群组相关
@@ -3387,22 +3387,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DismissGroupReq'
+          $ref: '#/definitions/api_struct.DismissGroupReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DismissGroupResp'
+            $ref: '#/definitions/api_struct.DismissGroupResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 解散群组
       tags:
       - 群组相关
@@ -3423,7 +3423,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetGroupAllMemberReq'
+          $ref: '#/definitions/api_struct.GetGroupAllMemberReq'
       produces:
       - application/json
       responses:
@@ -3431,7 +3431,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetGroupAllMemberResp'
+            - $ref: '#/definitions/api_struct.GetGroupAllMemberResp'
             - properties:
                 data:
                   items:
@@ -3441,11 +3441,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取全部群成员列表
       tags:
       - 群组相关
@@ -3466,7 +3466,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetGroupMembersInfoReq'
+          $ref: '#/definitions/api_struct.GetGroupMembersInfoReq'
       produces:
       - application/json
       responses:
@@ -3474,7 +3474,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetGroupMembersInfoResp'
+            - $ref: '#/definitions/api_struct.GetGroupMembersInfoResp'
             - properties:
                 data:
                   items:
@@ -3484,11 +3484,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取群成员信息
       tags:
       - 群组相关
@@ -3509,22 +3509,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetGroupInfoReq'
+          $ref: '#/definitions/api_struct.GetGroupInfoReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetGroupInfoResp'
+            $ref: '#/definitions/api_struct.GetGroupInfoResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 通过群ID列表获取群信息
       tags:
       - 群组相关
@@ -3545,7 +3545,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetJoinedGroupListReq'
+          $ref: '#/definitions/api_struct.GetJoinedGroupListReq'
       produces:
       - application/json
       responses:
@@ -3553,7 +3553,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetJoinedGroupListResp'
+            - $ref: '#/definitions/api_struct.GetJoinedGroupListResp'
             - properties:
                 data:
                   items:
@@ -3563,11 +3563,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取用户加入群列表
       tags:
       - 群组相关
@@ -3588,7 +3588,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetGroupApplicationListReq'
+          $ref: '#/definitions/api_struct.GetGroupApplicationListReq'
       produces:
       - application/json
       responses:
@@ -3596,7 +3596,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetGroupApplicationListResp'
+            - $ref: '#/definitions/api_struct.GetGroupApplicationListResp'
             - properties:
                 data:
                   items:
@@ -3606,11 +3606,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取用户收到的加群信息列表
       tags:
       - 群组相关
@@ -3631,7 +3631,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetUserReqGroupApplicationListReq'
+          $ref: '#/definitions/api_struct.GetUserReqGroupApplicationListReq'
       produces:
       - application/json
       responses:
@@ -3639,7 +3639,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetGroupApplicationListResp'
+            - $ref: '#/definitions/api_struct.GetGroupApplicationListResp'
             - properties:
                 data:
                   items:
@@ -3649,11 +3649,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取用户加群申请列表
       tags:
       - 群组相关
@@ -3675,22 +3675,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.ApplicationGroupResponseReq'
+          $ref: '#/definitions/api_struct.ApplicationGroupResponseReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.ApplicationGroupResponseResp'
+            $ref: '#/definitions/api_struct.ApplicationGroupResponseResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 处理加群消息
       tags:
       - 群组相关
@@ -3711,22 +3711,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.InviteUserToGroupReq'
+          $ref: '#/definitions/api_struct.InviteUserToGroupReq'
       produces:
       - application/json
       responses:
         "0":
           description: result为结果码, -1为失败, 0为成功
           schema:
-            $ref: '#/definitions/base_info.InviteUserToGroupResp'
+            $ref: '#/definitions/api_struct.InviteUserToGroupResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 将用户拉入群组
       tags:
       - 群组相关
@@ -3747,22 +3747,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.JoinGroupReq'
+          $ref: '#/definitions/api_struct.JoinGroupReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.JoinGroupResp'
+            $ref: '#/definitions/api_struct.JoinGroupResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 加入群聊
       tags:
       - 群组相关
@@ -3783,22 +3783,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.KickGroupMemberReq'
+          $ref: '#/definitions/api_struct.KickGroupMemberReq'
       produces:
       - application/json
       responses:
         "0":
           description: result为结果码, -1为失败, 0为成功
           schema:
-            $ref: '#/definitions/base_info.KickGroupMemberResp'
+            $ref: '#/definitions/api_struct.KickGroupMemberResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 把用户踢出群组
       tags:
       - 群组相关
@@ -3819,22 +3819,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.MuteGroupReq'
+          $ref: '#/definitions/api_struct.MuteGroupReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.MuteGroupResp'
+            $ref: '#/definitions/api_struct.MuteGroupResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.MuteGroupResp'
+            $ref: '#/definitions/api_struct.MuteGroupResp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.MuteGroupResp'
+            $ref: '#/definitions/api_struct.MuteGroupResp'
       summary: 禁言群组
       tags:
       - 群组相关
@@ -3855,22 +3855,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.MuteGroupMemberReq'
+          $ref: '#/definitions/api_struct.MuteGroupMemberReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DismissGroupResp'
+            $ref: '#/definitions/api_struct.DismissGroupResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 禁言群成员
       tags:
       - 群组相关
@@ -3891,22 +3891,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.QuitGroupReq'
+          $ref: '#/definitions/api_struct.QuitGroupReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.QuitGroupResp'
+            $ref: '#/definitions/api_struct.QuitGroupResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 当前用户退出群聊
       tags:
       - 群组相关
@@ -3928,22 +3928,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.SetGroupInfoReq'
+          $ref: '#/definitions/api_struct.SetGroupInfoReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.SetGroupInfoResp'
+            $ref: '#/definitions/api_struct.SetGroupInfoResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 设置群信息
       tags:
       - 群组相关
@@ -3965,22 +3965,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.SetGroupMemberInfoReq'
+          $ref: '#/definitions/api_struct.SetGroupMemberInfoReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.SetGroupMemberInfoResp'
+            $ref: '#/definitions/api_struct.SetGroupMemberInfoResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 修改群成员信息
       tags:
       - 群组相关
@@ -4001,22 +4001,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.TransferGroupOwnerReq'
+          $ref: '#/definitions/api_struct.TransferGroupOwnerReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.TransferGroupOwnerResp'
+            $ref: '#/definitions/api_struct.TransferGroupOwnerResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 转让群主
       tags:
       - 群组相关
@@ -4038,7 +4038,7 @@ paths:
         required: true
         schema:
           allOf:
-          - $ref: '#/definitions/base_info.ManagementBatchSendMsgReq'
+          - $ref: '#/definitions/api_struct.ManagementBatchSendMsgReq'
           - properties:
               content:
                 $ref: '#/definitions/Open_IM_internal_api_manage.TextElem'
@@ -4049,7 +4049,7 @@ paths:
         required: true
         schema:
           allOf:
-          - $ref: '#/definitions/base_info.ManagementSendMsgReq'
+          - $ref: '#/definitions/api_struct.ManagementSendMsgReq'
           - properties:
               content:
                 $ref: '#/definitions/Open_IM_internal_api_manage.OANotificationElem'
@@ -4060,15 +4060,15 @@ paths:
         "0":
           description: serverMsgID为服务器消息ID <br> clientMsgID为客户端消息ID <br> sendTime为发送消息时间
           schema:
-            $ref: '#/definitions/base_info.ManagementBatchSendMsgReq'
+            $ref: '#/definitions/api_struct.ManagementBatchSendMsgReq'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.ManagementBatchSendMsgReq'
+            $ref: '#/definitions/api_struct.ManagementBatchSendMsgReq'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.ManagementBatchSendMsgReq'
+            $ref: '#/definitions/api_struct.ManagementBatchSendMsgReq'
       summary: 管理员批量发送群聊单聊消息
       tags:
       - 消息相关
@@ -4089,22 +4089,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CleanUpMsgReq'
+          $ref: '#/definitions/api_struct.CleanUpMsgReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.CleanUpMsgResp'
+            $ref: '#/definitions/api_struct.CleanUpMsgResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 清空用户消息
       tags:
       - 消息相关
@@ -4125,22 +4125,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DelMsgReq'
+          $ref: '#/definitions/api_struct.DelMsgReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DelMsgResp'
+            $ref: '#/definitions/api_struct.DelMsgResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 根据seq列表删除消息
       tags:
       - 消息相关
@@ -4161,22 +4161,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetAllConversationsReq'
+          $ref: '#/definitions/api_struct.GetAllConversationsReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetAllConversationsResp'
+            $ref: '#/definitions/api_struct.GetAllConversationsResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取用户所有会话
       tags:
       - 会话相关
@@ -4197,22 +4197,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetConversationReq'
+          $ref: '#/definitions/api_struct.GetConversationReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetConversationResp'
+            $ref: '#/definitions/api_struct.GetConversationResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 根据会话ID获取会话
       tags:
       - 会话相关
@@ -4233,22 +4233,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetConversationsReq'
+          $ref: '#/definitions/api_struct.GetConversationsReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetConversationsResp'
+            $ref: '#/definitions/api_struct.GetConversationsResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 根据会话ID列表获取会话
       tags:
       - 会话相关
@@ -4270,7 +4270,7 @@ paths:
         required: true
         schema:
           allOf:
-          - $ref: '#/definitions/base_info.ManagementSendMsgReq'
+          - $ref: '#/definitions/api_struct.ManagementSendMsgReq'
           - properties:
               content:
                 $ref: '#/definitions/Open_IM_internal_api_manage.TextElem'
@@ -4281,7 +4281,7 @@ paths:
         required: true
         schema:
           allOf:
-          - $ref: '#/definitions/base_info.ManagementSendMsgReq'
+          - $ref: '#/definitions/api_struct.ManagementSendMsgReq'
           - properties:
               content:
                 $ref: '#/definitions/Open_IM_internal_api_manage.OANotificationElem'
@@ -4292,7 +4292,7 @@ paths:
         required: true
         schema:
           allOf:
-          - $ref: '#/definitions/base_info.ManagementSendMsgReq'
+          - $ref: '#/definitions/api_struct.ManagementSendMsgReq'
           - properties:
               content:
                 $ref: '#/definitions/Open_IM_internal_api_manage.RevokeElem'
@@ -4303,15 +4303,15 @@ paths:
         "0":
           description: serverMsgID为服务器消息ID <br> clientMsgID为客户端消息ID <br> sendTime为发送消息时间
           schema:
-            $ref: '#/definitions/base_info.ManagementSendMsgResp'
+            $ref: '#/definitions/api_struct.ManagementSendMsgResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.ManagementSendMsgResp'
+            $ref: '#/definitions/api_struct.ManagementSendMsgResp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.ManagementSendMsgResp'
+            $ref: '#/definitions/api_struct.ManagementSendMsgResp'
       summary: 管理员发送/撤回消息
       tags:
       - 消息相关
@@ -4332,22 +4332,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CommentOneWorkMomentReq'
+          $ref: '#/definitions/api_struct.CommentOneWorkMomentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.CommentOneWorkMomentResp'
+            $ref: '#/definitions/api_struct.CommentOneWorkMomentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 评论一条工作圈
       tags:
       - 工作圈
@@ -4369,22 +4369,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CreateOneWorkMomentReq'
+          $ref: '#/definitions/api_struct.CreateOneWorkMomentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.CreateOneWorkMomentResp'
+            $ref: '#/definitions/api_struct.CreateOneWorkMomentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 创建一条工作圈
       tags:
       - 工作圈
@@ -4405,22 +4405,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CreateTagReq'
+          $ref: '#/definitions/api_struct.CreateTagReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.CreateTagResp'
+            $ref: '#/definitions/api_struct.CreateTagResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 创建标签
       tags:
       - 标签
@@ -4441,22 +4441,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DeleteCommentReq'
+          $ref: '#/definitions/api_struct.DeleteCommentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DeleteCommentResp'
+            $ref: '#/definitions/api_struct.DeleteCommentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 删除一条评论
       tags:
       - 工作圈
@@ -4477,22 +4477,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DeleteOneWorkMomentReq'
+          $ref: '#/definitions/api_struct.DeleteOneWorkMomentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DeleteOneWorkMomentResp'
+            $ref: '#/definitions/api_struct.DeleteOneWorkMomentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 删除一条工作圈
       tags:
       - 工作圈
@@ -4513,22 +4513,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DeleteTagReq'
+          $ref: '#/definitions/api_struct.DeleteTagReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DeleteTagResp'
+            $ref: '#/definitions/api_struct.DeleteTagResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 删除标签
       tags:
       - 标签
@@ -4549,22 +4549,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetTagSendLogsReq'
+          $ref: '#/definitions/api_struct.GetTagSendLogsReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetTagSendLogsResp'
+            $ref: '#/definitions/api_struct.GetTagSendLogsResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取发送历史记录
       tags:
       - 标签
@@ -4585,22 +4585,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetUserFriendWorkMomentsReq'
+          $ref: '#/definitions/api_struct.GetUserFriendWorkMomentsReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetUserFriendWorkMomentsResp'
+            $ref: '#/definitions/api_struct.GetUserFriendWorkMomentsResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 查询自己大工作圈页面
       tags:
       - 工作圈
@@ -4621,22 +4621,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetUserTagByIDReq'
+          $ref: '#/definitions/api_struct.GetUserTagByIDReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetUserTagByIDResp'
+            $ref: '#/definitions/api_struct.GetUserTagByIDResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取该用户的标签信息
       tags:
       - 标签
@@ -4657,22 +4657,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetUserTagsReq'
+          $ref: '#/definitions/api_struct.GetUserTagsReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetUserTagsResp'
+            $ref: '#/definitions/api_struct.GetUserTagsResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取用户标签信息
       tags:
       - 标签
@@ -4693,22 +4693,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetUserWorkMomentsReq'
+          $ref: '#/definitions/api_struct.GetUserWorkMomentsReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetUserWorkMomentsResp'
+            $ref: '#/definitions/api_struct.GetUserWorkMomentsResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 查询用户工作圈
       tags:
       - 工作圈
@@ -4729,22 +4729,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetWorkMomentByIDReq'
+          $ref: '#/definitions/api_struct.GetWorkMomentByIDReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetWorkMomentByIDResp'
+            $ref: '#/definitions/api_struct.GetWorkMomentByIDResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 通过ID获取工作圈
       tags:
       - 工作圈
@@ -4765,22 +4765,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.LikeOneWorkMomentReq'
+          $ref: '#/definitions/api_struct.LikeOneWorkMomentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.LikeOneWorkMomentResp'
+            $ref: '#/definitions/api_struct.LikeOneWorkMomentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 点赞一条工作圈
       tags:
       - 工作圈
@@ -4801,22 +4801,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.SendMsg2TagReq'
+          $ref: '#/definitions/api_struct.SendMsg2TagReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.SendMsg2TagResp'
+            $ref: '#/definitions/api_struct.SendMsg2TagResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 发送标签消息
       tags:
       - 标签
@@ -4837,22 +4837,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.SetTagReq'
+          $ref: '#/definitions/api_struct.SetTagReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.SetTagResp'
+            $ref: '#/definitions/api_struct.SetTagResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 修改标签
       tags:
       - 标签
@@ -4873,7 +4873,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CreateDepartmentReq'
+          $ref: '#/definitions/api_struct.CreateDepartmentReq'
       produces:
       - application/json
       responses:
@@ -4881,7 +4881,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.CreateDepartmentResp'
+            - $ref: '#/definitions/api_struct.CreateDepartmentResp'
             - properties:
                 data:
                   $ref: '#/definitions/server_api_params.Department'
@@ -4889,11 +4889,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 创建部门
       tags:
       - 组织架构相关
@@ -4914,22 +4914,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CreateDepartmentMemberReq'
+          $ref: '#/definitions/api_struct.CreateDepartmentMemberReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.CreateDepartmentMemberResp'
+            $ref: '#/definitions/api_struct.CreateDepartmentMemberResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 创建部门用户
       tags:
       - 组织架构相关
@@ -4950,22 +4950,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.CreateOrganizationUserReq'
+          $ref: '#/definitions/api_struct.CreateOrganizationUserReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.CreateOrganizationUserResp'
+            $ref: '#/definitions/api_struct.CreateOrganizationUserResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 组织架构导入用户
       tags:
       - 组织架构相关
@@ -4986,22 +4986,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DeleteDepartmentReq'
+          $ref: '#/definitions/api_struct.DeleteDepartmentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DeleteDepartmentResp'
+            $ref: '#/definitions/api_struct.DeleteDepartmentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 删除部门
       tags:
       - 组织架构相关
@@ -5022,22 +5022,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DeleteOrganizationUserReq'
+          $ref: '#/definitions/api_struct.DeleteOrganizationUserReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DeleteOrganizationUserResp'
+            $ref: '#/definitions/api_struct.DeleteOrganizationUserResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 删除组织架构中某个用户
       tags:
       - 组织架构相关
@@ -5058,22 +5058,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.DeleteUserInDepartmentReq'
+          $ref: '#/definitions/api_struct.DeleteUserInDepartmentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.DeleteUserInDepartmentResp'
+            $ref: '#/definitions/api_struct.DeleteUserInDepartmentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 删除部门中某个用户
       tags:
       - 组织架构相关
@@ -5094,7 +5094,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetDepartmentMemberReq'
+          $ref: '#/definitions/api_struct.GetDepartmentMemberReq'
       produces:
       - application/json
       responses:
@@ -5102,7 +5102,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetDepartmentMemberResp'
+            - $ref: '#/definitions/api_struct.GetDepartmentMemberResp'
             - properties:
                 data:
                   items:
@@ -5112,11 +5112,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取部门中所有成员
       tags:
       - 组织架构相关
@@ -5137,7 +5137,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetSubDepartmentReq'
+          $ref: '#/definitions/api_struct.GetSubDepartmentReq'
       produces:
       - application/json
       responses:
@@ -5145,7 +5145,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetSubDepartmentResp'
+            - $ref: '#/definitions/api_struct.GetSubDepartmentResp'
             - properties:
                 data:
                   items:
@@ -5155,11 +5155,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取子部门列表
       tags:
       - 组织架构相关
@@ -5180,7 +5180,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetUserInDepartmentReq'
+          $ref: '#/definitions/api_struct.GetUserInDepartmentReq'
       produces:
       - application/json
       responses:
@@ -5188,7 +5188,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetUserInDepartmentResp'
+            - $ref: '#/definitions/api_struct.GetUserInDepartmentResp'
             - properties:
                 data:
                   $ref: '#/definitions/server_api_params.UserInDepartment'
@@ -5196,11 +5196,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取部门中的所有用户
       tags:
       - 组织架构相关
@@ -5221,22 +5221,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.UpdateDepartmentReq'
+          $ref: '#/definitions/api_struct.UpdateDepartmentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.UpdateDepartmentResp'
+            $ref: '#/definitions/api_struct.UpdateDepartmentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 更新部门信息
       tags:
       - 组织架构相关
@@ -5257,22 +5257,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.UpdateOrganizationUserReq'
+          $ref: '#/definitions/api_struct.UpdateOrganizationUserReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.UpdateOrganizationUserResp'
+            $ref: '#/definitions/api_struct.UpdateOrganizationUserResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 更新组织架构中的用户
       tags:
       - 组织架构相关
@@ -5293,22 +5293,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.UpdateUserInDepartmentReq'
+          $ref: '#/definitions/api_struct.UpdateUserInDepartmentReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.UpdateUserInDepartmentResp'
+            $ref: '#/definitions/api_struct.UpdateUserInDepartmentResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 更新部门中某个用户
       tags:
       - 组织架构相关
@@ -5345,15 +5345,15 @@ paths:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.MinioUploadFileResp'
+            $ref: '#/definitions/api_struct.MinioUploadFileResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: minio上传文件(web api)
       tags:
       - 第三方服务相关
@@ -5374,22 +5374,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.AccountCheckReq'
+          $ref: '#/definitions/api_struct.AccountCheckReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.AccountCheckResp'
+            $ref: '#/definitions/api_struct.AccountCheckResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 检查列表账户注册状态，并且返回结果
       tags:
       - 用户相关
@@ -5410,22 +5410,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetAllUsersUidReq'
+          $ref: '#/definitions/api_struct.GetAllUsersUidReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetAllUsersUidResp'
+            $ref: '#/definitions/api_struct.GetAllUsersUidResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取所有用户uid列表
       tags:
       - 用户相关
@@ -5446,7 +5446,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetSelfUserInfoReq'
+          $ref: '#/definitions/api_struct.GetSelfUserInfoReq'
       produces:
       - application/json
       responses:
@@ -5454,7 +5454,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetSelfUserInfoResp'
+            - $ref: '#/definitions/api_struct.GetSelfUserInfoResp'
             - properties:
                 data:
                   $ref: '#/definitions/server_api_params.UserInfo'
@@ -5462,11 +5462,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取自己的信息
       tags:
       - 用户相关
@@ -5487,7 +5487,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetUsersInfoReq'
+          $ref: '#/definitions/api_struct.GetUsersInfoReq'
       produces:
       - application/json
       responses:
@@ -5495,7 +5495,7 @@ paths:
           description: ""
           schema:
             allOf:
-            - $ref: '#/definitions/base_info.GetUsersInfoResp'
+            - $ref: '#/definitions/api_struct.GetUsersInfoResp'
             - properties:
                 Data:
                   items:
@@ -5505,11 +5505,11 @@ paths:
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取用户信息
       tags:
       - 用户相关
@@ -5530,22 +5530,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.GetUsersOnlineStatusReq'
+          $ref: '#/definitions/api_struct.GetUsersOnlineStatusReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.GetUsersOnlineStatusResp'
+            $ref: '#/definitions/api_struct.GetUsersOnlineStatusResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 获取用户在线状态
       tags:
       - 用户相关
@@ -5566,22 +5566,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.SetGlobalRecvMessageOptReq'
+          $ref: '#/definitions/api_struct.SetGlobalRecvMessageOptReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.SetGlobalRecvMessageOptResp'
+            $ref: '#/definitions/api_struct.SetGlobalRecvMessageOptResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 设置全局免打扰
       tags:
       - 用户相关
@@ -5602,22 +5602,22 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/base_info.UpdateSelfUserInfoReq'
+          $ref: '#/definitions/api_struct.UpdateSelfUserInfoReq'
       produces:
       - application/json
       responses:
         "0":
           description: ""
           schema:
-            $ref: '#/definitions/base_info.UpdateUserInfoResp'
+            $ref: '#/definitions/api_struct.UpdateUserInfoResp'
         "400":
           description: errCode为400 一般为参数输入错误, token未带上等
           schema:
-            $ref: '#/definitions/base_info.Swagger400Resp'
+            $ref: '#/definitions/api_struct.Swagger400Resp'
         "500":
           description: errCode为500 一般为服务器内部错误
           schema:
-            $ref: '#/definitions/base_info.Swagger500Resp'
+            $ref: '#/definitions/api_struct.Swagger500Resp'
       summary: 修改用户信息
       tags:
       - 用户相关
