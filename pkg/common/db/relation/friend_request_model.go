@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var FriendRequestDB *gorm.DB
+//var FriendRequestDB *gorm.DB
 
 type FriendRequest struct {
 	FromUserID    string    `gorm:"column:from_user_id;primary_key;size:64"`

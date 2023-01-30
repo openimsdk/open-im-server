@@ -3,158 +3,159 @@ import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 option go_package = "Open_IM/pkg/proto/friend;friend";
 package friend;
 
-message GetFriendsInfoReq{
-  string fromUserID = 1;
-  repeated string toUserIDs = 2;
+message getFriendsInfoReq{
+  string ownerUserID = 1;
+  repeated string friendUserIDs = 2;
 }
-message GetFriendsInfoResp{
+message getFriendsInfoResp{
   repeated server_api_params.FriendInfo FriendInfoList = 1;
 }
 
 
-message AddFriendReq{
+message addFriendReq{
   string fromUserID = 1;
   string toUserID = 2;
   string reqMsg = 3;
+  string ex = 4;
 }
-message AddFriendResp{
-}
-
-
-message ImportFriendReq{
-  repeated string FriendUserIDList = 1;
-  string FromUserID = 2;
-}
-
-message ImportFriendResp{
+message addFriendResp{
 }
 
 
-message GetToFriendApplyListReq{
+message importFriendReq{
+  string ownerUserID = 1;
+  repeated string friendUserIDs = 2;
+}
+
+message importFriendResp{
+}
+
+
+message getToFriendsApplyReq{
   string userID = 1;
   server_api_params.RequestPagination pagination = 2;
 
 }
-message GetToFriendApplyListResp{
-  repeated server_api_params.FriendRequest FriendRequestList = 1;
+message getToFriendsApplyResp{
+  repeated server_api_params.FriendRequest FriendRequests = 1;
   int32 total = 2;
 }
 
 
-message GetFriendListReq{
+message getFriendsReq{
   server_api_params.RequestPagination pagination = 1;
   string userID = 2;
 }
-message GetFriendListResp{
-  repeated server_api_params.FriendInfo FriendInfoList = 1;
+message getFriendsResp{
+  repeated server_api_params.FriendInfo FriendsInfo = 1;
   int32 total = 2;
 }
 
 
-message AddBlacklistReq{
-  string fromUserID = 1;
-  string toUserID = 2;
+message addBlackReq{
+  string ownerUserID = 1;
+  string blackUserID = 2;
 }
-message AddBlacklistResp{
-}
-
-
-message RemoveBlacklistReq{
-  string fromUserID = 1;
-  string toUserID = 2;
-}
-message RemoveBlacklistResp{
+message addBlackResp{
 }
 
-message GetBlacklistReq{
+
+message removeBlackReq{
+  string ownerUserID = 1;
+  string blackUserID = 2;
+}
+message removeBlackReqResp{
+}
+
+message getBlacksReq{
   string userID = 1;
   server_api_params.RequestPagination pagination = 2;
 }
-message GetBlacklistResp{
+message getBlacksResp{
   repeated server_api_params.PublicUserInfo BlackUserInfoList = 1;
   int32 total = 2;
 }
 
 
-message IsFriendReq{
-  string fromUserID = 1;
-  string toUserID = 2;
+message isFriendReq{
+  string ownerUserID = 1;
+  string friendUserID = 2;
 }
-message IsFriendResp{
-  bool Response = 1;
-}
-
-
-message IsInBlackListReq{
-  string fromUserID = 1;
-  string toUserID = 2;
-}
-message IsInBlackListResp{
-  bool Response = 1;
+message isFriendResp{
+  bool response = 1;
 }
 
 
-message DeleteFriendReq{
-  string fromUserID = 1;
-  string toUserID = 2;
+message isBlackReq{
+  string ownerUserID = 1;
+  string blackUserID = 2;
 }
-message DeleteFriendResp{
+message isBlackResp{
+  bool response = 1;
+}
+
+
+message deleteFriendReq{
+  string ownerUserID = 1;
+  string friendUserID = 2;
+}
+message deleteFriendResp{
 }
 
 //process
-message FriendApplyResponseReq{
-  string fromUserID = 1;
-  string toUserID = 2;
+message respondFriendApplyReq{
+  string fromUserID = 1; //主动发起的申请者
+  string toUserID = 2;   //被动添加者
   int32  handleResult = 3;
   string handleMsg = 4;
 }
-message FriendApplyResponseResp{
+message respondFriendApplyResp{
 }
 
-message SetFriendRemarkReq{
-  string fromUserID = 1;
-  string toUserID = 2;
+message setFriendRemarkReq{
+  string ownerUserID = 1;
+  string friendUserID = 2;
   string remark = 3;
 }
-message SetFriendRemarkResp{
+message setFriendRemarkResp{
 }
 
-message GetFromFriendApplyListReq{
+message getFromFriendsApplyReq{
   string userID = 1;
   server_api_params.RequestPagination pagination = 2;
 }
-message GetFromFriendApplyListResp{
-  repeated server_api_params.FriendRequest friendRequestList = 1;
+message getFromFriendsApplyResp{
+  repeated server_api_params.FriendRequest friendRequests = 1;
   int32 total = 2;
 }
 
 service friend{
   //申请加好友
-  rpc addFriend(AddFriendReq) returns(AddFriendResp);
+  rpc addFriend(addFriendReq) returns(addFriendResp);
   //获取收到的好友申请列表
-  rpc getToFriendApplyList(GetToFriendApplyListReq) returns(GetToFriendApplyListResp);
+  rpc getToFriendsApply(getToFriendsApplyReq) returns(getToFriendsApplyResp);
   //获取主动发出去的好友申请列表
-  rpc getFromFriendApplyList(GetFromFriendApplyListReq) returns(GetFromFriendApplyListResp);
+  rpc getFromFriendsApply(getFromFriendsApplyReq) returns(getFromFriendsApplyResp);
   //获取好友列表
-  rpc getFriendList(GetFriendListReq) returns(GetFriendListResp);
+  rpc getFriends(getFriendsReq) returns(getFriendsResp);
   //添加黑名单
-  rpc addBlacklist(AddBlacklistReq) returns(AddBlacklistResp);
+  rpc addBlack(addBlackReq) returns(addBlackResp);
   //移除黑名单
-  rpc removeBlacklist(RemoveBlacklistReq) returns(RemoveBlacklistResp);
+  rpc removeBlack(removeBlackReq) returns(removeBlackReqResp);
   //判断是否好友关系
-  rpc isFriend(IsFriendReq) returns(IsFriendResp);
+  rpc isFriend(isFriendReq) returns(isFriendResp);
   //判断是否在黑名单中
-  rpc isInBlackList(IsInBlackListReq) returns(IsInBlackListResp);
+  rpc isBlack(isBlackReq) returns(isBlackResp);
   //获取黑名单列表
-  rpc getBlacklist(GetBlacklistReq) returns(GetBlacklistResp);
+  rpc getBlacks(getBlacksReq) returns(getBlacksResp);
   //删除好友
-  rpc deleteFriend(DeleteFriendReq) returns(DeleteFriendResp);
+  rpc deleteFriend(deleteFriendReq) returns(deleteFriendResp);
   //对好友申请响应（同意或拒绝）
-  rpc friendApplyResponse(FriendApplyResponseReq) returns(FriendApplyResponseResp);
+  rpc respondFriendApply(respondFriendApplyReq) returns(respondFriendApplyResp);
   //设置好友备注
-  rpc setFriendRemark(SetFriendRemarkReq) returns(SetFriendRemarkResp);
+  rpc setFriendRemark(setFriendRemarkReq) returns(setFriendRemarkResp);
   //导入好友关系
-  rpc importFriend(ImportFriendReq)  returns(ImportFriendResp);
+  rpc importFriends(importFriendReq)  returns(importFriendResp);
   //获取指定好友信息
-  rpc getFriendsInfo(GetFriendsInfoReq) returns (GetFriendsInfoResp);
+  rpc getFriendsInfo(getFriendsInfoReq) returns (getFriendsInfoResp);
 }

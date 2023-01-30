@@ -6,10 +6,6 @@ import (
 	"errors"
 )
 
-func GetUserInfo(ctx context.Context, userID string) (*server_api_params.PublicUserInfo, error) {
-	return nil, errors.New("TODO:GetUserInfo")
-}
-
 func GetPublicUserInfoBatch(ctx context.Context, userIDs []string) ([]*server_api_params.PublicUserInfo, error) {
 	if len(userIDs) == 0 {
 		return []*server_api_params.PublicUserInfo{}, nil
@@ -17,7 +13,7 @@ func GetPublicUserInfoBatch(ctx context.Context, userIDs []string) ([]*server_ap
 	return nil, errors.New("TODO:GetUserInfo")
 }
 
-func GetUserInfoList(ctx context.Context, userIDs []string) ([]*server_api_params.UserInfo, error) {
+func GetUsersInfo(ctx context.Context, userIDs []string) ([]*server_api_params.UserInfo, error) {
 	if len(userIDs) == 0 {
 		return []*server_api_params.UserInfo{}, nil
 	}

@@ -7,6 +7,16 @@ import (
 )
 
 type FriendInterface interface {
+	// CheckIn 检查fromUserID是否在toUserID的好友列表中(inTo==true) 检查toUserID是否在fromUserID的好友列表中(inFrom==true)
+	CheckIn(ctx context.Context, fromUserID, toUserID string) (err error, inTo bool, inFrom bool)
+	// AddFriendRequest 增加或者更新好友申请
+	AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error)
+	// 先判断是否在好友表，如果在则不插入
+	BecomeFriend(ctx context.Context, friends []*relation.Friend) (err error)
+	//拒绝好友申请
+	RefuseFriendRequest(ctx context.Context, friendRequest *relation.FriendRequest) (err error)
+	// 同意好友申请
+	AgreeFriendRequest(ctx context.Context, friendRequest *relation.FriendRequest) (err error)
 	Create(ctx context.Context, friends []*relation.Friend) (err error)
 	Delete(ctx context.Context, ownerUserID string, friendUserIDs string) (err error)
 	UpdateByMap(ctx context.Context, ownerUserID string, args map[string]interface{}) (err error)

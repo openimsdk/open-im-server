@@ -12,20 +12,15 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tools"
-	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-	"errors"
-	"gorm.io/gorm"
+	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"net"
 	"strconv"
 	"strings"
-	"time"
-
-	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 
 	"google.golang.org/grpc"
 )
@@ -36,7 +31,6 @@ type friendServer struct {
 	etcdSchema      string
 	etcdAddr        []string
 	controller.FriendInterface
-	controller.FriendRequestInterface
 	controller.BlackInterface
 }
 
@@ -61,7 +55,6 @@ func NewFriendServer(port int) *friendServer {
 		panic("db init err:" + "conn is nil")
 	}
 	f.FriendInterface = controller.NewFriendController(model.DB)
-	f.FriendRequestInterface = controller.NewFriendRequestController(model.DB)
 	f.BlackInterface = controller.NewBlackController(model.DB)
 	return &f
 }
@@ -142,43 +135,23 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	if err := callbackBeforeAddFriendV1(req); err != nil {
 		return nil, err
 	}
-	friends1, err := s.FriendInterface.FindOwnerUserID(ctx, req.ToUserID)
+
+	//检查toUserID是否存在
+	if _, err := GetUsersInfo(ctx, []string{req.ToUserID}); err != nil {
+		return nil, err
+	}
+	//from是否在to的好友列表里面
+	err, in1, in2 := s.FriendInterface.CheckIn(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
 		return nil, err
 	}
-	friends2, err := s.FriendInterface.FindOwnerUserID(ctx, req.FromUserID)
-	if err != nil {
+	if in1 && in2 {
+		return nil, constant.ErrRelationshipAlready.Wrap()
+	}
+	if err = s.FriendInterface.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
 	}
-	var isSend = true
-	for _, v1 := range friends1 {
-		if v1.FriendUserID == req.FromUserID {
-			for _, v2 := range friends2 {
-				if v2.FriendUserID == req.ToUserID {
-					isSend = false
-					break
-				}
-			}
-			break
-		}
-	}
-	//Cannot add non-existent users
-	if isSend {
-		if _, err := GetUserInfo(ctx, req.ToUserID); err != nil {
-			return nil, err
-		}
-		friendRequest := relation.FriendRequest{
-			FromUserID:   req.FromUserID,
-			ToUserID:     req.ToUserID,
-			HandleResult: 0,
-			ReqMsg:       req.ReqMsg,
-			CreateTime:   time.Now(),
-		}
-		if err := s.FriendRequestInterface.Create(ctx, []*relation.FriendRequest{&friendRequest}); err != nil {
-			return nil, err
-		}
-		chat.FriendApplicationNotification(req)
-	}
+	chat.FriendApplicationNotification(req)
 	return resp, nil
 }
 
@@ -187,34 +160,16 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	if err := token_verify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := GetUserInfo(ctx, req.FromUserID); err != nil {
+	if _, err := GetUsersInfo(ctx, []string{req.FromUserID}); err != nil {
 		return nil, err
 	}
 
 	var friends []*relation.Friend
 	for _, userID := range utils.RemoveDuplicateElement(req.FriendUserIDList) {
-		if _, err := GetUserInfo(ctx, userID); err != nil {
-			return nil, err
-		}
-		fs, err := s.FriendInterface.FindUserState(ctx, req.FromUserID, userID)
-		if err != nil {
-			return nil, err
-		}
-		switch len(fs) {
-		case 1:
-			if fs[0].OwnerUserID == req.FromUserID {
-				friends = append(friends, &relation.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID})
-			} else {
-				friends = append(friends, &relation.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
-			}
-		case 0:
-			friends = append(friends, &relation.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID}, &relation.Friend{OwnerUserID: req.FromUserID, FriendUserID: userID})
-		default:
-			continue
-		}
+		friends = append(friends, &relation.Friend{OwnerUserID: userID, FriendUserID: req.FromUserID, AddSource: constant.BecomeFriendByImport, OperatorUserID: tools.OpUserID(ctx)})
 	}
 	if len(friends) > 0 {
-		if err := s.FriendInterface.Create(ctx, friends); err != nil {
+		if err := s.FriendInterface.BecomeFriend(ctx, friends); err != nil {
 			return nil, err
 		}
 	}
@@ -222,46 +177,30 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 }
 
 // process Friend application
-func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddFriendResponseReq) (*pbFriend.AddFriendResponseResp, error) {
-	resp := &pbFriend.AddFriendResponseResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
-		return nil, err
-	}
-	friendRequest, err := s.friendRequestModel.Take(ctx, req.ToUserID, req.FromUserID)
-	if err != nil {
-		return nil, err
-	}
-	friendRequest.HandleResult = req.HandleResult
-	friendRequest.HandleTime = time.Now()
-	friendRequest.HandleMsg = req.HandleMsg
-	friendRequest.HandlerUserID = tools.OpUserID(ctx)
-	err = relation.UpdateFriendApplication(friendRequest)
-	if err != nil {
+func (s *friendServer) friendApplyResponse(ctx context.Context, req *pbFriend.FriendApplyResponseReq) (*pbFriend.FriendApplyResponseResp, error) {
+	resp := &pbFriend.FriendApplyResponseResp{}
+	if err := token_verify.CheckAccessV3(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
 
-	//Change the status of the friend request form
-	if req.HandleResult == constant.FriendFlag {
-		//Establish friendship after find friend relationship not exists
-		_, err := s.friendModel.Take(ctx, req.FromUserID, req.ToUserID)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if err := s.friendModel.Create(ctx, []*relation.Friend{{OwnerUserID: req.FromUserID, FriendUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}}); err != nil {
-				return nil, err
-			}
-			chat.FriendAddedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.FromUserID, req.ToUserID)
-		} else if err != nil {
+	friendRequest := relation.FriendRequest{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
+	if req.HandleResult == constant.FriendResponseAgree {
+		err := s.AgreeFriendRequest(ctx, &friendRequest)
+		if err != nil {
 			return nil, err
 		}
-	}
-
-	if req.HandleResult == constant.FriendResponseAgree {
 		chat.FriendApplicationApprovedNotification(req)
-	} else if req.HandleResult == constant.FriendResponseRefuse {
-		chat.FriendApplicationRejectedNotification(req)
-	} else {
-		tracelog.SetCtxInfo(ctx, utils.GetSelfFuncName(), nil, "handleResult", req.HandleResult)
+		return resp, nil
 	}
-	return resp, nil
+	if req.HandleResult == constant.FriendResponseRefuse {
+		err := s.RefuseFriendRequest(ctx, &friendRequest)
+		if err != nil {
+			return nil, err
+		}
+		chat.FriendApplicationRejectedNotification(req)
+		return resp, nil
+	}
+	return nil, constant.ErrArgs.Wrap("req.HandleResult != -1/1")
 }
 
 func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFriendReq) (*pbFriend.DeleteFriendResp, error) {
@@ -273,26 +212,6 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 		return nil, err
 	}
 	chat.FriendDeletedNotification(req)
-	return resp, nil
-}
-
-func (s *friendServer) GetBlacklist(ctx context.Context, req *pbFriend.GetBlacklistReq) (*pbFriend.GetBlacklistResp, error) {
-	resp := &pbFriend.GetBlacklistResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
-		return nil, err
-	}
-	blacks, err := s.BlackInterface.FindByOwnerUserID(ctx, req.FromUserID)
-	if err != nil {
-		return nil, err
-	}
-	blackIDList := make([]string, 0, len(blacks))
-	for _, black := range blacks {
-		blackIDList = append(blackIDList, black.BlockUserID)
-	}
-	resp.BlackUserInfoList, err = GetPublicUserInfoBatch(ctx, blackIDList)
-	if err != nil {
-		return nil, err
-	}
 	return resp, nil
 }
 
@@ -321,32 +240,6 @@ func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.Remove
 	return resp, nil
 }
 
-func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlackListReq) (*pbFriend.IsInBlackListResp, error) {
-	resp := &pbFriend.IsInBlackListResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
-		return nil, err
-	}
-	exist, err := s.BlackInterface.IsExist(ctx, req.FromUserID, req.ToUserID)
-	if err != nil {
-		return nil, err
-	}
-	resp.Response = exist
-	return resp, nil
-}
-
-func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) (*pbFriend.IsFriendResp, error) {
-	resp := &pbFriend.IsFriendResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
-		return nil, err
-	}
-	exist, err := s.FriendInterface.IsExist(ctx, req.FromUserID, req.ToUserID)
-	if err != nil {
-		return nil, err
-	}
-	resp.Response = exist
-	return resp, nil
-}
-
 func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFriendListReq) (*pbFriend.GetFriendListResp, error) {
 	resp := &pbFriend.GetFriendListResp{}
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
@@ -360,7 +253,7 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 	for _, f := range friends {
 		userIDList = append(userIDList, f.FriendUserID)
 	}
-	users, err := GetUserInfoList(ctx, userIDList)
+	users, err := GetUsersInfo(ctx, userIDList)
 	if err != nil {
 		return nil, err
 	}
@@ -442,5 +335,51 @@ func (s *friendServer) GetSelfApplyList(ctx context.Context, req *pbFriend.GetSe
 		utils.CopyStructFields(&userInfo, friendRequest)
 		resp.FriendRequestList = append(resp.FriendRequestList, &userInfo)
 	}
+	return resp, nil
+}
+
+func (s *friendServer) GetBlacklist(ctx context.Context, req *pbFriend.GetBlacklistReq) (*pbFriend.GetBlacklistResp, error) {
+	resp := &pbFriend.GetBlacklistResp{}
+	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+		return nil, err
+	}
+	blacks, err := s.BlackInterface.FindByOwnerUserID(ctx, req.FromUserID)
+	if err != nil {
+		return nil, err
+	}
+	blackIDList := make([]string, 0, len(blacks))
+	for _, black := range blacks {
+		blackIDList = append(blackIDList, black.BlockUserID)
+	}
+	resp.BlackUserInfoList, err = GetPublicUserInfoBatch(ctx, blackIDList)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (s *friendServer) IsInBlackList(ctx context.Context, req *pbFriend.IsInBlackListReq) (*pbFriend.IsInBlackListResp, error) {
+	resp := &pbFriend.IsInBlackListResp{}
+	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+		return nil, err
+	}
+	exist, err := s.BlackInterface.IsExist(ctx, req.FromUserID, req.ToUserID)
+	if err != nil {
+		return nil, err
+	}
+	resp.Response = exist
+	return resp, nil
+}
+
+func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) (*pbFriend.IsFriendResp, error) {
+	resp := &pbFriend.IsFriendResp{}
+	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+		return nil, err
+	}
+	exist, err := s.FriendInterface.IsExist(ctx, req.FromUserID, req.ToUserID)
+	if err != nil {
+		return nil, err
+	}
+	resp.Response = exist
 	return resp, nil
 }
