@@ -11,13 +11,12 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/getcdv3"
-	pbConversation "Open_IM/pkg/proto/conversation"
 	pbFriend "Open_IM/pkg/proto/friend"
-	sdkws "Open_IM/pkg/proto/sdk_ws"
+	pbGroup "Open_IM/pkg/proto/group"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
-	"errors"
+	"github.com/golang/protobuf/ptypes/wrappers"
 	"net"
 	"strconv"
 	"strings"
@@ -26,7 +25,6 @@ import (
 
 	utils2 "Open_IM/internal/utils"
 	"google.golang.org/grpc"
-	"gorm.io/gorm"
 )
 
 type userServer struct {
@@ -62,7 +60,7 @@ func NewUserServer(port int) *userServer {
 }
 
 func (s *userServer) Run() {
-	log.NewInfo("0", "rpc user start...")
+	log.NewInfo("", "rpc user start...")
 
 	listenIP := ""
 	if config.Config.ListenIP == "" {
@@ -77,7 +75,7 @@ func (s *userServer) Run() {
 	if err != nil {
 		panic("listening err:" + err.Error() + s.rpcRegisterName)
 	}
-	log.NewInfo("0", "listen network success, address ", address, listener)
+	log.NewInfo("", "listen network success, address ", address, listener)
 	defer listener.Close()
 	//grpc server
 	var grpcOpts []grpc.ServerOption
@@ -102,327 +100,70 @@ func (s *userServer) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
 	if err != nil {
-		log.NewError("0", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
+		log.NewError("", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
 		panic(utils.Wrap(err, "register user module  rpc to etcd err"))
 	}
 	err = srv.Serve(listener)
 	if err != nil {
-		log.NewError("0", "Serve failed ", err.Error())
+		log.NewError("", "Serve failed ", err.Error())
 		return
 	}
-	log.NewInfo("0", "rpc  user success")
+	log.NewInfo("", "rpc  user success")
 }
 
-func syncPeerUserConversation(conversation *pbConversation.Conversation, operationID string) error {
-	peerUserConversation := imdb.Conversation{
-		OwnerUserID:      conversation.UserID,
-		ConversationID:   utils.GetConversationIDBySessionType(conversation.OwnerUserID, constant.SingleChatType),
-		ConversationType: constant.SingleChatType,
-		UserID:           conversation.OwnerUserID,
-		GroupID:          "",
-		RecvMsgOpt:       0,
-		UnreadCount:      0,
-		DraftTextTime:    0,
-		IsPinned:         false,
-		IsPrivateChat:    conversation.IsPrivateChat,
-		AttachedInfo:     "",
-		Ex:               "",
-	}
-	err := imdb.PeerUserSetConversation(peerUserConversation)
+func (s *userServer) SyncJoinedGroupMemberFaceURL(ctx context.Context, userID string, faceURL string, operationID string, opUserID string) {
+	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
-		return err
-	}
-	chat.ConversationSetPrivateNotification(operationID, conversation.OwnerUserID, conversation.UserID, conversation.IsPrivateChat)
-	return nil
-}
-
-func (s *userServer) BatchSetConversations(ctx context.Context, req *pbUser.BatchSetConversationsReq) (*pbUser.BatchSetConversationsResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	if req.NotificationType == 0 {
-		req.NotificationType = constant.ConversationOptChangeNotification
-	}
-	resp := &pbUser.BatchSetConversationsResp{}
-	for _, v := range req.Conversations {
-		conversation := imdb.Conversation{}
-		if err := utils.CopyStructFields(&conversation, v); err != nil {
-			log.NewDebug(req.OperationID, utils.GetSelfFuncName(), v.String(), "CopyStructFields failed", err.Error())
-		}
-		//redis op
-		if err := db.DB.SetSingleConversationRecvMsgOpt(req.OwnerUserID, v.ConversationID, v.RecvMsgOpt); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error())
-			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-			return resp, nil
-		}
-
-		isUpdate, err := imdb.SetConversation(conversation)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
-			resp.Failed = append(resp.Failed, v.ConversationID)
-			continue
-		}
-		if isUpdate {
-			err = rocksCache.DelConversationFromCache(v.OwnerUserID, v.ConversationID)
-		} else {
-			err = rocksCache.DelUserConversationIDListFromCache(v.OwnerUserID)
-		}
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), v.ConversationID, v.OwnerUserID)
-		}
-		resp.Success = append(resp.Success, v.ConversationID)
-		// if is set private msg operation，then peer user need to sync and set tips\
-		if v.ConversationType == constant.SingleChatType && req.NotificationType == constant.ConversationPrivateChatNotification {
-			if err := syncPeerUserConversation(v, req.OperationID); err != nil {
-				log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())
-			}
-		}
-	}
-	chat.ConversationChangeNotification(req.OperationID, req.OwnerUserID)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return", resp.String())
-	resp.CommonResp = &pbUser.CommonResp{}
-	return resp, nil
-}
-
-func (s *userServer) GetAllConversations(ctx context.Context, req *pbUser.GetAllConversationsReq) (*pbUser.GetAllConversationsResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetAllConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := rocksCache.GetUserAllConversationList(req.OwnerUserID)
-	log.NewDebug(req.OperationID, "conversations: ", conversations)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversations error", err.Error())
-		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
-	if err = utils.CopyStructFields(&resp.Conversations, conversations); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields error", err.Error())
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return", resp.String())
-	resp.CommonResp = &pbUser.CommonResp{}
-	return resp, nil
-}
-
-func (s *userServer) GetConversation(ctx context.Context, req *pbUser.GetConversationReq) (*pbUser.GetConversationResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetConversationResp{Conversation: &pbConversation.Conversation{}}
-	conversation, err := rocksCache.GetConversationFromCache(req.OwnerUserID, req.ConversationID)
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "conversation", conversation)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversation error", err.Error())
-		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
-	if err := utils.CopyStructFields(resp.Conversation, &conversation); err != nil {
-		log.Debug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields error", conversation, err.Error())
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	resp.CommonResp = &pbUser.CommonResp{}
-	return resp, nil
-}
-
-func (s *userServer) GetConversations(ctx context.Context, req *pbUser.GetConversationsReq) (*pbUser.GetConversationsResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.GetConversationsResp{Conversations: []*pbConversation.Conversation{}}
-	conversations, err := rocksCache.GetConversationsFromCache(req.OwnerUserID, req.ConversationIDs)
-	log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "conversations", conversations)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetConversations error", err.Error())
-		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
-	if err := utils.CopyStructFields(&resp.Conversations, conversations); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", conversations, err.Error())
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	resp.CommonResp = &pbUser.CommonResp{}
-	return resp, nil
-}
-
-func (s *userServer) SetConversation(ctx context.Context, req *pbUser.SetConversationReq) (*pbUser.SetConversationResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.SetConversationResp{}
-	if req.NotificationType == 0 {
-		req.NotificationType = constant.ConversationOptChangeNotification
-	}
-	if req.Conversation.ConversationType == constant.GroupChatType {
-		groupInfo, err := imdb.GetGroupInfoByGroupID(req.Conversation.GroupID)
-		if err != nil {
-			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", req.Conversation.GroupID, err.Error())
-			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-			return resp, nil
-		}
-		if groupInfo.Status == constant.GroupStatusDismissed && !req.Conversation.IsNotInGroup {
-			log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "group status is dismissed", groupInfo)
-			errMsg := "group status is dismissed"
-			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}
-			return resp, nil
-		}
-	}
-	var conversation imdb.Conversation
-	if err := utils.CopyStructFields(&conversation, req.Conversation); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", *req.Conversation, err.Error())
-	}
-	if err := db.DB.SetSingleConversationRecvMsgOpt(req.Conversation.OwnerUserID, req.Conversation.ConversationID, req.Conversation.RecvMsgOpt); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error())
-		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
-	isUpdate, err := imdb.SetConversation(conversation)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
-		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
-	if isUpdate {
-		err = rocksCache.DelConversationFromCache(req.Conversation.OwnerUserID, req.Conversation.ConversationID)
-	} else {
-		err = rocksCache.DelUserConversationIDListFromCache(req.Conversation.OwnerUserID)
-	}
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), req.Conversation.ConversationID, req.Conversation.OwnerUserID)
-	}
-
-	// notification
-	if req.Conversation.ConversationType == constant.SingleChatType && req.NotificationType == constant.ConversationPrivateChatNotification {
-		//sync peer user conversation if conversation is singleChatType
-		if err := syncPeerUserConversation(req.Conversation, req.OperationID); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "syncPeerUserConversation", err.Error())
-			resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-			return resp, nil
-		}
-	} else {
-		chat.ConversationChangeNotification(req.OperationID, req.Conversation.OwnerUserID)
-	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "rpc return", resp.String())
-	resp.CommonResp = &pbUser.CommonResp{}
-	return resp, nil
-}
-
-func (s *userServer) SetRecvMsgOpt(ctx context.Context, req *pbUser.SetRecvMsgOptReq) (*pbUser.SetRecvMsgOptResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.SetRecvMsgOptResp{}
-	var conversation imdb.Conversation
-	if err := utils.CopyStructFields(&conversation, req); err != nil {
-		log.NewDebug(req.OperationID, utils.GetSelfFuncName(), "CopyStructFields failed", *req, err.Error())
-	}
-	if err := db.DB.SetSingleConversationRecvMsgOpt(req.OwnerUserID, req.ConversationID, req.RecvMsgOpt); err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "cache failed, rpc return", err.Error())
-		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
-	stringList := strings.Split(req.ConversationID, "_")
-	if len(stringList) > 1 {
-		switch stringList[0] {
-		case "single":
-			conversation.UserID = stringList[1]
-			conversation.ConversationType = constant.SingleChatType
-		case "group":
-			conversation.GroupID = stringList[1]
-			conversation.ConversationType = constant.GroupChatType
-		}
-	}
-	isUpdate, err := imdb.SetRecvMsgOpt(conversation)
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "SetConversation error", err.Error())
-		resp.CommonResp = &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}
-		return resp, nil
-	}
-	if isUpdate {
-		err = rocksCache.DelConversationFromCache(conversation.OwnerUserID, conversation.ConversationID)
-	} else {
-		err = rocksCache.DelUserConversationIDListFromCache(conversation.OwnerUserID)
-	}
-	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), conversation.ConversationID, err.Error())
-	}
-	chat.ConversationChangeNotification(req.OperationID, req.OwnerUserID)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	resp.CommonResp = &pbUser.CommonResp{}
-	return resp, nil
-}
-
-func (s *userServer) GetAllUserID(_ context.Context, req *pbUser.GetAllUserIDReq) (*pbUser.GetAllUserIDResp, error) {
-	log.NewInfo(req.OperationID, "GetAllUserID args ", req.String())
-	if !token_verify.IsManagerUserID(req.OpUserID) {
-		log.NewError(req.OperationID, "IsManagerUserID false ", req.OpUserID)
-		return &pbUser.GetAllUserIDResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: constant.ErrAccess.ErrMsg}}, nil
-	}
-	uidList, err := imdb.SelectAllUserID()
-	if err != nil {
-		log.NewError(req.OperationID, "SelectAllUserID false ", err.Error())
-		return &pbUser.GetAllUserIDResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: constant.ErrDB.ErrMsg}}, nil
-	} else {
-		log.NewInfo(req.OperationID, "GetAllUserID rpc return ", pbUser.GetAllUserIDResp{CommonResp: &pbUser.CommonResp{}, UserIDList: uidList})
-		return &pbUser.GetAllUserIDResp{CommonResp: &pbUser.CommonResp{}, UserIDList: uidList}, nil
-	}
-}
-
-func (s *userServer) SyncJoinedGroupMemberFaceURL(userID string, faceURL string, operationID string, opUserID string) {
-	joinedGroupIDList, err := rocksCache.GetJoinedGroupIDListFromCache(userID)
-	if err != nil {
-		log.NewWarn(operationID, "GetJoinedGroupIDListByUserID failed ", userID, err.Error())
 		return
 	}
-	for _, groupID := range joinedGroupIDList {
-		groupMemberInfo := imdb.GroupMember{UserID: userID, GroupID: groupID, FaceURL: faceURL}
-		if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
-			continue
-		}
-		//if err := rocksCache.DelAllGroupMembersInfoFromCache(groupID); err != nil {
-		//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
-		//	continue
-		//}
-		if err := rocksCache.DelGroupMemberInfoFromCache(groupID, userID); err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID, userID)
-			continue
-		}
-		chat.GroupMemberInfoSetNotification(operationID, opUserID, groupID, userID)
-	}
-}
-
-func (s *userServer) SyncJoinedGroupMemberNickname(userID string, newNickname, oldNickname string, operationID string, opUserID string) {
-	joinedGroupIDList, err := imdb.GetJoinedGroupIDListByUserID(userID)
+	client := pbGroup.NewGroupClient(etcdConn)
+	newReq := &pbGroup.GetJoinedGroupListReq{FromUserID: userID}
+	rpcResp, err := client.GetJoinedGroupList(ctx, newReq)
 	if err != nil {
-		log.NewWarn(operationID, "GetJoinedGroupIDListByUserID failed ", userID, err.Error())
 		return
 	}
-	for _, v := range joinedGroupIDList {
-		member, err := imdb.GetGroupMemberInfoByGroupIDAndUserID(v, userID)
+
+	for _, group := range rpcResp.Groups {
+		req := &pbGroup.SetGroupMemberInfoReq{GroupID: group.GroupID, UserID: userID, FaceURL: &wrappers.StringValue{Value: faceURL}}
+		_, err := client.SetGroupMemberInfo(ctx, req)
 		if err != nil {
-			log.NewWarn(operationID, "GetGroupMemberInfoByGroupIDAndUserID failed ", err.Error(), v, userID)
-			continue
+			return
 		}
-		if member.Nickname == oldNickname {
-			groupMemberInfo := imdb.GroupMember{UserID: userID, GroupID: v, Nickname: newNickname}
-			if err := imdb.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupMemberInfo)
-				continue
-			}
-			//if err := rocksCache.DelAllGroupMembersInfoFromCache(v); err != nil {
-			//	log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
-			//	continue
-			//}
-			if err := rocksCache.DelGroupMemberInfoFromCache(v, userID); err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), v)
-			}
-			chat.GroupMemberInfoSetNotification(operationID, opUserID, v, userID)
-		}
+		chat.GroupMemberInfoSetNotification(operationID, opUserID, group.GroupID, userID)
 	}
 }
 
-func (s *userServer) AddUser(ctx context.Context, req *pbUser.AddUserReq) (*pbUser.AddUserResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbUser.AddUserResp{CommonResp: &pbUser.CommonResp{}}
-	err := imdb.AddUser(req.UserInfo.UserID, req.UserInfo.PhoneNumber, req.UserInfo.Nickname, req.UserInfo.Email, req.UserInfo.Gender, req.UserInfo.FaceURL, req.UserInfo.BirthStr)
+func (s *userServer) SyncJoinedGroupMemberNickname(ctx context.Context, userID string, newNickname, oldNickname string, operationID string, opUserID string) {
+	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "AddUser", err.Error(), req.String())
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+		return
 	}
-	return resp, nil
+	client := pbGroup.NewGroupClient(etcdConn)
+	newReq := &pbGroup.GetJoinedGroupListReq{FromUserID: userID}
+	rpcResp, err := client.GetJoinedGroupList(ctx, newReq)
+	if err != nil {
+		return
+	}
+	req := pbGroup.GetUserInGroupMembersReq{UserID: userID}
+	for _, group := range rpcResp.Groups {
+		req.GroupIDs = append(req.GroupIDs, group.GroupID)
+	}
+	resp, err := client.GetUserInGroupMembers(ctx, &req)
+	if err != nil {
+		return
+	}
+	for _, v := range resp.Members {
+		if v.Nickname == oldNickname {
+			req := pbGroup.SetGroupMemberNicknameReq{Nickname: newNickname, GroupID: v.GroupID, UserID: v.UserID}
+			_, err := client.SetGroupMemberNickname(ctx, &req)
+			if err != nil {
+				return
+			}
+			chat.GroupMemberInfoSetNotification(operationID, opUserID, v.GroupID, userID)
+		}
+	}
 }
 
 func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoReq) (*pbUser.GetUsersInfoResp, error) {
@@ -447,7 +188,6 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-
 	oldNickname := ""
 	if req.UserInfo.Nickname != "" {
 		u, err := s.Take(ctx, req.UserInfo.UserID)
@@ -456,7 +196,6 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		}
 		oldNickname = u.Nickname
 	}
-
 	user, err := utils2.NewPBUser(req.UserInfo).Convert()
 	if err != nil {
 		return nil, err
@@ -469,36 +208,26 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-
 	client := pbFriend.NewFriendClient(etcdConn)
-	newReq := &pbFriend.GetFriendListReq{
-		CommID: &pbFriend.CommID{OperationID: req.OperationID, FromUserID: req.UserInfo.UserID, OpUserID: req.OpUserID},
-	}
-
+	newReq := &pbFriend.GetFriendListReq{UserID: req.UserInfo.UserID}
 	rpcResp, err := client.GetFriendList(context.Background(), newReq)
 	if err != nil {
-		log.NewError(req.OperationID, "GetFriendList failed ", err.Error(), newReq)
-		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: 500, ErrMsg: err.Error()}}, nil
+		return nil, err
 	}
-	for _, v := range rpcResp.FriendInfoList {
-		log.Info(req.OperationID, "UserInfoUpdatedNotification ", req.UserInfo.UserID, v.FriendUser.UserID)
-		//	chat.UserInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID, v.FriendUser.UserID)
-		chat.FriendInfoUpdatedNotification(req.OperationID, req.UserInfo.UserID, v.FriendUser.UserID, req.OpUserID)
-	}
-	if err := rocksCache.DelUserInfoFromCache(user.UserID); err != nil {
-		log.NewError(req.OperationID, "GetFriendList failed ", err.Error(), newReq)
-		return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
-	}
-	//chat.UserInfoUpdatedNotification(req.OperationID, req.OpUserID, req.UserInfo.UserID)
-	chat.UserInfoUpdatedNotification(req.OperationID, req.OpUserID, req.UserInfo.UserID)
-	log.Info(req.OperationID, "UserInfoUpdatedNotification ", req.UserInfo.UserID, req.OpUserID)
+	go func() {
+		for _, v := range rpcResp.FriendInfoList {
+			chat.FriendInfoUpdatedNotification(tools.OperationID(ctx), req.UserInfo.UserID, v.FriendUser.UserID, tools.OpUserID(ctx))
+		}
+	}()
+
+	chat.UserInfoUpdatedNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.UserInfo.UserID)
 	if req.UserInfo.FaceURL != "" {
-		s.SyncJoinedGroupMemberFaceURL(req.UserInfo.UserID, req.UserInfo.FaceURL, req.OperationID, req.OpUserID)
+		s.SyncJoinedGroupMemberFaceURL(ctx, req.UserInfo.UserID, req.UserInfo.FaceURL, tools.OperationID(ctx), tools.OpUserID(ctx))
 	}
 	if req.UserInfo.Nickname != "" {
-		s.SyncJoinedGroupMemberNickname(req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, req.OperationID, req.OpUserID)
+		s.SyncJoinedGroupMemberNickname(ctx, req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, tools.OperationID(ctx), tools.OpUserID(ctx))
 	}
-	return &pbUser.UpdateUserInfoResp{CommonResp: &pbUser.CommonResp{}}, nil
+	return &resp, nil
 }
 
 func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (*pbUser.SetGlobalRecvMessageOptResp, error) {
@@ -559,74 +288,48 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	}
 
 	if req.UserName != "" {
-		usersDB, err = imdb.GetUserByName(req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		usersDB, total, err := s.GetByName(ctx, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
-			return resp, nil
+			return nil, err
 		}
-		resp.TotalNums, err = imdb.GetUsersCount(req.UserName)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.UserName, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
+		resp.Total = int32(total)
+		for _, v := range usersDB {
+			u1, err := utils2.NewDBUser(v).Convert()
+			if err != nil {
+				return nil, err
+			}
+			resp.Users = append(resp.Users, u1)
 		}
-
+		return &resp, nil
 	} else if req.Content != "" {
-		var count int64
-		usersDB, count, err = imdb.GetUsersByNameAndID(req.Content, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		usersDB, total, err := s.GetByNameAndID(ctx, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
+			return nil, err
 		}
-		resp.TotalNums = int32(count)
+		resp.Total = int32(total)
+		for _, v := range usersDB {
+			u1, err := utils2.NewDBUser(v).Convert()
+			if err != nil {
+				return nil, err
+			}
+			resp.Users = append(resp.Users, u1)
+		}
+		return &resp, nil
 	}
 
-	else {
-		usersDB, err = imdb.GetUsers(req.Pagination.ShowNumber, req.Pagination.PageNumber)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetUsers failed", req.Pagination.ShowNumber, req.Pagination.PageNumber, err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-		resp.TotalNums, err = imdb.GetTotalUserNum()
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-			resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-			resp.CommonResp.ErrMsg = err.Error()
-			return resp, nil
-		}
-	}
-	for _, userDB := range usersDB {
-		var user sdkws.UserInfo
-		utils.CopyStructFields(&user, userDB)
-		user.CreateTime = uint32(userDB.CreateTime.Unix())
-		user.BirthStr = utils.TimeToString(userDB.Birth)
-		resp.UserList = append(resp.UserList, &pbUser.CmsUser{User: &user})
-	}
-
-	var userIDList []string
-	for _, v := range resp.UserList {
-		userIDList = append(userIDList, v.User.UserID)
-	}
-	isBlockUser, err := imdb.UsersIsBlock(userIDList)
+	usersDB, total, err := s.Get(ctx, req.Pagination.ShowNumber, req.Pagination.PageNumber)
 	if err != nil {
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error(), userIDList)
-		resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		resp.CommonResp.ErrMsg = err.Error()
-		return resp, nil
+		return nil, err
 	}
 
-	for _, v := range resp.UserList {
-		if utils.IsContain(v.User.UserID, isBlockUser) {
-			v.IsBlock = true
+	resp.Total = int32(total)
+
+	for _, userDB := range usersDB {
+		u, err := utils2.NewDBUser(userDB).Convert()
+		if err != nil {
+			return nil, err
 		}
+		resp.Users = append(resp.Users, u)
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
-	return resp, nil
+	return &resp, nil
 }
