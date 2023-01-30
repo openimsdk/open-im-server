@@ -1,8 +1,8 @@
 package main
 
 import (
+	mongoUtils "Open_IM/cmdutils/mongo"
 	"Open_IM/pkg/common/config"
-	mongo2 "Open_IM/test/mongo"
 	"context"
 	"flag"
 	"fmt"
@@ -26,11 +26,11 @@ func init() {
 		}
 	}
 	var err error
-	mongo2.Client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	mongoUtils.Client, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		panic(err)
 	}
-	err = mongo2.Client.Ping(context.TODO(), nil)
+	err = mongoUtils.Client.Ping(context.TODO(), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -41,5 +41,5 @@ func main() {
 	userID := flag.String("userID", "", "userID")
 	flag.Parse()
 	fmt.Println("userID:", *userID)
-	mongo2.GetUserAllChat(*userID)
+	mongoUtils.GetUserAllChat(*userID)
 }

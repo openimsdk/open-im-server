@@ -1,4 +1,4 @@
-package callback
+package utils
 
 import (
 	"Open_IM/pkg/common/constant"
