@@ -37,35 +37,35 @@ func (GroupRequest) TableName() string {
 
 func (*GroupRequest) Create(ctx context.Context, groupRequests []*GroupRequest) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests)
 	}()
 	return utils.Wrap(GroupRequestDB.Create(&groupRequests).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) Delete(ctx context.Context, groupRequests []*GroupRequest) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests)
 	}()
 	return utils.Wrap(GroupRequestDB.Delete(&groupRequests).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) UpdateByMap(ctx context.Context, groupID string, userID string, args map[string]interface{}) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
 	}()
 	return utils.Wrap(GroupRequestDB.Where("group_id = ? and user_id = ? ", groupID, userID).Updates(args).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) Update(ctx context.Context, groupRequests []*GroupRequest) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests)
 	}()
 	return utils.Wrap(GroupRequestDB.Updates(&groupRequests).Error, utils.GetSelfFuncName())
 }
 
 func (*GroupRequest) Find(ctx context.Context, groupRequests []*GroupRequest) (resultGroupRequests []*GroupRequest, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests, "resultGroupRequests", resultGroupRequests)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupRequests", groupRequests, "resultGroupRequests", resultGroupRequests)
 	}()
 	var where [][]interface{}
 	for _, groupMember := range groupRequests {
@@ -77,7 +77,7 @@ func (*GroupRequest) Find(ctx context.Context, groupRequests []*GroupRequest) (r
 func (*GroupRequest) Take(ctx context.Context, groupID string, userID string) (groupRequest *GroupRequest, err error) {
 	groupRequest = &GroupRequest{}
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupRequest", *groupRequest)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupRequest", *groupRequest)
 	}()
 	return groupRequest, utils.Wrap(GroupRequestDB.Where("group_id = ? and user_id = ? ", groupID, userID).Take(groupRequest).Error, utils.GetSelfFuncName())
 }

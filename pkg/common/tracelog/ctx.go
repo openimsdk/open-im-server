@@ -1,4 +1,4 @@
-package trace_log
+package tracelog
 
 import (
 	"Open_IM/pkg/common/constant"

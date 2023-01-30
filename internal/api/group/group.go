@@ -996,15 +996,15 @@ func MuteGroupMember(c *gin.Context) {
 // @Failure 400 {object} api.Swagger400Resp "errCode为400 一般为参数输入错误, token未带上等"
 // @Router /group/cancel_mute_group_member [post]
 func CancelMuteGroupMember(c *gin.Context) {
-	nCtx := trace_log.NewCtx(c, utils.GetSelfFuncName())
+	nCtx := tracelog.NewCtx(c, utils.GetSelfFuncName())
 	defer log.ShowLog(c)
 
 	params := api.CancelMuteGroupMemberReq{}
 	if err := c.BindJSON(&params); err != nil {
-		trace_log.WriteErrorResponse(nCtx, "BindJSON", err)
+		tracelog.WriteErrorResponse(nCtx, "BindJSON", err)
 		return
 	}
-	trace_log.SetCtxInfo(nCtx, "BindJSON", nil, "params", params)
+	tracelog.SetCtxInfo(nCtx, "BindJSON", nil, "params", params)
 	req := &rpc.CancelMuteGroupMemberReq{}
 	utils.CopyStructFields(req, &params)
 
@@ -1013,18 +1013,18 @@ func CancelMuteGroupMember(c *gin.Context) {
 	//	trace_log.WriteErrorResponse(nCtx, "ParseUserIDFromToken", err)
 	//	return
 	//}
-	trace_log.SetCtxInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
+	tracelog.SetCtxInfo(nCtx, "ParseUserIDFromToken", nil, "token", c.Request.Header.Get("token"), "OpUserID", req.OpUserID)
 
 	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 
 	client := rpc.NewGroupClient(etcdConn)
 	reply, err := client.CancelMuteGroupMember(nCtx, req)
 	if err != nil {
-		trace_log.WriteErrorResponse(nCtx, "CancelMuteGroupMember", err)
+		tracelog.WriteErrorResponse(nCtx, "CancelMuteGroupMember", err)
 		return
 	}
 
-	trace_log.SetCtxInfo(nCtx, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
+	tracelog.SetCtxInfo(nCtx, "CancelMuteGroupMember", nil, "req", req.String(), "resp", reply.String())
 	resp := api.CancelMuteGroupMemberResp{CommResp: api.CommResp{ErrCode: reply.CommonResp.ErrCode, ErrMsg: reply.CommonResp.ErrMsg}}
 	c.JSON(http.StatusOK, resp)
 }

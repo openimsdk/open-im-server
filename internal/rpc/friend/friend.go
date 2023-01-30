@@ -247,7 +247,7 @@ func (s *friendServer) AddFriendResponse(ctx context.Context, req *pbFriend.AddF
 	} else if req.HandleResult == constant.FriendResponseRefuse {
 		chat.FriendApplicationRejectedNotification(req)
 	} else {
-		trace_log.SetCtxInfo(ctx, utils.GetSelfFuncName(), nil, "handleResult", req.HandleResult)
+		tracelog.SetCtxInfo(ctx, utils.GetSelfFuncName(), nil, "handleResult", req.HandleResult)
 	}
 	return resp, nil
 }

@@ -34,7 +34,7 @@ func NewUserDB(db *gorm.DB) *User {
 
 func (u *User) Create(ctx context.Context, users []*User) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
 	err = utils.Wrap(u.DB.Create(&users).Error, "")
 	return err
@@ -42,21 +42,21 @@ func (u *User) Create(ctx context.Context, users []*User) (err error) {
 
 func (u *User) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "args", args)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "args", args)
 	}()
 	return utils.Wrap(u.DB.Where("user_id = ?", userID).Updates(args).Error, "")
 }
 
 func (u *User) Update(ctx context.Context, users []*User) (err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
 	return utils.Wrap(u.DB.Updates(&users).Error, "")
 }
 
 func (u *User) Find(ctx context.Context, userIDs []string) (users []*User, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
 	}()
 	err = utils.Wrap(u.DB.Where("user_id in (?)", userIDs).Find(&users).Error, "")
 	return users, err
@@ -65,7 +65,7 @@ func (u *User) Find(ctx context.Context, userIDs []string) (users []*User, err e
 func (u *User) Take(ctx context.Context, userID string) (user *User, err error) {
 	user = &User{}
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "user", *user)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "user", *user)
 	}()
 	err = utils.Wrap(u.DB.Where("user_id = ?", userID).Take(&user).Error, "")
 	return user, err
@@ -73,7 +73,7 @@ func (u *User) Take(ctx context.Context, userID string) (user *User, err error) 
 
 func (u *User) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*User, err error) {
 	defer func() {
-		trace_log.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users)
 	}()
 	err = u.DB.Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1))).Find(&users).Error
 	return users, utils.Wrap(err, "")

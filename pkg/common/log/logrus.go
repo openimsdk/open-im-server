@@ -237,8 +237,8 @@ func NewWarn(OperationID string, args ...interface{}) {
 }
 
 func ShowLog(ctx context.Context) {
-	t := ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo)
-	OperationID := trace_log.GetOperationID(ctx)
+	t := ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo)
+	OperationID := tracelog.GetOperationID(ctx)
 	//if ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo).GinCtx != nil {
 	//	ctxLogger.WithFields(logrus.Fields{
 	//		"OperationID": OperationID,
@@ -284,8 +284,8 @@ func ShowLog(ctx context.Context) {
 }
 
 func InfoWithCtx(ctx context.Context, args ...interface{}) {
-	t := ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo)
-	OperationID := trace_log.GetOperationID(ctx)
+	t := ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo)
+	OperationID := tracelog.GetOperationID(ctx)
 	for _, v := range *t.Funcs {
 		logger.WithFields(logrus.Fields{
 			"OperationID": OperationID,
@@ -295,8 +295,8 @@ func InfoWithCtx(ctx context.Context, args ...interface{}) {
 }
 
 func DebugWithCtx(ctx context.Context, args ...interface{}) {
-	t := ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo)
-	OperationID := trace_log.GetOperationID(ctx)
+	t := ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo)
+	OperationID := tracelog.GetOperationID(ctx)
 	for _, v := range *t.Funcs {
 		logger.WithFields(logrus.Fields{
 			"OperationID": OperationID,
@@ -306,8 +306,8 @@ func DebugWithCtx(ctx context.Context, args ...interface{}) {
 }
 
 func ErrorWithCtx(ctx context.Context, args ...interface{}) {
-	t := ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo)
-	OperationID := trace_log.GetOperationID(ctx)
+	t := ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo)
+	OperationID := tracelog.GetOperationID(ctx)
 	for _, v := range *t.Funcs {
 		if v.Err != nil {
 			logger.WithFields(logrus.Fields{
@@ -319,8 +319,8 @@ func ErrorWithCtx(ctx context.Context, args ...interface{}) {
 }
 
 func WarnWithCtx(ctx context.Context, args ...interface{}) {
-	t := ctx.Value(trace_log.TraceLogKey).(*trace_log.ApiInfo)
-	OperationID := trace_log.GetOperationID(ctx)
+	t := ctx.Value(tracelog.TraceLogKey).(*tracelog.ApiInfo)
+	OperationID := tracelog.GetOperationID(ctx)
 	for _, v := range *t.Funcs {
 		logger.WithFields(logrus.Fields{
 			"OperationID": OperationID,
