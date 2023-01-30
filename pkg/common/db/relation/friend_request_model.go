@@ -25,7 +25,7 @@ type FriendRequest struct {
 
 func NewFriendRequest(db *gorm.DB) *FriendRequest {
 	var fr FriendRequest
-	fr.DB = initModel(db, &fr)
+	fr.DB = db
 	return &fr
 }
 

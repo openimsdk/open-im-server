@@ -20,7 +20,7 @@ type Black struct {
 
 func NewBlack(db *gorm.DB) *Black {
 	var black Black
-	black.DB = initModel(db, &black)
+	black.DB = db
 	return &black
 }
 
