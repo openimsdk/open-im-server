@@ -1,4 +1,4 @@
-package utils
+package convert
 
 import (
 	"Open_IM/pkg/common/db/relation"
@@ -34,14 +34,14 @@ func NewPBFriend(friendInfo *sdk.FriendInfo) *PBFriend {
 	return &PBFriend{FriendInfo: friendInfo}
 }
 
-func (db *DBFriend) convert() (*sdk.FriendInfo, error) {
+func (db *DBFriend) Convert() (*sdk.FriendInfo, error) {
 	pbFriend := &sdk.FriendInfo{FriendUser: &sdk.UserInfo{}}
 	utils.CopyStructFields(pbFriend, db)
 	user, err := getUsersInfo([]string{db.FriendUserID})
 	if err != nil {
 		return nil, err
 	}
-	CopyStructFields(pbFriend.FriendUser, user[0])
+	utils.CopyStructFields(pbFriend.FriendUser, user[0])
 	pbFriend.CreateTime = db.CreateTime.Unix()
 
 	pbFriend.FriendUser.CreateTime = db.CreateTime.Unix()
@@ -50,9 +50,9 @@ func (db *DBFriend) convert() (*sdk.FriendInfo, error) {
 
 func (pb *PBFriend) Convert() (*relation.Friend, error) {
 	dbFriend := &relation.Friend{}
-	CopyStructFields(dbFriend, pb)
+	utils.CopyStructFields(dbFriend, pb)
 	dbFriend.FriendUserID = pb.FriendUser.UserID
-	dbFriend.CreateTime = UnixSecondToTime(pb.CreateTime)
+	dbFriend.CreateTime = utils.UnixSecondToTime(pb.CreateTime)
 	return dbFriend, nil
 }
 
@@ -126,7 +126,7 @@ func (pb *PBBlack) Convert() (*relation.Black, error) {
 func (db *DBBlack) Convert() (*sdk.BlackInfo, error) {
 	pbBlack := &sdk.BlackInfo{}
 	utils.CopyStructFields(pbBlack, db)
-	pbBlack.CreateTime = uint32(db.CreateTime.Unix())
+	pbBlack.CreateTime = db.CreateTime.Unix()
 	user, err := getUsersInfo([]string{db.BlockUserID})
 	if err != nil {
 		return nil, err
@@ -248,8 +248,8 @@ func (pb *PBGroupRequest) Convert() (*relation.GroupRequest, error) {
 func (db *DBGroupRequest) Convert() (*sdk.GroupRequest, error) {
 	dst := &sdk.GroupRequest{}
 	utils.CopyStructFields(dst, db)
-	dst.ReqTime = uint32(db.ReqTime.Unix())
-	dst.HandleTime = uint32(db.HandledTime.Unix())
+	dst.ReqTime = db.ReqTime.Unix()
+	dst.HandleTime = db.HandledTime.Unix()
 	return dst, nil
 }
 
