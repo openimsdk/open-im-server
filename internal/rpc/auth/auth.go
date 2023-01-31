@@ -29,12 +29,12 @@ func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbA
 	if _, err := check.GetUsersInfo(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	token, expTime, err := token_verify.CreateToken(req.UserID, int(req.PlatformID))
+	token, err := s.CreateToken(ctx, req.UserID, int(req.PlatformID), config.Config.TokenPolicy.AccessExpire)
 	if err != nil {
 		return nil, err
 	}
 	resp.Token = token
-	resp.ExpireTimeSeconds = expTime
+	resp.ExpireTimeSeconds = config.Config.TokenPolicy.AccessExpire
 	return &resp, nil
 }
 
@@ -75,7 +75,7 @@ func (s *rpcAuth) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (*p
 
 func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
 	resp := pbAuth.ForceLogoutResp{}
-	if err := token_verify.CheckManagerUserID(ctx, tracelog.GetOpUserID(ctx)); err != nil {
+	if err := token_verify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
 	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, tracelog.GetOperationID(ctx)); err != nil {
