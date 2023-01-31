@@ -1265,7 +1265,6 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 
 func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.SetGroupMemberNicknameReq) (*pbGroup.SetGroupMemberNicknameResp, error) {
 	resp := &pbGroup.SetGroupMemberNicknameResp{}
-
 	if utils.OpUserID(ctx) != req.UserID && !token_verify.IsManagerUserID(utils.OpUserID(ctx)) {
 		return nil, utils.Wrap(constant.ErrIdentity, "")
 	}

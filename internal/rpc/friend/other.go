@@ -13,9 +13,6 @@ func GetPublicUserInfoBatch(ctx context.Context, userIDs []string) ([]*server_ap
 	return nil, errors.New("TODO:GetUserInfo")
 }
 
-func GetUsersInfo(ctx context.Context, userIDs []string) ([]*server_api_params.UserInfo, error) {
-	if len(userIDs) == 0 {
-		return []*server_api_params.UserInfo{}, nil
-	}
+func GetUsersInfo(ctx context.Context, args ...interface{}) ([]*server_api_params.UserInfo, error) {
 	return nil, errors.New("TODO:GetUserInfo")
 }

@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
+	"Open_IM/pkg/common/tracelog"
 
 	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/log"
@@ -114,12 +115,12 @@ func (s *friendServer) Run() {
 	}
 }
 
-func (s *friendServer) AddBlacklist(ctx context.Context, req *pbFriend.AddBlacklistReq) (*pbFriend.AddBlacklistResp, error) {
-	resp := &pbFriend.AddBlacklistResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) (*pbFriend.AddBlackResp, error) {
+	resp := &pbFriend.AddBlackResp{}
+	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	black := relation.Black{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID, OperatorUserID: tools.OpUserID(ctx)}
+	black := relation.Black{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.OpUserID(ctx)}
 	if err := s.BlackInterface.Create(ctx, []*relation.Black{&black}); err != nil {
 		return nil, err
 	}
@@ -136,10 +137,11 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 		return nil, err
 	}
 
-	//检查toUserID是否存在
-	if _, err := GetUsersInfo(ctx, []string{req.ToUserID}); err != nil {
+	//检查toUserID fromUserID是否存在
+	if _, err := GetUsersInfo(ctx, req.ToUserID, req.FromUserID); err != nil {
 		return nil, err
 	}
+
 	//from是否在to的好友列表里面
 	err, in1, in2 := s.FriendInterface.CheckIn(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
@@ -160,7 +162,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	if err := token_verify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := GetUsersInfo(ctx, []string{req.OwnerUserID}); err != nil {
+	if _, err := GetUsersInfo(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 
@@ -177,12 +179,11 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 }
 
 // process Friend application
-func (s *friendServer) friendApplyResponse(ctx context.Context, req *pbFriend.FriendApplyResponseReq) (*pbFriend.FriendApplyResponseResp, error) {
-	resp := &pbFriend.FriendApplyResponseResp{}
+func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.RespondFriendApplyReq) (*pbFriend.RespondFriendApplyResp, error) {
+	resp := &pbFriend.RespondFriendApplyResp{}
 	if err := token_verify.CheckAccessV3(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
-
 	friendRequest := relation.FriendRequest{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
 	if req.HandleResult == constant.FriendResponseAgree {
 		err := s.AgreeFriendRequest(ctx, &friendRequest)
@@ -205,10 +206,10 @@ func (s *friendServer) friendApplyResponse(ctx context.Context, req *pbFriend.Fr
 
 func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFriendReq) (*pbFriend.DeleteFriendResp, error) {
 	resp := &pbFriend.DeleteFriendResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	if err := s.FriendInterface.Delete(ctx, req.FromUserID, req.ToUserID); err != nil {
+	if err := s.FriendInterface.Delete(ctx, req.OwnerUserID, req.FriendUserID); err != nil {
 		return nil, err
 	}
 	chat.FriendDeletedNotification(req)
@@ -217,17 +218,17 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFriendRemarkReq) (*pbFriend.SetFriendRemarkResp, error) {
 	resp := &pbFriend.SetFriendRemarkResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	if err := s.FriendInterface.UpdateRemark(ctx, req.FromUserID, req.ToUserID, req.Remark); err != nil {
+	if err := s.FriendInterface.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
 		return nil, err
 	}
-	chat.FriendRemarkSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.FromUserID, req.ToUserID)
+	chat.FriendRemarkSetNotification(tools.OperationID(ctx), tools.OpUserID(ctx), req.OwnerUserID, req.FriendUserID)
 	return resp, nil
 }
 
-func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.RemoveBlacklistReq) (*pbFriend.RemoveBlacklistResp, error) {
+func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.RemoveBlackReq) (*pbFriend.RemoveBlackResp, error) {
 	resp := &pbFriend.RemoveBlacklistResp{}
 	//Parse token, to find current user information
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {

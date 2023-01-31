@@ -64,7 +64,7 @@ message removeBlackReq{
   string ownerUserID = 1;
   string blackUserID = 2;
 }
-message removeBlackReqResp{
+message removeBlackResp{
 }
 
 message getBlacksReq{
@@ -141,7 +141,7 @@ service friend{
   //添加黑名单
   rpc addBlack(addBlackReq) returns(addBlackResp);
   //移除黑名单
-  rpc removeBlack(removeBlackReq) returns(removeBlackReqResp);
+  rpc removeBlack(removeBlackReq) returns(removeBlackResp);
   //判断是否好友关系
   rpc isFriend(isFriendReq) returns(isFriendResp);
   //判断是否在黑名单中
