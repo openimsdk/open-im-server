@@ -7,8 +7,8 @@ import (
 )
 
 type FriendInterface interface {
-	// CheckIn 检查fromUserID是否在toUserID的好友列表中(inTo==true) 检查toUserID是否在fromUserID的好友列表中(inFrom==true)
-	CheckIn(ctx context.Context, fromUserID, toUserID string) (err error, inTo bool, inFrom bool)
+	// CheckIn 检查user2是否在user1的好友列表中(inUser1Friends==true) 检查user1是否在user2的好友列表中(inUser2Friends==true)
+	CheckIn(ctx context.Context, user1, user2 string) (err error, inUser1Friends bool, inUser2Friends bool)
 	// AddFriendRequest 增加或者更新好友申请
 	AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error)
 	// 先判断是否在好友表，如果在则不插入

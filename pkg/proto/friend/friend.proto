@@ -72,26 +72,28 @@ message getBlacksReq{
   server_api_params.RequestPagination pagination = 2;
 }
 message getBlacksResp{
-  repeated server_api_params.PublicUserInfo blackUsersInfo= 1;
+  repeated server_api_params.BlackInfo blacks= 1;
   int32 total = 2;
 }
 
 
 message isFriendReq{
-  string ownerUserID = 1;
-  string friendUserID = 2;
+  string userID1 = 1;
+  string userID2 = 2;
 }
 message isFriendResp{
-  bool response = 1;
+  bool inUser1Friends = 1; //如果userID2在userID1的好友列表中 true
+  bool inUser2Friends = 2; //如果userID1在userID2的好友列表中 true
 }
 
 
 message isBlackReq{
-  string ownerUserID = 1;
-  string blackUserID = 2;
+  string userID1 = 1;
+  string userID2 = 2;
 }
 message isBlackResp{
-  bool response = 1;
+  bool inUser1Blacks = 1; //如果userID2在userID1的黑名单列表中 true
+  bool inUser2Blacks = 2; //如果userID1在userID2的黑名单列表中 true
 }
 
 

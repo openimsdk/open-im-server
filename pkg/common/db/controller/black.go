@@ -13,7 +13,10 @@ type BlackInterface interface {
 	Update(ctx context.Context, blacks []*relation.Black) (err error)
 	Find(ctx context.Context, blacks []*relation.Black) (blackList []*relation.Black, err error)
 	Take(ctx context.Context, ownerUserID, blockUserID string) (black *relation.Black, err error)
-	FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*relation.Black, err error)
+
+	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blackList []*relation.Black, err error)
+	// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
+	CheckIn(ctx context.Context, ownerUserID, blackUserID string) (inUser1Blacks bool, inUser2Blacks bool, err error)
 }
 
 type BlackController struct {
