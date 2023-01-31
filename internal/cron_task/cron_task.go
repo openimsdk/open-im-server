@@ -3,6 +3,7 @@ package cronTask
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	rocksCache "Open_IM/pkg/common/db/rocks_cache"
 	"Open_IM/pkg/common/log"
@@ -45,6 +46,9 @@ func StartCronTask(userID, workingGroupID string) {
 }
 
 type CronTask struct {
+	spec           string
+	groupInterface controller.GroupInterface
+	userInterface  controller.UserInterface
 }
 
 func getCronTaskOperationID() string {
