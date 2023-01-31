@@ -435,6 +435,11 @@ func (ws *WServer) getUserAllCons(uid string) map[int]*UserConn {
 //		}
 //		return "", 0
 //	}
+
+func WsVerifyToken(token, uid string, platformID string, operationID string) (bool, error, string) {
+
+}
+
 func (ws *WServer) headerCheck(w http.ResponseWriter, r *http.Request, operationID string) (isPass, compression bool) {
 	status := http.StatusUnauthorized
 	query := r.URL.Query()

@@ -3,63 +3,36 @@ import "Open-IM-Server/pkg/proto/sdk_ws/ws.proto";
 package pbAuth;
 option go_package = "Open_IM/pkg/proto/auth;pbAuth";
 
-message CommonResp{
-    int32   errCode = 1;
-    string  errMsg = 2;
+
+message userTokenReq {
+    int32  platformID = 1;
+    string userID = 2;
+}
+message userTokenResp {
+    string token = 2;
+    int64  expireTimeSeconds = 3;
 }
 
-message UserRegisterReq {
-    server_api_params.UserInfo UserInfo = 1;
-    string OperationID = 2;
+message forceLogoutReq {
+    int32  platformID = 1;
+    string userID = 2;
 }
-message UserRegisterResp {
-    CommonResp CommonResp = 1;
-}
-
-
-message UserTokenReq {
-    int32  Platform = 1;
-    string FromUserID = 2;
-    string OpUserID = 3;
-    string OperationID = 4;
-    string LoginIp = 5;
-}
-message UserTokenResp {
-    CommonResp CommonResp = 1;
-    string Token = 2;
-    int64  ExpiredTime = 3;
+message forceLogoutResp {
 }
 
-
-message ForceLogoutReq {
-    int32  Platform = 1;
-    string FromUserID = 2;
-    string OpUserID = 3;
-    string OperationID = 4;
-}
-message ForceLogoutResp {
-    CommonResp CommonResp = 1;
-}
-
-message ParseTokenReq{
+message parseTokenReq{
     string token = 1;
-    string operationID = 2;
 }
-
-
-message ParseTokenResp{
+message parseTokenResp{
     string userID = 1;
     string platform = 2;
-    CommonResp commonResp = 3;
-    uint32 expireTimeSeconds = 4;
+    int64 expireTimeSeconds = 4;
 }
 
-
 service Auth {
-    rpc UserRegister(UserRegisterReq) returns(UserRegisterResp);
-    rpc UserToken(UserTokenReq) returns(UserTokenResp);
-    rpc ForceLogout(ForceLogoutReq) returns(ForceLogoutResp);
-    rpc ParseToken(ParseTokenReq)returns(ParseTokenResp);
+    rpc userToken(userTokenReq) returns(userTokenResp);
+    rpc forceLogout(forceLogoutReq) returns(forceLogoutResp);
+    rpc parseToken(parseTokenReq)returns(parseTokenResp);
 }
 
 

@@ -124,10 +124,10 @@ message getUsersResp{
   repeated server_api_params.UserInfo users = 2;
 }
 
-message UserRegisterReq {
+message userRegisterReq {
   repeated server_api_params.UserInfo users = 1;
 }
-message UserRegisterResp {
+message userRegisterResp {
 }
 
 
@@ -144,5 +144,7 @@ service user {
   rpc accountCheck(accountCheckReq)returns(accountCheckResp);
   //翻页（或指定userID，昵称）拉取用户信息 全字段
   rpc getUsers(getUsersReq) returns (getUsersResp);
+  //用户注册
+  rpc userRegister(userRegisterReq) returns (userRegisterResp);
 }
 

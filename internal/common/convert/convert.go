@@ -269,6 +269,28 @@ func NewPBUser(userInfo *sdk.UserInfo) *PBUser {
 	return &PBUser{UserInfo: userInfo}
 }
 
+func (*PBUser) PB2DB(users []*sdk.UserInfo) (DBUsers []*relation.User, err error) {
+	for _, v := range users {
+		u, err := NewPBUser(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		DBUsers = append(DBUsers, u)
+	}
+	return
+}
+
+func (*DBUser) DB2PB(users []*relation.User) (PBUsers []*sdk.UserInfo, err error) {
+	for _, v := range users {
+		u, err := NewDBUser(v).Convert()
+		if err != nil {
+			return nil, err
+		}
+		PBUsers = append(PBUsers, u)
+	}
+	return
+}
+
 func (pb *PBUser) Convert() (*relation.User, error) {
 	dst := &relation.User{}
 	utils.CopyStructFields(dst, pb)

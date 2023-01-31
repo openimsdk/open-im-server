@@ -15,6 +15,8 @@ type UserInterface interface {
 	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
 	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
 	Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
+	//userIDs是否存在 只要有一个存在就为true
+	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
 
 type UserController struct {
