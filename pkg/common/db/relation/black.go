@@ -71,44 +71,14 @@ func (b *Black) Take(ctx context.Context, ownerUserID, blockUserID string) (blac
 	return black, utils.Wrap(b.DB.Where("owner_user_id = ? and block_user_id = ?", ownerUserID, blockUserID).Take(black).Error, "")
 }
 
-func (b *Black) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*Black, err error) {
+func (b *Black) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blacks []*Black, total int64, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blackList", blackList)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "blacks", blacks)
 	}()
-	return blackList, utils.Wrap(GroupMemberDB.Where("owner_user_id = ?", ownerUserID).Find(&blackList).Error, "")
-}
-
-func InsertInToUserBlackList(ctx context.Context, black Black) (err error) {
-	defer tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "black", black)
-	black.CreateTime = time.Now()
-	err = BlackDB.Create(black).Error
-	return err
-}
-
-func CheckBlack(ownerUserID, blockUserID string) error {
-	var black Black
-	return BlackDB.Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Find(&black).Error
-}
-
-func RemoveBlackList(ownerUserID, blockUserID string) error {
-	err := BlackDB.Where("owner_user_id=? and block_user_id=?", ownerUserID, blockUserID).Delete(Black{}).Error
-	return utils.Wrap(err, "RemoveBlackList failed")
-}
-
-func GetBlackListByUserID(ownerUserID string) ([]Black, error) {
-	var blackListUsersInfo []Black
-	err := BlackDB.Where("owner_user_id=?", ownerUserID).Find(&blackListUsersInfo).Error
+	err = b.DB.Model(b).Count(&total).Error
 	if err != nil {
-		return nil, err
+		return nil, 0, utils.Wrap(err, "")
 	}
-	return blackListUsersInfo, nil
-}
-
-func GetBlackIDListByUserID(ownerUserID string) ([]string, error) {
-	var blackIDList []string
-	err := b.db.Where("owner_user_id=?", ownerUserID).Pluck("block_user_id", &blackIDList).Error
-	if err != nil {
-		return nil, err
-	}
-	return blackIDList, nil
+	err = utils.Wrap(b.DB.Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&blacks).Error, "")
+	return
 }
