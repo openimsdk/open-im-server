@@ -12,7 +12,6 @@ import (
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
-	"Open_IM/pkg/common/tools"
 	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
@@ -23,6 +22,7 @@ import (
 	"strconv"
 	"strings"
 
+	"Open_IM/internal/common/check"
 	"google.golang.org/grpc"
 )
 
@@ -138,7 +138,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	}
 
 	//检查toUserID fromUserID是否存在
-	if _, err := GetUsersInfo(ctx, req.ToUserID, req.FromUserID); err != nil {
+	if _, err := check.GetUsersInfo(ctx, req.ToUserID, req.FromUserID); err != nil {
 		return nil, err
 	}
 
