@@ -181,7 +181,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 // process Friend application
 func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.RespondFriendApplyReq) (*pbFriend.RespondFriendApplyResp, error) {
 	resp := &pbFriend.RespondFriendApplyResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.ToUserID); err != nil {
+	if err := check.Access(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
 	friendRequest := relation.FriendRequest{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
@@ -206,7 +206,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 
 func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFriendReq) (*pbFriend.DeleteFriendResp, error) {
 	resp := &pbFriend.DeleteFriendResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	if err := s.FriendInterface.Delete(ctx, req.OwnerUserID, req.FriendUserID); err != nil {
@@ -218,7 +218,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 
 func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFriendRemarkReq) (*pbFriend.SetFriendRemarkResp, error) {
 	resp := &pbFriend.SetFriendRemarkResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
+	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 	if err := s.FriendInterface.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
@@ -228,25 +228,25 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 	return resp, nil
 }
 
-func (s *friendServer) RemoveBlacklist(ctx context.Context, req *pbFriend.RemoveBlackReq) (*pbFriend.RemoveBlackResp, error) {
-	resp := &pbFriend.RemoveBlacklistResp{}
+func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlackReq) (*pbFriend.RemoveBlackResp, error) {
+	resp := &pbFriend.RemoveBlackResp{}
 	//Parse token, to find current user information
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	if err := s.BlackInterface.Delete(ctx, []*relation.Black{{OwnerUserID: req.FromUserID, BlockUserID: req.ToUserID}}); err != nil {
+	if err := s.BlackInterface.Delete(ctx, []*relation.Black{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
 	chat.BlackDeletedNotification(req)
 	return resp, nil
 }
 
-func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFriendListReq) (*pbFriend.GetFriendListResp, error) {
-	resp := &pbFriend.GetFriendListResp{}
-	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
+func (s *friendServer) GetFriends(ctx context.Context, req *pbFriend.GetFriendsReq) (*pbFriend.GetFriendsResp, error) {
+	resp := &pbFriend.GetFriendsResp{}
+	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friends, err := s.FriendInterface.FindOwnerUserID(ctx, req.FromUserID)
+	friends, err := s.FriendInterface.FindOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +254,7 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 	for _, f := range friends {
 		userIDList = append(userIDList, f.FriendUserID)
 	}
-	users, err := GetUsersInfo(ctx, userIDList)
+	users, err := check.GetUsersInfo(ctx, userIDList)
 	if err != nil {
 		return nil, err
 	}
@@ -263,9 +263,12 @@ func (s *friendServer) GetFriendList(ctx context.Context, req *pbFriend.GetFrien
 		userMap[user.UserID] = users[i]
 	}
 	for _, friendUser := range friends {
-		friendUserInfo := sdkws.FriendInfo{FriendUser: userMap[friendUser.FriendUserID]}
-		utils.CopyStructFields(&friendUserInfo, friendUser)
-		resp.FriendInfoList = append(resp.FriendInfoList, &friendUserInfo)
+
+		friendUserInfo, err := (utils.NewDBFriend(friendUser)).Convert()
+		if err != nil {
+			return nil, err
+		}
+		resp.FriendsInfo = append(resp.FriendsInfo, friendUserInfo)
 	}
 	return resp, nil
 }

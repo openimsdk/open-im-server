@@ -22,8 +22,10 @@ type FriendInterface interface {
 	UpdateByMap(ctx context.Context, ownerUserID string, args map[string]interface{}) (err error)
 	Update(ctx context.Context, friends []*relation.Friend) (err error)
 	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error)
-	FindOwnerUserID(ctx context.Context, ownerUserID string) (friends []*relation.Friend, err error)
-	FindFriendUserID(ctx context.Context, friendUserID string) (friends []*relation.Friend, err error)
+	//获取ownerUserID的好友列表
+	FindOwnerFriends(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (friends []*relation.Friend, err error)
+	//friendUserID在哪些人的好友列表中
+	FindInWhoseFriends(ctx context.Context, friendUserID string, pageNumber, showNumber int32) (friends []*relation.Friend, err error)
 	Take(ctx context.Context, ownerUserID, friendUserID string) (friend *relation.Friend, err error)
 	FindUserState(ctx context.Context, userID1, userID2 string) (friends []*relation.Friend, err error)
 }
@@ -70,6 +72,7 @@ type FriendDatabaseInterface interface {
 	UpdateByMap(ctx context.Context, ownerUserID string, args map[string]interface{}) (err error)
 	Update(ctx context.Context, friends []*relation.Friend) (err error)
 	UpdateRemark(ctx context.Context, ownerUserID, friendUserID, remark string) (err error)
+
 	FindOwnerUserID(ctx context.Context, ownerUserID string) (friends []*relation.Friend, err error)
 	FindFriendUserID(ctx context.Context, friendUserID string) (friends []*relation.Friend, err error)
 	Take(ctx context.Context, ownerUserID, friendUserID string) (friend *relation.Friend, err error)
