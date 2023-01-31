@@ -7,13 +7,11 @@ import (
 )
 
 type BlackInterface interface {
+	// Create 增加黑名单
 	Create(ctx context.Context, blacks []*relation.Black) (err error)
+	// Delete 删除黑名单
 	Delete(ctx context.Context, blacks []*relation.Black) (err error)
-	UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error)
-	Update(ctx context.Context, blacks []*relation.Black) (err error)
-	Find(ctx context.Context, blacks []*relation.Black) (blackList []*relation.Black, err error)
-	Take(ctx context.Context, ownerUserID, blockUserID string) (black *relation.Black, err error)
-
+	// FindOwnerBlacks 获取黑名单列表
 	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blackList []*relation.Black, err error)
 	// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
 	CheckIn(ctx context.Context, ownerUserID, blackUserID string) (inUser1Blacks bool, inUser2Blacks bool, err error)
@@ -26,36 +24,33 @@ type BlackController struct {
 func NewBlackController(db *gorm.DB) *BlackController {
 	return &BlackController{database: NewBlackDatabase(db)}
 }
-func (f *BlackController) Create(ctx context.Context, blacks []*relation.Black) (err error) {
-	return f.database.Create(ctx, blacks)
+
+// Create 增加黑名单
+func (b *BlackController) Create(ctx context.Context, blacks []*relation.Black) (err error) {
 }
-func (f *BlackController) Delete(ctx context.Context, blacks []*relation.Black) (err error) {
-	return f.database.Delete(ctx, blacks)
+
+// Delete 删除黑名单
+func (b *BlackController) Delete(ctx context.Context, blacks []*relation.Black) (err error) {
 }
-func (f *BlackController) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error) {
-	return f.database.UpdateByMap(ctx, ownerUserID, blockUserID, args)
+
+// FindOwnerBlacks 获取黑名单列表
+func (b *BlackController) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blackList []*relation.Black, err error) {
 }
-func (f *BlackController) Update(ctx context.Context, blacks []*relation.Black) (err error) {
-	return f.database.Update(ctx, blacks)
-}
-func (f *BlackController) Find(ctx context.Context, blacks []*relation.Black) (blackList []*relation.Black, err error) {
-	return f.database.Find(ctx, blacks)
-}
-func (f *BlackController) Take(ctx context.Context, ownerUserID, blockUserID string) (black *relation.Black, err error) {
-	return f.database.Take(ctx, ownerUserID, blockUserID)
-}
-func (f *BlackController) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*relation.Black, err error) {
-	return f.database.FindByOwnerUserID(ctx, ownerUserID)
+
+// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
+func (b *BlackController) CheckIn(ctx context.Context, ownerUserID, blackUserID string) (inUser1Blacks bool, inUser2Blacks bool, err error) {
 }
 
 type BlackDatabaseInterface interface {
+	// Create 增加黑名单
 	Create(ctx context.Context, blacks []*relation.Black) (err error)
+	// Delete 删除黑名单
 	Delete(ctx context.Context, blacks []*relation.Black) (err error)
-	UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error)
-	Update(ctx context.Context, blacks []*relation.Black) (err error)
-	Find(ctx context.Context, blacks []*relation.Black) (blackList []*relation.Black, err error)
-	Take(ctx context.Context, ownerUserID, blockUserID string) (black *relation.Black, err error)
-	FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*relation.Black, err error)
+	// FindOwnerBlacks 获取黑名单列表
+	FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blackList []*relation.Black, err error)
+	// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
+	CheckIn(ctx context.Context, ownerUserID, blackUserID string) (inUser1Blacks bool, inUser2Blacks bool, err error)
+}
 }
 
 type BlackDatabase struct {
@@ -70,24 +65,18 @@ func NewBlackDatabase(db *gorm.DB) *BlackDatabase {
 	return database
 }
 
-func (f *BlackDatabase) Create(ctx context.Context, blacks []*relation.Black) (err error) {
-	return f.sqlDB.Create(ctx, blacks)
+// Create 增加黑名单
+func (b *BlackDatabase) Create(ctx context.Context, blacks []*relation.Black) (err error) {
 }
-func (f *BlackDatabase) Delete(ctx context.Context, blacks []*relation.Black) (err error) {
-	return f.sqlDB.Delete(ctx, blacks)
+
+// Delete 删除黑名单
+func (b *BlackDatabase) Delete(ctx context.Context, blacks []*relation.Black) (err error) {
 }
-func (f *BlackDatabase) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error) {
-	return f.sqlDB.UpdateByMap(ctx, ownerUserID, blockUserID, args)
+
+// FindOwnerBlacks 获取黑名单列表
+func (b *BlackDatabase) FindOwnerBlacks(ctx context.Context, ownerUserID string, pageNumber, showNumber int32) (blackList []*relation.Black, err error) {
 }
-func (f *BlackDatabase) Update(ctx context.Context, blacks []*relation.Black) (err error) {
-	return f.sqlDB.Update(ctx, blacks)
-}
-func (f *BlackDatabase) Find(ctx context.Context, blacks []*relation.Black) (blackList []*relation.Black, err error) {
-	return f.sqlDB.Find(ctx, blacks)
-}
-func (f *BlackDatabase) Take(ctx context.Context, ownerUserID, blockUserID string) (black *relation.Black, err error) {
-	return f.sqlDB.Take(ctx, ownerUserID, blockUserID)
-}
-func (f *BlackDatabase) FindByOwnerUserID(ctx context.Context, ownerUserID string) (blackList []*relation.Black, err error) {
-	return f.sqlDB.FindByOwnerUserID(ctx, ownerUserID)
+
+// CheckIn 检查user2是否在user1的黑名单列表中(inUser1Blacks==true) 检查user1是否在user2的黑名单列表中(inUser2Blacks==true)
+func (b *BlackDatabase) CheckIn(ctx context.Context, ownerUserID, blackUserID string) (inUser1Blacks bool, inUser2Blacks bool, err error) {
 }

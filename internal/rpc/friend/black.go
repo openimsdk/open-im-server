@@ -6,6 +6,7 @@ import (
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
 	"context"
 )
@@ -25,7 +26,7 @@ func (s *friendServer) GetBlacks(ctx context.Context, req *pbFriend.GetBlacksReq
 		if err != nil {
 			return nil, err
 		}
-		resp.BlackUsersInfo = append(resp.BlackUsersInfo, b)
+		resp.Blacks = append(resp.Blacks, b)
 		blackIDList = append(blackIDList, black.BlockUserID)
 	}
 	return resp, nil
@@ -33,7 +34,6 @@ func (s *friendServer) GetBlacks(ctx context.Context, req *pbFriend.GetBlacksReq
 
 func (s *friendServer) IsBlack(ctx context.Context, req *pbFriend.IsBlackReq) (*pbFriend.IsBlackResp, error) {
 	resp := &pbFriend.IsBlackResp{}
-
 	in1, in2, err := s.BlackInterface.CheckIn(ctx, req.UserID1, req.UserID2)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,6 @@ func (s *friendServer) IsBlack(ctx context.Context, req *pbFriend.IsBlackReq) (*
 
 func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlackReq) (*pbFriend.RemoveBlackResp, error) {
 	resp := &pbFriend.RemoveBlackResp{}
-	//Parse token, to find current user information
 	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
@@ -61,7 +60,7 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	black := relation.Black{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.OpUserID(ctx)}
+	black := relation.Black{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.GetOpUserID(ctx)}
 	if err := s.BlackInterface.Create(ctx, []*relation.Black{&black}); err != nil {
 		return nil, err
 	}
