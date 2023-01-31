@@ -16,7 +16,7 @@ func (s *friendServer) GetBlacks(ctx context.Context, req *pbFriend.GetBlacksReq
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	blacks, err := s.BlackInterface.FindOwnerBlacks(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	blacks, total, err := s.BlackInterface.FindOwnerBlacks(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -29,6 +29,7 @@ func (s *friendServer) GetBlacks(ctx context.Context, req *pbFriend.GetBlacksReq
 		resp.Blacks = append(resp.Blacks, b)
 		blackIDList = append(blackIDList, black.BlockUserID)
 	}
+	resp.Total = int32(total)
 	return resp, nil
 }
 

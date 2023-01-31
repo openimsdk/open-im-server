@@ -190,11 +190,11 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	oldNickname := ""
 	if req.UserInfo.Nickname != "" {
-		u, err := s.Take(ctx, req.UserInfo.UserID)
+		u, err := s.Find(ctx, []string{req.UserInfo.UserID})
 		if err != nil {
 			return nil, err
 		}
-		oldNickname = u.Nickname
+		oldNickname = u[0].Nickname
 	}
 	user, err := convert.NewPBUser(req.UserInfo).Convert()
 	if err != nil {
@@ -274,12 +274,12 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	resp := pbUser.GetUsersResp{}
 	var err error
 	if req.UserID != "" {
-		u, err := s.Take(ctx, req.UserID)
+		u, err := s.Find(ctx, []string{req.UserID})
 		if err != nil {
 			return nil, err
 		}
 		resp.Total = 1
-		u1, err := convert.NewDBUser(u).Convert()
+		u1, err := convert.NewDBUser(u[0]).Convert()
 		if err != nil {
 			return nil, err
 		}
