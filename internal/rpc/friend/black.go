@@ -65,6 +65,6 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := s.BlackInterface.Create(ctx, []*relation.Black{&black}); err != nil {
 		return nil, err
 	}
-	chat.BlackAddedNotification(req)
+	chat.BlackAddedNotification(tracelog.GetOperationID(ctx), req)
 	return resp, nil
 }
