@@ -162,7 +162,7 @@ func (s *friendServer) ImportFriend(ctx context.Context, req *pbFriend.ImportFri
 	if err := token_verify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := GetUsersInfo(ctx, req.OwnerUserID); err != nil {
+	if _, err := check.GetUsersInfo(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
 
