@@ -26,7 +26,7 @@ type FriendUser struct {
 
 func NewFriendDB(db *gorm.DB) *Friend {
 	var friend Friend
-	friend.DB = initModel(db, friend)
+	friend.DB = db
 	return &friend
 }
 
