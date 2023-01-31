@@ -108,8 +108,8 @@ func (db *SuperGroupMgoDB) RemoverUserFromSuperGroup(ctx context.Context, groupI
 
 func (db *SuperGroupMgoDB) GetSuperGroupByUserID(ctx context.Context, userID string) (*UserToSuperGroup, error) {
 	var user UserToSuperGroup
-	_ = db.userToSuperGroupCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
-	return &user, nil
+	err := db.userToSuperGroupCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
+	return &user, utils.Wrap(err, "")
 }
 
 func (db *SuperGroupMgoDB) DeleteSuperGroup(ctx context.Context, groupID string) error {

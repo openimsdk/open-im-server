@@ -2,7 +2,6 @@ package relation
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db"
 	pbMsg "Open_IM/pkg/proto/msg"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -37,7 +36,11 @@ func (ChatLog) TableName() string {
 	return "chat_logs"
 }
 
-func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
+func NewChatLog(db *gorm.DB) *ChatLog {
+	return &ChatLog{DB: db}
+}
+
+func (c *ChatLog) Create(msg pbMsg.MsgDataToMQ) error {
 	chatLog := new(ChatLog)
 	copier.Copy(chatLog, msg.MsgData)
 	switch msg.MsgData.SessionType {
@@ -61,12 +64,11 @@ func InsertMessageToChatLog(msg pbMsg.MsgDataToMQ) error {
 	}
 	chatLog.CreateTime = utils.UnixMillSecondToTime(msg.MsgData.CreateTime)
 	chatLog.SendTime = utils.UnixMillSecondToTime(msg.MsgData.SendTime)
-	log.NewDebug("test", "this is ", chatLog)
-	return db.DB.MysqlDB.DefaultGormDB().Table("chat_logs").Create(chatLog).Error
+	return c.DB.Create(chatLog).Error
 }
 
-func GetChatLog(chatLog *ChatLog, pageNumber, showNumber int32, contentTypeList []int32) (int64, []ChatLog, error) {
-	mdb := ChatLogDB.Table("chat_logs")
+func (c *ChatLog) GetChatLog(chatLog *ChatLog, pageNumber, showNumber int32, contentTypeList []int32) (int64, []ChatLog, error) {
+	mdb := c.DB.Model(chatLog)
 	if chatLog.SendTime.Unix() > 0 {
 		mdb = mdb.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
 	}

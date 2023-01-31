@@ -3,6 +3,7 @@ package admin_cms
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/log"
@@ -36,16 +37,26 @@ type adminCMSServer struct {
 	adminCMSInterface controller.AdminCMSInterface
 	groupInterface    controller.GroupInterface
 	userInterface     controller.UserInterface
+	chatLogInterface  controller.ChatLogInterface
 }
 
 func NewAdminCMSServer(port int) *adminCMSServer {
 	log.NewPrivateLog(constant.LogFileName)
-	return &adminCMSServer{
+	admin := &adminCMSServer{
 		rpcPort:         port,
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImAdminCMSName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
+	var mysql relation.Mysql
+	var redis cache.RedisClient
+	mysql.InitConn()
+	redis.InitRedis()
+	admin.userInterface = controller.NewUserController(mysql.GormConn())
+	admin.groupInterface = controller.NewGroupController(mysql.GormConn(), redis.GetClient(), nil)
+	admin.adminCMSInterface = controller.NewAdminCMSController(mysql.GormConn())
+	admin.chatLogInterface = controller.NewChatLogController(mysql.GormConn())
+	return admin
 }
 
 func (s *adminCMSServer) Run() {
@@ -125,18 +136,15 @@ func (s *adminCMSServer) AdminLogin(ctx context.Context, req *pbAdminCMS.AdminLo
 	}
 	resp.UserName = admin.Nickname
 	resp.FaceURL = admin.FaceURL
-	log.NewInfo(tracelog.GetOperationID(ctx), utils.GetSelfFuncName(), "resp: ", resp.String())
 	return resp, nil
 }
 
 func (s *adminCMSServer) GetUserToken(ctx context.Context, req *pbAdminCMS.GetUserTokenReq) (*pbAdminCMS.GetUserTokenResp, error) {
-	resp := &pbAdminCMS.GetUserTokenResp{}
 	token, expTime, err := token_verify.CreateToken(req.UserID, int(req.PlatformID))
 	if err != nil {
-		return resp, nil
+		return nil, err
 	}
-	resp.Token = token
-	resp.ExpTime = expTime
+	resp := &pbAdminCMS.GetUserTokenResp{Token: token, ExpTime: expTime}
 	return resp, nil
 }
 
@@ -156,8 +164,7 @@ func (s *adminCMSServer) GetChatLogs(ctx context.Context, req *pbAdminCMS.GetCha
 		}
 		chatLog.SendTime = sendTime
 	}
-	resp := &pbAdminCMS.GetChatLogsResp{}
-	num, chatLogs, err := relation.GetChatLog(&chatLog, req.Pagination.PageNumber, req.Pagination.ShowNumber, []int32{
+	num, chatLogs, err := s.chatLogInterface.GetChatLog(&chatLog, req.Pagination.PageNumber, req.Pagination.ShowNumber, []int32{
 		constant.Text,
 		constant.Picture,
 		constant.Voice,
@@ -177,6 +184,7 @@ func (s *adminCMSServer) GetChatLogs(ctx context.Context, req *pbAdminCMS.GetCha
 	if err != nil {
 		return nil, err
 	}
+	resp := &pbAdminCMS.GetChatLogsResp{}
 	resp.ChatLogsNum = int32(num)
 	for _, chatLog := range chatLogs {
 		pbChatLog := &pbAdminCMS.ChatLog{}
