@@ -277,7 +277,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 			go func() {
 				for _, v := range okUserIDList {
-					chat.SuperGroupNotification(req.OperationID, v, v)
+					chat.SuperGroupNotification(req.OperationID, v, v, false)
 				}
 			}()
 		}
@@ -536,7 +536,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 			}
 		}
 		for _, v := range req.InvitedUserIDList {
-			chat.SuperGroupNotification(req.OperationID, v, v)
+			chat.SuperGroupNotification(req.OperationID, v, v, false)
 		}
 	}
 
@@ -741,7 +741,7 @@ func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGrou
 		}
 		go func() {
 			for _, v := range req.KickedUserIDList {
-				chat.SuperGroupNotification(req.OperationID, v, v)
+				chat.SuperGroupNotification(req.OperationID, v, v, true)
 			}
 		}()
 
@@ -1162,7 +1162,7 @@ func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) 
 		if err := rocksCache.DelGroupMemberListHashFromCache(req.GroupID); err != nil {
 			log.NewError(req.OperationID, utils.GetSelfFuncName(), req.GroupID, err.Error())
 		}
-		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.OpUserID)
+		chat.SuperGroupNotification(req.OperationID, req.OpUserID, req.OpUserID, false)
 	}
 	log.NewInfo(req.OperationID, "rpc QuitGroup return ", pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{}})
 	return &pbGroup.QuitGroupResp{CommonResp: &pbGroup.CommonResp{}}, nil
