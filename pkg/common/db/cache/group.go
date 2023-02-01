@@ -2,6 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/localcache"
 	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/tracelog"
@@ -39,18 +40,13 @@ type GroupCache struct {
 
 	//local cache
 	cacheGroupMtx           sync.RWMutex
-	cacheGroupMemberUserIDs map[string]*GroupMemberIDsHash
-}
-
-type GroupMemberIDsHash struct {
-	MemberListHash uint64
-	UserIDs        []string
+	cacheGroupMemberUserIDs map[string]*localcache.GroupMemberIDsHash
 }
 
 func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.Group, groupMemberDB *relation.GroupMember, groupRequestDB *relation.GroupRequest, mongoClient *unrelation.SuperGroupMgoDB, opts rockscache.Options) *GroupCache {
 	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
 		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
-		mongoDB: mongoClient, cacheGroupMemberUserIDs: make(map[string]*GroupMemberIDsHash, 0),
+		mongoDB: mongoClient, cacheGroupMemberUserIDs: make(map[string]*localcache.GroupMemberIDsHash, 0),
 	}
 }
 
@@ -287,7 +283,7 @@ func (g *GroupCache) LocalGetGroupMemberIDs(ctx context.Context, groupID string)
 	if err != nil {
 		return nil, err
 	}
-	g.cacheGroupMemberUserIDs[groupID] = &GroupMemberIDsHash{
+	g.cacheGroupMemberUserIDs[groupID] = &localcache.GroupMemberIDsHash{
 		MemberListHash: remoteHash,
 		UserIDs:        groupMemberIDsRemote,
 	}
@@ -348,6 +344,51 @@ func (g *GroupCache) GetGroupMemberInfo(ctx context.Context, groupID, userID str
 	groupMember = &relation.GroupMember{}
 	err = json.Unmarshal([]byte(groupMemberInfoStr), groupMember)
 	return groupMember, utils.Wrap(err, "")
+}
+
+func (g *GroupCache) GetGroupMembersInfo(ctx context.Context, count, offset int32, groupID string) (groupMembers []*relation.GroupMember, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "count", count, "offset", offset, "groupID", groupID, "groupMember", groupMembers)
+	}()
+	groupMemberIDList, err := g.GetGroupMemberIDs(ctx, groupID)
+	if err != nil {
+		return nil, err
+	}
+	if count < 0 || offset < 0 {
+		return nil, nil
+	}
+	var groupMemberList []*relation.GroupMember
+	var start, stop int32
+	start = offset
+	stop = offset + count
+	l := int32(len(groupMemberIDList))
+	if start > stop {
+		return nil, nil
+	}
+	if start >= l {
+		return nil, nil
+	}
+	if count != 0 {
+		if stop >= l {
+			stop = l
+		}
+		groupMemberIDList = groupMemberIDList[start:stop]
+	} else {
+		if l < 1000 {
+			stop = l
+		} else {
+			stop = 1000
+		}
+		groupMemberIDList = groupMemberIDList[start:stop]
+	}
+	for _, userID := range groupMemberIDList {
+		groupMember, err := g.GetGroupMemberInfo(ctx, groupID, userID)
+		if err != nil {
+			return
+		}
+		groupMembers = append(groupMembers, groupMember)
+	}
+	return groupMemberList, nil
 }
 
 func (g *GroupCache) DelGroupMemberInfo(ctx context.Context, groupID, userID string) (err error) {

@@ -20,7 +20,7 @@ type Black struct {
 
 func NewBlack(db *gorm.DB) *Black {
 	var black Black
-	black.DB = db
+	black.DB = db.Model(&Black{})
 	return &black
 }
 
@@ -35,7 +35,7 @@ func (b *Black) Delete(ctx context.Context, blacks []*Black) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "blacks", blacks)
 	}()
-	return utils.Wrap(GroupMemberDB.Delete(blacks).Error, "")
+	return utils.Wrap(b.DB.Delete(blacks).Error, "")
 }
 
 func (b *Black) UpdateByMap(ctx context.Context, ownerUserID, blockUserID string, args map[string]interface{}) (err error) {
@@ -60,7 +60,15 @@ func (b *Black) Find(ctx context.Context, blacks []*Black) (blackList []*Black, 
 	for _, black := range blacks {
 		where = append(where, []interface{}{black.OwnerUserID, black.BlockUserID})
 	}
-	return blackList, utils.Wrap(GroupMemberDB.Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error, "")
+	return blackList, utils.Wrap(b.DB.Where("(owner_user_id, block_user_id) in ?", where).Find(&blackList).Error, "")
+}
+
+func (b *Black) GetBlackIDs(ctx context.Context, ownerUserID string) (userIDs []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "userIDs", userIDs)
+	}()
+	err = utils.Wrap(b.DB.Where("owner_user_id = ?", ownerUserID).Pluck("block_user_id", &userIDs).Error, "")
+	return userIDs, err
 }
 
 func (b *Black) Take(ctx context.Context, ownerUserID, blockUserID string) (black *Black, err error) {

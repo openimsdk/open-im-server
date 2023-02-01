@@ -26,7 +26,7 @@ type FriendUser struct {
 
 func NewFriendDB(db *gorm.DB) *Friend {
 	var friend Friend
-	friend.DB = initModel(db, friend)
+	friend.DB = db.Model(friend)
 	return &friend
 }
 
@@ -63,7 +63,7 @@ func (f *Friend) UpdateRemark(ctx context.Context, ownerUserID, friendUserID, re
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID, "remark", remark)
 	}()
-	return utils.Wrap(f.DB.Model(f).Where("owner_user_id = ? and friend_user_id = ?", ownerUserID, friendUserID).Update("remark", remark).Error, "")
+	return utils.Wrap(f.DB.Where("owner_user_id = ? and friend_user_id = ?", ownerUserID, friendUserID).Update("remark", remark).Error, "")
 }
 
 func (f *Friend) FindOwnerUserID(ctx context.Context, ownerUserID string) (friends []*Friend, err error) {
@@ -78,6 +78,17 @@ func (f *Friend) FindFriendUserID(ctx context.Context, friendUserID string) (fri
 		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friendUserID", friendUserID, "friends", friends)
 	}()
 	return friends, utils.Wrap(f.DB.Where("friend_user_id = ?", friendUserID).Find(&friends).Error, "")
+}
+
+func (f *Friend) GetFriendIDs(ctx context.Context, ownerUserID string) (friendIDList []string, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "ownerUserID", ownerUserID, "friendIDList", friendIDList)
+	}()
+	err = f.DB.Where("owner_user_id=?", ownerUserID).Pluck("friend_user_id", &friendIDList).Error
+	if err != nil {
+		return nil, err
+	}
+	return friendIDList, nil
 }
 
 func (f *Friend) Take(ctx context.Context, ownerUserID, friendUserID string) (friend *Friend, err error) {

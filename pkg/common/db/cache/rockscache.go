@@ -21,15 +21,15 @@ import (
 
 const (
 	//userInfoCache       = "USER_INFO_CACHE:"
-	friendRelationCache = "FRIEND_RELATION_CACHE:"
-	blackListCache      = "BLACK_LIST_CACHE:"
+	//friendRelationCache = "FRIEND_RELATION_CACHE:"
+	blackListCache = "BLACK_LIST_CACHE:"
 	//groupCache          = "GROUP_CACHE:"
 	//groupInfoCache            = "GROUP_INFO_CACHE:"
 	//groupOwnerIDCache         = "GROUP_OWNER_ID:"
 	//joinedGroupListCache      = "JOINED_GROUP_LIST_CACHE:"
 	//groupMemberInfoCache      = "GROUP_MEMBER_INFO_CACHE:"
 	//groupAllMemberInfoCache   = "GROUP_ALL_MEMBER_INFO_CACHE:"
-	allFriendInfoCache = "ALL_FRIEND_INFO_CACHE:"
+	//allFriendInfoCache = "ALL_FRIEND_INFO_CACHE:"
 	//joinedSuperGroupListCache = "JOINED_SUPER_GROUP_LIST_CACHE:"
 	//groupMemberListHashCache  = "GROUP_MEMBER_LIST_HASH_CACHE:"
 	//groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
