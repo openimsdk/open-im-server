@@ -17,19 +17,23 @@ type GroupInterface interface {
 	CreateGroup(ctx context.Context, groups []*relation.Group, groupMember []*relation.GroupMember) error
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation.Group, err error)
+	TakeGroupMemberByID(ctx context.Context, groupID string, userID string) (groupMember *relation.GroupMember, err error)
 	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error)
 	GetGroupMemberList(ctx context.Context, groupID string) ([]*relation.GroupMember, error)
 	GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation.GroupMember, error)
 	GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation.GroupMember, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
+	FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*relation.GroupMember, err error)
+	DelGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
 	GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
+	GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation.GroupRequest, error)
 
 	CreateGroupMember(ctx context.Context, groupMember []*relation.GroupMember) error
-
 	CreateGroupRequest(ctx context.Context, requests []*relation.GroupRequest) error
 
 	//mongo
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
+	DelSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
 }
@@ -38,6 +42,51 @@ var _ GroupInterface = (*GroupController)(nil)
 
 type GroupController struct {
 	database GroupDataBaseInterface
+}
+
+func (g *GroupController) TakeGroupMemberByID(ctx context.Context, groupID string, userID string) (groupMember *relation.GroupMember, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*relation.GroupMember, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) DelGroupMember(ctx context.Context, groupID string, userIDs []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation.GroupRequest, error) {
+	/*
+		var groupRequestList []db.GroupRequest
+			memberList, err := GetGroupMemberListByUserID(userID)
+			if err != nil {
+				return nil, err
+			}
+			for _, v := range memberList {
+				if v.RoleLevel > constant.GroupOrdinaryUsers {
+					list, err := GetGroupRequestByGroupID(v.GroupID)
+					if err != nil {
+						//		fmt.Println("111 GetGroupRequestByGroupID failed ", err.Error())
+						continue
+					}
+					//	fmt.Println("222 GetGroupRequestByGroupID ok ", list)
+					groupRequestList = append(groupRequestList, list...)
+					//	fmt.Println("333 GetGroupRequestByGroupID ok ", groupRequestList)
+				}
+			}
+			return groupRequestList, nil
+	*/
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) DelSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (g *GroupController) GetJoinedGroupList(ctx context.Context, userID string) ([]*relation.Group, error) {
