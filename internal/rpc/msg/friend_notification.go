@@ -4,9 +4,7 @@ import (
 	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
-	utils2 "Open_IM/pkg/common/utils"
 	pbFriend "Open_IM/pkg/proto/friend"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -115,21 +113,22 @@ func FriendApplicationRejectedNotification(operationID string, req *pbFriend.Res
 	friendNotification(operationID, req.ToUserID, req.FromUserID, constant.FriendApplicationRejectedNotification, &FriendApplicationApprovedTips)
 }
 
-func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string) {
+func FriendAddedNotification(ctx context.Context, operationID, opUserID, fromUserID, toUserID string) {
 	friendAddedTips := open_im_sdk.FriendAddedTips{Friend: &open_im_sdk.FriendInfo{}, OpUser: &open_im_sdk.PublicUserInfo{}}
-	user, err := imdb.GetUserByUserID(opUserID)
+	user, err := check.GetUsersInfo(context.Background(), opUserID)
 	if err != nil {
-		log.NewError(operationID, "GetUserByUserID failed ", err.Error(), opUserID)
 		return
 	}
-	utils2.UserDBCopyOpenIMPublicUser(friendAddedTips.OpUser, user)
-	friend, err := imdb.GetFriendRelationshipFromFriend(fromUserID, toUserID)
-	if err != nil {
-		log.NewError(operationID, "GetFriendRelationshipFromFriend failed ", err.Error(), fromUserID, toUserID)
-		return
-	}
-	utils2.FriendDBCopyOpenIM(friendAddedTips.Friend, friend)
+	friendAddedTips.OpUser.UserID = user[0].UserID
+	friendAddedTips.OpUser.Ex = user[0].Ex
+	friendAddedTips.OpUser.Nickname = user[0].Nickname
+	friendAddedTips.OpUser.FaceURL = user[0].FaceURL
 
+	friend, err := check.GetFriendsInfo(ctx, fromUserID, toUserID)
+	if err != nil {
+		return
+	}
+	friendAddedTips.Friend = friend
 	friendNotification(operationID, fromUserID, toUserID, constant.FriendAddedNotification, &friendAddedTips)
 }
 
