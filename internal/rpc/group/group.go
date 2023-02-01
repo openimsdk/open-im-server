@@ -8,6 +8,7 @@ import (
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
+	"Open_IM/pkg/common/db/table"
 	"Open_IM/pkg/common/db/unrelation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
@@ -54,7 +55,7 @@ func NewGroupServer(port int) *groupServer {
 	//mysql init
 	var mysql relation.Mysql
 	var mongo unrelation.Mongo
-	var groupModel relation.Group
+	var groupModel table.GroupModel
 	var redis cache.RedisClient
 	err := mysql.InitConn().AutoMigrateModel(&groupModel)
 	if err != nil {
@@ -170,7 +171,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
-	var group relation.Group
+	var group relation.GroupGorm
 	var groupMembers []*relation.GroupMember
 	utils.CopyStructFields(&group, req.GroupInfo)
 	group.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
@@ -203,7 +204,7 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 		}
 	}
-	if err := s.GroupInterface.CreateGroup(ctx, []*relation.Group{&group}, groupMembers); err != nil {
+	if err := s.GroupInterface.CreateGroup(ctx, []*relation.GroupGorm{&group}, groupMembers); err != nil {
 		return nil, err
 	}
 	utils.CopyStructFields(resp.GroupInfo, group)
@@ -554,7 +555,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	if err != nil {
 		return nil, err
 	}
-	groupMap := make(map[string]*relation.Group)
+	groupMap := make(map[string]*relation.GroupGorm)
 	for i, group := range groups {
 		groupMap[group.GroupID] = groups[i]
 	}
@@ -851,7 +852,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		}
 	}
 	//only administrators can set group information
-	var groupInfo relation.Group
+	var groupInfo relation.GroupGorm
 	utils.CopyStructFields(&groupInfo, req.GroupInfoForSet)
 	if req.GroupInfoForSet.Notification != "" {
 		groupInfo.NotificationUserID = tracelog.GetOpUserID(ctx)
