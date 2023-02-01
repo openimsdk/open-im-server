@@ -1,6 +1,8 @@
 package table
 
-import "time"
+import (
+	"time"
+)
 
 type FriendModel struct {
 	OwnerUserID    string    `gorm:"column:owner_user_id;primary_key;size:64"`
@@ -28,4 +30,16 @@ type ConversationModel struct {
 	UpdateUnreadCountTime int64  `gorm:"column:update_unread_count_time" json:"updateUnreadCountTime"`
 	AttachedInfo          string `gorm:"column:attached_info;type:varchar(1024)" json:"attachedInfo"`
 	Ex                    string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+}
+
+type FriendRequestModel struct {
+	FromUserID    string    `gorm:"column:from_user_id;primary_key;size:64"`
+	ToUserID      string    `gorm:"column:to_user_id;primary_key;size:64"`
+	HandleResult  int32     `gorm:"column:handle_result"`
+	ReqMsg        string    `gorm:"column:req_msg;size:255"`
+	CreateTime    time.Time `gorm:"column:create_time"`
+	HandlerUserID string    `gorm:"column:handler_user_id;size:64"`
+	HandleMsg     string    `gorm:"column:handle_msg;size:255"`
+	HandleTime    time.Time `gorm:"column:handle_time"`
+	Ex            string    `gorm:"column:ex;size:1024"`
 }
