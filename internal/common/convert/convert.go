@@ -2,6 +2,7 @@ package convert
 
 import (
 	"Open_IM/pkg/common/db/relation"
+	"Open_IM/pkg/common/db/table"
 	sdk "Open_IM/pkg/proto/sdk_ws"
 	utils "github.com/OpenIMSDK/open_utils"
 	"time"
@@ -19,10 +20,10 @@ func getNumberOfGroupMember(groupID string) (int32, error) {
 }
 
 type DBFriend struct {
-	*relation.Friend
+	*table.FriendModel
 }
 
-func NewDBFriend(friend *relation.Friend) *DBFriend {
+func NewDBFriend(friend *controller.Friend) *DBFriend {
 	return &DBFriend{Friend: friend}
 }
 
