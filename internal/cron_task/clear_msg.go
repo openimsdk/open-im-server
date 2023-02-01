@@ -7,11 +7,12 @@ import (
 	"Open_IM/pkg/common/log"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
-	goRedis "github.com/go-redis/redis/v8"
-	"github.com/golang/protobuf/proto"
 	"math"
 	"strconv"
 	"strings"
+
+	goRedis "github.com/go-redis/redis/v8"
+	"github.com/golang/protobuf/proto"
 )
 
 const oldestList = 0
@@ -105,59 +106,45 @@ func deleteMongoMsg(operationID string, ID string, index int64, delStruct *delMs
 	if len(msgs.Msg) > db.GetSingleGocMsgNum() {
 		log.NewWarn(operationID, utils.GetSelfFuncName(), "msgs too large", len(msgs.Msg), msgs.UID)
 	}
-	var hasMsgDoNotNeedDel bool
-	for i, msg := range msgs.Msg {
-		// 找到列表中不需要删除的消息了, 表示为递归到最后一个块
-		if utils.GetCurrentTimestampByMill() < msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) {
-			log.NewDebug(operationID, ID, "find uid", msgs.UID)
-			// 删除块失败 递归结束 返回0
-			hasMsgDoNotNeedDel = true
-			if err := delMongoMsgsPhysical(delStruct.delUidList); err != nil {
-				return 0, err
-			}
-			// unMarshall失败 块删除成功  设置为最小seq
-			msgPb := &server_api_params.MsgData{}
-			if err = proto.Unmarshal(msg.Msg, msgPb); err != nil {
-				return delStruct.getSetMinSeq(), utils.Wrap(err, "")
-			}
-			// 如果不是块中第一个，就把前面比他早插入的全部设置空 seq字段除外。
-			if i > 0 {
-				delStruct.minSeq, err = db.DB.ReplaceMsgToBlankByIndex(msgs.UID, i-1)
-				if err != nil {
-					log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), msgs.UID, i)
-					return delStruct.getSetMinSeq(), utils.Wrap(err, "")
-				}
-			}
-			// 递归结束
-			return msgPb.Seq, nil
-		} else {
-			if !msgListIsFull(msgs) {
-
-			}
-		}
-	}
-	// 该列表中消息全部为老消息并且列表满了, 加入删除列表继续递归
-	lastMsgPb := &server_api_params.MsgData{}
-	err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
-	if err != nil {
-		log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
-		return 0, utils.Wrap(err, "proto.Unmarshal failed")
-	}
-	delStruct.minSeq = lastMsgPb.Seq
-	if msgListIsFull(msgs) {
-		log.NewDebug(operationID, "msg list is full", msgs.UID)
+	if msgs.Msg[len(msgs.Msg)-1].SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) < utils.GetCurrentTimestampByMill() && msgListIsFull(msgs) {
 		delStruct.delUidList = append(delStruct.delUidList, msgs.UID)
+		lastMsgPb := &server_api_params.MsgData{}
+		err = proto.Unmarshal(msgs.Msg[len(msgs.Msg)-1].Msg, lastMsgPb)
+		if err != nil {
+			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
+			return 0, utils.Wrap(err, "proto.Unmarshal failed")
+		}
+		delStruct.minSeq = lastMsgPb.Seq + 1
+		log.NewDebug(operationID, utils.GetSelfFuncName(), msgs.UID, "add to delUidList", "minSeq", lastMsgPb.Seq+1)
 	} else {
-		// 列表没有满且没有不需要被删除的消息 代表他是最新的消息块
-		if !hasMsgDoNotNeedDel {
-			delStruct.minSeq, err = db.DB.ReplaceMsgToBlankByIndex(msgs.UID, len(msgs.Msg)-1)
+		var hasMarkDelFlag bool
+		for index, msg := range msgs.Msg {
+			if msg.SendTime == 0 {
+				continue
+			}
+			msgPb := &server_api_params.MsgData{}
+			err = proto.Unmarshal(msg.Msg, msgPb)
 			if err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), msgs.UID, "Index:", len(msgs.Msg)-1)
-				err = delMongoMsgsPhysical(delStruct.delUidList)
-				if err != nil {
-					return delStruct.getSetMinSeq(), err
+				log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), len(msgs.Msg)-1, msgs.UID)
+				return 0, utils.Wrap(err, "proto.Unmarshal failed")
+			}
+			if utils.GetCurrentTimestampByMill() > msg.SendTime+(int64(config.Config.Mongo.DBRetainChatRecords)*24*60*60*1000) {
+				msgPb.Status = constant.MsgDeleted
+				bytes, _ := proto.Marshal(msgPb)
+				msgs.Msg[index].Msg = bytes
+				msgs.Msg[index].SendTime = 0
+				hasMarkDelFlag = true
+			} else {
+				if err := delMongoMsgsPhysical(delStruct.delUidList); err != nil {
+					return 0, err
 				}
-				return delStruct.getSetMinSeq(), nil
+				if hasMarkDelFlag {
+					log.NewInfo(operationID, ID, "hasMarkDelFlag", "index:", index, "msgPb:", msgPb, msgs.UID)
+					if err := db.DB.UpdateOneMsgList(msgs); err != nil {
+						return delStruct.getSetMinSeq(), utils.Wrap(err, "")
+					}
+				}
+				return msgPb.Seq, nil
 			}
 		}
 	}
@@ -178,14 +165,6 @@ func msgListIsFull(chat *db.UserChat) bool {
 		return true
 	}
 	return false
-}
-
-func CheckGroupUserMinSeq(operationID, groupID, userID string) error {
-	return nil
-}
-
-func CheckUserMinSeqWithMongo(operationID, userID string) error {
-	return nil
 }
 
 func checkMaxSeqWithMongo(operationID, ID string, diffusionType int) error {

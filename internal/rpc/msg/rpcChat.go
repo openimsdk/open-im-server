@@ -31,7 +31,8 @@ type rpcChat struct {
 	etcdAddr        []string
 	messageWriter   MessageWriter
 	//offlineProducer *kafka.Producer
-	delMsgCh chan deleteMsg
+	delMsgCh       chan deleteMsg
+	dMessageLocker MessageLocker
 }
 
 type deleteMsg struct {
@@ -48,6 +49,7 @@ func NewRpcChatServer(port int) *rpcChat {
 		rpcRegisterName: config.Config.RpcRegisterName.OpenImMsgName,
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
+		dMessageLocker:  NewLockerMessage(),
 	}
 	rc.messageWriter = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschat.Addr, config.Config.Kafka.Ws2mschat.Topic)
 	//rc.offlineProducer = kafka.NewKafkaProducer(config.Config.Kafka.Ws2mschatOffline.Addr, config.Config.Kafka.Ws2mschatOffline.Topic)
@@ -143,14 +145,9 @@ func (rpc *rpcChat) runCh() {
 		select {
 		case msg := <-rpc.delMsgCh:
 			log.NewInfo(msg.OperationID, utils.GetSelfFuncName(), "delmsgch recv new: ", msg)
-			db.DB.DelMsgFromCache(msg.UserID, msg.SeqList, msg.OperationID)
-			unexistSeqList, err := db.DB.DelMsgBySeqList(msg.UserID, msg.SeqList, msg.OperationID)
-			if err != nil {
-				log.NewError(msg.OperationID, utils.GetSelfFuncName(), "DelMsgBySeqList args: ", msg.UserID, msg.SeqList, msg.OperationID, err.Error())
-				continue
-			}
-			if len(unexistSeqList) > 0 {
-				DeleteMessageNotification(msg.OpUserID, msg.UserID, unexistSeqList, msg.OperationID)
+			if len(msg.SeqList) > 0 {
+				db.DB.DelMsgFromCache(msg.UserID, msg.SeqList, msg.OperationID)
+				DeleteMessageNotification(msg.OpUserID, msg.UserID, msg.SeqList, msg.OperationID)
 			}
 		}
 	}

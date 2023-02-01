@@ -10,13 +10,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
+	"sync"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/gogo/protobuf/sortkeys"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"math/rand"
-	"sync"
 
 	//"github.com/garyburd/redigo/redis"
 	"github.com/golang/protobuf/proto"
@@ -93,7 +94,7 @@ func (d *DataBases) GetMinSeqFromMongo2(uid string) (MinSeq uint32, err error) {
 }
 
 // deleteMsgByLogic
-func (d *DataBases) DelMsgBySeqList(userID string, seqList []uint32, operationID string) (totalUnexistSeqList []uint32, err error) {
+func (d *DataBases) DelMsgBySeqList(userID string, seqList []uint32, operationID string) (totalUnExistSeqList []uint32, err error) {
 	log.Debug(operationID, utils.GetSelfFuncName(), "args ", userID, seqList)
 	sortkeys.Uint32s(seqList)
 	suffixUserID2SubSeqList := func(uid string, seqList []uint32) map[string][]uint32 {
@@ -122,11 +123,11 @@ func (d *DataBases) DelMsgBySeqList(userID string, seqList []uint32, operationID
 				return
 			}
 			lock.Lock()
-			totalUnexistSeqList = append(totalUnexistSeqList, unexistSeqList...)
+			totalUnExistSeqList = append(totalUnExistSeqList, unexistSeqList...)
 			lock.Unlock()
 		}(k, v, operationID)
 	}
-	return totalUnexistSeqList, err
+	return totalUnExistSeqList, err
 }
 
 func (d *DataBases) DelMsgBySeqListInOneDoc(suffixUserID string, seqList []uint32, operationID string) ([]uint32, error) {
@@ -204,6 +205,13 @@ func (d *DataBases) ReplaceMsgBySeq(uid string, msg *open_im_sdk.MsgData, operat
 		return utils.Wrap(err, "")
 	}
 	return nil
+}
+
+func (d *DataBases) UpdateOneMsgList(msg *UserChat) error {
+	ctx, _ := context.WithTimeout(context.Background(), time.Duration(config.Config.Mongo.DBTimeout)*time.Second)
+	c := d.mongoClient.Database(config.Config.Mongo.DBDatabase).Collection(cChat)
+	_, err := c.UpdateOne(ctx, bson.M{"uid": msg.UID}, bson.M{"$set": bson.M{"msg": msg.Msg}})
+	return err
 }
 
 func (d *DataBases) GetMsgBySeqList(uid string, seqList []uint32, operationID string) (seqMsg []*open_im_sdk.MsgData, err error) {

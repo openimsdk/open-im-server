@@ -225,6 +225,54 @@ func (r *RPCServer) SuperGroupOnlineBatchPushOneMsg(_ context.Context, req *pbRe
 		SinglePushResult: singleUserResult,
 	}, nil
 }
+func (r *RPCServer) SuperGroupBackgroundOnlinePush(_ context.Context, req *pbRelay.OnlineBatchPushOneMsgReq) (*pbRelay.OnlineBatchPushOneMsgResp, error) {
+	log.NewInfo(req.OperationID, "BatchPushMsgToUser is arriving", req.String())
+	var singleUserResult []*pbRelay.SingelMsgToUserResultList
+	//r.GetBatchMsgForPush(req.OperationID,req.MsgData,req.PushToUserIDList,)
+	msgBytes, _ := proto.Marshal(req.MsgData)
+	mReply := Resp{
+		ReqIdentifier: constant.WSPushMsg,
+		OperationID:   req.OperationID,
+		Data:          msgBytes,
+	}
+	var replyBytes bytes.Buffer
+	enc := gob.NewEncoder(&replyBytes)
+	err := enc.Encode(mReply)
+	if err != nil {
+		log.NewError(req.OperationID, "data encode err", err.Error())
+	}
+	for _, v := range req.PushToUserIDList {
+		var resp []*pbRelay.SingleMsgToUserPlatform
+		tempT := &pbRelay.SingelMsgToUserResultList{
+			UserID: v,
+		}
+		userConnMap := ws.getUserAllCons(v)
+		for platform, userConn := range userConnMap {
+			if userConn != nil && userConn.IsBackground {
+				temp := &pbRelay.SingleMsgToUserPlatform{
+					RecvID:         v,
+					RecvPlatFormID: int32(platform),
+				}
+				if constant.PlatformIDToClass(int(userConn.PlatformID)) == constant.TerminalPC || userConn.PlatformID == constant.WebPlatformID {
+					resultCode := sendMsgBatchToUser(userConn, replyBytes.Bytes(), req, platform, v)
+					if resultCode == 0 && utils.IsContainInt(platform, r.pushTerminal) {
+						tempT.OnlinePush = true
+						promePkg.PromeInc(promePkg.MsgOnlinePushSuccessCounter)
+						log.Info(req.OperationID, "PushSuperMsgToUser is success By Ws", "args", req.String(), "recvPlatForm", constant.PlatformIDToName(platform), "recvID", v)
+						temp.ResultCode = resultCode
+						resp = append(resp, temp)
+					}
+				}
+			}
+		}
+		tempT.Resp = resp
+		singleUserResult = append(singleUserResult, tempT)
+	}
+
+	return &pbRelay.OnlineBatchPushOneMsgResp{
+		SinglePushResult: singleUserResult,
+	}, nil
+}
 func (r *RPCServer) OnlineBatchPushOneMsg(_ context.Context, req *pbRelay.OnlineBatchPushOneMsgReq) (*pbRelay.OnlineBatchPushOneMsgResp, error) {
 	log.NewInfo(req.OperationID, "BatchPushMsgToUser is arriving", req.String())
 	var singleUserResult []*pbRelay.SingelMsgToUserResultList
@@ -328,7 +376,7 @@ func (r *RPCServer) KickUserOffline(_ context.Context, req *pbRelay.KickUserOffl
 		oldConnMap := ws.getUserAllCons(v)
 		if conn, ok := oldConnMap[int(req.PlatformID)]; ok { // user->map[platform->conn]
 			log.NewWarn(req.OperationID, "send kick msg, close connection ", req.PlatformID, v)
-			ws.sendKickMsg(conn)
+			ws.sendKickMsg(conn, req.OperationID)
 			conn.Close()
 		}
 	}

@@ -248,11 +248,16 @@ type config struct {
 			Addr  []string `yaml:"addr"`
 			Topic string   `yaml:"topic"`
 		}
+		MsgToModify struct {
+			Addr  []string `yaml:"addr"`
+			Topic string   `yaml:"topic"`
+		}
 		ConsumerGroupID struct {
-			MsgToRedis string `yaml:"msgToTransfer"`
-			MsgToMongo string `yaml:"msgToMongo"`
-			MsgToMySql string `yaml:"msgToMySql"`
-			MsgToPush  string `yaml:"msgToPush"`
+			MsgToRedis  string `yaml:"msgToTransfer"`
+			MsgToMongo  string `yaml:"msgToMongo"`
+			MsgToMySql  string `yaml:"msgToMySql"`
+			MsgToPush   string `yaml:"msgToPush"`
+			MsgToModify string `yaml:"msgToModify"`
 		}
 	}
 	Secret                            string `yaml:"secret"`
@@ -292,7 +297,7 @@ type config struct {
 		CallbackBeforeAddFriend            callBackConfig `yaml:"callbackBeforeAddFriend"`
 		CallbackBeforeCreateGroup          callBackConfig `yaml:"callbackBeforeCreateGroup"`
 		CallbackBeforeMemberJoinGroup      callBackConfig `yaml:"callbackBeforeMemberJoinGroup"`
-		CallbackBeforeExtendMsgModify      callBackConfig `yaml:"callbackBeforeExtendMsgModify"`
+		CallbackBeforeSetGroupMemberInfo   callBackConfig `yaml:"callbackBeforeSetGroupMemberInfo"`
 	} `yaml:"callback"`
 	Notification struct {
 		///////////////////////group/////////////////////////////
@@ -648,7 +653,7 @@ func unmarshalConfig(config interface{}, configName string) {
 	} else {
 		bytes, err := ioutil.ReadFile(fmt.Sprintf("../config/%s", configName))
 		if err != nil {
-			panic(err.Error())
+			panic(err.Error() + configName)
 		}
 		if err = yaml.Unmarshal(bytes, config); err != nil {
 			panic(err.Error())

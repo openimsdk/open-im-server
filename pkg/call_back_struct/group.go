@@ -46,3 +46,22 @@ type CallbackBeforeMemberJoinGroupResp struct {
 	MuteEndTime *int64  `json:"muteEndTime"`
 	Ex          *string `json:"ex"`
 }
+
+type CallbackBeforeSetGroupMemberInfoReq struct {
+	CallbackCommand string `json:"callbackCommand"`
+	OperationID     string `json:"operationID"`
+	GroupID         string `json:"groupID"`
+	UserID          string `json:"userID"`
+	Nickname        string `json:"nickName"`
+	FaceURL         string `json:"faceURL"`
+	RoleLevel       int32  `json:"roleLevel"`
+	Ex              string `json:"ex"`
+}
+
+type CallbackBeforeSetGroupMemberInfoResp struct {
+	*CommonCallbackResp
+	Ex        *string `json:"ex"`
+	Nickname  *string `json:"nickName"`
+	FaceURL   *string `json:"faceURL"`
+	RoleLevel *int32  `json:"roleLevel"`
+}

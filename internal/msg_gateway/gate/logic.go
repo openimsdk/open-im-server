@@ -186,8 +186,10 @@ func (ws *WServer) pullMsgBySeqListResp(conn *UserConn, m *Req, pb *sdk_ws.PullM
 }
 func (ws *WServer) userLogoutReq(conn *UserConn, m *Req) {
 	log.NewInfo(m.OperationID, "Ws call success to userLogoutReq start", m.SendID, m.ReqIdentifier, m.MsgIncr, string(m.Data))
+
 	rpcReq := push.DelUserPushTokenReq{}
 	rpcReq.UserID = m.SendID
+	rpcReq.PlatformID = conn.PlatformID
 	rpcReq.OperationID = m.OperationID
 	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImPushName, m.OperationID)
 	if grpcConn == nil {

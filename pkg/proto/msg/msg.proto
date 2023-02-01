@@ -154,26 +154,140 @@ message GetWriteDiffMsgResp{
   server_api_params.MsgData msgData = 3;
 }
 
-message ModifyMsgReq {
+message ModifyMessageReactionExtensionsReq {
   string operationID = 1;
-  string ID = 2;
-  int32 Index = 3;
-  int32 msgIndex = 4;
-  string opUserID = 5;
-  string userID = 6;
-  bool isFirstModify = 7;
-  string clientMsgID = 8;
-  google.protobuf.StringValue value = 9;
-  google.protobuf.StringValue ex = 10;
-  google.protobuf.StringValue attachedInfo = 11;
+  string sourceID = 2;
+  string opUserID = 3;
+  int32 sessionType = 4;
+  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
+  string clientMsgID = 6;
+  google.protobuf.StringValue ex = 7;
+  google.protobuf.StringValue attachedInfo = 8;
+  bool isReact = 9;
+  bool isExternalExtensions = 10;
+  int64 msgFirstModifyTime = 11;
 }
-
-message ModifyMsgResp {
+message SetMessageReactionExtensionsReq {
+  string operationID = 1;
+  string sourceID = 2;
+  string opUserID = 3;
+  int32 sessionType = 4;
+  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
+  string clientMsgID = 6;
+  google.protobuf.StringValue ex = 7;
+  google.protobuf.StringValue attachedInfo = 8;
+  bool isReact = 9;
+  bool isExternalExtensions = 10;
+  int64 msgFirstModifyTime = 11;
+}
+message SetMessageReactionExtensionsResp {
   int32 errCode = 1;
   string errMsg = 2;
-  int32 Index = 4;
-  int32 msgIndex = 3;
+  string clientMsgID = 3;
+  int64 msgFirstModifyTime = 4;
+  bool isReact = 5;
+  repeated KeyValueResp result = 6;
 }
+message AddMessageReactionExtensionsReq {
+  string operationID = 1;
+  string sourceID = 2;
+  string opUserID = 3;
+  int32 sessionType = 4;
+  map <string, server_api_params.KeyValue>reactionExtensionList = 5;
+  string clientMsgID = 6;
+  google.protobuf.StringValue ex = 7;
+  google.protobuf.StringValue attachedInfo = 8;
+  bool isReact = 9;
+  bool isExternalExtensions = 10;
+  int64 msgFirstModifyTime = 11;
+}
+message AddMessageReactionExtensionsResp {
+  int32 errCode = 1;
+  string errMsg = 2;
+  string clientMsgID = 3;
+  int64 msgFirstModifyTime = 4;
+  bool isReact = 5;
+  repeated KeyValueResp result = 6;
+}
+
+
+message GetMessageListReactionExtensionsReq {
+  string operationID = 1;
+  string opUserID = 2;
+  string sourceID = 3;
+  int32 sessionType = 4;
+  bool isExternalExtensions = 5;
+  message MessageReactionKey {
+    string clientMsgID = 1;
+    int64 msgFirstModifyTime = 2;
+  }
+  repeated  string  typeKeyList = 6;
+  repeated MessageReactionKey messageReactionKeyList = 7;
+}
+message GetMessageListReactionExtensionsResp{
+  int32 errCode = 1;
+  string errMsg = 2;
+  repeated SingleMessageExtensionResult  singleMessageResult =3;
+
+}
+message SingleMessageExtensionResult {
+  int32 errCode = 1;
+  string errMsg = 2;
+  map <string,  server_api_params.KeyValue>reactionExtensionList = 3;
+  string clientMsgID = 4;
+}
+
+
+message ModifyMessageReactionExtensionsResp {
+  int32 errCode = 1;
+  string errMsg = 2;
+  repeated ExtendMsgResp successList = 3;
+  repeated ExtendMsgResp failedList = 4;
+}
+
+message DeleteMessageListReactionExtensionsReq {
+  string operationID = 1;
+  string opUserID = 2;
+  string sourceID = 3;
+  int32 sessionType = 4;
+  string clientMsgID = 5;
+  bool isExternalExtensions = 6;
+  int64 msgFirstModifyTime = 7;
+  repeated server_api_params.KeyValue reactionExtensionList = 8;
+}
+
+message DeleteMessageListReactionExtensionsResp {
+  int32 errCode = 1;
+  string errMsg = 2;
+  repeated KeyValueResp result = 6;
+}
+
+message ExtendMsgResp {
+  ExtendMsg extendMsg = 1;
+  int32 errCode = 2;
+  string errMsg = 3;
+}
+
+message ExtendMsg {
+  map <string, KeyValueResp>reactionExtensionList = 1;
+  string clientMsgID = 2;
+  int64 msgFirstModifyTime = 3;
+  string attachedInfo = 4;
+  string ex = 5;
+}
+
+message KeyValueResp {
+  server_api_params.KeyValue keyValue = 1;
+  int32 errCode = 2;
+  string errMsg = 3;
+}
+
+message MsgDataToModifyByMQ{
+ string aggregationID = 1;
+ repeated MsgDataToMQ messageList = 2;
+ string triggerID = 3;
+}
+
 
 service msg {
   rpc GetMaxAndMinSeq(server_api_params.GetMaxAndMinSeqReq) returns(server_api_params.GetMaxAndMinSeqResp);
@@ -189,5 +303,8 @@ service msg {
   rpc GetWriteDiffMsg(GetWriteDiffMsgReq) returns(GetWriteDiffMsgResp);
 
   // modify msg
-  rpc ModifyMsg(ModifyMsgReq) returns(ModifyMsgResp);
+  rpc SetMessageReactionExtensions(SetMessageReactionExtensionsReq) returns(SetMessageReactionExtensionsResp);
+  rpc GetMessageListReactionExtensions(GetMessageListReactionExtensionsReq) returns(GetMessageListReactionExtensionsResp);
+  rpc AddMessageReactionExtensions(AddMessageReactionExtensionsReq) returns(AddMessageReactionExtensionsResp);
+  rpc DeleteMessageReactionExtensions(DeleteMessageListReactionExtensionsReq) returns(DeleteMessageListReactionExtensionsResp);
 }

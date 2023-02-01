@@ -93,10 +93,11 @@ func (r *RPCServer) PushMsg(_ context.Context, pbData *pbPush.PushMsgReq) (*pbPu
 }
 
 func (r *RPCServer) DelUserPushToken(c context.Context, req *pbPush.DelUserPushTokenReq) (*pbPush.DelUserPushTokenResp, error) {
+	log.Debug(req.OperationID, utils.GetSelfFuncName(), "req", req.String())
 	var resp pbPush.DelUserPushTokenResp
 	err := db.DB.DelFcmToken(req.UserID, int(req.PlatformID))
 	if err != nil {
-		errMsg := req.OperationID + " " + "SetFcmToken failed " + err.Error()
+		errMsg := req.OperationID + " " + "DelFcmToken failed " + err.Error()
 		log.NewError(req.OperationID, errMsg)
 		resp.ErrCode = 500
 		resp.ErrMsg = errMsg

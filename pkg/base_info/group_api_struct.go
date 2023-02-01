@@ -29,6 +29,7 @@ type GetGroupMembersInfoReq struct {
 	GroupID     string   `json:"groupID" binding:"required"`
 	MemberList  []string `json:"memberList" binding:"required"`
 	OperationID string   `json:"operationID" binding:"required"`
+	NoCache     bool     `json:"noCache"`
 }
 type GetGroupMembersInfoResp struct {
 	CommResp
