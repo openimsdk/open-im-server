@@ -2,17 +2,12 @@ package cache
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/mongo"
-	"Open_IM/pkg/common/db/mysql"
 	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
 	"encoding/json"
-	"github.com/dtm-labs/rockscache"
-	"github.com/go-redis/redis/v8"
-	"gorm.io/gorm"
 	"math/big"
 	"sort"
 	"strconv"
@@ -358,7 +353,7 @@ func DelAllGroupMembersInfoFromCache(ctx context.Context, groupID string) (err e
 	return db.DB.Rc.TagAsDeleted(groupAllMemberInfoCache + groupID)
 }
 
-//func GetGroupInfoFromCache(ctx context.Context, groupID string) (groupInfo *mysql.Group, err error) {
+//func GetGroupInfoFromCache(ctx context.Context, groupID string) (groupInfo *mysql.GroupGorm, err error) {
 //	getGroupInfo := func() (string, error) {
 //		groupInfo, err := mysql.GetGroupInfoByGroupID(groupID)
 //		if err != nil {
@@ -370,7 +365,7 @@ func DelAllGroupMembersInfoFromCache(ctx context.Context, groupID string) (err e
 //		}
 //		return string(bytes), nil
 //	}
-//	groupInfo = &mysql.Group{}
+//	groupInfo = &mysql.GroupGorm{}
 //	defer func() {
 //		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupInfo", groupInfo)
 //	}()
