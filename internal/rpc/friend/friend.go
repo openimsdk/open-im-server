@@ -120,7 +120,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	if err := callbackBeforeAddFriendV1(req); err != nil {
+	if err := callbackBeforeAddFriendV1(ctx, req); err != nil {
 		return nil, err
 	}
 
@@ -140,7 +140,7 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	if err = s.FriendInterface.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
 	}
-	chat.FriendApplicationNotification(req)
+	chat.FriendApplicationNotification(ctx, req)
 	return resp, nil
 }
 
@@ -177,7 +177,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 		if err != nil {
 			return nil, err
 		}
-		chat.FriendApplicationApprovedNotification(req)
+		chat.FriendApplicationApprovedNotification(ctx, req)
 		return resp, nil
 	}
 	if req.HandleResult == constant.FriendResponseRefuse {
@@ -185,7 +185,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 		if err != nil {
 			return nil, err
 		}
-		chat.FriendApplicationRejectedNotification(req)
+		chat.FriendApplicationRejectedNotification(ctx, req)
 		return resp, nil
 	}
 	return nil, constant.ErrArgs.Wrap("req.HandleResult != -1/1")
@@ -199,7 +199,7 @@ func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFri
 	if err := s.FriendInterface.Delete(ctx, req.OwnerUserID, req.FriendUserID); err != nil {
 		return nil, err
 	}
-	chat.FriendDeletedNotification(req)
+	chat.FriendDeletedNotification(ctx, req)
 	return resp, nil
 }
 
@@ -211,7 +211,7 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 	if err := s.FriendInterface.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
 		return nil, err
 	}
-	chat.FriendRemarkSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.OwnerUserID, req.FriendUserID)
+	chat.FriendRemarkSetNotification(ctx, req.OwnerUserID, req.FriendUserID)
 	return resp, nil
 }
 
