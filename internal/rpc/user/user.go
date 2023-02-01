@@ -45,7 +45,7 @@ func NewUserServer(port int) *userServer {
 	}
 	//mysql init
 	var mysql relation.Mysql
-	var model relation.User
+	var model relation.UserGorm
 	err := mysql.InitConn().AutoMigrateModel(&model)
 	if err != nil {
 		panic("db init err:" + err.Error())
