@@ -1,7 +1,6 @@
 package convert
 
 import (
-	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/table"
 	sdk "Open_IM/pkg/proto/sdk_ws"
 	utils "github.com/OpenIMSDK/open_utils"
@@ -119,20 +118,19 @@ func (db *DBFriendRequest) Convert() (*sdk.FriendRequest, error) {
 }
 
 type DBBlack struct {
-	*relation.Black
+	*table.BlackModel
 }
 
-func (*PBBlack) PB2DB(friendRequests []*sdk.BlackInfo) (DBFriendRequests []*table., err error) {
-
-}
-
-func (*DBBlack) DB2PB(friendRequests []*table.FriendRequestModel) (PBFriendRequests []*sdk.FriendRequest, err error) {
+func (*PBBlack) PB2DB(blacks []*sdk.BlackInfo) (DBBlacks []*table.BlackModel, err error) {
 
 }
 
+func (*DBBlack) DB2PB(blacks []*table.BlackModel) (PBBlacks []*sdk.BlackInfo, err error) {
 
-func NewDBBlack(black *relation.Black) *DBBlack {
-	return &DBBlack{Black: black}
+}
+
+func NewDBBlack(black *table.BlackModel) *DBBlack {
+	return &DBBlack{BlackModel: black}
 }
 
 type PBBlack struct {
@@ -143,8 +141,8 @@ func NewPBBlack(blackInfo *sdk.BlackInfo) *PBBlack {
 	return &PBBlack{BlackInfo: blackInfo}
 }
 
-func (pb *PBBlack) Convert() (*relation.Black, error) {
-	dbBlack := &relation.Black{}
+func (pb *PBBlack) Convert() (*table.BlackModel, error) {
+	dbBlack := &table.BlackModel{}
 	dbBlack.BlockUserID = pb.BlackUserInfo.UserID
 	dbBlack.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
 	return dbBlack, nil
@@ -163,6 +161,14 @@ func (db *DBBlack) Convert() (*sdk.BlackInfo, error) {
 
 type DBGroup struct {
 	*table.GroupModel
+}
+
+func (*PBGroup) PB2DB(groups []*sdk.GroupInfo) (DBGroups []*table.GroupModel, err error) {
+
+}
+
+func (*DBGroup) DB2PB(groups []*table.GroupModel) (PBGroups []*sdk.GroupInfo, err error) {
+
 }
 
 func NewDBGroup(group *table.GroupModel) *DBGroup {
@@ -208,6 +214,14 @@ type DBGroupMember struct {
 	*table.GroupMemberModel
 }
 
+func (*PBGroupMember) PB2DB(groupMembers []*sdk.GroupMemberFullInfo) (DBGroupMembers []*table.GroupMemberModel, err error) {
+
+}
+
+func (*DBGroupMember) DB2PB(groupMembers []*table.GroupMemberModel) (PBGroupMembers []*sdk.GroupMemberFullInfo, err error) {
+
+}
+
 func NewDBGroupMember(groupMember *table.GroupMemberModel) *DBGroupMember {
 	return &DBGroupMember{GroupMemberModel: groupMember}
 }
@@ -250,6 +264,14 @@ func (db *DBGroupMember) Convert() (*sdk.GroupMemberFullInfo, error) {
 
 type DBGroupRequest struct {
 	*table.GroupRequestModel
+}
+
+func (*PBGroupRequest) PB2DB(groupRequests []*sdk.GroupRequest) (DBGroupRequests []*table.GroupRequestModel, err error) {
+
+}
+
+func (*DBGroupRequest) DB2PB(groupRequests []*table.GroupRequestModel) (PBGroupRequests []*sdk.GroupRequest, err error) {
+
 }
 
 func NewDBGroupRequest(groupRequest *table.GroupRequestModel) *DBGroupRequest {
