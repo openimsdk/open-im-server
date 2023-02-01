@@ -117,11 +117,11 @@ type FriendDatabaseInterface interface {
 }
 
 type FriendDatabase struct {
-	sqlDB *relation.Friend
+	sqlDB relation.FriendDB
 }
 
 func NewFriendDatabase(db *gorm.DB) *FriendDatabase {
-	sqlDB := relation.NewFriendDB(db)
+	sqlDB := relation.NewFriendGorm(db)
 	database := &FriendDatabase{
 		sqlDB: sqlDB,
 	}

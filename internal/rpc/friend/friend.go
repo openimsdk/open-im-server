@@ -45,8 +45,8 @@ func NewFriendServer(port int) *friendServer {
 	}
 	//mysql init
 	var mysql relation.Mysql
-	var model relation.Friend
-	err := mysql.InitConn().AutoMigrateModel(&model)
+	var model relation.FriendGorm
+	err := mysql.InitConn().AutoMigrateModel(&relation.FriendModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
