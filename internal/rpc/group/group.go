@@ -301,7 +301,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		if !token_verify.IsAppManagerUid(ctx) {
 			opUserID := tracelog.GetOpUserID(ctx)
 			member, ok := memberMap[opUserID]
-			if ok {
+			if !ok {
 				return nil, constant.ErrNoPermission.Wrap("not in group")
 			}
 			if !(member.RoleLevel == constant.GroupOwner || member.RoleLevel == constant.GroupAdmin) {
