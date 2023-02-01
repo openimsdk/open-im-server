@@ -172,12 +172,9 @@ func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoR
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range users {
-		n, err := convert.NewDBUser(v).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.UsersInfo = append(resp.UsersInfo, n)
+	resp.UsersInfo, err = (*convert.DBUser)(nil).DB2PB(users)
+	if err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
@@ -256,9 +253,9 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckR
 	for _, v := range user {
 		uidList = append(uidList, v.UserID)
 	}
-	var r []*pbUser.AccountCheckResp_SingleUserStatus
+	var r []*pbUser.AccountCheckRespSingleUserStatus
 	for _, v := range req.CheckUserIDs {
-		temp := new(pbUser.AccountCheckResp_SingleUserStatus)
+		temp := new(pbUser.AccountCheckRespSingleUserStatus)
 		temp.UserID = v
 		if utils.IsContain(v, uidList) {
 			temp.AccountStatus = constant.Registered
@@ -330,6 +327,30 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 			return nil, err
 		}
 		resp.Users = append(resp.Users, u)
+	}
+	return &resp, nil
+}
+
+func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterReq) (*pbUser.UserRegisterResp, error) {
+	resp := pbUser.UserRegisterResp{}
+	userIDs := make([]string, 0)
+	for _, v := range req.Users {
+		userIDs = append(userIDs, v.UserID)
+	}
+	exist, err := s.IsExist(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
+		return nil, constant.ErrRegisteredAlready.Wrap("exist")
+	}
+	users, err := (*convert.PBUser)(nil).PB2DB(req.Users)
+	if err != nil {
+		return nil, err
+	}
+	err = s.Create(ctx, users)
+	if err != nil {
+		return nil, err
 	}
 	return &resp, nil
 }

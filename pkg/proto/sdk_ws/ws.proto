@@ -420,12 +420,6 @@ message OrganizationChangedTips{
 
 
 //////////////////////friend/////////////////////
-//message FriendInfo{
-//  UserInfo OwnerUser = 1;
-//  string Remark = 2;
-//  uint64 CreateTime = 3;
-//  UserInfo FriendUser = 4;
-//}
 
 message FriendApplication{
   int64 addTime = 1;
@@ -440,18 +434,18 @@ message FromToUserID{
 
 //FromUserID apply to add ToUserID
 message FriendApplicationTips{
-  FromToUserID fromToUserID = 1;
+  FromToUserID fromToUserID = 1; //from：发起者； to：接收者
 }
 
 //FromUserID accept or reject ToUserID
 message FriendApplicationApprovedTips{
-  FromToUserID fromToUserID = 1;
+  FromToUserID fromToUserID = 1; //from：同意者；to：请求发起者
   string handleMsg = 2;
 }
 
 //FromUserID accept or reject ToUserID
 message FriendApplicationRejectedTips{
-  FromToUserID fromToUserID = 1;
+  FromToUserID fromToUserID = 1; //from：拒绝者；to：请求发起者
   string handleMsg = 2;
 }
 
@@ -466,21 +460,21 @@ message FriendAddedTips{
 
 // FromUserID  deleted a friend ToUserID
 message FriendDeletedTips{
-  FromToUserID fromToUserID = 1;
+  FromToUserID fromToUserID = 1; //from：owner； to：friend
 }
 
 
 
 message BlackAddedTips{
-  FromToUserID fromToUserID = 1;
+  FromToUserID fromToUserID = 1; //from：owner； to：black
 }
 
 message BlackDeletedTips{
-  FromToUserID fromToUserID = 1;
+  FromToUserID fromToUserID = 1; //from：owner； to：black
 }
 
 message FriendInfoChangedTips{
-  FromToUserID fromToUserID = 1;
+  FromToUserID fromToUserID = 1; //from：changed； to：friend
 }
 //////////////////////user/////////////////////
 message UserInfoUpdatedTips{

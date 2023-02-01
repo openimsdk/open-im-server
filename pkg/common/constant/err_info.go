@@ -1,10 +1,7 @@
 package constant
 
 import (
-	sdkws "Open_IM/pkg/proto/sdk_ws"
-	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"strings"
@@ -66,29 +63,4 @@ func ToAPIErrWithErr(err error) *ErrInfo {
 		return toDetail(err, errInfo)
 	}
 	return toDetail(err, ErrDefaultOther)
-}
-
-func SetErrorForResp(err error, commonResp *sdkws.CommonResp) {
-	errInfo := ToAPIErrWithErr(err)
-	commonResp.ErrCode = errInfo.ErrCode
-	commonResp.ErrMsg = errInfo.ErrMsg
-	commonResp.DetailErrMsg = err.Error()
-}
-
-func CommonResp2Err(resp *sdkws.CommonResp) error {
-	if resp.ErrCode != NoError {
-		return errors.New(fmt.Sprintf("call rpc error, errCode is %d, errMsg is %s, detailErrMsg is %s", resp.ErrCode, resp.ErrMsg, resp.DetailErrMsg))
-	}
-	return nil
-}
-
-func Error2CommResp(ctx context.Context, info *ErrInfo, detailErrMsg string) *sdkws.CommonResp {
-	err := &sdkws.CommonResp{
-		ErrCode: info.ErrCode,
-		ErrMsg:  info.ErrMsg,
-	}
-	if detailErrMsg != "" {
-		err.DetailErrMsg = detailErrMsg
-	}
-	return err
 }

@@ -1,17 +1,18 @@
 package auth
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/constant"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
+	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/getcdv3"
 	pbAuth "Open_IM/pkg/proto/auth"
 	pbRelay "Open_IM/pkg/proto/relay"
 	"Open_IM/pkg/utils"
 	"context"
-	"errors"
 	"net"
 	"strconv"
 	"strings"
@@ -23,93 +24,76 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (rpc *rpcAuth) UserRegister(_ context.Context, req *pbAuth.UserRegisterReq) (*pbAuth.UserRegisterResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	var user imdb.User
-	utils.CopyStructFields(&user, req.UserInfo)
-	if req.UserInfo.BirthStr != "" {
-		time, err := utils.TimeStringToTime(req.UserInfo.BirthStr)
-		if err != nil {
-			log.NewError(req.OperationID, "TimeStringToTime failed ", err.Error(), req.UserInfo.BirthStr)
-			return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrArgs.ErrCode, ErrMsg: "TimeStringToTime failed:" + err.Error()}}, nil
-		}
-		user.Birth = time
+func (s *rpcAuth) UserToken(ctx context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
+	resp := pbAuth.UserTokenResp{}
+	if _, err := check.GetUsersInfo(ctx, req.UserID); err != nil {
+		return nil, err
 	}
-	log.Debug(req.OperationID, "copy ", user, req.UserInfo)
-	err := imdb.UserRegister(user)
+	token, err := s.CreateToken(ctx, req.UserID, int(req.PlatformID), config.Config.TokenPolicy.AccessExpire)
 	if err != nil {
-		errMsg := req.OperationID + " imdb.UserRegister failed " + err.Error() + user.UserID
-		log.NewError(req.OperationID, errMsg, user)
-		return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+		return nil, err
 	}
-	promePkg.PromeInc(promePkg.UserRegisterCounter)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}})
-	return &pbAuth.UserRegisterResp{CommonResp: &pbAuth.CommonResp{}}, nil
-}
-
-func (rpc *rpcAuth) UserToken(_ context.Context, req *pbAuth.UserTokenReq) (*pbAuth.UserTokenResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	_, err := imdb.GetUserByUserID(req.FromUserID)
-	if err != nil {
-		log.NewError(req.OperationID, "not this user:", req.FromUserID, req.String())
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: err.Error()}}, nil
-	}
-	tokens, expTime, err := token_verify.CreateToken(req.FromUserID, int(req.Platform))
-	if err != nil {
-		errMsg := req.OperationID + " token_verify.CreateToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	}
-	promePkg.PromeInc(promePkg.UserLoginCounter)
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime})
-	return &pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}, Token: tokens, ExpiredTime: expTime}, nil
-}
-
-func (rpc *rpcAuth) ParseToken(_ context.Context, req *pbAuth.ParseTokenReq) (*pbAuth.ParseTokenResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	claims, err := token_verify.ParseToken(req.Token, req.OperationID)
-	if err != nil {
-		errMsg := "ParseToken failed " + err.Error() + req.OperationID + " token " + req.Token
-		log.Error(req.OperationID, errMsg, "token:", req.Token)
-		return &pbAuth.ParseTokenResp{CommonResp: &pbAuth.CommonResp{ErrCode: 4001, ErrMsg: errMsg}}, nil
-	}
-	resp := pbAuth.ParseTokenResp{CommonResp: &pbAuth.CommonResp{}, UserID: claims.UID, Platform: claims.Platform, ExpireTimeSeconds: uint32(claims.ExpiresAt.Unix())}
-	log.Info(req.OperationID, utils.GetSelfFuncName(), " rpc return ", resp.String())
+	resp.Token = token
+	resp.ExpireTimeSeconds = config.Config.TokenPolicy.AccessExpire
 	return &resp, nil
 }
 
-func (rpc *rpcAuth) ForceLogout(_ context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc args ", req.String())
-	if !token_verify.IsManagerUserID(req.OpUserID) {
-		errMsg := req.OperationID + " IsManagerUserID false " + req.OpUserID
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
+func (s *rpcAuth) parseToken(ctx context.Context, tokensString, operationID string) (claims *token_verify.Claims, err error) {
+	claims, err = token_verify.GetClaimFromToken(tokensString)
+	if err != nil {
+		return nil, utils.Wrap(err, "")
 	}
-	//if err := token_verify.DeleteToken(req.FromUserID, int(req.Platform)); err != nil {
-	//	errMsg := req.OperationID + " DeleteToken failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
-	//	log.NewError(req.OperationID, errMsg)
-	//	return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
-	//}
-	if err := rpc.forceKickOff(req.FromUserID, req.Platform, req.OperationID); err != nil {
-		errMsg := req.OperationID + " forceKickOff failed " + err.Error() + req.FromUserID + utils.Int32ToString(req.Platform)
-		log.NewError(req.OperationID, errMsg)
-		return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{ErrCode: constant.ErrDB.ErrCode, ErrMsg: errMsg}}, nil
+	m, err := s.GetTokens(ctx, claims.UID, claims.Platform)
+	if err != nil {
+		return nil, err
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), " rpc return ", pbAuth.UserTokenResp{CommonResp: &pbAuth.CommonResp{}})
-	return &pbAuth.ForceLogoutResp{CommonResp: &pbAuth.CommonResp{}}, nil
+
+	if v, ok := m[tokensString]; ok {
+		switch v {
+		case constant.NormalToken:
+			return claims, nil
+		case constant.KickedToken:
+			return nil, utils.Wrap(constant.ErrTokenKicked, "this token has been kicked by other same terminal ")
+		default:
+			return nil, utils.Wrap(constant.ErrTokenUnknown, "")
+		}
+	}
+	return nil, utils.Wrap(constant.ErrTokenNotExist, "redis token map not find")
 }
 
-func (rpc *rpcAuth) forceKickOff(userID string, platformID int32, operationID string) error {
-	log.NewInfo(operationID, utils.GetSelfFuncName(), " args ", userID, platformID)
+func (s *rpcAuth) ParseToken(ctx context.Context, req *pbAuth.ParseTokenReq) (*pbAuth.ParseTokenResp, error) {
+	resp := pbAuth.ParseTokenResp{}
+	claims, err := s.parseToken(ctx, req.Token, req.OperationID)
+	if err != nil {
+		return nil, err
+	}
+	resp.UserID = claims.UID
+	resp.Platform = claims.Platform
+	resp.ExpireTimeSeconds = claims.ExpiresAt.Unix()
+	return &resp, nil
+}
+
+func (s *rpcAuth) ForceLogout(ctx context.Context, req *pbAuth.ForceLogoutReq) (*pbAuth.ForceLogoutResp, error) {
+	resp := pbAuth.ForceLogoutResp{}
+	if err := token_verify.CheckAdmin(ctx); err != nil {
+		return nil, err
+	}
+	if err := s.forceKickOff(ctx, req.UserID, req.PlatformID, tracelog.GetOperationID(ctx)); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+func (s *rpcAuth) forceKickOff(ctx context.Context, userID string, platformID int32, operationID string) error {
 	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
 		kickReq := &pbRelay.KickUserOfflineReq{OperationID: operationID, KickUserIDList: []string{userID}, PlatformID: platformID}
 		log.NewInfo(operationID, "KickUserOffline ", client, kickReq.String())
-		_, err := client.KickUserOffline(context.Background(), kickReq)
+		_, err := client.KickUserOffline(ctx, kickReq)
 		return utils.Wrap(err, "")
 	}
-	return errors.New("no rpc node ")
+	return constant.ErrInternalServer.Wrap()
 }
 
 type rpcAuth struct {
@@ -117,6 +101,7 @@ type rpcAuth struct {
 	rpcRegisterName string
 	etcdSchema      string
 	etcdAddr        []string
+	controller.AuthInterface
 }
 
 func NewRpcAuthServer(port int) *rpcAuth {
@@ -129,7 +114,7 @@ func NewRpcAuthServer(port int) *rpcAuth {
 	}
 }
 
-func (rpc *rpcAuth) Run() {
+func (s *rpcAuth) Run() {
 	operationID := utils.OperationIDGenerator()
 	log.NewInfo(operationID, "rpc auth start...")
 
@@ -139,10 +124,10 @@ func (rpc *rpcAuth) Run() {
 	} else {
 		listenIP = config.Config.ListenIP
 	}
-	address := listenIP + ":" + strconv.Itoa(rpc.rpcPort)
+	address := listenIP + ":" + strconv.Itoa(s.rpcPort)
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		panic("listening err:" + err.Error() + rpc.rpcRegisterName)
+		panic("listening err:" + err.Error() + s.rpcRegisterName)
 	}
 	log.NewInfo(operationID, "listen network success, ", address, listener)
 	var grpcOpts []grpc.ServerOption
@@ -162,7 +147,7 @@ func (rpc *rpcAuth) Run() {
 	defer srv.GracefulStop()
 
 	//service registers with etcd
-	pbAuth.RegisterAuthServer(srv, rpc)
+	pbAuth.RegisterAuthServer(srv, s)
 	rpcRegisterIP := config.Config.RpcRegisterIP
 	if config.Config.RpcRegisterIP == "" {
 		rpcRegisterIP, err = utils.GetLocalIP()
@@ -172,14 +157,14 @@ func (rpc *rpcAuth) Run() {
 	}
 	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
 
-	err = getcdv3.RegisterEtcd(rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName, 10)
+	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
 	if err != nil {
 		log.NewError(operationID, "RegisterEtcd failed ", err.Error(),
-			rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
+			s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
 		panic(utils.Wrap(err, "register auth module  rpc to etcd err"))
 
 	}
-	log.NewInfo(operationID, "RegisterAuthServer ok ", rpc.etcdSchema, strings.Join(rpc.etcdAddr, ","), rpcRegisterIP, rpc.rpcPort, rpc.rpcRegisterName)
+	log.NewInfo(operationID, "RegisterAuthServer ok ", s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError(operationID, "Serve failed ", err.Error())

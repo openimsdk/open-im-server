@@ -1,32 +1,33 @@
 package msg
 
 import (
+	"Open_IM/internal/common/check"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	imdb "Open_IM/pkg/common/db/mysql_model/im_mysql_model"
 	"Open_IM/pkg/common/log"
-	utils2 "Open_IM/pkg/common/utils"
+	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
 
 func getFromToUserNickname(fromUserID, toUserID string) (string, string, error) {
-	from, err := imdb.GetUserByUserID(fromUserID)
+	users, err := check.GetUsersInfo(context.Background(), fromUserID, toUserID)
 	if err != nil {
-		return "", "", utils.Wrap(err, "")
+		return "", "", nil
 	}
-	to, err := imdb.GetUserByUserID(toUserID)
-	if err != nil {
-		return "", "", utils.Wrap(err, "")
+	if users[0].UserID == fromUserID {
+		return users[0].Nickname, users[1].Nickname, nil
 	}
-	return from.Nickname, to.Nickname, nil
+	return users[1].Nickname, users[0].Nickname, nil
+
 }
 
 func friendNotification(operationID, fromUserID, toUserID string, contentType int32, m proto.Message) {
-	log.Info(operationID, utils.GetSelfFuncName(), "args: ", commID, contentType)
+	log.Info(operationID, utils.GetSelfFuncName(), "args: ", contentType)
 	var err error
 	var tips open_im_sdk.TipsComm
 	tips.Detail, err = proto.Marshal(m)
@@ -90,84 +91,83 @@ func friendNotification(operationID, fromUserID, toUserID string, contentType in
 	Notification(&n)
 }
 
-func FriendApplicationNotification(req *pbFriend.AddFriendReq) {
+func FriendApplicationNotification(ctx context.Context, req *pbFriend.AddFriendReq) {
 	FriendApplicationTips := open_im_sdk.FriendApplicationTips{FromToUserID: &open_im_sdk.FromToUserID{}}
-	FriendApplicationTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	FriendApplicationTips.FromToUserID.ToUserID = req.CommID.ToUserID
-	friendNotification(req.CommID, constant.FriendApplicationNotification, &FriendApplicationTips)
+	FriendApplicationTips.FromToUserID.FromUserID = req.FromUserID
+	FriendApplicationTips.FromToUserID.ToUserID = req.ToUserID
+	friendNotification(tracelog.GetOperationID(ctx), req.FromUserID, req.ToUserID, constant.FriendApplicationNotification, &FriendApplicationTips)
 }
 
-func FriendApplicationApprovedNotification(req *pbFriend.AddFriendResponseReq) {
+func FriendApplicationApprovedNotification(ctx context.Context, req *pbFriend.RespondFriendApplyReq) {
 	FriendApplicationApprovedTips := open_im_sdk.FriendApplicationApprovedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
-	FriendApplicationApprovedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	FriendApplicationApprovedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	FriendApplicationApprovedTips.FromToUserID.FromUserID = req.FromUserID
+	FriendApplicationApprovedTips.FromToUserID.ToUserID = req.ToUserID
 	FriendApplicationApprovedTips.HandleMsg = req.HandleMsg
-	friendNotification(req.CommID, constant.FriendApplicationApprovedNotification, &FriendApplicationApprovedTips)
+	friendNotification(tracelog.GetOperationID(ctx), req.ToUserID, req.FromUserID, constant.FriendApplicationApprovedNotification, &FriendApplicationApprovedTips)
 }
 
-func FriendApplicationRejectedNotification(req *pbFriend.AddFriendResponseReq) {
+func FriendApplicationRejectedNotification(ctx context.Context, req *pbFriend.RespondFriendApplyReq) {
 	FriendApplicationApprovedTips := open_im_sdk.FriendApplicationApprovedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
-	FriendApplicationApprovedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	FriendApplicationApprovedTips.FromToUserID.ToUserID = req.CommID.ToUserID
+	FriendApplicationApprovedTips.FromToUserID.FromUserID = req.FromUserID
+	FriendApplicationApprovedTips.FromToUserID.ToUserID = req.ToUserID
 	FriendApplicationApprovedTips.HandleMsg = req.HandleMsg
-	friendNotification(req.CommID, constant.FriendApplicationRejectedNotification, &FriendApplicationApprovedTips)
+	friendNotification(tracelog.GetOperationID(ctx), req.ToUserID, req.FromUserID, constant.FriendApplicationRejectedNotification, &FriendApplicationApprovedTips)
 }
 
-func FriendAddedNotification(operationID, opUserID, fromUserID, toUserID string) {
+func FriendAddedNotification(ctx context.Context, operationID, opUserID, fromUserID, toUserID string) {
 	friendAddedTips := open_im_sdk.FriendAddedTips{Friend: &open_im_sdk.FriendInfo{}, OpUser: &open_im_sdk.PublicUserInfo{}}
-	user, err := imdb.GetUserByUserID(opUserID)
+	user, err := check.GetUsersInfo(context.Background(), opUserID)
 	if err != nil {
-		log.NewError(operationID, "GetUserByUserID failed ", err.Error(), opUserID)
 		return
 	}
-	utils2.UserDBCopyOpenIMPublicUser(friendAddedTips.OpUser, user)
-	friend, err := imdb.GetFriendRelationshipFromFriend(fromUserID, toUserID)
+	friendAddedTips.OpUser.UserID = user[0].UserID
+	friendAddedTips.OpUser.Ex = user[0].Ex
+	friendAddedTips.OpUser.Nickname = user[0].Nickname
+	friendAddedTips.OpUser.FaceURL = user[0].FaceURL
+
+	friend, err := check.GetFriendsInfo(ctx, fromUserID, toUserID)
 	if err != nil {
-		log.NewError(operationID, "GetFriendRelationshipFromFriend failed ", err.Error(), fromUserID, toUserID)
 		return
 	}
-	utils2.FriendDBCopyOpenIM(friendAddedTips.Friend, friend)
-	commID := pbFriend.CommID{FromUserID: fromUserID, ToUserID: toUserID, OpUserID: opUserID, OperationID: operationID}
-	friendNotification(&commID, constant.FriendAddedNotification, &friendAddedTips)
+	friendAddedTips.Friend = friend
+	friendNotification(operationID, fromUserID, toUserID, constant.FriendAddedNotification, &friendAddedTips)
 }
 
-func FriendDeletedNotification(req *pbFriend.DeleteFriendReq) {
+func FriendDeletedNotification(ctx context.Context, req *pbFriend.DeleteFriendReq) {
 	friendDeletedTips := open_im_sdk.FriendDeletedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
-	friendDeletedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	friendDeletedTips.FromToUserID.ToUserID = req.CommID.ToUserID
-	friendNotification(req.CommID, constant.FriendDeletedNotification, &friendDeletedTips)
+	friendDeletedTips.FromToUserID.FromUserID = req.OwnerUserID
+	friendDeletedTips.FromToUserID.ToUserID = req.FriendUserID
+	friendNotification(tracelog.GetOperationID(ctx), req.OwnerUserID, req.FriendUserID, constant.FriendDeletedNotification, &friendDeletedTips)
 }
 
-func FriendRemarkSetNotification(operationID, opUserID, fromUserID, toUserID string) {
+func FriendRemarkSetNotification(ctx context.Context, fromUserID, toUserID string) {
 	friendInfoChangedTips := open_im_sdk.FriendInfoChangedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
 	friendInfoChangedTips.FromToUserID.FromUserID = fromUserID
 	friendInfoChangedTips.FromToUserID.ToUserID = toUserID
-	commID := pbFriend.CommID{FromUserID: fromUserID, ToUserID: toUserID, OpUserID: opUserID, OperationID: operationID}
-	friendNotification(&commID, constant.FriendRemarkSetNotification, &friendInfoChangedTips)
+	friendNotification(tracelog.GetOperationID(ctx), fromUserID, toUserID, constant.FriendRemarkSetNotification, &friendInfoChangedTips)
 }
 
-func BlackAddedNotification(req *pbFriend.AddBlacklistReq) {
+func BlackAddedNotification(ctx context.Context, req *pbFriend.AddBlackReq) {
 	blackAddedTips := open_im_sdk.BlackAddedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
-	blackAddedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	blackAddedTips.FromToUserID.ToUserID = req.CommID.ToUserID
-	friendNotification(req.CommID, constant.BlackAddedNotification, &blackAddedTips)
+	blackAddedTips.FromToUserID.FromUserID = req.OwnerUserID
+	blackAddedTips.FromToUserID.ToUserID = req.BlackUserID
+	friendNotification(tracelog.GetOperationID(ctx), req.OwnerUserID, req.BlackUserID, constant.BlackAddedNotification, &blackAddedTips)
 }
 
-func BlackDeletedNotification(req *pbFriend.RemoveBlacklistReq) {
+func BlackDeletedNotification(ctx context.Context, req *pbFriend.RemoveBlackReq) {
 	blackDeletedTips := open_im_sdk.BlackDeletedTips{FromToUserID: &open_im_sdk.FromToUserID{}}
-	blackDeletedTips.FromToUserID.FromUserID = req.CommID.FromUserID
-	blackDeletedTips.FromToUserID.ToUserID = req.CommID.ToUserID
-	friendNotification(req.CommID, constant.BlackDeletedNotification, &blackDeletedTips)
+	blackDeletedTips.FromToUserID.FromUserID = req.OwnerUserID
+	blackDeletedTips.FromToUserID.ToUserID = req.BlackUserID
+	friendNotification(tracelog.GetOperationID(ctx), req.OwnerUserID, req.BlackUserID, constant.BlackDeletedNotification, &blackDeletedTips)
 }
 
 // send to myself
-func UserInfoUpdatedNotification(operationID, opUserID string, changedUserID string) {
+func UserInfoUpdatedNotification(ctx context.Context, opUserID string, changedUserID string) {
 	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: changedUserID}
-	commID := pbFriend.CommID{FromUserID: opUserID, ToUserID: changedUserID, OpUserID: opUserID, OperationID: operationID}
-	friendNotification(&commID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
+	friendNotification(tracelog.GetOperationID(ctx), opUserID, changedUserID, constant.UserInfoUpdatedNotification, &selfInfoUpdatedTips)
 }
 
-func FriendInfoUpdatedNotification(operationID, changedUserID string, needNotifiedUserID string, opUserID string) {
+func FriendInfoUpdatedNotification(ctx context.Context, changedUserID string, needNotifiedUserID string, opUserID string) {
 	selfInfoUpdatedTips := open_im_sdk.UserInfoUpdatedTips{UserID: changedUserID}
-	friendNotification(operationID, opUserID, needNotifiedUserID, constant.FriendInfoUpdatedNotification, &selfInfoUpdatedTips)
+	friendNotification(tracelog.GetOperationID(ctx), opUserID, needNotifiedUserID, constant.FriendInfoUpdatedNotification, &selfInfoUpdatedTips)
 }

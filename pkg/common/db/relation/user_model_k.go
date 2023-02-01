@@ -84,7 +84,7 @@ func (u *User) GetByName(ctx context.Context, userName string, showNumber, pageN
 
 func (u *User) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*User, count int64, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "content", content, "showNumber", showNumber, "pageNumber", pageNumber, "users", users)
 	}()
 	db := u.DB.Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
 	if err := db.Count(&count).Error; err != nil {
