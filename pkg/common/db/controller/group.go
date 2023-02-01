@@ -134,8 +134,8 @@ func (g *GroupController) AddUserToSuperGroup(ctx context.Context, groupID strin
 	panic("implement me")
 }
 
-func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Client) GroupInterface {
-	groupController := &GroupController{database: newGroupDatabase(db, rdb, mgoDB)}
+func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.Client) GroupInterface {
+	groupController := &GroupController{database: newGroupDatabase(db, rdb, mgoClient)}
 	return groupController
 }
 
@@ -182,23 +182,24 @@ type GroupDataBase struct {
 	mongoDB *unrelation.SuperGroupMgoDB
 }
 
-func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoDB *mongo.Client) GroupDataBaseInterface {
+func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.Client) GroupDataBaseInterface {
 	groupDB := relation.NewGroupDB(db)
 	groupMemberDB := relation.NewGroupMemberDB(db)
 	groupRequestDB := relation.NewGroupRequest(db)
 	newDB := db
+	superGroupMgoDB := unrelation.NewSuperGroupMgoDB(mgoClient)
 	database := &GroupDataBase{
 		groupDB:        groupDB,
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		db:             newDB,
-		cache: cache.NewGroupCache(rdb, groupDB, groupMemberDB, groupRequestDB, rockscache.Options{
+		cache: cache.NewGroupCache(rdb, groupDB, groupMemberDB, groupRequestDB, superGroupMgoDB, rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,
 			DisableCacheDelete:     false,
 			StrongConsistency:      true,
 		}),
-		mongoDB: unrelation.NewSuperGroupMgoDB(mgoDB),
+		mongoDB: superGroupMgoDB,
 	}
 	return database
 }
@@ -272,7 +273,7 @@ func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, in
 		return err
 	}
 
-	if err = g.cache.DelJoinedSuperGroupIDs(ctx, initMemberIDList); err != nil {
+	if err = g.cache.BatchDelJoinedSuperGroupIDs(ctx, initMemberIDList); err != nil {
 		_ = sess.AbortTransaction(ctx)
 		return err
 	}

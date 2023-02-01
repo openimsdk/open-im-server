@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/mongo"
 	"Open_IM/pkg/common/db/mysql"
+	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
@@ -19,31 +20,32 @@ import (
 )
 
 const (
-	userInfoCache       = "USER_INFO_CACHE:"
+	//userInfoCache       = "USER_INFO_CACHE:"
 	friendRelationCache = "FRIEND_RELATION_CACHE:"
 	blackListCache      = "BLACK_LIST_CACHE:"
-	groupCache          = "GROUP_CACHE:"
+	//groupCache          = "GROUP_CACHE:"
 	//groupInfoCache            = "GROUP_INFO_CACHE:"
-	groupOwnerIDCache         = "GROUP_OWNER_ID:"
-	joinedGroupListCache      = "JOINED_GROUP_LIST_CACHE:"
-	groupMemberInfoCache      = "GROUP_MEMBER_INFO_CACHE:"
-	groupAllMemberInfoCache   = "GROUP_ALL_MEMBER_INFO_CACHE:"
-	allFriendInfoCache        = "ALL_FRIEND_INFO_CACHE:"
-	joinedSuperGroupListCache = "JOINED_SUPER_GROUP_LIST_CACHE:"
-	groupMemberListHashCache  = "GROUP_MEMBER_LIST_HASH_CACHE:"
-	groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
-	conversationCache         = "CONVERSATION_CACHE:"
-	conversationIDListCache   = "CONVERSATION_ID_LIST_CACHE:"
-	extendMsgSetCache         = "EXTEND_MSG_SET_CACHE:"
-	extendMsgCache            = "EXTEND_MSG_CACHE:"
+	//groupOwnerIDCache         = "GROUP_OWNER_ID:"
+	//joinedGroupListCache      = "JOINED_GROUP_LIST_CACHE:"
+	//groupMemberInfoCache      = "GROUP_MEMBER_INFO_CACHE:"
+	//groupAllMemberInfoCache   = "GROUP_ALL_MEMBER_INFO_CACHE:"
+	allFriendInfoCache = "ALL_FRIEND_INFO_CACHE:"
+	//joinedSuperGroupListCache = "JOINED_SUPER_GROUP_LIST_CACHE:"
+	//groupMemberListHashCache  = "GROUP_MEMBER_LIST_HASH_CACHE:"
+	//groupMemberNumCache       = "GROUP_MEMBER_NUM_CACHE:"
+	conversationCache       = "CONVERSATION_CACHE:"
+	conversationIDListCache = "CONVERSATION_ID_LIST_CACHE:"
+
+	extendMsgSetCache = "EXTEND_MSG_SET_CACHE:"
+	extendMsgCache    = "EXTEND_MSG_CACHE:"
 )
 
 const scanCount = 3000
 const RandomExpireAdjustment = 0.2
 
 func (rc *RcClient) DelKeys() {
-	for _, key := range []string{groupCache, friendRelationCache, blackListCache, userInfoCache, groupInfoCacheKey, groupOwnerIDCache, joinedGroupListCache,
-		groupMemberInfoCache, groupAllMemberInfoCache, allFriendInfoCache} {
+	for _, key := range []string{"GROUP_CACHE:", "FRIEND_RELATION_CACHE", "BLACK_LIST_CACHE:", "USER_INFO_CACHE:", "GROUP_INFO_CACHE", groupOwnerIDCache, joinedGroupListCache,
+		groupMemberInfoCache, groupAllMemberInfoCache, "ALL_FRIEND_INFO_CACHE:"} {
 		fName := utils.GetSelfFuncName()
 		var cursor uint64
 		var n int

@@ -1,21 +1,6 @@
 package constant
 
 const (
-
-	//group admin
-	//	OrdinaryMember = 0
-	//	GroupOwner     = 1
-	//	Administrator  = 2
-	//group application
-	//	Application      = 0
-	//	AgreeApplication = 1
-
-	//friend related
-	BlackListFlag         = 1
-	ApplicationFriendFlag = 0
-	FriendFlag            = 1
-	RefuseFriendFlag      = -1
-
 	//Websocket Protocol
 	WSGetNewestSeq        = 1001
 	WSPullMsgBySeqList    = 1002

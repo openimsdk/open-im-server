@@ -7,134 +7,144 @@ package user;
 
 
 
-message GetAllUserIDReq{
+message getAllUserIDReq{
   server_api_params.RequestPagination pagination = 1;
 }
-message GetAllUserIDResp{
+message getAllUserIDResp{
   int32 total = 1;
-  repeated string UserIDList = 2;
+  repeated string userIDList = 2;
 }
 
 
-message AccountCheckReq{
+message accountCheckReq{
   repeated string checkUserIDs = 1;
 }
-message AccountCheckResp{
-  message SingleUserStatus {
+message accountCheckResp{
+  message singleUserStatus {
     string userID = 1;
     string accountStatus = 2;
   }
-  repeated SingleUserStatus results = 1;
+  repeated singleUserStatus results = 1;
 }
 
 
-message GetUsersInfoReq{
+message getUsersInfoReq{
   repeated string userIDs = 1;
 }
-message GetUsersInfoResp{
+message getUsersInfoResp{
   repeated server_api_params.UserInfo usersInfo = 1;
 }
 
-message UpdateUserInfoReq{
+message updateUserInfoReq{
   server_api_params.UserInfo userInfo = 1;
 }
-message UpdateUserInfoResp{
+message updateUserInfoResp{
 }
 
-message SetGlobalRecvMessageOptReq{
+message setGlobalRecvMessageOptReq{
   string userID = 1;
   int32 globalRecvMsgOpt = 3;
 }
-message SetGlobalRecvMessageOptResp{
+message setGlobalRecvMessageOptResp{
 }
 
-message SetConversationReq{
-  conversation.Conversation Conversation = 1;
+message setConversationReq{
+  conversation.Conversation conversation = 1;
   int32 notificationType = 2;
-  string OperationID = 3;
+  string operationID = 3;
 }
 
-message SetConversationResp{
+message setConversationResp{
 
 }
 
-message SetRecvMsgOptReq {
-  string OwnerUserID = 1;
-  string ConversationID = 2;
-  int32 RecvMsgOpt = 3;
+message setRecvMsgOptReq {
+  string ownerUserID = 1;
+  string conversationID = 2;
+  int32 recvMsgOpt = 3;
   int32 notificationType = 4;
-  string OperationID = 5;
+  string operationID = 5;
 }
 
-message SetRecvMsgOptResp {
+message setRecvMsgOptResp {
 
 }
 
-message GetConversationReq{
-  string ConversationID = 1;
-  string OwnerUserID = 2;
-  string OperationID = 3;
+message getConversationReq{
+  string conversationID = 1;
+  string ownerUserID = 2;
+  string operationID = 3;
 }
 
-message GetConversationResp{
-  conversation.Conversation Conversation = 2;
+message getConversationResp{
+  conversation.Conversation conversation = 2;
 }
 
-message GetConversationsReq{
-  string OwnerUserID = 1;
-  repeated string ConversationIDs = 2;
-  string OperationID = 3;
+message getConversationsReq{
+  string ownerUserID = 1;
+  repeated string conversationIDs = 2;
+  string operationID = 3;
 }
 
-message GetConversationsResp{
-  repeated conversation.Conversation Conversations = 2;
+message getConversationsResp{
+  repeated conversation.Conversation conversations = 2;
 }
 
-message GetAllConversationsReq{
-  string OwnerUserID = 1;
-  string OperationID = 2;
+message getAllConversationsReq{
+  string ownerUserID = 1;
+  string operationID = 2;
 }
 
-message GetAllConversationsResp{
-  repeated conversation.Conversation Conversations = 2;
+message getAllConversationsResp{
+  repeated conversation.Conversation conversations = 2;
 }
 
-message BatchSetConversationsReq{
-  repeated conversation.Conversation Conversations = 1;
+message batchSetConversationsReq{
+  repeated conversation.Conversation conversations = 1;
   string OwnerUserID = 2;
   int32 notificationType = 3;
   string OperationID = 4;
 }
 
-message BatchSetConversationsResp{
+message batchSetConversationsResp{
   repeated string Success = 2;
   repeated string Failed = 3;
 }
 
 
-message GetUsersReq {
+message getUsersReq {
   server_api_params.RequestPagination pagination = 2;
   string userName = 3;
   string userID = 4;
   string content = 5;
 }
 
-message GetUsersResp{
+message getUsersResp{
   int32 total = 1;
   repeated server_api_params.UserInfo users = 2;
 }
 
+message userRegisterReq {
+  repeated server_api_params.UserInfo users = 1;
+}
+message userRegisterResp {
+}
+
+
+
 
 service user {
   //获取指定的用户信息 全字段
-  rpc GetUsersInfo(GetUsersInfoReq) returns(GetUsersInfoResp);
+  rpc getUsersInfo(getUsersInfoReq) returns(getUsersInfoResp);
   //更新用户信息
-  rpc UpdateUserInfo(UpdateUserInfoReq) returns(UpdateUserInfoResp);
+  rpc updateUserInfo(updateUserInfoReq) returns(updateUserInfoResp);
   //设置用户消息接收选项
-  rpc SetGlobalRecvMessageOpt(SetGlobalRecvMessageOptReq) returns(SetGlobalRecvMessageOptResp);
+  rpc setGlobalRecvMessageOpt(setGlobalRecvMessageOptReq) returns(setGlobalRecvMessageOptResp);
   //检查userID是否存在
-  rpc AccountCheck(AccountCheckReq)returns(AccountCheckResp);
+  rpc accountCheck(accountCheckReq)returns(accountCheckResp);
   //翻页（或指定userID，昵称）拉取用户信息 全字段
-  rpc GetUsers(GetUsersReq) returns (GetUsersResp);
+  rpc getUsers(getUsersReq) returns (getUsersResp);
+  //用户注册
+  rpc userRegister(userRegisterReq) returns (userRegisterResp);
 }
 

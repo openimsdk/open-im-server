@@ -7,14 +7,16 @@ import (
 )
 
 type UserInterface interface {
+	//获取指定用户的信息 如果有记录未找到 也返回错误
 	Find(ctx context.Context, userIDs []string) (users []*relation.User, err error)
 	Create(ctx context.Context, users []*relation.User) error
-	Take(ctx context.Context, userID string) (user *relation.User, err error)
 	Update(ctx context.Context, users []*relation.User) (err error)
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
 	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
 	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
 	Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.User, count int64, err error)
+	//userIDs是否存在 只要有一个存在就为true
+	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
 
 type UserController struct {

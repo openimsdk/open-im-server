@@ -1,6 +1,7 @@
 package user
 
 import (
+	"Open_IM/internal/common/convert"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -9,6 +10,7 @@ import (
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
+	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	pbGroup "Open_IM/pkg/proto/group"
@@ -170,12 +172,9 @@ func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoR
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range users {
-		n, err := utils.NewDBUser(v).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.UsersInfo = append(resp.UsersInfo, n)
+	resp.UsersInfo, err = (*convert.DBUser)(nil).DB2PB(users)
+	if err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
@@ -188,13 +187,13 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	oldNickname := ""
 	if req.UserInfo.Nickname != "" {
-		u, err := s.Take(ctx, req.UserInfo.UserID)
+		u, err := s.Find(ctx, []string{req.UserInfo.UserID})
 		if err != nil {
 			return nil, err
 		}
-		oldNickname = u.Nickname
+		oldNickname = u[0].Nickname
 	}
-	user, err := utils.NewPBUser(req.UserInfo).Convert()
+	user, err := convert.NewPBUser(req.UserInfo).Convert()
 	if err != nil {
 		return nil, err
 	}
@@ -207,23 +206,23 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 		return nil, err
 	}
 	client := pbFriend.NewFriendClient(etcdConn)
-	newReq := &pbFriend.GetFriendListReq{UserID: req.UserInfo.UserID}
-	rpcResp, err := client.GetFriendList(context.Background(), newReq)
+	newReq := &pbFriend.GetFriendsReq{UserID: req.UserInfo.UserID}
+	rpcResp, err := client.GetFriends(context.Background(), newReq)
 	if err != nil {
 		return nil, err
 	}
 	go func() {
-		for _, v := range rpcResp.FriendInfoList {
-			chat.FriendInfoUpdatedNotification(utils.OperationID(ctx), req.UserInfo.UserID, v.FriendUser.UserID, utils.OpUserID(ctx))
+		for _, v := range rpcResp.FriendsInfo {
+			chat.FriendInfoUpdatedNotification(tracelog.GetOperationID(ctx), req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
 		}
 	}()
 
-	chat.UserInfoUpdatedNotification(utils.OperationID(ctx), utils.OpUserID(ctx), req.UserInfo.UserID)
+	chat.UserInfoUpdatedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
 	if req.UserInfo.FaceURL != "" {
-		s.SyncJoinedGroupMemberFaceURL(ctx, req.UserInfo.UserID, req.UserInfo.FaceURL, utils.OperationID(ctx), utils.OpUserID(ctx))
+		s.SyncJoinedGroupMemberFaceURL(ctx, req.UserInfo.UserID, req.UserInfo.FaceURL, tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx))
 	}
 	if req.UserInfo.Nickname != "" {
-		s.SyncJoinedGroupMemberNickname(ctx, req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, utils.OperationID(ctx), utils.OpUserID(ctx))
+		s.SyncJoinedGroupMemberNickname(ctx, req.UserInfo.UserID, req.UserInfo.Nickname, oldNickname, tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx))
 	}
 	return &resp, nil
 }
@@ -236,13 +235,13 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.Se
 	if err != nil {
 		return nil, err
 	}
-	chat.UserInfoUpdatedNotification(utils.OperationID(ctx), req.UserID, req.UserID)
+	chat.UserInfoUpdatedNotification(tracelog.GetOperationID(ctx), req.UserID, req.UserID)
 	return &resp, nil
 }
 
 func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
 	resp := pbUser.AccountCheckResp{}
-	err := token_verify.CheckManagerUserID(ctx, utils.OpUserID(ctx))
+	err := token_verify.CheckManagerUserID(ctx, tracelog.GetOpUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -254,9 +253,9 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckR
 	for _, v := range user {
 		uidList = append(uidList, v.UserID)
 	}
-	var r []*pbUser.AccountCheckResp_SingleUserStatus
+	var r []*pbUser.AccountCheckRespSingleUserStatus
 	for _, v := range req.CheckUserIDs {
-		temp := new(pbUser.AccountCheckResp_SingleUserStatus)
+		temp := new(pbUser.AccountCheckRespSingleUserStatus)
 		temp.UserID = v
 		if utils.IsContain(v, uidList) {
 			temp.AccountStatus = constant.Registered
@@ -272,12 +271,12 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	resp := pbUser.GetUsersResp{}
 	var err error
 	if req.UserID != "" {
-		u, err := s.Take(ctx, req.UserID)
+		u, err := s.Find(ctx, []string{req.UserID})
 		if err != nil {
 			return nil, err
 		}
 		resp.Total = 1
-		u1, err := utils.NewDBUser(u).Convert()
+		u1, err := convert.NewDBUser(u[0]).Convert()
 		if err != nil {
 			return nil, err
 		}
@@ -292,7 +291,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		}
 		resp.Total = int32(total)
 		for _, v := range usersDB {
-			u1, err := utils.NewDBUser(v).Convert()
+			u1, err := convert.NewDBUser(v).Convert()
 			if err != nil {
 				return nil, err
 			}
@@ -306,7 +305,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		}
 		resp.Total = int32(total)
 		for _, v := range usersDB {
-			u1, err := utils.NewDBUser(v).Convert()
+			u1, err := convert.NewDBUser(v).Convert()
 			if err != nil {
 				return nil, err
 			}
@@ -323,11 +322,35 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	resp.Total = int32(total)
 
 	for _, userDB := range usersDB {
-		u, err := utils.NewDBUser(userDB).Convert()
+		u, err := convert.NewDBUser(userDB).Convert()
 		if err != nil {
 			return nil, err
 		}
 		resp.Users = append(resp.Users, u)
+	}
+	return &resp, nil
+}
+
+func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterReq) (*pbUser.UserRegisterResp, error) {
+	resp := pbUser.UserRegisterResp{}
+	userIDs := make([]string, 0)
+	for _, v := range req.Users {
+		userIDs = append(userIDs, v.UserID)
+	}
+	exist, err := s.IsExist(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
+		return nil, constant.ErrRegisteredAlready.Wrap("exist")
+	}
+	users, err := (*convert.PBUser)(nil).PB2DB(req.Users)
+	if err != nil {
+		return nil, err
+	}
+	err = s.Create(ctx, users)
+	if err != nil {
+		return nil, err
 	}
 	return &resp, nil
 }
