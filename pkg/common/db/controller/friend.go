@@ -2,6 +2,7 @@ package controller
 
 import (
 	"Open_IM/pkg/common/db/relation"
+	"Open_IM/pkg/common/db/table"
 	"context"
 	"gorm.io/gorm"
 )
@@ -95,7 +96,7 @@ type FriendDatabaseInterface interface {
 	// AddFriendRequest 增加或者更新好友申请
 	AddFriendRequest(ctx context.Context, fromUserID, toUserID string, reqMsg string, ex string) (err error)
 	// BecomeFriend 先判断是否在好友表，如果在则不插入
-	BecomeFriend(ctx context.Context, friends []*relation.Friend) (err error)
+	BecomeFriend(ctx context.Context, friends []*table.FriendModel) (err error)
 	// RefuseFriendRequest 拒绝好友申请
 	RefuseFriendRequest(ctx context.Context, friendRequest *relation.FriendRequest) (err error)
 	// AgreeFriendRequest 同意好友申请
