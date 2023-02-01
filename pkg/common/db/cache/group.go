@@ -30,9 +30,9 @@ const (
 )
 
 type GroupCache struct {
-	group        *relation.Group
-	groupMember  *relation.GroupMember
-	groupRequest *relation.GroupRequest
+	group        *relation.GroupGorm
+	groupMember  *relation.GroupMemberGorm
+	groupRequest *relation.GroupRequestGorm
 	mongoDB      *unrelation.SuperGroupMgoDB
 	expireTime   time.Duration
 	redisClient  *RedisClient
@@ -43,7 +43,7 @@ type GroupCache struct {
 	cacheGroupMemberUserIDs map[string]*localcache.GroupMemberIDsHash
 }
 
-func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.Group, groupMemberDB *relation.GroupMember, groupRequestDB *relation.GroupRequest, mongoClient *unrelation.SuperGroupMgoDB, opts rockscache.Options) *GroupCache {
+func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMgoDB, opts rockscache.Options) *GroupCache {
 	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
 		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
 		mongoDB: mongoClient, cacheGroupMemberUserIDs: make(map[string]*localcache.GroupMemberIDsHash, 0),
@@ -82,7 +82,7 @@ func (g *GroupCache) getGroupMemberNumKey(groupID string) string {
 	return groupMemberNumKey + groupID
 }
 
-/// groupInfo
+// / groupInfo
 func (g *GroupCache) GetGroupsInfo(ctx context.Context, groupIDs []string) (groups []*relation.Group, err error) {
 	for _, groupID := range groupIDs {
 		group, err := g.GetGroupInfo(ctx, groupID)
@@ -94,7 +94,7 @@ func (g *GroupCache) GetGroupsInfo(ctx context.Context, groupIDs []string) (grou
 	return groups, nil
 }
 
-func (g *GroupCache) GetGroupInfo(ctx context.Context, groupID string) (group *relation.Group, err error) {
+func (g *GroupCache) GetGroupInfo(ctx context.Context, groupID string) (group *relation.GroupGorm, err error) {
 	getGroup := func() (string, error) {
 		groupInfo, err := g.group.Take(ctx, groupID)
 		if err != nil {
@@ -106,7 +106,7 @@ func (g *GroupCache) GetGroupInfo(ctx context.Context, groupID string) (group *r
 		}
 		return string(bytes), nil
 	}
-	group = &relation.Group{}
+	group = &relation.GroupGorm{}
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "group", *group)
 	}()

@@ -45,8 +45,8 @@ func NewFriendServer(port int) *friendServer {
 	}
 	//mysql init
 	var mysql relation.Mysql
-	var model relation.Friend
-	err := mysql.InitConn().AutoMigrateModel(&model)
+	var model relation.FriendGorm
+	err := mysql.InitConn().AutoMigrateModel(&relation.FriendModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
@@ -171,7 +171,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 	if err := check.Access(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
-	friendRequest := relation.FriendRequest{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
+	friendRequest := controller.FriendRequest{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
 	if req.HandleResult == constant.FriendResponseAgree {
 		err := s.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {
