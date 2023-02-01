@@ -3,6 +3,7 @@ package unrelation
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/table"
 	"Open_IM/pkg/utils"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
@@ -22,57 +23,12 @@ type OfficeMgoDB struct {
 	WorkMomentCollection *mongo.Collection
 }
 
-type Tag struct {
-	UserID   string   `bson:"user_id"`
-	TagID    string   `bson:"tag_id"`
-	TagName  string   `bson:"tag_name"`
-	UserList []string `bson:"user_list"`
-}
-
-type commonUser struct {
-	UserID   string `bson:"user_id"`
-	UserName string `bson:"user_name"`
-}
-
-type TagSendLog struct {
-	UserList         []commonUser `bson:"tag_list"`
-	SendID           string       `bson:"send_id"`
-	SenderPlatformID int32        `bson:"sender_platform_id"`
-	Content          string       `bson:"content"`
-	SendTime         int64        `bson:"send_time"`
-}
-
-type WorkMoment struct {
-	WorkMomentID         string        `bson:"work_moment_id"`
-	UserID               string        `bson:"user_id"`
-	UserName             string        `bson:"user_name"`
-	FaceURL              string        `bson:"face_url"`
-	Content              string        `bson:"content"`
-	LikeUserList         []*commonUser `bson:"like_user_list"`
-	AtUserList           []*commonUser `bson:"at_user_list"`
-	PermissionUserList   []*commonUser `bson:"permission_user_list"`
-	Comments             []*commonUser `bson:"comments"`
-	PermissionUserIDList []string      `bson:"permission_user_id_list"`
-	Permission           int32         `bson:"permission"`
-	CreateTime           int32         `bson:"create_time"`
-}
-
-type Comment struct {
-	UserID        string `bson:"user_id" json:"user_id"`
-	UserName      string `bson:"user_name" json:"user_name"`
-	ReplyUserID   string `bson:"reply_user_id" json:"reply_user_id"`
-	ReplyUserName string `bson:"reply_user_name" json:"reply_user_name"`
-	ContentID     string `bson:"content_id" json:"content_id"`
-	Content       string `bson:"content" json:"content"`
-	CreateTime    int32  `bson:"create_time" json:"create_time"`
-}
-
 func NewOfficeMgoDB(mgoDB *mongo.Database) *OfficeMgoDB {
 	return &OfficeMgoDB{mgoDB: mgoDB, TagCollection: mgoDB.Collection(cTag), TagSendLogCollection: mgoDB.Collection(cSendLog), WorkMomentCollection: mgoDB.Collection(cSendLog)}
 }
 
-func (db *OfficeMgoDB) GetUserTags(ctx context.Context, userID string) ([]Tag, error) {
-	var tags []Tag
+func (db *OfficeMgoDB) GetUserTags(ctx context.Context, userID string) ([]table.Tag, error) {
+	var tags []table.Tag
 	cursor, err := db.TagCollection.Find(ctx, bson.M{"user_id": userID})
 	if err != nil {
 		return tags, err
@@ -85,7 +41,7 @@ func (db *OfficeMgoDB) GetUserTags(ctx context.Context, userID string) ([]Tag, e
 
 func (db *OfficeMgoDB) CreateTag(ctx context.Context, userID, tagName string, userList []string) error {
 	tagID := generateTagID(tagName, userID)
-	tag := Tag{
+	tag := table.Tag{
 		UserID:   userID,
 		TagID:    tagID,
 		TagName:  tagName,
@@ -95,8 +51,8 @@ func (db *OfficeMgoDB) CreateTag(ctx context.Context, userID, tagName string, us
 	return err
 }
 
-func (db *OfficeMgoDB) GetTagByID(ctx context.Context, userID, tagID string) (Tag, error) {
-	var tag Tag
+func (db *OfficeMgoDB) GetTagByID(ctx context.Context, userID, tagID string) (table.Tag, error) {
+	var tag table.Tag
 	err := db.TagCollection.FindOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}).Decode(&tag)
 	return tag, err
 }
@@ -107,7 +63,7 @@ func (db *OfficeMgoDB) DeleteTag(ctx context.Context, userID, tagID string) erro
 }
 
 func (db *OfficeMgoDB) SetTag(ctx context.Context, userID, tagID, newName string, increaseUserIDList []string, reduceUserIDList []string) error {
-	var tag Tag
+	var tag table.Tag
 	if err := db.TagCollection.FindOne(ctx, bson.M{"tag_id": tagID, "user_id": userID}).Decode(&tag); err != nil {
 		return err
 	}
@@ -140,18 +96,18 @@ func (db *OfficeMgoDB) SetTag(ctx context.Context, userID, tagID, newName string
 }
 
 func (db *OfficeMgoDB) GetUserIDListByTagID(ctx context.Context, userID, tagID string) ([]string, error) {
-	var tag Tag
+	var tag table.Tag
 	err := db.TagCollection.FindOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}).Decode(&tag)
 	return tag.UserList, err
 }
 
-func (db *OfficeMgoDB) SaveTagSendLog(ctx context.Context, tagSendLog *TagSendLog) error {
+func (db *OfficeMgoDB) SaveTagSendLog(ctx context.Context, tagSendLog *table.TagSendLog) error {
 	_, err := db.TagSendLogCollection.InsertOne(ctx, tagSendLog)
 	return err
 }
 
-func (db *OfficeMgoDB) GetTagSendLogs(ctx context.Context, userID string, showNumber, pageNumber int32) ([]TagSendLog, error) {
-	var tagSendLogs []TagSendLog
+func (db *OfficeMgoDB) GetTagSendLogs(ctx context.Context, userID string, showNumber, pageNumber int32) ([]table.TagSendLog, error) {
+	var tagSendLogs []table.TagSendLog
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"send_time": -1})
 	cursor, err := db.TagSendLogCollection.Find(ctx, bson.M{"send_id": userID}, findOpts)
 	if err != nil {
@@ -161,7 +117,7 @@ func (db *OfficeMgoDB) GetTagSendLogs(ctx context.Context, userID string, showNu
 	return tagSendLogs, err
 }
 
-func (db *OfficeMgoDB) CreateOneWorkMoment(ctx context.Context, workMoment *WorkMoment) error {
+func (db *OfficeMgoDB) CreateOneWorkMoment(ctx context.Context, workMoment *table.WorkMoment) error {
 	workMomentID := generateWorkMomentID(workMoment.UserID)
 	workMoment.WorkMomentID = workMomentID
 	workMoment.CreateTime = int32(time.Now().Unix())
@@ -184,13 +140,13 @@ func (db *OfficeMgoDB) DeleteComment(ctx context.Context, workMomentID, contentI
 	return err
 }
 
-func (db *OfficeMgoDB) GetWorkMomentByID(ctx context.Context, workMomentID string) (*WorkMoment, error) {
-	workMoment := &WorkMoment{}
+func (db *OfficeMgoDB) GetWorkMomentByID(ctx context.Context, workMomentID string) (*table.WorkMoment, error) {
+	workMoment := &table.WorkMoment{}
 	err := db.WorkMomentCollection.FindOne(ctx, bson.M{"work_moment_id": workMomentID}).Decode(workMoment)
 	return workMoment, err
 }
 
-func (db *OfficeMgoDB) LikeOneWorkMoment(ctx context.Context, likeUserID, userName, workMomentID string) (*WorkMoment, bool, error) {
+func (db *OfficeMgoDB) LikeOneWorkMoment(ctx context.Context, likeUserID, userName, workMomentID string) (*table.WorkMoment, bool, error) {
 	workMoment, err := db.GetWorkMomentByID(ctx, workMomentID)
 	if err != nil {
 		return nil, false, err
@@ -203,7 +159,7 @@ func (db *OfficeMgoDB) LikeOneWorkMoment(ctx context.Context, likeUserID, userNa
 		}
 	}
 	if !isAlreadyLike {
-		workMoment.LikeUserList = append(workMoment.LikeUserList, &commonUser{UserID: likeUserID, UserName: userName})
+		workMoment.LikeUserList = append(workMoment.LikeUserList, &table.CommonUser{UserID: likeUserID, UserName: userName})
 	}
 	_, err = db.WorkMomentCollection.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_user_list": workMoment.LikeUserList}})
 	return workMoment, !isAlreadyLike, err
@@ -213,15 +169,15 @@ func (db *OfficeMgoDB) SetUserWorkMomentsLevel(ctx context.Context, userID strin
 	return nil
 }
 
-func (db *OfficeMgoDB) CommentOneWorkMoment(ctx context.Context, comment *Comment, workMomentID string) (WorkMoment, error) {
+func (db *OfficeMgoDB) CommentOneWorkMoment(ctx context.Context, comment *table.Comment, workMomentID string) (table.WorkMoment, error) {
 	comment.ContentID = generateWorkMomentCommentID(workMomentID)
-	var workMoment WorkMoment
+	var workMoment table.WorkMoment
 	err := db.WorkMomentCollection.FindOneAndUpdate(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$push": bson.M{"comments": comment}}).Decode(&workMoment)
 	return workMoment, err
 }
 
-func (db *OfficeMgoDB) GetUserSelfWorkMoments(ctx context.Context, userID string, showNumber, pageNumber int32) ([]WorkMoment, error) {
-	var workMomentList []WorkMoment
+func (db *OfficeMgoDB) GetUserSelfWorkMoments(ctx context.Context, userID string, showNumber, pageNumber int32) ([]table.WorkMoment, error) {
+	var workMomentList []table.WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
 	result, err := db.WorkMomentCollection.Find(ctx, bson.M{"user_id": userID}, findOpts)
 	if err != nil {
@@ -231,8 +187,8 @@ func (db *OfficeMgoDB) GetUserSelfWorkMoments(ctx context.Context, userID string
 	return workMomentList, err
 }
 
-func (db *OfficeMgoDB) GetUserWorkMoments(ctx context.Context, opUserID, userID string, showNumber, pageNumber int32, friendIDList []string) ([]WorkMoment, error) {
-	var workMomentList []WorkMoment
+func (db *OfficeMgoDB) GetUserWorkMoments(ctx context.Context, opUserID, userID string, showNumber, pageNumber int32, friendIDList []string) ([]table.WorkMoment, error) {
+	var workMomentList []table.WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
 	result, err := db.WorkMomentCollection.Find(ctx, bson.D{ // 等价条件: select * from
 		{"user_id", userID},

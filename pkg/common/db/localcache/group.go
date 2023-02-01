@@ -4,9 +4,11 @@ import (
 	"Open_IM/pkg/proto/group"
 	"context"
 	"google.golang.org/grpc"
+	"sync"
 )
 
 type GroupLocalCache struct {
+	lock  sync.Mutex
 	cache map[string]GroupMemberIDsHash
 	rpc   *grpc.ClientConn
 	group group.GroupClient
@@ -26,7 +28,7 @@ func NewGroupMemberIDsLocalCache(rpc *grpc.ClientConn) GroupLocalCache {
 }
 
 func (g *GroupLocalCache) GetGroupMemberIDs(ctx context.Context, groupID string) []string {
-	_, err := g.group.GetGroupAbstractInfo(ctx, &group.GetGroupAbstractInfoReq{
+	resp, err := g.group.GetGroupAbstractInfo(ctx, &group.GetGroupAbstractInfoReq{
 		GroupIDs: nil,
 	})
 	if err != nil {

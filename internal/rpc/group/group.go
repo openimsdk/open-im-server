@@ -56,7 +56,7 @@ func NewGroupServer(port int) *groupServer {
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
 	ttl := 10
-	etcdClient, err := getcdv3.NewEtcdConn(g.rpcRegisterName, strings.Join(g.etcdAddr, ","), config.Config.RpcRegisterIP, config.Config.Etcd.UserName, config.Config.Etcd.Password, port, ttl)
+	etcdClient, err := getcdv3.NewEtcdConn(config.Config.Etcd.EtcdSchema, strings.Join(g.etcdAddr, ","), config.Config.RpcRegisterIP, config.Config.Etcd.UserName, config.Config.Etcd.Password, port, ttl)
 	if err != nil {
 		panic("NewEtcdConn failed" + err.Error())
 	}
