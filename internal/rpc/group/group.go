@@ -526,14 +526,49 @@ func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sd
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
 	resp := &pbGroup.GetGroupApplicationListResp{}
-	reply, err := s.GroupInterface.GetGroupRecvApplicationList(ctx, req.FromUserID)
+	groupRequests, err := s.GroupInterface.GetGroupRecvApplicationList(ctx, req.FromUserID)
 	if err != nil {
 		return nil, err
 	}
+	if len(groupRequests) == 0 {
+		return resp, nil
+	}
+	var (
+		userIDs  []string
+		groupIDs []string
+	)
+	for _, gr := range groupRequests {
+		userIDs = append(userIDs, gr.UserID)
+		groupIDs = append(groupIDs, gr.GroupID)
+	}
+	userMap, err := getUserMap(ctx, userIDs)
+	if err != nil {
+		return nil, err
+	}
+	for _, userID := range userIDs {
+		if _, ok := userMap[userID]; !ok {
+			return nil, constant.ErrUserIDNotFound.Wrap(userID)
+		}
+	}
+	groups, err := s.GroupInterface.FindGroupsByID(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groupMap := make(map[string]*relation.Group)
+	for i, group := range groups {
+		groupMap[group.GroupID] = groups[i]
+	}
+
+	for _, gr := range groupRequests {
+		groupRequest := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
+		utils.CopyStructFields(&groupRequest, gr)
+		getUserMap()
+
+	}
 
 	var errResult error
-	tracelog.SetCtxInfo(ctx, "GetRecvGroupApplicationList", nil, " FromUserID: ", req.FromUserID, "GroupApplicationList: ", reply)
-	for _, v := range reply {
+	tracelog.SetCtxInfo(ctx, "GetRecvGroupApplicationList", nil, " FromUserID: ", req.FromUserID, "GroupApplicationList: ", groupRequests)
+	for _, v := range groupRequests {
 		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
 		err := FillGroupInfoByGroupID(tracelog.GetOperationID(ctx), v.GroupID, node.GroupInfo)
 		if err != nil {
