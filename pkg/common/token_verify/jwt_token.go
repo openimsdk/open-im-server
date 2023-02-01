@@ -73,6 +73,10 @@ func CheckAccessV3(ctx context.Context, ownerUserID string) (err error) {
 	return constant.ErrIdentity.Wrap(utils.GetSelfFuncName())
 }
 
+func IsAppManagerUid(ctx context.Context) bool {
+	return utils.IsContain(tracelog.GetOpUserID(ctx), config.Config.Manager.AppManagerUid)
+}
+
 func CheckAdmin(ctx context.Context) error {
 	if utils.IsContain(tracelog.GetOpUserID(ctx), config.Config.Manager.AppManagerUid) {
 		return nil

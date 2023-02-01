@@ -15,21 +15,21 @@ import (
 
 type GroupInterface interface {
 	FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*table.GroupModel, err error)
-	CreateGroup(ctx context.Context, groups []*table.GroupModel, groupMember []*table.GroupModel) error
+	CreateGroup(ctx context.Context, groups []*table.GroupModel, groupMember []*table.GroupMemberModel) error
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
 	TakeGroupByID(ctx context.Context, groupID string) (group *table.GroupModel, err error)
 	TakeGroupMemberByID(ctx context.Context, groupID string, userID string) (groupMember *table.GroupModel, err error)
 	GetJoinedGroupList(ctx context.Context, userID string) ([]*table.GroupModel, error)
-	GetGroupMemberList(ctx context.Context, groupID string) ([]*table.GroupModel, error)
-	GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*table.GroupModel, error)
+	GetGroupMemberList(ctx context.Context, groupID string) ([]*table.GroupMemberModel, error)
+	GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*table.GroupMemberModel, error)
 	GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*table.GroupModel, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
-	FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*table.GroupModel, err error)
+	FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*table.GroupMemberModel, err error)
 	DelGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
 	GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
 	GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*table.GroupRequestModel, error)
 
-	CreateGroupMember(ctx context.Context, groupMember []*table.GroupModel) error
+	CreateGroupMember(ctx context.Context, groupMember []*table.GroupMemberModel) error
 	CreateGroupRequest(ctx context.Context, requests []*table.GroupRequestModel) error
 
 	//mongo
