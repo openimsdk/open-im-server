@@ -44,7 +44,7 @@ func (rpc *rpcChat) DelSuperGroupMsg(_ context.Context, req *msg.DelSuperGroupMs
 		resp.ErrMsg = err.Error()
 		return resp, nil
 	}
-	err = db.DB.SetGroupUserMinSeq(req.GroupID, req.UserID, groupMaxSeq+1)
+	err = db.DB.SetGroupUserMinSeq(req.GroupID, req.UserID, groupMaxSeq)
 	if err != nil {
 		log.NewError(req.OperationID, "SetGroupUserMinSeq false ", req.OpUserID, req.UserID, req.GroupID)
 		resp.ErrCode = constant.ErrDB.ErrCode
