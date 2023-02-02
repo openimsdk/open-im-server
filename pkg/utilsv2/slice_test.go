@@ -42,3 +42,9 @@ func TestIndexOf(t *testing.T) {
 	fmt.Println(IndexOf(arr, 3))
 
 }
+
+func TestSort(t *testing.T) {
+	arr := []int{1, 1, 1, 4, 4, 5, 2, 3, 3, 3, 6}
+	fmt.Println(Sort(arr, false))
+
+}

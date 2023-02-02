@@ -1,5 +1,9 @@
 package utilsv2
 
+import (
+	"sort"
+)
+
 // DistinctAny 切片去重
 func DistinctAny[T any, V comparable](ts []T, fn func(t T) V) []T {
 	v := make([]T, 0, len(ts))
@@ -104,4 +108,45 @@ func MapValue[K comparable, V any](kv map[K]V) []V {
 		vs = append(vs, kv[k])
 	}
 	return vs
+}
+
+// Sort 排序
+func Sort[T Ordered](ts []T, asc bool) []T {
+	SortAny(ts, func(a, b T) bool {
+		if asc {
+			return a < b
+		} else {
+			return a > b
+		}
+	})
+	return ts
+}
+
+// SortAny 排序
+func SortAny[T any](ts []T, fn func(a, b T) bool) {
+	sort.Sort(&sortSlice[T]{
+		ts: ts,
+		fn: fn,
+	})
+}
+
+type sortSlice[T any] struct {
+	ts []T
+	fn func(a, b T) bool
+}
+
+func (o *sortSlice[T]) Len() int {
+	return len(o.ts)
+}
+
+func (o *sortSlice[T]) Less(i, j int) bool {
+	return o.fn(o.ts[i], o.ts[j])
+}
+
+func (o *sortSlice[T]) Swap(i, j int) {
+	o.ts[i], o.ts[j] = o.ts[j], o.ts[i]
+}
+
+type Ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
 }
