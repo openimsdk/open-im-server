@@ -1,5 +1,7 @@
 package utilsv2
 
+import "Open_IM/pkg/common/db/table"
+
 //func DuplicateRemoval[T comparable](ts []T) []T {
 //	v := make([]T, 0, len(ts))
 //	tmp := map[T]struct{}{}
@@ -31,8 +33,17 @@ func DuplicateRemoval[T comparable](ts []T) []T {
 	})
 }
 
+func demo() {
+
+	groups := []*table.GroupModel{}
+
+	groups = DuplicateRemovalAny(groups, func(t *table.GroupModel) string {
+		return t.GroupID
+	})
+
+}
+
 func DeleteAt[T any](ts []T, index ...int) []T {
-	l := len(ts)
 	switch len(index) {
 	case 0:
 		return ts
@@ -43,7 +54,6 @@ func DeleteAt[T any](ts []T, index ...int) []T {
 		for _, v := range index {
 			tmp[v] = struct{}{}
 		}
-		v := make([]byte)
 		for i, t := range ts {
 
 		}
