@@ -25,11 +25,21 @@ func DeleteAt[T any](ts []T, index ...int) []T {
 	case 0:
 		return ts
 	case 1:
+		i := index[0]
+		if len(ts) <= i || len(ts) < -i {
+			return ts
+		}
+		if i < 0 {
+			i = len(ts) + i
+		}
 		return append(ts[:index[0]], ts[index[0]+1:]...)
 	default:
 		tmp := make(map[int]struct{})
-		for _, v := range index {
-			tmp[v] = struct{}{}
+		for _, i := range index {
+			if i < 0 {
+				i = len(ts) + i
+			}
+			tmp[i] = struct{}{}
 		}
 		v := make([]T, 0, len(ts))
 		for i := 0; i < len(ts); i++ {
