@@ -19,12 +19,11 @@ func NewUserGorm(db *gorm.DB) *UserGorm {
 	return &user
 }
 
-func (u *UserGorm) Create(ctx context.Context, users []*table.UserModel) (err error) {
+func (u *UserGorm) Create(ctx context.Context, users []*table.UserModel, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
-	err = utils.Wrap(u.DB.Model(&table.UserModel{}).Create(&users).Error, "")
-	return err
+	return utils.Wrap(getDBConn(u.DB, tx).Model(&table.UserModel{}).Create(&users).Error, "")
 }
 
 func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {

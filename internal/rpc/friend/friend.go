@@ -7,14 +7,15 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
+	"Open_IM/pkg/common/db/table"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
-	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	sdkws "Open_IM/pkg/proto/sdk_ws"
+	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
@@ -23,6 +24,7 @@ import (
 	"strings"
 
 	"Open_IM/internal/common/check"
+	"github.com/OpenIMSDK/getcdv3"
 	"google.golang.org/grpc"
 )
 
@@ -33,6 +35,8 @@ type friendServer struct {
 	etcdAddr        []string
 	controller.FriendInterface
 	controller.BlackInterface
+
+	userRpc pbUser.UserClient
 }
 
 func NewFriendServer(port int) *friendServer {
@@ -43,10 +47,33 @@ func NewFriendServer(port int) *friendServer {
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
+	ttl := 10
+	etcdClient, err := getcdv3.NewEtcdConn(config.Config.Etcd.EtcdSchema, strings.Join(f.etcdAddr, ","), config.Config.RpcRegisterIP, config.Config.Etcd.UserName, config.Config.Etcd.Password, port, ttl)
+	if err != nil {
+		panic("NewEtcdConn failed" + err.Error())
+	}
+	err = etcdClient.RegisterEtcd("", f.rpcRegisterName)
+	if err != nil {
+		panic("NewEtcdConn failed" + err.Error())
+	}
+
+	etcdClient.SetDefaultEtcdConfig(config.Config.RpcRegisterName.OpenImUserName, config.Config.RpcPort.OpenImUserPort)
+	conn := etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImUserName)
+	f.userRpc = pbUser.NewUserClient(conn)
+
 	//mysql init
 	var mysql relation.Mysql
 	var model relation.FriendGorm
-	err := mysql.InitConn().AutoMigrateModel(&relation.FriendModel{})
+	err = mysql.InitConn().AutoMigrateModel(&table.FriendModel{})
+	if err != nil {
+		panic("db init err:" + err.Error())
+	}
+	err = mysql.InitConn().AutoMigrateModel(&table.FriendRequestModel{})
+	if err != nil {
+		panic("db init err:" + err.Error())
+	}
+
+	err = mysql.InitConn().AutoMigrateModel(&table.BlackModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
@@ -93,21 +120,7 @@ func (s *friendServer) Run() {
 	}
 	srv := grpc.NewServer(grpcOpts...)
 	defer srv.GracefulStop()
-	//User friend related services register to etcd
 	pbFriend.RegisterFriendServer(srv, s)
-	rpcRegisterIP := config.Config.RpcRegisterIP
-	if config.Config.RpcRegisterIP == "" {
-		rpcRegisterIP, err = utils.GetLocalIP()
-		if err != nil {
-			log.Error("", "GetLocalIP failed ", err.Error())
-		}
-	}
-	log.NewInfo("", "rpcRegisterIP", rpcRegisterIP)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
-	if err != nil {
-		log.NewError("0", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
-		panic(utils.Wrap(err, "register friend module  rpc to etcd err"))
-	}
 	err = srv.Serve(listener)
 	if err != nil {
 		log.NewError("0", "Serve failed ", err.Error(), listener)
@@ -153,9 +166,9 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFr
 		return nil, err
 	}
 
-	var friends []*relation.Friend
+	var friends []*table.FriendModel
 	for _, userID := range utils.RemoveDuplicateElement(req.FriendUserIDs) {
-		friends = append(friends, &relation.Friend{OwnerUserID: userID, FriendUserID: req.OwnerUserID, AddSource: constant.BecomeFriendByImport, OperatorUserID: tracelog.GetOpUserID(ctx)})
+		friends = append(friends, &table.FriendModel{OwnerUserID: userID, FriendUserID: req.OwnerUserID, AddSource: constant.BecomeFriendByImport, OperatorUserID: tracelog.GetOpUserID(ctx)})
 	}
 	if len(friends) > 0 {
 		if err := s.FriendInterface.BecomeFriend(ctx, friends); err != nil {
@@ -171,7 +184,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 	if err := check.Access(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
-	friendRequest := controller.FriendRequest{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
+	friendRequest := table.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
 	if req.HandleResult == constant.FriendResponseAgree {
 		err := s.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {
@@ -220,7 +233,7 @@ func (s *friendServer) GetFriends(ctx context.Context, req *pbFriend.GetFriendsR
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friends, err := s.FriendInterface.FindOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	friends, total, err := s.FriendInterface.FindOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -236,14 +249,11 @@ func (s *friendServer) GetFriends(ctx context.Context, req *pbFriend.GetFriendsR
 	for i, user := range users {
 		userMap[user.UserID] = users[i]
 	}
-	for _, friendUser := range friends {
-
-		friendUserInfo, err := (convert.NewDBFriend(friendUser)).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.FriendsInfo = append(resp.FriendsInfo, friendUserInfo)
+	resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(friends)
+	if err != nil {
+		return nil, err
 	}
+	resp.Total = int32(total)
 	return resp, nil
 }
 
@@ -253,17 +263,15 @@ func (s *friendServer) GetToFriendsApply(ctx context.Context, req *pbFriend.GetT
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friendRequests, err := s.FriendInterface.FindFriendRequestToMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	friendRequests, total, err := s.FriendInterface.FindFriendRequestToMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range friendRequests {
-		fUser, err := convert.NewDBFriendRequest(v).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.FriendRequests = append(resp.FriendRequests, fUser)
+	resp.FriendRequests, err = (*convert.DBFriendRequest)(nil).DB2PB(friendRequests)
+	if err != nil {
+		return nil, err
 	}
+	resp.Total = int32(total)
 	return resp, nil
 }
 
@@ -273,17 +281,15 @@ func (s *friendServer) GetFromFriendsApply(ctx context.Context, req *pbFriend.Ge
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
-	friendRequests, err := s.FriendInterface.FindFriendRequestFromMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	friendRequests, total, err := s.FriendInterface.FindFriendRequestFromMe(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range friendRequests {
-		fUser, err := convert.NewDBFriendRequest(v).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.FriendRequests = append(resp.FriendRequests, fUser)
+	resp.FriendRequests, err = (*convert.DBFriendRequest)(nil).DB2PB(friendRequests)
+	if err != nil {
+		return nil, err
 	}
+	resp.Total = int32(total)
 	return resp, nil
 }
 
@@ -304,12 +310,9 @@ func (s *friendServer) GetFriendsInfo(ctx context.Context, req *pbFriend.GetFrie
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range friends {
-		fUser, err := convert.NewDBFriend(v).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.FriendsInfo = append(resp.FriendsInfo, fUser)
+	resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(friends)
+	if err != nil {
+		return nil, err
 	}
 	return &resp, nil
 }
