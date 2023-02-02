@@ -2,10 +2,6 @@ syntax = "proto3";
 option go_package = "Open_IM/pkg/proto/conversation;conversation";
 package conversation;
 
-message CommonResp{
-  int32  errCode = 1;
-  string errMsg = 2;
-}
 message Conversation{
   string ownerUserID = 1;
   string conversationID = 2;
@@ -29,13 +25,73 @@ message ModifyConversationFieldReq{
   Conversation conversation = 1;
   int32 fieldType = 2;
   repeated string userIDList = 3;
-  string operationID = 4;
 }
 
 message ModifyConversationFieldResp{
-  CommonResp  commonResp = 1;
 }
+
+message SetConversationReq{
+  Conversation Conversation = 1;
+  int32 notificationType = 2;
+}
+
+message SetConversationResp{
+}
+
+message SetRecvMsgOptReq {
+  string OwnerUserID = 1;
+  string ConversationID = 2;
+  int32 RecvMsgOpt = 3;
+  int32 notificationType = 4;
+}
+
+message SetRecvMsgOptResp {
+}
+
+message GetConversationReq{
+  string ConversationID = 1;
+  string OwnerUserID = 2;
+}
+
+message GetConversationResp{
+  Conversation Conversation = 2;
+}
+
+message GetConversationsReq{
+  string OwnerUserID = 1;
+  repeated string ConversationIDs = 2;
+}
+
+message GetConversationsResp{
+  repeated Conversation Conversations = 2;
+}
+
+message GetAllConversationsReq{
+  string OwnerUserID = 1;
+}
+
+message GetAllConversationsResp{
+  repeated Conversation Conversations = 2;
+}
+
+message BatchSetConversationsReq{
+  repeated Conversation Conversations = 1;
+  string OwnerUserID = 2;
+  int32 notificationType = 3;
+}
+
+message BatchSetConversationsResp{
+  repeated string Success = 1;
+  repeated string Failed = 2;
+}
+
 service conversation {
   rpc ModifyConversationField(ModifyConversationFieldReq)returns(ModifyConversationFieldResp);
+  rpc GetConversation(GetConversationReq)returns(GetConversationResp);
+  rpc GetAllConversations(GetAllConversationsReq)returns(GetAllConversationsResp);
+  rpc GetConversations(GetConversationsReq)returns(GetConversationsResp);
+  rpc BatchSetConversations(BatchSetConversationsReq)returns(BatchSetConversationsResp);
+  rpc SetConversation(SetConversationReq)returns(SetConversationResp);
+  rpc SetRecvMsgOpt(SetRecvMsgOptReq)returns(SetRecvMsgOptResp);
 
 }
