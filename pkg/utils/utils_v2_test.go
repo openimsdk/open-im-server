@@ -1,4 +1,4 @@
-package utilsv2
+package utils
 
 import (
 	"fmt"
@@ -12,9 +12,9 @@ func TestDistinct(t *testing.T) {
 
 func TestDeleteAt(t *testing.T) {
 	arr := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
-	fmt.Println(DeleteAt(arr, 0, 1, -1, -2))
-	fmt.Println(DeleteAt(arr))
-	fmt.Println(DeleteAt(arr, 1))
+	fmt.Println(Delete(arr, 0, 1, -1, -2))
+	fmt.Println(Delete(arr))
+	fmt.Println(Delete(arr, 1))
 }
 
 func TestSliceToMap(t *testing.T) {
@@ -46,5 +46,39 @@ func TestIndexOf(t *testing.T) {
 func TestSort(t *testing.T) {
 	arr := []int{1, 1, 1, 4, 4, 5, 2, 3, 3, 3, 6}
 	fmt.Println(Sort(arr, false))
+}
+
+func TestBothExist(t *testing.T) {
+	arr1 := []int{1, 1, 1, 4, 4, 5, 2, 3, 3, 3, 6}
+	arr2 := []int{6, 1, 3}
+	arr3 := []int{5, 1, 3, 6}
+	fmt.Println(BothExist(arr1, arr2, arr3))
+}
+
+func TestCompleteAny(t *testing.T) {
+	type Item struct {
+		ID    int
+		Value string
+	}
+
+	ids := []int{1, 2, 3, 4, 5, 6, 7, 8}
+
+	var list []Item
+
+	for _, id := range ids {
+		list = append(list, Item{
+			ID:    id,
+			Value: fmt.Sprintf("%d", id*1000),
+		})
+	}
+
+	DeleteAt(&list, -1)
+	DeleteAt(&ids, -1)
+
+	ok := CompleteAny(ids, list, func(t Item) int {
+		return t.ID
+	})
+
+	fmt.Printf("%+v\n", ok)
 
 }

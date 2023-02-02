@@ -30,11 +30,11 @@ type FriendUser struct {
 	Nickname string `gorm:"column:name;size:255"`
 }
 
-func (f *FriendGorm) Create(ctx context.Context, friends []*table.FriendModel) (err error) {
+func (f *FriendGorm) Create(ctx context.Context, friends []*table.FriendModel, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
 	}()
-	return utils.Wrap(f.DB.Model(&table.FriendModel{}).Create(&friends).Error, "")
+	return utils.Wrap(getDBConn(f.DB, tx).Model(&table.FriendModel{}).Create(&friends).Error, "")
 }
 
 func (f *FriendGorm) Delete(ctx context.Context, ownerUserID string, friendUserIDs string) (err error) {
@@ -52,7 +52,7 @@ func (f *FriendGorm) UpdateByMap(ctx context.Context, ownerUserID string, args m
 	return utils.Wrap(f.DB.Model(&table.FriendModel{}).Where("owner_user_id = ?", ownerUserID).Updates(args).Error, "")
 }
 
-func (f *FriendGorm) Update(ctx context.Context, friends []*table.FriendModel) (err error) {
+func (f *FriendGorm) Update(ctx context.Context, friends []*table.FriendModel, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friends", friends)
 	}()
@@ -91,4 +91,20 @@ func (f *FriendGorm) FindUserState(ctx context.Context, userID1, userID2 string)
 		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "userID1", userID1, "userID2", userID2)
 	}()
 	return friends, utils.Wrap(f.DB.Model(&table.FriendModel{}).Where("(owner_user_id = ? and friend_user_id = ?) or (owner_user_id = ? and friend_user_id = ?)", userID1, userID2, userID2, userID1).Find(&friends).Error, "")
+}
+
+// 获取 owner的好友列表
+func (f *FriendGorm) FindFriends(ctx context.Context, ownerUserID string, friendUserIDs []string, tx ...*gorm.DB) (friends []*table.FriendModel, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friendUserIDs", friendUserIDs, "friends", friends)
+	}()
+	return friends, utils.Wrap(getDBConn(f.DB, tx).Where("owner_user_id = ? AND friend_user_id in (?)", ownerUserID, friendUserIDs).Find(&friends).Error, "")
+}
+
+// 获取哪些人添加了friendUserID
+func (f *FriendGorm) FindReversalFriends(ctx context.Context, friendUserID string, ownerUserIDs []string, tx ...*gorm.DB) (friends []*table.FriendModel, err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetSelfFuncName(), err, "friendUserID", friendUserID, "friends", friends)
+	}()
+	return friends, utils.Wrap(getDBConn(f.DB, tx).Where("friend_user_id = ? AND owner_user_id in (?)", friendUserID, ownerUserIDs).Find(&friends).Error, "")
 }
