@@ -261,6 +261,14 @@ func SortAny[E any](es []E, fn func(a, b E) bool) {
 	})
 }
 
+// If true -> a, false -> b
+func If[T any](isa bool, a, b T) T {
+	if isa {
+		return a
+	}
+	return b
+}
+
 type sortSlice[E any] struct {
 	ts []E
 	fn func(a, b E) bool
