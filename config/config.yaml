@@ -115,11 +115,11 @@ sdk:
 #对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
 credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
   tencent:
-    appID: 1302656840
-    region: ap-chengdu
-    bucket: echat-1302656840
-    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC1
-    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe1
+    appID:  
+    region:  
+    bucket:  
+    secretID:  
+    secretKey:  
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim # 存储内容桶
     appBucket: app # 存储app的桶
