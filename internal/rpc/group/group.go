@@ -43,8 +43,9 @@ type groupServer struct {
 	etcdAddr        []string
 	controller.GroupInterface
 
-	userRpc         pbUser.UserClient
-	conversationRpc pbConversation.ConversationClient
+	etcdConn *getcdv3.EtcdConn
+	//userRpc         pbUser.UserClient
+	//conversationRpc pbConversation.ConversationClient
 }
 
 func NewGroupServer(port int) *groupServer {
@@ -65,12 +66,12 @@ func NewGroupServer(port int) *groupServer {
 		panic("NewEtcdConn failed" + err.Error())
 	}
 	etcdClient.SetDefaultEtcdConfig(config.Config.RpcRegisterName.OpenImUserName, config.Config.RpcPort.OpenImUserPort)
-	conn := etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImUserName)
-	g.userRpc = pbUser.NewUserClient(conn)
+	//conn := etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImUserName)
+	//g.userRpc = pbUser.NewUserClient(conn)
 
 	etcdClient.SetDefaultEtcdConfig(config.Config.RpcRegisterName.OpenImConversationName, config.Config.RpcPort.OpenImConversationPort)
-	conn = etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)
-	g.conversationRpc = pbConversation.NewConversationClient(conn)
+	//conn = etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)
+	//g.conversationRpc = pbConversation.NewConversationClient(conn)
 
 	//mysql init
 	var mysql relation.Mysql
@@ -903,7 +904,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		conversation.GroupAtType = constant.GroupNotification
 		conversationReq.UserIDList = cacheResp.UserIDList
 
-		_, err := s.conversationRpc.ModifyConversationField(ctx, &conversationReq)
+		_, err = pbConversation.NewConversationClient(s.etcdConn.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)).ModifyConversationField(ctx, &conversationReq)
 		tracelog.SetCtxInfo(ctx, "ModifyConversationField", err, "req", &conversationReq, "resp", conversationReply)
 	}
 	return resp, nil
