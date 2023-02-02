@@ -765,18 +765,18 @@ demo:
   #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
   openImDemoPort: [ 10004 ]
   alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，enable为true则必须修改，阿里云为默认短信验证方式
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
-    signName: 托云信息技术
-    verificationCodeTemplateCode: SMS_226810164
+    accessKeyId:  
+    accessKeySecret:  
+    signName:  
+    verificationCodeTemplateCode:  
     enable: false
   tencentsms: #腾讯云短信配置，在腾讯云申请成功后，修改以下选项，enable为true则必须修改
-    appID:  2400000648
-    region: "ap-singapore"
-    secretID: IKIDra4JPGsFMDwQedMq42lESQBgwwgBQQAe
-    secretKey: HI6fz4uUotjJdiX6QUIrAE2buxlKdgU2
-    signName: ""
-    verificationCodeTemplateCode: 2902877
+    appID:   
+    region:  
+    secretID:  
+    secretKey:  
+    signName:  
+    verificationCodeTemplateCode:  
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   needInvitationCode: false
@@ -784,11 +784,11 @@ demo:
   codeTTL: 60
   useSuperCode: true
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
-    title: "openIM"
-    senderMail: "765567899@qq.com"
-    senderAuthorizationCode: "gxyausfoevlzbfag"
-    smtpAddr: "smtp.qq.com"
-    smtpPort: 25   #需开放此端口 出口方向
+    title:  
+    senderMail:  
+    senderAuthorizationCode:  
+    smtpAddr:  
+    smtpPort:     #需开放此端口 出口方向
   testDepartMentID: 001
   imAPIURL: http://127.0.0.1:10002
   onboardProcess: false # 是否开启注册流程
