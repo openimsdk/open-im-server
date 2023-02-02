@@ -1,4 +1,4 @@
-package utilsv2
+package utils
 
 import (
 	"sort"
@@ -26,8 +26,8 @@ func Distinct[T comparable](ts []T) []T {
 	})
 }
 
-// DeleteAt delete slice element, support negative number to delete the penultimate
-func DeleteAt[E any](es []E, index ...int) []E {
+// Delete delete slice element, support negative number to delete the penultimate
+func Delete[E any](es []E, index ...int) []E {
 	switch len(index) {
 	case 0:
 		return es
@@ -56,6 +56,13 @@ func DeleteAt[E any](es []E, index ...int) []E {
 		}
 		return v
 	}
+}
+
+// DeleteAt delete slice element, support negative number to delete the penultimate
+func DeleteAt[E any](es *[]E, index ...int) []E {
+	v := Delete(*es, index...)
+	*es = v
+	return v
 }
 
 // IndexAny get the index of the element

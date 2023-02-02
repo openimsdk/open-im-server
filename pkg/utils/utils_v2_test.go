@@ -1,4 +1,4 @@
-package utilsv2
+package utils
 
 import (
 	"fmt"
@@ -12,9 +12,9 @@ func TestDistinct(t *testing.T) {
 
 func TestDeleteAt(t *testing.T) {
 	arr := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
-	fmt.Println(DeleteAt(arr, 0, 1, -1, -2))
-	fmt.Println(DeleteAt(arr))
-	fmt.Println(DeleteAt(arr, 1))
+	fmt.Println(Delete(arr, 0, 1, -1, -2))
+	fmt.Println(Delete(arr))
+	fmt.Println(Delete(arr, 1))
 }
 
 func TestSliceToMap(t *testing.T) {
@@ -72,8 +72,8 @@ func TestCompleteAny(t *testing.T) {
 		})
 	}
 
-	list = DeleteAt(list, -1)
-	ids = DeleteAt(ids, -1)
+	DeleteAt(&list, -1)
+	DeleteAt(&ids, -1)
 
 	ok := CompleteAny(ids, list, func(t Item) int {
 		return t.ID
