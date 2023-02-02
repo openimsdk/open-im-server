@@ -39,14 +39,12 @@ type GroupCache struct {
 	rcClient     *rockscache.Client
 
 	//local cache
-	cacheGroupMtx           sync.RWMutex
-	cacheGroupMemberUserIDs map[string]*localcache.GroupMemberIDsHash
 }
 
 func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCache {
 	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
 		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
-		mongoDB: mongoClient, cacheGroupMemberUserIDs: make(map[string]*localcache.GroupMemberIDsHash, 0),
+		mongoDB: mongoClient,
 	}
 }
 
@@ -258,36 +256,6 @@ func (g *GroupCache) DelGroupMemberIDs(ctx context.Context, groupID string) (err
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID)
 	}()
 	return g.rcClient.TagAsDeleted(g.getGroupMemberIDsKey(groupID))
-}
-
-// from local map
-func (g *GroupCache) LocalGetGroupMemberIDs(ctx context.Context, groupID string) (groupMemberIDs []string, err error) {
-	remoteHash, err := g.GetGroupMembersHash(ctx, groupID)
-	if err != nil {
-		g.cacheGroupMtx.Lock()
-		defer g.cacheGroupMtx.Unlock()
-		delete(g.cacheGroupMemberUserIDs, groupID)
-		return nil, err
-	}
-	g.cacheGroupMtx.Lock()
-	defer g.cacheGroupMtx.Unlock()
-	if remoteHash == 0 {
-		delete(g.cacheGroupMemberUserIDs, groupID)
-		return []string{}, nil
-	}
-	localCache, ok := g.cacheGroupMemberUserIDs[groupID]
-	if ok && localCache.MemberListHash == remoteHash {
-		return localCache.UserIDs, nil
-	}
-	groupMemberIDsRemote, err := g.GetGroupMemberIDs(ctx, groupID)
-	if err != nil {
-		return nil, err
-	}
-	g.cacheGroupMemberUserIDs[groupID] = &localcache.GroupMemberIDsHash{
-		MemberListHash: remoteHash,
-		UserIDs:        groupMemberIDsRemote,
-	}
-	return groupMemberIDsRemote, nil
 }
 
 // JoinedGroups
