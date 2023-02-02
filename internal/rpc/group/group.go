@@ -16,8 +16,8 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
 	"fmt"
+	"github.com/OpenIMSDK/getcdv3"
 
-	"Open_IM/pkg/getcdv3"
 	pbConversation "Open_IM/pkg/proto/conversation"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
@@ -42,6 +42,10 @@ type groupServer struct {
 	etcdSchema      string
 	etcdAddr        []string
 	controller.GroupInterface
+
+	etcdConn *getcdv3.EtcdConn
+	//userRpc         pbUser.UserClient
+	//conversationRpc pbConversation.ConversationClient
 }
 
 func NewGroupServer(port int) *groupServer {
@@ -52,12 +56,29 @@ func NewGroupServer(port int) *groupServer {
 		etcdSchema:      config.Config.Etcd.EtcdSchema,
 		etcdAddr:        config.Config.Etcd.EtcdAddr,
 	}
+	ttl := 10
+	etcdClient, err := getcdv3.NewEtcdConn(config.Config.Etcd.EtcdSchema, strings.Join(g.etcdAddr, ","), config.Config.RpcRegisterIP, config.Config.Etcd.UserName, config.Config.Etcd.Password, port, ttl)
+	if err != nil {
+		panic("NewEtcdConn failed" + err.Error())
+	}
+	err = etcdClient.RegisterEtcd("", g.rpcRegisterName)
+	if err != nil {
+		panic("NewEtcdConn failed" + err.Error())
+	}
+	etcdClient.SetDefaultEtcdConfig(config.Config.RpcRegisterName.OpenImUserName, config.Config.RpcPort.OpenImUserPort)
+	//conn := etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImUserName)
+	//g.userRpc = pbUser.NewUserClient(conn)
+
+	etcdClient.SetDefaultEtcdConfig(config.Config.RpcRegisterName.OpenImConversationName, config.Config.RpcPort.OpenImConversationPort)
+	//conn = etcdClient.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)
+	//g.conversationRpc = pbConversation.NewConversationClient(conn)
+
 	//mysql init
 	var mysql relation.Mysql
 	var mongo unrelation.Mongo
 	var groupModel table.GroupModel
 	var redis cache.RedisClient
-	err := mysql.InitConn().AutoMigrateModel(&groupModel)
+	err = mysql.InitConn().AutoMigrateModel(&groupModel)
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
@@ -870,19 +891,6 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	}
 	if req.GroupInfoForSet.Notification != "" {
 		//get group member user id
-		getGroupMemberIDListFromCacheReq := &pbCache.GetGroupMemberIDListFromCacheReq{OperationID: tracelog.GetOperationID(ctx), GroupID: req.GroupInfoForSet.GroupID}
-		etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
-		if err != nil {
-			return nil, err
-		}
-		client := pbCache.NewCacheClient(etcdConn)
-		cacheResp, err := client.GetGroupMemberIDListFromCache(ctx, getGroupMemberIDListFromCacheReq)
-		if err != nil {
-			return nil, err
-		}
-		if err = constant.CommonResp2Err(cacheResp.CommonResp); err != nil {
-			return nil, err
-		}
 		var conversationReq pbConversation.ModifyConversationFieldReq
 		conversation := pbConversation.Conversation{
 			OwnerUserID:      tracelog.GetOpUserID(ctx),
@@ -895,12 +903,8 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 		conversationReq.FieldType = constant.FieldGroupAtType
 		conversation.GroupAtType = constant.GroupNotification
 		conversationReq.UserIDList = cacheResp.UserIDList
-		nEtcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
-		if err != nil {
-			return nil, err
-		}
-		nClient := pbConversation.NewConversationClient(nEtcdConn)
-		conversationReply, err := nClient.ModifyConversationField(context.Background(), &conversationReq)
+
+		_, err = pbConversation.NewConversationClient(s.etcdConn.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)).ModifyConversationField(ctx, &conversationReq)
 		tracelog.SetCtxInfo(ctx, "ModifyConversationField", err, "req", &conversationReq, "resp", conversationReply)
 	}
 	return resp, nil

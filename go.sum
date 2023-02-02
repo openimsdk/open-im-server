@@ -393,6 +393,8 @@ github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6Xge
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/OpenIMSDK/getcdv3 v1.0.3 h1:3/j92MuDPFhAJYBy/ht0qnybdaaCezefF1pMTClvvq4=
 github.com/OpenIMSDK/getcdv3 v1.0.3/go.mod h1:ZvsBwAjOZZr7HBF3SytJaHCltuOfBKbM1vLSCjut7kw=
+github.com/OpenIMSDK/getcdv3 v1.0.4 h1:wKpLcp1gbLbh+fa7b5iCL4fTBLm87hB0+p0ZQMg9tK8=
+github.com/OpenIMSDK/getcdv3 v1.0.4/go.mod h1:ZvsBwAjOZZr7HBF3SytJaHCltuOfBKbM1vLSCjut7kw=
 github.com/OpenIMSDK/open_log v1.0.0 h1:ZQ908aWgPqfHOfkQ/oFSV20AZdRwPw+sZjC/sAPd5cA=
 github.com/OpenIMSDK/open_log v1.0.0/go.mod h1:qWvqF4iT2qBAP1eGGbinc0aAng1Y25X8A9Si1WS3oB4=
 github.com/OpenIMSDK/open_utils v1.0.1/go.mod h1:PPRayByXnfu8PR5Xv9wzUMBrm1BV3y7s29GGg8ae47s=

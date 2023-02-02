@@ -4,7 +4,7 @@ import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
 	chat "Open_IM/internal/rpc/msg"
-	"Open_IM/pkg/common/db/relation"
+	"Open_IM/pkg/common/db/table"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
@@ -20,15 +20,11 @@ func (s *friendServer) GetBlacks(ctx context.Context, req *pbFriend.GetBlacksReq
 	if err != nil {
 		return nil, err
 	}
-	blackIDList := make([]string, 0, len(blacks))
-	for _, black := range blacks {
-		b, err := convert.NewDBBlack(black).Convert()
-		if err != nil {
-			return nil, err
-		}
-		resp.Blacks = append(resp.Blacks, b)
-		blackIDList = append(blackIDList, black.BlockUserID)
+	resp.Blacks, err = (*convert.DBBlack)(nil).DB2PB(blacks)
+	if err != nil {
+		return nil, err
 	}
+
 	resp.Total = int32(total)
 	return resp, nil
 }
@@ -49,10 +45,10 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlac
 	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	if err := s.BlackInterface.Delete(ctx, []*relation.Black{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
+	if err := s.BlackInterface.Delete(ctx, []*table.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
-	chat.BlackDeletedNotification(req)
+	chat.BlackDeletedNotification(ctx, req)
 	return resp, nil
 }
 
@@ -61,10 +57,10 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	black := relation.Black{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.GetOpUserID(ctx)}
-	if err := s.BlackInterface.Create(ctx, []*relation.Black{&black}); err != nil {
+	black := table.BlackModel{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.GetOpUserID(ctx)}
+	if err := s.BlackInterface.Create(ctx, []*table.BlackModel{&black}); err != nil {
 		return nil, err
 	}
-	chat.BlackAddedNotification(tracelog.GetOperationID(ctx), req)
+	chat.BlackAddedNotification(ctx, req)
 	return resp, nil
 }

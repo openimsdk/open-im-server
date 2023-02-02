@@ -7,6 +7,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
+	"Open_IM/pkg/common/db/table"
 	"Open_IM/pkg/common/log"
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
@@ -197,7 +198,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	err = s.Update(ctx, []*relation.User{user})
+	err = s.Update(ctx, []*table.UserModel{user})
 	if err != nil {
 		return nil, err
 	}
@@ -213,11 +214,11 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	}
 	go func() {
 		for _, v := range rpcResp.FriendsInfo {
-			chat.FriendInfoUpdatedNotification(tracelog.GetOperationID(ctx), req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
+			chat.FriendInfoUpdatedNotification(ctx, req.UserInfo.UserID, v.FriendUser.UserID, tracelog.GetOpUserID(ctx))
 		}
 	}()
 
-	chat.UserInfoUpdatedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
+	chat.UserInfoUpdatedNotification(ctx, tracelog.GetOpUserID(ctx), req.UserInfo.UserID)
 	if req.UserInfo.FaceURL != "" {
 		s.SyncJoinedGroupMemberFaceURL(ctx, req.UserInfo.UserID, req.UserInfo.FaceURL, tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx))
 	}
@@ -235,13 +236,13 @@ func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.Se
 	if err != nil {
 		return nil, err
 	}
-	chat.UserInfoUpdatedNotification(tracelog.GetOperationID(ctx), req.UserID, req.UserID)
+	chat.UserInfoUpdatedNotification(ctx, req.UserID, req.UserID)
 	return &resp, nil
 }
 
 func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
 	resp := pbUser.AccountCheckResp{}
-	err := token_verify.CheckManagerUserID(ctx, tracelog.GetOpUserID(ctx))
+	err := token_verify.CheckAdmin(ctx)
 	if err != nil {
 		return nil, err
 	}

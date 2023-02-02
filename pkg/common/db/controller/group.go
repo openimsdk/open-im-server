@@ -187,13 +187,13 @@ func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.C
 	groupDB := relation.NewGroupDB(db)
 	groupMemberDB := relation.NewGroupMemberDB(db)
 	groupRequestDB := relation.NewGroupRequest(db)
-	newDB := db
+	newDB := *db
 	superGroupMgoDB := unrelation.NewSuperGroupMgoDB(mgoClient)
 	database := &GroupDataBase{
 		groupDB:        groupDB,
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
-		db:             newDB,
+		db:             &newDB,
 		cache: cache.NewGroupCache(rdb, groupDB, groupMemberDB, groupRequestDB, superGroupMgoDB, rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,

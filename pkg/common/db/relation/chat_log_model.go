@@ -58,7 +58,6 @@ func (c *ChatLog) Create(msg pbMsg.MsgDataToMQ) error {
 			EmitDefaults: false,
 		}
 		chatLog.Content, _ = marshaler.MarshalToString(&tips)
-
 	} else {
 		chatLog.Content = string(msg.MsgData.Content)
 	}
