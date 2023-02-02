@@ -13,6 +13,7 @@ type FriendModel struct {
 	OperatorUserID string    `gorm:"column:operator_user_id;size:64"`
 	Ex             string    `gorm:"column:ex;size:1024"`
 }
+
 type ConversationModel struct {
 	OwnerUserID           string `gorm:"column:owner_user_id;primary_key;type:char(128)" json:"OwnerUserID"`
 	ConversationID        string `gorm:"column:conversation_id;primary_key;type:char(128)" json:"conversationID"`
@@ -48,6 +49,31 @@ type GroupModel struct {
 	ApplyMemberFriend      int32     `gorm:"column:apply_member_friend" json:"applyMemberFriend"`
 	NotificationUpdateTime time.Time `gorm:"column:notification_update_time"`
 	NotificationUserID     string    `gorm:"column:notification_user_id;size:64"`
+}
+
+func (f *GroupModel) EqID(i interface{}) bool {
+	switch v := i.(type) {
+	case GroupModel:
+		return f.GroupID == v.GroupID
+	case *GroupModel:
+		return f.GroupID == v.GroupID
+	default:
+		return false
+	}
+}
+
+func DuplicateRemoval[T any](arr []T, fn func(t T) string) {
+
+}
+
+func aaa() {
+	DuplicateRemoval([]GroupModel{}, func(t GroupModel) string {
+		return t.GroupID
+	})
+
+	DuplicateRemoval([]*GroupModel{}, func(t *GroupModel) string {
+		return t.GroupID
+	})
 }
 
 type FriendRequestModel struct {
