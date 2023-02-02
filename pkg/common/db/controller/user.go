@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/relation"
 	"Open_IM/pkg/common/db/table"
 	"context"
@@ -10,11 +11,17 @@ import (
 type UserInterface interface {
 	//获取指定用户的信息 如果有记录未找到 也返回错误
 	Find(ctx context.Context, userIDs []string) (users []*table.UserModel, err error)
+	//插入
 	Create(ctx context.Context, users []*table.UserModel) error
+	//更新
 	Update(ctx context.Context, users []*table.UserModel) (err error)
+	//更新带零值的
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
+	//通过名字搜索
 	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error)
+	//通过名字和id搜索
 	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error)
+	//获取，如果没找到，不不返回错误
 	Get(ctx context.Context, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error)
 	//userIDs是否存在 只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
@@ -30,23 +37,28 @@ func (u *UserController) Find(ctx context.Context, userIDs []string) (users []*t
 func (u *UserController) Create(ctx context.Context, users []*table.UserModel) error {
 	return u.database.Create(ctx, users)
 }
-func (u *UserController) Take(ctx context.Context, userID string) (user *table.UserModel, err error) {
-	return u.database.Take(ctx, userID)
-}
+
 func (u *UserController) Update(ctx context.Context, users []*table.UserModel) (err error) {
 	return u.database.Update(ctx, users)
 }
 func (u *UserController) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
 	return u.database.UpdateByMap(ctx, userID, args)
 }
+
 func (u *UserController) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error) {
 	return u.database.GetByName(ctx, userName, showNumber, pageNumber)
 }
+
 func (u *UserController) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error) {
 	return u.database.GetByNameAndID(ctx, content, showNumber, pageNumber)
 }
+
 func (u *UserController) Get(ctx context.Context, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error) {
 	return u.database.Get(ctx, showNumber, pageNumber)
+}
+
+func (u *UserController) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
+	return u.IsExist(ctx, userIDs)
 }
 func NewUserController(db *gorm.DB) *UserController {
 	controller := &UserController{database: newUserDatabase(db)}
@@ -56,12 +68,12 @@ func NewUserController(db *gorm.DB) *UserController {
 type UserDatabaseInterface interface {
 	Find(ctx context.Context, userIDs []string) (users []*table.UserModel, err error)
 	Create(ctx context.Context, users []*table.UserModel) error
-	Take(ctx context.Context, userID string) (user *table.UserModel, err error)
 	Update(ctx context.Context, users []*table.UserModel) (err error)
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
 	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error)
 	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error)
 	Get(ctx context.Context, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error)
+	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
 
 type UserDatabase struct {
@@ -76,16 +88,22 @@ func newUserDatabase(db *gorm.DB) *UserDatabase {
 	return database
 }
 
+// 获取指定用户的信息 如果有记录未找到 也返回错误
 func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*table.UserModel, err error) {
-	return u.sqlDB.Find(ctx, userIDs)
+	users, err = u.sqlDB.Find(ctx, userIDs)
+	if err != nil {
+		return
+	}
+	if len(users) != len(userIDs) {
+		err = constant.ErrRecordNotFound.Wrap()
+	}
+	return
 }
 
-func (u *UserDatabase) Create(ctx context.Context, users []*table.UserModel) error {
+func (u *UserDatabase) Create(ctx context.Context, users []*table.UserModel) (err error) {
 	return u.sqlDB.Create(ctx, users)
 }
-func (u *UserDatabase) Take(ctx context.Context, userID string) (user *table.UserModel, err error) {
-	return u.sqlDB.Take(ctx, userID)
-}
+
 func (u *UserDatabase) Update(ctx context.Context, users []*table.UserModel) (err error) {
 	return u.sqlDB.Update(ctx, users)
 }
@@ -98,6 +116,20 @@ func (u *UserDatabase) GetByName(ctx context.Context, userName string, showNumbe
 func (u *UserDatabase) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error) {
 	return u.sqlDB.GetByNameAndID(ctx, content, showNumber, pageNumber)
 }
+
+// 获取，如果没找到，不返回错误
 func (u *UserDatabase) Get(ctx context.Context, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error) {
 	return u.sqlDB.Get(ctx, showNumber, pageNumber)
+}
+
+// userIDs是否存在 只要有一个存在就为true
+func (u *UserDatabase) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
+	users, err := u.sqlDB.Find(ctx, userIDs)
+	if err != nil {
+		return
+	}
+	if len(users) > 0 {
+		return true, nil
+	}
+	return false, nil
 }
