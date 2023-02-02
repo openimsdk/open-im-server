@@ -23,52 +23,6 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type CommonResp struct {
-	ErrCode              int32    `protobuf:"varint,1,opt,name=errCode" json:"errCode,omitempty"`
-	ErrMsg               string   `protobuf:"bytes,2,opt,name=errMsg" json:"errMsg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *CommonResp) Reset()         { *m = CommonResp{} }
-func (m *CommonResp) String() string { return proto.CompactTextString(m) }
-func (*CommonResp) ProtoMessage()    {}
-func (*CommonResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_conversation_7438d6c35155b4e4, []int{0}
-}
-func (m *CommonResp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CommonResp.Unmarshal(m, b)
-}
-func (m *CommonResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CommonResp.Marshal(b, m, deterministic)
-}
-func (dst *CommonResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CommonResp.Merge(dst, src)
-}
-func (m *CommonResp) XXX_Size() int {
-	return xxx_messageInfo_CommonResp.Size(m)
-}
-func (m *CommonResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_CommonResp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CommonResp proto.InternalMessageInfo
-
-func (m *CommonResp) GetErrCode() int32 {
-	if m != nil {
-		return m.ErrCode
-	}
-	return 0
-}
-
-func (m *CommonResp) GetErrMsg() string {
-	if m != nil {
-		return m.ErrMsg
-	}
-	return ""
-}
-
 type Conversation struct {
 	OwnerUserID           string   `protobuf:"bytes,1,opt,name=ownerUserID" json:"ownerUserID,omitempty"`
 	ConversationID        string   `protobuf:"bytes,2,opt,name=conversationID" json:"conversationID,omitempty"`
@@ -95,7 +49,7 @@ func (m *Conversation) Reset()         { *m = Conversation{} }
 func (m *Conversation) String() string { return proto.CompactTextString(m) }
 func (*Conversation) ProtoMessage()    {}
 func (*Conversation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_conversation_7438d6c35155b4e4, []int{1}
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{0}
 }
 func (m *Conversation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Conversation.Unmarshal(m, b)
@@ -231,7 +185,6 @@ type ModifyConversationFieldReq struct {
 	Conversation         *Conversation `protobuf:"bytes,1,opt,name=conversation" json:"conversation,omitempty"`
 	FieldType            int32         `protobuf:"varint,2,opt,name=fieldType" json:"fieldType,omitempty"`
 	UserIDList           []string      `protobuf:"bytes,3,rep,name=userIDList" json:"userIDList,omitempty"`
-	OperationID          string        `protobuf:"bytes,4,opt,name=operationID" json:"operationID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
 	XXX_unrecognized     []byte        `json:"-"`
 	XXX_sizecache        int32         `json:"-"`
@@ -241,7 +194,7 @@ func (m *ModifyConversationFieldReq) Reset()         { *m = ModifyConversationFi
 func (m *ModifyConversationFieldReq) String() string { return proto.CompactTextString(m) }
 func (*ModifyConversationFieldReq) ProtoMessage()    {}
 func (*ModifyConversationFieldReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_conversation_7438d6c35155b4e4, []int{2}
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{1}
 }
 func (m *ModifyConversationFieldReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ModifyConversationFieldReq.Unmarshal(m, b)
@@ -282,25 +235,17 @@ func (m *ModifyConversationFieldReq) GetUserIDList() []string {
 	return nil
 }
 
-func (m *ModifyConversationFieldReq) GetOperationID() string {
-	if m != nil {
-		return m.OperationID
-	}
-	return ""
-}
-
 type ModifyConversationFieldResp struct {
-	CommonResp           *CommonResp `protobuf:"bytes,1,opt,name=commonResp" json:"commonResp,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *ModifyConversationFieldResp) Reset()         { *m = ModifyConversationFieldResp{} }
 func (m *ModifyConversationFieldResp) String() string { return proto.CompactTextString(m) }
 func (*ModifyConversationFieldResp) ProtoMessage()    {}
 func (*ModifyConversationFieldResp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_conversation_7438d6c35155b4e4, []int{3}
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{2}
 }
 func (m *ModifyConversationFieldResp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ModifyConversationFieldResp.Unmarshal(m, b)
@@ -320,18 +265,534 @@ func (m *ModifyConversationFieldResp) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ModifyConversationFieldResp proto.InternalMessageInfo
 
-func (m *ModifyConversationFieldResp) GetCommonResp() *CommonResp {
+type SetConversationReq struct {
+	Conversation         *Conversation `protobuf:"bytes,1,opt,name=Conversation" json:"Conversation,omitempty"`
+	NotificationType     int32         `protobuf:"varint,2,opt,name=notificationType" json:"notificationType,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *SetConversationReq) Reset()         { *m = SetConversationReq{} }
+func (m *SetConversationReq) String() string { return proto.CompactTextString(m) }
+func (*SetConversationReq) ProtoMessage()    {}
+func (*SetConversationReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{3}
+}
+func (m *SetConversationReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetConversationReq.Unmarshal(m, b)
+}
+func (m *SetConversationReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetConversationReq.Marshal(b, m, deterministic)
+}
+func (dst *SetConversationReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetConversationReq.Merge(dst, src)
+}
+func (m *SetConversationReq) XXX_Size() int {
+	return xxx_messageInfo_SetConversationReq.Size(m)
+}
+func (m *SetConversationReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetConversationReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetConversationReq proto.InternalMessageInfo
+
+func (m *SetConversationReq) GetConversation() *Conversation {
 	if m != nil {
-		return m.CommonResp
+		return m.Conversation
+	}
+	return nil
+}
+
+func (m *SetConversationReq) GetNotificationType() int32 {
+	if m != nil {
+		return m.NotificationType
+	}
+	return 0
+}
+
+type SetConversationResp struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SetConversationResp) Reset()         { *m = SetConversationResp{} }
+func (m *SetConversationResp) String() string { return proto.CompactTextString(m) }
+func (*SetConversationResp) ProtoMessage()    {}
+func (*SetConversationResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{4}
+}
+func (m *SetConversationResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetConversationResp.Unmarshal(m, b)
+}
+func (m *SetConversationResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetConversationResp.Marshal(b, m, deterministic)
+}
+func (dst *SetConversationResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetConversationResp.Merge(dst, src)
+}
+func (m *SetConversationResp) XXX_Size() int {
+	return xxx_messageInfo_SetConversationResp.Size(m)
+}
+func (m *SetConversationResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetConversationResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetConversationResp proto.InternalMessageInfo
+
+type SetRecvMsgOptReq struct {
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=OwnerUserID" json:"OwnerUserID,omitempty"`
+	ConversationID       string   `protobuf:"bytes,2,opt,name=ConversationID" json:"ConversationID,omitempty"`
+	RecvMsgOpt           int32    `protobuf:"varint,3,opt,name=RecvMsgOpt" json:"RecvMsgOpt,omitempty"`
+	NotificationType     int32    `protobuf:"varint,4,opt,name=notificationType" json:"notificationType,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SetRecvMsgOptReq) Reset()         { *m = SetRecvMsgOptReq{} }
+func (m *SetRecvMsgOptReq) String() string { return proto.CompactTextString(m) }
+func (*SetRecvMsgOptReq) ProtoMessage()    {}
+func (*SetRecvMsgOptReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{5}
+}
+func (m *SetRecvMsgOptReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetRecvMsgOptReq.Unmarshal(m, b)
+}
+func (m *SetRecvMsgOptReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetRecvMsgOptReq.Marshal(b, m, deterministic)
+}
+func (dst *SetRecvMsgOptReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetRecvMsgOptReq.Merge(dst, src)
+}
+func (m *SetRecvMsgOptReq) XXX_Size() int {
+	return xxx_messageInfo_SetRecvMsgOptReq.Size(m)
+}
+func (m *SetRecvMsgOptReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetRecvMsgOptReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetRecvMsgOptReq proto.InternalMessageInfo
+
+func (m *SetRecvMsgOptReq) GetOwnerUserID() string {
+	if m != nil {
+		return m.OwnerUserID
+	}
+	return ""
+}
+
+func (m *SetRecvMsgOptReq) GetConversationID() string {
+	if m != nil {
+		return m.ConversationID
+	}
+	return ""
+}
+
+func (m *SetRecvMsgOptReq) GetRecvMsgOpt() int32 {
+	if m != nil {
+		return m.RecvMsgOpt
+	}
+	return 0
+}
+
+func (m *SetRecvMsgOptReq) GetNotificationType() int32 {
+	if m != nil {
+		return m.NotificationType
+	}
+	return 0
+}
+
+type SetRecvMsgOptResp struct {
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SetRecvMsgOptResp) Reset()         { *m = SetRecvMsgOptResp{} }
+func (m *SetRecvMsgOptResp) String() string { return proto.CompactTextString(m) }
+func (*SetRecvMsgOptResp) ProtoMessage()    {}
+func (*SetRecvMsgOptResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{6}
+}
+func (m *SetRecvMsgOptResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SetRecvMsgOptResp.Unmarshal(m, b)
+}
+func (m *SetRecvMsgOptResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SetRecvMsgOptResp.Marshal(b, m, deterministic)
+}
+func (dst *SetRecvMsgOptResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SetRecvMsgOptResp.Merge(dst, src)
+}
+func (m *SetRecvMsgOptResp) XXX_Size() int {
+	return xxx_messageInfo_SetRecvMsgOptResp.Size(m)
+}
+func (m *SetRecvMsgOptResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_SetRecvMsgOptResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SetRecvMsgOptResp proto.InternalMessageInfo
+
+type GetConversationReq struct {
+	ConversationID       string   `protobuf:"bytes,1,opt,name=ConversationID" json:"ConversationID,omitempty"`
+	OwnerUserID          string   `protobuf:"bytes,2,opt,name=OwnerUserID" json:"OwnerUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetConversationReq) Reset()         { *m = GetConversationReq{} }
+func (m *GetConversationReq) String() string { return proto.CompactTextString(m) }
+func (*GetConversationReq) ProtoMessage()    {}
+func (*GetConversationReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{7}
+}
+func (m *GetConversationReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetConversationReq.Unmarshal(m, b)
+}
+func (m *GetConversationReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetConversationReq.Marshal(b, m, deterministic)
+}
+func (dst *GetConversationReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetConversationReq.Merge(dst, src)
+}
+func (m *GetConversationReq) XXX_Size() int {
+	return xxx_messageInfo_GetConversationReq.Size(m)
+}
+func (m *GetConversationReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetConversationReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetConversationReq proto.InternalMessageInfo
+
+func (m *GetConversationReq) GetConversationID() string {
+	if m != nil {
+		return m.ConversationID
+	}
+	return ""
+}
+
+func (m *GetConversationReq) GetOwnerUserID() string {
+	if m != nil {
+		return m.OwnerUserID
+	}
+	return ""
+}
+
+type GetConversationResp struct {
+	Conversation         *Conversation `protobuf:"bytes,2,opt,name=Conversation" json:"Conversation,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
+	XXX_unrecognized     []byte        `json:"-"`
+	XXX_sizecache        int32         `json:"-"`
+}
+
+func (m *GetConversationResp) Reset()         { *m = GetConversationResp{} }
+func (m *GetConversationResp) String() string { return proto.CompactTextString(m) }
+func (*GetConversationResp) ProtoMessage()    {}
+func (*GetConversationResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{8}
+}
+func (m *GetConversationResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetConversationResp.Unmarshal(m, b)
+}
+func (m *GetConversationResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetConversationResp.Marshal(b, m, deterministic)
+}
+func (dst *GetConversationResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetConversationResp.Merge(dst, src)
+}
+func (m *GetConversationResp) XXX_Size() int {
+	return xxx_messageInfo_GetConversationResp.Size(m)
+}
+func (m *GetConversationResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetConversationResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetConversationResp proto.InternalMessageInfo
+
+func (m *GetConversationResp) GetConversation() *Conversation {
+	if m != nil {
+		return m.Conversation
+	}
+	return nil
+}
+
+type GetConversationsReq struct {
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=OwnerUserID" json:"OwnerUserID,omitempty"`
+	ConversationIDs      []string `protobuf:"bytes,2,rep,name=ConversationIDs" json:"ConversationIDs,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetConversationsReq) Reset()         { *m = GetConversationsReq{} }
+func (m *GetConversationsReq) String() string { return proto.CompactTextString(m) }
+func (*GetConversationsReq) ProtoMessage()    {}
+func (*GetConversationsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{9}
+}
+func (m *GetConversationsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetConversationsReq.Unmarshal(m, b)
+}
+func (m *GetConversationsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetConversationsReq.Marshal(b, m, deterministic)
+}
+func (dst *GetConversationsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetConversationsReq.Merge(dst, src)
+}
+func (m *GetConversationsReq) XXX_Size() int {
+	return xxx_messageInfo_GetConversationsReq.Size(m)
+}
+func (m *GetConversationsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetConversationsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetConversationsReq proto.InternalMessageInfo
+
+func (m *GetConversationsReq) GetOwnerUserID() string {
+	if m != nil {
+		return m.OwnerUserID
+	}
+	return ""
+}
+
+func (m *GetConversationsReq) GetConversationIDs() []string {
+	if m != nil {
+		return m.ConversationIDs
+	}
+	return nil
+}
+
+type GetConversationsResp struct {
+	Conversations        []*Conversation `protobuf:"bytes,2,rep,name=Conversations" json:"Conversations,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *GetConversationsResp) Reset()         { *m = GetConversationsResp{} }
+func (m *GetConversationsResp) String() string { return proto.CompactTextString(m) }
+func (*GetConversationsResp) ProtoMessage()    {}
+func (*GetConversationsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{10}
+}
+func (m *GetConversationsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetConversationsResp.Unmarshal(m, b)
+}
+func (m *GetConversationsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetConversationsResp.Marshal(b, m, deterministic)
+}
+func (dst *GetConversationsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetConversationsResp.Merge(dst, src)
+}
+func (m *GetConversationsResp) XXX_Size() int {
+	return xxx_messageInfo_GetConversationsResp.Size(m)
+}
+func (m *GetConversationsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetConversationsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetConversationsResp proto.InternalMessageInfo
+
+func (m *GetConversationsResp) GetConversations() []*Conversation {
+	if m != nil {
+		return m.Conversations
+	}
+	return nil
+}
+
+type GetAllConversationsReq struct {
+	OwnerUserID          string   `protobuf:"bytes,1,opt,name=OwnerUserID" json:"OwnerUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GetAllConversationsReq) Reset()         { *m = GetAllConversationsReq{} }
+func (m *GetAllConversationsReq) String() string { return proto.CompactTextString(m) }
+func (*GetAllConversationsReq) ProtoMessage()    {}
+func (*GetAllConversationsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{11}
+}
+func (m *GetAllConversationsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAllConversationsReq.Unmarshal(m, b)
+}
+func (m *GetAllConversationsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAllConversationsReq.Marshal(b, m, deterministic)
+}
+func (dst *GetAllConversationsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAllConversationsReq.Merge(dst, src)
+}
+func (m *GetAllConversationsReq) XXX_Size() int {
+	return xxx_messageInfo_GetAllConversationsReq.Size(m)
+}
+func (m *GetAllConversationsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAllConversationsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetAllConversationsReq proto.InternalMessageInfo
+
+func (m *GetAllConversationsReq) GetOwnerUserID() string {
+	if m != nil {
+		return m.OwnerUserID
+	}
+	return ""
+}
+
+type GetAllConversationsResp struct {
+	Conversations        []*Conversation `protobuf:"bytes,2,rep,name=Conversations" json:"Conversations,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *GetAllConversationsResp) Reset()         { *m = GetAllConversationsResp{} }
+func (m *GetAllConversationsResp) String() string { return proto.CompactTextString(m) }
+func (*GetAllConversationsResp) ProtoMessage()    {}
+func (*GetAllConversationsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{12}
+}
+func (m *GetAllConversationsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetAllConversationsResp.Unmarshal(m, b)
+}
+func (m *GetAllConversationsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetAllConversationsResp.Marshal(b, m, deterministic)
+}
+func (dst *GetAllConversationsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetAllConversationsResp.Merge(dst, src)
+}
+func (m *GetAllConversationsResp) XXX_Size() int {
+	return xxx_messageInfo_GetAllConversationsResp.Size(m)
+}
+func (m *GetAllConversationsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetAllConversationsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetAllConversationsResp proto.InternalMessageInfo
+
+func (m *GetAllConversationsResp) GetConversations() []*Conversation {
+	if m != nil {
+		return m.Conversations
+	}
+	return nil
+}
+
+type BatchSetConversationsReq struct {
+	Conversations        []*Conversation `protobuf:"bytes,1,rep,name=Conversations" json:"Conversations,omitempty"`
+	OwnerUserID          string          `protobuf:"bytes,2,opt,name=OwnerUserID" json:"OwnerUserID,omitempty"`
+	NotificationType     int32           `protobuf:"varint,3,opt,name=notificationType" json:"notificationType,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *BatchSetConversationsReq) Reset()         { *m = BatchSetConversationsReq{} }
+func (m *BatchSetConversationsReq) String() string { return proto.CompactTextString(m) }
+func (*BatchSetConversationsReq) ProtoMessage()    {}
+func (*BatchSetConversationsReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{13}
+}
+func (m *BatchSetConversationsReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BatchSetConversationsReq.Unmarshal(m, b)
+}
+func (m *BatchSetConversationsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BatchSetConversationsReq.Marshal(b, m, deterministic)
+}
+func (dst *BatchSetConversationsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BatchSetConversationsReq.Merge(dst, src)
+}
+func (m *BatchSetConversationsReq) XXX_Size() int {
+	return xxx_messageInfo_BatchSetConversationsReq.Size(m)
+}
+func (m *BatchSetConversationsReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_BatchSetConversationsReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BatchSetConversationsReq proto.InternalMessageInfo
+
+func (m *BatchSetConversationsReq) GetConversations() []*Conversation {
+	if m != nil {
+		return m.Conversations
+	}
+	return nil
+}
+
+func (m *BatchSetConversationsReq) GetOwnerUserID() string {
+	if m != nil {
+		return m.OwnerUserID
+	}
+	return ""
+}
+
+func (m *BatchSetConversationsReq) GetNotificationType() int32 {
+	if m != nil {
+		return m.NotificationType
+	}
+	return 0
+}
+
+type BatchSetConversationsResp struct {
+	Success              []string `protobuf:"bytes,1,rep,name=Success" json:"Success,omitempty"`
+	Failed               []string `protobuf:"bytes,2,rep,name=Failed" json:"Failed,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BatchSetConversationsResp) Reset()         { *m = BatchSetConversationsResp{} }
+func (m *BatchSetConversationsResp) String() string { return proto.CompactTextString(m) }
+func (*BatchSetConversationsResp) ProtoMessage()    {}
+func (*BatchSetConversationsResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_conversation_b0216cb81f8b796f, []int{14}
+}
+func (m *BatchSetConversationsResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BatchSetConversationsResp.Unmarshal(m, b)
+}
+func (m *BatchSetConversationsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BatchSetConversationsResp.Marshal(b, m, deterministic)
+}
+func (dst *BatchSetConversationsResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BatchSetConversationsResp.Merge(dst, src)
+}
+func (m *BatchSetConversationsResp) XXX_Size() int {
+	return xxx_messageInfo_BatchSetConversationsResp.Size(m)
+}
+func (m *BatchSetConversationsResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_BatchSetConversationsResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BatchSetConversationsResp proto.InternalMessageInfo
+
+func (m *BatchSetConversationsResp) GetSuccess() []string {
+	if m != nil {
+		return m.Success
+	}
+	return nil
+}
+
+func (m *BatchSetConversationsResp) GetFailed() []string {
+	if m != nil {
+		return m.Failed
 	}
 	return nil
 }
 
 func init() {
-	proto.RegisterType((*CommonResp)(nil), "conversation.CommonResp")
 	proto.RegisterType((*Conversation)(nil), "conversation.Conversation")
 	proto.RegisterType((*ModifyConversationFieldReq)(nil), "conversation.ModifyConversationFieldReq")
 	proto.RegisterType((*ModifyConversationFieldResp)(nil), "conversation.ModifyConversationFieldResp")
+	proto.RegisterType((*SetConversationReq)(nil), "conversation.SetConversationReq")
+	proto.RegisterType((*SetConversationResp)(nil), "conversation.SetConversationResp")
+	proto.RegisterType((*SetRecvMsgOptReq)(nil), "conversation.SetRecvMsgOptReq")
+	proto.RegisterType((*SetRecvMsgOptResp)(nil), "conversation.SetRecvMsgOptResp")
+	proto.RegisterType((*GetConversationReq)(nil), "conversation.GetConversationReq")
+	proto.RegisterType((*GetConversationResp)(nil), "conversation.GetConversationResp")
+	proto.RegisterType((*GetConversationsReq)(nil), "conversation.GetConversationsReq")
+	proto.RegisterType((*GetConversationsResp)(nil), "conversation.GetConversationsResp")
+	proto.RegisterType((*GetAllConversationsReq)(nil), "conversation.GetAllConversationsReq")
+	proto.RegisterType((*GetAllConversationsResp)(nil), "conversation.GetAllConversationsResp")
+	proto.RegisterType((*BatchSetConversationsReq)(nil), "conversation.BatchSetConversationsReq")
+	proto.RegisterType((*BatchSetConversationsResp)(nil), "conversation.BatchSetConversationsResp")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -346,6 +807,12 @@ const _ = grpc.SupportPackageIsVersion4
 
 type ConversationClient interface {
 	ModifyConversationField(ctx context.Context, in *ModifyConversationFieldReq, opts ...grpc.CallOption) (*ModifyConversationFieldResp, error)
+	GetConversation(ctx context.Context, in *GetConversationReq, opts ...grpc.CallOption) (*GetConversationResp, error)
+	GetAllConversations(ctx context.Context, in *GetAllConversationsReq, opts ...grpc.CallOption) (*GetAllConversationsResp, error)
+	GetConversations(ctx context.Context, in *GetConversationsReq, opts ...grpc.CallOption) (*GetConversationsResp, error)
+	BatchSetConversations(ctx context.Context, in *BatchSetConversationsReq, opts ...grpc.CallOption) (*BatchSetConversationsResp, error)
+	SetConversation(ctx context.Context, in *SetConversationReq, opts ...grpc.CallOption) (*SetConversationResp, error)
+	SetRecvMsgOpt(ctx context.Context, in *SetRecvMsgOptReq, opts ...grpc.CallOption) (*SetRecvMsgOptResp, error)
 }
 
 type conversationClient struct {
@@ -365,10 +832,70 @@ func (c *conversationClient) ModifyConversationField(ctx context.Context, in *Mo
 	return out, nil
 }
 
+func (c *conversationClient) GetConversation(ctx context.Context, in *GetConversationReq, opts ...grpc.CallOption) (*GetConversationResp, error) {
+	out := new(GetConversationResp)
+	err := grpc.Invoke(ctx, "/conversation.conversation/GetConversation", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationClient) GetAllConversations(ctx context.Context, in *GetAllConversationsReq, opts ...grpc.CallOption) (*GetAllConversationsResp, error) {
+	out := new(GetAllConversationsResp)
+	err := grpc.Invoke(ctx, "/conversation.conversation/GetAllConversations", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationClient) GetConversations(ctx context.Context, in *GetConversationsReq, opts ...grpc.CallOption) (*GetConversationsResp, error) {
+	out := new(GetConversationsResp)
+	err := grpc.Invoke(ctx, "/conversation.conversation/GetConversations", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationClient) BatchSetConversations(ctx context.Context, in *BatchSetConversationsReq, opts ...grpc.CallOption) (*BatchSetConversationsResp, error) {
+	out := new(BatchSetConversationsResp)
+	err := grpc.Invoke(ctx, "/conversation.conversation/BatchSetConversations", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationClient) SetConversation(ctx context.Context, in *SetConversationReq, opts ...grpc.CallOption) (*SetConversationResp, error) {
+	out := new(SetConversationResp)
+	err := grpc.Invoke(ctx, "/conversation.conversation/SetConversation", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationClient) SetRecvMsgOpt(ctx context.Context, in *SetRecvMsgOptReq, opts ...grpc.CallOption) (*SetRecvMsgOptResp, error) {
+	out := new(SetRecvMsgOptResp)
+	err := grpc.Invoke(ctx, "/conversation.conversation/SetRecvMsgOpt", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for Conversation service
 
 type ConversationServer interface {
 	ModifyConversationField(context.Context, *ModifyConversationFieldReq) (*ModifyConversationFieldResp, error)
+	GetConversation(context.Context, *GetConversationReq) (*GetConversationResp, error)
+	GetAllConversations(context.Context, *GetAllConversationsReq) (*GetAllConversationsResp, error)
+	GetConversations(context.Context, *GetConversationsReq) (*GetConversationsResp, error)
+	BatchSetConversations(context.Context, *BatchSetConversationsReq) (*BatchSetConversationsResp, error)
+	SetConversation(context.Context, *SetConversationReq) (*SetConversationResp, error)
+	SetRecvMsgOpt(context.Context, *SetRecvMsgOptReq) (*SetRecvMsgOptResp, error)
 }
 
 func RegisterConversationServer(s *grpc.Server, srv ConversationServer) {
@@ -393,6 +920,114 @@ func _Conversation_ModifyConversationField_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Conversation_GetConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConversationReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServer).GetConversation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/conversation.conversation/GetConversation",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServer).GetConversation(ctx, req.(*GetConversationReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Conversation_GetAllConversations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllConversationsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServer).GetAllConversations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/conversation.conversation/GetAllConversations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServer).GetAllConversations(ctx, req.(*GetAllConversationsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Conversation_GetConversations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConversationsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServer).GetConversations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/conversation.conversation/GetConversations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServer).GetConversations(ctx, req.(*GetConversationsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Conversation_BatchSetConversations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchSetConversationsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServer).BatchSetConversations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/conversation.conversation/BatchSetConversations",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServer).BatchSetConversations(ctx, req.(*BatchSetConversationsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Conversation_SetConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetConversationReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServer).SetConversation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/conversation.conversation/SetConversation",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServer).SetConversation(ctx, req.(*SetConversationReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Conversation_SetRecvMsgOpt_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetRecvMsgOptReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationServer).SetRecvMsgOpt(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/conversation.conversation/SetRecvMsgOpt",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationServer).SetRecvMsgOpt(ctx, req.(*SetRecvMsgOptReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Conversation_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "conversation.conversation",
 	HandlerType: (*ConversationServer)(nil),
@@ -401,48 +1036,89 @@ var _Conversation_serviceDesc = grpc.ServiceDesc{
 			MethodName: "ModifyConversationField",
 			Handler:    _Conversation_ModifyConversationField_Handler,
 		},
+		{
+			MethodName: "GetConversation",
+			Handler:    _Conversation_GetConversation_Handler,
+		},
+		{
+			MethodName: "GetAllConversations",
+			Handler:    _Conversation_GetAllConversations_Handler,
+		},
+		{
+			MethodName: "GetConversations",
+			Handler:    _Conversation_GetConversations_Handler,
+		},
+		{
+			MethodName: "BatchSetConversations",
+			Handler:    _Conversation_BatchSetConversations_Handler,
+		},
+		{
+			MethodName: "SetConversation",
+			Handler:    _Conversation_SetConversation_Handler,
+		},
+		{
+			MethodName: "SetRecvMsgOpt",
+			Handler:    _Conversation_SetRecvMsgOpt_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "conversation/conversation.proto",
 }
 
 func init() {
-	proto.RegisterFile("conversation/conversation.proto", fileDescriptor_conversation_7438d6c35155b4e4)
+	proto.RegisterFile("conversation/conversation.proto", fileDescriptor_conversation_b0216cb81f8b796f)
 }
 
-var fileDescriptor_conversation_7438d6c35155b4e4 = []byte{
-	// 520 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x94, 0xd1, 0x6b, 0x13, 0x41,
-	0x10, 0xc6, 0xb9, 0xb4, 0x4d, 0x93, 0x49, 0x1a, 0xcb, 0x82, 0xba, 0x44, 0xd1, 0x10, 0x44, 0x4e,
-	0xc5, 0x06, 0xaa, 0x0f, 0x82, 0x50, 0xd0, 0x04, 0xe5, 0xc0, 0xd8, 0x72, 0xa4, 0x08, 0xbe, 0xc8,
-	0x35, 0x37, 0x49, 0x0f, 0xcd, 0xee, 0xba, 0xbb, 0x17, 0xd3, 0x17, 0xff, 0x2a, 0x1f, 0xfd, 0xe3,
-	0x64, 0x27, 0x49, 0xb3, 0x5b, 0x0d, 0xf8, 0x38, 0xbf, 0x9d, 0xfb, 0xe6, 0x9b, 0xcd, 0x97, 0x85,
-	0x87, 0x63, 0x29, 0xe6, 0xa8, 0x4d, 0x66, 0x0b, 0x29, 0x7a, 0x7e, 0x71, 0xa4, 0xb4, 0xb4, 0x92,
-	0x35, 0x7d, 0xd6, 0x3d, 0x01, 0xe8, 0xcb, 0xd9, 0x4c, 0x8a, 0x14, 0x8d, 0x62, 0x1c, 0xf6, 0x51,
-	0xeb, 0xbe, 0xcc, 0x91, 0x47, 0x9d, 0x28, 0xde, 0x4b, 0xd7, 0x25, 0xbb, 0x03, 0x55, 0xd4, 0x7a,
-	0x68, 0xa6, 0xbc, 0xd2, 0x89, 0xe2, 0x7a, 0xba, 0xaa, 0xba, 0xbf, 0x76, 0xa1, 0xd9, 0xf7, 0x04,
-	0x59, 0x07, 0x1a, 0xf2, 0x87, 0x40, 0x7d, 0x6e, 0x50, 0x27, 0x03, 0x92, 0xa9, 0xa7, 0x3e, 0x62,
-	0x8f, 0xa1, 0xe5, 0x5b, 0x48, 0x06, 0x2b, 0xc9, 0x1b, 0x94, 0x3d, 0x00, 0xd0, 0x38, 0x9e, 0x0f,
-	0xcd, 0xf4, 0x54, 0x59, 0xbe, 0x43, 0x7e, 0x3c, 0xc2, 0x9e, 0xc2, 0xa1, 0xff, 0xc5, 0xe8, 0x4a,
-	0x21, 0xdf, 0xa5, 0xae, 0xbf, 0xb8, 0xb3, 0x5f, 0x2e, 0x0d, 0xed, 0x2d, 0xed, 0x2f, 0x2b, 0xb7,
-	0xf0, 0x54, 0xcb, 0x52, 0x25, 0x03, 0x5e, 0xa5, 0x83, 0x75, 0xe9, 0xf6, 0x28, 0x85, 0xc6, 0x2c,
-	0xef, 0xcb, 0x52, 0x58, 0xbe, 0x4f, 0xc2, 0x3e, 0x62, 0x8f, 0xe0, 0x20, 0xd7, 0xd9, 0xc4, 0x8e,
-	0x70, 0x61, 0x47, 0xc5, 0x0c, 0x79, 0xad, 0x13, 0xc5, 0x3b, 0x69, 0x08, 0x59, 0x1b, 0x6a, 0x85,
-	0x39, 0x2b, 0x84, 0xc0, 0x9c, 0xd7, 0x3b, 0x51, 0x5c, 0x4b, 0xaf, 0x6b, 0xd6, 0x85, 0x66, 0x66,
-	0x6d, 0x36, 0xbe, 0xc4, 0x3c, 0x11, 0x13, 0xc9, 0x81, 0x2c, 0x04, 0xcc, 0x4d, 0x29, 0xcc, 0x99,
-	0x2e, 0xe6, 0x99, 0xc5, 0xfe, 0x65, 0x66, 0x79, 0x83, 0x44, 0x42, 0xe8, 0xdc, 0x92, 0xf1, 0x37,
-	0x96, 0xae, 0xa1, 0xb9, 0x74, 0xeb, 0x21, 0x37, 0xab, 0x30, 0x1f, 0xa5, 0x4d, 0xc4, 0x7b, 0x47,
-	0xf9, 0x01, 0xc9, 0x04, 0x8c, 0xb5, 0xa0, 0x82, 0x0b, 0xde, 0x22, 0x17, 0x15, 0x5c, 0xb0, 0x97,
-	0x70, 0xbb, 0x54, 0x79, 0x66, 0xf1, 0x7c, 0xb3, 0x36, 0x6d, 0x7a, 0x8b, 0x36, 0xfd, 0xf7, 0xa1,
-	0x9b, 0x74, 0x51, 0x6a, 0x31, 0x28, 0x35, 0xdd, 0x3f, 0x3f, 0x24, 0x33, 0x01, 0xeb, 0xfe, 0x8e,
-	0xa0, 0x3d, 0x94, 0x79, 0x31, 0xb9, 0xf2, 0xc3, 0xf3, 0xae, 0xc0, 0x6f, 0x79, 0x8a, 0xdf, 0xd9,
-	0x09, 0x04, 0x29, 0xa5, 0x14, 0x35, 0x8e, 0xdb, 0x47, 0x41, 0x9c, 0xfd, 0x2f, 0xd3, 0xa0, 0x9f,
-	0xdd, 0x87, 0xfa, 0xc4, 0x69, 0xd1, 0x65, 0x54, 0x68, 0xfe, 0x06, 0xb8, 0x60, 0x2d, 0x7f, 0xfe,
-	0x0f, 0x85, 0x71, 0xc1, 0xda, 0x89, 0xeb, 0xa9, 0x47, 0x28, 0xc2, 0x0a, 0xf5, 0x3a, 0x9d, 0xbb,
-	0xab, 0x08, 0x6f, 0x50, 0xf7, 0x13, 0xdc, 0xdb, 0xea, 0xde, 0x28, 0xf6, 0x0a, 0x60, 0x7c, 0xfd,
-	0xa7, 0x5a, 0x99, 0xe7, 0x37, 0xcd, 0xaf, 0xcf, 0x53, 0xaf, 0xf7, 0xf8, 0x67, 0xb8, 0x38, 0x13,
-	0x70, 0x77, 0xcb, 0x20, 0x16, 0x87, 0x82, 0xdb, 0x6f, 0xb3, 0xfd, 0xe4, 0x3f, 0x3b, 0x8d, 0x7a,
-	0xfb, 0xfc, 0xf3, 0xb3, 0x53, 0x85, 0xe2, 0x4b, 0x32, 0xec, 0xa9, 0xaf, 0xd3, 0x1e, 0xbd, 0x18,
-	0xc1, 0x23, 0xf2, 0xda, 0x2f, 0x2e, 0xaa, 0xd4, 0xf0, 0xe2, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff,
-	0xb3, 0xd2, 0x40, 0x56, 0x75, 0x04, 0x00, 0x00,
+var fileDescriptor_conversation_b0216cb81f8b796f = []byte{
+	// 789 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x5b, 0x4f, 0xdb, 0x48,
+	0x14, 0x96, 0x13, 0x6e, 0x39, 0x49, 0x20, 0x7b, 0x58, 0x60, 0xd6, 0xbb, 0x0b, 0x59, 0x8b, 0x65,
+	0xb3, 0xac, 0x16, 0x24, 0x76, 0x9f, 0x5a, 0xa9, 0x2a, 0x24, 0x22, 0x8a, 0xd4, 0x34, 0xc8, 0x81,
+	0xaa, 0x17, 0xa9, 0x95, 0x89, 0x27, 0xc4, 0x6a, 0x6a, 0x4f, 0x3d, 0x63, 0x0a, 0x6f, 0xfd, 0x1d,
+	0xfd, 0x05, 0x6d, 0x9f, 0xfb, 0x03, 0x2b, 0x4f, 0xb8, 0x78, 0x32, 0xce, 0x4d, 0xea, 0xe3, 0x7c,
+	0x3e, 0x97, 0xef, 0x9c, 0xf3, 0x9d, 0x19, 0xc3, 0x56, 0x27, 0xf0, 0x2f, 0x69, 0xc8, 0x1d, 0xe1,
+	0x05, 0xfe, 0x7e, 0xf2, 0xb0, 0xc7, 0xc2, 0x40, 0x04, 0x58, 0x48, 0x62, 0xd6, 0xb7, 0x39, 0x28,
+	0x54, 0x13, 0x00, 0x96, 0x21, 0x1f, 0x7c, 0xf0, 0x69, 0x78, 0xc6, 0x69, 0xd8, 0xa8, 0x11, 0xa3,
+	0x6c, 0x54, 0x72, 0x76, 0x12, 0xc2, 0x1d, 0x58, 0x4e, 0x86, 0x68, 0xd4, 0x48, 0x46, 0x1a, 0x0d,
+	0xa1, 0xb8, 0x09, 0x10, 0xd2, 0xce, 0x65, 0x93, 0x5f, 0xb4, 0x98, 0x20, 0xd9, 0xb2, 0x51, 0x99,
+	0xb7, 0x13, 0x08, 0xee, 0x42, 0x29, 0xe9, 0x71, 0x7a, 0xcd, 0x28, 0x99, 0x93, 0x56, 0x1a, 0x8e,
+	0xeb, 0xb0, 0x10, 0x0d, 0x08, 0xcd, 0xcb, 0x5c, 0x37, 0x27, 0x24, 0xb0, 0x78, 0x11, 0x06, 0x11,
+	0x6b, 0xd4, 0xc8, 0x82, 0xfc, 0x70, 0x7b, 0x8c, 0xeb, 0x88, 0xfc, 0x90, 0x3a, 0x6e, 0x35, 0x88,
+	0x7c, 0x41, 0x16, 0x65, 0xe0, 0x24, 0x84, 0xdb, 0x50, 0x74, 0x43, 0xa7, 0x2b, 0x4e, 0xe9, 0x95,
+	0x38, 0xf5, 0xde, 0x51, 0xb2, 0x54, 0x36, 0x2a, 0x59, 0x5b, 0x05, 0xd1, 0x84, 0x25, 0x8f, 0x9f,
+	0x78, 0xbe, 0x4f, 0x5d, 0x92, 0x2b, 0x1b, 0x95, 0x25, 0xfb, 0xee, 0x8c, 0x16, 0x14, 0x1c, 0x21,
+	0x9c, 0x4e, 0x8f, 0xba, 0x0d, 0xbf, 0x1b, 0x10, 0x90, 0x14, 0x14, 0x2c, 0xce, 0xe2, 0xf1, 0x93,
+	0xd0, 0xbb, 0x74, 0x04, 0xad, 0xf6, 0x1c, 0x41, 0xf2, 0x32, 0x88, 0x0a, 0xc6, 0x6c, 0x25, 0xf1,
+	0x43, 0x21, 0xdb, 0x50, 0x18, 0xb0, 0x4d, 0x40, 0x71, 0x2e, 0x8f, 0x3f, 0x0d, 0x44, 0xc3, 0xaf,
+	0xc7, 0x28, 0x29, 0xca, 0x30, 0x0a, 0x86, 0xcb, 0x90, 0xa1, 0x57, 0x64, 0x59, 0xb2, 0xc8, 0xd0,
+	0x2b, 0xfc, 0x1f, 0xd6, 0x22, 0xe6, 0x3a, 0x82, 0x9e, 0xdd, 0x97, 0x2d, 0x2b, 0x5d, 0x91, 0x95,
+	0xa6, 0x7f, 0x8c, 0x33, 0x9d, 0x47, 0xa1, 0x5f, 0x8b, 0x42, 0xd9, 0x7f, 0x52, 0x92, 0x64, 0x14,
+	0xcc, 0xfa, 0x64, 0x80, 0xd9, 0x0c, 0x5c, 0xaf, 0x7b, 0x9d, 0x14, 0xcf, 0xb1, 0x47, 0xfb, 0xae,
+	0x4d, 0xdf, 0xe3, 0x23, 0x50, 0x54, 0x26, 0x55, 0x94, 0x3f, 0x30, 0xf7, 0x14, 0x39, 0x26, 0x3d,
+	0x6d, 0xc5, 0x1e, 0x7f, 0x83, 0x5c, 0x37, 0x8e, 0x25, 0x9b, 0x91, 0x91, 0xf9, 0xef, 0x81, 0x58,
+	0x58, 0x83, 0xf1, 0x3f, 0xf1, 0x78, 0x2c, 0xac, 0x6c, 0x25, 0x67, 0x27, 0x10, 0xeb, 0x77, 0xf8,
+	0x75, 0x24, 0x37, 0xce, 0xac, 0x8f, 0x06, 0x60, 0x9b, 0x0a, 0x25, 0xfd, 0x80, 0x73, 0x75, 0x46,
+	0xce, 0xca, 0xe2, 0xec, 0x42, 0xc9, 0x0f, 0x84, 0xd7, 0xf5, 0x3a, 0xf7, 0x72, 0x1e, 0x50, 0xd7,
+	0x70, 0x6b, 0x0d, 0x56, 0x35, 0x06, 0x9c, 0x59, 0x9f, 0x0d, 0x28, 0xb5, 0xa9, 0xb0, 0xef, 0x76,
+	0x24, 0xe6, 0x55, 0x86, 0x7c, 0x4b, 0x5f, 0xc8, 0x96, 0xba, 0x90, 0xd5, 0xd4, 0x85, 0xac, 0x6a,
+	0x0b, 0x69, 0x6b, 0x0b, 0x69, 0x2b, 0x0b, 0xa9, 0x55, 0x30, 0x37, 0xa2, 0x82, 0x55, 0xf8, 0x69,
+	0x88, 0x29, 0x67, 0xd6, 0x6b, 0xc0, 0xba, 0xde, 0x58, 0x9d, 0x9e, 0x91, 0x4a, 0x6f, 0xa8, 0xd0,
+	0x8c, 0x56, 0xa8, 0x75, 0x06, 0xab, 0x75, 0xbd, 0x6d, 0xda, 0xe4, 0x32, 0xb3, 0x4d, 0xce, 0x72,
+	0xb4, 0xb0, 0x7c, 0xba, 0xc6, 0x57, 0x60, 0x45, 0xad, 0x81, 0x93, 0x8c, 0x54, 0xe3, 0x30, 0x6c,
+	0x3d, 0x87, 0x9f, 0xf5, 0x14, 0x9c, 0xe1, 0x63, 0x28, 0x2a, 0xa0, 0xf4, 0x1f, 0xcf, 0x5d, 0x75,
+	0xb0, 0x1e, 0xc0, 0x7a, 0x9d, 0x8a, 0xc3, 0x7e, 0x7f, 0x76, 0xfe, 0xd6, 0x2b, 0xd8, 0x48, 0xf5,
+	0xfd, 0x21, 0xc4, 0xbe, 0x1a, 0x40, 0x8e, 0x1c, 0xd1, 0xe9, 0xb5, 0x53, 0x7a, 0xab, 0x85, 0x37,
+	0x66, 0x0c, 0x3f, 0x59, 0x2d, 0xa9, 0x72, 0xce, 0x8e, 0x90, 0x73, 0x13, 0x7e, 0x19, 0xc1, 0x95,
+	0xb3, 0xf8, 0x91, 0x69, 0x47, 0x9d, 0x0e, 0xe5, 0x03, 0x9a, 0x39, 0xfb, 0xf6, 0x18, 0x3f, 0x4b,
+	0xc7, 0x8e, 0xd7, 0xa7, 0xee, 0xcd, 0xdc, 0x6f, 0x4e, 0x07, 0x5f, 0xe6, 0xd5, 0x0b, 0x10, 0x7d,
+	0xd8, 0x18, 0x71, 0x25, 0x61, 0x45, 0xad, 0x79, 0xf4, 0xad, 0x6a, 0xfe, 0x3d, 0xa5, 0x25, 0x67,
+	0xf8, 0x0c, 0x56, 0x86, 0xf4, 0x86, 0x65, 0xd5, 0x5b, 0x5f, 0x54, 0xf3, 0x8f, 0x09, 0x16, 0x9c,
+	0xe1, 0xb9, 0x5c, 0x95, 0x61, 0xc5, 0xe0, 0xb6, 0xe6, 0x99, 0x22, 0x48, 0xf3, 0xcf, 0x29, 0xac,
+	0x38, 0xc3, 0x17, 0x50, 0x1a, 0xde, 0x15, 0x1c, 0x4f, 0x4d, 0x46, 0xb7, 0x26, 0x99, 0x70, 0x86,
+	0x3d, 0x58, 0x4b, 0x1d, 0x33, 0xee, 0xa8, 0xce, 0xa3, 0x74, 0x6b, 0xfe, 0x35, 0x95, 0xdd, 0x60,
+	0x00, 0xed, 0xf1, 0x03, 0x68, 0x4f, 0x1c, 0x40, 0xca, 0x13, 0x81, 0x27, 0x50, 0x54, 0xee, 0x5d,
+	0xdc, 0xd4, 0x7c, 0x94, 0xe7, 0xc3, 0xdc, 0x1a, 0xfb, 0x9d, 0xb3, 0xa3, 0x7f, 0x5f, 0xfe, 0xd3,
+	0x62, 0xd4, 0x7f, 0xd3, 0x68, 0xee, 0xb3, 0xb7, 0x17, 0xfb, 0xf2, 0x27, 0x51, 0xf9, 0x6f, 0x7c,
+	0x98, 0x3c, 0x9c, 0x2f, 0x48, 0x83, 0xff, 0xbe, 0x07, 0x00, 0x00, 0xff, 0xff, 0xae, 0x18, 0x3d,
+	0x4f, 0x68, 0x0a, 0x00, 0x00,
 }
