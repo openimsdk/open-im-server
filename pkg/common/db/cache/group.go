@@ -33,7 +33,7 @@ type GroupCache struct {
 	group        *relation.GroupGorm
 	groupMember  *relation.GroupMemberGorm
 	groupRequest *relation.GroupRequestGorm
-	mongoDB      *unrelation.SuperGroupMgoDB
+	mongoDB      *unrelation.SuperGroupMongoDriver
 	expireTime   time.Duration
 	redisClient  *RedisClient
 	rcClient     *rockscache.Client
@@ -43,7 +43,7 @@ type GroupCache struct {
 	cacheGroupMemberUserIDs map[string]*localcache.GroupMemberIDsHash
 }
 
-func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMgoDB, opts rockscache.Options) *GroupCache {
+func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCache {
 	return &GroupCache{rcClient: rockscache.NewClient(rdb, opts), expireTime: groupExpireTime,
 		group: groupDB, groupMember: groupMemberDB, groupRequest: groupRequestDB, redisClient: NewRedisClient(rdb),
 		mongoDB: mongoClient, cacheGroupMemberUserIDs: make(map[string]*localcache.GroupMemberIDsHash, 0),

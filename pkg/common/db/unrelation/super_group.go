@@ -11,25 +11,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readconcern"
 )
 
-const (
-	cSuperGroup       = "super_group"
-	cUserToSuperGroup = "user_to_super_group"
-)
-
-type SuperGroupMgoDB struct {
+type SuperGroupMongoDriver struct {
 	MgoClient                  *mongo.Client
 	MgoDB                      *mongo.Database
 	superGroupCollection       *mongo.Collection
 	userToSuperGroupCollection *mongo.Collection
 }
 
-func NewSuperGroupMgoDB(mgoClient *mongo.Client) *SuperGroupMgoDB {
+func NewSuperGroupMongoDriver(mgoClient *mongo.Client) *SuperGroupMongoDriver {
 	mgoDB := mgoClient.Database(config.Config.Mongo.DBDatabase)
-	return &SuperGroupMgoDB{MgoDB: mgoDB, MgoClient: mgoClient, superGroupCollection: mgoDB.Collection(cSuperGroup), userToSuperGroupCollection: mgoDB.Collection(cUserToSuperGroup)}
+	return &SuperGroupMongoDriver{MgoDB: mgoDB, MgoClient: mgoClient, superGroupCollection: mgoDB.Collection(table.CSuperGroup), userToSuperGroupCollection: mgoDB.Collection(table.CUserToSuperGroup)}
 }
 
-func (db *SuperGroupMgoDB) CreateSuperGroup(sCtx mongo.SessionContext, groupID string, initMemberIDList []string) error {
-	superGroup := table.SuperGroup{
+func (db *SuperGroupMongoDriver) CreateSuperGroup(sCtx mongo.SessionContext, groupID string, initMemberIDList []string) error {
+	superGroup := table.SuperGroupModel{
 		GroupID:      groupID,
 		MemberIDList: initMemberIDList,
 	}
@@ -51,13 +46,13 @@ func (db *SuperGroupMgoDB) CreateSuperGroup(sCtx mongo.SessionContext, groupID s
 
 }
 
-func (db *SuperGroupMgoDB) GetSuperGroup(ctx context.Context, groupID string) (*table.SuperGroup, error) {
-	superGroup := table.SuperGroup{}
+func (db *SuperGroupMongoDriver) GetSuperGroup(ctx context.Context, groupID string) (*table.SuperGroupModel, error) {
+	superGroup := table.SuperGroupModel{}
 	err := db.superGroupCollection.FindOne(ctx, bson.M{"group_id": groupID}).Decode(&superGroup)
 	return &superGroup, err
 }
 
-func (db *SuperGroupMgoDB) AddUserToSuperGroup(ctx context.Context, groupID string, userIDList []string) error {
+func (db *SuperGroupMongoDriver) AddUserToSuperGroup(ctx context.Context, groupID string, userIDList []string) error {
 	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
 	return db.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
 		_, err := db.superGroupCollection.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$addToSet": bson.M{"member_id_list": bson.M{"$each": userIDList}}})
@@ -80,7 +75,7 @@ func (db *SuperGroupMgoDB) AddUserToSuperGroup(ctx context.Context, groupID stri
 	})
 }
 
-func (db *SuperGroupMgoDB) RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDList []string) error {
+func (db *SuperGroupMongoDriver) RemoverUserFromSuperGroup(ctx context.Context, groupID string, userIDList []string) error {
 	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
 	return db.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
 		_, err := db.superGroupCollection.UpdateOne(sCtx, bson.M{"group_id": groupID}, bson.M{"$pull": bson.M{"member_id_list": bson.M{"$in": userIDList}}})
@@ -97,16 +92,16 @@ func (db *SuperGroupMgoDB) RemoverUserFromSuperGroup(ctx context.Context, groupI
 	})
 }
 
-func (db *SuperGroupMgoDB) GetSuperGroupByUserID(ctx context.Context, userID string) (*table.UserToSuperGroup, error) {
-	var user table.UserToSuperGroup
+func (db *SuperGroupMongoDriver) GetSuperGroupByUserID(ctx context.Context, userID string) (*table.UserToSuperGroupModel, error) {
+	var user table.UserToSuperGroupModel
 	err := db.userToSuperGroupCollection.FindOne(ctx, bson.M{"user_id": userID}).Decode(&user)
 	return &user, utils.Wrap(err, "")
 }
 
-func (db *SuperGroupMgoDB) DeleteSuperGroup(ctx context.Context, groupID string) error {
+func (db *SuperGroupMongoDriver) DeleteSuperGroup(ctx context.Context, groupID string) error {
 	opts := options.Session().SetDefaultReadConcern(readconcern.Majority())
 	return db.MgoDB.Client().UseSessionWithOptions(ctx, opts, func(sCtx mongo.SessionContext) error {
-		superGroup := &table.SuperGroup{}
+		superGroup := &table.SuperGroupModel{}
 		_, err := db.superGroupCollection.DeleteOne(sCtx, bson.M{"group_id": groupID})
 		if err != nil {
 			_ = sCtx.AbortTransaction(ctx)
@@ -120,7 +115,7 @@ func (db *SuperGroupMgoDB) DeleteSuperGroup(ctx context.Context, groupID string)
 	})
 }
 
-func (db *SuperGroupMgoDB) RemoveGroupFromUser(sCtx context.Context, groupID string, userIDList []string) error {
+func (db *SuperGroupMongoDriver) RemoveGroupFromUser(sCtx context.Context, groupID string, userIDList []string) error {
 	_, err := db.userToSuperGroupCollection.UpdateOne(sCtx, bson.M{"user_id": bson.M{"$in": userIDList}}, bson.M{"$pull": bson.M{"group_id_list": groupID}})
 	return err
 }
