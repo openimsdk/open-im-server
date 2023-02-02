@@ -122,6 +122,18 @@ func RemoveDuplicateElement(idList []string) []string {
 	return result
 }
 
+func RemoveDuplicate[T comparable](arr []T) []T {
+	result := make([]T, 0, len(arr))
+	temp := map[T]struct{}{}
+	for _, item := range arr {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
 func IsDuplicateStringSlice(arr []string) bool {
 	t := make(map[string]struct{})
 	for _, s := range arr {
