@@ -5,6 +5,7 @@ import (
 	"Open_IM/pkg/common/db/table"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
+	"Open_IM/pkg/utilsv2"
 	"context"
 	"encoding/json"
 	"github.com/dtm-labs/rockscache"
@@ -115,7 +116,14 @@ func (f *FriendCache) GetFriend(ctx context.Context, ownerUserID, friendUserID s
 	if err != nil {
 		return nil, err
 	}
-	friendInfo := &relation.FriendUser{}
-	err = json.Unmarshal([]byte(groupMemberInfoStr), groupMember)
-	return groupMember, utils.Wrap(err, "")
+	friend = &table.FriendModel{}
+	err = json.Unmarshal([]byte(friendStr), friend)
+	return friend, utils.Wrap(err, "")
+}
+
+func (f *FriendCache) DelFriend(ctx context.Context, ownerUserID, friendUserID string) (err error) {
+	defer func() {
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "friendUserID", friendUserID)
+	}()
+	return f.rcClient.TagAsDeleted(f.getFriendKey(ownerUserID, friendUserID))
 }

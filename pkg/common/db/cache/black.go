@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/dtm-labs/rockscache"
+	"github.com/go-redis/redis/v8"
 	"time"
 )
 
@@ -22,11 +23,11 @@ type BlackCache struct {
 	rcClient   *rockscache.Client
 }
 
-func NewBlackCache(blackDB *relation.Black) *BlackCache {
+func NewBlackCache(rdb redis.UniversalClient, blackDB *relation.BlackGorm, options rockscache.Options) *BlackCache {
 	return &BlackCache{
-		blackDB:    nil,
-		expireTime: 0,
-		rcClient:   nil,
+		blackDB:    blackDB,
+		expireTime: blackExpireTime,
+		rcClient:   rockscache.NewClient(rdb, options),
 	}
 }
 
@@ -49,7 +50,7 @@ func (b *BlackCache) GetBlackIDs(ctx context.Context, userID string) (blackIDs [
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "blackIDList", blackIDs)
 	}()
-	blackIDListStr, err := b.rcClient.Fetch(blackListCache+userID, time.Second*30*60, getBlackIDList)
+	blackIDListStr, err := b.rcClient.Fetch(blackListCache+userID, b.expireTime, getBlackIDList)
 	if err != nil {
 		return nil, utils.Wrap(err, "")
 	}
