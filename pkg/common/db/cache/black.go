@@ -2,7 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
-	"Open_IM/pkg/common/db/table"
+	relation2 "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -18,7 +18,7 @@ const (
 )
 
 type BlackCache struct {
-	blackDB    *table.BlackModel
+	blackDB    *relation2.BlackModel
 	expireTime time.Duration
 	rcClient   *rockscache.Client
 }
@@ -60,7 +60,7 @@ func (b *BlackCache) GetBlackIDs(ctx context.Context, userID string) (blackIDs [
 
 func (b *BlackCache) DelBlackIDListFromCache(ctx context.Context, userID string) (err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ctx", ctx)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID)
 	}()
 	return b.rcClient.TagAsDeleted(blackListCache + userID)
 }

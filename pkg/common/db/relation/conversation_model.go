@@ -1,7 +1,7 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/db/table"
+	"Open_IM/pkg/common/db/table/relation"
 	"gorm.io/gorm"
 )
 
@@ -9,7 +9,7 @@ type ConversationGorm struct {
 	DB *gorm.DB
 }
 
-func SetConversation(conversation table.ConversationModel) (bool, error) {
+func SetConversation(conversation relation.ConversationModel) (bool, error) {
 	var isUpdate bool
 	newConversation := conversation
 	if ConversationDB.Model(&Conversation{}).Find(&newConversation).RowsAffected == 0 {
@@ -73,7 +73,7 @@ func GetExistConversationUserIDList(ownerUserIDList []string, conversationID str
 	return resultArr, nil
 }
 
-func GetConversation(OwnerUserID, conversationID string) (table.ConversationModel, error) {
+func GetConversation(OwnerUserID, conversationID string) (relation.ConversationModel, error) {
 	var conversation Conversation
 	err := ConversationDB.Table("conversations").Where("owner_user_id=? and conversation_id=?", OwnerUserID, conversationID).Take(&conversation).Error
 	return conversation, err
