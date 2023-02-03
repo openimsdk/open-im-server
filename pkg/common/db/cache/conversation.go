@@ -2,7 +2,7 @@ package cache
 
 import (
 	"Open_IM/pkg/common/db/relation"
-	"Open_IM/pkg/common/db/table"
+	relation2 "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -77,7 +77,7 @@ func (c *ConversationCache) DelUserConversationIDs(ctx context.Context, ownerUse
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationIDsKey(ownerUserID)), "DelUserConversationIDs err")
 }
 
-func (c *ConversationCache) GetConversation(ctx context.Context, ownerUserID, conversationID string) (conversation *table.ConversationModel, err error) {
+func (c *ConversationCache) GetConversation(ctx context.Context, ownerUserID, conversationID string) (conversation *relation2.ConversationModel, err error) {
 	getConversation := func() (string, error) {
 		conversation, err := relation.GetConversation(ownerUserID, conversationID)
 		if err != nil {
@@ -96,7 +96,7 @@ func (c *ConversationCache) GetConversation(ctx context.Context, ownerUserID, co
 	if err != nil {
 		return nil, err
 	}
-	conversation = &table.ConversationModel{}
+	conversation = &relation2.ConversationModel{}
 	err = json.Unmarshal([]byte(conversationStr), &conversation)
 	return conversation, utils.Wrap(err, "Unmarshal failed")
 }
@@ -108,7 +108,7 @@ func (c *ConversationCache) DelConversation(ctx context.Context, ownerUserID, co
 	return utils.Wrap(c.rcClient.TagAsDeleted(c.getConversationKey(ownerUserID, conversationID)), "DelConversation err")
 }
 
-func (c *ConversationCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []table.ConversationModel, err error) {
+func (c *ConversationCache) GetConversations(ctx context.Context, ownerUserID string, conversationIDs []string) (conversations []relation2.ConversationModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs, "conversations", conversations)
 	}()
@@ -122,7 +122,7 @@ func (c *ConversationCache) GetConversations(ctx context.Context, ownerUserID st
 	return conversations, nil
 }
 
-func (c *ConversationCache) GetUserAllConversations(ctx context.Context, ownerUserID string) (conversations []table.ConversationModel, err error) {
+func (c *ConversationCache) GetUserAllConversations(ctx context.Context, ownerUserID string) (conversations []relation2.ConversationModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversations", conversations)
 	}()
@@ -130,7 +130,7 @@ func (c *ConversationCache) GetUserAllConversations(ctx context.Context, ownerUs
 	if err != nil {
 		return nil, err
 	}
-	var conversationIDs []table.ConversationModel
+	var conversationIDs []relation2.ConversationModel
 	for _, conversationID := range IDs {
 		conversation, err := c.GetConversation(ctx, ownerUserID, conversationID)
 		if err != nil {

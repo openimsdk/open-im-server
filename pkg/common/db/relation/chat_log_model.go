@@ -2,7 +2,7 @@ package relation
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/table"
+	"Open_IM/pkg/common/db/table/relation"
 	pbMsg "Open_IM/pkg/proto/msg"
 	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -22,7 +22,7 @@ func NewChatLog(db *gorm.DB) *ChatLogGorm {
 }
 
 func (c *ChatLogGorm) Create(msg pbMsg.MsgDataToMQ) error {
-	chatLog := new(table.ChatLogModel)
+	chatLog := new(relation.ChatLogModel)
 	copier.Copy(chatLog, msg.MsgData)
 	switch msg.MsgData.SessionType {
 	case constant.GroupChatType, constant.SuperGroupChatType:
@@ -47,7 +47,7 @@ func (c *ChatLogGorm) Create(msg pbMsg.MsgDataToMQ) error {
 	return c.DB.Create(chatLog).Error
 }
 
-func (c *ChatLogGorm) GetChatLog(chatLog *table.ChatLogModel, pageNumber, showNumber int32, contentTypeList []int32) (int64, []ChatLogModel, error) {
+func (c *ChatLogGorm) GetChatLog(chatLog *relation.ChatLogModel, pageNumber, showNumber int32, contentTypeList []int32) (int64, []relation.ChatLogModel, error) {
 	mdb := c.DB.Model(chatLog)
 	if chatLog.SendTime.Unix() > 0 {
 		mdb = mdb.Where("send_time > ? and send_time < ?", chatLog.SendTime, chatLog.SendTime.AddDate(0, 0, 1))
@@ -76,7 +76,7 @@ func (c *ChatLogGorm) GetChatLog(chatLog *table.ChatLogModel, pageNumber, showNu
 	if err := mdb.Count(&count).Error; err != nil {
 		return 0, nil, err
 	}
-	var chatLogs []table.ChatLogModel
+	var chatLogs []relation.ChatLogModel
 	mdb = mdb.Limit(int(showNumber)).Offset(int(showNumber * (pageNumber - 1)))
 	if err := mdb.Find(&chatLogs).Error; err != nil {
 		return 0, nil, err
