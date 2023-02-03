@@ -1,15 +1,35 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/db/table/relation"
 	"gorm.io/gorm"
 )
 
-type ConversationGorm struct {
-	DB *gorm.DB
+var ConversationDB *gorm.DB
+
+//type Conversation struct {
+//	OwnerUserID           string `gorm:"column:owner_user_id;primary_key;type:char(128)" json:"OwnerUserID"`
+//	ConversationID        string `gorm:"column:conversation_id;primary_key;type:char(128)" json:"conversationID"`
+//	ConversationType      int32  `gorm:"column:conversation_type" json:"conversationType"`
+//	UserID                string `gorm:"column:user_id;type:char(64)" json:"userID"`
+//	GroupID               string `gorm:"column:group_id;type:char(128)" json:"groupID"`
+//	RecvMsgOpt            int32  `gorm:"column:recv_msg_opt" json:"recvMsgOpt"`
+//	UnreadCount           int32  `gorm:"column:unread_count" json:"unreadCount"`
+//	DraftTextTime         int64  `gorm:"column:draft_text_time" json:"draftTextTime"`
+//	IsPinned              bool   `gorm:"column:is_pinned" json:"isPinned"`
+//	IsPrivateChat         bool   `gorm:"column:is_private_chat" json:"isPrivateChat"`
+//	BurnDuration          int32  `gorm:"column:burn_duration;default:30" json:"burnDuration"`
+//	GroupAtType           int32  `gorm:"column:group_at_type" json:"groupAtType"`
+//	IsNotInGroup          bool   `gorm:"column:is_not_in_group" json:"isNotInGroup"`
+//	UpdateUnreadCountTime int64  `gorm:"column:update_unread_count_time" json:"updateUnreadCountTime"`
+//	AttachedInfo          string `gorm:"column:attached_info;type:varchar(1024)" json:"attachedInfo"`
+//	Ex                    string `gorm:"column:ex;type:varchar(1024)" json:"ex"`
+//}
+
+func (Conversation) TableName() string {
+	return "conversations"
 }
 
-func SetConversation(conversation relation.ConversationModel) (bool, error) {
+func SetConversation(conversation Conversation) (bool, error) {
 	var isUpdate bool
 	newConversation := conversation
 	if ConversationDB.Model(&Conversation{}).Find(&newConversation).RowsAffected == 0 {
@@ -73,7 +93,7 @@ func GetExistConversationUserIDList(ownerUserIDList []string, conversationID str
 	return resultArr, nil
 }
 
-func GetConversation(OwnerUserID, conversationID string) (relation.ConversationModel, error) {
+func GetConversation(OwnerUserID, conversationID string) (Conversation, error) {
 	var conversation Conversation
 	err := ConversationDB.Table("conversations").Where("owner_user_id=? and conversation_id=?", OwnerUserID, conversationID).Take(&conversation).Error
 	return conversation, err
@@ -96,7 +116,7 @@ func UpdateColumnsConversations(ownerUserIDList []string, conversationID string,
 
 }
 
-func GetConversationIDsByUserID(userID string) ([]string, error) {
+func GetConversationIDListByUserID(userID string) ([]string, error) {
 	var IDList []string
 	err := ConversationDB.Model(&Conversation{}).Where("owner_user_id=?", userID).Pluck("conversation_id", &IDList).Error
 	return IDList, err

@@ -6,6 +6,7 @@ import (
 	"Open_IM/pkg/common/log"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
+	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 )
@@ -59,7 +60,7 @@ func ConversationSetPrivateNotification(operationID, sendID, recvID string, isPr
 }
 
 // 会话改变
-func ConversationChangeNotification(operationID, userID string) {
+func ConversationChangeNotification(ctx context.Context, userID string) {
 	log.NewInfo(operationID, utils.GetSelfFuncName())
 	ConversationChangedTips := &open_im_sdk.ConversationUpdateTips{
 		UserID: userID,

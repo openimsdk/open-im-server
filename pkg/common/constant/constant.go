@@ -303,7 +303,7 @@ const (
 	BecomeFriendByImport    = 1 //管理员导入
 	BecomeFriendByMyApply   = 2 //自己主动申请添加
 	BecomeFriendByPeerApply = 3 //对方主动申请添加
-	BecomeFriendByApply     = 4 //自己主动申请添加
+	BecomeFriendByApply     = 4 //申请添加
 )
 
 const (
