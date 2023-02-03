@@ -2,6 +2,7 @@ package unrelation
 
 import (
 	"Open_IM/pkg/common/config"
+	"Open_IM/pkg/common/db/table"
 	"Open_IM/pkg/utils"
 	"context"
 	"fmt"
@@ -13,7 +14,7 @@ import (
 )
 
 type Mongo struct {
-	DB *mongo.Client
+	db *mongo.Client
 }
 
 func (m *Mongo) InitMongo() {
@@ -53,22 +54,22 @@ func (m *Mongo) InitMongo() {
 			panic(err.Error() + " mongo.Connect failed " + uri)
 		}
 	}
-	m.DB = mongoClient
+	m.db = mongoClient
 }
 
 func (m *Mongo) GetClient() *mongo.Client {
-	return m.DB
+	return m.db
 }
 
 func (m *Mongo) CreateTagIndex() {
-	if err := m.createMongoIndex(cSendLog, false, "send_id", "-send_time"); err != nil {
-		panic(err.Error() + " index create failed " + cSendLog + " send_id, -send_time")
+	if err := m.createMongoIndex(table.CSendLog, false, "send_id", "-send_time"); err != nil {
+		panic(err.Error() + " index create failed " + table.CSendLog + " send_id, -send_time")
 	}
-	if err := m.createMongoIndex(cTag, false, "user_id", "-create_time"); err != nil {
-		panic(err.Error() + "index create failed " + cTag + " user_id, -create_time")
+	if err := m.createMongoIndex(table.CTag, false, "user_id", "-create_time"); err != nil {
+		panic(err.Error() + "index create failed " + table.CTag + " user_id, -create_time")
 	}
-	if err := m.createMongoIndex(cTag, true, "tag_id"); err != nil {
-		panic(err.Error() + "index create failed " + cTag + " tag_id")
+	if err := m.createMongoIndex(table.CTag, true, "tag_id"); err != nil {
+		panic(err.Error() + "index create failed " + table.CTag + " tag_id")
 	}
 }
 
@@ -79,32 +80,37 @@ func (m *Mongo) CreateMsgIndex() {
 }
 
 func (m *Mongo) CreateSuperGroupIndex() {
-	if err := m.createMongoIndex(cSuperGroup, true, "group_id"); err != nil {
-		panic(err.Error() + "index create failed " + cTag + " group_id")
+	if err := m.createMongoIndex(table.CSuperGroup, true, "group_id"); err != nil {
+		panic(err.Error() + "index create failed " + table.CTag + " group_id")
 	}
-	if err := m.createMongoIndex(cUserToSuperGroup, true, "user_id"); err != nil {
-		panic(err.Error() + "index create failed " + cTag + "user_id")
+	if err := m.createMongoIndex(table.CUserToSuperGroup, true, "user_id"); err != nil {
+		panic(err.Error() + "index create failed " + table.CTag + "user_id")
 	}
 }
 
 func (m *Mongo) CreateWorkMomentIndex() {
-	if err := m.createMongoIndex(cWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
-		panic(err.Error() + "index create failed " + cWorkMoment + " -create_time, work_moment_id")
+	if err := m.createMongoIndex(table.CWorkMoment, true, "-create_time", "work_moment_id"); err != nil {
+		panic(err.Error() + "index create failed " + table.CWorkMoment + " -create_time, work_moment_id")
 	}
-	if err := m.createMongoIndex(cWorkMoment, true, "work_moment_id"); err != nil {
-		panic(err.Error() + "index create failed " + cWorkMoment + " work_moment_id ")
+	if err := m.createMongoIndex(table.CWorkMoment, true, "work_moment_id"); err != nil {
+		panic(err.Error() + "index create failed " + table.CWorkMoment + " work_moment_id ")
 	}
-	if err := m.createMongoIndex(cWorkMoment, false, "user_id", "-create_time"); err != nil {
-		panic(err.Error() + "index create failed " + cWorkMoment + "user_id, -create_time")
+	if err := m.createMongoIndex(table.CWorkMoment, false, "user_id", "-create_time"); err != nil {
+		panic(err.Error() + "index create failed " + table.CWorkMoment + "user_id, -create_time")
+	}
+}
+
+func (m *Mongo) CreateExtendMsgSetIndex() {
+	if err := m.createMongoIndex(table.CExtendMsgSet, true, "-create_time", "work_moment_id"); err != nil {
+		panic(err.Error() + "index create failed " + table.CWorkMoment + " -create_time, work_moment_id")
 	}
 }
 
 func (m *Mongo) createMongoIndex(collection string, isUnique bool, keys ...string) error {
-	db := m.DB.Database(config.Config.Mongo.DBDatabase).Collection(collection)
+	db := m.db.Database(config.Config.Mongo.DBDatabase).Collection(collection)
 	opts := options.CreateIndexes().SetMaxTime(10 * time.Second)
 	indexView := db.Indexes()
 	keysDoc := bsonx.Doc{}
-
 	// create composite indexes
 	for _, key := range keys {
 		if strings.HasPrefix(key, "-") {

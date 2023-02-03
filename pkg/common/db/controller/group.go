@@ -180,7 +180,7 @@ type GroupDataBase struct {
 	db             *gorm.DB
 
 	cache   *cache.GroupCache
-	mongoDB *unrelation.SuperGroupMgoDB
+	mongoDB *unrelation.SuperGroupMongoDriver
 }
 
 func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.Client) GroupDataBaseInterface {
@@ -188,19 +188,19 @@ func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.C
 	groupMemberDB := relation.NewGroupMemberDB(db)
 	groupRequestDB := relation.NewGroupRequest(db)
 	newDB := *db
-	superGroupMgoDB := unrelation.NewSuperGroupMgoDB(mgoClient)
+	SuperGroupMongoDriver := unrelation.NewSuperGroupMongoDriver(mgoClient)
 	database := &GroupDataBase{
 		groupDB:        groupDB,
 		groupMemberDB:  groupMemberDB,
 		groupRequestDB: groupRequestDB,
 		db:             &newDB,
-		cache: cache.NewGroupCache(rdb, groupDB, groupMemberDB, groupRequestDB, superGroupMgoDB, rockscache.Options{
+		cache: cache.NewGroupCache(rdb, groupDB, groupMemberDB, groupRequestDB, SuperGroupMongoDriver, rockscache.Options{
 			RandomExpireAdjustment: 0.2,
 			DisableCacheRead:       false,
 			DisableCacheDelete:     false,
 			StrongConsistency:      true,
 		}),
-		mongoDB: superGroupMgoDB,
+		mongoDB: SuperGroupMongoDriver,
 	}
 	return database
 }

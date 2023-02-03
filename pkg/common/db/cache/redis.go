@@ -324,9 +324,8 @@ func (r *RedisClient) HandleSignalInfo(operationID string, msg *pbCommon.MsgData
 			return false, nil
 		}
 	case *pbRtc.SignalReq_HungUp, *pbRtc.SignalReq_Cancel, *pbRtc.SignalReq_Reject, *pbRtc.SignalReq_Accept:
-		return false, errors.New("signalInfo do not need offlinePush")
+		return false, nil
 	default:
-		log2.NewDebug(operationID, utils.GetSelfFuncName(), "req invalid type", string(msg.Content))
 		return false, nil
 	}
 	if isInviteSignal {
