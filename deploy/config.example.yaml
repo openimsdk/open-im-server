@@ -79,11 +79,11 @@ cmsapi:
 
 credential:
   tencent:
-    appID: 1302656840
-    region: ap-chengdu
-    bucket: echat-1302656840
-    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC
-    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe
+    appID:  
+    region:    
+    bucket:  
+    secretID:  
+    secretKey:  
 
 
 rpcport:
@@ -131,16 +131,16 @@ longconnsvr:
 push:
   tpns:
     ios:
-      accessID: 1600018281
-      secretKey: 3cd68a77a95b89e5089a1aca523f318f
+      accessID:  
+      secretKey:  
     android:
-      accessID: 111
-      secretKey: 111
+      accessID:  
+      secretKey:  
   jpns:
-    appKey: cf47465a368f24c659608e7e
-    masterSecret: 02204efe3f3832947a236ee5
-    pushUrl: "https://api.jpush.cn/v3/push"
-    pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
+    appKey:  
+    masterSecret:  
+    pushUrl:  
+    pushIntent:  
 manager:
   appManagerUid: ["openIM123456","openIM654321"]
   secrets: ["openIM1","openIM2"]
@@ -168,16 +168,16 @@ demoswitch: true
 demo:
   openImDemoPort: [ 42233 ]
   alismsverify:
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe71
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV1
-    signName: OpenIM Corporation
-    verificationCodeTemplateCode: SMS_2268101641
+    accessKeyId:  
+    accessKeySecret:  
+    signName:    
+    verificationCodeTemplateCode:  
   superCode: 666666
   mail:
-    title: "openIM"
-    senderMail: "1765567899@qq.com"
-    senderAuthorizationCode: "1gxyausfoevlzbfag"
-    smtpAddr: "smtp.qq.com"
-    smtpPort: 25
+    title:  
+    senderMail:  
+    senderAuthorizationCode: 
+    smtpAddr:  
+    smtpPort:  
 
 
