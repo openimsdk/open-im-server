@@ -144,6 +144,14 @@ func SliceSetAny[E any, K comparable](es []E, fn func(e E) K) map[K]struct{} {
 	})
 }
 
+func Slice[E any, T any](es []E, fn func(e E) T) []T {
+	v := make([]T, len(es))
+	for i := 0; i < len(es); i++ {
+		v = append(v, fn(es[i]))
+	}
+	return v
+}
+
 // SliceSet slice to map[E]struct{}
 func SliceSet[E comparable](es []E) map[E]struct{} {
 	return SliceSetAny(es, func(e E) E {

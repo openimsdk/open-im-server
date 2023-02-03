@@ -12,7 +12,7 @@ type GroupModel struct {
 	Notification           string    `gorm:"column:notification;size:255" json:"notification"`
 	Introduction           string    `gorm:"column:introduction;size:255" json:"introduction"`
 	FaceURL                string    `gorm:"column:face_url;size:255" json:"faceURL"`
-	CreateTime             time.Time `gorm:"column:create_time;index:create_time"`
+	CreateTime             time.Time `gorm:"column:create_time;index:create_time;autoCreateTime"`
 	Ex                     string    `gorm:"column:ex" json:"ex;size:1024" json:"ex"`
 	Status                 int32     `gorm:"column:status"`
 	CreatorUserID          string    `gorm:"column:creator_user_id;size:64"`

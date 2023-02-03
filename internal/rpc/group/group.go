@@ -165,24 +165,13 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if req.OwnerUserID == "" {
 		return nil, constant.ErrArgs.Wrap("no group owner")
 	}
-	var userIDs []string
-	for _, userID := range req.InitMembers {
-		userIDs = append(userIDs, userID)
-	}
-	for _, userID := range req.AdminUserIDs {
-		userIDs = append(userIDs, userID)
-	}
-	userIDs = append(userIDs, req.OwnerUserID)
-	if utils.IsDuplicateID(userIDs) {
+	userIDs := append(append(req.InitMembers, req.AdminUserIDs...), req.OwnerUserID)
+	if utils.Duplicate(userIDs) {
 		return nil, constant.ErrArgs.Wrap("group member repeated")
 	}
-	users, err := getUsersInfo(ctx, userIDs)
+	userMap, err := getUserMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
-	}
-	userMap := make(map[string]*open_im_sdk.UserInfo)
-	for i, user := range users {
-		userMap[user.UserID] = users[i]
 	}
 	for _, userID := range userIDs {
 		if userMap[userID] == nil {
@@ -254,10 +243,9 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	if len(groups) == 0 {
 		return resp, nil
 	}
-	var groupIDs []string
-	for _, group := range groups {
-		groupIDs = append(groupIDs, group.GroupID)
-	}
+	groupIDs := utils.Slice(groups, func(e *relation2.GroupModel) string {
+		return e.GroupID
+	})
 	groupMemberNum, err := s.GroupInterface.GetGroupMemberNum(ctx, groupIDs)
 	if err != nil {
 		return nil, err
