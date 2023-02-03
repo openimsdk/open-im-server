@@ -173,10 +173,8 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err != nil {
 		return nil, err
 	}
-	for _, userID := range userIDs {
-		if userMap[userID] == nil {
-			return nil, constant.ErrUserIDNotFound.Wrap(userID)
-		}
+	if ids := utils.Single(userIDs, utils.MapKey(userMap)); len(ids) > 0 {
+		return nil, constant.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
 	}
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
@@ -275,7 +273,7 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if len(req.InvitedUserIDs) == 0 {
 		return nil, constant.ErrArgs.Wrap("user empty")
 	}
-	if utils.IsDuplicateID(req.InvitedUserIDs) {
+	if utils.Duplicate(req.InvitedUserIDs) {
 		return nil, constant.ErrArgs.Wrap("userID duplicate")
 	}
 	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
@@ -289,23 +287,18 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	if err != nil {
 		return nil, err
 	}
-	memberMap := make(map[string]*relation2.GroupMemberModel)
-	for i, member := range members {
-		memberMap[member.GroupID] = members[i]
-	}
-	for _, userID := range req.InvitedUserIDs {
-		if _, ok := memberMap[userID]; ok {
-			return nil, constant.ErrArgs.Wrap("user in group " + userID)
-		}
+	memberMap := utils.SliceToMap(members, func(e *relation2.GroupMemberModel) string {
+		return e.UserID
+	})
+	if ids := utils.Single(req.InvitedUserIDs, utils.MapKey(memberMap)); len(ids) > 0 {
+		return nil, constant.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
 	}
 	userMap, err := getUserMap(ctx, req.InvitedUserIDs)
 	if err != nil {
 		return nil, err
 	}
-	for _, userID := range req.InvitedUserIDs {
-		if _, ok := userMap[userID]; !ok {
-			return nil, constant.ErrUserIDNotFound.Wrap(userID)
-		}
+	if ids := utils.Single(req.InvitedUserIDs, utils.MapKey(userMap)); len(ids) > 0 {
+		return nil, constant.ErrArgs.Wrap("user not found " + strings.Join(ids, ","))
 	}
 	if group.NeedVerification == constant.AllNeedVerification {
 		if !token_verify.IsAppManagerUid(ctx) {
@@ -381,10 +374,6 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 		members, err := s.GroupInterface.GetGroupMemberList(ctx, req.GroupID)
 		if err != nil {
 			return nil, err
-		}
-		var userIDs []string
-		for _, member := range members {
-			userIDs = append(userIDs, member.UserID)
 		}
 		for _, member := range members {
 			var node open_im_sdk.GroupMemberFullInfo
