@@ -89,6 +89,26 @@ func Contain[E comparable](es []E, e E) bool {
 	return IndexOf(es, e) >= 0
 }
 
+// DuplicateAny judge whether it is repeated
+func DuplicateAny[E any, K comparable](es []E, fn func(e E) K) bool {
+	t := make(map[K]struct{})
+	for _, e := range es {
+		k := fn(e)
+		if _, ok := t[k]; ok {
+			return true
+		}
+		t[k] = struct{}{}
+	}
+	return false
+}
+
+// Duplicate judge whether it is repeated
+func Duplicate[E comparable](es []E) bool {
+	return DuplicateAny(es, func(e E) E {
+		return e
+	})
+}
+
 // SliceToMapOkAny slice to map
 func SliceToMapOkAny[E any, K comparable, V any](es []E, fn func(e E) (K, V, bool)) map[K]V {
 	kv := make(map[K]V)
@@ -224,6 +244,22 @@ func CompleteAny[K comparable, E any](ks []K, es []E, fn func(e E) K) bool {
 	return len(a) == 0
 }
 
+func Complete[E comparable](a []E, b []E) bool {
+	if len(a) == 0 && len(b) == 0 {
+		return true
+	}
+	if (len(a) == 0 && len(b) != 0) || (len(a) != 0 && len(b) == 0) {
+		return false
+	}
+	t := SliceSet(a)
+	for _, e := range b {
+		if _, ok := t[e]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
 // MapKey get map keys
 func MapKey[K comparable, V any](kv map[K]V) []K {
 	ks := make([]K, 0, len(kv))
@@ -268,6 +304,25 @@ func If[T any](isa bool, a, b T) T {
 		return a
 	}
 	return b
+}
+
+func Equal[E comparable](a []E, b []E) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// Single
+
+func Single[E comparable](a, b []E) []E {
+
+	return nil
 }
 
 func UniqueJoin(s ...string) string {
