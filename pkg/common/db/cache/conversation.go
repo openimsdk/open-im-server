@@ -48,26 +48,99 @@ func (c *ConversationCache) getSuperGroupRecvNotNotifyUserIDsKey(groupID string)
 }
 
 func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUserID string) (conversationIDs []string, err error) {
-	getConversationIDs := func() (string, error) {
-		conversationIDs, err := relation.GetConversationIDsByUserID(ownerUserID)
+	//getConversationIDs := func() (string, error) {
+	//	conversationIDs, err := relation.GetConversationIDsByUserID(ownerUserID)
+	//	if err != nil {
+	//		return "", err
+	//	}
+	//	bytes, err := json.Marshal(conversationIDs)
+	//	if err != nil {
+	//		return "", utils.Wrap(err, "")
+	//	}
+	//	return string(bytes), nil
+	//}
+	//defer func() {
+	//	tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs)
+	//}()
+	//conversationIDsStr, err := c.rcClient.Fetch(c.getConversationIDsKey(ownerUserID), time.Second*30*60, getConversationIDs)
+	//err = json.Unmarshal([]byte(conversationIDsStr), &conversationIDs)
+	//if err != nil {
+	//	return nil, utils.Wrap(err, "")
+	//}
+	//return conversationIDs, nil
+	return GetCache(c.rcClient, c.getConversationIDsKey(ownerUserID), time.Second*30*60, func() ([]string, error) {
+		return relation.GetConversationIDsByUserID(ownerUserID)
+	})
+}
+
+func (c *ConversationCache) GetUserConversationIDs1(ctx context.Context, ownerUserID string, fn func() (any, error)) (conversationIDs []string, err error) {
+	//getConversationIDs := func() (string, error) {
+	//	conversationIDs, err := relation.GetConversationIDsByUserID(ownerUserID)
+	//	if err != nil {
+	//		return "", err
+	//	}
+	//	bytes, err := json.Marshal(conversationIDs)
+	//	if err != nil {
+	//		return "", utils.Wrap(err, "")
+	//	}
+	//	return string(bytes), nil
+	//}
+	//defer func() {
+	//	tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs)
+	//}()
+	//conversationIDsStr, err := c.rcClient.Fetch(c.getConversationIDsKey(ownerUserID), time.Second*30*60, getConversationIDs)
+	//err = json.Unmarshal([]byte(conversationIDsStr), &conversationIDs)
+	//if err != nil {
+	//	return nil, utils.Wrap(err, "")
+	//}
+	//return conversationIDs, nil
+	return GetCache1[[]string](c.rcClient, c.getConversationIDsKey(ownerUserID), time.Second*30*60, fn)
+}
+
+func GetCache1[T any](rcClient *rockscache.Client, key string, expire time.Duration, fn func() (any, error)) (T, error) {
+	v, err := rcClient.Fetch(key, expire, func() (string, error) {
+		v, err := fn()
 		if err != nil {
 			return "", err
 		}
-		bytes, err := json.Marshal(conversationIDs)
+		bs, err := json.Marshal(v)
 		if err != nil {
 			return "", utils.Wrap(err, "")
 		}
-		return string(bytes), nil
-	}
-	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "ownerUserID", ownerUserID, "conversationIDs", conversationIDs)
-	}()
-	conversationIDsStr, err := c.rcClient.Fetch(c.getConversationIDsKey(ownerUserID), time.Second*30*60, getConversationIDs)
-	err = json.Unmarshal([]byte(conversationIDsStr), &conversationIDs)
+		return string(bs), nil
+	})
+	var t T
 	if err != nil {
-		return nil, utils.Wrap(err, "")
+		return t, err
 	}
-	return conversationIDs, nil
+	err = json.Unmarshal([]byte(v), &t)
+	if err != nil {
+		return t, utils.Wrap(err, "")
+	}
+	return t, nil
+}
+
+func GetCache[T any](rcClient *rockscache.Client, key string, expire time.Duration, fn func() (T, error)) (T, error) {
+	v, err := rcClient.Fetch(key, expire, func() (string, error) {
+		v, err := fn()
+		if err != nil {
+			return "", err
+		}
+		bs, err := json.Marshal(v)
+		if err != nil {
+			return "", utils.Wrap(err, "")
+		}
+		return string(bs), nil
+	})
+	var t T
+	if err != nil {
+		return t, err
+	}
+	err = json.Unmarshal([]byte(v), &t)
+	if err != nil {
+		return t, utils.Wrap(err, "")
+	}
+	return t, nil
 }
 
 func (c *ConversationCache) DelUserConversationIDs(ctx context.Context, ownerUserID string) (err error) {
