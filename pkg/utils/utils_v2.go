@@ -89,6 +89,26 @@ func Contain[E comparable](es []E, e E) bool {
 	return IndexOf(es, e) >= 0
 }
 
+// DuplicateAny judge whether it is repeated
+func DuplicateAny[E any, K comparable](es []E, fn func(e E) K) bool {
+	t := make(map[K]struct{})
+	for _, e := range es {
+		k := fn(e)
+		if _, ok := t[k]; ok {
+			return true
+		}
+		t[k] = struct{}{}
+	}
+	return false
+}
+
+// Duplicate judge whether it is repeated
+func Duplicate[E comparable](es []E) bool {
+	return DuplicateAny(es, func(e E) E {
+		return e
+	})
+}
+
 // SliceToMapOkAny slice to map
 func SliceToMapOkAny[E any, K comparable, V any](es []E, fn func(e E) (K, V, bool)) map[K]V {
 	kv := make(map[K]V)
