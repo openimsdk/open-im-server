@@ -37,8 +37,6 @@ type GroupCache struct {
 	expireTime   time.Duration
 	redisClient  *RedisClient
 	rcClient     *rockscache.Client
-
-	//local cache
 }
 
 func NewGroupCache(rdb redis.UniversalClient, groupDB *relation.GroupGorm, groupMemberDB *relation.GroupMemberGorm, groupRequestDB *relation.GroupRequestGorm, mongoClient *unrelation.SuperGroupMongoDriver, opts rockscache.Options) *GroupCache {

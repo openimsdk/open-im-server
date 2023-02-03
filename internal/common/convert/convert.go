@@ -1,7 +1,7 @@
 package convert
 
 import (
-	"Open_IM/pkg/common/db/table"
+	"Open_IM/pkg/common/db/table/relation"
 	sdk "Open_IM/pkg/proto/sdk_ws"
 	utils "github.com/OpenIMSDK/open_utils"
 	"time"
@@ -19,10 +19,10 @@ func getNumberOfGroupMember(groupID string) (int32, error) {
 }
 
 type DBFriend struct {
-	*table.FriendModel
+	*relation.FriendModel
 }
 
-func NewDBFriend(friend *table.FriendModel) *DBFriend {
+func NewDBFriend(friend *relation.FriendModel) *DBFriend {
 	return &DBFriend{FriendModel: friend}
 }
 
@@ -34,11 +34,11 @@ func NewPBFriend(friendInfo *sdk.FriendInfo) *PBFriend {
 	return &PBFriend{FriendInfo: friendInfo}
 }
 
-func (*PBFriend) PB2DB(friends []*sdk.FriendInfo) (DBFriends []*table.FriendModel, err error) {
+func (*PBFriend) PB2DB(friends []*sdk.FriendInfo) (DBFriends []*relation.FriendModel, err error) {
 
 }
 
-func (*DBFriend) DB2PB(friends []*table.FriendModel) (PBFriends []*sdk.FriendInfo, err error) {
+func (*DBFriend) DB2PB(friends []*relation.FriendModel) (PBFriends []*sdk.FriendInfo, err error) {
 
 }
 
@@ -56,8 +56,8 @@ func (db *DBFriend) Convert() (*sdk.FriendInfo, error) {
 	return pbFriend, nil
 }
 
-func (pb *PBFriend) Convert() (*table.FriendModel, error) {
-	dbFriend := &table.FriendModel{}
+func (pb *PBFriend) Convert() (*relation.FriendModel, error) {
+	dbFriend := &relation.FriendModel{}
 	utils.CopyStructFields(dbFriend, pb)
 	dbFriend.FriendUserID = pb.FriendUser.UserID
 	dbFriend.CreateTime = utils.UnixSecondToTime(pb.CreateTime)
@@ -65,10 +65,10 @@ func (pb *PBFriend) Convert() (*table.FriendModel, error) {
 }
 
 type DBFriendRequest struct {
-	*table.FriendRequestModel
+	*relation.FriendRequestModel
 }
 
-func NewDBFriendRequest(friendRequest *table.FriendRequestModel) *DBFriendRequest {
+func NewDBFriendRequest(friendRequest *relation.FriendRequestModel) *DBFriendRequest {
 	return &DBFriendRequest{FriendRequestModel: friendRequest}
 }
 
@@ -80,16 +80,16 @@ func NewPBFriendRequest(friendRequest *sdk.FriendRequest) *PBFriendRequest {
 	return &PBFriendRequest{FriendRequest: friendRequest}
 }
 
-func (*PBFriendRequest) PB2DB(friendRequests []*sdk.FriendRequest) (DBFriendRequests []*table.FriendRequestModel, err error) {
+func (*PBFriendRequest) PB2DB(friendRequests []*sdk.FriendRequest) (DBFriendRequests []*relation.FriendRequestModel, err error) {
 
 }
 
-func (*DBFriendRequest) DB2PB(friendRequests []*table.FriendRequestModel) (PBFriendRequests []*sdk.FriendRequest, err error) {
+func (*DBFriendRequest) DB2PB(friendRequests []*relation.FriendRequestModel) (PBFriendRequests []*sdk.FriendRequest, err error) {
 
 }
 
-func (pb *PBFriendRequest) Convert() (*table.FriendRequestModel, error) {
-	dbFriendRequest := &table.FriendRequestModel{}
+func (pb *PBFriendRequest) Convert() (*relation.FriendRequestModel, error) {
+	dbFriendRequest := &relation.FriendRequestModel{}
 	utils.CopyStructFields(dbFriendRequest, pb)
 	dbFriendRequest.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
 	dbFriendRequest.HandleTime = utils.UnixSecondToTime(int64(pb.HandleTime))
@@ -118,18 +118,18 @@ func (db *DBFriendRequest) Convert() (*sdk.FriendRequest, error) {
 }
 
 type DBBlack struct {
-	*table.BlackModel
+	*relation.BlackModel
 }
 
-func (*PBBlack) PB2DB(blacks []*sdk.BlackInfo) (DBBlacks []*table.BlackModel, err error) {
-
-}
-
-func (*DBBlack) DB2PB(blacks []*table.BlackModel) (PBBlacks []*sdk.BlackInfo, err error) {
+func (*PBBlack) PB2DB(blacks []*sdk.BlackInfo) (DBBlacks []*relation.BlackModel, err error) {
 
 }
 
-func NewDBBlack(black *table.BlackModel) *DBBlack {
+func (*DBBlack) DB2PB(blacks []*relation.BlackModel) (PBBlacks []*sdk.BlackInfo, err error) {
+
+}
+
+func NewDBBlack(black *relation.BlackModel) *DBBlack {
 	return &DBBlack{BlackModel: black}
 }
 
@@ -141,8 +141,8 @@ func NewPBBlack(blackInfo *sdk.BlackInfo) *PBBlack {
 	return &PBBlack{BlackInfo: blackInfo}
 }
 
-func (pb *PBBlack) Convert() (*table.BlackModel, error) {
-	dbBlack := &table.BlackModel{}
+func (pb *PBBlack) Convert() (*relation.BlackModel, error) {
+	dbBlack := &relation.BlackModel{}
 	dbBlack.BlockUserID = pb.BlackUserInfo.UserID
 	dbBlack.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
 	return dbBlack, nil
@@ -160,18 +160,18 @@ func (db *DBBlack) Convert() (*sdk.BlackInfo, error) {
 }
 
 type DBGroup struct {
-	*table.GroupModel
+	*relation.GroupModel
 }
 
-func (*PBGroup) PB2DB(groups []*sdk.GroupInfo) (DBGroups []*table.GroupModel, err error) {
-
-}
-
-func (*DBGroup) DB2PB(groups []*table.GroupModel) (PBGroups []*sdk.GroupInfo, err error) {
+func (*PBGroup) PB2DB(groups []*sdk.GroupInfo) (DBGroups []*relation.GroupModel, err error) {
 
 }
 
-func NewDBGroup(group *table.GroupModel) *DBGroup {
+func (*DBGroup) DB2PB(groups []*relation.GroupModel) (PBGroups []*sdk.GroupInfo, err error) {
+
+}
+
+func NewDBGroup(group *relation.GroupModel) *DBGroup {
 	return &DBGroup{GroupModel: group}
 }
 
@@ -183,8 +183,8 @@ func NewPBGroup(groupInfo *sdk.GroupInfo) *PBGroup {
 	return &PBGroup{GroupInfo: groupInfo}
 }
 
-func (pb *PBGroup) Convert() *table.GroupModel {
-	dst := &table.GroupModel{}
+func (pb *PBGroup) Convert() *relation.GroupModel {
+	dst := &relation.GroupModel{}
 	_ = utils.CopyStructFields(dst, pb)
 	return dst
 }
@@ -211,18 +211,18 @@ func (db *DBGroup) Convert() (*sdk.GroupInfo, error) {
 }
 
 type DBGroupMember struct {
-	*table.GroupMemberModel
+	*relation.GroupMemberModel
 }
 
-func (*PBGroupMember) PB2DB(groupMembers []*sdk.GroupMemberFullInfo) (DBGroupMembers []*table.GroupMemberModel, err error) {
-
-}
-
-func (*DBGroupMember) DB2PB(groupMembers []*table.GroupMemberModel) (PBGroupMembers []*sdk.GroupMemberFullInfo, err error) {
+func (*PBGroupMember) PB2DB(groupMembers []*sdk.GroupMemberFullInfo) (DBGroupMembers []*relation.GroupMemberModel, err error) {
 
 }
 
-func NewDBGroupMember(groupMember *table.GroupMemberModel) *DBGroupMember {
+func (*DBGroupMember) DB2PB(groupMembers []*relation.GroupMemberModel) (PBGroupMembers []*sdk.GroupMemberFullInfo, err error) {
+
+}
+
+func NewDBGroupMember(groupMember *relation.GroupMemberModel) *DBGroupMember {
 	return &DBGroupMember{GroupMemberModel: groupMember}
 }
 
@@ -234,8 +234,8 @@ func NewPBGroupMember(groupMemberFullInfo *sdk.GroupMemberFullInfo) *PBGroupMemb
 	return &PBGroupMember{GroupMemberFullInfo: groupMemberFullInfo}
 }
 
-func (pb *PBGroupMember) Convert() (*table.GroupMemberModel, error) {
-	dst := &table.GroupMemberModel{}
+func (pb *PBGroupMember) Convert() (*relation.GroupMemberModel, error) {
+	dst := &relation.GroupMemberModel{}
 	utils.CopyStructFields(dst, pb)
 	dst.JoinTime = utils.UnixSecondToTime(int64(pb.JoinTime))
 	dst.MuteEndTime = utils.UnixSecondToTime(int64(pb.MuteEndTime))
@@ -263,18 +263,18 @@ func (db *DBGroupMember) Convert() (*sdk.GroupMemberFullInfo, error) {
 }
 
 type DBGroupRequest struct {
-	*table.GroupRequestModel
+	*relation.GroupRequestModel
 }
 
-func (*PBGroupRequest) PB2DB(groupRequests []*sdk.GroupRequest) (DBGroupRequests []*table.GroupRequestModel, err error) {
-
-}
-
-func (*DBGroupRequest) DB2PB(groupRequests []*table.GroupRequestModel) (PBGroupRequests []*sdk.GroupRequest, err error) {
+func (*PBGroupRequest) PB2DB(groupRequests []*sdk.GroupRequest) (DBGroupRequests []*relation.GroupRequestModel, err error) {
 
 }
 
-func NewDBGroupRequest(groupRequest *table.GroupRequestModel) *DBGroupRequest {
+func (*DBGroupRequest) DB2PB(groupRequests []*relation.GroupRequestModel) (PBGroupRequests []*sdk.GroupRequest, err error) {
+
+}
+
+func NewDBGroupRequest(groupRequest *relation.GroupRequestModel) *DBGroupRequest {
 	return &DBGroupRequest{GroupRequestModel: groupRequest}
 }
 
@@ -286,8 +286,8 @@ func NewPBGroupRequest(groupRequest *sdk.GroupRequest) *PBGroupRequest {
 	return &PBGroupRequest{GroupRequest: groupRequest}
 }
 
-func (pb *PBGroupRequest) Convert() (*table.GroupRequestModel, error) {
-	dst := &table.GroupRequestModel{}
+func (pb *PBGroupRequest) Convert() (*relation.GroupRequestModel, error) {
+	dst := &relation.GroupRequestModel{}
 	utils.CopyStructFields(dst, pb)
 	dst.ReqTime = utils.UnixSecondToTime(int64(pb.ReqTime))
 	dst.HandledTime = utils.UnixSecondToTime(int64(pb.HandleTime))
@@ -302,10 +302,10 @@ func (db *DBGroupRequest) Convert() (*sdk.GroupRequest, error) {
 }
 
 type DBUser struct {
-	*table.UserModel
+	*relation.UserModel
 }
 
-func NewDBUser(user *table.UserModel) *DBUser {
+func NewDBUser(user *relation.UserModel) *DBUser {
 	return &DBUser{UserModel: user}
 }
 
@@ -317,7 +317,7 @@ func NewPBUser(userInfo *sdk.UserInfo) *PBUser {
 	return &PBUser{UserInfo: userInfo}
 }
 
-func (*PBUser) PB2DB(users []*sdk.UserInfo) (DBUsers []*table.UserModel, err error) {
+func (*PBUser) PB2DB(users []*sdk.UserInfo) (DBUsers []*relation.UserModel, err error) {
 	for _, v := range users {
 		u, err := NewPBUser(v).Convert()
 		if err != nil {
@@ -328,7 +328,7 @@ func (*PBUser) PB2DB(users []*sdk.UserInfo) (DBUsers []*table.UserModel, err err
 	return
 }
 
-func (*DBUser) DB2PB(users []*table.UserModel) (PBUsers []*sdk.UserInfo, err error) {
+func (*DBUser) DB2PB(users []*relation.UserModel) (PBUsers []*sdk.UserInfo, err error) {
 	for _, v := range users {
 		u, err := NewDBUser(v).Convert()
 		if err != nil {
@@ -339,8 +339,8 @@ func (*DBUser) DB2PB(users []*table.UserModel) (PBUsers []*sdk.UserInfo, err err
 	return
 }
 
-func (pb *PBUser) Convert() (*table.UserModel, error) {
-	dst := &table.UserModel{}
+func (pb *PBUser) Convert() (*relation.UserModel, error) {
+	dst := &relation.UserModel{}
 	utils.CopyStructFields(dst, pb)
 	dst.Birth = utils.UnixSecondToTime(pb.Birthday)
 	dst.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))

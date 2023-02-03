@@ -1,7 +1,7 @@
 package relation
 
 import (
-	"Open_IM/pkg/common/db/table"
+	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -19,75 +19,75 @@ func NewUserGorm(db *gorm.DB) *UserGorm {
 	return &user
 }
 
-func (u *UserGorm) Create(ctx context.Context, users []*table.UserModel, tx ...*gorm.DB) (err error) {
+func (u *UserGorm) Create(ctx context.Context, users []*relation.UserModel, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
-	return utils.Wrap(getDBConn(u.DB, tx).Model(&table.UserModel{}).Create(&users).Error, "")
+	return utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Create(&users).Error, "")
 }
 
 func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "args", args)
 	}()
-	return utils.Wrap(u.DB.Model(&table.UserModel{}).Where("user_id = ?", userID).Updates(args).Error, "")
+	return utils.Wrap(u.DB.Model(&relation.UserModel{}).Where("user_id = ?", userID).Updates(args).Error, "")
 }
 
-func (u *UserGorm) Update(ctx context.Context, users []*table.UserModel) (err error) {
+func (u *UserGorm) Update(ctx context.Context, users []*relation.UserModel) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
-	return utils.Wrap(u.DB.Model(&table.UserModel{}).Updates(&users).Error, "")
+	return utils.Wrap(u.DB.Model(&relation.UserModel{}).Updates(&users).Error, "")
 }
 
-func (u *UserGorm) Find(ctx context.Context, userIDs []string) (users []*table.UserModel, err error) {
+func (u *UserGorm) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
 	}()
-	err = utils.Wrap(u.DB.Model(&table.UserModel{}).Where("user_id in (?)", userIDs).Find(&users).Error, "")
+	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Where("user_id in (?)", userIDs).Find(&users).Error, "")
 	return users, err
 }
 
-func (u *UserGorm) Take(ctx context.Context, userID string) (user *table.UserModel, err error) {
-	user = &table.UserModel{}
+func (u *UserGorm) Take(ctx context.Context, userID string) (user *relation.UserModel, err error) {
+	user = &relation.UserModel{}
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "user", *user)
 	}()
-	err = utils.Wrap(u.DB.Model(&table.UserModel{}).Where("user_id = ?", userID).Take(&user).Error, "")
+	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Where("user_id = ?", userID).Take(&user).Error, "")
 	return user, err
 }
 
-func (u *UserGorm) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error) {
+func (u *UserGorm) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
 	}()
-	err = u.DB.Model(&table.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * pageNumber)).Find(&users).Error
+	err = u.DB.Model(&relation.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * pageNumber)).Find(&users).Error
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	return users, count, utils.Wrap(u.DB.Model(&table.UserModel{}).Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error, "")
+	return users, count, utils.Wrap(u.DB.Model(&relation.UserModel{}).Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error, "")
 }
 
-func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error) {
+func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "content", content, "showNumber", showNumber, "pageNumber", pageNumber, "users", users)
 	}()
-	db := u.DB.Model(&table.UserModel{}).Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
-	if err := db.Model(&table.UserModel{}).Count(&count).Error; err != nil {
+	db := u.DB.Model(&relation.UserModel{}).Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
+	if err := db.Model(&relation.UserModel{}).Count(&count).Error; err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
 	err = utils.Wrap(db.Limit(int(showNumber)).Offset(int(showNumber*pageNumber)).Find(&users).Error, "")
 	return
 }
 
-func (u *UserGorm) Get(ctx context.Context, showNumber, pageNumber int32) (users []*table.UserModel, count int64, err error) {
+func (u *UserGorm) Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
 	}()
-	err = u.DB.Model(&table.UserModel{}).Model(u).Count(&count).Error
+	err = u.DB.Model(&relation.UserModel{}).Model(u).Count(&count).Error
 	if err != nil {
 		return nil, 0, utils.Wrap(err, "")
 	}
-	err = utils.Wrap(u.DB.Model(&table.UserModel{}).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&users).Error, "")
+	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&users).Error, "")
 	return
 }

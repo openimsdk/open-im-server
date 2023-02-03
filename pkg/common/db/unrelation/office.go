@@ -3,7 +3,7 @@ package unrelation
 import (
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/table"
+	"Open_IM/pkg/common/db/table/unrelation"
 	"Open_IM/pkg/utils"
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,11 +20,11 @@ type OfficeMongoDriver struct {
 }
 
 func NewOfficeMongoDriver(mgoDB *mongo.Database) *OfficeMongoDriver {
-	return &OfficeMongoDriver{mgoDB: mgoDB, TagCollection: mgoDB.Collection(table.CTag), TagSendLogCollection: mgoDB.Collection(table.CSendLog), WorkMomentCollection: mgoDB.Collection(table.CSendLog)}
+	return &OfficeMongoDriver{mgoDB: mgoDB, TagCollection: mgoDB.Collection(unrelation.CTag), TagSendLogCollection: mgoDB.Collection(unrelation.CSendLog), WorkMomentCollection: mgoDB.Collection(unrelation.CSendLog)}
 }
 
-func (db *OfficeMongoDriver) GetUserTags(ctx context.Context, userID string) ([]table.TagModel, error) {
-	var tags []table.TagModel
+func (db *OfficeMongoDriver) GetUserTags(ctx context.Context, userID string) ([]unrelation.TagModel, error) {
+	var tags []unrelation.TagModel
 	cursor, err := db.TagCollection.Find(ctx, bson.M{"user_id": userID})
 	if err != nil {
 		return tags, err
@@ -37,7 +37,7 @@ func (db *OfficeMongoDriver) GetUserTags(ctx context.Context, userID string) ([]
 
 func (db *OfficeMongoDriver) CreateTag(ctx context.Context, userID, tagName string, userList []string) error {
 	tagID := generateTagID(tagName, userID)
-	tag := table.TagModel{
+	tag := unrelation.TagModel{
 		UserID:   userID,
 		TagID:    tagID,
 		TagName:  tagName,
@@ -47,8 +47,8 @@ func (db *OfficeMongoDriver) CreateTag(ctx context.Context, userID, tagName stri
 	return err
 }
 
-func (db *OfficeMongoDriver) GetTagByID(ctx context.Context, userID, tagID string) (table.TagModel, error) {
-	var tag table.TagModel
+func (db *OfficeMongoDriver) GetTagByID(ctx context.Context, userID, tagID string) (unrelation.TagModel, error) {
+	var tag unrelation.TagModel
 	err := db.TagCollection.FindOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}).Decode(&tag)
 	return tag, err
 }
@@ -59,7 +59,7 @@ func (db *OfficeMongoDriver) DeleteTag(ctx context.Context, userID, tagID string
 }
 
 func (db *OfficeMongoDriver) SetTag(ctx context.Context, userID, tagID, newName string, increaseUserIDList []string, reduceUserIDList []string) error {
-	var tag table.TagModel
+	var tag unrelation.TagModel
 	if err := db.TagCollection.FindOne(ctx, bson.M{"tag_id": tagID, "user_id": userID}).Decode(&tag); err != nil {
 		return err
 	}
@@ -92,18 +92,18 @@ func (db *OfficeMongoDriver) SetTag(ctx context.Context, userID, tagID, newName 
 }
 
 func (db *OfficeMongoDriver) GetUserIDListByTagID(ctx context.Context, userID, tagID string) ([]string, error) {
-	var tag table.TagModel
+	var tag unrelation.TagModel
 	err := db.TagCollection.FindOne(ctx, bson.M{"user_id": userID, "tag_id": tagID}).Decode(&tag)
 	return tag.UserList, err
 }
 
-func (db *OfficeMongoDriver) SaveTagSendLog(ctx context.Context, tagSendLog *table.TagSendLogModel) error {
+func (db *OfficeMongoDriver) SaveTagSendLog(ctx context.Context, tagSendLog *unrelation.TagSendLogModel) error {
 	_, err := db.TagSendLogCollection.InsertOne(ctx, tagSendLog)
 	return err
 }
 
-func (db *OfficeMongoDriver) GetTagSendLogs(ctx context.Context, userID string, showNumber, pageNumber int32) ([]table.TagSendLogModel, error) {
-	var tagSendLogs []table.TagSendLogModel
+func (db *OfficeMongoDriver) GetTagSendLogs(ctx context.Context, userID string, showNumber, pageNumber int32) ([]unrelation.TagSendLogModel, error) {
+	var tagSendLogs []unrelation.TagSendLogModel
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"send_time": -1})
 	cursor, err := db.TagSendLogCollection.Find(ctx, bson.M{"send_id": userID}, findOpts)
 	if err != nil {
@@ -113,7 +113,7 @@ func (db *OfficeMongoDriver) GetTagSendLogs(ctx context.Context, userID string, 
 	return tagSendLogs, err
 }
 
-func (db *OfficeMongoDriver) CreateOneWorkMoment(ctx context.Context, workMoment *table.WorkMoment) error {
+func (db *OfficeMongoDriver) CreateOneWorkMoment(ctx context.Context, workMoment *unrelation.WorkMoment) error {
 	workMomentID := generateWorkMomentID(workMoment.UserID)
 	workMoment.WorkMomentID = workMomentID
 	workMoment.CreateTime = int32(time.Now().Unix())
@@ -136,13 +136,13 @@ func (db *OfficeMongoDriver) DeleteComment(ctx context.Context, workMomentID, co
 	return err
 }
 
-func (db *OfficeMongoDriver) GetWorkMomentByID(ctx context.Context, workMomentID string) (*table.WorkMoment, error) {
-	workMoment := &table.WorkMoment{}
+func (db *OfficeMongoDriver) GetWorkMomentByID(ctx context.Context, workMomentID string) (*unrelation.WorkMoment, error) {
+	workMoment := &unrelation.WorkMoment{}
 	err := db.WorkMomentCollection.FindOne(ctx, bson.M{"work_moment_id": workMomentID}).Decode(workMoment)
 	return workMoment, err
 }
 
-func (db *OfficeMongoDriver) LikeOneWorkMoment(ctx context.Context, likeUserID, userName, workMomentID string) (*table.WorkMoment, bool, error) {
+func (db *OfficeMongoDriver) LikeOneWorkMoment(ctx context.Context, likeUserID, userName, workMomentID string) (*unrelation.WorkMoment, bool, error) {
 	workMoment, err := db.GetWorkMomentByID(ctx, workMomentID)
 	if err != nil {
 		return nil, false, err
@@ -155,7 +155,7 @@ func (db *OfficeMongoDriver) LikeOneWorkMoment(ctx context.Context, likeUserID, 
 		}
 	}
 	if !isAlreadyLike {
-		workMoment.LikeUserList = append(workMoment.LikeUserList, &table.CommonUserModel{UserID: likeUserID, UserName: userName})
+		workMoment.LikeUserList = append(workMoment.LikeUserList, &unrelation.CommonUserModel{UserID: likeUserID, UserName: userName})
 	}
 	_, err = db.WorkMomentCollection.UpdateOne(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$set": bson.M{"like_user_list": workMoment.LikeUserList}})
 	return workMoment, !isAlreadyLike, err
@@ -165,15 +165,15 @@ func (db *OfficeMongoDriver) SetUserWorkMomentsLevel(ctx context.Context, userID
 	return nil
 }
 
-func (db *OfficeMongoDriver) CommentOneWorkMoment(ctx context.Context, comment *table.Comment, workMomentID string) (table.WorkMoment, error) {
+func (db *OfficeMongoDriver) CommentOneWorkMoment(ctx context.Context, comment *unrelation.Comment, workMomentID string) (unrelation.WorkMoment, error) {
 	comment.ContentID = generateWorkMomentCommentID(workMomentID)
-	var workMoment table.WorkMoment
+	var workMoment unrelation.WorkMoment
 	err := db.WorkMomentCollection.FindOneAndUpdate(ctx, bson.M{"work_moment_id": workMomentID}, bson.M{"$push": bson.M{"comments": comment}}).Decode(&workMoment)
 	return workMoment, err
 }
 
-func (db *OfficeMongoDriver) GetUserSelfWorkMoments(ctx context.Context, userID string, showNumber, pageNumber int32) ([]table.WorkMoment, error) {
-	var workMomentList []table.WorkMoment
+func (db *OfficeMongoDriver) GetUserSelfWorkMoments(ctx context.Context, userID string, showNumber, pageNumber int32) ([]unrelation.WorkMoment, error) {
+	var workMomentList []unrelation.WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
 	result, err := db.WorkMomentCollection.Find(ctx, bson.M{"user_id": userID}, findOpts)
 	if err != nil {
@@ -183,8 +183,8 @@ func (db *OfficeMongoDriver) GetUserSelfWorkMoments(ctx context.Context, userID 
 	return workMomentList, err
 }
 
-func (db *OfficeMongoDriver) GetUserWorkMoments(ctx context.Context, opUserID, userID string, showNumber, pageNumber int32, friendIDList []string) ([]table.WorkMoment, error) {
-	var workMomentList []table.WorkMoment
+func (db *OfficeMongoDriver) GetUserWorkMoments(ctx context.Context, opUserID, userID string, showNumber, pageNumber int32, friendIDList []string) ([]unrelation.WorkMoment, error) {
+	var workMomentList []unrelation.WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
 	result, err := db.WorkMomentCollection.Find(ctx, bson.D{ // 等价条件: select * from
 		{"user_id", userID},
@@ -201,8 +201,8 @@ func (db *OfficeMongoDriver) GetUserWorkMoments(ctx context.Context, opUserID, u
 	return workMomentList, err
 }
 
-func (db *OfficeMongoDriver) GetUserFriendWorkMoments(ctx context.Context, showNumber, pageNumber int32, userID string, friendIDList []string) ([]table.WorkMoment, error) {
-	var workMomentList []table.WorkMoment
+func (db *OfficeMongoDriver) GetUserFriendWorkMoments(ctx context.Context, showNumber, pageNumber int32, userID string, friendIDList []string) ([]unrelation.WorkMoment, error) {
+	var workMomentList []unrelation.WorkMoment
 	findOpts := options.Find().SetLimit(int64(showNumber)).SetSkip(int64(showNumber) * (int64(pageNumber) - 1)).SetSort(bson.M{"create_time": -1})
 	var filter bson.D
 	permissionFilter := bson.D{

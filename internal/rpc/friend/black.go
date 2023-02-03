@@ -4,7 +4,7 @@ import (
 	"Open_IM/internal/common/check"
 	"Open_IM/internal/common/convert"
 	chat "Open_IM/internal/rpc/msg"
-	"Open_IM/pkg/common/db/table"
+	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
@@ -45,7 +45,7 @@ func (s *friendServer) RemoveBlack(ctx context.Context, req *pbFriend.RemoveBlac
 	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	if err := s.BlackInterface.Delete(ctx, []*table.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
+	if err := s.BlackInterface.Delete(ctx, []*relation.BlackModel{{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID}}); err != nil {
 		return nil, err
 	}
 	chat.BlackDeletedNotification(ctx, req)
@@ -57,8 +57,8 @@ func (s *friendServer) AddBlack(ctx context.Context, req *pbFriend.AddBlackReq) 
 	if err := token_verify.CheckAccessV3(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	black := table.BlackModel{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.GetOpUserID(ctx)}
-	if err := s.BlackInterface.Create(ctx, []*table.BlackModel{&black}); err != nil {
+	black := relation.BlackModel{OwnerUserID: req.OwnerUserID, BlockUserID: req.BlackUserID, OperatorUserID: tracelog.GetOpUserID(ctx)}
+	if err := s.BlackInterface.Create(ctx, []*relation.BlackModel{&black}); err != nil {
 		return nil, err
 	}
 	chat.BlackAddedNotification(ctx, req)
