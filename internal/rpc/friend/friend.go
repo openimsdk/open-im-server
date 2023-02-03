@@ -7,7 +7,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db/controller"
 	"Open_IM/pkg/common/db/relation"
-	"Open_IM/pkg/common/db/table"
+	relation2 "Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/middleware"
 	promePkg "Open_IM/pkg/common/prometheus"
@@ -64,16 +64,16 @@ func NewFriendServer(port int) *friendServer {
 	//mysql init
 	var mysql relation.Mysql
 	var model relation.FriendGorm
-	err = mysql.InitConn().AutoMigrateModel(&table.FriendModel{})
+	err = mysql.InitConn().AutoMigrateModel(&relation2.FriendModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
-	err = mysql.InitConn().AutoMigrateModel(&table.FriendRequestModel{})
+	err = mysql.InitConn().AutoMigrateModel(&relation2.FriendRequestModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
 
-	err = mysql.InitConn().AutoMigrateModel(&table.BlackModel{})
+	err = mysql.InitConn().AutoMigrateModel(&relation2.BlackModel{})
 	if err != nil {
 		panic("db init err:" + err.Error())
 	}
@@ -166,9 +166,9 @@ func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFr
 		return nil, err
 	}
 
-	var friends []*table.FriendModel
+	var friends []*relation2.FriendModel
 	for _, userID := range utils.RemoveDuplicateElement(req.FriendUserIDs) {
-		friends = append(friends, &table.FriendModel{OwnerUserID: userID, FriendUserID: req.OwnerUserID, AddSource: constant.BecomeFriendByImport, OperatorUserID: tracelog.GetOpUserID(ctx)})
+		friends = append(friends, &relation2.FriendModel{OwnerUserID: userID, FriendUserID: req.OwnerUserID, AddSource: constant.BecomeFriendByImport, OperatorUserID: tracelog.GetOpUserID(ctx)})
 	}
 	if len(friends) > 0 {
 		if err := s.FriendInterface.BecomeFriend(ctx, friends); err != nil {
@@ -184,7 +184,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 	if err := check.Access(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
-	friendRequest := table.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
+	friendRequest := relation2.FriendRequestModel{FromUserID: req.FromUserID, ToUserID: req.ToUserID, HandleMsg: req.HandleMsg, HandleResult: req.HandleResult}
 	if req.HandleResult == constant.FriendResponseAgree {
 		err := s.AgreeFriendRequest(ctx, &friendRequest)
 		if err != nil {

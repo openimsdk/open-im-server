@@ -2,7 +2,7 @@ package relation
 
 import (
 	"Open_IM/pkg/common/constant"
-	"Open_IM/pkg/common/db/table"
+	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/tracelog"
 	"Open_IM/pkg/utils"
 	"context"
@@ -17,14 +17,14 @@ func NewGroupMemberDB(db *gorm.DB) *GroupMemberGorm {
 	return &GroupMemberGorm{DB: db}
 }
 
-func (g *GroupMemberGorm) Create(ctx context.Context, groupMemberList []*table.GroupMemberModel, tx ...*gorm.DB) (err error) {
+func (g *GroupMemberGorm) Create(ctx context.Context, groupMemberList []*relation.GroupMemberModel, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMemberList", groupMemberList)
 	}()
 	return utils.Wrap(getDBConn(g.DB, tx).Create(&groupMemberList).Error, "")
 }
 
-func (g *GroupMemberGorm) Delete(ctx context.Context, groupMembers []*table.GroupMemberModel, tx ...*gorm.DB) (err error) {
+func (g *GroupMemberGorm) Delete(ctx context.Context, groupMembers []*relation.GroupMemberModel, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers)
 	}()
@@ -35,15 +35,15 @@ func (g *GroupMemberGorm) UpdateByMap(ctx context.Context, groupID string, userI
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "args", args)
 	}()
-	return utils.Wrap(getDBConn(g.DB, tx).Model(&table.GroupMemberModel{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
+	return utils.Wrap(getDBConn(g.DB, tx).Model(&relation.GroupMemberModel{}).Where("group_id = ? and user_id = ?", groupID, userID).Updates(args).Error, "")
 }
 
-func (g *GroupMemberGorm) Update(ctx context.Context, groupMembers []*table.GroupMemberModel, tx ...*gorm.DB) (err error) {
+func (g *GroupMemberGorm) Update(ctx context.Context, groupMembers []*relation.GroupMemberModel, tx ...*gorm.DB) (err error) {
 	defer func() { tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers) }()
 	return utils.Wrap(getDBConn(g.DB, tx).Updates(&groupMembers).Error, "")
 }
 
-func (g *GroupMemberGorm) Find(ctx context.Context, groupMembers []*table.GroupMemberModel, tx ...*gorm.DB) (groupList []*table.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) Find(ctx context.Context, groupMembers []*relation.GroupMemberModel, tx ...*gorm.DB) (groupList []*relation.GroupMemberModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupMembers", groupMembers, "groupList", groupList)
 	}()
@@ -54,19 +54,19 @@ func (g *GroupMemberGorm) Find(ctx context.Context, groupMembers []*table.GroupM
 	return groupList, utils.Wrap(getDBConn(g.DB, tx).Where("(group_id, user_id) in ?", where).Find(&groupList).Error, "")
 }
 
-func (g *GroupMemberGorm) Take(ctx context.Context, groupID string, userID string, tx ...*gorm.DB) (groupMember *table.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) Take(ctx context.Context, groupID string, userID string, tx ...*gorm.DB) (groupMember *relation.GroupMemberModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "userID", userID, "groupMember", *groupMember)
 	}()
-	groupMember = &table.GroupMemberModel{}
+	groupMember = &relation.GroupMemberModel{}
 	return groupMember, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and user_id = ?", groupID, userID).Take(groupMember).Error, "")
 }
 
-func (g *GroupMemberGorm) TakeOwnerInfo(ctx context.Context, groupID string, tx ...*gorm.DB) (groupMember *table.GroupMemberModel, err error) {
+func (g *GroupMemberGorm) TakeOwnerInfo(ctx context.Context, groupID string, tx ...*gorm.DB) (groupMember *relation.GroupMemberModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "groupID", groupID, "groupMember", *groupMember)
 	}()
-	groupMember = &table.GroupMemberModel{}
+	groupMember = &relation.GroupMemberModel{}
 	return groupMember, utils.Wrap(getDBConn(g.DB, tx).Where("group_id = ? and role_level = ?", groupID, constant.GroupOwner).Take(groupMember).Error, "")
 }
 

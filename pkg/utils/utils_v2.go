@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"sort"
 )
 
@@ -267,6 +268,11 @@ func If[T any](isa bool, a, b T) T {
 		return a
 	}
 	return b
+}
+
+func UniqueJoin(s ...string) string {
+	data, _ := json.Marshal(s)
+	return string(data)
 }
 
 type sortSlice[E any] struct {

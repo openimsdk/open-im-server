@@ -45,11 +45,6 @@ func StartCronTask(userID, workingGroupID string) {
 	}
 }
 
-type CronTask struct {
-	spec           string
-	groupInterface controller.GroupInterface
-	userInterface  controller.UserInterface
-}
 
 func getCronTaskOperationID() string {
 	return cronTaskOperationID + utils.OperationIDGenerator()
