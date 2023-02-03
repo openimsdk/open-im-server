@@ -244,6 +244,22 @@ func CompleteAny[K comparable, E any](ks []K, es []E, fn func(e E) K) bool {
 	return len(a) == 0
 }
 
+func Complete[E comparable](a []E, b []E) bool {
+	if len(a) == 0 && len(b) == 0 {
+		return true
+	}
+	if (len(a) == 0 && len(b) != 0) || (len(a) != 0 && len(b) == 0) {
+		return false
+	}
+	t := SliceSet(a)
+	for _, e := range b {
+		if _, ok := t[e]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
 // MapKey get map keys
 func MapKey[K comparable, V any](kv map[K]V) []K {
 	ks := make([]K, 0, len(kv))
@@ -288,6 +304,25 @@ func If[T any](isa bool, a, b T) T {
 		return a
 	}
 	return b
+}
+
+func Equal[E comparable](a []E, b []E) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// Single
+
+func Single[E comparable](a, b []E) []E {
+
+	return nil
 }
 
 func UniqueJoin(s ...string) string {
