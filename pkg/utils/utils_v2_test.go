@@ -75,9 +75,9 @@ func TestCompleteAny(t *testing.T) {
 	DeleteAt(&list, -1)
 	DeleteAt(&ids, -1)
 
-	ok := CompleteAny(ids, list, func(t Item) int {
+	ok := Complete(ids, Slice(list, func(t Item) int {
 		return t.ID
-	})
+	}))
 
 	fmt.Printf("%+v\n", ok)
 
