@@ -39,3 +39,37 @@ func PbToDbGroupRequest(req *pbGroup.GroupApplicationResponseReq, handleUserID s
 		HandledTime:  time.Now(),
 	}
 }
+
+func PbToDbMapGroupInfoForSet(group *open_im_sdk.GroupInfoForSet) map[string]any {
+	m := make(map[string]any)
+	if group.GroupName != "" {
+		m["group_name"] = group.GroupName
+	}
+	if group.Notification != "" {
+		m["notification"] = group.Notification
+	}
+	if group.Introduction != "" {
+		m["introduction"] = group.Introduction
+	}
+	if group.FaceURL != "" {
+		m["face_url"] = group.FaceURL
+	}
+	if group.NeedVerification != nil {
+		m["need_verification"] = group.NeedVerification.Value
+	}
+	if group.LookMemberInfo != nil {
+		m["look_member_info"] = group.LookMemberInfo.Value
+	}
+	if group.ApplyMemberFriend != nil {
+		m["apply_member_friend"] = group.ApplyMemberFriend.Value
+	}
+	return m
+}
+
+func DbToBpCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName string, memberCount uint32) *pbGroup.CMSGroup {
+	return &pbGroup.CMSGroup{
+		GroupInfo:          DbToPbGroupInfo(m, ownerUserID, memberCount),
+		GroupOwnerUserID:   ownerUserID,
+		GroupOwnerUserName: ownerUserName,
+	}
+}

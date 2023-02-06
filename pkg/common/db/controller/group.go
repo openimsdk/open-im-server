@@ -16,6 +16,7 @@ import (
 
 type GroupInterface interface {
 	FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error)
+	FindSearchGroup(ctx context.Context, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error)
 	CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupMemberModel) error
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation2.GroupModel, err error)
@@ -28,7 +29,12 @@ type GroupInterface interface {
 	DelGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
 	GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
+	GetGroupOwnerUser(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error)
+	FindGroupOwnerUser(ctx context.Context, groupID []string) ([]*relation2.GroupMemberModel, error)
+	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string) error
+
 	GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation2.GroupRequestModel, error)
+	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
 
 	CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupMemberModel) error
 	CreateGroupRequest(ctx context.Context, requests []*relation2.GroupRequestModel) error

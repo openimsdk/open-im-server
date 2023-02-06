@@ -1,7 +1,9 @@
 package group
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/tracelog"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
@@ -60,6 +62,24 @@ func GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sd
 	return utils.SliceToMap(users, func(e *sdk_ws.PublicUserInfo) string {
 		return e.UserID
 	}), nil
+}
+
+func GroupNotification(ctx context.Context, groupID string) {
+	var conversationReq pbConversation.ModifyConversationFieldReq
+	conversation := pbConversation.Conversation{
+		OwnerUserID:      tracelog.GetOpUserID(ctx),
+		ConversationID:   utils.GetConversationIDBySessionType(groupID, constant.GroupChatType),
+		ConversationType: constant.GroupChatType,
+		GroupID:          groupID,
+	}
+	conversationReq.Conversation = &conversation
+	conversationReq.OperationID = tracelog.GetOperationID(ctx)
+	conversationReq.FieldType = constant.FieldGroupAtType
+	conversation.GroupAtType = constant.GroupNotification
+	conversationReq.UserIDList = cacheResp.UserIDList
+
+	_, err = pbConversation.NewConversationClient(s.etcdConn.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)).ModifyConversationField(ctx, &conversationReq)
+	tracelog.SetCtxInfo(ctx, "ModifyConversationField", err, "req", &conversationReq, "resp", conversationReply)
 }
 
 func genGroupID(ctx context.Context, groupID string) string {
