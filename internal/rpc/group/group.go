@@ -712,37 +712,21 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 
 func (s *groupServer) QuitGroup(ctx context.Context, req *pbGroup.QuitGroupReq) (*pbGroup.QuitGroupResp, error) {
 	resp := &pbGroup.QuitGroupResp{}
-
-	groupInfo, err := relation.GetGroupInfoByGroupID(req.GroupID)
+	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	if groupInfo.GroupType != constant.SuperGroup {
-		_, err = rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
-		if err != nil {
+	if group.GroupType == constant.SuperGroup {
+		if err := s.GroupInterface.DelSuperGroupMember(ctx, req.GroupID, []string{tracelog.GetOpUserID(ctx)}); err != nil {
 			return nil, err
 		}
-		if err := s.DelGroupAndUserCache(ctx, req.GroupID, []string{tracelog.GetOpUserID(ctx)}); err != nil {
-			return nil, err
-		}
-		err = relation.DeleteGroupMemberByGroupIDAndUserID(req.GroupID, tracelog.GetOpUserID(ctx))
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		okUserIDList := []string{tracelog.GetOpUserID(ctx)}
-		if err := db.DB.RemoverUserFromSuperGroup(req.GroupID, okUserIDList); err != nil {
-			return nil, err
-		}
-	}
-
-	if groupInfo.GroupType != constant.SuperGroup {
-		_ = rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
-		chat.MemberQuitNotification(req)
-	} else {
-		_ = rocksCache.DelJoinedSuperGroupIDListFromCache(ctx, tracelog.GetOpUserID(ctx))
-		_ = rocksCache.DelGroupMemberListHashFromCache(ctx, req.GroupID)
 		chat.SuperGroupNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), tracelog.GetOpUserID(ctx))
+	} else {
+		_, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
+		if err != nil {
+			return nil, err
+		}
+		chat.MemberQuitNotification(req)
 	}
 	return resp, nil
 }
