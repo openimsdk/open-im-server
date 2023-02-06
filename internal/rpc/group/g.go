@@ -37,20 +37,32 @@ import (
 //	return dbGroupMember, nil
 //}
 
-func getUsersInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.UserInfo, error) {
+func GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.UserInfo, error) {
 	return nil, nil
 }
 
-func getUserMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.UserInfo, error) {
-	users, err := getUsersInfo(ctx, userIDs)
+func GetUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.UserInfo, error) {
+	users, err := GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	userMap := make(map[string]*sdk_ws.UserInfo)
-	for i, user := range users {
-		userMap[user.UserID] = users[i]
+	return utils.SliceToMap(users, func(e *sdk_ws.UserInfo) string {
+		return e.UserID
+	}), nil
+}
+
+func GetPublicUserInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.PublicUserInfo, error) {
+	return nil, nil
+}
+
+func GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.PublicUserInfo, error) {
+	users, err := GetPublicUserInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
 	}
-	return userMap, nil
+	return utils.SliceToMap(users, func(e *sdk_ws.PublicUserInfo) string {
+		return e.UserID
+	}), nil
 }
 
 func genGroupID(ctx context.Context, groupID string) string {

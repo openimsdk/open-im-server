@@ -169,11 +169,11 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if utils.Duplicate(userIDs) {
 		return nil, constant.ErrArgs.Wrap("group member repeated")
 	}
-	userMap, err := getUserMap(ctx, userIDs)
+	userMap, err := GetUserInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	if ids := utils.Single(userIDs, utils.MapKey(userMap)); len(ids) > 0 {
+	if ids := utils.Single(userIDs, utils.Keys(userMap)); len(ids) > 0 {
 		return nil, constant.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
 	}
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
@@ -290,14 +290,14 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 	memberMap := utils.SliceToMap(members, func(e *relation2.GroupMemberModel) string {
 		return e.UserID
 	})
-	if ids := utils.Single(req.InvitedUserIDs, utils.MapKey(memberMap)); len(ids) > 0 {
+	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(memberMap)); len(ids) > 0 {
 		return nil, constant.ErrArgs.Wrap("user in group " + strings.Join(ids, ","))
 	}
-	userMap, err := getUserMap(ctx, req.InvitedUserIDs)
+	userMap, err := GetUserInfoMap(ctx, req.InvitedUserIDs)
 	if err != nil {
 		return nil, err
 	}
-	if ids := utils.Single(req.InvitedUserIDs, utils.MapKey(userMap)); len(ids) > 0 {
+	if ids := utils.Single(req.InvitedUserIDs, utils.Keys(userMap)); len(ids) > 0 {
 		return nil, constant.ErrArgs.Wrap("user not found " + strings.Join(ids, ","))
 	}
 	if group.NeedVerification == constant.AllNeedVerification {
@@ -540,55 +540,40 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		userIDs = append(userIDs, gr.UserID)
 		groupIDs = append(groupIDs, gr.GroupID)
 	}
-	userMap, err := getUserMap(ctx, userIDs)
+	userIDs = utils.Distinct(userIDs)
+	groupIDs = utils.Distinct(groupIDs)
+	userMap, err := GetPublicUserInfoMap(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	for _, userID := range userIDs {
-		if _, ok := userMap[userID]; !ok {
-			return nil, constant.ErrUserIDNotFound.Wrap(userID)
-		}
+	if ids := utils.Single(utils.Keys(userMap), userIDs); len(ids) > 0 {
+		return nil, constant.ErrUserIDNotFound.Wrap(strings.Join(ids, ","))
 	}
-	groups, err := s.GroupInterface.FindGroupsByID(ctx, groupIDs)
+	groups, err := s.GroupInterface.FindGroupsByID(ctx, utils.Distinct(groupIDs))
 	if err != nil {
 		return nil, err
 	}
-	groupMap := make(map[string]*relation2.GroupModel)
-	for i, group := range groups {
-		groupMap[group.GroupID] = groups[i]
+	groupMap := utils.SliceToMap(groups, func(e *relation2.GroupModel) string {
+		return e.GroupID
+	})
+	if ids := utils.Single(utils.Keys(groupMap), groupIDs); len(ids) > 0 {
+		return nil, constant.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
 	}
-
+	groupMemberNumMap, err := s.GroupInterface.GetGroupMemberNum(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groupOwnerUserIDMap, err := s.GroupInterface.GetGroupOwnerUserID(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
 	for _, gr := range groupRequests {
-		groupRequest := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
+		groupRequest := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}}
 		utils.CopyStructFields(&groupRequest, gr)
-		getUserMap()
-
+		groupRequest.UserInfo = userMap[gr.UserID]
+		groupRequest.GroupInfo = ModelToGroupInfo(groupMap[gr.GroupID], groupOwnerUserIDMap[gr.GroupID], uint32(groupMemberNumMap[gr.GroupID]))
+		resp.GroupRequests = append(resp.GroupRequests, &groupRequest)
 	}
-
-	var errResult error
-	tracelog.SetCtxInfo(ctx, "GetRecvGroupApplicationList", nil, " FromUserID: ", req.FromUserID, "GroupApplicationList: ", groupRequests)
-	for _, v := range groupRequests {
-		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
-		err := FillGroupInfoByGroupID(tracelog.GetOperationID(ctx), v.GroupID, node.GroupInfo)
-		if err != nil {
-			if !errors.Is(errors.Unwrap(err), constant.ErrDismissedAlready) {
-				errResult = err
-			}
-			continue
-		}
-		tracelog.SetCtxInfo(ctx, "FillGroupInfoByGroupID ", nil, " groupID: ", v.GroupID, " groupInfo: ", node.GroupInfo)
-		err = FillPublicUserInfoByUserID(tracelog.GetOperationID(ctx), v.UserID, node.UserInfo)
-		if err != nil {
-			errResult = err
-			continue
-		}
-		cp.GroupRequestDBCopyOpenIM(&node, &v)
-		resp.GroupRequestList = append(resp.GroupRequestList, &node)
-	}
-	if errResult != nil && len(resp.GroupRequestList) == 0 {
-		return nil, err
-	}
-	tracelog.SetRpcRespInfo(ctx, utils.GetSelfFuncName(), resp.String())
 	return resp, nil
 }
 
