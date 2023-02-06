@@ -67,7 +67,7 @@ func DeleteAt[E any](es *[]E, index ...int) []E {
 }
 
 // IndexAny get the index of the element
-func IndexAny[E any, K comparable](es []E, e E, fn func(e E) K) int {
+func IndexAny[E any, K comparable](e E, es []E, fn func(e E) K) int {
 	k := fn(e)
 	for i := 0; i < len(es); i++ {
 		if fn(es[i]) == k {
@@ -78,15 +78,15 @@ func IndexAny[E any, K comparable](es []E, e E, fn func(e E) K) int {
 }
 
 // IndexOf get the index of the element
-func IndexOf[E comparable](es []E, e E) int {
-	return IndexAny(es, e, func(t E) E {
+func IndexOf[E comparable](e E, es ...E) int {
+	return IndexAny(e, es, func(t E) E {
 		return t
 	})
 }
 
 // Contain 是否包含
-func Contain[E comparable](es []E, e E) bool {
-	return IndexOf(es, e) >= 0
+func Contain[E comparable](e E, es ...E) bool {
+	return IndexOf(e, es...) >= 0
 }
 
 // DuplicateAny 是否有重复的

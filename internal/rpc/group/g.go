@@ -5,19 +5,12 @@ import (
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
 	"math/big"
 	"strconv"
 	"time"
 )
 
-//func getDBGroupRequest(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (dbGroupRequest *relation.GroupRequest) {
-//	dbGroupRequest = &relation.GroupRequest{}
-//	utils.CopyStructFields(&dbGroupRequest, req)
-//	dbGroupRequest.UserID = req.FromUserID
-//	dbGroupRequest.HandleUserID = utils.OpUserID(ctx)
-//	dbGroupRequest.HandledTime = time.Now()
-//	return dbGroupRequest
-//}
 //
 //func getDBGroupMember(ctx context.Context, groupID, userID string) (dbGroupMember *relation.GroupMember, err error) {
 //	dbGroupMember = &relation.GroupMember{}
@@ -37,8 +30,12 @@ import (
 //	return dbGroupMember, nil
 //}
 
+func GetPublicUserInfoOne(ctx context.Context, userID string) (*sdk_ws.PublicUserInfo, error) {
+	return nil, errors.New("todo")
+}
+
 func GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.UserInfo, error) {
-	return nil, nil
+	return nil, errors.New("todo")
 }
 
 func GetUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.UserInfo, error) {
@@ -52,7 +49,7 @@ func GetUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.U
 }
 
 func GetPublicUserInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.PublicUserInfo, error) {
-	return nil, nil
+	return nil, errors.New("todo")
 }
 
 func GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.PublicUserInfo, error) {

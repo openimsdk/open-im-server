@@ -2,10 +2,12 @@ package group
 
 import (
 	"Open_IM/pkg/common/db/table/relation"
+	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
+	"time"
 )
 
-func ModelToGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount uint32) *open_im_sdk.GroupInfo {
+func DbToPbGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount uint32) *open_im_sdk.GroupInfo {
 	return &open_im_sdk.GroupInfo{
 		GroupID:                m.GroupID,
 		GroupName:              m.GroupName,
@@ -24,5 +26,16 @@ func ModelToGroupInfo(m *relation.GroupModel, ownerUserID string, memberCount ui
 		ApplyMemberFriend:      m.ApplyMemberFriend,
 		NotificationUpdateTime: m.NotificationUpdateTime.UnixMilli(),
 		NotificationUserID:     m.NotificationUserID,
+	}
+}
+
+func PbToDbGroupRequest(req *pbGroup.GroupApplicationResponseReq, handleUserID string) *relation.GroupRequestModel {
+	return &relation.GroupRequestModel{
+		UserID:       req.FromUserID,
+		GroupID:      req.GroupID,
+		HandleResult: req.HandleResult,
+		HandledMsg:   req.HandledMsg,
+		HandleUserID: handleUserID,
+		HandledTime:  time.Now(),
 	}
 }

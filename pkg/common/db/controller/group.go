@@ -4,6 +4,7 @@ import (
 	"Open_IM/pkg/common/db/cache"
 	"Open_IM/pkg/common/db/relation"
 	relation2 "Open_IM/pkg/common/db/table/relation"
+	unrelation2 "Open_IM/pkg/common/db/table/unrelation"
 	"Open_IM/pkg/common/db/unrelation"
 	"context"
 	"github.com/dtm-labs/rockscache"
@@ -18,7 +19,7 @@ type GroupInterface interface {
 	CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupMemberModel) error
 	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
 	TakeGroupByID(ctx context.Context, groupID string) (group *relation2.GroupModel, err error)
-	TakeGroupMemberByID(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupModel, err error)
+	TakeGroupMemberByID(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error)
 	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation2.GroupModel, error)
 	GetGroupMemberList(ctx context.Context, groupID string) ([]*relation2.GroupMemberModel, error)
 	GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
@@ -32,11 +33,14 @@ type GroupInterface interface {
 	CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupMemberModel) error
 	CreateGroupRequest(ctx context.Context, requests []*relation2.GroupRequestModel) error
 
+	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error
+	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error)
+
 	//mongo
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	DelSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
-	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
+	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)
 }
 
 var _ GroupInterface = (*GroupController)(nil)

@@ -1,7 +1,6 @@
 package group
 
 import (
-	"Open_IM/internal/rpc/fault_tolerant"
 	chat "Open_IM/internal/rpc/msg"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
@@ -571,7 +570,7 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 		groupRequest := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}}
 		utils.CopyStructFields(&groupRequest, gr)
 		groupRequest.UserInfo = userMap[gr.UserID]
-		groupRequest.GroupInfo = ModelToGroupInfo(groupMap[gr.GroupID], groupOwnerUserIDMap[gr.GroupID], uint32(groupMemberNumMap[gr.GroupID]))
+		groupRequest.GroupInfo = DbToPbGroupInfo(groupMap[gr.GroupID], groupOwnerUserIDMap[gr.GroupID], uint32(groupMemberNumMap[gr.GroupID]))
 		resp.GroupRequests = append(resp.GroupRequests, &groupRequest)
 	}
 	return resp, nil
@@ -595,73 +594,73 @@ func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsI
 		return nil, err
 	}
 	resp.GroupInfos = utils.Slice(groups, func(e *relation2.GroupModel) *open_im_sdk.GroupInfo {
-		return ModelToGroupInfo(e, groupOwnerUserIDMap[e.GroupID], uint32(groupMemberNumMap[e.GroupID]))
+		return DbToPbGroupInfo(e, groupOwnerUserIDMap[e.GroupID], uint32(groupMemberNumMap[e.GroupID]))
 	})
 	return resp, nil
 }
 
-//func CheckPermission(ctx context.Context, groupID string, userID string) (err error) {
-//	defer func() {
-//		tracelog.SetCtxInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID)
-//	}()
-//	if !token_verify.IsManagerUserID(userID) && !relation.IsGroupOwnerAdmin(groupID, userID) {
-//		return utils.Wrap(constant.ErrNoPermission, utils.GetSelfFuncName())
-//	}
-//	return nil
-//}
-
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	resp := &pbGroup.GroupApplicationResponseResp{}
-
-	if err := CheckPermission(ctx, req.GroupID, tracelog.GetOpUserID(ctx)); err != nil {
-		return nil, err
+	if !utils.Contain(req.HandleResult, constant.GroupResponseAgree, constant.GroupResponseRefuse) {
+		return nil, constant.ErrArgs.Wrap("HandleResult unknown")
 	}
-	groupRequest := getDBGroupRequest(ctx, req)
-	if err := (&relation2.GroupRequestModel{}).Update(ctx, []*relation2.GroupRequestModel{groupRequest}); err != nil {
-		return nil, err
+	if !token_verify.IsAppManagerUid(ctx) {
+		groupMember, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, req.FromUserID)
+		if err != nil {
+			return nil, err
+		}
+		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
+			return nil, constant.ErrNoPermission.Wrap("no group owner or admin")
+		}
 	}
-	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
+	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
+	groupRequest, err := s.GroupInterface.TakeGroupRequest(ctx, req.GroupID, req.FromUserID)
+	if err != nil {
+		return nil, err
+	}
+	if groupRequest.HandleResult != 0 {
+		return nil, constant.ErrArgs.Wrap("group request already processed")
+	}
+	if _, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, req.FromUserID); err != nil {
+		if !IsNotFound(err) {
+			return nil, err
+		}
+	} else {
+		return nil, constant.ErrArgs.Wrap("already in group")
+	}
+	user, err := GetPublicUserInfoOne(ctx, req.FromUserID)
+	if err != nil {
+		return nil, err
+	}
+	var member *relation2.GroupMemberModel
 	if req.HandleResult == constant.GroupResponseAgree {
-		member, err := getDBGroupMember(ctx, req.GroupID, req.FromUserID)
-		if err != nil {
+		member = &relation2.GroupMemberModel{
+			GroupID:        req.GroupID,
+			UserID:         user.UserID,
+			Nickname:       user.Nickname,
+			FaceURL:        user.FaceURL,
+			RoleLevel:      constant.GroupOrdinaryUsers,
+			JoinTime:       time.Now(),
+			JoinSource:     groupRequest.JoinSource,
+			InviterUserID:  groupRequest.InviterUserID,
+			OperatorUserID: tracelog.GetOpUserID(ctx),
+			Ex:             groupRequest.Ex,
+		}
+		if err = CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), member, group.Ex); err != nil {
 			return nil, err
 		}
-		err = CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), member, groupInfo.Ex)
-		if err != nil {
-			return nil, err
-		}
-		err = (&relation2.GroupMemberModel{}).Create(ctx, []*relation2.GroupMemberModel{member})
-		if err != nil {
-			return nil, err
-		}
-		etcdCacheConn, err := fault_tolerant.GetDefaultConn(config.Config.RpcRegisterName.OpenImCacheName, tracelog.GetOperationID(ctx))
-		if err != nil {
-			return nil, err
-		}
-		cacheClient := pbCache.NewCacheClient(etcdCacheConn)
-		cacheResp, err := cacheClient.DelGroupMemberIDListFromCache(context.Background(), &pbCache.DelGroupMemberIDListFromCacheReq{OperationID: tracelog.GetOperationID(ctx), GroupID: req.GroupID})
-		if err != nil {
-			return nil, err
-		}
-		if cacheResp.CommonResp.ErrCode != 0 {
-			return nil, utils.Wrap(&constant.ErrInfo{
-				ErrCode: cacheResp.CommonResp.ErrCode,
-				ErrMsg:  cacheResp.CommonResp.ErrMsg,
-			}, "")
-		}
-		_ = rocksCache.DelGroupMemberListHashFromCache(ctx, req.GroupID)
-		_ = rocksCache.DelJoinedGroupIDListFromCache(ctx, req.FromUserID)
-		_ = rocksCache.DelGroupMemberNumFromCache(ctx, req.GroupID)
+	}
+	if err := s.GroupInterface.HandlerGroupRequest(ctx, req.GroupID, req.FromUserID, req.HandledMsg, req.HandleResult, member); err != nil {
+		return nil, err
+	}
+	if req.HandleResult == constant.GroupResponseAgree {
 		chat.GroupApplicationAcceptedNotification(req)
 		chat.MemberEnterNotification(req)
 	} else if req.HandleResult == constant.GroupResponseRefuse {
 		chat.GroupApplicationRejectedNotification(req)
-	} else {
-		//return nil, utils.Wrap(constant.ErrArgs, "")
-		return nil, constant.ErrArgs.Wrap()
 	}
 	return resp, nil
 }
