@@ -579,30 +579,36 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 
 func (s *groupServer) GetGroupsInfo(ctx context.Context, req *pbGroup.GetGroupsInfoReq) (*pbGroup.GetGroupsInfoResp, error) {
 	resp := &pbGroup.GetGroupsInfoResp{}
-	groupsInfoList := make([]*open_im_sdk.GroupInfo, 0)
-	for _, groupID := range req.GroupIDList {
-		groupInfoFromRedis, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
-		if err != nil {
-			continue
-		}
-		var groupInfo open_im_sdk.GroupInfo
-		cp.GroupDBCopyOpenIM(&groupInfo, groupInfoFromRedis)
-		groupInfo.NeedVerification = groupInfoFromRedis.NeedVerification
-		groupsInfoList = append(groupsInfoList, &groupInfo)
+	if len(req.GroupIDs) == 0 {
+		return nil, constant.ErrArgs.Wrap("groupID is empty")
 	}
-	resp.GroupInfoList = groupsInfoList
+	groups, err := s.GroupInterface.FindGroupsByID(ctx, req.GroupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groupMemberNumMap, err := s.GroupInterface.GetGroupMemberNum(ctx, req.GroupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groupOwnerUserIDMap, err := s.GroupInterface.GetGroupOwnerUserID(ctx, req.GroupIDs)
+	if err != nil {
+		return nil, err
+	}
+	resp.GroupInfos = utils.Slice(groups, func(e *relation2.GroupModel) *open_im_sdk.GroupInfo {
+		return ModelToGroupInfo(e, groupOwnerUserIDMap[e.GroupID], uint32(groupMemberNumMap[e.GroupID]))
+	})
 	return resp, nil
 }
 
-func CheckPermission(ctx context.Context, groupID string, userID string) (err error) {
-	defer func() {
-		tracelog.SetCtxInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID)
-	}()
-	if !token_verify.IsManagerUserID(userID) && !relation.IsGroupOwnerAdmin(groupID, userID) {
-		return utils.Wrap(constant.ErrNoPermission, utils.GetSelfFuncName())
-	}
-	return nil
-}
+//func CheckPermission(ctx context.Context, groupID string, userID string) (err error) {
+//	defer func() {
+//		tracelog.SetCtxInfo(ctx, utils.GetSelfFuncName(), err, "groupID", groupID, "userID", userID)
+//	}()
+//	if !token_verify.IsManagerUserID(userID) && !relation.IsGroupOwnerAdmin(groupID, userID) {
+//		return utils.Wrap(constant.ErrNoPermission, utils.GetSelfFuncName())
+//	}
+//	return nil
+//}
 
 func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (*pbGroup.GroupApplicationResponseResp, error) {
 	resp := &pbGroup.GroupApplicationResponseResp{}
