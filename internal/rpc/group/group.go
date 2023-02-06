@@ -667,75 +667,43 @@ func (s *groupServer) GroupApplicationResponse(ctx context.Context, req *pbGroup
 
 func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) (*pbGroup.JoinGroupResp, error) {
 	resp := &pbGroup.JoinGroupResp{}
-
-	if _, err := relation.GetUserByUserID(tracelog.GetOpUserID(ctx)); err != nil {
+	if _, err := GetPublicUserInfoOne(ctx, tracelog.GetOpUserID(ctx)); err != nil {
 		return nil, err
 	}
-	groupInfo, err := rocksCache.GetGroupInfoFromCache(ctx, req.GroupID)
+	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	if groupInfo.Status == constant.GroupStatusDismissed {
-		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
+	if group.Status == constant.GroupStatusDismissed {
+		return nil, constant.ErrDismissedAlready.Wrap()
 	}
-
-	if groupInfo.NeedVerification == constant.Directly {
-		if groupInfo.GroupType != constant.SuperGroup {
-			us, err := relation.GetUserByUserID(tracelog.GetOpUserID(ctx))
-			if err != nil {
-				return nil, err
-			}
-			//to group member
-			groupMember := relation2.GroupMemberModel{GroupID: req.GroupID, RoleLevel: constant.GroupOrdinaryUsers, OperatorUserID: tracelog.GetOpUserID(ctx)}
-			utils.CopyStructFields(&groupMember, us)
-			if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), &groupMember, groupInfo.Ex); err != nil {
-				return nil, err
-			}
-			if err := s.DelGroupAndUserCache(ctx, req.GroupID, []string{tracelog.GetOpUserID(ctx)}); err != nil {
-				return nil, err
-			}
-			err = relation.InsertIntoGroupMember(groupMember)
-			if err != nil {
-				return nil, err
-			}
-
-			var sessionType int
-			if groupInfo.GroupType == constant.NormalGroup {
-				sessionType = constant.GroupChatType
-			} else {
-				sessionType = constant.SuperGroupChatType
-			}
-			var reqPb pbUser.SetConversationReq
-			var c pbConversation.Conversation
-			reqPb.OperationID = tracelog.GetOperationID(ctx)
-			c.OwnerUserID = tracelog.GetOpUserID(ctx)
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, sessionType)
-			c.ConversationType = int32(sessionType)
-			c.GroupID = req.GroupID
-			c.IsNotInGroup = false
-			c.UpdateUnreadCountTime = utils.GetCurrentTimestampByMill()
-			reqPb.Conversation = &c
-			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
-			if err != nil {
-				return nil, err
-			}
-			client := pbUser.NewUserClient(etcdConn)
-			respPb, err := client.SetConversation(context.Background(), &reqPb)
-			tracelog.SetCtxInfo(ctx, "SetConversation", err, "req", reqPb, "resp", respPb)
-			chat.MemberEnterDirectlyNotification(req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
-			return resp, nil
-		} else {
-			constant.SetErrorForResp(constant.ErrGroupTypeNotSupport, resp.CommonResp)
-			return resp, nil
+	if group.NeedVerification == constant.Directly {
+		if group.GroupType == constant.SuperGroup {
+			return nil, constant.ErrGroupTypeNotSupport.Wrap()
 		}
+		us, err := relation.GetUserByUserID(tracelog.GetOpUserID(ctx))
+		if err != nil {
+			return nil, err
+		}
+		groupMember := relation2.GroupMemberModel{GroupID: req.GroupID, RoleLevel: constant.GroupOrdinaryUsers, OperatorUserID: tracelog.GetOpUserID(ctx)}
+		utils.CopyStructFields(&groupMember, us)
+		if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), &groupMember, group.Ex); err != nil {
+			return nil, err
+		}
+		if err := s.GroupInterface.CreateGroupMember(ctx, []*relation2.GroupMemberModel{&groupMember}); err != nil {
+			return nil, err
+		}
+		chat.MemberEnterDirectlyNotification(req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
+		return resp, nil
 	}
-	var groupRequest relation2.GroupRequestModel
-	groupRequest.UserID = tracelog.GetOpUserID(ctx)
-	groupRequest.ReqMsg = req.ReqMessage
-	groupRequest.GroupID = req.GroupID
-	groupRequest.JoinSource = req.JoinSource
-	err = relation.InsertIntoGroupRequest(groupRequest)
-	if err != nil {
+	groupRequest := relation2.GroupRequestModel{
+		UserID:     tracelog.GetOpUserID(ctx),
+		ReqMsg:     req.ReqMessage,
+		GroupID:    req.GroupID,
+		JoinSource: req.JoinSource,
+		ReqTime:    time.Now(),
+	}
+	if err := s.GroupInterface.CreateGroupRequest(ctx, []*relation2.GroupRequestModel{&groupRequest}); err != nil {
 		return nil, err
 	}
 	chat.JoinGroupApplicationNotification(ctx, req)
