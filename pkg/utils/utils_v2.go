@@ -241,35 +241,33 @@ func BothExist[E comparable](es ...[]E) []E {
 	})
 }
 
-// CompleteAny a中存在b的所有元素, 同时b中的所有元素a
-func CompleteAny[K comparable, E any](ks []K, es []E, fn func(e E) K) bool {
-	if len(ks) == 0 && len(es) == 0 {
-		return true
-	}
-	kn := make(map[K]uint8)
-	for _, e := range Distinct(ks) {
-		kn[e]++
-	}
-	for k := range SliceSetAny(es, fn) {
-		kn[k]++
-	}
-	for _, n := range kn {
-		if n != 2 {
-			return false
-		}
-	}
-	return true
-}
+//// CompleteAny a中存在b的所有元素, 同时b中的所有元素a
+//func CompleteAny[K comparable, E any](ks []K, es []E, fn func(e E) K) bool {
+//	if len(ks) == 0 && len(es) == 0 {
+//		return true
+//	}
+//	kn := make(map[K]uint8)
+//	for _, e := range Distinct(ks) {
+//		kn[e]++
+//	}
+//	for k := range SliceSetAny(es, fn) {
+//		kn[k]++
+//	}
+//	for _, n := range kn {
+//		if n != 2 {
+//			return false
+//		}
+//	}
+//	return true
+//}
 
-// Complete a中存在b的所有元素, 同时b中的所有元素a
+// Complete a和b去重后是否相等(忽略顺序)
 func Complete[E comparable](a []E, b []E) bool {
-	return CompleteAny(a, b, func(e E) E {
-		return e
-	})
+	return len(Single(a, b)) == 0
 }
 
-// MapKey get map keys
-func MapKey[K comparable, V any](kv map[K]V) []K {
+// Keys get map keys
+func Keys[K comparable, V any](kv map[K]V) []K {
 	ks := make([]K, 0, len(kv))
 	for k := range kv {
 		ks = append(ks, k)
@@ -277,8 +275,8 @@ func MapKey[K comparable, V any](kv map[K]V) []K {
 	return ks
 }
 
-// MapValue get map values
-func MapValue[K comparable, V any](kv map[K]V) []V {
+// Values get map values
+func Values[K comparable, V any](kv map[K]V) []V {
 	vs := make([]V, 0, len(kv))
 	for k := range kv {
 		vs = append(vs, kv[k])
@@ -327,7 +325,7 @@ func Equal[E comparable](a []E, b []E) bool {
 	return true
 }
 
-// Single a和b中都只存在一个
+// Single a中存在,b中不存在 或 b中存在,a中不存在
 func Single[E comparable](a, b []E) []E {
 	kn := make(map[E]uint8)
 	for _, e := range Distinct(a) {
