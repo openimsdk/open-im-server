@@ -24,7 +24,7 @@ type GroupInterface interface {
 	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation2.GroupModel, error)
 	GetGroupMemberList(ctx context.Context, groupID string) ([]*relation2.GroupMemberModel, error)
 	GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
-	GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupModel, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
+	GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupMemberModel, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
 	FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*relation2.GroupMemberModel, err error)
 	FindUserInGroup(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
 	DelGroupMember(ctx context.Context, groupID string, userIDs []string) error

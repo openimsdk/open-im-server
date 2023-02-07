@@ -88,3 +88,32 @@ func DbToPbGroupAbstractInfo(groupID string, groupMemberNumber int32, groupMembe
 		GroupMemberListHash: groupMemberListHash,
 	}
 }
+
+func PbToDBGroupInfo(m *open_im_sdk.GroupInfo) *relation.GroupModel {
+	return &relation.GroupModel{
+		GroupID:                m.GroupID,
+		GroupName:              m.GroupName,
+		Notification:           m.Notification,
+		Introduction:           m.Introduction,
+		FaceURL:                m.FaceURL,
+		CreateTime:             time.Now(),
+		Ex:                     m.Ex,
+		Status:                 m.Status,
+		CreatorUserID:          m.CreatorUserID,
+		GroupType:              m.GroupType,
+		NeedVerification:       m.NeedVerification,
+		LookMemberInfo:         m.LookMemberInfo,
+		ApplyMemberFriend:      m.ApplyMemberFriend,
+		NotificationUpdateTime: time.UnixMilli(m.NotificationUpdateTime),
+		NotificationUserID:     m.NotificationUserID,
+	}
+}
+
+func PbToDbGroupMember(m *open_im_sdk.UserInfo) *relation.GroupMemberModel {
+	return &relation.GroupMemberModel{
+		UserID:   m.UserID,
+		Nickname: m.Nickname,
+		FaceURL:  m.FaceURL,
+		Ex:       m.Ex,
+	}
+}

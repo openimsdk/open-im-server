@@ -13,25 +13,6 @@ import (
 	"time"
 )
 
-//
-//func getDBGroupMember(ctx context.Context, groupID, userID string) (dbGroupMember *relation.GroupMember, err error) {
-//	dbGroupMember = &relation.GroupMember{}
-//
-//	member := relation.GroupMember{}
-//	member.GroupID = groupID
-//	member.UserID = userID
-//	member.RoleLevel = constant.GroupOrdinaryUsers
-//	member.OperatorUserID = utils.OpUserID(ctx)
-//
-//	member.FaceURL = user.FaceURL
-//	member.Nickname = user.Nickname
-//	member.JoinSource = request.JoinSource
-//	member.InviterUserID = request.InviterUserID
-//	member.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
-//
-//	return dbGroupMember, nil
-//}
-
 func GetPublicUserInfoOne(ctx context.Context, userID string) (*sdk_ws.PublicUserInfo, error) {
 	return nil, errors.New("todo")
 }

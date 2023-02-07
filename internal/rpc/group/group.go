@@ -186,14 +186,16 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	if err := callbackBeforeCreateGroup(ctx, req); err != nil {
 		return nil, err
 	}
-	var group relation2.GroupModel
 	var groupMembers []*relation2.GroupMemberModel
-	utils.CopyStructFields(&group, req.GroupInfo)
+	group := PbToDBGroupInfo(req.GroupInfo)
 	group.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
 	joinGroup := func(userID string, roleLevel int32) error {
-		user := userMap[userID]
-		groupMember := &relation2.GroupMemberModel{GroupID: group.GroupID, RoleLevel: roleLevel, OperatorUserID: tracelog.GetOpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tracelog.GetOpUserID(ctx)}
-		utils.CopyStructFields(&groupMember, user)
+		groupMember := PbToDbGroupMember(userMap[userID])
+		groupMember.GroupID = group.GroupID
+		groupMember.RoleLevel = roleLevel
+		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
+		groupMember.JoinSource = constant.JoinByInvitation
+		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
 		if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), groupMember, group.Ex); err != nil {
 			return err
 		}
@@ -219,10 +221,10 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 			}
 		}
 	}
-	if err := s.GroupInterface.CreateGroup(ctx, []*relation2.GroupModel{&group}, groupMembers); err != nil {
+	if err := s.GroupInterface.CreateGroup(ctx, []*relation2.GroupModel{group}, groupMembers); err != nil {
 		return nil, err
 	}
-	utils.CopyStructFields(resp.GroupInfo, group)
+	resp.GroupInfo = DbToPbGroupInfo(group, req.OwnerUserID, uint32(len(userIDs)))
 	resp.GroupInfo.MemberCount = uint32(len(userIDs))
 	if req.GroupInfo.GroupType == constant.SuperGroup {
 		go func() {
@@ -263,13 +265,7 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 		if group.Status == constant.GroupStatusDismissed || group.GroupType == constant.SuperGroup {
 			continue
 		}
-		var groupNode open_im_sdk.GroupInfo
-		utils.CopyStructFields(&groupNode, group)
-		groupNode.MemberCount = uint32(groupMemberNum[group.GroupID])
-		groupNode.OwnerUserID = groupOwnerUserID[group.GroupID]
-		groupNode.CreateTime = group.CreateTime.UnixMilli()
-		groupNode.NotificationUpdateTime = group.NotificationUpdateTime.UnixMilli()
-		resp.Groups = append(resp.Groups, &groupNode)
+		resp.Groups = append(resp.Groups, DbToPbGroupInfo(group, groupOwnerUserID[group.GroupID], uint32(groupMemberNum[group.GroupID])))
 	}
 	resp.Total = int32(len(resp.Groups))
 	return resp, nil
@@ -350,18 +346,16 @@ func (s *groupServer) InviteUserToGroup(ctx context.Context, req *pbGroup.Invite
 		opUserID := tracelog.GetOpUserID(ctx)
 		var groupMembers []*relation2.GroupMemberModel
 		for _, userID := range req.InvitedUserIDs {
-			user := userMap[userID]
-			var member relation2.GroupMemberModel
-			utils.CopyStructFields(&member, user)
+			member := PbToDbGroupMember(userMap[userID])
 			member.GroupID = req.GroupID
 			member.RoleLevel = constant.GroupOrdinaryUsers
 			member.OperatorUserID = opUserID
 			member.InviterUserID = opUserID
 			member.JoinSource = constant.JoinByInvitation
-			if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), &member, group.Ex); err != nil {
+			if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), member, group.Ex); err != nil {
 				return nil, err
 			}
-			groupMembers = append(groupMembers, &member)
+			groupMembers = append(groupMembers, member)
 		}
 		if err := s.GroupInterface.CreateGroupMember(ctx, groupMembers); err != nil {
 			return nil, err
@@ -377,17 +371,16 @@ func (s *groupServer) GetGroupAllMember(ctx context.Context, req *pbGroup.GetGro
 	if err != nil {
 		return nil, err
 	}
-	if group.GroupType != constant.SuperGroup {
-		members, err := s.GroupInterface.GetGroupMemberList(ctx, req.GroupID)
-		if err != nil {
-			return nil, err
-		}
-		for _, member := range members {
-			var node open_im_sdk.GroupMemberFullInfo
-			utils.CopyStructFields(&node, member)
-			resp.Members = append(resp.Members, &node)
-		}
+	if group.GroupType == constant.SuperGroup {
+		return nil, constant.ErrArgs.Wrap("unsupported super group")
 	}
+	members, err := s.GroupInterface.GetGroupMemberList(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		return DbToPbGroupMembersCMSResp(e)
+	})
 	return resp, nil
 }
 
@@ -397,11 +390,9 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	if err != nil {
 		return nil, err
 	}
-	for _, member := range members {
-		var info open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(&info, &member)
-		resp.Members = append(resp.Members, &info)
-	}
+	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		return DbToPbGroupMembersCMSResp(e)
+	})
 	return resp, nil
 }
 
@@ -478,12 +469,9 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	if err != nil {
 		return nil, err
 	}
-	for _, member := range members {
-		var memberNode open_im_sdk.GroupMemberFullInfo
-		utils.CopyStructFields(&memberNode, member)
-		memberNode.JoinTime = member.JoinTime.UnixMilli()
-		resp.Members = append(resp.Members, &memberNode)
-	}
+	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		return DbToPbGroupMembersCMSResp(e)
+	})
 	return resp, nil
 }
 
@@ -531,13 +519,9 @@ func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.
 	if err != nil {
 		return nil, err
 	}
-	for _, gr := range groupRequests {
-		groupRequest := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}}
-		utils.CopyStructFields(&groupRequest, gr)
-		groupRequest.UserInfo = userMap[gr.UserID]
-		groupRequest.GroupInfo = DbToPbGroupInfo(groupMap[gr.GroupID], groupOwnerUserIDMap[gr.GroupID], uint32(groupMemberNumMap[gr.GroupID]))
-		resp.GroupRequests = append(resp.GroupRequests, &groupRequest)
-	}
+	resp.GroupRequests = utils.Slice(groupRequests, func(e *relation2.GroupRequestModel) *open_im_sdk.GroupRequest {
+		return DbToPbGroupRequest(e, userMap[e.UserID], DbToPbGroupInfo(groupMap[e.GroupID], groupOwnerUserIDMap[e.GroupID], uint32(groupMemberNumMap[e.GroupID])))
+	})
 	return resp, nil
 }
 
@@ -646,16 +630,20 @@ func (s *groupServer) JoinGroup(ctx context.Context, req *pbGroup.JoinGroupReq) 
 		if group.GroupType == constant.SuperGroup {
 			return nil, constant.ErrGroupTypeNotSupport.Wrap()
 		}
-		us, err := relation.GetUserByUserID(tracelog.GetOpUserID(ctx))
+		user, err := relation.GetUserByUserID(tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
-		groupMember := relation2.GroupMemberModel{GroupID: req.GroupID, RoleLevel: constant.GroupOrdinaryUsers, OperatorUserID: tracelog.GetOpUserID(ctx)}
-		utils.CopyStructFields(&groupMember, us)
-		if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), &groupMember, group.Ex); err != nil {
+		groupMember := PbToDbGroupMember(user)
+		groupMember.GroupID = group.GroupID
+		groupMember.RoleLevel = constant.GroupOrdinaryUsers
+		groupMember.OperatorUserID = tracelog.GetOpUserID(ctx)
+		groupMember.JoinSource = constant.JoinByInvitation
+		groupMember.InviterUserID = tracelog.GetOpUserID(ctx)
+		if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), groupMember, group.Ex); err != nil {
 			return nil, err
 		}
-		if err := s.GroupInterface.CreateGroupMember(ctx, []*relation2.GroupMemberModel{&groupMember}); err != nil {
+		if err := s.GroupInterface.CreateGroupMember(ctx, []*relation2.GroupMemberModel{groupMember}); err != nil {
 			return nil, err
 		}
 		chat.MemberEnterDirectlyNotification(req.GroupID, tracelog.GetOpUserID(ctx), tracelog.GetOperationID(ctx))
