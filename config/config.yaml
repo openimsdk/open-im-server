@@ -115,11 +115,11 @@ sdk:
 #对象存储服务，以下配置二选一，目前支持两种，腾讯云和minio，二者配置好其中一种即可（如果使用minio参考https://doc.rentsoft.cn/#/qa/minio搭建minio服务器）
 credential: #腾讯cos，发送图片、视频、文件时需要，请自行申请后替换，必须修改
   tencent:
-    appID: 1302656840
-    region: ap-chengdu
-    bucket: echat-1302656840
-    secretID: AKIDGNYVChzIQinu7QEgtNp0hnNgqcV8vZTC1
-    secretKey: kz15vW83qM6dBUWIq681eBZA0c0vlIbe1
+    appID:  
+    region:  
+    bucket:  
+    secretID:  
+    secretKey:  
   minio: #MinIO 发送图片、视频、文件时需要，请自行申请后替换，必须修改。 客户端初始化InitSDK，中 object_storage参数为minio
     bucket: openim # 存储内容桶
     appBucket: app # 存储app的桶
@@ -132,24 +132,24 @@ credential: #腾讯cos，发送图片、视频、文件时需要，请自行申�
     storageTime: 50 #文件在minio中保存的时间
     isDistributedMod: false # 是否分布式多硬盘部署 默认docker-compose中为false
   ali: # ali oss
-    regionID: "oss-cn-beijing"
+    regionID:  
     accessKeyID: ""
     accessKeySecret: ""
-    stsEndpoint: "sts.cn-beijing.aliyun.com"
-    ossEndpoint: "oss-cn-beijing.aliyuncs.com"
-    bucket: "bucket1"
-    finalHost: "http://bucket1.oss-cn-beijing.aliyuncs.com"
+    stsEndpoint:  
+    ossEndpoint: 
+    bucket: 
+    finalHost:  
     stsDurationSeconds: 3600
     OssRoleArn: "acs:ram::xxx:role/xxx"
   aws:
-    accessKeyID: 1                            #AssumeRole用户关联的accessKeyID
-    accessKeySecret: 2     #AssumeRole用户关联的accessKeySecrect
-    region: ap-southeast-1                                        #分区
-    bucket: ouyang                                                #桶
-    finalHost:  ouyang.s3.ap-southeast-1.amazonaws.com            #对外Host
-    roleArn: arn:aws:iam::192209831083:role/AWS_S3_FOR_OUYANG     #RoleArn
-    externalId: AssumeRoleExtend                                  #角色扩展Id
-    roleSessionName: Required-AWS-ID-OPENIM                       #角色SESSION名称
+    accessKeyID:                            #AssumeRole用户关联的accessKeyID
+    accessKeySecret:                        #AssumeRole用户关联的accessKeySecrect
+    region:                                 #分区
+    bucket:                                 #桶
+    finalHost:                              #对外Host
+    roleArn:                                #RoleArn
+    externalId:                             #角色扩展Id
+    roleSessionName:                        #角色SESSION名称
 
 
 rpcport: #rpc服务端口 默认即可
@@ -216,17 +216,17 @@ longconnsvr:
 push:
   tpns: #腾讯推送，暂未测试 暂不要使用
     ios:
-      accessID: 1600018281
-      secretKey: 3cd68a77a95b89e5089a1aca523f318f
+      accessID:  
+      secretKey:  
     android:
       accessID: 111
       secretKey: 111
     enable: false # true or false (bool)
   jpns: #极光推送 在极光后台申请后，修改以下四项，必须修改
-    appKey: cf47465a368f24c659608e7e
-    masterSecret: 02204efe3f3832947a236ee5
-    pushUrl: "https://api.jpush.cn/v3/push"
-    pushIntent: "intent:#Intent;component=io.openim.app.enterprisechat/io.openim.app.enterprisechat.MainActivity;end"
+    appKey:  
+    masterSecret:  
+    pushUrl:  
+    pushIntent:  
     enable: false # true or false (bool)
   getui:  #个推推送
     pushUrl: 
@@ -237,13 +237,13 @@ push:
     channelID: ""
     channelName: ""
   fcm:  #firebase cloud message 消息推送
-    serviceAccount: "openim-5c6c0-firebase-adminsdk-ppwol-8765884a78.json" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    serviceAccount:  #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
     enable: false
   mob:  #袤博推送
-    appKey: "3377f689a25" #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
-    pushUrl: "https://api.push.mob.com/v3/push/createPush"
-    scheme: "dianzhijiaunilinks://dianzhijia.com?page=rent"
-    appSecret: "77b4e20e94db3a776b87d8693be23e"
+    appKey:  #帐号文件，此处需要改修配置，并且这个文件放在 config目录下
+    pushUrl:  
+    scheme:  
+    appSecret:  
     enable: false
 
 
@@ -765,18 +765,18 @@ demo:
   #demo对外服务端口，默认即可，需要开放此端口或做nginx转发
   openImDemoPort: [ 10004 ]
   alismsverify: #阿里云短信配置，在阿里云申请成功后修改以下四项，enable为true则必须修改，阿里云为默认短信验证方式
-    accessKeyId: LTAI5tJPkn4HuuePdiLdGqe7
-    accessKeySecret: 4n9OJ7ZCVN1U6KeHDAtOyNeVZcjOuV
-    signName: 托云信息技术
-    verificationCodeTemplateCode: SMS_226810164
+    accessKeyId:  
+    accessKeySecret:  
+    signName:  
+    verificationCodeTemplateCode:  
     enable: false
   tencentsms: #腾讯云短信配置，在腾讯云申请成功后，修改以下选项，enable为true则必须修改
-    appID:  2400000648
-    region: "ap-singapore"
-    secretID: IKIDra4JPGsFMDwQedMq42lESQBgwwgBQQAe
-    secretKey: HI6fz4uUotjJdiX6QUIrAE2buxlKdgU2
-    signName: ""
-    verificationCodeTemplateCode: 2902877
+    appID:   
+    region:  
+    secretID:  
+    secretKey:  
+    signName: 
+    verificationCodeTemplateCode:  
     enable: true
   superCode: 666666 #超级验证码，建议修改掉，收不到短信验证码时可以用此替代
   needInvitationCode: false
@@ -784,11 +784,11 @@ demo:
   codeTTL: 60
   useSuperCode: true
   mail: #仅支持qq邮箱，具体操作参考 https://service.mail.qq.com/cgi-bin/help?subtype=1&id=28&no=1001256 必须修改
-    title: "openIM"
-    senderMail: "765567899@qq.com"
-    senderAuthorizationCode: "gxyausfoevlzbfag"
-    smtpAddr: "smtp.qq.com"
-    smtpPort: 25   #需开放此端口 出口方向
+    title:  
+    senderMail:  
+    senderAuthorizationCode: 
+    smtpAddr:  
+    smtpPort:     #需开放此端口 出口方向
   testDepartMentID: 001
   imAPIURL: http://127.0.0.1:10002
   onboardProcess: false # 是否开启注册流程
