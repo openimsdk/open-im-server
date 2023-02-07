@@ -190,24 +190,24 @@ func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupR
 	var groupMembers []*relation2.GroupMemberModel
 	utils.CopyStructFields(&group, req.GroupInfo)
 	group.GroupID = genGroupID(ctx, req.GroupInfo.GroupID)
+	joinGroup := func(userID string, roleLevel int32) error {
+		user := userMap[userID]
+		groupMember := &relation2.GroupMemberModel{GroupID: group.GroupID, RoleLevel: roleLevel, OperatorUserID: tracelog.GetOpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tracelog.GetOpUserID(ctx)}
+		utils.CopyStructFields(&groupMember, user)
+		if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), groupMember, group.Ex); err != nil {
+			return err
+		}
+		groupMembers = append(groupMembers, groupMember)
+		return nil
+	}
+	if err := joinGroup(req.OwnerUserID, constant.GroupOwner); err != nil {
+		return nil, err
+	}
 	if req.GroupInfo.GroupType == constant.SuperGroup {
 		if err := s.GroupInterface.CreateSuperGroup(ctx, group.GroupID, userIDs); err != nil {
 			return nil, err
 		}
 	} else {
-		joinGroup := func(userID string, roleLevel int32) error {
-			user := userMap[userID]
-			groupMember := &relation2.GroupMemberModel{GroupID: group.GroupID, RoleLevel: roleLevel, OperatorUserID: tracelog.GetOpUserID(ctx), JoinSource: constant.JoinByInvitation, InviterUserID: tracelog.GetOpUserID(ctx)}
-			utils.CopyStructFields(&groupMember, user)
-			if err := CallbackBeforeMemberJoinGroup(ctx, tracelog.GetOperationID(ctx), groupMember, group.Ex); err != nil {
-				return err
-			}
-			groupMembers = append(groupMembers, groupMember)
-			return nil
-		}
-		if err := joinGroup(req.OwnerUserID, constant.GroupOwner); err != nil {
-			return nil, err
-		}
 		for _, userID := range req.AdminUserIDs {
 			if err := joinGroup(userID, constant.GroupAdmin); err != nil {
 				return nil, err

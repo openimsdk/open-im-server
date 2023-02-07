@@ -53,6 +53,8 @@ type GroupInterface interface {
 	DelSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)
+	GetJoinSuperGroupByID(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error)
+	GetSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 }
 
 var _ GroupInterface = (*GroupController)(nil)
