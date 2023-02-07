@@ -181,8 +181,7 @@ message GetGroupMembersCMSReq {
 
 message GetGroupMembersCMSResp {
    repeated server_api_params.GroupMemberFullInfo members = 1;
-   server_api_params.ResponsePagination pagination = 2;
-   int32 memberNums = 3;
+   int32 memberNums = 2;
 }
 
 message DismissGroupReq{
