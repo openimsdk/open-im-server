@@ -3158,7 +3158,7 @@ func _Group_GetGroupMemberList_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/GetGroupMemberList",
+		FullMethod: "/group.group/FindGroupMemberAll",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GroupServer).GetGroupMemberList(ctx, req.(*GetGroupMemberListReq))
@@ -3212,7 +3212,7 @@ func _Group_GetJoinedGroupList_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/group.group/GetJoinedGroupList",
+		FullMethod: "/group.group/FindJoinedGroup",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GroupServer).GetJoinedGroupList(ctx, req.(*GetJoinedGroupListReq))

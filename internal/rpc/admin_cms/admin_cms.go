@@ -207,7 +207,7 @@ func (s *adminCMSServer) GetChatLogs(ctx context.Context, req *pbAdminCMS.GetCha
 			pbChatLog.SenderNickname = recvUser.Nickname
 
 		case constant.GroupChatType, constant.SuperGroupChatType:
-			group, err := s.groupInterface.TakeGroupByID(ctx, chatLog.RecvID)
+			group, err := s.groupInterface.TakeGroup(ctx, chatLog.RecvID)
 			if err != nil {
 				return nil, err
 			}

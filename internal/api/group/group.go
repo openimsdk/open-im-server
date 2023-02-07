@@ -72,7 +72,7 @@ func KickGroupMember(c *gin.Context) {
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.KickGroupMember(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMemberList failed ", err.Error(), req.String())
+		log.NewError(req.OperationID, "FindGroupMemberAll failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
@@ -136,7 +136,7 @@ func GetGroupMembersInfo(c *gin.Context) {
 
 	RpcResp, err := client.GetGroupMembersInfo(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMemberList failed ", err.Error(), req.String())
+		log.NewError(req.OperationID, "FindGroupMemberAll failed ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
@@ -167,7 +167,7 @@ func GetGroupMemberList(c *gin.Context) {
 		return
 	}
 
-	log.NewInfo(req.OperationID, "GetGroupMemberList args ", req.String())
+	log.NewInfo(req.OperationID, "FindGroupMemberAll args ", req.String())
 
 	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 	if etcdConn == nil {
@@ -180,7 +180,7 @@ func GetGroupMemberList(c *gin.Context) {
 
 	RpcResp, err := client.GetGroupMemberList(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "GetGroupMemberList failed, ", err.Error(), req.String())
+		log.NewError(req.OperationID, "FindGroupMemberAll failed, ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
@@ -188,7 +188,7 @@ func GetGroupMemberList(c *gin.Context) {
 	memberListResp := api.GetGroupMemberListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, MemberList: RpcResp.MemberList, NextSeq: RpcResp.NextSeq}
 	memberListResp.Data = jsonData.JsonDataList(memberListResp.MemberList)
 
-	log.NewInfo(req.OperationID, "GetGroupMemberList api return ", memberListResp)
+	log.NewInfo(req.OperationID, "FindGroupMemberAll api return ", memberListResp)
 	c.JSON(http.StatusOK, memberListResp)
 }
 
@@ -280,7 +280,7 @@ func GetJoinedGroupList(c *gin.Context) {
 		return
 	}
 
-	log.NewInfo(req.OperationID, "GetJoinedGroupList args ", req.String())
+	log.NewInfo(req.OperationID, "FindJoinedGroup args ", req.String())
 
 	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImGroupName, req.OperationID)
 	if etcdConn == nil {
@@ -292,14 +292,14 @@ func GetJoinedGroupList(c *gin.Context) {
 	client := rpc.NewGroupClient(etcdConn)
 	RpcResp, err := client.GetJoinedGroupList(context.Background(), req)
 	if err != nil {
-		log.NewError(req.OperationID, "GetJoinedGroupList failed  ", err.Error(), req.String())
+		log.NewError(req.OperationID, "FindJoinedGroup failed  ", err.Error(), req.String())
 		c.JSON(http.StatusInternalServerError, gin.H{"errCode": 500, "errMsg": err.Error()})
 		return
 	}
 
 	GroupListResp := api.GetJoinedGroupListResp{CommResp: api.CommResp{ErrCode: RpcResp.CommonResp.ErrCode, ErrMsg: RpcResp.CommonResp.ErrMsg}, GroupInfoList: RpcResp.GroupList}
 	GroupListResp.Data = jsonData.JsonDataList(GroupListResp.GroupInfoList)
-	log.NewInfo(req.OperationID, "GetJoinedGroupList api return ", GroupListResp)
+	log.NewInfo(req.OperationID, "FindJoinedGroup api return ", GroupListResp)
 	c.JSON(http.StatusOK, GroupListResp)
 }
 

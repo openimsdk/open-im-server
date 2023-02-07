@@ -11,7 +11,7 @@ import (
 
 func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.GetJoinedSuperGroupListReq) (*pbGroup.GetJoinedSuperGroupListResp, error) {
 	resp := &pbGroup.GetJoinedSuperGroupListResp{}
-	total, groupIDs, err := s.GroupInterface.GetJoinSuperGroupByID(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, groupIDs, err := s.GroupInterface.FindJoinSuperGroup(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -19,15 +19,15 @@ func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.
 	if len(groupIDs) == 0 {
 		return resp, nil
 	}
-	numMap, err := s.GroupInterface.GetSuperGroupMemberNum(ctx, groupIDs)
+	numMap, err := s.GroupInterface.MapSuperGroupMemberNum(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
-	ownerIdMap, err := s.GroupInterface.GetGroupOwnerUserID(ctx, groupIDs)
+	ownerIdMap, err := s.GroupInterface.MapGroupOwnerUserID(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
-	groups, err := s.GroupInterface.FindGroupsByID(ctx, groupIDs)
+	groups, err := s.GroupInterface.FindGroup(ctx, groupIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -45,15 +45,15 @@ func (s *groupServer) GetSuperGroupsInfo(ctx context.Context, req *pbGroup.GetSu
 	if len(req.GroupIDs) == 0 {
 		return nil, constant.ErrArgs.Wrap("groupIDs empty")
 	}
-	groups, err := s.GroupInterface.FindGroupsByID(ctx, req.GroupIDs)
+	groups, err := s.GroupInterface.FindGroup(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
-	numMap, err := s.GroupInterface.GetSuperGroupMemberNum(ctx, req.GroupIDs)
+	numMap, err := s.GroupInterface.MapSuperGroupMemberNum(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
-	ownerIdMap, err := s.GroupInterface.GetGroupOwnerUserID(ctx, req.GroupIDs)
+	ownerIdMap, err := s.GroupInterface.MapGroupOwnerUserID(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}

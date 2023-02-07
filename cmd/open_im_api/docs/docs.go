@@ -1375,7 +1375,7 @@ const docTemplate = `{
                     "群组相关"
                 ],
                 "summary": "获取用户加入群列表",
-                "operationId": "GetJoinedGroupList",
+                "operationId": "FindJoinedGroup",
                 "parameters": [
                     {
                         "type": "string",

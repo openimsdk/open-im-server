@@ -15,46 +15,44 @@ import (
 )
 
 type GroupInterface interface {
-	FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error)
-	FindSearchGroup(ctx context.Context, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error)
-	CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupMemberModel) error
-	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
-	TakeGroupByID(ctx context.Context, groupID string) (group *relation2.GroupModel, err error)
-	TakeGroupMemberByID(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error)
-	GetJoinedGroupList(ctx context.Context, userID string) ([]*relation2.GroupModel, error)
-	GetGroupMemberList(ctx context.Context, groupID string) ([]*relation2.GroupMemberModel, error)
-	GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
-	GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupMemberModel, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
-	FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*relation2.GroupMemberModel, err error)
-	FindUserInGroup(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
-	DelGroupMember(ctx context.Context, groupID string, userIDs []string) error
-	GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
-	GetGroupHash(ctx context.Context, groupIDs []string) (map[string]uint64, error)
-	GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
-	GetGroupOwnerUser(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error)
-	FindGroupOwnerUser(ctx context.Context, groupID []string) ([]*relation2.GroupMemberModel, error)
-	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string) error
-	FindSearchGroupMember(ctx context.Context, groupID, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
-	GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation2.GroupRequestModel, error)
+	// group
+	FindGroup(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error)
+	SearchGroup(ctx context.Context, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error)
+	TakeGroup(ctx context.Context, groupID string) (group *relation2.GroupModel, err error)
+	FindJoinedGroup(ctx context.Context, userID string, pageNumber, showNumber int32) ([]*relation2.GroupModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
+	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
+	// groupMember
+	CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupMemberModel) error
+	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error)
+	FindGroupMember(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
+	FindGroupMemberAll(ctx context.Context, groupID string) ([]*relation2.GroupMemberModel, error)
+	FindGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupMemberModel, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
+	SearchGroupMember(ctx context.Context, groupID, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
+	FindGroupMemberByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
+	TakeGroupOwner(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error)
+	FindGroupOwnerUser(ctx context.Context, groupID []string) ([]*relation2.GroupMemberModel, error)
+	CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupMemberModel) error
+	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error
+	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
+	MapGroupHash(ctx context.Context, groupIDs []string) (map[string]uint64, error)
+	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
+	MapGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
+	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string) error // 转让群
 	UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error
 
-	CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupMemberModel) error
 	CreateGroupRequest(ctx context.Context, requests []*relation2.GroupRequestModel) error
-	DismissGroup(ctx context.Context, groupID string) error // 设置状态，并清楚群成员
-
-	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error
+	GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation2.GroupRequestModel, error) // ?
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error)
 	FindUserGroupRequest(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error)
-
-	//mongo
+	// superGroup
+	TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
 	DeleteSuperGroup(ctx context.Context, groupID string) error
-	DelSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
+	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
-	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)
-	GetJoinSuperGroupByID(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error)
-	GetSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
+	FindJoinSuperGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error)
+	MapSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 }
 
 var _ GroupInterface = (*GroupController)(nil)
@@ -63,82 +61,122 @@ type GroupController struct {
 	database GroupDataBaseInterface
 }
 
-func (g *GroupController) TakeGroupMemberByID(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupModel, err error) {
+func (g *GroupController) FindGroup(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*relation2.GroupModel, err error) {
+func (g *GroupController) SearchGroup(ctx context.Context, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) DelGroupMember(ctx context.Context, groupID string, userIDs []string) error {
+func (g *GroupController) TakeGroup(ctx context.Context, groupID string) (group *relation2.GroupModel, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation2.GroupRequestModel, error) {
-	/*
-		var groupRequestList []db.GroupRequest
-			memberList, err := GetGroupMemberListByUserID(userID)
-			if err != nil {
-				return nil, err
-			}
-			for _, v := range memberList {
-				if v.RoleLevel > constant.GroupOrdinaryUsers {
-					list, err := GetGroupRequestByGroupID(v.GroupID)
-					if err != nil {
-						//		fmt.Println("111 GetGroupRequestByGroupID failed ", err.Error())
-						continue
-					}
-					//	fmt.Println("222 GetGroupRequestByGroupID ok ", list)
-					groupRequestList = append(groupRequestList, list...)
-					//	fmt.Println("333 GetGroupRequestByGroupID ok ", groupRequestList)
-				}
-			}
-			return groupRequestList, nil
-	*/
+func (g *GroupController) FindJoinedGroup(ctx context.Context, userID string, pageNumber, showNumber int32) ([]*relation2.GroupModel, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) DelSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
+func (g *GroupController) UpdateGroup(ctx context.Context, groupID string, data map[string]any) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) GetJoinedGroupList(ctx context.Context, userID string) ([]*relation2.GroupModel, error) {
+func (g *GroupController) DismissGroup(ctx context.Context, groupID string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) GetGroupMemberList(ctx context.Context, groupID string) ([]*relation2.GroupModel, error) {
+func (g *GroupController) CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupMemberModel) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupModel, error) {
+func (g *GroupController) TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupModel, error) {
+func (g *GroupController) FindGroupMember(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error) {
+func (g *GroupController) FindGroupMemberAll(ctx context.Context, groupID string) ([]*relation2.GroupMemberModel, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error) {
+func (g *GroupController) FindGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupMemberModel, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (g *GroupController) CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupModel) error {
+func (g *GroupController) FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*relation2.GroupMemberModel, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) SearchGroupMember(ctx context.Context, groupID, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) FindGroupMemberByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) TakeGroupOwner(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) FindGroupOwnerUser(ctx context.Context, groupID []string) ([]*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupMemberModel) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) MapGroupHash(ctx context.Context, groupIDs []string) (map[string]uint64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) MapGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error {
 	//TODO implement me
 	panic("implement me")
 }
@@ -148,48 +186,98 @@ func (g *GroupController) CreateGroupRequest(ctx context.Context, requests []*re
 	panic("implement me")
 }
 
+func (g *GroupController) GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation2.GroupRequestModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) FindUserGroupRequest(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) DeleteSuperGroup(ctx context.Context, groupID string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupController) DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (g *GroupController) AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error {
 	//TODO implement me
 	panic("implement me")
 }
 
-func NewGroupController(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.Client) GroupInterface {
-	groupController := &GroupController{database: newGroupDatabase(db, rdb, mgoClient)}
-	return groupController
+func (g *GroupController) FindJoinSuperGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (g *GroupController) FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error) {
-	return g.database.FindGroupsByID(ctx, groupIDs)
-}
-
-func (g *GroupController) CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupModel) error {
-	return g.database.CreateGroup(ctx, groups, groupMember)
-}
-
-func (g *GroupController) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
-	return g.database.DeleteGroupByIDs(ctx, groupIDs)
-}
-
-func (g *GroupController) TakeGroupByID(ctx context.Context, groupID string) (group *relation2.GroupModel, err error) {
-	return g.database.TakeGroupByID(ctx, groupID)
-}
-
-func (g *GroupController) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
-	return g.database.GetSuperGroupByID(ctx, groupID)
-}
-
-func (g *GroupController) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {
-	return g.database.CreateSuperGroup(ctx, groupID, initMemberIDList)
+func (g *GroupController) MapSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 type GroupDataBaseInterface interface {
-	FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error)
-	CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupModel) error
-	DeleteGroupByIDs(ctx context.Context, groupIDs []string) error
-	TakeGroupByID(ctx context.Context, groupID string) (group *relation2.GroupModel, err error)
-	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error)
+	// group
+	FindGroup(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error)
+	SearchGroup(ctx context.Context, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error)
+	TakeGroup(ctx context.Context, groupID string) (group *relation2.GroupModel, err error)
+	FindJoinedGroup(ctx context.Context, userID string, pageNumber, showNumber int32) ([]*relation2.GroupModel, error)
+	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
+	DismissGroup(ctx context.Context, groupID string) error // 解散群，并删除群成员
+	// groupMember
+	CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupMemberModel) error
+	TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error)
+	FindGroupMember(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
+	FindGroupMemberAll(ctx context.Context, groupID string) ([]*relation2.GroupMemberModel, error)
+	FindGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupMemberModel, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
+	SearchGroupMember(ctx context.Context, groupID, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
+	FindGroupMemberByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
+	TakeGroupOwner(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error)
+	FindGroupOwnerUser(ctx context.Context, groupID []string) ([]*relation2.GroupMemberModel, error)
+	CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupMemberModel) error
+	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error
+	DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error
+	MapGroupHash(ctx context.Context, groupIDs []string) (map[string]uint64, error)
+	MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
+	MapGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
+	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string) error // 转让群
+	UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error
+
+	CreateGroupRequest(ctx context.Context, requests []*relation2.GroupRequestModel) error
+	GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation2.GroupRequestModel, error) // ?
+	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error)
+	FindUserGroupRequest(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error)
+	// superGroup
+	TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
+	DeleteSuperGroup(ctx context.Context, groupID string) error
+	DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
+	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
+	FindJoinSuperGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error)
+	MapSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error)
 }
+
+var _ *GroupDataBase = (GroupDataBaseInterface)(nil)
 
 type GroupDataBase struct {
 	groupDB        *relation.GroupGorm
@@ -223,82 +311,257 @@ func newGroupDatabase(db *gorm.DB, rdb redis.UniversalClient, mgoClient *mongo.C
 	return database
 }
 
-func (g *GroupDataBase) FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error) {
-	return g.cache.GetGroupsInfo(ctx, groupIDs)
+//func (g *GroupDataBase) FindGroupsByID(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error) {
+//	return g.cache.GetGroupsInfo(ctx, groupIDs)
+//}
+//
+//func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMembers []*relation2.GroupMemberModel) error {
+//	return g.db.Transaction(func(tx *gorm.DB) error {
+//		if len(groups) > 0 {
+//			if err := g.groupDB.Create(ctx, groups, tx); err != nil {
+//				return err
+//			}
+//		}
+//		if len(groupMembers) > 0 {
+//			if err := g.groupMemberDB.Create(ctx, groupMembers, tx); err != nil {
+//				return err
+//			}
+//		}
+//		return nil
+//	})
+//}
+//
+//func (g *GroupDataBase) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
+//	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
+//		if err := g.groupDB.Delete(ctx, groupIDs, tx); err != nil {
+//			return err
+//		}
+//		if err := g.cache.DelGroupsInfo(ctx, groupIDs); err != nil {
+//			return err
+//		}
+//		return nil
+//	})
+//}
+//
+//func (g *GroupDataBase) TakeGroupByID(ctx context.Context, groupID string) (group *relation2.GroupModel, err error) {
+//	return g.cache.GetGroupInfo(ctx, groupID)
+//}
+//
+//func (g *GroupDataBase) Update(ctx context.Context, groups []*relation2.GroupModel) error {
+//	return g.db.Transaction(func(tx *gorm.DB) error {
+//		if err := g.groupDB.Update(ctx, groups, tx); err != nil {
+//			return err
+//		}
+//		var groupIDs []string
+//		for _, group := range groups {
+//			groupIDs = append(groupIDs, group.GroupID)
+//		}
+//		if err := g.cache.DelGroupsInfo(ctx, groupIDs); err != nil {
+//			return err
+//		}
+//		return nil
+//	})
+//}
+//
+//func (g *GroupDataBase) GetJoinedGroupList(ctx context.Context, userID string) ([]*relation2.GroupModel, error) {
+//
+//	return nil, nil
+//}
+//
+//func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {
+//	sess, err := g.mongoDB.MgoClient.StartSession()
+//	if err != nil {
+//		return err
+//	}
+//	defer sess.EndSession(ctx)
+//	sCtx := mongo.NewSessionContext(ctx, sess)
+//	if err = g.mongoDB.CreateSuperGroup(sCtx, groupID, initMemberIDList); err != nil {
+//		_ = sess.AbortTransaction(ctx)
+//		return err
+//	}
+//
+//	if err = g.cache.BatchDelJoinedSuperGroupIDs(ctx, initMemberIDList); err != nil {
+//		_ = sess.AbortTransaction(ctx)
+//		return err
+//	}
+//	return sess.CommitTransaction(ctx)
+//}
+//
+//func (g *GroupDataBase) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
+//	return g.mongoDB.GetSuperGroup(ctx, groupID)
+//}
+
+func (g *GroupDataBase) FindGroup(ctx context.Context, groupIDs []string) (groups []*relation2.GroupModel, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMembers []*relation2.GroupMemberModel) error {
-	return g.db.Transaction(func(tx *gorm.DB) error {
-		if len(groups) > 0 {
-			if err := g.groupDB.Create(ctx, groups, tx); err != nil {
-				return err
-			}
-		}
-		if len(groupMembers) > 0 {
-			if err := g.groupMemberDB.Create(ctx, groupMembers, tx); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+func (g *GroupDataBase) SearchGroup(ctx context.Context, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupModel, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (g *GroupDataBase) DeleteGroupByIDs(ctx context.Context, groupIDs []string) error {
-	return g.groupDB.DB.Transaction(func(tx *gorm.DB) error {
-		if err := g.groupDB.Delete(ctx, groupIDs, tx); err != nil {
-			return err
-		}
-		if err := g.cache.DelGroupsInfo(ctx, groupIDs); err != nil {
-			return err
-		}
-		return nil
-	})
+func (g *GroupDataBase) TakeGroup(ctx context.Context, groupID string) (group *relation2.GroupModel, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (g *GroupDataBase) TakeGroupByID(ctx context.Context, groupID string) (group *relation2.GroupModel, err error) {
-	return g.cache.GetGroupInfo(ctx, groupID)
+func (g *GroupDataBase) FindJoinedGroup(ctx context.Context, userID string, pageNumber, showNumber int32) ([]*relation2.GroupModel, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (g *GroupDataBase) Update(ctx context.Context, groups []*relation2.GroupModel) error {
-	return g.db.Transaction(func(tx *gorm.DB) error {
-		if err := g.groupDB.Update(ctx, groups, tx); err != nil {
-			return err
-		}
-		var groupIDs []string
-		for _, group := range groups {
-			groupIDs = append(groupIDs, group.GroupID)
-		}
-		if err := g.cache.DelGroupsInfo(ctx, groupIDs); err != nil {
-			return err
-		}
-		return nil
-	})
+func (g *GroupDataBase) UpdateGroup(ctx context.Context, groupID string, data map[string]any) error {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (g *GroupDataBase) GetJoinedGroupList(ctx context.Context, userID string) ([]*relation2.GroupModel, error) {
+func (g *GroupDataBase) DismissGroup(ctx context.Context, groupID string) error {
+	//TODO implement me
+	panic("implement me")
+}
 
-	return nil, nil
+func (g *GroupDataBase) CreateGroup(ctx context.Context, groups []*relation2.GroupModel, groupMember []*relation2.GroupMemberModel) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) TakeGroupMember(ctx context.Context, groupID string, userID string) (groupMember *relation2.GroupMemberModel, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) FindGroupMember(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) FindGroupMemberAll(ctx context.Context, groupID string) ([]*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) FindGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*relation2.GroupMemberModel, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) SearchGroupMember(ctx context.Context, groupID, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) FindGroupMemberByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) TakeGroupOwner(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) FindGroupOwnerUser(ctx context.Context, groupID []string) ([]*relation2.GroupMemberModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupMemberModel) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) DeleteGroupMember(ctx context.Context, groupID string, userIDs []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) MapGroupHash(ctx context.Context, groupIDs []string) (map[string]uint64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) MapGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) MapGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) CreateGroupRequest(ctx context.Context, requests []*relation2.GroupRequestModel) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation2.GroupRequestModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) FindUserGroupRequest(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) TakeSuperGroup(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (g *GroupDataBase) CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error {
-	sess, err := g.mongoDB.MgoClient.StartSession()
-	if err != nil {
-		return err
-	}
-	defer sess.EndSession(ctx)
-	sCtx := mongo.NewSessionContext(ctx, sess)
-	if err = g.mongoDB.CreateSuperGroup(sCtx, groupID, initMemberIDList); err != nil {
-		_ = sess.AbortTransaction(ctx)
-		return err
-	}
-
-	if err = g.cache.BatchDelJoinedSuperGroupIDs(ctx, initMemberIDList); err != nil {
-		_ = sess.AbortTransaction(ctx)
-		return err
-	}
-	return sess.CommitTransaction(ctx)
+	//TODO implement me
+	panic("implement me")
 }
 
-func (g *GroupDataBase) GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation.SuperGroup, err error) {
-	return g.mongoDB.GetSuperGroup(ctx, groupID)
+func (g *GroupDataBase) DeleteSuperGroup(ctx context.Context, groupID string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) DeleteSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) FindJoinSuperGroup(ctx context.Context, userID string, pageNumber, showNumber int32) (total int32, groupIDs []string, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (g *GroupDataBase) MapSuperGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]uint32, error) {
+	//TODO implement me
+	panic("implement me")
 }

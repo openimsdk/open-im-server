@@ -37,7 +37,7 @@ package relation
 //
 //}
 //
-//func GetGroupMemberListByUserID(userID string) ([]GroupMember, error) {
+//func FindGroupMember(userID string) ([]GroupMember, error) {
 //	var groupMemberList []GroupMember
 //	err := DB.DB.MysqlDB.DefaultGormDB().Table("group_members").Where("user_id=?", userID).Find(&groupMemberList).Error
 //	if err != nil {
@@ -167,7 +167,7 @@ package relation
 //}
 //
 //func GetJoinedGroupIDListByUserID(userID string) ([]string, error) {
-//	memberList, err := GetGroupMemberListByUserID(userID)
+//	memberList, err := FindGroupMember(userID)
 //	if err != nil {
 //		return nil, err
 //	}

@@ -95,7 +95,7 @@ func (g *GroupMemberGorm) TakeOwnerInfo(ctx context.Context, groupID string, tx 
 //
 //}
 //
-//func GetGroupMemberListByUserID(userID string) ([]GroupMemberModel, error) {
+//func FindGroupMember(userID string) ([]GroupMemberModel, error) {
 //	var groupMemberList []GroupMemberModel
 //	err := GroupMemberDB.Table("group_members").Where("user_id=?", userID).Find(&groupMemberList).Error
 //	if err != nil {
@@ -237,7 +237,7 @@ func (g *GroupMemberGorm) TakeOwnerInfo(ctx context.Context, groupID string, tx 
 //}
 //
 //func GetJoinedGroupIDListByUserID(userID string) ([]string, error) {
-//	memberList, err := GetGroupMemberListByUserID(userID)
+//	memberList, err := FindGroupMember(userID)
 //	if err != nil {
 //		return nil, err
 //	}
