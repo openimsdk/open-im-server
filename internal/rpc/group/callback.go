@@ -4,7 +4,7 @@ import (
 	cbApi "Open_IM/pkg/callback_struct"
 	"Open_IM/pkg/common/config"
 	"Open_IM/pkg/common/constant"
-	relation "Open_IM/pkg/common/db/mysql"
+	"Open_IM/pkg/common/db/table/relation"
 	"Open_IM/pkg/common/http"
 	"Open_IM/pkg/common/log"
 	"Open_IM/pkg/common/tracelog"
@@ -77,7 +77,7 @@ func callbackBeforeCreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq)
 	return err
 }
 
-func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, groupMember *relation.GroupMember, groupEx string) (err error) {
+func CallbackBeforeMemberJoinGroup(ctx context.Context, operationID string, groupMember *relation.GroupMemberModel, groupEx string) (err error) {
 	defer func() {
 		tracelog.SetCtxInfo(ctx, utils.GetFuncName(1), err, "groupMember", *groupMember, "groupEx", groupEx)
 	}()

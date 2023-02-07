@@ -13,18 +13,22 @@ import (
 	"time"
 )
 
-const (
-	conversationKey                      = "CONVERSATION:"
-	conversationIDsKey                   = "CONVERSATION_IDS:"
-	recvMsgOptKey                        = "RECV_MSG_OPT:"
-	superGroupRecvMsgNotNotifyUserIDsKey = "SUPER_GROUP_RECV_MSG_NOT_NOTIFY_USER_IDS:"
-	conversationExpireTime               = time.Second * 60 * 60 * 12
-)
+type DBFun func() (string, error)
 
-type ConversationCache struct {
-	conversationDB *relation.ConversationGorm
-	expireTime     time.Duration
-	rcClient       *rockscache.Client
+type ConversationCache interface {
+	GetUserConversationIDListFromCache(userID string, fn DBFun) ([]string, error)
+	DelUserConversationIDListFromCache(userID string) error
+	GetConversationFromCache(ownerUserID, conversationID string, fn DBFun) (*table.ConversationModel, error)
+	GetConversationsFromCache(ownerUserID string, conversationIDList []string, fn DBFun) ([]*table.ConversationModel, error)
+	GetUserAllConversationList(ownerUserID string, fn DBFun) ([]*table.ConversationModel, error)
+	DelConversationFromCache(ownerUserID, conversationID string) error
+}
+type ConversationRedis struct {
+	rcClient *rockscache.Client
+}
+
+func NewConversationRedis(rcClient *rockscache.Client) *ConversationRedis {
+	return &ConversationRedis{rcClient: rcClient}
 }
 
 func NewConversationCache(rdb redis.UniversalClient, conversationDB *relation.ConversationGorm, options rockscache.Options) *ConversationCache {
