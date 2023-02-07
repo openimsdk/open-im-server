@@ -1,6 +1,8 @@
 package unrelation
 
 import (
+	commonPb "Open_IM/pkg/proto/sdk_ws"
+	"context"
 	"strconv"
 	"strings"
 )
@@ -50,4 +52,18 @@ func (e *ExtendMsgSet) SplitSourceIDAndGetIndex() int32 {
 	l := strings.Split(e.SourceID, ":")
 	index, _ := strconv.Atoi(l[len(l)-1])
 	return int32(index)
+}
+
+type GetAllExtendMsgSetOpts struct {
+	ExcludeExtendMsgs bool
+}
+
+type ExtendMsgSetInterface interface {
+	CreateExtendMsgSet(ctx context.Context, set *ExtendMsgSet) error
+	GetAllExtendMsgSet(ctx context.Context, ID string, opts *GetAllExtendMsgSetOpts) (sets []*ExtendMsgSet, err error)
+	GetExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, maxMsgUpdateTime int64) (*ExtendMsgSet, error)
+	InsertExtendMsg(ctx context.Context, sourceID string, sessionType int32, msg *ExtendMsg) error
+	InsertOrUpdateReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*commonPb.KeyValue) error
+	DeleteReactionExtendMsgSet(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, msgFirstModifyTime int64, reactionExtensionList map[string]*commonPb.KeyValue) error
+	GetExtendMsg(ctx context.Context, sourceID string, sessionType int32, clientMsgID string, maxMsgUpdateTime int64) (extendMsg *ExtendMsg, err error)
 }

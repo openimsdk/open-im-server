@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-// DistinctAny remove duplicate elements
+// DistinctAny 去重
 func DistinctAny[E any, K comparable](es []E, fn func(e E) K) []E {
 	v := make([]E, 0, len(es))
 	tmp := map[K]struct{}{}
@@ -20,14 +20,14 @@ func DistinctAny[E any, K comparable](es []E, fn func(e E) K) []E {
 	return v
 }
 
-// Distinct remove duplicate elements
+// Distinct 去重
 func Distinct[T comparable](ts []T) []T {
 	return DistinctAny(ts, func(t T) T {
 		return t
 	})
 }
 
-// Delete delete slice element, support negative number to delete the penultimate
+// Delete 删除切片元素, 支持负数删除倒数第几个
 func Delete[E any](es []E, index ...int) []E {
 	switch len(index) {
 	case 0:
@@ -59,7 +59,7 @@ func Delete[E any](es []E, index ...int) []E {
 	}
 }
 
-// DeleteAt delete slice element, support negative number to delete the penultimate
+// DeleteAt 删除切片元素, 支持负数删除倒数第几个
 func DeleteAt[E any](es *[]E, index ...int) []E {
 	v := Delete(*es, index...)
 	*es = v
@@ -67,7 +67,7 @@ func DeleteAt[E any](es *[]E, index ...int) []E {
 }
 
 // IndexAny get the index of the element
-func IndexAny[E any, K comparable](es []E, e E, fn func(e E) K) int {
+func IndexAny[E any, K comparable](e E, es []E, fn func(e E) K) int {
 	k := fn(e)
 	for i := 0; i < len(es); i++ {
 		if fn(es[i]) == k {
@@ -78,18 +78,18 @@ func IndexAny[E any, K comparable](es []E, e E, fn func(e E) K) int {
 }
 
 // IndexOf get the index of the element
-func IndexOf[E comparable](es []E, e E) int {
-	return IndexAny(es, e, func(t E) E {
+func IndexOf[E comparable](e E, es ...E) int {
+	return IndexAny(e, es, func(t E) E {
 		return t
 	})
 }
 
-// Contain include element or not
-func Contain[E comparable](es []E, e E) bool {
-	return IndexOf(es, e) >= 0
+// Contain 是否包含
+func Contain[E comparable](e E, es ...E) bool {
+	return IndexOf(e, es...) >= 0
 }
 
-// DuplicateAny judge whether it is repeated
+// DuplicateAny 是否有重复的
 func DuplicateAny[E any, K comparable](es []E, fn func(e E) K) bool {
 	t := make(map[K]struct{})
 	for _, e := range es {
@@ -102,14 +102,14 @@ func DuplicateAny[E any, K comparable](es []E, fn func(e E) K) bool {
 	return false
 }
 
-// Duplicate judge whether it is repeated
+// Duplicate 是否有重复的
 func Duplicate[E comparable](es []E) bool {
 	return DuplicateAny(es, func(e E) E {
 		return e
 	})
 }
 
-// SliceToMapOkAny slice to map
+// SliceToMapOkAny slice to map (自定义类型, 筛选)
 func SliceToMapOkAny[E any, K comparable, V any](es []E, fn func(e E) (K, V, bool)) map[K]V {
 	kv := make(map[K]V)
 	for i := 0; i < len(es); i++ {
@@ -121,7 +121,7 @@ func SliceToMapOkAny[E any, K comparable, V any](es []E, fn func(e E) (K, V, boo
 	return kv
 }
 
-// SliceToMapAny slice to map
+// SliceToMapAny slice to map (自定义类型)
 func SliceToMapAny[E any, K comparable, V any](es []E, fn func(e E) (K, V)) map[K]V {
 	return SliceToMapOkAny(es, func(e E) (K, V, bool) {
 		k, v := fn(e)
@@ -142,6 +142,15 @@ func SliceSetAny[E any, K comparable](es []E, fn func(e E) K) map[K]struct{} {
 	return SliceToMapAny(es, func(e E) (K, struct{}) {
 		return fn(e), struct{}{}
 	})
+}
+
+// Slice 批量转换切片类型
+func Slice[E any, T any](es []E, fn func(e E) T) []T {
+	v := make([]T, len(es))
+	for i := 0; i < len(es); i++ {
+		v = append(v, fn(es[i]))
+	}
+	return v
 }
 
 // SliceSet slice to map[E]struct{}
@@ -182,7 +191,7 @@ func Max[E Ordered](e ...E) E {
 	return v
 }
 
-// BothExistAny get elements common to multiple slices
+// BothExistAny 获取切片中共同存在的元素(交集)
 func BothExistAny[E any, K comparable](es [][]E, fn func(e E) K) []E {
 	if len(es) == 0 {
 		return []E{}
@@ -225,43 +234,40 @@ func BothExistAny[E any, K comparable](es [][]E, fn func(e E) K) []E {
 	return v
 }
 
-// BothExist get elements common to multiple slices
+// BothExist 获取切片中共同存在的元素(交集)
 func BothExist[E comparable](es ...[]E) []E {
 	return BothExistAny(es, func(e E) E {
 		return e
 	})
 }
 
-// CompleteAny complete inclusion
-func CompleteAny[K comparable, E any](ks []K, es []E, fn func(e E) K) bool {
-	a := SliceSetAny(es, fn)
-	for k := range SliceSet(ks) {
-		if !HasKey(a, k) {
-			return false
-		}
-		delete(a, k)
-	}
-	return len(a) == 0
-}
+//// CompleteAny a中存在b的所有元素, 同时b中的所有元素a
+//func CompleteAny[K comparable, E any](ks []K, es []E, fn func(e E) K) bool {
+//	if len(ks) == 0 && len(es) == 0 {
+//		return true
+//	}
+//	kn := make(map[K]uint8)
+//	for _, e := range Distinct(ks) {
+//		kn[e]++
+//	}
+//	for k := range SliceSetAny(es, fn) {
+//		kn[k]++
+//	}
+//	for _, n := range kn {
+//		if n != 2 {
+//			return false
+//		}
+//	}
+//	return true
+//}
 
+// Complete a和b去重后是否相等(忽略顺序)
 func Complete[E comparable](a []E, b []E) bool {
-	if len(a) == 0 && len(b) == 0 {
-		return true
-	}
-	if (len(a) == 0 && len(b) != 0) || (len(a) != 0 && len(b) == 0) {
-		return false
-	}
-	t := SliceSet(a)
-	for _, e := range b {
-		if _, ok := t[e]; !ok {
-			return false
-		}
-	}
-	return true
+	return len(Single(a, b)) == 0
 }
 
-// MapKey get map keys
-func MapKey[K comparable, V any](kv map[K]V) []K {
+// Keys get map keys
+func Keys[K comparable, V any](kv map[K]V) []K {
 	ks := make([]K, 0, len(kv))
 	for k := range kv {
 		ks = append(ks, k)
@@ -269,8 +275,8 @@ func MapKey[K comparable, V any](kv map[K]V) []K {
 	return ks
 }
 
-// MapValue get map values
-func MapValue[K comparable, V any](kv map[K]V) []V {
+// Values get map values
+func Values[K comparable, V any](kv map[K]V) []V {
 	vs := make([]V, 0, len(kv))
 	for k := range kv {
 		vs = append(vs, kv[k])
@@ -306,6 +312,7 @@ func If[T any](isa bool, a, b T) T {
 	return b
 }
 
+// Equal 比较切片是否相对(包括元素顺序)
 func Equal[E comparable](a []E, b []E) bool {
 	if len(a) != len(b) {
 		return false
@@ -318,11 +325,50 @@ func Equal[E comparable](a []E, b []E) bool {
 	return true
 }
 
-// Single
-
+// Single a中存在,b中不存在 或 b中存在,a中不存在
 func Single[E comparable](a, b []E) []E {
+	kn := make(map[E]uint8)
+	for _, e := range Distinct(a) {
+		kn[e]++
+	}
+	for _, e := range Distinct(b) {
+		kn[e]++
+	}
+	v := make([]E, 0, len(kn))
+	for k, n := range kn {
+		if n == 1 {
+			v = append(v, k)
+		}
+	}
+	return v
+}
 
-	return nil
+// Order 将ts按es排序
+func Order[E comparable, T any](es []E, ts []T, fn func(t T) E) []T {
+	if len(es) == 0 || len(ts) == 0 {
+		return ts
+	}
+	kv := make(map[E][]T)
+	for i := 0; i < len(ts); i++ {
+		t := ts[i]
+		k := fn(t)
+		kv[k] = append(kv[k], t)
+	}
+	rs := make([]T, 0, len(ts))
+	for _, e := range es {
+		vs := kv[e]
+		delete(kv, e)
+		rs = append(rs, vs...)
+	}
+	for k := range kv {
+		rs = append(rs, kv[k]...)
+	}
+	return rs
+}
+
+func OrderPtr[E comparable, T any](es []E, ts *[]T, fn func(t T) E) []T {
+	*ts = Order(es, *ts, fn)
+	return *ts
 }
 
 func UniqueJoin(s ...string) string {

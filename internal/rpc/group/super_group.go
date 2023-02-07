@@ -1,68 +1,64 @@
 package group
 
 import (
-	rocksCache "Open_IM/pkg/common/db/rocks_cache"
-	"Open_IM/pkg/common/log"
-	cp "Open_IM/pkg/common/utils"
+	"Open_IM/pkg/common/constant"
+	"Open_IM/pkg/common/db/table/relation"
 	pbGroup "Open_IM/pkg/proto/group"
-	commonPb "Open_IM/pkg/proto/sdk_ws"
+	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
-
-	"github.com/go-redis/redis/v8"
 )
 
 func (s *groupServer) GetJoinedSuperGroupList(ctx context.Context, req *pbGroup.GetJoinedSuperGroupListReq) (*pbGroup.GetJoinedSuperGroupListResp, error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp := &pbGroup.GetJoinedSuperGroupListResp{CommonResp: &commonPb.CommonResp{}}
-	groupIDList, err := rocksCache.GetJoinedSuperGroupListFromCache(ctx, req.UserID)
+	resp := &pbGroup.GetJoinedSuperGroupListResp{}
+	total, groupIDs, err := s.GroupInterface.FindJoinSuperGroup(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
-		if err == redis.Nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroupByUserID nil ", err.Error(), req.UserID)
-			return resp, nil
-		}
-		log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroupByUserID failed ", err.Error(), req.UserID)
-		//resp.CommonResp.ErrCode = constant.ErrDB.ErrCode
-		//resp.CommonResp.ErrMsg = constant.ErrDB.ErrMsg
+		return nil, err
+	}
+	resp.Total = total
+	if len(groupIDs) == 0 {
 		return resp, nil
 	}
-	for _, groupID := range groupIDList {
-		groupInfoFromCache, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetGroupInfoByGroupID failed", groupID, err.Error())
-			continue
-		}
-		groupInfo := &commonPb.GroupInfo{}
-		if err := utils.CopyStructFields(groupInfo, groupInfoFromCache); err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), err.Error())
-		}
-		groupMemberIDList, err := rocksCache.GetGroupMemberIDListFromCache(ctx, groupID)
-		if err != nil {
-			log.NewError(req.OperationID, utils.GetSelfFuncName(), "GetSuperGroup failed", groupID, err.Error())
-			continue
-		}
-		groupInfo.MemberCount = uint32(len(groupMemberIDList))
-		resp.GroupList = append(resp.GroupList, groupInfo)
+	numMap, err := s.GroupInterface.MapSuperGroupMemberNum(ctx, groupIDs)
+	if err != nil {
+		return nil, err
 	}
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	ownerIdMap, err := s.GroupInterface.MapGroupOwnerUserID(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groups, err := s.GroupInterface.FindGroup(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groupMap := utils.SliceToMap(groups, func(e *relation.GroupModel) string {
+		return e.GroupID
+	})
+	resp.Groups = utils.Slice(groupIDs, func(groupID string) *sdk_ws.GroupInfo {
+		return DbToPbGroupInfo(groupMap[groupID], ownerIdMap[groupID], numMap[groupID])
+	})
 	return resp, nil
 }
 
 func (s *groupServer) GetSuperGroupsInfo(ctx context.Context, req *pbGroup.GetSuperGroupsInfoReq) (resp *pbGroup.GetSuperGroupsInfoResp, err error) {
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "req: ", req.String())
-	resp = &pbGroup.GetSuperGroupsInfoResp{CommonResp: &commonPb.CommonResp{}}
-	groupsInfoList := make([]*commonPb.GroupInfo, 0)
-	for _, groupID := range req.GroupIDList {
-		groupInfoFromRedis, err := rocksCache.GetGroupInfoFromCache(ctx, groupID)
-		if err != nil {
-			log.NewError(req.OperationID, "GetGroupInfoByGroupID failed ", err.Error(), groupID)
-			continue
-		}
-		var groupInfo commonPb.GroupInfo
-		cp.GroupDBCopyOpenIM(&groupInfo, groupInfoFromRedis)
-		groupsInfoList = append(groupsInfoList, &groupInfo)
+	resp = &pbGroup.GetSuperGroupsInfoResp{}
+	if len(req.GroupIDs) == 0 {
+		return nil, constant.ErrArgs.Wrap("groupIDs empty")
 	}
-	resp.GroupInfoList = groupsInfoList
-	log.NewInfo(req.OperationID, utils.GetSelfFuncName(), "resp: ", resp.String())
+	groups, err := s.GroupInterface.FindGroup(ctx, req.GroupIDs)
+	if err != nil {
+		return nil, err
+	}
+	numMap, err := s.GroupInterface.MapSuperGroupMemberNum(ctx, req.GroupIDs)
+	if err != nil {
+		return nil, err
+	}
+	ownerIdMap, err := s.GroupInterface.MapGroupOwnerUserID(ctx, req.GroupIDs)
+	if err != nil {
+		return nil, err
+	}
+	resp.GroupInfos = utils.Slice(groups, func(e *relation.GroupModel) *sdk_ws.GroupInfo {
+		return DbToPbGroupInfo(e, ownerIdMap[e.GroupID], numMap[e.GroupID])
+	})
 	return resp, nil
 }

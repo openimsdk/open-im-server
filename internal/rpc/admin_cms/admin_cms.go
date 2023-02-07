@@ -99,7 +99,7 @@ func (s *adminCMSServer) Run() {
 		}
 	}
 	log.NewInfo("", "rpcRegisterIP ", rpcRegisterIP)
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
+	err = rpc.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
 	if err != nil {
 		log.NewError("0", "RegisterEtcd failed ", err.Error())
 		panic(utils.Wrap(err, "register admin module  rpc to etcd err"))
@@ -207,7 +207,7 @@ func (s *adminCMSServer) GetChatLogs(ctx context.Context, req *pbAdminCMS.GetCha
 			pbChatLog.SenderNickname = recvUser.Nickname
 
 		case constant.GroupChatType, constant.SuperGroupChatType:
-			group, err := s.groupInterface.TakeGroupByID(ctx, chatLog.RecvID)
+			group, err := s.groupInterface.TakeGroup(ctx, chatLog.RecvID)
 			if err != nil {
 				return nil, err
 			}

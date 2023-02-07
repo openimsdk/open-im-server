@@ -55,7 +55,7 @@ package relation
 //received
 //func GetRecvGroupApplicationList(userID string) ([]GroupRequest, error) {
 //	var groupRequestList []GroupRequest
-//	memberList, err := GetGroupMemberListByUserID(userID)
+//	memberList, err := FindGroupMember(userID)
 //	if err != nil {
 //		return nil, utils.Wrap(err, utils.GetSelfFuncName())
 //	}

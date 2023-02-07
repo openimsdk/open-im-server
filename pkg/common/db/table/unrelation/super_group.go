@@ -1,5 +1,7 @@
 package unrelation
 
+import "go.mongodb.org/mongo-driver/mongo"
+
 const (
 	CSuperGroup       = "super_group"
 	CUserToSuperGroup = "user_to_super_group"
@@ -24,4 +26,5 @@ func (UserToSuperGroupModel) TableName() string {
 }
 
 type SuperGroupModelInterface interface {
+	CreateSuperGroup(sCtx mongo.SessionContext, groupID string, initMemberIDs []string) error
 }

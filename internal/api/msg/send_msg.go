@@ -71,7 +71,7 @@ func SendMsg(c *gin.Context) {
 	pbData := newUserSendMsgReq(token, &params)
 	log.Info(params.OperationID, "", "api SendMsg call start..., [data: %s]", pbData.String())
 
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
+	etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, params.OperationID)
 	if etcdConn == nil {
 		errMsg := params.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(params.OperationID, errMsg)

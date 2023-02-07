@@ -89,7 +89,7 @@ func (r *RPCServer) GetSingleUserMsg(operationID string, currentMsgSeq uint32, u
 	rpcReq.SeqList = seqList
 	rpcReq.UserID = userID
 	rpcReq.OperationID = operationID
-	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, rpcReq.OperationID)
+	grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, rpcReq.OperationID)
 	if grpcConn == nil {
 		errMsg := "getcdv3.GetDefaultConn == nil"
 		log.NewError(rpcReq.OperationID, errMsg)

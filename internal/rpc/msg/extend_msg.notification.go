@@ -88,7 +88,7 @@ func messageReactionSender(operationID, sendID string, sourceID string, sessionT
 	case constant.GroupChatType, constant.SuperGroupChatType:
 		pbData.MsgData.GroupID = sourceID
 	}
-	etcdConn, err := getcdv3.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
+	etcdConn, err := rpc.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImMsgName)
 	if err != nil {
 		return
 	}

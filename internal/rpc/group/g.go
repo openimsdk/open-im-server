@@ -1,56 +1,66 @@
 package group
 
 import (
+	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/tracelog"
+	pbConversation "Open_IM/pkg/proto/conversation"
 	sdk_ws "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
 	"context"
+	"errors"
 	"math/big"
 	"strconv"
 	"time"
 )
 
-//func getDBGroupRequest(ctx context.Context, req *pbGroup.GroupApplicationResponseReq) (dbGroupRequest *relation.GroupRequest) {
-//	dbGroupRequest = &relation.GroupRequest{}
-//	utils.CopyStructFields(&dbGroupRequest, req)
-//	dbGroupRequest.UserID = req.FromUserID
-//	dbGroupRequest.HandleUserID = utils.OpUserID(ctx)
-//	dbGroupRequest.HandledTime = time.Now()
-//	return dbGroupRequest
-//}
-//
-//func getDBGroupMember(ctx context.Context, groupID, userID string) (dbGroupMember *relation.GroupMember, err error) {
-//	dbGroupMember = &relation.GroupMember{}
-//
-//	member := relation.GroupMember{}
-//	member.GroupID = groupID
-//	member.UserID = userID
-//	member.RoleLevel = constant.GroupOrdinaryUsers
-//	member.OperatorUserID = utils.OpUserID(ctx)
-//
-//	member.FaceURL = user.FaceURL
-//	member.Nickname = user.Nickname
-//	member.JoinSource = request.JoinSource
-//	member.InviterUserID = request.InviterUserID
-//	member.MuteEndTime = time.Unix(int64(time.Now().Second()), 0)
-//
-//	return dbGroupMember, nil
-//}
-
-func getUsersInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.UserInfo, error) {
-	return nil, nil
+func GetPublicUserInfoOne(ctx context.Context, userID string) (*sdk_ws.PublicUserInfo, error) {
+	return nil, errors.New("todo")
 }
 
-func getUserMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.UserInfo, error) {
-	users, err := getUsersInfo(ctx, userIDs)
+func GetUsersInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.UserInfo, error) {
+	return nil, errors.New("todo")
+}
+
+func GetUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.UserInfo, error) {
+	users, err := GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	userMap := make(map[string]*sdk_ws.UserInfo)
-	for i, user := range users {
-		userMap[user.UserID] = users[i]
+	return utils.SliceToMap(users, func(e *sdk_ws.UserInfo) string {
+		return e.UserID
+	}), nil
+}
+
+func GetPublicUserInfo(ctx context.Context, userIDs []string) ([]*sdk_ws.PublicUserInfo, error) {
+	return nil, errors.New("todo")
+}
+
+func GetPublicUserInfoMap(ctx context.Context, userIDs []string) (map[string]*sdk_ws.PublicUserInfo, error) {
+	users, err := GetPublicUserInfo(ctx, userIDs)
+	if err != nil {
+		return nil, err
 	}
-	return userMap, nil
+	return utils.SliceToMap(users, func(e *sdk_ws.PublicUserInfo) string {
+		return e.UserID
+	}), nil
+}
+
+func GroupNotification(ctx context.Context, groupID string) {
+	var conversationReq pbConversation.ModifyConversationFieldReq
+	conversation := pbConversation.Conversation{
+		OwnerUserID:      tracelog.GetOpUserID(ctx),
+		ConversationID:   utils.GetConversationIDBySessionType(groupID, constant.GroupChatType),
+		ConversationType: constant.GroupChatType,
+		GroupID:          groupID,
+	}
+	conversationReq.Conversation = &conversation
+	conversationReq.OperationID = tracelog.GetOperationID(ctx)
+	conversationReq.FieldType = constant.FieldGroupAtType
+	conversation.GroupAtType = constant.GroupNotification
+	conversationReq.UserIDList = cacheResp.UserIDList
+
+	_, err = pbConversation.NewConversationClient(s.etcdConn.GetConn("", config.Config.RpcRegisterName.OpenImConversationName)).ModifyConversationField(ctx, &conversationReq)
+	tracelog.SetCtxInfo(ctx, "ModifyConversationField", err, "req", &conversationReq, "resp", conversationReply)
 }
 
 func genGroupID(ctx context.Context, groupID string) string {

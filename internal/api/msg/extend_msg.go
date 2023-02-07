@@ -41,7 +41,7 @@ func SetMessageReactionExtensions(c *gin.Context) {
 		return
 	}
 
-	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
+	grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
 	if grpcConn == nil {
 		errMsg := req.OperationID + " getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
@@ -90,7 +90,7 @@ func GetMessageListReactionExtensions(c *gin.Context) {
 		return
 	}
 
-	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
+	grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
 	if grpcConn == nil {
 		errMsg := req.OperationID + " getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
@@ -136,7 +136,7 @@ func AddMessageReactionExtensions(c *gin.Context) {
 		return
 	}
 
-	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
+	grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
 	if grpcConn == nil {
 		errMsg := req.OperationID + " getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
@@ -181,7 +181,7 @@ func DeleteMessageReactionExtensions(c *gin.Context) {
 		return
 	}
 
-	grpcConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
+	grpcConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
 	if grpcConn == nil {
 		errMsg := req.OperationID + " getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
