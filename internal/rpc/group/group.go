@@ -243,10 +243,11 @@ func (s *groupServer) GetJoinedGroupList(ctx context.Context, req *pbGroup.GetJo
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
-	groups, err := s.GroupInterface.FindJoinedGroup(ctx, req.FromUserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	total, groups, err := s.GroupInterface.FindJoinedGroup(ctx, req.FromUserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
+	resp.Total = total
 	if len(groups) == 0 {
 		return resp, nil
 	}
@@ -1039,7 +1040,7 @@ func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.Ge
 	if len(req.GroupIDs) == 0 {
 		return nil, constant.ErrArgs.Wrap("groupIDs empty")
 	}
-	members, err := s.GroupInterface.FindGroupMemberByUserID(ctx, req.UserID, req.GroupIDs)
+	members, err := s.GroupInterface.FindGroupMember(ctx, req.UserID, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}

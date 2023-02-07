@@ -343,6 +343,34 @@ func Single[E comparable](a, b []E) []E {
 	return v
 }
 
+// Order 将ts按es排序
+func Order[E comparable, T any](es []E, ts []T, fn func(t T) E) []T {
+	if len(es) == 0 || len(ts) == 0 {
+		return ts
+	}
+	kv := make(map[E][]T)
+	for i := 0; i < len(ts); i++ {
+		t := ts[i]
+		k := fn(t)
+		kv[k] = append(kv[k], t)
+	}
+	rs := make([]T, 0, len(ts))
+	for _, e := range es {
+		vs := kv[e]
+		delete(kv, e)
+		rs = append(rs, vs...)
+	}
+	for k := range kv {
+		rs = append(rs, kv[k]...)
+	}
+	return rs
+}
+
+func OrderPtr[E comparable, T any](es []E, ts *[]T, fn func(t T) E) []T {
+	*ts = Order(es, *ts, fn)
+	return *ts
+}
+
 func UniqueJoin(s ...string) string {
 	data, _ := json.Marshal(s)
 	return string(data)
