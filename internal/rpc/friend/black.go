@@ -11,8 +11,8 @@ import (
 	"context"
 )
 
-func (s *friendServer) GetBlacks(ctx context.Context, req *pbFriend.GetBlacksReq) (*pbFriend.GetBlacksResp, error) {
-	resp := &pbFriend.GetBlacksResp{}
+func (s *friendServer) GetPaginationBlacks(ctx context.Context, req *pbFriend.GetPaginationBlacksReq) (resp *pbFriend.GetPaginationBlacksResp, err error) {
+	resp = &pbFriend.GetPaginationBlacksResp{}
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -24,7 +24,6 @@ func (s *friendServer) GetBlacks(ctx context.Context, req *pbFriend.GetBlacksReq
 	if err != nil {
 		return nil, err
 	}
-
 	resp.Total = int32(total)
 	return resp, nil
 }

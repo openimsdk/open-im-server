@@ -9,20 +9,16 @@ import (
 )
 
 type UserInterface interface {
-	//获取指定用户的信息 如果有记录未找到 也返回错误
+	//获取指定用户的信息 如有userID未找到 也返回错误
 	Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error)
-	//插入
-	Create(ctx context.Context, users []*relation2.UserModel) error
-	//更新
+	//插入多条 外部保证userID 不重复 且在db中不存在
+	Create(ctx context.Context, users []*relation2.UserModel) (err error)
+	//更新（非零值） 外部保证userID存在
 	Update(ctx context.Context, users []*relation2.UserModel) (err error)
-	//更新带零值的
+	//更新（零值） 外部保证userID存在
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
-	//通过名字搜索
-	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error)
-	//通过名字和id搜索
-	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error)
-	//获取，如果没找到，不不返回错误
-	Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error)
+	//获取，如果没找到，不返回错误
+	Get(ctx context.Context, pageNumber, showNumber int32) (users []*relation2.UserModel, count int64, err error)
 	//userIDs是否存在 只要有一个存在就为true
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
@@ -45,20 +41,12 @@ func (u *UserController) UpdateByMap(ctx context.Context, userID string, args ma
 	return u.database.UpdateByMap(ctx, userID, args)
 }
 
-func (u *UserController) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error) {
-	return u.database.GetByName(ctx, userName, showNumber, pageNumber)
-}
-
-func (u *UserController) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error) {
-	return u.database.GetByNameAndID(ctx, content, showNumber, pageNumber)
-}
-
-func (u *UserController) Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error) {
-	return u.database.Get(ctx, showNumber, pageNumber)
+func (u *UserController) Get(ctx context.Context, pageNumber, showNumber int32) (users []*relation2.UserModel, count int64, err error) {
+	return u.database.Get(ctx, pageNumber, showNumber)
 }
 
 func (u *UserController) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
-	return u.IsExist(ctx, userIDs)
+	return u.database.IsExist(ctx, userIDs)
 }
 func NewUserController(db *gorm.DB) *UserController {
 	controller := &UserController{database: newUserDatabase(db)}
@@ -70,27 +58,25 @@ type UserDatabaseInterface interface {
 	Create(ctx context.Context, users []*relation2.UserModel) error
 	Update(ctx context.Context, users []*relation2.UserModel) (err error)
 	UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error)
-	GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error)
-	GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error)
-	Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error)
+	Get(ctx context.Context, pageNumber, showNumber int32) (users []*relation2.UserModel, count int64, err error)
 	IsExist(ctx context.Context, userIDs []string) (exist bool, err error)
 }
 
 type UserDatabase struct {
-	sqlDB *relation.UserGorm
+	user *relation.UserGorm
 }
 
 func newUserDatabase(db *gorm.DB) *UserDatabase {
 	sqlDB := relation.NewUserGorm(db)
 	database := &UserDatabase{
-		sqlDB: sqlDB,
+		user: sqlDB,
 	}
 	return database
 }
 
-// 获取指定用户的信息 如果有记录未找到 也返回错误
+// 获取指定用户的信息 如有userID未找到 也返回错误
 func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*relation2.UserModel, err error) {
-	users, err = u.sqlDB.Find(ctx, userIDs)
+	users, err = u.user.Find(ctx, userIDs)
 	if err != nil {
 		return
 	}
@@ -100,33 +86,31 @@ func (u *UserDatabase) Find(ctx context.Context, userIDs []string) (users []*rel
 	return
 }
 
+// 插入多条 外部保证userID 不重复 且在db中不存在
 func (u *UserDatabase) Create(ctx context.Context, users []*relation2.UserModel) (err error) {
-	return u.sqlDB.Create(ctx, users)
+	return u.user.Create(ctx, users)
 }
 
+// 更新（非零值） 外部保证userID存在
 func (u *UserDatabase) Update(ctx context.Context, users []*relation2.UserModel) (err error) {
-	return u.sqlDB.Update(ctx, users)
+	return u.user.Update(ctx, users)
 }
+
+// 更新（零值） 外部保证userID存在
 func (u *UserDatabase) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
-	return u.sqlDB.UpdateByMap(ctx, userID, args)
-}
-func (u *UserDatabase) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error) {
-	return u.sqlDB.GetByName(ctx, userName, showNumber, pageNumber)
-}
-func (u *UserDatabase) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error) {
-	return u.sqlDB.GetByNameAndID(ctx, content, showNumber, pageNumber)
+	return u.user.UpdateByMap(ctx, userID, args)
 }
 
 // 获取，如果没找到，不返回错误
 func (u *UserDatabase) Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation2.UserModel, count int64, err error) {
-	return u.sqlDB.Get(ctx, showNumber, pageNumber)
+	return u.user.Get(ctx, showNumber, pageNumber)
 }
 
 // userIDs是否存在 只要有一个存在就为true
 func (u *UserDatabase) IsExist(ctx context.Context, userIDs []string) (exist bool, err error) {
-	users, err := u.sqlDB.Find(ctx, userIDs)
+	users, err := u.user.Find(ctx, userIDs)
 	if err != nil {
-		return
+		return false, err
 	}
 	if len(users) > 0 {
 		return true, nil

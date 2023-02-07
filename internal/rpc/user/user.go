@@ -15,6 +15,7 @@ import (
 	"Open_IM/pkg/getcdv3"
 	pbFriend "Open_IM/pkg/proto/friend"
 	pbGroup "Open_IM/pkg/proto/group"
+	server_api_params "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -167,6 +168,7 @@ func (s *userServer) SyncJoinedGroupMemberNickname(ctx context.Context, userID s
 	}
 }
 
+// ok
 func (s *userServer) GetUsersInfo(ctx context.Context, req *pbUser.GetUsersInfoReq) (*pbUser.GetUsersInfoResp, error) {
 	resp := &pbUser.GetUsersInfoResp{}
 	users, err := s.Find(ctx, req.UserIDs)
@@ -228,21 +230,24 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	return &resp, nil
 }
 
-func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (*pbUser.SetGlobalRecvMessageOptResp, error) {
-	resp := pbUser.SetGlobalRecvMessageOptResp{}
+func (s *userServer) SetGlobalRecvMessageOpt(ctx context.Context, req *pbUser.SetGlobalRecvMessageOptReq) (resp *pbUser.SetGlobalRecvMessageOptResp, err error) {
+	resp = &pbUser.SetGlobalRecvMessageOptResp{}
+
+	if _, err := s.Find(ctx, []string{req.UserID}); err != nil {
+		return nil, err
+	}
 	m := make(map[string]interface{}, 1)
 	m["global_recv_msg_opt"] = req.GlobalRecvMsgOpt
-	err := s.UpdateByMap(ctx, req.UserID, m)
-	if err != nil {
+	if err := s.UpdateByMap(ctx, req.UserID, m); err != nil {
 		return nil, err
 	}
 	chat.UserInfoUpdatedNotification(ctx, req.UserID, req.UserID)
-	return &resp, nil
+	return resp, nil
 }
 
-func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckReq) (*pbUser.AccountCheckResp, error) {
-	resp := pbUser.AccountCheckResp{}
-	err := token_verify.CheckAdmin(ctx)
+func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckReq) (resp *pbUser.AccountCheckResp, err error) {
+	resp = &pbUser.AccountCheckResp{}
+	err = token_verify.CheckAdmin(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -250,24 +255,23 @@ func (s *userServer) AccountCheck(ctx context.Context, req *pbUser.AccountCheckR
 	if err != nil {
 		return nil, err
 	}
-	uidList := make([]string, 0)
+	userIDs := make(map[string]interface{}, 0)
 	for _, v := range user {
-		uidList = append(uidList, v.UserID)
+		userIDs[v.UserID] = nil
 	}
-	var r []*pbUser.AccountCheckRespSingleUserStatus
 	for _, v := range req.CheckUserIDs {
-		temp := new(pbUser.AccountCheckRespSingleUserStatus)
-		temp.UserID = v
-		if utils.IsContain(v, uidList) {
+		temp := &pbUser.AccountCheckRespSingleUserStatus{UserID: v}
+		if _, ok := userIDs[v]; ok {
 			temp.AccountStatus = constant.Registered
 		} else {
 			temp.AccountStatus = constant.UnRegistered
 		}
-		r = append(r, temp)
+		resp.Results = append(resp.Results, temp)
 	}
-	return &resp, nil
+	return resp, nil
 }
 
+// todo
 func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pbUser.GetUsersResp, error) {
 	resp := pbUser.GetUsersResp{}
 	var err error
@@ -286,7 +290,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	}
 
 	if req.UserName != "" {
-		usersDB, total, err := s.GetByName(ctx, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		usersDB, total, err := s.GetByName(ctx, req.UserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 		if err != nil {
 			return nil, err
 		}
@@ -300,7 +304,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		}
 		return &resp, nil
 	} else if req.Content != "" {
-		usersDB, total, err := s.GetByNameAndID(ctx, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+		usersDB, total, err := s.GetByNameAndID(ctx, req.UserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 		if err != nil {
 			return nil, err
 		}
@@ -315,7 +319,7 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 		return &resp, nil
 	}
 
-	usersDB, total, err := s.Get(ctx, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	usersDB, total, err := s.Get(ctx, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -332,18 +336,22 @@ func (s *userServer) GetUsers(ctx context.Context, req *pbUser.GetUsersReq) (*pb
 	return &resp, nil
 }
 
-func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterReq) (*pbUser.UserRegisterResp, error) {
-	resp := pbUser.UserRegisterResp{}
+func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterReq) (resp *pbUser.UserRegisterResp, err error) {
+	resp = &pbUser.UserRegisterResp{}
+	if utils.DuplicateAny(req.Users, func(e *server_api_params.UserInfo) string { return e.UserID }) {
+		return nil, constant.ErrArgs.Wrap("userID repeated")
+	}
 	userIDs := make([]string, 0)
 	for _, v := range req.Users {
 		userIDs = append(userIDs, v.UserID)
 	}
+
 	exist, err := s.IsExist(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
 	if exist {
-		return nil, constant.ErrRegisteredAlready.Wrap("exist")
+		return nil, constant.ErrRegisteredAlready.Wrap("userID exist in db")
 	}
 	users, err := (*convert.PBUser)(nil).PB2DB(req.Users)
 	if err != nil {
@@ -353,5 +361,5 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbUser.UserRegisterR
 	if err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	return resp, nil
 }

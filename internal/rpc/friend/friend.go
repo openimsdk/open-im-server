@@ -14,7 +14,6 @@ import (
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
 	pbFriend "Open_IM/pkg/proto/friend"
-	sdkws "Open_IM/pkg/proto/sdk_ws"
 	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
@@ -128,22 +127,22 @@ func (s *friendServer) Run() {
 	}
 }
 
-func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq) (*pbFriend.AddFriendResp, error) {
-	resp := &pbFriend.AddFriendResp{}
+// ok
+func (s *friendServer) ApplyToAddFriend(ctx context.Context, req *pbFriend.ApplyToAddFriendReq) (resp *pbFriend.ApplyToAddFriendResp, err error) {
+	resp = &pbFriend.ApplyToAddFriendResp{}
 	if err := token_verify.CheckAccessV3(ctx, req.FromUserID); err != nil {
 		return nil, err
 	}
 	if err := callbackBeforeAddFriendV1(ctx, req); err != nil {
 		return nil, err
 	}
-
-	//检查toUserID fromUserID是否存在
+	if req.ToUserID == req.FromUserID {
+		return nil, constant.ErrCanNotAddYourself.Wrap()
+	}
 	if _, err := check.GetUsersInfo(ctx, req.ToUserID, req.FromUserID); err != nil {
 		return nil, err
 	}
-
-	//from是否在to的好友列表里面
-	err, in1, in2 := s.FriendInterface.CheckIn(ctx, req.FromUserID, req.ToUserID)
+	in1, in2, err := s.FriendInterface.CheckIn(ctx, req.FromUserID, req.ToUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -153,34 +152,36 @@ func (s *friendServer) AddFriend(ctx context.Context, req *pbFriend.AddFriendReq
 	if err = s.FriendInterface.AddFriendRequest(ctx, req.FromUserID, req.ToUserID, req.ReqMsg, req.Ex); err != nil {
 		return nil, err
 	}
-	chat.FriendApplicationNotification(ctx, req)
+	chat.FriendApplicationAddNotification(ctx, req)
 	return resp, nil
 }
 
-func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFriendReq) (*pbFriend.ImportFriendResp, error) {
-	resp := &pbFriend.ImportFriendResp{}
+// ok
+func (s *friendServer) ImportFriends(ctx context.Context, req *pbFriend.ImportFriendReq) (resp *pbFriend.ImportFriendResp, err error) {
+	resp = &pbFriend.ImportFriendResp{}
 	if err := token_verify.CheckAdmin(ctx); err != nil {
 		return nil, err
 	}
-	if _, err := check.GetUsersInfo(ctx, req.OwnerUserID); err != nil {
+	if _, err := check.GetUsersInfo(ctx, req.OwnerUserID, req.FriendUserIDs); err != nil {
 		return nil, err
 	}
 
-	var friends []*relation2.FriendModel
-	for _, userID := range utils.RemoveDuplicateElement(req.FriendUserIDs) {
-		friends = append(friends, &relation2.FriendModel{OwnerUserID: userID, FriendUserID: req.OwnerUserID, AddSource: constant.BecomeFriendByImport, OperatorUserID: tracelog.GetOpUserID(ctx)})
+	if utils.Contain(req.FriendUserIDs, req.OwnerUserID) {
+		return nil, constant.ErrCanNotAddYourself.Wrap()
 	}
-	if len(friends) > 0 {
-		if err := s.FriendInterface.BecomeFriend(ctx, friends); err != nil {
-			return nil, err
-		}
+	if utils.Duplicate(req.FriendUserIDs) {
+		return nil, constant.ErrArgs.Wrap("friend userID repeated")
+	}
+
+	if err := s.FriendInterface.BecomeFriends(ctx, req.OwnerUserID, req.FriendUserIDs, constant.BecomeFriendByImport, tracelog.GetOpUserID(ctx)); err != nil {
+		return nil, err
 	}
 	return resp, nil
 }
 
-// process Friend application
-func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.RespondFriendApplyReq) (*pbFriend.RespondFriendApplyResp, error) {
-	resp := &pbFriend.RespondFriendApplyResp{}
+// ok
+func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.RespondFriendApplyReq) (resp *pbFriend.RespondFriendApplyResp, err error) {
+	resp = &pbFriend.RespondFriendApplyResp{}
 	if err := check.Access(ctx, req.ToUserID); err != nil {
 		return nil, err
 	}
@@ -190,7 +191,7 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 		if err != nil {
 			return nil, err
 		}
-		chat.FriendApplicationApprovedNotification(ctx, req)
+		chat.FriendApplicationAgreedNotification(ctx, req)
 		return resp, nil
 	}
 	if req.HandleResult == constant.FriendResponseRefuse {
@@ -198,27 +199,37 @@ func (s *friendServer) RespondFriendApply(ctx context.Context, req *pbFriend.Res
 		if err != nil {
 			return nil, err
 		}
-		chat.FriendApplicationRejectedNotification(ctx, req)
+		chat.FriendApplicationRefusedNotification(ctx, req)
 		return resp, nil
 	}
 	return nil, constant.ErrArgs.Wrap("req.HandleResult != -1/1")
 }
 
-func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFriendReq) (*pbFriend.DeleteFriendResp, error) {
-	resp := &pbFriend.DeleteFriendResp{}
+// ok
+func (s *friendServer) DeleteFriend(ctx context.Context, req *pbFriend.DeleteFriendReq) (resp *pbFriend.DeleteFriendResp, err error) {
+	resp = &pbFriend.DeleteFriendResp{}
 	if err := check.Access(ctx, req.OwnerUserID); err != nil {
 		return nil, err
 	}
-	if err := s.FriendInterface.Delete(ctx, req.OwnerUserID, req.FriendUserID); err != nil {
+	_, err = s.FindFriends(ctx, req.OwnerUserID, []string{req.FriendUserID})
+	if err != nil {
+		return nil, err
+	}
+	if err := s.FriendInterface.Delete(ctx, req.OwnerUserID, []string{req.FriendUserID}); err != nil {
 		return nil, err
 	}
 	chat.FriendDeletedNotification(ctx, req)
 	return resp, nil
 }
 
-func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFriendRemarkReq) (*pbFriend.SetFriendRemarkResp, error) {
-	resp := &pbFriend.SetFriendRemarkResp{}
+// ok
+func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFriendRemarkReq) (resp *pbFriend.SetFriendRemarkResp, err error) {
+	resp = &pbFriend.SetFriendRemarkResp{}
 	if err := check.Access(ctx, req.OwnerUserID); err != nil {
+		return nil, err
+	}
+	_, err = s.FindFriends(ctx, req.OwnerUserID, []string{req.FriendUserID})
+	if err != nil {
 		return nil, err
 	}
 	if err := s.FriendInterface.UpdateRemark(ctx, req.OwnerUserID, req.FriendUserID, req.Remark); err != nil {
@@ -228,26 +239,15 @@ func (s *friendServer) SetFriendRemark(ctx context.Context, req *pbFriend.SetFri
 	return resp, nil
 }
 
-func (s *friendServer) GetFriends(ctx context.Context, req *pbFriend.GetFriendsReq) (*pbFriend.GetFriendsResp, error) {
-	resp := &pbFriend.GetFriendsResp{}
+// ok
+func (s *friendServer) GetDesignatedFriendsReq(ctx context.Context, req *pbFriend.GetDesignatedFriendsReq) (resp *pbFriend.GetDesignatedFriendsResp, err error) {
+	resp = &pbFriend.GetDesignatedFriendsResp{}
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
 	friends, total, err := s.FriendInterface.FindOwnerFriends(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
-	}
-	userIDList := make([]string, 0, len(friends))
-	for _, f := range friends {
-		userIDList = append(userIDList, f.FriendUserID)
-	}
-	users, err := check.GetUsersInfo(ctx, userIDList)
-	if err != nil {
-		return nil, err
-	}
-	userMap := make(map[string]*sdkws.UserInfo)
-	for i, user := range users {
-		userMap[user.UserID] = users[i]
 	}
 	resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(friends)
 	if err != nil {
@@ -257,9 +257,9 @@ func (s *friendServer) GetFriends(ctx context.Context, req *pbFriend.GetFriendsR
 	return resp, nil
 }
 
-// 获取接收到的好友申请（即别人主动申请的）
-func (s *friendServer) GetToFriendsApply(ctx context.Context, req *pbFriend.GetToFriendsApplyReq) (*pbFriend.GetToFriendsApplyResp, error) {
-	resp := &pbFriend.GetToFriendsApplyResp{}
+// ok 获取接收到的好友申请（即别人主动申请的）
+func (s *friendServer) GetPaginationFriendsApplyTo(ctx context.Context, req *pbFriend.GetPaginationFriendsApplyToReq) (resp *pbFriend.GetPaginationFriendsApplyToResp, err error) {
+	resp = &pbFriend.GetPaginationFriendsApplyToResp{}
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -275,9 +275,9 @@ func (s *friendServer) GetToFriendsApply(ctx context.Context, req *pbFriend.GetT
 	return resp, nil
 }
 
-// 获取主动发出去的好友申请列表
-func (s *friendServer) GetFromFriendsApply(ctx context.Context, req *pbFriend.GetFromFriendsApplyReq) (*pbFriend.GetFromFriendsApplyResp, error) {
-	resp := &pbFriend.GetFromFriendsApplyResp{}
+// ok 获取主动发出去的好友申请列表
+func (s *friendServer) GetPaginationFriendsApplyFrom(ctx context.Context, req *pbFriend.GetPaginationFriendsApplyFromReq) (resp *pbFriend.GetPaginationFriendsApplyFromResp, err error) {
+	resp = &pbFriend.GetPaginationFriendsApplyFromResp{}
 	if err := check.Access(ctx, req.UserID); err != nil {
 		return nil, err
 	}
@@ -293,26 +293,28 @@ func (s *friendServer) GetFromFriendsApply(ctx context.Context, req *pbFriend.Ge
 	return resp, nil
 }
 
-func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) (*pbFriend.IsFriendResp, error) {
-	resp := &pbFriend.IsFriendResp{}
-	err, in1, in2 := s.FriendInterface.CheckIn(ctx, req.UserID1, req.UserID2)
+// ok
+func (s *friendServer) IsFriend(ctx context.Context, req *pbFriend.IsFriendReq) (resp *pbFriend.IsFriendResp, err error) {
+	resp = &pbFriend.IsFriendResp{}
+	resp.InUser1Friends, resp.InUser2Friends, err = s.FriendInterface.CheckIn(ctx, req.UserID1, req.UserID2)
 	if err != nil {
 		return nil, err
 	}
-	resp.InUser1Friends = in1
-	resp.InUser2Friends = in2
 	return resp, nil
 }
 
-func (s *friendServer) GetFriendsInfo(ctx context.Context, req *pbFriend.GetFriendsInfoReq) (*pbFriend.GetFriendsInfoResp, error) {
-	resp := pbFriend.GetFriendsInfoResp{}
+// ok
+func (s *friendServer) GetPaginationFriends(ctx context.Context, req *pbFriend.GetPaginationFriendsReq) (resp *pbFriend.GetPaginationFriendsResp, err error) {
+	resp = &pbFriend.GetPaginationFriendsResp{}
+	if utils.Duplicate(req.FriendUserIDs) {
+		return nil, constant.ErrArgs.Wrap("friend userID repeated")
+	}
 	friends, err := s.FriendInterface.FindFriends(ctx, req.OwnerUserID, req.FriendUserIDs)
 	if err != nil {
 		return nil, err
 	}
-	resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(friends)
-	if err != nil {
+	if resp.FriendsInfo, err = (*convert.DBFriend)(nil).DB2PB(friends); err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	return resp, nil
 }

@@ -18,6 +18,7 @@ var (
 
 	ErrRelationshipAlready = &ErrInfo{RelationshipAlreadyError, "RelationshipAlreadyError", ""}
 	ErrNotRelationshipYet  = &ErrInfo{NotRelationshipYetError, "NotRelationshipYetError", ""}
+	ErrCanNotAddYourself   = &ErrInfo{CanNotAddYourselfError, "CanNotAddYourselfError", ""}
 
 	ErrOnlyOneOwner        = &ErrInfo{OnlyOneOwnerError, "OnlyOneOwnerError", ""}
 	ErrInGroupAlready      = &ErrInfo{InGroupAlreadyError, "InGroupAlreadyError", ""}
@@ -90,6 +91,7 @@ const (
 const (
 	RelationshipAlreadyError = 92001 //已经是好友关系（或者黑名单）
 	NotRelationshipYetError  = 92002 //不是好友关系（或者黑名单）
+	CanNotAddYourselfError   = 92003 //不能添加自己为好友
 )
 
 // 群组错误码

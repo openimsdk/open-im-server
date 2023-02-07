@@ -343,7 +343,7 @@ func (pb *PBUser) Convert() (*relation.UserModel, error) {
 	dst := &relation.UserModel{}
 	utils.CopyStructFields(dst, pb)
 	dst.Birth = utils.UnixSecondToTime(pb.Birthday)
-	dst.CreateTime = utils.UnixSecondToTime(int64(pb.CreateTime))
+	dst.CreateTime = utils.UnixSecondToTime(pb.CreateTime)
 	return dst, nil
 }
 

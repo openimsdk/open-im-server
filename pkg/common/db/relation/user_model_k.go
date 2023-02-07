@@ -19,75 +19,84 @@ func NewUserGorm(db *gorm.DB) *UserGorm {
 	return &user
 }
 
+// 插入多条
 func (u *UserGorm) Create(ctx context.Context, users []*relation.UserModel, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
-	return utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Create(&users).Error, "")
+	return utils.Wrap(getDBConn(u.DB, tx).Create(&users).Error, "")
 }
 
-func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}) (err error) {
+// 更新用户信息 零值
+func (u *UserGorm) UpdateByMap(ctx context.Context, userID string, args map[string]interface{}, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "args", args)
 	}()
-	return utils.Wrap(u.DB.Model(&relation.UserModel{}).Where("user_id = ?", userID).Updates(args).Error, "")
+	return utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where("user_id = ?", userID).Updates(args).Error, "")
 }
 
-func (u *UserGorm) Update(ctx context.Context, users []*relation.UserModel) (err error) {
+// 更新多个用户信息 非零值
+func (u *UserGorm) Update(ctx context.Context, users []*relation.UserModel, tx ...*gorm.DB) (err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "users", users)
 	}()
-	return utils.Wrap(u.DB.Model(&relation.UserModel{}).Updates(&users).Error, "")
+	return utils.Wrap(getDBConn(u.DB, tx).Updates(&users).Error, "")
 }
 
-func (u *UserGorm) Find(ctx context.Context, userIDs []string) (users []*relation.UserModel, err error) {
+// 获取指定用户信息  不存在，也不返回错误
+func (u *UserGorm) Find(ctx context.Context, userIDs []string, tx ...*gorm.DB) (users []*relation.UserModel, err error) {
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userIDs", userIDs, "users", users)
 	}()
-	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Where("user_id in (?)", userIDs).Find(&users).Error, "")
+	err = utils.Wrap(getDBConn(u.DB, tx).Where("user_id in (?)", userIDs).Find(&users).Error, "")
 	return users, err
 }
 
-func (u *UserGorm) Take(ctx context.Context, userID string) (user *relation.UserModel, err error) {
+// 获取某个用户信息  不存在，则返回错误
+func (u *UserGorm) Take(ctx context.Context, userID string, tx ...*gorm.DB) (user *relation.UserModel, err error) {
 	user = &relation.UserModel{}
 	defer func() {
 		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userID", userID, "user", *user)
 	}()
-	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Where("user_id = ?", userID).Take(&user).Error, "")
+	err = utils.Wrap(getDBConn(u.DB, tx).Where("user_id = ?", userID).Take(&user).Error, "")
 	return user, err
 }
 
-func (u *UserGorm) GetByName(ctx context.Context, userName string, showNumber, pageNumber int32) (users []*relation.UserModel, count int64, err error) {
+// 通过名字查找用户 不存在，不返回错误
+func (u *UserGorm) GetByName(ctx context.Context, userName string, pageNumber, showNumber int32, tx ...*gorm.DB) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "userName", userName, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
 	}()
-	err = u.DB.Model(&relation.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber * pageNumber)).Find(&users).Error
+	err = utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error, "")
 	if err != nil {
-		return nil, 0, utils.Wrap(err, "")
+		return
 	}
-	return users, count, utils.Wrap(u.DB.Model(&relation.UserModel{}).Where(" name like ? ", fmt.Sprintf("%%%s%%", userName)).Count(&count).Error, "")
+	err = utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ?", fmt.Sprintf("%%%s%%", userName)).Limit(int(showNumber)).Offset(int(showNumber*pageNumber)).Find(&users).Error, "")
+	return
 }
 
-func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, showNumber, pageNumber int32) (users []*relation.UserModel, count int64, err error) {
+// 通过名字或userID查找用户 不存在，不返回错误
+func (u *UserGorm) GetByNameAndID(ctx context.Context, content string, pageNumber, showNumber int32, tx ...*gorm.DB) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "content", content, "showNumber", showNumber, "pageNumber", pageNumber, "users", users)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "content", content, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
 	}()
-	db := u.DB.Model(&relation.UserModel{}).Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
-	if err := db.Model(&relation.UserModel{}).Count(&count).Error; err != nil {
-		return nil, 0, utils.Wrap(err, "")
+	db := getDBConn(u.DB, tx).Model(&relation.UserModel{}).Where(" name like ? or user_id = ? ", fmt.Sprintf("%%%s%%", content), content)
+	if err = db.Count(&count).Error; err != nil {
+		return
 	}
 	err = utils.Wrap(db.Limit(int(showNumber)).Offset(int(showNumber*pageNumber)).Find(&users).Error, "")
 	return
 }
 
-func (u *UserGorm) Get(ctx context.Context, showNumber, pageNumber int32) (users []*relation.UserModel, count int64, err error) {
+// 获取用户信息 不存在，不返回错误
+func (u *UserGorm) Get(ctx context.Context, pageNumber, showNumber int32, tx ...*gorm.DB) (users []*relation.UserModel, count int64, err error) {
 	defer func() {
-		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "showNumber", showNumber, "pageNumber", pageNumber, "users", users, "count", count)
+		tracelog.SetCtxDebug(ctx, utils.GetFuncName(1), err, "pageNumber", pageNumber, "showNumber", showNumber, "users", users, "count", count)
 	}()
-	err = u.DB.Model(&relation.UserModel{}).Model(u).Count(&count).Error
+	err = utils.Wrap(getDBConn(u.DB, tx).Model(&relation.UserModel{}).Count(&count).Error, "")
 	if err != nil {
-		return nil, 0, utils.Wrap(err, "")
+		return
 	}
-	err = utils.Wrap(u.DB.Model(&relation.UserModel{}).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&users).Error, "")
+	err = utils.Wrap(getDBConn(u.DB, tx).Limit(int(showNumber)).Offset(int(pageNumber*showNumber)).Find(&users).Error, "")
 	return
 }

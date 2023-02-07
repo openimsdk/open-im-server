@@ -114,9 +114,6 @@ message batchSetConversationsResp{
 
 message getUsersReq {
   server_api_params.RequestPagination pagination = 2;
-  string userName = 3;
-  string userID = 4;
-  string content = 5;
 }
 
 message getUsersResp{
@@ -143,7 +140,7 @@ service user {
   //检查userID是否存在
   rpc accountCheck(accountCheckReq)returns(accountCheckResp);
   //翻页（或指定userID，昵称）拉取用户信息 全字段
-  rpc getUsers(getUsersReq) returns (getUsersResp);
+  rpc getPaginationUsers(getUsersReq) returns (getUsersResp);
   //用户注册
   rpc userRegister(userRegisterReq) returns (userRegisterResp);
 }
