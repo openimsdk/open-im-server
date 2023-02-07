@@ -13,6 +13,7 @@ import (
 	"Open_IM/pkg/common/constant"
 	"Open_IM/pkg/common/db"
 	"Open_IM/pkg/common/log"
+	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/grpc-etcdv3/getcdv3"
 	pbPush "Open_IM/pkg/proto/push"
 	pbRelay "Open_IM/pkg/proto/relay"
@@ -20,8 +21,7 @@ import (
 	"Open_IM/pkg/utils"
 	"context"
 	"strings"
-
-	promePkg "Open_IM/pkg/common/prometheus"
+	"unsafe"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -103,7 +103,7 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 			return
 		}
 		if pushMsg.MsgData.OfflinePushInfo != nil {
-			title = pushMsg.MsgData.OfflinePushInfo.Title
+			title = pushMsg.MsgData.SenderNickname //pushMsg.MsgData.OfflinePushInfo.Title
 			detailContent = pushMsg.MsgData.OfflinePushInfo.Desc
 		}
 
@@ -116,35 +116,35 @@ func MsgToUser(pushMsg *pbPush.PushMsgReq) {
 		}
 		log.NewInfo(pushMsg.OperationID, utils.GetSelfFuncName(), UIDList, title, detailContent, "opts:", opts)
 		if title == "" {
+			title = pushMsg.MsgData.SenderNickname
+		}
+		if detailContent == "" {
 			switch pushMsg.MsgData.ContentType {
 			case constant.Text:
-				fallthrough
+				detailContent = *(*string)(unsafe.Pointer(&pushMsg.MsgData.Content))
 			case constant.Picture:
-				fallthrough
+				detailContent = constant.ContentType2PushContent[constant.Picture]
 			case constant.Voice:
-				fallthrough
+				detailContent = constant.ContentType2PushContent[constant.Voice]
 			case constant.Video:
-				fallthrough
+				detailContent = constant.ContentType2PushContent[constant.Voice]
 			case constant.File:
-				title = constant.ContentType2PushContent[int64(pushMsg.MsgData.ContentType)]
+				detailContent = constant.ContentType2PushContent[constant.File]
 			case constant.AtText:
 				a := AtContent{}
 				_ = utils.JsonStringToStruct(string(pushMsg.MsgData.Content), &a)
 				if utils.IsContain(pushMsg.PushToUserID, a.AtUserList) {
-					title = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
+					detailContent = constant.ContentType2PushContent[constant.AtText] + constant.ContentType2PushContent[constant.Common]
 				} else {
-					title = constant.ContentType2PushContent[constant.GroupMsg]
+					detailContent = constant.ContentType2PushContent[constant.GroupMsg]
 				}
 			case constant.SignalingNotification:
-				title = constant.ContentType2PushContent[constant.SignalMsg]
+				detailContent = constant.ContentType2PushContent[constant.SignalMsg]
 			default:
-				title = constant.ContentType2PushContent[constant.Common]
+				detailContent = constant.ContentType2PushContent[constant.Common]
 
 			}
-			// detailContent = title
-		}
-		if detailContent == "" {
-			detailContent = title
+			//detailContent = *(*string)(unsafe.Pointer(&pushMsg.MsgData.Content))
 		}
 		pushResult, err := offlinePusher.Push(UIDList, title, detailContent, pushMsg.OperationID, opts)
 		if err != nil {
