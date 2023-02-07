@@ -47,7 +47,7 @@ func (c *ConversationCache) getSuperGroupRecvNotNotifyUserIDsKey(groupID string)
 	return superGroupRecvMsgNotNotifyUserIDsKey + groupID
 }
 
-func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUserID string) (conversationIDs []string, err error) {
+func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUserID string, f func(userID string) ([]string, error)) (conversationIDs []string, err error) {
 	//getConversationIDs := func() (string, error) {
 	//	conversationIDs, err := relation.GetConversationIDsByUserID(ownerUserID)
 	//	if err != nil {
@@ -69,11 +69,11 @@ func (c *ConversationCache) GetUserConversationIDs(ctx context.Context, ownerUse
 	//}
 	//return conversationIDs, nil
 	return GetCache(c.rcClient, c.getConversationIDsKey(ownerUserID), time.Second*30*60, func() ([]string, error) {
-		return relation.GetConversationIDsByUserID(ownerUserID)
+		return f(ownerUserID)
 	})
 }
 
-func (c *ConversationCache) GetUserConversationIDs1(ctx context.Context, ownerUserID string, fn func() (any, error)) (conversationIDs []string, err error) {
+func (c *ConversationCache) GetUserConversationIDs1(ctx context.Context, ownerUserID string) (conversationIDs []string, err error) {
 	//getConversationIDs := func() (string, error) {
 	//	conversationIDs, err := relation.GetConversationIDsByUserID(ownerUserID)
 	//	if err != nil {
