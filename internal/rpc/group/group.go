@@ -14,15 +14,12 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
-	"fmt"
-	"github.com/OpenIMSDK/getcdv3"
-
-	pbConversation "Open_IM/pkg/proto/conversation"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
-	pbUser "Open_IM/pkg/proto/user"
 	"Open_IM/pkg/utils"
 	"context"
+	"fmt"
+	"github.com/OpenIMSDK/getcdv3"
 	grpcPrometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
 	"net"
 	"strconv"
@@ -152,6 +149,19 @@ func (s *groupServer) Run() {
 		return
 	}
 	log.NewInfo("", "group rpc success")
+}
+
+func (s *groupServer) CheckGroupAdmin(ctx context.Context, groupID string) error {
+	if !token_verify.IsAppManagerUid(ctx) {
+		groupMember, err := s.GroupInterface.TakeGroupMemberByID(ctx, groupID, tracelog.GetOpUserID(ctx))
+		if err != nil {
+			return err
+		}
+		if !(groupMember.RoleLevel == constant.GroupOwner || groupMember.RoleLevel == constant.GroupAdmin) {
+			return constant.ErrNoPermission.Wrap("no group owner or admin")
+		}
+	}
+	return nil
 }
 
 func (s *groupServer) CreateGroup(ctx context.Context, req *pbGroup.CreateGroupReq) (*pbGroup.CreateGroupResp, error) {
@@ -395,26 +405,6 @@ func (s *groupServer) GetGroupMemberList(ctx context.Context, req *pbGroup.GetGr
 	return resp, nil
 }
 
-//func (s *groupServer) getGroupUserLevel(groupID, userID string) (int, error) {
-//	opFlag := 0
-//	if !token_verify.IsManagerUserID(userID) {
-//		opInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(groupID, userID)
-//		if err != nil {
-//			return opFlag, utils.Wrap(err, "")
-//		}
-//		if opInfo.RoleLevel == constant.GroupOrdinaryUsers {
-//			opFlag = 0
-//		} else if opInfo.RoleLevel == constant.GroupOwner {
-//			opFlag = 2 // owner
-//		} else {
-//			opFlag = 3 // admin
-//		}
-//	} else {
-//		opFlag = 1 // app manager
-//	}
-//	return opFlag, nil
-//}
-
 func (s *groupServer) KickGroupMember(ctx context.Context, req *pbGroup.KickGroupMemberReq) (*pbGroup.KickGroupMemberResp, error) {
 	resp := &pbGroup.KickGroupMemberResp{}
 	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
@@ -496,29 +486,6 @@ func (s *groupServer) GetGroupMembersInfo(ctx context.Context, req *pbGroup.GetG
 	}
 	return resp, nil
 }
-
-//func FillGroupInfoByGroupID(operationID, groupID string, groupInfo *open_im_sdk.GroupInfo) error {
-//	group, err := relation.TakeGroupInfoByGroupID(groupID)
-//	if err != nil {
-//		log.Error(operationID, "TakeGroupInfoByGroupID failed ", err.Error(), groupID)
-//		return utils.Wrap(err, "")
-//	}
-//	if group.Status == constant.GroupStatusDismissed {
-//		log.Debug(operationID, " group constant.GroupStatusDismissed ", group.GroupID)
-//		return utils.Wrap(constant.ErrDismissedAlready, "")
-//	}
-//	return utils.Wrap(cp.GroupDBCopyOpenIM(groupInfo, group), "")
-//}
-
-//func FillPublicUserInfoByUserID(operationID, userID string, userInfo *open_im_sdk.PublicUserInfo) error {
-//	user, err := relation.TakeUserByUserID(userID)
-//	if err != nil {
-//		log.Error(operationID, "TakeUserByUserID failed ", err.Error(), userID)
-//		return utils.Wrap(err, "")
-//	}
-//	cp.UserDBCopyOpenIMPublicUser(userInfo, user)
-//	return nil
-//}
 
 func (s *groupServer) GetGroupApplicationList(ctx context.Context, req *pbGroup.GetGroupApplicationListReq) (*pbGroup.GetGroupApplicationListResp, error) {
 	resp := &pbGroup.GetGroupApplicationListResp{}
@@ -747,7 +714,7 @@ func (s *groupServer) SetGroupInfo(ctx context.Context, req *pbGroup.SetGroupInf
 	if group.Status == constant.GroupStatusDismissed {
 		return nil, utils.Wrap(constant.ErrDismissedAlready, "")
 	}
-	data := PbToDbMapGroupInfoForSet(req.GroupInfoForSet)
+	data := UpdateGroupInfoMap(req.GroupInfoForSet)
 	if len(data) > 0 {
 		return resp, nil
 	}
@@ -844,151 +811,115 @@ func (s *groupServer) GetGroups(ctx context.Context, req *pbGroup.GetGroupsReq) 
 	if err != nil {
 		return nil, err
 	}
-	for _, group := range groups {
+	resp.Groups = utils.Slice(groups, func(group *relation2.GroupModel) *pbGroup.CMSGroup {
 		member := ownerMemberMap[group.GroupID]
-		resp.Groups = append(resp.Groups, DbToBpCMSGroup(group, member.UserID, member.Nickname, uint32(groupMemberNumMap[group.GroupID])))
-	}
+		return DbToPbCMSGroup(group, member.UserID, member.Nickname, uint32(groupMemberNumMap[group.GroupID]))
+	})
 	return resp, nil
 }
 
 func (s *groupServer) GetGroupMembersCMS(ctx context.Context, req *pbGroup.GetGroupMembersCMSReq) (*pbGroup.GetGroupMembersCMSResp, error) {
 	resp := &pbGroup.GetGroupMembersCMSResp{}
-	groupMembers, err := relation.GetGroupMembersByGroupIdCMS(req.GroupID, req.UserName, req.Pagination.ShowNumber, req.Pagination.PageNumber)
+	total, members, err := s.GroupInterface.FindSearchGroupMember(ctx, req.GroupID, req.UserName, req.Pagination.PageNumber, req.Pagination.ShowNumber)
 	if err != nil {
 		return nil, err
 	}
-	groupMembersCount, err := relation.GetGroupMembersCount(req.GroupID, req.UserName)
-	if err != nil {
-		return nil, err
-	}
-	log.NewInfo(tracelog.GetOperationID(ctx), groupMembersCount)
-	resp.MemberNums = int32(groupMembersCount)
-	for _, groupMember := range groupMembers {
-		member := open_im_sdk.GroupMemberFullInfo{}
-		utils.CopyStructFields(&member, groupMember)
-		member.JoinTime = int32(groupMember.JoinTime.Unix())
-		member.MuteEndTime = uint32(groupMember.MuteEndTime.Unix())
-		resp.Members = append(resp.Members, &member)
-	}
-	resp.Pagination = &open_im_sdk.ResponsePagination{
-		CurrentPage: req.Pagination.PageNumber,
-		ShowNumber:  req.Pagination.ShowNumber,
-	}
+	resp.MemberNums = total
+	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		return DbToPbGroupMembersCMSResp(e)
+	})
 	return resp, nil
 }
 
 func (s *groupServer) GetUserReqApplicationList(ctx context.Context, req *pbGroup.GetUserReqApplicationListReq) (*pbGroup.GetUserReqApplicationListResp, error) {
 	resp := &pbGroup.GetUserReqApplicationListResp{}
-	groupRequests, err := relation.GetUserReqGroupByUserID(req.UserID)
+	user, err := GetPublicUserInfoOne(ctx, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	for _, groupReq := range groupRequests {
-		node := open_im_sdk.GroupRequest{UserInfo: &open_im_sdk.PublicUserInfo{}, GroupInfo: &open_im_sdk.GroupInfo{}}
-		group, err := relation.GetGroupInfoByGroupID(groupReq.GroupID)
-		if err != nil {
-			tracelog.SetCtxInfo(ctx, "GetGroupInfoByGroupID", err, "GroupID", groupReq.GroupID)
-			continue
-		}
-		user, err := relation.GetUserByUserID(groupReq.UserID)
-		if err != nil {
-			tracelog.SetCtxInfo(ctx, "GetUserByUserID", err, "UserID", groupReq.UserID)
-			continue
-		}
-		cp.GroupRequestDBCopyOpenIM(&node, &groupReq)
-		cp.UserDBCopyOpenIMPublicUser(node.UserInfo, user)
-		cp.GroupDBCopyOpenIM(node.GroupInfo, group)
-		resp.GroupRequestList = append(resp.GroupRequestList, &node)
+	total, requests, err := s.GroupInterface.FindUserGroupRequest(ctx, req.UserID, req.Pagination.PageNumber, req.Pagination.ShowNumber)
+	if err != nil {
+		return nil, err
 	}
+	resp.Total = total
+	if len(requests) == 0 {
+		return resp, nil
+	}
+	groupIDs := utils.Distinct(utils.Slice(requests, func(e *relation2.GroupRequestModel) string {
+		return e.GroupID
+	}))
+	groups, err := s.GroupInterface.FindGroupsByID(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	groupMap := utils.SliceToMap(groups, func(e *relation2.GroupModel) string {
+		return e.GroupID
+	})
+	if ids := utils.Single(groupIDs, utils.Keys(groupMap)); len(ids) > 0 {
+		return nil, constant.ErrGroupIDNotFound.Wrap(strings.Join(ids, ","))
+	}
+	owners, err := s.GroupInterface.FindGroupOwnerUser(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	ownerMap := utils.SliceToMap(owners, func(e *relation2.GroupMemberModel) string {
+		return e.GroupID
+	})
+	if ids := utils.Single(groupIDs, utils.Keys(ownerMap)); len(ids) > 0 {
+		return nil, constant.ErrData.Wrap("group no owner", strings.Join(ids, ","))
+	}
+	groupMemberNum, err := s.GroupInterface.GetGroupMemberNum(ctx, groupIDs)
+	if err != nil {
+		return nil, err
+	}
+	resp.GroupRequests = utils.Slice(requests, func(e *relation2.GroupRequestModel) *open_im_sdk.GroupRequest {
+		return DbToPbGroupRequest(e, user, DbToPbGroupInfo(groupMap[e.GroupID], ownerMap[e.GroupID].UserID, uint32(groupMemberNum[e.GroupID])))
+	})
 	return resp, nil
 }
 
 func (s *groupServer) DismissGroup(ctx context.Context, req *pbGroup.DismissGroupReq) (*pbGroup.DismissGroupResp, error) {
 	resp := &pbGroup.DismissGroupResp{}
-
-	if !token_verify.IsManagerUserID(tracelog.GetOpUserID(ctx)) && !relation.IsGroupOwnerAdmin(req.GroupID, tracelog.GetOpUserID(ctx)) {
-		return nil, utils.Wrap(constant.ErrIdentity, "")
-	}
-
-	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
+	if err := s.CheckGroupAdmin(ctx, req.GroupID); err != nil {
 		return nil, err
 	}
-	if err := s.DelGroupAndUserCache(ctx, req.GroupID, nil); err != nil {
-		return nil, err
-	}
-
-	err := relation.OperateGroupStatus(req.GroupID, constant.GroupStatusDismissed)
+	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
 	if err != nil {
 		return nil, err
 	}
-	groupInfo, err := relation.GetGroupInfoByGroupID(req.GroupID)
-	if err != nil {
+	if group.Status == constant.GroupStatusDismissed {
+		return nil, constant.ErrArgs.Wrap("group status is dismissed")
+	}
+	if err := s.GroupInterface.DismissGroup(ctx, req.GroupID); err != nil {
 		return nil, err
 	}
-	if groupInfo.GroupType != constant.SuperGroup {
-		memberList, err := relation.GetGroupMemberListByGroupID(req.GroupID)
-		if err != nil {
-			tracelog.SetCtxInfo(ctx, "GetGroupMemberListByGroupID", err, "groupID", req.GroupID)
-		}
-		//modify quitter conversation info
-		var reqPb pbUser.SetConversationReq
-		var c pbConversation.Conversation
-		for _, v := range memberList {
-			reqPb.OperationID = tracelog.GetOperationID(ctx)
-			c.OwnerUserID = v.UserID
-			c.ConversationID = utils.GetConversationIDBySessionType(req.GroupID, constant.GroupChatType)
-			c.ConversationType = constant.GroupChatType
-			c.GroupID = req.GroupID
-			c.IsNotInGroup = true
-			reqPb.Conversation = &c
-			etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImUserName)
-			client := pbUser.NewUserClient(etcdConn)
-			respPb, err := client.SetConversation(context.Background(), &reqPb)
-			tracelog.SetCtxInfo(ctx, "SetConversation", err, "req", &reqPb, "resp", respPb)
-		}
-		err = relation.DeleteGroupMemberByGroupID(req.GroupID)
-		if err != nil {
+	if group.GroupType == constant.SuperGroup {
+		if err := s.GroupInterface.DeleteSuperGroup(ctx, group.GroupID); err != nil {
 			return nil, err
 		}
-		chat.GroupDismissedNotification(req)
 	} else {
-		err = db.DB.DeleteSuperGroup(req.GroupID)
-		if err != nil {
-			return nil, err
-		}
+		chat.GroupDismissedNotification(req)
 	}
 	return resp, nil
 }
 
 func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGroupMemberReq) (*pbGroup.MuteGroupMemberResp, error) {
 	resp := &pbGroup.MuteGroupMemberResp{}
-
-	opFlag, err := s.getGroupUserLevel(req.GroupID, tracelog.GetOpUserID(ctx))
+	member, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if opFlag == 0 {
-		return nil, err
+	if !(tracelog.GetOpUserID(ctx) == req.UserID || token_verify.IsAppManagerUid(ctx)) {
+		opMember, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, req.UserID)
+		if err != nil {
+			return nil, err
+		}
+		if opMember.RoleLevel <= member.RoleLevel {
+			return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+		}
 	}
-
-	mutedInfo, err := rocksCache.GetGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if mutedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
-		return nil, err
-	}
-	if mutedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-		return nil, err
-	}
-
-	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
-		return nil, err
-	}
-	groupMemberInfo := relation2.GroupMemberModel{GroupID: req.GroupID, UserID: req.UserID}
-	groupMemberInfo.MuteEndTime = time.Unix(int64(time.Now().Second())+int64(req.MutedSeconds), time.Now().UnixNano())
-	err = relation.UpdateGroupMemberInfo(groupMemberInfo)
-	if err != nil {
+	data := UpdateGroupMemberMutedTimeMap(time.Now().Add(time.Second * time.Duration(req.MutedSeconds)))
+	if err := s.GroupInterface.UpdateGroupMember(ctx, member.GroupID, member.UserID, data); err != nil {
 		return nil, err
 	}
 	chat.GroupMemberMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID, req.MutedSeconds)
@@ -997,33 +928,21 @@ func (s *groupServer) MuteGroupMember(ctx context.Context, req *pbGroup.MuteGrou
 
 func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.CancelMuteGroupMemberReq) (*pbGroup.CancelMuteGroupMemberResp, error) {
 	resp := &pbGroup.CancelMuteGroupMemberResp{}
-
-	opFlag, err := s.getGroupUserLevel(req.GroupID, tracelog.GetOpUserID(ctx))
+	member, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, req.UserID)
 	if err != nil {
 		return nil, err
 	}
-	if opFlag == 0 {
-		return nil, err
+	if !(tracelog.GetOpUserID(ctx) == req.UserID || token_verify.IsAppManagerUid(ctx)) {
+		opMember, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
+		if err != nil {
+			return nil, err
+		}
+		if opMember.RoleLevel <= member.RoleLevel {
+			return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+		}
 	}
-
-	mutedInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	if mutedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
-		return nil, err
-	}
-	if mutedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-		return nil, err
-	}
-	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
-		return nil, err
-	}
-
-	groupMemberInfo := relation2.GroupMemberModel{GroupID: req.GroupID, UserID: req.UserID}
-	groupMemberInfo.MuteEndTime = time.Unix(0, 0)
-	err = relation.UpdateGroupMemberInfo(groupMemberInfo)
-	if err != nil {
+	data := UpdateGroupMemberMutedTimeMap(time.Unix(0, 0))
+	if err := s.GroupInterface.UpdateGroupMember(ctx, member.GroupID, member.UserID, data); err != nil {
 		return nil, err
 	}
 	chat.GroupMemberCancelMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID)
@@ -1032,73 +951,22 @@ func (s *groupServer) CancelMuteGroupMember(ctx context.Context, req *pbGroup.Ca
 
 func (s *groupServer) MuteGroup(ctx context.Context, req *pbGroup.MuteGroupReq) (*pbGroup.MuteGroupResp, error) {
 	resp := &pbGroup.MuteGroupResp{}
-
-	opFlag, err := s.getGroupUserLevel(req.GroupID, tracelog.GetOpUserID(ctx))
-	if err != nil {
+	if err := s.CheckGroupAdmin(ctx, req.GroupID); err != nil {
 		return nil, err
 	}
-	if opFlag == 0 {
-		//errMsg := req.OperationID + "opFlag == 0  " + req.GroupID + req.OpUserID
-		//log.Error(req.OperationID, errMsg)
-		//return &pbGroup.MuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-		return nil, utils.Wrap(constant.ErrNoPermission, "")
-	}
-
-	//mutedInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.UserID)
-	//if err != nil {
-	//	errMsg := req.OperationID + " GetGroupMemberInfoByGroupIDAndUserID failed " + req.GroupID + req.OpUserID + err.Error()
-	//	return &pbGroup.MuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-	//}
-	//if mutedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
-	//	errMsg := req.OperationID + " mutedInfo.RoleLevel == constant.GroupOwner " + req.GroupID + req.OpUserID + err.Error()
-	//	return &pbGroup.MuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-	//}
-	//if mutedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-	//	errMsg := req.OperationID + " mutedInfo.RoleLevel == constant.GroupAdmin " + req.GroupID + req.OpUserID + err.Error()
-	//	return &pbGroup.MuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-	//}
-	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
+	if err := s.GroupInterface.UpdateGroup(ctx, req.GroupID, UpdateGroupStatusMap(constant.GroupStatusMuted)); err != nil {
 		return nil, err
 	}
-
-	err = relation.OperateGroupStatus(req.GroupID, constant.GroupStatusMuted)
-	if err != nil {
-		return nil, err
-	}
-
 	chat.GroupMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID)
 	return resp, nil
 }
 
 func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMuteGroupReq) (*pbGroup.CancelMuteGroupResp, error) {
 	resp := &pbGroup.CancelMuteGroupResp{}
-
-	opFlag, err := s.getGroupUserLevel(req.GroupID, tracelog.GetOpUserID(ctx))
-	if err != nil {
+	if err := s.CheckGroupAdmin(ctx, req.GroupID); err != nil {
 		return nil, err
 	}
-	if opFlag == 0 {
-		return nil, err
-	}
-	//mutedInfo, err := relation.GetGroupMemberInfoByGroupIDAndUserID(req.GroupID, req.)
-	//if err != nil {
-	//	errMsg := req.OperationID + " GetGroupMemberInfoByGroupIDAndUserID failed " + req.GroupID + req.OpUserID + err.Error()
-	//	return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-	//}
-	//if mutedInfo.RoleLevel == constant.GroupOwner && opFlag != 1 {
-	//	errMsg := req.OperationID + " mutedInfo.RoleLevel == constant.GroupOwner " + req.GroupID + req.OpUserID + err.Error()
-	//	return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-	//}
-	//if mutedInfo.RoleLevel == constant.GroupAdmin && opFlag == 3 {
-	//	errMsg := req.OperationID + " mutedInfo.RoleLevel == constant.GroupAdmin " + req.GroupID + req.OpUserID + err.Error()
-	//	return &pbGroup.CancelMuteGroupResp{CommonResp: &pbGroup.CommonResp{ErrCode: constant.ErrAccess.ErrCode, ErrMsg: errMsg}}, nil
-	//}
-	log.Debug(tracelog.GetOperationID(ctx), "UpdateGroupInfoDefaultZero ", req.GroupID, map[string]interface{}{"status": constant.GroupOk})
-	if err := rocksCache.DelGroupInfoFromCache(ctx, req.GroupID); err != nil {
-		return nil, err
-	}
-	err = relation.UpdateGroupInfoDefaultZero(req.GroupID, map[string]interface{}{"status": constant.GroupOk})
-	if err != nil {
+	if err := s.GroupInterface.UpdateGroup(ctx, req.GroupID, UpdateGroupStatusMap(constant.GroupOk)); err != nil {
 		return nil, err
 	}
 	chat.GroupCancelMutedNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID)
@@ -1106,141 +974,89 @@ func (s *groupServer) CancelMuteGroup(ctx context.Context, req *pbGroup.CancelMu
 }
 
 func (s *groupServer) SetGroupMemberNickname(ctx context.Context, req *pbGroup.SetGroupMemberNicknameReq) (*pbGroup.SetGroupMemberNicknameResp, error) {
-	resp := &pbGroup.SetGroupMemberNicknameResp{}
-	if tracelog.GetOpUserID(ctx) != req.UserID && !token_verify.IsManagerUserID(tracelog.GetOpUserID(ctx)) {
-		return nil, utils.Wrap(constant.ErrIdentity, "")
-	}
-	cbReq := &pbGroup.SetGroupMemberInfoReq{
-		GroupID:  req.GroupID,
-		UserID:   req.UserID,
-		Nickname: &wrapperspb.StringValue{Value: req.Nickname},
-	}
-	if err := CallbackBeforeSetGroupMemberInfo(ctx, cbReq); err != nil {
+	_, err := s.SetGroupMemberInfo(ctx, &pbGroup.SetGroupMemberInfoReq{GroupID: req.GroupID, UserID: req.UserID, Nickname: wrapperspb.String(req.Nickname)})
+	if err != nil {
 		return nil, err
 	}
-	nickName := cbReq.Nickname.Value
-	groupMemberInfo := relation2.GroupMemberModel{}
-	groupMemberInfo.UserID = req.UserID
-	groupMemberInfo.GroupID = req.GroupID
-	if nickName == "" {
-		userNickname, err := relation.GetUserNameByUserID(groupMemberInfo.UserID)
+	return &pbGroup.SetGroupMemberNicknameResp{}, nil
+}
+
+func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (*pbGroup.SetGroupMemberInfoResp, error) {
+	resp := &pbGroup.SetGroupMemberInfoResp{}
+	if req.RoleLevel != nil && req.RoleLevel.Value == constant.GroupOwner {
+		return nil, constant.ErrNoPermission.Wrap("set group owner")
+	}
+	group, err := s.GroupInterface.TakeGroupByID(ctx, req.GroupID)
+	if err != nil {
+		return nil, err
+	}
+	if group.Status == constant.GroupStatusDismissed {
+		return nil, constant.ErrArgs.Wrap("group status is dismissed")
+	}
+	member, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, req.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if tracelog.GetOpUserID(ctx) == req.UserID {
+		if req.RoleLevel != nil {
+			return nil, constant.ErrArgs.Wrap("update role level")
+		}
+	} else if !token_verify.IsAppManagerUid(ctx) {
+		opMember, err := s.GroupInterface.TakeGroupMemberByID(ctx, req.GroupID, tracelog.GetOpUserID(ctx))
 		if err != nil {
 			return nil, err
 		}
-		groupMemberInfo.Nickname = userNickname
-	} else {
-		groupMemberInfo.Nickname = nickName
+		if opMember.RoleLevel <= member.RoleLevel {
+			return nil, constant.ErrNoPermission.Wrap(fmt.Sprintf("self RoleLevel %d target %d", opMember.RoleLevel, member.RoleLevel))
+		}
 	}
-
-	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
+	if err := CallbackBeforeSetGroupMemberInfo(ctx, req); err != nil {
 		return nil, err
 	}
-
-	if err := relation.UpdateGroupMemberInfo(groupMemberInfo); err != nil {
+	if err := s.GroupInterface.UpdateGroupMember(ctx, req.GroupID, req.UserID, UpdateGroupMemberMap(req)); err != nil {
 		return nil, err
 	}
 	chat.GroupMemberInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID)
 	return resp, nil
 }
 
-func (s *groupServer) SetGroupMemberInfo(ctx context.Context, req *pbGroup.SetGroupMemberInfoReq) (*pbGroup.SetGroupMemberInfoResp, error) {
-	resp := &pbGroup.SetGroupMemberInfoResp{}
-
-	if err := rocksCache.DelGroupMemberInfoFromCache(ctx, req.GroupID, req.UserID); err != nil {
-		return nil, err
-	}
-	if err := CallbackBeforeSetGroupMemberInfo(ctx, req); err != nil {
-		return nil, err
-	}
-	groupMember := relation2.GroupMemberModel{
-		GroupID: req.GroupID,
-		UserID:  req.UserID,
-	}
-	m := make(map[string]interface{})
-	if req.RoleLevel != nil {
-		m["role_level"] = req.RoleLevel.Value
-	}
-	if req.FaceURL != nil {
-		m["user_group_face_url"] = req.FaceURL.Value
-	}
-	if req.Nickname != nil {
-		m["nickname"] = req.Nickname.Value
-	}
-	if req.Ex != nil {
-		m["ex"] = req.Ex.Value
-	} else {
-		m["ex"] = nil
-	}
-	if err := relation.UpdateGroupMemberInfoByMap(groupMember, m); err != nil {
-		return nil, err
-	}
-	if req.RoleLevel != nil {
-		switch req.RoleLevel.Value {
-		case constant.GroupOrdinaryUsers:
-			//msg.GroupMemberRoleLevelChangeNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID, constant.GroupMemberSetToOrdinaryUserNotification)
-			chat.GroupMemberInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID)
-		case constant.GroupAdmin, constant.GroupOwner:
-			//msg.GroupMemberRoleLevelChangeNotification(req.OperationID, req.OpUserID, req.GroupID, req.UserID, constant.GroupMemberSetToAdminNotification)
-			chat.GroupMemberInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID)
-		}
-	} else {
-		chat.GroupMemberInfoSetNotification(tracelog.GetOperationID(ctx), tracelog.GetOpUserID(ctx), req.GroupID, req.UserID)
-	}
-	return resp, nil
-}
-
 func (s *groupServer) GetGroupAbstractInfo(ctx context.Context, req *pbGroup.GetGroupAbstractInfoReq) (*pbGroup.GetGroupAbstractInfoResp, error) {
 	resp := &pbGroup.GetGroupAbstractInfoResp{}
-
-	hashCode, err := rocksCache.GetGroupMemberListHashFromCache(ctx, req.GroupID)
+	if len(req.GroupIDs) == 0 {
+		return nil, constant.ErrArgs.Wrap("groupIDs empty")
+	}
+	if utils.Duplicate(req.GroupIDs) {
+		return nil, constant.ErrArgs.Wrap("groupIDs duplicate")
+	}
+	groups, err := s.GroupInterface.FindGroupsByID(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
-	resp.GroupMemberListHash = hashCode
-	num, err := rocksCache.GetGroupMemberNumFromCache(ctx, req.GroupID)
+	numMap, err := s.GroupInterface.GetGroupMemberNum(ctx, req.GroupIDs)
 	if err != nil {
 		return nil, err
 	}
-	resp.GroupMemberNumber = int32(num)
+	hashMap, err := s.GroupInterface.GetGroupHash(ctx, req.GroupIDs)
+	if err != nil {
+		return nil, err
+	}
+	resp.GroupAbstractInfos = utils.Slice(groups, func(e *relation2.GroupModel) *pbGroup.GroupAbstractInfo {
+		return DbToPbGroupAbstractInfo(e.GroupID, int32(numMap[e.GroupID]), hashMap[e.GroupID])
+	})
 	return resp, nil
 }
 
-func (s *groupServer) DelGroupAndUserCache(ctx context.Context, groupID string, userIDList []string) error {
-	operationID := tracelog.GetOperationID(ctx)
-	if groupID != "" {
-		etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImCacheName)
-		if err != nil {
-			return err
-		}
-		cacheClient := pbCache.NewCacheClient(etcdConn)
-		cacheResp, err := cacheClient.DelGroupMemberIDListFromCache(context.Background(), &pbCache.DelGroupMemberIDListFromCacheReq{
-			GroupID:     groupID,
-			OperationID: operationID,
-		})
-		if err != nil {
-			log.NewError(operationID, "DelGroupMemberIDListFromCache rpc call failed ", err.Error())
-			return utils.Wrap(err, "")
-		}
-		err = constant.CommonResp2Err(cacheResp.CommonResp)
-		err = rocksCache.DelGroupMemberListHashFromCache(ctx, groupID)
-		if err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), groupID, err.Error())
-			return utils.Wrap(err, "")
-		}
-		err = rocksCache.DelGroupMemberNumFromCache(ctx, groupID)
-		if err != nil {
-			log.NewError(operationID, utils.GetSelfFuncName(), err.Error(), groupID)
-			return utils.Wrap(err, "")
-		}
+func (s *groupServer) GetUserInGroupMembers(ctx context.Context, req *pbGroup.GetUserInGroupMembersReq) (*pbGroup.GetUserInGroupMembersResp, error) {
+	resp := &pbGroup.GetUserInGroupMembersResp{}
+	if len(req.GroupIDs) == 0 {
+		return nil, constant.ErrArgs.Wrap("groupIDs empty")
 	}
-	if userIDList != nil {
-		for _, userID := range userIDList {
-			err := rocksCache.DelJoinedGroupIDListFromCache(ctx, userID)
-			if err != nil {
-				log.NewError(operationID, utils.GetSelfFuncName(), err.Error())
-				return utils.Wrap(err, "")
-			}
-		}
+	members, err := s.GroupInterface.FindUserInGroup(ctx, req.UserID, req.GroupIDs)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	resp.Members = utils.Slice(members, func(e *relation2.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+		return DbToPbGroupMembersCMSResp(e)
+	})
+	return resp, nil
 }

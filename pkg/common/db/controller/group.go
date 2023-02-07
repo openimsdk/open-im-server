@@ -26,24 +26,30 @@ type GroupInterface interface {
 	GetGroupMemberListByUserID(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
 	GetGroupMemberFilterList(ctx context.Context, groupID string, filter int32, begin int32, maxNumber int32) ([]*relation2.GroupModel, error) // relation.GetGroupMemberByGroupID(req.GroupID, req.Filter, req.NextSeq, 30)
 	FindGroupMembersByID(ctx context.Context, groupID string, userIDs []string) (groups []*relation2.GroupMemberModel, err error)
+	FindUserInGroup(ctx context.Context, groupID string, userIDs []string) ([]*relation2.GroupMemberModel, error)
 	DelGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	GetGroupMemberNum(ctx context.Context, groupIDs []string) (map[string]int, error)
+	GetGroupHash(ctx context.Context, groupIDs []string) (map[string]uint64, error)
 	GetGroupOwnerUserID(ctx context.Context, groupIDs []string) (map[string]string, error)
 	GetGroupOwnerUser(ctx context.Context, groupID string) (*relation2.GroupMemberModel, error)
 	FindGroupOwnerUser(ctx context.Context, groupID []string) ([]*relation2.GroupMemberModel, error)
 	TransferGroupOwner(ctx context.Context, groupID string, oldOwnerUserID, newOwnerUserID string) error
-
+	FindSearchGroupMember(ctx context.Context, groupID, name string, pageNumber, showNumber int32) (int32, []*relation2.GroupMemberModel, error)
 	GetGroupRecvApplicationList(ctx context.Context, userID string) ([]*relation2.GroupRequestModel, error)
 	UpdateGroup(ctx context.Context, groupID string, data map[string]any) error
+	UpdateGroupMember(ctx context.Context, groupID, userID string, data map[string]any) error
 
 	CreateGroupMember(ctx context.Context, groupMember []*relation2.GroupMemberModel) error
 	CreateGroupRequest(ctx context.Context, requests []*relation2.GroupRequestModel) error
+	DismissGroup(ctx context.Context, groupID string) error // 设置状态，并清楚群成员
 
 	HandlerGroupRequest(ctx context.Context, groupID string, userID string, handledMsg string, handleResult int32, member *relation2.GroupMemberModel) error
 	TakeGroupRequest(ctx context.Context, groupID string, userID string) (*relation2.GroupRequestModel, error)
+	FindUserGroupRequest(ctx context.Context, userID string, pageNumber, showNumber int32) (int32, []*relation2.GroupRequestModel, error)
 
 	//mongo
 	CreateSuperGroup(ctx context.Context, groupID string, initMemberIDList []string) error
+	DeleteSuperGroup(ctx context.Context, groupID string) error
 	DelSuperGroupMember(ctx context.Context, groupID string, userIDs []string) error
 	AddUserToSuperGroup(ctx context.Context, groupID string, userIDs []string) error
 	GetSuperGroupByID(ctx context.Context, groupID string) (superGroup *unrelation2.SuperGroupModel, err error)

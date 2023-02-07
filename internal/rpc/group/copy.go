@@ -40,36 +40,51 @@ func PbToDbGroupRequest(req *pbGroup.GroupApplicationResponseReq, handleUserID s
 	}
 }
 
-func PbToDbMapGroupInfoForSet(group *open_im_sdk.GroupInfoForSet) map[string]any {
-	m := make(map[string]any)
-	if group.GroupName != "" {
-		m["group_name"] = group.GroupName
-	}
-	if group.Notification != "" {
-		m["notification"] = group.Notification
-	}
-	if group.Introduction != "" {
-		m["introduction"] = group.Introduction
-	}
-	if group.FaceURL != "" {
-		m["face_url"] = group.FaceURL
-	}
-	if group.NeedVerification != nil {
-		m["need_verification"] = group.NeedVerification.Value
-	}
-	if group.LookMemberInfo != nil {
-		m["look_member_info"] = group.LookMemberInfo.Value
-	}
-	if group.ApplyMemberFriend != nil {
-		m["apply_member_friend"] = group.ApplyMemberFriend.Value
-	}
-	return m
-}
-
-func DbToBpCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName string, memberCount uint32) *pbGroup.CMSGroup {
+func DbToPbCMSGroup(m *relation.GroupModel, ownerUserID string, ownerUserName string, memberCount uint32) *pbGroup.CMSGroup {
 	return &pbGroup.CMSGroup{
 		GroupInfo:          DbToPbGroupInfo(m, ownerUserID, memberCount),
 		GroupOwnerUserID:   ownerUserID,
 		GroupOwnerUserName: ownerUserName,
+	}
+}
+
+func DbToPbGroupMembersCMSResp(m *relation.GroupMemberModel) *open_im_sdk.GroupMemberFullInfo {
+	return &open_im_sdk.GroupMemberFullInfo{
+		GroupID:   m.GroupID,
+		UserID:    m.UserID,
+		RoleLevel: m.RoleLevel,
+		JoinTime:  m.JoinTime.UnixMilli(),
+		Nickname:  m.Nickname,
+		FaceURL:   m.FaceURL,
+		//AppMangerLevel: m.AppMangerLevel,
+		JoinSource:     m.JoinSource,
+		OperatorUserID: m.OperatorUserID,
+		Ex:             m.Ex,
+		MuteEndTime:    m.MuteEndTime.UnixMilli(),
+		InviterUserID:  m.InviterUserID,
+	}
+}
+
+func DbToPbGroupRequest(m *relation.GroupRequestModel, user *open_im_sdk.PublicUserInfo, group *open_im_sdk.GroupInfo) *open_im_sdk.GroupRequest {
+	return &open_im_sdk.GroupRequest{
+		UserInfo:      user,
+		GroupInfo:     group,
+		HandleResult:  m.HandleResult,
+		ReqMsg:        m.ReqMsg,
+		HandleMsg:     m.HandledMsg,
+		ReqTime:       m.ReqTime.UnixMilli(),
+		HandleUserID:  m.HandleUserID,
+		HandleTime:    m.HandledTime.UnixMilli(),
+		Ex:            m.Ex,
+		JoinSource:    m.JoinSource,
+		InviterUserID: m.InviterUserID,
+	}
+}
+
+func DbToPbGroupAbstractInfo(groupID string, groupMemberNumber int32, groupMemberListHash uint64) *pbGroup.GroupAbstractInfo {
+	return &pbGroup.GroupAbstractInfo{
+		GroupID:             groupID,
+		GroupMemberNumber:   groupMemberNumber,
+		GroupMemberListHash: groupMemberListHash,
 	}
 }
