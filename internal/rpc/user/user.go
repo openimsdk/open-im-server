@@ -101,7 +101,7 @@ func (s *userServer) Run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-	err = getcdv3.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
+	err = rpc.RegisterEtcd(s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName, 10, "")
 	if err != nil {
 		log.NewError("", "RegisterEtcd failed ", err.Error(), s.etcdSchema, strings.Join(s.etcdAddr, ","), rpcRegisterIP, s.rpcPort, s.rpcRegisterName)
 		panic(utils.Wrap(err, "register user module  rpc to etcd err"))
@@ -115,7 +115,7 @@ func (s *userServer) Run() {
 }
 
 func (s *userServer) SyncJoinedGroupMemberFaceURL(ctx context.Context, userID string, faceURL string, operationID string, opUserID string) {
-	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
 		return
 	}
@@ -137,7 +137,7 @@ func (s *userServer) SyncJoinedGroupMemberFaceURL(ctx context.Context, userID st
 }
 
 func (s *userServer) SyncJoinedGroupMemberNickname(ctx context.Context, userID string, newNickname, oldNickname string, operationID string, opUserID string) {
-	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
 		return
 	}
@@ -202,7 +202,7 @@ func (s *userServer) UpdateUserInfo(ctx context.Context, req *pbUser.UpdateUserI
 	if err != nil {
 		return nil, err
 	}
-	etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
+	etcdConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImFriendName)
 	if err != nil {
 		return nil, err
 	}

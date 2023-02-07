@@ -1,4 +1,4 @@
-package getcdv3
+package discoveryRegistry
 
 import (
 	"Open_IM/pkg/common/config"
@@ -7,11 +7,17 @@ import (
 	"fmt"
 	"github.com/OpenIMSDK/getcdv3"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
 	"time"
 
 	"gopkg.in/yaml.v3"
 	"strings"
 )
+
+type SvcDiscoveryRegistry interface {
+	GetConns(serviceName string, opts ...grpc.DialOption) ([]*grpc.ClientConn, error)
+	GetConn(serviceName string, strategy func(slice []*grpc.ClientConn) int, opts ...grpc.DialOption) (*grpc.ClientConn, error)
+}
 
 func registerConf(key, conf string) {
 	etcdAddr := strings.Join(config.Config.Etcd.EtcdAddr, ",")

@@ -88,12 +88,12 @@ func (r *RPCServer) run() {
 			log.Error("", "GetLocalIP failed ", err.Error())
 		}
 	}
-	err = getcdv3.RegisterEtcd4Unique(r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName, 10)
+	err = rpc.RegisterEtcd4Unique(r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName, 10)
 	if err != nil {
 		log.Error("", "register push message rpc to etcd err", "", "err", err.Error(), r.etcdSchema, strings.Join(r.etcdAddr, ","), rpcRegisterIP, r.rpcPort, r.rpcRegisterName)
 		panic(utils.Wrap(err, "register msg_gataway module  rpc to etcd err"))
 	}
-	r.target = getcdv3.GetTarget(r.etcdSchema, rpcRegisterIP, r.rpcPort, r.rpcRegisterName)
+	r.target = rpc.GetTarget(r.etcdSchema, rpcRegisterIP, r.rpcPort, r.rpcRegisterName)
 	err = srv.Serve(listener)
 	if err != nil {
 		log.Error("", "push message rpc listening err", "", "err", err.Error())

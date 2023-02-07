@@ -16,12 +16,12 @@ var (
 )
 
 func init() {
-	JPushClient = newGetuiClient()
+	JPushClient = newJPushClient()
 }
 
 type JPush struct{}
 
-func newGetuiClient() *JPush {
+func newJPushClient() *JPush {
 	return &JPush{}
 }
 

@@ -14,6 +14,7 @@ import (
 	promePkg "Open_IM/pkg/common/prometheus"
 	"Open_IM/pkg/common/token_verify"
 	"Open_IM/pkg/common/tracelog"
+	discoveryRegistry "Open_IM/pkg/discovery_registry"
 	pbGroup "Open_IM/pkg/proto/group"
 	open_im_sdk "Open_IM/pkg/proto/sdk_ws"
 	"Open_IM/pkg/utils"
@@ -26,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OpenIMSDK/openKeeper"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
@@ -84,6 +86,12 @@ func NewGroupServer(port int) *groupServer {
 	mongo.InitMongo()
 	redis.InitRedis()
 	mongo.CreateSuperGroupIndex()
+	zkClient, err := openKeeper.NewClient([]string{"43.154.157.177:2181"}, config.Config.Etcd.EtcdSchema, 10, "", "")
+	if err != nil {
+		panic(err.Error())
+	}
+	var registerCenter discoveryRegistry.SvcDiscoveryRegistry = zkClient
+	conns, err := registerCenter.GetConns(config.Config.RpcRegisterName.OpenImConversationName)
 	g.GroupInterface = controller.NewGroupController(groupModel.DB, redis.GetClient(), mongo.GetClient())
 	return &g
 }

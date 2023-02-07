@@ -214,7 +214,7 @@ func main() {
 	}
 	//
 
-	go getcdv3.RegisterConf()
+	go rpc.RegisterConf()
 	go apiThird.MinioInit()
 	defaultPorts := config.Config.Api.GinPort
 	ginPort := flag.Int("port", defaultPorts[0], "get ginServerPort from cmd,default 10002 as port")

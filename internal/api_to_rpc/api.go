@@ -27,7 +27,7 @@ func ApiToRpc(c *gin.Context, apiReq, apiResp interface{}, rpcName string, rpcCl
 		return
 	}
 	tracelog.SetCtxInfo(ctx, logFuncName, nil, "apiReq", apiReq)
-	etcdConn, err := getcdv3.GetConn(ctx, rpcName)
+	etcdConn, err := rpc.GetConn(ctx, rpcName)
 	if err != nil {
 		WriteErrorResponse(ctx, "GetConn", err)
 		return

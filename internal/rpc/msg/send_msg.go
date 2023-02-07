@@ -129,7 +129,7 @@ func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMs
 		}
 		log.NewDebug(data.OperationID, *config.Config.MessageVerify.FriendVerify)
 		reqGetBlackIDListFromCache := &cacheRpc.GetBlackIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-		etcdConn, err := getcdv3.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImCacheName)
+		etcdConn, err := rpc.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImCacheName)
 		if err != nil {
 			errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
 			log.NewError(data.OperationID, errMsg)
@@ -152,7 +152,7 @@ func (rpc *rpcChat) messageVerification(ctx context.Context, data *pbChat.SendMs
 		log.NewDebug(data.OperationID, *config.Config.MessageVerify.FriendVerify)
 		if *config.Config.MessageVerify.FriendVerify {
 			reqGetFriendIDListFromCache := &cacheRpc.GetFriendIDListFromCacheReq{UserID: data.MsgData.RecvID, OperationID: data.OperationID}
-			etcdConn, err := getcdv3.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImCacheName)
+			etcdConn, err := rpc.GetConn(context.Background(), config.Config.RpcRegisterName.OpenImCacheName)
 			if err != nil {
 				errMsg := data.OperationID + "getcdv3.GetDefaultConn == nil"
 				log.NewError(data.OperationID, errMsg)
@@ -538,7 +538,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 						conversationReq.UserIDList = pb.MsgData.AtUserIDList
 						conversation.GroupAtType = constant.AtMe
 					}
-					etcdConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
+					etcdConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImConversationName)
 					if err != nil {
 						errMsg := pb.OperationID + "getcdv3.GetDefaultConn == nil"
 						log.NewError(pb.OperationID, errMsg)
@@ -554,7 +554,7 @@ func (rpc *rpcChat) SendMsg(ctx context.Context, pb *pbChat.SendMsgReq) (*pbChat
 					if tag {
 						conversationReq.UserIDList = utils.DifferenceString(atUserID, memberUserIDList)
 						conversation.GroupAtType = constant.AtAll
-						etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
+						etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImConversationName, pb.OperationID)
 						if etcdConn == nil {
 							errMsg := pb.OperationID + "getcdv3.GetDefaultConn == nil"
 							log.NewError(pb.OperationID, errMsg)
@@ -639,7 +639,7 @@ func (rpc *rpcChat) sendMsgToWriter(ctx context.Context, m *pbChat.MsgDataToMQ, 
 	case constant.OnlineStatus:
 		if m.MsgData.ContentType == constant.SignalingNotification {
 			rpcPushMsg := pbPush.PushMsgReq{OperationID: m.OperationID, MsgData: m.MsgData, PushToUserID: key}
-			grpcConn, err := getcdv3.GetConn(ctx, config.Config.RpcRegisterName.OpenImPushName)
+			grpcConn, err := rpc.GetConn(ctx, config.Config.RpcRegisterName.OpenImPushName)
 			if err != nil {
 				return err
 			}
@@ -1029,7 +1029,7 @@ func Notification(n *NotificationMsg) {
 	offlineInfo.Ex = ex
 	msg.OfflinePushInfo = &offlineInfo
 	req.MsgData = &msg
-	etcdConn := getcdv3.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
+	etcdConn := rpc.GetDefaultConn(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), config.Config.RpcRegisterName.OpenImMsgName, req.OperationID)
 	if etcdConn == nil {
 		errMsg := req.OperationID + "getcdv3.GetDefaultConn == nil"
 		log.NewError(req.OperationID, errMsg)
@@ -1053,7 +1053,7 @@ func getOnlineAndOfflineUserIDList(memberList []string, m map[string][]string, o
 	req.OperationID = operationID
 	req.OpUserID = config.Config.Manager.AppManagerUid[0]
 	flag := false
-	grpcCons := getcdv3.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
+	grpcCons := rpc.GetDefaultGatewayConn4Unique(config.Config.Etcd.EtcdSchema, strings.Join(config.Config.Etcd.EtcdAddr, ","), operationID)
 	for _, v := range grpcCons {
 		client := pbRelay.NewRelayClient(v)
 		reply, err := client.GetUsersOnlineStatus(context.Background(), req)
